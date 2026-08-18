@@ -1,4 +1,5 @@
-# Guard: Secondary IEffectGrantPlugin must not TakeDamage / SetHp / Bag.Grant
+# Guard: Secondary IEffectGrantPlugin must not TakeDamage / SetHp / Bag.Grant.
+# Combat SSOT: Core must not call EntityStatWriter; injector HP Add stays in FA10 sink.
 # Usage (repo root): .\scripts\guard-funnel-delta.ps1
 # Does not scan EffectFunnel.cs (rejection strings would false-positive).
 param(
@@ -55,8 +56,59 @@ if (Test-Path $Src) {
     }
 }
 
+$coreDir = Join-Path $Src "FusionRpg.Core"
+$coreWriterPatterns = @(
+    'EntityStatWriter',
+    'AddPlantHp',
+    'AddZombieHp',
+    'targetPtrs'
+)
+if (Test-Path $coreDir) {
+    Get-ChildItem -Path $coreDir -Recurse -Filter "*.cs" | ForEach-Object {
+        $full = $_.FullName
+        if ($full -match '[\\/](obj|bin)[\\/]') { return }
+        $name = [System.IO.Path]::GetFileName($full)
+        if ($name -eq "EffectFunnel.cs") { return }
+        $text = Get-Content -LiteralPath $full -Raw
+        if ([string]::IsNullOrEmpty($text)) { return }
+        $rel = $full.Substring($Root.Length).TrimStart('\', '/')
+        foreach ($pat in $coreWriterPatterns) {
+            if ([regex]::IsMatch($text, $pat)) {
+                $script:failures += "${rel}: matches /$pat/ (Core must fan-out via CombatDamageDispatcher + Funnel)"
+            }
+        }
+    }
+}
+
+$injectorDir = Join-Path $Src "FusionRpg.Injector"
+$writerAllow = @{
+    "EntityStatWriter.cs" = $true
+    "InjectorEffectActionSink.cs" = $true
+}
+$injectorWriterPatterns = @(
+    'EntityStatWriter\.AddPlantHp',
+    'EntityStatWriter\.AddZombieHp',
+    'targetPtrs'
+)
+if (Test-Path $injectorDir) {
+    Get-ChildItem -Path $injectorDir -Recurse -Filter "*.cs" | ForEach-Object {
+        $full = $_.FullName
+        if ($full -match '[\\/](obj|bin)[\\/]') { return }
+        $name = [System.IO.Path]::GetFileName($full)
+        if ($writerAllow.ContainsKey($name)) { return }
+        $text = Get-Content -LiteralPath $full -Raw
+        if ([string]::IsNullOrEmpty($text)) { return }
+        $rel = $full.Substring($Root.Length).TrimStart('\', '/')
+        foreach ($pat in $injectorWriterPatterns) {
+            if ([regex]::IsMatch($text, $pat)) {
+                $script:failures += "${rel}: matches /$pat/ (HP Add only via FA10 sink / dispatcher fan-out)"
+            }
+        }
+    }
+}
+
 if ($failures.Count -gt 0) {
-    Write-Host "FUNNEL DELTA GUARD FAILED — Secondary TakeDamage/SetHp/Bag.Grant:" -ForegroundColor Red
+    Write-Host "FUNNEL DELTA GUARD FAILED — Secondary TakeDamage/SetHp/Bag.Grant or multi-ptr Writer:" -ForegroundColor Red
     $failures | ForEach-Object { Write-Host "  $_" }
     exit 1
 }

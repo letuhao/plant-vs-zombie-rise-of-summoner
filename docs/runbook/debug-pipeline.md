@@ -145,6 +145,10 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=combat.hit,zombi
 | `plant-produce` | Sunflower + produce interval |
 | `board-config-speed` | `E-ZS` board.config |
 | `spawn-mc` | Mind-controlled zombie |
+| `combat-area-row` / `combat-random` | Overlay area / random FA10 fan-out |
+| `combat-counter-target` / `combat-counter-actor` | Counter burst (5 synthetics) |
+| `combat-dot` | OverTime scheduler (−20 × 5) |
+| `combat-heal` | Positive FA10 heal |
 
 `GET /api/debug/scenarios` lists ids.
 
@@ -179,8 +183,29 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.effect.fir
 
 Expect `ApplyResourceDelta` fired, `stat.writer` `hpBefore`/`hpAfter` delta −100, `debug.fx.shown` (Neutral white floater). Optional `{ "amount": 0, "tag": "Dodge" }` is MISS only (no HP write).
 
+Area / multi-target (after combat SSOT I3): freeze lawn census, then pass `target` on enqueue-delta (or grant `fx.overlay_damage` and fire a hit). Example row nuke:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/scenario/combat-area-row
+# then either wait for a pea hit, or:
+$ptr = "<zombie ptr from debug.board-stats>"
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/effect/enqueue-delta -ContentType application/json -Body (@{
+  amount = -50
+  targetPtr = $ptr
+  target = @{ mode = "Area"; shape = "Row"; anchor = "EventTarget"; filters = @{ side = "zombie" }; maxTargets = 8 }
+} | ConvertTo-Json -Depth 6 -Compress)
+```
+
+Expect several `stat.writer` rows (one per zombie in the lane) and `debug.combat.packet` with `fa10` count. Single-target `{ "amount": -100, "targetPtr": "..." }` is unchanged. Empty `POST /api/debug/select` body `{}` selects the first living zombie.
+
+Named combat scenarios (grant + select + fire-synthetic): `combat-area-row`, `combat-counter-target`, `combat-counter-actor`, `combat-dot`, `combat-heal`, `combat-random`.
+
+Counter / DoT: after `combat-dot`, the synthetic hit arms OverTime; injector ticks ~100ms and applies −20 HP five times over 5s. Inspect with `POST /api/debug/effect/dots` and `POST /api/debug/effect/board-snapshot`. Do not `fire-synthetic` `OnTimer` to tick DoT.
+
+`debug.combat.packet` fields: `source` (`capture` / `synthetic` / `dot` / `enqueue-delta`), `fa10`, `ptrs`, `trigger`, `skipped`.
+
 ## Injector commands
 
-`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, plus `pvz.spawn.extra`.
+`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, plus `pvz.spawn.extra`.
 
 REST helpers: `POST /api/debug/economy`, `POST /api/debug/board-config`.

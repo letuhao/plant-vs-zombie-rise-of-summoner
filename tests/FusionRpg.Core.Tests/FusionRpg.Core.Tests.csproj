@@ -20,5 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\fixtures\effects\**\*" Link="fixtures\effects\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\fixtures\combat\**\*" Link="fixtures\combat\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

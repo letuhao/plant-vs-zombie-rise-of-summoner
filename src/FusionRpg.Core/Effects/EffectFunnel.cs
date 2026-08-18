@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Combat;
 using FusionRpg.Core.Stats;
 
 namespace FusionRpg.Core.Effects;
@@ -38,6 +39,15 @@ public sealed class EffectFunnel
     public IReadOnlyList<EffectActionPlanItem> LastFlushedActions => _lastFlushed;
     public int FlushCallCount => _flushCalls;
     public bool HasPending => _modifiers.Count > 0 || _mutations.Count > 0 || _presents.Count > 0;
+
+    internal void NoteOverlayDamage(
+        string? actorPtr,
+        string targetPtr,
+        long amount,
+        int chainDepth,
+        string? sourceGrantId,
+        EffectEventDto? ev) =>
+        _bag.NoteOverlayDamage(actorPtr, targetPtr, amount, chainDepth, sourceGrantId, ev);
 
     public bool Enqueue(RpgEffectEvent ev)
     {
@@ -400,12 +410,7 @@ public sealed class EffectFunnel
     static string PresentKey(string targetPtr, DamageFxTag tag) =>
         PtrHex(targetPtr) + "|" + tag;
 
-    static string PtrHex(string targetPtr)
-    {
-        var n = StatApplyScope.Normalize(
-            targetPtr.Contains(':') ? targetPtr : EffectOwnerKeys.Entity(targetPtr));
-        return n.StartsWith("entity:", StringComparison.OrdinalIgnoreCase) ? n[7..] : n;
-    }
+    static string PtrHex(string targetPtr) => CombatPtr.Normalize(targetPtr);
 
     sealed class MutationSlot
     {

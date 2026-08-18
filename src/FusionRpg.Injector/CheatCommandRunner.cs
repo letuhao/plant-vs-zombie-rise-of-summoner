@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Stats;
 
@@ -324,13 +325,18 @@ public static class CheatCommandRunner
             }
             case "debug.effect.fire-synthetic":
             {
+                var selected = CheatState.SelectedPtr == IntPtr.Zero
+                    ? null
+                    : CheatState.SelectedPtr.ToString("X");
+                var actor = Str(p, "actorPtr") ?? selected;
+                var target = Str(p, "targetPtr") ?? selected;
                 var ev = new EffectEventDto
                 {
                     Trigger = Str(p, "trigger") ?? EffectTriggers.OnDamageDealt,
                     MatchKey = GameHooks.MatchKey,
                     Side = Str(p, "side") ?? "plant",
-                    ActorPtr = Str(p, "actorPtr"),
-                    TargetPtr = Str(p, "targetPtr"),
+                    ActorPtr = actor,
+                    TargetPtr = target,
                     TypeId = p.TryGetProperty("typeId", out var tid) && tid.TryGetInt32(out var t) ? t : null,
                     TargetTypeId = p.TryGetProperty("targetTypeId", out var ttid) && ttid.TryGetInt32(out var tt) ? tt : null,
                     Tick = Effects.EffectRuntime.NextTick(),
@@ -347,6 +353,15 @@ public static class CheatCommandRunner
             }
             case "debug.effect.enqueue-delta":
                 RunEnqueueDelta(p);
+                break;
+            case "debug.effect.board-snapshot":
+                EmitBoardSnapshot();
+                break;
+            case "debug.effect.dots":
+                EmitDots();
+                break;
+            case "debug.effect.counters":
+                EmitCounters();
                 break;
             default:
                 CheatState.Error("unknown debug cmd: " + name);
@@ -701,7 +716,7 @@ public static class CheatCommandRunner
             }
 
             var ptr = ResolveDeltaTargetPtr(p);
-            if (string.IsNullOrWhiteSpace(ptr))
+            if (string.IsNullOrWhiteSpace(ptr) && !HasCellAnchor(p))
             {
                 CheatState.Error("debug.effect.enqueue-delta: missing target");
                 DebugRuntime.Emit("debug.effect.error", new Dictionary<string, object>
@@ -720,6 +735,7 @@ public static class CheatCommandRunner
                 tag = parsed;
 
             Effects.EffectRuntime.Ensure();
+            Effects.EffectRuntime.FreezeBoard();
             var funnel = Effects.EffectRuntime.Bag.Funnel;
             if (funnel == null)
             {
@@ -727,9 +743,35 @@ public static class CheatCommandRunner
                 return;
             }
 
+            var hasTargetSpec = p.TryGetProperty("target", out var tEl) && tEl.ValueKind == JsonValueKind.Object;
             var ok = true;
-            if (amount != 0)
+            var resolved = 0;
+            if (hasTargetSpec)
+            {
+                var overlay = JsonElementToOverlay(p);
+                var packet = DamagePacketBuilder.FromOverlay(overlay, new EffectEventDto
+                {
+                    TargetPtr = ptr,
+                    ActorPtr = ptr,
+                    Tick = Effects.EffectRuntime.NextTick()
+                }, grantId: "debug.enqueue-delta", pluginId: "debug");
+                Effects.EffectRuntime.BindSelectedTarget(packet);
+                resolved = CombatDamageDispatcher.DispatchInstant(
+                    packet,
+                    Effects.EffectRuntime.Bag.BoardSnapshot,
+                    new EffectEventDto { TargetPtr = ptr, ActorPtr = ptr },
+                    funnel,
+                    Effects.EffectRuntime.Bag.CombatPolicy,
+                    Effects.EffectRuntime.Bag.CombatRng,
+                    Effects.EffectRuntime.Bag.CombatMath);
+                ok = resolved > 0 || amount == 0;
+            }
+            else if (amount != 0)
+            {
                 ok &= funnel.EnqueueMutation("entity:" + ptr, amount, pluginId: "debug");
+                resolved = ok ? 1 : 0;
+            }
+
             if (tag.HasValue)
             {
                 ok &= funnel.EnqueuePresent(new DamageFxDto
@@ -747,8 +789,17 @@ public static class CheatCommandRunner
                 ["ptr"] = ptr,
                 ["amount"] = amount,
                 ["tag"] = tag?.ToString() ?? "",
-                ["ok"] = ok
+                ["ok"] = ok,
+                ["resolved"] = resolved
             });
+            if (hasTargetSpec)
+            {
+                DebugRuntime.Emit("debug.combat.packet", new Dictionary<string, object>
+                {
+                    ["fa10"] = resolved,
+                    ["source"] = "enqueue-delta"
+                });
+            }
         }
         catch (Exception ex)
         {
@@ -777,6 +828,74 @@ public static class CheatCommandRunner
         return false;
     }
 
+    static bool HasCellAnchor(JsonElement p)
+    {
+        if (!p.TryGetProperty("target", out var t) || t.ValueKind != JsonValueKind.Object)
+            return false;
+        if (!t.TryGetProperty("anchor", out var a) || a.ValueKind != JsonValueKind.Object)
+            return false;
+        return a.TryGetProperty("row", out _) && a.TryGetProperty("col", out _);
+    }
+
+    static void EmitBoardSnapshot()
+    {
+        Effects.EffectRuntime.FreezeBoard();
+        var ents = Effects.EffectRuntime.Bag.BoardSnapshot.Entities
+            .Select(e => new Dictionary<string, object>
+            {
+                ["ptr"] = e.Ptr,
+                ["side"] = e.Side,
+                ["typeId"] = e.TypeId,
+                ["col"] = e.Col,
+                ["row"] = e.Row,
+                ["living"] = e.Living,
+                ["mindControlled"] = e.MindControlled
+            })
+            .ToList();
+        DebugRuntime.Emit("debug.effect.board-snapshot", new Dictionary<string, object>
+        {
+            ["count"] = ents.Count,
+            ["entities"] = ents,
+            ["selectedPtr"] = Effects.EffectRuntime.Bag.SelectedPtr ?? ""
+        });
+    }
+
+    static void EmitDots()
+    {
+        Effects.EffectRuntime.Ensure();
+        var now = DateTimeOffset.UtcNow;
+        var items = Effects.EffectRuntime.Bag.Dots.Entries
+            .Select(e => new Dictionary<string, object>
+            {
+                ["grantId"] = e.GrantId,
+                ["targetPtr"] = e.TargetPtr,
+                ["periodMs"] = e.PeriodMs,
+                ["nextMs"] = (long)Math.Max(0, (e.Next - now).TotalMilliseconds),
+                ["endMs"] = (long)Math.Max(0, (e.End - now).TotalMilliseconds),
+                ["ticksFired"] = e.TicksFired,
+                ["tickBudget"] = e.TickBudget
+            })
+            .ToList();
+        DebugRuntime.Emit("debug.effect.dots", new Dictionary<string, object>
+        {
+            ["count"] = items.Count,
+            ["items"] = items
+        });
+    }
+
+    static void EmitCounters()
+    {
+        Effects.EffectRuntime.Ensure();
+        var meters = Effects.EffectRuntime.Bag.Counters.Snapshot()
+            .Select(kv => new Dictionary<string, object> { ["key"] = kv.Key, ["hits"] = kv.Value })
+            .ToList();
+        DebugRuntime.Emit("debug.effect.counters", new Dictionary<string, object>
+        {
+            ["count"] = meters.Count,
+            ["meters"] = meters
+        });
+    }
+
     static string? ResolveDeltaTargetPtr(JsonElement p)
     {
         var raw = Str(p, "targetPtr");
@@ -789,9 +908,8 @@ public static class CheatCommandRunner
             return CheatState.SelectedPtr.ToString("X");
         }
 
-        if (raw.StartsWith("entity:", StringComparison.OrdinalIgnoreCase))
-            return raw[7..];
-        return raw;
+        raw = CombatPtr.Normalize(raw);
+        return string.IsNullOrEmpty(raw) ? null : raw;
     }
 
     static void RunEffectGrant(JsonElement p)
@@ -866,6 +984,15 @@ public static class CheatCommandRunner
             CheatState.Error("debug.effect.grant: " + ex.Message);
             DebugRuntime.Emit("debug.effect.error", new Dictionary<string, object> { ["error"] = ex.Message });
         }
+    }
+
+    static Dictionary<string, object?> JsonElementToOverlay(JsonElement p)
+    {
+        var overlay = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+        if (p.ValueKind != JsonValueKind.Object) return overlay;
+        foreach (var prop in p.EnumerateObject())
+            overlay[prop.Name] = UnwrapJson(prop.Value);
+        return overlay;
     }
 
     static object? UnwrapJson(JsonElement el) => el.ValueKind switch

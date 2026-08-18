@@ -198,4 +198,28 @@ public class DebugScenariosTests
             Assert.True(sessionIdx >= 0 && clearIdx > sessionIdx, id);
         }
     }
+
+    [Fact]
+    public void Combat_scenarios_arm_with_select_and_synthetic()
+    {
+        foreach (var id in new[]
+                 {
+                     "combat-area-row", "combat-counter-target", "combat-counter-actor",
+                     "combat-dot", "combat-heal", "combat-random"
+                 })
+        {
+            Assert.Contains(id, DebugScenarios.AllIds);
+            var steps = DebugScenarios.Expand(id, "sid");
+            Assert.Contains(steps, s => s.Name == "debug.select");
+            Assert.Contains(steps, s => s.Name == "debug.effect.fire-synthetic");
+        }
+
+        var area = DebugScenarios.Expand("combat-area-row", "sid");
+        var grant = area.First(s => s.Name == "debug.effect.grant").Payload;
+        var json = System.Text.Json.JsonSerializer.SerializeToElement(grant);
+        Assert.Equal("Area", json.GetProperty("overlay").GetProperty("target").GetProperty("mode").GetString());
+        Assert.Contains(area, s => s.Name == "debug.spawn-plant");
+        Assert.True(DebugScenarios.Expand("combat-counter-target", "sid")
+            .Count(s => s.Name == "debug.effect.fire-synthetic") >= 5);
+    }
 }

@@ -48,6 +48,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/effect-data.md](architecture/effect-data.md) | Effect / grant / overlay JSON shapes |
 | [architecture/effect-runtime.md](architecture/effect-runtime.md) | Injector apply path + capture → FT* |
 | [architecture/effect-funnel.md](architecture/effect-funnel.md) | Funnel + Guard: Secondary enqueue → merge → FA10 Writer Add (`guard-funnel-delta.ps1` shipped) |
+| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | DamagePacket target + delivery SSOT (signed HP delta; heal included) — partially shipped |
 | [architecture/effect-testing.md](architecture/effect-testing.md) | Offline SimEffectHost / scenarios vs LIVE L1–L14 |
 | [architecture/match-runtime.md](architecture/match-runtime.md) | MatchRuntime FSM + MatchState (W1–W5 shipped; bullets/hypno deferred) |
 | [architecture/unique-actor-runtime.md](architecture/unique-actor-runtime.md) | UniqueActor FSM — durable specimens (W4–W5 + W8 equip/XP/roster shipped) |

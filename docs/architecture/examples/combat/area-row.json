@@ -1,0 +1,18 @@
+{
+  "_comment": "Row AOE at event target's lane. Entity-centric FA10 fan-out — no vanilla cherry explode.",
+  "grantId": "example-area-row",
+  "effectId": "fx.overlay_damage",
+  "ownerKey": "match",
+  "overlay": {
+    "amount": -50,
+    "icd_ms": 0,
+    "target": {
+      "mode": "Area",
+      "shape": "Row",
+      "anchor": "EventTarget",
+      "filters": { "side": "zombie", "excludeMindControlled": true },
+      "maxTargets": 8
+    },
+    "delivery": { "mode": "Instant" }
+  }
+}

@@ -1,7 +1,7 @@
 # Effect Funnel + Guard (design lock)
 
 **Status:** Core `EffectFunnel` + injector FA10 Writer Add + `scripts/guard-funnel-delta.ps1` shipped (`FoundationContractVersion = 2`). CombatMath and LIVE prove of enqueue-delta remain later.  
-**Parent:** [effect-system.md](effect-system.md). Runtime: [effect-runtime.md](effect-runtime.md). Loops: [overlay-control-loops.md](overlay-control-loops.md). ADR: [decisions.md](decisions.md).
+**Parent:** [effect-system.md](effect-system.md). Runtime: [effect-runtime.md](effect-runtime.md). Loops: [overlay-control-loops.md](overlay-control-loops.md). Target/delivery: [combat-damage-ssot.md](combat-damage-ssot.md). ADR: [decisions.md](decisions.md).
 
 A **Funnel** is a command buffer between **Secondary** (RPG content: plugins, future skills) and sealed **Foundation** (`EffectBag` FA*). It is the **sole Secondary→Bag path** — no Grant exception. A **Guard** rejects stale absolute combat writes (`hp=4000` from an overlay snapshot) and keeps Secondary off Unity.
 
@@ -79,6 +79,8 @@ Two **apply adapters**, one **HP SSOT** (Unity). Do not run vanilla Prefix DEF a
 | **Funnel** | Pass-through modifier Grants; sum mutations; Guard; emit Grant / FA* | Await SignalR / HTTP / SQLite; emit `mode=set` HP; fold distinct `grantId`s into one overlay |
 | **Foundation** | Sole apply (`EffectBag` → Writer / Status / Intent; FA10 Writer **Add** + Die if HP≤0) | Accept RPG absolute HP; call `TakeDamage` for overlay deltas |
 | **CombatMath** (later) | Compute final signed delta **above** Funnel (DEF / element / shield) | Sit inside Funnel or FA10; re-use TakeDamage Prefix as RPG mitigation |
+
+Multi-target overlay damage (area / random / all) resolves to **N mutation enqueues** (one per ptr) — see [combat-damage-ssot.md](combat-damage-ssot.md). Funnel still sums per `targetKey|ResourceDelta|hp`.
 
 Stub plugins enqueue modifiers via `ctx.Funnel.EnqueueModifier`. Mutations sum to FA10. Nested `Flush` is a no-op; leftover Enqueue from OnDeath is **drained** in the same depth-0 window (Die capture stays on so OnDeath Secondary still runs).
 
@@ -261,6 +263,8 @@ Scan Secondary plugins / `IEffectGrantPlugin` implementers **and** Funnel emit D
 | `TakeDamage`, `SetHp`, `thePlantHealth=`, `theHealth=` in Secondary | Apply shortcut |
 | Funnel output `setHp` / `absoluteHp` / `EntityFinal.Hp` sourced from overlay snapshot | Stale write |
 | Secondary calling `EffectBag.Grant` or `Withdraw` | Skip Funnel (no exception) |
+| `EntityStatWriter` / `AddPlantHp` / `targetPtrs` in Core | Combat HP must fan-out via dispatcher → Funnel → one FA10 per ptr |
+| Injector `EntityStatWriter.AddPlantHp` / `AddZombieHp` outside the FA10 sink | Bypass Funnel / dispatcher |
 
 Only Funnel may `EffectBag.Grant` / `Withdraw` / enqueue FA* for Secondary-originated work. Modifier Grants after Funnel identity pass-through are Funnel→Bag, not plugin→Bag.
 

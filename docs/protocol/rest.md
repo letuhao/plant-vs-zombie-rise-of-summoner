@@ -127,7 +127,12 @@ Controllable effect-test APIs (not EffectBag). Runbook: [runbook/debug-pipeline.
 | POST | `/api/debug/kill` / `kill-plant` / `wave-freeze` / `ensure-sun` / `select` | |
 | POST | `/api/debug/spawn-extra` / `fire-spawn-extra` | Intent accept path (fact + command) |
 | POST | `/api/debug/arm/{kind}` / `disarm` | onkill/onhit arms |
-| POST | `/api/debug/effect/enqueue-delta` | Funnel FA10 Writer Add + overlay FX (`amount`, optional `targetPtr`/`tag`) |
+| POST | `/api/debug/effect/enqueue-delta` | Funnel FA10 Writer Add + overlay FX (`amount`, optional `targetPtr`/`tag`; `target` spec may use cell `anchor`) |
+| POST | `/api/debug/effect/grant` | Grant overlay (`target` / `delivery` / `burst`) |
+| POST | `/api/debug/effect/fire-synthetic` | Inject FT* (`OnDamageDealt` default). Omitting ptrs uses selected. |
+| POST | `/api/debug/effect/board-snapshot` | Frozen combat census (`debug.effect.board-snapshot`) |
+| POST | `/api/debug/effect/dots` | Active OverTime entries |
+| POST | `/api/debug/effect/counters` | Counter meters |
 | GET | `/api/debug/effects/contract` | Frozen FT*/FA* including FA10 `ApplyResourceDelta` (`FoundationContractVersion` 2) |
 
 ## RpgProgression

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Stats;
 using FusionRpg.Injector.Stats;
@@ -144,7 +145,7 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
         foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
         {
             if (z == null) continue;
-            if (!string.Equals(GameDumps.Ptr(z), targetPtr, StringComparison.OrdinalIgnoreCase)) continue;
+            if (!CombatPtr.EqualsPtr(GameDumps.Ptr(z), targetPtr)) continue;
             EntityStatWriter.AddZombieHp(z, amount, source);
             return true;
         }
@@ -152,7 +153,7 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
         foreach (var plant in UnityEngine.Object.FindObjectsOfType<Plant>())
         {
             if (plant == null) continue;
-            if (!string.Equals(GameDumps.Ptr(plant), targetPtr, StringComparison.OrdinalIgnoreCase)) continue;
+            if (!CombatPtr.EqualsPtr(GameDumps.Ptr(plant), targetPtr)) continue;
             EntityStatWriter.AddPlantHp(plant, amount, source);
             return true;
         }

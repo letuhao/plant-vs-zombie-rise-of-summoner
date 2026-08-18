@@ -28,6 +28,19 @@ public static class EffectEventAdapterCore
             string.Equals(kind, "bullet.init", StringComparison.OrdinalIgnoreCase))
             return MapSpawn(kind, p, tick, matchKey);
 
+        if (string.Equals(kind, "effect.timer", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(kind, "combat.timer", StringComparison.OrdinalIgnoreCase))
+        {
+            return new EffectEventDto
+            {
+                Trigger = EffectTriggers.OnTimer,
+                MatchKey = matchKey,
+                Tick = tick,
+                ActorPtr = p.TryGetValue("actorPtr", out var a) ? a?.ToString() : null,
+                TargetPtr = p.TryGetValue("targetPtr", out var t) ? t?.ToString() : null
+            };
+        }
+
         return null;
     }
 

@@ -2,7 +2,7 @@
 
 Logical schema for Foundation Effect catalog and grants. Secondary writes **grants + typed overlays** only — never parallel Unity write tables.
 
-Parent: [effect-system.md](effect-system.md). Runtime: [effect-runtime.md](effect-runtime.md). Funnel / FA10 v2: [effect-funnel.md](effect-funnel.md).
+Parent: [effect-system.md](effect-system.md). Runtime: [effect-runtime.md](effect-runtime.md). Funnel / FA10 v2: [effect-funnel.md](effect-funnel.md). Target + delivery SSOT: [combat-damage-ssot.md](combat-damage-ssot.md).
 
 ---
 
@@ -43,9 +43,9 @@ Unknown overlay keys for the FA* being executed → **reject** (log + skip actio
 |---|---|---|
 | `effect_id` | TEXT FK | |
 | `ord` | INT | Optional order if multiple |
-| `trigger` | TEXT | `OnSpawn` \| `OnDamageDealt` \| `OnDamageTaken` \| `OnDeath` \| `OnGranted` \| `OnRemoved` |
+| `trigger` | TEXT | `OnSpawn` \| `OnDamageDealt` \| `OnDamageTaken` \| `OnDeath` \| `OnGranted` \| `OnRemoved` \| `OnTimer` |
 
-Rich side/type filters live on the **grant overlay**, not here (keep def reusable).
+`OnTimer` — periodic DoT/aura ticks ([combat-damage-ssot.md](combat-damage-ssot.md)). Injector hot-loop ms scheduler; not Server-driven.
 
 ### `foundation_effect_action`
 
@@ -77,9 +77,13 @@ Rich side/type filters live on the **grant overlay**, not here (keep def reusabl
 | `effect_id` | TEXT | |
 | `match_key` | TEXT | |
 | `last_fire_utc` | TEXT | ICD |
-| `stacks` | INT | |
+| `stacks` | INT | Grant stack cap tracking (`max_stacks`) |
+| `hit_counter` | INT | Counter delivery meter ([combat-damage-ssot.md](combat-damage-ssot.md)) |
+| `counter_scope_key` | TEXT | `Target` meter key: `targetPtr` or `actorPtr` facet |
+| `last_tick_ms` | INT | DoT / OnTimer alignment |
+| `dot_budget_spent` | INT | B-DOT-BUDGET window counter |
 
-Ephemeral / session. Not content SSOT. No Unity handles as SSOT (ptrs only in event context).
+Rich side/type filters on **grant overlay** `filters` (event matching) stay separate from **`target.filters`** (damage recipient pool) — see [combat-damage-ssot.md](combat-damage-ssot.md).
 
 ---
 
@@ -111,6 +115,11 @@ Ephemeral / session. Not content SSOT. No Unity handles as SSOT (ptrs only in ev
 | `currency` | `sun`, `money`, `points` |
 | `boxType` | `Grass`, `Water`, `Dirt`, `Lava`, … (game BoxType names) |
 | `gridItemType` | `Grave`, `IceBlock`, … |
+| `target.mode` | `EventTarget`, `Actor`, `Selected`, `Single`, `Multi`, `Random`, `Area`, `All` — [combat-damage-ssot.md](combat-damage-ssot.md) |
+| `target.shape` | `Row`, `Column`, `Square`, `Rectangle` (Area mode only) |
+| `delivery.mode` | `Instant`, `OverTime`, `Counter` |
+| `delivery.counterScope` | `Target`, `Actor` |
+| `anchorOrigin` | `Corner`, `Center` (Rectangle / Square) |
 
 ---
 
@@ -133,6 +142,41 @@ Ephemeral / session. Not content SSOT. No Unity handles as SSOT (ptrs only in ev
 | `typeId` | int | Entity type filter |
 | `actorIsKiller` | bool | OnDeath when event carries killer |
 
+Event-matching filters only. For **damage recipient** filters use `target.filters` — [combat-damage-ssot.md](combat-damage-ssot.md).
+
+### `target` (ApplyResourceDelta / damage grants)
+
+Nested object on overlay. See [combat-damage-ssot.md](combat-damage-ssot.md) and [examples/combat/](examples/combat/).
+
+| Key | Type | Notes |
+|---|---|---|
+| `mode` | string | `EventTarget`, `Actor`, `Selected`, `Single`, `Multi`, `Random`, `Area`, `All` |
+| `ptr` | string | Required for `Single`; debug `Selected` uses cheat state |
+| `count` | int | `Multi` / `Random` |
+| `shape` | string | `Row`, `Column`, `Square`, `Rectangle` when `mode=Area` |
+| `size` | int | Square N×N; default from policy when omitted |
+| `width`, `height` | int | Rectangle; default from policy when omitted |
+| `anchor` | string or object | `EventTarget` or `{ "row", "col" }` |
+| `anchorOrigin` | string | `Corner` \| `Center` |
+| `filters` | object | Recipient pool — `side`, `typeId`, `typeIdIn`, `excludeMindControlled`, `row`, `col` |
+| `maxTargets` | int | Default 8 |
+
+### `delivery`
+
+| Key | Type | Notes |
+|---|---|---|
+| `mode` | string | `Instant`, `OverTime`, `Counter` |
+| `periodMs`, `durationMs` | int | OverTime |
+| `tickBudget` | int | OverTime — B-DOT-BUDGET |
+| `everyHits`, `resetOnBurst` | int / bool | Counter |
+| `counterScope` | string | `Target` \| `Actor` |
+
+### `burst` (Counter mode)
+
+Nested Instant sub-packet: `amount`, `target`, `delivery: { "mode": "Instant" }`.
+
+Optional grant keys: `procDepthLimit` (override match policy), `chainDepth` (runtime — usually not in content).
+
 ### Per-action overlay keys
 
 | Action | Extra keys |
@@ -146,7 +190,7 @@ Ephemeral / session. Not content SSOT. No Unity handles as SSOT (ptrs only in ev
 | `ClearGridItem` | `selector` (e.g. `randomGrave`) |
 | `SetBoxType` | `cells` `[{row,col},…]` |
 | `Economy` | `amount`, `capPerMatch` |
-| `ApplyResourceDelta` | `amount` (signed). No `absoluteHp` / `setHp` |
+| `ApplyResourceDelta` | `amount` (signed), `target`, `delivery`, `burst?`. No `absoluteHp` / `setHp`. Heal = positive amount |
 
 Any other key → reject for that action execute.
 
@@ -236,6 +280,8 @@ Any other key → reject for that action execute.
 - overlay `{ "byChannel": { "hp": { "more": 0.5 }, "atk": { "more": 0.25 } } }`
 
 Prefer **`byChannel`** when multiple ModifyStat rows share a grant; if absent, scalar `flat`/`increased`/`more` apply to every ModifyStat action in the def.
+
+Ephemeral runtime rows (`foundation_effect_runtime`) are session-scoped — not content SSOT. No Unity handles as SSOT (ptrs only in event context).
 
 ---
 

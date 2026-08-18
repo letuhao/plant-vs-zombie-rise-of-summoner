@@ -52,6 +52,9 @@ public static class DebugScenarios
         "debug.effect.list",
         "debug.effect.fire-synthetic",
         "debug.effect.enqueue-delta",
+        "debug.effect.board-snapshot",
+        "debug.effect.dots",
+        "debug.effect.counters",
         "pvz.spawn.extra"
     };
 
@@ -552,6 +555,177 @@ public static class DebugScenarios
                 });
                 Cmd("debug.board-stats", new { });
                 break;
+            case "combat-area-row":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.effect.clear", new { });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.spawn-plant", new { typeId = PeaTypeId, col = 2, row = 2 });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, x = 7.5f, hp = 8000, maxHp = 8000 });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, x = 8.2f, hp = 8000, maxHp = 8000 });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, x = 8.9f, hp = 8000, maxHp = 8000 });
+                Cmd("debug.effect.grant", new
+                {
+                    grantId = "area-row",
+                    effectId = "fx.overlay_damage",
+                    ownerKey = "match",
+                    overlay = new
+                    {
+                        amount = -50,
+                        icd_ms = 0,
+                        target = new
+                        {
+                            mode = "Area",
+                            shape = "Row",
+                            anchor = "EventTarget",
+                            filters = new { side = "zombie" },
+                            maxTargets = 8
+                        },
+                        delivery = new { mode = "Instant" }
+                    }
+                });
+                Cmd("debug.board-stats", new { });
+                Cmd("debug.select", new { side = "zombie" });
+                Cmd("debug.effect.fire-synthetic", new { trigger = "OnDamageDealt", side = "plant" });
+                break;
+            case "combat-counter-target":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.effect.clear", new { });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, hp = 20000, maxHp = 20000 });
+                Cmd("debug.effect.grant", new
+                {
+                    grantId = "counter-target",
+                    effectId = "fx.overlay_damage",
+                    ownerKey = "match",
+                    overlay = new
+                    {
+                        icd_ms = 0,
+                        delivery = new { mode = "Counter", everyHits = 5, resetOnBurst = true, counterScope = "Target" },
+                        burst = new
+                        {
+                            amount = -500,
+                            target = new { mode = "EventTarget" },
+                            delivery = new { mode = "Instant" }
+                        }
+                    }
+                });
+                Cmd("debug.board-stats", new { });
+                Cmd("debug.select", new { side = "zombie" });
+                for (var i = 0; i < 5; i++)
+                    Cmd("debug.effect.fire-synthetic", new { trigger = "OnDamageDealt", side = "plant" });
+                break;
+            case "combat-counter-actor":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.effect.clear", new { });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, hp = 20000, maxHp = 20000 });
+                Cmd("debug.effect.grant", new
+                {
+                    grantId = "counter-actor",
+                    effectId = "fx.overlay_damage",
+                    ownerKey = "match",
+                    overlay = new
+                    {
+                        icd_ms = 0,
+                        delivery = new { mode = "Counter", everyHits = 5, resetOnBurst = true, counterScope = "Actor" },
+                        burst = new
+                        {
+                            amount = -500,
+                            target = new { mode = "EventTarget", filters = new { side = "zombie" } },
+                            delivery = new { mode = "Instant" }
+                        }
+                    }
+                });
+                Cmd("debug.board-stats", new { });
+                Cmd("debug.select", new { side = "zombie" });
+                for (var i = 0; i < 5; i++)
+                    Cmd("debug.effect.fire-synthetic", new { trigger = "OnDamageDealt", side = "plant" });
+                break;
+            case "combat-dot":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.effect.clear", new { });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, hp = 8000, maxHp = 8000 });
+                Cmd("debug.effect.grant", new
+                {
+                    grantId = "dot-overtime",
+                    effectId = "fx.overlay_damage",
+                    ownerKey = "match",
+                    overlay = new
+                    {
+                        amount = -20,
+                        icd_ms = 0,
+                        delivery = new
+                        {
+                            mode = "OverTime",
+                            periodMs = 1000,
+                            durationMs = 5000,
+                            tickBudget = 1
+                        }
+                    }
+                });
+                Cmd("debug.board-stats", new { });
+                Cmd("debug.select", new { side = "zombie" });
+                Cmd("debug.effect.fire-synthetic", new { trigger = "OnDamageDealt", side = "plant" });
+                break;
+            case "combat-heal":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.effect.clear", new { });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, hp = 500, maxHp = 8000 });
+                Cmd("debug.effect.grant", new
+                {
+                    grantId = "heal",
+                    effectId = "fx.overlay_damage",
+                    ownerKey = "match",
+                    overlay = new
+                    {
+                        amount = 30,
+                        icd_ms = 0,
+                        target = new { mode = "EventTarget" },
+                        delivery = new { mode = "Instant" }
+                    }
+                });
+                Cmd("debug.board-stats", new { });
+                Cmd("debug.select", new { side = "zombie" });
+                Cmd("debug.effect.fire-synthetic", new { trigger = "OnDamageDealt", side = "plant" });
+                break;
+            case "combat-random":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.effect.clear", new { });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, x = 7.5f, hp = 8000, maxHp = 8000 });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 2, x = 8.2f, hp = 8000, maxHp = 8000 });
+                Cmd("debug.spawn-zombie", new { typeId = BasicZombieTypeId, row = 3, x = 7.5f, hp = 8000, maxHp = 8000 });
+                Cmd("debug.effect.grant", new
+                {
+                    grantId = "random-multi",
+                    effectId = "fx.overlay_damage",
+                    ownerKey = "match",
+                    overlay = new
+                    {
+                        amount = -40,
+                        icd_ms = 0,
+                        target = new
+                        {
+                            mode = "Random",
+                            count = 2,
+                            maxTargets = 8,
+                            filters = new { side = "zombie", excludeMindControlled = true }
+                        },
+                        delivery = new { mode = "Instant" }
+                    }
+                });
+                Cmd("debug.board-stats", new { });
+                Cmd("debug.select", new { side = "zombie" });
+                Cmd("debug.effect.fire-synthetic", new { trigger = "OnDamageDealt", side = "plant" });
+                break;
             case "effect-spawn-ondeath":
                 Cmd("debug.session", new { op = "start", scenarioId });
                 Cmd("debug.effect.clear", new { });
@@ -788,6 +962,8 @@ public static class DebugScenarios
         "effect-passive-atk", "effect-spawn-ondeath", "effect-spawn-plant-bullet",
         "effect-board-cherry", "effect-grid-cycle", "effect-set-dirt", "effect-economy-sun",
         "effect-icd-butter", "effect-withdraw", "effect-spawn-filter", "effect-entity-atk",
-        "effect-plant-type-atk", "effect-match-midspawn", "effect-entity-midspawn", "effect-spawn-then-grant"
+        "effect-plant-type-atk", "effect-match-midspawn", "effect-entity-midspawn", "effect-spawn-then-grant",
+        "combat-area-row", "combat-counter-target", "combat-counter-actor", "combat-dot",
+        "combat-heal", "combat-random"
     };
 }

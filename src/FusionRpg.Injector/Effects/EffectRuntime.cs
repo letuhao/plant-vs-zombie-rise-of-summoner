@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Plugins;
 using FusionRpg.Core.Stats;
@@ -16,6 +17,7 @@ public static class EffectRuntime
     static long _tick;
     /// <summary>Targets that already got OnDamageDealt this tick window (A2 — skip redundant taken).</summary>
     static readonly Dictionary<string, long> DealtIdentity = new(StringComparer.OrdinalIgnoreCase);
+    static float _dotAccum;
 
     public static EffectBag Bag
     {
@@ -50,6 +52,7 @@ public static class EffectRuntime
             _bag = null;
             _plugins = null;
             DealtIdentity.Clear();
+            _dotAccum = 0;
             Ensure();
         }
     }
@@ -197,7 +200,9 @@ public static class EffectRuntime
         if (!_dedupe.ShouldEmit(ev)) return;
         try
         {
+            FreezeBoard();
             var plan = Bag.OnEvent(ev);
+            MaybeEmitCombatPacketTrace(plan, "capture");
             if (plan.Actions.Count > 0)
             {
                 DebugRuntime.Emit("debug.effect.plan", new Dictionary<string, object>
@@ -224,7 +229,84 @@ public static class EffectRuntime
     {
         Ensure();
         if (ev.Tick <= 0) ev.Tick = NextTick();
-        return Bag.OnEvent(ev);
+        FreezeBoard();
+        var plan = Bag.OnEvent(ev);
+        MaybeEmitCombatPacketTrace(plan, "synthetic");
+        return plan;
+    }
+
+    public static void FreezeBoard()
+    {
+        Ensure();
+        Bag.BoardSnapshot = InjectorBoardSnapshot.Capture();
+        Bag.SelectedPtr = CheatState.SelectedPtr == IntPtr.Zero
+            ? null
+            : CheatState.SelectedPtr.ToString("X");
+    }
+
+    /// <summary>Coalesce OverTime ticks on a ~100ms grid. Safe no-op when no DoTs are armed.</summary>
+    public static void TickDots(float unscaledDeltaTime)
+    {
+        Ensure();
+        if (Bag.Dots.Entries.Count == 0)
+        {
+            _dotAccum = 0;
+            return;
+        }
+
+        _dotAccum += unscaledDeltaTime;
+        if (_dotAccum < 0.1f) return;
+        _dotAccum = 0;
+        FreezeBoard();
+        var n = Bag.TickDots();
+        if (n > 0)
+        {
+            var actions = Bag.Funnel?.LastFlushedActions ?? Array.Empty<EffectActionPlanItem>();
+            MaybeEmitCombatPacketTrace(new IntentPlanDto
+            {
+                Trigger = EffectTriggers.OnTimer,
+                Actions = actions.ToList(),
+                Skipped = Bag.LastSkipped.ToList()
+            }, "dot");
+        }
+    }
+
+    public static void BindSelectedTarget(DamagePacket packet)
+    {
+        if (packet?.Target == null) return;
+        if (!string.Equals(packet.Target.Mode, TargetModes.Selected, StringComparison.OrdinalIgnoreCase))
+            return;
+        if (CheatState.SelectedPtr == IntPtr.Zero)
+        {
+            packet.Target.Mode = TargetModes.Single;
+            packet.Target.Ptr = null;
+            return;
+        }
+
+        packet.Target.Mode = TargetModes.Single;
+        packet.Target.Ptr = CheatState.SelectedPtr.ToString("X");
+    }
+
+    static void MaybeEmitCombatPacketTrace(IntentPlanDto plan, string source)
+    {
+        var fa = plan.Actions
+            .Where(a => string.Equals(a.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (fa.Count <= 0) return;
+        var ptrs = fa
+            .Select(a => a.Params.TryGetValue("targetPtr", out var p) ? p?.ToString() : null)
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Cast<string>()
+            .ToList();
+        DebugRuntime.Emit("debug.combat.packet", new Dictionary<string, object>
+        {
+            ["source"] = source,
+            ["fa10"] = fa.Count,
+            ["skipped"] = plan.Skipped.Count,
+            ["trigger"] = plan.Trigger ?? "",
+            ["ptrs"] = ptrs,
+            ["chainDepth"] = 0
+        });
     }
 }
 

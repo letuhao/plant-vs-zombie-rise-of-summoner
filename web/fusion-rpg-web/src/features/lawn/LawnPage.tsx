@@ -268,6 +268,34 @@ export function LawnPage() {
     });
   };
 
+  const combatHitSelected = () => {
+    if (!selected?.ptr) return;
+    void runAction("Fire-synthetic enqueued", async () => {
+      await debugPost.mutateAsync({
+        path: "select",
+        body: { ptr: selected.ptr, side: selected.side }
+      });
+      await debugPost.mutateAsync({
+        path: "effect/fire-synthetic",
+        body: { trigger: "OnDamageDealt", side: "plant", targetPtr: selected.ptr }
+      });
+    });
+  };
+
+  const combatDeltaSelected = () => {
+    if (!selected?.ptr) return;
+    void runAction("Enqueue-delta enqueued", async () => {
+      await debugPost.mutateAsync({
+        path: "select",
+        body: { ptr: selected.ptr, side: selected.side }
+      });
+      await debugPost.mutateAsync({
+        path: "effect/enqueue-delta",
+        body: { amount: -50, targetPtr: selected.ptr }
+      });
+    });
+  };
+
   const killSelected = () => {
     if (!selected?.ptr) return;
     const path = selected.side === "plant" ? "kill-plant" : "kill";
@@ -566,6 +594,24 @@ export function LawnPage() {
               data-testid="lawn-kill"
             >
               Kill
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              onClick={combatHitSelected}
+              data-testid="lawn-combat-hit"
+            >
+              Overlay hit
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              onClick={combatDeltaSelected}
+              data-testid="lawn-combat-delta"
+            >
+              HP −50
             </Button>
             {selected.side === "zombie" ? (
               <>

@@ -184,6 +184,9 @@ public static class DebugEndpoints
         MapPost(g, "/effect/list", "debug.effect.list");
         MapPost(g, "/effect/fire-synthetic", "debug.effect.fire-synthetic");
         MapPost(g, "/effect/enqueue-delta", "debug.effect.enqueue-delta");
+        MapPost(g, "/effect/board-snapshot", "debug.effect.board-snapshot");
+        MapPost(g, "/effect/dots", "debug.effect.dots");
+        MapPost(g, "/effect/counters", "debug.effect.counters");
 
         g.MapPost("/effects/reload", async (IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
         {
@@ -210,7 +213,8 @@ public static class DebugEndpoints
             triggers = new[]
             {
                 EffectTriggers.OnSpawn, EffectTriggers.OnDamageDealt, EffectTriggers.OnDamageTaken,
-                EffectTriggers.OnDeath, EffectTriggers.OnGranted, EffectTriggers.OnRemoved
+                EffectTriggers.OnDeath, EffectTriggers.OnGranted, EffectTriggers.OnRemoved,
+                EffectTriggers.OnTimer
             },
             actions = new[]
             {

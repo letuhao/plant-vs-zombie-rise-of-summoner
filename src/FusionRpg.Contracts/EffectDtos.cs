@@ -16,6 +16,7 @@ public static class EffectTriggers
     public const string OnDeath = "OnDeath";
     public const string OnGranted = "OnGranted";
     public const string OnRemoved = "OnRemoved";
+    public const string OnTimer = "OnTimer";
 }
 
 public static class EffectActions
@@ -64,6 +65,8 @@ public sealed class EffectEventDto
     [JsonPropertyName("killerPtr")] public string? KillerPtr { get; set; }
     [JsonPropertyName("tick")] public long Tick { get; set; }
     [JsonPropertyName("scenarioId")] public string? ScenarioId { get; set; }
+    [JsonPropertyName("chainDepth")] public int ChainDepth { get; set; }
+    [JsonPropertyName("sourceGrantId")] public string? SourceGrantId { get; set; }
 }
 
 public sealed class EffectGrantDto

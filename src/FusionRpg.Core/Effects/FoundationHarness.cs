@@ -22,6 +22,7 @@ public sealed class FoundationHarness
         var grants = new InMemoryEffectGrantStore();
         var proc = new EffectProcPolicy(_clock, _rng);
         _bag = new EffectBag(catalog, grants, proc, _sink);
+        _bag.UtcNow = () => _clock.UtcNow;
         Funnel = new EffectFunnel(_bag, _fx);
     }
 
@@ -52,7 +53,11 @@ public sealed class FoundationHarness
         return _bag.Withdraw(grantId);
     }
 
-    public void AdvanceTime(int ms) => _clock.AdvanceMs(ms);
+    public void AdvanceTime(int ms)
+    {
+        _clock.AdvanceMs(ms);
+        _bag.TickDots();
+    }
 
     public void ClearAll()
     {
@@ -63,6 +68,15 @@ public sealed class FoundationHarness
     }
 
     public EffectCatalogSnapshotDto Snapshot() => _bag.Snapshot();
+
+    public Combat.BoardSnapshot BoardSnapshot
+    {
+        get => _bag.BoardSnapshot;
+        set => _bag.BoardSnapshot = value ?? Combat.BoardSnapshot.Empty;
+    }
+
+    public void SetBoard(IEnumerable<Combat.BoardEntitySnap> entities) =>
+        BoardSnapshot = new Combat.BoardSnapshot(entities);
 
     public IntentPlanDto OnEvent(EffectEventDto ev)
     {
@@ -96,7 +110,8 @@ public static class EffectSeedCatalog
         SetDirtBox(),
         EconomySun(),
         IcdButter(),
-        OnSpawnButter()
+        OnSpawnButter(),
+        OverlayDamage()
     };
 
     public static EffectDef ButterOnHit() => Triggered(
@@ -221,6 +236,10 @@ public static class EffectSeedCatalog
     public static EffectDef OnSpawnButter() => Triggered(
         "fx.spawn_butter", "Butter on spawn", EffectTriggers.OnSpawn,
         EffectActions.ApplyStatus, new Dictionary<string, object?> { ["status"] = "butter", ["duration"] = 3f });
+
+    public static EffectDef OverlayDamage() => Triggered(
+        "fx.overlay_damage", "Overlay HP delta", EffectTriggers.OnDamageDealt,
+        EffectActions.ApplyResourceDelta, new Dictionary<string, object?> { ["channel"] = "hp" });
 
     static EffectDef Triggered(string id, string name, string trigger, string action, Dictionary<string, object?> p) => new()
     {

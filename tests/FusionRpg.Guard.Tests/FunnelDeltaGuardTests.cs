@@ -111,6 +111,33 @@ public class FunnelDeltaGuardTests
     }
 
     [Fact]
+    public void Guard_script_exits_nonzero_when_core_calls_AddPlantHp()
+    {
+        var repoRoot = FindRepoRoot();
+        var script = Path.Combine(repoRoot, "scripts", "guard-funnel-delta.ps1");
+        var fixture = Path.Combine(Path.GetTempPath(), "fusionrpg-funnel-core-hp-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var coreDir = Path.Combine(fixture, "src", "FusionRpg.Core", "Combat");
+            Directory.CreateDirectory(coreDir);
+            Directory.CreateDirectory(Path.Combine(fixture, "src", "FusionRpg.Core", "Effects", "Plugins"));
+            File.WriteAllText(
+                Path.Combine(coreDir, "BadCoreWriter.cs"),
+                "namespace X { class Bad { void Hit() { EntityStatWriter.AddPlantHp(p, -10, \"x\"); } } }\n");
+
+            var (exit, stdout, stderr) = RunScript(script, fixture);
+            Assert.True(exit != 0,
+                $"expected fail exit, got 0\nstdout:\n{stdout}\nstderr:\n{stderr}");
+            Assert.Contains("FUNNEL DELTA GUARD FAILED", stdout, StringComparison.Ordinal);
+            Assert.Contains("AddPlantHp", stdout, StringComparison.Ordinal);
+        }
+        finally
+        {
+            try { Directory.Delete(fixture, recursive: true); } catch { /* temp */ }
+        }
+    }
+
+    [Fact]
     public void EffectFunnel_fa10_params_have_no_absolute_hp_keys()
     {
         var repoRoot = FindRepoRoot();

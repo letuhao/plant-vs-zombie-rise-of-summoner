@@ -1,0 +1,17 @@
+{
+  "_comment": "Pick 3 random zombies in row 2 matching type filter.",
+  "grantId": "example-random-multi",
+  "effectId": "fx.overlay_damage",
+  "ownerKey": "match",
+  "overlay": {
+    "amount": -40,
+    "icd_ms": 0,
+    "target": {
+      "mode": "Random",
+      "count": 3,
+      "filters": { "side": "zombie", "typeIdIn": [0, 1], "row": 2 },
+      "maxTargets": 3
+    },
+    "delivery": { "mode": "Instant" }
+  }
+}

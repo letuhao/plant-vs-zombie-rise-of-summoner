@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Combat;
 
 namespace FusionRpg.Core.Effects;
 
@@ -9,7 +10,18 @@ public sealed class EffectScenarioDto
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("seed")] public int Seed { get; set; } = 42;
     [JsonPropertyName("matchKey")] public string MatchKey { get; set; } = "sim-match";
+    [JsonPropertyName("board")] public List<BoardEntitySnapDto>? Board { get; set; }
     [JsonPropertyName("steps")] public List<EffectScenarioStepDto> Steps { get; set; } = new();
+}
+
+public sealed class BoardEntitySnapDto
+{
+    [JsonPropertyName("ptr")] public string Ptr { get; set; } = "";
+    [JsonPropertyName("side")] public string Side { get; set; } = "";
+    [JsonPropertyName("typeId")] public int TypeId { get; set; }
+    [JsonPropertyName("col")] public int Col { get; set; }
+    [JsonPropertyName("row")] public int Row { get; set; }
+    [JsonPropertyName("mindControlled")] public bool MindControlled { get; set; }
 }
 
 public sealed class EffectScenarioStepDto
@@ -77,6 +89,18 @@ public static class EffectScenarioRunner
     public static EffectScenarioRunResult Run(EffectScenarioDto scenario, string? goldenRoot = null)
     {
         var host = new SimEffectHost(scenario.Seed, scenario.MatchKey);
+        if (scenario.Board is { Count: > 0 })
+        {
+            host.SetBoard(scenario.Board.Select(b => new BoardEntitySnap
+            {
+                Ptr = b.Ptr,
+                Side = b.Side,
+                TypeId = b.TypeId,
+                Col = b.Col,
+                Row = b.Row,
+                MindControlled = b.MindControlled
+            }));
+        }
         var results = new List<EffectScenarioStepResult>();
         IntentPlanDto? lastPlan = null;
         var ok = true;
@@ -179,8 +203,20 @@ public static class EffectScenarioRunner
 
             case "advancems":
             case "advance":
+            {
+                var before = host.Sink.Items.Count;
                 host.AdvanceMs(step.Ms ?? 0);
+                var added = host.Sink.Items.Skip(before).ToList();
+                lastPlan = new IntentPlanDto
+                {
+                    ContractVersion = FoundationContractVersion.Current,
+                    Trigger = EffectTriggers.OnTimer,
+                    Actions = added,
+                    Skipped = host.Bag.LastSkipped.ToList()
+                };
+                plan = lastPlan;
                 break;
+            }
 
             case "hit":
                 plan = host.HitDealt(

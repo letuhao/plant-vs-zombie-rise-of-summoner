@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FusionRpg.Core.Combat;
 using FusionRpg.Core.Stats;
 using FusionRpg.Injector.Bridges;
 using FusionRpg.Injector.Lawn;
@@ -919,7 +920,7 @@ public static class DebugActions
         var side = Str(p, "side") ?? "zombie";
         if (p.TryGetProperty("ptr", out var ptrEl) && ptrEl.ValueKind == JsonValueKind.String)
         {
-            var hex = ptrEl.GetString() ?? "";
+            var hex = CombatPtr.Normalize(ptrEl.GetString());
             if (long.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out var v))
                 CheatState.Select(new IntPtr(v), side);
             return;
@@ -943,7 +944,38 @@ public static class DebugActions
             }
 
             CheatState.Error($"debug.select: no plant at col={col} row={row}");
+            return;
         }
+
+        if (string.Equals(side, "plant", StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (var plant in UObject.FindObjectsOfType<Plant>())
+            {
+                try
+                {
+                    if (plant == null || plant.thePlantType == PlantType.Nothing) continue;
+                    CheatState.Select(plant.Pointer, "plant");
+                    return;
+                }
+                catch { }
+            }
+
+            CheatState.Error("debug.select: no living plant");
+            return;
+        }
+
+        foreach (var z in UObject.FindObjectsOfType<Zombie>())
+        {
+            try
+            {
+                if (z == null || z.theZombieType == ZombieType.Nothing) continue;
+                CheatState.Select(z.Pointer, "zombie");
+                return;
+            }
+            catch { }
+        }
+
+        CheatState.Error("debug.select: no living zombie");
     }
 
     static IEnumerable<Zombie> ResolveZombies(string target, JsonElement p)

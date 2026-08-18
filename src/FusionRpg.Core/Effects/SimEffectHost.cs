@@ -25,6 +25,7 @@ public sealed class SimEffectHost
         var catalog = new InMemoryEffectCatalog();
         catalog.ReplaceAll(EffectSeedCatalog.CreateAll());
         _bag = new EffectBag(catalog, new InMemoryEffectGrantStore(), new EffectProcPolicy(_clock, _rng), _sink);
+        _bag.UtcNow = () => _clock.UtcNow;
         Funnel = new EffectFunnel(_bag, _fx);
         Plugins = EffectPluginHostFactory.Create(_bag);
     }
@@ -84,9 +85,22 @@ public sealed class SimEffectHost
         return _bag.Withdraw(grantId);
     }
 
-    public void AdvanceMs(int ms) => _clock.AdvanceMs(ms);
+    public void AdvanceMs(int ms)
+    {
+        _clock.AdvanceMs(ms);
+        _bag.TickDots();
+    }
 
     public long NextTick() => Interlocked.Increment(ref _tick);
+
+    public Combat.BoardSnapshot BoardSnapshot
+    {
+        get => _bag.BoardSnapshot;
+        set => _bag.BoardSnapshot = value ?? Combat.BoardSnapshot.Empty;
+    }
+
+    public void SetBoard(IEnumerable<Combat.BoardEntitySnap> entities) =>
+        BoardSnapshot = new Combat.BoardSnapshot(entities);
 
     public IntentPlanDto OnEvent(EffectEventDto ev)
     {

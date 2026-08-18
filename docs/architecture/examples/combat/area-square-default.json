@@ -1,0 +1,19 @@
+{
+  "_comment": "Square AOE with default N from policy (AreaDefaultSquareSize=3) when size omitted.",
+  "grantId": "example-area-square-default",
+  "effectId": "fx.overlay_damage",
+  "ownerKey": "match",
+  "overlay": {
+    "amount": -80,
+    "icd_ms": 0,
+    "target": {
+      "mode": "Area",
+      "shape": "Square",
+      "anchor": { "row": 2, "col": 4 },
+      "anchorOrigin": "Center",
+      "filters": { "side": "zombie" },
+      "maxTargets": 8
+    },
+    "delivery": { "mode": "Instant" }
+  }
+}

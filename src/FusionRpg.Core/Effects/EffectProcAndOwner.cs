@@ -151,7 +151,11 @@ public static class EffectOverlayMerge
         [EffectActions.Economy] = new(StringComparer.OrdinalIgnoreCase)
             { "currency", "op", "amount", "capPerMatch", "chance", "icd_ms", "max_stacks", "filters" },
         [EffectActions.ApplyResourceDelta] = new(StringComparer.OrdinalIgnoreCase)
-            { "channel", "amount", "mode", "mergedCount", "targetPtr", "chance", "icd_ms", "max_stacks", "filters" }
+        {
+            "channel", "amount", "mode", "mergedCount", "targetPtr",
+            "target", "delivery", "burst", "procDepthLimit", "chainDepth",
+            "chance", "icd_ms", "max_stacks", "filters"
+        }
     };
 
     public static bool TryValidateOverlayForDef(
