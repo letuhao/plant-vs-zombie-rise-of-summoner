@@ -1016,6 +1016,56 @@ public static class DebugActions
         CheatState.Error("debug.select: no living zombie");
     }
 
+    /// <summary>Living plant at col/row → hex ptr for synthetic OnDamageDealt actor.</summary>
+    public static string? TryResolvePlantPtr(int col, int row, out int typeId)
+    {
+        typeId = 0;
+        foreach (var plant in UObject.FindObjectsOfType<Plant>())
+        {
+            try
+            {
+                if (plant == null || plant.thePlantType == PlantType.Nothing) continue;
+                if (plant.thePlantColumn != col || plant.thePlantRow != row) continue;
+                typeId = (int)plant.thePlantType;
+                return plant.Pointer.ToString("X");
+            }
+            catch { }
+        }
+
+        return null;
+    }
+
+    /// <summary>Living zombie on row (optional x pick) → hex ptr for synthetic target.</summary>
+    public static string? TryResolveZombiePtr(int row, float? x, out int typeId)
+    {
+        typeId = 0;
+        Zombie? best = null;
+        var bestDx = float.MaxValue;
+        foreach (var z in UObject.FindObjectsOfType<Zombie>())
+        {
+            try
+            {
+                if (z == null || z.theZombieType == ZombieType.Nothing) continue;
+                if (z.theZombieRow != row) continue;
+                if (x == null)
+                {
+                    typeId = (int)z.theZombieType;
+                    return z.Pointer.ToString("X");
+                }
+
+                var dx = Math.Abs(z.transform.position.x - x.Value);
+                if (dx >= bestDx) continue;
+                bestDx = dx;
+                best = z;
+            }
+            catch { }
+        }
+
+        if (best == null) return null;
+        typeId = (int)best.theZombieType;
+        return best.Pointer.ToString("X");
+    }
+
     static IEnumerable<Zombie> ResolveZombies(string target, JsonElement p)
     {
         if (target is "all" or "all-zombies")

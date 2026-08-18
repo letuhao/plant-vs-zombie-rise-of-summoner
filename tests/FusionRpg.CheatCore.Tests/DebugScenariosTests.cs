@@ -230,11 +230,9 @@ public class DebugScenariosTests
     {
         Assert.Contains("debug.actor-derived", DebugScenarios.AllowedStepNames);
         Assert.Contains("debug.status.apply", DebugScenarios.AllowedStepNames);
-        foreach (var id in new[]
-                 {
-                     "status-l2-wither", "status-l2-snapshot", "status-l2-resist",
-                     "status-l2-blight-row", "status-l2-butter", "status-l2-freeze", "status-l2-poison"
-                 })
+        var l2Ids = DebugScenarios.AllIds.Where(id => id.StartsWith("status-l2-", StringComparison.Ordinal)).ToArray();
+        Assert.Equal(27, l2Ids.Length);
+        foreach (var id in l2Ids)
         {
             var steps = DebugScenarios.Expand(id, "sid");
             Assert.Contains(steps, s => s.Name == "debug.spawn-zombie");
@@ -242,10 +240,14 @@ public class DebugScenariosTests
             Assert.Contains(steps, s => s.Name == "debug.status");
             var grant = System.Text.Json.JsonSerializer.SerializeToElement(
                 steps.First(s => s.Name == "debug.effect.grant").Payload);
-            Assert.True(grant.GetProperty("overlay").TryGetProperty("statusId", out _));
+            Assert.True(grant.GetProperty("overlay").TryGetProperty("statusId", out _), id);
             var z = System.Text.Json.JsonSerializer.SerializeToElement(
                 steps.First(s => s.Name == "debug.spawn-zombie").Payload);
-            Assert.True(z.TryGetProperty("derivedProfile", out _));
+            Assert.True(z.TryGetProperty("derivedProfile", out _), id);
+            var synth = System.Text.Json.JsonSerializer.SerializeToElement(
+                steps.First(s => s.Name == "debug.effect.fire-synthetic").Payload);
+            Assert.True(synth.TryGetProperty("actorCol", out _), id);
+            Assert.True(synth.TryGetProperty("targetRow", out _), id);
         }
 
         var blight = DebugScenarios.Expand("status-l2-blight-row", "sid");
@@ -254,5 +256,13 @@ public class DebugScenariosTests
             DebugScenarios.Expand("status-l2-resist", "sid")
                 .First(s => s.Name == "debug.spawn-zombie").Payload);
         Assert.Equal("iron-dot", resist.GetProperty("derivedProfile").GetString());
+
+        var witherSynth = System.Text.Json.JsonSerializer.SerializeToElement(
+            DebugScenarios.Expand("status-l2-wither", "sid")
+                .First(s => s.Name == "debug.effect.fire-synthetic").Payload);
+        Assert.Equal(2, witherSynth.GetProperty("actorCol").GetInt32());
+        Assert.Equal(2, witherSynth.GetProperty("actorRow").GetInt32());
+        Assert.Equal(2, witherSynth.GetProperty("targetRow").GetInt32());
+        Assert.Equal(7.5f, witherSynth.GetProperty("targetX").GetSingle());
     }
 }

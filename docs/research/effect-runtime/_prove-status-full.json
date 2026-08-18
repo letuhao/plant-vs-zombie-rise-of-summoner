@@ -1,0 +1,145 @@
+{
+  "at": "2026-08-19T04:03:48.9598645+07:00",
+  "baseUrl": "http://127.0.0.1:5088",
+  "passed": 27,
+  "total": 27,
+  "results": [
+    {
+      "id": "status-l2-wither",
+      "pass": true,
+      "note": "statusId=wither attacker=23ED1D41D80 host=23ED0124960 synth.actions=0"
+    },
+    {
+      "id": "status-l2-snapshot",
+      "pass": true,
+      "note": "snapshot instances=1 resistedCount=0"
+    },
+    {
+      "id": "status-l2-resist",
+      "pass": true,
+      "note": "resisted wither reason=PotencyFloor n=11"
+    },
+    {
+      "id": "status-l2-leech",
+      "pass": true,
+      "note": "statusId=leech attacker=23ED1AF7D80 host=23ED0124000 synth.actions=0"
+    },
+    {
+      "id": "status-l2-rally",
+      "pass": true,
+      "note": "statusId=rally attacker=23ED1AF7480 host=23E0A95AC80 synth.actions=0"
+    },
+    {
+      "id": "status-l2-expose",
+      "pass": true,
+      "note": "statusId=expose attacker=23ED1AF7240 host=23E0A95A320 synth.actions=0"
+    },
+    {
+      "id": "status-l2-command",
+      "pass": true,
+      "note": "statusId=command attacker=23ED1AF7000 host=23E0A95A000 synth.actions=0"
+    },
+    {
+      "id": "status-l2-shatter",
+      "pass": true,
+      "note": "statusId=shatter attacker=23ED169CB40 host=23E0A57DC80 synth.actions=0"
+    },
+    {
+      "id": "status-l2-bond",
+      "pass": true,
+      "note": "bond instance + synthetics=5 5 synthetics (burst flushes via Funnel)"
+    },
+    {
+      "id": "status-l2-blight-row",
+      "pass": true,
+      "note": "row2 hosts=2 control23=0"
+    },
+    {
+      "id": "status-l2-rot",
+      "pass": true,
+      "note": "hosts=2 statusId=rot"
+    },
+    {
+      "id": "status-l2-spark",
+      "pass": true,
+      "note": "hosts=2 statusId=spark"
+    },
+    {
+      "id": "status-l2-pact-mark",
+      "pass": true,
+      "note": "hosts=2 statusId=pact_mark"
+    },
+    {
+      "id": "status-l2-spore",
+      "pass": true,
+      "note": "hosts=2 statusId=spore"
+    },
+    {
+      "id": "status-l2-butter",
+      "pass": true,
+      "note": "statusId=butter attacker=23ECE3A0D80 host=23EC8266C80 synth.actions=1"
+    },
+    {
+      "id": "status-l2-freeze",
+      "pass": true,
+      "note": "statusId=freeze attacker=23ECE3A0B40 host=23EC8266960 synth.actions=1"
+    },
+    {
+      "id": "status-l2-cold",
+      "pass": true,
+      "note": "statusId=cold attacker=23ECE3A0900 host=23EC8266640 synth.actions=1"
+    },
+    {
+      "id": "status-l2-poison",
+      "pass": true,
+      "note": "statusId=poison attacker=23ECE3A06C0 host=23EC8266320 synth.actions=1"
+    },
+    {
+      "id": "status-l2-hypno",
+      "pass": true,
+      "note": "statusId=hypno attacker=23ECE3A0240 host=23EC8266000 synth.actions=1"
+    },
+    {
+      "id": "status-l2-ember",
+      "pass": true,
+      "note": "statusId=ember attacker=23ECE3A0000 host=23ED1B55C80 synth.actions=1"
+    },
+    {
+      "id": "status-l2-jala",
+      "pass": true,
+      "note": "statusId=jala attacker=23ECD5936C0 host=23ED1B55960 synth.actions=1"
+    },
+    {
+      "id": "status-l2-kelp",
+      "pass": true,
+      "note": "statusId=kelp attacker=23ECD593480 host=23ED1B55640 synth.actions=1"
+    },
+    {
+      "id": "status-l2-charm-pulse",
+      "pass": true,
+      "note": "statusId=charm_pulse attacker=23ECD67C480 host=23ED1B55320 synth.actions=1"
+    },
+    {
+      "id": "status-l2-resist-cc",
+      "pass": true,
+      "note": "resisted butter reason=PotencyFloor n=11"
+    },
+    {
+      "id": "status-l2-resist-contagion",
+      "pass": true,
+      "note": "seed blight=1 resisted=5"
+    },
+    {
+      "id": "status-l2-poison-immune",
+      "pass": true,
+      "note": "resisted poison reason=Immunity n=10"
+    },
+    {
+      "id": "status-l2-actor-derived",
+      "pass": true,
+      "note": "actor-derived plant=23ECD15A6C0 status.power.omni=100"
+    }
+  ],
+  "status": "PASS",
+  "note": "StatusRuntime L2 prove. Poll via Get-MaxEventId + debug.run-steps.done. IncludeUnityBypass=False"
+}

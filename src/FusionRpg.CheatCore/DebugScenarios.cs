@@ -924,22 +924,78 @@ public static class DebugScenarios
                 break;
 
             case "status-l2-wither":
-                StatusL2Board(Cmd, scenarioId, WitherOverlay(), plantProfile: "neutral",
+                StatusL2Board(Cmd, scenarioId, OverlayDot("wither", -20), plantProfile: "neutral",
                     ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
                 break;
             case "status-l2-snapshot":
-                StatusL2Board(Cmd, scenarioId, WitherOverlay(), plantProfile: "neutral",
+                StatusL2Board(Cmd, scenarioId, OverlayDot("wither", -20), plantProfile: "neutral",
                     ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
                 Cmd("debug.status", new { });
                 break;
             case "status-l2-resist":
-                StatusL2Board(Cmd, scenarioId, WitherOverlay(), plantProfile: "caster",
+                StatusL2Board(Cmd, scenarioId, OverlayDot("wither", -20), plantProfile: "caster",
                     ZombieSlot(row: 2, x: 7.5f, profile: "iron-dot"));
                 break;
+            case "status-l2-leech":
+                StatusL2Board(Cmd, scenarioId, OverlayDot("leech", -12), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-rally":
+                StatusL2Board(Cmd, scenarioId, OverlayTimed("rally", 4000), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-expose":
+                StatusL2Board(Cmd, scenarioId, OverlayTimed("expose", 4000), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-command":
+                StatusL2Board(Cmd, scenarioId, OverlayTimed("command", 4000), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-shatter":
+                StatusL2Board(Cmd, scenarioId, OverlayTimed("shatter", 4000), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-bond":
+                StatusL2Board(Cmd, scenarioId, BondOverlay(), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                for (var i = 0; i < 4; i++)
+                    Cmd("debug.effect.fire-synthetic", FireSyntheticPayload(2, 7.5f));
+                Cmd("debug.status", new { });
+                break;
             case "status-l2-blight-row":
-                StatusL2Board(Cmd, scenarioId, BlightOverlay(), plantProfile: "neutral",
+                StatusL2Board(Cmd, scenarioId, ContagionOverlay("blight", AreaSpread("Row")), plantProfile: "neutral",
                     ZombieSlot(row: 2, x: 8.2f, profile: "glass"),
                     ZombieSlot(row: 3, x: 7.5f, profile: "glass"),
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-rot":
+                StatusL2Board(Cmd, scenarioId, ContagionOverlay("rot", AreaSpread("Column")), plantProfile: "neutral",
+                    ZombieSlot(row: 3, x: 7.5f, profile: "glass"),
+                    ZombieSlot(row: 2, x: 8.2f, profile: "glass"),
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-spark":
+                StatusL2Board(Cmd, scenarioId, ContagionOverlay("spark", AreaSpread("Square", size: 3)), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 8.2f, profile: "glass"),
+                    ZombieSlot(row: 4, x: 9.5f, profile: "glass"),
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-pact-mark":
+                StatusL2Board(Cmd, scenarioId, ContagionOverlay("pact_mark", new
+                {
+                    mode = "Random",
+                    count = 2,
+                    filters = new { side = "zombie" }
+                }), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 8.2f, profile: "glass"),
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-spore":
+                StatusL2Board(Cmd, scenarioId, ContagionOverlay("spore", AreaSpread("Rectangle", width: 3, height: 2)),
+                    plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 8.2f, profile: "glass"),
+                    ZombieSlot(row: 4, x: 7.5f, profile: "glass"),
                     ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
                 break;
             case "status-l2-butter":
@@ -950,9 +1006,51 @@ public static class DebugScenarios
                 StatusL2Board(Cmd, scenarioId, UnityCcOverlay("freeze", 3000), plantProfile: "caster",
                     ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
                 break;
+            case "status-l2-cold":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("cold", 5000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
             case "status-l2-poison":
                 StatusL2Board(Cmd, scenarioId, UnityCcOverlay("poison", 5000), plantProfile: "caster",
                     ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-hypno":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("hypno", 4000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-ember":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("ember", 4000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-jala":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("jala", 4000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-kelp":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("kelp", 4000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-charm-pulse":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("charm_pulse", 2000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-resist-cc":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("butter", 4000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "iron-cc"));
+                break;
+            case "status-l2-resist-contagion":
+                StatusL2Board(Cmd, scenarioId, ContagionOverlay("blight", AreaSpread("Row")), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 8.2f, profile: "iron-contagion"),
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-poison-immune":
+                StatusL2Board(Cmd, scenarioId, PoisonImmuneOverlay(), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "immune-poison"));
+                break;
+            case "status-l2-actor-derived":
+                StatusL2Board(Cmd, scenarioId, OverlayDot("wither", -20), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                Cmd("debug.actor-derived", new { });
                 break;
 
             default:
@@ -965,10 +1063,10 @@ public static class DebugScenarios
     static (int row, float x, string profile, int hp) ZombieSlot(int row, float x, string profile, int hp = 8000) =>
         (row, x, profile, hp);
 
-    static object WitherOverlay() => new
+    static object OverlayDot(string statusId, int amount) => new
     {
-        statusId = "wither",
-        amount = -20,
+        statusId,
+        amount,
         icd_ms = 0,
         periodMs = 1000,
         durationMs = 5000,
@@ -976,9 +1074,50 @@ public static class DebugScenarios
         target = new { mode = "EventTarget", filters = new { side = "zombie" } }
     };
 
-    static object BlightOverlay() => new
+    static object OverlayTimed(string statusId, int durationMs) => new
     {
-        statusId = "blight",
+        statusId,
+        icd_ms = 0,
+        durationMs,
+        target = new { mode = "EventTarget", filters = new { side = "zombie" } }
+    };
+
+    static object BondOverlay() => new
+    {
+        statusId = "bond",
+        icd_ms = 0,
+        delivery = new { mode = "Counter", everyHits = 5, resetOnBurst = true, counterScope = "Target" },
+        burst = new
+        {
+            amount = -500,
+            target = new { mode = "EventTarget" },
+            delivery = new { mode = "Instant" }
+        },
+        target = new { mode = "EventTarget", filters = new { side = "zombie" } }
+    };
+
+    static object PoisonImmuneOverlay() => new
+    {
+        statusId = "poison",
+        icd_ms = 0,
+        durationMs = 5000,
+        immunityTags = new[] { "poison" }
+    };
+
+    static object AreaSpread(string shape, int? size = null, int? width = null, int? height = null) => new
+    {
+        mode = "Area",
+        shape,
+        size,
+        width,
+        height,
+        anchor = "EventTarget",
+        filters = new { side = "zombie" }
+    };
+
+    static object ContagionOverlay(string statusId, object spreadTarget) => new
+    {
+        statusId,
         amount = -12,
         icd_ms = 0,
         periodMs = 1000,
@@ -989,14 +1128,8 @@ public static class DebugScenarios
             chance = 1.0,
             icd_ms = 0,
             maxHops = 2,
-            statusId = "blight",
-            target = new
-            {
-                mode = "Area",
-                shape = "Row",
-                anchor = "EventTarget",
-                filters = new { side = "zombie" }
-            }
+            statusId,
+            target = spreadTarget
         }
     };
 
@@ -1007,6 +1140,18 @@ public static class DebugScenarios
         durationMs
     };
 
+    static object FireSyntheticPayload(int targetRow, float targetX) => new
+    {
+        trigger = "OnDamageDealt",
+        side = "plant",
+        actorCol = 2,
+        actorRow = 2,
+        typeId = PeaTypeId,
+        targetRow,
+        targetX,
+        targetTypeId = BasicZombieTypeId
+    };
+
     static void StatusL2Board(
         Action<string, object> Cmd,
         string scenarioId,
@@ -1014,11 +1159,13 @@ public static class DebugScenarios
         string plantProfile,
         params (int row, float x, string profile, int hp)[] zombies)
     {
+        const int plantCol = 2;
+        const int plantRow = 2;
         Cmd("debug.session", new { op = "start", scenarioId });
         Cmd("debug.effect.clear", new { });
         Cmd("debug.wave-freeze", new { enabled = true });
         Cmd("debug.reset-board", new { });
-        Cmd("debug.spawn-plant", new { typeId = PeaTypeId, col = 2, row = 2, derivedProfile = plantProfile });
+        Cmd("debug.spawn-plant", new { typeId = PeaTypeId, col = plantCol, row = plantRow, derivedProfile = plantProfile });
         foreach (var z in zombies)
         {
             Cmd("debug.spawn-zombie", new
@@ -1042,7 +1189,7 @@ public static class DebugScenarios
         Cmd("debug.board-stats", new { });
         var seed = zombies.Length > 0 ? zombies[^1] : (row: 2, x: 7.5f, profile: "glass", hp: 8000);
         Cmd("debug.select", new { side = "zombie", row = seed.row, x = seed.x });
-        Cmd("debug.effect.fire-synthetic", new { trigger = "OnDamageDealt", side = "plant" });
+        Cmd("debug.effect.fire-synthetic", FireSyntheticPayload(seed.row, seed.x));
         Cmd("debug.status", new { });
     }
 
@@ -1086,7 +1233,11 @@ public static class DebugScenarios
         "effect-plant-type-atk", "effect-match-midspawn", "effect-entity-midspawn", "effect-spawn-then-grant",
         "combat-area-row", "combat-counter-target", "combat-counter-actor", "combat-dot",
         "combat-heal", "combat-random",
-        "status-l2-wither", "status-l2-snapshot", "status-l2-resist", "status-l2-blight-row",
-        "status-l2-butter", "status-l2-freeze", "status-l2-poison"
+        "status-l2-wither", "status-l2-snapshot", "status-l2-resist", "status-l2-leech",
+        "status-l2-rally", "status-l2-expose", "status-l2-command", "status-l2-shatter", "status-l2-bond",
+        "status-l2-blight-row", "status-l2-rot", "status-l2-spark", "status-l2-pact-mark", "status-l2-spore",
+        "status-l2-butter", "status-l2-freeze", "status-l2-cold", "status-l2-poison",
+        "status-l2-hypno", "status-l2-ember", "status-l2-jala", "status-l2-kelp", "status-l2-charm-pulse",
+        "status-l2-resist-cc", "status-l2-resist-contagion", "status-l2-poison-immune", "status-l2-actor-derived"
     };
 }

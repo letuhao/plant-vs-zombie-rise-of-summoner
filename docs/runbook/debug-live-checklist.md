@@ -81,23 +81,68 @@ After each scenario, wait **0.5–2s** (longer for combat). Prefer **`/api/event
 
 ## 11. StatusRuntime LIVE (F52+)
 
-Prove L2 instances, resisted telemetry, and contagion. **Do not** use `status-butter` / `debug.apply-status` here — those are Unity CC bypass (F5).
+Prove L2 instances, resisted telemetry, and contagion. **Do not** mix with F5–F10 (`status-butter` / `debug.apply-status`) — those are Unity CC bypass (visual only).
 
-Pin profiles on spawn (`derivedProfile`). Poll `debug.status`, `debug.status.resisted`, `debug.actor-derived`.
+Pin profiles on spawn (`derivedProfile`). After the fire-synthetic harness fix, `debug.effect.synthetic.actorPtr` and `debug.status.instances[].attackerPtr` must be the **plant** at col 2 / row 2, not the seed zombie (`attackerPtr != hostPtr`).
+
+Automated prove: [`../../scripts/prove-status-full.ps1`](../../scripts/prove-status-full.ps1) (default skips F5–F10; pass `-IncludeUnityBypass` for those). Raw dump: [`../research/effect-runtime/_prove-status-full.json`](../research/effect-runtime/_prove-status-full.json).
+
+**Polling:** do **not** use `GET /api/debug/events?limit=1` as `afterId` — that page is the oldest events. Capture max id (binary search on `/api/events`), run **one** scenario, wait for `debug.run-steps.done`, then page `afterId` for `debug.status`, `debug.status.resisted`, `debug.actor-derived`, `debug.effect.synthetic`.
 
 | # | Call | Wait | Script assert | Pass | Fail | Notes |
 |---|---|---|---|---|---|---|
-| F52 | `POST /api/debug/scenario/status-l2-wither` | 1s | `debug.status` instance `statusId=wither` on selected zombie | | | plant `neutral`, zombie `glass` |
+| F52 | `POST /api/debug/scenario/status-l2-wither` | 1s | instance `wither`; plant `attackerPtr` | | | plant `neutral`, zombie `glass` |
 | F53 | `POST /api/debug/scenario/status-l2-snapshot` or `GET /api/debug/status` | 0.5s | `debug.status` instances + `resisted[]` | | | alias: `POST /api/debug/effect/dots` |
 | F54 | `POST /api/debug/scenario/status-l2-resist` | 1s | `debug.status.resisted` `reason=PotencyFloor` | | | zombie `iron-dot`; no wither instance |
 | F55 | `POST /api/debug/scenario/status-l2-blight-row` | 2s | seed + row neighbor `blight`; row-3 control empty | | | Z1 x=7.5 r2, Z2 x=8.2 r2, Z3 r3 |
+| F56 | `status-l2-leech` | 1s | instance `leech`; plant attacker | | | OverTime |
+| F57 | `status-l2-rally` | 1s | instance `rally` | | | Buff |
+| F58 | `status-l2-expose` | 1s | instance `expose` | | | Debuff |
+| F59 | `status-l2-command` | 1s | instance `command` | | | Meter |
+| F60 | `status-l2-shatter` | 1s | instance `shatter` | | | Debuff |
+| F61 | `status-l2-bond` | 1.5s | instance `bond` + `debug.combat.packet` fa10 after 5 hits | | | Counter everyHits=5 |
+| F62 | `status-l2-rot` | 2s | 2+ `rot` hosts (column) | | | Contagion |
+| F63 | `status-l2-spark` | 2s | 2+ `spark` hosts (square) | | | Contagion |
+| F64 | `status-l2-pact-mark` | 2s | `pact_mark` instance | | | Random spread |
+| F65 | `status-l2-spore` | 2s | 2+ `spore` hosts (rect) | | | Contagion |
+| F66 | `status-l2-butter` | 1s | instance + `synthetic.actions` > 0 | | | UnityCc L2; not F5 |
+| F67 | `status-l2-freeze` | 1s | instance + synthetic actions | | | UnityCc |
+| F68 | `status-l2-cold` | 1s | instance + synthetic actions | | | UnityCc |
+| F69 | `status-l2-poison` | 1s | instance + synthetic actions | | | UnityCc |
+| F70 | `status-l2-hypno` | 1s | instance + synthetic actions | | | UnityCc |
+| F71 | `status-l2-ember` | 1s | instance + synthetic actions | | | UnityCc |
+| F72 | `status-l2-jala` | 1s | instance + synthetic actions | | | UnityCc |
+| F73 | `status-l2-kelp` | 1s | instance + synthetic actions | | | UnityCc |
+| F74 | `status-l2-charm-pulse` | 1s | instance `charm_pulse` | | | CrowdControl |
+| F75 | `status-l2-resist-cc` | 1s | `PotencyFloor` on butter; no instance | | | zombie `iron-cc`, plant `caster` |
+| F76 | `status-l2-resist-contagion` | 2s | seed blight; neighbor `PotencyFloor` | | | neighbor `iron-contagion` |
+| F77 | `status-l2-poison-immune` | 1s | `Immunity`; no poison instance | | | zombie `immune-poison` |
+| F78 | `status-l2-actor-derived` | 1s | `GET /api/debug/actor-derived?ptr=` plant matches caster pin | | | `status.power.omni` ≥ 100 |
 
-CC visual (optional): `status-l2-butter` / `status-l2-freeze` / `status-l2-poison` — L2 Apply then FA2. Distinct from F5 `status-butter`.
+Optional operator visual (Unity bypass, F5–F10): butter/freeze/cold/poison look-and-feel. Distinct from F66–F69.
 
 ```powershell
+# Capture the newest event id (not limit=1).
+function Get-MaxEventId([string]$url = 'http://127.0.0.1:5088') {
+    function Has-After([long]$id) {
+        $page = Invoke-RestMethod -Uri "$url/api/events?afterId=$id&limit=1"
+        return @($page.items).Count -gt 0
+    }
+    if (-not (Has-After 0)) { return 0L }
+    $lo = 0L; $hi = 1L
+    while (Has-After $hi) { $lo = $hi; $hi = $hi * 2L }
+    while (($hi - $lo) -gt 1L) {
+        $mid = $lo + (($hi - $lo) / 2L)
+        if (Has-After $mid) { $lo = $mid } else { $hi = $mid }
+    }
+    $tail = Invoke-RestMethod -Uri "$url/api/events?afterId=$lo&limit=500"
+    return [long]@($tail.items)[-1].id
+}
+
+$after = Get-MaxEventId
 Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/scenario/status-l2-wither -ContentType application/json -Body '{}'
-Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/status -ContentType application/json -Body '{}'
-Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.status,debug.status.resisted,debug.actor-derived&limit=50'
+# Wait for debug.run-steps.done, then:
+Invoke-RestMethod "http://127.0.0.1:5088/api/debug/events?afterId=$after&kinds=debug.status,debug.status.resisted,debug.actor-derived,debug.effect.synthetic,debug.run-steps.done&limit=200"
 ```
 
 ## 4. Final P1 verdict

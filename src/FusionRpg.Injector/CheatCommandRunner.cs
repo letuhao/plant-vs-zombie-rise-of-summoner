@@ -329,27 +329,14 @@ public static class CheatCommandRunner
             }
             case "debug.effect.fire-synthetic":
             {
-                var selected = CheatState.SelectedPtr == IntPtr.Zero
-                    ? null
-                    : CheatState.SelectedPtr.ToString("X");
-                var actor = Str(p, "actorPtr") ?? selected;
-                var target = Str(p, "targetPtr") ?? selected;
-                var ev = new EffectEventDto
-                {
-                    Trigger = Str(p, "trigger") ?? EffectTriggers.OnDamageDealt,
-                    MatchKey = GameHooks.MatchKey,
-                    Side = Str(p, "side") ?? "plant",
-                    ActorPtr = actor,
-                    TargetPtr = target,
-                    TypeId = p.TryGetProperty("typeId", out var tid) && tid.TryGetInt32(out var t) ? t : null,
-                    TargetTypeId = p.TryGetProperty("targetTypeId", out var ttid) && ttid.TryGetInt32(out var tt) ? tt : null,
-                    Tick = Effects.EffectRuntime.NextTick(),
-                    ScenarioId = DebugRuntime.ScenarioId
-                };
+                if (!TryResolveSyntheticEvent(p, out var ev))
+                    break;
                 var plan = Effects.EffectRuntime.FireSynthetic(ev);
                 DebugRuntime.Emit("debug.effect.synthetic", new Dictionary<string, object>
                 {
                     ["trigger"] = plan.Trigger,
+                    ["actorPtr"] = ev.ActorPtr ?? "",
+                    ["targetPtr"] = ev.TargetPtr ?? "",
                     ["actions"] = plan.Actions.Count,
                     ["skipped"] = plan.Skipped
                 });
@@ -1242,6 +1229,83 @@ public static class CheatCommandRunner
         if (p.TryGetProperty("loadout", out var obj) && obj.ValueKind is JsonValueKind.Object or JsonValueKind.String)
             return obj.ValueKind == JsonValueKind.String ? obj.GetString() : obj.GetRawText();
         return null;
+    }
+
+    static bool TryResolveSyntheticEvent(JsonElement p, out EffectEventDto ev)
+    {
+        ev = null!;
+        var selected = CheatState.SelectedPtr == IntPtr.Zero
+            ? null
+            : CheatState.SelectedPtr.ToString("X");
+        var side = Str(p, "side") ?? "plant";
+        var plantSide = string.Equals(side, "plant", StringComparison.OrdinalIgnoreCase);
+
+        var actor = Str(p, "actorPtr");
+        int? actorTypeId = p.TryGetProperty("typeId", out var tid) && tid.TryGetInt32(out var t) ? t : null;
+        if (string.IsNullOrWhiteSpace(actor))
+        {
+            if (plantSide)
+            {
+                var col = IntProp(p, "actorCol", IntProp(p, "col", 2));
+                var row = IntProp(p, "actorRow", IntProp(p, "row", 2));
+                actor = DebugActions.TryResolvePlantPtr(col, row, out var plantType);
+                if (string.IsNullOrWhiteSpace(actor))
+                {
+                    CheatState.Error($"debug.effect.fire-synthetic: no plant at col={col} row={row}");
+                    return false;
+                }
+
+                actorTypeId ??= plantType;
+            }
+            else
+                actor = selected;
+        }
+
+        var target = Str(p, "targetPtr");
+        int? targetTypeId = p.TryGetProperty("targetTypeId", out var ttid) && ttid.TryGetInt32(out var tt) ? tt : null;
+        if (string.IsNullOrWhiteSpace(target))
+        {
+            if (plantSide
+                && selected != null
+                && string.Equals(CheatState.SelectedSide, "zombie", StringComparison.OrdinalIgnoreCase))
+            {
+                target = selected;
+            }
+            else if (p.TryGetProperty("targetRow", out var tr) && tr.TryGetInt32(out var tRow))
+            {
+                float? tx = p.TryGetProperty("targetX", out var txEl) && txEl.TryGetSingle(out var txv) ? txv : null;
+                target = DebugActions.TryResolveZombiePtr(tRow, tx, out var zombieType);
+                targetTypeId ??= zombieType;
+            }
+            else
+                target = selected;
+        }
+
+        if (string.IsNullOrWhiteSpace(target))
+        {
+            CheatState.Error("debug.effect.fire-synthetic: no target (select zombie or pass targetPtr/targetRow)");
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(actor))
+        {
+            CheatState.Error("debug.effect.fire-synthetic: no actor");
+            return false;
+        }
+
+        ev = new EffectEventDto
+        {
+            Trigger = Str(p, "trigger") ?? EffectTriggers.OnDamageDealt,
+            MatchKey = GameHooks.MatchKey,
+            Side = side,
+            ActorPtr = actor,
+            TargetPtr = target,
+            TypeId = actorTypeId,
+            TargetTypeId = targetTypeId,
+            Tick = Effects.EffectRuntime.NextTick(),
+            ScenarioId = DebugRuntime.ScenarioId
+        };
+        return true;
     }
 
     static int IntProp(JsonElement p, string name, int fallback) =>
