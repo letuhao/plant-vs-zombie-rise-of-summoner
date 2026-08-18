@@ -71,7 +71,7 @@ Two **apply adapters**, one **HP SSOT** (Unity). Do not run vanilla Prefix DEF a
 
 **Funnel is not a second EffectBag.** It is the only Secondary entry. Modifier Grants still land in the bag (one Grant per source). Mutations coalesce, then one FA10.
 
-**Present mailbox is GUI only.** `EnqueuePresent` is not an FA opcode and never writes HP. Flush drains presents **after** FA10 and calls `IDamageFxSink.Show` so the injector can draw colored floaters. Same `(ptr, tag)` sums; a tagged present suppresses Neutral/Heal for that ptr (order-independent). CombatMath later fills `DamageFxTag` (weak / resist / null / crit / …); until then, each FA10 mutation enqueues a default Neutral or Heal present. FA10 Writer still only Add HP.
+**Present mailbox is GUI only.** `EnqueuePresent` is not an FA opcode and never writes HP. Flush drains presents **after** FA10 and calls `IDamageFxSink.Show` so the injector can draw colored floaters (IMGUI) and an optional world particle burst (`ParticleSystem` + a shader Fusion already shipped). Same `(ptr, tag)` sums; a tagged present suppresses Neutral/Heal for that ptr (order-independent). CombatMath later fills `DamageFxTag` (weak / resist / null / crit / …); until then, each FA10 mutation enqueues a default Neutral or Heal present. FA10 Writer still only Add HP.
 
 | Layer | May | Must not |
 |---|---|---|

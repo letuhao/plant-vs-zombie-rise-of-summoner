@@ -133,6 +133,8 @@ Controllable effect-test APIs (not EffectBag). Runbook: [runbook/debug-pipeline.
 | POST | `/api/debug/effect/board-snapshot` | Frozen combat census (`debug.effect.board-snapshot`) |
 | POST | `/api/debug/effect/dots` | Active OverTime entries |
 | POST | `/api/debug/effect/counters` | Counter meters |
+| POST | `/api/debug/fx/probe-shaders` | LIVE `Shader.Find` of Fusion-included particle/unlit shaders (`debug.fx.shader-probe`) |
+| POST | `/api/debug/fx/world-flash` | Particle burst at lawn `col`/`row` (defaults spawn cell). No HP write |
 | GET | `/api/debug/effects/contract` | Frozen FT*/FA* including FA10 `ApplyResourceDelta` (`FoundationContractVersion` 2) |
 
 ## RpgProgression

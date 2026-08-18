@@ -68,7 +68,7 @@ flowchart TB
     funnel["EffectFunnel EnqueueMutation × N"]
     fa10["FA10 ApplyResourceDelta"]
     writer["EntityStatWriter Add + Die if HP≤0"]
-    fx["DamageFx floaters optional"]
+    fx["DamageFx floaters + particle burst"]
   end
 
   sources --> build --> snap --> resolve --> math --> funnel --> fa10 --> writer
@@ -154,7 +154,7 @@ Anchor: event target cell, or overlay `anchor: { row, col }`.
 
 Constants live in **`RpgConstants` / match policy** — not hardcoded in resolver source.
 
-**Overlay AOE path:** TargetResolver → N× FA10 + damage floaters. **No** vanilla `CreateCherryExplode` / FA5 `BoardAction` for overlay HP changes (avoids dual pipelines). Custom injector VFX is a **future session**; v1 implementation uses floaters only.
+**Overlay AOE path:** TargetResolver → N× FA10 + damage floaters. Optional world-space flash is `Shader.Find` + a short `ParticleSystem` burst at `LawnCoords` (injector VFX). **No** vanilla `CreateCherryExplode` / FA5 `BoardAction` for overlay HP changes (avoids dual pipelines). Number popups stay IMGUI.
 
 Legacy FA5 cherry/freeze/doom remains for old debug scenarios — not for new overlay damage content.
 

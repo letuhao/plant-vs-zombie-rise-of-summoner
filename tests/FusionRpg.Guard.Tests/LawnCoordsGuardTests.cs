@@ -37,7 +37,29 @@ public class LawnCoordsGuardTests
         var text = ReadInjector(Path.Combine("Fx", "DamageFxOverlay.cs"));
         Assert.Contains("LawnCoords.BodyWorld", text, StringComparison.Ordinal);
         Assert.Contains("LawnCoords.TryWorldToGui", text, StringComparison.Ordinal);
+        Assert.Contains("GUI.Label", text, StringComparison.Ordinal);
+        Assert.Contains("OverlayWorldFx.SpawnAtWorld", text, StringComparison.Ordinal);
         Assert.DoesNotContain("Follow.position", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Overlay_world_fx_uses_found_shader_and_cell_center()
+    {
+        var probe = ReadInjector(Path.Combine("Fx", "OverlayShaderProbe.cs"));
+        Assert.Contains("Shader.Find", probe, StringComparison.Ordinal);
+        Assert.Contains("Particles/Additive", probe, StringComparison.Ordinal);
+        Assert.Contains("Sprites/Default", probe, StringComparison.Ordinal);
+        Assert.DoesNotContain("new Material(\"", probe, StringComparison.Ordinal);
+
+        var world = ReadInjector(Path.Combine("Fx", "OverlayWorldFx.cs"));
+        Assert.Contains("ParticleSystem", world, StringComparison.Ordinal);
+        Assert.Contains("LawnCoords.CellCenter", world, StringComparison.Ordinal);
+        Assert.Contains("new Material(shader)", world, StringComparison.Ordinal);
+        Assert.DoesNotContain("Texture2D.whiteTexture", world, StringComparison.Ordinal);
+        Assert.DoesNotContain("CreateCherryExplode", world, StringComparison.Ordinal);
+        Assert.DoesNotContain(".TakeDamage", world, StringComparison.Ordinal);
+        Assert.DoesNotContain("EntityStatWriter", world, StringComparison.Ordinal);
+        Assert.DoesNotContain("BoardAction", world, StringComparison.Ordinal);
     }
 
     [Fact]

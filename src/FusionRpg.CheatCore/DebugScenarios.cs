@@ -55,6 +55,8 @@ public static class DebugScenarios
         "debug.effect.board-snapshot",
         "debug.effect.dots",
         "debug.effect.counters",
+        "debug.fx.probe-shaders",
+        "debug.fx.world-flash",
         "pvz.spawn.extra"
     };
 

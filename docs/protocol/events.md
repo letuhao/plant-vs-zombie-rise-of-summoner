@@ -137,6 +137,8 @@ See [runbook/debug-pipeline.md](../runbook/debug-pipeline.md). Kinds (often stam
 | `debug.onkill.extra` / `onkill.status` | Armed onKill one-shots |
 | `debug.onhit.extra` / `onhit.status` | Armed onHit one-shots |
 | `debug.mods.set` / `wave.freeze` / `arm` / `disarm` / `snapshot` | Control |
+| `debug.fx.shader-probe` | LIVE `Shader.Find` result (`found`, `missing`, `drawShader`) |
+| `debug.fx.world.shown` / `world.skipped` | Overlay particle burst at a lawn cell |
 
 ## Cheat inject / probe observability
 

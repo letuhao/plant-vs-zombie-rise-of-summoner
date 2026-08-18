@@ -296,6 +296,26 @@ export function LawnPage() {
     });
   };
 
+  const probeShaders = () => {
+    void runAction("Shader probe enqueued", async () => {
+      await debugPost.mutateAsync({ path: "fx/probe-shaders", body: {} });
+    });
+  };
+
+  const cellFlash = () => {
+    if (!hasCell) {
+      setActionError("Select a cell first.");
+      setActionOk(null);
+      return;
+    }
+    void runAction("Cell flash enqueued", async () => {
+      await debugPost.mutateAsync({
+        path: "fx/world-flash",
+        body: { row: targetRow, col: targetCol }
+      });
+    });
+  };
+
   const killSelected = () => {
     if (!selected?.ptr) return;
     const path = selected.side === "plant" ? "kill-plant" : "kill";
@@ -472,6 +492,33 @@ export function LawnPage() {
         {!canSpawn ? (
           <HelpText>Spawn targeting disabled in {model.phase}.</HelpText>
         ) : null}
+      </div>
+
+      <div className="mt-4 space-y-2 border-t border-border pt-3" data-testid="lawn-overlay-fx">
+        <p className="text-sm font-semibold text-text">Overlay FX</p>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy}
+            onClick={probeShaders}
+            data-testid="lawn-probe-shaders"
+          >
+            Probe shaders
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy || !hasCell}
+            onClick={cellFlash}
+            data-testid="lawn-cell-flash"
+          >
+            Cell flash
+          </Button>
+        </div>
+        <HelpText>
+          World quad at the selected cell. HP still uses overlay hit / HP −50.
+        </HelpText>
       </div>
 
       {selected ? (

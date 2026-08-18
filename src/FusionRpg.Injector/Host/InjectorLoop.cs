@@ -57,6 +57,7 @@ public static class InjectorLoop
         try { CheatActions.TickContinuous(); } catch { }
         try { CheatActions.AutoCollectTick(); } catch { }
         try { DamageFxOverlay.Tick(unscaledDeltaTime); } catch { }
+        try { OverlayWorldFx.Tick(unscaledDeltaTime); } catch { }
         try { EffectRuntime.TickDots(unscaledDeltaTime); } catch { }
         _hb += unscaledDeltaTime;
         if (_hb >= 2f)

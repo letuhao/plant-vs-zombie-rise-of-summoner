@@ -6,6 +6,7 @@ using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Stats;
 
+using FusionRpg.Injector.Fx;
 using FusionRpg.Injector.Host;
 
 namespace FusionRpg.Injector;
@@ -362,6 +363,12 @@ public static class CheatCommandRunner
                 break;
             case "debug.effect.counters":
                 EmitCounters();
+                break;
+            case "debug.fx.probe-shaders":
+                RunShaderProbe();
+                break;
+            case "debug.fx.world-flash":
+                RunWorldFlash(p);
                 break;
             default:
                 CheatState.Error("unknown debug cmd: " + name);
@@ -894,6 +901,23 @@ public static class CheatCommandRunner
             ["count"] = meters.Count,
             ["meters"] = meters
         });
+    }
+
+    static void RunShaderProbe()
+    {
+        var payload = OverlayShaderProbe.ToEventPayload(force: true);
+        DebugRuntime.Emit("debug.fx.shader-probe", payload);
+        var found = payload.TryGetValue("foundCount", out var n) ? n : 0;
+        var draw = payload.TryGetValue("drawShader", out var s) ? s : "";
+        CheatState.Note("shader probe found=" + found + " draw=" + draw);
+    }
+
+    static void RunWorldFlash(JsonElement p)
+    {
+        var col = IntProp(p, "col", CheatState.SpawnCol);
+        var row = IntProp(p, "row", CheatState.SpawnRow);
+        OverlayWorldFx.SpawnAtCell(col, row);
+        CheatState.Note("world flash cell=" + col + "," + row);
     }
 
     static string? ResolveDeltaTargetPtr(JsonElement p)

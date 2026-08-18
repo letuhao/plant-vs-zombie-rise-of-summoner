@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace FusionRpg.Injector.Fx;
 
-/// <summary>IMGUI floaters only. Does not write HP or call TakeDamage.</summary>
+/// <summary>IMGUI floaters plus optional world flash. Does not write HP or call TakeDamage.</summary>
 public static class DamageFxOverlay
 {
     public const int Cap = DamageFxFloaterRules.Cap;
@@ -43,13 +43,22 @@ public static class DamageFxOverlay
 
         var rgb = DamageFxPalette.Rgb(fx.Tag);
         var label = DamageFxPalette.Label(fx.Tag, fx.Amount);
+        var color = new Color(rgb.R / 255f, rgb.G / 255f, rgb.B / 255f, 1f);
         Items.Add(new Floater
         {
             Label = label,
-            Color = new Color(rgb.R / 255f, rgb.G / 255f, rgb.B / 255f, 1f),
+            Color = color,
             Follow = follow,
             Age = 0f
         });
+        try
+        {
+            OverlayWorldFx.SpawnAtWorld(LawnCoords.BodyWorld(follow), color);
+        }
+        catch
+        {
+            // World flash is optional; never throw into Funnel Flush.
+        }
         DebugRuntime.Emit("debug.fx.shown", new Dictionary<string, object>
         {
             ["ptr"] = fx.TargetPtr ?? "",

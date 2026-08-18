@@ -204,8 +204,21 @@ Counter / DoT: after `combat-dot`, the synthetic hit arms OverTime; injector tic
 
 `debug.combat.packet` fields: `source` (`capture` / `synthetic` / `dot` / `enqueue-delta`), `fa10`, `ptrs`, `trigger`, `skipped`.
 
+## Overlay world VFX (shader probe + cell flash)
+
+IL2CPP cannot compile ShaderLab at runtime. Probe which particle/unlit shaders Fusion actually shipped, then draw a short quad at a lawn cell. HP still goes through FA10. Digits stay IMGUI floaters.
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/fx/probe-shaders
+Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.fx.shader-probe&limit=10'
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/fx/world-flash -ContentType application/json -Body '{"col":3,"row":2}'
+Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.fx.world.shown,debug.fx.world.skipped&limit=20'
+```
+
+`debug.fx.shader-probe` lists `found` / `missing` and `drawShader` (first hit). Lawn inspector: **Probe shaders** / **Cell flash**. Overlay hits also spawn a particle burst at the unit (still `SYS-DAMAGE-FX`). Do not `CreateCherryExplode` for overlay AOE.
+
 ## Injector commands
 
-`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, plus `pvz.spawn.extra`.
+`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, `debug.fx.probe-shaders`, `debug.fx.world-flash`, plus `pvz.spawn.extra`.
 
 REST helpers: `POST /api/debug/economy`, `POST /api/debug/board-config`.

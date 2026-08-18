@@ -189,6 +189,8 @@ public class DebugScenariosTests
     {
         Assert.Contains("debug.effect.clear", DebugScenarios.AllowedStepNames);
         Assert.Contains("debug.effect.enqueue-delta", DebugScenarios.AllowedStepNames);
+        Assert.Contains("debug.fx.probe-shaders", DebugScenarios.AllowedStepNames);
+        Assert.Contains("debug.fx.world-flash", DebugScenarios.AllowedStepNames);
         foreach (var id in DebugScenarios.AllIds.Where(i => i.StartsWith("effect-", StringComparison.Ordinal)))
         {
             var steps = DebugScenarios.Expand(id, "sid").ToList();
