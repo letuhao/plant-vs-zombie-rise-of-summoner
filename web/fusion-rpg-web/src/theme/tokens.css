@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  --color-soil: #16120e;
+  --color-soil-raised: #221c16;
+  --color-panel: #2a231b;
+  --color-panel-inset: #120f0c;
+  --color-almanac: #e4d5b5;
+  --color-lawn: #3d6b45;
+  --color-lawn-hot: #5a8f62;
+  --color-sun: #e0b44b;
+  --color-zombie: #6e5a7a;
+  --color-text: #f2ead8;
+  --color-muted: #a89880;
+  --color-border: #4a4034;
+  --color-ok: #6fbf73;
+  --color-bad: #c45c5c;
+  --color-warn: #c4923a;
+  --color-banner: #5a3a32;
+
+  --font-display: "Lilita One", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.75rem;
+  --text-md: 0.875rem;
+  --text-lg: 1rem;
+  --text-xl: 1.25rem;
+  --text-display: 1.75rem;
+
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-10: 3rem;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-pill: 999px;
+
+  --shadow-panel: 0 2px 8px rgb(0 0 0 / 0.35);
+  --shadow-inset: inset 0 1px 3px rgb(0 0 0 / 0.45);
+
+  --z-index-nav-active: 1;
+  --z-index-hud: 20;
+  --z-index-banner: 30;
+
+  --ease-default: 120ms;
+}
+
+:root {
+  color: var(--color-text);
+  background: var(--color-soil);
+  font-family: var(--font-ui);
+  font-size: var(--text-md);
+  line-height: 1.45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-soil);
+  color: var(--color-text);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-sun);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

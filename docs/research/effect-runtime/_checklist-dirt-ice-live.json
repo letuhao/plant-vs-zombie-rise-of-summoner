@@ -1,0 +1,33 @@
+{
+  "at": "2026-08-16T02:49:00+07:00",
+  "operator": "NeneScarlet",
+  "results": {
+    "tile-box-dirt": {
+      "verdict": "PASS",
+      "httpOk": true,
+      "note": "Grass→Dirt + SetPit; nuclear scorched grass READY",
+      "box": {
+        "ok": true,
+        "boxName": "Dirt",
+        "beforeName": "Grass",
+        "afterName": "Dirt",
+        "withPit": true,
+        "path": "BoardGrid.set_boxType+SetPit"
+      }
+    },
+    "tile-ice-road": {
+      "verdict": "FAIL",
+      "ship": "NOT SHIPPED",
+      "httpOk": true,
+      "operatorVisual": "Spawns Sledge/Driver zombie; ice trail Effect not usable",
+      "probeNote": "CreateIceRoad may return drove=true but probe path is spawn-driver, not a clean tile Effect",
+      "iceRetry": {
+        "ok": true,
+        "typeName": "DriverZombie",
+        "castPath": "TryCast<DriverZombie>",
+        "iceRoadCountBefore": 5,
+        "iceRoadCount": 5
+      }
+    }
+  }
+}

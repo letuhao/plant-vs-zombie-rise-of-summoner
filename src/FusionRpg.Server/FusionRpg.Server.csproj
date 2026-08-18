@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FusionRpg.Server</RootNamespace>
+    <AssemblyTitle>FusionRpg Server</AssemblyTitle>
+    <Product>FusionRpg</Product>
+    <Company>FusionRpg (hobby OSS)</Company>
+    <Authors>Lê Tú Hào</Authors>
+    <Description>FusionRpg Server — localhost RPG overlay API (AGPL hobby project)</Description>
+    <Copyright>Copyright (c) 2026 Lê Tú Hào</Copyright>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+    <Version>0.1.2</Version>
+    <InformationalVersion>0.1.2</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Player zip: scripts/publish-player.ps1 uses win-x64 self-contained publish -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishSingleFile>false</PublishSingleFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FusionRpg.Contracts\FusionRpg.Contracts.csproj" />
+    <ProjectReference Include="..\FusionRpg.Core\FusionRpg.Core.csproj" />
+    <ProjectReference Include="..\FusionRpg.CheatCore\FusionRpg.CheatCore.csproj" />
+    <ProjectReference Include="..\FusionRpg.Data\FusionRpg.Data.csproj" />
+  </ItemGroup>
+</Project>

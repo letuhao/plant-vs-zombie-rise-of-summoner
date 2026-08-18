@@ -1,0 +1,44 @@
+{
+  "at": "2026-08-16T04:55:00+07:00",
+  "foundationContractVersion": 2,
+  "frozen": true,
+  "sealed": true,
+  "seal": {
+    "verdict": "PASS",
+    "offline": "Core.Tests 125 + CheatCore 35 + Guard 1; EffectScenarioRunner L1–L14 Plan mirrors; /api/sim/effect grant/fire/scenario verified",
+    "live": "L1–L14 lawn PASS via POST /api/debug/scenario/{id} + event poll; results in _prove-foundation-live-results.json",
+    "contract": "FoundationContractVersion=2 (FA10 ApplyResourceDelta + Funnel). L1–L14 sealed on FA1–FA9; Secondary enqueue via Funnel"
+  },
+  "harness": {
+    "verdict": "PASS",
+    "tests": "FusionRpg.Core.Tests.EffectBagTests + EffectBagAuditTests + EffectOfflineKitTests + EffectScenarioRunnerTests",
+    "golden": "tests/fixtures/effects/*.plan.json + tests/fixtures/effects/scenarios/effect-*.json",
+    "notes": "IntentPlan goldens + ICD/chance/overlay/withdraw/Passive/filters/max_stacks + multi-step EffectScenarioRunner without opening PVZ. Capture dedupe is injector OnCapture only. Offline mirrors cover L1–L14 Plans."
+  },
+  "live": {
+    "matrix": [
+      { "id": "L1", "scenario": "effect-butter-hit", "covers": "FT2→FA2 butter", "expectKinds": ["combat.hit", "debug.effect.fired", "pvz.status.apply"], "status": "PASS" },
+      { "id": "L2", "scenario": "effect-freeze-hit", "covers": "FA2 freeze", "expectKinds": ["combat.hit", "debug.effect.fired"], "status": "PASS" },
+      { "id": "L3", "scenario": "effect-cold-hit", "covers": "FA2 cold family", "expectKinds": ["combat.hit", "debug.effect.fired"], "status": "PASS" },
+      { "id": "L4", "scenario": "effect-clear-butter", "covers": "FA3 ClearStatus", "expectKinds": ["combat.hit", "debug.effect.fired"], "status": "PASS" },
+      { "id": "L5", "scenario": "effect-passive-atk", "covers": "FA1 + OnGranted/OnRemoved", "expectKinds": ["debug.effect.granted", "debug.effect.fired", "debug.snapshot"], "status": "PASS" },
+      { "id": "L6", "scenario": "effect-spawn-ondeath", "covers": "FT4→FA4 zombie", "expectKinds": ["zombie.die", "debug.effect.fired", "debug.spawn.zombie"], "status": "PASS" },
+      { "id": "L7", "scenario": "effect-spawn-plant-bullet", "covers": "FA4 plant+bullet", "expectKinds": ["combat.hit", "debug.effect.fired"], "status": "PASS" },
+      { "id": "L8", "scenario": "effect-board-cherry", "covers": "FA5 BoardAction", "expectKinds": ["combat.hit", "debug.board.action"], "status": "PASS" },
+      { "id": "L9", "scenario": "effect-grid-cycle", "covers": "FA6–FA7", "expectKinds": ["combat.hit", "debug.effect.fired"], "status": "PASS" },
+      { "id": "L10", "scenario": "effect-set-dirt", "covers": "FA8 SetBoxType", "expectKinds": ["combat.hit", "debug.effect.fired"], "status": "PASS" },
+      { "id": "L11", "scenario": "effect-economy-sun", "covers": "FA9 Economy", "expectKinds": ["combat.hit", "debug.economy"], "status": "PASS" },
+      { "id": "L12", "scenario": "effect-icd-butter", "covers": "proc ICD 250ms", "expectKinds": ["combat.hit", "debug.effect.fired"], "status": "PASS" },
+      { "id": "L13", "scenario": "effect-withdraw", "covers": "GrantStore withdraw", "expectKinds": ["debug.effect.withdrawn"], "status": "PASS", "notes": "after withdraw, pea hits must NOT emit debug.effect.fired" },
+      { "id": "L14", "scenario": "effect-spawn-filter", "covers": "FT1 OnSpawn type grant", "expectKinds": ["debug.spawn.plant", "debug.effect.fired", "pvz.status.apply"], "status": "PASS" }
+    ],
+    "howTo": "Board open → deploy-play → POST /api/debug/scenario/{scenario} with unique scenarioId → page /api/debug/events?afterId=… (full walk; kinds filter alone misses when combat.hit floods the first page)",
+    "lawnPass": "PASS",
+    "proveResults": "_prove-foundation-live-results.json",
+    "notes": "Foundation L1–L14 sealed 2026-08-16. Contract 2 adds FA10/Funnel. Breaking Plan/Grant shape → bump contract + goldens."
+  },
+  "bans": {
+    "secondaryTestsOpenPvz": false,
+    "upperLayersUse": "FoundationHarness + SimEffectHost + EffectScenarioRunner fixtures + POST /api/sim/effect/* (IntentPlan only); LIVE grant/events via /api/debug/effect/*"
+  }
+}

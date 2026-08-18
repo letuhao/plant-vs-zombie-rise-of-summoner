@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            6.0.x
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/fusion-rpg-web/package-lock.json
+
+      - name: Unit tests (pre-publish)
+        shell: pwsh
+        run: |
+          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal
+
+      - name: Prepare injector refs
+        shell: pwsh
+        env:
+          FUSIONRPG_GAME_DIR: ${{ vars.FUSIONRPG_GAME_DIR }}
+          FUSIONRPG_INTEROP_ZIP_URL: ${{ secrets.FUSIONRPG_INTEROP_ZIP_URL }}
+        run: |
+          $ciDrop = "artifacts/ci-drop-into-game/FusionRpg.Injector.dll"
+          try {
+            ./scripts/prepare-injector-refs.ps1
+            "FUSIONRPG_GAME_DIR=$env:FUSIONRPG_GAME_DIR" | Out-File -FilePath $env:GITHUB_ENV -Append
+          }
+          catch {
+            if (Test-Path $ciDrop) {
+              Write-Host "::warning::No game interop in CI — using committed artifacts/ci-drop-into-game (set secrets.FUSIONRPG_INTEROP_ZIP_URL to rebuild injector from source)."
+              "FUSIONRPG_USE_CI_DROP=1" | Out-File -FilePath $env:GITHUB_ENV -Append
+            }
+            else {
+              Write-Host "::error::Cloud release needs secrets.FUSIONRPG_INTEROP_ZIP_URL (or vars.FUSIONRPG_GAME_DIR) or committed artifacts/ci-drop-into-game. $_"
+              throw
+            }
+          }
+
+      - name: Publish player pack
+        shell: pwsh
+        env:
+          FUSIONRPG_VERSION: ${{ github.ref_name }}
+        run: ./scripts/publish-player.ps1
+
+      - name: Smoke player pack
+        shell: pwsh
+        run: ./scripts/smoke-player-pack.ps1 -PackDir dist/FusionRpg
+
+      - name: Zip FusionRpg-win-x64.zip
+        shell: pwsh
+        run: |
+          $src = "dist/FusionRpg"
+          if (-not (Test-Path $src)) { throw "Missing $src" }
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $zip = "artifacts/FusionRpg-win-x64.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path "$src\*" -DestinationPath $zip -Force
+          Get-Item $zip | Format-List Name, Length
+          if (Test-Path "artifacts/player-pack-smoke.json") {
+            Write-Host "Smoke summary:"
+            Get-Content "artifacts/player-pack-smoke.json"
+          }
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/FusionRpg-win-x64.zip
+          generate_release_notes: true
+          body: |
+            ## FusionRpg ${{ github.ref_name }}
+
+            **Asset:** `FusionRpg-win-x64.zip` — unzip, double-click `FusionRpg.Launcher.exe`.
+
+            - Builds are **unsigned hobby OSS** — see Trust & security in the launcher / [players.md](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/blob/main/docs/runbook/players.md#trust--antivirus-unsigned-hobby-builds).
+            - Licensed **AGPL-3.0-or-later** (see `LICENSE` in the zip).
+            - Updates **FusionRpg only** (launcher + Server + DropIntoGame). Does **not** download or patch the PVZ Fusion game.
+            - Needs a legal game install. Use **Browse** then **Install BepInEx** from official GitHub if needed.
+            - Dual-loading BepInEx + MelonLoader is refused. MelonMod dual-host Play is not in this release.
+
+            Player guide: [docs/runbook/players.md](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/blob/main/docs/runbook/players.md)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

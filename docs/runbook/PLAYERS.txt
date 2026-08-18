@@ -1,0 +1,32 @@
+Rise of Summoner — how to use (no install)
+
+You do NOT need Node, npm, Visual Studio, a .NET SDK, or the .NET Desktop Runtime.
+
+1. Double-click FusionRpg.Launcher.exe
+
+2. First run: Trust & security — this is an UNSIGNED hobby AGPL build.
+   Some antivirus products may quarantine FusionRpg.Server.exe (false positive).
+   Click Allow if you accept that.
+   Optional: Prepare Windows Security (UAC) for Microsoft Defender only.
+   The launcher stays open — UAC is for PowerShell, not a second FusionRpg window.
+   Bitdefender and other AV: restore/exclude the FusionRpg folder yourself.
+
+3. Browse to your legal game folder (the folder with PlantsVsZombiesRH.exe).
+   The launcher does not assume a fixed path on your PC.
+
+4. If BepInEx is missing, click Install BepInEx (official GitHub).
+   Do not dual-load MelonLoader + BepInEx. Play needs BepInEx in this release.
+
+5. Click Play.
+   The launcher installs the plugin, starts the server, and starts the game.
+   A browser opens the RPG UI (default http://127.0.0.1:5088 — may hop if that port is busy).
+
+6. Optional: Download & install FusionRpg update when prompted (keeps Server\data; does not patch the game).
+
+Leave the launcher open (or minimize to tray) while you play.
+Closing only the launcher can leave the server running — use Stop all if you want everything stopped.
+
+Do NOT turn off antivirus entirely. Exclude only this FusionRpg folder if you choose to run it.
+Details: docs/runbook/players.md (Trust & antivirus).
+
+License: AGPL-3.0-or-later — see LICENSE and NOTICE.

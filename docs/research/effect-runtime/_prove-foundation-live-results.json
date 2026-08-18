@@ -1,0 +1,105 @@
+{
+  "at": "2026-08-16T04:57:21.2730781+07:00",
+  "pass": 14,
+  "fail": 0,
+  "rows": [
+    {
+      "id": "L1",
+      "scenario": "effect-butter-hit",
+      "status": "PASS",
+      "scenarioId": "L1-4b3fedb6",
+      "note": "combat.hit=7; debug.effect.fired=7; pvz.status.apply=7 sample=64014:combat.hit|64015:pvz.status.apply|64016:debug.effect.fired|64023:combat.hit|64024:pvz.status.apply|64025:debug.effect.fired|64032:combat.hit|64033:pvz.status.apply|64034:debug.effect.fired|64042:combat.hit"
+    },
+    {
+      "id": "L2",
+      "scenario": "effect-freeze-hit",
+      "status": "PASS",
+      "scenarioId": "L2-db698817",
+      "note": "combat.hit=6; debug.effect.fired=6 sample=64151:combat.hit|64153:debug.effect.fired|64158:combat.hit|64160:debug.effect.fired|64172:combat.hit|64174:debug.effect.fired|64181:combat.hit|64183:debug.effect.fired|64190:combat.hit|64192:debug.effect.fired"
+    },
+    {
+      "id": "L3",
+      "scenario": "effect-cold-hit",
+      "status": "PASS",
+      "scenarioId": "L3-f0125b65",
+      "note": "combat.hit=8; debug.effect.fired=8 sample=64277:combat.hit|64279:debug.effect.fired|64289:combat.hit|64291:debug.effect.fired|64300:combat.hit|64302:debug.effect.fired|64309:combat.hit|64311:debug.effect.fired|64318:combat.hit|64320:debug.effect.fired"
+    },
+    {
+      "id": "L4",
+      "scenario": "effect-clear-butter",
+      "status": "PASS",
+      "scenarioId": "L4-8a1a8d05",
+      "note": "combat.hit=8; debug.effect.fired=8 sample=64424:combat.hit|64426:debug.effect.fired|64438:combat.hit|64440:debug.effect.fired|64447:combat.hit|64449:debug.effect.fired|64456:combat.hit|64458:debug.effect.fired|64464:combat.hit|64466:debug.effect.fired"
+    },
+    {
+      "id": "L5",
+      "scenario": "effect-passive-atk",
+      "status": "PASS",
+      "scenarioId": "L5-333b4261",
+      "note": "debug.effect.granted=1; debug.effect.fired=1; debug.snapshot=1 sample=64574:debug.effect.fired|64575:debug.effect.granted|64576:debug.snapshot"
+    },
+    {
+      "id": "L6",
+      "scenario": "effect-spawn-ondeath",
+      "status": "PASS",
+      "scenarioId": "L6-51f0c84f",
+      "note": "zombie.die=1; debug.effect.fired=2; debug.spawn.zombie=2 sample=64603:debug.effect.fired|64628:debug.spawn.zombie|64632:zombie.die|64643:debug.spawn.zombie|64645:debug.effect.fired"
+    },
+    {
+      "id": "L7",
+      "scenario": "effect-spawn-plant-bullet",
+      "status": "PASS",
+      "scenarioId": "L7-83c20bfc",
+      "note": "combat.hit=79; debug.effect.fired=158 sample=64710:combat.hit|64717:debug.effect.fired|64721:debug.effect.fired|64730:combat.hit|64737:debug.effect.fired|64741:debug.effect.fired|64746:combat.hit|64753:debug.effect.fired|64757:debug.effect.fired|64770:combat.hit"
+    },
+    {
+      "id": "L8",
+      "scenario": "effect-board-cherry",
+      "status": "PASS",
+      "scenarioId": "L8-2d4068e7",
+      "note": "combat.hit=13; debug.board.action=13 sample=73044:combat.hit|73048:debug.board.action|73055:combat.hit|73059:debug.board.action|73066:combat.hit|73070:debug.board.action|73077:combat.hit|73081:debug.board.action|73088:combat.hit|73092:debug.board.action"
+    },
+    {
+      "id": "L9",
+      "scenario": "effect-grid-cycle",
+      "status": "PASS",
+      "scenarioId": "L9-44c82d04",
+      "note": "combat.hit=7; debug.effect.fired=14 sample=73234:combat.hit|73238:debug.effect.fired|73242:debug.effect.fired|73250:combat.hit|73254:debug.effect.fired|73258:debug.effect.fired|73267:combat.hit|73271:debug.effect.fired|73275:debug.effect.fired|73282:combat.hit"
+    },
+    {
+      "id": "L10",
+      "scenario": "effect-set-dirt",
+      "status": "PASS",
+      "scenarioId": "L10-680873db",
+      "note": "combat.hit=7; debug.effect.fired=7 sample=73443:combat.hit|73446:debug.effect.fired|73453:combat.hit|73456:debug.effect.fired|73463:combat.hit|73466:debug.effect.fired|73473:combat.hit|73476:debug.effect.fired|73482:combat.hit|73485:debug.effect.fired"
+    },
+    {
+      "id": "L11",
+      "scenario": "effect-economy-sun",
+      "status": "PASS",
+      "scenarioId": "L11-a5ca7de3",
+      "note": "combat.hit=8; debug.economy=9 sample=73560:debug.economy|73589:combat.hit|73592:debug.economy|73605:combat.hit|73608:debug.economy|73617:combat.hit|73620:debug.economy|73629:combat.hit|73632:debug.economy|73642:combat.hit"
+    },
+    {
+      "id": "L12",
+      "scenario": "effect-icd-butter",
+      "status": "PASS",
+      "scenarioId": "L12-32615805",
+      "note": "combat.hit=7; debug.effect.fired=7 sample=73767:combat.hit|73769:debug.effect.fired|73778:combat.hit|73780:debug.effect.fired|73788:combat.hit|73790:debug.effect.fired|73799:combat.hit|73801:debug.effect.fired|73808:combat.hit|73810:debug.effect.fired"
+    },
+    {
+      "id": "L13",
+      "scenario": "effect-withdraw",
+      "status": "PASS",
+      "scenarioId": "L13-b2a237bf",
+      "note": "debug.effect.withdrawn=1 sample=73902:debug.effect.withdrawn"
+    },
+    {
+      "id": "L14",
+      "scenario": "effect-spawn-filter",
+      "status": "PASS",
+      "scenarioId": "L14-dc1f0144",
+      "note": "debug.spawn.plant=1; debug.effect.fired=1; pvz.status.apply=1 sample=73987:pvz.status.apply|73988:debug.effect.fired|73991:debug.spawn.plant"
+    }
+  ]
+}

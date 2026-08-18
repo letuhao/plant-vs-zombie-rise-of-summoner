@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FusionRpg.Contracts/FusionRpg.Contracts.csproj" />
+    <Project Path="src/FusionRpg.Core/FusionRpg.Core.csproj" />
+    <Project Path="src/FusionRpg.CheatCore/FusionRpg.CheatCore.csproj" />
+    <Project Path="src/FusionRpg.Data/FusionRpg.Data.csproj" />
+    <Project Path="src/FusionRpg.Injector.BepInEx/FusionRpg.Injector.BepInEx.csproj" />
+    <Project Path="src/FusionRpg.Injector.MelonLoader/FusionRpg.Injector.MelonLoader.csproj" />
+    <Project Path="src/FusionRpg.Injector.MelonLoader.39/FusionRpg.Injector.MelonLoader.39.csproj" />
+    <Project Path="src/FusionRpg.Server/FusionRpg.Server.csproj" />
+    <Project Path="src/FusionRpg.Launcher/FusionRpg.Launcher.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj" />
+    <Project Path="tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj" />
+    <Project Path="tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj" />
+  </Folder>
+</Solution>

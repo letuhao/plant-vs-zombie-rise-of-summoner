@@ -1,0 +1,22 @@
+[
+  {
+    "F": "F11",
+    "Pass": false,
+    "Note": "plant.damage=0 sample="
+  },
+  {
+    "F": "F15",
+    "Pass": true,
+    "Note": "onhit.extra=1 kinds=cheat.apply=11; zombie.damage=9; bullet.init=4; bullet.place=4; zombie.spawn=3; cheat.inject=3; stat.writer=3; stat.applied=3; entity.stats=3; zombie.place=2; zombie.die=1; sun.gain=1; pvz.spawn.extra.ack=1; plant.unique=1; plant.spawn=1; plant.place=1; debug.wave.freeze=1; item.drop=1; debug.spawn.zombie=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.onhit.extra=1; debug.mods.reset=1; debug.arm=1; plant.die=1; board.economy=1"
+  },
+  {
+    "F": "F16",
+    "Pass": true,
+    "Note": "onhit.status=1 status.applied=0 kinds=zombie.damage=12; cheat.apply=11; bullet.init=4; bullet.place=4; cheat.inject=3; zombie.spawn=2; zombie.die=2; stat.writer=2; stat.applied=2; entity.stats=2; sun.gain=1; plant.unique=1; plant.spawn=1; plant.place=1; plant.die=1; debug.wave.freeze=1; zombie.place=1; debug.spawn.zombie=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.onhit.status=1; debug.mods.reset=1; debug.arm=1; item.drop=1; board.economy=1"
+  },
+  {
+    "F": "X1",
+    "Pass": true,
+    "Note": "ack=1 errCount=0 ok=True"
+  }
+]

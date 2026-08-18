@@ -1,0 +1,36 @@
+{
+  "at": "2026-08-16T21:37:52.7332308+07:00",
+  "game": "pvzrh-3.9",
+  "baseUrl": "http://127.0.0.1:5088",
+  "passed": 5,
+  "total": 5,
+  "results": [
+    {
+      "note": "col1=70 col3=20",
+      "id": "effect-entity-atk",
+      "pass": true
+    },
+    {
+      "note": "pea=60 wall=0",
+      "id": "effect-plant-type-atk",
+      "pass": true
+    },
+    {
+      "note": "col1=35 col3=35",
+      "id": "effect-match-midspawn",
+      "pass": true
+    },
+    {
+      "note": "col1=70 col3=20",
+      "id": "effect-spawn-then-grant",
+      "pass": true
+    },
+    {
+      "note": "g1=70 g3=20 w1=20 w3=20",
+      "id": "effect-entity-midspawn",
+      "pass": true
+    }
+  ],
+  "status": "PASS",
+  "note": "Run with Melon lawn open after deploy-play -LoaderHost MelonLoader"
+}

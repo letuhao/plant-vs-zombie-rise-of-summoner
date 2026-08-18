@@ -1,0 +1,118 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Optional MelonLoader host. Builds only when FUSIONRPG_ML_GAMEDIR (or MlGameDir) points at a
+    MelonLoader pack with MelonLoader\net6\MelonLoader.dll + Il2CppAssemblies.
+    Without refs: successful no-op skip so solution/CI builds stay green.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>FusionRpg.Injector.MelonLoader</AssemblyName>
+    <RootNamespace>FusionRpg.Injector</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <MlGameDir Condition="'$(MlGameDir)' == '' and '$(FUSIONRPG_ML_GAMEDIR)' != ''">$(FUSIONRPG_ML_GAMEDIR)</MlGameDir>
+    <GameProfile Condition="'$(GameProfile)' == '' and '$(FUSIONRPG_GAME_PROFILE)' != ''">$(FUSIONRPG_GAME_PROFILE)</GameProfile>
+    <GameProfile Condition="'$(GameProfile)' == ''">pvzrh-3.8.1</GameProfile>
+    <DefineConstants>$(DefineConstants);FUSIONRPG_MELON</DefineConstants>
+    <HasMelonRefs Condition="'$(MlGameDir)' != '' and Exists('$(MlGameDir)\MelonLoader\net6\MelonLoader.dll') and Exists('$(MlGameDir)\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll')">true</HasMelonRefs>
+    <HasMelonRefs Condition="'$(HasMelonRefs)' == ''">false</HasMelonRefs>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo Condition="'$(HasMelonRefs)' != 'true'">false</GenerateAssemblyInfo>
+    <OutputPath Condition="'$(HasMelonRefs)' == 'true' and '$(OutputPath)' == ''">$(MlGameDir)\Mods\</OutputPath>
+    <AssemblyTitle>FusionRpg MelonLoader Injector</AssemblyTitle>
+    <Product>FusionRpg</Product>
+    <Description>FusionRpg MelonLoader MelonMod host — same hooks as BepInEx twin</Description>
+    <Version>0.1.2</Version>
+    <InformationalVersion>0.1.2</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <Target Name="WarnSkipMelon" BeforeTargets="Build" Condition="'$(HasMelonRefs)' != 'true'">
+    <Message Importance="high"
+             Text="Skipping FusionRpg.Injector.MelonLoader (set FUSIONRPG_ML_GAMEDIR to a MelonLoader pack with MelonLoader\net6 + Il2CppAssemblies\Assembly-CSharp.dll)." />
+  </Target>
+
+  <!-- Empty successful build when Melon refs are absent -->
+  <ItemGroup Condition="'$(HasMelonRefs)' != 'true'">
+    <Compile Include="SkipStub.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(HasMelonRefs)' == 'true'">
+    <Compile Include="MelonFusionRpgMod.cs" />
+    <Compile Include="GlobalUsings.Il2Cpp.cs" />
+    <Compile Include="..\FusionRpg.Injector\**\*.cs"
+             Exclude="..\FusionRpg.Injector\obj\**;..\FusionRpg.Injector\bin\**;..\FusionRpg.Injector\Bridges\**" />
+    <Compile Include="..\FusionRpg.Injector\Bridges\$(GameProfile)\**\*.cs" />
+    <ProjectReference Include="..\FusionRpg.Contracts\FusionRpg.Contracts.csproj" />
+    <ProjectReference Include="..\FusionRpg.Core\FusionRpg.Core.csproj" />
+    <ProjectReference Include="..\FusionRpg.CheatCore\FusionRpg.CheatCore.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.36" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(HasMelonRefs)' == 'true'">
+    <Reference Include="0Harmony">
+      <HintPath>$(MlGameDir)\MelonLoader\net6\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MelonLoader">
+      <HintPath>$(MlGameDir)\MelonLoader\net6\MelonLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>$(MlGameDir)\MelonLoader\net6\Il2CppInterop.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Common">
+      <HintPath>$(MlGameDir)\MelonLoader\net6\Il2CppInterop.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\Il2CppSystem.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(MlGameDir)\MelonLoader\Il2CppAssemblies\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

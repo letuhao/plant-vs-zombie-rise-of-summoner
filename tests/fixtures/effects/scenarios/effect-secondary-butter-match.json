@@ -1,0 +1,10 @@
+{
+  "id": "effect-secondary-butter-match",
+  "seed": 42,
+  "steps": [
+    { "op": "clear" },
+    { "op": "matchStart" },
+    { "op": "hit", "typeId": 0, "targetTypeId": 0 },
+    { "op": "expectPlan", "golden": "butter_on_hit.plan.json" }
+  ]
+}

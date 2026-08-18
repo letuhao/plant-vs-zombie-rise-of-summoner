@@ -1,0 +1,109 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>FusionRpg.Injector</AssemblyName>
+    <RootNamespace>FusionRpg.Injector</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <BepGameDir Condition="'$(BepGameDir)' == '' and '$(GameDir)' != ''">$(GameDir)</BepGameDir>
+    <BepGameDir Condition="'$(BepGameDir)' == '' and '$(FUSIONRPG_GAME_DIR)' != ''">$(FUSIONRPG_GAME_DIR)</BepGameDir>
+    <BepGameDir Condition="'$(BepGameDir)' == ''">$(MSBuildThisFileDirectory)..\..\..</BepGameDir>
+    <GameDir>$(BepGameDir)</GameDir>
+    <OutputPath Condition="'$(OutputPath)' == ''">$(BepGameDir)\BepInEx\plugins\FusionRpg\</OutputPath>
+    <AssemblyTitle>FusionRpg Injector</AssemblyTitle>
+    <Product>FusionRpg</Product>
+    <Company>FusionRpg (hobby OSS)</Company>
+    <Authors>Lê Tú Hào</Authors>
+    <Description>FusionRpg BepInEx 6 IL2CPP host — game-side capture and apply (AGPL hobby project)</Description>
+    <Copyright>Copyright (c) 2026 Lê Tú Hào</Copyright>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+    <Version>0.1.2</Version>
+    <InformationalVersion>0.1.2</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <GameProfile Condition="'$(GameProfile)' == '' and '$(FUSIONRPG_GAME_PROFILE)' != ''">$(FUSIONRPG_GAME_PROFILE)</GameProfile>
+    <GameProfile Condition="'$(GameProfile)' == ''">pvzrh-3.8.1</GameProfile>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Shared game logic (host-agnostic). Host entry is Plugin.cs in this project. -->
+    <Compile Include="..\FusionRpg.Injector\**\*.cs"
+             Exclude="..\FusionRpg.Injector\obj\**;..\FusionRpg.Injector\bin\**;..\FusionRpg.Injector\Bridges\**" />
+    <Compile Include="..\FusionRpg.Injector\Bridges\$(GameProfile)\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FusionRpg.Contracts\FusionRpg.Contracts.csproj" />
+    <ProjectReference Include="..\FusionRpg.Core\FusionRpg.Core.csproj" />
+    <ProjectReference Include="..\FusionRpg.CheatCore\FusionRpg.CheatCore.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.36" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepGameDir)\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx.Core">
+      <HintPath>$(BepGameDir)\BepInEx\core\BepInEx.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity.IL2CPP">
+      <HintPath>$(BepGameDir)\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Runtime">
+      <HintPath>$(BepGameDir)\BepInEx\core\Il2CppInterop.Runtime.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppInterop.Common">
+      <HintPath>$(BepGameDir)\BepInEx\core\Il2CppInterop.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(BepGameDir)\BepInEx\interop\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2Cppmscorlib">
+      <HintPath>$(BepGameDir)\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Il2CppSystem.Core">
+      <HintPath>$(BepGameDir)\BepInEx\interop\Il2CppSystem.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(BepGameDir)\BepInEx\interop\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(BepGameDir)\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(BepGameDir)\BepInEx\interop\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(BepGameDir)\BepInEx\interop\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(BepGameDir)\BepInEx\interop\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(BepGameDir)\BepInEx\interop\Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BepGameDir)\BepInEx\interop\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(BepGameDir)\BepInEx\interop\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,19 @@
+Rise of Summoner (FusionRpg) — https://github.com/letuhao/plant-vs-zombie-rise-of-summoner
+Copyright (c) 2026 Lê Tú Hào
+
+This product is licensed under the GNU Affero General Public License v3.0 or later.
+See the LICENSE file in this repository and in the player zip.
+
+Third-party components (selected):
+
+- BepInEx (LGPL and related notices) — https://github.com/BepInEx/BepInEx
+  Downloaded at runtime by the launcher from official GitHub releases when the user chooses Install BepInEx.
+  Not redistributed inside FusionRpg-win-x64.zip by default.
+- MelonLoader — https://github.com/LavaGang/MelonLoader
+  Downloaded at runtime when the user chooses Install MelonLoader. Not dual-loaded with BepInEx.
+- WPF-UI — see NuGet package license for WPF-UI
+- ASP.NET Core / .NET runtime (self-contained publish) — Microsoft .NET license terms
+- Other NuGet and npm dependencies — see each package's license metadata
+
+Game content (Plants vs. Zombies Fusion / PVZRH) is not part of this project and is not licensed under AGPL.
+You must obtain and use a legal game install. FusionRpg never downloads or patches the game binary.

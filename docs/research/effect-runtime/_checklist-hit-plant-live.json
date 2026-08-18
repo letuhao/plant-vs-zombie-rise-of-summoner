@@ -1,0 +1,38 @@
+{
+  "at": "2026-08-16T03:12:00+07:00",
+  "verdict": {
+    "plant_side_combat_hit": "PASS",
+    "path": "Zombie.AttackPlant deferred Harmony",
+    "notes": "Plant TakeDamage damageFrom is the plant itself (WallNut), not the zombie — Bullet/Zombie cast on TakeDamage cannot identify melee attacker. AttackPlant emits combat.hit side=plant source=attackPlant."
+  },
+  "plantDamage": {
+    "sample": {
+      "ptr": "138994E8B40",
+      "damage": 10,
+      "before": 50,
+      "after": 10,
+      "path": "take",
+      "damageFrom": "138994E8B40",
+      "damageFromClass": "WallNut",
+      "damageFromIsBullet": false,
+      "damageFromIsZombie": false,
+      "damageFromIsPlant": true,
+      "scenarioId": "hit-plant2-2472"
+    }
+  },
+  "combatHit": {
+    "countInWindow": 77,
+    "sample": {
+      "side": "plant",
+      "source": "attackPlant",
+      "attackerKind": "zombie",
+      "attackerPtr": "1378C215320",
+      "damage": 50,
+      "fromType": 0,
+      "fromTypeName": "NormalZombie",
+      "targetPtr": "138994E8B40",
+      "targetType": 3,
+      "scenarioId": "hit-plant2-2472"
+    }
+  }
+}

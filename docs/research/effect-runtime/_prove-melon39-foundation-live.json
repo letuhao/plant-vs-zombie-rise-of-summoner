@@ -1,0 +1,105 @@
+{
+  "at": "2026-08-16T20:47:37.3381019+07:00",
+  "deadZombiesFix": true,
+  "game": "pvzrh-3.9",
+  "passed": 19,
+  "results": [
+    {
+      "id": "spawn-bullet-hit",
+      "note": "spawnBullet=1 init=1 hit=1 dmg=[50,50,50] hit50=True",
+      "pass": true
+    },
+    {
+      "id": "p1-baseline",
+      "note": "peaHit dmg=[20,20,20,20,20,20] bullet.init=[50,0,20] combat.hit=2",
+      "pass": true
+    },
+    {
+      "id": "p1-bullet",
+      "note": "EXPECTED: init999=True hit20=True dmg=[20,20,20,20,20,20] init=[999,999]",
+      "pass": true
+    },
+    {
+      "id": "onkill-grave",
+      "note": "die=True onkill.grave=True grave=True kinds=debug.scenario.start,cheat.apply,debug.mods.reset,debug.session.start,cheat.inject,debug.wave.freeze,plant.die,zombie.die,stat.writer,stat.applied,zombie.spawn,entity.stats,zombie.place,debug.spawn.zombie,debug.arm,cheat.enrich,grid.place,debug.spawn.grid,debug.onkill.grave,debug.run-steps.done",
+      "pass": true
+    },
+    {
+      "id": "onkill-clear-grave",
+      "note": "onkill.clear=True die=True kinds=debug.scenario.start,cheat.apply,debug.mods.reset,debug.session.start,cheat.inject,debug.wave.freeze,grid.place,debug.spawn.grid,stat.writer,stat.applied,zombie.spawn,entity.stats,zombie.place,debug.spawn.zombie,debug.arm,grid.die,debug.onkill.clear-grave,zombie.die,debug.run-steps.done,item.drop",
+      "pass": true
+    },
+    {
+      "id": "effect-butter-hit",
+      "note": "need ok [combat.hit,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-freeze-hit",
+      "note": "need ok [combat.hit,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-cold-hit",
+      "note": "need ok [combat.hit,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-clear-butter",
+      "note": "need ok [combat.hit,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-passive-atk",
+      "note": "need ok [debug.effect.granted,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-spawn-ondeath",
+      "note": "need ok [zombie.die,debug.effect.fired,debug.spawn.zombie]",
+      "pass": true
+    },
+    {
+      "id": "effect-spawn-plant-bullet",
+      "note": "need ok [combat.hit,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-board-cherry",
+      "note": "need ok [debug.board.action]",
+      "pass": true
+    },
+    {
+      "id": "effect-grid-cycle",
+      "note": "need ok [combat.hit,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-set-dirt",
+      "note": "need ok [combat.hit,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-economy-sun",
+      "note": "need ok [combat.hit,debug.economy]",
+      "pass": true
+    },
+    {
+      "id": "effect-icd-butter",
+      "note": "need ok [combat.hit,debug.effect.fired]",
+      "pass": true
+    },
+    {
+      "id": "effect-withdraw",
+      "note": "need ok [debug.effect.withdrawn]",
+      "pass": true
+    },
+    {
+      "id": "effect-spawn-filter",
+      "note": "need ok [debug.spawn.plant,debug.effect.fired]",
+      "pass": true
+    }
+  ],
+  "failed": 0,
+  "host": "MelonLoader"
+}

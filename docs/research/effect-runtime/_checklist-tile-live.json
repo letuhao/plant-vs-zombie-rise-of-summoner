@@ -1,0 +1,399 @@
+{
+  "at": "2026-08-16T02:35:52.9375262+07:00",
+  "scenarios": {
+    "tile-grave": {
+      "scenarioId": "F-tile-grave-658",
+      "httpOk": true,
+      "runDone": true,
+      "keys": "debug.scenario.start, cheat.apply, grid.place, debug.spawn.grid, debug.grid.query, debug.run-steps.done",
+      "spawnGrid": {
+        "ok": true,
+        "typeId": 7,
+        "typeName": "Grave",
+        "graveType": 0,
+        "col": 4,
+        "row": 2,
+        "source": "debug.spawn",
+        "scenarioId": "F-tile-grave-658"
+      },
+      "gridPlace": {
+        "ptr": "20B23F56D80",
+        "type": 7,
+        "typeName": "Grave",
+        "col": 4,
+        "row": 2
+      },
+      "gridClear": null,
+      "gridDie": null,
+      "boxSet": null,
+      "gridQuery": {
+        "col": 4,
+        "row": 2,
+        "boxType": 0,
+        "boxName": "Grass",
+        "hasGrave": true,
+        "graveNum": 1,
+        "hasPit": false,
+        "hasPot": false,
+        "hasLily": false,
+        "hasPlant": false,
+        "scenarioId": "F-tile-grave-658"
+      },
+      "onkillGrave": null,
+      "errors": ""
+    },
+    "tile-grave-clear": {
+      "scenarioId": "F-tile-grave-clear-6818",
+      "httpOk": true,
+      "runDone": true,
+      "keys": "debug.scenario.start, cheat.apply, debug.spawn.grid, grid.die, debug.grid.clear, debug.grid.query, debug.run-steps.done",
+      "spawnGrid": {
+        "ok": false,
+        "typeId": 7,
+        "typeName": "Grave",
+        "graveType": 0,
+        "col": 4,
+        "row": 2,
+        "source": "debug.spawn",
+        "scenarioId": "F-tile-grave-clear-6818"
+      },
+      "gridPlace": null,
+      "gridClear": {
+        "ok": true,
+        "typeId": 7,
+        "typeName": "Grave",
+        "col": 4,
+        "row": 2,
+        "random": false,
+        "scenarioId": "F-tile-grave-clear-6818"
+      },
+      "gridDie": {
+        "ptr": "20B23F56D80"
+      },
+      "boxSet": null,
+      "gridQuery": {
+        "col": 4,
+        "row": 2,
+        "boxType": 0,
+        "boxName": "Grass",
+        "hasGrave": false,
+        "graveNum": 0,
+        "hasPit": false,
+        "hasPot": false,
+        "hasLily": false,
+        "hasPlant": false,
+        "scenarioId": "F-tile-grave-clear-6818"
+      },
+      "onkillGrave": null,
+      "errors": ""
+    },
+    "tile-iceblock": {
+      "scenarioId": "F-tile-iceblock-9137",
+      "httpOk": true,
+      "runDone": true,
+      "keys": "debug.scenario.start, cheat.apply, grid.place, debug.spawn.grid, debug.run-steps.done",
+      "spawnGrid": {
+        "ok": true,
+        "typeId": 8,
+        "typeName": "IceBlock",
+        "graveType": 0,
+        "col": 5,
+        "row": 2,
+        "source": "debug.spawn",
+        "scenarioId": "F-tile-iceblock-9137"
+      },
+      "gridPlace": {
+        "ptr": "20ADCCB1280",
+        "type": 8,
+        "typeName": "IceBlock",
+        "col": 5,
+        "row": 2
+      },
+      "gridClear": null,
+      "gridDie": null,
+      "boxSet": null,
+      "gridQuery": null,
+      "onkillGrave": null,
+      "errors": ""
+    },
+    "tile-box-water": {
+      "scenarioId": "F-tile-box-water-6225",
+      "httpOk": true,
+      "runDone": true,
+      "keys": "debug.scenario.start, cheat.apply, debug.box.set, debug.grid.query, debug.run-steps.done",
+      "spawnGrid": null,
+      "gridPlace": null,
+      "gridClear": null,
+      "gridDie": null,
+      "boxSet": {
+        "ok": false,
+        "col": 3,
+        "row": 2,
+        "boxType": 1,
+        "boxName": "Water",
+        "before": 0,
+        "beforeName": "Grass",
+        "after": 0,
+        "afterName": "Grass",
+        "index": -1,
+        "layout": "noIndex cols=10 rows=5 len=12",
+        "scenarioId": "F-tile-box-water-6225"
+      },
+      "gridQuery": {
+        "col": 3,
+        "row": 2,
+        "boxType": 0,
+        "boxName": "Grass",
+        "hasGrave": false,
+        "graveNum": 0,
+        "hasPit": false,
+        "hasPot": false,
+        "hasLily": false,
+        "hasPlant": false,
+        "scenarioId": "F-tile-box-water-6225"
+      },
+      "onkillGrave": null,
+      "errors": "debug set-box Water @3,2 Grass->Grass"
+    },
+    "tile-box-grass": {
+      "scenarioId": "F-tile-box-grass-3986",
+      "httpOk": true,
+      "runDone": true,
+      "keys": "debug.scenario.start, cheat.apply, debug.box.set, debug.grid.query, debug.run-steps.done",
+      "spawnGrid": null,
+      "gridPlace": null,
+      "gridClear": null,
+      "gridDie": null,
+      "boxSet": {
+        "ok": false,
+        "col": 3,
+        "row": 2,
+        "boxType": 1,
+        "boxName": "Water",
+        "before": 0,
+        "beforeName": "Grass",
+        "after": 0,
+        "afterName": "Grass",
+        "index": -1,
+        "layout": "noIndex cols=10 rows=5 len=12",
+        "scenarioId": "F-tile-box-grass-3986"
+      },
+      "gridQuery": {
+        "col": 3,
+        "row": 2,
+        "boxType": 0,
+        "boxName": "Grass",
+        "hasGrave": false,
+        "graveNum": 0,
+        "hasPit": false,
+        "hasPot": false,
+        "hasLily": false,
+        "hasPlant": false,
+        "scenarioId": "F-tile-box-grass-3986"
+      },
+      "onkillGrave": null,
+      "errors": "debug set-box Water @3,2 Grass->Grass | debug set-box Grass @3,2 Grass->Grass"
+    },
+    "tile-box-lava": {
+      "scenarioId": "F-tile-box-lava-5586",
+      "httpOk": true,
+      "runDone": true,
+      "keys": "debug.scenario.start, cheat.apply, debug.box.set, debug.grid.query, debug.run-steps.done",
+      "spawnGrid": null,
+      "gridPlace": null,
+      "gridClear": null,
+      "gridDie": null,
+      "boxSet": {
+        "ok": false,
+        "col": 3,
+        "row": 2,
+        "boxType": 7,
+        "boxName": "Lava",
+        "before": 0,
+        "beforeName": "Grass",
+        "after": 0,
+        "afterName": "Grass",
+        "index": -1,
+        "layout": "noIndex cols=10 rows=5 len=12",
+        "scenarioId": "F-tile-box-lava-5586"
+      },
+      "gridQuery": {
+        "col": 3,
+        "row": 2,
+        "boxType": 0,
+        "boxName": "Grass",
+        "hasGrave": false,
+        "graveNum": 0,
+        "hasPit": false,
+        "hasPot": false,
+        "hasLily": false,
+        "hasPlant": false,
+        "scenarioId": "F-tile-box-lava-5586"
+      },
+      "onkillGrave": null,
+      "errors": "debug set-box Lava @3,2 Grass->Grass"
+    },
+    "onkill-grave": {
+      "scenarioId": "F-onkill-grave-7671",
+      "httpOk": true,
+      "runDone": true,
+      "keys": "debug.scenario.start, cheat.apply, grid.place, debug.spawn.grid, debug.onkill.grave, debug.run-steps.done",
+      "spawnGrid": {
+        "ok": true,
+        "typeId": 7,
+        "typeName": "Grave",
+        "graveType": 0,
+        "col": 7,
+        "row": 2,
+        "source": "debug.onkill.grave",
+        "scenarioId": "F-onkill-grave-7671"
+      },
+      "gridPlace": {
+        "ptr": "20B23ECAA80",
+        "type": 7,
+        "typeName": "Grave",
+        "col": 7,
+        "row": 2
+      },
+      "gridClear": null,
+      "gridDie": null,
+      "boxSet": null,
+      "gridQuery": null,
+      "onkillGrave": {
+        "col": 7,
+        "row": 2,
+        "deadPtr": "20ADC659640",
+        "scenarioId": "F-onkill-grave-7671"
+      },
+      "errors": "debug session F-onkill-grave-7671"
+    },
+    "onkill-clear-grave": {
+      "scenarioId": "F-onkill-clear-grave-2474",
+      "httpOk": true,
+      "runDone": true,
+      "keys": "debug.scenario.start, cheat.apply, grid.place, debug.spawn.grid, grid.die, debug.onkill.clear-grave, debug.run-steps.done",
+      "spawnGrid": {
+        "ok": true,
+        "typeId": 7,
+        "typeName": "Grave",
+        "graveType": 0,
+        "col": 3,
+        "row": 2,
+        "source": "debug.spawn",
+        "scenarioId": "F-onkill-clear-grave-2474"
+      },
+      "gridPlace": {
+        "ptr": "20B23ECA900",
+        "type": 7,
+        "typeName": "Grave",
+        "col": 5,
+        "row": 2
+      },
+      "gridClear": {
+        "ok": true,
+        "typeId": 7,
+        "typeName": "Grave",
+        "col": 3,
+        "row": 2,
+        "random": true,
+        "scenarioId": "F-onkill-clear-grave-2474"
+      },
+      "gridDie": {
+        "ptr": "20B23ECA960"
+      },
+      "boxSet": null,
+      "gridQuery": null,
+      "onkillGrave": null,
+      "errors": "debug session F-onkill-clear-grave-2474"
+    }
+  },
+  "boxRetry": {
+    "tile-box-water": {
+      "boxSet": {
+        "ok": true,
+        "wrote": true,
+        "col": 3,
+        "row": 2,
+        "boxType": 1,
+        "boxName": "Water",
+        "before": 0,
+        "beforeName": "Grass",
+        "after": 1,
+        "afterName": "Water",
+        "path": "BoardGrid.set_boxType",
+        "scenarioId": "F2-tile-box-water-5497"
+      },
+      "query": {
+        "col": 3,
+        "row": 2,
+        "boxType": 1,
+        "boxName": "Water",
+        "hasGrave": false,
+        "graveNum": 0,
+        "hasPit": false,
+        "hasPot": false,
+        "hasLily": false,
+        "hasPlant": false,
+        "scenarioId": "F2-tile-box-water-5497"
+      }
+    },
+    "tile-box-grass": {
+      "boxSet": {
+        "ok": true,
+        "wrote": true,
+        "col": 3,
+        "row": 2,
+        "boxType": 0,
+        "boxName": "Grass",
+        "before": 1,
+        "beforeName": "Water",
+        "after": 0,
+        "afterName": "Grass",
+        "path": "BoardGrid.set_boxType",
+        "scenarioId": "F2-tile-box-grass-6968"
+      },
+      "query": {
+        "col": 3,
+        "row": 2,
+        "boxType": 0,
+        "boxName": "Grass",
+        "hasGrave": false,
+        "graveNum": 0,
+        "hasPit": false,
+        "hasPot": false,
+        "hasLily": false,
+        "hasPlant": false,
+        "scenarioId": "F2-tile-box-grass-6968"
+      }
+    },
+    "tile-box-lava": {
+      "boxSet": {
+        "ok": true,
+        "wrote": true,
+        "col": 3,
+        "row": 2,
+        "boxType": 7,
+        "boxName": "Lava",
+        "before": 0,
+        "beforeName": "Grass",
+        "after": 7,
+        "afterName": "Lava",
+        "path": "BoardGrid.set_boxType",
+        "scenarioId": "F2-tile-box-lava-7530"
+      },
+      "query": {
+        "col": 3,
+        "row": 2,
+        "boxType": 7,
+        "boxName": "Lava",
+        "hasGrave": false,
+        "graveNum": 0,
+        "hasPit": false,
+        "hasPot": false,
+        "hasLily": false,
+        "hasPlant": false,
+        "scenarioId": "F2-tile-box-lava-7530"
+      }
+    }
+  }
+}

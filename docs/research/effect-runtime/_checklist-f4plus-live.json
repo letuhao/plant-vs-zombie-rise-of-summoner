@@ -1,0 +1,194 @@
+[
+  {
+    "F": "F4",
+    "id": "hit-capture",
+    "Pass": true,
+    "Fail": false,
+    "Note": "no combat.hit; zombie.damage=9 sample=20,20,20",
+    "Kinds": "cheat.apply=9; zombie.damage=9; bullet.init=4; bullet.place=4; cheat.inject=3; zombie.spawn=2; stat.writer=2; stat.applied=2; entity.stats=2; plant.die=2; sun.gain=1; plant.unique=1; plant.spawn=1; plant.place=1; debug.wave.freeze=1; zombie.place=1; debug.spawn.zombie=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.reset=1; item.drop=1; board.economy=1"
+  },
+  {
+    "F": "F5",
+    "id": "status-butter",
+    "Pass": true,
+    "Fail": false,
+    "Note": "statusWant=butter; debug.status.applied; sample=debug.scenario.start:{\"id\":\"status-butter\",\"scenarioId\":\"live-status-butter\",\"steps\":6} | debug.mods.reset:{\"ok\":true,\"scenarioId\":\"live-hit-capture\"} | debug.session.start:{\"scenarioId\":\"live-status-butter\",\"hitCapture\"",
+    "Kinds": "cheat.apply=9; cheat.inject=3; zombie.damage=3; stat.writer=2; stat.applied=2; zombie.spawn=2; debug.spawn.zombie=1; debug.status.applied=1; zombie.place=1; entity.stats=1; plant.die=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.reset=1; zombie.die=1; debug.session.start=1; debug.wave.freeze=1"
+  },
+  {
+    "F": "F6",
+    "id": "status-freeze",
+    "Pass": true,
+    "Fail": false,
+    "Note": "statusWant=freeze; debug.status.applied; sample=debug.scenario.start:{\"id\":\"status-freeze\",\"scenarioId\":\"live-status-freeze\",\"steps\":5} | debug.mods.reset:{\"ok\":true,\"scenarioId\":\"live-status-butter\"} | debug.session.start:{\"scenarioId\":\"live-status-freeze\",\"hitCaptur",
+    "Kinds": "cheat.apply=10; cheat.inject=2; stat.applied=2; stat.writer=2; zombie.spawn=2; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.zombie=1; debug.status.applied=1; entity.stats=1; zombie.die=1; zombie.place=1"
+  },
+  {
+    "F": "F7",
+    "id": "status-cold",
+    "Pass": true,
+    "Fail": false,
+    "Note": "statusWant=cold; debug.status.applied; sample=debug.scenario.start:{\"id\":\"status-cold\",\"scenarioId\":\"live-status-cold\",\"steps\":5} | debug.mods.reset:{\"ok\":true,\"scenarioId\":\"live-status-freeze\"} | debug.session.start:{\"scenarioId\":\"live-status-cold\",\"hitCapture\":tru",
+    "Kinds": "cheat.apply=11; cheat.inject=2; stat.applied=2; stat.writer=2; zombie.spawn=2; board.economy=1; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.zombie=1; debug.status.applied=1; entity.stats=1; sun.gain=1; zombie.die=1; zombie.place=1"
+  },
+  {
+    "F": "F8",
+    "id": "status-poison",
+    "Pass": true,
+    "Fail": false,
+    "Note": "statusWant=poison; debug.status.applied; sample=debug.scenario.start:{\"id\":\"status-poison\",\"scenarioId\":\"live-status-poison\",\"steps\":5} | debug.mods.reset:{\"ok\":true,\"scenarioId\":\"live-status-cold\"} | debug.session.start:{\"scenarioId\":\"live-status-poison\",\"hitCapture\"",
+    "Kinds": "zombie.damage=21; cheat.apply=11; cheat.inject=2; stat.applied=2; stat.writer=2; zombie.spawn=2; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.zombie=1; debug.status.applied=1; entity.stats=1; zombie.die=1; zombie.place=1"
+  },
+  {
+    "F": "F9",
+    "id": "status-float-butter",
+    "Pass": true,
+    "Fail": false,
+    "Note": "statusWant=butter; debug.status.applied; sample=debug.scenario.start:{\"id\":\"status-float-butter\",\"scenarioId\":\"live-status-float-butter\",\"steps\":5} | debug.mods.reset:{\"ok\":true,\"scenarioId\":\"live-status-poison\"} | debug.session.start:{\"scenarioId\":\"live-status-float-",
+    "Kinds": "cheat.apply=11; zombie.damage=6; cheat.inject=2; stat.applied=2; stat.writer=2; zombie.spawn=2; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.zombie=1; debug.status.applied=1; entity.stats=1; zombie.die=1; zombie.place=1"
+  },
+  {
+    "F": "F10",
+    "id": "status-clear",
+    "Pass": true,
+    "Fail": false,
+    "Note": "clear events=4",
+    "Kinds": "cheat.apply=4; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.status.cleared=1"
+  },
+  {
+    "F": "F11",
+    "id": "def-plant",
+    "Pass": false,
+    "Fail": true,
+    "Note": "plant.damage=0 sample=; zombie.damage=0",
+    "Kinds": "cheat.apply=14; stat.writer=9; stat.applied=9; cheat.inject=7; zombie.spawn=2; entity.stats=2; zombie.die=1; sun.gain=1; plant.unique=1; plant.spawn=1; plant.place=1; item.drop=1; debug.wave.freeze=1; debug.spawn.zombie=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.set=1; debug.mods.reset=1; zombie.place=1; board.economy=1"
+  },
+  {
+    "F": "F12",
+    "id": "def-zombie",
+    "Pass": true,
+    "Fail": false,
+    "Note": "zombie.damage n=9 avg=4 sample=4,4,4,4,4,4",
+    "Kinds": "cheat.apply=13; zombie.damage=9; stat.writer=8; stat.applied=8; cheat.inject=5; bullet.init=4; bullet.place=4; zombie.spawn=2; entity.stats=2; zombie.die=1; sun.gain=1; plant.unique=1; plant.spawn=1; plant.place=1; plant.die=1; debug.wave.freeze=1; zombie.place=1; debug.spawn.zombie=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.set=1; debug.mods.reset=1; item.drop=1; board.economy=1"
+  },
+  {
+    "F": "F13",
+    "id": "def-alt-paths",
+    "Pass": true,
+    "Fail": false,
+    "Note": "paths=apply=4,body=4,take=4; kinds sample",
+    "Kinds": "zombie.damage=12; cheat.apply=11; bullet.init=4; bullet.place=4; cheat.inject=3; zombie.spawn=2; stat.writer=2; stat.applied=2; entity.stats=2; zombie.die=1; sun.gain=1; plant.unique=1; plant.spawn=1; plant.place=1; plant.die=1; debug.wave.freeze=1; zombie.place=1; debug.spawn.zombie=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.set=1; debug.mods.reset=1; item.drop=1; board.economy=1"
+  },
+  {
+    "F": "F14",
+    "id": "onkilled-extra",
+    "Pass": true,
+    "Fail": false,
+    "Note": "die=2 spawnish=6 kinds=cheat.apply=13; stat.writer=4; stat.applied=4; zombie.spawn=4; cheat.inject=3; zombie.damage=3; zombie.place=2; entity.stats=2; zombie.die=2; debug.onkill.extra=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.zombie=1; item.drop=1; plant.die=1; pvz.spawn.extra.ack=1; debug.arm=1; debug.mods.reset=1; debug.wave.freeze=1",
+    "Kinds": "cheat.apply=13; stat.writer=4; stat.applied=4; zombie.spawn=4; cheat.inject=3; zombie.damage=3; zombie.place=2; entity.stats=2; zombie.die=2; debug.onkill.extra=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.zombie=1; item.drop=1; plant.die=1; pvz.spawn.extra.ack=1; debug.arm=1; debug.mods.reset=1; debug.wave.freeze=1"
+  },
+  {
+    "F": "F15",
+    "id": "onhit-extra",
+    "Pass": true,
+    "Fail": false,
+    "Note": "extra=3 dmg=6",
+    "Kinds": "cheat.apply=10; zombie.damage=6; bullet.init=3; bullet.place=3; cheat.inject=3; zombie.spawn=2; stat.writer=2; stat.applied=2; entity.stats=2; zombie.die=1; sun.gain=1; plant.unique=1; plant.spawn=1; plant.place=1; debug.spawn.zombie=1; zombie.place=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.reset=1; debug.arm=1; debug.wave.freeze=1; board.economy=1"
+  },
+  {
+    "F": "F16",
+    "id": "onhit-status",
+    "Pass": true,
+    "Fail": false,
+    "Note": "status=0 dmg=9 statusKinds=",
+    "Kinds": "cheat.apply=10; zombie.damage=9; bullet.init=3; bullet.place=3; cheat.inject=3; zombie.spawn=2; stat.writer=2; stat.applied=2; entity.stats=2; zombie.die=1; sun.gain=1; plant.unique=1; plant.spawn=1; plant.place=1; plant.die=1; debug.wave.freeze=1; zombie.place=1; debug.spawn.zombie=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.reset=1; debug.arm=1; item.drop=1; board.economy=1"
+  },
+  {
+    "F": "F17",
+    "id": "onkill-status",
+    "Pass": true,
+    "Fail": false,
+    "Note": "die=2 status=1",
+    "Kinds": "cheat.apply=12; stat.writer=5; stat.applied=5; zombie.spawn=5; cheat.inject=5; zombie.damage=3; debug.spawn.zombie=2; zombie.place=2; entity.stats=2; zombie.die=2; debug.onkill.status=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; item.drop=1; plant.die=1; debug.arm=1; debug.mods.reset=1; debug.wave.freeze=1"
+  },
+  {
+    "F": "F18",
+    "id": "kill-signal",
+    "Pass": true,
+    "Fail": false,
+    "Note": "zombie.die=2",
+    "Kinds": "cheat.apply=12; stat.applied=3; stat.writer=3; zombie.spawn=3; cheat.inject=2; zombie.die=2; board.economy=1; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.zombie=1; entity.stats=1; sun.gain=1; zombie.place=1"
+  },
+  {
+    "F": "F19",
+    "id": "kill-plant",
+    "Pass": true,
+    "Fail": false,
+    "Note": "plant.die=1",
+    "Kinds": "cheat.apply=9; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.plant=1; entity.stats=1; plant.die=1; plant.place=1; plant.spawn=1; plant.unique=1"
+  },
+  {
+    "F": "F20",
+    "id": "spawn-matrix",
+    "Pass": true,
+    "Fail": false,
+    "Note": "plant=atk=/77/77 hp=300/300; atk=/77/77 hp=300/300 zombie=hp=888/888/888; hp=888/888/888",
+    "Kinds": "cheat.apply=9; cheat.inject=6; stat.writer=3; stat.applied=3; zombie.spawn=2; entity.stats=2; plant.unique=1; plant.spawn=1; plant.place=1; debug.wave.freeze=1; debug.spawn.zombie=1; debug.spawn.plant=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.reset=1; bullet.place=1; zombie.place=1; bullet.init=1"
+  },
+  {
+    "F": "F21",
+    "id": "spawn-bullet-hit",
+    "Pass": true,
+    "Fail": false,
+    "Note": "combat.hit=0 dmg=6 bullet.init=1",
+    "Kinds": "cheat.apply=9; zombie.damage=6; cheat.inject=3; zombie.spawn=2; stat.writer=2; stat.applied=2; zombie.die=1; plant.die=1; item.drop=1; entity.stats=1; debug.spawn.zombie=1; zombie.place=1; debug.spawn.bullet=1; debug.session.start=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.reset=1; bullet.place=1; debug.wave.freeze=1; bullet.init=1"
+  },
+  {
+    "F": "F22",
+    "id": "wave-freeze-check",
+    "Pass": true,
+    "Fail": false,
+    "Note": "wave events=1 ok=True",
+    "Kinds": "cheat.apply=5; cheat.inject=1; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.wave.freeze=1"
+  },
+  {
+    "F": "F23",
+    "id": "hitland-butter",
+    "Pass": false,
+    "Fail": true,
+    "Note": "hitland=0 bullet.init=1",
+    "Kinds": "cheat.apply=8; bullet.init=1; bullet.place=1; cheat.inject=1; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.session.start=1; debug.spawn.bullet=1; debug.wave.freeze=1; zombie.die=1"
+  },
+  {
+    "F": "X1",
+    "id": "fire-spawn-extra",
+    "Pass": false,
+    "Fail": true,
+    "Note": "extra kinds= count=0",
+    "Kinds": "cheat.apply=1"
+  },
+  {
+    "F": "X2",
+    "id": "spawn-extra",
+    "Pass": false,
+    "Fail": true,
+    "Note": "count=0",
+    "Kinds": "cheat.apply=1; item.drop=1"
+  },
+  {
+    "F": "X3",
+    "id": "session",
+    "Pass": true,
+    "Fail": false,
+    "Note": "{\"sessionActive\":true,\"scenarioId\":\"live-hitland-butter\",\"arms\":{}}",
+    "Kinds": ""
+  },
+  {
+    "F": "X4",
+    "id": "snapshot",
+    "Pass": true,
+    "Fail": false,
+    "Note": "snapshot=1",
+    "Kinds": "board.economy=1; debug.snapshot=1; sun.gain=1"
+  }
+]

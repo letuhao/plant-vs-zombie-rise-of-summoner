@@ -1,0 +1,250 @@
+using System.IO.Compression;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace FusionRpg.Launcher.Services;
+
+public sealed record PlayerPackProbeStep(string Name, bool Ok, string Message);
+
+public sealed class PlayerPackProbeResult
+{
+    public bool Ok { get; init; }
+    public string PackDir { get; init; } = "";
+    public IReadOnlyList<PlayerPackProbeStep> Steps { get; init; } = Array.Empty<PlayerPackProbeStep>();
+
+    public string ToJson() => JsonSerializer.Serialize(this, JsonOpts);
+
+    static readonly JsonSerializerOptions JsonOpts = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+}
+
+/// <summary>
+/// Offline automation probe for an unpacked player pack (dist/FusionRpg).
+/// Distinct from SIM-only HTTP /api/test/probe.
+/// </summary>
+public sealed class PlayerPackProbe
+{
+    static readonly string[] RequiredRelativePaths =
+    {
+        "FusionRpg.Launcher.exe",
+        Path.Combine("Server", "FusionRpg.Server.exe"),
+        "loader-manifest.json",
+        "PLAYERS.txt",
+        "LICENSE",
+        Path.Combine("Server", "wwwroot", "index.html")
+    };
+
+    static bool HasInjectorDrop(string packDir)
+    {
+        var flat = Path.Combine(packDir, "DropIntoGame", "FusionRpg.Injector.dll");
+        var nestedBep = Path.Combine(packDir, "DropIntoGame", "BepInEx", "FusionRpg.Injector.dll");
+        var nestedMelon = Path.Combine(packDir, "DropIntoGame", "MelonLoader", "FusionRpg.Injector.MelonLoader.dll");
+        return File.Exists(flat) || File.Exists(nestedBep) || File.Exists(nestedMelon);
+    }
+
+    readonly LoaderProbe _loader = new();
+    readonly PluginInstaller _plugins = new();
+
+    public PlayerPackProbeResult Run(string packDir)
+    {
+        var steps = new List<PlayerPackProbeStep>();
+        if (string.IsNullOrWhiteSpace(packDir) || !Directory.Exists(packDir))
+        {
+            steps.Add(new PlayerPackProbeStep("layout", false, "Pack directory missing: " + packDir));
+            return new PlayerPackProbeResult { Ok = false, PackDir = packDir ?? "", Steps = steps };
+        }
+
+        packDir = Path.GetFullPath(packDir);
+        steps.Add(ProbeLayout(packDir));
+        steps.Add(ProbeManifest(packDir));
+        steps.Add(ProbeLoaderAndPlugin(packDir));
+        steps.Add(ProbeDualLoadRefuse(packDir));
+        steps.Add(ProbeUpdatePreserve(packDir));
+
+        return new PlayerPackProbeResult
+        {
+            Ok = steps.TrueForAll(s => s.Ok),
+            PackDir = packDir,
+            Steps = steps
+        };
+    }
+
+    PlayerPackProbeStep ProbeLayout(string packDir)
+    {
+        var missing = new List<string>();
+        foreach (var rel in RequiredRelativePaths)
+        {
+            if (!File.Exists(Path.Combine(packDir, rel)))
+                missing.Add(rel.Replace('/', Path.DirectorySeparatorChar));
+        }
+        if (!HasInjectorDrop(packDir))
+            missing.Add(Path.Combine("DropIntoGame", "FusionRpg.Injector.dll") + " (or DropIntoGame\\BepInEx\\…)");
+        if (missing.Count > 0)
+            return new PlayerPackProbeStep("layout", false, "Missing: " + string.Join(", ", missing));
+        return new PlayerPackProbeStep("layout", true, "Required pack files present.");
+    }
+
+    PlayerPackProbeStep ProbeManifest(string packDir)
+    {
+        try
+        {
+            var m = LoaderManifest.LoadFromLauncherDir(packDir);
+            if (string.IsNullOrWhiteSpace(m.BepInEx.AssetRegex) ||
+                string.IsNullOrWhiteSpace(m.MelonLoader.AssetRegex) ||
+                string.IsNullOrWhiteSpace(m.FusionRpg.AssetRegex))
+                return new PlayerPackProbeStep("manifest", false, "loader-manifest.json missing asset regex pins.");
+            return new PlayerPackProbeStep("manifest", true,
+                $"Pins OK (BepInEx {m.BepInEx.Tag}, Melon {m.MelonLoader.Tag}).");
+        }
+        catch (Exception ex)
+        {
+            return new PlayerPackProbeStep("manifest", false, ex.Message);
+        }
+    }
+
+    PlayerPackProbeStep ProbeLoaderAndPlugin(string packDir)
+    {
+        string? game = null;
+        try
+        {
+            game = CreateTempDir("probe-game");
+            File.WriteAllText(Path.Combine(game, "PlantsVsZombiesRH.exe"), "stub");
+            File.WriteAllText(Path.Combine(game, "winhttp.dll"), "stub");
+            Directory.CreateDirectory(Path.Combine(game, "BepInEx", "core"));
+            File.WriteAllText(Path.Combine(game, "BepInEx", "core", "core.txt"), "stub");
+
+            var probe = _loader.Probe(game);
+            if (!probe.OkForV1 || probe.PluginDir == null || probe.Host == null)
+                return new PlayerPackProbeStep("loader_plugin", false, "LoaderProbe not OkForV1: " + probe.Message);
+
+            var drop = _plugins.ResolveDropIntoGameDir(packDir, probe.Host);
+            if (!File.Exists(Path.Combine(drop, probe.Host.InjectorDllName)))
+                return new PlayerPackProbeStep("loader_plugin", false, "DropIntoGame missing Injector DLL.");
+
+            var n = _plugins.Install(drop, probe.PluginDir);
+            var installed = Path.Combine(probe.PluginDir, probe.Host.InjectorDllName);
+            if (!File.Exists(installed))
+                return new PlayerPackProbeStep("loader_plugin", false, "Install did not copy Injector DLL.");
+
+            return new PlayerPackProbeStep("loader_plugin", true, $"Installed {n} plugin file(s) into {probe.PluginDir}.");
+        }
+        catch (Exception ex)
+        {
+            return new PlayerPackProbeStep("loader_plugin", false, ex.Message);
+        }
+        finally
+        {
+            if (game != null) TryDeleteDir(game);
+        }
+    }
+
+    PlayerPackProbeStep ProbeDualLoadRefuse(string packDir)
+    {
+        string? game = null;
+        try
+        {
+            game = CreateTempDir("probe-dual");
+            File.WriteAllText(Path.Combine(game, "winhttp.dll"), "stub");
+            Directory.CreateDirectory(Path.Combine(game, "BepInEx", "core"));
+            File.WriteAllText(Path.Combine(game, "version.dll"), "stub");
+            Directory.CreateDirectory(Path.Combine(game, "MelonLoader"));
+
+            var probe = _loader.Probe(game);
+            if (probe.Kind != LoaderKind.Both || !probe.BlocksBepInExInstall || !probe.BlocksMelonLoaderInstall)
+                return new PlayerPackProbeStep("dual_load", false,
+                    $"Expected Both with dual-load blocks; got Kind={probe.Kind}, Msg={probe.Message}");
+
+            return new PlayerPackProbeStep("dual_load", true, "Dual-load correctly refused (Both markers).");
+        }
+        catch (Exception ex)
+        {
+            return new PlayerPackProbeStep("dual_load", false, ex.Message);
+        }
+        finally
+        {
+            if (game != null) TryDeleteDir(game);
+        }
+    }
+
+    PlayerPackProbeStep ProbeUpdatePreserve(string packDir)
+    {
+        string? install = null;
+        string? updates = null;
+        string? zipStage = null;
+        try
+        {
+            install = CreateTempDir("probe-install");
+            updates = CreateTempDir("probe-updates");
+            zipStage = CreateTempDir("probe-zip-src");
+
+            // Seed "old" install with launcher + save data
+            File.Copy(Path.Combine(packDir, "FusionRpg.Launcher.exe"), Path.Combine(install, "FusionRpg.Launcher.exe"));
+            Directory.CreateDirectory(Path.Combine(install, "Server", "data"));
+            File.WriteAllText(Path.Combine(install, "Server", "data", "rpg-hot.sqlite"), "SAVE-BYTES");
+
+            // Zip payload looks like a release: launcher + Server with wiped data
+            File.Copy(Path.Combine(packDir, "FusionRpg.Launcher.exe"), Path.Combine(zipStage, "FusionRpg.Launcher.exe"));
+            Directory.CreateDirectory(Path.Combine(zipStage, "Server", "data"));
+            File.WriteAllText(Path.Combine(zipStage, "Server", "FusionRpg.Server.exe"), "srv");
+            File.WriteAllText(Path.Combine(zipStage, "Server", "data", "rpg-hot.sqlite"), "WIPED");
+
+            var zipPath = Path.Combine(updates, "FusionRpg-win-x64.zip");
+            if (File.Exists(zipPath)) File.Delete(zipPath);
+            ZipFile.CreateFromDirectory(zipStage, zipPath);
+
+            var updater = new FusionRpgUpdater(updatesDir: updates);
+            var script = updater.PrepareApply(zipPath, install, stopGame: true);
+            if (!File.Exists(script))
+                return new PlayerPackProbeStep("update_preserve", false, "Bootstrap script missing.");
+
+            var scriptText = File.ReadAllText(script);
+            if (!scriptText.Contains("robocopy", StringComparison.OrdinalIgnoreCase))
+                return new PlayerPackProbeStep("update_preserve", false, "Bootstrap missing robocopy.");
+
+            var stages = Directory.GetDirectories(updates, "stage-*");
+            if (stages.Length == 0)
+                return new PlayerPackProbeStep("update_preserve", false, "No staging folder.");
+
+            var stagedData = Directory.GetFiles(stages[0], "rpg-hot.sqlite", SearchOption.AllDirectories).FirstOrDefault();
+            if (stagedData == null)
+                return new PlayerPackProbeStep("update_preserve", false, "Staged data file missing.");
+            if (File.ReadAllText(stagedData) != "SAVE-BYTES")
+                return new PlayerPackProbeStep("update_preserve", false, "Server\\data was not preserved.");
+
+            return new PlayerPackProbeStep("update_preserve", true, "Server\\data preserved; bootstrap has robocopy.");
+        }
+        catch (Exception ex)
+        {
+            return new PlayerPackProbeStep("update_preserve", false, ex.Message);
+        }
+        finally
+        {
+            if (install != null) TryDeleteDir(install);
+            if (updates != null) TryDeleteDir(updates);
+            if (zipStage != null) TryDeleteDir(zipStage);
+        }
+    }
+
+    static string CreateTempDir(string prefix)
+    {
+        var path = Path.Combine(Path.GetTempPath(), "FusionRpgPackProbe-" + prefix + "-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(path);
+        return path;
+    }
+
+    static void TryDeleteDir(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path)) Directory.Delete(path, true);
+        }
+        catch
+        {
+            /* ignore */
+        }
+    }
+}

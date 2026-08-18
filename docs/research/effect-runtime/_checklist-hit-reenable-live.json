@@ -1,0 +1,33 @@
+{
+  "at": "2026-08-16T02:56:31.6648273+07:00",
+  "verdict": {
+    "F4_combat_hit": "PASS",
+    "F23_combat_hitland": "FAIL",
+    "hitLandHarmony": "applied_deferred_no_av",
+    "hitZombieHitPlantHarmony": "skipped_default",
+    "notes": "combat.hit via TakeDamage Bullet cast (source=takeDamage). Base HitLand Harmony on after board.start but no combat.hitland events (~134 overrides). HitZombie/HitPlant stay off."
+  },
+  "hitCapture": {
+    "combatHit": 1,
+    "damageN": 1,
+    "scenarioId": "hit-f4-1059",
+    "sample": {
+      "side": "zombie",
+      "source": "takeDamage",
+      "bulletPtr": "25458AD45F0",
+      "bulletType": 0,
+      "damage": 20,
+      "fromType": 0,
+      "fromTypeName": "Peashooter",
+      "targetPtr": "25458A2A640",
+      "targetType": 0,
+      "scenarioId": "hit-f4-1059"
+    }
+  },
+  "hitLand": {
+    "combatHitland": 0,
+    "sample": null,
+    "scenarioId": "hitland-f23-5324",
+    "note": "patch.hitland ok; no combat.hitland events"
+  }
+}

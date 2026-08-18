@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/fusion-rpg-web/package-lock.json
+
+      - name: Restore / test (.NET)
+        shell: pwsh
+        run: |
+          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal
+
+      - name: Web unit tests
+        working-directory: web/fusion-rpg-web
+        shell: pwsh
+        run: |
+          if (-not (Test-Path package-lock.json)) { npm install } else { npm ci }
+          if ($LASTEXITCODE -ne 0) { throw "npm ci/install failed" }
+          if (Test-Path package.json) {
+            $pkg = Get-Content package.json -Raw | ConvertFrom-Json
+            if ($pkg.scripts.test) { npm test; if ($LASTEXITCODE -ne 0) { throw "npm test failed" } }
+            else { Write-Host "No npm test script; skipping web tests." }
+          }

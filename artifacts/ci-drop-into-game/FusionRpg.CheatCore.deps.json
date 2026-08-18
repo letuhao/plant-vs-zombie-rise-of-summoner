@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "FusionRpg.CheatCore/0.1.0": {
+        "dependencies": {
+          "FusionRpg.Contracts": "0.1.0"
+        },
+        "runtime": {
+          "FusionRpg.CheatCore.dll": {}
+        }
+      },
+      "FusionRpg.Contracts/0.1.0": {
+        "runtime": {
+          "FusionRpg.Contracts.dll": {
+            "assemblyVersion": "0.1.0.0",
+            "fileVersion": "0.1.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "FusionRpg.CheatCore/0.1.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FusionRpg.Contracts/0.1.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

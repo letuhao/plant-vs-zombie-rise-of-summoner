@@ -1,0 +1,63 @@
+# Bug report
+name: Bug report
+description: Something broken in FusionRpg (launcher, server, injector, web)
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Players: see [SUPPORT.md](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/blob/main/SUPPORT.md) and [players.md](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/blob/main/docs/runbook/players.md).
+  - type: input
+    id: fusionrpg-version
+    attributes:
+      label: FusionRpg version
+      description: Launcher About dialog, or release tag (e.g. v1.0.0)
+      placeholder: v1.0.0
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: Windows 11
+    validations:
+      required: true
+  - type: input
+    id: game-version
+    attributes:
+      label: Game version / pack
+      description: e.g. PVZ Fusion 3.8.1 — do not paste cracked or pirated pack names as a request for support of illegal copies
+      placeholder: 3.8.1
+    validations:
+      required: true
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Mod loader
+      options:
+        - BepInEx
+        - MelonLoader
+        - Both (dual-load — unsupported)
+        - None / unsure
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: 1. …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Launcher log pane, BepInEx LogOutput.log snippets, or server stderr (redact personal paths if you want)
+      render: shell

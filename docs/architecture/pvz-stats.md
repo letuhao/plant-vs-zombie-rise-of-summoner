@@ -1,0 +1,56 @@
+# PvzStats architecture
+
+Player-bound **game data foundation** between future RPG features and the injector write path.
+
+See also: [stat-system.md](stat-system.md), [decisions.md](decisions.md).
+
+## Naming
+
+| Name | Role |
+|---|---|
+| **PvzStats** | Persist Xi, revision, monitor sheet, FE drill-down |
+| **StatSystem** | Pure compose engine (`Y0 + Xi → Y`) |
+| **Cheats** | Global operator overlay (separate forever) |
+| **RPG stats** (later) | Progression/content that **upserts into** PvzStats |
+
+```text
+RPG features (later)
+  → upsert pvz_stat_modifiers
+PvzStats
+  → revision + derived snapshot/contributions (cache)
+  → API / SignalR
+pvz.stats plugin → StatSystem.Resolve → EntityStatWriter
+```
+
+## SSOT vs cache
+
+- **SSOT:** `pvz_stat_modifiers` (source-tagged rows).
+- **Cache only:** `pvz_stat_snapshots.finals_json` + `pvz_stat_contributions` — rebuilt on every mutate. Never re-apply from finals.
+
+Sheet compose uses **Y0 = 0** for monitoring (Flat +10/−5 → sheet hp **5**). Living combat Resolve uses real entity Y0 + PvzStats + cheats. FE must label **PvzStats sheet**, not match HP.
+
+## Plugin
+
+Single injector plugin `pvz.stats` (Order 250) emits all enabled mods from `StatContext.PvzStatsMods`. Row `plugin_id` is **provenance** from higher features (`rpg.item`, …), not a filter on the write path.
+
+## APIs
+
+| Route | Role |
+|---|---|
+| `GET /api/pvz-stats/{playerId}` | Sheet summary |
+| `GET /api/pvz-stats/{playerId}/channels/{channel}` | Contributions + detail_json |
+| `GET /api/pvz-stats/{playerId}/modifiers` | Raw SSOT |
+| `POST .../modifiers/upsert\|withdraw\|reset` | Mutate → bump → rebuild → `PvzStatsUpdated` + `pvz.stats.reload` |
+| `POST /api/test/seed-pvz-stats-demo` | Demo +10/−5 on **hp and maxHp**; broadcasts `PvzStatsUpdated` + enqueues `pvz.stats.reload` |
+
+Web UI: `#/pvz-stats`.
+
+## Living reapply
+
+Injector dirty path calls `CheatActions.ReapplyLivingFromStats` (not Tab-A-only `PushScalesNow`). Tracks `AppliedPvzStatsRevision` so clear/reset still rewrites living entities to baseline. Damage hooks pass `PvzStatsMods` and compose when cheats ApplyStats **or** PvzStats bag is non-empty.
+
+## API hardening
+
+- GET sheet/channel/modifiers → **404** if player missing (no orphan Ensure).
+- Withdraw requires ≥1 filter else **400** (use reset for full clear).
+- Channels canonicalize to `StatChannels` (case-insensitive); unknown → **400**.

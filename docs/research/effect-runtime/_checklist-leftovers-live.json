@@ -1,0 +1,27 @@
+[
+  {
+    "id": "takeDmgMult",
+    "Pass": false,
+    "Note": "base avg= field= | x3 avg=46.7 field= fieldOk=False dmgChanged=False"
+  },
+  {
+    "id": "butter-bullet-Dmg",
+    "Pass": true,
+    "Note": "hits=bt0:n=6:max=999; bt1:n=3:max=999; bt2:n=3:max=999; bt3:n=3:max=999; bt4:n=3:max=999; bt5:n=3:max=999; bt6:n=3:max=999; bt7:n=3:max=999; bt8:n=3:max=999; bt9:n=3:max=999; bt10:n=3:max=999; bt11:n=3:max=999; bt12:n=3:max=5; bt15:n=3:max=999; bt20:n=3:max=999; bt25:n=3:max=999; bt28:n=6:max=999; bt30:n=3:max=999; bt32:n=6:max=999; bt40:n=3:max=999; bt50:n=3:max=999; highDmg=20"
+  },
+  {
+    "id": "jala-kelp-CC",
+    "Pass": false,
+    "Note": "status applied event status=jala but no SetJala/Kelp in switch — NOT SHIPPED"
+  },
+  {
+    "id": "combat.hit",
+    "Pass": false,
+    "Note": "Hit* Harmony skipped (IL2CPP unsafe) — NOT SHIPPED"
+  },
+  {
+    "id": "F35-board-E-ZS",
+    "Pass": true,
+    "Note": "board.config E-ZS=0.25 applied + zombie spawned — OPERATOR: confirm crawl vs normal"
+  }
+]

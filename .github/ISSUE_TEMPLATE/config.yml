@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Player support / docs
+    url: https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/blob/main/SUPPORT.md
+    about: How to get help as a player (Releases + runbook)
+  - name: Contributing guide
+    url: https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/blob/main/CONTRIBUTING.md
+    about: Build, test, and PR expectations

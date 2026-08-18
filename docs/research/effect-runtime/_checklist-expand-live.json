@@ -1,0 +1,85 @@
+[
+  {
+    "F": "F24",
+    "id": "econ-sun-set",
+    "Pass": true,
+    "Note": "sun=827 debug={\"which\":\"sun\",\"value\":777,\"add\":false,\"scenarioId\":\"exp-econ-sun-set\"} kinds=zombie.damage=12; cheat.apply=8; board.economy=4; bullet.init=4; bullet.place=4; debug.session.start=2; sun.gain=2; cheat.inject=1; debug.economy=1; debug.mods.reset=1; debug.run-steps.done=1; debug.scenario.start=1; debug.wave.freeze=1"
+  },
+  {
+    "F": "F25",
+    "id": "econ-sun-add",
+    "Pass": true,
+    "Note": "suns=100,150,150"
+  },
+  {
+    "F": "F26",
+    "id": "econ-money-set",
+    "Pass": true,
+    "Note": "money=888"
+  },
+  {
+    "F": "F27",
+    "id": "econ-money-add",
+    "Pass": true,
+    "Note": "moneys=200,225,225,225"
+  },
+  {
+    "F": "F28",
+    "id": "econ-points-set",
+    "Pass": true,
+    "Note": "pts=42 debug={\"which\":\"points\",\"value\":42,\"add\":false,\"scenarioId\":\"exp-econ-points-set\"}"
+  },
+  {
+    "F": "F29",
+    "id": "zombie-speed-slow",
+    "Pass": true,
+    "Note": "uniqueSpeed=0.3 (OPERATOR: confirm crawl)",
+    "NeedsVisual": true
+  },
+  {
+    "F": "F30",
+    "id": "zombie-speed-fast",
+    "Pass": true,
+    "Note": "uniqueSpeed=2 (OPERATOR: confirm rush)",
+    "NeedsVisual": true
+  },
+  {
+    "F": "F31",
+    "id": "onspawn-inspect",
+    "Pass": true,
+    "Note": "plant atk=55 hp=400 zombie hp=1234 (exact)"
+  },
+  {
+    "F": "F32",
+    "id": "ondeath-inspect",
+    "Pass": true,
+    "Note": "plant.die=3 zombie.die=2 zpayload={\"type\":0,\"typeName\":\"NormalZombie\",\"ptr\":\"196F7A4B320\",\"reason\":0,\"scenarioId\":\"exp-ondeath-inspect\"}"
+  },
+  {
+    "F": "F33",
+    "id": "zombie-atk-bite",
+    "Pass": true,
+    "Note": "plant.damage n=3 avg=250 max=250 sample=250,250,250"
+  },
+  {
+    "F": "F34",
+    "id": "plant-produce",
+    "Pass": false,
+    "Note": "produceInterval= type=WallNut/ (OPERATOR: faster sun?)",
+    "NeedsVisual": true
+  },
+  {
+    "F": "F35",
+    "id": "board-config-speed",
+    "Pass": true,
+    "Note": "boardish=4 kinds=cheat.apply=12; cheat.inject=4; zombie.spawn=2; board.modifiers=2; stat.writer=2; stat.applied=2; sun.gain=1; plant.die=1; item.drop=1; entity.stats=1; debug.wave.freeze=1; debug.session.start=1; zombie.place=1; debug.scenario.start=1; debug.run-steps.done=1; debug.mods.set=1; debug.mods.reset=1; debug.board.config=1; debug.spawn.zombie=1; board.economy=1 (OPERATOR: slow feel?)",
+    "NeedsVisual": true
+  },
+  {
+    "F": "F36",
+    "id": "spawn-mc",
+    "Pass": true,
+    "Note": "mcEvents=4 sample={\"source\":\"initHealth\",\"type\":0,\"typeName\":\"NormalZombie\",\"displayName\":\"僵尸\",\"ptr\":\"196F76BE000\",\"theHealth\":5000,\"theMaxHealth\":5000,\"theFirstArmorHealth\":0,\"theFirstArmorMaxHealth\":0,\"theSecondArmorHealth\":0,\"theSecondArmorMaxHealth\":0,\"theAttackDamage\":50,\"level\":1,\"theArmor\":0,\"takeDmgMultiplier\":1,\"damageMultiplier\":1,\"theSpeed\":1,\"theOriginSpeed\":1.2674685,\"uniqueSpeed\":1,\"currentAllHealth\":5000,\"totalAllHealth\":5000,\"isMindControlled\":true,\"hpBase\":270,\"maxHpBase\":270,\"hp\":5000,\"maxHp\":5000,\"attackBase\":50,\"attack\":50,\"armorBase\":0,\"armor\":0,\"armorMaxBase\":0,\"armorMax\":0} (OPERATOR: hypno look?)",
+    "NeedsVisual": true
+  }
+]
