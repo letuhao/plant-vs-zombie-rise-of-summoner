@@ -24,7 +24,26 @@ public static class PvzStatsSheetComposer
         return null;
     }
 
-    public static bool IsKnownChannel(string? channel) => TryCanonicalizeChannel(channel) != null;
+    public static bool IsKnownChannel(string? channel) => TryCanonicalizeOrDerivedChannel(channel) != null;
+
+    /// <summary>Primary StatChannels id, or derived catalog channel, or null if unknown.</summary>
+    public static string? TryCanonicalizeOrDerivedChannel(string? channel)
+    {
+        var primary = TryCanonicalizeChannel(channel);
+        if (primary != null) return primary;
+
+        if (string.IsNullOrWhiteSpace(channel)) return null;
+        var trimmed = channel.Trim();
+        try
+        {
+            Derived.DerivedStatRegistry.CreateDefault().ValidateChannel(trimmed);
+            return trimmed;
+        }
+        catch (Derived.UnknownDerivedChannelException)
+        {
+            return null;
+        }
+    }
 
     public static PvzStatsSheetResult Build(IEnumerable<StatModifier> mods)
     {

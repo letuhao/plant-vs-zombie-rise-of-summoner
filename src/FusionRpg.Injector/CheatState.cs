@@ -3,9 +3,11 @@ using System.Text.Json;
 using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Stats;
+using FusionRpg.Core.Stats.Derived;
 
 using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Lawn;
+using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector;
 
@@ -25,6 +27,9 @@ public static class CheatState
     public static StatsConfig LocalStats { get; } = new();
     /// <summary>Shared StatSystem — plugins compose Y0 + Xi → Y. Cheats feed cheat.scale / cheat.absolute only.</summary>
     public static StatSystem Stats { get; } = StatSystemBootstrap.CreateDefault();
+    public static InjectorProgressionPowerProvider ProgressionPower { get; } = new();
+    /// <summary>Derived snapshot compose — wraps Stats; Writer uses AppliedCombat.</summary>
+    public static ActorHub ActorHub { get; } = ActorHubBootstrap.CreateDefault(Stats, ProgressionPower);
     public static IntPtr SelectedPtr;
     public static string SelectedSide = "";
     static int _spawnCol = 3;

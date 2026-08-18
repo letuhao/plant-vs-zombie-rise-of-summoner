@@ -75,7 +75,7 @@ flowchart TB
 
 | Loop | Latency OK? | Who decides | Who applies to Unity | Examples |
 |---|---|---|---|---|
-| **Hot** | Same process as capture (no Server await) | Injector `EffectBag` + **Funnel** (grants/mailbox already in RAM) | Writer / StatusExecutor / Intent sink / FA10 Writer **Add** | 5% freeze on hit; 10% heal on hit; ICD; 100 crits → one delta |
+| **Hot** | Same process as capture (no Server await) | Injector `EffectBag` + **Funnel** + **ActorHub** (derived at Apply) + **StatusRuntime** (design) | Writer / StatusExecutor / Intent / FA10 **Add** | 5% freeze on hit; DoT pulse; ICD; counter burst |
 | **Cold** | Seconds OK | Server UniqueActor + Data | Never directly — **pushes grants/loadout**; Hot applies later | Equip item, level-up mod defs, roster deploy templates |
 | **Intent** | Human / director scale OK | Server feature → `pvz.*` | Injector after MatchRuntime Admit | Extra spawn, unique deploy Create |
 
@@ -96,6 +96,8 @@ No: capture → Server roll → apply request → injector for hit procs.
 | Living overlay set, Admit, bind `instanceId ↔ ptr` | **MatchRuntime RAM** | Durable gear / XP |
 | Specimen phase, equipment, level, personal mod *definitions* | **UniqueActor / Data** | Per-hit proc rolls |
 | Active grant bag + ICD clocks for this process | **EffectBag (Injector)** | SQLite mid-proc |
+| Active status instances on actors | **StatusRuntime (Injector RAM)** — [status-ssot.md](status-ssot.md) | Durable status rows in SQLite mid-match |
+| Derived power/resist at Status Apply | **Actor Hub** — [actor-hub-ssot.md](actor-hub-ssot.md) | Primary `hp`/`atk` or StatSystem-only resist |
 | Secondary→Foundation command buffer | **Funnel mailbox (Injector / Core)** | Absolute HP from overlay snapshot; Server RTT |
 | Almanac type XP | **RpgProgression** | Lawn `ptr` identity |
 

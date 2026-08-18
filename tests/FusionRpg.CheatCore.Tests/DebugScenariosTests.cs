@@ -224,4 +224,35 @@ public class DebugScenariosTests
         Assert.True(DebugScenarios.Expand("combat-counter-target", "sid")
             .Count(s => s.Name == "debug.effect.fire-synthetic") >= 5);
     }
+
+    [Fact]
+    public void Status_l2_scenarios_pin_derived_and_use_statusId()
+    {
+        Assert.Contains("debug.actor-derived", DebugScenarios.AllowedStepNames);
+        Assert.Contains("debug.status.apply", DebugScenarios.AllowedStepNames);
+        foreach (var id in new[]
+                 {
+                     "status-l2-wither", "status-l2-snapshot", "status-l2-resist",
+                     "status-l2-blight-row", "status-l2-butter", "status-l2-freeze", "status-l2-poison"
+                 })
+        {
+            var steps = DebugScenarios.Expand(id, "sid");
+            Assert.Contains(steps, s => s.Name == "debug.spawn-zombie");
+            Assert.Contains(steps, s => s.Name == "debug.effect.grant");
+            Assert.Contains(steps, s => s.Name == "debug.status");
+            var grant = System.Text.Json.JsonSerializer.SerializeToElement(
+                steps.First(s => s.Name == "debug.effect.grant").Payload);
+            Assert.True(grant.GetProperty("overlay").TryGetProperty("statusId", out _));
+            var z = System.Text.Json.JsonSerializer.SerializeToElement(
+                steps.First(s => s.Name == "debug.spawn-zombie").Payload);
+            Assert.True(z.TryGetProperty("derivedProfile", out _));
+        }
+
+        var blight = DebugScenarios.Expand("status-l2-blight-row", "sid");
+        Assert.Equal(3, blight.Count(s => s.Name == "debug.spawn-zombie"));
+        var resist = System.Text.Json.JsonSerializer.SerializeToElement(
+            DebugScenarios.Expand("status-l2-resist", "sid")
+                .First(s => s.Name == "debug.spawn-zombie").Payload);
+        Assert.Equal("iron-dot", resist.GetProperty("derivedProfile").GetString());
+    }
 }

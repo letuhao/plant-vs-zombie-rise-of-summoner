@@ -32,7 +32,7 @@ public static class DamagePacketBuilder
             ProcDepthLimit = overlay.ContainsKey("procDepthLimit")
                 ? JsonOverlay.GetInt(overlay, "procDepthLimit")
                 : null,
-            Target = ParseTarget(overlay),
+            Target = ParseTargetFromOverlay(overlay),
             Delivery = ParseDelivery(overlay)
         };
 
@@ -46,7 +46,7 @@ public static class DamagePacketBuilder
         return packet;
     }
 
-    static TargetSpec ParseTarget(Dictionary<string, object?> overlay)
+    public static TargetSpec ParseTargetFromOverlay(Dictionary<string, object?> overlay)
     {
         if (!overlay.TryGetValue("target", out var t) || t == null)
         {

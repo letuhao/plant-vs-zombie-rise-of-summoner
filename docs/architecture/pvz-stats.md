@@ -2,7 +2,7 @@
 
 Player-bound **game data foundation** between future RPG features and the injector write path.
 
-See also: [stat-system.md](stat-system.md), [decisions.md](decisions.md).
+See also: [stat-system.md](stat-system.md), [actor-hub-ssot.md](actor-hub-ssot.md), [decisions.md](decisions.md).
 
 ## Naming
 
@@ -11,16 +11,22 @@ See also: [stat-system.md](stat-system.md), [decisions.md](decisions.md).
 | **PvzStats** | Persist Xi, revision, monitor sheet, FE drill-down |
 | **StatSystem** | Pure compose engine (`Y0 + Xi → Y`) |
 | **Cheats** | Global operator overlay (separate forever) |
-| **RPG stats** (later) | Progression/content that **upserts into** PvzStats |
+| **RPG stats** (later) | Progression/content that **upserts into** PvzStats or **Actor Hub derived catalog** |
 
 ```text
 RPG features (later)
-  → upsert pvz_stat_modifiers
+  → upsert pvz_stat_modifiers and/or derived catalog channels
 PvzStats
   → revision + derived snapshot/contributions (cache)
   → API / SignalR
 pvz.stats plugin → StatSystem.Resolve → EntityStatWriter
+
+Actor Hub (design)
+  → DerivedComposer → status.power.* / status.resist.* at Apply
+  → progression.power stub from RpgProgressionSubsystem
 ```
+
+**PvzStats** remains SSOT for persisted **primary-channel** modifier rows. **Actor Hub derived channels** (`progression.power`, `status.power.*`, …) are composed at resolve time — see [actor-hub-ssot.md](actor-hub-ssot.md). When PvzStats rows target catalog channels, validate against **DerivedStatCatalog** (future code plan).
 
 ## SSOT vs cache
 

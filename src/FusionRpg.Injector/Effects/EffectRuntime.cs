@@ -2,8 +2,9 @@ using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Plugins;
-using FusionRpg.Core.Stats;
+using FusionRpg.Core.Status;
 using FusionRpg.Injector.Fx;
+using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector.Effects;
 
@@ -13,11 +14,21 @@ public static class EffectRuntime
     static readonly object Gate = new();
     static EffectBag? _bag;
     static EffectPluginHost? _plugins;
+    static StatusRuntime? _status;
     static EffectEventDedupe _dedupe = new();
     static long _tick;
     /// <summary>Targets that already got OnDamageDealt this tick window (A2 — skip redundant taken).</summary>
     static readonly Dictionary<string, long> DealtIdentity = new(StringComparer.OrdinalIgnoreCase);
     static float _dotAccum;
+
+    public static StatusRuntime Status
+    {
+        get
+        {
+            Ensure();
+            return _status!;
+        }
+    }
 
     public static EffectBag Bag
     {
@@ -37,7 +48,19 @@ public static class EffectRuntime
             catalog.ReplaceAll(EffectSeedCatalog.CreateAll());
             var grants = new InMemoryEffectGrantStore();
             var proc = new EffectProcPolicy(new SystemEffectClock(), new SeededEffectRandom(Environment.TickCount));
+            _status = InjectorStatusBridge.CreateRuntime();
+            _status.OnResisted = ev => DebugRuntime.Emit("debug.status.resisted", new Dictionary<string, object>
+            {
+                ["statusId"] = ev.StatusId,
+                ["hostPtr"] = ev.HostPtr,
+                ["attackerPtr"] = ev.AttackerPtr ?? "",
+                ["grantId"] = ev.GrantId,
+                ["reason"] = ev.Reason.ToString(),
+                ["delta"] = ev.Delta,
+                ["at"] = ev.At.ToString("o")
+            });
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
+            _bag.Status = _status;
             _ = new EffectFunnel(_bag, DamageFxOverlay.Sink);
             _plugins = EffectPluginHostFactory.Create(_bag);
             _dedupe = new EffectEventDedupe();
@@ -51,6 +74,7 @@ public static class EffectRuntime
         {
             _bag = null;
             _plugins = null;
+            _status = null;
             DealtIdentity.Clear();
             _dotAccum = 0;
             Ensure();
@@ -116,6 +140,7 @@ public static class EffectRuntime
         if (string.IsNullOrWhiteSpace(ptrHex)) return 0;
         Ensure();
         var n = Bag.WithdrawForOwner(null, EffectOwnerKeys.Entity(ptrHex.Trim()));
+        _status?.WithdrawEntity(ptrHex.Trim());
         if (n > 0)
         {
             DebugRuntime.Emit("debug.effect.withdrawn_entity", new Dictionary<string, object>
@@ -140,8 +165,8 @@ public static class EffectRuntime
         }
 
         try { CheatState.Stats.WithdrawAllBySourceKind("effect"); } catch { }
-        // Match-wide clear: every living unit may have composed effect mods.
         try { CheatActions.ReapplyAllLiving(); } catch { }
+        InjectorDerivedOverride.Clear();
 
         DebugRuntime.Emit("debug.effect.cleared", new Dictionary<string, object>
         {
@@ -244,11 +269,12 @@ public static class EffectRuntime
             : CheatState.SelectedPtr.ToString("X");
     }
 
-    /// <summary>Coalesce OverTime ticks on a ~100ms grid. Safe no-op when no DoTs are armed.</summary>
+    /// <summary>Coalesce status/OverTime ticks on a ~100ms grid.</summary>
     public static void TickDots(float unscaledDeltaTime)
     {
         Ensure();
-        if (Bag.Dots.Entries.Count == 0)
+        var hasStatus = Status.AllInstances().Count > 0;
+        if (!hasStatus)
         {
             _dotAccum = 0;
             return;

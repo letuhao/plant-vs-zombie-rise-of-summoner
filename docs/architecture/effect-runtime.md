@@ -212,7 +212,20 @@ typeId / HP / ATK / MC / cell → **overlay only**.
 
 ---
 
-## StatusExecutor
+## StatusExecutor vs StatusRuntime
+
+| Component | Role |
+|---|---|
+| **StatusRuntime** (L2, design) | SSOT for actor status **instances**, lifecycle, resistance at Apply, contagion hops |
+| **StatusExecutor** (L4, shipped) | Sole Unity CC **apply** adapter (`Buttered`, `SetFreeze`, …) |
+
+Status HP changes still go **Funnel → FA10**. StatusExecutor never writes overlay HP deltas.
+
+Full spec: [status-ssot.md](status-ssot.md). Catalog ids include butter, freeze, cold, poison, hypno, ember, jala, kelp, and overlay ids (wither, bond, blight, …).
+
+---
+
+## StatusExecutor (L4 apply adapter)
 
 Single class wrapping LIVE methods:
 
@@ -223,6 +236,8 @@ Single class wrapping LIVE methods:
 | cold | `SetCold` |
 | poison | `SetPoison` |
 | floatSlow | float speed fields (weak VFX; documented) |
+
+Forward catalog (design): `ember`, `jala`, `kelp` — see [status-ssot.md](status-ssot.md) §9.
 
 No second butter path outside this executor.
 

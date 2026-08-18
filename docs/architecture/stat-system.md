@@ -2,7 +2,7 @@
 
 Forward-only combat stats: immutable game baseline **Y0**, source-tagged modifiers **Xi** in a bag, composed **Y**. Features register plugins; they never reverse `Y → Xi` or edit Unity fields.
 
-See also: [decisions.md](decisions.md), [overview.md](overview.md), [ARPG effects → FusionRpg mapping](../research/arpg-effects/06-fusionrpg-mapping.md) (inspiration only).
+See also: [decisions.md](decisions.md), [overview.md](overview.md), [actor-hub-ssot.md](actor-hub-ssot.md) (derived layer — design locked), [ARPG effects → FusionRpg mapping](../research/arpg-effects/06-fusionrpg-mapping.md) (inspiration only).
 
 ## Invariant
 
@@ -15,6 +15,21 @@ Never: Xi = f(Y)
 Never: persist final Y as RPG SSOT
 Save inputs (Y0 + bag / feature state), not computed totals.
 ```
+
+## Derived layer (Actor Hub — design locked)
+
+**StatSystem** composes **primary** channels only. **Actor Hub** adds a second pass — **DerivedComposer** → `ActorDerivedSnapshot` — for catalog channels such as `progression.power`, `status.power.*`, `status.resist.*`, and future `progression.bonus.*`.
+
+```text
+ActorHub.Resolve(entityKey):
+  RuntimePrimary = StatSystem.Resolve(entityKey)     // unchanged ownership
+  Derived        = DerivedComposer.Compose(...)      // catalog channels
+  AppliedCombat  = RuntimePrimary + progression.bonus.*   // Writer input
+```
+
+Status Apply (L2b) reads **Derived** for attacker + defender — not primary `hp`/`atk`. Spec: [actor-hub-ssot.md](actor-hub-ssot.md). **Implementation deferred**; StatusRuntime blocked until Actor Hub code lands.
+
+PvzStats and cheats may contribute modifiers on **catalog** channels when validated — same plugin path, extended channel allowlist.
 
 ## Single Unity writer (locked)
 
@@ -101,7 +116,7 @@ When `ApplyStats` / compose `applyStats` is **false**, Flat/Increased/More are i
 
 Do **not** edit `StatComposer`, `PhasedComposeStrategy`, or scatter Unity field writes. Extend via plugins + `EntityApply` / `EntityStatWriter` only.
 
-Stub plugin ids (Order bands): `rpg.class` 100, `rpg.achievement` 200, `pvz.stats` 250, `rpg.item` 300, `rpg.buff` 400, `cheat.scale` 900, `cheat.absolute` 950.
+Stub plugin ids (Order bands): `rpg.class` 100, `rpg.progression` 100 (derived stub — [actor-hub-ssot.md](actor-hub-ssot.md)), `rpg.achievement` 200, `pvz.stats` 250, `rpg.item` 300, `rpg.buff` 400, `cheat.scale` 900, `cheat.absolute` 950.
 
 ## Module paths
 

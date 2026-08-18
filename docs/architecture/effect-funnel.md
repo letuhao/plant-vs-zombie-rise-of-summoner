@@ -1,7 +1,7 @@
 # Effect Funnel + Guard (design lock)
 
 **Status:** Core `EffectFunnel` + injector FA10 Writer Add + `scripts/guard-funnel-delta.ps1` shipped (`FoundationContractVersion = 2`). CombatMath and LIVE prove of enqueue-delta remain later.  
-**Parent:** [effect-system.md](effect-system.md). Runtime: [effect-runtime.md](effect-runtime.md). Loops: [overlay-control-loops.md](overlay-control-loops.md). Target/delivery: [combat-damage-ssot.md](combat-damage-ssot.md). ADR: [decisions.md](decisions.md).
+**Parent:** [effect-system.md](effect-system.md). Runtime: [effect-runtime.md](effect-runtime.md). Loops: [overlay-control-loops.md](overlay-control-loops.md). Instant HP: [combat-damage-ssot.md](combat-damage-ssot.md). Status timed state: [status-ssot.md](status-ssot.md). ADR: [decisions.md](decisions.md).
 
 A **Funnel** is a command buffer between **Secondary** (RPG content: plugins, future skills) and sealed **Foundation** (`EffectBag` FA*). It is the **sole Secondary→Bag path** — no Grant exception. A **Guard** rejects stale absolute combat writes (`hp=4000` from an overlay snapshot) and keeps Secondary off Unity.
 
@@ -81,6 +81,8 @@ Two **apply adapters**, one **HP SSOT** (Unity). Do not run vanilla Prefix DEF a
 | **CombatMath** (later) | Compute final signed delta **above** Funnel (DEF / element / shield) | Sit inside Funnel or FA10; re-use TakeDamage Prefix as RPG mitigation |
 
 Multi-target overlay damage (area / random / all) resolves to **N mutation enqueues** (one per ptr) — see [combat-damage-ssot.md](combat-damage-ssot.md). Funnel still sums per `targetKey|ResourceDelta|hp`.
+
+**StatusRuntime pulses** (DoT ticks, counter bursts, contagion after Apply) also emit Instant `DamagePacket` mutations into the same Funnel — StatusRuntime must **never** call Writer or `TakeDamage` directly. See [status-ssot.md](status-ssot.md).
 
 Stub plugins enqueue modifiers via `ctx.Funnel.EnqueueModifier`. Mutations sum to FA10. Nested `Flush` is a no-op; leftover Enqueue from OnDeath is **drained** in the same depth-0 window (Die capture stays on so OnDeath Secondary still runs).
 

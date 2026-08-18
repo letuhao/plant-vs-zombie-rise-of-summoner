@@ -30,6 +30,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [research/open-questions.md](research/open-questions.md) | Runtime risks still untested |
 | [research/arpg-effects/00-index.md](research/arpg-effects/00-index.md) | ARPG effects inspiration (attrs, stacking, procs, ailments, hit/convert) — not product ADR |
 | [research/effect-runtime/00-index.md](research/effect-runtime/00-index.md) | Own-game inject/capture for Effects (hit/status/spawn capability matrix + proofs) |
+| [research/status-core-chaos-mapping.md](research/status-core-chaos-mapping.md) | Chaos status-core resistance borrow → Fusion layers (reference only) |
+| [research/actor-core-chaos-mapping.md](research/actor-core-chaos-mapping.md) | Chaos level/realm/power_scale → Fusion progression.power (reference only) |
 | [research/architecture-stress/00-index.md](research/architecture-stress/00-index.md) | Red-team: situations + break matrix vs dual-authority locks (research only) |
 | [research/mod-loaders.md](research/mod-loaders.md) | BepInEx vs MelonLoader on this machine; host choice (not Effect depth) |
 
@@ -39,6 +41,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 |---|---|
 | [architecture/overview.md](architecture/overview.md) | Four modules (Launcher + Injector + Server + Web), v1 scope |
 | [architecture/stat-system.md](architecture/stat-system.md) | Modifier bag, compose, EntityApply / single writer |
+| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | Derived snapshot, progression.power, dynamic ApplyScale — **design locked** |
+| [architecture/actor-hub-status-implement-plan.md](architecture/actor-hub-status-implement-plan.md) | Actor Hub + StatusRuntime implement checklist (S0–S7, P1–P2 deferred) |
 | [architecture/pvz-stats.md](architecture/pvz-stats.md) | Player-bound PvzStats layer (≠ future RPG stats) |
 | [architecture/pvz-middle-layer.md](architecture/pvz-middle-layer.md) | Stats + Activity + Intent constitution |
 | [architecture/pvz-activity.md](architecture/pvz-activity.md) | Typed play facts + rollups |
@@ -48,7 +52,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/effect-data.md](architecture/effect-data.md) | Effect / grant / overlay JSON shapes |
 | [architecture/effect-runtime.md](architecture/effect-runtime.md) | Injector apply path + capture → FT* |
 | [architecture/effect-funnel.md](architecture/effect-funnel.md) | Funnel + Guard: Secondary enqueue → merge → FA10 Writer Add (`guard-funnel-delta.ps1` shipped) |
-| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | DamagePacket target + delivery SSOT (signed HP delta; heal included) — partially shipped |
+| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | DamagePacket target + instant delivery (signed HP delta; heal included) — partially shipped |
+| [architecture/status-ssot.md](architecture/status-ssot.md) | StatusRuntime actor instances, ICD, resistance, contagion catalog — **design locked** |
 | [architecture/effect-testing.md](architecture/effect-testing.md) | Offline SimEffectHost / scenarios vs LIVE L1–L14 |
 | [architecture/match-runtime.md](architecture/match-runtime.md) | MatchRuntime FSM + MatchState (W1–W5 shipped; bullets/hypno deferred) |
 | [architecture/unique-actor-runtime.md](architecture/unique-actor-runtime.md) | UniqueActor FSM — durable specimens (W4–W5 + W8 equip/XP/roster shipped) |
@@ -56,7 +61,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/p0-hot-path-hardening.md](architecture/p0-hot-path-hardening.md) | P0 closed (W0); lawn observe on `#/lawn` (W12 deferred) |
 | [architecture/lawn-projector.md](architecture/lawn-projector.md) | Phaser 4 FE lawn projection (**W6–W7 shipped**; 12×5 canvas) |
 | [architecture/fe-game-foundation.md](architecture/fe-game-foundation.md) | Dual-Plane Lawn Projector runtime SSOT (DPLP; **W6–W7 shipped**) |
-| [architecture/implementation-roadmap.md](architecture/implementation-roadmap.md) | Master W0–W12 checklist — **W0–W11 shipped**, W12 triage deferred |
+| [architecture/implementation-roadmap.md](architecture/implementation-roadmap.md) | Master W0–W14 checklist — **W0–W11 shipped**, W12 triage deferred, W13–W14 → implement plan |
 | [architecture/unique-entity-effects.md](architecture/unique-entity-effects.md) | Lawn unique power path + apply scope (bind → `entity:{ptr}`) |
 | [architecture/decisions.md](architecture/decisions.md) | Locked choices |
 | [architecture/data-flow.md](architecture/data-flow.md) | Game → injector → server → web |

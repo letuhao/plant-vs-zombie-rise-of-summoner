@@ -1,4 +1,5 @@
 using FusionRpg.Core.Stats;
+using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Injector.Bridges;
 using FusionRpg.Injector.Stats;
 
@@ -65,7 +66,7 @@ public static class EntityApply
                 cheatScale: s, cheatAbsolute: abs,
                 applyStats: PvzStatsApplyGate.ShouldComposeScales(hasScaleMods, hasPvz, hasEffectMods),
                 pvzStatsMods: CheatState.PvzStatsMods);
-            var final = CheatState.Stats.Resolve(ctx);
+            var final = CheatState.ActorHub.Resolve(ctx).AppliedCombat;
 
             if (shouldWrite)
                 EntityStatWriter.WritePlant(p, final, prevHp, prevMax, preserveRatio, source);
@@ -179,7 +180,7 @@ public static class EntityApply
                 cheatScale: s, cheatAbsolute: abs,
                 applyStats: PvzStatsApplyGate.ShouldComposeScales(hasScaleMods, hasPvz, hasEffectMods),
                 pvzStatsMods: CheatState.PvzStatsMods);
-            var final = CheatState.Stats.Resolve(ctx);
+            var final = CheatState.ActorHub.Resolve(ctx).AppliedCombat;
 
             if (shouldWrite)
                 EntityStatWriter.WriteZombie(z, final, prevHp, prevMax, preserveRatio, source);

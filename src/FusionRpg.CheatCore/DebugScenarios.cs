@@ -55,6 +55,9 @@ public static class DebugScenarios
         "debug.effect.board-snapshot",
         "debug.effect.dots",
         "debug.effect.counters",
+        "debug.status",
+        "debug.status.apply",
+        "debug.actor-derived",
         "debug.fx.probe-shaders",
         "debug.fx.world-flash",
         "pvz.spawn.extra"
@@ -920,11 +923,127 @@ public static class DebugScenarios
                 Cmd("debug.board-stats", new { });
                 break;
 
+            case "status-l2-wither":
+                StatusL2Board(Cmd, scenarioId, WitherOverlay(), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-snapshot":
+                StatusL2Board(Cmd, scenarioId, WitherOverlay(), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                Cmd("debug.status", new { });
+                break;
+            case "status-l2-resist":
+                StatusL2Board(Cmd, scenarioId, WitherOverlay(), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "iron-dot"));
+                break;
+            case "status-l2-blight-row":
+                StatusL2Board(Cmd, scenarioId, BlightOverlay(), plantProfile: "neutral",
+                    ZombieSlot(row: 2, x: 8.2f, profile: "glass"),
+                    ZombieSlot(row: 3, x: 7.5f, profile: "glass"),
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-butter":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("butter", 4000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-freeze":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("freeze", 3000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+            case "status-l2-poison":
+                StatusL2Board(Cmd, scenarioId, UnityCcOverlay("poison", 5000), plantProfile: "caster",
+                    ZombieSlot(row: 2, x: 7.5f, profile: "glass"));
+                break;
+
             default:
                 throw new ArgumentException("unknown scenario: " + id);
         }
 
         return steps;
+    }
+
+    static (int row, float x, string profile, int hp) ZombieSlot(int row, float x, string profile, int hp = 8000) =>
+        (row, x, profile, hp);
+
+    static object WitherOverlay() => new
+    {
+        statusId = "wither",
+        amount = -20,
+        icd_ms = 0,
+        periodMs = 1000,
+        durationMs = 5000,
+        tickBudget = 1,
+        target = new { mode = "EventTarget", filters = new { side = "zombie" } }
+    };
+
+    static object BlightOverlay() => new
+    {
+        statusId = "blight",
+        amount = -12,
+        icd_ms = 0,
+        periodMs = 1000,
+        durationMs = 5000,
+        tickBudget = 5,
+        spread = new
+        {
+            chance = 1.0,
+            icd_ms = 0,
+            maxHops = 2,
+            statusId = "blight",
+            target = new
+            {
+                mode = "Area",
+                shape = "Row",
+                anchor = "EventTarget",
+                filters = new { side = "zombie" }
+            }
+        }
+    };
+
+    static object UnityCcOverlay(string statusId, int durationMs) => new
+    {
+        statusId,
+        icd_ms = 0,
+        durationMs
+    };
+
+    static void StatusL2Board(
+        Action<string, object> Cmd,
+        string scenarioId,
+        object overlay,
+        string plantProfile,
+        params (int row, float x, string profile, int hp)[] zombies)
+    {
+        Cmd("debug.session", new { op = "start", scenarioId });
+        Cmd("debug.effect.clear", new { });
+        Cmd("debug.wave-freeze", new { enabled = true });
+        Cmd("debug.reset-board", new { });
+        Cmd("debug.spawn-plant", new { typeId = PeaTypeId, col = 2, row = 2, derivedProfile = plantProfile });
+        foreach (var z in zombies)
+        {
+            Cmd("debug.spawn-zombie", new
+            {
+                typeId = BasicZombieTypeId,
+                row = z.row,
+                x = z.x,
+                hp = z.hp,
+                maxHp = z.hp,
+                derivedProfile = z.profile
+            });
+        }
+
+        Cmd("debug.effect.grant", new
+        {
+            grantId = "live-status-l2",
+            effectId = "fx.overlay_damage",
+            ownerKey = "match",
+            overlay
+        });
+        Cmd("debug.board-stats", new { });
+        var seed = zombies.Length > 0 ? zombies[^1] : (row: 2, x: 7.5f, profile: "glass", hp: 8000);
+        Cmd("debug.select", new { side = "zombie", row = seed.row, x = seed.x });
+        Cmd("debug.effect.fire-synthetic", new { trigger = "OnDamageDealt", side = "plant" });
+        Cmd("debug.status", new { });
     }
 
     static void EffectHitBoard(Action<string, object> Cmd, string scenarioId, string effectId, int? icdMs)
@@ -966,6 +1085,8 @@ public static class DebugScenarios
         "effect-icd-butter", "effect-withdraw", "effect-spawn-filter", "effect-entity-atk",
         "effect-plant-type-atk", "effect-match-midspawn", "effect-entity-midspawn", "effect-spawn-then-grant",
         "combat-area-row", "combat-counter-target", "combat-counter-actor", "combat-dot",
-        "combat-heal", "combat-random"
+        "combat-heal", "combat-random",
+        "status-l2-wither", "status-l2-snapshot", "status-l2-resist", "status-l2-blight-row",
+        "status-l2-butter", "status-l2-freeze", "status-l2-poison"
     };
 }

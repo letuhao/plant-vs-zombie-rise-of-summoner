@@ -3,7 +3,7 @@
 Architecture for **Foundation Effects**: minimal LIVE-proven lawn opcodes with a **centralized apply path**.  
 **Secondary Effects** compose Foundation via grants/overlays only — they never apply to the game.
 
-See also: [effect-data.md](effect-data.md), [effect-runtime.md](effect-runtime.md), [effect-funnel.md](effect-funnel.md) (Secondary → Funnel → Foundation; FA10 v2 spec), [combat-damage-ssot.md](combat-damage-ssot.md) (target + delivery SSOT for overlay HP), [effect-testing.md](effect-testing.md), [match-runtime.md](match-runtime.md) (live match FSM / caps — design spec), [unique-actor-runtime.md](unique-actor-runtime.md) (durable specimens — design), [stat-system.md](stat-system.md), [pvz-middle-layer.md](pvz-middle-layer.md).  
+See also: [effect-data.md](effect-data.md), [effect-runtime.md](effect-runtime.md), [effect-funnel.md](effect-funnel.md) (Secondary → Funnel → Foundation; FA10 v2 spec), [combat-damage-ssot.md](combat-damage-ssot.md) (target + instant delivery SSOT for overlay HP), [status-ssot.md](status-ssot.md) (timed status instances, ICD, contagion — design locked), [effect-testing.md](effect-testing.md), [match-runtime.md](match-runtime.md) (live match FSM / caps — design spec), [unique-actor-runtime.md](unique-actor-runtime.md) (durable specimens — design), [stat-system.md](stat-system.md), [pvz-middle-layer.md](pvz-middle-layer.md).  
 Evidence surface: [../research/effect-runtime/07-effect-opportunities.md](../research/effect-runtime/07-effect-opportunities.md).  
 Peer inspiration: [../research/arpg-effects/06-fusionrpg-mapping.md](../research/arpg-effects/06-fusionrpg-mapping.md).
 

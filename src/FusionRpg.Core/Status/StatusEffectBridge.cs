@@ -1,0 +1,326 @@
+using FusionRpg.Contracts;
+using FusionRpg.Core.Combat;
+using FusionRpg.Core.Effects;
+using FusionRpg.Core.Status;
+using FusionRpg.Core.Stats.Derived;
+
+namespace FusionRpg.Core.Status;
+
+/// <summary>Dispatch status PulseHp through L3 Instant → Funnel.</summary>
+public sealed class StatusFunnelPulseSink : IStatusPulseSink
+{
+    readonly BoardSnapshot _board;
+    readonly EffectEventDto _eventTemplate;
+    readonly EffectFunnel? _funnel;
+    readonly CombatPolicy _policy;
+    readonly ICombatRng _rng;
+    readonly ICombatMath _math;
+    readonly List<string> _skipped;
+    readonly string? _effectId;
+    readonly string? _pluginId;
+
+    public StatusFunnelPulseSink(
+        BoardSnapshot board,
+        EffectEventDto eventTemplate,
+        EffectFunnel? funnel,
+        CombatPolicy policy,
+        ICombatRng rng,
+        ICombatMath math,
+        List<string> skipped,
+        string? effectId,
+        string? pluginId)
+    {
+        _board = board;
+        _eventTemplate = eventTemplate;
+        _funnel = funnel;
+        _policy = policy;
+        _rng = rng;
+        _math = math;
+        _skipped = skipped;
+        _effectId = effectId;
+        _pluginId = pluginId;
+    }
+
+    public void PulseHp(StatusInstance instance, double amount)
+    {
+        var packet = new DamagePacket
+        {
+            PacketId = Guid.NewGuid().ToString("N"),
+            SourceGrantId = instance.GrantId,
+            EffectId = instance.EffectId ?? _effectId,
+            PluginId = instance.PluginId ?? _pluginId,
+            ActorPtr = instance.AttackerPtr,
+            SignedAmount = (long)Math.Round(amount),
+            Channel = "hp",
+            ChainDepth = _eventTemplate.ChainDepth + 1,
+            Target = new TargetSpec { Mode = TargetModes.Single, Ptr = instance.HostPtr },
+            Delivery = new DeliverySpec { Mode = DeliveryModes.Instant }
+        };
+
+        var ev = new EffectEventDto
+        {
+            Trigger = EffectTriggers.OnTimer,
+            MatchKey = _eventTemplate.MatchKey,
+            Side = _eventTemplate.Side,
+            ActorPtr = instance.AttackerPtr ?? _eventTemplate.ActorPtr,
+            TargetPtr = instance.HostPtr,
+            TypeId = _eventTemplate.TypeId,
+            TargetTypeId = _eventTemplate.TargetTypeId,
+            Tick = _eventTemplate.Tick,
+            ScenarioId = _eventTemplate.ScenarioId,
+            ChainDepth = packet.ChainDepth
+        };
+
+        CombatDamageDispatcher.DispatchInstant(
+            packet, _board, ev, _funnel, _policy, _rng, _math, _skipped);
+    }
+}
+
+public static class StatusEffectBridge
+{
+    public static bool TryResolveStatusId(
+        Dictionary<string, object?> overlay,
+        out string statusId)
+    {
+        statusId = JsonOverlay.GetString(overlay, "statusId") ?? "";
+        if (!string.IsNullOrWhiteSpace(statusId))
+            return true;
+
+        var delivery = ResolveDeliveryMode(overlay);
+        if (string.Equals(delivery, DeliveryModes.OverTime, StringComparison.OrdinalIgnoreCase))
+        {
+            statusId = "wither";
+            return true;
+        }
+
+        if (string.Equals(delivery, DeliveryModes.Counter, StringComparison.OrdinalIgnoreCase))
+        {
+            statusId = "bond";
+            return true;
+        }
+
+        return false;
+    }
+
+    static IReadOnlyList<string> ResolveHostPtrs(
+        Dictionary<string, object?> overlay,
+        EffectEventDto ev,
+        BoardSnapshot board)
+    {
+        var spec = DamagePacketBuilder.ParseTargetFromOverlay(overlay);
+        var mode = spec.Mode ?? TargetModes.EventTarget;
+        if (string.Equals(mode, TargetModes.Area, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(mode, TargetModes.All, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(mode, TargetModes.Multi, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(mode, TargetModes.Random, StringComparison.OrdinalIgnoreCase))
+        {
+            return TargetResolver.Resolve(spec, board, ev);
+        }
+
+        if (string.Equals(mode, TargetModes.Single, StringComparison.OrdinalIgnoreCase))
+        {
+            var ptr = spec.Ptr ?? ev.TargetPtr;
+            return string.IsNullOrWhiteSpace(ptr) ? Array.Empty<string>() : new[] { ptr.Trim() };
+        }
+
+        var host = ResolveHostPtr(overlay, ev);
+        return string.IsNullOrWhiteSpace(host) ? Array.Empty<string>() : new[] { host };
+    }
+
+    static string? ResolveDeliveryMode(Dictionary<string, object?> overlay)
+    {
+        if (!overlay.TryGetValue("delivery", out var d) || d == null)
+            return null;
+        var map = JsonOverlay.FromObject(d);
+        return JsonOverlay.GetString(map, "mode");
+    }
+
+    static string? ResolveHostPtr(Dictionary<string, object?> overlay, EffectEventDto ev)
+    {
+        if (overlay.TryGetValue("target", out var t) && t != null)
+        {
+            var map = JsonOverlay.FromObject(t);
+            var mode = JsonOverlay.GetString(map, "mode") ?? TargetModes.EventTarget;
+            if (string.Equals(mode, TargetModes.EventTarget, StringComparison.OrdinalIgnoreCase))
+                return ev.TargetPtr;
+            if (string.Equals(mode, TargetModes.Actor, StringComparison.OrdinalIgnoreCase))
+                return ev.ActorPtr;
+            if (string.Equals(mode, TargetModes.Single, StringComparison.OrdinalIgnoreCase))
+                return JsonOverlay.GetString(map, "ptr") ?? ev.TargetPtr;
+        }
+
+        return ev.TargetPtr;
+    }
+
+    public static StatusApplyInput BuildApplyInput(
+        string statusId,
+        EffectGrant grant,
+        EffectEventDto ev,
+        Dictionary<string, object?> overlay,
+        string hostPtr)
+    {
+        var period = JsonOverlay.GetInt(overlay, "periodMs", 0);
+        if (period <= 0)
+        {
+            var delivery = JsonOverlay.FromObject(overlay.GetValueOrDefault("delivery"));
+            period = JsonOverlay.GetInt(delivery, "periodMs", 1000);
+        }
+
+        var duration = JsonOverlay.GetInt(overlay, "durationMs", 0);
+        if (duration <= 0)
+        {
+            var delivery = JsonOverlay.FromObject(overlay.GetValueOrDefault("delivery"));
+            duration = JsonOverlay.GetInt(delivery, "durationMs", 5000);
+        }
+
+        var magnitude = JsonOverlay.GetDouble(overlay, "amount", 0);
+        if (Math.Abs(magnitude) < 1e-9)
+            magnitude = -Math.Abs(JsonOverlay.GetDouble(overlay, "magnitude", 0));
+        var chance = JsonOverlay.GetDouble(overlay, "chance", 1.0);
+        var statusIcd = JsonOverlay.GetInt(overlay, "status_icd_ms", 0);
+        if (statusIcd <= 0)
+            statusIcd = JsonOverlay.GetInt(overlay, "statusIcdMs", 0);
+
+        var tickBudget = JsonOverlay.GetInt(overlay, "tickBudget", 0);
+        if (tickBudget <= 0)
+        {
+            var delivery = JsonOverlay.FromObject(overlay.GetValueOrDefault("delivery"));
+            tickBudget = JsonOverlay.GetInt(delivery, "tickBudget", 1);
+        }
+
+        var spreadChance = 0.0;
+        string? spreadStatusId = null;
+        var spreadMaxHops = 0;
+        var spreadIcdMs = 0;
+        TargetSpec? spreadTarget = null;
+        if (overlay.TryGetValue("spread", out var spreadObj) && spreadObj != null)
+        {
+            var spread = JsonOverlay.FromObject(spreadObj);
+            spreadChance = JsonOverlay.GetDouble(spread, "chance", 0);
+            spreadStatusId = JsonOverlay.GetString(spread, "statusId") ?? statusId;
+            spreadMaxHops = JsonOverlay.GetInt(spread, "maxHops", 0);
+            spreadIcdMs = JsonOverlay.GetInt(spread, "icd_ms", 0);
+            if (spread.TryGetValue("target", out var targetObj) && targetObj != null)
+                spreadTarget = DamagePacketBuilder.ParseTargetFromOverlay(
+                    new Dictionary<string, object?> { ["target"] = targetObj });
+        }
+
+        var immunityTags = ParseImmunityTags(overlay);
+
+        return new StatusApplyInput(
+            statusId,
+            hostPtr,
+            ev.ActorPtr,
+            grant.GrantId,
+            magnitude,
+            duration,
+            period,
+            duration,
+            statusIcd,
+            tickBudget,
+            chance,
+            grant.EffectId,
+            grant.PluginId,
+            ImmunityTags: immunityTags,
+            SpreadChance: spreadChance,
+            SpreadStatusId: spreadStatusId,
+            SpreadMaxHops: spreadMaxHops,
+            SpreadIcdMs: spreadIcdMs,
+            SpreadTarget: spreadTarget);
+    }
+
+    static IReadOnlyList<string>? ParseImmunityTags(Dictionary<string, object?> overlay)
+    {
+        if (!overlay.TryGetValue("immunityTags", out var raw) || raw == null)
+            return null;
+
+        if (raw is IEnumerable<object> list)
+        {
+            var tags = list
+                .Select(x => x?.ToString()?.Trim())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Cast<string>()
+                .ToList();
+            return tags.Count > 0 ? tags : null;
+        }
+
+        if (raw is string single && !string.IsNullOrWhiteSpace(single))
+            return new[] { single.Trim() };
+
+        return null;
+    }
+
+    public static bool TryApplyFromGrant(
+        StatusRuntime runtime,
+        EffectGrant grant,
+        EffectEventDto ev,
+        Dictionary<string, object?> overlay,
+        BoardSnapshot board,
+        IStatusRng rng,
+        DateTimeOffset now,
+        List<string> skipped,
+        List<EffectActionPlanItem>? plannedOut = null,
+        EffectDef? effectDef = null)
+    {
+        if (!TryResolveStatusId(overlay, out var statusId))
+            return false;
+
+        StatusDef statusDef;
+        try
+        {
+            statusDef = runtime.Catalog.GetRequired(statusId);
+        }
+        catch (UnknownStatusIdException)
+        {
+            skipped.Add(grant.GrantId + ":unknown-statusId");
+            return true;
+        }
+
+        var hostPtrs = ResolveHostPtrs(overlay, ev, board);
+        if (hostPtrs.Count == 0)
+        {
+            skipped.Add(grant.GrantId + ":status-no-target");
+            return true;
+        }
+
+        foreach (var hostPtr in hostPtrs)
+        {
+            var input = BuildApplyInput(statusId, grant, ev, overlay, hostPtr);
+            var outcome = runtime.Apply(input, rng, now);
+            if (!outcome.Applied && outcome.ResistReason != StatusResistReason.StatusIcd)
+                skipped.Add(grant.GrantId + ":status-" + (outcome.ResistReason?.ToString() ?? "resisted"));
+            else if (!outcome.Applied && outcome.ResistReason == StatusResistReason.StatusIcd)
+                skipped.Add(grant.GrantId + ":status-icd");
+            else if (outcome.Applied
+                     && plannedOut != null
+                     && effectDef != null
+                     && statusDef.PayloadKinds.Contains(StatusPayloadKind.UnityCc))
+            {
+                plannedOut.Add(new EffectActionPlanItem
+                {
+                    Seq = plannedOut.Count,
+                    Action = EffectActions.ApplyStatus,
+                    EffectId = effectDef.EffectId,
+                    GrantId = grant.GrantId,
+                    SourceTag = "status:" + statusId,
+                    Params = new Dictionary<string, object?>
+                    {
+                        ["status"] = statusId,
+                        ["targetPtr"] = hostPtr,
+                        ["duration"] = Math.Max(0.1, outcome.Instance!.EffectiveDuration / 1000.0),
+                        ["level"] = 1,
+                        ["method"] = true
+                    },
+                    Tags = new Dictionary<string, string>
+                    {
+                        ["effect_id"] = effectDef.EffectId,
+                        ["grant_id"] = grant.GrantId,
+                        ["status_id"] = statusId
+                    }
+                });
+            }
+        }
+
+        return true;
+    }
+}

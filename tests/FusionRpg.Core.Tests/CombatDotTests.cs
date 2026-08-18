@@ -62,7 +62,7 @@ public class CombatDotTests
         }
 
         Assert.All(amounts, a => Assert.Equal(-20L, a));
-        Assert.Empty(h.Bag.Dots.Entries);
+        Assert.NotEmpty(h.Bag.Status!.ForHost("Z1"));
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class CombatDotTests
         var fa = h.Sink.Items.Where(a => a.Action == EffectActions.ApplyResourceDelta).ToList();
         Assert.Single(fa);
         Assert.Equal(-20L, Convert.ToInt64(fa[0].Params["amount"]));
-        Assert.Single(h.Bag.Dots.Entries);
+        Assert.NotEmpty(h.Bag.Status!.ForHost("Z1"));
     }
 
     [Fact]
@@ -95,6 +95,24 @@ public class CombatDotTests
     {
         var path = Path.Combine(FindFixtures(), "effects", "scenarios", "combat-dot.json");
         var result = EffectScenarioRunner.RunFile(path, FindFixtures());
+        Assert.True(result.Ok, result.Error);
+    }
+
+    [Fact]
+    public void Status_wither_apply_scenario_passes()
+    {
+        var root = FindFixtures();
+        var path = Path.Combine(root, "effects", "scenarios", "status-wither-apply.json");
+        var result = EffectScenarioRunner.RunFile(path, root);
+        Assert.True(result.Ok, result.Error);
+    }
+
+    [Fact]
+    public void Status_blight_spread_scenario_passes()
+    {
+        var root = FindFixtures();
+        var path = Path.Combine(root, "effects", "scenarios", "status-blight-spread.json");
+        var result = EffectScenarioRunner.RunFile(path, root);
         Assert.True(result.Ok, result.Error);
     }
 
@@ -137,6 +155,17 @@ public class CombatDotTests
         h.AdvanceTime(1000);
         var fa = h.Sink.Items.Where(a => a.Action == EffectActions.ApplyResourceDelta).ToList();
         Assert.Equal(2, fa.Count);
+        Assert.NotEmpty(h.Bag.Status!.ForHost("Z1"));
+        Assert.NotEmpty(h.Bag.Status.ForHost("Z2"));
+    }
+
+    [Fact]
+    public void Status_wither_area_scenario_passes()
+    {
+        var root = FindFixtures();
+        var path = Path.Combine(root, "effects", "scenarios", "status-wither-area.json");
+        var result = EffectScenarioRunner.RunFile(path, root);
+        Assert.True(result.Ok, result.Error);
     }
 
     [Fact]
@@ -149,8 +178,8 @@ public class CombatDotTests
             ActorPtr = "P1",
             Side = "plant"
         });
-        Assert.Contains(plan.Skipped, s => s.Contains("dot-no-target", StringComparison.OrdinalIgnoreCase));
-        Assert.Empty(h.Bag.Dots.Entries);
+        Assert.Contains(plan.Skipped, s => s.Contains("status-no-target", StringComparison.OrdinalIgnoreCase));
+        Assert.Empty(h.Bag.Status!.AllInstances());
     }
 
     static string FindFixtures()

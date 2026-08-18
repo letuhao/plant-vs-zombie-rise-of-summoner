@@ -14,3 +14,5 @@ Documentation JSON samples for [combat-damage-ssot.md](../combat-damage-ssot.md)
 | [dot-overtime.json](dot-overtime.json) | `OverTime` scheduler ticks (armed on hit) |
 
 Grant bodies match the shape passed to `POST /api/debug/effect/grant` overlay fields (merge with `effectId` / `ownerKey` as shown). Seed id is `fx.overlay_damage`. OverTime is armed on the triggering hit; ticks come from the injector ~100ms scheduler, not a def `OnTimer` trigger. Use `icd_ms: 0` for hit-streak Counter proves (default ICD is 250ms).
+
+**Forward (Status SSOT):** After StatusRuntime ships, prefer `statusId` + status overlay instead of `delivery.mode = OverTime|Counter`. Migration shapes: [../status/](../status/).

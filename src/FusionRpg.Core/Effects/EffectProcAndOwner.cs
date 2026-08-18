@@ -154,7 +154,10 @@ public static class EffectOverlayMerge
         {
             "channel", "amount", "mode", "mergedCount", "targetPtr",
             "target", "delivery", "burst", "procDepthLimit", "chainDepth",
-            "chance", "icd_ms", "max_stacks", "filters"
+            "chance", "icd_ms", "max_stacks", "filters",
+            "statusId", "periodMs", "durationMs", "status_icd_ms", "statusIcdMs",
+            "everyHits", "resetOnBurst", "counterScope", "tickBudget",
+            "spread", "immunityTags"
         }
     };
 

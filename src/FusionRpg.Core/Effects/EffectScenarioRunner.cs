@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Status;
 
 namespace FusionRpg.Core.Effects;
 
@@ -22,6 +23,8 @@ public sealed class BoardEntitySnapDto
     [JsonPropertyName("col")] public int Col { get; set; }
     [JsonPropertyName("row")] public int Row { get; set; }
     [JsonPropertyName("mindControlled")] public bool MindControlled { get; set; }
+    [JsonPropertyName("derivedProfile")] public string? DerivedProfile { get; set; }
+    [JsonPropertyName("derived")] public Dictionary<string, double>? Derived { get; set; }
 }
 
 public sealed class EffectScenarioStepDto
@@ -49,6 +52,10 @@ public sealed class EffectScenarioStepDto
     [JsonPropertyName("expect")] public IntentPlanDto? Expect { get; set; }
     [JsonPropertyName("golden")] public string? Golden { get; set; }
     [JsonPropertyName("contains")] public string? Contains { get; set; }
+    [JsonPropertyName("hostPtr")] public string? HostPtr { get; set; }
+    [JsonPropertyName("statusId")] public string? StatusId { get; set; }
+    [JsonPropertyName("present")] public bool? Present { get; set; }
+    [JsonPropertyName("reason")] public string? Reason { get; set; }
 }
 
 public sealed class EffectScenarioStepResult
@@ -100,6 +107,13 @@ public static class EffectScenarioRunner
                 Row = b.Row,
                 MindControlled = b.MindControlled
             }));
+            foreach (var b in scenario.Board)
+            {
+                if (string.IsNullOrWhiteSpace(b.Ptr)) continue;
+                if (string.IsNullOrWhiteSpace(b.DerivedProfile) && (b.Derived == null || b.Derived.Count == 0))
+                    continue;
+                host.PinDerived(b.Ptr, ActorDerivedProfiles.Resolve(b.DerivedProfile, b.Derived));
+            }
         }
         var results = new List<EffectScenarioStepResult>();
         IntentPlanDto? lastPlan = null;
@@ -283,6 +297,38 @@ public static class EffectScenarioRunner
                     throw new InvalidOperationException(
                         "skipped missing '" + needle + "': " + string.Join(",", actual.Skipped));
                 return Pass(index, op, actual);
+            }
+
+            case "expectstatus":
+            {
+                var status = host.Bag.Status ?? throw new InvalidOperationException("expectStatus: no StatusRuntime");
+                var hostPtr = step.HostPtr ?? throw new InvalidOperationException("expectStatus requires hostPtr");
+                var statusId = step.StatusId ?? throw new InvalidOperationException("expectStatus requires statusId");
+                var present = step.Present ?? true;
+                var found = status.ForHost(hostPtr).Any(i =>
+                    string.Equals(i.StatusId, statusId, StringComparison.OrdinalIgnoreCase));
+                if (found != present)
+                    throw new InvalidOperationException(
+                        "expectStatus " + statusId + " on " + hostPtr + " present=" + found + " expected=" + present);
+                return Pass(index, op, lastPlan);
+            }
+
+            case "expectresisted":
+            {
+                var status = host.Bag.Status ?? throw new InvalidOperationException("expectResisted: no StatusRuntime");
+                var hostPtr = step.HostPtr;
+                var statusId = step.StatusId;
+                var reason = step.Reason ?? "";
+                var hit = status.ResistedEvents.Any(ev =>
+                    (string.IsNullOrWhiteSpace(hostPtr) || CombatPtr.EqualsPtr(ev.HostPtr, hostPtr)) &&
+                    (string.IsNullOrWhiteSpace(statusId) ||
+                     string.Equals(ev.StatusId, statusId, StringComparison.OrdinalIgnoreCase)) &&
+                    (string.IsNullOrWhiteSpace(reason) ||
+                     string.Equals(ev.Reason.ToString(), reason, StringComparison.OrdinalIgnoreCase)));
+                if (!hit)
+                    throw new InvalidOperationException(
+                        "expectResisted no match host=" + hostPtr + " statusId=" + statusId + " reason=" + reason);
+                return Pass(index, op, lastPlan);
             }
 
             default:

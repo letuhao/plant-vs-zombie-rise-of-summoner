@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Lawn;
+using FusionRpg.Injector.Stats;
 using UnityEngine;
 
 namespace FusionRpg.Injector;
@@ -48,6 +49,7 @@ public static class DebugRuntime
         DisarmAll();
         var id = ScenarioId;
         SessionActive = false;
+        InjectorDerivedOverride.Clear();
         Emit("debug.session.end", new Dictionary<string, object> { ["scenarioId"] = id });
         ScenarioId = "";
     }

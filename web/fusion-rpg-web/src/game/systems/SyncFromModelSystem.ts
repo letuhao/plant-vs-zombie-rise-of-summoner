@@ -32,7 +32,11 @@ const CHIP_COLOR: Record<string, number> = {
   freeze: 0x7ec8e3,
   cold: 0x4a90d9,
   poison: 0x6aaa4f,
-  crash: 0xc0392b
+  crash: 0xc0392b,
+  wither: 0x8e6bb0,
+  bond: 0xd4a574,
+  blight: 0x5d8a45,
+  rot: 0x4a6741
 };
 
 function sceneIconState(scene: Phaser.Scene): SceneIconState {

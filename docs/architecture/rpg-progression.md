@@ -2,7 +2,7 @@
 
 First RPG content feature on top of Pvz* foundation: **per-save actor XP and levels** (player / plant-type / zombie-type). No combat power effects in v1.
 
-See [pvz-middle-layer.md](pvz-middle-layer.md), [pvz-activity.md](pvz-activity.md). For later power/effects vocabulary, see [ARPG effects → FusionRpg mapping](../research/arpg-effects/06-fusionrpg-mapping.md) (inspiration only).
+See [pvz-middle-layer.md](pvz-middle-layer.md), [pvz-activity.md](pvz-activity.md). For derived status power and ApplyScale, see [actor-hub-ssot.md](actor-hub-ssot.md). For later power/effects vocabulary, see [ARPG effects → FusionRpg mapping](../research/arpg-effects/06-fusionrpg-mapping.md) (inspiration only).
 
 ## Player binding
 
@@ -41,6 +41,23 @@ Every place/spawn awards (not once-per-type-per-run). Kill ledger `payload_json`
 
 **Power-scaled kill XP is reserved:** scaler stub returns 1.0 until zombie power SSOT exists. Do not treat flat awards as final combat-coupled design.
 
+## Combat power (design — not shipped)
+
+RpgProgression **levels** are the future input for combat **`progression.power`** on the Actor Hub derived catalog — separate from XP awards and separate from **`progression.bonus.*`** combat flats.
+
+| Concept | Role today | Future |
+|---|---|---|
+| **`RpgXpPowerScale.ForKill`** | Kill XP audit multiplier (stub **1.0**) | May read zombie tier for XP only — **not** status ApplyScale |
+| **`progression.power`** | Not in code | Derived channel from type level × realm; v1 Actor Hub stub **1.0** hardcoded |
+| **`progression.bonus.*`** | Not in code | Flat HP/ATK/defense at AppliedCombat merge — separate power ADR |
+| **`IProgressionPowerProvider.UpdatePower`** | Not in code | Replaces stub when level→power curve lands |
+
+**Grain for power:** same as progression PK — `(player_id, kind, type_id)`. Plant on lawn uses plant type level; zombie defender uses zombie type level. Player actor level may add summoner-wide omni later.
+
+**Precedence (v1 stub):** all Hot entities use hardcoded **`tierPower = 1.0`** until `IProgressionPowerProvider.UpdatePower` ships. Future: lawn entity reads type level from SQLite; bound unique specimen precedence — see [unique-actor-runtime.md](unique-actor-runtime.md).
+
+Do **not** conflate `RpgXpPowerScale` (ledger `powerScale` in kill payload) with combat `progression.power`. See [actor-hub-ssot.md](actor-hub-ssot.md) and [../research/actor-core-chaos-mapping.md](../research/actor-core-chaos-mapping.md) for Chaos level/realm curve reference.
+
 ## Curve
 
 Arithmetic per kind:
@@ -53,7 +70,7 @@ POC-locked: player `100/45`, plant `80/32`, zombie `70/28`. Unlimited levels; cl
 
 ## Level-change pipeline
 
-`ILevelChangeHandler` Chain of Responsibility in Core. v1: no power handlers. Future power clears demotion via API.
+`ILevelChangeHandler` Chain of Responsibility in Core. v1: no power handlers. Future: `UpdatePower` on level change clears demotion via API and feeds Actor Hub `progression.power`.
 
 ## API extras
 

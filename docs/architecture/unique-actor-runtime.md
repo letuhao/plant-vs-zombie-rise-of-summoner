@@ -1,7 +1,7 @@
 # UniqueActor runtime — durable specimens across runs (design spec)
 
 **Status:** Spec + **W4 Data + Server FSM shipped** (`rpg_unique_*` DDL, `UniqueActorService`, `/api/unique/*`, deploy Intent + ack/die/end observe) + **W5 UniqueBindings / binder / loadout / ops shipped** + **W8-A equipment → mods_json grants shipped** + **W8-B specimen XP awards shipped** + **W8-C roster FE shipped** (`#/roster`).  
-**Related:** [match-runtime.md](match-runtime.md) (live run FSM + ephemeral bindings), [unique-entity-effects.md](unique-entity-effects.md) (lawn power path), [overlay-control-loops.md](overlay-control-loops.md) (Hot vs Cold vs Intent), [lawn-projector.md](lawn-projector.md) (FE select Bound → instanceId), [rpg-progression.md](rpg-progression.md) (type almanac XP — orthogonal), [stat-system.md](stat-system.md), [effect-runtime.md](effect-runtime.md), [ledger-snapshot.md](../database/ledger-snapshot.md), [implementation-roadmap.md](implementation-roadmap.md).
+**Related:** [match-runtime.md](match-runtime.md) (live run FSM + ephemeral bindings), [unique-entity-effects.md](unique-entity-effects.md) (lawn power path), [overlay-control-loops.md](overlay-control-loops.md) (Hot vs Cold vs Intent), [lawn-projector.md](lawn-projector.md) (FE select Bound → instanceId), [rpg-progression.md](rpg-progression.md) (type almanac XP — orthogonal), [actor-hub-ssot.md](actor-hub-ssot.md) (combat `progression.power` — orthogonal until bound), [stat-system.md](stat-system.md), [effect-runtime.md](effect-runtime.md), [ledger-snapshot.md](../database/ledger-snapshot.md), [implementation-roadmap.md](implementation-roadmap.md).
 
 Cold specimen SSOT is live in `FusionRpg.Data` + Server. MatchRuntime UniqueBindings + binder + ptr-only Bound loadout + Deploying timeout + ActiveBound boot sweeper + purge-while-bound are live (W5).
 
@@ -207,6 +207,15 @@ Shipped scopes already cover reverse-arch lawn targeting:
 - Match-wide → `match`
 
 Future unique power path uses **bind then `entity:{ptr}`** only. Durable `instance:{guid}` stays Server/Data until binder translation.
+
+### Combat `progression.power` vs specimen (open — v1 stub masks)
+
+| Binding | `tierPower` source (future) | v1 |
+|---|---|---|
+| Hot lawn entity (type only) | `PowerCurve(plant\|zombie, type level)` from `rpg_actor_progression` | Stub **1.0** |
+| Bound unique specimen | **Open question:** `max(typePower, specimenPower)` vs specimen override | Stub **1.0** |
+
+Specimen XP (`rpg_unique_actors.level`) must **not** silently write type almanac rows. When power ADR lands, document precedence in [actor-hub-ssot.md](actor-hub-ssot.md) §11.
 
 ---
 

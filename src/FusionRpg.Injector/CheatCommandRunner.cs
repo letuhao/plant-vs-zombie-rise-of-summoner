@@ -5,9 +5,12 @@ using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Stats;
-
+using FusionRpg.Core.Status;
+using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Injector.Effects;
 using FusionRpg.Injector.Fx;
 using FusionRpg.Injector.Host;
+using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector;
 
@@ -359,10 +362,19 @@ public static class CheatCommandRunner
                 EmitBoardSnapshot();
                 break;
             case "debug.effect.dots":
-                EmitDots();
+                EmitStatus(includeLegacyDots: true);
                 break;
             case "debug.effect.counters":
-                EmitCounters();
+                EmitStatus(includeLegacyCounters: true);
+                break;
+            case "debug.status":
+                EmitStatus();
+                break;
+            case "debug.status.apply":
+                ApplyStatusL2(p);
+                break;
+            case "debug.actor-derived":
+                HandleActorDerived(p);
                 break;
             case "debug.fx.probe-shaders":
                 RunShaderProbe();
@@ -867,40 +879,225 @@ public static class CheatCommandRunner
         });
     }
 
-    static void EmitDots()
+    static void HandleActorDerived(JsonElement p)
     {
         Effects.EffectRuntime.Ensure();
-        var now = DateTimeOffset.UtcNow;
-        var items = Effects.EffectRuntime.Bag.Dots.Entries
-            .Select(e => new Dictionary<string, object>
-            {
-                ["grantId"] = e.GrantId,
-                ["targetPtr"] = e.TargetPtr,
-                ["periodMs"] = e.PeriodMs,
-                ["nextMs"] = (long)Math.Max(0, (e.Next - now).TotalMilliseconds),
-                ["endMs"] = (long)Math.Max(0, (e.End - now).TotalMilliseconds),
-                ["ticksFired"] = e.TicksFired,
-                ["tickBudget"] = e.TickBudget
-            })
-            .ToList();
-        DebugRuntime.Emit("debug.effect.dots", new Dictionary<string, object>
+        var ptr = Str(p, "ptr");
+        if (string.IsNullOrWhiteSpace(ptr) && CheatState.SelectedPtr != IntPtr.Zero)
+            ptr = CheatState.SelectedPtr.ToString("X");
+
+        var profile = Str(p, "profile") ?? Str(p, "derivedProfile");
+        Dictionary<string, double>? overlay = null;
+        if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("channels", out var ch) && ch.ValueKind == JsonValueKind.Object)
+            overlay = ReadDoubleMap(ch);
+        else if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("derived", out var d) && d.ValueKind == JsonValueKind.Object)
+            overlay = ReadDoubleMap(d);
+
+        if (!string.IsNullOrWhiteSpace(profile) || (overlay != null && overlay.Count > 0))
         {
-            ["count"] = items.Count,
-            ["items"] = items
+            if (string.IsNullOrWhiteSpace(ptr))
+            {
+                CheatState.Error("debug.actor-derived: ptr required to pin");
+                return;
+            }
+
+            try
+            {
+                InjectorDerivedOverride.PinProfile(ptr, profile, overlay);
+            }
+            catch (Exception ex)
+            {
+                CheatState.Error("debug.actor-derived pin: " + ex.Message);
+                return;
+            }
+        }
+
+        EmitActorDerived(ptr);
+    }
+
+    static Dictionary<string, double> ReadDoubleMap(JsonElement obj)
+    {
+        var map = new Dictionary<string, double>(StringComparer.Ordinal);
+        foreach (var prop in obj.EnumerateObject())
+        {
+            if (prop.Value.TryGetDouble(out var v))
+                map[prop.Name] = v;
+            else if (prop.Value.TryGetInt64(out var l))
+                map[prop.Name] = l;
+        }
+
+        return map;
+    }
+
+    static void ApplyStatusL2(JsonElement p)
+    {
+        Effects.EffectRuntime.Ensure();
+        Effects.EffectRuntime.FreezeBoard();
+        var statusId = Str(p, "statusId") ?? Str(p, "status");
+        if (string.IsNullOrWhiteSpace(statusId))
+        {
+            CheatState.Error("debug.status.apply: statusId required");
+            return;
+        }
+
+        var hostPtr = Str(p, "hostPtr") ?? Str(p, "targetPtr");
+        if (string.IsNullOrWhiteSpace(hostPtr) && CheatState.SelectedPtr != IntPtr.Zero)
+            hostPtr = CheatState.SelectedPtr.ToString("X");
+        if (string.IsNullOrWhiteSpace(hostPtr))
+        {
+            CheatState.Error("debug.status.apply: hostPtr required");
+            return;
+        }
+
+        var attackerPtr = Str(p, "attackerPtr");
+        var durationMs = IntProp(p, "durationMs", 4000);
+        var amount = LongProp(p, "amount", 0);
+        var now = DateTimeOffset.UtcNow;
+        var runtime = Effects.EffectRuntime.Status;
+        StatusDef def;
+        try
+        {
+            def = runtime.Catalog.GetRequired(statusId);
+        }
+        catch (UnknownStatusIdException ex)
+        {
+            CheatState.Error("debug.status.apply: " + ex.Message);
+            return;
+        }
+
+        var input = new StatusApplyInput(
+            statusId,
+            hostPtr,
+            attackerPtr,
+            GrantId: "debug-status-apply",
+            BaseMagnitude: amount,
+            BaseDuration: durationMs,
+            PeriodMs: IntProp(p, "periodMs", 1000),
+            DurationMs: durationMs,
+            TickBudget: IntProp(p, "tickBudget", 1),
+            GrantChance: 1.0,
+            AttackerLess: string.IsNullOrWhiteSpace(attackerPtr));
+        var outcome = runtime.Apply(input, Effects.EffectRuntime.Bag.StatusRng, now);
+        if (outcome.Applied
+            && def.PayloadKinds.Contains(StatusPayloadKind.UnityCc))
+        {
+            var durationSec = (float)Math.Max(0.1, (outcome.Instance?.EffectiveDuration ?? durationMs) / 1000.0);
+            foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
+            {
+                if (z == null) continue;
+                if (!string.Equals(GameDumps.Ptr(z), hostPtr, StringComparison.OrdinalIgnoreCase)) continue;
+                DebugActions.ApplyStatusToZombie(z, statusId, durationSec, 1, method: true);
+                break;
+            }
+        }
+
+        EmitStatus();
+    }
+
+    static void EmitActorDerived(string? ptr)
+    {
+        Effects.EffectRuntime.Ensure();
+        if (string.IsNullOrWhiteSpace(ptr))
+        {
+            CheatState.Error("debug.actor-derived: ptr required");
+            return;
+        }
+
+        var key = ptr.Trim();
+        var derived = InjectorStatusBridge.ResolveDerived(key, attackerLess: false);
+        var channels = derived.Channels
+            .OrderBy(kv => kv.Key, StringComparer.Ordinal)
+            .ToDictionary(kv => kv.Key, kv => kv.Value, StringComparer.Ordinal);
+        DebugRuntime.Emit("debug.actor-derived", new Dictionary<string, object>
+        {
+            ["ptr"] = key,
+            ["tierPower"] = derived.TierPower,
+            ["channels"] = channels
         });
     }
 
-    static void EmitCounters()
+    static void EmitStatus(bool includeLegacyDots = false, bool includeLegacyCounters = false)
     {
         Effects.EffectRuntime.Ensure();
-        var meters = Effects.EffectRuntime.Bag.Counters.Snapshot()
+        var now = DateTimeOffset.UtcNow;
+        var status = Effects.EffectRuntime.Status;
+        var instances = status.AllInstances()
+            .Select(i => new Dictionary<string, object>
+            {
+                ["instanceId"] = i.InstanceId,
+                ["statusId"] = i.StatusId,
+                ["hostPtr"] = i.HostPtr,
+                ["attackerPtr"] = i.AttackerPtr ?? "",
+                ["grantId"] = i.GrantId,
+                ["kind"] = i.Kind.ToString(),
+                ["effectiveMagnitude"] = i.EffectiveMagnitude,
+                ["periodMs"] = i.PeriodMs,
+                ["nextMs"] = (long)Math.Max(0, (i.NextPulse - now).TotalMilliseconds),
+                ["endMs"] = (long)Math.Max(0, (i.ExpiresAt - now).TotalMilliseconds),
+                ["pulsesFired"] = i.PulsesFired,
+                ["tickBudget"] = i.TickBudget,
+                ["hopDepth"] = i.HopDepth,
+                ["spreadChance"] = i.SpreadChance
+            })
+            .ToList();
+        var resisted = status.ResistedEvents
+            .Select(ev => new Dictionary<string, object>
+            {
+                ["statusId"] = ev.StatusId,
+                ["hostPtr"] = ev.HostPtr,
+                ["attackerPtr"] = ev.AttackerPtr ?? "",
+                ["grantId"] = ev.GrantId,
+                ["reason"] = ev.Reason.ToString(),
+                ["delta"] = ev.Delta,
+                ["at"] = ev.At.ToString("o")
+            })
+            .ToList();
+        DebugRuntime.Emit("debug.status", new Dictionary<string, object>
+        {
+            ["count"] = instances.Count,
+            ["instances"] = instances,
+            ["resistedCount"] = resisted.Count,
+            ["resisted"] = resisted
+        });
+
+        if (includeLegacyDots)
+            EmitDotsLegacy(now);
+        if (includeLegacyCounters)
+            EmitCountersLegacy();
+    }
+
+    static void EmitDotsLegacy(DateTimeOffset now)
+    {
+        _ = now;
+        DebugRuntime.Emit("debug.effect.dots", new Dictionary<string, object>
+        {
+            ["count"] = 0,
+            ["items"] = new List<Dictionary<string, object>>(),
+            ["note"] = "legacy scheduler removed; see debug.status"
+        });
+    }
+
+    static void EmitCountersLegacy()
+    {
+        var meters = Effects.EffectRuntime.Status.CounterSnapshot()
             .Select(kv => new Dictionary<string, object> { ["key"] = kv.Key, ["hits"] = kv.Value })
             .ToList();
         DebugRuntime.Emit("debug.effect.counters", new Dictionary<string, object>
         {
             ["count"] = meters.Count,
-            ["meters"] = meters
+            ["meters"] = meters,
+            ["note"] = meters.Count == 0 ? "legacy CounterProcState removed; bond meters on StatusRuntime" : ""
         });
+    }
+
+    static void EmitDots()
+    {
+        EmitStatus(includeLegacyDots: true);
+    }
+
+    static void EmitCounters()
+    {
+        EmitStatus(includeLegacyCounters: true);
     }
 
     static void RunShaderProbe()

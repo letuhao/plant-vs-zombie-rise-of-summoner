@@ -1,5 +1,7 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects.Plugins;
+using FusionRpg.Core.Status;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Effects;
 
@@ -13,6 +15,7 @@ public sealed class SimEffectHost
     readonly RecordingEffectSink _sink;
     readonly RecordingDamageFxSink _fx;
     readonly EffectBag _bag;
+    readonly ActorDerivedLookup _derived = new();
     long _tick;
 
     public SimEffectHost(int seed = 42, string matchKey = "sim-match")
@@ -26,6 +29,9 @@ public sealed class SimEffectHost
         catalog.ReplaceAll(EffectSeedCatalog.CreateAll());
         _bag = new EffectBag(catalog, new InMemoryEffectGrantStore(), new EffectProcPolicy(_clock, _rng), _sink);
         _bag.UtcNow = () => _clock.UtcNow;
+        _bag.Status = new StatusRuntime(
+            StatusCatalogBootstrap.CreateDefault(),
+            (ptr, attackerLess) => _derived.Resolve(ptr, attackerLess));
         Funnel = new EffectFunnel(_bag, _fx);
         Plugins = EffectPluginHostFactory.Create(_bag);
     }
@@ -101,6 +107,9 @@ public sealed class SimEffectHost
 
     public void SetBoard(IEnumerable<Combat.BoardEntitySnap> entities) =>
         BoardSnapshot = new Combat.BoardSnapshot(entities);
+
+    public void PinDerived(string ptr, ActorDerivedSnapshot snapshot) =>
+        _derived.Pin(ptr, snapshot);
 
     public IntentPlanDto OnEvent(EffectEventDto ev)
     {

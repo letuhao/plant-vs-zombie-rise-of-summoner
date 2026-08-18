@@ -2,7 +2,7 @@
 
 **Status:** Docs checklist only — **no wave implemented from this file yet.** All slice rows `pending` until a code plan ships them.  
 **Authority:** this file + linked SSOTs. Specs stay SSOT for design; this file is **order + prove gates**.  
-**Related:** [overlay-control-loops.md](overlay-control-loops.md), [p0-hot-path-hardening.md](p0-hot-path-hardening.md), [match-runtime.md](match-runtime.md), [unique-actor-runtime.md](unique-actor-runtime.md), [lawn-projector.md](lawn-projector.md), [fe-game-foundation.md](fe-game-foundation.md), [../research/architecture-stress/00-index.md](../research/architecture-stress/00-index.md), [../database/persistence-implement-checklist.md](../database/persistence-implement-checklist.md) (Data already live).
+**Related:** [overlay-control-loops.md](overlay-control-loops.md), [p0-hot-path-hardening.md](p0-hot-path-hardening.md), [match-runtime.md](match-runtime.md), [unique-actor-runtime.md](unique-actor-runtime.md), [actor-hub-ssot.md](actor-hub-ssot.md), [status-ssot.md](status-ssot.md), [lawn-projector.md](lawn-projector.md), [fe-game-foundation.md](fe-game-foundation.md), [../research/architecture-stress/00-index.md](../research/architecture-stress/00-index.md), [../database/persistence-implement-checklist.md](../database/persistence-implement-checklist.md) (Data already live).
 
 **Workstream rule for *this* doc’s creation:** markdown only. Executing a wave = separate implementation plan.
 
@@ -18,6 +18,8 @@
 | W6–W7 | FE game foundation docs (W6-0) → Phaser lawn monitor → Intent interact |
 | W8–W9 | Gear/specimen XP + Secondary content kit |
 | W10–W12 | Dual-host adapters + guards expand + stress P2–P3 triage |
+| W13 | Actor Hub derived snapshot + `progression.power` stub — **S0–S1** in [actor-hub-status-implement-plan.md](actor-hub-status-implement-plan.md) |
+| W14 | StatusRuntime L2 + L2b ResistanceEvaluator — **S2–S7** in [actor-hub-status-implement-plan.md](actor-hub-status-implement-plan.md); **blocked on W13** |
 
 ```text
 W0 → W1 → W2 → W3
@@ -413,6 +415,34 @@ Do not schedule W12 items without an explicit product pick. **Not scheduled** th
 
 ---
 
+### W13 — Actor Hub derived stats (docs locked; code pending)
+
+**Full slice breakdown:** [actor-hub-status-implement-plan.md](actor-hub-status-implement-plan.md) **S0–S1** (core contracts + ActorHub compose + Injector wire). Deferred: **P1** (UpdatePower), **P2** (`progression.bonus.*`).
+
+| Slice | Deliverable | Prove gate |
+|---|---|---|
+| S0 | `DerivedStatRegistry`, `ResistanceEvaluator`, `StatusCategoryRegistry` | Golden table; neutral stub; category cap 0.95 |
+| S1 | `ActorHub.Resolve`, `RpgProgressionSubsystem` stub, EntityApply hook | Primary HP/ATK unchanged; `guard-single-writer.ps1` |
+
+**Spec:** [actor-hub-ssot.md](actor-hub-ssot.md). **Blocks:** StatusRuntime (W14 / S4+).
+
+---
+
+### W14 — StatusRuntime + ResistanceEvaluator (blocked on W13)
+
+**Full slice breakdown:** [actor-hub-status-implement-plan.md](actor-hub-status-implement-plan.md) **S2–S7** (evaluator tests → catalog → runtime → grant wire → legacy migration → contagion/debug).
+
+| Slice | Deliverable | Prove gate |
+|---|---|---|
+| S2–S3 | Integration tests + `StatusCatalog` (21 ids) | §9.5 category map; unknown id reject |
+| S4 | `StatusRuntime` L2 lifecycle | Apply → Tick → Expire; family mutex |
+| S5–S6 | Grant path + DoT/Counter migration | `status-wither` scenario; `guard-funnel-delta.ps1` |
+| S7 | Contagion + `/api/debug/status` | `blight-row` hop; resisted telemetry |
+
+**Spec:** [status-ssot.md](status-ssot.md) §6, §9.5. **Prerequisite:** W13 / S1 derived snapshot at Apply.
+
+---
+
 ## Prove matrix (cross-cutting)
 
 | Concern | Wave | Gate |
@@ -422,6 +452,8 @@ Do not schedule W12 items without an explicit product pick. **Not scheduled** th
 | RPG UniqueActor FSM | W4–W5 | Deploy bind recover |
 | FE lawn | W6–W7 | Fold tests + canvas + Intent |
 | Validators | W0-C, W1-E, W11 | Guards green |
+| Actor Hub derived | W13 | Catalog + stub tierPower + ActorHub.Resolve |
+| Status apply / contagion | W14 | Two-phase resist + status debug API |
 | Unique gear safe | W0 + W5 + W0-E | No grant leak; bag rehydrate |
 
 ---
@@ -437,5 +469,7 @@ Do not schedule W12 items without an explicit product pick. **Not scheduled** th
 
 ## See also
 
-- [decisions.md](decisions.md) — Overlay P0, MatchRuntime, UniqueActor, Lawn projector rows  
+- [actor-hub-ssot.md](actor-hub-ssot.md) — W13 Actor Hub design
+- [actor-hub-status-implement-plan.md](actor-hub-status-implement-plan.md) — W13/W14 implement slices S0–S7
+- [decisions.md](decisions.md) — Overlay P0, MatchRuntime, UniqueActor, Lawn projector, Actor Hub rows  
 - [overview.md](overview.md) — module map  

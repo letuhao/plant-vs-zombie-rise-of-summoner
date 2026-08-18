@@ -31,7 +31,17 @@ import {
 
 type Payload = Record<string, unknown>;
 
-const OBSERVE_CHIPS = new Set(["butter", "freeze", "cold", "poison", "hypno"]);
+const OBSERVE_CHIPS = new Set([
+  "butter",
+  "freeze",
+  "cold",
+  "poison",
+  "hypno",
+  "wither",
+  "bond",
+  "blight",
+  "rot"
+]);
 const CC_CHIPS = ["butter", "freeze", "cold", "poison"] as const;
 
 function asObj(payload: unknown): Payload {
@@ -323,6 +333,26 @@ function withAllZombiePtrsIfEmpty(m: LawnViewModel, p: Payload): Payload {
     .map((o) => o.ptr);
   if (!ptrs.length) return p;
   return { ...p, ptrs };
+}
+
+function applyDebugStatusSnapshot(m: LawnViewModel, p: Payload): LawnViewModel {
+  const instances = p.instances;
+  if (!Array.isArray(instances)) return m;
+  let next = m;
+  let changed = false;
+  for (const inst of instances) {
+    if (!inst || typeof inst !== "object") continue;
+    const rec = inst as Record<string, unknown>;
+    const status = str(rec.statusId)?.toLowerCase();
+    const ptr = str(rec.hostPtr);
+    if (!status || !ptr || !OBSERVE_CHIPS.has(status)) continue;
+    const after = applyStatusApplied(next, { ptr, status });
+    if (after !== next) {
+      next = after;
+      changed = true;
+    }
+  }
+  return changed ? next : m;
 }
 
 function applyStatusApplied(m: LawnViewModel, p: Payload): LawnViewModel {
@@ -873,6 +903,10 @@ function applyOne(m: LawnViewModel, e: EventEnvelope): LawnViewModel {
       return maybeBump(m, applyHypno(m, p));
     case "debug.status.applied":
       return maybeBump(m, applyStatusApplied(m, p));
+    case "debug.status":
+      return maybeBump(m, applyDebugStatusSnapshot(m, p));
+    case "debug.status.resisted":
+      return bump(m);
     case "pvz.status.apply":
       return maybeBump(m, applyStatusApplied(m, withAllZombiePtrsIfEmpty(m, p)));
     case "debug.status.cleared":

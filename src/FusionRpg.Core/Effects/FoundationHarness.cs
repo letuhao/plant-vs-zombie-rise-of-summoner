@@ -1,4 +1,6 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Status;
 
 namespace FusionRpg.Core.Effects;
 
@@ -10,6 +12,7 @@ public sealed class FoundationHarness
     readonly RecordingEffectSink _sink;
     readonly RecordingDamageFxSink _fx;
     readonly EffectBag _bag;
+    readonly ActorDerivedLookup _derived = new();
 
     public FoundationHarness(int seed = 42)
     {
@@ -23,6 +26,9 @@ public sealed class FoundationHarness
         var proc = new EffectProcPolicy(_clock, _rng);
         _bag = new EffectBag(catalog, grants, proc, _sink);
         _bag.UtcNow = () => _clock.UtcNow;
+        _bag.Status = new StatusRuntime(
+            StatusCatalogBootstrap.CreateDefault(),
+            (ptr, attackerLess) => _derived.Resolve(ptr, attackerLess));
         Funnel = new EffectFunnel(_bag, _fx);
     }
 
@@ -77,6 +83,9 @@ public sealed class FoundationHarness
 
     public void SetBoard(IEnumerable<Combat.BoardEntitySnap> entities) =>
         BoardSnapshot = new Combat.BoardSnapshot(entities);
+
+    public void PinDerived(string ptr, ActorDerivedSnapshot snapshot) =>
+        _derived.Pin(ptr, snapshot);
 
     public IntentPlanDto OnEvent(EffectEventDto ev)
     {

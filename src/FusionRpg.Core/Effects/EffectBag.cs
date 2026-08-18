@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats;
 
 namespace FusionRpg.Core.Effects;
@@ -127,8 +128,8 @@ public sealed class EffectBag
     public CombatPolicy CombatPolicy { get; set; } = CombatPolicy.Default;
     public ICombatRng CombatRng { get; set; } = new SeededCombatRng(42);
     public ICombatMath CombatMath { get; set; } = PassThroughCombatMath.Instance;
-    public CounterProcState Counters { get; } = new();
-    public DoTTickScheduler Dots { get; } = new();
+    public StatusRuntime? Status { get; set; }
+    public IStatusRng StatusRng { get; set; } = new FixedStatusRng(0.0);
     public Func<DateTimeOffset> UtcNow { get; set; } = () => DateTimeOffset.UtcNow;
     /// <summary>Debug Selected ptr. Grant overlays with <c>target.mode=Selected</c> rewrite to Single.</summary>
     public string? SelectedPtr { get; set; }
@@ -176,8 +177,7 @@ public sealed class EffectBag
         var def = _catalog.Get(grant.EffectId);
         _grants.Withdraw(grantId);
         _proc.ClearGrant(grantId);
-        Counters.ClearGrant(grantId);
-        Dots.ClearGrant(grantId);
+        Status?.ClearGrant(grantId);
         BumpRevision();
         if (def != null &&
             (string.Equals(def.EffectType, EffectTypes.Passive, StringComparison.OrdinalIgnoreCase) ||
@@ -196,8 +196,7 @@ public sealed class EffectBag
         foreach (var g in _grants.All().ToList())
             Withdraw(g.GrantId);
         _proc.Clear();
-        Counters.Clear();
-        Dots.Clear();
+        Status?.Clear();
         _overlayProcs.Clear();
     }
 
@@ -357,16 +356,46 @@ public sealed class EffectBag
                     packet.SignedAmount = (long)JsonOverlay.GetDouble(merged, "amount");
                 BindSelected(packet);
 
-                var delivery = packet.Delivery.Mode ?? DeliveryModes.Instant;
-                if (string.Equals(delivery, DeliveryModes.OverTime, StringComparison.OrdinalIgnoreCase))
+                if (Status != null)
                 {
-                    RegisterDot(packet, ev);
+                    var statusPlanStart = plannedOut?.Count ?? 0;
+                    if (StatusEffectBridge.TryApplyFromGrant(
+                            Status, grant, ev, grant.Overlay, BoardSnapshot, StatusRng, UtcNow(),
+                            _lastSkipped, plannedOut, def))
+                    {
+                        if (StatusEffectBridge.TryResolveStatusId(grant.Overlay, out var sid)
+                            && string.Equals(sid, "bond", StringComparison.OrdinalIgnoreCase))
+                        {
+                            TryFireCounterBurst(packet, grant, ev);
+                        }
+
+                        if (plannedOut != null)
+                        {
+                            for (var i = statusPlanStart; i < plannedOut.Count; i++)
+                            {
+                                if (!_sink.Execute(ctx, plannedOut[i]))
+                                {
+                                    _lastSkipped.Add(grant.GrantId + ":executor-stop");
+                                    return;
+                                }
+                            }
+                        }
+
+                        continue;
+                    }
+                }
+
+                if (Status == null && JsonOverlay.GetString(grant.Overlay, "statusId") is { Length: > 0 })
+                {
+                    _lastSkipped.Add(grant.GrantId + ":status-runtime-missing");
                     continue;
                 }
 
-                if (string.Equals(delivery, DeliveryModes.Counter, StringComparison.OrdinalIgnoreCase))
+                var delivery = packet.Delivery.Mode ?? DeliveryModes.Instant;
+                if (string.Equals(delivery, DeliveryModes.OverTime, StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(delivery, DeliveryModes.Counter, StringComparison.OrdinalIgnoreCase))
                 {
-                    TryFireCounterBurst(packet, grant, ev);
+                    _lastSkipped.Add(grant.GrantId + ":status-runtime-missing");
                     continue;
                 }
 
@@ -410,12 +439,18 @@ public sealed class EffectBag
 
     void TryFireCounterBurst(DamagePacket packet, EffectGrant grant, EffectEventDto ev)
     {
+        if (Status == null)
+        {
+            _lastSkipped.Add(grant.GrantId + ":status-runtime-missing");
+            return;
+        }
+
         var every = packet.Delivery.EveryHits ?? 0;
         var scope = packet.Delivery.CounterScope ?? CounterScopes.Target;
         var scopeKey = string.Equals(scope, CounterScopes.Actor, StringComparison.OrdinalIgnoreCase)
             ? (ev.ActorPtr ?? "")
             : (ev.TargetPtr ?? "");
-        if (!Counters.TryBurst(grant.GrantId, scopeKey, every, packet.Delivery.ResetOnBurst))
+        if (!Status.RecordCounterHit(grant.GrantId, scopeKey, every, packet.Delivery.ResetOnBurst))
             return;
 
         var burst = packet.Burst;
@@ -442,57 +477,29 @@ public sealed class EffectBag
             _lastSkipped);
     }
 
-    void RegisterDot(DamagePacket packet, EffectEventDto ev)
+    public int TickDots()
     {
-        packet.ActorPtr ??= ev.ActorPtr;
-        if (!CanArmDot(packet, ev))
+        var now = UtcNow();
+        var n = 0;
+        if (Status != null)
         {
-            _lastSkipped.Add((packet.SourceGrantId ?? "") + ":dot-no-target");
-            return;
+            var sink = new StatusFunnelPulseSink(
+                BoardSnapshot,
+                new EffectEventDto { Trigger = EffectTriggers.OnTimer, ChainDepth = 0 },
+                Funnel,
+                CombatPolicy,
+                CombatRng,
+                CombatMath,
+                _lastSkipped,
+                effectId: null,
+                pluginId: null);
+            n = Status.Tick(now, sink, BoardSnapshot, StatusRng);
         }
 
-        var period = CombatPolicy.ResolveDotPeriodMs(packet.Delivery.PeriodMs);
-        var duration = CombatPolicy.ResolveDotDurationMs(packet.Delivery.DurationMs);
-        var now = UtcNow();
-        Dots.Register(new DoTEntry
-        {
-            GrantId = packet.SourceGrantId ?? "",
-            Template = packet,
-            Event = new EffectEventDto
-            {
-                Trigger = EffectTriggers.OnTimer,
-                MatchKey = ev.MatchKey,
-                Side = ev.Side,
-                ActorPtr = ev.ActorPtr,
-                TargetPtr = ev.TargetPtr,
-                TypeId = ev.TypeId,
-                TargetTypeId = ev.TargetTypeId,
-                Tick = ev.Tick,
-                ScenarioId = ev.ScenarioId,
-                ChainDepth = packet.ChainDepth
-            },
-            TargetPtr = ev.TargetPtr ?? ev.ActorPtr ?? packet.Target?.Ptr ?? "",
-            PeriodMs = period,
-            DurationMs = duration,
-            TickBudget = packet.Delivery.TickBudget is > 0 ? packet.Delivery.TickBudget.Value : 1,
-            Start = now,
-            Next = now.AddMilliseconds(period),
-            End = now.AddMilliseconds(duration)
-        });
-    }
-
-    static bool CanArmDot(DamagePacket packet, EffectEventDto ev)
-    {
-        var mode = packet.Target?.Mode ?? TargetModes.EventTarget;
-        if (string.Equals(mode, TargetModes.EventTarget, StringComparison.OrdinalIgnoreCase))
-            return !string.IsNullOrWhiteSpace(ev.TargetPtr);
-        if (string.Equals(mode, TargetModes.Actor, StringComparison.OrdinalIgnoreCase))
-            return !string.IsNullOrWhiteSpace(ev.ActorPtr);
-        if (string.Equals(mode, TargetModes.Single, StringComparison.OrdinalIgnoreCase))
-            return !string.IsNullOrWhiteSpace(packet.Target?.Ptr);
-        if (string.Equals(mode, TargetModes.Selected, StringComparison.OrdinalIgnoreCase))
-            return false;
-        return true;
+        Funnel?.Flush();
+        if (!_drainingOverlay)
+            DrainOverlayProcs();
+        return n;
     }
 
     void BindSelected(DamagePacket packet)
@@ -569,22 +576,6 @@ public sealed class EffectBag
         {
             _drainingOverlay = false;
         }
-    }
-
-    public int TickDots()
-    {
-        var n = Dots.Tick(
-            UtcNow(),
-            BoardSnapshot,
-            Funnel,
-            CombatPolicy,
-            CombatRng,
-            CombatMath,
-            _lastSkipped);
-        Funnel?.Flush();
-        if (!_drainingOverlay)
-            DrainOverlayProcs();
-        return n;
     }
 
     sealed class OverlayProcNote

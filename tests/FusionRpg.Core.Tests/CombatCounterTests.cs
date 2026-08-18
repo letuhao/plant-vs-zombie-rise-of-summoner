@@ -60,6 +60,10 @@ public class CombatCounterTests
         var fa = Assert.Single(plan.Actions.Where(a => a.Action == EffectActions.ApplyResourceDelta));
         Assert.Equal(-500L, Convert.ToInt64(fa.Params["amount"]));
         Assert.Equal("z1", fa.Params["targetPtr"]?.ToString(), ignoreCase: true);
+        Assert.NotEmpty(h.Bag.Status!.ForHost("Z1"));
+        Assert.Contains(h.Bag.Status.ForHost("Z1"), i =>
+            string.Equals(i.StatusId, "bond", StringComparison.OrdinalIgnoreCase));
+        Assert.DoesNotContain(h.Bag.Status.CounterSnapshot(), kv => kv.Value >= 5);
     }
 
     [Fact]

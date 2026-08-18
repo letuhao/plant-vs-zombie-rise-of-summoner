@@ -1,0 +1,22 @@
+{
+  "_comment": "Forward shape after StatusRuntime ships. Replaces examples/combat/counter-scope-target.json delivery.mode=Counter.",
+  "grantId": "example-bond",
+  "effectId": "fx.overlay_damage",
+  "ownerKey": "match",
+  "overlay": {
+    "statusId": "bond",
+    "icd_ms": 0,
+    "everyHits": 5,
+    "resetOnBurst": true,
+    "counterScope": "Target",
+    "target": {
+      "mode": "EventTarget",
+      "filters": { "side": "zombie" }
+    },
+    "burst": {
+      "amount": -500,
+      "target": { "mode": "EventTarget" },
+      "delivery": { "mode": "Instant" }
+    }
+  }
+}

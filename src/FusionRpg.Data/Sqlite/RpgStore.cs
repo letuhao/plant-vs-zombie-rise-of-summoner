@@ -620,7 +620,7 @@ public sealed partial class RpgStore : IRpgDb
     public PvzStatsSheetDto UpsertPvzStatModifier(long playerId, PvzStatModifierDto mod)
     {
         if (mod == null) throw new ArgumentNullException(nameof(mod));
-        var channel = FusionRpg.Core.Stats.PvzStatsSheetComposer.TryCanonicalizeChannel(mod.Channel)
+        var channel = FusionRpg.Core.Stats.PvzStatsSheetComposer.TryCanonicalizeOrDerivedChannel(mod.Channel)
                       ?? throw new ArgumentException("unknown channel", nameof(mod));
         using var db = Open();
         if (GetPlayerUnlocked(db, playerId) is null)
@@ -668,7 +668,7 @@ public sealed partial class RpgStore : IRpgDb
             throw new ArgumentException("withdraw requires at least one filter; use reset to clear all");
         var canonChannel = string.IsNullOrWhiteSpace(channel)
             ? null
-            : FusionRpg.Core.Stats.PvzStatsSheetComposer.TryCanonicalizeChannel(channel)
+            : FusionRpg.Core.Stats.PvzStatsSheetComposer.TryCanonicalizeOrDerivedChannel(channel)
               ?? throw new ArgumentException("unknown channel");
         using var db = Open();
         if (GetPlayerUnlocked(db, playerId) is null)

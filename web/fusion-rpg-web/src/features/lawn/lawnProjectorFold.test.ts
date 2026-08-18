@@ -372,6 +372,27 @@ describe("lawnProjectorFold", () => {
     expect(findOccupant(cleared, "Z1")?.statusChips).not.toContain("butter");
   });
 
+  it("debug.status snapshot applies L2 instance chips", () => {
+    const seeded = foldLawnEvents([
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1 }),
+      evt("zombie.spawn", { ptr: "Z2", type: 0, row: 2 })
+    ]);
+    const applied = foldLawnEvents(
+      [
+        evt("debug.status", {
+          count: 2,
+          instances: [
+            { hostPtr: "Z1", statusId: "wither" },
+            { hostPtr: "Z2", statusId: "bond" }
+          ]
+        })
+      ],
+      seeded
+    );
+    expect(findOccupant(applied, "Z1")?.statusChips).toContain("wither");
+    expect(findOccupant(applied, "Z2")?.statusChips).toContain("bond");
+  });
+
   it("debug.status.applied ptrs[] freeze/cold/poison; cleared keeps hypno", () => {
     const seeded = foldLawnEvents([
       evt("zombie.spawn", { ptr: "A", type: 1, isMindControlled: true }),

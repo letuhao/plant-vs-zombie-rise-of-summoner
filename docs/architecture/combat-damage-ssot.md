@@ -1,9 +1,9 @@
-# Combat damage SSOT — target + delivery
+# Combat damage SSOT — target + instant delivery
 
-**Status:** Partially shipped — TargetResolver, instant Funnel fan-out, LIVE board snapshot, Counter, OnTimer DoT. CombatMath is a pass-through stub (`ICombatMath` / `PassThroughCombatMath`) until a dedicated plan.  
-**Parent:** [decisions.md](decisions.md) (ADR row **Combat damage SSOT**). Data shapes: [effect-data.md](effect-data.md). Apply path: [effect-funnel.md](effect-funnel.md), [effect-system.md](effect-system.md).
+**Status:** Partially shipped — TargetResolver, instant Funnel fan-out, LIVE board snapshot, overlay world flash. **Legacy:** Counter and DoT still use `DeliverySpec.OverTime|Counter` until [Status SSOT](status-ssot.md) code plan migrates them. CombatMath is a pass-through stub until a dedicated plan.  
+**Parent:** [decisions.md](decisions.md) (ADR rows **Combat damage SSOT**, **Status SSOT**). Timed/counter **state:** [status-ssot.md](status-ssot.md). Apply path: [effect-funnel.md](effect-funnel.md), [effect-system.md](effect-system.md).
 
-This spec defines how overlay **HP changes** choose targets and schedule application. It is **not** an elemental damage system — fire/ice/shield/DEF math belongs in future **CombatMath** above the Funnel.
+This spec defines how overlay **HP changes** choose targets and apply **instant** deltas. Scheduling (DoT ticks, hit counters, contagion) belongs to **StatusRuntime**, not `DeliverySpec`.
 
 ---
 
@@ -12,8 +12,10 @@ This spec defines how overlay **HP changes** choose targets and schedule applica
 Today FA10 `ApplyResourceDelta` applies to a **single** `targetPtr` (usually the combat event target). Content needs:
 
 - Target modes: single, multi, random, area (row/column/square/rectangle), all, filtered by plant/zombie type
-- Delivery modes: instant hit, hit-counter burst, damage-over-time (DoT)
+- **Instant** overlay HP delta (damage or heal on the same pipeline)
 - Heal on the **same** pipeline as damage (signed amount)
+
+DoT, hit-counter bursts, and contagion spread are **status instances** that *emit* Instant packets — see [status-ssot.md](status-ssot.md). Status Apply reads **Actor Hub derived** power/resist — not primary `atk`/`hp` ([actor-hub-ssot.md](actor-hub-ssot.md)).
 
 Without a SSOT, targeting logic would scatter across Secondary plugins, FA executors, and debug commands.
 
@@ -25,9 +27,10 @@ Three orthogonal pieces:
 
 | Piece | Question | SSOT type |
 |---|---|---|
-| **Target** | Who receives the HP change? | `TargetSpec` → resolved by `TargetResolver` (future Core) |
-| **Delivery** | When / how often does it apply? | `DeliverySpec` |
+| **Target** | Who receives the HP change? | `TargetSpec` → `TargetResolver` |
+| **Delivery** | When does this **packet** apply? | **`Instant` only** (v1 forward). Omit or fix `mode: Instant`. |
 | **Amount** | How much HP changes? | Signed delta on `DamagePacket`; CombatMath (later) adjusts per ptr |
+| **Timed state** | DoT / counter / contagion on actor? | [status-ssot.md](status-ssot.md) — not `DeliverySpec` |
 
 Envelope:
 
@@ -51,26 +54,30 @@ DamagePacket
 
 ```mermaid
 flowchart TB
-  subgraph sources [Packet sources]
-    trig["OnDamageDealt / OnDamageTaken / manual"]
-    timer["OnTimer DoT tick"]
-    counter["Counter threshold burst"]
+  subgraph sources [Instant packet sources]
+    trig["OnDamageDealt / manual / enqueue-delta"]
+    statusPulse["StatusRuntime PulseHp tick or counter burst"]
   end
 
-  subgraph core [Core future]
-    build["Build DamagePacket"]
+  subgraph core [Core]
+    build["Build DamagePacket delivery=Instant"]
     snap["Freeze BoardSnapshot"]
     resolve["TargetResolver → ptr[]"]
     math["CombatMath per ptr later"]
   end
 
-  subgraph apply [Locked today]
+  subgraph apply [Locked]
     funnel["EffectFunnel EnqueueMutation × N"]
     fa10["FA10 ApplyResourceDelta"]
     writer["EntityStatWriter Add + Die if HP≤0"]
     fx["DamageFx floaters + particle burst"]
   end
 
+  subgraph statusSide [Status SSOT — separate spec]
+    runtime["StatusRuntime Tick Apply Spread"]
+  end
+
+  runtime -->|"Instant sub-packet"| build
   sources --> build --> snap --> resolve --> math --> funnel --> fa10 --> writer
   fa10 --> fx
 ```
@@ -160,40 +167,35 @@ Legacy FA5 cherry/freeze/doom remains for old debug scenarios — not for new ov
 
 ---
 
-## 6. DeliverySpec
+## 6. DeliverySpec (Instant-only forward)
 
 | `mode` | Behavior |
 |---|---|
 | `Instant` | One packet → (CombatMath) → FA10 per resolved ptr |
-| `OverTime` | Periodic ticks via **`OnTimer`** trigger; each tick spawns an `Instant` sub-packet |
-| `Counter` | Increment hit meter; at `everyHits` fire **`burst`** (`Instant` sub-packet) |
 
-### 6.1 Counter
+**Legacy (shipped, migrate to Status SSOT):** `OverTime` and `Counter` on grant overlay still arm `DoTTickScheduler` / `CounterProcState` on `EffectBag`. New content should use `statusId` + status overlay per [status-ssot.md](status-ssot.md) when the code plan lands. Do **not** add new grants with `delivery.mode = OverTime|Counter` after StatusRuntime ships.
+
+### 6.1 Legacy Counter (until migration)
 
 | Key | Type | Notes |
 |---|---|---|
 | `everyHits` | int | Threshold |
 | `resetOnBurst` | bool | Default true |
-| `counterScope` | `Target` \| `Actor` | See below |
+| `counterScope` | `Target` \| `Actor` | Meter key = target or actor ptr |
 
-| `counterScope` | Meter key | Example |
-|---|---|---|
-| `Target` | `(grantId, targetPtr)` | 5 hits on same zombie → burst on that zombie |
-| `Actor` | `(grantId, actorPtr)` | 5 hits anywhere → burst on next qualifying target |
+Maps to catalog id **`bond`** after migration. See [examples/combat/counter-scope-target.json](examples/combat/counter-scope-target.json).
 
-Runtime state: `foundation_effect_runtime.hit_counter` (see [effect-data.md](effect-data.md)). **Not** the same as `max_stacks` (grant stack cap).
-
-**Burst default:** firing burst damage **does** emit `OnDamageDealt`-class events for the burst amount, subject to `ProcDepthLimit` and ICD.
-
-### 6.2 OverTime (DoT)
+### 6.2 Legacy OverTime (until migration)
 
 | Key | Type | Notes |
 |---|---|---|
 | `periodMs` | int | Tick interval |
 | `durationMs` | int | Total duration |
-| `tickBudget` | int | Max proc-eligible ticks per period per `(grantId, targetPtr)` — **B-DOT-BUDGET** |
+| `tickBudget` | int | B-DOT-BUDGET |
 
-Scheduler: match ms clock on injector hot loop (coalesce ticks — not every render frame). Each tick = new `DamagePacket` with `delivery.mode = Instant`, `chainDepth` inherited + 1.
+Maps to catalog id **`wither`** after migration. Each tick still spawns `delivery.mode = Instant` sub-packet. See [examples/combat/dot-overtime.json](examples/combat/dot-overtime.json).
+
+**Forward shape (doc only):** [examples/status/wither.overlay.json](examples/status/wither.overlay.json).
 
 ---
 
@@ -290,14 +292,15 @@ Copy-paste grants: [examples/combat/](examples/combat/).
 
 ## 10. Gap vs shipped code
 
-| Feature | Shipped | After implementation |
+| Feature | Shipped today | After Status SSOT code plan |
 |---|---|---|
-| Single ptr FA10 | Yes (`enqueue-delta` + `EventTarget`) | — |
-| Multi / random / area / all | Yes (`TargetResolver` + dispatcher fan-out) | — |
-| Counter burst | Yes (`Delivery.Counter`, in-memory meters) | SQLite runtime columns later |
-| DoT overlay | Yes (`OverTime` + injector ~100ms `OnTimer`) | — |
-| Heal via FA10 | Yes (positive delta) | Same `DamagePacket` sign convention |
-| CombatMath | Pass-through `signedAmount` | DEF / element / shield |
+| Single ptr FA10 | Yes | — |
+| Multi / random / area / all | Yes | — |
+| Counter burst | Yes (legacy `Delivery.Counter`) | `statusId: bond` on StatusRuntime |
+| DoT overlay | Yes (legacy `Delivery.OverTime`) | `statusId: wither` on StatusRuntime |
+| Heal via FA10 | Yes | — |
+| CombatMath | Pass-through | DEF / element / shield |
+| Contagion spread | No | `Spread` payload — [status-ssot.md](status-ssot.md) |
 
 ---
 
@@ -319,7 +322,10 @@ Verification (unit tests, guards, LIVE matrix) belongs in that plan — not here
 
 ## 12. Related docs
 
-- [effect-data.md](effect-data.md) — overlay keys, `OnTimer`, runtime columns
+- [status-ssot.md](status-ssot.md) — timed state, resistance, contagion, catalog ids
+- [actor-hub-ssot.md](actor-hub-ssot.md) — derived power/resist at Status Apply
+- [effect-data.md](effect-data.md) — overlay keys, runtime columns
 - [effect-funnel.md](effect-funnel.md) — FA10 add-only, mutation sum
-- [effect-testing.md](effect-testing.md) — future scenario ids `combat-target-*`, `combat-counter-*`, `combat-dot-*`
+- [effect-testing.md](effect-testing.md) — scenario ids `combat-target-*`, `combat-counter-*`, `combat-dot-*`
+- [examples/status/](examples/status/) — forward overlay shapes
 - [../research/arpg-effects/03-effects-procs-triggers.md](../research/arpg-effects/03-effects-procs-triggers.md) — inspiration only

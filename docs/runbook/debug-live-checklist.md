@@ -79,6 +79,27 @@ After each scenario, wait **0.5–2s** (longer for combat). Prefer **`/api/event
 | X3 | `GET /api/debug/session` | sessionActive | **PASS** | |
 | X4 | `GET /api/debug/snapshot` | `debug.snapshot` | **PASS** | |
 
+## 11. StatusRuntime LIVE (F52+)
+
+Prove L2 instances, resisted telemetry, and contagion. **Do not** use `status-butter` / `debug.apply-status` here — those are Unity CC bypass (F5).
+
+Pin profiles on spawn (`derivedProfile`). Poll `debug.status`, `debug.status.resisted`, `debug.actor-derived`.
+
+| # | Call | Wait | Script assert | Pass | Fail | Notes |
+|---|---|---|---|---|---|---|
+| F52 | `POST /api/debug/scenario/status-l2-wither` | 1s | `debug.status` instance `statusId=wither` on selected zombie | | | plant `neutral`, zombie `glass` |
+| F53 | `POST /api/debug/scenario/status-l2-snapshot` or `GET /api/debug/status` | 0.5s | `debug.status` instances + `resisted[]` | | | alias: `POST /api/debug/effect/dots` |
+| F54 | `POST /api/debug/scenario/status-l2-resist` | 1s | `debug.status.resisted` `reason=PotencyFloor` | | | zombie `iron-dot`; no wither instance |
+| F55 | `POST /api/debug/scenario/status-l2-blight-row` | 2s | seed + row neighbor `blight`; row-3 control empty | | | Z1 x=7.5 r2, Z2 x=8.2 r2, Z3 r3 |
+
+CC visual (optional): `status-l2-butter` / `status-l2-freeze` / `status-l2-poison` — L2 Apply then FA2. Distinct from F5 `status-butter`.
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/scenario/status-l2-wither -ContentType application/json -Body '{}'
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/status -ContentType application/json -Body '{}'
+Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.status,debug.status.resisted,debug.actor-derived&limit=50'
+```
+
 ## 4. Final P1 verdict
 
 | Case | Typical damage | vs baseline | Pass? |

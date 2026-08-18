@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats;
 using FusionRpg.Injector.Bridges;
 using FusionRpg.Injector.Lawn;
@@ -50,6 +51,7 @@ public static class DebugActions
             try { dump["thePlantProduceInterval"] = plant.thePlantProduceInterval; } catch { }
             DebugRuntime.Emit("debug.spawn.plant", dump);
             CheatState.Note($"debug spawn plant {typeId} @{CheatState.SpawnCol},{CheatState.SpawnRow}");
+            MaybePinDerived(p, plant.Pointer.ToString("X"));
             return true;
         }
         catch (Exception ex)
@@ -112,6 +114,7 @@ public static class DebugActions
             try { dump["theSpeed"] = z.theSpeed; } catch { }
             DebugRuntime.Emit("debug.spawn.zombie", dump);
             CheatState.Note($"debug spawn zombie {typeId} row={CheatState.SpawnRow}");
+            MaybePinDerived(p, z.Pointer.ToString("X"));
             return true;
         }
         catch (Exception ex)
@@ -964,6 +967,41 @@ public static class DebugActions
             return;
         }
 
+        if (p.TryGetProperty("row", out var zRowEl) && zRowEl.TryGetInt32(out var zRow))
+        {
+            var wantX = p.TryGetProperty("x", out var zxEl) && zxEl.TryGetSingle(out var zxv) ? zxv : (float?)null;
+            Zombie? best = null;
+            var bestDx = float.MaxValue;
+            foreach (var z in UObject.FindObjectsOfType<Zombie>())
+            {
+                try
+                {
+                    if (z == null || z.theZombieType == ZombieType.Nothing) continue;
+                    if (z.theZombieRow != zRow) continue;
+                    if (wantX == null)
+                    {
+                        CheatState.Select(z.Pointer, "zombie");
+                        return;
+                    }
+
+                    var dx = Math.Abs(z.transform.position.x - wantX.Value);
+                    if (dx >= bestDx) continue;
+                    bestDx = dx;
+                    best = z;
+                }
+                catch { }
+            }
+
+            if (best != null)
+            {
+                CheatState.Select(best.Pointer, "zombie");
+                return;
+            }
+
+            CheatState.Error($"debug.select: no zombie at row={zRow}");
+            return;
+        }
+
         foreach (var z in UObject.FindObjectsOfType<Zombie>())
         {
             try
@@ -1091,4 +1129,25 @@ public static class DebugActions
 
     static string? Str(JsonElement p, string name) =>
         p.TryGetProperty(name, out var e) && e.ValueKind == JsonValueKind.String ? e.GetString() : null;
+
+    static void MaybePinDerived(JsonElement p, string ptr)
+    {
+        var profile = Str(p, "derivedProfile");
+        Dictionary<string, double>? overlay = null;
+        if (p.TryGetProperty("derived", out var d) && d.ValueKind == JsonValueKind.Object)
+        {
+            overlay = new Dictionary<string, double>(StringComparer.Ordinal);
+            foreach (var prop in d.EnumerateObject())
+            {
+                if (prop.Value.TryGetDouble(out var v))
+                    overlay[prop.Name] = v;
+                else if (prop.Value.TryGetInt64(out var l))
+                    overlay[prop.Name] = l;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(profile) && (overlay == null || overlay.Count == 0))
+            return;
+        InjectorDerivedOverride.PinProfile(ptr, profile, overlay);
+    }
 }

@@ -12,7 +12,7 @@ Parent: [effect-system.md](effect-system.md). Runtime: [effect-runtime.md](effec
 |---|---|---|
 | **`foundation_effect_def` + trigger + action** | Opcode skeleton (type, FT*, FA*, coarse enums) | chance, icd, typeId, Flat/Inc/More amounts |
 | **`foundation_effect_grant.overlay_json`** | Secondary: chance, icd_ms, amounts, typeId, filters, duration | Direct game apply |
-| **`foundation_effect_runtime`** | Session ICD clocks / stacks | SSOT content |
+| **`foundation_effect_runtime`** | Session ICD clocks / stacks; **legacy** Counter/DoT columns until StatusRuntime ships | SSOT content |
 
 ```text
 EffectCatalog.Get(effect_id)     → Def + Triggers + Actions
@@ -71,17 +71,21 @@ Unknown overlay keys for the FA* being executed → **reject** (log + skip actio
 
 ### `foundation_effect_runtime`
 
+Session-scoped proc gates and **legacy** delivery meters. When [StatusRuntime](status-ssot.md) ships, Counter/DoT/tick columns move to L2 RAM; grant ICD + `max_stacks` stay here or on grant policy as today.
+
 | Column | Type | Notes |
 |---|---|---|
 | `grant_id` | TEXT | |
 | `effect_id` | TEXT | |
 | `match_key` | TEXT | |
-| `last_fire_utc` | TEXT | ICD |
+| `last_fire_utc` | TEXT | Grant ICD |
 | `stacks` | INT | Grant stack cap tracking (`max_stacks`) |
-| `hit_counter` | INT | Counter delivery meter ([combat-damage-ssot.md](combat-damage-ssot.md)) |
-| `counter_scope_key` | TEXT | `Target` meter key: `targetPtr` or `actorPtr` facet |
-| `last_tick_ms` | INT | DoT / OnTimer alignment |
-| `dot_budget_spent` | INT | B-DOT-BUDGET window counter |
+| `hit_counter` | INT | **Legacy** Counter meter — migrates to StatusRuntime |
+| `counter_scope_key` | TEXT | **Legacy** Target/Actor meter key |
+| `last_tick_ms` | INT | **Legacy** DoT alignment |
+| `dot_budget_spent` | INT | **Legacy** B-DOT-BUDGET |
+
+Active **status instances** (duration, stacks on actor, contagion hops) are **not** rows in this table — they live on StatusRuntime per [status-ssot.md](status-ssot.md).
 
 Rich side/type filters on **grant overlay** `filters` (event matching) stay separate from **`target.filters`** (damage recipient pool) — see [combat-damage-ssot.md](combat-damage-ssot.md).
 
@@ -165,11 +169,27 @@ Nested object on overlay. See [combat-damage-ssot.md](combat-damage-ssot.md) and
 
 | Key | Type | Notes |
 |---|---|---|
-| `mode` | string | `Instant`, `OverTime`, `Counter` |
-| `periodMs`, `durationMs` | int | OverTime |
-| `tickBudget` | int | OverTime — B-DOT-BUDGET |
-| `everyHits`, `resetOnBurst` | int / bool | Counter |
-| `counterScope` | string | `Target` \| `Actor` |
+| `mode` | string | **`Instant`** forward. `OverTime`, `Counter` = **legacy** until [status-ssot.md](status-ssot.md) ships |
+| `periodMs`, `durationMs` | int | Legacy OverTime |
+| `tickBudget` | int | Legacy OverTime — B-DOT-BUDGET |
+| `everyHits`, `resetOnBurst` | int / bool | Legacy Counter |
+| `counterScope` | string | Legacy `Target` \| `Actor` |
+
+### `statusId` and status overlay (forward)
+
+When StatusRuntime ships, timed/counter grants reference a catalog id instead of `delivery.mode = OverTime|Counter`:
+
+| Key | Type | Notes |
+|---|---|---|
+| `statusId` | string | One of 21 locked ids — [status-ssot.md](status-ssot.md) §9; L2b category — §9.5 |
+| `chance` | number 0–1 | L1 proc gate; default **1** if omitted. L2b combine: `p_final = chance × p_apply` — [status-ssot.md §6](status-ssot.md), [actor-hub-ssot.md](actor-hub-ssot.md) |
+| `periodMs`, `durationMs`, `tickBudget` | int | OverTime overlay (wither, blight, …) |
+| `amount` | signed int | PulseHp magnitude per tick or instant |
+| `everyHits`, `burst`, `counterScope` | | Counter overlay (bond) |
+| `stat` | object | ModifyStat overlay (rally, expose) |
+| `spread` | object | Contagion — `chance`, `icd_ms`, `maxHops`, `statusId`, `target` (TargetSpec) |
+
+Examples: [examples/status/](examples/status/).
 
 ### `burst` (Counter mode)
 

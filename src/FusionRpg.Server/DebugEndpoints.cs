@@ -187,6 +187,37 @@ public static class DebugEndpoints
         MapPost(g, "/effect/board-snapshot", "debug.effect.board-snapshot");
         MapPost(g, "/effect/dots", "debug.effect.dots");
         MapPost(g, "/effect/counters", "debug.effect.counters");
+        MapPost(g, "/status", "debug.status");
+        g.MapGet("/status", async (IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            await Send(hub, inbox, "debug.status", new { });
+            return Results.Ok(new
+            {
+                ok = true,
+                note = "injector emits debug.status; poll GET /api/debug/events?kinds=debug.status,debug.status.resisted"
+            });
+        });
+        g.MapGet("/actor-derived", async (string? ptr, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            await Send(hub, inbox, "debug.actor-derived", new { ptr = ptr ?? "" });
+            return Results.Ok(new
+            {
+                ok = true,
+                note = "injector emits debug.actor-derived; poll GET /api/debug/events?kinds=debug.actor-derived"
+            });
+        });
+        g.MapPost("/actor-derived", async (JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.actor-derived", b);
+            return Results.Ok(new { ok = true, queued = inbox.Count, command = "debug.actor-derived" });
+        });
+        g.MapPost("/status/apply", async (JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
+        {
+            var b = BodyOrEmpty(body);
+            await Send(hub, inbox, "debug.status.apply", b);
+            return Results.Ok(new { ok = true, queued = inbox.Count, command = "debug.status.apply" });
+        });
         MapPost(g, "/fx/probe-shaders", "debug.fx.probe-shaders");
         MapPost(g, "/fx/world-flash", "debug.fx.world-flash");
 
