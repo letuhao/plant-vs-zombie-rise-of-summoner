@@ -18,19 +18,27 @@ public sealed partial class RpgStore
 
     List<RpgProgressionDirty> ApplyRpgProgressionFromActivityUnlocked(
         SqliteConnection db, long playerId, long? runId, string t, string factKind,
-        string payload, string dedupeKey, long factId)
+        string payload, string dedupeKey, long factId, bool pvzGame = true)
     {
         var dirty = new List<RpgProgressionDirty>();
         var result = TryString(payload, "result");
         var typeId = TryInt(payload, "type");
+        // Run-scope the ledger dedupe: the raw fact dedupe ("run", reused ptrs) collides across
+        // matches — a second match's defeat XP was silently eaten by INSERT OR IGNORE. Fact-level
+        // dedupe still gates true replays; this key only separates distinct facts.
+        var runScopedDedupe = (runId ?? 0) + ":" + dedupeKey;
         foreach (var award in RpgXpAwardMap.FromActivity(factKind, result, typeId, payload))
         {
+            // Web-mode runs never level PvZ almanac type actors (audit 2026-08-21) —
+            // player-kind XP still flows (one economy); demon specimen XP is expedition-owned.
+            if (!pvzGame && award.Kind != RpgActorKinds.Player)
+                continue;
             var ledgerPayload = award.Reason == RpgXpReasons.Kill
                 ? MergePowerScalePayload(payload, award.PowerScale)
                 : payload;
             var d = TryApplyXpUnlocked(
                 db, playerId, award.Kind, award.TypeId, runId ?? 0, t,
-                award.Delta, award.Reason, dedupeKey, factId, ledgerPayload);
+                award.Delta, award.Reason, runScopedDedupe, factId, ledgerPayload);
             if (d is { } item)
             {
                 dirty.Add(item);

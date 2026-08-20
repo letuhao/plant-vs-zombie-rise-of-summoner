@@ -120,6 +120,84 @@ suspects `CheatActions.AutoCollectTick`/`TickContinuous` (per-frame `FindObjects
 toggles are on — audit finding, never fixed) and the new `VfxDirector.Tick`. frameMax 2.6 s
 is the known alt-tab/level-load artifact; real spikes were ≤85 ms.
 
+## Stress scaling curve (2026-08-21 ~02:15, stress-fill API, waves frozen, 60fps cap)
+
+| tier | board | fps | frameMax | pipeline share | gen2 / drops | verdict |
+|---|---|---|---|---|---|---|
+| 300z | 40p/302z | 59.8 | 39 ms | 3.67% | 0 / 0 | **PASS** |
+| 600z | 50p/600z | 55.8 | 251 ms | ~8% (11.85% w/ double-count) | 0 / 0 | over bar — causes identified |
+| 1000z (normal speed, plants ×50HP/×10ATK) | 64p/1006z | — | — | — | — | game playable ("lag but playable"); **server process crashed mid-run** — capture lost |
+
+600z findings: (a) per-death `FlushForPtr` pops/re-appends the whole ring — O(ring) per death,
+runs outside the drain budget (`effect.onCapture` 379ms/5s > `drain.tick` 222ms/5s);
+(b) board snapshot rebuild cost scales with entities (57µs → 467µs at 640); (c) remaining
+`effect.onEvent` ~957µs/record is largely real target-resolution work at density.
+1000z finding: **server died under the spawn/death event burst** (~2000+ entity rows +
+events in seconds) — injector unaffected, game playable; server stability under burst is now
+a v3 item. Verdict-formula note: drain.tick contains onEvent-in-drain; summing both
+double-counts — fix stress-test.ps1 arithmetic.
+
+## v3 gate curve (2026-08-21 ~03:10 — NOTE: tiers 2–3 ran under owner-buffed sustained-war
+conditions, far harsher than the v2 benchmark: plants ATK×5/HP×100/DEF×30, zombies HP×60)
+
+| tier | fps | share (corrected) | gen2/drops | verdict |
+|---|---|---|---|---|
+| v3-300z | 59.5 | **4.44%** | 0/0 | **PASS** — A-module acceptance met |
+| v3-600z (war) | 50.7 | 19.8% | 0/0 | over bar under war conditions |
+| v3-1000z (war) | 7.2 | 22.5% | 1/0 | over bar; **server alive end-to-end (B4 ✓)**; fps floor largely base-game sim of 1002 buffed entities |
+
+Loop decomposition worked perfectly: `cheat.autocollect` 0.07 ms/5s (was ~9 ms/frame),
+`vfx.tick` 0.12, `pump.main` 0.22, zero dark cost. No ring drops at any tier.
+
+### v4 — IMPLEMENTED 2026-08-21 (~03:25), same session
+
+All four items below shipped and offline-verified (875 Core tests): death-flush per-frame
+allowance with shed counter (`droppedDeathBudget`), `maxRecordUs` + expensive threshold
+0.5→0.35, `combat.dispatch`/`funnel.flush` probe decomposition, `maxLatencyFrames` in the
+perf window. **Pending live validation: one war-tier re-run on the v4 build** (deploy +
+`stress-test.ps1 -Zombies 600` under buffed sustained-war conditions) — expected: death-flush
+cost inside budget, `onCaptureOutside` collapses, latency measured directly.
+
+### v5 — persistent-carry saturation fix (2026-08-21 ~04:00)
+
+Storage split into ring (new records) + persistent coalesced carry with cursor (never
+re-coalesced). Validated live (`v5-600z-war`, conditions escalated AGAIN to 2,123 damage
+events/s — 30× the original war): carry churn 2.07M → 508k *and the number now means true
+backlog (~300 records)*; drain progresses every frame instead of re-coalescing; first ring
+drops appeared (123,858 — designed shed under input≫output, counted). fps 18.3 dominated by
+base-game sim of ~118 attacks/frame; our share 11.8%.
+
+**New finding fixed same hour:** `stats.resolve` ran per TakeDamage (2,123/s — v1 leftover
+defense scaling, top allocator at density). Now cached by (DocumentRevision, PvzStatsRevision)
+per side — hook cost drops to a comparison. Deployed with the next restart.
+
+**Where the ceiling genuinely is now:** single mega-record effect execution (~4.4 ms atomic —
+splitting or capping merged HitCount is the remaining knob if ever needed) and the base game
+itself. At ≤900 events/s (v4 conditions) the pipeline held without drops.
+
+### FINAL — resolve-cache build (2026-08-21 ~04:11, `final-600z-war`, 2,979 events/s)
+
+First run where pipeline share FELL while load rose: **8.59%** at 2,979 events/s (vs 14.0% at
+2,123). `stats.resolve` 2,123/s → 0.47/s; TakeDamage hook 12.5 µs → **1.46 µs**; gen2 back to
+0. War-protocol trajectory across the night: share 19.8→15.1→14.0→8.6% while event rate rose
+70→906→2,123→2,979/s — ~150× cheaper per event end to end. fps 12 at the final tier is the
+base game simulating ~246 attacks/frame; drops (158k) are the designed shed in that regime.
+Remaining optional knob: mega-record execution splitting (~4.5 ms atomic) — only relevant
+beyond the base game's own renderable density. **Perf campaign closed.**
+
+### v4 targets (named by the war-tier data — original list)
+
+1. **Death-flush inside the budget**: FlushForPtr processed 832 ms/5s outside drain.tick at
+   1000z kill rates — batch death flushes per frame or process them as priority records in
+   the next drain instead of synchronously in the hook.
+2. **Per-record budget overshoot**: budget is checked between records; a ~1–1.5 ms effect
+   execution blows through the 2 ms clamp. Sub-record accounting or tighter expensive-class
+   thresholds.
+3. **Per-record cost decomposition**: instrument inside OnDrained (target resolve vs funnel
+   vs status) — 1 ms/merged-record is the real ceiling under sustained war.
+4. Carried backlog telemetry: 38.8k (600z war) / 1.85M (1000z war) carries — add
+   effect-latency-frames to the probe window so delay is measured, not inferred.
+
 ### Next iteration (v3 targets)
 
 1. Instrument `InjectorLoop` subsections (`vfx.tick`, `cheat.continuous`, `cheat.autocollect`,
@@ -127,6 +205,16 @@ is the known alt-tab/level-load artifact; real spikes were ≤85 ms.
 2. Registry-fy `AutoCollectTick` (coin scans per frame) and `TickContinuous`.
 3. Spec criterion 2 formally near-miss (≈5 ms per 5s per 100 events/s vs the 2 ms letter) —
    intent met at 0.7% wall; revisit the number or the pipeline after the loop work lands.
+4. **Death-flush batching** (600z finding a): index pending records by ptr, or mark-dead and
+   let the next drain handle them first — removes the O(ring)-per-death churn outside budget.
+5. **Incremental board snapshot** (600z finding b): maintain the snapshot in place on
+   registry add/remove instead of rebuild-on-invalidate; cost stops scaling with entities.
+6. **Server burst stability** (1000z finding): server process died under a ~2000-row
+   spawn/death event burst — reproduce headless (POST synthetic events), find the crash
+   (likely SQLite insert pressure or OOM in EventIngest), add backpressure. Injector is
+   already immune (queue + drop policy).
+7. stress-test.ps1 verdict arithmetic double-counts nested sections (drain contains onEvent);
+   subtract the overlap.
 
 ### Remaining (next iteration)
 

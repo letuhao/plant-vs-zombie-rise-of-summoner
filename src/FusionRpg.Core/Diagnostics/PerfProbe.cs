@@ -17,7 +17,16 @@ public enum PerfSection
     EntityApply = 9,
     MatchApply = 10,
     EffectOnEvent = 11,
-    DrainTick = 12
+    DrainTick = 12,
+    // v3 A1 — InjectorLoop callee decomposition (find the dark loop cost)
+    VfxTick = 13,
+    CheatContinuous = 14,
+    CheatAutoCollect = 15,
+    PollBoard = 16,
+    PumpMain = 17,
+    // v4 — per-record cost decomposition inside the effect pipeline
+    CombatDispatch = 18,
+    FunnelFlush = 19
 }
 
 /// <summary>
@@ -27,7 +36,7 @@ public enum PerfSection
 /// </summary>
 public static class PerfProbe
 {
-    const int SectionCount = 13;
+    const int SectionCount = 20;
 
     static readonly string[] SectionNames =
     {
@@ -43,7 +52,14 @@ public static class PerfProbe
         "entity.apply",
         "match.apply",
         "effect.onEvent",
-        "drain.tick"
+        "drain.tick",
+        "vfx.tick",
+        "cheat.continuous",
+        "cheat.autocollect",
+        "poll.board",
+        "pump.main",
+        "combat.dispatch",
+        "funnel.flush"
     };
 
     static readonly long[] Counts = new long[SectionCount];

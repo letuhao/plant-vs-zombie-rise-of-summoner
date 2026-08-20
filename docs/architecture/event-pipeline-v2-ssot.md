@@ -1,8 +1,12 @@
 # Event Pipeline v2 — record-then-drain SSOT
 
-Status: **DRAFT — audit in progress** (2026-08-21). Companion perf data:
-[`../research/perf/00-baseline.md`](../research/perf/00-baseline.md). Needs a `decisions.md`
-row before implementation locks behavior.
+Status: **AS-BUILT** (2026-08-21) — implemented (event-pipeline-v2-spec.md, Phase 1+2), hardened
+by a two-pass adversarial review (all Criticals/Importants fixed with regression tests), and
+live-verified: wave freezes eliminated, 300z stress at 4.44% frame share, playable at 1,006
+zombies, server alive end-to-end. Perf data: [`../research/perf/00-baseline.md`](../research/perf/00-baseline.md).
+Owner writes the `decisions.md` row at commit time. Known ceiling under sustained max-intensity
+war (owner-buffed 600z+): drain throughput — v4 targets filed in 00-baseline.md §v4; these are
+tuning within this contract, not changes to it.
 
 ## 1. Why v1 cannot ship
 

@@ -19,10 +19,33 @@ public static class VfxRules
     public const int GlobalCuePerTickCap = 32;
     public const int CueQueueCap = 256;
 
-    public const float AnchorSweepMinIntervalSeconds = 0.5f;
-
     /// <summary>Crit keeps distinctness via size, not color — vfx-ssot.md §16.4.</summary>
     public const float CritFontScale = 1.25f;
+
+    /// <summary>Crit pop: start big, settle to CritFontScale by this normalized life t.</summary>
+    public const float CritPopStartScale = 1.5f;
+    public const float CritPopSettleT = 0.3f;
+
+    /// <summary>Amount tiers (|amount|): small hits shrink, big hits grow — numeric labels only.</summary>
+    public const long AmountTierSmallBelow = 50;
+    public const long AmountTierBigFrom = 200;
+    public const float AmountTierSmallScale = 0.9f;
+    public const float AmountTierBigScale = 1.15f;
+
+    public static float PopScale(float t)
+    {
+        if (t <= 0f) return CritPopStartScale;
+        if (t >= CritPopSettleT) return CritFontScale;
+        return CritPopStartScale - (CritPopStartScale - CritFontScale) * (t / CritPopSettleT);
+    }
+
+    public static float AmountScale(long amount)
+    {
+        var a = Math.Abs(amount);
+        if (a < AmountTierSmallBelow) return AmountTierSmallScale;
+        if (a < AmountTierBigFrom) return 1f;
+        return AmountTierBigScale;
+    }
 }
 
 /// <summary>Enumerated skip reasons — debug.fx.skipped payload contract (vfx-ssot.md §11).</summary>
@@ -36,4 +59,6 @@ public static class VfxSkipReasons
     public const string Missing = "missing";
     public const string NoShader = "no-shader";
     public const string ParticleFail = "particle-fail";
+    /// <summary>Every renderable spec required an element color and the cue had none.</summary>
+    public const string NoElement = "no-element";
 }

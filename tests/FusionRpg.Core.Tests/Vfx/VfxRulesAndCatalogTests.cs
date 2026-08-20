@@ -28,14 +28,22 @@ public class VfxRulesAndCatalogTests
         Assert.True(catalog.TryGet(VfxCueIds.CombatHit, out var hit));
         Assert.True(catalog.TryGet(VfxCueIds.CombatHeal, out var heal));
         Assert.True(catalog.TryGet(VfxCueIds.DebugProbe, out var probe));
-        Assert.Equal(3, catalog.Ids.Count);
+        // 3 combat/debug cues + 21 status.{id}.apply cues (SPEC W5)
+        Assert.Equal(24, catalog.Ids.Count);
 
-        // combat.hit = floater + burst; heal = floater only; probe = fixed-color burst.
-        Assert.Equal(2, hit.Primitives.Count);
+        // combat.hit = floater + burst + impact flash; heal = floater + rising motes; probe = fixed-color burst.
+        Assert.Equal(3, hit.Primitives.Count);
         Assert.Equal(VfxPrimitiveKind.Floater, hit.Primitives[0].Kind);
+        Assert.False(hit.Primitives[0].RequireElement); // plain damage always keeps its number
         Assert.Equal(VfxPrimitiveKind.Burst, hit.Primitives[1].Kind);
-        Assert.Single(heal.Primitives);
+        Assert.Equal(VfxBurstShape.Radial, hit.Primitives[1].Shape);
+        Assert.True(hit.Primitives[1].RequireElement);  // burst/flash are element-only (owner call)
+        Assert.Equal(VfxPrimitiveKind.Flash, hit.Primitives[2].Kind);
+        Assert.True(hit.Primitives[2].RequireElement);
+        Assert.Equal(2, heal.Primitives.Count);
         Assert.Equal(VfxPrimitiveKind.Floater, heal.Primitives[0].Kind);
+        Assert.Equal(VfxPrimitiveKind.Burst, heal.Primitives[1].Kind);
+        Assert.Equal(VfxBurstShape.Rising, heal.Primitives[1].Shape);
         Assert.Single(probe.Primitives);
         Assert.Equal(VfxColorSourceKind.Fixed, probe.Primitives[0].Color);
         Assert.Equal(VfxSeedCatalog.ProbeOrange, probe.Primitives[0].FixedRgb);

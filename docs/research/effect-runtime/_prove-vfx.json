@@ -1,0 +1,223 @@
+{
+  "at": "2026-08-21T04:51:38.6796388+07:00",
+  "baseUrl": "http://127.0.0.1:5088",
+  "targetPtr": "1F37B199000",
+  "pass": true,
+  "results": [
+    {
+      "case": "probe",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "hit-neutral-cell",
+      "ok": true,
+      "detail": "skip=no-element"
+    },
+    {
+      "case": "hit-fire",
+      "ok": true,
+      "detail": "rgb=#FF5A28 hybrid=False prims=burst"
+    },
+    {
+      "case": "hit-ice",
+      "ok": true,
+      "detail": "rgb=#6ED2FF hybrid=False prims=burst"
+    },
+    {
+      "case": "hit-air",
+      "ok": true,
+      "detail": "rgb=#BEFFAA hybrid=False prims=burst"
+    },
+    {
+      "case": "hit-earth",
+      "ok": true,
+      "detail": "rgb=#D2A046 hybrid=False prims=burst"
+    },
+    {
+      "case": "hit-light",
+      "ok": true,
+      "detail": "rgb=#FFE878 hybrid=False prims=burst"
+    },
+    {
+      "case": "hit-dark",
+      "ok": true,
+      "detail": "rgb=#965ADC hybrid=False prims=burst"
+    },
+    {
+      "case": "hit-hybrid",
+      "ok": true,
+      "detail": "rgb=#FF5A28 hybrid=True prims=burst"
+    },
+    {
+      "case": "heal-rising",
+      "ok": true,
+      "detail": "rgb=#50DC50 hybrid=False prims=burst"
+    },
+    {
+      "case": "unknown-cue",
+      "ok": true,
+      "detail": "skip=unknown-cue"
+    },
+    {
+      "case": "hit-ptr-crit-fire",
+      "ok": true,
+      "detail": "rgb=#FF5A28 hybrid=False prims=floater+burst+flash"
+    },
+    {
+      "case": "hit-ptr-plain-no-burst",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=floater"
+    },
+    {
+      "case": "heal-ptr",
+      "ok": true,
+      "detail": "rgb=#50DC50 hybrid=False prims=floater+burst"
+    },
+    {
+      "case": "status-recipe-butter",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-freeze",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-cold",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-poison",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-hypno",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-ember",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-jala",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-kelp",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-wither",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-bond",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-rally",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-leech",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-expose",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-command",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-shatter",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-charm_pulse",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-blight",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-rot",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-spark",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-pact_mark",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "status-recipe-spore",
+      "ok": true,
+      "detail": "rgb=#FFFFFF hybrid=False prims=burst"
+    },
+    {
+      "case": "world-flash-alias",
+      "ok": true,
+      "detail": "prims=burst"
+    },
+    {
+      "case": "organic-combat-fire",
+      "ok": true,
+      "detail": "cue=combat.hit rgb=#FF5A28"
+    },
+    {
+      "case": "organic-status-wither",
+      "ok": true,
+      "detail": "shown"
+    },
+    {
+      "case": "rate-limit-collapse",
+      "ok": true,
+      "detail": "shown=2 limited=3 (volley of 4)"
+    },
+    {
+      "case": "mute-roundtrip",
+      "ok": true,
+      "detail": "muted=1 unmutedShown=1"
+    },
+    {
+      "case": "master-toggle-off",
+      "ok": true,
+      "detail": "disabledSkips=1"
+    },
+    {
+      "case": "element-toggle-off",
+      "ok": true,
+      "detail": "skip=no-element"
+    },
+    {
+      "case": "fx-list",
+      "ok": true,
+      "detail": "cues=combat.heal,combat.hit,debug.probe,status.blight.apply,status.bond.apply,status.butter.apply,status.charm_pulse.apply,status.cold.apply,status.command.apply,status.ember.apply,status.expose.apply,status.freeze.apply,status.hypno.apply,status.jala.apply,status.kelp.apply,status.leech.apply,status.pact_mark.apply,status.poison.apply,status.rally.apply,status.rot.apply,status.shatter.apply,status.spark.apply,status.spore.apply,status.wither.apply"
+    }
+  ]
+}

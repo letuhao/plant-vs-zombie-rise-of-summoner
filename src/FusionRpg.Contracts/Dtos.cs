@@ -89,6 +89,8 @@ public sealed class RunItem
     [JsonPropertyName("boardLevel")] public int? BoardLevel { get; set; }
     [JsonPropertyName("modifiers")] public object? Modifiers { get; set; }
     [JsonPropertyName("archiveUri")] public string? ArchiveUri { get; set; }
+    /// <summary>Game profile that produced this run (pvzrh-* or webrpg-1). Legacy rows default to pvzrh.</summary>
+    [JsonPropertyName("game")] public string Game { get; set; } = RpgConstants.GameId;
 }
 
 public sealed class RecipeItem
@@ -209,12 +211,26 @@ public static class RpgConstants
     public const string GameId = GameId381;
     public const string GameId381 = "pvzrh-3.8.1";
     public const string GameId39 = "pvzrh-3.9";
+    /// <summary>
+    /// Web-mode game profile: matches produced by the server's own battle resolver
+    /// (standalone-charter). Event vocabulary / runs only — never a game-profiles.json
+    /// entry (that catalog drives launcher fingerprint matching).
+    /// </summary>
+    public const string GameIdWebRpg = "webrpg-1";
     public const string InjectorGroup = "injector";
     public const string WebGroup = "web";
     public const string SourceNone = "none";
     public const string SourceSim = "sim";
     public const string SourceInjector = "injector";
+    public const string SourceWeb = "web";
     public const string SimEnvVar = "FUSIONRPG_SIM";
+
+    /// <summary>
+    /// Game-mode classifier (standalone charter): null/empty = legacy injector = PvZ.
+    /// SSOT for the predicate — the SQL mirror in RpgStore.Compaction.cs must match.
+    /// </summary>
+    public static bool IsPvzGame(string? game) =>
+        string.IsNullOrEmpty(game) || game.StartsWith("pvzrh", StringComparison.Ordinal);
 
     public static bool IsNoisyKind(string? kind) =>
         kind is "plant.damage" or "zombie.damage" or "bullet.init" or "bullet.place" or "item.drop" or "pet.xp";

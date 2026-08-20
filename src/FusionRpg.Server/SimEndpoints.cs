@@ -123,6 +123,7 @@ public static class SimEndpoints
         sim.MapGet("/state", (SimService svc) => Results.Ok(svc.Engine.Snapshot()));
 
         var test = app.MapGroup("/api/test");
+        test.MapSoulTestSeed();
         test.MapPost("/reset", async (SimService svc) =>
         {
             await svc.FullResetAsync();

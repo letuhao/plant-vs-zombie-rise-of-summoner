@@ -39,6 +39,18 @@ public class ProcMergeMathTests
     }
 
     [Fact]
+    public void Counter_burst_keeps_residual_hits()
+    {
+        // I3 (review): merged records must not eat progress — 7 hits over an every-3 counter
+        // bursts once (spec: one burst per crossing) and keeps residual 1, so 2 more hits
+        // cross again.
+        var rt = new StatusRuntime(StatusCatalogBootstrap.CreateDefault(), (_, _) => ActorDerivedSnapshot.AttackerLess());
+        Assert.True(rt.RecordCounterHit("g1", "t1", everyHits: 3, resetOnBurst: true, hits: 7));
+        Assert.True(rt.RecordCounterHit("g1", "t1", everyHits: 3, resetOnBurst: true, hits: 2));
+        Assert.False(rt.RecordCounterHit("g1", "t1", everyHits: 3, resetOnBurst: true, hits: 2));
+    }
+
+    [Fact]
     public void Counter_hits_one_matches_legacy_behavior()
     {
         var rt = new StatusRuntime(StatusCatalogBootstrap.CreateDefault(), (_, _) => ActorDerivedSnapshot.AttackerLess());

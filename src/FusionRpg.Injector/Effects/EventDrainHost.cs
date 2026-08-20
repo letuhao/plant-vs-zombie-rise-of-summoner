@@ -21,9 +21,10 @@ public static class EventDrainHost
 
     static EventDrain? _drain;
     static int _pairSeq;
-    static int _pendingMeleePairId;
-    static int _pendingMeleeFrame = -1;
-    static IntPtr _pendingMeleeTarget;
+    // I1 (2026-08-21 review): per-TARGET pending melee pairs — a single slot leaked N-1
+    // spurious OnDamageTaken per multi-bite frame. Cleared when the frame advances.
+    static readonly Dictionary<IntPtr, int> _meleePairsByTarget = new();
+    static int _meleePairsFrame = -1;
 
     public static EventDrain Drain => _drain ??= new EventDrain(EffectRuntime.OnDrained);
 
@@ -37,16 +38,20 @@ public static class EventDrainHost
     }
 
     /// <summary>Bullet dealt (pea→zombie, projectile→plant). No pair — the taken side is
-    /// suppressed at source for bullets (CombatHitEmitPolicy), matching v1.</summary>
+    /// suppressed at source for bullets (CombatHitEmitPolicy), matching v1.
+    /// <paramref name="wasBullet"/> distinguishes "not a bullet → caller records taken" from
+    /// "bullet but ring overflow → drop counted, caller must NOT record taken" (I2).</summary>
     public static bool TryRecordDealtFromBullet(
-        byte targetSide, Il2CppObjectBase? damageFrom, IntPtr targetPtr, int targetTypeId, int damage)
+        byte targetSide, Il2CppObjectBase? damageFrom, IntPtr targetPtr, int targetTypeId, int damage, out bool wasBullet)
     {
+        wasBullet = false;
         if (!Active || !EffectRuntime.HasOnDamageDealtGrant()) return false;
         if (damageFrom == null) return false;
 
         Bullet? bullet = null;
         try { bullet = damageFrom.TryCast<Bullet>(); } catch { }
         if (bullet == null) return false; // melee is the AttackPlant site's job
+        wasBullet = true;
 
         var fromType = 0;
         try { fromType = (int)bullet.fromType; } catch { }
@@ -66,9 +71,10 @@ public static class EventDrainHost
     {
         if (!Active || !EffectRuntime.HasOnDamageDealtGrant()) return false;
         var d = Drain;
+        var frame = SafeFrame();
         var pair = ++_pairSeq;
         var ok = d.Record(new GameEventRec(
-            GameEventKind.CombatHit, SafeFrame(), d.NextSeq(),
+            GameEventKind.CombatHit, frame, d.NextSeq(),
             actorPtr: attackerPtr, targetPtr: targetPtr,
             typeId: attackerTypeId, targetTypeId: targetTypeId, side: GameEventSide.Plant,
             amount: -Math.Abs(damage), hitCount: 1,
@@ -76,9 +82,12 @@ public static class EventDrainHost
             matchKeyIdx: d.InternMatchKey(GameHooks.MatchKey), pairId: pair));
         if (ok)
         {
-            _pendingMeleePairId = pair;
-            _pendingMeleeFrame = SafeFrame();
-            _pendingMeleeTarget = targetPtr;
+            if (frame != _meleePairsFrame)
+            {
+                _meleePairsByTarget.Clear();
+                _meleePairsFrame = frame;
+            }
+            _meleePairsByTarget[targetPtr] = pair;
         }
         return ok;
     }
@@ -91,10 +100,10 @@ public static class EventDrainHost
         var d = Drain;
 
         var pair = 0;
-        if (_pendingMeleePairId != 0 && _pendingMeleeFrame == SafeFrame() && _pendingMeleeTarget == targetPtr)
+        if (_meleePairsFrame == SafeFrame() && _meleePairsByTarget.TryGetValue(targetPtr, out var mp))
         {
-            pair = _pendingMeleePairId;
-            _pendingMeleePairId = 0;
+            pair = mp;
+            _meleePairsByTarget.Remove(targetPtr);
         }
 
         return d.Record(new GameEventRec(
@@ -125,6 +134,12 @@ public static class EventDrainHost
     static long _processedWindow;
     static long _carriedWindow;
     static long _expensiveDeferredWindow;
+    static int _maxLatencyFramesWindow;
+    static long _maxRecordTicksWindow;
+    // v4 item 1: per-frame death-flush allowance pool (one drain-budget's worth per frame).
+    static long _lastBudgetTicks;
+    static int _deathFlushFrame = -1;
+    static long _deathFlushSpent;
 
     /// <summary>
     /// Per-frame drain (plan Task 10): budget = 10% of the measured frame time (spec decision
@@ -139,13 +154,16 @@ public static class EventDrainHost
         var frameSec = unscaledDeltaTime > 0f ? unscaledDeltaTime : 1f / 60f;
         var budgetSec = Math.Clamp(frameSec * 0.10, 0.0002, 0.002);
         var budgetTicks = (long)(budgetSec * System.Diagnostics.Stopwatch.Frequency);
+        _lastBudgetTicks = budgetTicks;
 
         _drain.SessionMode = DebugRuntime.SessionActive;
         EffectRuntime.FreezeBoard();
-        var stats = _drain.Drain(budgetTicks);
+        var stats = _drain.Drain(budgetTicks, SafeFrame());
         _processedWindow += stats.Processed;
         _carriedWindow += stats.Carried;
         _expensiveDeferredWindow += stats.ExpensiveDeferred;
+        if (stats.MaxLatencyFrames > _maxLatencyFramesWindow) _maxLatencyFramesWindow = stats.MaxLatencyFrames;
+        if (stats.MaxRecordTicks > _maxRecordTicksWindow) _maxRecordTicksWindow = stats.MaxRecordTicks;
     }
 
     /// <summary>Perf-window stats for PerfReporter — returns and resets the rolling counters.</summary>
@@ -157,6 +175,11 @@ public static class EventDrainHost
             ["pending"] = _drain?.PendingCount ?? 0,
             ["droppedOverflow"] = _drain?.DroppedByOverflow ?? 0,
             ["droppedDepth"] = _drain?.DroppedByDepth ?? 0,
+            ["droppedDeathBudget"] = _drain?.DroppedByDeathBudget ?? 0,
+            ["maxLatencyFrames"] = _maxLatencyFramesWindow,
+            ["maxRecordUs"] = _maxRecordTicksWindow > 0
+                ? Math.Round(_maxRecordTicksWindow * 1_000_000.0 / System.Diagnostics.Stopwatch.Frequency, 0)
+                : 0,
             ["processed"] = _processedWindow,
             ["carried"] = _carriedWindow,
             ["expensiveDeferred"] = _expensiveDeferredWindow
@@ -164,15 +187,32 @@ public static class EventDrainHost
         _processedWindow = 0;
         _carriedWindow = 0;
         _expensiveDeferredWindow = 0;
+        _maxLatencyFramesWindow = 0;
+        _maxRecordTicksWindow = 0;
         return d;
     }
 
-    /// <summary>Death barrier — pending hits for a dying entity drain before grant-withdraw (SSOT §A2).</summary>
+    /// <summary>
+    /// Death barrier — pending hits for a dying entity drain before grant-withdraw (SSOT §A2).
+    /// v4 item 1: bounded by a per-frame allowance (one drain-budget's worth); over-allowance
+    /// records for dying entities are shed with a counter instead of blowing the frame.
+    /// </summary>
     public static void FlushForPtr(IntPtr ptr)
     {
         if (_drain == null || _drain.PendingCount == 0) return;
+
+        var frame = SafeFrame();
+        if (frame != _deathFlushFrame)
+        {
+            _deathFlushFrame = frame;
+            _deathFlushSpent = 0;
+        }
+        var allowance = _lastBudgetTicks > 0 ? _lastBudgetTicks : System.Diagnostics.Stopwatch.Frequency / 500; // 2ms fallback
+        var remaining = allowance - _deathFlushSpent;
+        if (remaining <= 0) remaining = 0; // still processes nothing beyond budget; drops counted
+
         EffectRuntime.FreezeBoard();
-        _drain.FlushForPtr(ptr);
+        _deathFlushSpent += _drain.FlushForPtr(ptr, remaining);
     }
 
     /// <summary>Match-edge barrier — drain everything, reset interning (board.end / match.result).</summary>
@@ -182,7 +222,7 @@ public static class EventDrainHost
         if (_drain.PendingCount > 0)
             EffectRuntime.FreezeBoard();
         _drain.FlushAllAndReset();
-        _pendingMeleePairId = 0;
-        _pendingMeleeFrame = -1;
+        _meleePairsByTarget.Clear();
+        _meleePairsFrame = -1;
     }
 }

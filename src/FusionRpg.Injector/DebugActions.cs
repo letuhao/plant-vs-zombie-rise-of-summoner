@@ -921,6 +921,119 @@ public static class DebugActions
     }
 
     /// <summary>
+    /// Stress-test board setup in one command (perf runbook): freeze waves, raise spawn caps,
+    /// fill a plant grid, and mass-spawn zombies with staggered x so they walk and fight.
+    /// Payload: { plants, zombies, plantType, zombieType, freeze=true, rows=5 }.
+    /// Runs synchronously — call BEFORE starting a probe capture; the setup hitch is not the
+    /// measurement. Ack: <c>debug.stress.fill</c> with spawned/failed counts and elapsed ms.
+    /// </summary>
+    // C1 (2026-08-21 review): stress runs must not leave caps/toggles corrupted for normal play.
+    static FusionRpg.Core.Match.CapPolicyConfig? _stressPrevCaps;
+    static bool _stressPrevWaveFreeze;
+    static bool _stressPrevFreeSet;
+    static bool _stressActive;
+
+    public static void StressFill(JsonElement p)
+    {
+        if (GameHooks.Board == null)
+        {
+            // S4: bail before mutating any state — spawns would all fail anyway.
+            DebugRuntime.Emit("debug.stress.fill", new Dictionary<string, object> { ["error"] = "no-board" });
+            CheatState.Error("stress-fill: no live board");
+            return;
+        }
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var plants = Int(p, "plants", 40);
+        var zombies = Int(p, "zombies", 150);
+        var plantType = Int(p, "plantType", 0);
+        var zombieType = Int(p, "zombieType", 0);
+        var rows = Math.Clamp(Int(p, "rows", 5), 1, 6);
+        var freeze = !(p.TryGetProperty("freeze", out var f) && f.ValueKind == JsonValueKind.False);
+
+        if (!_stressActive)
+        {
+            _stressActive = true;
+            _stressPrevCaps = Match.SpawnAdmit.Config; // getter returns a copy
+            _stressPrevWaveFreeze = CheatState.On("F-WAVE-FREEZE");
+            _stressPrevFreeSet = CheatState.On("G-FREE-SET");
+        }
+
+        if (freeze) WaveFreeze(true);
+        EnsureSun();
+        Match.SpawnAdmit.Config = new FusionRpg.Core.Match.CapPolicyConfig
+        {
+            MaxLivingPlants = Math.Max(plants + 10, 50),
+            MaxLivingZombies = Math.Max(zombies + 20, 80),
+            MaxLivingBullets = 4096
+        };
+
+        var plantOk = 0;
+        var plantFail = 0;
+        for (var i = 0; i < plants; i++)
+        {
+            var col = i % 9;
+            var row = (i / 9) % rows;
+            using var doc = JsonDocument.Parse(
+                $"{{\"typeId\":{plantType},\"col\":{col},\"row\":{row}}}");
+            if (SpawnPlant(doc.RootElement)) plantOk++;
+            else plantFail++;
+        }
+
+        var zombieOk = 0;
+        var zombieFail = 0;
+        for (var i = 0; i < zombies; i++)
+        {
+            var row = i % rows;
+            // Stagger x 4.0..9.5 so the horde spreads across the lawn instead of stacking.
+            var x = (4.0f + (i / rows % 12) * 0.5f).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            using var doc = JsonDocument.Parse(
+                $"{{\"typeId\":{zombieType},\"row\":{row},\"x\":{x}}}");
+            if (SpawnZombie(doc.RootElement)) zombieOk++;
+            else zombieFail++;
+        }
+
+        sw.Stop();
+        DebugRuntime.Emit("debug.stress.fill", new Dictionary<string, object>
+        {
+            ["plantsRequested"] = plants,
+            ["plantsSpawned"] = plantOk,
+            ["plantsFailed"] = plantFail,
+            ["zombiesRequested"] = zombies,
+            ["zombiesSpawned"] = zombieOk,
+            ["zombiesFailed"] = zombieFail,
+            ["freeze"] = freeze,
+            ["elapsedMs"] = sw.ElapsedMilliseconds
+        });
+        CheatState.Note($"stress fill: {plantOk}/{plants} plants, {zombieOk}/{zombies} zombies in {sw.ElapsedMilliseconds}ms");
+    }
+
+    /// <summary>
+    /// Restore the session state a stress run mutated: spawn caps, wave freeze, free-set
+    /// toggle (C1). Sun is not restorable (EnsureSun overwrote it) — noted in the ack.
+    /// Safe to call when no stress run is active (restores defaults).
+    /// </summary>
+    public static void StressClear(JsonElement p)
+    {
+        Match.SpawnAdmit.Config = _stressActive && _stressPrevCaps != null
+            ? _stressPrevCaps
+            : FusionRpg.Core.Match.CapPolicyConfig.Defaults();
+        WaveFreeze(_stressActive && _stressPrevWaveFreeze);
+        CheatState.SetToggle("G-FREE-SET", _stressActive && _stressPrevFreeSet, "debug", emitInject: false);
+        var wasActive = _stressActive;
+        _stressActive = false;
+        _stressPrevCaps = null;
+
+        DebugRuntime.Emit("debug.stress.clear", new Dictionary<string, object>
+        {
+            ["restored"] = wasActive,
+            ["sunNote"] = "sun value not restored"
+        });
+        CheatState.Note("stress clear: caps/freeze/free-set restored");
+        _ = p;
+    }
+
+    /// <summary>
     /// Gated LIVE probe: call <c>UIMgr.EnterGame</c>. Requires <c>FUSIONRPG_LEVEL_ENTRY=1</c>
     /// or toggle <c>DEBUG-LEVEL-ENTRY</c>. Rejects when a Board is already live unless <c>force</c>.
     /// </summary>

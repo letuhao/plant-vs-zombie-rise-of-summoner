@@ -36,6 +36,8 @@ public static class CombatDerivedReader
         ElementTypeId.Ice => DerivedStatChannels.CombatPowerIce,
         ElementTypeId.Air => DerivedStatChannels.CombatPowerAir,
         ElementTypeId.Earth => DerivedStatChannels.CombatPowerEarth,
+        ElementTypeId.Light => DerivedStatChannels.CombatPowerLight,
+        ElementTypeId.Dark => DerivedStatChannels.CombatPowerDark,
         _ => throw new ArgumentOutOfRangeException(nameof(e), e, null)
     };
 
@@ -45,6 +47,8 @@ public static class CombatDerivedReader
         ElementTypeId.Ice => DerivedStatChannels.CombatDefenseIce,
         ElementTypeId.Air => DerivedStatChannels.CombatDefenseAir,
         ElementTypeId.Earth => DerivedStatChannels.CombatDefenseEarth,
+        ElementTypeId.Light => DerivedStatChannels.CombatDefenseLight,
+        ElementTypeId.Dark => DerivedStatChannels.CombatDefenseDark,
         _ => throw new ArgumentOutOfRangeException(nameof(e), e, null)
     };
 
@@ -54,6 +58,8 @@ public static class CombatDerivedReader
         ElementTypeId.Ice => DerivedStatChannels.CombatAccuracyIce,
         ElementTypeId.Air => DerivedStatChannels.CombatAccuracyAir,
         ElementTypeId.Earth => DerivedStatChannels.CombatAccuracyEarth,
+        ElementTypeId.Light => DerivedStatChannels.CombatAccuracyLight,
+        ElementTypeId.Dark => DerivedStatChannels.CombatAccuracyDark,
         _ => throw new ArgumentOutOfRangeException(nameof(e), e, null)
     };
 
@@ -63,6 +69,8 @@ public static class CombatDerivedReader
         ElementTypeId.Ice => DerivedStatChannels.CombatDodgeIce,
         ElementTypeId.Air => DerivedStatChannels.CombatDodgeAir,
         ElementTypeId.Earth => DerivedStatChannels.CombatDodgeEarth,
+        ElementTypeId.Light => DerivedStatChannels.CombatDodgeLight,
+        ElementTypeId.Dark => DerivedStatChannels.CombatDodgeDark,
         _ => throw new ArgumentOutOfRangeException(nameof(e), e, null)
     };
 
@@ -72,6 +80,8 @@ public static class CombatDerivedReader
         ElementTypeId.Ice => DerivedStatChannels.CombatCritRateIce,
         ElementTypeId.Air => DerivedStatChannels.CombatCritRateAir,
         ElementTypeId.Earth => DerivedStatChannels.CombatCritRateEarth,
+        ElementTypeId.Light => DerivedStatChannels.CombatCritRateLight,
+        ElementTypeId.Dark => DerivedStatChannels.CombatCritRateDark,
         _ => throw new ArgumentOutOfRangeException(nameof(e), e, null)
     };
 
@@ -81,6 +91,8 @@ public static class CombatDerivedReader
         ElementTypeId.Ice => DerivedStatChannels.CombatCritResistIce,
         ElementTypeId.Air => DerivedStatChannels.CombatCritResistAir,
         ElementTypeId.Earth => DerivedStatChannels.CombatCritResistEarth,
+        ElementTypeId.Light => DerivedStatChannels.CombatCritResistLight,
+        ElementTypeId.Dark => DerivedStatChannels.CombatCritResistDark,
         _ => throw new ArgumentOutOfRangeException(nameof(e), e, null)
     };
 
@@ -90,6 +102,8 @@ public static class CombatDerivedReader
         ElementTypeId.Ice => DerivedStatChannels.CombatCritDamageIce,
         ElementTypeId.Air => DerivedStatChannels.CombatCritDamageAir,
         ElementTypeId.Earth => DerivedStatChannels.CombatCritDamageEarth,
+        ElementTypeId.Light => DerivedStatChannels.CombatCritDamageLight,
+        ElementTypeId.Dark => DerivedStatChannels.CombatCritDamageDark,
         _ => throw new ArgumentOutOfRangeException(nameof(e), e, null)
     };
 
@@ -99,6 +113,8 @@ public static class CombatDerivedReader
         ElementTypeId.Ice => DerivedStatChannels.CombatCritResistDamageIce,
         ElementTypeId.Air => DerivedStatChannels.CombatCritResistDamageAir,
         ElementTypeId.Earth => DerivedStatChannels.CombatCritResistDamageEarth,
+        ElementTypeId.Light => DerivedStatChannels.CombatCritResistDamageLight,
+        ElementTypeId.Dark => DerivedStatChannels.CombatCritResistDamageDark,
         _ => throw new ArgumentOutOfRangeException(nameof(e), e, null)
     };
 }

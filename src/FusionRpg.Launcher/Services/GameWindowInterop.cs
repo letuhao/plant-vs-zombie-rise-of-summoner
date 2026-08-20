@@ -19,7 +19,10 @@ public static class GameWindowInterop
     const int SwMinimize = 6;
     static readonly IntPtr HwndTopmost = new(-1);
     const uint SwpShowWindow = 0x0040;
-    const int QunsRunningD3dFullScreen = 2; // SHQueryUserNotificationState: exclusive-fullscreen D3D app
+    // QUERY_USER_NOTIFICATION_STATE: 2 = QUNS_BUSY (any fullscreen app, incl. borderless — topmost
+    // still works there); 3 = QUNS_RUNNING_D3D_FULL_SCREEN (exclusive D3D — the case that needs
+    // the minimize fallback). Pinned by GameWindowInteropTests.
+    internal const int QunsRunningD3dFullScreen = 3;
 
     [StructLayout(LayoutKind.Sequential)]
     public struct Rect
@@ -91,7 +94,12 @@ public static class GameWindowInterop
         try
         {
             if (SHQueryUserNotificationState(out var state) != 0) return false;
-            return state == QunsRunningD3dFullScreen && GetForegroundWindow() == hwnd;
+            if (state != QunsRunningD3dFullScreen) return false;
+            // Exclusive D3D is active and the game exists. Prefer the fallback even when the
+            // foreground handle is stale/ambiguous — the failure mode of guessing "borderless"
+            // here is an invisible overlay, which is strictly worse than one extra minimize.
+            var fg = GetForegroundWindow();
+            return fg == hwnd || fg == IntPtr.Zero;
         }
         catch
         {
@@ -129,13 +137,13 @@ public static class GameWindowInterop
 
     /// <summary>
     /// Parse a settings hotkey name ("F10", "F9", "Pause", …) into a WPF Key.
-    /// Falls back to <see cref="DefaultOverlayKey"/> for null/unknown/modifier-only names.
+    /// Falls back to <see cref="DefaultOverlayKey"/> for null/unknown/numeric/modifier-only names.
     /// </summary>
     public static Key ParseOverlayKey(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return DefaultOverlayKey;
-        if (!Enum.TryParse<Key>(name.Trim(), ignoreCase: true, out var key))
+        if (!Enum.TryParse<Key>(name.Trim(), ignoreCase: true, out var key) || !Enum.IsDefined(typeof(Key), key))
             return DefaultOverlayKey;
         return key is Key.None or Key.LeftCtrl or Key.RightCtrl or Key.LeftShift or Key.RightShift
             or Key.LeftAlt or Key.RightAlt or Key.LWin or Key.RWin

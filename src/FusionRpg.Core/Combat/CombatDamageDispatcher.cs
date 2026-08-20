@@ -18,6 +18,7 @@ public static class CombatDamageDispatcher
         ICombatMath? math = null,
         List<string>? skipped = null)
     {
+        using var _perf = FusionRpg.Core.Diagnostics.PerfProbe.Measure(FusionRpg.Core.Diagnostics.PerfSection.CombatDispatch);
         policy ??= CombatPolicy.Default;
         math ??= PassThroughCombatMath.Instance;
         snapshot ??= BoardSnapshot.Empty;

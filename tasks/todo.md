@@ -1,102 +1,78 @@
-# Tasks: Event Pipeline v2 — Phase 2
+# Tasks: Perf v3 — frame-cost residue + server burst
 
-Plan: [plan.md](plan.md) · Spec: [../docs/architecture/event-pipeline-v2-spec.md](../docs/architecture/event-pipeline-v2-spec.md)
-Test command: `dotnet test tests\FusionRpg.Core.Tests` (focused: `--filter FullyQualifiedName~Events`)
-Build: `dotnet build src\FusionRpg.Injector.BepInEx\FusionRpg.Injector.BepInEx.csproj -c Release -p:GameDir=$env:FUSIONRPG_GAME_DIR -p:OutputPath=artifacts\perf-build\`
+Plan: [plan.md](plan.md) · Spec: [../docs/architecture/perf-v3-spec.md](../docs/architecture/perf-v3-spec.md)
+Prior round complete: event-pipeline-v2 (12/12, stress-verified to 1006 zombies).
 
-## Phase 1: Foundation (pure Core, offline)
+## Module A: injector-frame-cost
 
-- [x] **Task 1: GameEventRec struct + kind enum + interning**
-  - Description: `GameEventKind` enum for the hot tier, readonly `GameEventRec` struct (values only, per SSOT §4b.6), and small intern tables (matchKey, grantId → int) with clear-on-match-end.
-  - Acceptance: struct has no reference-type fields except via intern indices; intern round-trips; kind enum covers combat.hit, plant.damage, zombie.damage, bullet.init, status hooks, chain-synthetic.
-  - Verify: new `Events/GameEventRecTests` green; all existing Core tests green.
-  - Dependencies: none. Files: `src/FusionRpg.Core/Events/GameEventRec.cs`, `tests/.../Events/GameEventRecTests.cs`. Scope: S.
+- [x] **Task A1: Instrument InjectorLoop subsections**
+  - Description: probe sections `vfx.tick`, `cheat.continuous`, `cheat.autocollect`, `poll.board`, `pump.main` wrapping the corresponding `InjectorLoop.Tick` callees; sections list updated in probe-perf.ps1.
+  - Acceptance: with all features toggled on, sum of loop subsections ≈ loop.tick total (±0.5 ms/frame — no dark cost).
+  - Verify: build; deploy; one 300z stress window shows the new sections.
+  - Files: `PerfProbe.cs`, `InjectorLoop.cs`, `probe-perf.ps1`. Scope: S.
 
-- [x] **Task 2: Counter/stack math takes HitCount**
-  - Description: `StatusRuntime.RecordCounterHit` accepts `hits` (default 1), advances by N, fires one burst per threshold crossing; `EffectProcPolicy` `max_stacks` consumes per hit.
-  - Acceptance: `hits=1` byte-identical to today (existing CombatCounterTests untouched and green); N=3 on a 5-threshold fires at cumulative 5 not 15; crossing twice in one call fires one burst.
-  - Verify: new tests + existing 733 green.
-  - Dependencies: none. Files: `src/FusionRpg.Core/Status/StatusRuntime.cs`, `src/FusionRpg.Core/Effects/EffectProcAndOwner.cs`, new tests. Scope: S.
-
-- [x] **Task 3: Chance proc closed-form merge**
-  - Description: `EffectProcPolicy.TryPass` chance gate accepts hit count n: single roll vs `1−(1−p)^n` (owner decision #2). n=1 identical to today.
-  - Acceptance: n=1 path unchanged (existing tests green); distribution test: for p=0.2, n=5, pass rate ≈ 0.672 over 10k seeded trials (±2%).
-  - Verify: new `Events/ProcMergeMathTests` green.
-  - Dependencies: none. Files: `src/FusionRpg.Core/Effects/EffectProcAndOwner.cs`, tests. Scope: S.
+- [x] **Task A2: Fix stress verdict arithmetic**
+  - Description: subtract nested-section overlap (drain.tick contains onEvent-in-drain; onCapture contains OnDrained) — compute share from drain.tick + onCapture-outside-drain + takeDamage-outside, or simply report drain.tick + takeDamage + (onCapture − drain.tick, floored at 0).
+  - Acceptance: recomputed 600z share from existing `_baseline-stress-40p-600z.json` lands near the hand-computed ~8%.
+  - Verify: script re-run against the stored JSON.
+  - Files: `scripts/stress-test.ps1`. Scope: XS.
 
 ### Checkpoint 1
-- [x] All new Phase-1 tests green; all 733 existing Core tests green untouched; guards green.
+- [x] Build + suites + guards green; deployed; 300z window shows subsections, no dark cost (autocollect 0.07ms/5s).
 
-## Phase 2: Ring + coalescer (pure Core)
+- [x] **Task A3: Ptr-indexed pending records**
+  - Description: `EventDrain` maintains `Dictionary<IntPtr, int>` count (or small list) of pending records per actor/target ptr, updated on append/pop; `FlushForPtr` early-outs when count==0 and otherwise still walks once (already single-pass — the win is skipping the walk for ptrs with nothing pending, the common case at high death rates).
+  - Acceptance: invariant test (index matches ring scan after arbitrary op sequence); death-burst micro-bench in tests shows FlushForPtr no-op is O(1); existing drain tests green.
+  - Verify: `--filter FullyQualifiedName~Events`.
+  - Files: `Core/Events/EventDrain.cs`, tests. Scope: S.
 
-- [x] **Task 4: GameEventRing**
-  - Description: fixed-capacity (4096) single-writer ring with drain cursor; overflow drops droppable kinds with a counter, never drops non-droppable (backpressure: overwrite oldest droppable, else grow-once diagnostic mode).
-  - Acceptance: FIFO order preserved; append during drain is safe (records land after current drain cursor); overflow counters visible.
-  - Verify: `Events/GameEventRingTests` incl. append-during-drain; all suites green.
-  - Dependencies: T1. Files: `src/FusionRpg.Core/Events/GameEventRing.cs`, tests. Scope: S.
+- [x] **Task A4: Incremental board snapshot**
+  - Description: `InjectorEntityRegistry`/`InjectorBoardSnapshot` maintain entity snap entries incrementally (update on add/remove; position/col refreshed lazily per freeze for zombies only); freeze still returns an immutable `BoardSnapshot` instance (copy-on-freeze preserved — a frozen board never mutates under a drain).
+  - Acceptance: frozen-instance immutability test; construction cost independent of N in steady state (no per-freeze full iteration allocating per-entity dicts/strings beyond the changed set); existing targeting tests green.
+  - Verify: Core tests + capture avgUs at 600z in the gate run (expect ≪467 µs).
+  - Files: `Injector/Effects/InjectorEntityRegistry.cs`, `InjectorBoardSnapshot.cs`, Core tests where applicable. Scope: M.
 
-- [x] **Task 5: EventCoalescer**
-  - Description: merge window over pending records: key `(Kind, MatchKey, Side, ActorPtr, TargetPtr, TypeId, TargetTypeId)`; sums Amount, accumulates HitCount; never merges ChainDepth>0, SourceGrantId set, or paired-taken records across their dealt partner.
-  - Acceptance: SSOT §4b.2 exclusions all enforced; per-target FIFO survives; PairId adjacency preserved.
-  - Verify: `Events/EventCoalescerTests`; funnel 1e9-cap extreme-amount test.
-  - Dependencies: T1, T4. Files: `src/FusionRpg.Core/Events/EventCoalescer.cs`, tests. Scope: M.
+- [x] **Task A5: Registry-fy AutoCollectTick + TickContinuous**
+  - Description: guided by A1 numbers — replace per-frame `FindObjectsOfType` in `CheatActions.AutoCollectTick` (CoinSun/CoinMoney — hook-fed coin registry or 250 ms throttle + registry) and `TickContinuous`. VfxDirector struck as suspect: vfx-v2 T2 made Tick idle-cheap (no per-frame Camera.main; early-out when nothing live) and T1 removed the VFX-owned sweep — see [vfx-v2-todo.md](vfx-v2-todo.md).
+  - Acceptance: `cheat.autocollect`/`cheat.continuous` sections ≈ 0 ms with toggles on; coins still collect (manual check).
+  - Verify: probe delta before/after; manual play.
+  - Files: `Injector/CheatActions.cs` (+ registry). Scope: M.
 
 ### Checkpoint 2
-- [x] Ring + coalescer tests green; all suites green.
+- [x] All suites + guards green; probe confirms A3/A4/A5 deltas.
 
-## Phase 3: Drain (pure Core)
+- [x] **Task A6: (300z PASS 4.44%; 600z/1000z re-ran under owner-buffed sustained-war conditions — harsher than spec benchmark, over bar; v4 targets filed in 00-baseline.md) Stress gate re-run**
+  - Description: deploy; `stress-test.ps1 -Zombies 300` and `-Zombies 600`; append results to 00-baseline.md.
+  - Acceptance: both PASS with corrected verdict (share ≤5%).
+  - Scope: S + owner playtime (fill is scripted; owner just has a lawn open).
 
-- [x] **Task 6: EventDrain core — budgeted FIFO**
-  - Description: processes coalesced records into `EffectEventDto` → `Bag.OnEvent`; injectable time source; budget parameter (caller computes 10% of frame); carry-over queue.
-  - Acceptance: budget exhaustion carries remainder in order; a grant's actions never split; zero-record drain is allocation-free.
-  - Verify: `Events/EventDrainTests` (test groups 1, 4 from spec).
-  - Dependencies: T1–T5. Files: `src/FusionRpg.Core/Events/EventDrain.cs`, tests. Scope: M.
+- [x] **Task A7: Fold in 5-axis review findings**
+  - Description: Critical/Important findings from the 2026-08-21 review (agents in flight; one Critical — EventDrain re-entrancy — already fixed with regression tests). Size when the reports land.
+  - Acceptance: every Critical fixed with a regression test; Importants fixed or explicitly deferred with a note.
+  - Scope: TBD.
 
-- [x] **Task 7: Barriers, chain records, session bypass**
-  - Description: ptr-flush API (drain all pending records for a ptr, called by death hooks before ForgetEntity); drain-generated records inherit ChainDepth+1 (limit clamped 1..8, default 6, mechanism hard-coded); generation cap ≤3/frame with overflow to next frame; session mode = no budget, no coalescing.
-  - Acceptance: death-flush ordering test (OnDeath sees grants); depth-6 chain terminates; generation-4 records processed next frame; session mode preserves v1 event-for-event behavior.
-  - Verify: `Events/EventDrainBarrierTests` (test groups 1, 5, 6).
-  - Dependencies: T6. Files: `EventDrain.cs`, tests. Scope: M.
+## Module B: server-burst (parallel-safe)
 
-- [x] **Task 8: Cost classes**
-  - Description: classify expensive records (match-scoped ModifyStat, all-target packets, ClearStatus-bearing plans) — max 1 expensive record per frame, own carry queue.
-  - Acceptance: two expensive records in one frame → second drains next frame; cheap records unaffected behind an expensive one (no head-of-line block beyond budget).
-  - Verify: `Events/EventDrainCostClassTests`.
-  - Dependencies: T6. Files: `EventDrain.cs`, tests. Scope: S.
+- [x] **Task B1: Headless burst repro**
+  - Description: `scripts/burst-repro.ps1` — POSTs ≥5,000 synthetic events (mix: zombie.spawn/zombie.die with entity payloads, board.start first) to `/api/events` in ≤5 s against a scratch-data server instance; watches `/health` + process liveness; records outcome.
+  - Acceptance: reproduces the crash (or definitively shows the in-game crash needs another ingredient — either result is a finding).
+  - Verify: script output + server exit noted in `docs/research/perf/01-server-burst.md` (created).
+  - Files: `scripts/burst-repro.ps1`, research doc. Scope: S.
 
-### Checkpoint 3
-- [x] Spec test groups 1–6 all green; 733 + new tests green; guards green.
+- [x] **Task B2: Root cause**
+  - Description: instrument/inspect `EventIngest` + `RpgStore.InsertOneUnlocked` fan-out under the repro (timings, memory, SQLite errors); name the mechanism in 01-server-burst.md.
+  - Acceptance: doc states the cause with evidence, and the chosen fix shape.
+  - Scope: S–M.
 
-## Phase 4: Injector wiring
+- [x] **Task B3: Bounded ingest fix + test**
+  - Description: per root cause — likely: cap per-flush batch size, single transaction per batch, defer noisy-kind projections under pressure, hard queue cap with shed-and-count for `IsNoisyKind` only. XP-bearing kinds never shed.
+  - Acceptance: new `FusionRpg.Data.Tests` burst ingest test green (asserts XP kinds all persisted); DAL guard green.
+  - Files: `Server/EventIngest.cs`, `Data/Sqlite/RpgStore*.cs`, tests. Scope: M.
 
-- [x] **Task 9: Record sites** *(landed flag-off — `EventDrainHost.Enabled=false` keeps legacy behavior byte-identical until T10 wires the drain tick; zombie.status StatusHook wiring deferred to backlog, web chips keep legacy emits)*
-  - Description: hot-kind hook sites (TakeDamage ×2, AttackPlant, status hooks, bullet.init-when-consumed) append `GameEventRec` instead of calling `OnCapture`; PairId stamped for dealt/taken of one physical hit; payload dicts for transport deferred (built at drain only if kind emits).
-  - Acceptance: hooks allocate nothing on the record path; `ref damage` scaling unchanged; non-hot kinds untouched.
-  - Verify: build vs game dir; guards; Core tests.
-  - Dependencies: T7. Files: `GameHooks.cs`, `GameCaptureHooks.cs`, `src/FusionRpg.Injector/Effects/EventDrainHost.cs` (new). Scope: M.
+- [x] **Task B4: (1000z captured end-to-end, server alive throughout / foreground-owned) Burst re-run + in-game 1000z**
+  - Description: B1 script against fixed build → healthy throughout; then in-game `stress-test.ps1 -Zombies 1000` end-to-end with server alive.
+  - Acceptance: `/health` responsive during burst; 1000z capture completes with verdict printed.
+  - Scope: S + owner playtime.
 
-- [x] **Task 10: Drain host + death flush + transport**
-  - Description: drain runs in `InjectorLoop.Tick` before `TickDots` sharing one board freeze; death/board-end hooks call ptr-flush/match-flush; drained records that still need transport build payloads there and Enqueue.
-  - Acceptance: DoT damage and drained damage merge into one FA10 per target per frame; death ordering preserved live; server still receives every kind it consumed before.
-  - Verify: build + guards + all suites; manual: web log shows hot kinds while a session is active.
-  - Dependencies: T9. Files: `EventDrainHost.cs`, `InjectorLoop.cs`, `EffectRuntime.cs`. Scope: M.
-
-- [x] **Task 11: FPS cap default + probe counters**
-  - Description: `FUSIONRPG_FPS_CAP` unset → 60 (owner decision #3), `0` → uncapped; PerfProbe `drain.tick` section + ring depth/dropped/carryover counters in the 5s window.
-  - Acceptance: default launch caps at 60; probe window shows drain stats.
-  - Verify: build; probe smoke via `/api/perf/recent`.
-  - Dependencies: T10. Files: `InjectorLoop.cs`, `PerfProbe.cs`, `PerfReporter.cs`, `probe-perf.ps1`. Scope: S.
-
-### Checkpoint 4
-- [x] Injector builds vs game dir; 4 guards green; all 5 test suites green.
-
-## Phase 5: Live verification
-
-- [ ] **Task 12: Stress verification + baseline record**
-  - Description: deploy; owner plays heaviest board at max speed with grants active; capture `v2-stress` probe scenario; re-run LIVE checklist F-rows inside a session; append results to `docs/research/perf/00-baseline.md`.
-  - Acceptance: spec Success Criteria 1–3 and 5–6 met, or findings drive an iterate loop.
-  - Verify: probe summary table + checklist rows.
-  - Dependencies: T11 + owner playtime. Scope: S (code) + live session.
-
-### Checkpoint: Complete
-- [ ] All spec success criteria met; SSOT updated with as-built notes; owner writes decisions.md row; commit message drafted for owner.
+### Checkpoint: Round complete
+- [ ] Stress curve 300/600 PASS, 1000z captured end-to-end; 00-baseline.md updated; SSOT/spec notes appended; owner commits.

@@ -12,30 +12,59 @@ Success looks like: the player earns Souls by playing, spends them at the Summon
 
 ### Banner catalog (code-authored)
 
-`SummonBannerCatalog` in Core. V1: one banner, `standard-rift` — cost **100** Souls/pull, 10-pull for **900**. Pool = every `seed`-eligible species weighted by rarity: common 74% · rare 20% · epic 5% · legendary 1%. **Pity:** a 10-pull guarantees ≥1 rare-or-better (roll the guarantee slot last if none landed). Variant roll per pull (species-allowed variants; `shiny`-class odds 1/64). Trait roll: 1–3 traits drawn from the species trait pool by rarity (common 1, rare/epic 2, legendary 3).
+`SummonBannerCatalog` in Core. Two banners at V1 (the second exists so standard-vs-focused is a real spend decision — the economy review's "one banner = conveyor belt" finding):
+
+- `standard-rift` — **100** Souls/pull, 10-pull **900**. Pool = every `summonable` species (acquisition flag from demon-core), weighted common 74% · rare 20% · epic 5% · legendary 1%.
+- `element-focus` (rotating) — **120**/pull, 10-pull **1,080**. One element's species get 3× weight within their rarity band; rotation is code-scheduled, not time-of-day-dependent (determinism).
+
+**Pity v2 (2026-08-21 review; the old "10-pull guarantees rare+" fired only ~5% of the time — cosmetic):**
+- 10-pull rare floor kept (cheap, harmless).
+- **Epic hard pity at 25**: 25 pulls without epic+ guarantees one; counter resets on any epic+.
+- **Legendary soft ramp + hard ceiling**: base 1%; from pull 41 without a legendary, +6%/pull; hard guarantee at pull 55. Expected first legendary ≈ 43–48 pulls ≈ 6–9 hours at the v2 earn rate — a real first-week arc instead of an unbounded lottery (~13% of players would never see one in 200 pulls at flat 1%).
+- Counters are per-player, persist across sessions **and banners**, reset only on a hit of that tier, and are **visible in the Summon panel** ("12/25 to guaranteed Epic · 31/55 to guaranteed Legendary") — a no-money game has no reason for opacity; visible counters turn dead pulls into progress.
+- Storage: pity counters live in a per-player row updated inside the pull transaction (derivable from `rpg_summon_log` for audit).
+
+Variant roll per pull (species-allowed variants; `shiny`-class odds 1/64). Trait roll: 1–3 traits from the species pool by rarity (common 1, rare/epic 2, legendary 3). All rolls from the owned seeded PRNG (`gacha` stream — see match-source-core's determinism discipline; never `System.Random`), seed recorded per pull batch.
 
 ### Pull flow (server-side, Cold plane, one atomic sequence)
 
 ```
 POST /api/demons/summon { playerId, bannerId, count(1|10), correlationId }
-  → replay check: correlationId already in rpg_summon_log → return stored results
-  → TrySpendSouls(cost, "summon", correlationId)   → 409 souls.insufficient
-  → roll results (server RNG; seed recorded in the log for reproducibility)
-  → per result: atomic mint (UniqueActor Roster + demon profile, origin=summon)
-  → codex upsert (state=seen; first-ever species → discovered)
-  → append rpg_summon_log(correlation_id UNIQUE, banner_id, results_json, rng_seed, t)
-  → SignalR DemonsUpdated + SoulsUpdated → return results
+  → ONE gate-serialized store transaction:
+      replay check by (player_id, correlation_id) in rpg_summon_log
+        → hit: validate stored (bannerId, count) matches the request, return stored results
+      spend check → insufficient: rollback, 409 souls.insufficient (refusals write nothing)
+      soul ledger spend + roll results (seeded, pity counters advanced)
+      + mints (UniqueActor Roster + profile, origin=summon)
+      + codex upsert (MAX-state lattice: seen, first-ever → discovered, never downgrade)
+      + pity counter row update
+      + rpg_summon_log append (player_id, correlation_id UNIQUE per player, banner_id,
+        count, results_json, rng_seed, t)
+  → after commit: SignalR DemonsUpdated + SoulsUpdated → return results
 ```
 
-Crash-safety: log append is the last write inside the same store transaction scope as the mints — a replayed `correlationId` either finds the log (returns stored results) or the spend refusal; partial mints must be impossible (single gate-serialized store call).
+Crash-safety (corrected by the 2026-08-21 review — the old two-transaction flow had a third post-crash state where Souls were spent but nothing was recorded, and replay would re-roll a fresh seed): spend, mints, codex, pity, and log commit **atomically or not at all** in a single store transaction. Correlation uniqueness is **per player** (a global unique key would let one save replay another save's correlation and receive its results without spending).
 
 ### Data
 
 `rpg_summon_log` — `id`; `correlation_id` UNIQUE; `player_id`, `banner_id`, `results_json`, `rng_seed`, `t`. (Profiles/codex/souls tables come from the upstream modules.)
 
+### Duplicates: the V1 valve (adjudicated 2026-08-21)
+
+Every pull mints an individual — but at ~74% common that's 4–5 common specimens per hour into a roster with no sink until fusion. The valve, none of which destroys anything:
+
+- **Active roster (cap 24) / Reserve split**: the player hand-picks the Active roster; everything else lands in a Reserve tab that **stacks by species** with a count badge (`imp-grunt ×17`, expandable). The grid the player looks at stays team-sized.
+- **Lock + nickname at reveal**: optional rename in the reveal flow; `locked` sorts to top and protects from future fusion consumption. These two are the cheapest possible implementation of "demons are individuals" and belong at V1, not later.
+- Reserve banner text: "Reserved demons become fusion and ritual material in a future update" — sets the hoard expectation explicitly.
+- **No release/dismiss valve in V1**: any pre-fusion refund teaches players to liquidate the exact commons fusion will want. (Arknights-style dupe→essence conversion is noted as a candidate *inside* the fusion module, not before it.)
+
 ### FE (minimal V1 slice of `demon-domain-fe`)
 
-`#/demons` page: Souls balance header · Summon panel (×1 / ×10, disabled below cost, results reveal ordered common→legendary) · roster grid of demon specimens (portrait from linked type icons, rarity frame, element badges, traits) · Codex tab (species grid: undiscovered = silhouette + `???`). Uses the existing bus layer (`lib/bus`) — no direct fetch.
+`#/demons` page: Souls balance header · Summon panel (×1 / ×10, disabled below cost, **pity counters displayed**, results reveal ordered common→legendary with nickname/lock controls) · Active/Reserve roster (portrait from linked type icons, rarity frame, element badges, traits) · Codex tab (species grid: undiscovered = silhouette + `???`; discovery rewards from the soul-economy faucet surface here). Uses the existing bus layer (`lib/bus`) — no direct fetch.
+
+### V1 playable floor (resolved 2026-08-21)
+
+**V1 is an internal gate, not an announced release** — the owner declined the Patron-demon bridge, so the first player-facing announced ship is **expeditions**. V1 still includes the near-free floor items: visible pity counters, nickname/lock at reveal, and codex discovery rewards. No injector work in this module.
 
 ## Commands
 

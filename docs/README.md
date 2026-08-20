@@ -72,6 +72,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/unique-entity-effects.md](architecture/unique-entity-effects.md) | Lawn unique power path + apply scope (bind → `entity:{ptr}`) |
 | [architecture/standalone-rpg-map.md](architecture/standalone-rpg-map.md) | Standalone-first program: web-playable RPG core, PvZ as extension — capability map + invariants |
 | [architecture/standalone/](architecture/standalone/spec-standalone-charter.md) | Module specs: standalone-charter, match-source-core (wave 1) |
+| [architecture/standalone/audit-2026-08-21.md](architecture/standalone/audit-2026-08-21.md) | Structured multi-perspective review: findings, debates, adjudications behind the spec hardening |
 | [architecture/demon-system-map.md](architecture/demon-system-map.md) | Demon gameplay program: capability map, vision→stack mapping, module build order |
 | [architecture/demons/](architecture/demons/spec-element-extension.md) | Module specs: element-extension, demon-core, soul-economy, demon-summoning (V1) |
 | [architecture/decisions.md](architecture/decisions.md) | Locked choices |

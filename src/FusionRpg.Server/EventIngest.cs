@@ -39,8 +39,12 @@ public sealed class EventIngest : BackgroundService
         _uniqueActors = uniqueActors;
     }
 
+    long _droppedBatches;
+    long _lastDropLogTick;
+
     public int Queued => Volatile.Read(ref _queued);
     public double LastFlushMs => Volatile.Read(ref _lastFlushMs);
+    public long DroppedBatches => Interlocked.Read(ref _droppedBatches);
 
     public HealthDto Decorate(HealthDto health)
     {
@@ -49,10 +53,16 @@ public sealed class EventIngest : BackgroundService
         return health;
     }
 
+    /// <summary>PvZ-game events only — web-mode (webrpg) events must not touch injector-facing state.</summary>
+    static bool IsPvzGameEvent(EventEnvelope env) => RpgConstants.IsPvzGame(env.Game);
+
     public int Enqueue(EventEnvelope? env)
     {
         if (env is null || string.IsNullOrWhiteSpace(env.Kind)) return 0;
-        EffectGrantSessionRecorder.NoteMatchLifecycle(_grants, env.Kind);
+        // Guard (audit 2026-08-21): a web battle's board.start/end must never clear the LIVE
+        // PvZ match's effect-grant session.
+        if (IsPvzGameEvent(env))
+            EffectGrantSessionRecorder.NoteMatchLifecycle(_grants, env.Kind);
         Interlocked.Increment(ref _queued);
         if (!_channel.Writer.TryWrite(env))
         {
@@ -101,7 +111,11 @@ public sealed class EventIngest : BackgroundService
             try
             {
                 var notify = _store.InsertEvents(batch);
-                try { _uniqueActors.ObserveEvents(batch); } catch { /* fail-closed */ }
+                // UniqueActor recovery watches real PvZ matches only — web-battle die/end events
+                // must not recover an ActiveBound specimen mid-PvZ-match (audit 2026-08-21).
+                var pvzBatch = batch.Where(IsPvzGameEvent).ToList();
+                if (pvzBatch.Count > 0)
+                    try { _uniqueActors.ObserveEvents(pvzBatch); } catch { /* fail-closed */ }
                 Volatile.Write(ref _lastFlushMs, sw.Elapsed.TotalMilliseconds);
                 await BroadcastAsync(batch).ConfigureAwait(false);
                 await BroadcastActivityAsync(notify.ActivityPlayers).ConfigureAwait(false);
@@ -109,8 +123,19 @@ public sealed class EventIngest : BackgroundService
                 foreach (var runId in notify.ClosedRunIds)
                     _compaction.EnqueueClosedRun(runId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // A failed flush drops the whole batch — make that visible instead of silent
+                // (rate-limited: disk-full/locked-DB storms would otherwise flood the console).
+                Interlocked.Increment(ref _droppedBatches);
+                var now = Environment.TickCount64;
+                if (now - Interlocked.Read(ref _lastDropLogTick) > 30_000)
+                {
+                    Interlocked.Exchange(ref _lastDropLogTick, now);
+                    Console.Error.WriteLine(
+                        $"[ingest] dropped batch of {batch.Count} events ({_droppedBatches} total): {ex.GetType().Name}: {ex.Message}");
+                }
+
                 Volatile.Write(ref _lastFlushMs, sw.Elapsed.TotalMilliseconds);
             }
             finally

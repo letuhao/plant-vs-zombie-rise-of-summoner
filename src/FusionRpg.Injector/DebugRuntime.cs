@@ -47,6 +47,9 @@ public static class DebugRuntime
     public static void EndSession()
     {
         DisarmAll();
+        // StartSession enabled per-hit telemetry; leaving it on after the session silently
+        // re-enables the per-hit emit path until game restart (lag with no visible cause).
+        CheatState.LocalStats.LogDamage = false;
         var id = ScenarioId;
         SessionActive = false;
         InjectorDerivedOverride.Clear();

@@ -46,6 +46,21 @@ public class LawnCoordsGuardTests
     }
 
     [Fact]
+    public void Vfx_per_cue_path_never_scans_the_scene()
+    {
+        // vfx-ssot.md ban: no FindObjectsOfType anywhere in VFX code — anchors resolve via
+        // InjectorEntityRegistry, and the texture steal is gone (soft disc always).
+        foreach (var file in new[] { "AnchorResolver.cs", "VfxDirector.cs", "BurstPool.cs", "FxResources.cs" })
+        {
+            var text = ReadInjector(Path.Combine("Fx", file));
+            Assert.DoesNotContain("FindObjectsOfType", text, StringComparison.Ordinal);
+        }
+
+        var anchor = ReadInjector(Path.Combine("Fx", "AnchorResolver.cs"));
+        Assert.Contains("InjectorEntityRegistry", anchor, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Overlay_world_fx_uses_found_shader_and_cell_center()
     {
         var probe = ReadInjector(Path.Combine("Fx", "OverlayShaderProbe.cs"));

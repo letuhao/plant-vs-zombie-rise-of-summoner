@@ -3,8 +3,11 @@ using FusionRpg.Core.Stats.Derived;
 namespace FusionRpg.Core.Combat.Element;
 
 /// <summary>
-/// Normative ring-cycle STR/WEK/NEU table — fire → ice → earth → air → fire.
+/// Normative STR/WEK/NEU table — ring fire → ice → earth → air → fire, plus the
+/// light ⇄ dark mutual counter (both STR vs each other; neutral vs the ring four).
 /// Single SSOT for matchup relations; combat must not duplicate this table.
+/// The default arm is fail-open Neutral — the roster-generated golden matrix test
+/// is what guarantees no pair silently falls through.
 /// </summary>
 public static class ElementRingMatrix
 {
@@ -15,6 +18,9 @@ public static class ElementRingMatrix
 
         return (attacker, defender) switch
         {
+            (ElementTypeId.Light, ElementTypeId.Dark) => ElementMatchupRelation.Strong,
+            (ElementTypeId.Dark, ElementTypeId.Light) => ElementMatchupRelation.Strong,
+
             (ElementTypeId.Fire, ElementTypeId.Ice) => ElementMatchupRelation.Strong,
             (ElementTypeId.Fire, ElementTypeId.Air) => ElementMatchupRelation.Weak,
             (ElementTypeId.Fire, ElementTypeId.Earth) => ElementMatchupRelation.Neutral,

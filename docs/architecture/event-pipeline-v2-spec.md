@@ -1,8 +1,10 @@
 # Spec: Event Pipeline v2 — Phase 2 (record-then-drain)
 
-Status: **draft — awaiting owner review**. Design SSOT (invariants, audit evidence, record
-struct): [`event-pipeline-v2-ssot.md`](event-pipeline-v2-ssot.md). This spec does not repeat
-the SSOT; it defines the deliverable, the contract, and how we know it's done.
+Status: **IMPLEMENTED + VERIFIED** (2026-08-21). All 12 tasks complete (tasks superseded by
+the perf-v3 round, also complete). Success criteria: 1–2 met at the spec's benchmark
+conditions (4.44% @300z), 3 met (bounded carry), 4 met (offline suites green), 6 met
+(coalescing 3:1 observed); criterion 5 (LIVE F-rows in a session) remains an open validation
+item for a future lab session. Design SSOT: [`event-pipeline-v2-ssot.md`](event-pipeline-v2-ssot.md).
 
 ## Objective
 

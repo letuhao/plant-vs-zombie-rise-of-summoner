@@ -33,10 +33,11 @@ Injector Hot-path invariants (single writer, Funnel, no-Data-in-hot-plane), DAL 
 ## Deliverables
 
 1. This spec approved → its charter section becomes normative.
-2. `decisions.md` amendment: "Standalone-first: web RPG is the core game; PvZ is extension gameplay (4 roles); gameless-first rule" + the `webrpg-1` profile row.
+2. `decisions.md` amendment: "Standalone-first: web RPG is the core game; PvZ is extension gameplay (4 roles, guardrailed); gameless-first rule" + the `webrpg-1` profile row + an explicit **qualification of the "game profile is build-level only, not a DB column" lock**: `runs.game` becomes a column (match-source-core precondition — without it, per-source attribution, retention exemptions, and the runs-list profile display are unimplementable; fact source derives by run join, no facts column).
 3. [software-architecture.md](../software-architecture.md) §1/§3 updated: top-level shape gains the web-mode producer; the overlay principle section notes it governs *PvZ mode* specifically.
-4. `RpgConstants`/game-profile catalog gains `webrpg-1` (constant only; first consumer is `match-source-core`).
-5. Doc map rows for this program.
+4. `RpgConstants` gains `webrpg-1` (constant + event vocabulary only — explicitly **not** a `game-profiles.json` entry: that catalog drives launcher fingerprint matching and a fingerprint-less profile would pollute it).
+5. Threat-model note in the charter: localhost, no auth, user-owned SQLite — all economy/authority guarantees are honest-server guarantees (tamper-evident ledgers, not tamper-proof); single-player self-cheat via debug endpoints is accepted.
+6. Doc map rows for this program.
 
 ## Commands
 

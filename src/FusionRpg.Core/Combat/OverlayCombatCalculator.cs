@@ -111,7 +111,7 @@ public sealed class OverlayCombatCalculator
         {
             if (string.IsNullOrWhiteSpace(dto.Element))
                 throw new ArgumentException("Element payload component missing element id.");
-            if (!Enum.TryParse<ElementTypeId>(dto.Element, ignoreCase: true, out var parsed))
+            if (!ElementRoster.TryParse(dto.Element, out var parsed))
                 throw new ArgumentException($"Unknown element id '{dto.Element}'.");
             list.Add(new ElementPayloadComponent(parsed, dto.Weight));
         }

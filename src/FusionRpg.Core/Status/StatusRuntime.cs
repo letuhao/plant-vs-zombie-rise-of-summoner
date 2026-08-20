@@ -83,6 +83,9 @@ public sealed class StatusRuntime
 
     public Action<StatusResistedEvent>? OnResisted { get; set; }
 
+    /// <summary>Fires on every definitive apply (spread hops included) — VFX cue producer seam (SPEC W5).</summary>
+    public Action<StatusInstance>? OnApplied { get; set; }
+
     public IReadOnlyList<StatusResistedEvent> ResistedEvents => _resisted;
 
     public IReadOnlyDictionary<string, int> CounterSnapshot() =>
@@ -187,6 +190,7 @@ public sealed class StatusRuntime
         };
 
         UpsertInstance(input.HostPtr, instance, def.Stacking);
+        OnApplied?.Invoke(instance);
         return new StatusApplyOutcome(true, null, instance, eval);
     }
 
@@ -334,7 +338,9 @@ public sealed class StatusRuntime
         n += hits;
         if (n >= everyHits)
         {
-            if (resetOnBurst) _counterHits[key] = 0;
+            // I3 (review): keep the residual (n % everyHits) instead of zeroing — merged
+            // records must not eat progress toward the next burst. hits=1 unchanged (0).
+            if (resetOnBurst) _counterHits[key] = n % everyHits;
             else _counterHits[key] = n;
             return true;
         }

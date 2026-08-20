@@ -57,6 +57,26 @@ public static class EventCoalescer
         return output;
     }
 
+    /// <summary>
+    /// Session-mode window (I4): no merging — event-for-event fidelity — but pair suppression
+    /// still applies. The dealt/taken pair is one physical hit (a causal fact, not a
+    /// coalescing optimization); v1 suppressed the taken too, via DealtIdentity.
+    /// </summary>
+    public static List<GameEventRec> PassthroughWindow(GameEventRing ring)
+    {
+        var output = new List<GameEventRec>(ring.Count);
+        HashSet<int>? dealtPairs = null;
+        while (ring.TryPop(out var rec))
+        {
+            if (rec.PairId > 0 && rec.Kind == GameEventKind.CombatHit)
+                (dealtPairs ??= new HashSet<int>()).Add(rec.PairId);
+            if (rec.PairId > 0 && IsTakenKind(rec.Kind) && dealtPairs != null && dealtPairs.Contains(rec.PairId))
+                continue;
+            output.Add(rec);
+        }
+        return output;
+    }
+
     static bool IsTakenKind(GameEventKind kind) =>
         kind is GameEventKind.PlantDamage or GameEventKind.ZombieDamage;
 

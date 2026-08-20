@@ -1,78 +1,40 @@
-using FusionRpg.Core.Vfx;
+using FusionRpg.Injector.Effects;
 using UnityEngine;
-using UObject = UnityEngine.Object;
 
 namespace FusionRpg.Injector.Fx;
 
 /// <summary>
-/// ptr → Transform cache — vfx-ssot.md §9. Hook-fed (Plant/Zombie Start postfixes register),
-/// with a reconciliation sweep throttled to one per 0.5s for units the hooks never saw
-/// (injector attached mid-match). Never FindObjectsOfType per cue.
+/// ptr → Transform via the hook-fed <see cref="InjectorEntityRegistry"/> — vfx-ssot.md §9.
+/// VFX owns no cache and no scene scan; a miss triggers the registry's own frame-throttled
+/// resync (mid-match attach backstop), so worst case is one shared scan per ~1024 frames.
 /// </summary>
 public static class AnchorResolver
 {
-    static readonly Dictionary<string, Transform> Cache = new(StringComparer.OrdinalIgnoreCase);
-    static float _now;
-    static float _lastSweep = -999f;
-
-    public static void Tick(float dt)
-    {
-        if (dt > 0f) _now += dt;
-    }
-
-    public static void Register(string? ptr, Transform? transform)
-    {
-        if (string.IsNullOrWhiteSpace(ptr) || transform == null) return;
-        Cache[ptr] = transform;
-    }
-
-    public static void Clear() => Cache.Clear();
-
     public static Transform? Resolve(string? ptr)
     {
         if (string.IsNullOrWhiteSpace(ptr)) return null;
-        if (Cache.TryGetValue(ptr, out var t))
-        {
-            if (t != null) return t;
-            Cache.Remove(ptr);
-        }
-
-        if (_now - _lastSweep < VfxRules.AnchorSweepMinIntervalSeconds) return null;
-        _lastSweep = _now;
-        Sweep();
-        return Cache.TryGetValue(ptr, out var found) && found != null ? found : null;
-    }
-
-    static void Sweep()
-    {
         try
         {
-            foreach (var z in UObject.FindObjectsOfType<Zombie>())
-            {
-                if (z == null) continue;
-                Cache[GameDumps.Ptr(z)] = z.transform;
-            }
+            var t = Lookup(ptr);
+            if (t != null) return t;
 
-            foreach (var p in UObject.FindObjectsOfType<Plant>())
-            {
-                if (p == null) continue;
-                Cache[GameDumps.Ptr(p)] = p.transform;
-            }
+            var frame = Time.frameCount;
+            if (!InjectorEntityRegistry.NeedsResync(frame)) return null;
+            InjectorEntityRegistry.Resync(frame);
+            return Lookup(ptr);
         }
         catch
         {
-            // Missing scene objects — resolve simply misses; never throw into the loop.
+            // Destroyed native objects mid-lookup — a miss, never a throw into the loop.
+            return null;
         }
+    }
 
-        List<string>? dead = null;
-        foreach (var kv in Cache)
-        {
-            if (kv.Value == null) (dead ??= new List<string>()).Add(kv.Key);
-        }
-
-        if (dead != null)
-        {
-            foreach (var k in dead) Cache.Remove(k);
-        }
+    static Transform? Lookup(string ptr)
+    {
+        var z = InjectorEntityRegistry.FindZombie(ptr);
+        if (z != null) return z.transform;
+        var p = InjectorEntityRegistry.FindPlant(ptr);
+        return p != null ? p.transform : null;
     }
 }

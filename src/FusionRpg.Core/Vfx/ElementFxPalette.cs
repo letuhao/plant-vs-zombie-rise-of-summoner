@@ -14,6 +14,8 @@ public static class ElementFxPalette
         "ice" => (110, 210, 255),
         "air" => (190, 255, 170),
         "earth" => (210, 160, 70),
+        "light" => (255, 232, 120),
+        "dark" => (150, 90, 220),
         _ => (255, 255, 255) // omni / unknown / no payload — matches the existing white overlay
     };
 
@@ -25,7 +27,8 @@ public static class ElementFxPalette
         foreach (var e in elements)
         {
             if (e == null || e.Weight <= 0) continue;
-            if (Norm(e.Element) is "fire" or "ice" or "air" or "earth")
+            // Roster membership by strict name — keeps this palette in lockstep with ElementRoster.
+            if (FusionRpg.Core.Stats.Derived.ElementRoster.TryParse(e.Element, out _))
                 list.Add(e);
         }
 

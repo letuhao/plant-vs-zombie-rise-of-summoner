@@ -39,6 +39,10 @@ public class CatalogAndStressE2ETests : IAsyncLifetime
     public async Task Catalog_every_implemented_kind_one_match()
     {
         (await _http.PostAsJsonAsync("/api/sim/hello", new { })).EnsureSuccessStatusCode();
+        // Per-hit telemetry is opt-in (StatsConfig.LogDamage default flipped to false) —
+        // this catalog run wants every implemented kind visible, so opt in explicitly.
+        (await _http.PutAsJsonAsync("/api/stats", new StatsConfig { ApplyStats = true, LogDamage = true }))
+            .EnsureSuccessStatusCode();
         (await _http.PostAsJsonAsync("/api/sim/board/start", new { levelName = "Catalog" })).EnsureSuccessStatusCode();
         (await _http.PostAsJsonAsync("/api/sim/mower/place", new { row = 0 })).EnsureSuccessStatusCode();
         (await _http.PostAsJsonAsync("/api/sim/plant/place", new { ptr = "P1" })).EnsureSuccessStatusCode();

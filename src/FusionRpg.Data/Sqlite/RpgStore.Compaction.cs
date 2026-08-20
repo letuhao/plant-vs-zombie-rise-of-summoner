@@ -232,39 +232,32 @@ public sealed partial class RpgStore
     void EnforceKeepLastNCore()
     {
         var limit = SealedCompactionPolicy.KeepLastNFullCaptureRuns;
-        while (true)
+        // Web-mode (webrpg) runs are exempt from capture KeepLastN/archiving: their events
+        // replay from the logged seed, and expedition volume would otherwise evict real PvZ
+        // capture runs (audit 2026-08-21). Eligible ids are fetched ONCE — the old
+        // count-then-oldest loop re-scanned `runs` per promoted run (review I5).
+        List<long> promote;
+        using (var db = OpenUnlocked())
         {
-            long count;
-            long oldestId;
-            using (var db = OpenUnlocked())
-            {
-                using (var cmd = db.CreateCommand())
-                {
-                    cmd.CommandText = """
-                        SELECT COUNT(*) FROM runs
-                        WHERE ended_utc IS NOT NULL AND (archive_uri IS NULL OR archive_uri = '');
-                        """;
-                    count = Convert.ToInt64(cmd.ExecuteScalar() ?? 0L);
-                }
-                if (count <= limit)
-                    return;
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT id FROM runs
+                WHERE ended_utc IS NOT NULL AND (archive_uri IS NULL OR archive_uri = '')
+                  AND (game IS NULL OR game LIKE 'pvzrh%')
+                ORDER BY id ASC;
+                """;
+            var eligible = new List<long>();
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                eligible.Add(r.GetInt64(0));
+            if (eligible.Count <= limit)
+                return;
+            promote = eligible.Take(eligible.Count - limit).ToList();
+        }
 
-                using (var cmd = db.CreateCommand())
-                {
-                    cmd.CommandText = """
-                        SELECT id FROM runs
-                        WHERE ended_utc IS NOT NULL AND (archive_uri IS NULL OR archive_uri = '')
-                        ORDER BY id ASC
-                        LIMIT 1;
-                        """;
-                    var v = cmd.ExecuteScalar();
-                    if (v is null || v is DBNull)
-                        return;
-                    oldestId = Convert.ToInt64(v);
-                }
-            }
-
-            if (PromoteClosedRunCaptureCore(oldestId) is null)
+        foreach (var runId in promote)
+        {
+            if (PromoteClosedRunCaptureCore(runId) is null)
                 return;
         }
     }

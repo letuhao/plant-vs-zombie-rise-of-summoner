@@ -22,6 +22,7 @@ flowchart LR
 
 - **Injector never talks to the browser.** Both talk to the server at `http://127.0.0.1:5088` (launcher may hop ports; 5173 is reserved for Vite dev).
 - Server and web are **game-agnostic**: every payload is `game` + `kind` + JSON. Only the injector knows `Plant` / `Zombie`.
+- **Standalone-first (2026-08-21):** the injector is one of two match producers. The server's own battle resolver (`match-source-core`, profile `webrpg-1`, source `web`) produces web-mode matches through the same ingest — the RPG is fully playable with the PvZ game closed; PvZ runs are extension gameplay. Charter: [standalone/spec-standalone-charter.md](standalone/spec-standalone-charter.md).
 - No auth in v1. Localhost only.
 
 ## 2. Processes, modules, and boundaries
@@ -46,6 +47,8 @@ flowchart LR
 2. **Mutates** Unity only through Foundation paths: `EntityApply`/`EntityStatWriter` (stats), the Unity CC executor in `InjectorEffectActionSink` (status), FA10 Writer **Add** (HP deltas), and `pvz.*` Intent (spawns).
 
 Two apply pipelines (vanilla vs overlay), **one HP SSOT (Unity)**. Everything in §5–§7 exists to keep that true at 120 fps without crashing the game.
+
+> Scope note (standalone-first): this overlay principle governs **PvZ mode**. Web-mode matches (`webrpg-1`) have no Unity — the server's battle engine owns their state outright and emits results through the same event pipeline.
 
 ## 4. Runtime subsystem inventory
 

@@ -1,11 +1,11 @@
 using UnityEngine;
-using UObject = UnityEngine.Object;
 
 namespace FusionRpg.Injector.Fx;
 
 /// <summary>
 /// Shared shader / material / texture cache — vfx-ssot.md §10. Wraps <see cref="OverlayShaderProbe"/>.
-/// Texture order stays steal-first, soft-disc fallback; the winner is reported in the probe payload.
+/// Texture is ALWAYS the generated soft disc: the v1 "steal a vanilla particle texture" idea
+/// grabbed arbitrary scene imagery (electric/lightning sheets — LIVE finding 2026-08-21) and is gone.
 /// </summary>
 public static class FxResources
 {
@@ -15,12 +15,8 @@ public static class FxResources
     static Material? _particleMat;
     static Texture2D? _softDisc;
     static string _matShaderName = "";
-    static string _textureSource = "";
 
-    /// <summary>Last texture source used for the particle material ("stolen" | "soft-disc" | "").</summary>
-    public static string TextureSource => _textureSource;
-
-    /// <summary>Cached additive particle material, or null when no shipped shader survives stripping.</summary>
+    /// <summary>Cached particle material, or null when no shipped shader survives stripping.</summary>
     public static Material? ParticleMaterial()
     {
         var shader = OverlayShaderProbe.DrawShader();
@@ -37,12 +33,10 @@ public static class FxResources
 
         try
         {
-            var stolen = StealParticleTexture();
-            _textureSource = stolen != null ? "stolen" : "soft-disc";
             _particleMat = new Material(shader)
             {
                 hideFlags = HideFlags.HideAndDontSave,
-                mainTexture = stolen ?? SoftDisc()
+                mainTexture = SoftDisc()
             };
             try { _particleMat.SetColor("_Color", Color.white); } catch { }
             try { _particleMat.SetColor("_TintColor", new Color(1f, 1f, 1f, 0.6f)); } catch { }
@@ -55,30 +49,6 @@ public static class FxResources
             _matShaderName = "";
             return null;
         }
-    }
-
-    static Texture? StealParticleTexture()
-    {
-        try
-        {
-            foreach (var r in UObject.FindObjectsOfType<ParticleSystemRenderer>())
-            {
-                if (r == null) continue;
-                Material? src = null;
-                try { src = r.sharedMaterial; } catch { }
-                if (src == null)
-                {
-                    try { src = r.material; } catch { }
-                }
-                if (src == null) continue;
-                Texture? tex = null;
-                try { tex = src.mainTexture; } catch { }
-                if (tex != null) return tex;
-            }
-        }
-        catch { }
-
-        return null;
     }
 
     static Texture2D SoftDisc()

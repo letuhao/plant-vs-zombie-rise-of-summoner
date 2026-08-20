@@ -78,6 +78,9 @@ export function HubProvider({ children }: { children: ReactNode }) {
       }
       void qc.invalidateQueries({ queryKey: ["pvzActivity"] });
       void qc.invalidateQueries({ queryKey: ["pvzActivityFacts"] });
+      // Soul earns ride the fact transaction (spec-soul-economy) — refresh balances with facts.
+      void qc.invalidateQueries({ queryKey: ["souls"] });
+      void qc.invalidateQueries({ queryKey: ["demonSummonState"] });
     };
 
     const onRpgProgressionUpdated = (msg: { playerId?: number } | null) => {
@@ -100,6 +103,17 @@ export function HubProvider({ children }: { children: ReactNode }) {
       void qc.invalidateQueries({ queryKey: ["iconDumps"] });
     };
 
+    const onDemonsUpdated = () => {
+      void qc.invalidateQueries({ queryKey: ["demonRoster"] });
+      void qc.invalidateQueries({ queryKey: ["demonCodex"] });
+      void qc.invalidateQueries({ queryKey: ["demonSummonState"] });
+    };
+
+    const onSoulsUpdated = () => {
+      void qc.invalidateQueries({ queryKey: ["souls"] });
+      void qc.invalidateQueries({ queryKey: ["demonSummonState"] });
+    };
+
     const onAlmanacTextUpdated = () => {
       void qc.invalidateQueries({ queryKey: ["almanacDumps"] });
       // Promoted fields land on progression actor DTOs + types catalog.
@@ -117,6 +131,8 @@ export function HubProvider({ children }: { children: ReactNode }) {
     c.on("PvzActivityUpdated", onPvzActivityUpdated);
     c.on("RpgProgressionUpdated", onRpgProgressionUpdated);
     c.on("TypeIconUpdated", onTypeIconUpdated);
+    c.on("DemonsUpdated", onDemonsUpdated);
+    c.on("SoulsUpdated", onSoulsUpdated);
     c.on("AlmanacTextUpdated", onAlmanacTextUpdated);
 
     c.onreconnecting(() => setStatus("off"));
@@ -148,6 +164,8 @@ export function HubProvider({ children }: { children: ReactNode }) {
       c.off("RpgProgressionUpdated", onRpgProgressionUpdated);
       c.off("TypeIconUpdated", onTypeIconUpdated);
       c.off("AlmanacTextUpdated", onAlmanacTextUpdated);
+      c.off("DemonsUpdated", onDemonsUpdated);
+      c.off("SoulsUpdated", onSoulsUpdated);
       void c.stop();
     };
   }, [qc]);

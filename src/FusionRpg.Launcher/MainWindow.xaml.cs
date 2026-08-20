@@ -279,8 +279,11 @@ public partial class MainWindow : FluentWindow
         return IntPtr.Zero;
     }
 
+    bool _overlayBusy;
+
     async Task ToggleOverlayAsync()
     {
+        if (_overlayBusy) return; // rapid re-press while WebView2 is still initializing
         if (_overlay is { IsVisible: true })
         {
             HideOverlayToGame();
@@ -304,6 +307,7 @@ public partial class MainWindow : FluentWindow
         }
 
         _overlay ??= new OverlayWindow(HideOverlayToGame, _overlayKey.ToString());
+        _overlayBusy = true;
         try
         {
             await _overlay.ShowOverGameAsync(url);
@@ -311,6 +315,10 @@ public partial class MainWindow : FluentWindow
         catch (Exception ex)
         {
             AppendLog("Overlay failed: " + ex.Message);
+        }
+        finally
+        {
+            _overlayBusy = false;
         }
     }
 

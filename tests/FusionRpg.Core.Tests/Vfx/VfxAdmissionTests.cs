@@ -62,11 +62,12 @@ public class VfxAdmissionTests
         var d = a.Decide(Hit("0xAAA"), 0.02, true);
         Assert.False(d.Admitted);
         Assert.Equal(VfxSkipReasons.RateLimited, d.Reason);
-        // after the floater interval the floater re-admits (burst may still be limited)
+        // after the floater interval the floater re-admits (burst + flash still limited)
         var later = a.Decide(Hit("0xAAA"), 0.08, true);
         Assert.True(later.Admitted);
         Assert.Contains(0, later.SpecIndices);   // floater spec
         Assert.DoesNotContain(1, later.SpecIndices); // burst still inside 0.15s
+        Assert.DoesNotContain(2, later.SpecIndices); // flash grouped with bursts
     }
 
     [Fact]
@@ -78,8 +79,8 @@ public class VfxAdmissionTests
         var d2 = a.Decide(Hit("0xBBB"), 0, true);
         Assert.True(d1.Admitted);
         Assert.True(d2.Admitted);
-        Assert.Equal(2, d1.SpecIndices.Count);
-        Assert.Equal(2, d2.SpecIndices.Count);
+        Assert.Equal(3, d1.SpecIndices.Count);
+        Assert.Equal(3, d2.SpecIndices.Count);
     }
 
     [Fact]
@@ -92,8 +93,8 @@ public class VfxAdmissionTests
         var d2 = a.Decide(Hit("0xBBB", col: 3, row: 2), 0, true);
         Assert.True(d1.Admitted);
         Assert.True(d2.Admitted);
-        Assert.Equal(2, d1.SpecIndices.Count);          // floater + burst
-        Assert.Single(d2.SpecIndices);                   // floater only — cell burst collapsed
+        Assert.Equal(3, d1.SpecIndices.Count);          // floater + burst + flash
+        Assert.Single(d2.SpecIndices);                   // floater only — cell burst/flash collapsed
         Assert.Equal(0, d2.SpecIndices[0]);
     }
 

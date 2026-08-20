@@ -12,9 +12,13 @@ Success looks like: a specimen can be minted with a full demon profile in one at
 
 **A demon = a UniqueActor specimen + a demon profile.** The UniqueActor FSM, equipment, XP, and deploy path are untouched; demon-ness is a profile keyed by the same `instanceId`.
 
-### Content: species catalog (code-authored, like the status catalog)
+### Content: species catalog (generated from captured game data — resolved 2026-08-21)
 
-`DemonSpeciesCatalog` bootstrap in Core (follows `StatusCatalogBootstrap` precedent): `speciesId` (kebab-case, stable), display name, linked game side+`typeId` (the PvZ type whose body/portrait it wears), element primary/secondary (extended roster), base rarity (`common|rare|epic|legendary`), allowed variants, trait pool (trait ids + weights), `deployMode` (`plant-avatar` | `hypno-ally` — per resolved decision 1; v1 stores it, deploy modules consume it later). Unknown species/trait/element ids reject — catalog discipline.
+The owner chose to source the roster from the game's own captured data instead of hand-authoring: a **deterministic generator tool** reads the capture stores (`types` catalog for species + names, `type_almanac_dump` for lore text, `type_icons` for portraits, `spawn_stats` baselines for power tiering) and **emits the checked-in code catalog** below. Generation is seeded by `typeId` (same input data ⇒ same roster), so ids stay stable across regenerations; element/rarity/trait assignment derive from hashed typeId + observed stats (higher observed HP/ATK tiers → higher rarity bands). The generator runs at dev time against a captured DB; its *output* is committed, so the gameless-first rule holds (a fresh install needs no game data). Species whose types lack almanac dumps use a silhouette fallback portrait and the capture `typeName`.
+
+### Catalog shape (code-authored, like the status catalog)
+
+`DemonSpeciesCatalog` bootstrap in Core (follows `StatusCatalogBootstrap` precedent): `speciesId` (kebab-case, stable), display name, linked game side+`typeId` (the PvZ type whose body/portrait it wears), **demon type id in a disjoint id space (≥10000)** so web-battle events never collide with PvZ almanac type ids, element primary/secondary (extended roster), base rarity (`common|rare|epic|legendary`), allowed variants, trait pool (trait ids + weights), `deployMode` (`plant-avatar` | `hypno-ally` — per resolved decision 1; v1 stores it, deploy modules consume it later), and **acquisition flags** (`summonable`, `captureOnly`, `eventOnly` — summoning pools and the later exclusive-capture guardrails both read these; a species is never implicitly acquirable). Unknown species/trait/element ids reject — catalog discipline.
 
 Traits v1 = stored identity only (`traitId` list per specimen, validated against a `DemonTraitCatalog` naming effect-grant templates). Wiring traits into live Effect grants happens in the deploy-facing modules.
 
@@ -22,8 +26,8 @@ Traits v1 = stored identity only (`traitId` list per specimen, validated against
 
 | Table | Key | Columns (essence) |
 |---|---|---|
-| `rpg_demon_profiles` | `instance_id` (FK → `rpg_unique_actors`) | `species_id`, `rarity`, `variant`, `element_primary`, `element_secondary`, `traits_json`, `origin` (`summon\|capture\|fusion\|seed`), `created_utc`, `revision` |
-| `rpg_demon_codex` | `(player_id, species_id)` | `state` (`seen\|discovered`), `first_utc`, `updated_utc` |
+| `rpg_demon_profiles` | `instance_id` (FK → `rpg_unique_actors`) | `species_id`, `rarity`, `variant`, `element_primary`, `element_secondary`, `traits_json`, `origin` (`summon\|capture\|fusion\|seed`), `nickname`, `locked` (favorite/protect flag — the attachment primitive, protects from future fusion consumption), `created_utc`, `revision` |
+| `rpg_demon_codex` | `(player_id, species_id)` | `state` (`seen\|discovered`), `first_utc`, `updated_utc`. **Monotonic lattice: `discovered` > `seen`, upserts take `MAX(state)` — pulling a second copy must never downgrade `discovered` back to `seen`** |
 
 Specimen SSOT stays `rpg_unique_actors` + profile; Codex is per-player discovery state; the species catalog is code, not DB. Mint = create UniqueActor (Roster) + profile + codex upsert in **one** store call.
 
@@ -64,7 +68,7 @@ Data.Tests: mint atomicity (actor+profile+codex in one call; failure leaves noth
 
 ## Success criteria
 
-1. Seed content: ≥ 8 species across 4 rarities with valid element typing (incl. ≥1 `light`, ≥1 `dark`, ≥1 `hypno-ally` boss species). 2. Atomic mint proven by tests. 3. Codex read shows `seen`/`discovered` correctly. 4. `guard-dal` green. 5. All existing suites stay green.
+1. Seed content: **≥ 16 species** across 4 rarities with valid element typing (incl. ≥1 `light`, ≥1 `dark`, ≥1 `hypno-ally` boss species; the 2026-08-21 economy review showed an 8-species pool is consumed in one session at any sane pull rate). 2. Atomic mint proven by tests. 3. Codex lattice proven monotonic (downgrade attempt is a no-op). 4. `guard-dal` green. 5. All existing suites stay green. 6. Acquisition flags validated (a species with no flag is a catalog error).
 
 ## Open questions
 

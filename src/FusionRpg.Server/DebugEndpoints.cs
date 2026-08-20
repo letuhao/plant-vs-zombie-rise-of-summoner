@@ -145,6 +145,8 @@ public static class DebugEndpoints
         MapPost(g, "/kill", "debug.kill");
         MapPost(g, "/kill-plant", "debug.kill-plant");
         MapPost(g, "/wave-freeze", "debug.wave-freeze");
+        MapPost(g, "/stress-fill", "debug.stress-fill");
+        MapPost(g, "/stress-clear", "debug.stress-clear");
         MapPost(g, "/ensure-sun", "debug.ensure-sun");
         MapPost(g, "/enter-level", "debug.enter-level");
         MapPost(g, "/select", "debug.select");

@@ -45,48 +45,11 @@ public static class InjectorBoardSnapshot
         if (InjectorEntityRegistry.NeedsResync(frame))
             InjectorEntityRegistry.Resync(frame);
 
+        // v3 A4: entries carry cached immutable snaps — plants once per lifetime, zombies
+        // refreshed on a throttle — so capture cost no longer scales with interop reads per
+        // entity per freeze. The BoardSnapshot instance itself stays immutable as before.
         var list = new List<BoardEntitySnap>(InjectorEntityRegistry.PlantCount + InjectorEntityRegistry.ZombieCount);
-
-        InjectorEntityRegistry.VisitPlants(p =>
-        {
-            if (p.thePlantType == PlantType.Nothing) return;
-            list.Add(new BoardEntitySnap
-            {
-                Ptr = GameDumps.Ptr(p),
-                Side = "plant",
-                TypeId = (int)p.thePlantType,
-                Col = p.thePlantColumn,
-                Row = p.thePlantRow
-            });
-        });
-
-        InjectorEntityRegistry.VisitZombies(z =>
-        {
-            if (z.theZombieType == ZombieType.Nothing) return;
-            var col = -1;
-            try { col = LawnCoords.ColFromX(z.transform.position.x); } catch { }
-            if (col < 0)
-            {
-                try { col = z.Column; } catch { }
-            }
-
-            var row = 0;
-            try { row = z.theZombieRow; } catch { }
-
-            var mc = false;
-            try { mc = z.isMindControlled; } catch { }
-
-            list.Add(new BoardEntitySnap
-            {
-                Ptr = GameDumps.Ptr(z),
-                Side = "zombie",
-                TypeId = (int)z.theZombieType,
-                Col = col,
-                Row = row,
-                MindControlled = mc
-            });
-        });
-
+        InjectorEntityRegistry.CollectSnaps(list);
         return new BoardSnapshot(list);
     }
 }

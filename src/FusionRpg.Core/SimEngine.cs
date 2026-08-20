@@ -703,10 +703,13 @@ public sealed class SimEngine
 
     static SimResult Fail(string error) => new() { Error = error };
 
+    /// <summary>Game profile stamped on emitted events — override to `webrpg-1` for web-mode e2e.</summary>
+    public string GameProfileId { get; set; } = RpgConstants.GameId;
+
     EventEnvelope Evt(string kind, object payload) => new()
     {
         T = DateTime.UtcNow.ToString("o"),
-        Game = RpgConstants.GameId,
+        Game = GameProfileId,
         Kind = kind,
         MatchKey = MatchKey,
         Payload = payload

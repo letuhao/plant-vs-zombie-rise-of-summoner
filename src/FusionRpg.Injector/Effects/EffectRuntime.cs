@@ -66,6 +66,10 @@ public static class EffectRuntime
                 ["delta"] = ev.Delta,
                 ["at"] = ev.At.ToString("o")
             });
+            _status.OnApplied = inst =>
+            {
+                try { VfxDirector.Play(Core.Vfx.StatusVfxCues.Cue(inst)); } catch { }
+            };
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
             _bag.Status = _status;
             WireCombatMath(_bag);

@@ -1,0 +1,224 @@
+using System.Text;
+using FusionRpg.Core.Stats.Derived;
+
+namespace FusionRpg.Core.Demons.Generation;
+
+/// <summary>One captured catalog row, as fed to the generator (from `types` via the DAL).</summary>
+public sealed record CapturedTypeSeed(string Side, int TypeId, string? TypeName, string? DisplayName, int HpBase);
+
+/// <summary>
+/// Deterministic species generation from captured game data (spec-demon-core.md, resolved 2026-08-21):
+/// same input rows ⇒ identical roster. Element/rarity/traits derive from typeId hashes and observed
+/// HP tiers; the emitted C# is committed so a fresh install needs no game data (gameless-first).
+/// </summary>
+public static class DemonSpeciesGenerator
+{
+    public const int DefaultMaxSpecies = 24;
+
+    public static List<DemonSpeciesDef> Generate(IEnumerable<CapturedTypeSeed> captured, int maxSpecies = DefaultMaxSpecies)
+    {
+        // Usable rows: named, alive-capable; zombies first (demons wear zombie bodies), plants fill.
+        var rows = captured
+            .Where(c => c.HpBase > 0 && (!string.IsNullOrWhiteSpace(c.TypeName) || !string.IsNullOrWhiteSpace(c.DisplayName)))
+            .GroupBy(c => (c.Side, c.TypeId))
+            .Select(g => g.First())
+            .ToList();
+
+        var pool = rows.Where(c => c.Side == "zombie")
+            .OrderByDescending(c => c.HpBase).ThenBy(c => c.TypeId)
+            .Take(maxSpecies)
+            .ToList();
+        if (pool.Count < maxSpecies)
+            pool.AddRange(rows.Where(c => c.Side == "plant")
+                .OrderByDescending(c => c.HpBase).ThenBy(c => c.TypeId)
+                .Take(maxSpecies - pool.Count));
+
+        var species = new List<DemonSpeciesDef>(pool.Count);
+        var usedIds = new HashSet<string>(StringComparer.Ordinal);
+        for (var rank = 0; rank < pool.Count; rank++)
+        {
+            var row = pool[rank];
+            var rarity = RarityForRank(rank, pool.Count);
+            var primary = ElementRoster.Concrete[(int)(Hash(row.TypeId, "element") % (uint)ElementRoster.Concrete.Count)];
+            ElementTypeId? secondary = null;
+            if (Hash(row.TypeId, "sec") % 3 == 0)
+            {
+                var s = ElementRoster.Concrete[(int)(Hash(row.TypeId, "sec2") % (uint)ElementRoster.Concrete.Count)];
+                if (s != primary) secondary = s;
+            }
+
+            species.Add(new DemonSpeciesDef
+            {
+                SpeciesId = UniqueId(KebabId(row), usedIds, row.TypeId),
+                Name = row.DisplayName ?? row.TypeName ?? $"Demon {row.TypeId}",
+                Side = row.Side,
+                GameTypeId = row.TypeId,
+                DemonTypeId = DemonSpeciesCatalog.DemonTypeIdFloor + (row.Side == "plant" ? 5000 : 0) + row.TypeId,
+                ElementPrimary = primary,
+                ElementSecondary = secondary,
+                BaseRarity = rarity,
+                DeployMode = rank < 2 ? DemonDeployMode.HypnoAlly : DemonDeployMode.PlantAvatar,
+                Acquisition = DemonAcquisition.Summonable,
+                Variants = VariantsFor(rarity, row.TypeId),
+                TraitPool = TraitsFor(rarity, row.TypeId)
+            });
+        }
+
+        EnsureElementPresence(species, ElementTypeId.Light);
+        EnsureElementPresence(species, ElementTypeId.Dark);
+        MarkCaptureExclusives(species);
+        return species;
+    }
+
+    static DemonRarity RarityForRank(int rank, int count)
+    {
+        // Observed-power tiers: top 2 legendary, next ~17% epic, next ~25% rare, rest common.
+        if (rank < 2) return DemonRarity.Legendary;
+        if (rank < 2 + Math.Max(2, count / 6)) return DemonRarity.Epic;
+        if (rank < 2 + Math.Max(2, count / 6) + Math.Max(3, count / 4)) return DemonRarity.Rare;
+        return DemonRarity.Common;
+    }
+
+    static void EnsureElementPresence(List<DemonSpeciesDef> species, ElementTypeId element)
+    {
+        if (species.Any(s => s.ElementPrimary == element)) return;
+        var idx = species.FindIndex(s => s.BaseRarity == DemonRarity.Common && s.ElementSecondary != element);
+        if (idx < 0) idx = species.Count - 1;
+        if (idx < 0) return;
+        species[idx] = species[idx] with { ElementPrimary = element };
+    }
+
+    static void MarkCaptureExclusives(List<DemonSpeciesDef> species)
+    {
+        // Guardrail: ≤15% capture-only, never legendary. Two deterministic rares become
+        // future hunting-ground content (silhouettes until demon-capture ships).
+        if (species.Count < 14) return;
+        var marked = 0;
+        for (var i = 0; i < species.Count && marked < 2; i++)
+        {
+            if (species[i].BaseRarity != DemonRarity.Rare) continue;
+            species[i] = species[i] with { Acquisition = DemonAcquisition.CaptureOnly };
+            marked++;
+        }
+    }
+
+    static IReadOnlyList<string> VariantsFor(DemonRarity rarity, int typeId)
+    {
+        var list = new List<string> { "normal", "shiny" };
+        if (rarity >= DemonRarity.Epic)
+        {
+            var extras = new[] { "ancient", "mutated", "corrupted", "blessed", "cursed" };
+            list.Add(extras[(int)(Hash(typeId, "variant") % (uint)extras.Length)]);
+        }
+
+        return list;
+    }
+
+    static IReadOnlyList<string> TraitsFor(DemonRarity rarity, int typeId)
+    {
+        var combat = new[] { "berserker", "regenerator", "soul-eater", "critical-hunter", "guardian", "swift" };
+        var personality = new[] { "loyal", "greedy", "bloodthirsty", "coward", "genius" };
+        var pool = new List<string>
+        {
+            combat[(int)(Hash(typeId, "t1") % (uint)combat.Length)],
+            personality[(int)(Hash(typeId, "t2") % (uint)personality.Length)]
+        };
+        var third = combat[(int)(Hash(typeId, "t3") % (uint)combat.Length)];
+        if (!pool.Contains(third)) pool.Add(third);
+        if (rarity >= DemonRarity.Epic)
+            pool.Add(Hash(typeId, "essence") % 2 == 0 ? "void-touched" : "chaos-marked");
+        if (rarity == DemonRarity.Legendary)
+            pool.Add("immortal");
+        return pool;
+    }
+
+    static string KebabId(CapturedTypeSeed row)
+    {
+        var source = !string.IsNullOrWhiteSpace(row.TypeName) ? row.TypeName! : $"demon-{row.TypeId}";
+        var sb = new StringBuilder(source.Length + 8);
+        var lastDash = true;
+        foreach (var ch in source)
+        {
+            if (ch is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or (>= '0' and <= '9'))
+            {
+                sb.Append(char.ToLowerInvariant(ch));
+                lastDash = false;
+            }
+            else if (!lastDash)
+            {
+                sb.Append('-');
+                lastDash = true;
+            }
+        }
+
+        var id = sb.ToString().Trim('-');
+        return id.Length == 0 ? $"demon-{row.TypeId}" : id;
+    }
+
+    static string UniqueId(string baseId, HashSet<string> used, int typeId)
+    {
+        var id = used.Add(baseId) ? baseId : $"{baseId}-{typeId}";
+        if (id != baseId) used.Add(id);
+        return id;
+    }
+
+    /// <summary>FNV-1a over (typeId, salt) — the deterministic randomness source; never wall clock, never Random.</summary>
+    static uint Hash(int typeId, string salt)
+    {
+        unchecked
+        {
+            var h = 2166136261u;
+            foreach (var ch in salt)
+            {
+                h ^= ch;
+                h *= 16777619u;
+            }
+
+            h ^= (uint)typeId;
+            h *= 16777619u;
+            return h;
+        }
+    }
+
+    /// <summary>Emit the checked-in Generated.cs source for a roster.</summary>
+    public static string EmitCSharp(IReadOnlyList<DemonSpeciesDef> species)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated>");
+        sb.AppendLine("// Demon species roster generated from captured game data (spec-demon-core.md).");
+        sb.AppendLine("// Regenerate: dotnet run --project tools/DemonCatalogGen -- <server data dir>");
+        sb.AppendLine("// Do not hand-edit — rebalance via the generator, then re-emit.");
+        sb.AppendLine("// </auto-generated>");
+        sb.AppendLine("using FusionRpg.Core.Stats.Derived;");
+        sb.AppendLine();
+        sb.AppendLine("namespace FusionRpg.Core.Demons;");
+        sb.AppendLine();
+        sb.AppendLine("public static partial class DemonSpeciesCatalog");
+        sb.AppendLine("{");
+        sb.AppendLine("    static readonly IReadOnlyList<DemonSpeciesDef> GeneratedSpecies = new DemonSpeciesDef[]");
+        sb.AppendLine("    {");
+        foreach (var s in species)
+        {
+            sb.Append("        new() { SpeciesId = ").Append(Quote(s.SpeciesId));
+            sb.Append(", Name = ").Append(Quote(s.Name));
+            sb.Append(", Side = ").Append(Quote(s.Side));
+            sb.Append(", GameTypeId = ").Append(s.GameTypeId);
+            sb.Append(", DemonTypeId = ").Append(s.DemonTypeId);
+            sb.Append(", ElementPrimary = ElementTypeId.").Append(s.ElementPrimary);
+            sb.Append(", ElementSecondary = ").Append(s.ElementSecondary is { } sec ? $"ElementTypeId.{sec}" : "null");
+            sb.Append(", BaseRarity = DemonRarity.").Append(s.BaseRarity);
+            sb.Append(", DeployMode = DemonDeployMode.").Append(s.DeployMode);
+            sb.Append(", Acquisition = DemonAcquisition.").Append(s.Acquisition);
+            sb.Append(", Variants = new[] { ").Append(string.Join(", ", s.Variants.Select(Quote))).Append(" }");
+            sb.Append(", TraitPool = new[] { ").Append(string.Join(", ", s.TraitPool.Select(Quote))).Append(" }");
+            sb.AppendLine(" },");
+        }
+
+        sb.AppendLine("    };");
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    static string Quote(string value) =>
+        "\"" + value.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+}

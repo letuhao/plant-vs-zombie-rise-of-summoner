@@ -10,7 +10,14 @@ The stack was built game-agnostic from day one: server and web already speak onl
 
 1. **Gameplay form:** expeditions first (timed, auto-resolved, server-simulated squad missions), interactive turn-based battles second. Both feed the same event → Activity → XP/Souls pipelines.
 2. **Combat authority:** server-authoritative. Battles resolve server-side with Core subsystems and seeded RNG (summon-roller precedent); the FE renders and commands, never rolls.
-3. **PvZ extension roles — all four:** exclusive capture source (some species only catchable in real runs) · economy booster (multiplied earn rates in real runs) · shared battle content (one roster deploys to both battlefields via the existing UniqueBindings path) · trophy/prestige (real-run feats feed titles/codex flair).
+3. **PvZ extension roles — all four, with guardrails** (adjudicated in the [2026-08-21 review](standalone/audit-2026-08-21.md); companion-game precedent says gating content behind a companion is the classic failure, so each role is bounded):
+   - **One-axis rule:** each role owns exactly one axis — capture = collection *breadth*, booster = earn *tempo*, shared battles = roster *expression*, trophies = *prestige*. PvZ must never be the best source of something web mode also provides.
+   - **Exclusive capture:** ≤15% of the species catalog, zero legendaries; codex completion milestones claimable at 90% so web-only players get every milestone; world-events later rotates a slow web path to each exclusive (exclusive *method*, not permanent lock).
+   - **Booster = Blessing, not multiplier:** a real PvZ run charges +50% Soul earn for the next 3 web expeditions (max 1 charge banked) — PvZ play makes web play better instead of competing with it; PvZ-sourced income intended ≤40% of total.
+   - **Shared battles:** ≤2 demon deploys per PvZ run, small additive grants via the existing bounded effect path; specimens on a web expedition are soft-locked from PvZ deploy (Cold-plane flag, not the UniqueActor FSM) and vice versa — no double-dipping.
+   - **Trophies:** cosmetic, one-time grants only — never stats, never repeatable faucets.
+
+**Expedition design anchors** (prior-art research; the expeditions spec elaborates): duration tiers 30 min / 4 h / 8 h / 20 h (20 h so daily schedule drift never punishes); parallelism gated by expedition slots (2 → 5 via progression), **no stamina system** — with no monetization a stamina gate has no honest job; recall allowed anytime with rewards pro-rated to completed ticks; outcome sealed at dispatch by recorded seed, revealed at collection; nothing expires if uncollected.
 
 ## Modules
 

@@ -12,4 +12,7 @@
     <ProjectReference Include="..\FusionRpg.Core\FusionRpg.Core.csproj" />
     <ProjectReference Include="..\FusionRpg.CheatCore\FusionRpg.CheatCore.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FusionRpg.Data.Tests" />
+  </ItemGroup>
 </Project>

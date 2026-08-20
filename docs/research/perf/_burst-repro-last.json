@@ -1,0 +1,11 @@
+{
+  "events": 20000,
+  "batch": 512,
+  "matchKey": "burst-9974ae12",
+  "healthFailures": 0,
+  "sendFailures": 0,
+  "elapsedMs": 3213,
+  "serverRespondingAfter": true,
+  "processAlive": true,
+  "eventsPerSec": 6224.0
+}

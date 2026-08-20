@@ -824,9 +824,17 @@ public static class CheatActions
         CheatState.Note("I-TRAVEL-BUFF: inject API varies by mode — observe travel.buff events; stub OK");
     }
 
+    // v3 A5: two FindObjectsOfType scans per FRAME made auto-collect the largest loop cost
+    // (~9ms/frame on big boards). 150ms cadence is imperceptible for coin pickup and cuts the
+    // scans 10–30×. Escalate to a hook-fed coin registry if the stress gate still shows heat.
+    static long _nextAutoCollectMs;
+
     public static void AutoCollectTick()
     {
         if (!CheatState.On("G-AUTOCOLLECT")) return;
+        var nowMs = Environment.TickCount64;
+        if (nowMs < _nextAutoCollectMs) return;
+        _nextAutoCollectMs = nowMs + 150;
         var board = GameHooks.Board ?? Board.Instance;
         try
         {

@@ -207,6 +207,8 @@ public sealed partial class RpgStore : IRpgDb
         EnsureColumn(db, "runs", "modifiers_json", "TEXT");
         EnsureColumn(db, "runs", "snapshot_json", "TEXT");
         EnsureColumn(db, "runs", "archive_uri", "TEXT");
+        // Standalone-first (decisions.md 2026-08-21): per-run game profile — NULL = legacy pvzrh.
+        EnsureColumn(db, "runs", "game", "TEXT");
         EnsureColumn(db, "types", "display_name", "TEXT");
         EnsureColumn(db, "types", "sample_json", "TEXT");
         Exec(db, """
@@ -361,6 +363,70 @@ public sealed partial class RpgStore : IRpgDb
               instance_id TEXT NOT NULL PRIMARY KEY,
               mods_json TEXT NOT NULL DEFAULT '{}'
             );
+            CREATE TABLE IF NOT EXISTS rpg_demon_profiles (
+              instance_id TEXT NOT NULL PRIMARY KEY,
+              species_id TEXT NOT NULL,
+              rarity TEXT NOT NULL,
+              variant TEXT NOT NULL DEFAULT 'normal',
+              element_primary TEXT NOT NULL,
+              element_secondary TEXT,
+              traits_json TEXT NOT NULL DEFAULT '[]',
+              origin TEXT NOT NULL,
+              nickname TEXT,
+              locked INTEGER NOT NULL DEFAULT 0,
+              created_utc TEXT NOT NULL,
+              revision INTEGER NOT NULL DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS rpg_demon_codex (
+              player_id INTEGER NOT NULL,
+              species_id TEXT NOT NULL,
+              state TEXT NOT NULL,
+              first_utc TEXT NOT NULL,
+              updated_utc TEXT NOT NULL,
+              PRIMARY KEY (player_id, species_id)
+            );
+            CREATE TABLE IF NOT EXISTS rpg_soul_ledger (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              player_id INTEGER NOT NULL,
+              run_id INTEGER NOT NULL DEFAULT 0,
+              delta INTEGER NOT NULL,
+              reason TEXT NOT NULL,
+              ref_kind TEXT,
+              ref_id TEXT,
+              dedupe_key TEXT NOT NULL,
+              t TEXT NOT NULL,
+              payload_json TEXT,
+              UNIQUE(player_id, reason, dedupe_key)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_soul_ledger_player ON rpg_soul_ledger(player_id, id);
+            CREATE INDEX IF NOT EXISTS ix_rpg_soul_ledger_earn ON rpg_soul_ledger(player_id, reason, run_id);
+            CREATE TABLE IF NOT EXISTS rpg_soul_balances (
+              player_id INTEGER NOT NULL PRIMARY KEY,
+              balance INTEGER NOT NULL DEFAULT 0,
+              earned_total INTEGER NOT NULL DEFAULT 0,
+              spent_total INTEGER NOT NULL DEFAULT 0,
+              through_ledger_id INTEGER NOT NULL DEFAULT 0,
+              revision INTEGER NOT NULL DEFAULT 0,
+              updated_utc TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS rpg_summon_log (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              player_id INTEGER NOT NULL,
+              correlation_id TEXT NOT NULL,
+              banner_id TEXT NOT NULL,
+              count INTEGER NOT NULL,
+              focus_element TEXT,
+              rng_seed TEXT NOT NULL,
+              results_json TEXT NOT NULL,
+              t TEXT NOT NULL,
+              UNIQUE(player_id, correlation_id)
+            );
+            CREATE TABLE IF NOT EXISTS rpg_summon_pity (
+              player_id INTEGER NOT NULL PRIMARY KEY,
+              pulls_since_epic INTEGER NOT NULL DEFAULT 0,
+              pulls_since_legendary INTEGER NOT NULL DEFAULT 0,
+              updated_utc TEXT NOT NULL
+            );
             """);
         EnsureColumn(db, "pvz_activity_rollups", "through_fact_id", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "pvz_activity_rollups", "schema_version", "INTEGER NOT NULL DEFAULT 0");
@@ -410,6 +476,7 @@ public sealed partial class RpgStore : IRpgDb
         {
             LastHeartbeatUtc = null;
             Source = RpgConstants.SourceNone;
+            _killEarnMemo.Clear();
             using (var db = OpenUnlocked())
             {
                 foreach (var sql in new[]
@@ -422,6 +489,9 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM pvz_activity_revisions;",
                              "DELETE FROM rpg_xp_ledger;", "DELETE FROM rpg_actor_progression;",
                              "DELETE FROM rpg_unique_equipment;", "DELETE FROM rpg_unique_stat_mods;",
+                             "DELETE FROM rpg_demon_profiles;", "DELETE FROM rpg_demon_codex;",
+                             "DELETE FROM rpg_soul_ledger;", "DELETE FROM rpg_soul_balances;",
+                             "DELETE FROM rpg_summon_log;", "DELETE FROM rpg_summon_pity;",
                              "DELETE FROM rpg_unique_actors;",
                              "DELETE FROM archive_catalog;",
                              "DELETE FROM players;"
@@ -1176,7 +1246,7 @@ public sealed partial class RpgStore : IRpgDb
         }
     }
 
-    void ProjectPvzActivityFromCapture(SqliteConnection db, string kind, string payload, string t, long playerId, long runId, string? matchKey)
+    void ProjectPvzActivityFromCapture(SqliteConnection db, string kind, string payload, string t, long playerId, long runId, string? matchKey, bool pvzGame = true)
     {
         var factKind = FusionRpg.Core.Activity.PvzActivityKinds.FromCaptureKind(kind);
         if (factKind is null) return;
@@ -1195,7 +1265,9 @@ public sealed partial class RpgStore : IRpgDb
             BumpAndApplyPvzActivityDeltaUnlocked(db, playerId, inserted.FactId, factKind, payload);
             _activityNotifyBatch?.Add(playerId);
             ApplyRpgProgressionFromActivityUnlocked(
-                db, playerId, runId, t, factKind, payload, dedupe, inserted.FactId);
+                db, playerId, runId, t, factKind, payload, dedupe, inserted.FactId, pvzGame);
+            // Soul earns ride the same transaction as the fact — a crash can never lose one (spec-soul-economy.md).
+            ApplySoulEarnFromActivityUnlocked(db, playerId, runId, t, factKind, payload, inserted.FactId);
         }
     }
 
@@ -1772,6 +1844,7 @@ public sealed partial class RpgStore : IRpgDb
                 catch
                 {
                     try { Exec(db, "ROLLBACK;"); } catch { /* ignore */ }
+                    _killEarnMemo.Clear(); // in-memory memo must not outrun the rolled-back ledger
                     throw;
                 }
                 return new EventInsertNotify(
@@ -1803,10 +1876,12 @@ public sealed partial class RpgStore : IRpgDb
             using (var cmd = db.CreateCommand())
             {
                 cmd.CommandText = """
-                    INSERT INTO runs(player_id, match_key, started_utc, level_name, level_type, board_level, summary, modifiers_json)
-                    VALUES($p,$k,$t,$n,$lt,$bl,'{}',$mod);
+                    INSERT INTO runs(player_id, match_key, started_utc, level_name, level_type, board_level, summary, modifiers_json, game)
+                    VALUES($p,$k,$t,$n,$lt,$bl,'{}',$mod,$g);
                     SELECT last_insert_rowid();
                     """;
+                cmd.Parameters.AddWithValue("$g",
+                    string.IsNullOrWhiteSpace(e.Game) ? RpgConstants.GameId : e.Game);
                 cmd.Parameters.AddWithValue("$p", playerId);
                 cmd.Parameters.AddWithValue("$k", matchKey);
                 cmd.Parameters.AddWithValue("$t", t);
@@ -1844,12 +1919,16 @@ public sealed partial class RpgStore : IRpgDb
             id = (long)(cmd.ExecuteScalar() ?? 0L);
         }
 
+        // Pollution guards (audit 2026-08-21): web-mode events must not touch the pvzrh
+        // catalog, global metrics, or almanac type XP — runs/facts/souls still project.
+        var pvzGame = IsPvzGame(e.Game);
         if (runId is { } run)
-            Project(db, e.Kind, payload, t, playerId, run, matchKey);
+            Project(db, e.Kind, payload, t, playerId, run, matchKey, pvzGame);
         else
             ProjectGlobal(db, e.Kind, payload, t);
 
-        BumpFromKindUnlocked(db, e.Kind);
+        if (pvzGame)
+            BumpFromKindUnlocked(db, e.Kind);
         e.Id = id;
         e.PlayerId = playerId;
         e.RunId = runId;
@@ -2017,7 +2096,7 @@ public sealed partial class RpgStore : IRpgDb
         cmd.CommandText = """
             SELECT id, player_id, match_key, started_utc, ended_utc, level_name, result,
                    mowers_used, plants_planted, plants_died, zombies_killed, summary,
-                   level_type, board_level, modifiers_json, snapshot_json, archive_uri
+                   level_type, board_level, modifiers_json, snapshot_json, archive_uri, game
             FROM runs WHERE player_id = $p ORDER BY id DESC LIMIT 100;
             """;
         cmd.Parameters.AddWithValue("$p", pid);
@@ -2060,7 +2139,8 @@ public sealed partial class RpgStore : IRpgDb
                 LevelType = r.IsDBNull(12) ? null : r.GetString(12),
                 BoardLevel = r.IsDBNull(13) ? null : r.GetInt32(13),
                 Modifiers = modifiers,
-                ArchiveUri = r.IsDBNull(16) ? null : r.GetString(16)
+                ArchiveUri = r.IsDBNull(16) ? null : r.GetString(16),
+                Game = r.IsDBNull(17) ? RpgConstants.GameId : r.GetString(17)
             });
         }
         return list;
@@ -2097,7 +2177,9 @@ public sealed partial class RpgStore : IRpgDb
         AddMetricUnlocked(db, name, delta);
     }
 
-    void Project(SqliteConnection db, string kind, string payload, string t, long playerId, long runId, string? matchKey)
+    static bool IsPvzGame(string? game) => RpgConstants.IsPvzGame(game);
+
+    void Project(SqliteConnection db, string kind, string payload, string t, long playerId, long runId, string? matchKey, bool pvzGame = true)
     {
         switch (kind)
         {
@@ -2107,12 +2189,12 @@ public sealed partial class RpgStore : IRpgDb
             case "plant.spawn":
                 InsertEntity(db, payload, t, playerId, runId, "plant");
                 InsertSpawnStats(db, payload, t, playerId, runId, "plant");
-                UpsertTypeFromSpawn(db, payload, t, "plant");
+                if (pvzGame) UpsertTypeFromSpawn(db, payload, t, "plant");
                 break;
             case "zombie.spawn":
                 InsertEntity(db, payload, t, playerId, runId, "zombie");
                 InsertSpawnStats(db, payload, t, playerId, runId, "zombie");
-                UpsertTypeFromSpawn(db, payload, t, "zombie");
+                if (pvzGame) UpsertTypeFromSpawn(db, payload, t, "zombie");
                 break;
             case "entity.stats":
                 InsertSpawnStats(db, payload, t, playerId, runId, TryString(payload, "side") ?? "zombie");
@@ -2120,12 +2202,12 @@ public sealed partial class RpgStore : IRpgDb
                 break;
             case "plant.die":
                 MarkDied(db, payload, t, runId, "reason");
-                BumpTypeKilled(db, payload, t, "plant");
+                if (pvzGame) BumpTypeKilled(db, payload, t, "plant");
                 ExecParam(db, "UPDATE runs SET plants_died = plants_died + 1 WHERE id=$id;", "$id", runId);
                 break;
             case "zombie.die":
                 MarkDied(db, payload, t, runId, "reason");
-                BumpTypeKilled(db, payload, t, "zombie");
+                if (pvzGame) BumpTypeKilled(db, payload, t, "zombie");
                 ExecParam(db, "UPDATE runs SET zombies_killed = zombies_killed + 1 WHERE id=$id;", "$id", runId);
                 break;
             case "mower.place":
@@ -2197,7 +2279,7 @@ public sealed partial class RpgStore : IRpgDb
                 }
         }
 
-        ProjectPvzActivityFromCapture(db, kind, payload, t, playerId, runId, matchKey);
+        ProjectPvzActivityFromCapture(db, kind, payload, t, playerId, runId, matchKey, pvzGame);
     }
 
     void ProjectGlobal(SqliteConnection db, string kind, string payload, string t)

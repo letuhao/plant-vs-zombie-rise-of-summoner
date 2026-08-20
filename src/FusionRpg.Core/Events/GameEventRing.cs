@@ -78,4 +78,15 @@ public sealed class GameEventRing
         _head = 0;
         _count = 0;
     }
+
+    /// <summary>Non-destructive in-order visit (v5 index rebuild) — does not move the cursor.</summary>
+    public void ForEach(Action<GameEventRec> visit)
+    {
+        for (var i = 0; i < _count; i++)
+        {
+            var idx = _head + i;
+            if (idx >= _buf.Length) idx -= _buf.Length;
+            visit(_buf[idx]);
+        }
+    }
 }

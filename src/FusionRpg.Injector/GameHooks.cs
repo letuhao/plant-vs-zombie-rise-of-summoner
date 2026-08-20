@@ -502,7 +502,6 @@ public static class GameHooks
             if (__instance == null) return;
             Effects.InjectorEntityRegistry.Add(__instance);
             Effects.InjectorBoardSnapshot.Invalidate();
-            try { Fx.AnchorResolver.Register(GameDumps.Ptr(__instance), __instance.transform); } catch { }
             if (!Ready()) return;
             if (__instance.thePlantType == PlantType.Nothing) return;
             ApplyPlant(__instance, "start");
@@ -532,6 +531,37 @@ public static class GameHooks
         }
     }
 
+    // v5 hotfix (v5-600z-war finding): a full StatSystem.Resolve ran per TakeDamage —
+    // 2,100+/s under war load, a top allocator. The defense scale only changes with the
+    // cheat document or pvz-mod revisions, so resolve once per revision pair per side.
+    static long _dmgScaleDocRev = long.MinValue;
+    static long _dmgScalePvzRev = long.MinValue;
+    static bool _dmgScaleActive;
+    static float _plantDefPct = 1f;
+    static int _plantDefFlat;
+    static float _zombieDefPct = 1f;
+    static int _zombieDefFlat;
+
+    static void EnsureDamageScaleCache(StatsConfig s)
+    {
+        if (_dmgScaleDocRev == CheatState.DocumentRevision && _dmgScalePvzRev == CheatState.PvzStatsRevision)
+            return;
+        _dmgScaleDocRev = CheatState.DocumentRevision;
+        _dmgScalePvzRev = CheatState.PvzStatsRevision;
+        var hasPvz = CheatState.HasPvzStatsMods();
+        _dmgScaleActive = s.ApplyStats || hasPvz;
+        if (!_dmgScaleActive) return;
+        var baseline = new EntityBaseline { Hp = 1, MaxHp = 1, Atk = 1 };
+        var pf = CheatState.Stats.Resolve(CheatState.Stats.Contexts.ForPlant(
+            "dmg", baseline, cheatScale: s, applyStats: true, pvzStatsMods: CheatState.PvzStatsMods));
+        _plantDefPct = pf.DefensePercent;
+        _plantDefFlat = pf.DefenseFlat;
+        var zf = CheatState.Stats.Resolve(CheatState.Stats.Contexts.ForZombie(
+            "dmg", baseline, cheatScale: s, applyStats: true, pvzStatsMods: CheatState.PvzStatsMods));
+        _zombieDefPct = zf.DefensePercent;
+        _zombieDefFlat = zf.DefenseFlat;
+    }
+
     [HarmonyPatch(typeof(Plant), nameof(Plant.TakeDamage))]
     public static class PlantTakeDamage
     {
@@ -543,16 +573,9 @@ public static class GameHooks
             if (OverlayApplyGuard.IsActive) return;
             var s = CheatState.EffectiveStats();
             var before = damage;
-            var hasPvz = CheatState.HasPvzStatsMods();
-            if (s.ApplyStats || hasPvz)
-            {
-                var baseline = new EntityBaseline { Hp = 1, MaxHp = 1, Atk = 1 };
-                var ctx = CheatState.Stats.Contexts.ForPlant(
-                    "dmg", baseline, cheatScale: s, applyStats: s.ApplyStats || hasPvz,
-                    pvzStatsMods: CheatState.PvzStatsMods);
-                var final = CheatState.Stats.Resolve(ctx);
-                damage = StatMath.ScaleIncoming(damage, final.DefensePercent, final.DefenseFlat);
-            }
+            EnsureDamageScaleCache(s);
+            if (_dmgScaleActive)
+                damage = StatMath.ScaleIncoming(damage, _plantDefPct, _plantDefFlat);
             // v2 record path (Task 9) — mirrors ZombieTakeDamage; melee bites consume the
             // AttackPlant prefix's pending pair id inside TryRecordTaken.
             var telemetry = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive;
@@ -578,8 +601,9 @@ public static class GameHooks
                 try { pType = (int)__instance.thePlantType; } catch { }
                 var actorPtr = IntPtr.Zero;
                 try { if (damageFrom is Il2CppObjectBase dfObj) actorPtr = dfObj.Pointer; } catch { }
-                if (!Effects.EventDrainHost.TryRecordDealtFromBullet(
-                        Core.Events.GameEventSide.Plant, damageFrom as Il2CppObjectBase, __instance.Pointer, pType, damage))
+                Effects.EventDrainHost.TryRecordDealtFromBullet(
+                    Core.Events.GameEventSide.Plant, damageFrom as Il2CppObjectBase, __instance.Pointer, pType, damage, out var wasBullet);
+                if (!wasBullet)
                     Effects.EventDrainHost.TryRecordTaken(
                         Core.Events.GameEventSide.Plant, __instance.Pointer, pType, actorPtr, damage);
             }
@@ -609,7 +633,6 @@ public static class GameHooks
             if (__instance == null) return;
             Effects.InjectorEntityRegistry.Add(__instance);
             Effects.InjectorBoardSnapshot.Invalidate();
-            try { Fx.AnchorResolver.Register(GameDumps.Ptr(__instance), __instance.transform); } catch { }
             if (!Ready() || __instance.theZombieType == ZombieType.Nothing) return;
             ApplyZombie(__instance, "start");
         }
@@ -655,16 +678,9 @@ public static class GameHooks
             if (OverlayApplyGuard.IsActive) return;
             var s = CheatState.EffectiveStats();
             var before = theDamage;
-            var hasPvz = CheatState.HasPvzStatsMods();
-            if (s.ApplyStats || hasPvz)
-            {
-                var baseline = new EntityBaseline { Hp = 1, MaxHp = 1, Atk = 1 };
-                var ctx = CheatState.Stats.Contexts.ForZombie(
-                    "dmg", baseline, cheatScale: s, applyStats: s.ApplyStats || hasPvz,
-                    pvzStatsMods: CheatState.PvzStatsMods);
-                var final = CheatState.Stats.Resolve(ctx);
-                theDamage = StatMath.ScaleIncoming(theDamage, final.DefensePercent, final.DefenseFlat);
-            }
+            EnsureDamageScaleCache(s);
+            if (_dmgScaleActive)
+                theDamage = StatMath.ScaleIncoming(theDamage, _zombieDefPct, _zombieDefFlat);
             // v2 record path (Task 9): telemetry/session keeps the legacy dict path for
             // fidelity; otherwise grants get compact records via the drain host.
             var telemetry = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive;
@@ -690,9 +706,12 @@ public static class GameHooks
                 try { zType = (int)__instance.theZombieType; } catch { }
                 var actorPtr = IntPtr.Zero;
                 try { if (damageFrom is Il2CppObjectBase dfObj) actorPtr = dfObj.Pointer; } catch { }
-                // Bullet dealt suppresses the taken record at source, matching v1 policy.
-                if (!Effects.EventDrainHost.TryRecordDealtFromBullet(
-                        Core.Events.GameEventSide.Zombie, damageFrom as Il2CppObjectBase, __instance.Pointer, zType, theDamage))
+                // Bullet damage suppresses the taken record at source, matching v1 policy —
+                // including on ring overflow (I2: a dropped bullet-dealt must not turn into
+                // a spurious taken).
+                Effects.EventDrainHost.TryRecordDealtFromBullet(
+                    Core.Events.GameEventSide.Zombie, damageFrom as Il2CppObjectBase, __instance.Pointer, zType, theDamage, out var wasBullet);
+                if (!wasBullet)
                     Effects.EventDrainHost.TryRecordTaken(
                         Core.Events.GameEventSide.Zombie, __instance.Pointer, zType, actorPtr, theDamage);
             }

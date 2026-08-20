@@ -201,6 +201,7 @@ public sealed class EffectFunnel
     {
         _flushCalls++;
         if (_flushDepth > 0) return;
+        using var _perf = FusionRpg.Core.Diagnostics.PerfProbe.Measure(FusionRpg.Core.Diagnostics.PerfSection.FunnelFlush);
         _flushDepth++;
         try
         {

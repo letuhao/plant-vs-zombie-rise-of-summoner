@@ -14,12 +14,15 @@ public class DerivedStatRegistryTests
     }
 
     [Fact]
-    public void Combat_channel_count_is_40()
+    public void Combat_channel_count_is_8_families_x_roster_plus_omni()
     {
-        Assert.Equal(40, DerivedStatChannels.AllCombatChannelIds.Count);
+        // 8 families × (omni + ElementRoster.Concrete) — 56 since light/dark landed.
+        var expected = DerivedStatChannels.CombatChannelFamilies.Count * (ElementRoster.Concrete.Count + 1);
+        Assert.Equal(56, expected);
+        Assert.Equal(expected, DerivedStatChannels.AllCombatChannelIds.Count);
         var reg = DerivedStatRegistry.CreateDefault();
         var combatRegistered = reg.AllRegistered.Count(d => DerivedStatChannels.AllCombatChannelIds.Contains(d.ChannelId));
-        Assert.Equal(40, combatRegistered);
+        Assert.Equal(expected, combatRegistered);
     }
 
     [Fact]

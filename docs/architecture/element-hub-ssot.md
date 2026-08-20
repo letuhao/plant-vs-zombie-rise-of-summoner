@@ -67,22 +67,26 @@ flowchart TB
 
 ---
 
-## 4. Element roster (locked v1)
+## 4. Element roster (extended 2026-08-21 — [demons/spec-element-extension.md](demons/spec-element-extension.md))
 
-FusionRpg v1 element ids:
+FusionRpg element ids:
 
 - `omni`
 - `fire`
 - `ice`
 - `air`
 - `earth`
+- `light` *(extension)*
+- `dark` *(extension)*
 
 Rules:
 
 - `omni` is **not** an actor type slot.
 - `omni` is an additive baseline for power and resist.
-- Each actor may have **0, 1, or 2** concrete types from `fire|ice|air|earth`.
+- Each actor may have **0, 1, or 2** concrete types from the roster.
 - A damage payload may carry **one or more** element components.
+- Code iterates elements via **`ElementRoster.Concrete`** only; the 56 combat channels (8 families × roster + omni) are generated from it. Element name parsing is strict (names only; numeric strings reject).
+- **Light/dark matchups:** `light ⇄ dark` are a **mutual counter** (each STR vs the other); both are NEU vs the four ring elements in both directions. The ring itself is unchanged. `void`/`chaos` are traits, never elements.
 
 Examples:
 
@@ -310,6 +314,8 @@ flowchart LR
 
 **Flavor (balance copy only, not mechanics):** fire melts ice; ice cracks earth; earth blocks air; air blows out fire.
 
+**Extension rows (2026-08-21):** `light` vs `dark` = STR +0.25 both directions (mutual counter); `light`/`dark` vs any ring element = NEU 0 both directions; same-vs-same = 0 as always. The ring rows above are unchanged; the golden matrix test generates all 36 pairs from `ElementRoster`.
+
 #### Single-type defender
 
 Lookup attacker element vs the one defender type. Apply STR / WEK / NEU / same from the table.
@@ -341,7 +347,7 @@ Example: `fire` component vs defender `air + earth` → `0.75 × 1.0 − 1 = −
 
 | Topic | Owner | Rule |
 |---|---|---|
-| Element ids and roster | Element Hub spec + ADR | Only `omni`, `fire`, `ice`, `air`, `earth` in v1 |
+| Element ids and roster | Element Hub spec + ADR | `omni` + `ElementRoster.Concrete` (`fire`, `ice`, `air`, `earth`, `light`, `dark` since 2026-08-21) |
 | Actor type metadata | Element Hub semantics; Actor Hub storage | `element.type.primary` / `.secondary` validated at content ingest |
 | Matchup matrix content | Element Hub | Combat layer must not hardcode STR/WEK tables |
 | Derived channel registration | Actor Hub catalog | Element Hub defines ids; Actor Hub registers and validates |

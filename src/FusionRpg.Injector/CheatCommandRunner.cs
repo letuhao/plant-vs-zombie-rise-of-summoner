@@ -247,6 +247,12 @@ public static class CheatCommandRunner
             case "debug.wave-freeze":
                 DebugActions.WaveFreeze(p.TryGetProperty("enabled", out var en) && en.ValueKind != JsonValueKind.False);
                 break;
+            case "debug.stress-fill":
+                DebugActions.StressFill(p);
+                break;
+            case "debug.stress-clear":
+                DebugActions.StressClear(p);
+                break;
             case "debug.ensure-sun":
                 DebugActions.EnsureSun(p.TryGetProperty("value", out var sv) && sv.TryGetSingle(out var sf) ? sf : 9999f);
                 break;

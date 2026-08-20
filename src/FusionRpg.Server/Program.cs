@@ -51,6 +51,10 @@ if (SimFlags.Enabled)
 
 var app = builder.Build();
 app.Services.GetRequiredService<RpgStore>().Init();
+// Fail fast on demon content errors: the catalogs are lazy, and a bad species surfacing on the
+// first request would permanently poison WaveCatalog's static initializer (review I6).
+_ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
+_ = FusionRpg.Core.Battle.WaveCatalog.All;
 var portraits = app.Services.GetRequiredService<TypeIconStore>().BackfillPortraitsFromDumps();
 if (portraits > 0)
     Console.WriteLine($"[icons] backfilled {portraits} portraits from dump layer 'image'");
@@ -60,6 +64,8 @@ app.UseStaticFiles();
 
 app.MapStorageEndpoints();
 app.MapUniqueActors();
+app.MapDemons();
+app.MapSouls();
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));
 
@@ -742,7 +748,15 @@ if (SimFlags.Enabled)
     app.MapSimAndProbes();
 
 app.MapSimEffect();
-app.MapDebug();
+// Debug endpoints are spawn/kill/mods control — loopback-only unless explicitly forced
+// (2026-08-21 review I3: a 0.0.0.0 rebind must not expose them to the LAN unauthenticated).
+var debugAllowed = listenUrl.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase)
+                   || listenUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(Environment.GetEnvironmentVariable("FUSIONRPG_DEBUG_REMOTE"), "1", StringComparison.Ordinal);
+if (debugAllowed)
+    app.MapDebug();
+else
+    Console.WriteLine("[debug] endpoints disabled on non-loopback bind (set FUSIONRPG_DEBUG_REMOTE=1 to force)");
 app.MapPerf();
 
 app.MapHub<RpgHub>("/hub/rpg");

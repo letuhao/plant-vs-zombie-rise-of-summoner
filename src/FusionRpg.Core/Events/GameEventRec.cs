@@ -12,7 +12,10 @@ public enum GameEventKind : byte
     ChainSynthetic = 6  // drain-generated (overlay procs, counter bursts)
 }
 
-/// <summary>Actor side for grant filter resolution.</summary>
+/// <summary>
+/// Side of the TARGET for damage records (every producer stamps target side; the drain's DTO
+/// mapping inverts it for OnDamageDealt where the DTO wants the attacker side) — S2 review note.
+/// </summary>
 public static class GameEventSide
 {
     public const byte None = 0;

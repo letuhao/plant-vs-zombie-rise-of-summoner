@@ -1,0 +1,142 @@
+using FusionRpg.Core.Battle;
+using FusionRpg.Core.Stats.Derived;
+
+namespace FusionRpg.Core.Demons;
+
+/// <summary>Per-player pity counters — persisted, cross-banner, visible in the UI.</summary>
+public sealed record PityState(int PullsSinceEpic, int PullsSinceLegendary)
+{
+    public static readonly PityState Fresh = new(0, 0);
+}
+
+public sealed record SummonRollResult(
+    string SpeciesId,
+    DemonRarity Rarity,
+    string Variant,
+    IReadOnlyList<string> TraitIds);
+
+/// <summary>
+/// Pure summon roller (spec-demon-summoning.md, pity v2). Deterministic from (banner, focus,
+/// count, pity, rng) — the store runs it inside the pull transaction with the recorded seed.
+/// Rates: common 74 % / rare 20 % / epic 5 % / legendary 1 %. Epic hard pity 25; legendary soft
+/// ramp +6 %/pull from pull 41, hard 55; 10-pull rare floor rolled in the last slot.
+/// </summary>
+public static class SummonRoller
+{
+    public const int EpicHardPity = 25;
+    public const int LegendarySoftStart = 41;   // pull number where the ramp begins
+    public const int LegendaryHardPity = 55;
+    public const int LegendaryBasePerMille = 10;
+    public const int LegendaryRampPerMille = 60;
+    public const int EpicPerMille = 50;
+    public const int RarePerMille = 200;
+    public const int ShinyOneIn = 64;
+
+    public static (IReadOnlyList<SummonRollResult> Results, PityState Pity) Roll(
+        SummonBannerDef banner, ElementTypeId? focusElement, int count, PityState pity, SeededRng rng)
+    {
+        if (count is not (1 or 10)) throw new ArgumentOutOfRangeException(nameof(count));
+        var results = new List<SummonRollResult>(count);
+        var sawRarePlus = false;
+        for (var i = 0; i < count; i++)
+        {
+            // 10-pull rare floor: the guarantee slot rolls last.
+            var floorRare = count == 10 && i == count - 1 && !sawRarePlus;
+            var rarity = RollRarity(pity, floorRare, rng);
+            pity = Advance(pity, rarity);
+            if (rarity >= DemonRarity.Rare) sawRarePlus = true;
+            results.Add(RollSpecies(rarity, banner, focusElement, rng));
+        }
+
+        return (results, pity);
+    }
+
+    static DemonRarity RollRarity(PityState pity, bool floorRare, SeededRng rng)
+    {
+        var legendaryPull = pity.PullsSinceLegendary + 1;
+        if (legendaryPull >= LegendaryHardPity)
+            return DemonRarity.Legendary;
+
+        var legendaryPerMille = LegendaryBasePerMille +
+            Math.Max(0, legendaryPull - (LegendarySoftStart - 1)) * LegendaryRampPerMille;
+        var roll = rng.NextPerMille();
+        if (roll < legendaryPerMille)
+            return DemonRarity.Legendary;
+
+        if (pity.PullsSinceEpic + 1 >= EpicHardPity)
+            return DemonRarity.Epic;
+        if (roll < legendaryPerMille + EpicPerMille)
+            return DemonRarity.Epic;
+        if (roll < legendaryPerMille + EpicPerMille + RarePerMille)
+            return DemonRarity.Rare;
+        return floorRare ? DemonRarity.Rare : DemonRarity.Common;
+    }
+
+    static PityState Advance(PityState pity, DemonRarity rolled) => new(
+        PullsSinceEpic: rolled >= DemonRarity.Epic ? 0 : pity.PullsSinceEpic + 1,
+        PullsSinceLegendary: rolled == DemonRarity.Legendary ? 0 : pity.PullsSinceLegendary + 1);
+
+    static SummonRollResult RollSpecies(
+        DemonRarity rarity, SummonBannerDef banner, ElementTypeId? focusElement, SeededRng rng)
+    {
+        var band = BandWithFallback(rarity);
+        var picked = PickWeighted(band.Pool, banner, focusElement, rng);
+        var variant = picked.Variants.Contains("shiny") && rng.NextInt(ShinyOneIn) == 0 ? "shiny" : "normal";
+        return new SummonRollResult(picked.SpeciesId, band.Rarity, variant, RollTraits(picked, band.Rarity, rng));
+    }
+
+    static (DemonRarity Rarity, List<DemonSpeciesDef> Pool) BandWithFallback(DemonRarity rarity)
+    {
+        for (var r = rarity; ; r--)
+        {
+            var pool = DemonSpeciesCatalog.All
+                .Where(s => s.BaseRarity == r && s.Acquisition.HasFlag(DemonAcquisition.Summonable))
+                .ToList();
+            if (pool.Count > 0) return (r, pool);
+            if (r == DemonRarity.Common)
+                throw new InvalidOperationException("No summonable species in the catalog.");
+        }
+    }
+
+    static DemonSpeciesDef PickWeighted(
+        List<DemonSpeciesDef> pool, SummonBannerDef banner, ElementTypeId? focusElement, SeededRng rng)
+    {
+        if (!banner.HasElementFocus || focusElement is null)
+            return pool[rng.NextInt(pool.Count)];
+
+        // Focus banner: focus-element species get FocusWeightMultiplier× weight within the band.
+        var mult = (int)Math.Round(banner.FocusWeightMultiplier);
+        var total = 0;
+        foreach (var s in pool)
+            total += s.ElementPrimary == focusElement ? mult : 1;
+        var pick = rng.NextInt(total);
+        foreach (var s in pool)
+        {
+            pick -= s.ElementPrimary == focusElement ? mult : 1;
+            if (pick < 0) return s;
+        }
+
+        return pool[^1];
+    }
+
+    static IReadOnlyList<string> RollTraits(DemonSpeciesDef species, DemonRarity rarity, SeededRng rng)
+    {
+        var want = rarity switch
+        {
+            DemonRarity.Common => 1,
+            DemonRarity.Rare => 2,
+            DemonRarity.Epic => 2,
+            _ => 3
+        };
+        var pool = species.TraitPool.ToList();
+        var picked = new List<string>(want);
+        while (picked.Count < want && pool.Count > 0)
+        {
+            var i = rng.NextInt(pool.Count);
+            picked.Add(pool[i]);
+            pool.RemoveAt(i);
+        }
+
+        return picked;
+    }
+}

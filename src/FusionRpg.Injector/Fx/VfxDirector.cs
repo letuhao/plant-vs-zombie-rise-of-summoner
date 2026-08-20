@@ -72,8 +72,11 @@ public static class VfxDirector
     {
         if (dt < 0f) dt = 0f;
         _now += dt;
-        try { _cam = Camera.main; } catch { _cam = null; }
-        AnchorResolver.Tick(dt);
+        // Idle early-out: with nothing queued or live the frame costs one lock + three counts.
+        bool queued;
+        lock (Gate) queued = Pending.Count > 0;
+        if (!queued && Floaters.Count == 0 && Flashes.Count == 0 && BurstPool.LiveCount() == 0)
+            return;
         DrainQueue();
         TickFloaters(dt);
         BurstPool.Tick(dt);
@@ -88,7 +91,6 @@ public static class VfxDirector
         RestoreAndClearFlashes();
         BurstPool.StopAll();
         Admission.Clear();
-        AnchorResolver.Clear();
     }
 
     static void DrainQueue()
@@ -187,9 +189,15 @@ public static class VfxDirector
         var cellSize = EstimateCellSize(sizeCol, sizeRow);
         var kinds = new List<string>(decision.SpecIndices.Count);
         string? failReason = null;
+        var elementGated = false;
         foreach (var idx in decision.SpecIndices)
         {
             var spec = decision.Recipe!.Primitives[idx];
+            if (spec.RequireElement && !plan.ElementColored)
+            {
+                elementGated = true;
+                continue;
+            }
             switch (spec.Kind)
             {
                 case VfxPrimitiveKind.Floater:
@@ -213,7 +221,7 @@ public static class VfxDirector
 
         if (kinds.Count == 0)
         {
-            EmitSkipped(cue, failReason ?? VfxSkipReasons.ParticleFail);
+            EmitSkipped(cue, failReason ?? (elementGated ? VfxSkipReasons.NoElement : VfxSkipReasons.ParticleFail));
             return;
         }
 
@@ -315,6 +323,19 @@ public static class VfxDirector
         }
 
         if (Floaters.Count == 0) return;
+        // Camera resolves only here — with live floaters, on Repaint — never in Tick.
+        // Re-resolve when the cached camera is destroyed OR merely disabled: scene switches
+        // often disable the old MainCamera without destroying it, and Camera.main tracks
+        // the enabled one. Stale-but-alive must not stick.
+        var stale = _cam == null;
+        if (!stale)
+        {
+            try { stale = !_cam!.isActiveAndEnabled; } catch { stale = true; }
+        }
+        if (stale)
+        {
+            try { _cam = Camera.main; } catch { _cam = null; }
+        }
         var cam = _cam;
         if (cam == null) return;
 
@@ -339,11 +360,15 @@ public static class VfxDirector
                 var t = f.Life > 0f ? Mathf.Clamp01(f.Age / f.Life) : 1f;
                 if (!LawnCoords.TryWorldToGui(cam, world, t, out var gui)) continue;
 
+                var alpha = Core.Effects.DamageFxFloaterRules.Alpha(t);
+                style.fontSize = (int)Math.Round(20f * f.Plan.FontScaleAt(t));
+                var rect = new Rect(gui.x - 80f, gui.y - 16f, 160f, 32f);
+                // Shadow pass first — readability on bright lawns (SPEC W3).
+                GUI.color = new Color(0f, 0f, 0f, alpha);
+                GUI.Label(new Rect(rect.x + 1f, rect.y + 1f, rect.width, rect.height), f.Label, style);
                 var rgb = f.Plan.ColorAt(t);
-                GUI.color = new Color(rgb.R / 255f, rgb.G / 255f, rgb.B / 255f,
-                    Core.Effects.DamageFxFloaterRules.Alpha(t));
-                style.fontSize = (int)Math.Round(20f * f.Plan.FontScale);
-                GUI.Label(new Rect(gui.x - 80f, gui.y - 16f, 160f, 32f), f.Label, style);
+                GUI.color = new Color(rgb.R / 255f, rgb.G / 255f, rgb.B / 255f, alpha);
+                GUI.Label(rect, f.Label, style);
             }
         }
         finally

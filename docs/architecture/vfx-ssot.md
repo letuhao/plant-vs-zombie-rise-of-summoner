@@ -1,6 +1,6 @@
 # VFX SSOT — cue → recipe → primitive presentation layer
 
-**Status:** **Locked (2026-08-20); implemented offline (2026-08-20)** — migration phases 1–3 plus the §16 element extension are in code with full offline test coverage (Core/CheatCore/Guard/E2E green, MelonLoader 3.9 injector compiles against game assemblies). LIVE probe pending: run `scripts/prove-vfx.ps1` with the lawn open. Former open questions are resolved in §15 with rationale.
+**Status:** **Locked (2026-08-20); LIVE-proven (2026-08-21, 43/43 + owner visual confirmation)** — migration phases 1–4 in code: the §16 element extension, the `status.{id}.apply` producer path (all 21 catalog statuses seeded), burst shapes, crit-pop/amount-tier floaters with shadow pass, idle-cheap tick, registry-based anchors, element-only hit accents, and the three LIVE render fixes (§10, §16.4). Verdict: `docs/research/effect-runtime/_prove-vfx.json`. See [../../SPEC.md](../../SPEC.md) + `tasks/vfx-v2-todo.md`.
 **Parent:** [decisions.md](decisions.md) (ADR row **VFX**). Cue producers: [effect-funnel.md](effect-funnel.md), [status-ssot.md](status-ssot.md), [combat-damage-ssot.md](combat-damage-ssot.md). Current implementation being replaced: `src/FusionRpg.Injector/Fx/*`, `src/FusionRpg.Core/Effects/DamageFx.cs`.
 
 This spec defines the **presentation layer** for RPG overlay visual feedback. It does **not** own gameplay state, and it does **not** replace vanilla PVZ animations or particles.
@@ -105,6 +105,8 @@ Rules:
 Phases 1–3 ship exactly three cues: `combat.hit`, `combat.heal`, `debug.probe`.
 
 Status cues are added by **criterion, not list**: a status gets `status.{id}.apply` in phase 4 when its LIVE prove pack next runs — the pack gains one `fx.play`/assert line at the same time. No status cue lands without a prove line.
+
+**Phase 4 complete (vfx-v2, 2026-08-21):** all 21 catalog statuses had prove coverage, so the full roster is seeded (`VfxSeedCatalog.StatusFx` — one statusId→RGB row each). The producer is `StatusRuntime.OnApplied` (fires on definitive apply only, spread hops included; resists and StatusICD emit nothing), wired to `VfxDirector.Sink` in `EffectRuntime.Ensure`. Adding a status VFX is now one `StatusFx` row.
 
 ---
 
@@ -280,7 +282,7 @@ VFX animate on **`unscaledDeltaTime`**, matching today. Deliberate: floaters/bur
 `AnchorResolver` replaces per-overlay `TryResolve`:
 
 - ptr → `Transform` lookups served from a cache — never `FindObjectsOfType` per cue.
-- **Fill strategy (locked): incremental-first with throttled sweep fallback.** `GameHooks` already carries Harmony spawn/die patches for `Zombie`, `Plant`, `Mower`, and `Bullet` — those postfixes register/unregister `(ptr, Transform)` in the cache for O(1) maintenance. A cache **miss** (e.g. injector attached mid-match, so pre-existing units never hit a spawn hook) triggers one `FindObjectsOfType` reconciliation sweep, throttled to **at most one sweep per 0.5s**; repeat misses inside the window skip with reason `missing`. The pure-lazy alternative was rejected: a full-scene IL2CPP sweep every tick under DoT load is exactly the hot path this spec exists to remove.
+- **Fill strategy (locked, updated vfx-v2 T1): the shared `InjectorEntityRegistry`.** `AnchorResolver` is a thin facade over the combat path's hook-fed, IntPtr-keyed registry (`FindZombie/FindPlant(ptrHex)?.transform`) — VFX owns no cache and no scan of its own. A miss triggers the registry's frame-throttled resync (`ResyncFrames = 1024`, the mid-match-attach backstop); repeat misses inside the window skip with reason `missing`. The original VFX-private cache + 0.5s sweep was retired when the registry (built later for the event pipeline) superseded it.
 - Cell anchors go through `LawnCoords.CellCenter` + `ClampCol/ClampRow`; unit anchors through `LawnCoords.BodyWorld`. `EstimateCellSize` moves here from `OverlayWorldFx` as the shared size basis primitives scale against.
 - A destroyed/missing anchor at spawn time = skip. A destroyed anchor mid-life = the primitive instance expires silently (current floater behavior).
 
@@ -292,7 +294,8 @@ VFX animate on **`unscaledDeltaTime`**, matching today. Deliberate: floaters/bur
 - Owns the cached material(s) and textures (`StealParticleTexture`, `SoftDisc`) currently in `OverlayWorldFx`.
 - Primitives request materials by role (`AdditiveParticle`, future `SpriteTint`); FxResources caches per role.
 - No shader available → primitives that need one skip with reason `no-shader`, floaters still work (IMGUI needs no shader). This matches today's degradation.
-- Texture source order stays **steal-first, soft-disc fallback** (current behavior); which source won is recorded in the shader-probe event payload so a wrong-looking burst is diagnosable from events alone.
+- Texture is **always the generated soft disc** (changed 2026-08-21): the v1 steal-first rule rendered arbitrary vanilla imagery inside our bursts (electric/lightning sprite sheets — LIVE finding), nondeterministic per scene. The steal is deleted, which also makes all VFX code `FindObjectsOfType`-free (guard-pinned).
+- Shader preference is **alpha-blend first** (`Sprites/Default`, then unlit particle shaders): additive blending washed pale element colors to near-white over the bright lawn (LIVE finding). The pooled systems also disable Unity's default emission module — auto rate-emission painted default-white circles over every burst until this was killed.
 - Render ordering constants (today's magic `sortingOrder = 80`) live here as named constants — one place to move VFX above/below future overlays.
 
 ---
@@ -304,7 +307,7 @@ House pattern, extended:
 | Surface | Rule |
 |---|---|
 | `debug.fx.shown` | Always includes `cueId`, anchor fields, primitive kinds rendered |
-| `debug.fx.skipped` | Always includes `cueId` + enumerated `reason`: `disabled`, `unknown-cue`, `muted`, `rate-limited`, `cap`, `missing`, `no-shader`, `particle-fail` |
+| `debug.fx.skipped` | Always includes `cueId` + enumerated `reason`: `disabled`, `unknown-cue`, `muted`, `rate-limited`, `cap`, `missing`, `no-shader`, `particle-fail`, `no-element` |
 | `debug.fx.world.shown` / `.skipped` | **Retired in phase 2** — folded into the two events above. Phase 2 must update [../protocol/events.md](../protocol/events.md) §fx row and the curl example in [../runbook/debug-pipeline.md](../runbook/debug-pipeline.md) in the same change |
 | `debug.fx.world-flash` | **Command/scenario step name survives unchanged** — it is locked into `DebugScenarios.AllowedStepNames` (test-pinned) and the `/fx/world-flash` endpoint. It becomes an alias for `fx.play debug.probe <col> <row>` |
 | CheatState `SYS-DAMAGE-FX` | **Locked: keep the id, no rename.** It is baked into `CheatSchema`, `CheatRegistry`, `CheatState`, E2E tests, README, and runbooks; a rename buys naming honesty and nothing else. Its documented meaning widens to "all overlay VFX" |
@@ -400,6 +403,8 @@ First content consumer of this spec: overlay damage hits colored by element. Ele
 | `ice` | 110, 210, 255 | Glacial cyan |
 | `air` | 190, 255, 170 | Pale gust green (white is taken by omni) |
 | `earth` | 210, 160, 70 | Amber ochre |
+| `light` | 255, 232, 120 | Radiant gold (roster growth 2026-08-21; membership via `ElementRoster`) |
+| `dark` | 150, 90, 220 | Umbral violet |
 
 Single-element payload → that element's color for floater text and burst particles.
 
@@ -421,6 +426,14 @@ A payload with **≥ 2 concrete elements** renders multi-colored, cost-free:
 | Plain damage or `Crit`, no payload | Current palette (white / crit orange) | Amount |
 
 Rationale: semantic outcomes (MISS/BLOCK/…) must stay instantly readable and keep their colors; element identity takes over only where color was previously just "white number". Crit keeps distinctness through size instead of color, because crit-orange collides with fire.
+
+**vfx-v2 additions (2026-08-21, SPEC W3/W4 — all pure `VfxRules` math, test-pinned):**
+
+- Crit size is a **pop curve**, not a flat 1.25×: starts at `CritPopStartScale` (1.5×), settles to 1.25× by normalized life t = 0.3. Applies to every crit, element payload or not.
+- **Amount tiers** scale numeric labels: |amount| < 50 → 0.9×, < 200 → 1.0×, ≥ 200 → 1.15×. Semantic labels (MISS/BLOCK/heal "+n") never scale.
+- Floaters draw with a **1px black shadow pass** (two labels per floater, Repaint-only) for readability on bright lawns.
+- Bursts have a **shape** (`Radial` — the legacy default, `Rising`, `Directional`) computed by pure `VfxBurstMath`; `combat.heal` uses Rising motes, and `combat.hit` now includes the `Flash` primitive (first user of §8.5).
+- **Element-only hit accents (owner call, 2026-08-21 LIVE feedback):** `combat.hit`'s burst and flash carry `RequireElement` — plain/omni damage renders the number only (no white puff; it fires on every hit and carries no signal), so the colored burst *is* the element signal. A cue whose renderable specs were all element-gated skips with reason `no-element`. `SYS-ELEMENT-FX` off degrades element hits to the same plain path.
 
 ### 16.5 Toggle (locked)
 

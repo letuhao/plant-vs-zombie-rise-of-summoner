@@ -76,14 +76,14 @@ static class BurstPool
                     ? ElementFxPalette.ParticleColor(plan.HybridComponents, i, count)
                     : flat;
                 var c32 = new Color32(rgb.R, rgb.G, rgb.B, 242);
-                var ang = i / (float)count * Mathf.PI * 2f;
-                var rad = span * (0.04f + 0.12f * (i % 5) / 5f);
-                var pos = new Vector3(Mathf.Cos(ang) * rad, Mathf.Sin(ang) * rad, 0f);
-                var speed = span * (0.8f + i % 7 * 0.18f);
-                var vel = new Vector3(Mathf.Cos(ang) * speed, Mathf.Sin(ang) * speed, 0f);
-                var size = span * (0.16f + i % 4 * 0.08f);
-                var energy = life * (0.55f + i % 5 * 0.08f);
-                try { ps.Emit(pos, vel, size, energy, c32); }
+                var p = VfxBurstMath.Particle(spec.Shape, i, count, span, life);
+                try
+                {
+                    ps.Emit(
+                        new Vector3(p.PosX, p.PosY, 0f),
+                        new Vector3(p.VelX, p.VelY, 0f),
+                        p.Size, p.Energy, c32);
+                }
                 catch { break; }
             }
 
@@ -183,6 +183,15 @@ static class BurstPool
             }
 
             try { ps.playOnAwake = false; } catch { }
+            // The default emission module rate-emits ~10 white particles/sec once Play() runs —
+            // the "white circles" LIVE finding. We only ever manual-Emit; kill the auto emitter.
+            try
+            {
+                var emission = ps.emission;
+                emission.enabled = false;
+                emission.rateOverTime = 0f;
+            }
+            catch { }
             try { ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); } catch { }
             try
             {

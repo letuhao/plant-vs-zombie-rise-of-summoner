@@ -5,7 +5,46 @@ public enum ElementTypeId
     Fire,
     Ice,
     Air,
-    Earth
+    Earth,
+    Light,
+    Dark
+}
+
+/// <summary>
+/// The one legal way to enumerate elements (element-hub-ssot.md §roster).
+/// Ring: fire → ice → earth → air → fire; light ⇄ dark mutual counter, neutral vs the ring.
+/// </summary>
+public static class ElementRoster
+{
+    public const string OmniId = "omni";
+
+    public static readonly IReadOnlyList<ElementTypeId> Concrete = new[]
+    {
+        ElementTypeId.Fire,
+        ElementTypeId.Ice,
+        ElementTypeId.Air,
+        ElementTypeId.Earth,
+        ElementTypeId.Light,
+        ElementTypeId.Dark
+    };
+
+    /// <summary>
+    /// Strict name → id parse. Names only — numeric strings are rejected
+    /// (Enum.TryParse would accept "42" and, post-extension, silently remap "4"/"5").
+    /// </summary>
+    public static bool TryParse(string? value, out ElementTypeId id)
+    {
+        switch ((value ?? "").Trim().ToLowerInvariant())
+        {
+            case "fire": id = ElementTypeId.Fire; return true;
+            case "ice": id = ElementTypeId.Ice; return true;
+            case "air": id = ElementTypeId.Air; return true;
+            case "earth": id = ElementTypeId.Earth; return true;
+            case "light": id = ElementTypeId.Light; return true;
+            case "dark": id = ElementTypeId.Dark; return true;
+            default: id = default; return false;
+        }
+    }
 }
 
 public sealed record ActorElementTypes
@@ -41,9 +80,9 @@ public sealed record ActorElementTypes
     {
         if (string.IsNullOrWhiteSpace(value))
             return null;
-        if (string.Equals(value, "omni", StringComparison.OrdinalIgnoreCase))
+        if (string.Equals(value, ElementRoster.OmniId, StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException($"Element slot '{slotName}' cannot use omni.");
-        if (Enum.TryParse<ElementTypeId>(value, ignoreCase: true, out var parsed))
+        if (ElementRoster.TryParse(value, out var parsed))
             return parsed;
         throw new ArgumentException($"Unknown element type '{value}' for slot '{slotName}'.");
     }
@@ -57,6 +96,8 @@ public static class ElementTypeIdExtensions
         ElementTypeId.Ice => "ice",
         ElementTypeId.Air => "air",
         ElementTypeId.Earth => "earth",
+        ElementTypeId.Light => "light",
+        ElementTypeId.Dark => "dark",
         _ => throw new ArgumentOutOfRangeException(nameof(id), id, "Unknown element type.")
     };
 }

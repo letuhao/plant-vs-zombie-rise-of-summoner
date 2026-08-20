@@ -10,17 +10,24 @@ public struct DrainStats
     public int Generations;
     public int ExpensiveDeferred;
     public long DroppedByDepth;
+    /// <summary>v4: worst record age at processing time (frames), when the caller passes its frame.</summary>
+    public int MaxLatencyFrames;
+    /// <summary>v4: costliest single record this pass (timestamp ticks) — budget overshoot visibility.</summary>
+    public long MaxRecordTicks;
 }
 
 /// <summary>
 /// Frame-budgeted processor for hot-tier event records — event-pipeline-v2 plan Tasks 6–8.
 ///
-/// Storage model: the ring is the only store. Each Drain pass pops the pending set, coalesces
-/// it (whole set — a dealt/taken pair is never split across windows), and processes records
-/// under the caller's budget. Unprocessed remainder re-appends to the ring at the end of the
-/// pass, before any future hook can record, so FIFO order survives frames. Records appended
-/// *during* processing (Unity re-entry through action execution) form the next generation,
-/// processed in the same pass up to <see cref="GenerationCap"/>, then carried.
+/// Storage model (v5 — saturation fix): two tiers. The RING holds only new records from
+/// hooks. The CARRY list holds the already-coalesced remainder of previous windows, drained
+/// first via a cursor and NEVER re-coalesced — the previous rotate-through-the-ring design
+/// re-popped and re-coalesced the whole backlog every frame, making drain cost O(backlog)
+/// (v4-600z-war: 2.07M re-carries, 123 MB/5s churn, processing starved). FIFO holds by
+/// construction: carry (older) drains before ring windows (newer). A dealt/taken pair still
+/// lands in one ring window together (same-frame recording contract), so pair suppression is
+/// unaffected. Records appended *during* processing (Unity re-entry) form the next generation,
+/// processed in the same pass up to <see cref="GenerationCap"/>.
 ///
 /// Chain containment: records carry ChainDepth; while a record is being processed,
 /// <see cref="RecordDepth"/> exposes parent+1 for hooks to stamp. Records at or beyond
@@ -41,13 +48,67 @@ public sealed class EventDrain
     readonly EventStringInterner _grantIds = new();
     readonly Dictionary<IntPtr, string> _ptrHex = new();
     readonly Dictionary<GameEventKind, double> _costEma = new();
-    readonly List<GameEventRec> _scratch = new();
+    // v5: persistent already-coalesced remainder, drained from _carryCursor. Never re-coalesced.
+    readonly List<GameEventRec> _carry = new();
+    int _carryCursor;
     readonly Action<EffectEventDto> _process;
     readonly Func<long> _timestamp;
 
     int _chainDepthLimit = DefaultChainDepthLimit;
     byte _recordDepth;
     long _droppedByDepth;
+    // Re-entrancy guard: Drain/FlushForPtr/FlushAllAndReset share _scratch, and processing a
+    // record can fire game hooks that call back into the flush APIs (drained FA10 kills a
+    // zombie → death hook → FlushForPtr). Nested entries no-op: the records stay pending and
+    // the outer pass (or next frame) handles them. The nested entity's death-flush ordering
+    // degrades to next-frame in that rare case — documented in the SSOT.
+    bool _active;
+    // Set by a nested FlushAllAndReset (match ended mid-drain); completed in Drain's finally.
+    bool _resetRequested;
+    long _droppedDeathBudget;
+    int _currentFrame = -1;
+
+    // v3 A3 (reworked v5): pending-record count per actor/target ptr so FlushForPtr no-ops in
+    // O(1) for ptrs with nothing pending. Hook path stays incremental (+1 on Append); drains
+    // and flushes rebuild it from carry-remainder + ring at their boundaries — O(pending) dict
+    // ops once per structural change, correct by construction (merges/suppression included).
+    readonly Dictionary<IntPtr, int> _pendingByPtr = new();
+
+    void IndexBump(IntPtr ptr, int delta)
+    {
+        if (ptr == IntPtr.Zero) return;
+        _pendingByPtr.TryGetValue(ptr, out var n);
+        n += delta;
+        if (n <= 0) _pendingByPtr.Remove(ptr);
+        else _pendingByPtr[ptr] = n;
+    }
+
+    void RebuildIndex()
+    {
+        _pendingByPtr.Clear();
+        for (var i = _carryCursor; i < _carry.Count; i++)
+        {
+            IndexBump(_carry[i].ActorPtr, +1);
+            IndexBump(_carry[i].TargetPtr, +1);
+        }
+        _ring.ForEach(rec =>
+        {
+            IndexBump(rec.ActorPtr, +1);
+            IndexBump(rec.TargetPtr, +1);
+        });
+    }
+
+    bool Append(in GameEventRec rec)
+    {
+        if (!_ring.TryAppend(rec)) return false;
+        IndexBump(rec.ActorPtr, +1);
+        IndexBump(rec.TargetPtr, +1);
+        return true;
+    }
+
+    /// <summary>Pending records referencing this ptr (test/diagnostic view of the A3 index).</summary>
+    public int PendingCountFor(IntPtr ptr) =>
+        _pendingByPtr.TryGetValue(ptr, out var n) ? n : 0;
 
     public EventDrain(Action<EffectEventDto> process, Func<long>? timestamp = null, int capacity = GameEventRing.DefaultCapacity)
     {
@@ -59,8 +120,9 @@ public sealed class EventDrain
     public bool SessionMode { get; set; }
     public int GenerationCap { get; set; } = 3;
 
-    /// <summary>A kind whose EMA cost exceeds this fraction of the budget is "expensive": max 1 per pass.</summary>
-    public double ExpensiveBudgetFraction { get; set; } = 0.5;
+    /// <summary>A kind whose EMA cost exceeds this fraction of the budget is "expensive": max 1 per pass.
+    /// v4: tightened 0.5 → 0.35 — single-record overshoot was the main budget violation under war load.</summary>
+    public double ExpensiveBudgetFraction { get; set; } = 0.35;
 
     public int ChainDepthLimit
     {
@@ -68,7 +130,7 @@ public sealed class EventDrain
         set => _chainDepthLimit = Math.Clamp(value, MinChainDepthLimit, MaxChainDepthLimit);
     }
 
-    public int PendingCount => _ring.Count;
+    public int PendingCount => (_carry.Count - _carryCursor) + _ring.Count;
     public long DroppedByOverflow => _ring.Dropped;
     public long DroppedByDepth => _droppedByDepth;
 
@@ -86,27 +148,79 @@ public sealed class EventDrain
             _droppedByDepth++;
             return false;
         }
-        return _ring.TryAppend(rec);
+        return Append(rec);
     }
 
     /// <summary>
     /// Per-frame drain. <paramref name="budgetTicks"/> in timestamp units (caller computes
-    /// 10% of frame budget). Ignored in session mode.
+    /// 10% of frame budget). Ignored in session mode. <paramref name="currentFrame"/> (v4)
+    /// enables effect-latency measurement (record age at processing time).
     /// </summary>
-    public DrainStats Drain(long budgetTicks)
+    public DrainStats Drain(long budgetTicks, int currentFrame = -1)
     {
+        _currentFrame = currentFrame;
         var stats = default(DrainStats);
+        if (_active) return stats;
+        _active = true;
+        try
+        {
+            return DrainCore(budgetTicks, ref stats);
+        }
+        finally
+        {
+            _active = false;
+            if (_resetRequested)
+            {
+                _resetRequested = false;
+                _ring.Clear();
+                _carry.Clear();
+                _carryCursor = 0;
+                _pendingByPtr.Clear();
+                _matchKeys.Clear();
+                _grantIds.Clear();
+                _ptrHex.Clear();
+            }
+        }
+    }
+
+    DrainStats DrainCore(long budgetTicks, ref DrainStats stats)
+    {
         var start = _timestamp();
         var expensiveUsed = false;
+        var budgetDead = false;
 
-        while (_ring.Count > 0 && stats.Generations <= GenerationCap)
+        // Phase 1 (v5): drain the persistent carry — already coalesced, oldest records first,
+        // zero re-coalescing cost. Expensive-deferral does not apply here: these records were
+        // already deferred once and must not starve.
+        while (_carryCursor < _carry.Count && !_resetRequested)
         {
-            var window = SessionMode ? PassthroughWindow() : EventCoalescer.Window(_ring);
+            if (!SessionMode && stats.Processed > 0 && _timestamp() - start >= budgetTicks)
+            {
+                budgetDead = true;
+                break;
+            }
+            var carried = _carry[_carryCursor];
+            _carryCursor++;
+            Process(carried, ref stats);
+        }
+        if (_carryCursor >= _carry.Count)
+        {
+            _carry.Clear();
+            _carryCursor = 0;
+        }
+
+        // Phase 2: new-record windows (coalesced), only when the carry fully drained.
+        while (!budgetDead && !_resetRequested && _ring.Count > 0 && stats.Generations < GenerationCap)
+        {
+            var window = SessionMode
+                ? EventCoalescer.PassthroughWindow(_ring)
+                : EventCoalescer.Window(_ring);
             stats.Generations++;
 
             var idx = 0;
             for (; idx < window.Count; idx++)
             {
+                if (_resetRequested) break; // match ended mid-drain — remainder belongs to it
                 if (!SessionMode && stats.Processed > 0 && _timestamp() - start >= budgetTicks)
                     break;
 
@@ -115,8 +229,8 @@ public sealed class EventDrain
                 {
                     if (expensiveUsed)
                     {
-                        // Defer past this pass; cheap records behind it still process.
-                        _scratch.Add(rec);
+                        // Defer to the carry (processed next frame, after older remainder).
+                        _carry.Add(rec);
                         stats.ExpensiveDeferred++;
                         continue;
                     }
@@ -126,67 +240,159 @@ public sealed class EventDrain
                 Process(rec, ref stats);
             }
 
-            // Budget exhausted mid-window: stash the remainder (order preserved).
-            for (; idx < window.Count; idx++)
-                _scratch.Add(window[idx]);
+            // Budget exhausted mid-window: the remainder becomes carry, in order, exactly once.
+            if (!_resetRequested)
+                for (; idx < window.Count; idx++)
+                    _carry.Add(window[idx]);
 
-            if (_scratch.Count > 0) break; // carry set exists — stop consuming generations
-            if (SessionMode) continue;     // session mode keeps draining re-entrant records
+            if (_carryCursor < _carry.Count) break; // carry exists — stop consuming generations
+            if (SessionMode) continue;              // session mode keeps draining re-entrants
         }
 
-        // Re-append carried records ahead of nothing (no producer runs between here and the
-        // next frame's hooks), so FIFO order across frames is preserved.
-        if (_scratch.Count > 0)
+        if (_resetRequested)
         {
-            foreach (var rec in _scratch)
-                _ring.TryAppend(rec);
-            stats.Carried = _scratch.Count;
-            _scratch.Clear();
+            // C1 (review): a match ended inside this drain — nothing of it may resurrect.
+            _carry.Clear();
+            _carryCursor = 0;
         }
 
+        stats.Carried = _carry.Count - _carryCursor;
         stats.DroppedByDepth = _droppedByDepth;
+        RebuildIndex();
         return stats;
     }
 
     /// <summary>
-    /// Death/lifecycle barrier: process every pending record referencing <paramref name="ptr"/>
-    /// now (unbudgeted, uncoalesced — bounded per death), keeping all others pending in order.
-    /// Call before grant-withdraw so OnDeath-adjacent hits still see entity grants (SSOT §A2).
+    /// Death/lifecycle barrier: process pending records referencing <paramref name="ptr"/>
+    /// now, keeping all others pending in order. Call before grant-withdraw so OnDeath-adjacent
+    /// hits still see entity grants (SSOT §A2).
+    /// v4 item 1: <paramref name="budgetTicks"/> bounds the synchronous work per death —
+    /// &lt; 0 is unlimited (tests/legacy); once spent, the dying entity's REMAINING records are
+    /// dropped with a counter (its grants withdraw immediately after, so late processing would
+    /// find nothing — shedding is the honest semantics under extreme kill rates).
+    /// Returns timestamp ticks spent, so the host can pool a per-frame death-flush allowance.
     /// </summary>
-    public void FlushForPtr(IntPtr ptr)
+    public long FlushForPtr(IntPtr ptr, long budgetTicks = -1)
     {
-        if (_ring.Count == 0 || ptr == IntPtr.Zero) return;
-        var stats = default(DrainStats);
-        var n = _ring.Count;
-        for (var i = 0; i < n && _ring.TryPop(out var rec); i++)
+        if (_active || ptr == IntPtr.Zero) return 0;
+        if (PendingCountFor(ptr) == 0) return 0; // A3: O(1) no-op — the common case per death
+        var start = _timestamp();
+        _active = true;
+        try
         {
-            if (rec.ActorPtr == ptr || rec.TargetPtr == ptr)
-                Process(rec, ref stats);
-            else
-                _scratch.Add(rec);
+            var stats = default(DrainStats);
+
+            // v5: matching records live in the carry remainder and/or the ring.
+            if (_carryCursor < _carry.Count)
+            {
+                var keep = new List<GameEventRec>(_carry.Count - _carryCursor);
+                for (var i = _carryCursor; i < _carry.Count; i++)
+                {
+                    var rec = _carry[i];
+                    if (rec.ActorPtr == ptr || rec.TargetPtr == ptr)
+                    {
+                        if (budgetTicks >= 0 && _timestamp() - start > budgetTicks)
+                            _droppedDeathBudget++;
+                        else
+                            Process(rec, ref stats);
+                    }
+                    else
+                    {
+                        keep.Add(rec);
+                    }
+                }
+                _carry.Clear();
+                _carry.AddRange(keep);
+                _carryCursor = 0;
+            }
+
+            var flushScratch = new List<GameEventRec>(_ring.Count);
+            var n = _ring.Count;
+            for (var i = 0; i < n && _ring.TryPop(out var rec); i++)
+            {
+                if (_resetRequested) break;
+                if (rec.ActorPtr == ptr || rec.TargetPtr == ptr)
+                {
+                    if (budgetTicks >= 0 && _timestamp() - start > budgetTicks)
+                        _droppedDeathBudget++; // dying entity, over budget — shed, counted
+                    else
+                        Process(rec, ref stats);
+                }
+                else
+                {
+                    flushScratch.Add(rec);
+                }
+            }
+            if (!_resetRequested)
+                foreach (var rec in flushScratch)
+                    _ring.TryAppend(rec);
         }
-        foreach (var rec in _scratch)
-            _ring.TryAppend(rec);
-        _scratch.Clear();
+        finally
+        {
+            _active = false;
+            if (_resetRequested)
+            {
+                // Match ended inside this flush (processed record fired board.end): complete
+                // the reset here — nothing of the ended match may survive.
+                _resetRequested = false;
+                _ring.Clear();
+                _carry.Clear();
+                _carryCursor = 0;
+                _pendingByPtr.Clear();
+                _matchKeys.Clear();
+                _grantIds.Clear();
+                _ptrHex.Clear();
+            }
+            else
+            {
+                RebuildIndex();
+            }
+        }
+        return _timestamp() - start;
     }
+
+    /// <summary>v4: records shed by the per-death flush budget (visible, never silent).</summary>
+    public long DroppedByDeathBudget => _droppedDeathBudget;
 
     /// <summary>Lifecycle barrier (board end / match result): drain everything, then reset interned state.</summary>
     public void FlushAllAndReset()
     {
-        var stats = default(DrainStats);
-        while (_ring.TryPop(out var rec))
-            Process(rec, ref stats);
+        if (_active)
+        {
+            // Nested inside a drain/flush (board.end fired by a processed record): drop pending
+            // records unprocessed — their match is over. _resetRequested makes the outer pass
+            // discard its carry/window remainder and clear interners (C1: nothing from the
+            // ended match may resurrect into the next one).
+            _ring.Clear();
+            _carry.Clear();
+            _carryCursor = 0;
+            _pendingByPtr.Clear();
+            _resetRequested = true;
+            return;
+        }
+        _active = true;
+        try
+        {
+            var stats = default(DrainStats);
+            for (var i = _carryCursor; i < _carry.Count && !_resetRequested; i++)
+                Process(_carry[i], ref stats);
+            _carry.Clear();
+            _carryCursor = 0;
+            while (!_resetRequested && _ring.TryPop(out var rec))
+                Process(rec, ref stats);
+        }
+        finally
+        {
+            _active = false;
+            _resetRequested = false;
+        }
+        _ring.Clear();
+        _carry.Clear();
+        _carryCursor = 0;
+        _pendingByPtr.Clear();
         _matchKeys.Clear();
         _grantIds.Clear();
         _ptrHex.Clear();
-    }
-
-    List<GameEventRec> PassthroughWindow()
-    {
-        var list = new List<GameEventRec>(_ring.Count);
-        while (_ring.TryPop(out var rec))
-            list.Add(rec);
-        return list;
     }
 
     bool IsExpensive(GameEventKind kind, long budgetTicks) =>
@@ -196,6 +402,12 @@ public sealed class EventDrain
 
     void Process(in GameEventRec rec, ref DrainStats stats)
     {
+        if (_currentFrame >= 0 && rec.Frame > 0)
+        {
+            var age = _currentFrame - rec.Frame;
+            if (age > stats.MaxLatencyFrames) stats.MaxLatencyFrames = age;
+        }
+
         var t0 = _timestamp();
         _recordDepth = (byte)Math.Min(byte.MaxValue, rec.ChainDepth + 1);
         try
@@ -208,6 +420,7 @@ public sealed class EventDrain
         }
 
         var cost = _timestamp() - t0;
+        if (cost > stats.MaxRecordTicks) stats.MaxRecordTicks = cost;
         _costEma[rec.Kind] = _costEma.TryGetValue(rec.Kind, out var ema)
             ? ema * 0.8 + cost * 0.2
             : cost;

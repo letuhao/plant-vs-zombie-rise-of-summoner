@@ -88,6 +88,17 @@ public class VfxColorPlanTests
     }
 
     [Fact]
+    public void Element_colored_flag_gates_element_only_specs()
+    {
+        Assert.True(VfxColorPlan.For(DamageFxTag.Neutral, Fire(), true, -10).ElementColored);
+        Assert.True(VfxColorPlan.For(DamageFxTag.Crit, FireIce(), true, -10).ElementColored);
+        // plain, toggle-off, and semantic paths are never element-colored
+        Assert.False(VfxColorPlan.For(DamageFxTag.Neutral, null, true, -10).ElementColored);
+        Assert.False(VfxColorPlan.For(DamageFxTag.Neutral, Fire(), false, -10).ElementColored);
+        Assert.False(VfxColorPlan.For(DamageFxTag.Heal, Fire(), true, 25).ElementColored);
+    }
+
+    [Fact]
     public void Labels_come_from_the_tag_palette()
     {
         Assert.Equal("MISS", VfxColorPlan.For(DamageFxTag.Dodge, null, true, 0).Label);

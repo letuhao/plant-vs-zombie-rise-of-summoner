@@ -11,12 +11,14 @@ public static class OverlayShaderProbe
 {
     public static readonly string[] CandidateNames =
     {
+        // Alpha-blended first: additive washed pale element colors to white over the bright
+        // lawn (LIVE finding 2026-08-21). Sprites/Default renders true vertex colors.
+        "Sprites/Default",
+        "Particles/Standard Unlit",
         "Particles/Additive",
         "Legacy Shaders/Particles/Additive",
         "Mobile/Particles/Additive",
-        "Particles/Standard Unlit",
         "Unlit/Transparent",
-        "Sprites/Default",
         "Unlit/Color",
         "Unlit/Texture",
         "UI/Default",

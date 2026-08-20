@@ -1,56 +1,53 @@
-# Plan: Event Pipeline v2 — Phase 2 implementation
+# Plan: Perf v3 — frame-cost residue + server burst stability
 
-Spec: [docs/architecture/event-pipeline-v2-spec.md](../docs/architecture/event-pipeline-v2-spec.md)
-Design SSOT: [docs/architecture/event-pipeline-v2-ssot.md](../docs/architecture/event-pipeline-v2-ssot.md)
+Spec: [docs/architecture/perf-v3-spec.md](../docs/architecture/perf-v3-spec.md)
+Evidence: [docs/research/perf/00-baseline.md](../docs/research/perf/00-baseline.md)
+Prior round (complete, 12/12): event-pipeline-v2 — see spec/SSOT in docs/architecture; this file supersedes its plan after the owner commits.
 
-## Key scoping decision (risk cutter)
+## Dependency graph
 
-**The ring buffer carries the per-hit tier only** — `combat.hit`, `*.damage`, per-hit status
-hooks, and effect-consumed spawn triggers (`bullet.init` when an OnSpawn grant is live), plus
-drain-generated chain records. Everything else — board lifecycle, `match.*`, spawn/die
-membership, mower/card/travel — **stays synchronous exactly as today**: those kinds are
-per-spawn/per-death/per-match rate (cheap), and they carry every hard ordering hazard the
-audit found (die-before-withdraw, board.start-first, MatchHost membership, XP per-instance).
-By draining only the hot tier, the barrier logic shrinks to: "a synchronous death/lifecycle
-event flushes ring records referencing that ptr / that match before proceeding."
+```
+Module A: injector-frame-cost                Module B: server-burst (independent)
+  A1 instrument loop subsections  ──┐          B1 headless burst repro (crash proven)
+  A2 verdict arithmetic fix         │              │
+  (both independent, ship first)    │          B2 root-cause doc
+                                    ▼              │
+  A3 ptr-indexed pending (Core)   informs      B3 bounded ingest fix + test
+  A4 incremental snapshot (Core)  A5 priority      │
+  A5 auto-collect/continuous fix  (biggest     B4 burst re-run healthy
+        (Injector, guided by A1)   offender
+                                   first)
+  A6 deploy + stress 300/600 re-run gate
+  A7 review-findings fold-in (sized when the 5-axis review lands)
+```
 
-This preserves: MatchHost timing (unchanged), UniqueBoundLoadout same-frame stat writes
-(unchanged), XP per-instance events (never enter the ring), `ForgetEntity` ordering (death
-flushes the ptr's pending hits first — bounded, per-death).
+Vertical slicing note: A3/A4 are each a complete slice (Core change + tests + measurable
+effect); A1 is the flashlight that orders A5's work. B runs fully parallel to A — different
+process, headless verification, no shared files.
 
-## Components and order
+## Ordering rationale
 
-| # | Component | Depends on | Parallel? |
-|---|---|---|---|
-| A | `GameEventRec` struct + kind enum + string interning (matchKey/grantId) | — | with B |
-| B | Proc math takes `HitCount`: counters accumulate by N, one burst per crossing; chance = single roll vs `1−(1−p)^n`; `max_stacks` consumes per hit. Default N=1 → v1 behavior byte-identical | — | with A |
-| C | `GameEventRing` (fixed cap 4096, single-writer, drop-with-counter overflow policy for droppable kinds) + `EventCoalescer` (key per SSOT §4b.2; chain/`SourceGrantId` never merge) | A | — |
-| D | `EventDrain`: budgeted FIFO (budget = 10% of frame, from measured frame time), cost classes (expensive actions 1/frame), ptr-flush barrier API, generation cap (≤3), chain records inherit depth+1 (clamped limit 1..8, default 6), session bypass (no budget, no coalescing) | A,B,C | — |
-| E | Injector wiring: record sites replace direct `OnCapture` calls for hot kinds; drain runs in `InjectorLoop.Tick` before `TickDots`, sharing one board freeze; death/lifecycle hooks call ptr-flush; transport payloads for hot kinds built at drain time | D | — |
-| F | FPS cap default 60 (`FUSIONRPG_FPS_CAP` unset → 60; `0` → uncapped); PerfProbe `drain.tick` section + ring depth/dropped counters | E | with E |
-| G | Live verification: stress board at max speed, LIVE checklist F-rows in a session, probe scenarios before/after | E,F | — |
+- A1+A2 first: zero-risk, and A1's numbers decide whether A5 targets auto-collect,
+  VfxDirector, or something unexpected — don't fix blind.
+- A3 before A4: both touch drain/snapshot internals; A3 is smaller and de-risks the shared
+  test harness.
+- B1 before any server change: the crash must be reproducible on demand or the fix is a guess.
+- A7 last-but-flexible: Critical review findings jump the queue.
 
-## Risks and mitigations
+## Risks
 
-1. **Dealt/taken pairing across the ring** — `PairId` stamped by the hook that emits both
-   records of one physical hit; replaces the fragile 8-event window. Test group 1.
-2. **Death flush cost** — a death flushing that ptr's pending hit records is bounded by
-   per-target pending count (small); test with burst scenarios.
-3. **Chain semantics change** (depth tightening) — owner-approved; explicit test + SSOT note.
-4. **Coalescer over-merge tripping the funnel's 1e9 cap** — test with extreme amounts.
-5. **Session fidelity** — bypass path tested offline + LIVE F-rows re-run (checkpoint 4).
-6. **Behavior drift in v1-shared code (B)** — `HitCount=1` default keeps every existing test
-   green untouched; new behavior only activates for merged records.
+| Risk | Impact | Mitigation |
+|---|---|---|
+| Incremental snapshot breaks copy-on-freeze semantics (drain holds a frozen board while registry mutates) | High | A4 keeps immutable snapshot instances; incremental = maintain a *dirty template* cheaply, still materialize an immutable copy on freeze; tests assert frozen instance never mutates |
+| Ptr index drifts from ring contents | Med | index is derived-only (built during append/pop); invariant test: index == scan of ring |
+| Server fix suppresses XP events | High | burst test asserts XP-bearing kinds all present post-ingest |
+| Auto-collect behavior change (collect radius/timing) | Low | registry path mirrors scan results; probe-only verification plus manual play check |
 
 ## Verification checkpoints
 
-1. After A+B: new unit tests green, all 733 existing Core tests green untouched.
-2. After C+D: full offline test groups 1–6 (spec Testing Strategy) green.
-3. After E+F: injector builds vs game dir; 4 boundary guards green; all suites green.
-4. Deploy: stress probe hits spec success criteria (≤5% frame share, ≤3-frame effect latency,
-   gen2=0); LIVE checklist F-rows pass in a session.
-
-## Out of scope
-
-Launcher UI for the fps setting; server/web changes (none needed — hot kinds either don't
-reach the server or arrive as today, batched); Phase 3 niceties (adaptive coalescing windows).
+1. After A1+A2: build + suites + guards; deploy; one 300z run shows new sections, no dark cost.
+2. After A3+A4: Core tests (new invariants incl. frozen-snapshot immutability) + all suites.
+3. After A5: probe shows `cheat.autocollect`/`cheat.continuous` ≈ 0 scans.
+4. Gate: stress 300 + 600 both PASS (corrected verdict). Module A done.
+5. B1 crash repro documented → B3 fix → B4 same burst healthy + Data.Tests green. Module B done.
+6. Final: stress 1000z end-to-end with server alive; 00-baseline.md updated; owner commits.
