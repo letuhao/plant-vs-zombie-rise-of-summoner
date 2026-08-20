@@ -106,6 +106,16 @@ public sealed class StatusRuntime
     public IReadOnlyList<StatusInstance> AllInstances() =>
         _byHost.Values.SelectMany(v => v).ToList();
 
+    /// <summary>Allocation-free liveness probe — checked per frame by the DoT tick.</summary>
+    public bool HasAnyInstances()
+    {
+        foreach (var list in _byHost.Values)
+        {
+            if (list.Count > 0) return true;
+        }
+        return false;
+    }
+
     public StatusApplyOutcome Apply(StatusApplyInput input, IStatusRng rng, DateTimeOffset now)
     {
         var def = _catalog.GetRequired(input.StatusId);
@@ -310,13 +320,18 @@ public sealed class StatusRuntime
             _counterHits.Remove(key);
     }
 
-    /// <summary>Counter delivery hit meter — returns true when burst threshold reached.</summary>
-    public bool RecordCounterHit(string grantId, string scopeKey, int everyHits, bool resetOnBurst)
+    /// <summary>
+    /// Counter delivery hit meter — returns true when burst threshold reached.
+    /// <paramref name="hits"/> supports v2 coalesced records (N merged hits advance by N,
+    /// one burst per call on crossing — event-pipeline-v2-spec.md decision #2).
+    /// </summary>
+    public bool RecordCounterHit(string grantId, string scopeKey, int everyHits, bool resetOnBurst, int hits = 1)
     {
         if (everyHits <= 0 || string.IsNullOrWhiteSpace(grantId)) return false;
+        if (hits <= 0) return false;
         var key = grantId.Trim() + "|" + (scopeKey ?? "").Trim();
         _counterHits.TryGetValue(key, out var n);
-        n++;
+        n += hits;
         if (n >= everyHits)
         {
             if (resetOnBurst) _counterHits[key] = 0;

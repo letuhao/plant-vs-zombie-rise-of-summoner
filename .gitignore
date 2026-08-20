@@ -81,3 +81,20 @@ web/fusion-rpg-web/blob-report/
 _tmp_reflect/
 src/FusionRpg.Injector/CheatMenuGui.Legacy.cs.bak
 AGENTS.md
+
+# Third-party Claude agent skills (addyosmani/agent-skills) — vendored locally, not committed.
+# Update: git -C .claude/vendor/agent-skills pull
+#         cp -r .claude/vendor/agent-skills/skills/. .claude/skills/
+.claude/vendor/
+.claude/skills/
+# Local-only assistant config (same policy as AGENTS.md — never commit)
+.claude/README.md
+.claude/settings.local.json
+CLAUDE.md
+src/FusionRpg.Core/artifacts/perf-build/
+
+src/FusionRpg.Injector.BepInEx/artifacts/perf-build/
+
+src/FusionRpg.Contracts/artifacts/perf-build/
+
+src/FusionRpg.CheatCore/artifacts/perf-build/

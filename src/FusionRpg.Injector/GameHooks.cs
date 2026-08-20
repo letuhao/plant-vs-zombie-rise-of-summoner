@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using FusionRpg.Contracts;
 using FusionRpg.Core;
+using FusionRpg.Core.Diagnostics;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Stats;
 using FusionRpg.Injector.Stats;
@@ -33,6 +34,8 @@ public static class GameHooks
 
     public static void ClearMatch()
     {
+        Effects.InjectorEntityRegistry.Clear();
+        Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();
         EntityStatWriter.Clear();
         CheatState.Stats.ClearBaselines();
@@ -52,6 +55,7 @@ public static class GameHooks
 
     internal static void Emit(string kind, object payload)
     {
+        PerfProbe.CountEmit(kind);
         Dictionary<string, object>? dict = null;
         try
         {
@@ -64,6 +68,7 @@ public static class GameHooks
                 dict["matchKey"] = MatchKey!;
             }
 
+            using var _perf = PerfProbe.Measure(PerfSection.MatchApply);
             Match.MatchHost.Apply(kind, dict);
         }
         catch (Exception ex)
@@ -451,6 +456,7 @@ public static class GameHooks
             });
             MatchKey = null;
             ClearMatch();
+            try { Fx.VfxDirector.ClearAll(); } catch { }
         }
     }
 
@@ -489,7 +495,11 @@ public static class GameHooks
     {
         public static void Postfix(Plant __instance)
         {
-            if (!Ready() || __instance == null) return;
+            if (__instance == null) return;
+            Effects.InjectorEntityRegistry.Add(__instance);
+            Effects.InjectorBoardSnapshot.Invalidate();
+            try { Fx.AnchorResolver.Register(GameDumps.Ptr(__instance), __instance.transform); } catch { }
+            if (!Ready()) return;
             if (__instance.thePlantType == PlantType.Nothing) return;
             ApplyPlant(__instance, "start");
         }
@@ -501,6 +511,8 @@ public static class GameHooks
         public static void Postfix(Plant __instance, Plant.DieReason reason)
         {
             if (__instance == null) return;
+            try { Effects.InjectorEntityRegistry.Remove(__instance.Pointer); } catch { }
+            Effects.InjectorBoardSnapshot.Invalidate();
             // OnDeath must see entity grants; ForgetEntity withdraws after Emit.
             Emit("plant.die", new Dictionary<string, object>
             {
@@ -520,6 +532,7 @@ public static class GameHooks
         // Plant signature: (int damage, IDamageMaker damageFrom, DamageType damageType, PlantType reportType, bool fix)
         public static void Prefix(Plant __instance, ref int damage, IDamageMaker damageFrom, DamageType damageType, PlantType reportType, bool fix)
         {
+            using var _perf = PerfProbe.Measure(PerfSection.TakeDamagePrefix);
             if (CheatState.On("P-GOD")) { damage = 0; return; }
             if (OverlayApplyGuard.IsActive) return;
             var s = CheatState.EffectiveStats();
@@ -534,7 +547,9 @@ public static class GameHooks
                 var final = CheatState.Stats.Resolve(ctx);
                 damage = StatMath.ScaleIncoming(damage, final.DefensePercent, final.DefenseFlat);
             }
-            if (s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive)
+            // OnDamageTaken grants need *.damage even with telemetry off (v2 audit 4c.2).
+            if (s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive
+                || Effects.EffectRuntime.HasOnDamageTakenGrant())
             {
                 var payload = new Dictionary<string, object>
                 {
@@ -561,7 +576,11 @@ public static class GameHooks
     {
         public static void Postfix(Zombie __instance)
         {
-            if (!Ready() || __instance == null || __instance.theZombieType == ZombieType.Nothing) return;
+            if (__instance == null) return;
+            Effects.InjectorEntityRegistry.Add(__instance);
+            Effects.InjectorBoardSnapshot.Invalidate();
+            try { Fx.AnchorResolver.Register(GameDumps.Ptr(__instance), __instance.transform); } catch { }
+            if (!Ready() || __instance.theZombieType == ZombieType.Nothing) return;
             ApplyZombie(__instance, "start");
         }
     }
@@ -571,6 +590,8 @@ public static class GameHooks
     {
         public static void Postfix(Zombie __instance)
         {
+            Effects.InjectorEntityRegistry.Add(__instance);
+            Effects.InjectorBoardSnapshot.Invalidate();
             if (!Ready() || __instance == null || __instance.theZombieType == ZombieType.Nothing) return;
             ApplyZombie(__instance, "initHealth");
         }
@@ -599,6 +620,7 @@ public static class GameHooks
     {
         public static void Prefix(Zombie __instance, ref int theDamage, IDamageMaker damageFrom, DamageType theDamageType, PlantType reportType, bool fix)
         {
+            using var _perf = PerfProbe.Measure(PerfSection.TakeDamagePrefix);
             if (CheatState.On("Z-GOD")) { theDamage = 0; return; }
             if (OverlayApplyGuard.IsActive) return;
             var s = CheatState.EffectiveStats();
@@ -613,7 +635,9 @@ public static class GameHooks
                 var final = CheatState.Stats.Resolve(ctx);
                 theDamage = StatMath.ScaleIncoming(theDamage, final.DefensePercent, final.DefenseFlat);
             }
-            if (s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive)
+            // OnDamageTaken grants need *.damage even with telemetry off (v2 audit 4c.2).
+            if (s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive
+                || Effects.EffectRuntime.HasOnDamageTakenGrant())
             {
                 var payload = new Dictionary<string, object>
                 {
@@ -821,8 +845,13 @@ public static class GameHooks
     {
         public static void Postfix(Bullet __instance)
         {
+            // BumpBullet is the authoritative bullets_spawned source; always count.
             RpgHost.Client?.BumpBullet();
             if (__instance == null) return;
+            // Highest-rate kind (~per pea). Emit only when something consumes it: an OnSpawn
+            // grant or a debug session. MatchHost ignores it; the server metric is redundant;
+            // the web strips it (v2 audit §4c.2).
+            if (!Effects.EffectRuntime.HasOnSpawnGrant() && !DebugRuntime.SessionActive) return;
             var payload = new Dictionary<string, object> { ["ptr"] = GameDumps.Ptr(__instance) };
             try { payload["damage"] = __instance.Damage; } catch { }
             try
@@ -839,6 +868,8 @@ public static class GameHooks
     {
         if (z == null) return;
         var p = z.Pointer;
+        Effects.InjectorEntityRegistry.Remove(p);
+        Effects.InjectorBoardSnapshot.Invalidate();
         if (!DeadZombies.Add(p)) return;
         var diePayload = new Dictionary<string, object>
         {
@@ -960,12 +991,18 @@ public static class GameHooks
     }
 
     /// <summary>Delegates to EntityApply — sole Resolve→Writer path.</summary>
-    internal static void ApplyPlant(Plant p, string source, bool includeAbsolute = true) =>
+    internal static void ApplyPlant(Plant p, string source, bool includeAbsolute = true)
+    {
+        using var _perf = PerfProbe.Measure(PerfSection.EntityApply);
         EntityApply.RunPlant(p, source, includeAbsolute);
+    }
 
     /// <summary>Delegates to EntityApply — sole Resolve→Writer path.</summary>
-    internal static void ApplyZombie(Zombie z, string source, bool includeAbsolute = true) =>
+    internal static void ApplyZombie(Zombie z, string source, bool includeAbsolute = true)
+    {
+        using var _perf = PerfProbe.Measure(PerfSection.EntityApply);
         EntityApply.RunZombie(z, source, includeAbsolute);
+    }
 
     /// <summary>
     /// Leave-board cleanup: withdraw <c>entity:{ptr}</c> grants (OnRemoved) then clear baselines.

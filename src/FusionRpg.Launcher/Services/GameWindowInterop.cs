@@ -16,8 +16,10 @@ public static class GameWindowInterop
 
     const uint ModNoRepeat = 0x4000;
     const int SwRestore = 9;
+    const int SwMinimize = 6;
     static readonly IntPtr HwndTopmost = new(-1);
     const uint SwpShowWindow = 0x0040;
+    const int QunsRunningD3dFullScreen = 2; // SHQueryUserNotificationState: exclusive-fullscreen D3D app
 
     [StructLayout(LayoutKind.Sequential)]
     public struct Rect
@@ -48,6 +50,12 @@ public static class GameWindowInterop
     [DllImport("user32.dll")]
     static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
 
+    [DllImport("user32.dll")]
+    static extern IntPtr GetForegroundWindow();
+
+    [DllImport("shell32.dll")]
+    static extern int SHQueryUserNotificationState(out int state);
+
     /// <summary>Main window handle of the running game process, or IntPtr.Zero.</summary>
     public static IntPtr FindGameWindow()
     {
@@ -68,8 +76,33 @@ public static class GameWindowInterop
     {
         rect = default;
         var hwnd = FindGameWindow();
-        if (hwnd == IntPtr.Zero) return false;
+        if (hwnd == IntPtr.Zero || IsIconic(hwnd)) return false; // minimized rect is off-screen garbage
         return GetWindowRect(hwnd, out rect) && rect.Width > 0 && rect.Height > 0;
+    }
+
+    /// <summary>
+    /// True when the game is the foreground window in exclusive-fullscreen D3D mode —
+    /// topmost windows cannot render over it, so the overlay must fall back to a window switch.
+    /// </summary>
+    public static bool IsGameExclusiveFullscreen()
+    {
+        var hwnd = FindGameWindow();
+        if (hwnd == IntPtr.Zero) return false;
+        try
+        {
+            if (SHQueryUserNotificationState(out var state) != 0) return false;
+            return state == QunsRunningD3dFullScreen && GetForegroundWindow() == hwnd;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public static void MinimizeGame()
+    {
+        var hwnd = FindGameWindow();
+        if (hwnd != IntPtr.Zero) ShowWindow(hwnd, SwMinimize);
     }
 
     /// <summary>Place <paramref name="hwnd"/> exactly over the given device-pixel rect, topmost.</summary>

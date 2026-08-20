@@ -32,15 +32,20 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
                 _ => throw new InvalidOperationException("unknown action " + item.Action)
             };
 
-            DebugRuntime.Emit("debug.effect.fired", new Dictionary<string, object>
+            // Per-action fire trace — session-only; in normal play this allocated a dict per
+            // executed action per hit (v2 audit §4b.7). Errors below stay unconditional.
+            if (DebugRuntime.SessionActive)
             {
-                ["grantId"] = item.GrantId,
-                ["effectId"] = item.EffectId,
-                ["action"] = item.Action,
-                ["ok"] = ok,
-                ["skipped"] = skipped,
-                ["trigger"] = ctx.Event.Trigger
-            });
+                DebugRuntime.Emit("debug.effect.fired", new Dictionary<string, object>
+                {
+                    ["grantId"] = item.GrantId,
+                    ["effectId"] = item.EffectId,
+                    ["action"] = item.Action,
+                    ["ok"] = ok,
+                    ["skipped"] = skipped,
+                    ["trigger"] = ctx.Event.Trigger
+                });
+            }
 
             if (!ok)
             {
@@ -142,6 +147,22 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
         }
 
         var source = "effect.fa10:" + item.GrantId;
+        // Registry first (O(1), runs per FA10 action in combat); scans only on a registry miss
+        // so a unit the hooks never saw still takes its delta.
+        var zHit = InjectorEntityRegistry.FindZombie(targetPtr);
+        if (zHit != null)
+        {
+            EntityStatWriter.AddZombieHp(zHit, amount, source);
+            return true;
+        }
+
+        var pHit = InjectorEntityRegistry.FindPlant(targetPtr);
+        if (pHit != null)
+        {
+            EntityStatWriter.AddPlantHp(pHit, amount, source);
+            return true;
+        }
+
         foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
         {
             if (z == null) continue;
@@ -182,13 +203,22 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
 
         if (!string.IsNullOrEmpty(targetPtr))
         {
-            foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
+            var zTarget = InjectorEntityRegistry.FindZombie(targetPtr);
+            if (zTarget != null)
             {
-                if (z == null) continue;
-                if (!string.Equals(GameDumps.Ptr(z), targetPtr, StringComparison.OrdinalIgnoreCase)) continue;
-                DebugActions.ApplyStatusToZombie(z, status, duration, level, method: true);
+                DebugActions.ApplyStatusToZombie(zTarget, status, duration, level, method: true);
                 n++;
-                break;
+            }
+            else
+            {
+                foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
+                {
+                    if (z == null) continue;
+                    if (!string.Equals(GameDumps.Ptr(z), targetPtr, StringComparison.OrdinalIgnoreCase)) continue;
+                    DebugActions.ApplyStatusToZombie(z, status, duration, level, method: true);
+                    n++;
+                    break;
+                }
             }
 
             DebugRuntime.Emit("pvz.status.apply", new Dictionary<string, object>
@@ -234,15 +264,20 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
 
         IEnumerable<Zombie> Targets()
         {
-            var all = UnityEngine.Object.FindObjectsOfType<Zombie>().Where(z => z != null);
             if (!string.IsNullOrEmpty(targetPtr) &&
                 (string.IsNullOrEmpty(targetParam) ||
                  string.Equals(targetParam, "event", StringComparison.OrdinalIgnoreCase) ||
                  string.Equals(targetParam, "selected", StringComparison.OrdinalIgnoreCase)))
             {
-                return all.Where(z =>
+                // Targeted clear: registry O(1) first, scan only on a miss (v2 audit §4b.7).
+                var zTarget = InjectorEntityRegistry.FindZombie(targetPtr);
+                if (zTarget != null) return new[] { zTarget };
+                return UnityEngine.Object.FindObjectsOfType<Zombie>().Where(z =>
+                    z != null &&
                     string.Equals(GameDumps.Ptr(z), targetPtr, StringComparison.OrdinalIgnoreCase));
             }
+
+            var all = UnityEngine.Object.FindObjectsOfType<Zombie>().Where(z => z != null);
 
             if (string.Equals(targetParam, "all-zombies", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(targetParam, "all", StringComparison.OrdinalIgnoreCase) ||

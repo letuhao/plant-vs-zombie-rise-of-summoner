@@ -111,6 +111,19 @@ On launcher startup, restore `LastPort` into the session if `/health` still answ
 | Open server folder | `Server\` next to the launcher (exe + `data\`) |
 | Log pane | Launcher messages + captured server stdout/stderr |
 
+## Game / web overlay (F10)
+
+The launcher hosts the RPG web UI in an embedded browser so players can flip between the game and the UI without alt-tabbing:
+
+- **OverlayWindow** — borderless topmost WPF window with **WebView2** pointed at the active server URL; positioned exactly over the game window (`GetWindowRect` + `SetWindowPos`), maximized fallback when the game window is not found.
+- **Global hotkey** — `RegisterHotKey` on the main window (default **F10**, override via `overlayHotKey` in `%AppData%\FusionRpg\launcher.json`, WPF `Key` names). Works while the game has focus; the **Overlay** button in the actions row does the same. `Esc` or the in-overlay button returns to the game (`SetForegroundWindow`).
+- Toggling **hides** the overlay (never destroys it) so the SPA keeps its SignalR session; Alt+F4 on the overlay also just hides it. The window is destroyed only on launcher shutdown.
+- **WebView2 Runtime** (Evergreen, preinstalled on Win 10/11) — if missing, the overlay shows install instructions (`https://developer.microsoft.com/microsoft-edge/webview2/`) and players can still use **Open RPG UI** in a normal browser. User data dir: `%LocalAppData%\FusionRpg\webview2`.
+- If the hotkey is taken by another app, the launcher logs it and the button remains the fallback.
+- Seamless covering toggle needs the game in **windowed / borderless-fullscreen** mode (Unity 2022 default). **Exclusive fullscreen** is detected (`SHQueryUserNotificationState`) and falls back to a window switch: the game is minimized, the overlay opens maximized, and toggling back restores the game.
+
+Code: `OverlayWindow.xaml(.cs)`, `Services/GameWindowInterop.cs` (Win32 P/Invoke: hotkey, window rect, foreground, fullscreen probe). Contract + live checklist: [overlay-spec.md](overlay-spec.md).
+
 ## Disk thresholds
 
 - Warn free space &lt; **2 GB** on the server data drive.

@@ -67,6 +67,8 @@ public sealed class EffectEventDto
     [JsonPropertyName("scenarioId")] public string? ScenarioId { get; set; }
     [JsonPropertyName("chainDepth")] public int ChainDepth { get; set; }
     [JsonPropertyName("sourceGrantId")] public string? SourceGrantId { get; set; }
+    /// <summary>Merged physical hits this event represents (v2 coalescing); 1 = a single hit.</summary>
+    [JsonPropertyName("hitCount")] public int HitCount { get; set; } = 1;
 }
 
 public sealed class EffectGrantDto

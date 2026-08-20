@@ -1,3 +1,4 @@
+using FusionRpg.Core.Diagnostics;
 using FusionRpg.Injector.Effects;
 using FusionRpg.Injector.Fx;
 using UnityEngine;
@@ -14,6 +15,7 @@ public static class InjectorLoop
     static float _poll;
     static float _cheatPush;
     static float _startDelay;
+    static float _perf;
     static bool _started;
 
     /// <summary>Reset timers (e.g. after host reload). Normally not needed.</summary>
@@ -24,11 +26,14 @@ public static class InjectorLoop
         _poll = 0;
         _cheatPush = 0;
         _startDelay = 0;
+        _perf = 0;
         _started = false;
     }
 
     public static void Tick(float unscaledDeltaTime)
     {
+        PerfProbe.RecordFrame(unscaledDeltaTime);
+        using var _perfScope = PerfProbe.Measure(PerfSection.LoopTick);
         var client = RpgHost.Client;
         if (!_started)
         {
@@ -36,6 +41,7 @@ public static class InjectorLoop
             if (_startDelay >= 2f)
             {
                 _started = true;
+                ApplyFpsCap();
                 _ = client?.StartAsync();
             }
         }
@@ -56,8 +62,7 @@ public static class InjectorLoop
         catch { }
         try { CheatActions.TickContinuous(); } catch { }
         try { CheatActions.AutoCollectTick(); } catch { }
-        try { DamageFxOverlay.Tick(unscaledDeltaTime); } catch { }
-        try { OverlayWorldFx.Tick(unscaledDeltaTime); } catch { }
+        try { VfxDirector.Tick(unscaledDeltaTime); } catch { }
         try { EffectRuntime.TickDots(unscaledDeltaTime); } catch { }
         _hb += unscaledDeltaTime;
         if (_hb >= 2f)
@@ -70,6 +75,12 @@ public static class InjectorLoop
         {
             _cmdPull = 0;
             _ = client?.PullPendingCommandsAsync();
+        }
+        _perf += unscaledDeltaTime;
+        if (_perf >= PerfReporter.IntervalSeconds)
+        {
+            _perf = 0;
+            try { PerfReporter.Flush(client); } catch { }
         }
         _cheatPush += unscaledDeltaTime;
         if (_cheatPush >= 3f)
@@ -86,6 +97,20 @@ public static class InjectorLoop
                 _ = client.RefreshStatsAsync();
             }
         }
+    }
+
+    /// <summary>Optional frame cap for pacing on heavy boards: set FUSIONRPG_FPS_CAP=60|120.</summary>
+    static void ApplyFpsCap()
+    {
+        try
+        {
+            var s = Environment.GetEnvironmentVariable("FUSIONRPG_FPS_CAP");
+            if (!int.TryParse(s, out var cap) || cap <= 0) return;
+            QualitySettings.vSyncCount = 0; // targetFrameRate is ignored while vsync is on
+            Application.targetFrameRate = cap;
+            RpgHost.Log.Info($"[perf] fps capped at {cap} (FUSIONRPG_FPS_CAP)");
+        }
+        catch { }
     }
 
     /// <summary>Convenience when Unity Time is available (BepInEx RpgLoop).</summary>

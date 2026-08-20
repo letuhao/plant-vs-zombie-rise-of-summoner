@@ -114,6 +114,9 @@ public static class LawnCoords
         return new Vector3(p.x, p.y + HalfCellY, p.z);
     }
 
+    /// <summary>Row membership for a zombie — row semantics stay here, not in callers.</summary>
+    public static bool ZombieInRow(Zombie z, int row) => z != null && z.theZombieRow == row;
+
     public static bool TryWorldToGui(Camera cam, Vector3 world, float t, out Vector2 gui)
     {
         gui = default;

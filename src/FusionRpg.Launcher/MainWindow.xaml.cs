@@ -295,6 +295,14 @@ public partial class MainWindow : FluentWindow
             return;
         }
 
+        // Exclusive fullscreen hides topmost windows — drop to a plain window switch instead.
+        if (GameWindowInterop.IsGameExclusiveFullscreen())
+        {
+            GameWindowInterop.MinimizeGame();
+            AppendLog("Game is exclusive-fullscreen — minimized it for the overlay. " +
+                      "Borderless/windowed mode gives a seamless toggle.");
+        }
+
         _overlay ??= new OverlayWindow(HideOverlayToGame, _overlayKey.ToString());
         try
         {

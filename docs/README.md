@@ -91,6 +91,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | File | Contents |
 |---|---|
 | [launcher/spec.md](launcher/spec.md) | WPF player entry: loader install, FusionRpg update, port pick, process dashboard |
+| [launcher/overlay-spec.md](launcher/overlay-spec.md) | Game ⇄ web overlay contract (WebView2 + F10 hotkey) — behavior, boundaries, live checklist |
 | [injector/spec.md](injector/spec.md) | BepInEx plugin (current host) |
 | [injector/lawn-coords.md](injector/lawn-coords.md) | Unity Mouse box = injector lawn XY (cherry + floaters) |
 | [injector/dual-host-roadmap.md](injector/dual-host-roadmap.md) | BepInEx + MelonLoader dual-artifact port (not dual-load) |

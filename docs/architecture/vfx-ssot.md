@@ -1,6 +1,6 @@
 # VFX SSOT — cue → recipe → primitive presentation layer
 
-**Status:** **Locked (2026-08-20)** — spec sealed after Unity-side audit; no code yet. Former open questions are resolved in §15 with rationale.
+**Status:** **Locked (2026-08-20); implemented offline (2026-08-20)** — migration phases 1–3 plus the §16 element extension are in code with full offline test coverage (Core/CheatCore/Guard/E2E green, MelonLoader 3.9 injector compiles against game assemblies). LIVE probe pending: run `scripts/prove-vfx.ps1` with the lawn open. Former open questions are resolved in §15 with rationale.
 **Parent:** [decisions.md](decisions.md) (ADR row **VFX**). Cue producers: [effect-funnel.md](effect-funnel.md), [status-ssot.md](status-ssot.md), [combat-damage-ssot.md](combat-damage-ssot.md). Current implementation being replaced: `src/FusionRpg.Injector/Fx/*`, `src/FusionRpg.Core/Effects/DamageFx.cs`.
 
 This spec defines the **presentation layer** for RPG overlay visual feedback. It does **not** own gameplay state, and it does **not** replace vanilla PVZ animations or particles.
@@ -304,7 +304,7 @@ House pattern, extended:
 | Surface | Rule |
 |---|---|
 | `debug.fx.shown` | Always includes `cueId`, anchor fields, primitive kinds rendered |
-| `debug.fx.skipped` | Always includes `cueId` + enumerated `reason`: `disabled`, `unknown-cue`, `rate-limited`, `cap`, `missing`, `no-shader`, `particle-fail` |
+| `debug.fx.skipped` | Always includes `cueId` + enumerated `reason`: `disabled`, `unknown-cue`, `muted`, `rate-limited`, `cap`, `missing`, `no-shader`, `particle-fail` |
 | `debug.fx.world.shown` / `.skipped` | **Retired in phase 2** — folded into the two events above. Phase 2 must update [../protocol/events.md](../protocol/events.md) §fx row and the curl example in [../runbook/debug-pipeline.md](../runbook/debug-pipeline.md) in the same change |
 | `debug.fx.world-flash` | **Command/scenario step name survives unchanged** — it is locked into `DebugScenarios.AllowedStepNames` (test-pinned) and the `/fx/world-flash` endpoint. It becomes an alias for `fx.play debug.probe <col> <row>` |
 | CheatState `SYS-DAMAGE-FX` | **Locked: keep the id, no rename.** It is baked into `CheatSchema`, `CheatRegistry`, `CheatState`, E2E tests, README, and runbooks; a rename buys naming honesty and nothing else. Its documented meaning widens to "all overlay VFX" |

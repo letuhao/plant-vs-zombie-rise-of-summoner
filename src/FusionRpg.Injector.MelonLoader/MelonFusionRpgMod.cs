@@ -61,7 +61,7 @@ public sealed class MelonFusionRpgMod : MelonMod
     {
         if (!RpgHost.IsInitialized) return;
         if (RpgHost.Client == null && RpgHost.Harmony == null) return; // skip-harmony stub
-        DamageFxOverlay.Draw();
+        VfxDirector.Draw();
     }
 
     static string ResolveGameRoot()

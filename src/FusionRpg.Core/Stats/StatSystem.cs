@@ -1,3 +1,5 @@
+using FusionRpg.Core.Diagnostics;
+
 namespace FusionRpg.Core.Stats;
 
 public sealed class StatSystem
@@ -146,6 +148,7 @@ public sealed class StatSystem
     public EntityFinal Resolve(StatContext ctx)
     {
         if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+        using var _perf = PerfProbe.Measure(PerfSection.StatsResolve);
         var bag = new ModifierBag();
         foreach (var plugin in Plugins.Ordered())
             plugin.Contribute(ctx, bag);

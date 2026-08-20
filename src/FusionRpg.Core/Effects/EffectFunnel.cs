@@ -103,7 +103,8 @@ public sealed class EffectFunnel
         string? grantId = null,
         string channel = "hp",
         string? mode = null,
-        Dictionary<string, object?>? extra = null)
+        Dictionary<string, object?>? extra = null,
+        List<ElementPayloadComponentDto>? elements = null)
     {
         if (!TryGuardMutation(targetKey, amount, channel, mode, extra, out var reason))
         {
@@ -132,6 +133,8 @@ public sealed class EffectFunnel
 
         slot.Amount += amount;
         slot.MergedCount++;
+        if (elements is { Count: > 0 })
+            slot.Elements = elements;
         return true;
     }
 
@@ -175,6 +178,7 @@ public sealed class EffectFunnel
             slot.Amount += fx.Amount;
             slot.MergedCount += Math.Max(1, fx.MergedCount);
             if (!string.IsNullOrWhiteSpace(fx.Fx)) slot.Fx = fx.Fx;
+            if (fx.Elements is { Count: > 0 }) slot.Elements = fx.Elements;
         }
         else
         {
@@ -184,7 +188,8 @@ public sealed class EffectFunnel
                 Amount = fx.Amount,
                 Tag = fx.Tag,
                 Fx = string.IsNullOrWhiteSpace(fx.Fx) ? "float" : fx.Fx,
-                MergedCount = Math.Max(1, fx.MergedCount)
+                MergedCount = Math.Max(1, fx.MergedCount),
+                Elements = fx.Elements is { Count: > 0 } ? fx.Elements : null
             };
         }
 
@@ -376,10 +381,10 @@ public sealed class EffectFunnel
         var ctx = new EffectExecuteContext { Event = ev, Grant = grant, Def = new EffectDef { EffectId = slot.EffectId } };
         _lastFlushed.Add(item);
         _sink.Execute(ctx, item);
-        EnqueueDefaultPresent(ptr, slot.Amount, slot.MergedCount);
+        EnqueueDefaultPresent(ptr, slot.Amount, slot.MergedCount, slot.Elements);
     }
 
-    void EnqueueDefaultPresent(string ptr, long amount, int mergedCount)
+    void EnqueueDefaultPresent(string ptr, long amount, int mergedCount, List<ElementPayloadComponentDto>? elements)
     {
         var hex = PtrHex(ptr);
         var prefix = hex + "|";
@@ -394,7 +399,8 @@ public sealed class EffectFunnel
             TargetPtr = hex,
             Amount = amount,
             Tag = amount < 0 ? DamageFxTag.Neutral : DamageFxTag.Heal,
-            MergedCount = mergedCount
+            MergedCount = mergedCount,
+            Elements = elements
         });
     }
 
@@ -420,5 +426,6 @@ public sealed class EffectFunnel
         public string GrantId { get; set; } = "";
         public long Amount { get; set; }
         public int MergedCount { get; set; }
+        public List<ElementPayloadComponentDto>? Elements { get; set; }
     }
 }

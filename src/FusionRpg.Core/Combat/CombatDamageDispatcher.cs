@@ -44,7 +44,8 @@ public static class CombatDamageDispatcher
                 grantId: string.IsNullOrWhiteSpace(packet.SourceGrantId)
                     ? null
                     : packet.SourceGrantId,
-                channel: packet.Channel ?? "hp");
+                channel: packet.Channel ?? "hp",
+                elements: packet.ElementPayload);
             if (ok)
             {
                 n++;

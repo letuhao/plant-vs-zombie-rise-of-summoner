@@ -39,6 +39,7 @@ builder.Services.AddSingleton<InjectorCommandInbox>();
 builder.Services.AddSingleton<FusionRpg.Core.Effects.EffectGrantSession>();
 builder.Services.AddSingleton<FusionRpg.Core.Effects.SimEffectHost>();
 builder.Services.AddSingleton<UniqueActorService>();
+builder.Services.AddSingleton<PerfWindowBuffer>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<EventIngest>());
 builder.Services.AddHostedService(sp => sp.GetRequiredService<CompactionWorker>());
 builder.Services.AddHostedService<UniqueActorDeployWatchdog>();
@@ -742,6 +743,7 @@ if (SimFlags.Enabled)
 
 app.MapSimEffect();
 app.MapDebug();
+app.MapPerf();
 
 app.MapHub<RpgHub>("/hub/rpg");
 app.MapFallbackToFile("index.html");

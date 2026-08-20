@@ -23,4 +23,7 @@ public sealed class DamageFxDto
     public DamageFxTag Tag { get; set; } = DamageFxTag.Neutral;
     public string Fx { get; set; } = "float";
     public int MergedCount { get; set; } = 1;
+
+    /// <summary>Optional element payload for element-colored presents (vfx-ssot.md §16).</summary>
+    public List<ElementPayloadComponentDto>? Elements { get; set; }
 }

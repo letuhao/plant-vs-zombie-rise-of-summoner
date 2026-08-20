@@ -352,6 +352,8 @@ public static class GameCaptureHooks
         public static void Postfix(float x, float y, int theRow, BulletType theBulletType, BulletMoveWay theMovingWay, bool fromEnermy, Bullet __result)
         {
             if (__result == null) return;
+            // No consumer outside debug sessions (v2 audit §4c.2) — per-bullet rate.
+            if (!DebugRuntime.SessionActive) return;
             Emit("bullet.place", new Dictionary<string, object>
             {
                 ["ptr"] = GameDumps.Ptr(__result),
@@ -410,6 +412,8 @@ public static class GameCaptureHooks
     {
         public static void Postfix(int theColumn, int theRow, int theItemType, GameObject __result)
         {
+            // No consumer outside debug sessions (v2 audit §4c.2) — ~per-kill rate.
+            if (!DebugRuntime.SessionActive) return;
             Emit("item.drop", new Dictionary<string, object>
             {
                 ["col"] = theColumn,
@@ -664,6 +668,8 @@ public static class GameCaptureHooks
         public static void Postfix(MiniPet __instance, int value)
         {
             if (__instance == null) return;
+            // No consumer outside debug sessions (v2 audit §4c.2) — ~per-kill rate.
+            if (!DebugRuntime.SessionActive) return;
             Emit("pet.xp", new Dictionary<string, object>
             {
                 ["ptr"] = GameDumps.Ptr(__instance),

@@ -138,7 +138,9 @@ See [runbook/debug-pipeline.md](../runbook/debug-pipeline.md). Kinds (often stam
 | `debug.onhit.extra` / `onhit.status` | Armed onHit one-shots |
 | `debug.mods.set` / `wave.freeze` / `arm` / `disarm` / `snapshot` | Control |
 | `debug.fx.shader-probe` | LIVE `Shader.Find` result (`found`, `missing`, `drawShader`) |
-| `debug.fx.world.shown` / `world.skipped` | Overlay particle burst at a lawn cell |
+| `debug.fx.shown` | VFX cue rendered (`cueId`, anchor, `rgb`, `hybrid`, `primitives`) — vfx-ssot.md §11 |
+| `debug.fx.skipped` | VFX cue dropped (`cueId`, enumerated `reason`: `disabled`, `unknown-cue`, `muted`, `rate-limited`, `cap`, `missing`, `no-shader`, `particle-fail`) |
+| `debug.fx.list` / `debug.fx.mute` | Catalog cue ids + mute state roundtrip |
 
 ## Cheat inject / probe observability
 

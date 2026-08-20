@@ -16,7 +16,9 @@ public sealed class StatsConfig
 {
     [JsonPropertyName("plants")] public StatMod Plants { get; set; } = new();
     [JsonPropertyName("zombies")] public StatMod Zombies { get; set; } = new();
-    [JsonPropertyName("logDamage")] public bool LogDamage { get; set; } = true;
+    // Per-hit telemetry is opt-in: the old default=true made every player pay per-hit
+    // *.damage + combat.hit emission unless a server pull happened to say otherwise.
+    [JsonPropertyName("logDamage")] public bool LogDamage { get; set; }
     [JsonPropertyName("applyStats")] public bool ApplyStats { get; set; } = true;
 }
 

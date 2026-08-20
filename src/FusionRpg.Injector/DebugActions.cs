@@ -1146,7 +1146,7 @@ public static class DebugActions
             try
             {
                 if (z == null || z.theZombieType == ZombieType.Nothing) continue;
-                if (z.theZombieRow != row) continue;
+                if (!LawnCoords.ZombieInRow(z, row)) continue;
                 if (x == null)
                 {
                     typeId = (int)z.theZombieType;

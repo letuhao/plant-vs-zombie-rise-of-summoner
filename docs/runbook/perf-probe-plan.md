@@ -1,6 +1,6 @@
 # Performance probe + optimization plan (combat/element hot path)
 
-Status: **plan** — no code changes yet. Findings that motivated this: see audit summary at bottom.
+Status: **Phase A implemented** (2026-08-20) — PerfProbe + wiring + `POST /api/perf` / `GET /api/perf/recent` + `scripts/probe-perf.ps1` are built and smoke-tested; Phase B baselines are next. Findings that motivated this: see audit summary at bottom.
 Owner runbooks: [`debug-live-checklist.md`](debug-live-checklist.md), [`debug-pipeline.md`](debug-pipeline.md).
 
 ## 0. Frame budget (targets)

@@ -34,11 +34,14 @@ public class LawnCoordsGuardTests
     [Fact]
     public void Overlay_draw_uses_BodyWorld_and_TryWorldToGui()
     {
-        var text = ReadInjector(Path.Combine("Fx", "DamageFxOverlay.cs"));
+        // vfx-ssot.md: VfxDirector owns all floater draw; Repaint-gated, LawnCoords-anchored.
+        var text = ReadInjector(Path.Combine("Fx", "VfxDirector.cs"));
         Assert.Contains("LawnCoords.BodyWorld", text, StringComparison.Ordinal);
         Assert.Contains("LawnCoords.TryWorldToGui", text, StringComparison.Ordinal);
+        Assert.Contains("LawnCoords.CellCenter", text, StringComparison.Ordinal);
         Assert.Contains("GUI.Label", text, StringComparison.Ordinal);
-        Assert.Contains("OverlayWorldFx.SpawnAtWorld", text, StringComparison.Ordinal);
+        Assert.Contains("EventType.Repaint", text, StringComparison.Ordinal);
+        Assert.Contains("BurstPool.Spawn", text, StringComparison.Ordinal);
         Assert.DoesNotContain("Follow.position", text, StringComparison.Ordinal);
     }
 
@@ -51,11 +54,14 @@ public class LawnCoordsGuardTests
         Assert.Contains("Sprites/Default", probe, StringComparison.Ordinal);
         Assert.DoesNotContain("new Material(\"", probe, StringComparison.Ordinal);
 
-        var world = ReadInjector(Path.Combine("Fx", "OverlayWorldFx.cs"));
+        // vfx-ssot.md §10: FxResources owns the found-shader material; no runtime ShaderLab.
+        var resources = ReadInjector(Path.Combine("Fx", "FxResources.cs"));
+        Assert.Contains("new Material(shader)", resources, StringComparison.Ordinal);
+        Assert.DoesNotContain("Texture2D.whiteTexture", resources, StringComparison.Ordinal);
+
+        // vfx-ssot.md §8.4: pooled bursts, presentation only — no vanilla spawns, no HP writes.
+        var world = ReadInjector(Path.Combine("Fx", "BurstPool.cs"));
         Assert.Contains("ParticleSystem", world, StringComparison.Ordinal);
-        Assert.Contains("LawnCoords.CellCenter", world, StringComparison.Ordinal);
-        Assert.Contains("new Material(shader)", world, StringComparison.Ordinal);
-        Assert.DoesNotContain("Texture2D.whiteTexture", world, StringComparison.Ordinal);
         Assert.DoesNotContain("CreateCherryExplode", world, StringComparison.Ordinal);
         Assert.DoesNotContain(".TakeDamage", world, StringComparison.Ordinal);
         Assert.DoesNotContain("EntityStatWriter", world, StringComparison.Ordinal);

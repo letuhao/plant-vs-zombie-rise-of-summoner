@@ -231,21 +231,24 @@ Pin defender types: `POST /api/debug/combat/pin-element` with `{ ptr, elementPri
 
 Combat derived prove profiles: `combat-neutral`, `combat-fire-caster`, `combat-ice-tank`, `combat-glass` (see `debug.actor-derived`).
 
-## Overlay world VFX (shader probe + cell flash)
+## Overlay VFX (cue → recipe → primitive; vfx-ssot.md)
 
-IL2CPP cannot compile ShaderLab at runtime. Probe which particle/unlit shaders Fusion actually shipped, then draw a short quad at a lawn cell. HP still goes through FA10. Digits stay IMGUI floaters.
+IL2CPP cannot compile ShaderLab at runtime. Probe which particle/unlit shaders Fusion actually shipped; all overlay visuals then go through `VfxDirector` (pooled bursts + IMGUI floaters). HP still goes through FA10.
 
 ```powershell
 Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/fx/probe-shaders
 Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.fx.shader-probe&limit=10'
+# preview any catalog cue (fx.play); world-flash stays as a debug.probe alias
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/fx/play -ContentType application/json -Body '{"cueId":"combat.hit","col":3,"row":2,"amount":-60,"elements":[{"element":"fire","weight":1.0}]}'
 Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/fx/world-flash -ContentType application/json -Body '{"col":3,"row":2}'
-Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.fx.world.shown,debug.fx.world.skipped&limit=20'
+Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.fx.shown,debug.fx.skipped&limit=20'
+# full LIVE proof: .\scripts\prove-vfx.ps1 (plays every cue + element/hybrid variants + toggle-off path)
 ```
 
-`debug.fx.shader-probe` lists `found` / `missing` and `drawShader` (first hit). Lawn inspector: **Probe shaders** / **Cell flash**. Overlay hits also spawn a particle burst at the unit (still `SYS-DAMAGE-FX`). Do not `CreateCherryExplode` for overlay AOE.
+`debug.fx.shader-probe` lists `found` / `missing` and `drawShader` (first hit). Overlay hits spawn element-colored bursts + floaters at the unit (`SYS-DAMAGE-FX` master; `SYS-ELEMENT-FX` gates element coloring). `debug.fx.skipped` reasons are enumerated in vfx-ssot.md §11. Do not `CreateCherryExplode` for overlay AOE.
 
 ## Injector commands
 
-`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, `debug.combat.pin-element`, `debug.combat.silence-vanilla`, `debug.combat.probe`, `debug.combat.snapshot`, `debug.fx.probe-shaders`, `debug.fx.world-flash`, plus `pvz.spawn.extra`.
+`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, `debug.combat.pin-element`, `debug.combat.silence-vanilla`, `debug.combat.probe`, `debug.combat.snapshot`, `debug.fx.probe-shaders`, `debug.fx.world-flash`, `debug.fx.play`, `debug.fx.list`, `debug.fx.mute`, `debug.fx.unmute`, plus `pvz.spawn.extra`.
 
 REST helpers: `POST /api/debug/economy`, `POST /api/debug/board-config`.

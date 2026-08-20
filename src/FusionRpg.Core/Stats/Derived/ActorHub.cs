@@ -1,3 +1,4 @@
+using FusionRpg.Core.Diagnostics;
 using FusionRpg.Core.Stats;
 
 namespace FusionRpg.Core.Stats.Derived;
@@ -51,6 +52,7 @@ public sealed class ActorHub
     public ActorDerivedSnapshot ResolveDerived(StatContext ctx)
     {
         if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+        using var _perf = PerfProbe.Measure(PerfSection.HubResolveDerived);
         var mods = new List<DerivedModifier>();
         foreach (var subsystem in _subsystems)
             subsystem.ContributeDerived(ctx, mods);

@@ -64,6 +64,10 @@ public static class DebugScenarios
         "debug.combat.snapshot",
         "debug.fx.probe-shaders",
         "debug.fx.world-flash",
+        "debug.fx.play",
+        "debug.fx.list",
+        "debug.fx.mute",
+        "debug.fx.unmute",
         "pvz.spawn.extra"
     };
 

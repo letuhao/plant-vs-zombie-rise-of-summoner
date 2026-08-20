@@ -27,7 +27,7 @@ public class Plugin : BasePlugin
     public class RpgLoop : MonoBehaviour
     {
         void Update() => InjectorLoop.TickFromUnity();
-        void OnGUI() => DamageFxOverlay.Draw();
+        void OnGUI() => VfxDirector.Draw();
     }
 }
 

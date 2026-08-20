@@ -378,6 +378,21 @@ public sealed class RpgClient
         }
     }
 
+    /// <summary>Ship one PerfProbe window — best-effort, off the frame path.</summary>
+    public async Task PostPerfAsync(object window)
+    {
+        try
+        {
+            var body = JsonSerializer.Serialize(window, Json);
+            using var content = new StringContent(body, Encoding.UTF8, "application/json");
+            await Http().PostAsync(_base + "/api/perf", content).ConfigureAwait(false);
+        }
+        catch
+        {
+            /* perf telemetry is never allowed to fail loudly */
+        }
+    }
+
     private async Task SendBatch(List<EventEnvelope> batch)
     {
         try

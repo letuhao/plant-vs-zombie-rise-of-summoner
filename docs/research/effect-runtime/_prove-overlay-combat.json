@@ -1,4 +1,5 @@
 {
+  "targetPtr": "1AD15663000",
   "results": [
     {
       "name": "C1 overlay-fire-vs-ice",
@@ -29,8 +30,28 @@
       "name": "C6 overlay-flag-off",
       "pass": true,
       "detail": "pass-through -100; no overlay emit"
+    },
+    {
+      "name": "C7 overlay-ice-vs-fire",
+      "pass": true,
+      "detail": "matchupBonus=-25"
+    },
+    {
+      "name": "C8 overlay-air-vs-earth",
+      "pass": true,
+      "detail": "matchupBonus=-25"
+    },
+    {
+      "name": "C9 overlay-earth-vs-air",
+      "pass": true,
+      "detail": "matchupBonus=25"
+    },
+    {
+      "name": "C10 overlay-force-crit",
+      "pass": true,
+      "detail": "crit=true critMultiplierFinal=1.99330714907572"
     }
   ],
-  "targetPtr": "1C592858C80",
-  "at": "2026-08-20T22:23:40.1657023+07:00"
+  "at": "2026-08-20T23:03:54.4584503+07:00",
+  "actorPtr": "1ADD2371D80"
 }

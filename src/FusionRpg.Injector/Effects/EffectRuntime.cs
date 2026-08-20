@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Diagnostics;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Plugins;
@@ -18,7 +19,12 @@ public static class EffectRuntime
     static StatusRuntime? _status;
     static EffectEventDedupe _dedupe = new();
     static long _tick;
-    /// <summary>Targets that already got OnDamageDealt this tick window (A2 — skip redundant taken).</summary>
+    /// <summary>
+    /// Last OnDamageDealt tick per <c>matchKey|targetPtr</c> (A2 — skip redundant taken).
+    /// Keyed by target, not target+actor: the taken-side check only asks "was this target dealt
+    /// to within 8 ticks", and the newest tick is always the closest — O(1) instead of the old
+    /// full-table prefix scan per damage event (~1000 events/s in heavy combat).
+    /// </summary>
     static readonly Dictionary<string, long> DealtIdentity = new(StringComparer.OrdinalIgnoreCase);
     static float _dotAccum;
 
@@ -63,7 +69,7 @@ public static class EffectRuntime
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
             _bag.Status = _status;
             WireCombatMath(_bag);
-            _ = new EffectFunnel(_bag, DamageFxOverlay.Sink);
+            _ = new EffectFunnel(_bag, DamageFxCueAdapter.Sink);
             _plugins = EffectPluginHostFactory.Create(_bag);
             _dedupe = new EffectEventDedupe();
             _tick = 0;
@@ -102,6 +108,12 @@ public static class EffectRuntime
     public static bool HasGrantForEffect(string effectId) => Bag.HasGrantForEffect(effectId);
 
     public static bool HasOnDamageDealtGrant() => Bag.HasGrantWithTrigger(EffectTriggers.OnDamageDealt);
+
+    /// <summary>Producer gate for *.damage emission — melee OnDamageTaken effects need it even with telemetry off.</summary>
+    public static bool HasOnDamageTakenGrant() => Bag.HasGrantWithTrigger(EffectTriggers.OnDamageTaken);
+
+    /// <summary>Producer gate for bullet.init emission (OnSpawn trigger).</summary>
+    public static bool HasOnSpawnGrant() => Bag.HasGrantWithTrigger(EffectTriggers.OnSpawn);
 
     /// <summary>
     /// Product <c>combat.hit</c> when debug/LogDamage hit-capture is on, or bag has OnDamageDealt grants.
@@ -198,6 +210,7 @@ public static class EffectRuntime
 
     public static void OnCapture(string kind, Dictionary<string, object> payload)
     {
+        using var _perf = PerfProbe.Measure(PerfSection.EffectOnCapture);
         Ensure();
         if (!Bag.HasAnyGrant() && !(Bag.Funnel?.HasPending ?? false)) return;
 
@@ -211,21 +224,19 @@ public static class EffectRuntime
 
         if (string.Equals(ev.Trigger, EffectTriggers.OnDamageDealt, StringComparison.OrdinalIgnoreCase))
         {
-            var id = (ev.MatchKey ?? "") + "|" + (ev.TargetPtr ?? "") + "|" + (ev.ActorPtr ?? "");
+            var id = (ev.MatchKey ?? "") + "|" + (ev.TargetPtr ?? "");
             DealtIdentity[id] = tick;
             if (DealtIdentity.Count > 2048) DealtIdentity.Clear();
         }
         else if (string.Equals(ev.Trigger, EffectTriggers.OnDamageTaken, StringComparison.OrdinalIgnoreCase))
         {
-            var id = (ev.MatchKey ?? "") + "|" + (ev.TargetPtr ?? "") + "|";
-            foreach (var kv in DealtIdentity)
-            {
-                if (kv.Key.StartsWith(id, StringComparison.OrdinalIgnoreCase) && Math.Abs(kv.Value - tick) < 8)
-                    return;
-            }
+            var id = (ev.MatchKey ?? "") + "|" + (ev.TargetPtr ?? "");
+            if (DealtIdentity.TryGetValue(id, out var dealtTick) && Math.Abs(dealtTick - tick) < 8)
+                return;
         }
 
-        if (!_dedupe.ShouldEmit(ev)) return;
+        // EffectEventDedupe removed from this path: with a per-event tick its window (1) made
+        // it always-pass dead code (v2 audit §D2), while still costing a dict insert per event.
         try
         {
             FreezeBoard();
@@ -275,8 +286,9 @@ public static class EffectRuntime
     /// <summary>Coalesce status/OverTime ticks on a ~100ms grid.</summary>
     public static void TickDots(float unscaledDeltaTime)
     {
+        using var _perf = PerfProbe.Measure(PerfSection.EffectTickDots);
         Ensure();
-        var hasStatus = Status.AllInstances().Count > 0;
+        var hasStatus = Status.HasAnyInstances();
         if (!hasStatus)
         {
             _dotAccum = 0;
@@ -318,6 +330,8 @@ public static class EffectRuntime
 
     static void MaybeEmitCombatPacketTrace(IntentPlanDto plan, string source)
     {
+        // LIVE-prove trace only — in normal play this fired per hit (dict + list allocs + queue).
+        if (!DebugRuntime.SessionActive) return;
         var fa = plan.Actions
             .Where(a => string.Equals(a.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase))
             .ToList();

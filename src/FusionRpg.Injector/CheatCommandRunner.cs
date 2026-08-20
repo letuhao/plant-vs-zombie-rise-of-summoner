@@ -7,6 +7,7 @@ using FusionRpg.Core.Effects;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Vfx;
 using FusionRpg.Injector.Effects;
 using FusionRpg.Injector.Fx;
 using FusionRpg.Injector.Host;
@@ -383,6 +384,18 @@ public static class CheatCommandRunner
                 break;
             case "debug.fx.world-flash":
                 RunWorldFlash(p);
+                break;
+            case "debug.fx.play":
+                RunFxPlay(p);
+                break;
+            case "debug.fx.list":
+                RunFxList();
+                break;
+            case "debug.fx.mute":
+                RunFxMute(p, mute: true);
+                break;
+            case "debug.fx.unmute":
+                RunFxMute(p, mute: false);
                 break;
             default:
                 CheatState.Error("unknown debug cmd: " + name);
@@ -1152,10 +1165,87 @@ public static class CheatCommandRunner
 
     static void RunWorldFlash(JsonElement p)
     {
+        // Legacy scenario-step name — locked alias for fx.play debug.probe (vfx-ssot.md §11).
         var col = IntProp(p, "col", CheatState.SpawnCol);
         var row = IntProp(p, "row", CheatState.SpawnRow);
-        OverlayWorldFx.SpawnAtCell(col, row);
+        VfxDirector.Play(new VfxCueDto { CueId = VfxCueIds.DebugProbe, Col = col, Row = row });
         CheatState.Note("world flash cell=" + col + "," + row);
+    }
+
+    static void RunFxPlay(JsonElement p)
+    {
+        var cueId = Str(p, "cueId");
+        var cue = new VfxCueDto
+        {
+            CueId = string.IsNullOrWhiteSpace(cueId) ? VfxCueIds.DebugProbe : cueId!,
+            Amount = LongProp(p, "amount", 0)
+        };
+        var tagRaw = Str(p, "tag");
+        if (!string.IsNullOrWhiteSpace(tagRaw) &&
+            Enum.TryParse<DamageFxTag>(tagRaw, ignoreCase: true, out var tag))
+            cue.Tag = tag;
+        cue.Elements = ParseFxElements(p);
+        var ptr = Str(p, "ptr");
+        if (!string.IsNullOrWhiteSpace(ptr))
+        {
+            cue.TargetPtr = ptr;
+        }
+        else
+        {
+            cue.Col = IntProp(p, "col", CheatState.SpawnCol);
+            cue.Row = IntProp(p, "row", CheatState.SpawnRow);
+        }
+
+        VfxDirector.Play(cue);
+        CheatState.Note("fx.play " + cue.CueId +
+                        (cue.TargetPtr != null ? " ptr=" + cue.TargetPtr : " cell=" + cue.Col + "," + cue.Row));
+    }
+
+    static void RunFxList()
+    {
+        DebugRuntime.Emit("debug.fx.list", new Dictionary<string, object>
+        {
+            ["cues"] = VfxDirector.CueIds.ToList(),
+            ["muted"] = VfxDirector.MutedIds.ToList()
+        });
+        CheatState.Note("fx cues: " + string.Join(",", VfxDirector.CueIds));
+    }
+
+    static void RunFxMute(JsonElement p, bool mute)
+    {
+        var cueId = Str(p, "cueId");
+        if (string.IsNullOrWhiteSpace(cueId))
+        {
+            CheatState.Error("debug.fx." + (mute ? "mute" : "unmute") + ": missing cueId");
+            return;
+        }
+
+        VfxDirector.SetMuted(cueId!, mute);
+        DebugRuntime.Emit("debug.fx.mute", new Dictionary<string, object>
+        {
+            ["cueId"] = cueId!,
+            ["muted"] = mute
+        });
+        CheatState.Note("fx " + (mute ? "muted " : "unmuted ") + cueId);
+    }
+
+    static List<ElementPayloadComponentDto>? ParseFxElements(JsonElement p)
+    {
+        if (!p.TryGetProperty("elements", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return null;
+        var list = new List<ElementPayloadComponentDto>();
+        foreach (var e in arr.EnumerateArray())
+        {
+            if (e.ValueKind != JsonValueKind.Object) continue;
+            var element = e.TryGetProperty("element", out var ev) ? ev.GetString() ?? "" : "";
+            if (string.IsNullOrWhiteSpace(element)) continue;
+            var weight = e.TryGetProperty("weight", out var wv) && wv.ValueKind == JsonValueKind.Number
+                ? wv.GetDouble()
+                : 1.0;
+            list.Add(new ElementPayloadComponentDto { Element = element, Weight = weight });
+        }
+
+        return list.Count > 0 ? list : null;
     }
 
     static string? ResolveDeltaTargetPtr(JsonElement p)

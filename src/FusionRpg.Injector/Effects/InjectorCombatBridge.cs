@@ -79,6 +79,8 @@ public static class InjectorCombatBridge
         string targetPtr,
         IReadOnlyDictionary<string, object>? extras = null)
     {
+        // Prove-pack telemetry — outside a debug session every overlay hit paid this emit.
+        if (!DebugRuntime.SessionActive) return;
         var source = "overlay";
         if (string.Equals(packet.PluginId, "debug", StringComparison.OrdinalIgnoreCase))
             source = "enqueue-delta";

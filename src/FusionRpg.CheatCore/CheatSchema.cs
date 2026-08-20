@@ -98,6 +98,7 @@ public static class CheatSchema
             T(id);
         T("SYS-EMIT-PROOF", true);
         T("SYS-DAMAGE-FX", true);
+        T("SYS-ELEMENT-FX", true);
 
         Cfg("D-DMG-%", 1, "slider");
         Extra("D-DMG-SET"); Extra("D-TYPE-SWAP");

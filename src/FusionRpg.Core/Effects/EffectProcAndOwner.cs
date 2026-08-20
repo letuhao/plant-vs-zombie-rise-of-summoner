@@ -279,16 +279,23 @@ public sealed class EffectProcPolicy
             _stacks.Remove(k);
     }
 
-    public bool TryPass(EffectGrant grant, string trigger, out string? skipReason)
+    public bool TryPass(EffectGrant grant, string trigger, out string? skipReason, int hitCount = 1)
     {
         var overlay = grant.Overlay;
         var chance = overlay.ContainsKey("chance")
             ? JsonOverlay.GetDouble(overlay, "chance", 1)
             : 1.0;
-        if (chance < 1.0 && _rng.NextDouble() > chance)
+        if (chance < 1.0)
         {
-            skipReason = "chance";
-            return false;
+            // v2 merged-record math: P(≥1 of n per-hit rolls) = 1−(1−p)^n — one roll, exactly
+            // the per-hit distribution for at-most-one-proc-per-event semantics
+            // (event-pipeline-v2-spec.md decision #2). hitCount=1 is byte-identical to v1.
+            var effective = hitCount <= 1 ? chance : 1.0 - Math.Pow(1.0 - chance, hitCount);
+            if (_rng.NextDouble() > effective)
+            {
+                skipReason = "chance";
+                return false;
+            }
         }
 
         var icdMs = ResolveIcdMs(overlay, trigger);
@@ -313,7 +320,8 @@ public sealed class EffectProcPolicy
                 return false;
             }
 
-            _stacks[key] = s + 1;
+            // Merged records consume one stack per hit, clamped (spec decision #2).
+            _stacks[key] = Math.Min(maxStacks, s + Math.Max(1, hitCount));
         }
 
         if (icdMs > 0)

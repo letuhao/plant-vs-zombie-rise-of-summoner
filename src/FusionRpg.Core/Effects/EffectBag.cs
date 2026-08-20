@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Diagnostics;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats;
 
@@ -29,6 +30,8 @@ public sealed class InMemoryEffectCatalog : IEffectCatalog
 
     public void Upsert(EffectDef def)
     {
+        // Actions sorted once here so FireGrant can iterate without a per-fire OrderBy.
+        def.Actions.Sort((a, b) => a.Seq.CompareTo(b.Seq));
         _defs[def.EffectId] = def;
         _revision++;
     }
@@ -37,7 +40,10 @@ public sealed class InMemoryEffectCatalog : IEffectCatalog
     {
         _defs.Clear();
         foreach (var d in defs)
+        {
+            d.Actions.Sort((a, b) => a.Seq.CompareTo(b.Seq));
             _defs[d.EffectId] = d;
+        }
         _revision++;
     }
 
@@ -67,15 +73,30 @@ public interface IEffectGrantStore
 public sealed class InMemoryEffectGrantStore : IEffectGrantStore
 {
     readonly Dictionary<string, EffectGrant> _grants = new(StringComparer.OrdinalIgnoreCase);
+    // All()/Matching() run per combat event (~1000/s in heavy boards) — the sorted view is
+    // cached and rebuilt only on grant mutation, never per read.
+    List<EffectGrant>? _sorted;
 
     public EffectGrant? Get(string grantId) =>
         _grants.TryGetValue(grantId, out var g) ? g : null;
 
-    public IReadOnlyList<EffectGrant> All() =>
-        _grants.Values.OrderByDescending(g => g.Priority).ThenBy(g => g.GrantId).ToList();
+    List<EffectGrant> Sorted() =>
+        _sorted ??= _grants.Values.OrderByDescending(g => g.Priority).ThenBy(g => g.GrantId).ToList();
 
-    public IReadOnlyList<EffectGrant> Matching(EffectEventDto ev) =>
-        All().Where(g => EffectOwnerKey.MatchesEvent(g, ev)).ToList();
+    public IReadOnlyList<EffectGrant> All() => Sorted();
+
+    public IReadOnlyList<EffectGrant> Matching(EffectEventDto ev)
+    {
+        var all = Sorted();
+        if (all.Count == 0) return Array.Empty<EffectGrant>();
+        List<EffectGrant>? matched = null;
+        foreach (var g in all)
+        {
+            if (EffectOwnerKey.MatchesEvent(g, ev))
+                (matched ??= new List<EffectGrant>()).Add(g);
+        }
+        return (IReadOnlyList<EffectGrant>?)matched ?? Array.Empty<EffectGrant>();
+    }
 
     public IReadOnlyList<EffectGrant> ForOwner(string? ownerKind, string ownerKey)
     {
@@ -90,11 +111,24 @@ public sealed class InMemoryEffectGrantStore : IEffectGrantStore
         }).ToList();
     }
 
-    public void Upsert(EffectGrant grant) => _grants[grant.GrantId] = grant;
+    public void Upsert(EffectGrant grant)
+    {
+        _grants[grant.GrantId] = grant;
+        _sorted = null;
+    }
 
-    public bool Withdraw(string grantId) => _grants.Remove(grantId);
+    public bool Withdraw(string grantId)
+    {
+        var ok = _grants.Remove(grantId);
+        if (ok) _sorted = null;
+        return ok;
+    }
 
-    public void Clear() => _grants.Clear();
+    public void Clear()
+    {
+        _grants.Clear();
+        _sorted = null;
+    }
 }
 
 /// <summary>Foundation Effect bag — sole planner of FA* IntentPlan items for Secondary/LIVE.</summary>
@@ -232,21 +266,46 @@ public sealed class EffectBag
             mem.TouchRevision();
     }
 
-    public bool HasGrantForEffect(string effectId) =>
-        _grants.All().Any(g => string.Equals(g.EffectId, effectId, StringComparison.OrdinalIgnoreCase));
+    public bool HasGrantForEffect(string effectId)
+    {
+        using var _perf = PerfProbe.Measure(PerfSection.GrantsScan);
+        return _grants.All().Any(g => string.Equals(g.EffectId, effectId, StringComparison.OrdinalIgnoreCase));
+    }
 
     public bool HasAnyGrant() => _grants.All().Count > 0;
 
-    public bool HasGrantWithTrigger(string trigger) =>
-        _grants.All().Any(g =>
+    // Trigger index — event-pipeline-v2-ssot.md §3.1. Hooks consult this per game event to
+    // decide whether to emit at all, so it must be O(1). BumpRevision (grant mutations) and
+    // catalog Upsert/ReplaceAll both advance _catalog.Revision, which keys the cache.
+    Dictionary<string, int>? _triggerCounts;
+    int _triggerIndexRevision = -1;
+
+    Dictionary<string, int> TriggerIndex()
+    {
+        var rev = _catalog.Revision;
+        if (_triggerCounts != null && _triggerIndexRevision == rev) return _triggerCounts;
+        var idx = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var g in _grants.All())
         {
             var def = _catalog.Get(g.EffectId);
-            return def != null && def.Enabled &&
-                   def.Triggers.Any(t => string.Equals(t, trigger, StringComparison.OrdinalIgnoreCase));
-        });
+            if (def == null || !def.Enabled) continue;
+            foreach (var t in def.Triggers)
+                idx[t] = idx.TryGetValue(t, out var n) ? n + 1 : 1;
+        }
+        _triggerCounts = idx;
+        _triggerIndexRevision = rev;
+        return idx;
+    }
+
+    public bool HasGrantWithTrigger(string trigger)
+    {
+        using var _perf = PerfProbe.Measure(PerfSection.GrantsScan);
+        return TriggerIndex().TryGetValue(trigger, out var n) && n > 0;
+    }
 
     public IntentPlanDto OnEvent(EffectEventDto ev)
     {
+        using var _perf = PerfProbe.Measure(PerfSection.EffectOnEvent);
         _lastSkipped.Clear();
         var planned = new List<EffectActionPlanItem>();
         var sinkRecorder = _sink as RecordingEffectSink;
@@ -319,14 +378,16 @@ public sealed class EffectBag
                 return;
             }
 
-            if (!_proc.TryPass(grant, trigger, out var skip))
+            if (!_proc.TryPass(grant, trigger, out var skip, Math.Max(1, ev.HitCount)))
             {
                 _lastSkipped.Add(grant.GrantId + ":" + (skip ?? "proc"));
                 return;
             }
         }
 
-        var actions = def.Actions.OrderBy(a => a.Seq).ToList();
+        // InMemoryEffectCatalog sorts Actions by Seq at Upsert/ReplaceAll; defs from other
+        // sources (tests building EffectDef inline) are seeded in Seq order already.
+        var actions = def.Actions;
         // Passive OnRemoved: reverse ModifyStat polarity via overlay flag remove=true
         var ctx = new EffectExecuteContext { Event = ev, Grant = grant, Def = def };
 
@@ -450,7 +511,7 @@ public sealed class EffectBag
         var scopeKey = string.Equals(scope, CounterScopes.Actor, StringComparison.OrdinalIgnoreCase)
             ? (ev.ActorPtr ?? "")
             : (ev.TargetPtr ?? "");
-        if (!Status.RecordCounterHit(grant.GrantId, scopeKey, every, packet.Delivery.ResetOnBurst))
+        if (!Status.RecordCounterHit(grant.GrantId, scopeKey, every, packet.Delivery.ResetOnBurst, Math.Max(1, ev.HitCount)))
             return;
 
         var burst = packet.Burst;
