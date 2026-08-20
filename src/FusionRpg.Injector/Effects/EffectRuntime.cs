@@ -208,6 +208,27 @@ public static class EffectRuntime
         });
     }
 
+    /// <summary>
+    /// v2 drain entry (event-pipeline-v2 plan Task 9) — the DTO is already mapped and
+    /// dealt/taken pairing already resolved by the coalescer, so this skips OnCapture's
+    /// mapping, DealtIdentity, and per-event board freeze (the host freezes once per drain).
+    /// </summary>
+    public static void OnDrained(EffectEventDto ev)
+    {
+        using var _perf = PerfProbe.Measure(PerfSection.EffectOnCapture);
+        Ensure();
+        if (!Bag.HasAnyGrant() && !(Bag.Funnel?.HasPending ?? false)) return;
+        try
+        {
+            var plan = Bag.OnEvent(ev);
+            MaybeEmitCombatPacketTrace(plan, "drain");
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("effect OnDrained: " + ex.Message);
+        }
+    }
+
     public static void OnCapture(string kind, Dictionary<string, object> payload)
     {
         using var _perf = PerfProbe.Measure(PerfSection.EffectOnCapture);

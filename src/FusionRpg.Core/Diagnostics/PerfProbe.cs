@@ -16,7 +16,8 @@ public enum PerfSection
     GrantsScan = 8,
     EntityApply = 9,
     MatchApply = 10,
-    EffectOnEvent = 11
+    EffectOnEvent = 11,
+    DrainTick = 12
 }
 
 /// <summary>
@@ -26,7 +27,7 @@ public enum PerfSection
 /// </summary>
 public static class PerfProbe
 {
-    const int SectionCount = 12;
+    const int SectionCount = 13;
 
     static readonly string[] SectionNames =
     {
@@ -41,7 +42,8 @@ public static class PerfProbe
         "grants.scan",
         "entity.apply",
         "match.apply",
-        "effect.onEvent"
+        "effect.onEvent",
+        "drain.tick"
     };
 
     static readonly long[] Counts = new long[SectionCount];

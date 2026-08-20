@@ -99,6 +99,35 @@ Live combat observation (board growing 20p/10z → 31p/23z, x2 speed): fps 127�
 summary is an alt-tab/level-load artifact — unscaledDeltaTime counts focus-loss pauses as one
 giant frame; no in-combat window exceeded 92 ms.
 
+## v2-stress — event pipeline v2 live (2026-08-21, 24 windows / 120s, 60fps cap, drain on)
+
+| section | o3 (before v2) | v2-stress | change |
+|---|---|---|---|
+| takeDamage.prefix avgUs | 4588 | **26** | 176× |
+| takeDamage.prefix avgUs (vs v1 baseline) | 12324 | **26** | **467×** |
+| effect.onCapture avgUs | 480 | **37** | 13× |
+| board.capture avgUs | 25 | 57 | — (already solved) |
+| drain.tick | — | 120 µs avg, 12 ms/5s (0.25%) | new |
+| emits per 120s | ~21k | **8.6k** (damage/combat ≈ 0) | |
+| gen2 | 0 | 0 | |
+
+**v2 pipeline sections combined ≈ 1.8% of wall time — spec criterion 1 met for the event
+pipeline.** Coalescing visible: 116 captures/s in → 38 pipeline executions/s (≈3:1).
+
+**New top offender exposed:** `loop.tick` avg 9.2 ms/frame (53% of wall) with only ~50 ms/5s
+in instrumented subsections — the cost is in *uninstrumented per-frame loop work*: prime
+suspects `CheatActions.AutoCollectTick`/`TickContinuous` (per-frame `FindObjectsOfType` when
+toggles are on — audit finding, never fixed) and the new `VfxDirector.Tick`. frameMax 2.6 s
+is the known alt-tab/level-load artifact; real spikes were ≤85 ms.
+
+### Next iteration (v3 targets)
+
+1. Instrument `InjectorLoop` subsections (`vfx.tick`, `cheat.continuous`, `cheat.autocollect`,
+   `poll.board`) — find the 9 ms.
+2. Registry-fy `AutoCollectTick` (coin scans per frame) and `TickContinuous`.
+3. Spec criterion 2 formally near-miss (≈5 ms per 5s per 100 events/s vs the 2 ms letter) —
+   intent met at 0.7% wall; revisit the number or the pipeline after the loop work lands.
+
 ### Remaining (next iteration)
 
 1. **Capture count went up** (~60–113/s vs 21/s) — cheap now (~0.34 ms), ~3% of wall time, but

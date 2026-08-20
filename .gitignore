@@ -98,3 +98,6 @@ src/FusionRpg.Injector.BepInEx/artifacts/perf-build/
 src/FusionRpg.Contracts/artifacts/perf-build/
 
 src/FusionRpg.CheatCore/artifacts/perf-build/
+.agents/
+skills-lock.json
+.claude/

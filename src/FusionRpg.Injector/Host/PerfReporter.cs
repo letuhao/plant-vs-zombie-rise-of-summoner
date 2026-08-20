@@ -34,6 +34,8 @@ public static class PerfReporter
             };
         }
 
+        try { window["drain"] = Effects.EventDrainHost.SnapshotStats(); } catch { }
+
         try { LogLine(window); } catch { }
         _ = client?.PostPerfAsync(window);
     }

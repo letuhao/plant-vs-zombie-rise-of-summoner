@@ -1,0 +1,2697 @@
+{
+  "scenario": "v2-stress",
+  "baseUrl": "http://127.0.0.1:5088",
+  "durationSec": 120,
+  "capturedUtc": "2026-08-20T18:59:57.8197487Z",
+  "windows": [
+    {
+      "t": "2026-08-20T18:57:59.4499288Z",
+      "windowMs": 5016,
+      "frames": {
+        "total": 299,
+        "lt8ms": 0,
+        "lt17ms": 280,
+        "lt33ms": 19,
+        "gte33ms": 0,
+        "maxMs": 22.96,
+        "fpsAvg": 59.6
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 299,
+          "totalMs": 2818.64,
+          "maxMs": 14.957,
+          "avgUs": 9426.9,
+          "perSec": 59.6
+        },
+        "board.capture": {
+          "count": 68,
+          "totalMs": 2.294,
+          "maxMs": 0.131,
+          "avgUs": 33.7,
+          "perSec": 13.6
+        },
+        "stats.resolve": {
+          "count": 109,
+          "totalMs": 2.033,
+          "maxMs": 0.039,
+          "avgUs": 18.6,
+          "perSec": 21.7
+        },
+        "hub.resolveDerived": {
+          "count": 14,
+          "totalMs": 0.214,
+          "maxMs": 0.017,
+          "avgUs": 15.3,
+          "perSec": 2.8
+        },
+        "effect.onCapture": {
+          "count": 318,
+          "totalMs": 7.422,
+          "maxMs": 4.689,
+          "avgUs": 23.3,
+          "perSec": 63.4
+        },
+        "effect.tickDots": {
+          "count": 299,
+          "totalMs": 0.313,
+          "maxMs": 0.002,
+          "avgUs": 1,
+          "perSec": 59.6
+        },
+        "takeDamage.prefix": {
+          "count": 95,
+          "totalMs": 2.539,
+          "maxMs": 0.055,
+          "avgUs": 26.7,
+          "perSec": 18.9
+        },
+        "grants.scan": {
+          "count": 546,
+          "totalMs": 0.244,
+          "maxMs": 0.002,
+          "avgUs": 0.4,
+          "perSec": 108.9
+        },
+        "entity.apply": {
+          "count": 26,
+          "totalMs": 9.781,
+          "maxMs": 1.878,
+          "avgUs": 376.2,
+          "perSec": 5.2
+        },
+        "match.apply": {
+          "count": 241,
+          "totalMs": 0.109,
+          "maxMs": 0.005,
+          "avgUs": 0.5,
+          "perSec": 48.1
+        },
+        "effect.onEvent": {
+          "count": 94,
+          "totalMs": 6.894,
+          "maxMs": 4.688,
+          "avgUs": 73.3,
+          "perSec": 18.7
+        },
+        "drain.tick": {
+          "count": 51,
+          "totalMs": 4.745,
+          "maxMs": 0.189,
+          "avgUs": 93,
+          "perSec": 10.2
+        }
+      },
+      "emits": {
+        "other": 241
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 4554
+      },
+      "board": {
+        "plants": 7,
+        "zombies": 13,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 76,
+        "carried": 2,
+        "expensiveDeferred": 2
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:04.459283Z",
+      "windowMs": 5009,
+      "frames": {
+        "total": 290,
+        "lt8ms": 0,
+        "lt17ms": 235,
+        "lt33ms": 54,
+        "gte33ms": 1,
+        "maxMs": 106.9,
+        "fpsAvg": 57.9
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 290,
+          "totalMs": 2916.927,
+          "maxMs": 15.878,
+          "avgUs": 10058.4,
+          "perSec": 57.9
+        },
+        "board.capture": {
+          "count": 86,
+          "totalMs": 3.362,
+          "maxMs": 0.08,
+          "avgUs": 39.1,
+          "perSec": 17.2
+        },
+        "stats.resolve": {
+          "count": 123,
+          "totalMs": 3.034,
+          "maxMs": 0.324,
+          "avgUs": 24.7,
+          "perSec": 24.6
+        },
+        "hub.resolveDerived": {
+          "count": 10,
+          "totalMs": 0.171,
+          "maxMs": 0.021,
+          "avgUs": 17.1,
+          "perSec": 2
+        },
+        "effect.onCapture": {
+          "count": 371,
+          "totalMs": 20.654,
+          "maxMs": 6.732,
+          "avgUs": 55.7,
+          "perSec": 74.1
+        },
+        "effect.tickDots": {
+          "count": 290,
+          "totalMs": 0.292,
+          "maxMs": 0.003,
+          "avgUs": 1,
+          "perSec": 57.9
+        },
+        "takeDamage.prefix": {
+          "count": 113,
+          "totalMs": 3.909,
+          "maxMs": 0.342,
+          "avgUs": 34.6,
+          "perSec": 22.6
+        },
+        "grants.scan": {
+          "count": 632,
+          "totalMs": 0.319,
+          "maxMs": 0.003,
+          "avgUs": 0.5,
+          "perSec": 126.2
+        },
+        "entity.apply": {
+          "count": 18,
+          "totalMs": 7.956,
+          "maxMs": 1.522,
+          "avgUs": 442,
+          "perSec": 3.6
+        },
+        "match.apply": {
+          "count": 272,
+          "totalMs": 0.156,
+          "maxMs": 0.014,
+          "avgUs": 0.6,
+          "perSec": 54.3
+        },
+        "effect.onEvent": {
+          "count": 119,
+          "totalMs": 19.682,
+          "maxMs": 6.731,
+          "avgUs": 165.4,
+          "perSec": 23.8
+        },
+        "drain.tick": {
+          "count": 70,
+          "totalMs": 7.064,
+          "maxMs": 0.654,
+          "avgUs": 100.9,
+          "perSec": 14
+        }
+      },
+      "emits": {
+        "other": 272
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 5043.9
+      },
+      "board": {
+        "plants": 9,
+        "zombies": 12,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 2,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 96,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:09.4610277Z",
+      "windowMs": 5002,
+      "frames": {
+        "total": 296,
+        "lt8ms": 0,
+        "lt17ms": 263,
+        "lt33ms": 32,
+        "gte33ms": 1,
+        "maxMs": 35.44,
+        "fpsAvg": 59.2
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 296,
+          "totalMs": 2832.763,
+          "maxMs": 15.339,
+          "avgUs": 9570.1,
+          "perSec": 59.2
+        },
+        "board.capture": {
+          "count": 78,
+          "totalMs": 4.222,
+          "maxMs": 0.839,
+          "avgUs": 54.1,
+          "perSec": 15.6
+        },
+        "stats.resolve": {
+          "count": 95,
+          "totalMs": 1.963,
+          "maxMs": 0.038,
+          "avgUs": 20.7,
+          "perSec": 19
+        },
+        "hub.resolveDerived": {
+          "count": 12,
+          "totalMs": 7.528,
+          "maxMs": 7.35,
+          "avgUs": 627.4,
+          "perSec": 2.4
+        },
+        "effect.onCapture": {
+          "count": 292,
+          "totalMs": 16.002,
+          "maxMs": 7.747,
+          "avgUs": 54.8,
+          "perSec": 58.4
+        },
+        "effect.tickDots": {
+          "count": 296,
+          "totalMs": 0.306,
+          "maxMs": 0.002,
+          "avgUs": 1,
+          "perSec": 59.2
+        },
+        "takeDamage.prefix": {
+          "count": 83,
+          "totalMs": 2.494,
+          "maxMs": 0.054,
+          "avgUs": 30.1,
+          "perSec": 16.6
+        },
+        "grants.scan": {
+          "count": 510,
+          "totalMs": 0.274,
+          "maxMs": 0.02,
+          "avgUs": 0.5,
+          "perSec": 102
+        },
+        "entity.apply": {
+          "count": 22,
+          "totalMs": 15.557,
+          "maxMs": 8.312,
+          "avgUs": 707.1,
+          "perSec": 4.4
+        },
+        "match.apply": {
+          "count": 222,
+          "totalMs": 0.129,
+          "maxMs": 0.005,
+          "avgUs": 0.6,
+          "perSec": 44.4
+        },
+        "effect.onEvent": {
+          "count": 91,
+          "totalMs": 14.476,
+          "maxMs": 7.746,
+          "avgUs": 159.1,
+          "perSec": 18.2
+        },
+        "drain.tick": {
+          "count": 59,
+          "totalMs": 5.993,
+          "maxMs": 0.538,
+          "avgUs": 101.6,
+          "perSec": 11.8
+        }
+      },
+      "emits": {
+        "other": 222
+      },
+      "gc": {
+        "gen0": 1,
+        "gen1": 1,
+        "gen2": 0,
+        "allocKb": 4624.8
+      },
+      "board": {
+        "plants": 10,
+        "zombies": 15,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 68,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:14.4750415Z",
+      "windowMs": 5014,
+      "frames": {
+        "total": 297,
+        "lt8ms": 0,
+        "lt17ms": 262,
+        "lt33ms": 35,
+        "gte33ms": 0,
+        "maxMs": 31.27,
+        "fpsAvg": 59.2
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 297,
+          "totalMs": 2811.165,
+          "maxMs": 14.241,
+          "avgUs": 9465.2,
+          "perSec": 59.2
+        },
+        "board.capture": {
+          "count": 118,
+          "totalMs": 6.355,
+          "maxMs": 0.426,
+          "avgUs": 53.9,
+          "perSec": 23.5
+        },
+        "stats.resolve": {
+          "count": 171,
+          "totalMs": 3.68,
+          "maxMs": 0.297,
+          "avgUs": 21.5,
+          "perSec": 34.1
+        },
+        "hub.resolveDerived": {
+          "count": 14,
+          "totalMs": 0.202,
+          "maxMs": 0.017,
+          "avgUs": 14.4,
+          "perSec": 2.8
+        },
+        "effect.onCapture": {
+          "count": 462,
+          "totalMs": 27.255,
+          "maxMs": 6.564,
+          "avgUs": 59,
+          "perSec": 92.1
+        },
+        "effect.tickDots": {
+          "count": 297,
+          "totalMs": 0.286,
+          "maxMs": 0.01,
+          "avgUs": 1,
+          "perSec": 59.2
+        },
+        "takeDamage.prefix": {
+          "count": 157,
+          "totalMs": 4.812,
+          "maxMs": 0.325,
+          "avgUs": 30.6,
+          "perSec": 31.3
+        },
+        "grants.scan": {
+          "count": 844,
+          "totalMs": 0.397,
+          "maxMs": 0.016,
+          "avgUs": 0.5,
+          "perSec": 168.3
+        },
+        "entity.apply": {
+          "count": 25,
+          "totalMs": 8.792,
+          "maxMs": 1.42,
+          "avgUs": 351.7,
+          "perSec": 5
+        },
+        "match.apply": {
+          "count": 341,
+          "totalMs": 0.154,
+          "maxMs": 0.006,
+          "avgUs": 0.5,
+          "perSec": 68
+        },
+        "effect.onEvent": {
+          "count": 146,
+          "totalMs": 26.348,
+          "maxMs": 6.562,
+          "avgUs": 180.5,
+          "perSec": 29.1
+        },
+        "drain.tick": {
+          "count": 98,
+          "totalMs": 11.045,
+          "maxMs": 0.545,
+          "avgUs": 112.7,
+          "perSec": 19.5
+        }
+      },
+      "emits": {
+        "other": 341
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 6503.9
+      },
+      "board": {
+        "plants": 12,
+        "zombies": 17,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 117,
+        "carried": 1,
+        "expensiveDeferred": 1
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:19.4838309Z",
+      "windowMs": 5009,
+      "frames": {
+        "total": 299,
+        "lt8ms": 0,
+        "lt17ms": 277,
+        "lt33ms": 22,
+        "gte33ms": 0,
+        "maxMs": 24.86,
+        "fpsAvg": 59.7
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 299,
+          "totalMs": 2714.056,
+          "maxMs": 14.191,
+          "avgUs": 9077.1,
+          "perSec": 59.7
+        },
+        "board.capture": {
+          "count": 86,
+          "totalMs": 3.59,
+          "maxMs": 0.074,
+          "avgUs": 41.7,
+          "perSec": 17.2
+        },
+        "stats.resolve": {
+          "count": 152,
+          "totalMs": 2.409,
+          "maxMs": 0.034,
+          "avgUs": 15.8,
+          "perSec": 30.3
+        },
+        "hub.resolveDerived": {
+          "count": 2,
+          "totalMs": 0.032,
+          "maxMs": 0.017,
+          "avgUs": 15.8,
+          "perSec": 0.4
+        },
+        "effect.onCapture": {
+          "count": 340,
+          "totalMs": 24.765,
+          "maxMs": 4.424,
+          "avgUs": 72.8,
+          "perSec": 67.9
+        },
+        "effect.tickDots": {
+          "count": 299,
+          "totalMs": 0.282,
+          "maxMs": 0.003,
+          "avgUs": 0.9,
+          "perSec": 59.7
+        },
+        "takeDamage.prefix": {
+          "count": 150,
+          "totalMs": 3.297,
+          "maxMs": 0.05,
+          "avgUs": 22,
+          "perSec": 29.9
+        },
+        "grants.scan": {
+          "count": 746,
+          "totalMs": 0.313,
+          "maxMs": 0.002,
+          "avgUs": 0.4,
+          "perSec": 148.9
+        },
+        "entity.apply": {
+          "count": 2,
+          "totalMs": 2.911,
+          "maxMs": 1.576,
+          "avgUs": 1455.6,
+          "perSec": 0.4
+        },
+        "match.apply": {
+          "count": 239,
+          "totalMs": 0.106,
+          "maxMs": 0.005,
+          "avgUs": 0.4,
+          "perSec": 47.7
+        },
+        "effect.onEvent": {
+          "count": 119,
+          "totalMs": 24.275,
+          "maxMs": 4.423,
+          "avgUs": 204,
+          "perSec": 23.8
+        },
+        "drain.tick": {
+          "count": 72,
+          "totalMs": 6.75,
+          "maxMs": 0.162,
+          "avgUs": 93.7,
+          "perSec": 14.4
+        }
+      },
+      "emits": {
+        "other": 239
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 5037
+      },
+      "board": {
+        "plants": 13,
+        "zombies": 3,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 96,
+        "carried": 1,
+        "expensiveDeferred": 1
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:24.4961668Z",
+      "windowMs": 5012,
+      "frames": {
+        "total": 299,
+        "lt8ms": 0,
+        "lt17ms": 286,
+        "lt33ms": 13,
+        "gte33ms": 0,
+        "maxMs": 31.58,
+        "fpsAvg": 59.7
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 299,
+          "totalMs": 2716.418,
+          "maxMs": 14.622,
+          "avgUs": 9085,
+          "perSec": 59.7
+        },
+        "board.capture": {
+          "count": 19,
+          "totalMs": 0.488,
+          "maxMs": 0.037,
+          "avgUs": 25.7,
+          "perSec": 3.8
+        },
+        "stats.resolve": {
+          "count": 23,
+          "totalMs": 0.484,
+          "maxMs": 0.036,
+          "avgUs": 21,
+          "perSec": 4.6
+        },
+        "hub.resolveDerived": {
+          "count": 2,
+          "totalMs": 0.032,
+          "maxMs": 0.016,
+          "avgUs": 15.8,
+          "perSec": 0.4
+        },
+        "effect.onCapture": {
+          "count": 76,
+          "totalMs": 0.69,
+          "maxMs": 0.078,
+          "avgUs": 9.1,
+          "perSec": 15.2
+        },
+        "effect.tickDots": {
+          "count": 299,
+          "totalMs": 0.336,
+          "maxMs": 0.002,
+          "avgUs": 1.1,
+          "perSec": 59.7
+        },
+        "takeDamage.prefix": {
+          "count": 21,
+          "totalMs": 0.621,
+          "maxMs": 0.052,
+          "avgUs": 29.6,
+          "perSec": 4.2
+        },
+        "grants.scan": {
+          "count": 147,
+          "totalMs": 0.077,
+          "maxMs": 0.002,
+          "avgUs": 0.5,
+          "perSec": 29.3
+        },
+        "entity.apply": {
+          "count": 2,
+          "totalMs": 2.523,
+          "maxMs": 1.373,
+          "avgUs": 1261.7,
+          "perSec": 0.4
+        },
+        "match.apply": {
+          "count": 62,
+          "totalMs": 0.047,
+          "maxMs": 0.006,
+          "avgUs": 0.8,
+          "perSec": 12.4
+        },
+        "effect.onEvent": {
+          "count": 21,
+          "totalMs": 0.523,
+          "maxMs": 0.078,
+          "avgUs": 24.9,
+          "perSec": 4.2
+        },
+        "drain.tick": {
+          "count": 14,
+          "totalMs": 1.054,
+          "maxMs": 0.121,
+          "avgUs": 75.2,
+          "perSec": 2.8
+        }
+      },
+      "emits": {
+        "other": 62
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 2135.2
+      },
+      "board": {
+        "plants": 14,
+        "zombies": 0,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 14,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:29.5047345Z",
+      "windowMs": 5009,
+      "frames": {
+        "total": 297,
+        "lt8ms": 0,
+        "lt17ms": 271,
+        "lt33ms": 25,
+        "gte33ms": 1,
+        "maxMs": 38.86,
+        "fpsAvg": 59.3
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 297,
+          "totalMs": 2739.167,
+          "maxMs": 14.832,
+          "avgUs": 9222.8,
+          "perSec": 59.3
+        },
+        "board.capture": {
+          "count": 53,
+          "totalMs": 2.52,
+          "maxMs": 0.142,
+          "avgUs": 47.6,
+          "perSec": 10.6
+        },
+        "stats.resolve": {
+          "count": 62,
+          "totalMs": 1.124,
+          "maxMs": 0.038,
+          "avgUs": 18.1,
+          "perSec": 12.4
+        },
+        "hub.resolveDerived": {
+          "count": 27,
+          "totalMs": 0.377,
+          "maxMs": 0.023,
+          "avgUs": 14,
+          "perSec": 5.4
+        },
+        "effect.onCapture": {
+          "count": 263,
+          "totalMs": 7.226,
+          "maxMs": 4.828,
+          "avgUs": 27.5,
+          "perSec": 52.5
+        },
+        "effect.tickDots": {
+          "count": 297,
+          "totalMs": 0.344,
+          "maxMs": 0.011,
+          "avgUs": 1.2,
+          "perSec": 59.3
+        },
+        "takeDamage.prefix": {
+          "count": 35,
+          "totalMs": 1.126,
+          "maxMs": 0.054,
+          "avgUs": 32.2,
+          "perSec": 7
+        },
+        "grants.scan": {
+          "count": 379,
+          "totalMs": 0.161,
+          "maxMs": 0.002,
+          "avgUs": 0.4,
+          "perSec": 75.7
+        },
+        "entity.apply": {
+          "count": 51,
+          "totalMs": 12.499,
+          "maxMs": 1.441,
+          "avgUs": 245.1,
+          "perSec": 10.2
+        },
+        "match.apply": {
+          "count": 228,
+          "totalMs": 0.128,
+          "maxMs": 0.008,
+          "avgUs": 0.6,
+          "perSec": 45.5
+        },
+        "effect.onEvent": {
+          "count": 65,
+          "totalMs": 6.508,
+          "maxMs": 4.828,
+          "avgUs": 100.1,
+          "perSec": 13
+        },
+        "drain.tick": {
+          "count": 25,
+          "totalMs": 3.9,
+          "maxMs": 0.271,
+          "avgUs": 156,
+          "perSec": 5
+        }
+      },
+      "emits": {
+        "other": 228
+      },
+      "gc": {
+        "gen0": 1,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 4908.1
+      },
+      "board": {
+        "plants": 16,
+        "zombies": 23,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 34,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:34.5172216Z",
+      "windowMs": 5012,
+      "frames": {
+        "total": 296,
+        "lt8ms": 0,
+        "lt17ms": 254,
+        "lt33ms": 42,
+        "gte33ms": 0,
+        "maxMs": 28.39,
+        "fpsAvg": 59.1
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 296,
+          "totalMs": 2780.549,
+          "maxMs": 15.252,
+          "avgUs": 9393.7,
+          "perSec": 59.1
+        },
+        "board.capture": {
+          "count": 153,
+          "totalMs": 8.978,
+          "maxMs": 0.132,
+          "avgUs": 58.7,
+          "perSec": 30.5
+        },
+        "stats.resolve": {
+          "count": 285,
+          "totalMs": 4.401,
+          "maxMs": 0.037,
+          "avgUs": 15.4,
+          "perSec": 56.9
+        },
+        "hub.resolveDerived": {
+          "count": 16,
+          "totalMs": 0.232,
+          "maxMs": 0.022,
+          "avgUs": 14.5,
+          "perSec": 3.2
+        },
+        "effect.onCapture": {
+          "count": 679,
+          "totalMs": 27.763,
+          "maxMs": 6.563,
+          "avgUs": 40.9,
+          "perSec": 135.5
+        },
+        "effect.tickDots": {
+          "count": 296,
+          "totalMs": 0.25,
+          "maxMs": 0.002,
+          "avgUs": 0.8,
+          "perSec": 59.1
+        },
+        "takeDamage.prefix": {
+          "count": 269,
+          "totalMs": 5.856,
+          "maxMs": 0.064,
+          "avgUs": 21.8,
+          "perSec": 53.7
+        },
+        "grants.scan": {
+          "count": 1343,
+          "totalMs": 0.524,
+          "maxMs": 0.006,
+          "avgUs": 0.4,
+          "perSec": 267.9
+        },
+        "entity.apply": {
+          "count": 30,
+          "totalMs": 8.474,
+          "maxMs": 1.245,
+          "avgUs": 282.5,
+          "perSec": 6
+        },
+        "match.apply": {
+          "count": 491,
+          "totalMs": 0.211,
+          "maxMs": 0.006,
+          "avgUs": 0.4,
+          "perSec": 98
+        },
+        "effect.onEvent": {
+          "count": 221,
+          "totalMs": 26.407,
+          "maxMs": 6.562,
+          "avgUs": 119.5,
+          "perSec": 44.1
+        },
+        "drain.tick": {
+          "count": 123,
+          "totalMs": 14.661,
+          "maxMs": 0.207,
+          "avgUs": 119.2,
+          "perSec": 24.5
+        }
+      },
+      "emits": {
+        "other": 491
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 9007.7
+      },
+      "board": {
+        "plants": 18,
+        "zombies": 20,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 2,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 184,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:39.5110157Z",
+      "windowMs": 4994,
+      "frames": {
+        "total": 294,
+        "lt8ms": 0,
+        "lt17ms": 251,
+        "lt33ms": 43,
+        "gte33ms": 0,
+        "maxMs": 30.93,
+        "fpsAvg": 58.9
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 294,
+          "totalMs": 2760.413,
+          "maxMs": 17.09,
+          "avgUs": 9389.2,
+          "perSec": 58.9
+        },
+        "board.capture": {
+          "count": 164,
+          "totalMs": 9.24,
+          "maxMs": 0.153,
+          "avgUs": 56.3,
+          "perSec": 32.8
+        },
+        "stats.resolve": {
+          "count": 270,
+          "totalMs": 4.956,
+          "maxMs": 0.383,
+          "avgUs": 18.4,
+          "perSec": 54.1
+        },
+        "hub.resolveDerived": {
+          "count": 15,
+          "totalMs": 0.218,
+          "maxMs": 0.02,
+          "avgUs": 14.5,
+          "perSec": 3
+        },
+        "effect.onCapture": {
+          "count": 693,
+          "totalMs": 26.306,
+          "maxMs": 6.432,
+          "avgUs": 38,
+          "perSec": 138.8
+        },
+        "effect.tickDots": {
+          "count": 294,
+          "totalMs": 0.246,
+          "maxMs": 0.01,
+          "avgUs": 0.8,
+          "perSec": 58.9
+        },
+        "takeDamage.prefix": {
+          "count": 255,
+          "totalMs": 6.513,
+          "maxMs": 0.405,
+          "avgUs": 25.5,
+          "perSec": 51.1
+        },
+        "grants.scan": {
+          "count": 1315,
+          "totalMs": 0.555,
+          "maxMs": 0.011,
+          "avgUs": 0.4,
+          "perSec": 263.3
+        },
+        "entity.apply": {
+          "count": 29,
+          "totalMs": 8.375,
+          "maxMs": 1.332,
+          "avgUs": 288.8,
+          "perSec": 5.8
+        },
+        "match.apply": {
+          "count": 498,
+          "totalMs": 0.216,
+          "maxMs": 0.006,
+          "avgUs": 0.4,
+          "perSec": 99.7
+        },
+        "effect.onEvent": {
+          "count": 230,
+          "totalMs": 24.871,
+          "maxMs": 6.431,
+          "avgUs": 108.1,
+          "perSec": 46.1
+        },
+        "drain.tick": {
+          "count": 132,
+          "totalMs": 14.893,
+          "maxMs": 0.265,
+          "avgUs": 112.8,
+          "perSec": 26.4
+        }
+      },
+      "emits": {
+        "other": 498
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 8689
+      },
+      "board": {
+        "plants": 18,
+        "zombies": 16,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 2,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 191,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:44.5142917Z",
+      "windowMs": 5003,
+      "frames": {
+        "total": 294,
+        "lt8ms": 0,
+        "lt17ms": 239,
+        "lt33ms": 54,
+        "gte33ms": 1,
+        "maxMs": 35.04,
+        "fpsAvg": 58.8
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 294,
+          "totalMs": 2813.19,
+          "maxMs": 14.838,
+          "avgUs": 9568.7,
+          "perSec": 58.8
+        },
+        "board.capture": {
+          "count": 172,
+          "totalMs": 9.592,
+          "maxMs": 0.356,
+          "avgUs": 55.8,
+          "perSec": 34.4
+        },
+        "stats.resolve": {
+          "count": 255,
+          "totalMs": 4.96,
+          "maxMs": 0.096,
+          "avgUs": 19.4,
+          "perSec": 51
+        },
+        "hub.resolveDerived": {
+          "count": 17,
+          "totalMs": 0.297,
+          "maxMs": 0.041,
+          "avgUs": 17.5,
+          "perSec": 3.4
+        },
+        "effect.onCapture": {
+          "count": 738,
+          "totalMs": 25.51,
+          "maxMs": 4.544,
+          "avgUs": 34.6,
+          "perSec": 147.5
+        },
+        "effect.tickDots": {
+          "count": 294,
+          "totalMs": 0.233,
+          "maxMs": 0.002,
+          "avgUs": 0.8,
+          "perSec": 58.8
+        },
+        "takeDamage.prefix": {
+          "count": 238,
+          "totalMs": 6.561,
+          "maxMs": 0.111,
+          "avgUs": 27.6,
+          "perSec": 47.6
+        },
+        "grants.scan": {
+          "count": 1294,
+          "totalMs": 0.563,
+          "maxMs": 0.007,
+          "avgUs": 0.4,
+          "perSec": 258.6
+        },
+        "entity.apply": {
+          "count": 32,
+          "totalMs": 10.554,
+          "maxMs": 1.854,
+          "avgUs": 329.8,
+          "perSec": 6.4
+        },
+        "match.apply": {
+          "count": 532,
+          "totalMs": 0.51,
+          "maxMs": 0.283,
+          "avgUs": 1,
+          "perSec": 106.3
+        },
+        "effect.onEvent": {
+          "count": 241,
+          "totalMs": 24.131,
+          "maxMs": 4.543,
+          "avgUs": 100.1,
+          "perSec": 48.2
+        },
+        "drain.tick": {
+          "count": 140,
+          "totalMs": 16.385,
+          "maxMs": 0.48,
+          "avgUs": 117,
+          "perSec": 28
+        }
+      },
+      "emits": {
+        "other": 532
+      },
+      "gc": {
+        "gen0": 1,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 8707.3
+      },
+      "board": {
+        "plants": 19,
+        "zombies": 15,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 202,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:49.5252807Z",
+      "windowMs": 5011,
+      "frames": {
+        "total": 294,
+        "lt8ms": 0,
+        "lt17ms": 237,
+        "lt33ms": 56,
+        "gte33ms": 1,
+        "maxMs": 40.9,
+        "fpsAvg": 58.7
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 294,
+          "totalMs": 2828.344,
+          "maxMs": 14.32,
+          "avgUs": 9620.2,
+          "perSec": 58.7
+        },
+        "board.capture": {
+          "count": 185,
+          "totalMs": 10.781,
+          "maxMs": 0.107,
+          "avgUs": 58.3,
+          "perSec": 36.9
+        },
+        "stats.resolve": {
+          "count": 323,
+          "totalMs": 5.682,
+          "maxMs": 0.074,
+          "avgUs": 17.6,
+          "perSec": 64.5
+        },
+        "hub.resolveDerived": {
+          "count": 16,
+          "totalMs": 0.286,
+          "maxMs": 0.026,
+          "avgUs": 17.8,
+          "perSec": 3.2
+        },
+        "effect.onCapture": {
+          "count": 833,
+          "totalMs": 23.446,
+          "maxMs": 5.62,
+          "avgUs": 28.1,
+          "perSec": 166.2
+        },
+        "effect.tickDots": {
+          "count": 294,
+          "totalMs": 0.225,
+          "maxMs": 0.002,
+          "avgUs": 0.8,
+          "perSec": 58.7
+        },
+        "takeDamage.prefix": {
+          "count": 307,
+          "totalMs": 7.574,
+          "maxMs": 0.096,
+          "avgUs": 24.7,
+          "perSec": 61.3
+        },
+        "grants.scan": {
+          "count": 1567,
+          "totalMs": 0.64,
+          "maxMs": 0.004,
+          "avgUs": 0.4,
+          "perSec": 312.7
+        },
+        "entity.apply": {
+          "count": 30,
+          "totalMs": 14.094,
+          "maxMs": 2.033,
+          "avgUs": 469.8,
+          "perSec": 6
+        },
+        "match.apply": {
+          "count": 593,
+          "totalMs": 0.24,
+          "maxMs": 0.006,
+          "avgUs": 0.4,
+          "perSec": 118.3
+        },
+        "effect.onEvent": {
+          "count": 272,
+          "totalMs": 21.733,
+          "maxMs": 5.619,
+          "avgUs": 79.9,
+          "perSec": 54.3
+        },
+        "drain.tick": {
+          "count": 157,
+          "totalMs": 17.797,
+          "maxMs": 0.368,
+          "avgUs": 113.4,
+          "perSec": 31.3
+        }
+      },
+      "emits": {
+        "other": 593
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 9611.2
+      },
+      "board": {
+        "plants": 21,
+        "zombies": 13,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 2,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 237,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:54.531268Z",
+      "windowMs": 5006,
+      "frames": {
+        "total": 289,
+        "lt8ms": 0,
+        "lt17ms": 230,
+        "lt33ms": 56,
+        "gte33ms": 3,
+        "maxMs": 38.19,
+        "fpsAvg": 57.7
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 289,
+          "totalMs": 2767.182,
+          "maxMs": 15.863,
+          "avgUs": 9575,
+          "perSec": 57.7
+        },
+        "board.capture": {
+          "count": 208,
+          "totalMs": 13.762,
+          "maxMs": 0.395,
+          "avgUs": 66.2,
+          "perSec": 41.6
+        },
+        "stats.resolve": {
+          "count": 448,
+          "totalMs": 6.467,
+          "maxMs": 0.136,
+          "avgUs": 14.4,
+          "perSec": 89.5
+        },
+        "hub.resolveDerived": {
+          "count": 37,
+          "totalMs": 0.581,
+          "maxMs": 0.029,
+          "avgUs": 15.7,
+          "perSec": 7.4
+        },
+        "effect.onCapture": {
+          "count": 999,
+          "totalMs": 34.858,
+          "maxMs": 6.164,
+          "avgUs": 34.9,
+          "perSec": 199.6
+        },
+        "effect.tickDots": {
+          "count": 289,
+          "totalMs": 0.227,
+          "maxMs": 0.003,
+          "avgUs": 0.8,
+          "perSec": 57.7
+        },
+        "takeDamage.prefix": {
+          "count": 411,
+          "totalMs": 8.176,
+          "maxMs": 0.14,
+          "avgUs": 19.9,
+          "perSec": 82.1
+        },
+        "grants.scan": {
+          "count": 2027,
+          "totalMs": 0.648,
+          "maxMs": 0.008,
+          "avgUs": 0.3,
+          "perSec": 404.9
+        },
+        "entity.apply": {
+          "count": 72,
+          "totalMs": 24.035,
+          "maxMs": 2.773,
+          "avgUs": 333.8,
+          "perSec": 14.4
+        },
+        "match.apply": {
+          "count": 745,
+          "totalMs": 0.354,
+          "maxMs": 0.007,
+          "avgUs": 0.5,
+          "perSec": 148.8
+        },
+        "effect.onEvent": {
+          "count": 320,
+          "totalMs": 31.347,
+          "maxMs": 6.164,
+          "avgUs": 98,
+          "perSec": 63.9
+        },
+        "drain.tick": {
+          "count": 146,
+          "totalMs": 18.979,
+          "maxMs": 0.298,
+          "avgUs": 130,
+          "perSec": 29.2
+        }
+      },
+      "emits": {
+        "other": 745
+      },
+      "gc": {
+        "gen0": 1,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 12803.9
+      },
+      "board": {
+        "plants": 22,
+        "zombies": 21,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 249,
+        "carried": 1,
+        "expensiveDeferred": 1
+      }
+    },
+    {
+      "t": "2026-08-20T18:58:59.5376849Z",
+      "windowMs": 5006,
+      "frames": {
+        "total": 288,
+        "lt8ms": 0,
+        "lt17ms": 223,
+        "lt33ms": 63,
+        "gte33ms": 2,
+        "maxMs": 60.7,
+        "fpsAvg": 57.5
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 288,
+          "totalMs": 2735.403,
+          "maxMs": 16.009,
+          "avgUs": 9497.9,
+          "perSec": 57.5
+        },
+        "board.capture": {
+          "count": 228,
+          "totalMs": 14.296,
+          "maxMs": 0.404,
+          "avgUs": 62.7,
+          "perSec": 45.5
+        },
+        "stats.resolve": {
+          "count": 433,
+          "totalMs": 6.313,
+          "maxMs": 0.148,
+          "avgUs": 14.6,
+          "perSec": 86.5
+        },
+        "hub.resolveDerived": {
+          "count": 49,
+          "totalMs": 0.816,
+          "maxMs": 0.032,
+          "avgUs": 16.7,
+          "perSec": 9.8
+        },
+        "effect.onCapture": {
+          "count": 1206,
+          "totalMs": 63.941,
+          "maxMs": 5.612,
+          "avgUs": 53,
+          "perSec": 240.9
+        },
+        "effect.tickDots": {
+          "count": 288,
+          "totalMs": 0.23,
+          "maxMs": 0.002,
+          "avgUs": 0.8,
+          "perSec": 57.5
+        },
+        "takeDamage.prefix": {
+          "count": 384,
+          "totalMs": 7.604,
+          "maxMs": 0.164,
+          "avgUs": 19.8,
+          "perSec": 76.7
+        },
+        "grants.scan": {
+          "count": 2155,
+          "totalMs": 0.72,
+          "maxMs": 0.01,
+          "avgUs": 0.3,
+          "perSec": 430.4
+        },
+        "entity.apply": {
+          "count": 96,
+          "totalMs": 30.076,
+          "maxMs": 2.754,
+          "avgUs": 313.3,
+          "perSec": 19.2
+        },
+        "match.apply": {
+          "count": 925,
+          "totalMs": 0.588,
+          "maxMs": 0.13,
+          "avgUs": 0.6,
+          "perSec": 184.8
+        },
+        "effect.onEvent": {
+          "count": 369,
+          "totalMs": 59.762,
+          "maxMs": 5.611,
+          "avgUs": 162,
+          "perSec": 73.7
+        },
+        "drain.tick": {
+          "count": 144,
+          "totalMs": 18.443,
+          "maxMs": 0.554,
+          "avgUs": 128.1,
+          "perSec": 28.8
+        }
+      },
+      "emits": {
+        "other": 925
+      },
+      "gc": {
+        "gen0": 1,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 13574.3
+      },
+      "board": {
+        "plants": 23,
+        "zombies": 31,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 5,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 270,
+        "carried": 7,
+        "expensiveDeferred": 7
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:04.5381945Z",
+      "windowMs": 5001,
+      "frames": {
+        "total": 292,
+        "lt8ms": 0,
+        "lt17ms": 226,
+        "lt33ms": 65,
+        "gte33ms": 1,
+        "maxMs": 34.05,
+        "fpsAvg": 58.4
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 292,
+          "totalMs": 2749.795,
+          "maxMs": 14.64,
+          "avgUs": 9417.1,
+          "perSec": 58.4
+        },
+        "board.capture": {
+          "count": 190,
+          "totalMs": 13.917,
+          "maxMs": 0.419,
+          "avgUs": 73.2,
+          "perSec": 38
+        },
+        "stats.resolve": {
+          "count": 431,
+          "totalMs": 9.041,
+          "maxMs": 2.605,
+          "avgUs": 21,
+          "perSec": 86.2
+        },
+        "hub.resolveDerived": {
+          "count": 21,
+          "totalMs": 0.282,
+          "maxMs": 0.022,
+          "avgUs": 13.4,
+          "perSec": 4.2
+        },
+        "effect.onCapture": {
+          "count": 958,
+          "totalMs": 36.718,
+          "maxMs": 4.817,
+          "avgUs": 38.3,
+          "perSec": 191.6
+        },
+        "effect.tickDots": {
+          "count": 292,
+          "totalMs": 0.23,
+          "maxMs": 0.002,
+          "avgUs": 0.8,
+          "perSec": 58.4
+        },
+        "takeDamage.prefix": {
+          "count": 410,
+          "totalMs": 11.127,
+          "maxMs": 2.623,
+          "avgUs": 27.1,
+          "perSec": 82
+        },
+        "grants.scan": {
+          "count": 1988,
+          "totalMs": 0.666,
+          "maxMs": 0.008,
+          "avgUs": 0.3,
+          "perSec": 397.6
+        },
+        "entity.apply": {
+          "count": 41,
+          "totalMs": 9.391,
+          "maxMs": 1.672,
+          "avgUs": 229,
+          "perSec": 8.2
+        },
+        "match.apply": {
+          "count": 689,
+          "totalMs": 0.283,
+          "maxMs": 0.016,
+          "avgUs": 0.4,
+          "perSec": 137.8
+        },
+        "effect.onEvent": {
+          "count": 315,
+          "totalMs": 34.422,
+          "maxMs": 4.815,
+          "avgUs": 109.3,
+          "perSec": 63
+        },
+        "drain.tick": {
+          "count": 147,
+          "totalMs": 21.106,
+          "maxMs": 0.547,
+          "avgUs": 143.6,
+          "perSec": 29.4
+        }
+      },
+      "emits": {
+        "other": 689
+      },
+      "gc": {
+        "gen0": 1,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 12110
+      },
+      "board": {
+        "plants": 24,
+        "zombies": 26,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 2,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 263,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:09.5417172Z",
+      "windowMs": 5004,
+      "frames": {
+        "total": 295,
+        "lt8ms": 0,
+        "lt17ms": 248,
+        "lt33ms": 47,
+        "gte33ms": 0,
+        "maxMs": 26.34,
+        "fpsAvg": 59
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 295,
+          "totalMs": 2757.687,
+          "maxMs": 16.316,
+          "avgUs": 9348.1,
+          "perSec": 59
+        },
+        "board.capture": {
+          "count": 154,
+          "totalMs": 8.264,
+          "maxMs": 0.165,
+          "avgUs": 53.7,
+          "perSec": 30.8
+        },
+        "stats.resolve": {
+          "count": 298,
+          "totalMs": 4.555,
+          "maxMs": 0.039,
+          "avgUs": 15.3,
+          "perSec": 59.6
+        },
+        "hub.resolveDerived": {
+          "count": 1,
+          "totalMs": 0.022,
+          "maxMs": 0.022,
+          "avgUs": 21.6,
+          "perSec": 0.2
+        },
+        "effect.onCapture": {
+          "count": 703,
+          "totalMs": 34.86,
+          "maxMs": 5.916,
+          "avgUs": 49.6,
+          "perSec": 140.5
+        },
+        "effect.tickDots": {
+          "count": 295,
+          "totalMs": 0.243,
+          "maxMs": 0.002,
+          "avgUs": 0.8,
+          "perSec": 59
+        },
+        "takeDamage.prefix": {
+          "count": 297,
+          "totalMs": 6.286,
+          "maxMs": 0.058,
+          "avgUs": 21.2,
+          "perSec": 59.4
+        },
+        "grants.scan": {
+          "count": 1467,
+          "totalMs": 0.533,
+          "maxMs": 0.003,
+          "avgUs": 0.4,
+          "perSec": 293.2
+        },
+        "entity.apply": {
+          "count": 1,
+          "totalMs": 1.49,
+          "maxMs": 1.49,
+          "avgUs": 1490.3,
+          "perSec": 0.2
+        },
+        "match.apply": {
+          "count": 483,
+          "totalMs": 0.2,
+          "maxMs": 0.006,
+          "avgUs": 0.4,
+          "perSec": 96.5
+        },
+        "effect.onEvent": {
+          "count": 247,
+          "totalMs": 33.769,
+          "maxMs": 5.915,
+          "avgUs": 136.7,
+          "perSec": 49.4
+        },
+        "drain.tick": {
+          "count": 128,
+          "totalMs": 13.601,
+          "maxMs": 0.264,
+          "avgUs": 106.3,
+          "perSec": 25.6
+        }
+      },
+      "emits": {
+        "other": 483
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 7963.9
+      },
+      "board": {
+        "plants": 25,
+        "zombies": 0,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 214,
+        "carried": 6,
+        "expensiveDeferred": 6
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:14.5513677Z",
+      "windowMs": 5010,
+      "frames": {
+        "total": 291,
+        "lt8ms": 0,
+        "lt17ms": 257,
+        "lt33ms": 33,
+        "gte33ms": 1,
+        "maxMs": 79.82,
+        "fpsAvg": 58.1
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 291,
+          "totalMs": 2680.662,
+          "maxMs": 15.308,
+          "avgUs": 9211.9,
+          "perSec": 58.1
+        },
+        "board.capture": {
+          "count": 96,
+          "totalMs": 7.764,
+          "maxMs": 0.258,
+          "avgUs": 80.9,
+          "perSec": 19.2
+        },
+        "stats.resolve": {
+          "count": 103,
+          "totalMs": 1.889,
+          "maxMs": 0.076,
+          "avgUs": 18.3,
+          "perSec": 20.6
+        },
+        "hub.resolveDerived": {
+          "count": 59,
+          "totalMs": 0.888,
+          "maxMs": 0.034,
+          "avgUs": 15.1,
+          "perSec": 11.8
+        },
+        "effect.onCapture": {
+          "count": 452,
+          "totalMs": 5.595,
+          "maxMs": 0.292,
+          "avgUs": 12.4,
+          "perSec": 90.2
+        },
+        "effect.tickDots": {
+          "count": 291,
+          "totalMs": 0.325,
+          "maxMs": 0.011,
+          "avgUs": 1.1,
+          "perSec": 58.1
+        },
+        "takeDamage.prefix": {
+          "count": 44,
+          "totalMs": 1.433,
+          "maxMs": 0.081,
+          "avgUs": 32.6,
+          "perSec": 8.8
+        },
+        "grants.scan": {
+          "count": 584,
+          "totalMs": 0.22,
+          "maxMs": 0.003,
+          "avgUs": 0.4,
+          "perSec": 116.6
+        },
+        "entity.apply": {
+          "count": 116,
+          "totalMs": 33.843,
+          "maxMs": 3.343,
+          "avgUs": 291.7,
+          "perSec": 23.2
+        },
+        "match.apply": {
+          "count": 408,
+          "totalMs": 0.271,
+          "maxMs": 0.005,
+          "avgUs": 0.7,
+          "perSec": 81.4
+        },
+        "effect.onEvent": {
+          "count": 111,
+          "totalMs": 1.726,
+          "maxMs": 0.094,
+          "avgUs": 15.5,
+          "perSec": 22.2
+        },
+        "drain.tick": {
+          "count": 33,
+          "totalMs": 6.468,
+          "maxMs": 0.353,
+          "avgUs": 196,
+          "perSec": 6.6
+        }
+      },
+      "emits": {
+        "other": 408
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 8077.7
+      },
+      "board": {
+        "plants": 25,
+        "zombies": 53,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 44,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:19.5643597Z",
+      "windowMs": 5013,
+      "frames": {
+        "total": 295,
+        "lt8ms": 0,
+        "lt17ms": 239,
+        "lt33ms": 56,
+        "gte33ms": 0,
+        "maxMs": 27.65,
+        "fpsAvg": 58.8
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 295,
+          "totalMs": 2793.382,
+          "maxMs": 16.934,
+          "avgUs": 9469.1,
+          "perSec": 58.8
+        },
+        "board.capture": {
+          "count": 174,
+          "totalMs": 19.915,
+          "maxMs": 0.498,
+          "avgUs": 114.5,
+          "perSec": 34.7
+        },
+        "stats.resolve": {
+          "count": 360,
+          "totalMs": 5.833,
+          "maxMs": 0.043,
+          "avgUs": 16.2,
+          "perSec": 71.8
+        },
+        "hub.resolveDerived": {
+          "count": 1,
+          "totalMs": 0.023,
+          "maxMs": 0.023,
+          "avgUs": 22.7,
+          "perSec": 0.2
+        },
+        "effect.onCapture": {
+          "count": 937,
+          "totalMs": 23.076,
+          "maxMs": 5.491,
+          "avgUs": 24.6,
+          "perSec": 186.9
+        },
+        "effect.tickDots": {
+          "count": 295,
+          "totalMs": 0.218,
+          "maxMs": 0.002,
+          "avgUs": 0.7,
+          "perSec": 58.8
+        },
+        "takeDamage.prefix": {
+          "count": 359,
+          "totalMs": 8.134,
+          "maxMs": 0.06,
+          "avgUs": 22.7,
+          "perSec": 71.6
+        },
+        "grants.scan": {
+          "count": 1759,
+          "totalMs": 0.667,
+          "maxMs": 0.003,
+          "avgUs": 0.4,
+          "perSec": 350.9
+        },
+        "entity.apply": {
+          "count": 1,
+          "totalMs": 1.26,
+          "maxMs": 1.26,
+          "avgUs": 1260.2,
+          "perSec": 0.2
+        },
+        "match.apply": {
+          "count": 637,
+          "totalMs": 0.192,
+          "maxMs": 0.019,
+          "avgUs": 0.3,
+          "perSec": 127.1
+        },
+        "effect.onEvent": {
+          "count": 314,
+          "totalMs": 21.893,
+          "maxMs": 5.49,
+          "avgUs": 69.7,
+          "perSec": 62.6
+        },
+        "drain.tick": {
+          "count": 164,
+          "totalMs": 27.904,
+          "maxMs": 0.564,
+          "avgUs": 170.1,
+          "perSec": 32.7
+        }
+      },
+      "emits": {
+        "other": 637
+      },
+      "gc": {
+        "gen0": 1,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 12513
+      },
+      "board": {
+        "plants": 25,
+        "zombies": 42,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 297,
+        "carried": 1,
+        "expensiveDeferred": 1
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:24.569807Z",
+      "windowMs": 5005,
+      "frames": {
+        "total": 289,
+        "lt8ms": 0,
+        "lt17ms": 201,
+        "lt33ms": 88,
+        "gte33ms": 0,
+        "maxMs": 31.37,
+        "fpsAvg": 57.7
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 289,
+          "totalMs": 2781.436,
+          "maxMs": 16.372,
+          "avgUs": 9624.3,
+          "perSec": 57.7
+        },
+        "board.capture": {
+          "count": 212,
+          "totalMs": 16.029,
+          "maxMs": 0.201,
+          "avgUs": 75.6,
+          "perSec": 42.4
+        },
+        "stats.resolve": {
+          "count": 524,
+          "totalMs": 6.925,
+          "maxMs": 0.124,
+          "avgUs": 13.2,
+          "perSec": 104.7
+        },
+        "hub.resolveDerived": {
+          "count": 2,
+          "totalMs": 0.039,
+          "maxMs": 0.023,
+          "avgUs": 19.6,
+          "perSec": 0.4
+        },
+        "effect.onCapture": {
+          "count": 921,
+          "totalMs": 53.673,
+          "maxMs": 7.045,
+          "avgUs": 58.3,
+          "perSec": 184
+        },
+        "effect.tickDots": {
+          "count": 289,
+          "totalMs": 0.219,
+          "maxMs": 0.009,
+          "avgUs": 0.8,
+          "perSec": 57.7
+        },
+        "takeDamage.prefix": {
+          "count": 522,
+          "totalMs": 9.655,
+          "maxMs": 0.135,
+          "avgUs": 18.5,
+          "perSec": 104.3
+        },
+        "grants.scan": {
+          "count": 2298,
+          "totalMs": 0.759,
+          "maxMs": 0.007,
+          "avgUs": 0.3,
+          "perSec": 459.1
+        },
+        "entity.apply": {
+          "count": 2,
+          "totalMs": 2.47,
+          "maxMs": 1.262,
+          "avgUs": 1235.2,
+          "perSec": 0.4
+        },
+        "match.apply": {
+          "count": 640,
+          "totalMs": 0.28,
+          "maxMs": 0.007,
+          "avgUs": 0.4,
+          "perSec": 127.9
+        },
+        "effect.onEvent": {
+          "count": 325,
+          "totalMs": 51.582,
+          "maxMs": 7.044,
+          "avgUs": 158.7,
+          "perSec": 64.9
+        },
+        "drain.tick": {
+          "count": 172,
+          "totalMs": 23.216,
+          "maxMs": 0.274,
+          "avgUs": 135,
+          "perSec": 34.4
+        }
+      },
+      "emits": {
+        "other": 640
+      },
+      "gc": {
+        "gen0": 1,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 12336.1
+      },
+      "board": {
+        "plants": 25,
+        "zombies": 4,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 272,
+        "carried": 6,
+        "expensiveDeferred": 6
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:29.5674959Z",
+      "windowMs": 4998,
+      "frames": {
+        "total": 284,
+        "lt8ms": 0,
+        "lt17ms": 243,
+        "lt33ms": 39,
+        "gte33ms": 2,
+        "maxMs": 180.49,
+        "fpsAvg": 56.8
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 284,
+          "totalMs": 2732.035,
+          "maxMs": 14.448,
+          "avgUs": 9619.8,
+          "perSec": 56.8
+        },
+        "board.capture": {
+          "count": 13,
+          "totalMs": 0.367,
+          "maxMs": 0.042,
+          "avgUs": 28.3,
+          "perSec": 2.6
+        },
+        "stats.resolve": {
+          "count": 101,
+          "totalMs": 0.708,
+          "maxMs": 0.037,
+          "avgUs": 7,
+          "perSec": 20.2
+        },
+        "hub.resolveDerived": {
+          "count": 88,
+          "totalMs": 1.102,
+          "maxMs": 0.02,
+          "avgUs": 12.5,
+          "perSec": 17.6
+        },
+        "effect.onCapture": {
+          "count": 330,
+          "totalMs": 5.041,
+          "maxMs": 4.587,
+          "avgUs": 15.3,
+          "perSec": 66
+        },
+        "effect.tickDots": {
+          "count": 284,
+          "totalMs": 0.325,
+          "maxMs": 0.002,
+          "avgUs": 1.1,
+          "perSec": 56.8
+        },
+        "takeDamage.prefix": {
+          "count": 13,
+          "totalMs": 0.437,
+          "maxMs": 0.054,
+          "avgUs": 33.6,
+          "perSec": 2.6
+        },
+        "grants.scan": {
+          "count": 117,
+          "totalMs": 0.072,
+          "maxMs": 0.003,
+          "avgUs": 0.6,
+          "perSec": 23.4
+        },
+        "entity.apply": {
+          "count": 1,
+          "totalMs": 0.047,
+          "maxMs": 0.047,
+          "avgUs": 47,
+          "perSec": 0.2
+        },
+        "match.apply": {
+          "count": 317,
+          "totalMs": 60.185,
+          "maxMs": 41.497,
+          "avgUs": 189.9,
+          "perSec": 63.4
+        },
+        "effect.onEvent": {
+          "count": 17,
+          "totalMs": 4.887,
+          "maxMs": 4.586,
+          "avgUs": 287.4,
+          "perSec": 3.4
+        },
+        "drain.tick": {
+          "count": 9,
+          "totalMs": 0.696,
+          "maxMs": 0.118,
+          "avgUs": 77.3,
+          "perSec": 1.8
+        }
+      },
+      "emits": {
+        "debug": 2,
+        "other": 315
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 5429.1
+      },
+      "board": {
+        "plants": 0,
+        "zombies": 0,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 12,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:34.5706328Z",
+      "windowMs": 5003,
+      "frames": {
+        "total": 300,
+        "lt8ms": 0,
+        "lt17ms": 294,
+        "lt33ms": 6,
+        "gte33ms": 0,
+        "maxMs": 16.99,
+        "fpsAvg": 60
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 300,
+          "totalMs": 902.729,
+          "maxMs": 5.907,
+          "avgUs": 3009.1,
+          "perSec": 60
+        },
+        "effect.tickDots": {
+          "count": 300,
+          "totalMs": 0.33,
+          "maxMs": 0.003,
+          "avgUs": 1.1,
+          "perSec": 60
+        }
+      },
+      "emits": {},
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 705
+      },
+      "board": {
+        "plants": 0,
+        "zombies": 0,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 0,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:39.5916553Z",
+      "windowMs": 5021,
+      "frames": {
+        "total": 143,
+        "lt8ms": 0,
+        "lt17ms": 129,
+        "lt33ms": 13,
+        "gte33ms": 1,
+        "maxMs": 2616.2,
+        "fpsAvg": 28.5
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 143,
+          "totalMs": 1051.837,
+          "maxMs": 84.588,
+          "avgUs": 7355.5,
+          "perSec": 28.5
+        },
+        "effect.onCapture": {
+          "count": 22,
+          "totalMs": 0.04,
+          "maxMs": 0.013,
+          "avgUs": 1.8,
+          "perSec": 4.4
+        },
+        "effect.tickDots": {
+          "count": 143,
+          "totalMs": 0.171,
+          "maxMs": 0.003,
+          "avgUs": 1.2,
+          "perSec": 28.5
+        },
+        "grants.scan": {
+          "count": 20,
+          "totalMs": 0.012,
+          "maxMs": 0.003,
+          "avgUs": 0.6,
+          "perSec": 4
+        },
+        "match.apply": {
+          "count": 22,
+          "totalMs": 8.504,
+          "maxMs": 8.493,
+          "avgUs": 386.6,
+          "perSec": 4.4
+        }
+      },
+      "emits": {
+        "debug": 1,
+        "other": 21
+      },
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 6543
+      },
+      "board": {
+        "plants": 0,
+        "zombies": 0,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 0,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:44.605675Z",
+      "windowMs": 5014,
+      "frames": {
+        "total": 297,
+        "lt8ms": 0,
+        "lt17ms": 250,
+        "lt33ms": 47,
+        "gte33ms": 0,
+        "maxMs": 26.75,
+        "fpsAvg": 59.2
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 297,
+          "totalMs": 3093.82,
+          "maxMs": 18.56,
+          "avgUs": 10416.9,
+          "perSec": 59.2
+        },
+        "effect.tickDots": {
+          "count": 297,
+          "totalMs": 0.365,
+          "maxMs": 0.003,
+          "avgUs": 1.2,
+          "perSec": 59.2
+        }
+      },
+      "emits": {},
+      "gc": {
+        "gen0": 1,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 3178.4
+      },
+      "board": {
+        "plants": 0,
+        "zombies": 0,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 0,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:49.6128935Z",
+      "windowMs": 5007,
+      "frames": {
+        "total": 298,
+        "lt8ms": 0,
+        "lt17ms": 254,
+        "lt33ms": 44,
+        "gte33ms": 0,
+        "maxMs": 22.17,
+        "fpsAvg": 59.5
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 298,
+          "totalMs": 3128.947,
+          "maxMs": 17.927,
+          "avgUs": 10499.8,
+          "perSec": 59.5
+        },
+        "effect.tickDots": {
+          "count": 298,
+          "totalMs": 0.362,
+          "maxMs": 0.002,
+          "avgUs": 1.2,
+          "perSec": 59.5
+        }
+      },
+      "emits": {},
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 3094.7
+      },
+      "board": {
+        "plants": 0,
+        "zombies": 0,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 0,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    },
+    {
+      "t": "2026-08-20T18:59:54.6131012Z",
+      "windowMs": 5000,
+      "frames": {
+        "total": 299,
+        "lt8ms": 0,
+        "lt17ms": 276,
+        "lt33ms": 23,
+        "gte33ms": 0,
+        "maxMs": 21.85,
+        "fpsAvg": 59.8
+      },
+      "sections": {
+        "loop.tick": {
+          "count": 299,
+          "totalMs": 2924.974,
+          "maxMs": 16.76,
+          "avgUs": 9782.5,
+          "perSec": 59.8
+        },
+        "effect.tickDots": {
+          "count": 299,
+          "totalMs": 0.362,
+          "maxMs": 0.006,
+          "avgUs": 1.2,
+          "perSec": 59.8
+        }
+      },
+      "emits": {},
+      "gc": {
+        "gen0": 0,
+        "gen1": 0,
+        "gen2": 0,
+        "allocKb": 3158.3
+      },
+      "board": {
+        "plants": 0,
+        "zombies": 0,
+        "bullets": 0
+      },
+      "queue": {
+        "depth": 0,
+        "dropped": 0
+      },
+      "drain": {
+        "enabled": true,
+        "pending": 0,
+        "droppedOverflow": 0,
+        "droppedDepth": 0,
+        "processed": 0,
+        "carried": 0,
+        "expensiveDeferred": 0
+      }
+    }
+  ]
+}

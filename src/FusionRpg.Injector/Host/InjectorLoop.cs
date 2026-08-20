@@ -42,6 +42,7 @@ public static class InjectorLoop
             {
                 _started = true;
                 ApplyFpsCap();
+                ApplyEventPipelineMode();
                 _ = client?.StartAsync();
             }
         }
@@ -63,6 +64,9 @@ public static class InjectorLoop
         try { CheatActions.TickContinuous(); } catch { }
         try { CheatActions.AutoCollectTick(); } catch { }
         try { VfxDirector.Tick(unscaledDeltaTime); } catch { }
+        // v2 drain before TickDots so DoT pulses share the drain's board freeze and
+        // merge into the same funnel window (plan Task 10).
+        try { EventDrainHost.Tick(unscaledDeltaTime); } catch { }
         try { EffectRuntime.TickDots(unscaledDeltaTime); } catch { }
         _hb += unscaledDeltaTime;
         if (_hb >= 2f)
@@ -99,16 +103,38 @@ public static class InjectorLoop
         }
     }
 
-    /// <summary>Optional frame cap for pacing on heavy boards: set FUSIONRPG_FPS_CAP=60|120.</summary>
+    /// <summary>
+    /// Frame cap — spec decision #3: default 60 for headroom; FUSIONRPG_FPS_CAP=0 uncaps,
+    /// any other value overrides.
+    /// </summary>
     static void ApplyFpsCap()
     {
         try
         {
             var s = Environment.GetEnvironmentVariable("FUSIONRPG_FPS_CAP");
-            if (!int.TryParse(s, out var cap) || cap <= 0) return;
+            var cap = 60;
+            if (int.TryParse(s, out var parsed))
+                cap = parsed;
+            if (cap <= 0)
+            {
+                RpgHost.Log.Info("[perf] fps uncapped (FUSIONRPG_FPS_CAP=0)");
+                return;
+            }
             QualitySettings.vSyncCount = 0; // targetFrameRate is ignored while vsync is on
             Application.targetFrameRate = cap;
-            RpgHost.Log.Info($"[perf] fps capped at {cap} (FUSIONRPG_FPS_CAP)");
+            RpgHost.Log.Info($"[perf] fps capped at {cap} (default 60; FUSIONRPG_FPS_CAP overrides, 0 = uncapped)");
+        }
+        catch { }
+    }
+
+    /// <summary>v2 record-then-drain is on by default; FUSIONRPG_EVENT_V2=0 reverts to the legacy inline pipeline.</summary>
+    static void ApplyEventPipelineMode()
+    {
+        try
+        {
+            var off = string.Equals(Environment.GetEnvironmentVariable("FUSIONRPG_EVENT_V2"), "0", StringComparison.Ordinal);
+            EventDrainHost.Enabled = !off;
+            RpgHost.Log.Info("[perf] event pipeline v2 " + (off ? "OFF (legacy inline)" : "ON (record-then-drain)"));
         }
         catch { }
     }

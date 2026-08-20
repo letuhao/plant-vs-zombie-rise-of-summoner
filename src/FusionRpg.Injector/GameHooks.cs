@@ -34,6 +34,8 @@ public static class GameHooks
 
     public static void ClearMatch()
     {
+        // Backstop: any records still pending at a match edge drain before state clears.
+        try { Effects.EventDrainHost.FlushAllAndReset(); } catch { }
         Effects.InjectorEntityRegistry.Clear();
         Effects.InjectorBoardSnapshot.Invalidate();
         Applied.Clear();
@@ -446,6 +448,8 @@ public static class GameHooks
     {
         public static void Postfix()
         {
+            // v2 lifecycle barrier: drain everything before board.end triggers ClearAll (SSOT §A1).
+            try { Effects.EventDrainHost.FlushAllAndReset(); } catch { }
             Dictionary<string, object> summary;
             try { summary = GameDumps.BoardStats(Board, Board?.boardStatistics); }
             catch { summary = new Dictionary<string, object>(); }
@@ -511,6 +515,8 @@ public static class GameHooks
         public static void Postfix(Plant __instance, Plant.DieReason reason)
         {
             if (__instance == null) return;
+            // v2 barrier: pending hit records for this plant drain before its grants withdraw.
+            try { Effects.EventDrainHost.FlushForPtr(__instance.Pointer); } catch { }
             try { Effects.InjectorEntityRegistry.Remove(__instance.Pointer); } catch { }
             Effects.InjectorBoardSnapshot.Invalidate();
             // OnDeath must see entity grants; ForgetEntity withdraws after Emit.
@@ -547,9 +553,10 @@ public static class GameHooks
                 var final = CheatState.Stats.Resolve(ctx);
                 damage = StatMath.ScaleIncoming(damage, final.DefensePercent, final.DefenseFlat);
             }
-            // OnDamageTaken grants need *.damage even with telemetry off (v2 audit 4c.2).
-            if (s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive
-                || Effects.EffectRuntime.HasOnDamageTakenGrant())
+            // v2 record path (Task 9) — mirrors ZombieTakeDamage; melee bites consume the
+            // AttackPlant prefix's pending pair id inside TryRecordTaken.
+            var telemetry = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive;
+            if (telemetry)
             {
                 var payload = new Dictionary<string, object>
                 {
@@ -565,9 +572,32 @@ public static class GameHooks
                 DebugRuntime.Stamp(payload);
                 Emit("plant.damage", payload);
             }
+            else if (Effects.EventDrainHost.Enabled)
+            {
+                var pType = 0;
+                try { pType = (int)__instance.thePlantType; } catch { }
+                var actorPtr = IntPtr.Zero;
+                try { if (damageFrom is Il2CppObjectBase dfObj) actorPtr = dfObj.Pointer; } catch { }
+                if (!Effects.EventDrainHost.TryRecordDealtFromBullet(
+                        Core.Events.GameEventSide.Plant, damageFrom as Il2CppObjectBase, __instance.Pointer, pType, damage))
+                    Effects.EventDrainHost.TryRecordTaken(
+                        Core.Events.GameEventSide.Plant, __instance.Pointer, pType, actorPtr, damage);
+            }
+            else if (Effects.EffectRuntime.HasOnDamageTakenGrant())
+            {
+                var payload = new Dictionary<string, object>
+                {
+                    ["ptr"] = GameDumps.Ptr(__instance),
+                    ["damage"] = damage,
+                    ["path"] = "take"
+                };
+                TryStampDamageFrom(payload, damageFrom);
+                Emit("plant.damage", payload);
+            }
             // Hit* Harmony skipped — drive on-hit arms + combat.hit identity from TakeDamage.
             try { DebugRuntime.OnCombatHit("plant", null, __instance); } catch (Exception ex) { CheatState.Error("debug onhit plant: " + ex.Message); }
-            TryEmitCombatHitFromBullet("plant", damageFrom, plantTarget: __instance, zombieTarget: null, fallbackDamage: damage);
+            if (!Effects.EventDrainHost.Enabled || telemetry)
+                TryEmitCombatHitFromBullet("plant", damageFrom, plantTarget: __instance, zombieTarget: null, fallbackDamage: damage);
         }
     }
 
@@ -635,9 +665,10 @@ public static class GameHooks
                 var final = CheatState.Stats.Resolve(ctx);
                 theDamage = StatMath.ScaleIncoming(theDamage, final.DefensePercent, final.DefenseFlat);
             }
-            // OnDamageTaken grants need *.damage even with telemetry off (v2 audit 4c.2).
-            if (s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive
-                || Effects.EffectRuntime.HasOnDamageTakenGrant())
+            // v2 record path (Task 9): telemetry/session keeps the legacy dict path for
+            // fidelity; otherwise grants get compact records via the drain host.
+            var telemetry = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive;
+            if (telemetry)
             {
                 var payload = new Dictionary<string, object>
                 {
@@ -653,9 +684,34 @@ public static class GameHooks
                 DebugRuntime.Stamp(payload);
                 Emit("zombie.damage", payload);
             }
+            else if (Effects.EventDrainHost.Enabled)
+            {
+                var zType = 0;
+                try { zType = (int)__instance.theZombieType; } catch { }
+                var actorPtr = IntPtr.Zero;
+                try { if (damageFrom is Il2CppObjectBase dfObj) actorPtr = dfObj.Pointer; } catch { }
+                // Bullet dealt suppresses the taken record at source, matching v1 policy.
+                if (!Effects.EventDrainHost.TryRecordDealtFromBullet(
+                        Core.Events.GameEventSide.Zombie, damageFrom as Il2CppObjectBase, __instance.Pointer, zType, theDamage))
+                    Effects.EventDrainHost.TryRecordTaken(
+                        Core.Events.GameEventSide.Zombie, __instance.Pointer, zType, actorPtr, theDamage);
+            }
+            else if (Effects.EffectRuntime.HasOnDamageTakenGrant())
+            {
+                // v2 host off: preserve the audit-4c.2 fix via the legacy path.
+                var payload = new Dictionary<string, object>
+                {
+                    ["ptr"] = GameDumps.Ptr(__instance),
+                    ["damage"] = theDamage,
+                    ["path"] = "take"
+                };
+                TryStampDamageFrom(payload, damageFrom);
+                Emit("zombie.damage", payload);
+            }
             // Hit* Harmony skipped — drive on-hit arms + combat.hit identity from TakeDamage.
             try { DebugRuntime.OnCombatHit("zombie", __instance, null); } catch (Exception ex) { CheatState.Error("debug onhit zombie: " + ex.Message); }
-            TryEmitCombatHitFromBullet("zombie", damageFrom, plantTarget: null, zombieTarget: __instance, fallbackDamage: theDamage);
+            if (!Effects.EventDrainHost.Enabled || telemetry)
+                TryEmitCombatHitFromBullet("zombie", damageFrom, plantTarget: null, zombieTarget: __instance, fallbackDamage: theDamage);
         }
     }
 
@@ -787,6 +843,19 @@ public static class GameHooks
                 if (__instance.Pointer == IntPtr.Zero || plant.Pointer == IntPtr.Zero) return;
             }
             catch { return; }
+            // v2 record path (Task 9): melee dealt as a compact record with a pair id that the
+            // plant's TakeDamage taken record consumes.
+            if (Effects.EventDrainHost.Enabled && !DebugRuntime.SessionActive)
+            {
+                var dmgRec = 0;
+                try { dmgRec = __instance.theAttackDamage; } catch { }
+                var zTypeRec = 0;
+                try { zTypeRec = (int)__instance.theZombieType; } catch { }
+                var pTypeRec = 0;
+                try { pTypeRec = (int)plant.thePlantType; } catch { }
+                Effects.EventDrainHost.TryRecordMeleeDealt(__instance.Pointer, zTypeRec, plant.Pointer, pTypeRec, dmgRec);
+                return;
+            }
             if (!Effects.EffectRuntime.ShouldEmitCombatHit()) return;
             try
             {
@@ -852,6 +921,14 @@ public static class GameHooks
             // grant or a debug session. MatchHost ignores it; the server metric is redundant;
             // the web strips it (v2 audit §4c.2).
             if (!Effects.EffectRuntime.HasOnSpawnGrant() && !DebugRuntime.SessionActive) return;
+            // v2 record path (Task 9): compact record instead of dict when the host is live.
+            if (Effects.EventDrainHost.Enabled && !DebugRuntime.SessionActive)
+            {
+                var fromTypeRec = 0;
+                try { fromTypeRec = (int)__instance.fromType; } catch { }
+                Effects.EventDrainHost.TryRecordBulletSpawn(__instance.Pointer, fromTypeRec);
+                return;
+            }
             var payload = new Dictionary<string, object> { ["ptr"] = GameDumps.Ptr(__instance) };
             try { payload["damage"] = __instance.Damage; } catch { }
             try
@@ -871,6 +948,8 @@ public static class GameHooks
         Effects.InjectorEntityRegistry.Remove(p);
         Effects.InjectorBoardSnapshot.Invalidate();
         if (!DeadZombies.Add(p)) return;
+        // v2 barrier: pending hit records for this zombie drain before its grants withdraw.
+        try { Effects.EventDrainHost.FlushForPtr(p); } catch { }
         var diePayload = new Dictionary<string, object>
         {
             ["type"] = (int)z.theZombieType,

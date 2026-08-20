@@ -59,7 +59,7 @@ Write-Host ("{0,-22} {1,10} {2,12} {3,10} {4,10}" -f "section", "calls/s", "tota
 
 $sectionNames = @("loop.tick", "board.capture", "stats.resolve", "hub.resolveDerived",
     "effect.onCapture", "effect.tickDots", "takeDamage.prefix", "fx.show", "grants.scan",
-    "entity.apply", "match.apply", "effect.onEvent")
+    "entity.apply", "match.apply", "effect.onEvent", "drain.tick")
 foreach ($name in $sectionNames) {
     $rows = @($windows | ForEach-Object { $_.sections.$name } | Where-Object { $_ })
     if (-not $rows.Count) { continue }
