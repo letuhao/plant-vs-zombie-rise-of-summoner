@@ -146,6 +146,7 @@ public static class DebugEndpoints
         MapPost(g, "/kill-plant", "debug.kill-plant");
         MapPost(g, "/wave-freeze", "debug.wave-freeze");
         MapPost(g, "/ensure-sun", "debug.ensure-sun");
+        MapPost(g, "/enter-level", "debug.enter-level");
         MapPost(g, "/select", "debug.select");
         MapPost(g, "/spawn-cell", "debug.spawn-cell");
         MapPost(g, "/disarm", "debug.disarm");
@@ -212,6 +213,10 @@ public static class DebugEndpoints
             await Send(hub, inbox, "debug.actor-derived", b);
             return Results.Ok(new { ok = true, queued = inbox.Count, command = "debug.actor-derived" });
         });
+        MapPost(g, "/combat/pin-element", "debug.combat.pin-element");
+        MapPost(g, "/combat/silence-vanilla", "debug.combat.silence-vanilla");
+        MapPost(g, "/combat/probe", "debug.combat.probe");
+        MapPost(g, "/combat/snapshot", "debug.combat.snapshot");
         g.MapPost("/status/apply", async (JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var b = BodyOrEmpty(body);

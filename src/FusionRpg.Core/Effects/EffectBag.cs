@@ -347,7 +347,7 @@ public sealed class EffectBag
             if (string.Equals(action.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase))
             {
                 var packet = DamagePacketBuilder.FromOverlay(
-                    grant.Overlay,
+                    merged,
                     ev,
                     grant.GrantId,
                     def.EffectId,

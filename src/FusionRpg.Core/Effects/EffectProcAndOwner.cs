@@ -157,7 +157,7 @@ public static class EffectOverlayMerge
             "chance", "icd_ms", "max_stacks", "filters",
             "statusId", "periodMs", "durationMs", "status_icd_ms", "statusIcdMs",
             "everyHits", "resetOnBurst", "counterScope", "tickBudget",
-            "spread", "immunityTags"
+            "spread", "immunityTags", "elementPayload"
         }
     };
 

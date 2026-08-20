@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Stats;
 
@@ -27,6 +28,9 @@ public sealed class StatContext
 
     /// <summary>Enabled PvzStats modifiers for this resolve (hydrated by injector; Core stays DB-free).</summary>
     public IReadOnlyList<StatModifier>? PvzStatsMods { get; init; }
+
+    /// <summary>Future ElementHub-facing actor typing metadata; neutral by default in C0.</summary>
+    public ActorElementTypes ElementTypes { get; init; } = ActorElementTypes.Neutral;
 
     public IReadOnlyDictionary<string, object> Tags { get; init; } =
         new Dictionary<string, object>(StringComparer.Ordinal);

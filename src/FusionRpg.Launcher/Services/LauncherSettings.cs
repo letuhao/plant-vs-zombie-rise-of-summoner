@@ -11,6 +11,9 @@ public sealed class LauncherSettings
     public string? GameProfile { get; set; }
     public bool MinimizeToTray { get; set; } = true;
 
+    /// <summary>Global hotkey that toggles the game/web overlay (WPF Key name, e.g. "F10"). Null = F10.</summary>
+    public string? OverlayHotKey { get; set; }
+
     /// <summary>User acknowledged unsigned hobby / AV false-positive risk.</summary>
     public bool TrustAcknowledged { get; set; }
 

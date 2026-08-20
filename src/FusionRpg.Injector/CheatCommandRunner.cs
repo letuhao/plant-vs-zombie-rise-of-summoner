@@ -249,6 +249,9 @@ public static class CheatCommandRunner
             case "debug.ensure-sun":
                 DebugActions.EnsureSun(p.TryGetProperty("value", out var sv) && sv.TryGetSingle(out var sf) ? sf : 9999f);
                 break;
+            case "debug.enter-level":
+                DebugActions.EnterLevel(p);
+                break;
             case "debug.select":
                 DebugActions.Select(p);
                 break;
@@ -362,6 +365,18 @@ public static class CheatCommandRunner
                 break;
             case "debug.actor-derived":
                 HandleActorDerived(p);
+                break;
+            case "debug.combat.pin-element":
+                HandleCombatPinElement(p);
+                break;
+            case "debug.combat.silence-vanilla":
+                DebugCombatActions.SilenceVanilla(p);
+                break;
+            case "debug.combat.probe":
+                DebugCombatActions.Probe(p);
+                break;
+            case "debug.combat.snapshot":
+                DebugCombatActions.Snapshot(p);
                 break;
             case "debug.fx.probe-shaders":
                 RunShaderProbe();
@@ -750,9 +765,10 @@ public static class CheatCommandRunner
             }
 
             var hasTargetSpec = p.TryGetProperty("target", out var tEl) && tEl.ValueKind == JsonValueKind.Object;
+            var useCombatDispatch = hasTargetSpec || HasElementPayload(p) || HasCellAnchor(p);
             var ok = true;
             var resolved = 0;
-            if (hasTargetSpec)
+            if (useCombatDispatch)
             {
                 var overlay = JsonElementToOverlay(p);
                 var packet = DamagePacketBuilder.FromOverlay(overlay, new EffectEventDto
@@ -770,7 +786,6 @@ public static class CheatCommandRunner
                     Effects.EffectRuntime.Bag.CombatPolicy,
                     Effects.EffectRuntime.Bag.CombatRng,
                     Effects.EffectRuntime.Bag.CombatMath);
-                ok = resolved > 0 || amount == 0;
             }
             else if (amount != 0)
             {
@@ -798,7 +813,7 @@ public static class CheatCommandRunner
                 ["ok"] = ok,
                 ["resolved"] = resolved
             });
-            if (hasTargetSpec)
+            if (useCombatDispatch)
             {
                 DebugRuntime.Emit("debug.combat.packet", new Dictionary<string, object>
                 {
@@ -841,6 +856,13 @@ public static class CheatCommandRunner
         if (!t.TryGetProperty("anchor", out var a) || a.ValueKind != JsonValueKind.Object)
             return false;
         return a.TryGetProperty("row", out _) && a.TryGetProperty("col", out _);
+    }
+
+    static bool HasElementPayload(JsonElement p)
+    {
+        if (!p.TryGetProperty("elementPayload", out var el) || el.ValueKind != JsonValueKind.Array)
+            return false;
+        return el.GetArrayLength() > 0;
     }
 
     static void EmitBoardSnapshot()
@@ -1000,6 +1022,38 @@ public static class CheatCommandRunner
             ["ptr"] = key,
             ["tierPower"] = derived.TierPower,
             ["channels"] = channels
+        });
+    }
+
+    static void HandleCombatPinElement(JsonElement p)
+    {
+        Effects.EffectRuntime.Ensure();
+        var ptr = Str(p, "ptr");
+        if (string.IsNullOrWhiteSpace(ptr) && CheatState.SelectedPtr != IntPtr.Zero)
+            ptr = CheatState.SelectedPtr.ToString("X");
+        if (string.IsNullOrWhiteSpace(ptr))
+        {
+            CheatState.Error("debug.combat.pin-element: ptr required");
+            return;
+        }
+
+        var primary = Str(p, "elementPrimary") ?? Str(p, "primary");
+        var secondary = Str(p, "elementSecondary") ?? Str(p, "secondary");
+        try
+        {
+            InjectorElementOverride.PinParse(ptr, primary, secondary);
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.combat.pin-element: " + ex.Message);
+            return;
+        }
+
+        DebugRuntime.Emit("debug.combat.pin-element", new Dictionary<string, object>
+        {
+            ["ptr"] = ptr.Trim(),
+            ["elementPrimary"] = primary ?? "",
+            ["elementSecondary"] = secondary ?? ""
         });
     }
 

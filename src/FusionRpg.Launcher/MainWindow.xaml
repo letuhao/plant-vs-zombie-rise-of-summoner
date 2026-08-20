@@ -122,6 +122,8 @@
         <ui:Button Content="Restart game" Click="RestartGame_Click" Appearance="Secondary" Margin="0,0,8,0" />
         <ui:Button Content="Restart server" Click="RestartServer_Click" Appearance="Secondary" Margin="0,0,8,0" />
         <ui:Button Content="Stop all" Click="StopAll_Click" Appearance="Secondary" Margin="0,0,8,0" />
+        <ui:Button x:Name="OverlayButton" Content="Overlay (F10)" Click="Overlay_Click" Appearance="Secondary" Margin="0,0,8,0"
+                   ToolTip="Toggle the in-game web overlay. Global hotkey works while the game has focus." />
         <ui:Button x:Name="PlayButton" Content="Play" Click="Play_Click" Appearance="Primary" MinWidth="100" />
       </StackPanel>
     </Grid>

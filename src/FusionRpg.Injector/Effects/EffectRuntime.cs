@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Plugins;
 using FusionRpg.Core.Status;
@@ -61,6 +62,7 @@ public static class EffectRuntime
             });
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
             _bag.Status = _status;
+            WireCombatMath(_bag);
             _ = new EffectFunnel(_bag, DamageFxOverlay.Sink);
             _plugins = EffectPluginHostFactory.Create(_bag);
             _dedupe = new EffectEventDedupe();
@@ -167,6 +169,7 @@ public static class EffectRuntime
         try { CheatState.Stats.WithdrawAllBySourceKind("effect"); } catch { }
         try { CheatActions.ReapplyAllLiving(); } catch { }
         InjectorDerivedOverride.Clear();
+        InjectorElementOverride.Clear();
 
         DebugRuntime.Emit("debug.effect.cleared", new Dictionary<string, object>
         {
@@ -333,6 +336,20 @@ public static class EffectRuntime
             ["ptrs"] = ptrs,
             ["chainDepth"] = 0
         });
+    }
+
+    static void WireCombatMath(EffectBag bag)
+    {
+        var overlay = OverlayCombatMath.Create(
+            InjectorCombatBridge.ResolveActor,
+            ElementHub.Default,
+            bag.CombatRng,
+            (breakdown, packet, targetPtr) =>
+                InjectorCombatBridge.EmitOverlayBreakdown(breakdown, packet, targetPtr));
+        bag.CombatMath = new ConditionalOverlayCombatMath(overlay)
+        {
+            IsEnabled = () => OverlayCombatFeature.Enabled
+        };
     }
 }
 

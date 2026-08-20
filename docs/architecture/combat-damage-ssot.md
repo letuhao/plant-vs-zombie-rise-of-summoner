@@ -1,331 +1,410 @@
-# Combat damage SSOT — target + instant delivery
+# Combat damage SSOT — RPG overlay damage layer
 
-**Status:** Partially shipped — TargetResolver, instant Funnel fan-out, LIVE board snapshot, overlay world flash. **Legacy:** Counter and DoT still use `DeliverySpec.OverTime|Counter` until [Status SSOT](status-ssot.md) code plan migrates them. CombatMath is a pass-through stub until a dedicated plan.  
-**Parent:** [decisions.md](decisions.md) (ADR rows **Combat damage SSOT**, **Status SSOT**). Timed/counter **state:** [status-ssot.md](status-ssot.md). Apply path: [effect-funnel.md](effect-funnel.md), [effect-system.md](effect-system.md).
+**Status:** **Shipped (flag-gated)** — TargetResolver, instant Funnel fan-out, LIVE board snapshot, Element Hub ring-cycle runtime, and overlay combat calculator (`OverlayCombatMath`) are in code. Enable with cheat `OVERLAY-COMBAT` or env `FUSIONRPG_OVERLAY_COMBAT=1`. Packets without `elementPayload` still pass-through. Legacy Counter/DoT delivery may still use `DeliverySpec` until fully on StatusRuntime.  
+**Parent:** [decisions.md](decisions.md) (ADR rows **Combat damage SSOT**, **Element Hub SSOT**, **Actor Hub SSOT**, **Status SSOT**). Targeting and apply path: [effect-funnel.md](effect-funnel.md), [effect-runtime.md](effect-runtime.md). Element input: [element-hub-ssot.md](element-hub-ssot.md) §8.5. Timed state stays in [status-ssot.md](status-ssot.md).
 
-This spec defines how overlay **HP changes** choose targets and apply **instant** deltas. Scheduling (DoT ticks, hit counters, contagion) belongs to **StatusRuntime**, not `DeliverySpec`.
+This spec defines how FusionRpg computes **overlay damage only**. It does **not** replace Unity projectile, bite, or vanilla `TakeDamage` flow.
 
 ---
 
 ## 1. Problem
 
-Today FA10 `ApplyResourceDelta` applies to a **single** `targetPtr` (usually the combat event target). Content needs:
+FusionRpg already has:
 
-- Target modes: single, multi, random, area (row/column/square/rectangle), all, filtered by plant/zombie type
-- **Instant** overlay HP delta (damage or heal on the same pipeline)
-- Heal on the **same** pipeline as damage (signed amount)
+- a single signed-delta apply path (`DamagePacket` -> Funnel -> FA10 Writer Add)
+- target resolution for single / multi / random / area packet fan-out
+- a status runtime that owns timed state and status Apply-time resistance
 
-DoT, hit-counter bursts, and contagion spread are **status instances** that *emit* Instant packets — see [status-ssot.md](status-ssot.md). Status Apply reads **Actor Hub derived** power/resist — not primary `atk`/`hp` ([actor-hub-ssot.md](actor-hub-ssot.md)).
+What is still missing is the **overlay damage calculator** that turns RPG data into the final signed HP delta.
 
-Without a SSOT, targeting logic would scatter across Secondary plugins, FA executors, and debug commands.
+That calculator must be explicit about three things:
+
+1. It is **not** vanilla PVZ damage
+2. It uses **Actor Hub derived channels**, not raw primary stats
+3. It consumes **Element Hub** matchup data, then sends one final delta to the injector apply path
 
 ---
 
-## 2. Core model
+## 2. Product boundary (locked)
 
-Three orthogonal pieces:
+This layer is narrow by design.
 
-| Piece | Question | SSOT type |
-|---|---|---|
-| **Target** | Who receives the HP change? | `TargetSpec` → `TargetResolver` |
-| **Delivery** | When does this **packet** apply? | **`Instant` only** (v1 forward). Omit or fix `mode: Instant`. |
-| **Amount** | How much HP changes? | Signed delta on `DamagePacket`; CombatMath (later) adjusts per ptr |
-| **Timed state** | DoT / counter / contagion on actor? | [status-ssot.md](status-ssot.md) — not `DeliverySpec` |
+- Vanilla PVZ `atk`, shooter hit logic, bite cadence, and Unity `TakeDamage` remain unchanged
+- Overlay combat computes a second, RPG-owned damage result
+- Output is a final **signed HP delta** sent through Funnel
+- Status does not participate in the overlay combat formula in v1
+- Status hits do not trigger from overlay combat in v1
+- Status pulses do not route through overlay combat in v1
 
-Envelope:
+In short:
 
 ```text
-DamagePacket
-  ├── TargetSpec target
-  ├── DeliverySpec delivery
-  ├── long signedAmount     // negative = loss, positive = gain (heal)
-  ├── int chainDepth        // proc re-entry guard
-  ├── string channel        // v1: "hp" only
-  └── … trace fields (packetId, sourceGrantId, actorPtr, tick, fxTag)
+vanilla hit pipeline != overlay combat pipeline
 ```
 
-**Heal is not a separate feature.** Positive `signedAmount` uses the same target and delivery machinery. GUI maps sign → `DamageFxTag` (`Heal` vs `Neutral`) via existing [DamageFxDtos.cs](../../src/FusionRpg.Contracts/DamageFxDtos.cs).
-
-**Planning vs execution:** `DamagePacket` is a **planning DTO**. Runtime still emits `RpgEffectEvent` mutations into [EffectFunnel](effect-funnel.md) — no second mailbox.
+Both may exist in the same match, but they are separate authorities.
 
 ---
 
-## 3. Apply flow (locked)
+## 3. Layer model (locked)
 
 ```mermaid
 flowchart TB
-  subgraph sources [Instant packet sources]
-    trig["OnDamageDealt / manual / enqueue-delta"]
-    statusPulse["StatusRuntime PulseHp tick or counter burst"]
-  end
+  action[GrantOrFutureSkill]
+  target[TargetResolver]
+  actorHub[ActorHubDerivedSnapshot]
+  elementHub[ElementHub]
+  combat[MathAndRolls]
+  funnel[EffectFunnel]
+  fa10[FA10 WriterAdd]
+  unity[UnityCurrentHp]
 
-  subgraph core [Core]
-    build["Build DamagePacket delivery=Instant"]
-    snap["Freeze BoardSnapshot"]
-    resolve["TargetResolver → ptr[]"]
-    math["CombatMath per ptr later"]
-  end
+  action --> target
+  action --> actorHub
+  actorHub --> combat
+  elementHub --> combat
+  target --> combat
+  combat --> funnel --> fa10 --> unity
+```
 
-  subgraph apply [Locked]
-    funnel["EffectFunnel EnqueueMutation × N"]
-    fa10["FA10 ApplyResourceDelta"]
-    writer["EntityStatWriter Add + Die if HP≤0"]
-    fx["DamageFx floaters + particle burst"]
-  end
+| Layer | Owns | Must not |
+|---|---|---|
+| **Action / grant** | Base overlay amount, target, payload tags, damage element payload | Compute final HP directly |
+| **Actor Hub** | Derived combat channels and actor metadata lookup | Apply damage |
+| **Element Hub** | Actor types, matchup matrix, matchup bonus | Roll crit / hit or write HP |
+| **Overlay combat** | Delta, hit, crit, final signed amount | Own timed status state |
+| **Funnel / FA10** | Final injector apply | Re-run overlay combat math |
 
-  subgraph statusSide [Status SSOT — separate spec]
-    runtime["StatusRuntime Tick Apply Spread"]
-  end
+---
 
-  runtime -->|"Instant sub-packet"| build
-  sources --> build --> snap --> resolve --> math --> funnel --> fa10 --> writer
-  fa10 --> fx
+## 4. Request and result shape
+
+### 4.1 Conceptual request
+
+```text
+OverlayDamageRequest
+  source actor
+  target actor
+  base overlay damage
+  damage element payload (single or hybrid)
+  target spec / resolved ptr
+  optional tags
+```
+
+Examples:
+
+```text
+single element: [{ element: fire, weight: 1.0 }]
+hybrid payload: [{ element: fire, weight: 0.7 }, { element: air, weight: 0.3 }]
+```
+
+### 4.2 Conceptual result
+
+```text
+OverlayDamageResult
+  final signed hp delta
+  hit result (hit / miss)
+  crit result (yes/no + multiplier)
+  matchup bonus (sum of weighted component bonuses)
+  debug breakdown
+```
+
+The output is final and injector-safe:
+
+```text
+signedAmount = -finalDamage   // damage
+signedAmount = +finalHeal     // heal — same transport path only in v1 (see §4.3)
+```
+
+### 4.3 Healing boundary (locked v1)
+
+Overlay **damage** runs the full pipeline: typed power/defense, matchup, hit, crit.
+
+Overlay **heal** in v1 uses the **same Funnel → FA10 signed-delta transport** only. It does **not** re-run matchup, hit, or crit unless a future ADR explicitly adds a heal formula path.
+
+```text
+heal request → signedAmount = +baseOverlayHeal → Funnel → FA10
+```
+
+This keeps one apply mailbox while element/combat math stays damage-only in v1.
+
+---
+
+## 5. v1 derived inputs (locked)
+
+Overlay combat consumes these 4 stat families only.
+
+| Family | Attacker | Defender | Role |
+|---|---|---|---|
+| Power / Defense | `combat.power.*` | `combat.defense.*` | Base damage delta |
+| Crit probability | `combat.crit.rate.*` | `combat.crit.resist.*` | Crit roll |
+| Crit magnitude | `combat.crit.damage.*` | `combat.crit.resist.damage.*` | Crit multiplier |
+| Hit / miss | `combat.accuracy.*` | `combat.dodge.*` | Hit roll |
+
+Each family has:
+
+- `omni`
+- `fire`
+- `ice`
+- `air`
+- `earth`
+
+Element typing comes from actor metadata owned by [element-hub-ssot.md](element-hub-ssot.md), not from numeric derived channels.
+
+### Deferred from Chaos
+
+Not in v1:
+
+- `StatusProbability`, `StatusDuration`, `StatusIntensity`
+- `Penetration`, `Absorption`, `Reflection`
+- `Parry*`, `Block*`
+- mastery, terrain, social, or mobility systems
+
+---
+
+## 6. Core formulas (locked v1)
+
+### 6.1 Typed totals
+
+For a single typed component `E`:
+
+```text
+attackerPower(E) = combat.power.omni + combat.power.E
+defenderDefense(E) = combat.defense.omni + combat.defense.E
+```
+
+Omni is additive-only.
+
+### 6.2 Matchup bonus (per-component)
+
+Element Hub owns the matrix ([element-hub-ssot.md](element-hub-ssot.md) §8.5). Overlay combat **consumes** per-component bonuses only.
+
+For each payload component `E` with weight `w`:
+
+```text
+componentBonus(E) = ElementHub.resolveComponentBonus(E, defenderTypes, baseOverlayDamage)
+matchupBonus = Σ (w × componentBonus(E))
+```
+
+Dual-type defenders use the product rule from Element Hub §8.5. Combat must not reimplement STR/WEK tables.
+
+### 6.3 Effective delta
+
+```text
+effectiveDelta(E) = (attackerPower(E) - defenderDefense(E)) + componentBonus(E)
+weightedDelta = Σ (w × effectiveDelta(E))
+```
+
+### 6.4 Hit roll
+
+For each component `E`:
+
+```text
+attackerAccuracy(E) = combat.accuracy.omni + combat.accuracy.E
+defenderDodge(E) = combat.dodge.omni + combat.dodge.E
+accuracyDelta(E) = attackerAccuracy(E) - defenderDodge(E)
+p_hit(E) = sigmoid(accuracyDelta(E) / AccuracyScale)
+```
+
+**Hybrid aggregation (locked v1):** one final hit roll per request using the weighted mean:
+
+```text
+p_hit_final = Σ (w × p_hit(E))
+roll once against p_hit_final
+```
+
+All four elements share the same `AccuracyScale` in v1.
+
+### 6.5 Crit probability
+
+For each component `E`:
+
+```text
+attackerCritRate(E) = combat.crit.rate.omni + combat.crit.rate.E
+defenderCritResist(E) = combat.crit.resist.omni + combat.crit.resist.E
+critRateDelta(E) = attackerCritRate(E) - defenderCritResist(E)
+p_crit(E) = sigmoid(critRateDelta(E) / CritRateScale)
+```
+
+**Hybrid aggregation (locked v1):**
+
+```text
+p_crit_final = Σ (w × p_crit(E))
+roll once against p_crit_final
+```
+
+All four elements share the same `CritRateScale` in v1.
+
+### 6.6 Crit magnitude
+
+For each component `E`:
+
+```text
+attackerCritDamage(E) = combat.crit.damage.omni + combat.crit.damage.E
+defenderCritDamageResist(E) = combat.crit.resist.damage.omni + combat.crit.resist.damage.E
+critDamageDelta(E) = attackerCritDamage(E) - defenderCritDamageResist(E)
+critMultiplier(E) = 1.0 + sigmoid(critDamageDelta(E) / CritDamageScale)
+```
+
+**Hybrid aggregation (locked v1):**
+
+```text
+critMultiplier_final = Σ (w × critMultiplier(E))
+apply critMultiplier_final when crit roll succeeds
+```
+
+This keeps crit magnitude bounded and monotone without adding a second unrelated scaling family in v1.
+
+### 6.7 Final damage
+
+If hit fails:
+
+```text
+finalDamage = 0
+```
+
+If hit succeeds:
+
+```text
+baseDamage = request.baseOverlayDamage
+powerAdjustedDamage = baseDamage + weightedDelta
+finalDamage = max(0, powerAdjustedDamage)
+if crit succeeds:
+  finalDamage = finalDamage × critMultiplier_final
+```
+
+`weightedDelta` already includes per-component matchup bonuses from §6.2–6.3.
+
+### 6.8 Probability shape
+
+The formula family is sigmoid-based like Chaos, but v1 ships flat policy values for all elements.
+
+```text
+sigmoid(x) = 1 / (1 + e^-x)
+```
+
+Future shape may expose per-element scales and steepness, but v1 keeps shared values.
+
+---
+
+## 7. Apply flow (locked)
+
+```mermaid
+flowchart TB
+  request[OverlayDamageRequest]
+  resolve[Resolve target ptrs]
+  snapshot[Read ActorHub plus ElementHub]
+  hit[Hit roll]
+  crit[Crit roll]
+  damage[Compute final overlay damage]
+  packet[Build signed DamagePacket]
+  funnel[Funnel]
+  writer[FA10 WriterAdd]
+
+  request --> resolve --> snapshot --> hit --> crit --> damage --> packet --> funnel --> writer
 ```
 
 Rules:
 
-1. **Multi-target = N Funnel mutations** (one per `entity:{ptr}`), not one FA10 with `targets[]`.
-2. **CombatMath runs after resolve, once per ptr** — never one pass for the whole area.
-3. **Snapshot freeze:** capture `BoardSnapshot` at start of flush; skip ptrs that died before apply (Writer no-op).
-4. **Hot path only** — no Server RTT for target RNG ([overlay-control-loops.md](overlay-control-loops.md)).
-5. **Never** FA10 → Unity `TakeDamage` (Prefix DEF + `combat.hit` re-entry).
+1. Resolve targets first, then compute per ptr
+2. Read derived stats and actor type metadata per resolved ptr
+3. Run hit / crit / delta math once per ptr
+4. Build one final signed packet per ptr
+5. Funnel and FA10 must treat the amount as final
+6. No later stage re-runs element or combat logic
 
 ---
 
-## 4. Owner vs target (do not confuse)
+## 8. Injector boundary (hard)
 
-| Concept | Mechanism | Meaning |
-|---|---|---|
-| **Grant owner** | `ownerKey` on grant (`match`, `plant:{typeId}`, `entity:{ptr}`, …) | Who **listens** to triggers / owns the effect |
-| **Event filter** | Grant overlay `filters` | Which **events** match (side, typeId on spawn/death/hit) |
-| **Damage target** | Overlay `target` (`TargetSpec`) | Who **receives** the HP delta when the action fires |
+The overlay combat layer stops at the signed delta.
 
-Example: grant owned by `entity:{plantPtr}` on `OnDamageDealt`, but `target.mode = Area` shape `Row` — the plant proc damages every zombie in the hit row, not only the event target.
+- It must not call Unity `TakeDamage`
+- It must not modify vanilla projectile or bite formulas
+- It must not write absolute HP from an overlay snapshot
+- It must not bypass Funnel
+- It must not re-enter status Apply logic in v1
 
----
+Allowed path:
 
-## 5. TargetSpec
-
-Resolved in Core against a **BoardSnapshot** (Sim + LIVE adapter over lawn census — same shape as `debug.board-stats`).
-
-### 5.1 Modes
-
-| `mode` | Behavior | Notes |
-|---|---|---|
-| `EventTarget` | `EffectEventDto.targetPtr` | Default; matches today’s FA10 |
-| `Actor` | `EffectEventDto.actorPtr` | Thorns / self-damage |
-| `Selected` | Cheat selected ptr | **Debug-only**; Sim uses `Single` + explicit ptr |
-| `Single` | Overlay `ptr` | Scripted |
-| `Multi` | Up to `count` from filtered pool | Stable ptr sort; cap `maxTargets` |
-| `Random` | Pick `count` from pool | Match-scoped deterministic RNG + ptr tie-break |
-| `Area` | Spatial query — see shapes | Entity-centric FA10; no vanilla cherry explode for HP |
-| `All` | All living entities matching filters | Cap `maxTargets` |
-
-### 5.2 Filters (on `TargetSpec.filters`)
-
-| Key | Type | Notes |
-|---|---|---|
-| `side` | `plant` \| `zombie` | Required for most pool modes |
-| `typeId` | int | Single type |
-| `typeIdIn` | int[] | Allow-list |
-| `excludeMindControlled` | bool | Default true for zombie-side damage |
-| `row` | int | Fixed row |
-| `col` | int or `{ min, max }` | Column or range |
-
-### 5.3 Caps
-
-| Key | Default | Notes |
-|---|---|---|
-| `maxTargets` | **8** | `Multi`, `Random`, `Area`, `All` — drop overflow by stable ptr order |
-| Area shape max | policy | See §5.4 |
-
-Tie to backlog **B-PROC-BUDGET** when documenting proc storms.
-
-### 5.4 Area shapes (`target.mode = Area`)
-
-Anchor: event target cell, or overlay `anchor: { row, col }`.
-
-| `shape` | Footprint |
-|---|---|
-| `Row` | Entire lane at anchor `row` |
-| `Column` | Entire column at anchor `col` |
-| `Square` | N×N centered on anchor |
-| `Rectangle` | W×H from anchor (corner or center — document in overlay `anchorOrigin`) |
-
-**Defaults when size omitted:**
-
-| Shape | Fallback constant (policy) | Notes |
-|---|---|---|
-| `Square` | `AreaDefaultSquareSize` = **3** | Modeled on cherry bomb grid footprint; tune when VFX session probes LIVE |
-| `Rectangle` | `AreaDefaultRectangle` = **{ w: 3, h: 3 }** | Chili/cherry-class fallback |
-
-Constants live in **`RpgConstants` / match policy** — not hardcoded in resolver source.
-
-**Overlay AOE path:** TargetResolver → N× FA10 + damage floaters. Optional world-space flash is `Shader.Find` + a short `ParticleSystem` burst at `LawnCoords` (injector VFX). **No** vanilla `CreateCherryExplode` / FA5 `BoardAction` for overlay HP changes (avoids dual pipelines). Number popups stay IMGUI.
-
-Legacy FA5 cherry/freeze/doom remains for old debug scenarios — not for new overlay damage content.
-
----
-
-## 6. DeliverySpec (Instant-only forward)
-
-| `mode` | Behavior |
-|---|---|
-| `Instant` | One packet → (CombatMath) → FA10 per resolved ptr |
-
-**Legacy (shipped, migrate to Status SSOT):** `OverTime` and `Counter` on grant overlay still arm `DoTTickScheduler` / `CounterProcState` on `EffectBag`. New content should use `statusId` + status overlay per [status-ssot.md](status-ssot.md) when the code plan lands. Do **not** add new grants with `delivery.mode = OverTime|Counter` after StatusRuntime ships.
-
-### 6.1 Legacy Counter (until migration)
-
-| Key | Type | Notes |
-|---|---|---|
-| `everyHits` | int | Threshold |
-| `resetOnBurst` | bool | Default true |
-| `counterScope` | `Target` \| `Actor` | Meter key = target or actor ptr |
-
-Maps to catalog id **`bond`** after migration. See [examples/combat/counter-scope-target.json](examples/combat/counter-scope-target.json).
-
-### 6.2 Legacy OverTime (until migration)
-
-| Key | Type | Notes |
-|---|---|---|
-| `periodMs` | int | Tick interval |
-| `durationMs` | int | Total duration |
-| `tickBudget` | int | B-DOT-BUDGET |
-
-Maps to catalog id **`wither`** after migration. Each tick still spawns `delivery.mode = Instant` sub-packet. See [examples/combat/dot-overtime.json](examples/combat/dot-overtime.json).
-
-**Forward shape (doc only):** [examples/status/wither.overlay.json](examples/status/wither.overlay.json).
-
----
-
-## 7. Proc depth
-
-| Field / policy | Notes |
-|---|---|
-| `DamagePacket.chainDepth` | Starts at 0; child packets (burst, DoT tick) = parent + 1 |
-| `ProcDepthLimit` | From match config / `RpgConstants` / optional grant overlay — **default 6** |
-| Halt rule | Do not enqueue when `chainDepth >= ProcDepthLimit` |
-
-**Never hardcode** the limit literal in resolver, bag, or sink — read policy at runtime.
-
----
-
-## 8. Ban list
-
-| Banned | Why |
-|---|---|
-| Vanilla `BoardAction` cherry/chili for **overlay HP** | Dual pipeline vs FA10; confuses stats |
-| FA11 multi-ptr opcode | Funnel fan-out is sufficient; keeps guards simple |
-| Server-side target RNG | Breaks Hot loop |
-| FA10 → `TakeDamage` | Prefix DEF + proc re-entry + double-dip |
-| Separate heal packet / delivery mode | One signed `DamagePacket` |
-| Target logic in Secondary plugins | Only `TargetResolver` interprets modes |
-| Element type in this SSOT | CombatMath later |
-
----
-
-## 9. JSON overlay shape (grant)
-
-On FA10 actions, overlay may include:
-
-```json
-{
-  "amount": -100,
-  "target": {
-    "mode": "Area",
-    "shape": "Row",
-    "anchor": "EventTarget",
-    "filters": { "side": "zombie" },
-    "maxTargets": 8
-  },
-  "delivery": { "mode": "Instant" }
-}
+```text
+OverlayDamageResult -> DamagePacket.signedAmount -> Funnel -> FA10 Writer Add
 ```
 
-Counter example:
-
-```json
-{
-  "delivery": {
-    "mode": "Counter",
-    "everyHits": 5,
-    "resetOnBurst": true,
-    "counterScope": "Target"
-  },
-  "burst": {
-    "amount": -500,
-    "target": { "mode": "EventTarget" },
-    "delivery": { "mode": "Instant" }
-  }
-}
-```
-
-DoT example:
-
-```json
-{
-  "amount": -20,
-  "target": { "mode": "EventTarget", "filters": { "side": "zombie" } },
-  "delivery": {
-    "mode": "OverTime",
-    "periodMs": 1000,
-    "durationMs": 5000,
-    "tickBudget": 1
-  }
-}
-```
-
-Heal example (positive amount):
-
-```json
-{
-  "amount": 30,
-  "target": { "mode": "EventTarget" },
-  "delivery": { "mode": "Instant" }
-}
-```
-
-Copy-paste grants: [examples/combat/](examples/combat/).
+This keeps one HP apply authority for overlay damage, aligned with [effect-funnel.md](effect-funnel.md).
 
 ---
 
-## 10. Gap vs shipped code
+## 9. Policy surface (documented now, tune later)
 
-| Feature | Shipped today | After Status SSOT code plan |
+| Policy key | Role | v1 |
 |---|---|---|
-| Single ptr FA10 | Yes | — |
-| Multi / random / area / all | Yes | — |
-| Counter burst | Yes (legacy `Delivery.Counter`) | `statusId: bond` on StatusRuntime |
-| DoT overlay | Yes (legacy `Delivery.OverTime`) | `statusId: wither` on StatusRuntime |
-| Heal via FA10 | Yes | — |
-| CombatMath | Pass-through | DEF / element / shield |
-| Contagion spread | No | `Spread` payload — [status-ssot.md](status-ssot.md) |
+| `ElementMatchupPolicy.MatchupShareK` | STR/WEK share of `baseOverlayDamage` | **0.25** (Element Hub) |
+| `CombatProbabilityPolicy.AccuracyScale` | Hit sigmoid divisor | shared constant |
+| `CombatProbabilityPolicy.CritRateScale` | Crit sigmoid divisor | shared constant |
+| `CombatProbabilityPolicy.CritDamageScale` | Crit magnitude divisor | shared constant |
+| `CombatProbabilityPolicy.Steepness` | Optional custom sigmoid steepness | shared constant |
+
+Do not use `CombatDamagePolicy.PowerScale` in v1 — typed delta comes from derived `combat.power.*` / `combat.defense.*` plus `MatchupShareK`. Per-element scale overrides remain deferred; see [element-hub-ssot.md](element-hub-ssot.md) §9.
 
 ---
 
-## 11. Implementation checklist (separate plan)
+## 10. Relationship to existing docs
 
-When opening the code plan, expected waves:
+### 10.1 Actor Hub
 
-| Wave | Deliverable |
-|---|---|
-| I1 | Contracts + pure `TargetResolver` + Sim fixtures |
-| I2 | EffectBag fan-out + LIVE `IBoardSnapshot` |
-| I3 | Counter + `ProcDepthLimit` enforcement |
-| I4 | `OnTimer` DoT + tick budget |
-| I5 | CombatMath per-ptr |
+Actor Hub remains the SSOT for derived channels.
 
-Verification (unit tests, guards, LIVE matrix) belongs in that plan — not here.
+- combat channels must be registered in the same catalog style as status channels
+- unknown combat channel should reject like unknown `statusId`
+- progression may contribute to these channels later without touching primary stats
+
+### 10.2 Element Hub
+
+Element Hub owns:
+
+- actor type metadata
+- matchup matrix ([element-hub-ssot.md](element-hub-ssot.md) §8.5)
+- per-component `componentBonus(E)` resolution
+
+Overlay combat consumes those outputs but does not own them.
+
+### 10.3 Status runtime
+
+Status is separate in v1.
+
+- no status-on-hit bridge here
+- no status probability duplication here
+- no contagion, ICD, or duration logic here
+
+### 10.4 Funnel
+
+Funnel remains the sole apply path.
+
+- combat layer may enrich debug breakdowns
+- Funnel still only sees final signed deltas and present tags
+
+---
+
+## 11. Ban list
+
+- No vanilla `atk` as direct input to Element Hub
+- No element multiplier on top of final signed delta after combat math
+- No status hooks in overlay combat v1
+- No per-element special cases beyond matchup bonus and typed channels
+- No SMT null / absorb / reflect in v1
+- No direct Unity HP writes from combat layer
+- No second apply mailbox parallel to Funnel
 
 ---
 
 ## 12. Related docs
 
-- [status-ssot.md](status-ssot.md) — timed state, resistance, contagion, catalog ids
-- [actor-hub-ssot.md](actor-hub-ssot.md) — derived power/resist at Status Apply
-- [effect-data.md](effect-data.md) — overlay keys, runtime columns
-- [effect-funnel.md](effect-funnel.md) — FA10 add-only, mutation sum
-- [effect-testing.md](effect-testing.md) — scenario ids `combat-target-*`, `combat-counter-*`, `combat-dot-*`
-- [examples/status/](examples/status/) — forward overlay shapes
-- [../research/arpg-effects/03-effects-procs-triggers.md](../research/arpg-effects/03-effects-procs-triggers.md) — inspiration only
+- [combat-element-implement-plan.md](combat-element-implement-plan.md) — phased code + prove plan for overlay CombatMath and Element Hub
+- [element-hub-ssot.md](element-hub-ssot.md) — element ids, actor type slots, matchup matrix §8.5, omni rule
+- [actor-hub-ssot.md](actor-hub-ssot.md) — derived snapshot SSOT and catalog discipline
+- [status-ssot.md](status-ssot.md) — timed status runtime, fully separate in v1
+- [effect-funnel.md](effect-funnel.md) — final overlay delta apply path
+- [effect-runtime.md](effect-runtime.md) — hot runtime and Secondary/Funnel law
+- [examples/combat/README.md](examples/combat/README.md) — packet and overlay examples
+- [../research/effect-runtime/06-chaos-combat-element-adaptation.md](../research/effect-runtime/06-chaos-combat-element-adaptation.md) — Chaos borrow vs defer notes

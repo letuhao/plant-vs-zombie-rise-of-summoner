@@ -1,0 +1,36 @@
+{
+  "results": [
+    {
+      "name": "C1 overlay-fire-vs-ice",
+      "pass": true,
+      "detail": "matchupBonus=25"
+    },
+    {
+      "name": "C2 overlay-fire-vs-air",
+      "pass": true,
+      "detail": "matchupBonus=-25"
+    },
+    {
+      "name": "C3 overlay-hybrid-vs-ice",
+      "pass": true,
+      "detail": "matchupBonus=17.5"
+    },
+    {
+      "name": "C4 overlay-miss",
+      "pass": true,
+      "detail": "hit=false finalSignedDelta=0"
+    },
+    {
+      "name": "C5 overlay-heal",
+      "pass": true,
+      "detail": "no overlay breakdown; heal pass-through"
+    },
+    {
+      "name": "C6 overlay-flag-off",
+      "pass": true,
+      "detail": "pass-through -100; no overlay emit"
+    }
+  ],
+  "targetPtr": "1C592858C80",
+  "at": "2026-08-20T22:23:40.1657023+07:00"
+}

@@ -102,7 +102,8 @@ public static class CheatState
                          "D-PROBE-PLANT", "D-PROBE-BULLET", "D-HOMING",
                          "F-WAVE-FREEZE", "G-TIMEFREEZE", "G-AUTOCOLLECT", "G-FREE-SET",
                          "H-ANYWHERE", "H-NOCD-CARD", "H-NOCD-GLOVE", "H-NOCD-HAMMER", "H-NOCD-WHEEL", "H-MOWER-INF",
-                         "SYS-EMIT-PROOF", "SYS-DAMAGE-FX", "SYS-LIMHEALTH-GATE", "SYS-LIMHEALTH-OBSERVE"
+                         "SYS-EMIT-PROOF", "SYS-DAMAGE-FX", "SYS-LIMHEALTH-GATE", "SYS-LIMHEALTH-OBSERVE",
+                         "OVERLAY-COMBAT", "DEBUG-LEVEL-ENTRY"
                      })
                 T(id);
 

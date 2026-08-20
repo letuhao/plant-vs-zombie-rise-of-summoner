@@ -58,6 +58,10 @@ public static class DebugScenarios
         "debug.status",
         "debug.status.apply",
         "debug.actor-derived",
+        "debug.combat.pin-element",
+        "debug.combat.silence-vanilla",
+        "debug.combat.probe",
+        "debug.combat.snapshot",
         "debug.fx.probe-shaders",
         "debug.fx.world-flash",
         "pvz.spawn.extra"
@@ -1053,6 +1057,66 @@ public static class DebugScenarios
                 Cmd("debug.actor-derived", new { });
                 break;
 
+            // Reusable mid-match lab: operator enters any day lawn, then POST scenario.
+            case "lab-empty":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.set-mods", new
+                {
+                    probePlant = false,
+                    probeBullet = false,
+                    plant = new { attackPercent = 0.0, defensePercent = 1.0 },
+                    zombie = new { defensePercent = 1.0 },
+                    bullet = new { damageSet = -1, damagePercent = 1.0 },
+                    board = new { zombieCountMultiplier = 0.0 },
+                    logDamage = true
+                });
+                Cmd("debug.board-config", new { });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.ensure-sun", new { value = 9999f });
+                Cmd("debug.combat.silence-vanilla", new { plant = true });
+                Cmd("debug.board-stats", new { });
+                break;
+
+            case "lab-overlay":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.set-mods", new
+                {
+                    probePlant = false,
+                    probeBullet = false,
+                    plant = new { attackPercent = 0.0, defensePercent = 1.0 },
+                    zombie = new { defensePercent = 1.0 },
+                    bullet = new { damageSet = -1, damagePercent = 1.0 },
+                    board = new { zombieCountMultiplier = 0.0 },
+                    logDamage = true
+                });
+                Cmd("debug.board-config", new { });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.ensure-sun", new { value = 9999f });
+                Cmd("debug.spawn-plant", new
+                {
+                    typeId = PeaTypeId,
+                    col = 2,
+                    row = 2,
+                    atk = 0,
+                    derivedProfile = "combat-fire-caster",
+                    elementPrimary = "fire"
+                });
+                Cmd("debug.spawn-zombie", new
+                {
+                    typeId = BasicZombieTypeId,
+                    row = 2,
+                    x = 7.5f,
+                    hp = 20000,
+                    maxHp = 20000,
+                    derivedProfile = "combat-ice-tank",
+                    elementPrimary = "ice"
+                });
+                Cmd("debug.combat.silence-vanilla", new { plant = true });
+                Cmd("debug.board-stats", new { });
+                break;
+
             default:
                 throw new ArgumentException("unknown scenario: " + id);
         }
@@ -1238,6 +1302,7 @@ public static class DebugScenarios
         "status-l2-blight-row", "status-l2-rot", "status-l2-spark", "status-l2-pact-mark", "status-l2-spore",
         "status-l2-butter", "status-l2-freeze", "status-l2-cold", "status-l2-poison",
         "status-l2-hypno", "status-l2-ember", "status-l2-jala", "status-l2-kelp", "status-l2-charm-pulse",
-        "status-l2-resist-cc", "status-l2-resist-contagion", "status-l2-poison-immune", "status-l2-actor-derived"
+        "status-l2-resist-cc", "status-l2-resist-contagion", "status-l2-poison-immune", "status-l2-actor-derived",
+        "lab-empty", "lab-overlay"
     };
 }

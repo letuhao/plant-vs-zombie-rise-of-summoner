@@ -6,6 +6,7 @@ Player-facing name: **Rise of Summoner**. Internal binaries and modules keep the
 
 | Audience | Start |
 |---|---|
+| **Anyone new** | [architecture/software-architecture.md](architecture/software-architecture.md) (whole system, one page) · [architecture/data-architecture.md](architecture/data-architecture.md) (all data, one page) |
 | **Players** | [runbook/players.md](runbook/players.md) · [SUPPORT.md](../SUPPORT.md) · [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases) |
 | **Contributors** | [../CONTRIBUTING.md](../CONTRIBUTING.md) · [contributing/dev-setup.md](contributing/dev-setup.md) · [contributing/architecture-map.md](contributing/architecture-map.md) |
 
@@ -28,8 +29,10 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [research/events-lifecycle.md](research/events-lifecycle.md) | Board / spawn / death |
 | [research/simple-spawner.md](research/simple-spawner.md) | Simple Spawner vs our capture |
 | [research/open-questions.md](research/open-questions.md) | Runtime risks still untested |
+| [research/level-entry.md](research/level-entry.md) | How levels open (`UIMgr.EnterGame`); gated probe; mid-match lab vs custom run |
 | [research/arpg-effects/00-index.md](research/arpg-effects/00-index.md) | ARPG effects inspiration (attrs, stacking, procs, ailments, hit/convert) — not product ADR |
 | [research/effect-runtime/00-index.md](research/effect-runtime/00-index.md) | Own-game inject/capture for Effects (hit/status/spawn capability matrix + proofs) |
+| [research/effect-runtime/06-chaos-combat-element-adaptation.md](research/effect-runtime/06-chaos-combat-element-adaptation.md) | Chaos combat/element borrow vs Fusion overlay damage adaptation |
 | [research/status-core-chaos-mapping.md](research/status-core-chaos-mapping.md) | Chaos status-core resistance borrow → Fusion layers (reference only) |
 | [research/actor-core-chaos-mapping.md](research/actor-core-chaos-mapping.md) | Chaos level/realm/power_scale → Fusion progression.power (reference only) |
 | [research/architecture-stress/00-index.md](research/architecture-stress/00-index.md) | Red-team: situations + break matrix vs dual-authority locks (research only) |
@@ -39,10 +42,15 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 
 | File | Contents |
 |---|---|
+| [architecture/software-architecture.md](architecture/software-architecture.md) | **Start here** — whole-system map: modules, hot path, invariants, loops, FSMs, protocol, build |
+| [architecture/data-architecture.md](architecture/data-architecture.md) | **Start here (data)** — physical stores, table inventory, SSOT map, lifecycle, DAL boundary |
 | [architecture/overview.md](architecture/overview.md) | Four modules (Launcher + Injector + Server + Web), v1 scope |
 | [architecture/stat-system.md](architecture/stat-system.md) | Modifier bag, compose, EntityApply / single writer |
-| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | Derived snapshot, progression.power, dynamic ApplyScale — **design locked** |
-| [architecture/actor-hub-status-implement-plan.md](architecture/actor-hub-status-implement-plan.md) | Actor Hub + StatusRuntime implement checklist (S0–S7, P1–P2 deferred) |
+| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | Derived snapshot, progression.power, dynamic ApplyScale — **shipped** (status path); combat channels reserved |
+| [architecture/status-ssot.md](architecture/status-ssot.md) | StatusRuntime actor instances, ICD, resistance, contagion catalog — **shipped** |
+| [architecture/element-hub-ssot.md](architecture/element-hub-ssot.md) | Element typing, ring-cycle matchup matrix (§8.5), combat derived channels — **design locked** |
+| [architecture/combat-element-implement-plan.md](architecture/combat-element-implement-plan.md) | Overlay combat + Element Hub implement checklist (C0–C4; matrix golden tests) |
+| [architecture/actor-hub-status-implement-plan.md](architecture/actor-hub-status-implement-plan.md) | Actor Hub + StatusRuntime implement checklist (S0–S7 **shipped**) |
 | [architecture/pvz-stats.md](architecture/pvz-stats.md) | Player-bound PvzStats layer (≠ future RPG stats) |
 | [architecture/pvz-middle-layer.md](architecture/pvz-middle-layer.md) | Stats + Activity + Intent constitution |
 | [architecture/pvz-activity.md](architecture/pvz-activity.md) | Typed play facts + rollups |
@@ -52,8 +60,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/effect-data.md](architecture/effect-data.md) | Effect / grant / overlay JSON shapes |
 | [architecture/effect-runtime.md](architecture/effect-runtime.md) | Injector apply path + capture → FT* |
 | [architecture/effect-funnel.md](architecture/effect-funnel.md) | Funnel + Guard: Secondary enqueue → merge → FA10 Writer Add (`guard-funnel-delta.ps1` shipped) |
-| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | DamagePacket target + instant delivery (signed HP delta; heal included) — partially shipped |
-| [architecture/status-ssot.md](architecture/status-ssot.md) | StatusRuntime actor instances, ICD, resistance, contagion catalog — **design locked** |
+| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | RPG overlay damage layer: derived combat + element math → signed HP delta — **partially shipped** (resolver/Funnel); overlay CombatMath **deferred** |
 | [architecture/effect-testing.md](architecture/effect-testing.md) | Offline SimEffectHost / scenarios vs LIVE L1–L14 |
 | [architecture/match-runtime.md](architecture/match-runtime.md) | MatchRuntime FSM + MatchState (W1–W5 shipped; bullets/hypno deferred) |
 | [architecture/unique-actor-runtime.md](architecture/unique-actor-runtime.md) | UniqueActor FSM — durable specimens (W4–W5 + W8 equip/XP/roster shipped) |
@@ -112,3 +119,5 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [runbook/debug-pipeline.md](runbook/debug-pipeline.md) | `/api/debug/*` + `/api/sim/effect/*` controllable Effect tests |
 | [runbook/debug-live-checklist.md](runbook/debug-live-checklist.md) | Ordered LIVE prove checklist (F1–F23, P1 verdict, sign-off) |
 | [research/effect-runtime/_checklist-effect-foundation-live.json](research/effect-runtime/_checklist-effect-foundation-live.json) | Foundation L1–L14 seal status (offline + lawn) |
+
+

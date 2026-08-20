@@ -92,7 +92,8 @@ public static class CheatSchema
                      "D-PROBE-PLANT", "D-PROBE-BULLET", "D-HOMING",
                      "F-WAVE-FREEZE", "G-TIMEFREEZE", "G-AUTOCOLLECT", "G-FREE-SET",
                      "H-ANYWHERE", "H-NOCD-CARD", "H-NOCD-GLOVE", "H-NOCD-HAMMER", "H-NOCD-WHEEL", "H-MOWER-INF",
-                     "SYS-LIMHEALTH-GATE", "SYS-LIMHEALTH-OBSERVE"
+                     "SYS-LIMHEALTH-GATE", "SYS-LIMHEALTH-OBSERVE",
+                     "OVERLAY-COMBAT", "DEBUG-LEVEL-ENTRY"
                  })
             T(id);
         T("SYS-EMIT-PROOF", true);

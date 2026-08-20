@@ -5,7 +5,10 @@ namespace FusionRpg.Core.Stats.Derived;
 public sealed record ActorResolveResult(
     EntityFinal RuntimePrimary,
     ActorDerivedSnapshot Derived,
-    EntityFinal AppliedCombat);
+    EntityFinal AppliedCombat)
+{
+    public ActorElementTypes ElementTypes { get; init; } = ActorElementTypes.Neutral;
+}
 
 /// <summary>Wraps StatSystem primary resolve + derived compose — actor-hub-ssot.md §7.</summary>
 public sealed class ActorHub
@@ -38,7 +41,10 @@ public sealed class ActorHub
         var primary = _stats.Resolve(ctx);
         var derived = ResolveDerived(ctx);
         var applied = MergeAppliedCombat(primary, derived);
-        return new ActorResolveResult(primary, derived, applied);
+        return new ActorResolveResult(primary, derived, applied)
+        {
+            ElementTypes = ctx.ElementTypes
+        };
     }
 
     /// <summary>L2b Apply-scoped derived compose — fresh per call in v1.</summary>

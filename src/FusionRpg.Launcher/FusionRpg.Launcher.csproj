@@ -25,6 +25,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WPF-UI" Version="3.0.5" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
   </ItemGroup>
     <ItemGroup>
     <None Update="loader-manifest.json">

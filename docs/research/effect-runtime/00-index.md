@@ -15,8 +15,10 @@ LIVE checklist: [`_checklist-effect-foundation-live.json`](_checklist-effect-fou
 4. [`04-proof-results.md`](04-proof-results.md) — P1–P6 evidence
 5. [`05-effect-system-prerequisites.md`](05-effect-system-prerequisites.md) — prerequisites + Foundation progress (bag shipped)
 6. [`06-combat-metrics-hit-vs-speed.md`](06-combat-metrics-hit-vs-speed.md) — hit damage vs attack interval vs derived DPS (**LIVE**)
-7. [`07-effect-opportunities.md`](07-effect-opportunities.md) — richer Effect list from game WRITE/CAPTURE surface
-8. Live controllable tests: [`../../runbook/debug-pipeline.md`](../../runbook/debug-pipeline.md)
+7. [`06-chaos-combat-element-adaptation.md`](06-chaos-combat-element-adaptation.md) — Chaos combat/element borrow trimmed to Fusion overlay damage (ring-cycle matrix, MatchupShareK=0.25)
+8. [`../../architecture/combat-element-implement-plan.md`](../../architecture/combat-element-implement-plan.md) — overlay combat + Element Hub code plan (C0–C4)
+9. [`07-effect-opportunities.md`](07-effect-opportunities.md) — richer Effect list from game WRITE/CAPTURE surface
+10. Live controllable tests: [`../../runbook/debug-pipeline.md`](../../runbook/debug-pipeline.md)
 
 ## Document map
 
@@ -28,6 +30,8 @@ LIVE checklist: [`_checklist-effect-foundation-live.json`](_checklist-effect-fou
 | [04-proof-results.md](04-proof-results.md) | P1–P6 |
 | [05-effect-system-prerequisites.md](05-effect-system-prerequisites.md) | Foundation progress + prereqs |
 | [06-combat-metrics-hit-vs-speed.md](06-combat-metrics-hit-vs-speed.md) | Hit vs speed vs DPS |
+| [06-chaos-combat-element-adaptation.md](06-chaos-combat-element-adaptation.md) | Chaos combat/element adaptation (ring-cycle, k=0.25) |
+| [../../architecture/combat-element-implement-plan.md](../../architecture/combat-element-implement-plan.md) | Overlay combat implement plan |
 | [07-effect-opportunities.md](07-effect-opportunities.md) | Effect list from game surface |
 
 ## Legend (same as modifiable-gameplay)
@@ -65,3 +69,5 @@ Zombie.TakeDamage(…, damageFrom, …, reportType, …)  ← FusionRpg DEF + da
 - [`../mod-loaders.md`](../mod-loaders.md) — BepInEx vs MelonLoader (host only; same Harmony depth)
 - [`../../architecture/pvz-intent.md`](../../architecture/pvz-intent.md) — `pvz.spawn.extra`
 - [`../arpg-effects/06-fusionrpg-mapping.md`](../arpg-effects/06-fusionrpg-mapping.md) — peer EffectBag sketch
+
+

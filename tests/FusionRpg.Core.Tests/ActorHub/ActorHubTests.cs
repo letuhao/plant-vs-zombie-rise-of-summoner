@@ -63,6 +63,126 @@ public class ActorHubResolveTests
         Assert.Equal(100, result.RuntimePrimary.MaxHp);
     }
 
+    [Fact]
+    public void Resolve_preserves_neutral_element_types_by_default()
+    {
+        var hub = ActorHubBootstrap.CreateDefault();
+        var ctx = hub.Stats.Contexts.ForPlant("P1", new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 });
+
+        var result = hub.Resolve(ctx);
+
+        Assert.True(result.ElementTypes.IsNeutral);
+        Assert.Null(result.ElementTypes.Primary);
+        Assert.Null(result.ElementTypes.Secondary);
+    }
+
+    [Fact]
+    public void Resolve_preserves_explicit_element_types()
+    {
+        var hub = ActorHubBootstrap.CreateDefault();
+        var ctx = hub.Stats.Contexts.ForZombie(
+            "Z1",
+            new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 },
+            elementTypes: ActorElementTypes.Create(ElementTypeId.Fire, ElementTypeId.Air));
+
+        var result = hub.Resolve(ctx);
+
+        Assert.Equal(ElementTypeId.Fire, result.ElementTypes.Primary);
+        Assert.Equal(ElementTypeId.Air, result.ElementTypes.Secondary);
+    }
+
+    [Fact]
+    public void Actor_element_types_parse_neutral_when_empty()
+    {
+        var types = ActorElementTypes.Parse(null, "");
+        Assert.True(types.IsNeutral);
+    }
+
+    [Fact]
+    public void Actor_element_types_reject_duplicate_slots()
+    {
+        Assert.Throws<ArgumentException>(() => ActorElementTypes.Create(ElementTypeId.Fire, ElementTypeId.Fire));
+    }
+
+    [Fact]
+    public void Actor_element_types_reject_omni_slot()
+    {
+        Assert.Throws<ArgumentException>(() => ActorElementTypes.Parse("omni", null));
+    }
+
+    [Fact]
+    public void Actor_element_types_reject_unknown_slot()
+    {
+        Assert.Throws<ArgumentException>(() => ActorElementTypes.Parse("storm", null));
+    }
+
+    [Fact]
+    public void Combat_policies_match_docs()
+    {
+        Assert.Equal(0.25, ElementMatchupPolicy.MatchupShareK);
+        Assert.Equal(100.0, CombatProbabilityPolicy.AccuracyScale);
+        Assert.Equal(100.0, CombatProbabilityPolicy.CritRateScale);
+        Assert.Equal(100.0, CombatProbabilityPolicy.CritDamageScale);
+        Assert.Equal(1.0, CombatProbabilityPolicy.Steepness);
+    }
+
+    [Fact]
+    public void Parse_single_type_fire_only()
+    {
+        var types = ActorElementTypes.Parse("fire", null);
+        Assert.Equal(ElementTypeId.Fire, types.Primary);
+        Assert.Null(types.Secondary);
+        Assert.False(types.IsNeutral);
+    }
+
+    [Fact]
+    public void Parse_rejects_secondary_without_primary()
+    {
+        Assert.Throws<ArgumentException>(() => ActorElementTypes.Parse(null, "ice"));
+    }
+
+    [Fact]
+    public void Parse_round_trips_lowercase_element_ids()
+    {
+        var types = ActorElementTypes.Parse("fire", "ice");
+        Assert.Equal("fire", types.Primary!.Value.ToElementId());
+        Assert.Equal("ice", types.Secondary!.Value.ToElementId());
+    }
+
+    [Fact]
+    public void Element_metadata_keys_match_docs()
+    {
+        Assert.Equal("element.type.primary", ElementMetadataKeys.Primary);
+        Assert.Equal("element.type.secondary", ElementMetadataKeys.Secondary);
+    }
+
+    [Fact]
+    public void StatContext_factory_defaults_neutral_types()
+    {
+        var stats = StatSystemBootstrap.CreateDefault();
+        var ctx = stats.Contexts.ForPlant("P1", new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 });
+        Assert.True(ctx.ElementTypes.IsNeutral);
+    }
+
+    [Fact]
+    public void Element_types_do_not_change_applied_combat()
+    {
+        var stats = StatSystemBootstrap.CreateDefault();
+        var hub = ActorHubBootstrap.CreateDefault(stats);
+        var neutralCtx = stats.Contexts.ForPlant("P1", new EntityBaseline { Hp = 200, MaxHp = 200, Atk = 15 });
+        var typedCtx = stats.Contexts.ForPlant(
+            "P2",
+            new EntityBaseline { Hp = 200, MaxHp = 200, Atk = 15 },
+            elementTypes: ActorElementTypes.Create(ElementTypeId.Fire, ElementTypeId.Ice));
+
+        var neutral = hub.Resolve(neutralCtx);
+        var typed = hub.Resolve(typedCtx);
+
+        Assert.Equal(neutral.AppliedCombat.Hp, typed.AppliedCombat.Hp);
+        Assert.Equal(neutral.AppliedCombat.Atk, typed.AppliedCombat.Atk);
+        Assert.Equal(neutral.RuntimePrimary.Hp, typed.RuntimePrimary.Hp);
+    }
+
     sealed class FixedLevelProgressionProvider : IProgressionPowerProvider
     {
         readonly int _level;

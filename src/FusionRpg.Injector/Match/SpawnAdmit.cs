@@ -46,6 +46,8 @@ public static class SpawnAdmit
 
     public static bool TryAdmit(string side, out GateResult result)
     {
+        EnsureMatchReadyForDebugSpawn();
+
         CapPolicyConfig cfg;
         lock (Gate)
         {
@@ -85,5 +87,39 @@ public static class SpawnAdmit
         catch { }
 
         return false;
+    }
+
+    /// <summary>
+    /// Debug Create can run while Unity <see cref="GameHooks.Board"/> is live but MatchRuntime
+    /// was left Idle (missed board.start fold, or board.end without Board clear). Re-sync so Admit works.
+    /// </summary>
+    public static void EnsureMatchReadyForDebugSpawn()
+    {
+        try
+        {
+            if (GameHooks.Board == null) return;
+
+            var phase = MatchHost.Runtime.Phase;
+            if (phase == MatchPhase.InMatch) return;
+
+            if (phase == MatchPhase.Paused)
+            {
+                MatchHost.NotifyPaused(false);
+                return;
+            }
+
+            var key = GameHooks.MatchKey;
+            if (string.IsNullOrWhiteSpace(key))
+                key = Guid.NewGuid().ToString();
+
+            MatchHost.Apply("board.start", new Dictionary<string, object>
+            {
+                ["matchKey"] = key
+            });
+        }
+        catch (Exception ex)
+        {
+            try { CheatState.Error("SpawnAdmit.EnsureMatchReady: " + ex.Message); } catch { }
+        }
     }
 }

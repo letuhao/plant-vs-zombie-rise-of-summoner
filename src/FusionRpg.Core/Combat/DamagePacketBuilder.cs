@@ -43,7 +43,34 @@ public static class DamagePacketBuilder
             packet.Burst.ChainDepth = packet.ChainDepth + 1;
         }
 
+        packet.ElementPayload = ParseElementPayload(overlay);
+
         return packet;
+    }
+
+    static List<ElementPayloadComponentDto>? ParseElementPayload(Dictionary<string, object?> overlay)
+    {
+        if (!overlay.TryGetValue("elementPayload", out var raw) || raw == null)
+            return null;
+
+        var items = raw as IList<object?> ?? (raw is IEnumerable<object?> en ? en.ToList() : null);
+        if (items == null || items.Count == 0)
+            return null;
+
+        var list = new List<ElementPayloadComponentDto>();
+        foreach (var item in items)
+        {
+            var map = JsonOverlay.FromObject(item);
+            var element = JsonOverlay.GetString(map, "element");
+            if (string.IsNullOrWhiteSpace(element)) continue;
+            list.Add(new ElementPayloadComponentDto
+            {
+                Element = element,
+                Weight = JsonOverlay.GetDouble(map, "weight", 1.0)
+            });
+        }
+
+        return list.Count > 0 ? list : null;
     }
 
     public static TargetSpec ParseTargetFromOverlay(Dictionary<string, object?> overlay)

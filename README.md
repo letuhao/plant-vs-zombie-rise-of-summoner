@@ -17,6 +17,18 @@ We retired the generic **Fusion RPG** name. It described the mod accurately but 
 
 **License:** [AGPL-3.0-or-later](LICENSE). Windows-only. You need a **legal** PVZ Fusion install — FusionRpg never downloads or patches the game binary.
 
+## Understand the system in 15 minutes
+
+| # | Read | You will learn |
+|---|---|---|
+| 1 | [docs/architecture/software-architecture.md](docs/architecture/software-architecture.md) | The whole system on one page: modules, hot path, invariants, control loops, FSMs, protocol, build |
+| 2 | [docs/architecture/data-architecture.md](docs/architecture/data-architecture.md) | Every database/table, who is source of truth, hot → cold lifecycle, DAL boundary |
+| 3 | [docs/architecture/overview.md](docs/architecture/overview.md) | The original four-module v1 scope and boundaries |
+| 4 | [docs/architecture/data-flow.md](docs/architecture/data-flow.md) | Sequence diagrams: web → game stat change, game → web event capture |
+| 5 | [docs/README.md](docs/README.md) | Full documentation map (research, per-subsystem SSOT docs, protocol, runbooks) |
+
+Then per subsystem (deep dives): [stat-system](docs/architecture/stat-system.md) · [actor-hub](docs/architecture/actor-hub-ssot.md) · [status](docs/architecture/status-ssot.md) · [element-hub](docs/architecture/element-hub-ssot.md) · [combat-damage](docs/architecture/combat-damage-ssot.md) · [effect-system](docs/architecture/effect-system.md) · [effect-funnel](docs/architecture/effect-funnel.md) · [match-runtime](docs/architecture/match-runtime.md) · [unique-actor](docs/architecture/unique-actor-runtime.md) · [pvz-middle-layer](docs/architecture/pvz-middle-layer.md) · [rpg-progression](docs/architecture/rpg-progression.md) · [lawn-projector](docs/architecture/lawn-projector.md) · [decisions](docs/architecture/decisions.md)
+
 ## Players
 
 1. Download `FusionRpg-win-x64.zip` from [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases).

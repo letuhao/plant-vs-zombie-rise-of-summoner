@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Stats;
 
@@ -13,7 +14,8 @@ public sealed class StatContextFactory
         StatsConfig? cheatScale = null,
         IReadOnlyDictionary<string, int>? cheatAbsolute = null,
         bool applyStats = true,
-        IReadOnlyList<StatModifier>? pvzStatsMods = null) =>
+        IReadOnlyList<StatModifier>? pvzStatsMods = null,
+        ActorElementTypes? elementTypes = null) =>
         new()
         {
             Side = StatSide.Plant,
@@ -25,7 +27,8 @@ public sealed class StatContextFactory
             CheatScale = cheatScale,
             CheatAbsolute = cheatAbsolute,
             ApplyStats = applyStats,
-            PvzStatsMods = pvzStatsMods
+            PvzStatsMods = pvzStatsMods,
+            ElementTypes = elementTypes ?? ActorElementTypes.Neutral
         };
 
     public StatContext ForZombie(
@@ -37,7 +40,8 @@ public sealed class StatContextFactory
         StatsConfig? cheatScale = null,
         IReadOnlyDictionary<string, int>? cheatAbsolute = null,
         bool applyStats = true,
-        IReadOnlyList<StatModifier>? pvzStatsMods = null) =>
+        IReadOnlyList<StatModifier>? pvzStatsMods = null,
+        ActorElementTypes? elementTypes = null) =>
         new()
         {
             Side = StatSide.Zombie,
@@ -49,6 +53,7 @@ public sealed class StatContextFactory
             CheatScale = cheatScale,
             CheatAbsolute = cheatAbsolute,
             ApplyStats = applyStats,
-            PvzStatsMods = pvzStatsMods
+            PvzStatsMods = pvzStatsMods,
+            ElementTypes = elementTypes ?? ActorElementTypes.Neutral
         };
 }

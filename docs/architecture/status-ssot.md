@@ -1,7 +1,7 @@
 # Status SSOT — actor instances, ICD, lifecycle
 
-**Status:** Design locked (docs). **Implementation deferred** — [actor-hub-status-implement-plan.md](actor-hub-status-implement-plan.md) (S0–S7; **S4+ blocked until S1**).  
-**Parent:** [decisions.md](decisions.md) (ADR row **Status SSOT**). Derived inputs: [actor-hub-ssot.md](actor-hub-ssot.md) (**implementation blocked until S1**). Combat instant HP: [combat-damage-ssot.md](combat-damage-ssot.md). Apply path: [effect-funnel.md](effect-funnel.md), [effect-runtime.md](effect-runtime.md).
+**Status:** Design locked (docs). **Shipped in Core + Injector** (S0–S7). Legacy Counter/DoT on `DeliverySpec` may remain until all content migrates to StatusRuntime pulses.  
+**Parent:** [decisions.md](decisions.md) (ADR row **Status SSOT**). Derived inputs: [actor-hub-ssot.md](actor-hub-ssot.md) (**shipped**). Combat instant HP: [combat-damage-ssot.md](combat-damage-ssot.md). Apply path: [effect-funnel.md](effect-funnel.md), [effect-runtime.md](effect-runtime.md).
 
 **ICD** in this repo means **Internal Cooldown** (proc gate), not an interface-control document.
 

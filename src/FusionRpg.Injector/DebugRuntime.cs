@@ -50,6 +50,7 @@ public static class DebugRuntime
         var id = ScenarioId;
         SessionActive = false;
         InjectorDerivedOverride.Clear();
+        InjectorElementOverride.Clear();
         Emit("debug.session.end", new Dictionary<string, object> { ["scenarioId"] = id });
         ScenarioId = "";
     }

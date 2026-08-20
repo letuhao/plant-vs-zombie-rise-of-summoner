@@ -265,4 +265,43 @@ public class DebugScenariosTests
         Assert.Equal(2, witherSynth.GetProperty("targetRow").GetInt32());
         Assert.Equal(7.5f, witherSynth.GetProperty("targetX").GetSingle());
     }
+
+    [Fact]
+    public void Lab_scenarios_freeze_reset_and_allowed_steps()
+    {
+        Assert.Contains("lab-empty", DebugScenarios.AllIds);
+        Assert.Contains("lab-overlay", DebugScenarios.AllIds);
+
+        foreach (var id in new[] { "lab-empty", "lab-overlay" })
+        {
+            var steps = DebugScenarios.Expand(id, "sid");
+            Assert.Contains(steps, s => s.Name == "debug.wave-freeze");
+            Assert.Contains(steps, s => s.Name == "debug.reset-board");
+            Assert.Contains(steps, s => s.Name == "debug.ensure-sun");
+            Assert.Contains(steps, s => s.Name == "debug.board-config");
+            Assert.Contains(steps, s => s.Name == "debug.board-stats");
+            foreach (var step in steps)
+                Assert.True(DebugScenarios.AllowedStepNames.Contains(step.Name), $"{id}:{step.Name}");
+        }
+
+        var empty = DebugScenarios.Expand("lab-empty", "sid");
+        Assert.DoesNotContain(empty, s => s.Name == "debug.spawn-plant");
+        Assert.DoesNotContain(empty, s => s.Name == "debug.spawn-zombie");
+
+        var overlay = DebugScenarios.Expand("lab-overlay", "sid");
+        Assert.Contains(overlay, s => s.Name == "debug.spawn-plant");
+        Assert.Contains(overlay, s => s.Name == "debug.spawn-zombie");
+        Assert.Contains(overlay, s => s.Name == "debug.combat.silence-vanilla");
+        Assert.Contains(empty, s => s.Name == "debug.combat.silence-vanilla");
+        var plant = System.Text.Json.JsonSerializer.SerializeToElement(
+            overlay.First(s => s.Name == "debug.spawn-plant").Payload);
+        Assert.Equal("combat-fire-caster", plant.GetProperty("derivedProfile").GetString());
+        Assert.Equal("fire", plant.GetProperty("elementPrimary").GetString());
+        Assert.Equal(0, plant.GetProperty("atk").GetInt32());
+        var zombie = System.Text.Json.JsonSerializer.SerializeToElement(
+            overlay.First(s => s.Name == "debug.spawn-zombie").Payload);
+        Assert.Equal("combat-ice-tank", zombie.GetProperty("derivedProfile").GetString());
+        Assert.Equal("ice", zombie.GetProperty("elementPrimary").GetString());
+        Assert.Equal(20000, zombie.GetProperty("hp").GetInt32());
+    }
 }

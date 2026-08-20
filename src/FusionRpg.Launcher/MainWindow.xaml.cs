@@ -34,6 +34,9 @@ public partial class MainWindow : FluentWindow
     bool _stoppedForUpdate;
     CancellationTokenSource? _busyCts;
     NotifyIcon? _tray;
+    OverlayWindow? _overlay;
+    System.Windows.Interop.HwndSource? _hwndSource;
+    System.Windows.Input.Key _overlayKey = GameWindowInterop.DefaultOverlayKey;
 
     static readonly SolidColorBrush Green = new(Color.FromRgb(0x3D, 0xD6, 0x8C));
     static readonly SolidColorBrush Red = new(Color.FromRgb(0xE5, 0x5C, 0x5C));
@@ -60,6 +63,8 @@ public partial class MainWindow : FluentWindow
         GameFolderBox.LostFocus += (_, _) => PersistGameFolderFromUi(quiet: true);
 
         InitTray();
+
+        SourceInitialized += (_, _) => InitOverlayHotKey();
 
         _pollTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _pollTimer.Tick += async (_, _) => await RefreshStatusAsync();
@@ -243,6 +248,72 @@ public partial class MainWindow : FluentWindow
         Activate();
         if (_tray != null) _tray.Visible = false;
     }
+
+    // ---- Game / web overlay switch (WebView2 window + global hotkey) ----
+
+    void InitOverlayHotKey()
+    {
+        _overlayKey = GameWindowInterop.ParseOverlayKey(_settings.OverlayHotKey);
+        OverlayButton.Content = $"Overlay ({_overlayKey})";
+
+        var helper = new System.Windows.Interop.WindowInteropHelper(this);
+        _hwndSource = System.Windows.Interop.HwndSource.FromHwnd(helper.Handle);
+        if (_hwndSource == null)
+            return;
+        _hwndSource.AddHook(OverlayHotKeyHook);
+
+        if (GameWindowInterop.TryRegisterOverlayHotKey(helper.Handle, _overlayKey))
+            AppendLog($"Overlay hotkey registered: {_overlayKey} (toggles game ⇄ web UI).");
+        else
+            AppendLog($"Overlay hotkey {_overlayKey} is taken by another app — use the Overlay button instead " +
+                      "(or set overlayHotKey in launcher.json).");
+    }
+
+    IntPtr OverlayHotKeyHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == GameWindowInterop.WmHotKey && wParam.ToInt32() == GameWindowInterop.OverlayHotKeyId)
+        {
+            handled = true;
+            _ = Dispatcher.InvokeAsync(ToggleOverlayAsync);
+        }
+        return IntPtr.Zero;
+    }
+
+    async Task ToggleOverlayAsync()
+    {
+        if (_overlay is { IsVisible: true })
+        {
+            HideOverlayToGame();
+            return;
+        }
+
+        var url = _session.ActiveUrl
+                  ?? (_settings.LastPort is int p ? $"http://127.0.0.1:{p}" : null);
+        if (url == null)
+        {
+            AppendLog("Overlay: no server URL yet — press Play first.");
+            return;
+        }
+
+        _overlay ??= new OverlayWindow(HideOverlayToGame, _overlayKey.ToString());
+        try
+        {
+            await _overlay.ShowOverGameAsync(url);
+        }
+        catch (Exception ex)
+        {
+            AppendLog("Overlay failed: " + ex.Message);
+        }
+    }
+
+    void HideOverlayToGame()
+    {
+        _overlay?.Hide();
+        if (!GameWindowInterop.FocusGame())
+            AppendLog("Overlay hidden — game window not found to refocus.");
+    }
+
+    async void Overlay_Click(object sender, RoutedEventArgs e) => await ToggleOverlayAsync();
 
     static string LocalVersion()
     {
@@ -934,6 +1005,14 @@ public partial class MainWindow : FluentWindow
             _tray.Dispose();
             _tray = null;
         }
+        if (_hwndSource != null)
+        {
+            GameWindowInterop.UnregisterOverlayHotKey(_hwndSource.Handle);
+            _hwndSource.RemoveHook(OverlayHotKeyHook);
+            _hwndSource = null;
+        }
+        _overlay?.ForceClose();
+        _overlay = null;
         _forceClose = true;
     }
 }

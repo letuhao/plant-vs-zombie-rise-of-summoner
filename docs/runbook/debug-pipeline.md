@@ -22,6 +22,18 @@ Enter any level. Leave the lawn running. Prefer Simulator **off**. Leave `FUSION
 
 Base URL: `http://127.0.0.1:5088`
 
+## Lab run (reusable board setup)
+
+Preferred path for overlay combat / effect proves. Does **not** open a level — enter a normal **Adventure day** lawn once (not Explore / travel), then reset fixtures:
+
+```powershell
+.\scripts\setup-lab-run.ps1                 # lab-overlay: freeze, clear, pea + ice-tank zombie
+.\scripts\setup-lab-run.ps1 -Scenario lab-empty
+.\scripts\setup-lab-run.ps1 -ThenProve      # then prove-overlay-combat.ps1
+```
+
+If the game looks stuck (“run never starts”), check `board.start`: `levelType=Explore` with `zombieSpeedMultiplier=0` is a bad lab surface — back to menu → Adventure day. See [level-entry.md](../research/level-entry.md).
+
 ## TypeId catalog (defaults — confirm with `/api/types`)
 
 | Role | Constant in code | Typical 3.8.1 |
@@ -61,6 +73,7 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=combat.hit,zombi
 | POST | `/api/debug/clear-zombies` |
 | POST | `/api/debug/spawn-cell` |
 | POST | `/api/debug/ensure-sun` |
+| POST | `/api/debug/enter-level` | Gated `UIMgr.EnterGame` probe — see [level-entry.md](../research/level-entry.md) |
 | POST | `/api/debug/wave-freeze` `{ "enabled": true }` |
 | POST | `/api/debug/select` |
 | POST | `/api/debug/kill` / `kill-plant` |
@@ -83,6 +96,11 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=combat.hit,zombi
 | POST | `/api/debug/effect/list` | Emit snapshot summary event (not sync HTTP body) |
 | POST | `/api/debug/effect/fire-synthetic` | Inject FT* without lawn capture |
 | POST | `/api/debug/effect/enqueue-delta` | Funnel mutation + FA10 Writer Add + overlay floater (`amount`, optional `targetPtr`/`tag`) |
+| POST | `/api/debug/combat/pin-element` | Pin actor element types (`ptr`, `elementPrimary`, optional `elementSecondary`) |
+| POST | `/api/debug/combat/silence-vanilla` | Zero plant vanilla ATK (`A-P-ATK%=0`, `P-ATK=0`, reapply living plants). Body `{ plant: true }` default |
+| POST | `/api/debug/combat/probe` | One-shot deterministic overlay hit (`amount`, `targetPtr`, optional `actorPtr`, `elementPayload`, `seed` default 1, `pinTargetElement`, `pinActorProfile` / `pinActorChannels`, `forceHit` / `forceMiss` / `forceCrit`). Emits `debug.combat.probe` + `debug.combat.overlay` when overlay runs |
+| POST | `/api/debug/combat/snapshot` | Living entities + derived/element pins + `lastOverlay` / `lastProbe` / recent overlays (`debug.combat.snapshot`) |
+| POST | `/api/debug/actor-derived` | Pin / emit derived profile (`ptr`, `derivedProfile` / `channels`) |
 | POST | `/api/debug/effects/reload` | Re-seed catalog (`effects.reload`) |
 | GET | `/api/debug/effects/contract` | Server-local FT*/FA* + `FoundationContractVersion` |
 | POST | `/api/sim/effect/clear` | Offline host clear (sync `{ ok, revision }`) |
@@ -123,6 +141,7 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=combat.hit,zombi
 
 | id | Purpose |
 |---|---|
+| `lab-overlay` / `lab-empty` | Reusable mid-match lab (freeze + clear; overlay spawns pea + tank) |
 | `p1-baseline` / `p1-plant` / `p1-bullet` | ATK path proof |
 | `hit-capture` | `combat.hit` fields |
 | `status-butter` / `freeze` / `cold` / `poison` | method status |
@@ -204,6 +223,14 @@ Counter / DoT: after `combat-dot`, the synthetic hit arms OverTime; injector tic
 
 `debug.combat.packet` fields: `source` (`capture` / `synthetic` / `dot` / `enqueue-delta`), `fa10`, `ptrs`, `trigger`, `skipped`.
 
+`debug.combat.overlay` fields (when `OVERLAY-COMBAT` on and `elementPayload` present): `source`, `actorPtr`, `targetPtr`, `baseOverlayDamage`, `matchupBonus`, `weightedDelta`, `powerAdjustedDamage`, `hit`, `crit`, `pHitFinal`, `pCritFinal`, `critMultiplierFinal`, `finalSignedDelta`, `elementPayload`, plus optional enrichments `defenderElements`, `attackerElements`, `seed`, `forced` (`hit`/`miss`/`crit` when probe overrides), `scenarioId` (active debug session).
+
+`debug.combat.probe` mirrors the hit outcome (`hit`, `crit`, `matchupBonus`, `finalSignedDelta`, …) and is remembered for `POST /api/debug/combat/snapshot` (`lastProbe` / `lastOverlay` / `recentOverlays` ring ≤8). Prefer probe for LIVE prove scripts — assert telemetry fields only, not ad-hoc HP forensics.
+
+Pin defender types: `POST /api/debug/combat/pin-element` with `{ ptr, elementPrimary, elementSecondary? }`. Spawn JSON may include `elementPrimary` / `elementSecondary` on plant/zombie spawn bodies. Lab scenarios `lab-overlay` / `lab-empty` set `plant.attackPercent=0`, pea `atk=0`, and run `debug.combat.silence-vanilla` so peas do not add vanilla ATK noise.
+
+Combat derived prove profiles: `combat-neutral`, `combat-fire-caster`, `combat-ice-tank`, `combat-glass` (see `debug.actor-derived`).
+
 ## Overlay world VFX (shader probe + cell flash)
 
 IL2CPP cannot compile ShaderLab at runtime. Probe which particle/unlit shaders Fusion actually shipped, then draw a short quad at a lawn cell. HP still goes through FA10. Digits stay IMGUI floaters.
@@ -219,6 +246,6 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.fx.world.s
 
 ## Injector commands
 
-`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, `debug.fx.probe-shaders`, `debug.fx.world-flash`, plus `pvz.spawn.extra`.
+`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, `debug.combat.pin-element`, `debug.combat.silence-vanilla`, `debug.combat.probe`, `debug.combat.snapshot`, `debug.fx.probe-shaders`, `debug.fx.world-flash`, plus `pvz.spawn.extra`.
 
 REST helpers: `POST /api/debug/economy`, `POST /api/debug/board-config`.

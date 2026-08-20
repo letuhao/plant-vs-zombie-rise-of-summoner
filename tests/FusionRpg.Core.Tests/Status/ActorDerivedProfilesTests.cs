@@ -98,4 +98,16 @@ public class ActorDerivedProfilesTests
     {
         Assert.Throws<ArgumentException>(() => ActorDerivedProfiles.Get("not-a-profile"));
     }
+
+    [Theory]
+    [InlineData(ActorDerivedProfiles.CombatFireCaster, 50)]
+    [InlineData(ActorDerivedProfiles.CombatIceTank, 30)]
+    public void Combat_profiles_expose_typed_channels(string profile, double expected)
+    {
+        var snap = ActorDerivedProfiles.Get(profile);
+        if (profile == ActorDerivedProfiles.CombatFireCaster)
+            Assert.Equal(expected, snap.Get(DerivedStatChannels.CombatPowerFire));
+        else
+            Assert.Equal(expected, snap.Get(DerivedStatChannels.CombatDefenseIce));
+    }
 }

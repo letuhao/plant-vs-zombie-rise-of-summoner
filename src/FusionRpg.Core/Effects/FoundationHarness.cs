@@ -1,4 +1,6 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Combat;
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Status;
 
@@ -13,6 +15,8 @@ public sealed class FoundationHarness
     readonly RecordingDamageFxSink _fx;
     readonly EffectBag _bag;
     readonly ActorDerivedLookup _derived = new();
+    readonly ActorElementLookup _elements = new();
+    readonly List<OverlayCombatBreakdown> _breakdowns = new();
 
     public FoundationHarness(int seed = 42)
     {
@@ -87,11 +91,38 @@ public sealed class FoundationHarness
     public void PinDerived(string ptr, ActorDerivedSnapshot snapshot) =>
         _derived.Pin(ptr, snapshot);
 
+    public void PinElementTypes(string ptr, ActorElementTypes types) =>
+        _elements.Pin(ptr, types);
+
+    public IReadOnlyList<OverlayCombatBreakdown> CombatBreakdowns => _breakdowns;
+
+    public FoundationHarness WithOverlayCombatMath(int combatSeed = 42)
+    {
+        _breakdowns.Clear();
+        _bag.CombatRng = new SeededCombatRng(combatSeed);
+        _bag.CombatMath = OverlayCombatMath.Create(
+            ResolveCombatActor,
+            ElementHub.Default,
+            _bag.CombatRng,
+            (breakdown, _, _) => _breakdowns.Add(breakdown));
+        return this;
+    }
+
+    CombatActorSnapshot ResolveCombatActor(string? ptr, bool attackerLess)
+    {
+        if (attackerLess)
+            return CombatActorSnapshot.AttackerLess();
+        return new CombatActorSnapshot(
+            _derived.Resolve(ptr, attackerLess: false),
+            _elements.Resolve(ptr));
+    }
+
     public IntentPlanDto OnEvent(EffectEventDto ev)
     {
         _sink.Items.Clear();
         _sink.Fired.Clear();
         _fx.Items.Clear();
+        _breakdowns.Clear();
         return _bag.OnEvent(ev);
     }
 

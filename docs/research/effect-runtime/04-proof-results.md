@@ -95,10 +95,40 @@ See also: [`06-combat-metrics-hit-vs-speed.md`](06-combat-metrics-hit-vs-speed.m
 |---|---|---|
 | P1 | Hit dmg / interval / bullet field | **LIVE closed** — plant ATK = hit; see [06](06-combat-metrics-hit-vs-speed.md) |
 | P2 | Hit identity | **LIVE** — zombie via TakeDamage Bullet; plant melee via AttackPlant; HitLand rare |
-| P3 | Status | **LIVE** methods + float event |
+| P3 | Status | **LIVE** methods + float event; StatusRuntime L2 catalog **27/27** 2026-08-19 |
 | P4 | Spawn command | **LIVE** |
 | P5 | Kill / onhit / onkill | **LIVE** |
 | P6 | DEF | **LIVE** + CODE |
+
+## StatusRuntime L2 (2026-08-19)
+
+Full catalog prove on BepInEx lawn (`simEnabled=false`, `injectorConnected=true`).
+
+- Script: [`../../../scripts/prove-status-full.ps1`](../../../scripts/prove-status-full.ps1)
+- Dump: [`_prove-status-full.json`](_prove-status-full.json) — **27/27 PASS**
+- Checklist: [`../../runbook/debug-live-checklist.md`](../../runbook/debug-live-checklist.md) F52–F78
+
+Harness: `debug.effect.fire-synthetic` with `side=plant` uses the pea at col 2 / row 2 as `actorPtr`; seed zombie is `targetPtr` / `hostPtr`. Poll max event id (not `limit=1`), one scenario at a time, wait for `debug.run-steps.done`.
+
+Resist: `iron-dot` / `iron-cc` → `PotencyFloor`; `immune-poison` → `Immunity`; blight neighbor `iron-contagion` blocked. Actor pin: caster plant `status.power.omni=100`.
+
+## Overlay combat + Element Hub (2026-08-19)
+
+Offline prove (no game required):
+
+- `dotnet test tests/FusionRpg.Core.Tests` — **653/653 PASS** (includes §5 matrix golden tests, hit/crit/miss, heal pass-through, status isolation)
+- Filter: `FullyQualifiedName~FusionRpg.Core.Tests.Combat`
+
+LIVE rows (operator): [`../../runbook/debug-live-checklist.md`](../../runbook/debug-live-checklist.md) §10 C1–C6. Script: [`../../../scripts/prove-overlay-combat.ps1`](../../../scripts/prove-overlay-combat.ps1). Enable `OVERLAY-COMBAT` or `FUSIONRPG_OVERLAY_COMBAT=1` before typed hits.
+
+| Check | Result | Tier |
+|---|---|---|
+| Ring-cycle matrix §8.5 golden table | **653 Core tests green** | **CODE** |
+| Hybrid payload weighted matchup §5.3 | **PASS** unit tests | **CODE** |
+| Heal bypasses matchup/hit/crit | **PASS** unit tests | **CODE** |
+| No payload → pass-through | **PASS** unit tests | **CODE** |
+| `debug.combat.overlay` emit on enqueue-delta | Wired in injector C3 | **CODE** |
+| fire vs ice/air LIVE matchup bonus | **PENDING** operator | **PENDING** |
 
 ## Follow-up live probes (operator)
 

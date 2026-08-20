@@ -15,8 +15,18 @@ public static class ActorDerivedProfiles
     public const string ImmunePoison = "immune-poison";
     public const string AttackerLess = "attacker-less";
 
+    public const string CombatNeutral = "combat-neutral";
+    public const string CombatFireCaster = "combat-fire-caster";
+    public const string CombatIceTank = "combat-ice-tank";
+    public const string CombatGlass = "combat-glass";
+
     public const double IronOmniResist = 1_000_000;
     public const double CasterPower = 100;
+    public const double CombatFirePower = 50;
+    public const double CombatIceDefense = 30;
+    public const double CombatHighAccuracy = 500;
+    public const double CombatLowAccuracy = -500;
+    public const double CombatHighDodge = 500;
 
     public static ActorDerivedSnapshot Get(string? profile)
     {
@@ -38,6 +48,14 @@ public static class ActorDerivedProfiles
             {
                 new KeyValuePair<string, double>(DerivedStatChannels.StatusImmune("poison"), 1.0)
             });
+        if (string.Equals(id, CombatNeutral, StringComparison.OrdinalIgnoreCase))
+            return CombatNeutralSnapshot();
+        if (string.Equals(id, CombatFireCaster, StringComparison.OrdinalIgnoreCase))
+            return CombatFireCasterSnapshot();
+        if (string.Equals(id, CombatIceTank, StringComparison.OrdinalIgnoreCase))
+            return CombatIceTankSnapshot();
+        if (string.Equals(id, CombatGlass, StringComparison.OrdinalIgnoreCase))
+            return CombatGlassSnapshot();
         if (string.Equals(id, Neutral, StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(id))
             return ActorDerivedSnapshot.StubNeutral();
         throw new ArgumentException("unknown derivedProfile: " + id);
@@ -75,6 +93,30 @@ public static class ActorDerivedProfiles
             new KeyValuePair<string, double>(DerivedStatChannels.ProgressionRealm, 1.0),
             new KeyValuePair<string, double>(DerivedStatChannels.StatusResistOmni, IronOmniResist),
             new KeyValuePair<string, double>(categoryChannel, IronOmniResist)
+        });
+
+    static ActorDerivedSnapshot CombatNeutralSnapshot() =>
+        ActorDerivedSnapshot.StubNeutral();
+
+    static ActorDerivedSnapshot CombatFireCasterSnapshot() =>
+        ActorDerivedSnapshot.StubNeutral().Overlay(new[]
+        {
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatPowerFire, CombatFirePower),
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatAccuracyOmni, CombatHighAccuracy),
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritRateOmni, -CombatHighAccuracy)
+        });
+
+    static ActorDerivedSnapshot CombatIceTankSnapshot() =>
+        ActorDerivedSnapshot.StubNeutral().Overlay(new[]
+        {
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatDefenseIce, CombatIceDefense),
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatDodgeOmni, CombatHighDodge)
+        });
+
+    static ActorDerivedSnapshot CombatGlassSnapshot() =>
+        ActorDerivedSnapshot.StubNeutral().Overlay(new[]
+        {
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatDefenseOmni, -50)
         });
 }
 

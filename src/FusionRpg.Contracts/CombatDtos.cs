@@ -69,6 +69,27 @@ public sealed class DeliverySpec
     [JsonPropertyName("counterScope")] public string? CounterScope { get; set; }
 }
 
+/// <summary>One weighted element in a hybrid overlay damage payload.</summary>
+public sealed class ElementPayloadComponentDto
+{
+    [JsonPropertyName("element")] public string Element { get; set; } = "";
+    [JsonPropertyName("weight")] public double Weight { get; set; }
+}
+
+/// <summary>Debug breakdown from overlay combat calculator — combat-damage-ssot.md §4.2.</summary>
+public sealed class OverlayCombatBreakdown
+{
+    [JsonPropertyName("hit")] public bool Hit { get; init; }
+    [JsonPropertyName("crit")] public bool Crit { get; init; }
+    [JsonPropertyName("matchupBonus")] public double MatchupBonus { get; init; }
+    [JsonPropertyName("weightedDelta")] public double WeightedDelta { get; init; }
+    [JsonPropertyName("powerAdjustedDamage")] public double PowerAdjustedDamage { get; init; }
+    [JsonPropertyName("finalSignedDelta")] public long FinalSignedDelta { get; init; }
+    [JsonPropertyName("pHitFinal")] public double PHitFinal { get; init; }
+    [JsonPropertyName("pCritFinal")] public double PCritFinal { get; init; }
+    [JsonPropertyName("critMultiplierFinal")] public double CritMultiplierFinal { get; init; }
+}
+
 /// <summary>
 /// Planning DTO for overlay HP changes. Signed amount: negative = loss, positive = heal.
 /// Runtime still emits Funnel mutations — this is not a second mailbox.
@@ -89,4 +110,5 @@ public sealed class DamagePacket
     [JsonPropertyName("tick")] public long Tick { get; set; }
     [JsonPropertyName("burst")] public DamagePacket? Burst { get; set; }
     [JsonPropertyName("procDepthLimit")] public int? ProcDepthLimit { get; set; }
+    [JsonPropertyName("elementPayload")] public List<ElementPayloadComponentDto>? ElementPayload { get; set; }
 }

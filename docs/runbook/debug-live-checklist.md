@@ -91,33 +91,35 @@ Automated prove: [`../../scripts/prove-status-full.ps1`](../../scripts/prove-sta
 
 | # | Call | Wait | Script assert | Pass | Fail | Notes |
 |---|---|---|---|---|---|---|
-| F52 | `POST /api/debug/scenario/status-l2-wither` | 1s | instance `wither`; plant `attackerPtr` | | | plant `neutral`, zombie `glass` |
-| F53 | `POST /api/debug/scenario/status-l2-snapshot` or `GET /api/debug/status` | 0.5s | `debug.status` instances + `resisted[]` | | | alias: `POST /api/debug/effect/dots` |
-| F54 | `POST /api/debug/scenario/status-l2-resist` | 1s | `debug.status.resisted` `reason=PotencyFloor` | | | zombie `iron-dot`; no wither instance |
-| F55 | `POST /api/debug/scenario/status-l2-blight-row` | 2s | seed + row neighbor `blight`; row-3 control empty | | | Z1 x=7.5 r2, Z2 x=8.2 r2, Z3 r3 |
-| F56 | `status-l2-leech` | 1s | instance `leech`; plant attacker | | | OverTime |
-| F57 | `status-l2-rally` | 1s | instance `rally` | | | Buff |
-| F58 | `status-l2-expose` | 1s | instance `expose` | | | Debuff |
-| F59 | `status-l2-command` | 1s | instance `command` | | | Meter |
-| F60 | `status-l2-shatter` | 1s | instance `shatter` | | | Debuff |
-| F61 | `status-l2-bond` | 1.5s | instance `bond` + `debug.combat.packet` fa10 after 5 hits | | | Counter everyHits=5 |
-| F62 | `status-l2-rot` | 2s | 2+ `rot` hosts (column) | | | Contagion |
-| F63 | `status-l2-spark` | 2s | 2+ `spark` hosts (square) | | | Contagion |
-| F64 | `status-l2-pact-mark` | 2s | `pact_mark` instance | | | Random spread |
-| F65 | `status-l2-spore` | 2s | 2+ `spore` hosts (rect) | | | Contagion |
-| F66 | `status-l2-butter` | 1s | instance + `synthetic.actions` > 0 | | | UnityCc L2; not F5 |
-| F67 | `status-l2-freeze` | 1s | instance + synthetic actions | | | UnityCc |
-| F68 | `status-l2-cold` | 1s | instance + synthetic actions | | | UnityCc |
-| F69 | `status-l2-poison` | 1s | instance + synthetic actions | | | UnityCc |
-| F70 | `status-l2-hypno` | 1s | instance + synthetic actions | | | UnityCc |
-| F71 | `status-l2-ember` | 1s | instance + synthetic actions | | | UnityCc |
-| F72 | `status-l2-jala` | 1s | instance + synthetic actions | | | UnityCc |
-| F73 | `status-l2-kelp` | 1s | instance + synthetic actions | | | UnityCc |
-| F74 | `status-l2-charm-pulse` | 1s | instance `charm_pulse` | | | CrowdControl |
-| F75 | `status-l2-resist-cc` | 1s | `PotencyFloor` on butter; no instance | | | zombie `iron-cc`, plant `caster` |
-| F76 | `status-l2-resist-contagion` | 2s | seed blight; neighbor `PotencyFloor` | | | neighbor `iron-contagion` |
-| F77 | `status-l2-poison-immune` | 1s | `Immunity`; no poison instance | | | zombie `immune-poison` |
-| F78 | `status-l2-actor-derived` | 1s | `GET /api/debug/actor-derived?ptr=` plant matches caster pin | | | `status.power.omni` ≥ 100 |
+| F52 | `POST /api/debug/scenario/status-l2-wither` | 1s | instance `wither`; plant `attackerPtr` | **PASS** | | plant `neutral`, zombie `glass`; synthetic actor = plant |
+| F53 | `POST /api/debug/scenario/status-l2-snapshot` or `GET /api/debug/status` | 0.5s | `debug.status` instances + `resisted[]` | **PASS** | | alias: `POST /api/debug/effect/dots` |
+| F54 | `POST /api/debug/scenario/status-l2-resist` | 1s | `debug.status.resisted` `reason=PotencyFloor` | **PASS** | | zombie `iron-dot`; no wither instance |
+| F55 | `POST /api/debug/scenario/status-l2-blight-row` | 2s | seed + row neighbor `blight`; row-3 control empty | **PASS** | | Z1 x=7.5 r2, Z2 x=8.2 r2, Z3 r3 |
+| F56 | `status-l2-leech` | 1s | instance `leech`; plant attacker | **PASS** | | OverTime |
+| F57 | `status-l2-rally` | 1s | instance `rally` | **PASS** | | Buff |
+| F58 | `status-l2-expose` | 1s | instance `expose` | **PASS** | | Debuff |
+| F59 | `status-l2-command` | 1s | instance `command` | **PASS** | | Meter |
+| F60 | `status-l2-shatter` | 1s | instance `shatter` | **PASS** | | Debuff |
+| F61 | `status-l2-bond` | 1.5s | instance `bond` + 5 synthetics | **PASS** | | Counter everyHits=5; burst via Funnel |
+| F62 | `status-l2-rot` | 2s | 2+ `rot` hosts (column) | **PASS** | | Contagion |
+| F63 | `status-l2-spark` | 2s | 2+ `spark` hosts (square) | **PASS** | | Contagion |
+| F64 | `status-l2-pact-mark` | 2s | `pact_mark` instance | **PASS** | | Random spread |
+| F65 | `status-l2-spore` | 2s | 2+ `spore` hosts (rect) | **PASS** | | Contagion |
+| F66 | `status-l2-butter` | 1s | instance + `synthetic.actions` > 0 | **PASS** | | UnityCc L2; not F5 |
+| F67 | `status-l2-freeze` | 1s | instance + synthetic actions | **PASS** | | UnityCc |
+| F68 | `status-l2-cold` | 1s | instance + synthetic actions | **PASS** | | UnityCc |
+| F69 | `status-l2-poison` | 1s | instance + synthetic actions | **PASS** | | UnityCc |
+| F70 | `status-l2-hypno` | 1s | instance + synthetic actions | **PASS** | | UnityCc |
+| F71 | `status-l2-ember` | 1s | instance + synthetic actions | **PASS** | | UnityCc |
+| F72 | `status-l2-jala` | 1s | instance + synthetic actions | **PASS** | | UnityCc |
+| F73 | `status-l2-kelp` | 1s | instance + synthetic actions | **PASS** | | UnityCc |
+| F74 | `status-l2-charm-pulse` | 1s | instance `charm_pulse` | **PASS** | | CrowdControl |
+| F75 | `status-l2-resist-cc` | 1s | `PotencyFloor` on butter; no instance | **PASS** | | zombie `iron-cc`, plant `caster` |
+| F76 | `status-l2-resist-contagion` | 2s | seed blight; neighbor `PotencyFloor` | **PASS** | | neighbor `iron-contagion` |
+| F77 | `status-l2-poison-immune` | 1s | `Immunity`; no poison instance | **PASS** | | zombie `immune-poison` |
+| F78 | `status-l2-actor-derived` | 1s | `GET /api/debug/actor-derived?ptr=` plant matches caster pin | **PASS** | | `status.power.omni` ≥ 100 |
+
+LIVE dump 2026-08-19: [`../research/effect-runtime/_prove-status-full.json`](../research/effect-runtime/_prove-status-full.json) **27/27 PASS**.
 
 Optional operator visual (Unity bypass, F5–F10): butter/freeze/cold/poison look-and-feel. Distinct from F66–F69.
 
@@ -237,6 +239,53 @@ Spawn/clear graves & ice, paint `BoxType`, on-kill arms. Raw: [`../research/effe
 | F51 | `tile-ice-road` | 2s | Ice trail on row | `debug.ice.road` | | **FAIL** | Spawns **Sledge/Driver zombie**; no usable ice-trail Effect — **NOT SHIPPED** |
 
 `Board.roadType` alone is **not** a full lawn map (len≈12) — do not use for Effects.
+
+## 10. Overlay combat prove (C1–C10)
+
+**Prerequisite:** lawn open + reusable lab fixtures + `OVERLAY-COMBAT` on.
+
+```powershell
+.\scripts\setup-lab-run.ps1
+# prints ZombiePtr — or chain prove:
+.\scripts\setup-lab-run.ps1 -ThenProve
+```
+
+Lab zeros plant vanilla ATK (`attackPercent=0`, pea `atk=0`, `POST /api/debug/combat/silence-vanilla`). Prefer `POST /api/debug/combat/probe` (seeded / forceHit / forceMiss / forceCrit) and assert `debug.combat.overlay` (or `POST /api/debug/combat/snapshot` → `lastOverlay` / `lastProbe`). Do not use `/api/debug/command`.
+
+Manual flag (if not using `-ThenProve`):
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/cheats/toggle -ContentType application/json -Body '{"id":"OVERLAY-COMBAT","enabled":true}'
+```
+
+Example probe:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/combat/probe -ContentType application/json -Body (@{
+  amount = -100
+  targetPtr = "<Z_PTR>"
+  seed = 1
+  forceHit = $true
+  pinTargetElement = "ice"
+  elementPayload = @(@{ element = "fire"; weight = 1.0 })
+} | ConvertTo-Json -Depth 6 -Compress)
+Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.combat.overlay&limit=5'
+```
+
+| # | Scenario | Setup | Assert | Pass | Fail | Notes |
+|---|---|---|---|---|---|---|
+| C1 | `overlay-fire-vs-ice` | Probe fire vs pin ice, forceHit | `matchupBonus ≈ 25` | | | |
+| C2 | `overlay-fire-vs-air` | Probe fire vs pin air | `matchupBonus ≈ −25` | | | |
+| C3 | `overlay-hybrid-vs-ice` | Payload `[fire:0.7, air:0.3]` vs ice | `matchupBonus ≈ 17.5` | | | |
+| C4 | `overlay-miss` | `forceMiss=true` | `hit=false`, `finalSignedDelta=0` | | | |
+| C5 | `overlay-heal` | `amount=+50` | no overlay emit | | | |
+| C6 | `overlay-flag-off` | Toggle off + probe | no overlay emit | | | |
+| C7 | `overlay-ice-vs-fire` | ice payload vs pin fire | `matchupBonus ≈ −25` | | | |
+| C8 | `overlay-air-vs-earth` | air vs earth | `matchupBonus ≈ −25` | | | |
+| C9 | `overlay-earth-vs-air` | earth vs air | `matchupBonus ≈ 25` | | | |
+| C10 | `overlay-force-crit` | forceCrit + actor crit.damage channels | `crit=true`, `critMultiplierFinal > 1` | | | needs plant ActorPtr |
+
+Offline golden tests (complex damage SSOT): `dotnet test tests/FusionRpg.Core.Tests --filter FullyQualifiedName~Combat`. LIVE (narrow telemetry only): `.\scripts\setup-lab-run.ps1` then `.\scripts\prove-overlay-combat.ps1 -TargetPtr <ZombiePtr>`. Level entry probe (separate): [level-entry.md](../research/level-entry.md).
 
 ## 9. Sign-off
 

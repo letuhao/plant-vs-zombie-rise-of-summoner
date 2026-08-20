@@ -1,7 +1,7 @@
 # Actor Hub — derived stats SSOT
 
-**Status:** Design locked (docs). **Implementation deferred** — separate code plan after this spec merges.  
-**Parent:** [decisions.md](decisions.md) (ADR row **Actor Hub SSOT**). Status apply: [status-ssot.md](status-ssot.md) §6. Primary compose: [stat-system.md](stat-system.md). Progression grain: [rpg-progression.md](rpg-progression.md).
+**Status:** Design locked (docs). **Shipped** for status-derived channels and `ActorHub` compose (S0–S1, S2–S7 status path). **Overlay combat channels** (`combat.*`) are catalog-reserved — runtime registration and Element Hub integration **deferred** per [combat-element-implement-plan.md](combat-element-implement-plan.md).  
+**Parent:** [decisions.md](decisions.md) (ADR rows **Actor Hub SSOT**, **Element Hub SSOT**). Status apply: [status-ssot.md](status-ssot.md) §6. Primary compose: [stat-system.md](stat-system.md). Progression grain: [rpg-progression.md](rpg-progression.md).
 
 ---
 
@@ -10,7 +10,7 @@
 1. [status-ssot.md](status-ssot.md) **L2b ResistanceEvaluator** needs attacker **power** and defender **resist** at Apply — not primary `hp`/`atk`.
 2. Progression will add flat combat bonuses — must not mutate vanilla **Y0** or confuse game capture with RPG growth.
 3. **StatSystem** today composes only **primary** channels (`hp`, `maxHp`, `atk`, `defense`, armor…). There is no derived layer, no `status.power.*`, no `progression.power`.
-4. **StatusRuntime code is blocked** until Actor Hub derived resolve exists (even with stub defaults).
+4. **Overlay combat channels** (`combat.*`) need catalog registration here; **Element Hub** owns element semantics and matchup matrix — see [element-hub-ssot.md](element-hub-ssot.md) §8.6.
 
 ---
 
@@ -128,14 +128,31 @@ Hardcoded stub keeps StatusRuntime / Actor Hub testable before level→power cur
 
 **v1 stub:** `ResistFromPowerRatio = 0` — progression contributes to attacker power and ApplyScale only until resist-from-level is designed.
 
-### E. Reserved (catalog stub — not v1 gameplay)
+### E. Overlay combat channels (catalog + runtime shipped)
+
+Normative channel list and omni rule: [element-hub-ssot.md](element-hub-ssot.md) §6.
+
+**Ownership split:**
+
+| Concern | Owner |
+|---|---|
+| Channel id registration and validation | **Actor Hub** (this catalog) — **shipped C0** |
+| Element roster, typing rules, matchup matrix | **Element Hub** spec — **shipped C1** |
+| Hit/crit/damage formulas | **Overlay combat** spec — **shipped C2** (flag-gated C3) |
+
+**40 channels (v1):** `combat.power.*`, `combat.defense.*`, `combat.crit.rate.*`, `combat.crit.resist.*`, `combat.crit.damage.*`, `combat.crit.resist.damage.*`, `combat.accuracy.*`, `combat.dodge.*` — each with `omni` + `fire|ice|air|earth`.
+
+**Actor type metadata (not derived channels):** `element.type.primary`, `element.type.secondary` — validated per Element Hub §5.
+
+Implement checklist: [combat-element-implement-plan.md](combat-element-implement-plan.md) — **C0–C4 shipped 2026-08-19**.
+
+### F. Other reserved stubs (not v1 gameplay)
 
 | Channel id | Notes |
 |---|---|
-| `status.expose.{category}` | Future CombatMath vulnerability |
-| `combat.crit.chance` | Future — not lawn v1 |
+| `status.expose.{category}` | Future vulnerability hook |
 
-**Catalog count (v1 locked):** 5 progression bonus + 2 tier + 4 power categories + 2 sparse power + 4 resist categories + 2 sparse resist + 2 immune patterns + 2 reserved stubs = **23 named patterns** (excluding `{statusId}` / `{tag}` expansions).
+**Catalog count (status v1 locked):** 5 progression bonus + 2 tier + 4 power categories + 2 sparse power + 4 resist categories + 2 sparse resist + 2 immune patterns + reserved stubs above = **23 named status patterns** (excluding `{statusId}` / `{tag}` expansions). Overlay combat adds **40** additional reserved channels when C0 lands.
 
 **Ban:** `totalPower = omni × category` or `totalResist = omni × category` — **forbidden** (Chaos Omni additive-only).
 
@@ -411,15 +428,14 @@ Unique specimen vs type power: see [unique-actor-runtime.md](unique-actor-runtim
 
 ```text
 This spec (docs):     actor-hub-ssot.md + amendments
-Implement checklist:  actor-hub-status-implement-plan.md (S0–S7, P1–P2 deferred)
-Next code:            S0 contracts → S1 ActorHub + stub tierPower
-Then:                 S2–S7 StatusRuntime + ResistanceEvaluator (blocked until S1)
+Status implement:     actor-hub-status-implement-plan.md (S0–S7 shipped)
+Overlay combat next:  combat-element-implement-plan.md (C0–C4 deferred)
 Later:                P1 Power ADR → UpdatePower from level/realm
 Separate ADR:         P2 progression.bonus.* combat flats
 ```
 
-**Implement plan:** [actor-hub-status-implement-plan.md](actor-hub-status-implement-plan.md).  
-**Status SSOT** ([status-ssot.md](status-ssot.md)) is design-locked but **implementation blocked** on Actor Hub derived snapshot (S1).
+**Status path:** [status-ssot.md](status-ssot.md) — **shipped** in Core + Injector (S0–S7).  
+**Overlay combat path:** [element-hub-ssot.md](element-hub-ssot.md) + [combat-damage-ssot.md](combat-damage-ssot.md) — design locked; code in [combat-element-implement-plan.md](combat-element-implement-plan.md).
 
 ---
 
@@ -427,8 +443,12 @@ Separate ADR:         P2 progression.bonus.* combat flats
 
 - [actor-hub-status-implement-plan.md](actor-hub-status-implement-plan.md) — S0–S7 implement checklist, prove gates
 - [status-ssot.md](status-ssot.md) — L2 StatusRuntime, L2b ResistanceEvaluator consumer
+- [combat-element-implement-plan.md](combat-element-implement-plan.md) — overlay combat + Element Hub code plan (C0–C4)
+- [element-hub-ssot.md](element-hub-ssot.md) — element typing and combat-element derived channels for overlay damage
+- [combat-damage-ssot.md](combat-damage-ssot.md) — overlay combat consumer of derived combat and element channels
 - [stat-system.md](stat-system.md) — primary Y0 + compose (unchanged ownership)
 - [rpg-progression.md](rpg-progression.md) — type actor grain, power stub vs XP scale
 - [pvz-stats.md](pvz-stats.md) — may contribute catalog channels; not progression power SSOT
 - [../research/actor-core-chaos-mapping.md](../research/actor-core-chaos-mapping.md) — level/realm borrow
 - [../research/status-core-chaos-mapping.md](../research/status-core-chaos-mapping.md) — apply pipeline borrow
+

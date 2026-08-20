@@ -46,8 +46,13 @@ public sealed class DerivedStatRegistry
         Register(new(DerivedStatChannels.StatusResistDot, DerivedComposeKind.SumIncreased, 0, 0.95));
         Register(new(DerivedStatChannels.StatusResistCc, DerivedComposeKind.SumIncreased, 0, 0.95));
         Register(new(DerivedStatChannels.StatusResistContagion, DerivedComposeKind.SumIncreased, 0, 0.95));
+        RegisterCombatDefaults();
+    }
 
-        Register(new(DerivedStatChannels.CombatCritChance, DerivedComposeKind.SumIncreased, 0));
+    void RegisterCombatDefaults()
+    {
+        foreach (var channelId in DerivedStatChannels.AllCombatChannelIds)
+            Register(new(channelId, DerivedComposeKind.FlatSum, 0));
     }
 
     public void Register(DerivedStatDef def)

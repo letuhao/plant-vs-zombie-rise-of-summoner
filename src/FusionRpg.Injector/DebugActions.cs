@@ -52,6 +52,7 @@ public static class DebugActions
             DebugRuntime.Emit("debug.spawn.plant", dump);
             CheatState.Note($"debug spawn plant {typeId} @{CheatState.SpawnCol},{CheatState.SpawnRow}");
             MaybePinDerived(p, plant.Pointer.ToString("X"));
+            MaybePinElement(p, plant.Pointer.ToString("X"));
             return true;
         }
         catch (Exception ex)
@@ -115,6 +116,7 @@ public static class DebugActions
             DebugRuntime.Emit("debug.spawn.zombie", dump);
             CheatState.Note($"debug spawn zombie {typeId} row={CheatState.SpawnRow}");
             MaybePinDerived(p, z.Pointer.ToString("X"));
+            MaybePinElement(p, z.Pointer.ToString("X"));
             return true;
         }
         catch (Exception ex)
@@ -918,6 +920,104 @@ public static class DebugActions
         CheatState.SetToggle("G-FREE-SET", true, "debug", emitInject: false);
     }
 
+    /// <summary>
+    /// Gated LIVE probe: call <c>UIMgr.EnterGame</c>. Requires <c>FUSIONRPG_LEVEL_ENTRY=1</c>
+    /// or toggle <c>DEBUG-LEVEL-ENTRY</c>. Rejects when a Board is already live unless <c>force</c>.
+    /// </summary>
+    public static void EnterLevel(JsonElement p)
+    {
+        var envOn = string.Equals(
+            Environment.GetEnvironmentVariable("FUSIONRPG_LEVEL_ENTRY"), "1", StringComparison.Ordinal);
+        var toggleOn = CheatState.On("DEBUG-LEVEL-ENTRY");
+        var force = p.TryGetProperty("force", out var fEl) && fEl.ValueKind == JsonValueKind.True;
+
+        var dump = new Dictionary<string, object>
+        {
+            ["env"] = envOn,
+            ["toggle"] = toggleOn,
+            ["force"] = force
+        };
+
+        if (!envOn && !toggleOn)
+        {
+            dump["ok"] = false;
+            dump["error"] = "disabled — set FUSIONRPG_LEVEL_ENTRY=1 or enable DEBUG-LEVEL-ENTRY";
+            DebugRuntime.Emit("debug.level.enter", dump);
+            CheatState.Error("debug.enter-level: disabled");
+            return;
+        }
+
+        if (GameHooks.Board != null && !force)
+        {
+            dump["ok"] = false;
+            dump["error"] = "board already live — return to main menu, or pass force=true (unsafe)";
+            DebugRuntime.Emit("debug.level.enter", dump);
+            CheatState.Error("debug.enter-level: board already live");
+            return;
+        }
+
+        LevelType levelType;
+        try
+        {
+            levelType = ParseLevelType(p);
+        }
+        catch (Exception ex)
+        {
+            dump["ok"] = false;
+            dump["error"] = ex.Message;
+            DebugRuntime.Emit("debug.level.enter", dump);
+            CheatState.Error("debug.enter-level: " + ex.Message);
+            return;
+        }
+
+        var levelNumber = Int(p, "levelNumber", 1);
+        var id = Int(p, "id", 0);
+        var name = Str(p, "name") ?? "";
+        dump["levelType"] = levelType.ToString();
+        dump["levelTypeInt"] = (int)levelType;
+        dump["levelNumber"] = levelNumber;
+        dump["id"] = id;
+        dump["name"] = name;
+
+        try
+        {
+            UIMgr.EnterGame(levelType, levelNumber, id, name);
+            dump["ok"] = true;
+            DebugRuntime.Emit("debug.level.enter", dump);
+            CheatState.Note($"debug.enter-level {levelType}#{levelNumber}");
+        }
+        catch (Exception ex)
+        {
+            dump["ok"] = false;
+            dump["error"] = ex.Message;
+            DebugRuntime.Emit("debug.level.enter", dump);
+            CheatState.Error("debug.enter-level: " + ex.Message);
+        }
+    }
+
+    static LevelType ParseLevelType(JsonElement p)
+    {
+        if (p.TryGetProperty("levelType", out var el))
+        {
+            if (el.ValueKind == JsonValueKind.Number && el.TryGetInt32(out var n))
+                return (LevelType)n;
+            if (el.ValueKind == JsonValueKind.String)
+            {
+                var s = el.GetString() ?? "";
+                if (int.TryParse(s, out var asInt))
+                    return (LevelType)asInt;
+                if (Enum.TryParse(s, ignoreCase: true, out LevelType parsed))
+                    return parsed;
+                // Game spelling Advanture — accept Adventure typo.
+                if (string.Equals(s, "Adventure", StringComparison.OrdinalIgnoreCase))
+                    return LevelType.Advanture;
+                throw new ArgumentException("unknown levelType string: " + s);
+            }
+        }
+
+        return LevelType.Advanture;
+    }
+
     public static void Select(JsonElement p)
     {
         var side = Str(p, "side") ?? "zombie";
@@ -1199,5 +1299,21 @@ public static class DebugActions
         if (string.IsNullOrWhiteSpace(profile) && (overlay == null || overlay.Count == 0))
             return;
         InjectorDerivedOverride.PinProfile(ptr, profile, overlay);
+    }
+
+    static void MaybePinElement(JsonElement p, string ptr)
+    {
+        var primary = Str(p, "elementPrimary") ?? Str(p, "element.primary");
+        var secondary = Str(p, "elementSecondary") ?? Str(p, "element.secondary");
+        if (string.IsNullOrWhiteSpace(primary) && string.IsNullOrWhiteSpace(secondary))
+            return;
+        try
+        {
+            InjectorElementOverride.PinParse(ptr, primary, secondary);
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug spawn element pin: " + ex.Message);
+        }
     }
 }
