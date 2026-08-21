@@ -293,3 +293,27 @@ Demon contracts: binding slots, loyalty, daily tribute
   contract badges, ritual CTA, gated pickers. Battle and expedition goldens byte-identical —
   a fresh contract sits in the zero-bonus band by design.
 ```
+
+## Post-Wave-G test pass (2026-08-21) — regression locks for what held only by construction
+
+- [x] Settlement: solvency is decided **per day**, not once for the span (day 1 pays, days 2–3 decay in the same call).
+- [x] Settlement: a day one Soul short is **not** partially paid — all-or-nothing, remainder untouched.
+- [x] Settlement: consecutive settles never bill a day twice (settle 1 day, then ask for 3 → 2 more).
+- [x] Churn guard: the pact fee is forgiven only within the same UTC day — a next-day re-sign pays again (without this the guard silently expires).
+- [x] Isolation: contracts never reach across players — results, bind, and release all refuse another summoner's demon.
+- [x] A consumed (Retired) demon cannot be re-contracted (`specimen.missing`); its slot stays reclaimable.
+- [x] Slot ladder climbs all 36 purchases to the 48 ceiling, then refuses `capacity.max` writing nothing (199,800 Souls of ladder proven exactly).
+- [x] Migration tie-break: level outranks seniority when rarity and stars tie (test asserts its own premise — that XP moved the level).
+- [x] E2E: a squadless match **skips** unbound demons instead of refusing, and credits nothing to the demon that sat it out.
+- [x] E2E: an expedition moves the loyalty of everyone who went, and both members share the trip's single verdict.
+
+New: 8 Data + 2 E2E. Suites after: Core 1474 / Data 191 / E2E 139 / Guard 40; guards 4/4.
+
+## Five-axis review of Wave G (2026-08-21) — findings + fixes
+
+- [x] **Important (correctness):** settlement conflated "the ledger refused this charge" with "the player could not pay" — a day already on the books fell through to the decay branch, eroding loyalty on a day that was *paid for*. Currently only reachable if a dedupe row outlives its stamp, but silent and player-punishing. Split the balance check from the append result; an already-present key now counts as settled. Prove-It test verified RED against the old code first (`A_day_already_on_the_ledger_is_paid_not_unpaid`).
+- [x] **Suggestion (robustness):** `DateTimeOffset.Parse` of round-trip stamps used the ambient culture — a non-Gregorian calendar parses those into a different date, and one of the two sites is on the mint path where a throw would break summoning. Both now pass `InvariantCulture` + `RoundtripKind`. Note: `ExpeditionEndpoints.cs:80-81` has the same pattern from Wave D — pre-existing, left alone, worth a sweep someday.
+- [x] **Suggestion (readability):** hoisted the daily `due` out of the settle loop (it cannot change within a settle) and folded the `bound.Count == 0` check into the loop condition; dropped a `due <= 0` guard that could never fire.
+- [x] **Documented, not changed (architecture):** the loyalty credit sits OUTSIDE the exactly-once envelope on both result paths (web match and expedition collect). A crash between ingest/rewards and the credit loses ±15 loyalty and no sweep replaces it; a retry can never double-credit. Accepted trade, now stated in both files rather than left as an accident.
+- Reviewed and found sound: refusal-rollback semantics (a refused bind discards its own settlement, which the next call redoes — no double charge, no lost money); no nested store connections inside a held gate (every gate uses `*Unlocked` helpers); cross-player isolation enforced at the store, not the endpoint; `playerId`-in-body matches the existing PatronEndpoints pattern and the loopback threat model.
+- Post-fix suites: Core 1483 / Data 202 / E2E 139 mine-green / Guard 40 / Vitest 220; guards 4/4. Foreign reds excluded: 6 × `WorldE2ETests` (world stream, landed mid-session), CheatCore `lab-shield-bar` (shield/VFX stream).

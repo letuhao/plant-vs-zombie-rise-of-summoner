@@ -165,7 +165,10 @@ public sealed class ExpeditionService
         if (!applied) return (false, applyReason, null);
 
         // Loyalty for the trip as a whole, not per battle: an expedition credits a win when most
-        // of its battles were victories. A recall before the first battle is neither.
+        // of its battles were victories. A recall before the first battle is neither. Like the
+        // web-match credit, this sits outside the exactly-once rewards envelope on purpose — a
+        // retry after the rewards commit finds the expedition closed and returns before reaching
+        // here, so the worst case is a lost ±15, never a double credit.
         if (battleResults.Count > 0)
             _store.ApplyContractResults(playerId, squadIds, victories * 2 >= battleResults.Count);
 

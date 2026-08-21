@@ -81,7 +81,13 @@ public sealed class ActionSlots
         {
             var byTick = x.ReadyTick.CompareTo(y.ReadyTick);
             if (byTick != 0) return byTick;
-            return x.Seq.CompareTo(y.Seq);
+            var bySeq = x.Seq.CompareTo(y.Seq);
+            if (bySeq != 0) return bySeq;
+            // ActorKey is the final tiebreak, and it is not decoration: List<T>.Sort is introsort,
+            // which is UNSTABLE and switches algorithm by length, so any pair equal on the first
+            // two keys would land in a length- and pivot-dependent order. Actor keys are unique,
+            // which makes this comparator a total order and the sort's instability irrelevant.
+            return string.CompareOrdinal(x.ActorKey, y.ActorKey);
         });
     }
 }

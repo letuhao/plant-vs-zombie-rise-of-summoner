@@ -109,4 +109,59 @@ public sealed record ActionEnvelope
     /// thing the seam is validated against.
     /// </summary>
     public static readonly ActionEnvelope NoOp = new();
+
+    // Records give value equality for free, but a compiler-generated Equals compares
+    // ResolveOffsets by REFERENCE. That produced a trap where two structurally identical
+    // envelopes were unequal, while two default ones were equal (they share SingleResolve) — so
+    // equality silently changed meaning depending on whether the caller touched one field. Any
+    // dedup, cache key, or golden comparison over envelopes would have inherited that.
+    public bool Equals(ActionEnvelope? other) =>
+        other is not null &&
+        ActionId == other.ActionId &&
+        TimeCostTicks == other.TimeCostTicks &&
+        SpeedChannel == other.SpeedChannel &&
+        WindupTicks == other.WindupTicks &&
+        RecoveryTicks == other.RecoveryTicks &&
+        Class == other.Class &&
+        CooldownKey == other.CooldownKey &&
+        CooldownTicks == other.CooldownTicks &&
+        StartsAt == other.StartsAt &&
+        SlotConsuming == other.SlotConsuming &&
+        PriorityBand == other.PriorityBand &&
+        Interruptible == other.Interruptible &&
+        InterruptRefundMilli == other.InterruptRefundMilli &&
+        Commitment == other.Commitment &&
+        OffsetsEqual(ResolveOffsets, other.ResolveOffsets);
+
+    /// <summary>Hand-rolled rather than <c>SequenceEqual</c>: LINQ allocates an enumerator, and
+    /// kernel code is held to a zero-allocation standard by a source guard.</summary>
+    static bool OffsetsEqual(IReadOnlyList<long> a, IReadOnlyList<long> b)
+    {
+        if (ReferenceEquals(a, b)) return true;
+        if (a.Count != b.Count) return false;
+        for (var i = 0; i < a.Count; i++)
+            if (a[i] != b[i]) return false;
+        return true;
+    }
+
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(ActionId);
+        hash.Add(TimeCostTicks);
+        hash.Add(SpeedChannel);
+        hash.Add(WindupTicks);
+        hash.Add(RecoveryTicks);
+        hash.Add((int)Class);
+        hash.Add(CooldownKey);
+        hash.Add(CooldownTicks);
+        hash.Add((int)StartsAt);
+        hash.Add(SlotConsuming);
+        hash.Add(PriorityBand);
+        hash.Add((int)Interruptible);
+        hash.Add(InterruptRefundMilli);
+        hash.Add((int)Commitment);
+        foreach (var offset in ResolveOffsets) hash.Add(offset);
+        return hash.ToHashCode();
+    }
 }

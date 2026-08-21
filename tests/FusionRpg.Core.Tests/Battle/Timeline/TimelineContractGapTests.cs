@@ -279,6 +279,132 @@ public class EventQueueChurnTests
     }
 }
 
+/// <summary>Regression locks for the 2026-08-21 code-review findings.</summary>
+public class ReviewFixTests
+{
+    [Fact]
+    public void A_foreign_handle_cannot_cancel_an_event()
+    {
+        // Handles are bare integers; without a queue id, q1's handle addressed a DIFFERENT event
+        // in q2 and deleted it silently — no error, no exception, and a replay that diverges with
+        // nothing to point at.
+        var q1 = new EventQueue();
+        var q2 = new EventQueue();
+        var h1 = q1.Schedule(100, "q1-first", 1, 0);
+        q2.Schedule(100, "q2-victim", 1, 0);
+        q2.Schedule(200, "q2-other", 1, 0);
+
+        Assert.False(q2.Cancel(h1));
+        Assert.False(q2.Reschedule(h1, 900));
+        Assert.Equal(2, q2.Count);
+
+        var into = new List<ScheduledEvent>();
+        q2.PopDue(long.MaxValue, into);
+        Assert.Equal(new[] { "q2-victim", "q2-other" }, into.Select(e => e.OwnerKey));
+    }
+
+    [Fact]
+    public void A_bogus_handle_cannot_drive_count_negative()
+    {
+        // The liveness bound was one-sided (`seq < _nextSeq`), so every negative read as live and
+        // decremented Count. A driver looping `while (Count > 0)` could then never terminate.
+        var q = new EventQueue();
+        q.Schedule(100, "a", 1, 0);
+
+        Assert.False(q.Cancel(new EventHandle(long.MaxValue, -1)));
+        Assert.False(q.Cancel(new EventHandle(long.MaxValue, -999)));
+        Assert.Equal(1, q.Count);
+
+        q.PopDue(100, new List<ScheduledEvent>());
+        Assert.Equal(0, q.Count);
+    }
+
+    [Fact]
+    public void The_legal_transition_table_cannot_be_rewritten_through_the_public_view()
+    {
+        // static readonly array behind IReadOnlyList: one cast rewrote the rules for every actor,
+        // every battle, and every later test in the process.
+        Assert.Throws<InvalidCastException>(() =>
+            _ = (ValueTuple<TurnState, TurnState>[])TurnTransitions.All);
+    }
+
+    [Fact]
+    public void A_retreating_actor_can_withdraw_mid_resolution()
+    {
+        // The engine checks retreat inside the dispatch loop, so a coward crossing its threshold
+        // on the hit it is delivering withdraws while Resolving. The table omitted it while its
+        // own comment claimed "any live state" — and illegal transitions throw.
+        var m = new ActorTurnMachine("squad:0");
+        m.TransitionTo(TurnState.Ready);
+        m.TransitionTo(TurnState.Committed);
+        m.TransitionTo(TurnState.Resolving);
+
+        m.TransitionTo(TurnState.Withdrawn);   // must not throw
+        Assert.Equal(TurnState.Withdrawn, m.State);
+    }
+
+    [Fact]
+    public void Contender_order_is_total_even_when_tick_and_seq_collide()
+    {
+        // List<T>.Sort is introsort: unstable, and it switches algorithm above 16 elements. With
+        // only (tick, seq) as keys, 40 colliding contenders came out in a pivot-dependent
+        // permutation — in the one method whose doc promises determinism. The 4-element test
+        // could never catch it, being inside the stable insertion-sort region.
+        var contenders = Enumerable.Range(0, 40)
+            .Select(i => ("a" + i.ToString("D2"), 0L, 0L)).ToList();
+
+        var first = new List<(string, long, long)>(contenders);
+        ActionSlots.SortContenders(first);
+
+        var shuffled = contenders.AsEnumerable().Reverse().ToList();
+        ActionSlots.SortContenders(shuffled);
+
+        Assert.Equal(first.Select(c => c.Item1), shuffled.Select(c => c.Item1));
+        Assert.Equal(first.Select(c => c.Item1).OrderBy(k => k, StringComparer.Ordinal),
+                     first.Select(c => c.Item1));
+    }
+
+    [Fact]
+    public void Envelopes_compare_by_value_including_their_resolve_offsets()
+    {
+        var a = ActionEnvelope.NoOp with { ResolveOffsets = new long[] { 0, 100 } };
+        var b = ActionEnvelope.NoOp with { ResolveOffsets = new long[] { 0, 100 } };
+        var c = ActionEnvelope.NoOp with { ResolveOffsets = new long[] { 0, 250 } };
+
+        Assert.Equal(a, b);
+        Assert.Equal(a.GetHashCode(), b.GetHashCode());
+        Assert.NotEqual(a, c);
+    }
+
+    [Fact]
+    public void Trace_views_are_snapshots_that_cannot_be_forged()
+    {
+        var t = new BattleTrace();
+        t.Phase(1, "status");
+        t.Draw("crit", 5);
+
+        Assert.Throws<InvalidCastException>(() => _ = (List<string>)t.Phases);
+        Assert.Throws<InvalidCastException>(() => _ = (List<int>)t.Draws("crit"));
+
+        var before = t.Draws("crit");
+        t.Draw("crit", 6);
+        Assert.Single(before);           // the snapshot did not grow underneath the caller
+        Assert.Equal(2, t.Draws("crit").Count);
+    }
+
+    [Fact]
+    public void An_absurd_frame_count_is_refused_rather_than_overflowing()
+    {
+        var advance = new FixedIncrementAdvance(1000, 60);
+        var clock = new SimulationClock();
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            clock.TryAdvance(advance, new EventQueue(), frames: long.MaxValue / 500));
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            clock.TryAdvance(advance, new EventQueue(), frames: -1));
+    }
+}
+
 public class ClockContractGapTests
 {
     [Fact]

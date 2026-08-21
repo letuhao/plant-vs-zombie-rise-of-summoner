@@ -7,8 +7,6 @@ namespace FusionRpg.Core.Tests.Battle.Timeline;
 /// <summary>T1 — the clock and the Future Event List. No actors, no battle, no game.</summary>
 public class EventQueueTests
 {
-    static readonly List<ScheduledEvent> Buf = new();
-
     static List<ScheduledEvent> Drain(EventQueue q, long now)
     {
         var into = new List<ScheduledEvent>();
@@ -60,7 +58,7 @@ public class EventQueueTests
         Drain(q, 100);
 
         Assert.False(q.Cancel(h));      // already fired — not an exception
-        Assert.False(q.Cancel(new EventHandle(9999)));
+        Assert.False(q.Cancel(new EventHandle(long.MaxValue, 9999)));   // foreign queue + unknown seq
     }
 
     [Fact]
@@ -231,6 +229,151 @@ public class TimelinePurityGuardTests
         {
             try { Directory.Delete(tmp, true); } catch { /* temp */ }
         }
+    }
+
+    [Theory]
+    [InlineData("var x = items.Where(i => i > 0);", ".Where(")]
+    [InlineData("var all = items.ToList();", ".ToList(")]
+    [InlineData("var go = FindObjectsOfType<Thing>();", "FindObjectsOfType")]
+    [InlineData("var s = StatSystem.Resolve(actor);", "StatSystem.Resolve")]
+    public void The_scan_detects_tick_path_cost(string badLine, string expectedToken)
+    {
+        // Frame-cost rules, not style: the kernel ticks inside the Unity frame, so LINQ allocates
+        // and a scene scan is the exact cost this repo already had to rescue once.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "Ticker.cs"),
+                new[] { "public sealed class Ticker", "{", "    void Tick() { " + badLine + " }", "}" });
+
+            var offences = KernelPurityScan.Scan(tmp);
+            Assert.Contains(offences, o => o.Contains(expectedToken, StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void The_diagnostics_exemption_covers_tick_cost_but_never_determinism()
+    {
+        // BattleTrace may allocate — it is null in production. It may NOT read a clock: a
+        // diagnostic that made the kernel nondeterministic would corrupt the very fixtures the
+        // byte-identity gate compares against.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "BattleTrace.cs"),
+                new[] { "public sealed class BattleTrace", "{", "    object A() { return items.ToArray(); }",
+                        "    object B() { return DateTime.UtcNow; }", "}" });
+
+            var offences = KernelPurityScan.Scan(tmp);
+            Assert.DoesNotContain(offences, o => o.Contains(".ToArray(", StringComparison.Ordinal));
+            Assert.Contains(offences, o => o.Contains("DateTime", StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void The_exemption_does_not_leak_to_any_other_file()
+    {
+        // The exemption is a named list precisely so it cannot grow by pattern. A file that is
+        // merely NEAR the diagnostic, or named similarly, gets no relief.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "BattleTraceHelper.cs"),
+                new[] { "public sealed class BattleTraceHelper", "{", "    object A() { return items.ToArray(); }", "}" });
+
+            Assert.Contains(KernelPurityScan.Scan(tmp),
+                o => o.Contains(".ToArray(", StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void Math_intrinsics_are_not_mistaken_for_LINQ_but_real_LINQ_still_is()
+    {
+        // The guard caught Math.Max( on its first strict run — a false positive, since Math.Max
+        // is a cheap intrinsic and nothing like IEnumerable.Max. A guard that cries wolf gets
+        // suppressed, which is the same outcome as no guard, reached more slowly. Both halves
+        // are asserted so the exclusion cannot quietly swallow the real thing.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "Fine.cs"),
+                new[] { "public sealed class Fine { int A(int x) { return Math.Max(0, x - 1); } }" });
+            Assert.Empty(KernelPurityScan.Scan(tmp));
+
+            File.WriteAllLines(Path.Combine(tmp, "NotFine.cs"),
+                new[] { "public sealed class NotFine { int A() { return items.Max(); } }" });
+            Assert.Contains(KernelPurityScan.Scan(tmp),
+                o => o.Contains(".Max(", StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void The_scan_reaches_into_subdirectories()
+    {
+        // A top-level-only scan stops covering the kernel the moment anyone adds a subfolder —
+        // green guard, unguarded code. That is worse than no guard at all.
+        var tmp = NewTempDir();
+        try
+        {
+            var nested = Path.Combine(tmp, "Nested", "Deeper");
+            Directory.CreateDirectory(nested);
+            File.WriteAllLines(Path.Combine(nested, "Hidden.cs"),
+                new[] { "public sealed class Hidden { long T() { return DateTime.UtcNow.Ticks; } }" });
+
+            Assert.Contains(KernelPurityScan.Scan(tmp),
+                o => o.Contains("DateTime", StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void A_comment_marker_inside_a_string_does_not_blind_the_scan()
+    {
+        // Cutting at the first "//" is a BYPASS, not merely a false positive: the marker inside
+        // the literal would truncate the line and hide the violation that follows it.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "Sneaky.cs"),
+                new[] { "public sealed class Sneaky", "{",
+                        "    void Go() { var s = \"a//b\"; var t = DateTime.UtcNow; }", "}" });
+
+            Assert.Contains(KernelPurityScan.Scan(tmp),
+                o => o.Contains("DateTime", StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void A_trailing_comment_does_not_trip_the_scan()
+    {
+        // The scan strips comments before matching, so annotating a line stays safe. Without this,
+        // the guard would punish exactly the explanations that make it understandable.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "Clean.cs"),
+                new[] { "public sealed class Clean", "{", "    long Now; // never a DateTime here", "}" });
+
+            Assert.Empty(KernelPurityScan.Scan(tmp));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    static string NewTempDir()
+    {
+        var tmp = Path.Combine(Path.GetTempPath(), "fusionrpg-scan-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tmp);
+        return tmp;
+    }
+
+    static void Cleanup(string dir)
+    {
+        try { Directory.Delete(dir, true); } catch { /* temp */ }
     }
 
     [Fact]

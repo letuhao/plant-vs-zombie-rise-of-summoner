@@ -20,60 +20,62 @@ Adopted in review: discrete-event movement · per-slot guards by encounter id ·
   - Files: `Core/World/{WorldState,WorldTemplateCatalog,WorldValidation}.cs`, tests. Scope: M.
   - Dependencies: W1.
 
-- [ ] **Task W3: Schema + `CreateWorld` / `LoadWorldState`**
+- [x] **Task W3: Schema + `CreateWorld` / `LoadWorldState`** *(done 2026-08-21 — 11 tests; Data 201/201, Core 1483/1483, Guard 40/40, `guard-dal` OK. DDL lives in `RpgStore.World.cs` with a one-line hook in `EnsureHotSchema` — smallest possible edit to a file another stream is also touching. **Deviation:** the "forced mid-creation failure leaves zero rows" criterion cannot be triggered through the public API, because validation runs before the transaction and makes every constraint violation unreachable — a stronger property than the test asked for. Covered instead by asserting a refused creation leaves no header, no graph, and no listing.)*
   - Description: the seven tables in `EnsureColumn` style; creation in one gate-serialized transaction validating before commit; loading returns the Core model in stable order.
   - Acceptance: create → load → deep-equal with the in-memory build; forced mid-creation failure leaves zero rows across all seven tables; an entity neither at a sector nor on a lane is rejected at the gate.
   - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter FullyQualifiedName~World`; `.\scripts\guard-dal.ps1`.
   - Files: `Data/Sqlite/RpgStore.World.cs`, schema block, tests. Scope: M.
   - Dependencies: W2.
 
-- [ ] **Task W4: DTOs + read endpoints + SIM create hook**
+- [x] **Task W4: DTOs + read endpoints + SIM create hook** *(done 2026-08-21 — 6 E2E tests; E2E 145/145, all four guards OK. The seed is deliberately absent from every wire projection — a client that knows it can predict rolls the server has not committed. `CreateWorldRequest.Seed` is a **string**: a ulong does not survive JavaScript's number type.)*
   - Description: `WorldDtos`; `GET /api/world/{playerId}`, `GET /api/world/{worldId}/state`; `POST /api/test/world/create` behind `FUSIONRPG_SIM=1`; SignalR `WorldUpdated` on revision bump. Reads only.
   - Acceptance: SIM create → state read returns the full graph with layout coordinates and slot guard state; wire projections never leak the world seed.
   - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`.
   - Files: `Contracts/WorldDtos.cs`, `Server/WorldEndpoints.cs`, tests. Scope: S.
   - Dependencies: W3.
 
-### Checkpoint 1 — the world exists
-- [ ] Core + Data + E2E suites green; `guard-dal` green.
-- [ ] `first-light` creates, persists, reloads deep-equal, and rejects all seven malformed cases atomically.
-- [ ] The state DTO is frozen enough for W13's fixture to be generated from it.
+### Checkpoint 1 — the world exists ✅ 2026-08-21
+- [x] Core **1489/1489** · Data **202/202** · E2E **145/145** · Guard **40/40**; **all four** guard scripts OK.
+- [x] `first-light` creates, persists, reloads byte-identically (`WorldCanonical`), and every malformed case is refused before a single row is written.
+- [x] The state DTO is frozen enough for W13's fixture — `GET /api/world/{id}/state` already carries layout coordinates, nullable climate, and per-slot guard state.
+- [x] Review pass (`/review`): 3 defects found and fixed with regression tests — culture-sensitive canonical form, untrimmed ids, and intact-guard-without-encounter (which would have soft-locked a sector).
 
 ## Phase 2 — the clock (still no gameplay verbs)
 
-- [ ] **Task W5: Command model + admission + command store**
+- [x] **Task W5: Command model + admission + command store** *(done 2026-08-21 — 10 Core + 7 Data + 1 E2E; Core 1507/1507, Data 209/209, E2E 146/146. `stand-fast` optionally names an entity, which makes the ownership and existence checks real in wave 1 instead of deferred to W9. Payload is typed fields, not a JSON blob — the store serializes it, so a typo is a compile error. Batch submit reports **per command**: one stale order must not throw away the rest of a commander's turn.)*
   - Description: `WorldCommand` records (commanderId, commandId, kind, payload) with admission validation at submit; `rpg_world_commands` keyed `(world_id, turn, commander_id, command_id)`; `POST /api/world/{id}/commands` idempotent on replay. v1 kind: `stand-fast`.
   - Acceptance: a replayed submission changes nothing; a command referencing a missing entity is refused at admission with a reason; one commander's submission never overwrites another's.
   - Verify: Data + E2E filtered tests.
   - Files: `Core/World/Turn/WorldCommand.cs`, `Data/Sqlite/RpgStore.WorldTurns.cs`, `Server/WorldTurnEndpoints.cs`, tests. Scope: M.
   - Dependencies: W4.
 
-- [ ] **Task W6: `TurnEngine` — phases, barrier, event queue, report, hash**
+- [x] **Task W6: `TurnEngine` — phases, barrier, event queue, report, hash** *(done 2026-08-22 — 20 tests. **Wrote the world's own `TurnEventQueue` rather than reusing `Battle/Timeline/EventQueue`**: theirs ties by insertion sequence and carries cancel/reschedule for combat delay effects, the spec calls for an entityId tie-break (stable if a seeding loop is reordered) and no cancellation — and coupling a determinism-critical path to a file another stream is actively reshaping is not worth ~60 lines. `SeededRng` **is** reused. Calendar rolls implemented (week/month/special/plague) as report entries only; effects belong to sector-development.)*
   - Description: pure `Step(state, commands, seed)` running the locked phase order; the **discrete-event queue** (integer per-mille turn time, ordered by `(timeMilli, entityId)`, monotonicity assert on enqueue); `ITurnBarrier` + `WaitForAllCommitted` as the only implementation; stub commanders auto-committing `stand-fast`; `TurnReport` (accepted and dropped commands with reasons); `StateHasher`.
   - Acceptance: same `(state, commands, seed)` twice ⇒ identical state and hash; an illegal-at-reveal command is dropped into the report, never thrown; reordering the input command list changes nothing; enqueueing an event earlier than the one being processed throws in tests.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Turn`.
   - Files: `Core/World/Turn/{TurnEngine,EventQueue,ITurnBarrier,WaitForAllCommitted,TurnPhases,TurnReport,StateHasher}.cs`, tests. Scope: M.
   - Dependencies: W5.
 
-- [ ] **Task W7: The turn transaction + turn log + report re-derivation**
+- [x] **Task W7: The turn transaction + turn log + report re-derivation** *(done 2026-08-22 — 8 tests; Data 221/221. `WriteWorldGraphUnlocked` extracted so creation and every turn share one write path. Reports are stored for a 50-turn hot tail and **re-derived by replay** beyond it — proven by trimming to zero and asserting the re-derived entries are identical; re-derivation refuses across an engine/ruleset version change rather than fabricating a report.)*
   - Description: `POST /api/world/{id}/commit`; when the barrier fires, one transaction loads state, steps, writes mutated rows, appends `rpg_world_turn_log` (hash + versions, `report_json` only within the hot tail), bumps `current_turn` and the world revision. `GET /api/world/{id}/turn/{n}` serves a stored report or **re-derives** it by replaying the command log, refusing rather than fabricating when engine versions differ. SIM `run-turns` drives N turns from a scripted log.
   - Acceptance: exactly one turn-log row per turn; a replayed commit returns the stored result and mutates nothing; forced mid-turn failure leaves zero rows and does not advance `current_turn`; a re-derived old report is byte-identical to the one that was stored before trimming.
   - Verify: Data + E2E filtered tests, including a trim-then-re-derive equality test.
   - Files: `Data/Sqlite/RpgStore.WorldTurns.cs`, `Server/WorldTurnEndpoints.cs`, tests. Scope: M.
   - Dependencies: W6.
 
-- [ ] **Task W8: Determinism guards**
+- [x] **Task W8: Determinism guards** *(done 2026-08-22 — 4 guard tests; Guard 44/44. Source scan over `Core/World/**` bans wall-clock reads, `System.Random`, and floating-point in stored state, plus a self-check that the guard would actually catch a violation.)*
   - Description: a guard test asserting no `DateTime.Now` / `UtcNow` / `Environment.TickCount` / `System.Random` symbol under `Core/World/`; hash-stability test; a replay test running the same scripted log twice from scratch.
   - Acceptance: all three green; a deliberately introduced wall-clock read makes the guard fail (verified once by hand, not committed).
   - Verify: `dotnet test tests\FusionRpg.Guard.Tests` + Core filtered tests.
   - Files: `tests/FusionRpg.Guard.Tests/WorldDeterminismGuardTests.cs`, Core tests. Scope: S.
   - Dependencies: W7.
 
-### Checkpoint 2 — the SSOT gate (highest-value checkpoint in the wave)
-- [ ] 20 turns of `stand-fast` produce a golden state hash.
-- [ ] Replay from `(seed, template, command log)` is byte-identical.
-- [ ] Exactly one transaction and one turn-log row per turn; a trimmed report re-derives identically.
-- [ ] Determinism guards green; full suites green.
+### Checkpoint 2 — the SSOT gate ✅ 2026-08-22
+- [x] 20 turns of `stand-fast` produce a stable hash sequence; the same script + seed reproduces it exactly, a different seed diverges.
+- [x] **Replay from `(seed, template, command log)` through the pure engine reproduces the store's hashes** — the sharpest assertion in the wave: if persistence ever perturbs state, store and engine diverge here.
+- [x] One turn-log row per turn, none beyond; a report trimmed out of the hot tail re-derives to exactly what was stored.
+- [x] Determinism guards green. Core **1540/1540** · Data **227/227** · E2E **146/146** · Guard **44/44**; all four guard scripts OK.
+- [x] Defect caught by this checkpoint: `WorldCanonical` was hashing the world **id**, so two identical worlds hashed differently and no golden could ever be portable. The id is identity, not state — removed.
 - [ ] **Owner review before Phase 3.**
 
 ## Phase 3 — the first verbs

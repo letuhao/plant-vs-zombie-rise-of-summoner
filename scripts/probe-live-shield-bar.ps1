@@ -1,5 +1,8 @@
 # Tight shield-bar HUD probe — world VFX bars, not IMGUI.
 #
+# Preferred: python -m live_test run shield.bar  (from tools/live_test)
+# See docs/runbook/live-test-ssot.md
+#
 # Prerequisites: Melon/Bep injector connected + Adventure lawn live.
 # Optional: already ran setup-shield-bar-lab.ps1 (or pass -Setup).
 #

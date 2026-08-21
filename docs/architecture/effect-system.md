@@ -167,6 +167,7 @@ Foundation ≈ **Diablo II CtC + Last Epoch ailments + PoE ICD engine**, sitting
 
 ## See also
 
+- [effect-atom-ideal.md](effect-atom-ideal.md) — **ideal capture (not a spec)** for the Secondary layer above this one: atom effects, containers, SQLite values, power as a currency  
 - [effect-data.md](effect-data.md) — tables and typed overlays  
 - [effect-runtime.md](effect-runtime.md) — Facade, executors, evaluation  
 - [effect-funnel.md](effect-funnel.md) — Secondary → Funnel → Foundation; delta vs modifier; FA10 v2  

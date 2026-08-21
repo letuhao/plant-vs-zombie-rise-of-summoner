@@ -536,6 +536,8 @@ public sealed partial class RpgStore : IRpgDb
         // above it would throw "no such table" on every fresh database.
         EnsureColumn(db, "rpg_web_match_log", "environment_stamp", "TEXT");
         EnsureColumn(db, "rpg_web_match_log", "sweep_refused", "TEXT");
+        // World map (spec-world-model.md) — its DDL lives beside its store partial.
+        EnsureWorldSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)

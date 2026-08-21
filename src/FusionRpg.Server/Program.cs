@@ -77,6 +77,7 @@ app.MapExpeditions();
 app.MapFusion();
 app.MapPatron();
 app.MapContracts();
+app.MapWorld();
 PatronEndpoints.RefreshRuntimeState(app.Services.GetRequiredService<RpgStore>()); // SIM plugins read it
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));

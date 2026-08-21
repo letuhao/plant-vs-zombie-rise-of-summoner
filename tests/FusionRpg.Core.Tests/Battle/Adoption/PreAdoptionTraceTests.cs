@@ -59,16 +59,22 @@ public class PreAdoptionTraceTests
     }
 
     [Fact]
-    public void Status_and_proc_streams_draw_nothing_in_battle()
+    public void The_instrumented_status_stream_genuinely_never_draws_in_battle()
     {
-        // Asserted rather than assumed: spread needs a non-null board (battle passes null) and
-        // procs only roll on the Grant path, which battle never uses. A parity trace that let
-        // these drift would be silently wrong.
+        // This means something ONLY because the status stream is instrumented (see
+        // BattleStatusRng): asserting emptiness on an unrecorded stream would pass even if it
+        // drew a thousand times, which is how a guard manufactures confidence. It is a live
+        // regression lock — battle passes `board: null`, so contagion spread cannot roll, and if
+        // that ever changes this fails with the draw sequence in hand.
         var trace = new BattleTrace();
         BattleEngine.Resolve(BattleGoldenTests.CloseSetup(), 2002, trace);
 
         Assert.Empty(trace.Draws("status"));
-        Assert.Empty(trace.Draws("proc"));
+
+        // NOT asserted: the `proc` stream. It lives in the effect host and is not wired to the
+        // trace, so any claim about it here would be exactly the vacuous assertion above. It is
+        // unreachable from battle today (procs roll only on the Grant path, which battle never
+        // takes), and instrumenting it belongs with whichever task first gives battle a proc.
     }
 
     [Fact]

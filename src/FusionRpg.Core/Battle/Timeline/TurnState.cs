@@ -60,15 +60,29 @@ public static class TurnTransitions
         (TurnState.Downed, TurnState.Charging),
         (TurnState.Downed, TurnState.Dead),
 
-        // retreat is checked after every dispatch, so it can fire from any live state
+        // Retreat is checked after every dispatch, so it fires from any live state — INCLUDING
+        // Resolving. The engine runs its retreat check inside the dispatch loop, so a coward
+        // crossing its HP threshold on the very hit it is delivering withdraws mid-resolution.
+        // An earlier table omitted Resolving while the comment claimed "any live state"; since
+        // illegal transitions throw, that omission was the same latent crash Downed was added to
+        // prevent, and the meta-test mirrored the omission rather than catching it.
         (TurnState.Charging, TurnState.Withdrawn),
         (TurnState.Ready, TurnState.Withdrawn),
         (TurnState.Committed, TurnState.Withdrawn),
+        (TurnState.Resolving, TurnState.Withdrawn),
         (TurnState.Recovering, TurnState.Withdrawn),
         (TurnState.Downed, TurnState.Withdrawn)
     };
 
-    public static IReadOnlyList<(TurnState From, TurnState To)> All => Legal;
+    /// <summary>
+    /// A genuinely read-only view. An <c>IReadOnlyList&lt;T&gt;</c> over a bare <c>T[]</c> casts straight
+    /// back, and because <see cref="Legal"/> is <c>static readonly</c>, one such cast would rewrite
+    /// the legal-transition table for every actor, every battle, and every later test in the
+    /// process — resurrecting the dead or outlawing the action cycle.
+    /// </summary>
+    static readonly IReadOnlyList<(TurnState From, TurnState To)> ReadOnlyLegal = Array.AsReadOnly(Legal);
+
+    public static IReadOnlyList<(TurnState From, TurnState To)> All => ReadOnlyLegal;
 
     public static bool IsLegal(TurnState from, TurnState to)
     {

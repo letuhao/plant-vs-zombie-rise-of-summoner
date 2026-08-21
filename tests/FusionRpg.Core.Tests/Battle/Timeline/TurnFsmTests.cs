@@ -118,6 +118,7 @@ public class TurnFsmTests
     [InlineData(TurnState.Charging)]
     [InlineData(TurnState.Ready)]
     [InlineData(TurnState.Committed)]
+    [InlineData(TurnState.Resolving)]
     [InlineData(TurnState.Recovering)]
     public void Retreat_is_reachable_from_every_live_state(TurnState from)
     {
@@ -175,7 +176,7 @@ public class TurnFsmTests
             "Resolving->Downed", "Recovering->Downed",
             "Downed->Charging", "Downed->Dead",
             "Charging->Withdrawn", "Ready->Withdrawn", "Committed->Withdrawn",
-            "Recovering->Withdrawn", "Downed->Withdrawn"
+            "Resolving->Withdrawn", "Recovering->Withdrawn", "Downed->Withdrawn"
         };
 
         var actual = new HashSet<string>(

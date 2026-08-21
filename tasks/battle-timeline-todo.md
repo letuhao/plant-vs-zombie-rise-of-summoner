@@ -17,9 +17,23 @@ Scope: S ≈ under an hour, M ≈ a focused session, L ≈ multi-session.
   - **Deviation:** the planned *mid-battle summon* fixture could not be captured — summons do not exist in the engine yet, so there is nothing to trace. Re-filed as a **forward guard**: the summon fixture must be written by whichever enrichment wave first adds a summon, because appending an actor mid-round changes the initiative draw count for that round and every round after.
   - Verified: 7 new tests green; **Core 1350/1350** with all eight goldens unchanged, proving the instrumentation is behavior-neutral. The sub-round lock empirically confirms today's under-delivery (100 HP lost = 4 pulses × 25, not 16).
 
+## Phase P — performance contract (cross-cutting, owner-directed 2026-08-21)
+
+Spec: [spec-kernel-performance.md](../docs/architecture/battle/spec-kernel-performance.md). The kernel runs **per-frame in the injector**, so it is frame-critical Unity code sharing the existing ≤1 ms/frame injector budget.
+
+- [x] **P1a: allocation contract + CI assertions** — `ActionIntent` was a record **class**: one heap object per actor per turn, at 200+ entities, on the Unity main thread. Now a `readonly record struct` with `IsNone` (a `Nullable<ActionIntent>` would have re-introduced the same wrapper). `EventQueue` pre-sizes both structures so a battle never resizes mid-tick. Eight CI tests assert **zero bytes** across schedule/drain, 6 000 reschedules, 5 000 clock advances, 10 000 intent declarations, 50 000 transitions, and slot churn — deterministic, unlike wall-clock timing.
+- [x] **P1d: tick-path source guard** — the scan now carries **two rule sets**: purity (wall clock, RNG, floating point, dictionary enumeration — **no file exempt**) and tick-path cost (LINQ, `FindObjectsOfType`, `GetComponent`, `StatSystem.Resolve`). Diagnostics are exempt from the *cost* rules only and never from purity, via a **named list rather than a pattern**, so the exemption cannot grow silently — a test proves a similarly-named neighbouring file gets no relief. Every new category is proven detectable against a planted violation. Comment-stripping means prose may still name a banned construct, so the guard doesn't punish documentation. It caught one real violation on first run: `ActionEnvelope` used `SequenceEqual`, now a manual loop (also one enumerator allocation lighter).
+
+- [x] **P2: stress harness — the measurement gate before T13** — 200 entities, 600 frames (10 s at 60 fps), drain-and-re-arm shaped like a live board. **Result: 0.0084 ms/frame against a 0.15 ms slice (~18× headroom) and 0 bytes allocated.** T13 is unblocked on measurement.
+  - The pass/fail gate is **allocation**, which is deterministic; wall clock is reported precisely but asserted only against a catastrophic-regression ceiling, since a tight timing assertion in CI measures the build agent and gets muted at the first flake. A third test asserts drain work scales sub-linearly with board size, so a quadratic regression cannot hide behind a fixed-size case.
+  - The first run failed at **40 bytes** — the harness's own `Stopwatch`, allocated inside the measured region. Fixed by hoisting it, and worth recording: the gate is sensitive to a single small object.
+
+- [ ] **P1b: `PerfProbe` sections** — `kernel.tick` / `kernel.drain` / `kernel.schedule` in the existing 5 s window beside `loop.tick`; probe overhead within its own 0.05 ms budget. **Blocked on T13** (nothing to measure until the kernel ticks in-process). Scope: S.
+- [ ] **P1c: bounded resumable drain** — per-frame work capped and resumed next frame, following event-pipeline-v2's frame-budgeted precedent. **Blocked on T13.** Scope: M.
+
 ## Phase 1 — the kernel (T1–T4)
 
-- [x] **B2: T1 clock + event queue** — 13 tests. Zero drift over 10 000 frames at 60 fps; `Reschedule` preserves `Seq` (proven by showing unrelated tie-break order is untouched); `TryAdvance` reports `Blocked` on an empty queue; clock clamps rather than rewinding on a past-due event. Purity guard implemented as a **source scan** rather than reflection — reflection cannot see `DateTime.UtcNow` inside a method body, which is exactly where it would hide.
+- [x] **B2: T1 clock + event queue** — rewritten 2026-08-21 as an **indexed** binary heap after the owner challenged the algorithm. The first draft used lazy deletion (reschedule pushed a duplicate, old copy marked stale), which made re-timing O(n) with permanent growth: **20k events + 20k reschedules took 3157 ms**, and 12k reschedules over 200 live events left a **12 200-entry heap**. Maintaining `seq → heapIndex` through every swap makes cancel and reschedule O(log n) in place: the same workloads now run in **48 ms** and **11 ms**, with the heap holding exactly the live count. It also deleted a whole correctness class — no `_rescheduled` map, no `IsStale`, no duplicate entries, and no tombstone set to grow unboundedly; `Count` is now the heap's length so it cannot drift. Tests assert the global sort invariant under adversarial churn rather than scripted sequences. 13 tests. Zero drift over 10 000 frames at 60 fps; `Reschedule` preserves `Seq` (proven by showing unrelated tie-break order is untouched); `TryAdvance` reports `Blocked` on an empty queue; clock clamps rather than rewinding on a past-due event. Purity guard implemented as a **source scan** rather than reflection — reflection cannot see `DateTime.UtcNow` inside a method body, which is exactly where it would hide.
   - `SimulationClock` with `TryAdvance → Advanced | Blocked`; `NextEventAdvance` and `FixedIncrementAdvance(long frames)` with internal carry; `EventQueue` on `(DueTick, Seq)` with handles, tombstones, and `Reschedule` that **preserves `Seq`**. No dilation.
   - Acceptance: zero tick drift over 10 000 frames at 60 fps; rescheduling one event provably leaves unrelated tie-break order untouched; `TryAdvance` can report `Blocked`; purity guard green across module **and call sites**.
   - Verify: `--filter ~VirtualTime`. Scope: M.
@@ -148,5 +162,32 @@ Scope: S ≈ under an hour, M ≈ a focused session, L ≈ multi-session.
   - Acceptance: zero dictionary/string allocation on the observe path; the documented frame budget holds at 200+ entities; telemetry, VFX, and forecast speak one vocabulary across modes.
   - Verify: guards + a perf probe run. Scope: L.
 
-### ✅ Checkpoint D — program complete
-- [ ] All modes on stamped `RulesetVersion` history; ban test green; expeditions resolve; commit drafts handed over per task group (no git writes).
+### ✅ Checkpoint D — observer
+- [ ] Live game events project into the shared state vocabulary; frame budget held; no queue or per-actor machine injector-side.
+
+## Phase 6 — the injector drive (T13) — the highest-risk phase
+
+The kernel ticks **inside the Unity frame** and takes over the injector's ad-hoc timing grids. Sequenced last because it touches the hot path this repo has already had to rescue once, and because its failure mode is stutter that no unit test sees. **Gated by P2.**
+
+- [ ] **B24: T13 spec** *(spec first)*
+  - Scope the takeover precisely: which existing grids move (the 100 ms shield tick, the 100 ms DoT grid), what stays, and the acceptance baseline — those grids' current *behaviour* is the contract, so this is a substitution, not a redesign.
+  - Restate the boundary in the spec: the kernel schedules **our** timeline; Unity still owns when its own actors act.
+  - Acceptance: spec reviewed before any injector edit. Scope: M.
+
+- [ ] **B25: per-frame drive + bounded drain** (delivers P1c)
+  - `InjectorLoop` advances the clock by the frame's ticks (carry-corrected — a truncating conversion loses 2.4 s/minute at 60 fps) and drains due events under a work budget, resuming next frame.
+  - Acceptance: a deliberately oversized backlog **never** blows the frame — it drains across frames and the tick order is unchanged, because simulated time is decoupled from wall-clock so deferral is pacing, not correctness. Zero allocation in the drive loop, asserted.
+  - Verify: allocation tests + a backlog scenario. Scope: L.
+
+- [ ] **B26: shield + DoT grids onto the kernel**
+  - Replace the 100 ms grids with scheduled events. Shield regen carry must survive the change — it truncates to zero below 1000‰ if driven at 1 ms granularity.
+  - Acceptance: shield and DoT behaviour identical to the grids they replace (existing suites unedited); no second scheduler remains in the injector.
+  - Verify: Core + injector build + guards. Scope: L.
+
+- [ ] **B27: probe sections + live verification** (delivers P1b)
+  - `kernel.*` sections; rerun the B1–B9 matrix.
+  - Acceptance: kernel share **≤0.15 ms/frame avg at 200+ entities**, injector total still within ≤2 ms stress budget, **no gen2 GC during a level**, allocation rate unchanged versus the pre-T13 baseline. **⛔ owner-run** — deploys and stress scenarios are the owner's, not mine.
+  - Verify: probe run + baseline comparison. Scope: M.
+
+### ✅ Checkpoint E — program complete
+- [ ] All modes on stamped `RulesetVersion` history; ban test green; expeditions resolve; one scheduler in the injector, measured inside budget; commit drafts handed over per task group (no git writes).

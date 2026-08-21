@@ -99,6 +99,31 @@ public class ContractRegressionTests : IDisposable
         Assert.Equal(1, result.DemonsDecayed);
     }
 
+    /// <summary>
+    /// Review fix: an already-paid day must not be treated as an unpaid one. The ledger's dedupe key
+    /// is the record of payment — if the charge is refused because that day is already on the books,
+    /// the demons have been paid for and must not decay.
+    /// </summary>
+    [Fact]
+    public void A_day_already_on_the_ledger_is_paid_not_unpaid()
+    {
+        var id = Mint();
+        _store.EnsureContractsMigrated(1, Day0);
+        var due = DailyTribute();
+
+        // Pre-write the exact ledger row settlement would write for day 1, then settle that day.
+        var day = Day0.AddDays(1).UtcDateTime.ToString("yyyy-MM-dd");
+        Assert.True(_store.AppendSoulLedgerForTest(1, -due, SoulEarnPolicy.Reasons.Upkeep,
+            $"upkeep:1:{day}", Day0.AddDays(1)));
+        var afterPrepay = _store.GetSoulBalance(1).Balance;
+
+        var result = _store.SettleContracts(1, Day0.AddDays(1));
+
+        Assert.Equal(0, result.DemonsDecayed);                       // paid, so no erosion
+        Assert.Equal(ContractPolicy.BindLoyalty, _store.GetContract(id)!.Loyalty);
+        Assert.Equal(afterPrepay, _store.GetSoulBalance(1).Balance); // and charged exactly once
+    }
+
     [Fact]
     public void Consecutive_settles_never_bill_a_day_twice()
     {

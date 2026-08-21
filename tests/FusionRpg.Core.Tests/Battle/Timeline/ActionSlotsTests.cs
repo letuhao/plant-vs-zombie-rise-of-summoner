@@ -97,12 +97,12 @@ public class IntentSourceTests
 {
     sealed class NeverDeclares : IIntentSource
     {
-        public ActionIntent? TryDeclare(string actorKey, long nowTick) => null;
+        public ActionIntent TryDeclare(string actorKey, long nowTick) => ActionIntent.None;
     }
 
     sealed class AlwaysAttacks : IIntentSource
     {
-        public ActionIntent? TryDeclare(string actorKey, long nowTick) =>
+        public ActionIntent TryDeclare(string actorKey, long nowTick) =>
             new("basic-attack", "wave:0", ActionEnvelope.NoOp with { ActionId = "basic-attack" });
     }
 
@@ -115,13 +115,9 @@ public class IntentSourceTests
         IIntentSource source = new NeverDeclares();
 
         var intent = source.TryDeclare("squad:0", 0);
-        Assert.Null(intent);
-        if (intent == null)
-        {
-            // kernel rule: pass, do not seat
-            Assert.False(slots.Holds("squad:0"));
-        }
-
+        Assert.True(intent.IsNone);
+        // kernel rule: pass, do not seat
+        Assert.False(slots.Holds("squad:0"));
         Assert.True(slots.TryAcquire("other", "wave"), "the slot must still be available");
     }
 
@@ -129,8 +125,8 @@ public class IntentSourceTests
     public void A_declared_intent_carries_its_envelope()
     {
         var intent = new AlwaysAttacks().TryDeclare("squad:0", 0);
-        Assert.NotNull(intent);
-        Assert.Equal("basic-attack", intent!.ActionId);
+        Assert.False(intent.IsNone);
+        Assert.Equal("basic-attack", intent.ActionId);
         Assert.Equal("basic-attack", intent.Envelope.ActionId);
     }
 }

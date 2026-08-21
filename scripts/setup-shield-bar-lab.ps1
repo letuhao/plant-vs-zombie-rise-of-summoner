@@ -1,4 +1,6 @@
 # Setup a frozen lawn with pea + zombie, each with 3 RPG shield stacks (fire/ice/earth).
+# Preferred: python -m live_test run shield.lab   (tools/live_test)
+# See docs/runbook/live-test-ssot.md
 # Use this BEFORE looking for the in-game shield bar — do not use the bare probe alone.
 #
 # Requires: Melon/Bep injector connected, operator already in an Adventure day lawn

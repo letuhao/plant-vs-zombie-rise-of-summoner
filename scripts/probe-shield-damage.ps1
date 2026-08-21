@@ -1,4 +1,6 @@
 # Damage RPG shields and show bar fillRatio shrink.
+# Preferred: python -m live_test run shield.absorb   (tools/live_test)
+# See docs/runbook/live-test-ssot.md
 # Prerequisites: Adventure lawn live, injector connected, units with shields
 #   (.\scripts\setup-shield-bar-lab.ps1 or demo-all first).
 #
@@ -104,12 +106,14 @@ Invoke-RestMethod -Method POST "$BaseUrl/api/debug/shield/snapshot" -ContentType
     -Body (@{ targetPtr = $zPtr } | ConvertTo-Json) | Out-Null
 $afterSnap = Get-Payload (Wait-Kind $after "debug.shield.snapshot" 8)
 foreach ($o in @($afterSnap.owners)) {
-    $ratio = if ([double]$o.maxHp -gt 0) { [double]$o.hp / [double]$o.maxHp } else { 0 }
-    Write-Host ("  hp={0}/{1} ratio={2:N2}" -f $o.hp, $o.maxHp, $ratio)
+    $trueRatio = if ([double]$o.maxHp -gt 0) { [double]$o.hp / [double]$o.maxHp } else { 0 }
+    $display = [Math]::Floor($trueRatio * 10) / 10
+    if ($trueRatio -gt 0 -and $display -eq 0) { $display = 0.1 }
+    Write-Host ("  hp={0}/{1} true={2:N2} displayFill={3:N1}" -f $o.hp, $o.maxHp, $trueRatio, $display)
     foreach ($s in @($o.stacks)) {
         Write-Host ("    {0} {1}/{2}" -f $s.element, $s.hp, $s.maxHp)
     }
 }
 
-Write-Host "In-game: bar under that unit should be shorter (fill length = hp/maxHp)."
+Write-Host "In-game: bar fill length uses 10% steps (displayFill), not every HP tick."
 Write-Host "Repeat probe to drain further; stacks break outer→inner (fire then ice then earth)."

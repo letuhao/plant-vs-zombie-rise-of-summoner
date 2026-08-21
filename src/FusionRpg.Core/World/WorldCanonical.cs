@@ -20,7 +20,10 @@ public static class WorldCanonical
     {
         var sb = new StringBuilder();
 
-        Row(sb, "world", w.WorldId, w.TemplateId, w.Seed, w.CurrentTurn);
+        // The world's *id* is deliberately absent: it is identity, not state. Two worlds built from
+        // the same template and seed and played the same way must hash identically, or a golden
+        // could never be compared across saves, machines, or test fixtures.
+        Row(sb, "world", w.TemplateId, w.Seed, w.CurrentTurn);
 
         foreach (var f in w.Factions)
             Row(sb, "faction", f.FactionId, f.Kind, f.Name, f.PolicyId);

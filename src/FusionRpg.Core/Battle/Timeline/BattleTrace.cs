@@ -19,8 +19,12 @@ public sealed class BattleTrace
     readonly Dictionary<string, List<int>> _draws = new(StringComparer.Ordinal);
     readonly List<string> _phases = new();
 
-    /// <summary>Intra-round phase markers in the order they actually ran.</summary>
-    public IReadOnlyList<string> Phases => _phases;
+    /// <summary>
+    /// Intra-round phase markers in the order they actually ran. A snapshot, not a live view:
+    /// handing out the backing list lets a caller cast it back and append, so the fixture the
+    /// byte-identity gate compares could disagree with <see cref="Digest"/> about the same battle.
+    /// </summary>
+    public IReadOnlyList<string> Phases => _phases.ToArray();
 
     /// <summary>
     /// One RNG draw. Records the returned VALUE, never a count — <c>SeededRng.NextUInt</c> uses
@@ -39,9 +43,13 @@ public sealed class BattleTrace
         _lines.Add($"draw {stream} {value}");
     }
 
-    /// <summary>Draws seen on one stream, in order. Empty for a stream that never drew.</summary>
+    /// <summary>
+    /// Draws seen on one stream, in order. Empty for a stream that never drew. A snapshot, for the
+    /// same reason as <see cref="Phases"/> — and so a caller holding a result mid-battle does not
+    /// watch it grow underneath them.
+    /// </summary>
     public IReadOnlyList<int> Draws(string stream) =>
-        _draws.TryGetValue(stream, out var list) ? list : Array.Empty<int>();
+        _draws.TryGetValue(stream, out var list) ? list.ToArray() : Array.Empty<int>();
 
     public void Phase(int round, string phase)
     {

@@ -62,7 +62,14 @@ public sealed class FixedIncrementAdvance : ITimeAdvance
 
     public long? NextAdvance(long now, EventQueue queue, long frames)
     {
-        if (frames <= 0) return 0;
+        if (frames < 0) throw new ArgumentOutOfRangeException(nameof(frames), "frames cannot be negative.");
+        if (frames == 0) return 0;
+        // frames * _num overflows silently at absurd inputs, and the resulting negative delta was
+        // being swallowed by the caller's `if (d > 0)` — reporting Advanced with the clock
+        // unmoved and the carry left garbage. Refuse rather than drift.
+        if (frames > (long.MaxValue - _carry) / _num)
+            throw new ArgumentOutOfRangeException(nameof(frames), "frame count overflows the tick clock.");
+
         var total = frames * _num + _carry;
         var ticks = total / _den;
         _carry = total - ticks * _den;

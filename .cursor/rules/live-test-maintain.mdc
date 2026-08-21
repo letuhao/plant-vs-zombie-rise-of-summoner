@@ -1,0 +1,44 @@
+---
+description: Keep live_test scenarios and live-test-ssot.md honest when changing LIVE debug behavior
+globs: tools/live_test/**,docs/runbook/live-test-ssot.md,docs/contributing/live-test-maintain.md,scripts/setup-*.ps1,scripts/probe-*.ps1,scripts/prove-*.ps1,scripts/smoke-*.ps1,scripts/stress-*.ps1
+alwaysApply: false
+---
+
+# Live-test maintain
+
+Human mirror: [docs/contributing/live-test-maintain.md](../../docs/contributing/live-test-maintain.md). SSOT: [docs/runbook/live-test-ssot.md](../../docs/runbook/live-test-ssot.md).
+
+## Two stacks
+
+1. **Python** (`tools/live_test`) — reusable one-liner smoke (shield/lab first). Prefer for new shield/lab smoke.
+2. **Checklists + `prove-*.ps1` / `smoke-*.ps1`** — full LIVE regression (F-rows, C-rows, Melon host, effect L*) until a Python pack has **hard-assert** parity.
+
+Do not tell operators that `status.catalog` or `combat.probe` replaces `prove-status-full.ps1` / `prove-overlay-combat.ps1`.
+
+## When LIVE behavior changes
+
+Same change must update `docs/runbook/live-test-ssot.md` (route, event kind, assert, or mark **checklist-only**). Add or adjust a Python scenario when the change is meant to be a one-liner prove; otherwise document checklist/PS1 as the prove path.
+
+Adding a matrix row ≠ covered. Covered means product fields use `Report.require`.
+
+## Assert strength
+
+| Kind | Use |
+|---|---|
+| Event ack only | smoke → `check` (or require event present, soft on payload) |
+| Product fields (`shieldAbsorbed`, `shaderOk`, `displayRatio`, empty board, peel order) | `require` |
+| Visual / F9 | explicit SKIP with label |
+
+Never soft-pass vacuous lists (`len >= 0`). Never claim parity in the PS1 map unless intentional; else **PS1 stronger** or **mis-mapped**.
+
+## Command vs emit kind
+
+Document mismatches. Example: `POST /api/debug/shield/clear` needs `targetPtr`; success event is `debug.shield.cleared`.
+
+## Lawn tip cursor
+
+Always use max event-id tip for “latest”. Never `afterId=0` + `kinds=` to find the latest `board.start` (returns oldest page).
+
+## Do not delete PS1
+
+Keep PowerShell until Python hard-assert parity + SSOT parity column says ≈.

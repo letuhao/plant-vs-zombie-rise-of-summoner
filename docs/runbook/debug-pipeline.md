@@ -4,6 +4,8 @@ Controllable effect-test APIs. You stay in a level; curl or a PowerShell script 
 
 **Not** EffectBag. Debug one-shots only.
 
+**LIVE SSOT (preferred):** [`live-test-ssot.md`](live-test-ssot.md) — full API map, scenario matrix, Python harness (`tools/live_test`). This page keeps PowerShell recipes.
+
 **LIVE prove:** BepInEx — [`debug-live-checklist.md`](debug-live-checklist.md). MelonLoader (Blooms) — [`melon-live-checklist.md`](melon-live-checklist.md). This page is the API reference (host-agnostic).
 
 ## Deploy

@@ -132,6 +132,7 @@ public static class SimEndpoints
         test.MapExpeditionTest();
         test.MapFusionTest();
         test.MapContractTest();
+        test.MapWorldTest();
         test.MapPost("/reset", async (SimService svc, RpgStore store) =>
         {
             await svc.FullResetAsync();

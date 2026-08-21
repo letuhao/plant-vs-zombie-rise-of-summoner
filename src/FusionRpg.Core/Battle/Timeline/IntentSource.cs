@@ -3,8 +3,19 @@ namespace FusionRpg.Core.Battle.Timeline;
 /// <summary>
 /// What an actor has decided to do. The kernel treats this as opaque beyond its timing envelope —
 /// what the action *does* belongs to the combat action program.
+///
+/// A <b>struct</b>, deliberately: the kernel ticks inside the Unity frame, so a class here would
+/// be one heap object per actor per turn, every turn, on a board that can hold 200+ entities.
+/// <see cref="Envelope"/> stays a reference because envelopes are content — authored once and
+/// shared, never built per turn.
 /// </summary>
-public sealed record ActionIntent(string ActionId, string? TargetKey, ActionEnvelope Envelope);
+public readonly record struct ActionIntent(string ActionId, string? TargetKey, ActionEnvelope Envelope)
+{
+    /// <summary>No declaration. Distinguishes "chose nothing" without allocating a null wrapper.</summary>
+    public bool IsNone => Envelope is null;
+
+    public static readonly ActionIntent None = default;
+}
 
 /// <summary>
 /// Where intents come from. One interface serves both masters: it is the AI-policy seam the
@@ -17,7 +28,12 @@ public sealed record ActionIntent(string ActionId, string? TargetKey, ActionEnve
 /// </summary>
 public interface IIntentSource
 {
-    ActionIntent? TryDeclare(string actorKey, long nowTick);
+    /// <summary>
+    /// Returns <see cref="ActionIntent.None"/> when the actor has no legal action. A
+    /// <c>Nullable&lt;ActionIntent&gt;</c> would re-introduce the per-call wrapper the struct exists
+    /// to avoid, so absence is encoded in the value itself.
+    /// </summary>
+    ActionIntent TryDeclare(string actorKey, long nowTick);
 }
 
 /// <summary>What the kernel decided to do with an actor that reached <see cref="TurnState.Ready"/>.</summary>
@@ -33,4 +49,4 @@ public enum SeatOutcome
     Incapacitated
 }
 
-public readonly record struct SeatResult(SeatOutcome Outcome, ActionIntent? Intent);
+public readonly record struct SeatResult(SeatOutcome Outcome, ActionIntent Intent);

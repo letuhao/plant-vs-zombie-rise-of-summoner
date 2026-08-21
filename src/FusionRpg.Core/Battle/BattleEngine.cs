@@ -64,8 +64,23 @@ public static class BattleEngine
     sealed class BattleStatusRng : IStatusRng
     {
         readonly SeededRng _rng;
-        public BattleStatusRng(ulong seed) => _rng = SeededRng.DeriveStream(seed, "status");
-        public double NextUnit() => _rng.NextInt(1_000_000) / 1_000_000.0;
+        readonly Timeline.BattleTrace? _trace;
+
+        public BattleStatusRng(ulong seed, Timeline.BattleTrace? trace = null)
+        {
+            _rng = SeededRng.DeriveStream(seed, "status");
+            _trace = trace;
+        }
+
+        public double NextUnit()
+        {
+            // Recorded so the parity ladder can see this stream at all. Asserting "the status
+            // stream never draws" against an UNinstrumented stream would pass even if it drew a
+            // thousand times — the assertion only means something because of this line.
+            var raw = _rng.NextInt(1_000_000);
+            _trace?.Draw("status", raw);
+            return raw / 1_000_000.0;
+        }
     }
 
     /// <summary>
@@ -118,7 +133,7 @@ public static class BattleEngine
         ICombatRng critRng = new SeededRngCombatAdapter(SeededRng.DeriveStream(seed, "crit")); // hit + crit rolls
         if (trace != null) critRng = trace.WrapCombat("crit", critRng);
         var essenceRng = SeededRng.DeriveStream(seed, "essence"); // void/chaos rider procs
-        var statusRng = new BattleStatusRng(seed);
+        var statusRng = new BattleStatusRng(seed, trace);
         var calculator = new OverlayCombatCalculator();
 
         // Stable ordered state — never dictionary-enumerated (determinism discipline).

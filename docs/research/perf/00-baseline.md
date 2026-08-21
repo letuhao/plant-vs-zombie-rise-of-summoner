@@ -5,6 +5,13 @@ Raw windows: `_baseline-<scenario>.json` beside this file.
 
 ## Hardware truth (2026-08-20)
 
+> **Superseded for the default configuration (noted 2026-08-22).** These numbers were taken
+> **uncapped**, before the frame cap shipped. `InjectorLoop.ApplyFpsCap` now sets
+> `Application.targetFrameRate = 60` by default at startup, and uncapping requires an explicit
+> `FUSIONRPG_FPS_CAP=0`. With the cap on, the frame is **16.6 ms** and the plan's original
+> **≤ 1.0 ms/frame** injector target applies. The section below remains correct for the
+> uncapped case — read it as "what happens if you remove the cap", not as the current budget.
+
 The game runs **~240 fps** uncapped on this machine (idle lawn: fpsAvg 239.6, frameMax 8.7ms).
 Frame budget is therefore **4.16 ms**, not 16.6 — tighter than the plan assumed. Injector target
 revised: ≤ 0.5 ms/frame avg.

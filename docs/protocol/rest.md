@@ -135,7 +135,18 @@ Controllable effect-test APIs (not EffectBag). Runbook: [runbook/debug-pipeline.
 | POST | `/api/debug/effect/counters` | Counter meters |
 | POST | `/api/debug/fx/probe-shaders` | LIVE `Shader.Find` of Fusion-included particle/unlit shaders (`debug.fx.shader-probe`) |
 | POST | `/api/debug/fx/world-flash` | Particle burst at lawn `col`/`row` (defaults spawn cell). No HP write |
+| POST | `/api/debug/fx/play` / `list` / `mute` / `unmute` / `state` | Play cue / list / mute / state |
 | GET | `/api/debug/effects/contract` | Frozen FT*/FA* including FA10 `ApplyResourceDelta` (`FoundationContractVersion` 2) |
+| POST | `/api/debug/combat/pin-element` / `silence-vanilla` / `probe` / `snapshot` | Overlay combat prove |
+| POST | `/api/debug/shield/grant` / `clear` / `demo` / `demo-all` / `snapshot` / `bar-status` | RPG shield + world bar audit |
+| POST | `/api/debug/board-stats` / `stress-fill` / `stress-clear` / `enter-level` | Census / stress / gated EnterGame |
+| POST | `/api/debug/clear-plants` / `clear-zombies` / `spawn-cell` / `economy` / `board-config` / `board-action` | Board helpers |
+| POST | `/api/debug/spawn-grid` / `clear-grid` / `set-box` / `grid-query` / `ice-road` | Grid helpers |
+| GET/POST | `/api/debug/actor-derived` | Derived combat profile |
+| GET | `/api/debug/effects/session-grants` | Session grant snapshot |
+| POST | `/api/debug/effects/reload` | Reload effects |
+
+Full LIVE operator contract: [runbook/live-test-ssot.md](../runbook/live-test-ssot.md).
 
 ## RpgProgression
 

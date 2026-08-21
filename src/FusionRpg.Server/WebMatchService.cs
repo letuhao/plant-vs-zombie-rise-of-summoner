@@ -69,7 +69,10 @@ public sealed class WebMatchService
         // 3–4. Resolve + dedicated ingest; 5. notify.
         var (report, notify) = ResolveAndIngest(playerId, matchKey, setup, seed);
         // 4b. The squad lived it: contracted members gain or lose loyalty for the result. Replays
-        //     return above, so a retry never credits a second time.
+        //     return above, so a retry never credits a second time. Deliberately OUTSIDE the
+        //     log-before-ingest envelope: a crash between ingest and here loses ±15 loyalty and the
+        //     boot sweep will not replace it. That is the accepted trade — widening the exactly-once
+        //     envelope for a loyalty point is not worth the coupling.
         _store.ApplyContractResults(playerId, pickedIds, report.Outcome == BattleOutcome.Victory);
         await BroadcastAsync(playerId, notify).ConfigureAwait(false);
 

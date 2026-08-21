@@ -12,19 +12,40 @@ public readonly record struct ScheduledEvent(long DueTick, long Seq, string Owne
 /// Carries the id of the queue that issued it: handles are bare integers, and without an owner a
 /// handle from one queue silently addresses a <i>different</i> event in another — cancelling
 /// something unrelated with no error. One queue per battle and per replay makes that a real
-/// confusion, so the queue rejects foreign handles loudly instead.
+/// confusion, so the queue rejects foreign handles instead.
 /// </summary>
 public readonly record struct EventHandle(long QueueId, long Seq);
 
 /// <summary>
-/// The Future Event List: a binary heap ordered by <c>(DueTick, Seq)</c>.
+/// The Future Event List: an <b>indexed</b> binary min-heap ordered by <c>(DueTick, Seq)</c>.
 ///
-/// Two ordering rules are load-bearing for byte-identical replay:
+/// "Indexed" is the load-bearing word. Alongside the heap it keeps <c>seq → heap position</c>,
+/// maintained by every swap, which is the standard structure for a scheduler that must cancel and
+/// re-time events (the same shape as a decrease-key priority queue). It gives:
+///
 /// <list type="bullet">
-/// <item>Cancellation uses tombstones and never renumbers <c>Seq</c>, so ordering cannot become
-/// dependent on cancellation history.</item>
-/// <item><see cref="Reschedule"/> <b>preserves</b> <c>Seq</c>. Implemented as cancel+insert with a
-/// fresh sequence, a delay effect would silently reorder unrelated actors.</item>
+/// <item><c>Schedule</c> / <c>PopDue</c> / <c>Cancel</c> / <c>Reschedule</c> all O(log n).</item>
+/// <item>Heap size exactly equals live event count — nothing accumulates.</item>
+/// <item><c>Count</c> is simply the heap's length, so it cannot drift out of step.</item>
+/// </list>
+///
+/// The first draft used lazy deletion instead: reschedule pushed a <i>duplicate</i> entry and
+/// marked the old one stale. That was the wrong pattern here — it made re-timing O(n) per call
+/// with permanent heap growth (measured: 12 000 reschedules over 200 live events left a 12 200-entry
+/// heap), and it required a whole staleness apparatus whose subtlest case was two live-looking
+/// copies that could only be told apart by retiring the id on fire. Maintaining the index removes
+/// the cost *and* deletes that entire correctness class: there are no duplicates to distinguish.
+///
+/// <b>Single-threaded by design.</b> No locking, and <see cref="ComparisonCount"/> is a plain
+/// increment. Every consumer is expected to be one owner on one thread — a battle resolving
+/// server-side, or the Unity main thread. Sharing one queue across threads would corrupt both the
+/// heap and the index map, and the fix would be an owner, not a lock.
+///
+/// Ordering rules that byte-identical replay depends on:
+/// <list type="bullet">
+/// <item>Total order is <c>(DueTick, Seq)</c>; <c>Seq</c> is unique, so ties never arise between
+/// distinct events and the heap need not be stable.</item>
+/// <item><c>Reschedule</c> <b>preserves</b> <c>Seq</c> — re-timing must not reorder unrelated events.</item>
 /// </list>
 /// </summary>
 public sealed class EventQueue
@@ -32,70 +53,71 @@ public sealed class EventQueue
     static long _nextQueueId;
 
     readonly long _queueId = System.Threading.Interlocked.Increment(ref _nextQueueId);
-    readonly List<ScheduledEvent> _heap = new();
-    /// <summary>Seqs that will never fire again — cancelled OR already fired.</summary>
-    readonly HashSet<long> _retired = new();
-    readonly Dictionary<long, long> _rescheduled = new();   // seq → newest DueTick
+    readonly List<ScheduledEvent> _heap;
+    readonly Dictionary<long, int> _indexOf;   // seq → position in _heap
     long _nextSeq;
 
-    /// <summary>Live (non-tombstoned) events still queued.</summary>
-    public int Count { get; private set; }
+    /// <param name="expectedEvents">
+    /// Pre-sizes both structures. The kernel ticks inside the Unity frame, so a mid-battle resize
+    /// is an allocation and a copy at exactly the wrong moment; sizing once at battle start keeps
+    /// the steady state allocation-free. Growing beyond it still works — it is a hint, not a cap.
+    /// </param>
+    public EventQueue(int expectedEvents = 64)
+    {
+        if (expectedEvents < 0) throw new ArgumentOutOfRangeException(nameof(expectedEvents));
+        _heap = new List<ScheduledEvent>(expectedEvents);
+        _indexOf = new Dictionary<long, int>(expectedEvents);
+    }
+
+    /// <summary>Live events queued. Structurally exact: it is the heap's length.</summary>
+    public int Count => _heap.Count;
+
+    /// <summary>
+    /// Total order comparisons performed. Exists so complexity can be asserted by <b>counting</b>
+    /// rather than by stopwatch: a timing test in CI measures the build agent, while a comparison
+    /// count rises only when the algorithm actually degrades. One <c>long</c> increment per
+    /// comparison — no allocation, and cheap enough to leave always-on so Release builds are
+    /// measured too.
+    /// </summary>
+    public long ComparisonCount { get; private set; }
 
     public EventHandle Schedule(long dueTick, string ownerKey, int kind, long tag)
     {
         var seq = _nextSeq++;
-        Push(new ScheduledEvent(dueTick, seq, ownerKey, kind, tag));
-        Count++;
-        return new EventHandle(seq);
+        _heap.Add(new ScheduledEvent(dueTick, seq, ownerKey, kind, tag));
+        var i = _heap.Count - 1;
+        _indexOf[seq] = i;
+        SiftUp(i);
+        return new EventHandle(_queueId, seq);
     }
 
-    /// <summary>Tombstones the event. Returns false if it already fired or never existed.</summary>
+    /// <summary>Removes the event outright. False if it already fired, was cancelled, or is foreign.</summary>
     public bool Cancel(EventHandle handle)
     {
-        if (!IsLive(handle.Seq)) return false;
-        _cancelled.Add(handle.Seq);
-        _rescheduled.Remove(handle.Seq);
-        Count--;
+        if (!TryIndex(handle, out var i)) return false;
+        RemoveAt(i);
         return true;
     }
 
     /// <summary>
-    /// Moves a pending event to a new due tick, keeping its <c>Seq</c> so tie-break order with
-    /// unrelated events is untouched.
+    /// Re-times a pending event in place, keeping its <c>Seq</c> so tie-break order with unrelated
+    /// events is untouched. Sifts in whichever direction the new tick requires.
     /// </summary>
     public bool Reschedule(EventHandle handle, long newDueTick)
     {
-        if (!IsLive(handle.Seq)) return false;
-
-        // Find the live entry, re-push it at the new tick with the SAME seq, and tombstone the
-        // stale copy by recording the authoritative tick.
-        for (var i = 0; i < _heap.Count; i++)
-        {
-            if (_heap[i].Seq != handle.Seq) continue;
-            var e = _heap[i];
-            _rescheduled[handle.Seq] = newDueTick;
-            Push(e with { DueTick = newDueTick });
-            return true;
-        }
-
-        return false;
+        if (!TryIndex(handle, out var i)) return false;
+        _heap[i] = _heap[i] with { DueTick = newDueTick };
+        // Exactly one of these does work; the other returns immediately.
+        SiftUp(i);
+        SiftDown(_indexOf[handle.Seq]);
+        return true;
     }
 
-    /// <summary>The earliest live due tick, or null when nothing is queued.</summary>
-    public long? PeekDueTick()
-    {
-        while (_heap.Count > 0)
-        {
-            var top = _heap[0];
-            if (IsStale(top)) { PopRoot(); continue; }
-            return top.DueTick;
-        }
-
-        return null;
-    }
+    /// <summary>The earliest due tick, or null when nothing is queued.</summary>
+    public long? PeekDueTick() => _heap.Count > 0 ? _heap[0].DueTick : null;
 
     /// <summary>
-    /// Drains every live event with <c>DueTick &lt;= now</c> into a caller-owned buffer, in
+    /// Drains every event with <c>DueTick &lt;= now</c> into a caller-owned buffer, in
     /// <c>(DueTick, Seq)</c> order. The buffer is appended to, never cleared — callers own their
     /// scratch (the same contract as <c>ShieldRuntime.DrainEvents</c>).
     /// </summary>
@@ -103,60 +125,82 @@ public sealed class EventQueue
     {
         if (into == null) throw new ArgumentNullException(nameof(into));
         var drained = 0;
-        while (_heap.Count > 0)
+        while (_heap.Count > 0 && _heap[0].DueTick <= now)
         {
-            var top = _heap[0];
-            if (IsStale(top)) { PopRoot(); continue; }
-            if (top.DueTick > now) break;
-            PopRoot();
-            _cancelled.Add(top.Seq);      // fired: further cancel/reschedule is a no-op
-            _rescheduled.Remove(top.Seq);
-            into.Add(top);
-            Count--;
+            into.Add(_heap[0]);
+            RemoveAt(0);
             drained++;
         }
 
         return drained;
     }
 
-    bool IsLive(long seq) => seq < _nextSeq && !_cancelled.Contains(seq);
-
-    /// <summary>A heap entry is stale if cancelled/fired, or superseded by a reschedule.</summary>
-    bool IsStale(ScheduledEvent e) =>
-        _cancelled.Contains(e.Seq) ||
-        (_rescheduled.TryGetValue(e.Seq, out var due) && due != e.DueTick);
-
-    // ---- binary heap on (DueTick, Seq) ----
-
-    static bool Less(in ScheduledEvent a, in ScheduledEvent b) =>
-        a.DueTick != b.DueTick ? a.DueTick < b.DueTick : a.Seq < b.Seq;
-
-    void Push(ScheduledEvent e)
+    /// <summary>
+    /// Resolves a handle to its live heap position. The map lookup is the whole liveness test:
+    /// fired and cancelled events are removed from it, and a foreign or never-issued id is simply
+    /// absent — so a bogus handle cannot mutate anything.
+    /// </summary>
+    bool TryIndex(EventHandle handle, out int index)
     {
-        _heap.Add(e);
-        var i = _heap.Count - 1;
+        index = -1;
+        return handle.QueueId == _queueId && _indexOf.TryGetValue(handle.Seq, out index);
+    }
+
+    // ---- indexed binary heap on (DueTick, Seq) ----
+
+    bool Less(in ScheduledEvent a, in ScheduledEvent b)
+    {
+        ComparisonCount++;
+        return a.DueTick != b.DueTick ? a.DueTick < b.DueTick : a.Seq < b.Seq;
+    }
+
+    void RemoveAt(int i)
+    {
+        _indexOf.Remove(_heap[i].Seq);
+        var last = _heap.Count - 1;
+        if (i == last)
+        {
+            _heap.RemoveAt(last);
+            return;
+        }
+
+        _heap[i] = _heap[last];
+        var movedSeq = _heap[i].Seq;      // captured BEFORE sifting: after SiftUp, slot i holds
+        _indexOf[movedSeq] = i;           // a different element, so re-reading _heap[i] would
+        _heap.RemoveAt(last);             // sift the wrong node and silently corrupt the heap.
+
+        // The relocated element may belong above or below its new position; one of these is a no-op.
+        SiftUp(i);
+        SiftDown(_indexOf[movedSeq]);
+    }
+
+    void Swap(int a, int b)
+    {
+        (_heap[a], _heap[b]) = (_heap[b], _heap[a]);
+        _indexOf[_heap[a].Seq] = a;
+        _indexOf[_heap[b].Seq] = b;
+    }
+
+    void SiftUp(int i)
+    {
         while (i > 0)
         {
             var parent = (i - 1) / 2;
             if (!Less(_heap[i], _heap[parent])) break;
-            (_heap[i], _heap[parent]) = (_heap[parent], _heap[i]);
+            Swap(i, parent);
             i = parent;
         }
     }
 
-    void PopRoot()
+    void SiftDown(int i)
     {
-        var last = _heap.Count - 1;
-        _heap[0] = _heap[last];
-        _heap.RemoveAt(last);
-        var i = 0;
         while (true)
         {
             int l = 2 * i + 1, r = l + 1, smallest = i;
             if (l < _heap.Count && Less(_heap[l], _heap[smallest])) smallest = l;
             if (r < _heap.Count && Less(_heap[r], _heap[smallest])) smallest = r;
             if (smallest == i) break;
-            (_heap[i], _heap[smallest]) = (_heap[smallest], _heap[i]);
+            Swap(i, smallest);
             i = smallest;
         }
     }

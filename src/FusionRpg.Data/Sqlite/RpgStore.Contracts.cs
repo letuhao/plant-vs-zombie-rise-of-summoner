@@ -87,7 +87,9 @@ public sealed partial class RpgStore
         if (state is null)
         {
             // First contact with contracts also migrates whatever the player already owns.
-            EnsureContractsMigratedUnlocked(db, playerId, DateTimeOffset.Parse(now).ToUniversalTime());
+            EnsureContractsMigratedUnlocked(db, playerId, DateTimeOffset.Parse(
+                now, System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.RoundtripKind));
             state = ReadContractStateUnlocked(db, playerId);
         }
 
@@ -128,7 +130,10 @@ public sealed partial class RpgStore
         var state = ReadContractStateUnlocked(db, playerId);
         if (state is null) return (0, 0, 0);
 
-        var lastSettled = DateTimeOffset.Parse(state.LastSettledUtc, null,
+        // Invariant culture on purpose: these stamps are round-trip "o" strings, and a non-Gregorian
+        // ambient culture would parse them into a different date.
+        var lastSettled = DateTimeOffset.Parse(state.LastSettledUtc,
+            System.Globalization.CultureInfo.InvariantCulture,
             System.Globalization.DateTimeStyles.RoundtripKind);
         var elapsed = ContractPolicy.ElapsedDays(lastSettled, now);
         if (elapsed == 0) return (0, 0, 0);
@@ -142,19 +147,18 @@ public sealed partial class RpgStore
         long paid = 0;
         var decayed = new HashSet<string>(StringComparer.Ordinal);
         var firstDay = lastSettled.UtcDateTime.Date;
-        for (var d = 1; d <= elapsed; d++)
+        var due = bound.Sum(c => (long)ContractPolicy.UpkeepPerDay(
+            rarities.TryGetValue(c.InstanceId, out var r) ? r : DemonRarity.Common, c.Personality));
+        for (var d = 1; d <= elapsed && bound.Count > 0; d++)
         {
-            if (bound.Count == 0) break;
             var day = firstDay.AddDays(d).ToString("yyyy-MM-dd");
-            var due = bound.Sum(c => (long)ContractPolicy.UpkeepPerDay(
-                rarities.TryGetValue(c.InstanceId, out var r) ? r : DemonRarity.Common, c.Personality));
-            if (due <= 0) continue;
-
-            if (ReadSoulBalanceUnlocked(db, playerId).Balance >= due
-                && AppendSoulLedgerUnlocked(db, playerId, 0, -due, SoulEarnPolicy.Reasons.Upkeep,
-                    "contract", day, $"upkeep:{playerId}:{day}", stamp))
+            if (ReadSoulBalanceUnlocked(db, playerId).Balance >= due)
             {
-                paid += due;
+                // A false append means this day is ALREADY paid for (a dedupe key survives). That is
+                // a settled day, not an unpaid one — decaying here would punish a player who paid.
+                if (AppendSoulLedgerUnlocked(db, playerId, 0, -due, SoulEarnPolicy.Reasons.Upkeep,
+                        "contract", day, $"upkeep:{playerId}:{day}", stamp))
+                    paid += due;
                 continue;
             }
 
@@ -464,6 +468,21 @@ public sealed partial class RpgStore
         if (profile is null) return (false, DemonRarity.Common);
         DemonRarityIds.TryParse(profile.Rarity, out var rarity);
         return (true, rarity);
+    }
+
+    /// <summary>Test seam: writes a raw soul-ledger row, to stage states settlement must survive.</summary>
+    internal bool AppendSoulLedgerForTest(
+        long playerId, long delta, string reason, string dedupeKey, DateTimeOffset utcNow)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var ok = AppendSoulLedgerUnlocked(db, playerId, 0, delta, reason, "contract", null,
+                dedupeKey, utcNow.UtcDateTime.ToString("o"));
+            tx.Commit();
+            return ok;
+        }
     }
 
     /// <summary>Test seam: puts a demon's loyalty where a long play history would have.</summary>

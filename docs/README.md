@@ -62,6 +62,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/effect-funnel.md](architecture/effect-funnel.md) | Funnel + Guard: Secondary enqueue → merge → FA10 Writer Add (`guard-funnel-delta.ps1` shipped) |
 | [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | RPG overlay damage layer: derived combat + element math → signed HP delta — **partially shipped** (resolver/Funnel); overlay CombatMath **deferred** |
 | [architecture/effect-testing.md](architecture/effect-testing.md) | Offline SimEffectHost / scenarios vs LIVE L1–L14 |
+| [architecture/effect-atom-ideal.md](architecture/effect-atom-ideal.md) | **Ideal capture (not a spec)** — atom effects as the smallest unit, skills/traits/items as containers, values + power in SQLite; roll policy (fixed / on-instantiate / on-apply) and power as a category vector |
 | [architecture/match-runtime.md](architecture/match-runtime.md) | MatchRuntime FSM + MatchState (W1–W5 shipped; bullets/hypno deferred) |
 | [architecture/unique-actor-runtime.md](architecture/unique-actor-runtime.md) | UniqueActor FSM — durable specimens (W4–W5 + W8 equip/XP/roster shipped) |
 | [architecture/overlay-control-loops.md](architecture/overlay-control-loops.md) | Dual authority: Hot / Cold / Intent loops (design lock) |
@@ -111,6 +112,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [server/spec.md](server/spec.md) | ASP.NET + SQLite + SignalR |
 | [web/spec.md](web/spec.md) | Vite React UI + Phaser `#/lawn` (12×5 projector) |
 | [contributing/dev-setup.md](contributing/dev-setup.md) | SDK/Node, `FUSIONRPG_GAME_DIR`, publish + release |
+| [contributing/live-test-maintain.md](contributing/live-test-maintain.md) | Enrich/maintain LIVE Python harness + SSOT honesty |
 | [contributing/architecture-map.md](contributing/architecture-map.md) | Where code/SQL/Unity writes belong |
 
 ## 5. Testing
@@ -130,6 +132,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [runbook/release-prove.md](runbook/release-prove.md) | Tag → GitHub Release → real Browse/Install/Play prove |
 | [runbook/local-dev.md](runbook/local-dev.md) | Developers: Vite, `dotnet`, publish zip |
 | [runbook/simulator.md](runbook/simulator.md) | Fake injector tab, `FUSIONRPG_SIM=1`, `dotnet test` |
+| [runbook/live-test-ssot.md](runbook/live-test-ssot.md) | LIVE SSOT: API map, scenario matrix, coverage honesty, Python CLI |
 | [runbook/debug-pipeline.md](runbook/debug-pipeline.md) | `/api/debug/*` + `/api/sim/effect/*` controllable Effect tests |
 | [runbook/debug-live-checklist.md](runbook/debug-live-checklist.md) | Ordered LIVE prove checklist (F1–F23, P1 verdict, sign-off) |
 | [research/effect-runtime/_checklist-effect-foundation-live.json](research/effect-runtime/_checklist-effect-foundation-live.json) | Foundation L1–L14 seal status (offline + lawn) |
