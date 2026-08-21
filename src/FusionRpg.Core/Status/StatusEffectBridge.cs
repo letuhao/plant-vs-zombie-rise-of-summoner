@@ -18,6 +18,7 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
     readonly List<string> _skipped;
     readonly string? _effectId;
     readonly string? _pluginId;
+    readonly Combat.Shield.ShieldGate? _shieldGate;
 
     public StatusFunnelPulseSink(
         BoardSnapshot board,
@@ -28,8 +29,10 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
         ICombatMath math,
         List<string> skipped,
         string? effectId,
-        string? pluginId)
+        string? pluginId,
+        Combat.Shield.ShieldGate? shieldGate = null)
     {
+        _shieldGate = shieldGate;
         _board = board;
         _eventTemplate = eventTemplate;
         _funnel = funnel;
@@ -72,7 +75,7 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
         };
 
         CombatDamageDispatcher.DispatchInstant(
-            packet, _board, ev, _funnel, _policy, _rng, _math, _skipped);
+            packet, _board, ev, _funnel, _policy, _rng, _math, _skipped, _shieldGate);
     }
 }
 

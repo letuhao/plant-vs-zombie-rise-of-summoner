@@ -57,7 +57,9 @@ function Get-FxEvents([string]$url, [long]$afterId) {
         $page = Invoke-RestMethod -Uri "$url/api/events?afterId=$cursor&limit=200" -Method GET
         $items = @($page.items)
         if ($items.Count -eq 0) { break }
-        $all += @($items | Where-Object { $_.kind -in @("debug.fx.shown", "debug.fx.skipped", "debug.fx.list") })
+        $all += @($items | Where-Object { $_.kind -in @(
+            "debug.fx.shown", "debug.fx.skipped", "debug.fx.list",
+            "debug.fx.state", "debug.fx.state.started", "debug.fx.state.ended") })
         $cursor = [long]$items[-1].id
         if ($items.Count -lt 200) { break }
     }
@@ -179,6 +181,22 @@ if (-not $ok) { $pass = $false }
 $results += [pscustomobject]@{ case = "world-flash-alias"; ok = $ok; detail = if ($wf) { "prims=$(@($wf.primitives) -join '+')" } else { "no shown" } }
 Write-Host ("[{0}] world-flash-alias" -f ($(if ($ok) { "PASS" } else { "FAIL" })))
 
+# LIVE status applies carry a real apply-roll (~50% for neutral derived) — a single POST can
+# legitimately resist. Retry until the sustained set starts; refresh semantics make extra
+# applies harmless (TTL refresh, never a duplicate start).
+function Apply-StatusUntilStarted([string]$statusId, [string]$ptr, [int]$durationMs, [int]$tries = 6) {
+    for ($i = 0; $i -lt $tries; $i++) {
+        $win = Get-MaxEventId $BaseUrl
+        Post-Fx "/status/apply" @{ statusId = $statusId; hostPtr = $ptr; amount = 20; durationMs = $durationMs }
+        $p = Wait-FxMatch $BaseUrl $win {
+            param($ev, $pl)
+            $ev.kind -eq "debug.fx.state.started" -and $pl.statusId -eq $statusId
+        } 2500
+        if ($p) { return $true }
+    }
+    return $false
+}
+
 # ---- organic producer paths (real funnel / StatusRuntime, not fx.play) ------
 if ($TargetPtr) {
     # combat: enqueue-delta drives dispatcher → funnel mutation (elements ride along) → cue
@@ -194,18 +212,52 @@ if ($TargetPtr) {
     $results += [pscustomobject]@{ case = "organic-combat-fire"; ok = $ok; detail = if ($p) { "cue=$($p.cueId) rgb=$($p.rgb)" } else { "no matching shown" } }
     Write-Host ("[{0}] organic-combat-fire" -f ($(if ($ok) { "PASS" } else { "FAIL" })))
 
-    # status: debug.status.apply drives StatusRuntime.Apply → OnApplied → cue
+    # status: debug.status.apply drives StatusRuntime.Apply → OnApplied → cue + sustained start
+    Start-Sleep -Milliseconds 400
+    $expireWindow = Get-MaxEventId $BaseUrl
+    $started = Apply-StatusUntilStarted "wither" $TargetPtr 4000
+    $ok = $started
+    if (-not $ok) { $pass = $false }
+    $results += [pscustomobject]@{ case = "organic-status-wither"; ok = $ok; detail = "started=$started (apply-roll retried)" }
+    Write-Host ("[{0}] organic-status-wither (apply + sustained start)" -f ($(if ($ok) { "PASS" } else { "FAIL" })))
+
+    # sustained lifecycle: natural expire ends the visual (reason=expired), ~4s out
+    $expired = Wait-FxMatch $BaseUrl $expireWindow {
+        param($ev, $pl)
+        $ev.kind -eq "debug.fx.state.ended" -and $pl.statusId -eq "wither" -and $pl.reason -eq "expired"
+    } 10000
+    $ok = $null -ne $expired
+    if (-not $ok) { $pass = $false }
+    $results += [pscustomobject]@{ case = "sustain-expire"; ok = $ok; detail = if ($expired) { "reason=expired" } else { "no expired end within 10s" } }
+    Write-Host ("[{0}] sustain-expire" -f ($(if ($ok) { "PASS" } else { "FAIL" })))
+
+    # refresh must not flicker: once started, further applies refresh — zero ended events
     Start-Sleep -Milliseconds 400
     $after = Get-MaxEventId $BaseUrl
-    Post-Fx "/status/apply" @{ statusId = "wither"; hostPtr = $TargetPtr; amount = 20; durationMs = 4000 }
-    $p = Wait-FxMatch $BaseUrl $after {
-        param($ev, $pl)
-        $ev.kind -eq "debug.fx.shown" -and $pl.cueId -eq "status.wither.apply"
-    }
-    $ok = $null -ne $p
+    $started = Apply-StatusUntilStarted "pact_mark" $TargetPtr 15000
+    Post-Fx "/status/apply" @{ statusId = "pact_mark"; hostPtr = $TargetPtr; amount = 5; durationMs = 15000 }
+    Start-Sleep -Milliseconds 1500
+    $events = Get-FxEvents $BaseUrl $after
+    $startedN = @($events | Where-Object { $_.kind -eq "debug.fx.state.started" -and (Get-Payload $_).statusId -eq "pact_mark" }).Count
+    $endedN = @($events | Where-Object { $_.kind -eq "debug.fx.state.ended" -and (Get-Payload $_).statusId -eq "pact_mark" }).Count
+    $ok = $started -and ($startedN -eq 1) -and ($endedN -eq 0)
     if (-not $ok) { $pass = $false }
-    $results += [pscustomobject]@{ case = "organic-status-wither"; ok = $ok; detail = if ($p) { "shown" } else { "no matching shown" } }
-    Write-Host ("[{0}] organic-status-wither" -f ($(if ($ok) { "PASS" } else { "FAIL" })))
+    $results += [pscustomobject]@{ case = "sustain-refresh-no-flicker"; ok = $ok; detail = "started=$startedN ended=$endedN" }
+    Write-Host ("[{0}] sustain-refresh-no-flicker — started={1} ended={2}" -f ($(if ($ok) { "PASS" } else { "FAIL" })), $startedN, $endedN)
+
+    # host death reaps sustained visuals (reason=host-gone). Runs LAST — it kills the lab target.
+    Start-Sleep -Milliseconds 400
+    $after = Get-MaxEventId $BaseUrl
+    $started = Apply-StatusUntilStarted "rally" $TargetPtr 30000
+    Post-Fx "/kill" @{ target = "all" }  # debug.kill has no ptr form; lab holds one zombie and this runs last
+    $gone = Wait-FxMatch $BaseUrl $after {
+        param($ev, $pl)
+        $ev.kind -eq "debug.fx.state.ended" -and $pl.reason -eq "host-gone"
+    } 8000
+    $ok = $started -and ($null -ne $gone)
+    if (-not $ok) { $pass = $false }
+    $results += [pscustomobject]@{ case = "sustain-host-gone"; ok = $ok; detail = if ($gone) { "reason=host-gone" } else { "started=$started, no host-gone end within 8s" } }
+    Write-Host ("[{0}] sustain-host-gone" -f ($(if ($ok) { "PASS" } else { "FAIL" })))
 }
 else {
     Write-Warning "no -TargetPtr: organic producer + flash/floater cases SKIPPED — run setup-lab-run.ps1 and pass the printed ZombiePtr for full coverage"
@@ -315,4 +367,10 @@ Write-Host "  [ ] floaters have a black shadow — readable over bright lawn til
 Write-Host "  [ ] heal motes drift UPWARD (Rising shape), hit bursts stay radial"
 Write-Host "  [ ] hybrid hits cycle rainbow colors; struck units flash briefly on hit"
 Write-Host "  [ ] with heavy DoT statuses active, cue frequency feels ok (else: raise status RateLimit, see review note)"
+Write-Host "Sustained status visuals (vfx-v3 — apply via /api/debug/status/apply to a unit and watch):"
+Write-Host "  [ ] wither: ash drips + graying tint     [ ] blight/rot: green/umber ooze, distinct"
+Write-Host "  [ ] spark: yellow crackle  [ ] shatter: icy glints  [ ] expose: gold glints + v-marker"
+Write-Host "  [ ] spore/bond/charm: orbiting motes (lime/pink/magenta)  [ ] rally: rising gold"
+Write-Host "  [ ] pact_mark: violet ring + diamond badge  [ ] command: blue halo + ring badge"
+Write-Host "  [ ] visuals vanish on expire/death; vanilla statuses (butter/freeze/...) look UNCHANGED"
 if (-not $pass) { exit 1 }

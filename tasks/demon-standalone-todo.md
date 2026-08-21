@@ -74,17 +74,177 @@ Demon summoning V1: banners + pity v2 + atomic pulls + #/demons FE
 
 - [x] C1: engine skeleton — `BattleSetup`/`BattleReport`/`BattleActorState` models, `WaveCatalog` (code-authored waves over demon species + pvz types), round loop with `RoundDurationMs = 1000` and locked order (status ticks → initiative attacks → death triggers → round end), integer-only state, `(engineVersion, rngAlgoVersion, rulesetVersion, seed)` stamps
   - Verify: same setup+seed ⇒ byte-identical serialized report (before any subsystem lands). Files: `Core/Battle/*`, tests. M
-- [ ] C2: subsystem integration — squads composed via ActorHub derived profiles (traits → EffectBag grants via battle-local `EffectFunnel` + battle `IEffectActionSink`), damage via `OverlayCombatMath` + ElementHub, statuses via `StatusRuntime` with injected clock
-  - Verify: element matchup swings a fixed battle; DoT trait kills through a round; CC skips a turn; resistance blocks an apply — each vs the shipped math. Files: `Core/Battle/*`, tests. L
-- [ ] C3: report emission — lean event vocabulary (`board.start`→spawns→dies→`match.result`→`board.end`), `web:{matchKey}:{n}` actor ids, no wall-clock in engine; 3 golden battles (stomp/close/wipe) with locked result hashes
-  - Verify: golden hashes in CI; event list validates against the lean profile. Files: `Core/Battle/BattleReportEmitter.cs`, goldens. M
-- [ ] C4: `WebMatchService` — `rpg_web_match_log` (per-player UNIQUE correlation, setup_json, seed, versions) written before ingest; dedicated single-transaction `InsertEvents` (never the shared channel); monotonic `t` stamping; boot sweep re-ingests logged matches with no run row; SIM trigger `POST /api/test/web-match`
-  - Verify: SIM e2e — run row (`game=webrpg-1`) + facts + XP + Souls appear, replay adds nothing, crash-window (log without run) recovers on boot, concurrent-PvZ grant session untouched. Files: `Server/WebMatchService.cs`, `RpgStore.WebMatches.cs`, E2E. L
+Refined 2026-08-21 into sliced tasks (detail table in [demon-standalone-plan.md](demon-standalone-plan.md) §Refinement; trait split: Funnel-routed stats/HP vs engine-native behaviors — behaviors are outside the FA vocabulary by design):
+
+- [x] C2a: ActorHub-composed battle stats — per-actor derived snapshots (level + trait stat mods → 56-channel reads via `CombatDerivedReader`), hit/dodge/crit via the `crit` RNG stream. Verify: crit/dodge swing fixed battles. M
+- [x] C2b: battle-local `EffectFunnel` + `BattleEffectSink` — HP mutations merge/cap/apply to battle state. Verify: regen heals across rounds; opposite-sign sums net; caps hold. M
+- [x] C2c: battle-local `StatusRuntime` (catalog bootstrap, `ResistanceEvaluator` over derived profiles, clock = round × 1000 ms). Verify: DoT kills through a round; CC skips a turn; resistance blocks an apply. L
+- [x] C2d: `TraitBattleCatalog` — ALL 14 trait defs (7 Funnel-routed: berserker/regenerator/soul-eater/critical-hunter/guardian/swift/immortal; 7 engine-native behaviors: coward/bloodthirsty/loyal/greedy/genius/void-touched/chaos-marked). Verify: 14-row table test + behavior scenarios (coward survives a wipe, loyal redirects damage). L
+- [x] C3a: `BattleReportEmitter` — lean event vocabulary, `web:{matchKey}:{n}` ids, service-stamped monotonic `t`. Verify: emitted list validates against the lean profile. S
+- [x] C3b: 3 golden battles (stomp/close/wipe) + 32-seed sweep hash — blessed after all of C2 (`BattleGoldenTests`, locked 2026-08-21). M
+- [x] C4a: Data — `rpg_web_match_log` (per-player UNIQUE correlation, setup_json, seed, versions) + dedicated explicit-player single-transaction web insert + boot-sweep query. Verify: crash-window test (log without run row re-ingests on boot). M
+- [x] C4b: Server — `WebMatchService` (log-before-ingest, resolver, SIM trigger `POST /api/test/web-match`) + FE log/lawn feed filter by game (deferred from B4). Verify: SIM e2e run+facts+XP+Souls, replay adds nothing. L
+- [x] C4c: concurrency e2e — web match during a live PvZ match leaves grant session + ActiveBound actors untouched through the real service path. S
 
 ### Checkpoint C — match-source success criteria
-- [ ] All five spec success criteria green; commit draft handed to owner.
+- [x] All five spec success criteria green (2026-08-21): goldens locked (`BattleGoldenTests`), subsystem tests prove shared math, SIM e2e web match → run+Souls with zero injector, guards + suites green (2 foreign in-flight VFX-stream failures excluded), runs list shows profile badges. Suites: Core 1177 (58 battle) / Data 106 / Guard 40 / E2E 112 / CheatCore 40 / Launcher 128 / Vitest 200.
+
+Commit draft for the owner (Wave C):
+```
+Web battle engine: composed stats, all-14 traits, goldens, WebMatchService
+  BattleEngine C2: ActorHub-composed per-actor snapshots (56-channel reads via
+  CombatDerivedReader, integer per-mille hit/dodge/crit on a `crit` stream),
+  battle-local EffectFunnel + FA10 sink over engine state, battle-local
+  StatusRuntime on the round clock (DoT/CC/resistance), TraitBattleCatalog with
+  all 14 traits (7 Funnel-routed, 7 engine-native behaviors — outside the FA
+  vocabulary by design). C3: BattleReportEmitter (lean profile, web:{key}:{n}
+  ptrs, clockless), 3 golden battles + 32-seed sweep hash locked. C4:
+  rpg_web_match_log (log-before-ingest, per-player correlation), dedicated
+  explicit-player single-transaction web insert + boot sweep, WebMatchService
+  with SIM trigger POST /api/test/web-match, FE live-feed game filter,
+  concurrency e2e (live PvZ session untouched).
+```
 
 ## WAVE D — expeditions (the announced ship)
 
-- [ ] D1: write `docs/architecture/standalone/spec-expeditions.md` from the map anchors (tiers 30m/4h/8h/20h, slots 2→5, no stamina, recall pro-rated to ticks, outcome sealed at dispatch via recorded seed, specimen soft-lock ⇄ PvZ deploy, rewards through WebMatchService) — present per the spec gate, then break into D2+ tasks
-- [ ] D2+: dispatch/collect API + timers → soft-lock integration → FE screens → Checkpoint D (playable loop)
+- [x] D1 (written 2026-08-21, presented with the Wave C report): `docs/architecture/standalone/spec-expeditions.md` from the LOCKED anchors (2026-08-21): tiers 30m/4h/8h/20h, slots 2→5, no stamina, recall pro-rated at tick boundaries, seed-sealed at dispatch; **content = chain + events** (1–4 battles by tier + boss wave at 20h, interleaved seed-rolled event ticks: found-souls / wild-demon-met / injury); **rewards = all channels** (Souls + player XP via pipeline, specimen XP per battle won, wild-join chance origin `expedition`, fusion material stubs in a per-player inventory); specimen soft-lock ⇄ PvZ deploy; soul-ledger tail-trim lands in this wave (volume becomes real)
+- [x] D2: Data — `rpg_expeditions` (Dispatched/Collected/Recalled, tier, squad_json, seed, due_utc) + `rpg_demon_materials` + soft-lock membership checks in expedition dispatch AND UniqueActor deploy. Verify: locked specimens refuse cross-mode deploy both ways. M
+- [x] D3: Core — `ExpeditionResolver` (pure: tier + squad + seed → battle setups via tier-scaled WaveCatalog + event ticks via `loot` stream + rewards manifest incl. wild-join rolls + materials). Verify: determinism + tick pro-rating goldens. L
+- [x] D4: Server — dispatch/collect/recall endpoints; collect = resolver → battles through `WebMatchService` → specimen XP + wild-join mints (origin `expedition`) + materials + Souls; correlation-idempotent; SIM force-due hook. Verify: SIM e2e full loop. L
+- [x] D5: soul-ledger tail-trim + archive (the P4 deferral lands here; XP-ledger pattern). Verify: trim/rebuild test (spec success criterion 4). M
+- [x] D6: FE — expeditions UI (dispatch from Active roster, tier pick, slot gating, live timers, collect reveal battle-by-battle + events, materials shelf; `#/expeditions` route + nav). Vitest: tick/pro-rate display math. L
+- [x] D7: Checkpoint D sweep + docs sync (standalone map status, doc map, expeditions spec status header). All suites + guards green.
+
+### Checkpoint D — the announced ship gate
+- [x] PASSED 2026-08-21: dispatch→collect loop playable in FE against SIM; specimens soft-locked both ways while deployed; all reward channels land through the one economy (event Souls via `expedition` ledger reason, battle Souls/XP via the pipeline, specimen XP with genius multiplier, wild-join mints origin `expedition`, materials shelf); soul-ledger tail-trim live in compaction. Suites: Core 1187 / Data 116 / Guard 40 / E2E 117 / CheatCore 40 / Launcher 128 / Vitest 205; guards 4/4; FE build clean.
+
+Commit draft for the owner (Wave D):
+```
+Expeditions: the first playable web loop (dispatch → timers → collect)
+  Core: ExpeditionTierCatalog (30m/4h/8h/20h, slots 2→5), pure ExpeditionResolver
+  (per-tick derived RNG streams — recall pro-rating exact by construction; chain
+  battles + boss at 20h; found-souls/wild-demon-met/injury events; per-tier
+  goldens locked), DemonMaterialCatalog stubs. Data: rpg_expeditions +
+  soft-lock membership rows consulted by BOTH expedition dispatch and PvZ deploy,
+  rpg_demon_materials inventory, exactly-once reward apply (one state-gated
+  transaction: souls + materials + specimen XP + wild-join mints), soul-ledger
+  tail-trim + archive in compaction (P4 deferral). Server: dispatch/collect/
+  recall endpoints, battles through WebMatchService with deterministic
+  exp:{id}:{n} correlations, SIM force-due hook. FE: #/expeditions (tier pick,
+  slot gating, live timers, collect reveal, materials shelf).
+```
+
+## Five-axis review of Waves C+D (2026-08-21, four-perspective fan-out) — ALL FIXED
+
+- [x] CRITICAL: web-match replay gate was check-then-append across two lock acquisitions — concurrent same-correlation requests could double-ingest (orphan run + double souls). Fixed: the atomic `AppendWebMatchLog` IS the replay gate in both `RunWebMatchAsync` and `RunPlannedMatchAsync` (Created=false ⇒ validate stored row, replay).
+- [x] Important: expedition wire payloads leaked the sealed seed (outcome pre-reading + ulong→JS precision loss) → server-side projection, seed/correlation/squad_json never leave.
+- [x] Important: post-commit hub sends unguarded in collect/dispatch (a SignalR fault burned the one-time reveal) → best-effort try/catch, matching `WebMatchService.BroadcastAsync`.
+- [x] Important: greedy multiplier + wild-join trait rolls lived in Server → folded into `ExpeditionResolver` (manifest complete in Core, one stream namespace); forage tier golden consciously re-blessed (other three tiers byte-identical — the move touched nothing else).
+- [x] Important: `Reset()` missed all four new tables → added; regression test.
+- [x] Important: collect-retry elapsed could shrink under clock skew, stranding committed tail battles → elapsed floored at the furthest already-logged battle's tick (`BattleSchedule` + ≤5 log lookups).
+- [x] Important: funnel lower-cases target keys vs case-sensitive actor map (mixed-case key = silently unhittable actor); MaxHp<1 spawned die-event-less corpses; duplicate keys shadowed actors → loud validation at `Resolve` entry; dispatch replay now validates tier+squad (house pattern).
+- [x] Suggestions taken: saturating damage math (wrap → 1-damage inversion), materialized initiative rolls, `BuildSquad` cap+dedupe, invariant-culture defensive seed parse, run-link subquery guard, band-constant renames + WHY comments (shards-at-plan-time, XpMilli multiplier, swift/berserker labels, mutual-wipe tie-break), FE timer gated on active expeditions + `lockedIds` memo fix, spec vocabulary synced (stream names, matchKey scheme, manifest ownership).
+- Deferred with notes: boot-sweep 100-row window can starve behind permanently version-skipped rows (page or quarantine when a version bump first ships); squad stats snapshot-at-dispatch (today the soft-lock freezes stats, but any future XP path touching locked specimens breaks lazy≡eager — revisit with fusion); log-store incremental membership (per-event O(CAP) signature rebuild on hit-heavy capture traffic); retired-specimen XP silently dropped at collect (acceptable: retirement forfeits earnings).
+- Post-fix sweep: Core 1203 / Data 121 / E2E 120 / Guard 40 / Vitest 206, guards 4/4, FE build clean.
+
+## WAVE F — demon-fusion (spec: docs/architecture/demons/spec-demon-fusion.md; detail table in demon-standalone-plan.md §Wave F)
+
+- [x] F1: `StarPolicy` + `FusionCostTable` (pure Core). 9 tests. S
+- [x] F2: `DemonRecipeCatalog` — deterministic, 10 recipes (4 rare/4 epic/2 legendary), unique orderless input pairs, eager-warmed. 5 tests. M
+- [x] F3: `FusionRoller` — pick-one + seeded rest, promotion keeps existing traits; `fusion:*` streams. 5 tests. S
+- [x] F4: Data schema (`star`/`promoted`, lineage, fusion log, discovery; Reset covers all three new tables) + Retired filtering. 2 tests. M
+- [x] F5: `ExecuteFusion` star-merge mode, ONE transaction (atomic-append replay gate — review C1 lesson applied from day one). 5 tests. M
+- [x] F6: recipe + promotion modes; discovery pays `DiscoveryDelta` once (dedupe `recipe:{id}`); promotion keeps traits, resets stars, once only. 3 tests. M
+- [x] F7: `FusionEndpoints` preview/execute/recipes (silhouette projection — undiscovered recipe ids/outputs never on the wire) + SIM fixtures (`/api/test/seed-materials`, `/api/test/mint-demon`) + guarded hub pushes. 3 E2E tests. M
+- [x] F8: `BuildSquad` star channel mods (flat per-mille of level stats, floored at `star`); battle goldens re-run byte-identical. 2 tests. S
+- [x] F9: FE `#/fusion` lab (mode tabs, base/sacrifice trays, pick-one trait selector, have/need cost, recipe book silhouettes) + star pips on `#/demons` cards. 5 Vitest. L
+- [x] F10: Checkpoint F sweep + E2E legendary chain (commons → rares → epics → legendary purely via the recipe graph) + docs sync.
+
+### Checkpoint F — fusion success criteria
+- [x] PASSED 2026-08-21: all six spec success criteria green; battle goldens untouched (re-run proof); suites Core 1222 / Data 131 / Guard 40 / E2E 126 / CheatCore 40 / Launcher 128 / Vitest 211; guards 4/4; FE build clean.
+
+Commit draft for the owner (Wave F):
+```
+Demon fusion: star merges, capped promotion, discoverable recipes
+  Core: StarPolicy (caps 3/4/5/5, n+1 sacrifices, +30‰/star) + FusionCostTable,
+  DemonRecipeCatalog (deterministic over the species catalog: one recipe per
+  summonable rare+, band-below inputs, unique orderless pairs, eager-warmed),
+  FusionRoller (pick-one guaranteed + seeded rest on fusion:* streams;
+  promotion keeps existing traits). Data: star/promoted columns, append-only
+  rpg_demon_lineage, rpg_fusion_log (atomic-append replay gate) +
+  rpg_fusion_discovery; ExecuteFusion = ONE gate-serialized transaction for
+  all three modes (refusals write nothing, locked specimens unconsumable,
+  consumption = phase Retired — never deleted); roster filters Retired.
+  Server: /api/fusion preview/execute/recipes with silhouette projection
+  (undiscovered outputs never on the wire), SIM fixtures for deterministic
+  tests. Battles: BuildSquad star channel mods only — engine and goldens
+  untouched (re-run proof). FE: #/fusion lab + star pips. E2E proves the
+  commons→legendary chain purely via fusion.
+```
+
+## Five-axis review of Wave F (2026-08-21, three-perspective fan-out) — ALL FIXED
+
+- [x] Important: untrimmed base id could pass its own trimmed id as a sacrifice and consume itself (trim asymmetry between actor reads and the is-base string compare) → ids normalized once at `ExecuteFusion` entry; Prove-It test.
+- [x] Important: replay lost the discovery reveal (`NewlyDiscovered`/`DiscoverySouls` hardcoded false/0, against the spec's stored-outcome promise) → flags stored in `output_json`, rebuilt on replay; live-specimen replay semantics documented (idempotency, not a snapshot); Prove-It test.
+- [x] Economy consistency (review S5, adjudicated): a species first obtained via fusion or an expedition wild-join now pays the same `species:{id}` discovery bonus a summon would — shared dedupe keeps it once-ever regardless of path; test locks the double-bonus first craft.
+- [x] Suggestions taken: merge log records the real caller seed; recipe mode refuses a stray base id (`base.unexpected`); discovery ledger-append return guarded (no phantom Souls banners); shiny odds reference `SummonRoller.ShinyOneIn` + gate on the species' variant list; ONE trait-slot table (`FusionRoller.SlotsFor` is the authority); tx-consistent `now` in material spends; named private tuples; `ProjectCost` split into explicit overloads with the essence-breadcrumb decision documented (leak is deliberate — it tells the player which essence to farm); hub sends replay-guarded; preview refuses duplicate sacrifices; SIM mint guards traitless species.
+- [x] FE: selecting a base strips it from the sacrifice tray (was a raw server-error bounce); `useSpeciesIndex()` extracted (third copy was the escalation point) and adopted by all three pages; star pips added to expedition squad picks (spec parity); preview effect rebuilt with a complete dependency list (picked trait deliberately not sent — server ignores it; documented).
+- [x] Spec synced: structure line (FusionCostTable lives in StarPolicy.cs), essence breadcrumb + replayed-discovery + cross-path species-bonus paragraphs.
+- Post-fix sweep: Core 1264 / Data 140 / Guard 40 / E2E 127 / Vitest 211, guards 4/4, FE build clean.
+
+## WAVE P — patron-demon (spec: docs/architecture/demons/spec-patron-demon.md; injector scope, ends at a LIVE owner gate)
+
+- [x] PT1: `PatronPolicy` — aura magnitudes + patron kill-earn shape as a running-total difference (cap exact at the boundary, no bonus overshoot). 10 tests. S
+- [x] PT2: Data — `rpg_patron`, `SetPatron` (first free; switch spends 100, ledger dedupe = replay anchor; same-target = natural free replay), fusion guard `sacrifice.is-patron` (patron may LEAD merges), earn hook gated on a PK point lookup (unpatroned path byte-identical). 6 tests. M
+- [x] PT3: Server — `/api/patron` get/set (409 insufficient), `PatronUpdated`, `patron.aura` command pushed on set AND on injector Hello (grant-snapshot rehydrate discipline), runtime state refreshed at boot/set/reset. M
+- [x] PT4: Injector — investigation resolved the risk: the aura is BOTH a session grant (server upserts `patron:aura` into `EffectGrantSession` at each pvzrh board.start → SIM-visible, reconnect-rehydrated, lifecycle-cleared) and a compose-time overlay (`PatronAuraOverlay` in `InjectorCombatBridge.ResolveActor`, plant-side only, riding the side the element resolve already looks up — zero extra board scans; ‰→points at /10). `PatronSecondaryPlugin` (grant-only) freezes the match aura so mid-match switches stay inert; pinned prove-pack scenarios stay aura-free. Secondary-no-unity guard green. L
+- [x] PT5: FE — `bus/patron.ts`, roster "Make patron" + patron badge with aura preview label, fusion trays disable + badge the patron. 2 Vitest. M
+- [x] PT6: SIM sweep — 4 E2E (designation pricing, grant appears at board.start and leaves at board.end, 10-kill match pays 111, unset baseline pays exactly 110); injector builds clean against the game interop; suites Core 1303 / Data 146 / E2E 131 / Guard 40 / Vitest 213; guards 4/4. Registry tests updated for the third plugin; `/api/test/reset` clears the patron cache (process-state lesson).
+- [ ] PT7: **LIVE gate (owner)** — see the handoff below.
+
+### Checkpoint P
+- [x] SIM half PASSED 2026-08-21 (criteria 1/2/3/5 + guards) — full-auto stops here.
+- [ ] LIVE half — owner sign-off pending (criterion 4).
+
+**LIVE handoff (PT7, owner):**
+```powershell
+$env:FUSIONRPG_GAME_DIR = "H:\Games\PVZ FUSION 3.8.1 FULL MOD TOOL"
+.\scripts\deploy-play.ps1 -NoServer     # injector already built into the plugins dir
+```
+Then, with the server up and a patron designated in `#/demons`:
+1. `/api/debug/effects/session-grants` shows `patron:aura` after board.start.
+2. Plant damage vs a fixed target shifts by the aura (150‰ cap → up to +15 typed points).
+3. board.end withdraws the grant (session view empties).
+4. Perf probe window shows no new hot-path cost.
+5. Switching patrons mid-match changes nothing until the next match.
+
+Commit draft for the owner (Wave P):
+```
+Patron demon: element aura into live PvZ, soul-priced switching, kill bonus
+  Core: PatronPolicy (rarityBase+10·star+level clamp 150; primary full /
+  secondary half; kill-earn +1 per 10th earning kill as a running-total
+  difference so the audited 50-soul cap is exact), PatronRuntimeState,
+  grant-only PatronSecondaryPlugin + fx.patron_aura marker (passive, no
+  actions). Data: rpg_patron + SetPatron one transaction (first free, switch
+  spends 100 with ledger-dedupe replay), fusion guard sacrifice.is-patron,
+  earn hook gated on a PK lookup — unpatroned earns byte-identical. Server:
+  /api/patron get/set, patron.aura command on set + injector Hello, session
+  grant upserted at each pvzrh board.start (reconnect rehydrate + SIM proof).
+  Injector: PatronAuraOverlay applies plant-side typed channel points at
+  compose time (no Unity writes, no extra board scans); patron.aura command
+  cached at the client edge. FE: Make-patron roster action + aura badge;
+  fusion trays protect the patron. LIVE checklist pending owner sign-off.
+```
+
+## Post-patron order: demon-contracts → demon-capture → world-events
+
+## demon-fusion — owner decisions (locked 2026-08-21, all eight; spec builds from these)
+
+1. **Identity — both, by mode:** same-species-band merges evolve the BASE demon (instanceId, nickname, XP, lineage survive; sacrifices consumed); cross-species RECIPE fusions consume all inputs and mint the recipe's output.
+2. **Recipes — both layers:** rarity-band merges are the always-available floor; code-authored discoverable cross-species recipes (generated from the species catalog) are the ceiling — hidden until first success, codex-recorded with discovery Soul bonuses.
+3. **Materials — cost + element gate:** every fusion costs rarity-matched shards; the result's element demands matching essences; Souls charge a base fee.
+4. **Randomness — sure species, rolled extras:** output species guaranteed (recipes always work — crafting, the anti-gacha); traits/variant roll from a server seed, correlation-idempotent like summon pulls.
+5. **Traits — pick one, roll rest:** player picks ONE guaranteed trait from any input; remaining slots (count by result rarity 1/2/2/3) seeded-roll from the combined input pool.
+6. **Ceiling — recipes reach legendary:** deep recipes (epic bases + rare materials) mint legendaries as the deterministic path beside pity; capture-only species stay excluded everywhere.
+7. **Merge floor — stars + capped promotion:** sacrifices raise the base's star rank (cap by rarity; per-mille combat channel bonuses per star, deploy-power later in PvZ); a max-star base may promote ONE rarity once, re-rolling trait slots upward.
+8. **Patron demon — after fusion:** un-parked; slots between fusion and contracts (small injector scope; patron effect scales from stars/fused demons).

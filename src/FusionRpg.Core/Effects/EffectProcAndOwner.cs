@@ -158,6 +158,11 @@ public static class EffectOverlayMerge
             "statusId", "periodMs", "durationMs", "status_icd_ms", "statusIcdMs",
             "everyHits", "resetOnBurst", "counterScope", "tickBudget",
             "spread", "immunityTags", "elementPayload"
+        },
+        [EffectActions.GrantShield] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "amount", "element", "priority", "sourceClass", "durationTicks", "refillOnMerge",
+            "target", "chance", "icd_ms", "max_stacks", "filters"
         }
     };
 

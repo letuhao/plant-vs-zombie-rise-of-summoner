@@ -40,6 +40,8 @@ builder.Services.AddSingleton<FusionRpg.Core.Effects.EffectGrantSession>();
 builder.Services.AddSingleton<FusionRpg.Core.Effects.SimEffectHost>();
 builder.Services.AddSingleton<UniqueActorService>();
 builder.Services.AddSingleton<PerfWindowBuffer>();
+builder.Services.AddSingleton<WebMatchService>();
+builder.Services.AddSingleton<ExpeditionService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<EventIngest>());
 builder.Services.AddHostedService(sp => sp.GetRequiredService<CompactionWorker>());
 builder.Services.AddHostedService<UniqueActorDeployWatchdog>();
@@ -55,6 +57,11 @@ app.Services.GetRequiredService<RpgStore>().Init();
 // first request would permanently poison WaveCatalog's static initializer (review I6).
 _ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
 _ = FusionRpg.Core.Battle.WaveCatalog.All;
+_ = FusionRpg.Core.Demons.Fusion.DemonRecipeCatalog.All; // recipe graph must fail fast, not poison lazily
+// Boot sweep: web matches logged but never ingested (crash window) re-resolve deterministically.
+var sweptMatches = app.Services.GetRequiredService<WebMatchService>().SweepUnresolved();
+if (sweptMatches > 0)
+    Console.WriteLine($"[web-match] boot sweep re-ingested {sweptMatches} logged matches");
 var portraits = app.Services.GetRequiredService<TypeIconStore>().BackfillPortraitsFromDumps();
 if (portraits > 0)
     Console.WriteLine($"[icons] backfilled {portraits} portraits from dump layer 'image'");
@@ -66,6 +73,10 @@ app.MapStorageEndpoints();
 app.MapUniqueActors();
 app.MapDemons();
 app.MapSouls();
+app.MapExpeditions();
+app.MapFusion();
+app.MapPatron();
+PatronEndpoints.RefreshRuntimeState(app.Services.GetRequiredService<RpgStore>()); // SIM plugins read it
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));
 

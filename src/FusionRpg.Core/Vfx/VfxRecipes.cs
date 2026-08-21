@@ -4,7 +4,30 @@ public enum VfxPrimitiveKind
 {
     Floater = 0,
     Burst = 1,
-    Flash = 2
+    Flash = 2,
+    // Sustained kinds (vfx-v3): lifetime runs apply-cue → expire-cue, not LifeSeconds.
+    Aura = 3,
+    Tint = 4,
+    Marker = 5
+}
+
+/// <summary>Aura motion styles — sampled by pure VfxAuraMath (SPEC vfx-v3 §4 grammar).</summary>
+public enum VfxAuraStyle
+{
+    Drip = 0,
+    Orbit = 1,
+    RiseSparkle = 2,
+    CrackleJitter = 3,
+    PulseRing = 4,
+    StreamOut = 5
+}
+
+public enum VfxMarkerShape
+{
+    Ring = 0,
+    Diamond = 1,
+    TriangleDown = 2,
+    Cross = 3
 }
 
 public enum VfxColorSourceKind
@@ -38,6 +61,14 @@ public sealed class VfxPrimitiveSpec
     /// <summary>Render only when the cue resolved an element color — plain/omni hits skip this
     /// spec (owner call 2026-08-21: normal damage always fires, so its burst carries no signal).</summary>
     public bool RequireElement { get; init; }
+
+    public VfxAuraStyle AuraStyle { get; init; } = VfxAuraStyle.Drip;
+    public VfxMarkerShape MarkerShape { get; init; } = VfxMarkerShape.Ring;
+    /// <summary>Tint kind only: lerp strength toward FixedRgb (clamped by VfxTintMath.MaxStrength).</summary>
+    public float TintStrength { get; init; } = 0.2f;
+
+    public bool IsSustained =>
+        Kind is VfxPrimitiveKind.Aura or VfxPrimitiveKind.Tint or VfxPrimitiveKind.Marker;
     public (byte R, byte G, byte B) FixedRgb { get; init; } = (255, 255, 255);
     public VfxLabelSourceKind Label { get; init; } = VfxLabelSourceKind.None;
     public string FixedLabel { get; init; } = "";
@@ -60,4 +91,7 @@ public sealed class VfxRecipe
     public string CueId { get; init; } = "";
     public IReadOnlyList<VfxPrimitiveSpec> Primitives { get; init; } = Array.Empty<VfxPrimitiveSpec>();
     public VfxRateLimit RateLimit { get; init; } = new();
+
+    public bool HasSustained => Primitives.Any(p => p.IsSustained);
+    public bool HasMarker => Primitives.Any(p => p.Kind == VfxPrimitiveKind.Marker);
 }

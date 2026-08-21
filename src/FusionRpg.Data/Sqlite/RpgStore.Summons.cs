@@ -88,7 +88,8 @@ public sealed partial class RpgStore
                     false, new List<DemonSpecimenDto>(), ReadPityUnlocked(db, playerId), balance, 0));
             }
 
-            AppendSoulLedgerUnlocked(db, playerId, 0, -cost, SoulEarnPolicy.Reasons.Summon, "spend", corr, corr, now);
+            if (!AppendSoulLedgerUnlocked(db, playerId, 0, -cost, SoulEarnPolicy.Reasons.Summon, "spend", corr, corr, now))
+                throw new InvalidOperationException("summon spend dedupe collision — correlation reused outside the summon log");
 
             var pity = ReadPityUnlocked(db, playerId);
             var rng = SeededRng.DeriveStream(rngSeed, "gacha");
@@ -130,6 +131,22 @@ public sealed partial class RpgStore
                 }
             }
 
+            // Codex milestone faucet (spec-soul-economy): half at ≥50 % discovered, full at ≥90 %
+            // (the guardrail lets web-only players claim it once capture-exclusives exist).
+            var totalSpecies = DemonSpeciesCatalog.All.Count;
+            if (totalSpecies > 0)
+            {
+                var discovered = CountDiscoveredUnlocked(db, playerId);
+                if (discovered * 2 >= totalSpecies &&
+                    AppendSoulLedgerUnlocked(db, playerId, 0, SoulEarnPolicy.CodexHalfMilestone,
+                        SoulEarnPolicy.Reasons.Milestone, "codex", "half", "codex:half", now))
+                    discoverySouls += SoulEarnPolicy.CodexHalfMilestone;
+                if (discovered * 10 >= totalSpecies * 9 &&
+                    AppendSoulLedgerUnlocked(db, playerId, 0, SoulEarnPolicy.CodexFullMilestone,
+                        SoulEarnPolicy.Reasons.Milestone, "codex", "full", "codex:full", now))
+                    discoverySouls += SoulEarnPolicy.CodexFullMilestone;
+            }
+
             WritePityUnlocked(db, playerId, newPity, now);
 
             using (var log = db.CreateCommand())
@@ -163,6 +180,14 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             return ReadPityUnlocked(db, playerId);
         }
+    }
+
+    long CountDiscoveredUnlocked(SqliteConnection db, long playerId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM rpg_demon_codex WHERE player_id=$p AND state='discovered';";
+        cmd.Parameters.AddWithValue("$p", playerId);
+        return (long)(cmd.ExecuteScalar() ?? 0L);
     }
 
     PityState ReadPityUnlocked(SqliteConnection db, long playerId)

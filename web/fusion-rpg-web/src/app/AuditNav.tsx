@@ -18,6 +18,8 @@ const links = [
   { to: "/lawn", label: "Lawn" },
   { to: "/roster", label: "Roster" },
   { to: "/demons", label: "Demons" },
+  { to: "/expeditions", label: "Expeditions" },
+  { to: "/fusion", label: "Fusion" },
   { to: "/storage", label: "Storage" }
 ] as const;
 

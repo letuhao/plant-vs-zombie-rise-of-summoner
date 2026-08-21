@@ -107,6 +107,9 @@ export function HubProvider({ children }: { children: ReactNode }) {
       void qc.invalidateQueries({ queryKey: ["demonRoster"] });
       void qc.invalidateQueries({ queryKey: ["demonCodex"] });
       void qc.invalidateQueries({ queryKey: ["demonSummonState"] });
+      // Expeditions ride specimen state: locks, wild-join mints, and materials all land here.
+      void qc.invalidateQueries({ queryKey: ["expeditions"] });
+      void qc.invalidateQueries({ queryKey: ["demonMaterials"] });
     };
 
     const onSoulsUpdated = () => {

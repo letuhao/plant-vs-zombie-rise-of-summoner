@@ -567,6 +567,13 @@ export function LawnPage() {
                     : "—"
               },
               {
+                label: "Shield",
+                value:
+                  selected.rpgShield != null
+                    ? `${selected.rpgShield}/${selected.rpgShieldMax ?? "?"}`
+                    : "—"
+              },
+              {
                 label: "Speed",
                 value: selected.speed != null ? String(selected.speed) : "—"
               },

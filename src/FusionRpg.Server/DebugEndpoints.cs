@@ -231,6 +231,7 @@ public static class DebugEndpoints
         MapPost(g, "/fx/list", "debug.fx.list");
         MapPost(g, "/fx/mute", "debug.fx.mute");
         MapPost(g, "/fx/unmute", "debug.fx.unmute");
+        MapPost(g, "/fx/state", "debug.fx.state");
 
         g.MapPost("/effects/reload", async (IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
         {

@@ -159,10 +159,11 @@ public sealed partial class RpgStore
                 SELECT a.instance_id, a.player_id, a.side, a.type_id, a.phase, a.level, a.xp,
                        a.match_key, a.last_ptr, a.deploy_correlation_id, a.revision, a.created_utc, a.updated_utc,
                        p.species_id, p.rarity, p.variant, p.element_primary, p.element_secondary,
-                       p.traits_json, p.origin, p.nickname, p.locked, p.created_utc, p.revision
+                       p.traits_json, p.origin, p.nickname, p.locked, p.created_utc, p.revision,
+                       p.star, p.promoted
                 FROM rpg_unique_actors a
                 JOIN rpg_demon_profiles p ON p.instance_id = a.instance_id
-                WHERE a.player_id = $pid
+                WHERE a.player_id = $pid AND a.phase != 'Retired'
                 ORDER BY a.created_utc ASC;
                 """;
             cmd.Parameters.AddWithValue("$pid", playerId);
@@ -185,7 +186,9 @@ public sealed partial class RpgStore
                         Nickname = r.IsDBNull(20) ? null : r.GetString(20),
                         Locked = r.GetInt64(21) != 0,
                         CreatedUtc = r.GetString(22),
-                        Revision = r.GetInt64(23)
+                        Revision = r.GetInt64(23),
+                        Star = r.GetInt32(24),
+                        Promoted = r.GetInt64(25) != 0
                     }
                 });
             }
@@ -261,7 +264,7 @@ public sealed partial class RpgStore
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             SELECT instance_id, species_id, rarity, variant, element_primary, element_secondary,
-                   traits_json, origin, nickname, locked, created_utc, revision
+                   traits_json, origin, nickname, locked, created_utc, revision, star, promoted
             FROM rpg_demon_profiles WHERE instance_id = $id;
             """;
         cmd.Parameters.AddWithValue("$id", instanceId);
@@ -280,7 +283,9 @@ public sealed partial class RpgStore
             Nickname = r.IsDBNull(8) ? null : r.GetString(8),
             Locked = r.GetInt64(9) != 0,
             CreatedUtc = r.GetString(10),
-            Revision = r.GetInt64(11)
+            Revision = r.GetInt64(11),
+            Star = r.GetInt32(12),
+            Promoted = r.GetInt64(13) != 0
         };
     }
 }

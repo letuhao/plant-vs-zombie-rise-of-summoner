@@ -86,10 +86,43 @@ public class StatusVfxCuesTests
         foreach (var id in statusIds)
         {
             Assert.True(catalog.TryGet(StatusVfxCues.CueId(id), out var recipe), id);
-            Assert.All(recipe.Primitives, p => Assert.True(p.LifeSeconds > 0f));
+            // transient specs need a life; sustained specs live apply→expire
+            Assert.All(recipe.Primitives, p => Assert.True(p.IsSustained || p.LifeSeconds > 0f));
         }
 
-        // 3 combat/debug cues + 21 status cues
-        Assert.Equal(24, catalog.Ids.Count);
+        // vfx-v3: every one of the 13 CUSTOM statuses has a sustained composition;
+        // the 8 engine-wrapped vanilla statuses have NONE (original visuals untouched).
+        var custom = new[]
+        {
+            "wither", "blight", "rot", "spark", "spore", "pact_mark", "leech",
+            "expose", "shatter", "bond", "rally", "command", "charm_pulse"
+        };
+        var engineWrapped = new[] { "butter", "freeze", "cold", "poison", "hypno", "ember", "jala", "kelp" };
+        foreach (var id in custom)
+        {
+            Assert.True(catalog.TryGet(StatusVfxCues.CueId(id), out var r), id);
+            Assert.True(r.HasSustained, id + " must have a sustained composition");
+        }
+
+        foreach (var id in engineWrapped)
+        {
+            Assert.True(catalog.TryGet(StatusVfxCues.CueId(id), out var r), id);
+            Assert.False(r.HasSustained, id + " is vanilla-visualized — no sustained set allowed");
+        }
+
+        // markers only on react-to states (SPEC §4 grammar)
+        var markerIds = custom.Where(id =>
+        {
+            catalog.TryGet(StatusVfxCues.CueId(id), out var r);
+            return r.HasMarker;
+        }).OrderBy(x => x).ToArray();
+        Assert.Equal(new[] { "bond", "command", "expose", "pact_mark" }, markerIds);
+
+        Assert.Contains(
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "wither").Aura,
+            new VfxAuraStyle?[] { VfxAuraStyle.Drip });
+
+        // 3 combat/debug cues + shield.broken + 21 status cues
+        Assert.Equal(25, catalog.Ids.Count);
     }
 }

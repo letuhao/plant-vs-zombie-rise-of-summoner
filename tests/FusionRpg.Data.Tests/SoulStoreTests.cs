@@ -122,4 +122,52 @@ public class SoulStoreTests : IDisposable
         Assert.True(ledger.Items[0].Id > ledger.Items[1].Id);
         Assert.True(_store.GetSoulBalance(1).Revision >= 2);
     }
+
+    [Fact]
+    public void Ledger_pagination_walks_older_history()
+    {
+        _store.AwardSouls(1, 10, SoulEarnPolicy.Reasons.Discovery, "p1");
+        _store.AwardSouls(1, 20, SoulEarnPolicy.Reasons.Discovery, "p2");
+        _store.AwardSouls(1, 30, SoulEarnPolicy.Reasons.Discovery, "p3");
+        var page1 = _store.ListSoulLedger(1, limit: 2);
+        Assert.Equal(2, page1.Items.Count);
+        var page2 = _store.ListSoulLedger(1, limit: 2, afterId: page1.Items[^1].Id);
+        // Regression (review): with the old `id > after` + DESC, this returned page 1 again.
+        Assert.Single(page2.Items);
+        Assert.True(page2.Items[0].Id < page1.Items[^1].Id);
+    }
+
+    [Fact]
+    public void Spend_replay_with_a_different_amount_is_refused()
+    {
+        _store.AwardSouls(1, 500, SoulEarnPolicy.Reasons.Seed, "bank");
+        var (ok1, _, _) = _store.TrySpendSouls(1, 100, "ritual", "corr-r");
+        Assert.True(ok1);
+        var (ok2, reason, bal) = _store.TrySpendSouls(1, 200, "ritual", "corr-r");
+        Assert.False(ok2);
+        Assert.Equal("correlation.mismatch", reason);
+        Assert.Equal(400, bal.Balance); // nothing double-spent
+        var (ok3, replay, _) = _store.TrySpendSouls(1, 100, "ritual", "corr-r");
+        Assert.True(ok3);
+        Assert.Equal("replay", replay);
+    }
+
+    [Fact]
+    public void Awards_beyond_the_balance_cap_are_rejected()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            _store.AwardSouls(1, RpgStore.MaxSoulAward + 1, SoulEarnPolicy.Reasons.Seed, "huge"));
+        Assert.Equal(0, _store.GetSoulBalance(1).Balance);
+    }
+
+    [Fact]
+    public void Kill_earn_memo_stays_exact_across_runs()
+    {
+        // Two separate matches, both past the per-match cap — the in-memory memo (review C1)
+        // must isolate runs and match the ledger exactly.
+        PlayMatch(Guid.NewGuid().ToString("N"), 60, "defeat");
+        PlayMatch(Guid.NewGuid().ToString("N"), 60, "defeat");
+        var expected = 2 * (50 * SoulEarnPolicy.KillDelta + SoulEarnPolicy.DefeatDelta);
+        Assert.Equal(expected, _store.GetSoulBalance(1).Balance);
+    }
 }

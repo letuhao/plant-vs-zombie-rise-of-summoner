@@ -124,6 +124,18 @@ Damage extras use `path`: `real` / `take` / `body` / `apply`. Scale DEF only on 
 | `patch.failed` | SafePatchAll |
 | `test.probe` | sim only |
 
+## Shield (RPG overlay resource — shield-system-spec.md §2.6)
+
+All carry `{ targetPtr, shieldId, element, amount, hitCount, hp, maxHp }`; `element` is an
+element id or `none`; `amount`/`hitCount` are meaningful on `shield.absorbed` only.
+
+| kind | When |
+|---|---|
+| `shield.granted` | New shield instance applied (merge re-asserts are silent) |
+| `shield.absorbed` | Aggregated per `(targetPtr, shieldId)` per 100 ms flush window — noisy kind |
+| `shield.broken` | Pool hit 0 during dispatch — the VFX moment; its pending absorb aggregate is flushed first |
+| `shield.expired` | Duration expiry, cap eviction, or merge-to-zero removal (no break VFX) |
+
 ## Debug pipeline
 
 See [runbook/debug-pipeline.md](../runbook/debug-pipeline.md). Kinds (often stamped with `scenarioId`):
@@ -160,7 +172,7 @@ Live packs: `GET /api/cheats/packs`, `POST /api/cheats/probe`, `POST /api/cheats
 
 ## Noisy kinds (SQLite only, not live-pushed)
 
-`plant.damage`, `zombie.damage`, `bullet.init`, `bullet.place`, `item.drop`, `pet.xp`
+`plant.damage`, `zombie.damage`, `bullet.init`, `bullet.place`, `item.drop`, `pet.xp`, `shield.absorbed`
 
 ## Metrics names (global)
 

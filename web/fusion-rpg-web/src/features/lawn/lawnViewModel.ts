@@ -33,6 +33,9 @@ export type Occupant = {
   armorMax?: number;
   armor2?: number;
   armor2Max?: number;
+  /** RPG shield resource (rpgShield* payload keys) — separate bar, never merged into armor. */
+  rpgShield?: number;
+  rpgShieldMax?: number;
   speed?: number;
   interval?: number;
   statusChips: string[];

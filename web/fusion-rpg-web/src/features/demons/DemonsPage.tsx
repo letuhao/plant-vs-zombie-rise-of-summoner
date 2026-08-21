@@ -7,14 +7,17 @@ import {
   useDemonRoster,
   useSetDemonLocked,
   useSetDemonNickname,
+  useSpeciesIndex,
   useSummon,
   useSummonState,
   type DemonSpecimenDto,
   type SummonOutcomeDto
 } from "@/lib/bus/demons";
 import { Page } from "@/layouts/Page";
+import { usePatron, useSetPatron } from "@/lib/bus/patron";
 import { Badge, Banner, Button, EmptyState, Panel, TabList, TextInput, TypeIcon } from "@/ui";
 import { displayName, pityLine, splitRoster } from "./rosterSplit";
+import { auraLabel, auraPreviewMilli } from "./patronView";
 
 const RARITY_BADGE: Record<string, string> = {
   legendary: "★★★★ Legendary",
@@ -37,18 +40,15 @@ export function DemonsPage() {
   const summon = useSummon();
   const setNickname = useSetDemonNickname();
   const setLocked = useSetDemonLocked();
+  const patron = usePatron(playerId);
+  const setPatron = useSetPatron();
 
   const [tab, setTab] = useState<"summon" | "roster" | "codex">("summon");
   const [reveal, setReveal] = useState<SummonOutcomeDto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nickDrafts, setNickDrafts] = useState<Record<string, string>>({});
 
-  const speciesById = useMemo(() => {
-    const map = new Map<string, { name: string; side: "plant" | "zombie"; gameTypeId: number }>();
-    for (const s of catalog.data?.species ?? [])
-      map.set(s.speciesId, { name: s.name, side: s.side, gameTypeId: s.gameTypeId });
-    return map;
-  }, [catalog.data]);
+  const speciesById = useSpeciesIndex();
 
   const split = useMemo(() => splitRoster(roster.data?.items ?? []), [roster.data?.items]);
   const balance = summonState.data?.balance.balance ?? 0;
@@ -89,6 +89,9 @@ export function DemonsPage() {
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold">
             {displayName(s, species?.name)}
+            {s.profile.star > 0 ? (
+              <span className="ml-2 text-xs text-amber-300">{"★".repeat(s.profile.star)}</span>
+            ) : null}
             {s.profile.variant !== "normal" ? <Badge className="ml-2">{s.profile.variant}</Badge> : null}
           </p>
           <p className="text-xs text-muted">
@@ -121,6 +124,25 @@ export function DemonsPage() {
             >
               {s.profile.locked ? "🔒" : "🔓"}
             </Button>
+            {patron.data?.patron?.instanceId === id ? (
+              <Badge data-testid={`patron-${id}`}>
+                patron · {auraLabel(
+                  s.profile.elementPrimary,
+                  auraPreviewMilli(s.profile.rarity, s.profile.star, Number(s.actor.level)),
+                  Math.floor(auraPreviewMilli(s.profile.rarity, s.profile.star, Number(s.actor.level)) / 2)
+                )}
+              </Badge>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                title={patron.data?.patron ? `Switch costs ${patron.data.switchCostSouls} Souls` : "First patron is free"}
+                onClick={() => void setPatron.mutateAsync({ playerId, instanceId: id, correlationId: newCorrelationId() })}
+                data-testid={`make-patron-${id}`}
+              >
+                Patron
+              </Button>
+            )}
           </div>
         ) : null}
       </div>

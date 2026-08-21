@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { CatalogPage } from "@/features/catalog/CatalogPage";
 import { DemonsPage } from "@/features/demons/DemonsPage";
+import { ExpeditionsPage } from "@/features/expeditions/ExpeditionsPage";
+import { FusionPage } from "@/features/fusion/FusionPage";
 import { CheatsPage } from "@/features/cheats/CheatsPage";
 import { AlmanacDumpPage } from "@/features/almanac-dump/AlmanacDumpPage";
 import { IconDumpPage } from "@/features/icon-dump/IconDumpPage";
@@ -40,6 +42,8 @@ export function AppRoutes() {
         <Route path="lawn" element={<LawnPage />} />
         <Route path="roster" element={<RosterPage />} />
         <Route path="demons" element={<DemonsPage />} />
+        <Route path="expeditions" element={<ExpeditionsPage />} />
+        <Route path="fusion" element={<FusionPage />} />
         <Route path="sim" element={<SimPage />} />
         <Route path="*" element={<Navigate to="/status" replace />} />
       </Route>

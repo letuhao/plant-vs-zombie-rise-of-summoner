@@ -355,6 +355,9 @@ public static class CheatCommandRunner
             case "debug.effect.enqueue-delta":
                 RunEnqueueDelta(p);
                 break;
+            case "debug.shield.grant":
+                RunShieldGrant(p);
+                break;
             case "debug.effect.board-snapshot":
                 EmitBoardSnapshot();
                 break;
@@ -402,6 +405,9 @@ public static class CheatCommandRunner
                 break;
             case "debug.fx.unmute":
                 RunFxMute(p, mute: false);
+                break;
+            case "debug.fx.state":
+                RunFxState();
                 break;
             default:
                 CheatState.Error("unknown debug cmd: " + name);
@@ -727,6 +733,77 @@ public static class CheatCommandRunner
         }
     }
 
+    /// <summary>
+    /// debug.shield.grant — owner decision 10: grant a shield to the selected/target ptr
+    /// (base, element, durationTicks, priority default skill 20). Same command pattern as
+    /// enqueue-delta; goes through ShieldRuntime.Apply, never a Funnel write.
+    /// </summary>
+    static void RunShieldGrant(JsonElement p)
+    {
+        var ptr = ResolveDeltaTargetPtr(p);
+        if (string.IsNullOrWhiteSpace(ptr))
+        {
+            CheatState.Error("debug.shield.grant: missing target");
+            DebugRuntime.Emit("debug.effect.error", new Dictionary<string, object>
+            {
+                ["error"] = "missing-target",
+                ["command"] = "debug.shield.grant"
+            });
+            return;
+        }
+
+        var amount = LongProp(p, "amount", 0);
+        if (amount <= 0)
+        {
+            CheatState.Error("debug.shield.grant: amount must be > 0");
+            return;
+        }
+
+        FusionRpg.Core.Stats.Derived.ElementTypeId? element = null;
+        var elementStr = Str(p, "element");
+        if (!string.IsNullOrWhiteSpace(elementStr))
+        {
+            if (!FusionRpg.Core.Stats.Derived.ElementRoster.TryParse(elementStr, out var parsedEl))
+            {
+                CheatState.Error("debug.shield.grant: unknown element " + elementStr);
+                return;
+            }
+
+            element = parsedEl;
+        }
+
+        Effects.EffectRuntime.Ensure();
+        Effects.EffectRuntime.FreezeBoard();
+        var gate = Effects.EffectRuntime.Bag.ShieldGate;
+        if (gate == null)
+        {
+            CheatState.Error("debug.shield.grant: shield gate missing");
+            return;
+        }
+
+        var duration = LongProp(p, "durationTicks", 0);
+        var sourceId = Str(p, "sourceId");
+        var result = gate.ApplyGrant(CombatPtr.Normalize(ptr!), new FusionRpg.Core.Combat.Shield.ShieldGrant
+        {
+            SourceId = "debug.shield:" + (string.IsNullOrWhiteSpace(sourceId) ? "manual" : sourceId),
+            Element = element,
+            BaseHp = amount,
+            Priority = (int)LongProp(p, "priority", FusionRpg.Core.Combat.Shield.ShieldPolicy.PrioritySkill),
+            DurationTicks = duration > 0 ? duration : null,
+            RefillOnMerge = true
+        });
+
+        DebugRuntime.Emit("debug.shield.granted", new Dictionary<string, object>
+        {
+            ["targetPtr"] = ptr!,
+            ["outcome"] = result.Outcome.ToString(),
+            ["shieldId"] = result.Instance?.ShieldId ?? "",
+            ["hp"] = result.Instance?.Hp ?? 0,
+            ["maxHp"] = result.Instance?.MaxHp ?? 0,
+            ["evicted"] = result.Evicted?.ShieldId ?? ""
+        });
+    }
+
     static void RunEnqueueDelta(JsonElement p)
     {
         try
@@ -804,7 +881,9 @@ public static class CheatCommandRunner
                     funnel,
                     Effects.EffectRuntime.Bag.CombatPolicy,
                     Effects.EffectRuntime.Bag.CombatRng,
-                    Effects.EffectRuntime.Bag.CombatMath);
+                    Effects.EffectRuntime.Bag.CombatMath,
+                    skipped: null,
+                    shieldGate: Effects.EffectRuntime.Bag.ShieldGate);
             }
             else if (amount != 0)
             {
@@ -1205,6 +1284,17 @@ public static class CheatCommandRunner
         VfxDirector.Play(cue);
         CheatState.Note("fx.play " + cue.CueId +
                         (cue.TargetPtr != null ? " ptr=" + cue.TargetPtr : " cell=" + cue.Col + "," + cue.Row));
+    }
+
+    static void RunFxState()
+    {
+        var sets = VfxDirector.SustainedSnapshot();
+        DebugRuntime.Emit("debug.fx.state", new Dictionary<string, object>
+        {
+            ["count"] = sets.Count,
+            ["sets"] = sets
+        });
+        CheatState.Note("fx sustained: " + sets.Count);
     }
 
     static void RunFxList()

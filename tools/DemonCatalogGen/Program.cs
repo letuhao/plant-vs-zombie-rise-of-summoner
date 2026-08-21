@@ -18,7 +18,12 @@ var output = Path.GetFullPath(args.Length > 1
 
 var store = new RpgStore(dataDir);
 store.Init();
+// Deterministic tie order: (side, type, game) — `types` can carry the same (side, type) under
+// multiple game ids and SQLite's duplicate order is unspecified; the generator dedupes by First().
 var seeds = store.ListTypes()
+    .OrderBy(t => t.Side, StringComparer.Ordinal)
+    .ThenBy(t => t.Type)
+    .ThenBy(t => t.Game, StringComparer.Ordinal)
     .Select(t => new CapturedTypeSeed(t.Side, t.Type, t.TypeName, t.DisplayName, (int)(t.HpBase ?? 0)))
     .ToList();
 Console.WriteLine($"captured type rows: {seeds.Count} (zombie {seeds.Count(s => s.Side == "zombie")}, plant {seeds.Count(s => s.Side == "plant")})");

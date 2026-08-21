@@ -108,6 +108,37 @@ public sealed class FoundationHarness
         return this;
     }
 
+    /// <summary>Shield runtime when <see cref="WithShieldGate"/> was called; null otherwise.</summary>
+    public Combat.Shield.ShieldRuntime? ShieldRuntime { get; private set; }
+
+    public FoundationHarness WithShieldGate()
+    {
+        ShieldRuntime = new Combat.Shield.ShieldRuntime();
+        _bag.ShieldGate = new Combat.Shield.ShieldGate(ShieldRuntime, ResolveCombatActor);
+        return this;
+    }
+
+    /// <summary>Grant a shield to a board ptr (normalized like dispatcher targets are).</summary>
+    public Combat.Shield.ShieldApplyResult GrantShield(
+        string ptr, long baseHp, ElementTypeId? element = null,
+        int priority = Combat.Shield.ShieldPolicy.PrioritySkill,
+        string sourceId = "test-shield", long? durationTicks = null, bool refillOnMerge = true)
+    {
+        if (ShieldRuntime == null)
+            throw new InvalidOperationException("Call WithShieldGate() first.");
+        var ownerKey = EffectOwnerKeys.Entity(CombatPtr.Normalize(ptr));
+        return ShieldRuntime.Apply(new Combat.Shield.ShieldGrant
+        {
+            OwnerKey = ownerKey,
+            SourceId = sourceId,
+            Element = element,
+            BaseHp = baseHp,
+            Priority = priority,
+            DurationTicks = durationTicks,
+            RefillOnMerge = refillOnMerge
+        }, _derived.Resolve(CombatPtr.Normalize(ptr), attackerLess: false), nowTick: 0);
+    }
+
     CombatActorSnapshot ResolveCombatActor(string? ptr, bool attackerLess)
     {
         if (attackerLess)
@@ -151,7 +182,8 @@ public static class EffectSeedCatalog
         EconomySun(),
         IcdButter(),
         OnSpawnButter(),
-        OverlayDamage()
+        OverlayDamage(),
+        ShieldGrantEffect()
     };
 
     public static EffectDef ButterOnHit() => Triggered(
@@ -173,6 +205,20 @@ public static class EffectSeedCatalog
     public static EffectDef ClearButter() => Triggered(
         "fx.clear_butter", "Clear butter", EffectTriggers.OnDamageDealt,
         EffectActions.ClearStatus, new Dictionary<string, object?> { ["status"] = "butter" });
+
+    /// <summary>Patron aura marker (spec-patron-demon.md): a passive with NO actions — the grant
+    /// is the session-visible lifecycle anchor; magnitudes live in PatronRuntimeState and apply
+    /// as a pure compose-time overlay, never through FA stat writes.</summary>
+    public static EffectDef PatronAuraMarker() => new()
+    {
+        EffectId = "fx.patron_aura",
+        EffectType = EffectTypes.Passive,
+        Name = "Patron aura",
+        Enabled = true,
+        SourceTag = "seed",
+        Triggers = new List<string>(),
+        Actions = new List<EffectActionRow>()
+    };
 
     public static EffectDef PassiveAtkFlat() => new()
     {
@@ -280,6 +326,20 @@ public static class EffectSeedCatalog
     public static EffectDef OverlayDamage() => Triggered(
         "fx.overlay_damage", "Overlay HP delta", EffectTriggers.OnDamageDealt,
         EffectActions.ApplyResourceDelta, new Dictionary<string, object?> { ["channel"] = "hp" });
+
+    public static EffectDef ShieldGrantEffect() => new()
+    {
+        EffectId = "fx.shield_grant",
+        EffectType = EffectTypes.Triggered,
+        Name = "Grant shield",
+        Enabled = true,
+        SourceTag = "seed",
+        Triggers = new List<string> { EffectTriggers.OnDamageDealt, EffectTriggers.OnTimer, EffectTriggers.OnSpawn },
+        Actions = new List<EffectActionRow>
+        {
+            new() { Seq = 1, Action = EffectActions.GrantShield, Params = new Dictionary<string, object?>() }
+        }
+    };
 
     static EffectDef Triggered(string id, string name, string trigger, string action, Dictionary<string, object?> p) => new()
     {

@@ -31,6 +31,7 @@ public static class EffectActions
     public const string SetBoxType = "SetBoxType";
     public const string Economy = "Economy";
     public const string ApplyResourceDelta = "ApplyResourceDelta";
+    public const string GrantShield = "GrantShield";
 }
 
 public static class EffectTypes

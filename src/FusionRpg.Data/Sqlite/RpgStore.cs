@@ -385,6 +385,37 @@ public sealed partial class RpgStore : IRpgDb
               updated_utc TEXT NOT NULL,
               PRIMARY KEY (player_id, species_id)
             );
+            CREATE TABLE IF NOT EXISTS rpg_demon_lineage (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              instance_id TEXT NOT NULL,
+              event TEXT NOT NULL,
+              detail_json TEXT NOT NULL DEFAULT '{}',
+              t TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_demon_lineage_instance ON rpg_demon_lineage(instance_id, id);
+            CREATE TABLE IF NOT EXISTS rpg_fusion_log (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              player_id INTEGER NOT NULL,
+              correlation_id TEXT NOT NULL,
+              mode TEXT NOT NULL,
+              inputs_json TEXT NOT NULL,
+              output_json TEXT NOT NULL,
+              seed TEXT NOT NULL,
+              t TEXT NOT NULL,
+              UNIQUE(player_id, correlation_id)
+            );
+            CREATE TABLE IF NOT EXISTS rpg_fusion_discovery (
+              player_id INTEGER NOT NULL,
+              recipe_id TEXT NOT NULL,
+              t TEXT NOT NULL,
+              PRIMARY KEY (player_id, recipe_id)
+            );
+            CREATE TABLE IF NOT EXISTS rpg_patron (
+              player_id INTEGER NOT NULL PRIMARY KEY,
+              instance_id TEXT NOT NULL,
+              set_utc TEXT NOT NULL,
+              revision INTEGER NOT NULL DEFAULT 0
+            );
             CREATE TABLE IF NOT EXISTS rpg_soul_ledger (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               player_id INTEGER NOT NULL,
@@ -427,11 +458,63 @@ public sealed partial class RpgStore : IRpgDb
               pulls_since_legendary INTEGER NOT NULL DEFAULT 0,
               updated_utc TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS rpg_web_match_log (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              player_id INTEGER NOT NULL,
+              correlation_id TEXT NOT NULL,
+              match_key TEXT NOT NULL UNIQUE,
+              setup_json TEXT NOT NULL,
+              seed TEXT NOT NULL,
+              engine_version INTEGER NOT NULL,
+              ruleset_version INTEGER NOT NULL,
+              rng_algo_version INTEGER NOT NULL,
+              environment_stamp TEXT,
+              sweep_refused TEXT,
+              run_id INTEGER,
+              t TEXT NOT NULL,
+              UNIQUE(player_id, correlation_id)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_web_match_log_unresolved ON rpg_web_match_log(id) WHERE run_id IS NULL;
+            CREATE TABLE IF NOT EXISTS rpg_expeditions (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              player_id INTEGER NOT NULL,
+              correlation_id TEXT NOT NULL,
+              state TEXT NOT NULL,
+              tier_id TEXT NOT NULL,
+              squad_json TEXT NOT NULL,
+              seed TEXT NOT NULL,
+              dispatched_utc TEXT NOT NULL,
+              due_utc TEXT NOT NULL,
+              collected_utc TEXT,
+              UNIQUE(player_id, correlation_id)
+            );
+            CREATE TABLE IF NOT EXISTS rpg_expedition_members (
+              expedition_id INTEGER NOT NULL,
+              instance_id TEXT NOT NULL,
+              active INTEGER NOT NULL DEFAULT 1,
+              PRIMARY KEY (expedition_id, instance_id)
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_expedition_members_active
+              ON rpg_expedition_members(instance_id) WHERE active = 1;
+            CREATE TABLE IF NOT EXISTS rpg_demon_materials (
+              player_id INTEGER NOT NULL,
+              material_id TEXT NOT NULL,
+              qty INTEGER NOT NULL DEFAULT 0,
+              updated_utc TEXT NOT NULL,
+              PRIMARY KEY (player_id, material_id)
+            );
             """);
         EnsureColumn(db, "pvz_activity_rollups", "through_fact_id", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "pvz_activity_rollups", "schema_version", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "through_ledger_id", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "xp_by_reason_json", "TEXT");
+        EnsureColumn(db, "rpg_demon_profiles", "star", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_demon_profiles", "promoted", "INTEGER NOT NULL DEFAULT 0");
+        // battle-adoption: platform stamp for the cross-arch replay guard, and the sweep's
+        // terminal state. Both live HERE, after rpg_web_match_log's own CREATE — an ALTER
+        // above it would throw "no such table" on every fresh database.
+        EnsureColumn(db, "rpg_web_match_log", "environment_stamp", "TEXT");
+        EnsureColumn(db, "rpg_web_match_log", "sweep_refused", "TEXT");
     }
 
     void EnsureMediaSchema(SqliteConnection db)
@@ -492,6 +575,11 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_demon_profiles;", "DELETE FROM rpg_demon_codex;",
                              "DELETE FROM rpg_soul_ledger;", "DELETE FROM rpg_soul_balances;",
                              "DELETE FROM rpg_summon_log;", "DELETE FROM rpg_summon_pity;",
+                             "DELETE FROM rpg_web_match_log;",
+                             "DELETE FROM rpg_expeditions;", "DELETE FROM rpg_expedition_members;",
+                             "DELETE FROM rpg_demon_materials;",
+                             "DELETE FROM rpg_demon_lineage;", "DELETE FROM rpg_fusion_log;",
+                             "DELETE FROM rpg_fusion_discovery;", "DELETE FROM rpg_patron;",
                              "DELETE FROM rpg_unique_actors;",
                              "DELETE FROM archive_catalog;",
                              "DELETE FROM players;"
@@ -1861,7 +1949,7 @@ public sealed partial class RpgStore : IRpgDb
         }
     }
 
-    void InsertOneUnlocked(SqliteConnection db, EventEnvelope e)
+    void InsertOneUnlocked(SqliteConnection db, EventEnvelope e, long? explicitPlayerId = null)
     {
         var payload = e.Payload is null ? "{}" : JsonSerializer.Serialize(e.Payload, Json);
         var t = string.IsNullOrWhiteSpace(e.T) ? DateTime.UtcNow.ToString("o") : e.T;
@@ -1872,7 +1960,9 @@ public sealed partial class RpgStore : IRpgDb
         if (e.Kind == "board.start")
         {
             matchKey ??= Guid.NewGuid().ToString();
-            playerId = GetCurrentPlayerIdUnlocked(db);
+            // Explicit player (web ingest): never stamp current_player_id on a web run — a mid-
+            // resolution player switch would mis-credit the save (audit precondition 4).
+            playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
             using (var cmd = db.CreateCommand())
             {
                 cmd.CommandText = """
@@ -1896,9 +1986,9 @@ public sealed partial class RpgStore : IRpgDb
         {
             runId = FindRunId(db, matchKey);
             if (runId is { } rid)
-                playerId = GetRunPlayerId(db, rid) ?? GetCurrentPlayerIdUnlocked(db);
+                playerId = GetRunPlayerId(db, rid) ?? explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
             else
-                playerId = GetCurrentPlayerIdUnlocked(db);
+                playerId = explicitPlayerId ?? GetCurrentPlayerIdUnlocked(db);
         }
 
         long id;
@@ -2246,16 +2336,16 @@ public sealed partial class RpgStore : IRpgDb
                     break;
                 }
             case "catalog.types":
-                ProjectCatalog(db, payload, t);
+                if (pvzGame) ProjectCatalog(db, payload, t);
                 break;
             case "catalog.recipes":
-                ProjectRecipes(db, payload);
+                if (pvzGame) ProjectRecipes(db, payload);
                 break;
             case "pet.spawn":
-                UpsertTypeFromSpawn(db, payload, t, "pet");
+                if (pvzGame) UpsertTypeFromSpawn(db, payload, t, "pet");
                 break;
             case "grid.place":
-                UpsertTypeFromSpawn(db, payload, t, "grid");
+                if (pvzGame) UpsertTypeFromSpawn(db, payload, t, "grid");
                 break;
             case "level.name":
                 {

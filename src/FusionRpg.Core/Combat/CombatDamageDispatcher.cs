@@ -16,7 +16,8 @@ public static class CombatDamageDispatcher
         CombatPolicy? policy = null,
         ICombatRng? rng = null,
         ICombatMath? math = null,
-        List<string>? skipped = null)
+        List<string>? skipped = null,
+        Shield.ShieldGate? shieldGate = null)
     {
         using var _perf = FusionRpg.Core.Diagnostics.PerfProbe.Measure(FusionRpg.Core.Diagnostics.PerfSection.CombatDispatch);
         policy ??= CombatPolicy.Default;
@@ -37,29 +38,22 @@ public static class CombatDamageDispatcher
             if (string.IsNullOrWhiteSpace(ptr)) continue;
             var amount = math.Finalize(packet.SignedAmount, ptr, packet, snapshot.FindPtr(ptr));
             if (funnel == null) continue;
-            var ok = funnel.EnqueueMutation(
-                EffectOwnerKeys.Entity(ptr),
-                amount,
-                pluginId: packet.PluginId ?? "combat",
-                effectId: packet.EffectId,
-                grantId: string.IsNullOrWhiteSpace(packet.SourceGrantId)
-                    ? null
-                    : packet.SourceGrantId,
-                channel: packet.Channel ?? "hp",
-                elements: packet.ElementPayload);
-            if (ok)
+            // Apply tail is the shared DamageApplyPipeline (combat-unification): shield gate
+            // → funnel, byte-identical to the pre-extraction inline tail.
+            var applied = DamageApplyPipeline.ApplyPacketToFunnel(
+                packet, ptr, amount, ev?.HitCount ?? 1, shieldGate, funnel, ev);
+            switch (applied.Outcome)
             {
-                n++;
-                if (amount < 0)
-                    funnel.NoteOverlayDamage(
-                        packet.ActorPtr ?? ev?.ActorPtr,
-                        ptr,
-                        amount,
-                        packet.ChainDepth,
-                        packet.SourceGrantId,
-                        ev);
+                case DamageApplyOutcome.Applied:
+                    n++;
+                    break;
+                case DamageApplyOutcome.FullyAbsorbed:
+                    skipped?.Add((packet.SourceGrantId ?? ptr) + ":absorbed");
+                    break;
+                default:
+                    skipped?.Add((packet.SourceGrantId ?? ptr) + ":enqueue");
+                    break;
             }
-            else skipped?.Add((packet.SourceGrantId ?? ptr) + ":enqueue");
         }
 
         return n;

@@ -53,7 +53,9 @@ public static class DemonSpeciesGenerator
                 Name = row.DisplayName ?? row.TypeName ?? $"Demon {row.TypeId}",
                 Side = row.Side,
                 GameTypeId = row.TypeId,
-                DemonTypeId = DemonSpeciesCatalog.DemonTypeIdFloor + (row.Side == "plant" ? 5000 : 0) + row.TypeId,
+                // Wide side split: zombie 10000+, plant 60000+ — a zombie typeId can never
+                // collide with a plant typeId in the demon id space.
+                DemonTypeId = DemonSpeciesCatalog.DemonTypeIdFloor + (row.Side == "plant" ? 50_000 : 0) + row.TypeId,
                 ElementPrimary = primary,
                 ElementSecondary = secondary,
                 BaseRarity = rarity,
@@ -82,8 +84,14 @@ public static class DemonSpeciesGenerator
     static void EnsureElementPresence(List<DemonSpeciesDef> species, ElementTypeId element)
     {
         if (species.Any(s => s.ElementPrimary == element)) return;
-        var idx = species.FindIndex(s => s.BaseRarity == DemonRarity.Common && s.ElementSecondary != element);
-        if (idx < 0) idx = species.Count - 1;
+        // Never repurpose a species another ensure-pass just promoted (light then dark would
+        // otherwise fight over the same slot), and keep primary != secondary in every path.
+        bool Eligible(DemonSpeciesDef s) =>
+            s.ElementSecondary != element &&
+            s.ElementPrimary != ElementTypeId.Light &&
+            s.ElementPrimary != ElementTypeId.Dark;
+        var idx = species.FindIndex(s => s.BaseRarity == DemonRarity.Common && Eligible(s));
+        if (idx < 0) idx = species.FindIndex(Eligible);
         if (idx < 0) return;
         species[idx] = species[idx] with { ElementPrimary = element };
     }

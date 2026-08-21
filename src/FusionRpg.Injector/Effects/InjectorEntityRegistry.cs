@@ -50,6 +50,9 @@ public static class InjectorEntityRegistry
         {
             if (p == null || p.Pointer == IntPtr.Zero) return;
             Plants[p.Pointer] = new PlantEntry { P = p };
+            var typeId = -1;
+            try { typeId = (int)p.thePlantType; } catch { }
+            if (typeId >= 0) QueueInnateShield("plant", typeId, p.Pointer);
         }
         catch { }
     }
@@ -67,6 +70,34 @@ public static class InjectorEntityRegistry
                 PtrHex = z.Pointer.ToString("X"),
                 TypeId = typeId
             };
+            QueueInnateShield("zombie", typeId, z.Pointer);
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// Innate content-row shields (shield-system-spec.md §2.6): queued here, applied on the
+    /// first shield tick (capacity read behind the barrier). Granted-once tracking in the
+    /// runtime keeps resync re-Adds from re-forming a broken innate shield.
+    /// </summary>
+    static void QueueInnateShield(string side, int typeId, IntPtr ptr)
+    {
+        try
+        {
+            if (FusionRpg.Core.Combat.Shield.ShieldInnateCatalog.IsEmpty) return;
+            if (!FusionRpg.Core.Combat.Shield.ShieldInnateCatalog.TryGet(side, typeId, out var def)) return;
+            var runtime = EffectRuntime.Bag.ShieldGate?.Runtime;
+            runtime?.QueueInnate(new FusionRpg.Core.Combat.Shield.ShieldGrant
+            {
+                OwnerKey = FusionRpg.Contracts.EffectOwnerKeys.Entity(
+                    FusionRpg.Core.Combat.CombatPtr.Normalize(ptr.ToString("X"))),
+                SourceId = "innate:" + typeId,
+                Element = def.Element,
+                BaseHp = def.BaseHp,
+                Priority = def.Priority,
+                RefillOnMerge = false,
+                IsInnate = true
+            });
         }
         catch { }
     }
@@ -76,6 +107,15 @@ public static class InjectorEntityRegistry
         if (ptr == IntPtr.Zero) return;
         Plants.Remove(ptr);
         Zombies.Remove(ptr);
+        // Death/lifecycle flush (shield-system-spec.md §2.6): shields, innate markers, and
+        // regen carry die with the actor so a reused ptr starts clean.
+        try
+        {
+            Effects.EffectRuntime.Bag.ShieldGate?.Runtime.RemoveAll(
+                FusionRpg.Contracts.EffectOwnerKeys.Entity(
+                    FusionRpg.Core.Combat.CombatPtr.Normalize(ptr.ToString("X"))));
+        }
+        catch { }
     }
 
     public static void Clear()
@@ -83,6 +123,9 @@ public static class InjectorEntityRegistry
         Plants.Clear();
         Zombies.Clear();
         _lastResyncFrame = int.MinValue;
+        // Board-start barrier only — Resync clears the dicts directly and must NOT wipe
+        // shields (it re-Adds the same live actors every ResyncFrames).
+        try { EffectRuntime.Bag.ShieldGate?.Runtime.Clear(); } catch { }
     }
 
     public static bool NeedsResync(int frame) =>

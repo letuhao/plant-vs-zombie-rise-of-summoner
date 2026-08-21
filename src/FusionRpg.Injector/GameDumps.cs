@@ -61,7 +61,29 @@ internal static class GameDumps
         Try(d, "maxHp", () => p.thePlantMaxHealth);
         d["attackBase"] = attackBase;
         Try(d, "attack", () => p.attackDamage);
+        AddRpgShield(d, Ptr(p));
         return d;
+    }
+
+    /// <summary>
+    /// RPG shield resource keys — deliberately distinct from the vanilla theShieldHealth
+    /// keys, which the web fold maps into the armor bar (shield-system-spec.md §2.6).
+    /// </summary>
+    static void AddRpgShield(Dictionary<string, object> d, string ptrHex)
+    {
+        try
+        {
+            var runtime = Effects.EffectRuntime.Bag.ShieldGate?.Runtime;
+            if (runtime == null) return;
+            // Always emit when the gate is wired — an explicit 0/0 is how the web fold
+            // CLEARS a bar after the shield breaks (omitting the keys would leave it stale).
+            var totals = runtime.Totals(
+                FusionRpg.Contracts.EffectOwnerKeys.Entity(
+                    FusionRpg.Core.Combat.CombatPtr.Normalize(ptrHex)));
+            d["rpgShieldHp"] = totals.Hp;
+            d["rpgShieldMax"] = totals.MaxHp;
+        }
+        catch { }
     }
 
     public static Dictionary<string, object> Zombie(Zombie z, string source, long hpBase, long maxHpBase, int attackBase, int armorBase, int armorMaxBase)
@@ -101,6 +123,7 @@ internal static class GameDumps
         Try(d, "armor", () => z.theFirstArmorHealth);
         d["armorMaxBase"] = armorMaxBase;
         Try(d, "armorMax", () => z.theFirstArmorMaxHealth);
+        AddRpgShield(d, Ptr(z));
         return d;
     }
 

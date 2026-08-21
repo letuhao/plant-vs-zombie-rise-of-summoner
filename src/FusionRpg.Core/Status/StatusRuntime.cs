@@ -86,6 +86,14 @@ public sealed class StatusRuntime
     /// <summary>Fires on every definitive apply (spread hops included) — VFX cue producer seam (SPEC W5).</summary>
     public Action<StatusInstance>? OnApplied { get; set; }
 
+    /// <summary>
+    /// Fires when an instance definitively ENDS mid-life: expiry prune, ClearGrant, family mutex.
+    /// Deliberately silent on Refresh/Replace re-applies (would flicker sustained visuals),
+    /// WithdrawEntity (host death — VFX reaps via anchor), and Clear (match teardown — VFX ClearAll).
+    /// Handlers must only enqueue — the expiry prune can run mid-spread (vfx-v3 V1).
+    /// </summary>
+    public Action<StatusInstance>? OnEnded { get; set; }
+
     public IReadOnlyList<StatusResistedEvent> ResistedEvents => _resisted;
 
     public IReadOnlyDictionary<string, int> CounterSnapshot() =>
@@ -231,9 +239,20 @@ public sealed class StatusRuntime
             return;
         if (!_byHost.TryGetValue(hostPtr, out var list))
             return;
+        List<StatusInstance>? displaced = null;
+        foreach (var i in list)
+        {
+            if (string.Equals(i.Family, "elemental", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(i.StatusId, def.StatusId, StringComparison.OrdinalIgnoreCase))
+                (displaced ??= new List<StatusInstance>()).Add(i);
+        }
+
+        if (displaced == null) return;
         list.RemoveAll(i =>
             string.Equals(i.Family, "elemental", StringComparison.OrdinalIgnoreCase)
             && !string.Equals(i.StatusId, def.StatusId, StringComparison.OrdinalIgnoreCase));
+        foreach (var e in displaced)
+            OnEnded?.Invoke(e);
     }
 
     bool IsStatusIcdBlocked(StatusApplyInput input, DateTimeOffset now, out StatusInstance? existing)
@@ -255,7 +274,14 @@ public sealed class StatusRuntime
     {
         var rng = spreadRng ?? new FixedStatusRng(0);
         var pulses = 0;
-        foreach (var host in _byHost.Keys.ToList())
+
+        // Ordinal-sorted, not raw dictionary order: host order decides the order pulses reach
+        // the shield gate, which decides the order shield.absorbed aggregates land in a
+        // BattleReport. Battle advertises byte-identical replay, so that ordering must come
+        // from us and not from Dictionary's internals (mirrors ShieldRuntime.Tick's own sort).
+        var hosts = _byHost.Keys.ToList();
+        hosts.Sort(StringComparer.Ordinal);
+        foreach (var host in hosts)
         {
             if (!_byHost.TryGetValue(host, out var list)) continue;
             for (var i = list.Count - 1; i >= 0; i--)
@@ -264,6 +290,7 @@ public sealed class StatusRuntime
                 if (inst.ExpiresAt < now)
                 {
                     list.RemoveAt(i);
+                    OnEnded?.Invoke(inst);
                     continue;
                 }
 
@@ -311,12 +338,25 @@ public sealed class StatusRuntime
     public void ClearGrant(string grantId)
     {
         if (string.IsNullOrWhiteSpace(grantId)) return;
+        List<StatusInstance>? ended = null;
         foreach (var host in _byHost.Keys.ToList())
         {
             if (!_byHost.TryGetValue(host, out var list)) continue;
+            foreach (var i in list)
+            {
+                if (string.Equals(i.GrantId, grantId, StringComparison.OrdinalIgnoreCase))
+                    (ended ??= new List<StatusInstance>()).Add(i);
+            }
+
             list.RemoveAll(i => string.Equals(i.GrantId, grantId, StringComparison.OrdinalIgnoreCase));
             if (list.Count == 0)
                 _byHost.Remove(host);
+        }
+
+        if (ended != null)
+        {
+            foreach (var e in ended)
+                OnEnded?.Invoke(e);
         }
 
         var prefix = grantId.Trim() + "|";

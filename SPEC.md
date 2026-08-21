@@ -1,118 +1,113 @@
-# SPEC — Injector VFX v2 enhancements
+# SPEC — Status state visuals (vfx-v3): sustained per-status VFX
 
-**Status:** **Complete (2026-08-21)** — W1–W6 landed (T1–T7), all findings F1–F8 closed. LIVE gate PASSED 43/43 + owner eyeball confirmation. The gate surfaced and fixed three render-layer defects the offline tests could not see (auto-emission whiteout, vanilla texture steal, additive color washout) and one product rule (element-only hit accents) — all folded into vfx-ssot.md.
-**Scope:** Game-injector VFX only. No other feature is touched.
-**Parent:** [docs/architecture/vfx-ssot.md](docs/architecture/vfx-ssot.md) stays the locked architecture SSOT. This spec adds enhancements inside that architecture; it changes no locked decision.
+**Status:** Draft — pending owner review.
+**Scope:** Injector VFX only. The **13 custom statuses** get unique while-active visuals; the 8 engine-wrapped vanilla statuses (butter, freeze, cold, poison, hypno, ember, jala, kelp) keep their original game visuals **untouched**.
+**Parent:** [docs/architecture/vfx-ssot.md](docs/architecture/vfx-ssot.md) (locked; this spec uses its reserved extension points). Prior round: [docs/architecture/vfx-v2-spec.md](docs/architecture/vfx-v2-spec.md) (complete, LIVE-proven).
 
 ---
 
 ## 1. Objective
 
-The 2026-08-20 audit of the shipped VFX layer (cue → recipe → primitive) found the architecture sound: it survived the event-pipeline-v2 rework and the element-roster growth without structural strain. What remains are three gaps, one per goal:
+Vanilla PVZ communicates status through **duration-bound** visuals — the butter blob stays while buttered, the freeze tint stays while frozen. Our 13 custom statuses are **invisible while active**: a player cannot see that a zombie is withering, marked by a pact, or exposed. This round gives each custom status a unique, glanceable visual identity that lives exactly as long as the status does.
 
-| Goal | Gap today | Outcome when done |
+**Architecture answer (asked and settled):** the locked cue → recipe → primitive design supports this without structural change. What's needed is exactly what the SSOT reserved: the `status.{id}.expire` cue (§4.1, vocabulary reserved since v1) plus one new *sustained* primitive family whose lifetime runs from apply-cue to expire-cue instead of a fixed `LifeSeconds`. Everything else — catalog, admission, pooling discipline, prove harness — extends as data.
+
+Done means: every custom status is identifiable on sight by its visual alone; vanilla visuals byte-identical; the tight budget holds (no lag); apply→sustain→end proven LIVE for lifecycle edges (expire, clear, host death, match end).
+
+## 2. Capability map (build order)
+
+| Module | Delivers | Depends on |
 |---|---|---|
-| **Producibility** | No `status.*` producer path exists — a status VFX cannot be added by "catalog entry + emit line" because nothing emits. LIVE probe never ran. Spec/doc/prove drift (light/dark elements in code, not in docs or prove script). | A new status VFX = 1 catalog entry + 1 producer line + 1 prove line, and `prove-vfx.ps1` passes LIVE with all 6 elements. |
-| **Performance** | `VfxDirector.Tick` resolves `Camera.main` (tag scan) every frame even with zero live VFX — a named suspect in the 9.2 ms/frame `loop.tick` finding. `AnchorResolver` duplicates `InjectorEntityRegistry` with its own string-keyed cache and its own `FindObjectsOfType` sweep. | `vfx.tick` ≤ **0.5% of wall** at the 300z stress tier; **zero** `FindObjectsOfType` owned by VFX code; near-zero cost when no VFX are live. |
-| **Visual quality** | Floaters are raw IMGUI labels (no shadow — unreadable on bright lawns). Every burst is the same radial puff. `Flash` is implemented but unused by any recipe. Big and small hits look identical apart from the number. | Shadowed, crit-popping, amount-tiered floaters; three burst shapes; impact flash on hits — all inside the existing primitives and pool, zero new allocations per hit. |
+| **M1 expire producer** | `StatusRuntime.OnExpired` (+ clear path) mirroring `OnApplied`; `status.{id}.expire` cues; `VfxCueDto.DurationMs` carried on apply cues (TTL safety) | — |
+| **M2 sustained state tracker** | Director-side registry keyed `(hostPtr, statusId)`: start on apply, refresh on re-apply, end on first of expire / clear / host-gone / TTL cap / match end / eviction; `debug.fx.state.*` events | M1 |
+| **M3 Aura primitive** | Pooled looping attached particles; motion styles from pure `VfxAuraMath` (Drip, Orbit, RiseSparkle, CrackleJitter, PulseRing, StreamOut) | M2 |
+| **M4 Tint primitive** | `TintCompositor`: per-renderer tint stack, multiplicative blend (≤35%), base capture/restore, 0.25s re-assert vs vanilla color writes | M2 |
+| **M5 Marker primitive** | Floating badge above unit; procedurally generated shape textures (Ring, Diamond, TriangleDown, Cross); gentle bob | M2, M3 (shares pool) |
+| **M6 designs + prove** | 13 seed compositions (§4), prove-vfx lifecycle cases, eyeball checklist per status | M3–M5 |
 
-## 2. Audit findings (ranked)
+M3/M4/M5 are independent of each other; each ships green separately.
 
-| # | Finding | Goal | Severity | Fix shape |
-|---|---|---|---|---|
-| F1 | `status.{id}.apply` cues: catalog has none, `StatusRuntime` emits nothing — phase 4 of the SSOT migration never happened | Producibility | High | W5 |
-| F2 | LIVE probe never ran (`_prove-vfx.json` absent); prove script covers only 4 of 6 elements | Producibility | High | W6 |
-| F3 | `Camera.main` per tick, unconditional — cost paid even at zero live VFX | Performance | High | W2 |
-| F4 | `AnchorResolver` duplicates `InjectorEntityRegistry` (string keys + own sweep vs IntPtr keys + frame resync); per-spawn `GameDumps.Ptr` string alloc to feed it | Performance | Med | W1 |
-| F5 | Floater readability: no shadow/outline, fixed 20px, crit differs only by 1.25× static size | Visual | Med | W3 |
-| F6 | One burst shape for everything; `Flash` primitive dead code (no recipe uses it) | Visual | Med | W4 |
-| F7 | `vfx-ssot.md` §16.2 palette table lacks `light`/`dark` (code has them via `ElementRoster`) | Producibility | Low | W6 |
-| F8 | `PerfSection.VfxTick` instrumented but no budget asserted anywhere | Performance | Low | W6 |
+## 3. Architecture extension (locked shapes)
 
-**Explicitly fine (audited, no change):** thread-safe cue queue, admission/rate-limit engine, pooled bursts, element/hybrid color math, Repaint gating, `ClearAll` on `Board.Die`, funnel present path, C#-seeded catalog (JSON stays deferred), all SSOT bans.
+- **Producer:** `OnExpired` fires when `StatusRuntime` prunes an expired instance and when a clear removes it (payload: the `StatusInstance`). Death of the host emits nothing — the tracker reaps via anchor Unity-null (host-gone), same lesson as floaters.
+- **Cue contract:** apply cues gain `DurationMs` (from `EffectiveDuration`) so the tracker sets a hard TTL = duration + 2s; the expire cue normally ends the visual first. A visual may **never** outlive its TTL — a missed expire cue self-heals.
+- **Recipe model:** `VfxPrimitiveSpec` gains `Sustained = true` variants via `Kind ∈ {Aura, Tint, Marker}` + `AuraStyle`, `MarkerShape` fields. Sustained specs ignore `LifeSeconds` (lifetime is the status's). Existing transient kinds unchanged.
+- **Keying and refresh:** one sustained visual set per `(hostPtr, statusId)` — re-apply refreshes TTL, never duplicates (matches Refresh stacking).
+- **Budget (locked, "tight"):** `AuraPool` = **24** looping systems global (markers share it); **max 2 sustained visual sets per host** — priority: marker-bearing statuses (they are gameplay-reactive) over newest, evicted sets end with reason `evicted`. Aura particle discipline follows the LIVE lessons: emission module **off**, particles pulsed manually from the director tick (≤6 live per aura, pulse every ~0.3s), explicit per-particle colors always.
+- **Tint safety (the risky one, rules locked):** custom statuses only; compositor owns one stack per renderer; composite = base × lerp(white, statusColor, ≤0.35); base captured at first custom tint, restored when the stack empties; re-asserted every 0.25s — if an external write is detected at re-assert (vanilla hurt-flash), adopt the new value as base and re-composite. If a status is both tinted and vanilla-tinted territory, tint loses (Marker/Aura carry the identity).
+- **Events:** `debug.fx.state.started` / `debug.fx.state.ended` with `cueId`, `ptr`, and enumerated end `reason`: `expired`, `cleared`, `host-gone`, `ttl-cap`, `evicted`, `match-end`, `disabled`. `SYS-DAMAGE-FX` off ends all sustained visuals immediately.
+- **Idle-cheapness preserved:** the director's early-out gains one count (live sustained sets); with none live the tick cost is unchanged.
 
-## 3. Work items (dependency order; each ships green)
+## 4. The 13 identities (design table — the creative core)
 
-### W1 — Anchor resolution via the entity registry
-Replace `AnchorResolver`'s private cache + sweep with lookups into `InjectorEntityRegistry` (`FindZombie/FindPlant(ptrHex)?.transform`). The registry is already hook-fed and frame-resynced for the combat path.
-- Delete: AnchorResolver's dictionary, `Sweep()`, and the `GameDumps.Ptr` register calls in `Plant.Start`/`Zombie.Start` postfixes (registry adds already exist there).
-- Keep: the `AnchorResolver.Resolve(ptr)` facade so `VfxDirector` doesn't change.
-- **Accept:** zero `FindObjectsOfType` under `src/FusionRpg.Injector/Fx/`; guard test updated to pin that; all suites green.
+Composition per status mixes the three methods freely; no two share a motion × color × marker combo. Colors extend `VfxSeedCatalog.StatusFx`.
 
-### W2 — Idle-cheap Tick
-- Resolve the camera in `Draw()` only, only when floaters exist, cached and re-resolved on null (a destroyed camera on scene change must not strand stale state).
-- `Tick` early-outs the per-frame work when queue, floaters, bursts, and flashes are all empty (`AnchorResolver.Tick` clock keeps running).
-- **Accept:** unit-testable early-out logic in core where possible; next stress run shows `vfx.tick` ≤ 0.5% wall at 300z (F8 budget lands in `stress-test.ps1` expectations).
+| Status | Fantasy | Aura (style, color) | Tint | Marker | Read-at-a-glance |
+|---|---|---|---|---|---|
+| `wither` | life draining out | Drip, ash-brown motes falling slow | 25% desaturating grey-brown | — | unit visibly "graying out" |
+| `blight` | spreading disease | Drip, sickly-green bubbles | 20% green, slow pulse | — | dripping green ooze |
+| `rot` | earthy decay | Drip, dark umber chunks, heavy/slow | 20% umber | — | heavier, darker than blight |
+| `spark` | electrified | CrackleJitter, yellow-white sparks teleporting around body | — | — | electric crackle, no tint needed |
+| `spore` | fungal host | Orbit, lime spores drifting upward | — | — | circling spores |
+| `pact_mark` | marked for the pact | PulseRing at feet, violet | — | Diamond, violet | **must** be instantly readable — it's a target mark |
+| `leech` | being drained | StreamOut, deep-red motes sinking inward | 15% red | — | red seep |
+| `expose` | armor opened | CrackleJitter, gold glints (sparser than spark) | — | TriangleDown, gold | "hit this one now" |
+| `shatter` | armor shattered | CrackleJitter, cyan-white shard glints | 15% cyan | — | icy glitter distinct from spark's yellow |
+| `bond` | linked | Orbit, pink motes, slow | — | Ring, pink | paired units share the ring |
+| `rally` | rallied buff | RiseSparkle, warm gold | 10% warm | — | buffs rise (heal-motes grammar) |
+| `command` | commanded | PulseRing above head, blue-violet halo | — | Ring, blue-violet | crown-like halo |
+| `charm_pulse` | charmed | Orbit, magenta motes + PulseRing beat | 15% magenta pulse | — | magenta heartbeat |
 
-### W3 — Floater visual pack (pure math + Draw)
-- Shadow pass: each label draws twice — black at (+1,+1) then color — same style, ~2× label cost, floaters only exist ≤0.9s.
-- Crit pop: font scale becomes a curve `PopScale(t)` in `VfxRules` (fast overshoot ~1.5× → settle 1.25×); plain hits stay flat 1.0.
-- Amount tiers: `AmountScale(amount)` in `VfxRules` — e.g. <50 → 0.9×, <200 → 1.0×, ≥200 → 1.15× (exact numbers locked in code constants, test-pinned).
-- **Accept:** all curves/tiers are pure `VfxRules` functions with unit tests; Draw changes compile against game assemblies.
+Grammar rules that keep the battlefield legible: **Drip = DoT**, **CrackleJitter = armor/electric state**, **Orbit = passive affliction/link**, **Rise = buff**, **PulseRing = active mark/aura**, markers only on states the player must react to (pact_mark, expose, bond, command). Apply-moment bursts from v2 stay as-is on all 21.
 
-### W4 — Burst shapes + impact flash
-- `VfxPrimitiveSpec` gains `Shape: VfxBurstShape { Radial, Rising, Directional }`. Emission math per shape lives in core (`VfxBurstMath`: per-particle pos/vel from (shape, index, count, span)) so it is unit-testable; `BurstPool` consumes it. Same pool, same caps, per-particle `Emit` unchanged.
-- `combat.hit` recipe adds a `Flash` spec (existing primitive, §8.5 rules already implemented) — impact feedback on the struck unit.
-- `combat.heal` gets a `Rising` burst (green motes drifting up) — first visible payoff of shapes.
-- **Accept:** `VfxBurstMath` unit tests pin each shape's direction envelope; catalog validation accepts the new field; rate limits unchanged.
-
-### W5 — Status cue producer path (unblocks all future status VFX)
-- `StatusRuntime` gains an optional `IVfxSink` (core interface already exists; injector wires `VfxDirector.Sink` in `InjectorStatusBridge`). On a successful status apply it emits `status.{statusId}.apply` with the host ptr; resisted applies emit nothing.
-- Seed recipes for the statuses with existing prove packs (per SSOT §4.2 criterion — butter, freeze/cold, poison/blight family; exact list read from the status catalog at seeding).
-- **Accept:** core test — recording sink sees `status.{id}.apply` on apply and nothing on resist; each seeded cue gets a `prove-vfx.ps1` line.
-
-### W6 — Sync + LIVE gate
-- `vfx-ssot.md` §16.2 gains `light` (255,232,120) and `dark` (150,90,220) rows; status line updated.
-- `prove-vfx.ps1`: 6-element coverage, one shape case, one status-apply case; verdict JSON unchanged in shape.
-- Stress expectations: `vfx.tick` budget assertion noted in `stress-test.ps1` docs.
-- **Final gate: run `scripts/prove-vfx.ps1` LIVE** (lawn open, via `setup-lab-run.ps1`) — this closes F2, which has been open since the VFX layer shipped.
-
-## 4. Commands
+## 5. Commands
 
 ```powershell
-# offline verification (after every work item)
-dotnet test tests\FusionRpg.Core.Tests
-dotnet test tests\FusionRpg.CheatCore.Tests
-dotnet test tests\FusionRpg.Guard.Tests
-
-# injector compile check against game assemblies (no deploy)
-$env:FUSIONRPG_ML_GAMEDIR = 'H:\Games\PVZ-Fusion-3.9_MelonLoader'
+# offline (per module)
+dotnet test tests\FusionRpg.Core.Tests; dotnet test tests\FusionRpg.Guard.Tests
+$env:FUSIONRPG_ML_GAMEDIR='H:\Games\PVZ-Fusion-3.9_MelonLoader'
 dotnet build src\FusionRpg.Injector.MelonLoader.39\FusionRpg.Injector.MelonLoader.39.csproj -p:OutputPath="$env:TEMP\fusionrpg-vfx-build\"
 
-# LIVE gate (W6, owner-run with game open)
+# LIVE (established cycle: close game → build to Mods → relaunch → enter level → lab → prove)
 .\scripts\setup-lab-run.ps1
-.\scripts\prove-vfx.ps1
+.\scripts\prove-vfx.ps1 -TargetPtr <ZombiePtr>
+# debug: POST /api/debug/fx/state (new) dumps live sustained sets
 ```
 
-## 5. Project structure (touched files only)
+## 6. Project structure (touched)
 
 ```
-src/FusionRpg.Core/Vfx/            VfxRules (curves/tiers), VfxRecipes (+Shape), VfxBurstMath (new),
-                                   VfxCatalog (seed additions), ElementFxPalette (no change)
-src/FusionRpg.Core/Status/         StatusRuntime (+optional IVfxSink emit)
-src/FusionRpg.Injector/Fx/         AnchorResolver (registry facade), VfxDirector (idle-cheap tick,
-                                   shadow draw), BurstPool (shape consumption)
-src/FusionRpg.Injector/Effects/    InjectorStatusBridge (sink wiring)
-src/FusionRpg.Injector/GameHooks.cs  remove now-duplicate anchor Register lines
-tests/FusionRpg.Core.Tests/Vfx/    new: burst math, curves, status-cue tests
-tests/FusionRpg.Guard.Tests/       LawnCoordsGuardTests: no-FindObjectsOfType-in-Fx pin
-scripts/prove-vfx.ps1              6-element + shape + status coverage
-docs/architecture/vfx-ssot.md      §16.2 palette rows, status line
+src/FusionRpg.Core/Vfx/       VfxRecipes (+Aura/Tint/Marker kinds, styles), VfxAuraMath (new, pure),
+                              VfxRules (sustained caps/TTL constants), VfxCatalog (13 sustained rows),
+                              StatusVfxCues (+Expire cue)
+src/FusionRpg.Core/Status/    StatusRuntime (+OnExpired at prune/clear sites)
+src/FusionRpg.Contracts/      VfxCueDto (+DurationMs)
+src/FusionRpg.Injector/Fx/    AuraPool (new), TintCompositor (new), VfxDirector (state tracker,
+                              start/end, eviction, new events), FxResources (marker shape textures)
+src/FusionRpg.Injector/       CheatCommandRunner (+debug.fx.state), Server DebugEndpoints (+/fx/state)
+tests/…/Vfx/                  aura math envelopes, tracker lifecycle (pure decision core), tint
+                              compositor math, catalog completeness (13 sustained sets)
+scripts/prove-vfx.ps1         lifecycle cases: apply→started, expire→ended(expired), kill→ended(host-gone)
 ```
 
-## 6. Code style
+## 7. Code style
 
-Repo rules apply unchanged: no throws into the game loop (guarded try/catch, skip + `debug.fx.skipped`); every tunable constant lives in `VfxRules`; decision logic stays in pure Core (injector classes are thin shells); no `renderer.material`, no per-cue `FindObjectsOfType`, no per-burst instantiate (SSOT ban list); comments state constraints, not narration; neutral project voice, no vendor names.
+House rules unchanged: constants in `VfxRules`; decision logic pure in Core (the tracker's start/refresh/end/evict decisions are a pure class the director drives — same pattern as `VfxAdmission`); no throws into the loop; every end path emits its reason; comments state constraints (especially TintCompositor's restore rules); neutral voice.
 
-## 7. Testing strategy
+## 8. Testing strategy
 
-- **Unit (core, no Unity):** every new curve, tier, shape envelope, and the status-emit decision — same pattern as the existing `tests/FusionRpg.Core.Tests/Vfx/` suite.
-- **Guard:** source-level pin that `Fx/` contains no `FindObjectsOfType` after W1.
-- **Compile:** MelonLoader 3.9 build against the real game assemblies after every injector-touching item.
-- **LIVE:** `prove-vfx.ps1` is the only acceptance for on-screen behavior; it runs once at W6 and its JSON lands in `docs/research/perf/../effect-runtime/`. Perf acceptance reads the next stress run's `vfx.tick`.
+- **Unit:** `VfxAuraMath` envelopes per style (Drip falls, Orbit closes a loop, Crackle stays in-bounds); tracker lifecycle as a pure state machine (apply/refresh/expire/ttl/evict orderings, including expire-after-ttl and re-apply-after-evict); tint composite/restore math; catalog completeness (each of 13 has a sustained set; engine-wrapped 8 have **none**).
+- **Guard:** Fx/ stays `FindObjectsOfType`-free; no vanilla-status visual code paths touched.
+- **LIVE (the real oracle, per the v2 lesson):** prove-vfx lifecycle cases event-asserted; per-status eyeball checklist (13 rows) — visuals are judged by your eyes, events only prove lifecycle.
 
-## 8. Boundaries
+## 9. Boundaries
 
-**Always:** ship each W item green before the next; keep `vfx-ssot.md` as the SSOT and sync it in the same change that alters behavior it locks; presentation-only (no HP/stat/status writes from VFX).
-**Ask first:** any new primitive kind beyond the locked three; any change to rate-limit values or caps; anything touching non-VFX systems beyond the listed integration lines; running the LIVE gate (needs the game open on the owner's machine).
-**Never:** timeline/keyframe DSL, runtime recipe files, per-VFX sink interfaces, `renderer.material`, gameplay reads/writes from VFX, git commits (owner commits manually).
+**Always:** vanilla status visuals untouched (engine-wrapped 8 get no sustained visuals at all); every sustained visual ends via TTL even if all signals are missed; restore tints on every end path including `ClearAll`; each module ships green before the next.
+**Ask first:** raising the 24/2 budget; adding sustained visuals to engine-wrapped statuses; any new marker shape needing non-procedural art; changes to locked rate-limit values.
+**Never:** gameplay reads/writes from VFX; `renderer.material`; auto-emission without explicit color (LIVE lesson); scene scans; timeline DSL; git commits (owner commits).
+
+## 10. Open questions for review
+
+1. Tint re-assert vs vanilla hurt-flash: the 0.25s adopt-latest-base heuristic is my best design; accept, or drop Tint from statuses where it proves flickery LIVE (fallback is always aura-only)?
+2. `bond` pairs: same ring on both linked units is v1; a visible link line between them is a possible future primitive (Beam) — out of scope here?
+3. Marker glyphs are geometric (procedural). Good enough, or do you want a tiny pixel-art asset pipeline someday (bigger question, separate spec)?

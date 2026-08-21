@@ -114,6 +114,10 @@ public static class SimEndpoints
             await svc.RunAsync(_ => svc.Engine.DieZombie(body)));
         sim.MapPost("/bullet", async (SimService svc) =>
             await svc.RunAsync(_ => svc.Engine.Bullet()));
+        // Server-side shield probe (combat-unification, sim-adoption): grant + damage +
+        // /state show absorption with the game closed.
+        sim.MapPost("/shield/grant", async (SimShieldGrantRequest body, SimService svc) =>
+            await svc.RunAsync(_ => svc.Engine.GrantShield(body)));
         sim.MapPost("/mower/place", async (SimMowerRequest? body, SimService svc) =>
             await svc.RunAsync(_ => svc.Engine.PlaceMower(body)));
         sim.MapPost("/mower/start", async (SimMowerRequest? body, SimService svc) =>
@@ -124,9 +128,15 @@ public static class SimEndpoints
 
         var test = app.MapGroup("/api/test");
         test.MapSoulTestSeed();
-        test.MapPost("/reset", async (SimService svc) =>
+        test.MapWebMatchTest();
+        test.MapExpeditionTest();
+        test.MapFusionTest();
+        test.MapPost("/reset", async (SimService svc, RpgStore store) =>
         {
             await svc.FullResetAsync();
+            // The patron cache is process state — a reset that wipes rpg_patron must clear it
+            // too, or later tests/scenarios inherit a phantom designation.
+            PatronEndpoints.RefreshRuntimeState(store);
             return Results.Ok(new { ok = true });
         });
         test.MapGet("/snapshot", async (RpgStore store, SimService svc, EventIngest ingest) =>

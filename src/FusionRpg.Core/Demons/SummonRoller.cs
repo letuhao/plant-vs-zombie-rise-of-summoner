@@ -42,10 +42,13 @@ public static class SummonRoller
         {
             // 10-pull rare floor: the guarantee slot rolls last.
             var floorRare = count == 10 && i == count - 1 && !sawRarePlus;
-            var rarity = RollRarity(pity, floorRare, rng);
-            pity = Advance(pity, rarity);
-            if (rarity >= DemonRarity.Rare) sawRarePlus = true;
-            results.Add(RollSpecies(rarity, banner, focusElement, rng));
+            var rolled = RollRarity(pity, floorRare, rng);
+            var result = RollSpecies(rolled, banner, focusElement, rng);
+            // Pity and the floor track the DELIVERED band — if band fallback ever downgrades a
+            // roll (empty summonable band), the player must not lose a pity hit they never got.
+            pity = Advance(pity, result.Rarity);
+            if (result.Rarity >= DemonRarity.Rare) sawRarePlus = true;
+            results.Add(result);
         }
 
         return (results, pity);
@@ -119,15 +122,11 @@ public static class SummonRoller
         return pool[^1];
     }
 
-    static IReadOnlyList<string> RollTraits(DemonSpeciesDef species, DemonRarity rarity, SeededRng rng)
+    /// <summary>Rarity-scaled trait roll from the species pool — shared by summons and wild joins.</summary>
+    public static IReadOnlyList<string> RollTraits(DemonSpeciesDef species, DemonRarity rarity, SeededRng rng)
     {
-        var want = rarity switch
-        {
-            DemonRarity.Common => 1,
-            DemonRarity.Rare => 2,
-            DemonRarity.Epic => 2,
-            _ => 3
-        };
+        // ONE slot table for every acquisition path — fusion's SlotsFor is the authority.
+        var want = Fusion.FusionRoller.SlotsFor(rarity);
         var pool = species.TraitPool.ToList();
         var picked = new List<string>(want);
         while (picked.Count < want && pool.Count > 0)

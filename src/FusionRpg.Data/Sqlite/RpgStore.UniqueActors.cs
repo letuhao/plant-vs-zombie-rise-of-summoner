@@ -86,6 +86,11 @@ public sealed partial class RpgStore
                 string.Equals(row.DeployCorrelationId, corr, StringComparison.Ordinal))
                 return (true, "", row, false);
 
+            // Cross-mode soft-lock (spec-expeditions.md): a specimen on an active expedition
+            // cannot be PvZ-deployed; the mirror check lives in DispatchExpedition.
+            if (HasActiveExpeditionMembershipUnlocked(db, id))
+                return (false, "expedition.locked", row, false);
+
             if (!string.Equals(row.Phase, UniqueActorPhases.Roster, StringComparison.Ordinal))
                 return (false, "phase." + row.Phase.ToLowerInvariant(), row, false);
 
@@ -704,36 +709,44 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            var row = ReadUniqueActorUnlocked(db, id);
-            if (row is null) return (false, "not_found", null);
-            if (string.Equals(row.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
-                return (false, "phase.retired", row);
-
-            var xp = row.Xp + delta;
-            var level = row.Level < 1 ? 1 : row.Level;
-            while (xp >= 100.0)
-            {
-                xp -= 100.0;
-                level++;
-            }
-
-            var now = DateTime.UtcNow.ToString("o");
-            using var cmd = db.CreateCommand();
-            cmd.CommandText = """
-                UPDATE rpg_unique_actors SET
-                  xp = $xp,
-                  level = $lvl,
-                  revision = revision + 1,
-                  updated_utc = $now
-                WHERE instance_id = $id;
-                """;
-            cmd.Parameters.AddWithValue("$xp", xp);
-            cmd.Parameters.AddWithValue("$lvl", level);
-            cmd.Parameters.AddWithValue("$now", now);
-            cmd.Parameters.AddWithValue("$id", id);
-            cmd.ExecuteNonQuery();
+            var (ok, why, actor) = AwardUniqueActorXpUnlocked(db, id, delta);
             _ = reason; // audit reason reserved; no type progression write
-            return (true, "", ReadUniqueActorUnlocked(db, id));
+            return (ok, why, actor);
         }
+    }
+
+    /// <summary>XP award inside an open transaction — used by the expedition reward apply.</summary>
+    internal (bool Ok, string Reason, UniqueActorDto? Actor) AwardUniqueActorXpUnlocked(
+        SqliteConnection db, string instanceId, double delta)
+    {
+        var row = ReadUniqueActorUnlocked(db, instanceId);
+        if (row is null) return (false, "not_found", null);
+        if (string.Equals(row.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
+            return (false, "phase.retired", row);
+
+        var xp = row.Xp + delta;
+        var level = row.Level < 1 ? 1 : row.Level;
+        while (xp >= 100.0)
+        {
+            xp -= 100.0;
+            level++;
+        }
+
+        var now = DateTime.UtcNow.ToString("o");
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = """
+            UPDATE rpg_unique_actors SET
+              xp = $xp,
+              level = $lvl,
+              revision = revision + 1,
+              updated_utc = $now
+            WHERE instance_id = $id;
+            """;
+        cmd.Parameters.AddWithValue("$xp", xp);
+        cmd.Parameters.AddWithValue("$lvl", level);
+        cmd.Parameters.AddWithValue("$now", now);
+        cmd.Parameters.AddWithValue("$id", instanceId);
+        cmd.ExecuteNonQuery();
+        return (true, "", ReadUniqueActorUnlocked(db, instanceId));
     }
 }

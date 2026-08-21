@@ -96,6 +96,23 @@ function foldArmorMax(p: Payload, fallback?: number): number | undefined {
   );
 }
 
+/**
+ * RPG shield resource (shield-system-spec.md §2.6) — rpgShield* keys ONLY, never the vanilla
+ * theShieldHealth keys (those belong to armor). An explicit rpgShieldMax <= 0 CLEARS the bar
+ * (the injector emits 0/0 after a break); absent keys keep the previous value.
+ */
+function foldRpgShield(p: Payload, fallback?: number): number | undefined {
+  const max = num(p.rpgShieldMax);
+  if (max != null) return max > 0 ? num(p.rpgShieldHp) : undefined;
+  return num(p.rpgShieldHp) ?? fallback;
+}
+
+function foldRpgShieldMax(p: Payload, fallback?: number): number | undefined {
+  const max = num(p.rpgShieldMax);
+  if (max != null) return max > 0 ? max : undefined;
+  return fallback;
+}
+
 function foldArmor2(p: Payload, fallback?: number): number | undefined {
   return num(p.armor2) ?? num(p.theSecondArmorHealth) ?? fallback;
 }
@@ -250,6 +267,8 @@ function upsertLiving(
     armorMax: foldArmorMax(p, extras?.armorMax ?? existing?.armorMax),
     armor2: foldArmor2(p, extras?.armor2 ?? existing?.armor2),
     armor2Max: foldArmor2Max(p, extras?.armor2Max ?? existing?.armor2Max),
+    rpgShield: foldRpgShield(p, existing?.rpgShield),
+    rpgShieldMax: foldRpgShieldMax(p, existing?.rpgShieldMax),
     speed: foldSpeed(p, extras?.speed ?? existing?.speed),
     interval: foldInterval(p, extras?.interval ?? existing?.interval),
     statusChips: extras?.statusChips ?? existing?.statusChips ?? [],
@@ -651,6 +670,8 @@ function applyBoardStatsMembership(m: LawnViewModel, p: Payload): LawnViewModel 
       armorMax: foldArmorMax(item, prev?.armorMax),
       armor2: foldArmor2(item, prev?.armor2),
       armor2Max: foldArmor2Max(item, prev?.armor2Max),
+      rpgShield: foldRpgShield(item, prev?.rpgShield),
+      rpgShieldMax: foldRpgShieldMax(item, prev?.rpgShieldMax),
       speed: foldSpeed(item, prev?.speed),
       interval: foldInterval(item, prev?.interval),
       statusChips: prev?.statusChips ?? [],
@@ -766,6 +787,8 @@ function applyDebugSnapshot(m: LawnViewModel, p: Payload): LawnViewModel {
         armorMax: foldArmorMax(e, prev?.armorMax),
         armor2: foldArmor2(e, prev?.armor2),
         armor2Max: foldArmor2Max(e, prev?.armor2Max),
+        rpgShield: foldRpgShield(e, prev?.rpgShield),
+        rpgShieldMax: foldRpgShieldMax(e, prev?.rpgShieldMax),
         speed: foldSpeed(e, prev?.speed),
         interval: foldInterval(e, prev?.interval),
         statusChips: prev?.statusChips ?? [],

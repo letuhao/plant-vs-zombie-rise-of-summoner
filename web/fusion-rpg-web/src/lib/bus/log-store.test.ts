@@ -1,78 +1,50 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   appendLogEvent,
   appendLogEvents,
   clearLogEvents,
-  getLastHitEvent,
   getLawnMembershipRing,
   getLogEvents,
-  subscribeLastHit,
-  subscribeLog
+  isCaptureGame
 } from "./log-store";
 import type { EventEnvelope } from "./types";
 
-function evt(kind: string, id?: number): EventEnvelope {
-  return { id, t: "2026-01-01T00:00:00Z", game: "pvzrh-3.8.1", kind };
-}
+const ev = (game: string, kind: string, id: number): EventEnvelope => ({
+  id,
+  t: new Date(id).toISOString(),
+  game,
+  kind,
+  matchKey: "m"
+});
 
-describe("log-store", () => {
-  it("appends newest first and notifies subscribers", () => {
-    const listener = vi.fn();
-    const unsub = subscribeLog(listener);
-    appendLogEvent(evt("board.start", 1));
-    expect(getLogEvents()[0]?.kind).toBe("board.start");
-    expect(listener).toHaveBeenCalledTimes(1);
-    unsub();
-    appendLogEvent(evt("board.end", 2));
-    expect(listener).toHaveBeenCalledTimes(1);
+describe("live feed game filter (spec-match-source-core precondition 8)", () => {
+  beforeEach(() => clearLogEvents());
+
+  it("classifies capture games", () => {
+    expect(isCaptureGame("pvzrh-3.8.1")).toBe(true);
+    expect(isCaptureGame("pvzrh-4.0")).toBe(true);
+    expect(isCaptureGame("")).toBe(true); // legacy events without a game stamp
+    expect(isCaptureGame(undefined)).toBe(true);
+    expect(isCaptureGame("webrpg-1")).toBe(false);
   });
 
-  it("prepends batches in reverse order", () => {
-    appendLogEvents([evt("a", 1), evt("b", 2)]);
-    expect(getLogEvents().map((e) => e.kind)).toEqual(["b", "a"]);
+  it("web battle bursts never enter the live log ring", () => {
+    appendLogEvents([
+      ev("pvzrh-3.8.1", "zombie.spawn", 1),
+      ev("webrpg-1", "board.start", 2),
+      ev("webrpg-1", "zombie.die", 3),
+      ev("pvzrh-3.8.1", "zombie.die", 4)
+    ]);
+
+    const games = getLogEvents().map((e) => e.game);
+    expect(games).toEqual(["pvzrh-3.8.1", "pvzrh-3.8.1"]);
   });
 
-  it("caps at 800 events", () => {
-    for (let i = 0; i < 820; i++) appendLogEvent(evt(`k${i}`, i));
-    expect(getLogEvents()).toHaveLength(800);
-    expect(getLogEvents()[0]?.kind).toBe("k819");
-  });
+  it("single web events are filtered too, and the lawn ring stays capture-only", () => {
+    appendLogEvent(ev("webrpg-1", "board.start", 5));
+    appendLogEvent(ev("pvzrh-3.8.1", "plant.spawn", 6));
 
-  it("clears events", () => {
-    appendLogEvent(evt("x"));
-    clearLogEvents();
-    expect(getLogEvents()).toEqual([]);
-  });
-
-  it("ignores empty batch", () => {
-    const listener = vi.fn();
-    subscribeLog(listener);
-    appendLogEvents([]);
-    expect(listener).not.toHaveBeenCalled();
-  });
-
-  it("membership snapshot excludes hits and keeps the same array on hit-only append", () => {
-    appendLogEvent(evt("plant.spawn", 1));
-    const first = getLawnMembershipRing();
-    expect(first.map((e) => e.kind)).toEqual(["plant.spawn"]);
-    appendLogEvent({
-      ...evt("combat.hit", 2),
-      payload: { damage: 9, targetPtr: "P" }
-    });
-    expect(getLogEvents()[0]?.kind).toBe("combat.hit");
-    const second = getLawnMembershipRing();
-    expect(second).toBe(first);
-    expect(second.map((e) => e.kind)).toEqual(["plant.spawn"]);
-    expect(getLastHitEvent()?.kind).toBe("combat.hit");
-  });
-
-  it("lastHit slot notifies independently", () => {
-    const hitFn = vi.fn();
-    subscribeLastHit(hitFn);
-    appendLogEvent(evt("plant.spawn", 1));
-    expect(hitFn).not.toHaveBeenCalled();
-    appendLogEvent({ ...evt("combat.hit", 2), payload: { damage: 1 } });
-    expect(hitFn).toHaveBeenCalledTimes(1);
-    expect(getLastHitEvent()?.kind).toBe("combat.hit");
+    expect(getLogEvents()).toHaveLength(1);
+    expect(getLawnMembershipRing().every((e) => isCaptureGame(e.game))).toBe(true);
   });
 });

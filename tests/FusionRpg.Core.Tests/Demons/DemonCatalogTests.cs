@@ -80,6 +80,41 @@ public class DemonCatalogTests
     }
 
     [Fact]
+    public void Generator_invariants_hold_across_many_input_shapes()
+    {
+        // Property-style regression for the ensure-pass bug (review I2): whatever the hash
+        // distribution of the input, the roster must end with ≥1 light AND ≥1 dark primary,
+        // never primary==secondary, and always validate.
+        for (var offset = 0; offset < 20; offset++)
+        {
+            var seeds = Enumerable.Range(0, 18)
+                .Select(i => new CapturedTypeSeed("zombie", offset * 137 + i, $"Z{offset}_{i}", null, 90 + i * 13))
+                .ToList();
+            var roster = DemonSpeciesGenerator.Generate(seeds);
+            DemonSpeciesCatalog.Validate(roster);
+            Assert.Contains(roster, s => s.ElementPrimary == ElementTypeId.Light);
+            Assert.Contains(roster, s => s.ElementPrimary == ElementTypeId.Dark);
+            Assert.DoesNotContain(roster, s => s.ElementSecondary == s.ElementPrimary);
+        }
+    }
+
+    [Fact]
+    public void Demon_type_ids_never_collide_across_sides()
+    {
+        // Review S5: zombie 10000+t vs plant 60000+t — a mixed roster with overlapping raw
+        // type ids must stay collision-free.
+        var seeds = Enumerable.Range(0, 10)
+            .SelectMany(i => new[]
+            {
+                new CapturedTypeSeed("zombie", i, $"Zed{i}", null, 200 + i),
+                new CapturedTypeSeed("plant", i, $"Plant{i}", null, 100 + i)
+            })
+            .ToList();
+        var roster = DemonSpeciesGenerator.Generate(seeds);
+        Assert.Equal(roster.Count, roster.Select(s => s.DemonTypeId).Distinct().Count());
+    }
+
+    [Fact]
     public void Trait_catalog_ids_are_stable_kebab_and_unique()
     {
         Assert.Equal(DemonTraitCatalog.All.Count, DemonTraitCatalog.All.Select(t => t.TraitId).Distinct().Count());

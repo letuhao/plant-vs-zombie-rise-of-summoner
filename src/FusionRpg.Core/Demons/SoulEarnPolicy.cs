@@ -38,6 +38,9 @@ public static class SoulEarnPolicy
         public const string Discovery = "discovery";
         public const string Milestone = "milestone";
         public const string Summon = "summon";
+        public const string Expedition = "expedition";
+        public const string Fusion = "fusion";
+        public const string Patron = "patron";
         /// <summary>Test/dev bankrolls only — keeps the discovery namespace clean for analytics.</summary>
         public const string Seed = "seed";
     }

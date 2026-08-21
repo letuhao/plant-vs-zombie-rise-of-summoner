@@ -1,7 +1,7 @@
 {
-  "at": "2026-08-21T04:51:38.6796388+07:00",
+  "at": "2026-08-21T09:03:54.5157930+07:00",
   "baseUrl": "http://127.0.0.1:5088",
-  "targetPtr": "1F37B199000",
+  "targetPtr": "2897AD9EC80",
   "pass": true,
   "results": [
     {
@@ -192,12 +192,27 @@
     {
       "case": "organic-status-wither",
       "ok": true,
-      "detail": "shown"
+      "detail": "started=True (apply-roll retried)"
+    },
+    {
+      "case": "sustain-expire",
+      "ok": true,
+      "detail": "reason=expired"
+    },
+    {
+      "case": "sustain-refresh-no-flicker",
+      "ok": true,
+      "detail": "started=1 ended=0"
+    },
+    {
+      "case": "sustain-host-gone",
+      "ok": true,
+      "detail": "reason=host-gone"
     },
     {
       "case": "rate-limit-collapse",
       "ok": true,
-      "detail": "shown=2 limited=3 (volley of 4)"
+      "detail": "shown=1 limited=3 (volley of 4)"
     },
     {
       "case": "mute-roundtrip",

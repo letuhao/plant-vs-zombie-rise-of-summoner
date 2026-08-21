@@ -15,6 +15,8 @@ public sealed class DemonProfileDto
     [JsonPropertyName("origin")] public string Origin { get; set; } = "";
     [JsonPropertyName("nickname")] public string? Nickname { get; set; }
     [JsonPropertyName("locked")] public bool Locked { get; set; }
+    [JsonPropertyName("star")] public int Star { get; set; }
+    [JsonPropertyName("promoted")] public bool Promoted { get; set; }
     [JsonPropertyName("createdUtc")] public string CreatedUtc { get; set; } = "";
     [JsonPropertyName("revision")] public long Revision { get; set; }
 }

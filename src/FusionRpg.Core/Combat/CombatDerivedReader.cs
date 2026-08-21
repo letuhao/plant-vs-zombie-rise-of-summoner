@@ -30,6 +30,25 @@ public static class CombatDerivedReader
     public static double CritResistDamage(ActorDerivedSnapshot snap, ElementTypeId element) =>
         snap.Get(DerivedStatChannels.CombatCritResistDamageOmni) + snap.Get(CritResistDamageChannel(element));
 
+    // Shield families (shield-system-spec.md §2.3): element is nullable — an untyped shield
+    // (element = none) reads the omni half only. Channel ids are roster-generated, so these
+    // never fall through a hand-maintained switch.
+    public static double ShieldCapacity(ActorDerivedSnapshot snap, ElementTypeId? element) =>
+        snap.Get(DerivedStatChannels.CombatShieldCapacityOmni)
+        + (element is { } e ? snap.Get(DerivedStatChannels.CombatShieldCapacity(e)) : 0);
+
+    public static double ShieldToughness(ActorDerivedSnapshot snap, ElementTypeId? element) =>
+        snap.Get(DerivedStatChannels.CombatShieldToughnessOmni)
+        + (element is { } e ? snap.Get(DerivedStatChannels.CombatShieldToughness(e)) : 0);
+
+    public static double ShieldPen(ActorDerivedSnapshot snap, ElementTypeId? element) =>
+        snap.Get(DerivedStatChannels.CombatShieldPenOmni)
+        + (element is { } e ? snap.Get(DerivedStatChannels.CombatShieldPen(e)) : 0);
+
+    public static double ShieldRegen(ActorDerivedSnapshot snap, ElementTypeId? element) =>
+        snap.Get(DerivedStatChannels.CombatShieldRegenOmni)
+        + (element is { } e ? snap.Get(DerivedStatChannels.CombatShieldRegen(e)) : 0);
+
     static string PowerChannel(ElementTypeId e) => e switch
     {
         ElementTypeId.Fire => DerivedStatChannels.CombatPowerFire,

@@ -73,6 +73,16 @@ public sealed class SimDamageRequest
     public int? Damage { get; set; }
 }
 
+/// <summary>Sim shield-grant probe (sim-adoption) — durations unsupported (no sim tick host).</summary>
+public sealed class SimShieldGrantRequest
+{
+    public string Ptr { get; set; } = "";
+    public long Amount { get; set; }
+    public string? Element { get; set; }
+    public int? Priority { get; set; }
+    public string? SourceId { get; set; }
+}
+
 public sealed class SimDieRequest
 {
     public string Ptr { get; set; } = "";

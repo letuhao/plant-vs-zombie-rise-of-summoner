@@ -68,6 +68,8 @@ public static class InjectorLoop
         // merge into the same funnel window (plan Task 10).
         try { EventDrainHost.Tick(unscaledDeltaTime); } catch { }
         try { EffectRuntime.TickDots(unscaledDeltaTime); } catch { }
+        // Shield upkeep after dispatch+DoTs — spec frame order (shield-system-spec.md §2.6).
+        try { EffectRuntime.TickShields(unscaledDeltaTime); } catch { }
         _hb += unscaledDeltaTime;
         if (_hb >= 2f)
         {

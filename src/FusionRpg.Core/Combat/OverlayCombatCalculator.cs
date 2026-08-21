@@ -16,6 +16,9 @@ public sealed class OverlayCombatRequest
 
     /// <summary>Debug/test: when set and hit, overrides the crit roll.</summary>
     public bool? ForceCrit { get; init; }
+
+    /// <summary>Host resolution profile — overlay default keeps behavior byte-identical.</summary>
+    public CombatProfile Profile { get; init; } = CombatProfile.Overlay;
 }
 
 /// <summary>Overlay damage pipeline — combat-damage-ssot.md §6.</summary>
@@ -33,17 +36,43 @@ public sealed class OverlayCombatCalculator
         if (request == null) throw new ArgumentNullException(nameof(request));
         if (rng == null) throw new ArgumentNullException(nameof(rng));
 
-        ElementPayload.Validate(request.Components);
+        // Omni fallback (combat-unification, resolver-core): an EMPTY component list is a
+        // legal untyped attack resolved over the omni halves only — matchup 0. Replaces the
+        // former hard throw; content-boundary validation (ElementPayload.Validate) stays
+        // strict, and the overlay dispatcher never builds an empty request (payload-null is
+        // pass-through in OverlayCombatMath).
+        var omniFallback = request.Components.Count == 0;
+        if (!omniFallback)
+            ElementPayload.Validate(request.Components);
 
-        var matchupBonus = _elementHub.ResolvePayloadBonus(
-            request.Components,
-            request.Defender.ElementTypes,
-            request.BaseOverlayDamage);
+        var matchupBonus = omniFallback
+            ? 0.0
+            : _elementHub.ResolvePayloadBonus(
+                request.Components,
+                request.Defender.ElementTypes,
+                request.BaseOverlayDamage);
 
         var weightedDelta = 0.0;
         var pHitFinal = 0.0;
         var pCritFinal = 0.0;
         var critMultFinal = 0.0;
+
+        if (omniFallback)
+        {
+            var atk = request.Attacker.Derived;
+            var def = request.Defender.Derived;
+            weightedDelta = atk.Get(DerivedStatChannels.CombatPowerOmni)
+                            - def.Get(DerivedStatChannels.CombatDefenseOmni);
+            pHitFinal = CombatProbability.Sigmoid(
+                atk.Get(DerivedStatChannels.CombatAccuracyOmni) - def.Get(DerivedStatChannels.CombatDodgeOmni),
+                CombatProbabilityPolicy.AccuracyScale);
+            pCritFinal = CombatProbability.Sigmoid(
+                atk.Get(DerivedStatChannels.CombatCritRateOmni) - def.Get(DerivedStatChannels.CombatCritResistOmni),
+                CombatProbabilityPolicy.CritRateScale);
+            critMultFinal = 1.0 + CombatProbability.Sigmoid(
+                atk.Get(DerivedStatChannels.CombatCritDamageOmni) - def.Get(DerivedStatChannels.CombatCritResistDamageOmni),
+                CombatProbabilityPolicy.CritDamageScale);
+        }
 
         foreach (var c in request.Components)
         {
@@ -82,6 +111,17 @@ public sealed class OverlayCombatCalculator
             finalDamage = Math.Max(0, powerAdjusted);
             if (crit)
                 finalDamage *= critMultFinal;
+
+            // Min-chip floor (owner decision 6): profile-scoped — a landed hit deals at
+            // least ceil(share × base), min 1. Overlay profile is 0 → this branch is dead
+            // there and behavior stays byte-identical.
+            if (request.Profile.MinChipShareKPm > 0)
+            {
+                var chip = Math.Max(1.0,
+                    Math.Ceiling(request.BaseOverlayDamage * request.Profile.MinChipShareKPm / 1000.0));
+                if (finalDamage < chip)
+                    finalDamage = chip;
+            }
         }
 
         var signedDelta = finalDamage > 0 ? -(long)Math.Round(finalDamage) : 0L;

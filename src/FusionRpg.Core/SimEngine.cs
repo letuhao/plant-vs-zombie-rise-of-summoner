@@ -28,6 +28,45 @@ public sealed class SimEngine
     int _zombieSeq;
     int _mowerSeq;
 
+    // Shield probe (combat-unification, sim-adoption): sim mounts the SSOT shield runtime
+    // behind the shared apply pipeline in direct-sink mode — sim has no funnel by design.
+    // Neutral snapshots: sim entities carry no derived channels. No tick host in sim, so
+    // shields persist until broken or the board resets (durations are not supported here).
+    readonly Combat.Shield.ShieldRuntime _shields = new();
+    readonly Combat.Shield.ShieldGate _shieldGate;
+    readonly Combat.IHpDeltaSink _hpSink;
+
+    public SimEngine()
+    {
+        _shieldGate = new Combat.Shield.ShieldGate(_shields, static (_, _) =>
+            new Combat.CombatActorSnapshot(
+                global::FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot.StubNeutral(),
+                global::FusionRpg.Core.Stats.Derived.ActorElementTypes.Neutral));
+        _hpSink = new SimHpSink(this);
+    }
+
+    sealed class SimHpSink : Combat.IHpDeltaSink
+    {
+        readonly SimEngine _engine;
+        public SimHpSink(SimEngine engine) => _engine = engine;
+
+        public bool Apply(string ownerKey, long amount, string? pluginId, string? effectId,
+            string? grantId, string channel, List<FusionRpg.Contracts.ElementPayloadComponentDto>? elements)
+        {
+            var ptr = ownerKey.StartsWith("entity:", StringComparison.Ordinal)
+                ? ownerKey.Substring("entity:".Length)
+                : ownerKey;
+            var e = _engine.Plants.FirstOrDefault(p => p.Ptr == ptr)
+                    ?? _engine.Zombies.FirstOrDefault(z => z.Ptr == ptr);
+            if (e is null) return false;
+            // Damage keeps the legacy semantics (floor 0, NO MaxHp clamp — overhealed sim
+            // entities lose only what was dealt); only heals clamp up at MaxHp.
+            var next = e.Hp + amount;
+            e.Hp = (int)(amount < 0 ? Math.Max(0, next) : Math.Min(e.MaxHp, next));
+            return true;
+        }
+    }
+
     public int NextPlantNumber => _plantSeq + 1;
     public int NextZombieNumber => _zombieSeq + 1;
     public int NextMowerNumber => _mowerSeq + 1;
@@ -47,6 +86,7 @@ public sealed class SimEngine
         Plants.Clear();
         Zombies.Clear();
         Mowers.Clear();
+        _shields.Clear();
         LevelName = null;
         MatchKey = null;
         Wave = 0;
@@ -80,6 +120,7 @@ public sealed class SimEngine
         Plants.Clear();
         Zombies.Clear();
         Mowers.Clear();
+        _shields.Clear();
         Stats.ClearBaselines();
         LevelName = string.IsNullOrWhiteSpace(req?.LevelName) ? SimDefaults.LevelName : req!.LevelName!;
         MatchKey = string.IsNullOrWhiteSpace(req?.MatchKey) ? Guid.NewGuid().ToString() : req!.MatchKey!;
@@ -110,6 +151,7 @@ public sealed class SimEngine
         Plants.Clear();
         Zombies.Clear();
         Mowers.Clear();
+        _shields.Clear();
         Stats.ClearBaselines();
         var key = MatchKey;
         MatchKey = null;
@@ -302,16 +344,25 @@ public sealed class SimEngine
             var final = Stats.Resolve(ctx);
             after = StatMath.ScaleIncoming(incoming, final.DefensePercent, final.DefenseFlat);
         }
-        e.Hp = Math.Max(0, e.Hp - after);
+
+        var applied = Combat.DamageApplyPipeline.Apply(
+            e.Ptr, -after, 1, Array.Empty<Combat.Element.ElementPayloadComponent>(),
+            attackerSnapshot: null, ownerSnapshot: null, _shieldGate, _hpSink, pluginId: "sim");
         var result = new SimResult();
         if (stats.LogDamage)
-            result.Events.Add(Evt("plant.damage", new Dictionary<string, object>
+        {
+            var payload = new Dictionary<string, object>
             {
                 ["ptr"] = e.Ptr,
                 ["damage"] = after,
                 ["before"] = before,
                 ["after"] = after
-            }));
+            };
+            if (applied.AbsorbedAmount > 0)
+                payload["shieldAbsorbed"] = applied.AbsorbedAmount;
+            result.Events.Add(Evt("plant.damage", payload));
+        }
+
         return WithKey(result);
     }
 
@@ -330,18 +381,68 @@ public sealed class SimEngine
             var final = Stats.Resolve(ctx);
             after = StatMath.ScaleIncoming(incoming, final.DefensePercent, final.DefenseFlat);
         }
-        e.Hp = Math.Max(0, e.Hp - after);
+
+        var applied = Combat.DamageApplyPipeline.Apply(
+            e.Ptr, -after, 1, Array.Empty<Combat.Element.ElementPayloadComponent>(),
+            attackerSnapshot: null, ownerSnapshot: null, _shieldGate, _hpSink, pluginId: "sim");
         var result = new SimResult();
         if (stats.LogDamage)
-            result.Events.Add(Evt("zombie.damage", new Dictionary<string, object>
+        {
+            var payload = new Dictionary<string, object>
             {
                 ["ptr"] = e.Ptr,
                 ["damage"] = after,
                 ["before"] = before,
                 ["after"] = after
-            }));
+            };
+            if (applied.AbsorbedAmount > 0)
+                payload["shieldAbsorbed"] = applied.AbsorbedAmount;
+            result.Events.Add(Evt("zombie.damage", payload));
+        }
+
         return WithKey(result);
     }
+
+    /// <summary>
+    /// Sim shield grant (sim-adoption): the server-side probe surface — no game required.
+    /// Durations are unsupported (sim has no upkeep tick); shields persist until broken or
+    /// the board resets.
+    /// </summary>
+    public SimResult GrantShield(SimShieldGrantRequest req)
+    {
+        var e = Plants.FirstOrDefault(p => p.Ptr == req.Ptr)
+                ?? Zombies.FirstOrDefault(z => z.Ptr == req.Ptr);
+        if (e is null) return Fail("entity not found");
+        if (req.Amount <= 0) return Fail("amount must be > 0");
+        global::FusionRpg.Core.Stats.Derived.ElementTypeId? element = null;
+        if (!string.IsNullOrWhiteSpace(req.Element))
+        {
+            if (!global::FusionRpg.Core.Stats.Derived.ElementRoster.TryParse(req.Element, out var parsed))
+                return Fail("unknown element " + req.Element);
+            element = parsed;
+        }
+
+        var applied = _shieldGate.ApplyGrant(e.Ptr, new Combat.Shield.ShieldGrant
+        {
+            SourceId = "sim.shield:" + (string.IsNullOrWhiteSpace(req.SourceId) ? "manual" : req.SourceId),
+            Element = element,
+            BaseHp = req.Amount,
+            Priority = req.Priority ?? Combat.Shield.ShieldPolicy.PrioritySkill,
+            RefillOnMerge = true
+        });
+        var totals = _shields.Totals("entity:" + e.Ptr);
+        return WithKey(Ok(Evt("shield.granted", new Dictionary<string, object>
+        {
+            ["ptr"] = e.Ptr,
+            ["outcome"] = applied.Outcome.ToString(),
+            ["shieldId"] = applied.Instance?.ShieldId ?? "",
+            ["hp"] = totals.Hp,
+            ["maxHp"] = totals.MaxHp
+        })));
+    }
+
+    /// <summary>Current shield totals for a sim entity — state/dump surface.</summary>
+    public (long Hp, long MaxHp) ShieldTotals(string ptr) => _shields.Totals("entity:" + ptr);
 
     public SimResult DiePlant(SimDieRequest req)
     {
@@ -599,11 +700,17 @@ public sealed class SimEngine
         plants = Plants,
         zombies = Zombies,
         mowers = Mowers,
+        // Shield probe surface (sim-adoption): live totals per shielded entity.
+        shields = Plants.Concat(Zombies)
+            .Select(e => new { ptr = e.Ptr, shield = ShieldTotals(e.Ptr) })
+            .Where(x => x.shield.MaxHp > 0)
+            .Select(x => new { x.ptr, hp = x.shield.Hp, maxHp = x.shield.MaxHp })
+            .ToArray(),
         applied = Tracker.Applied.ToArray(),
         lastStats = LastStats
     };
 
-    static Dictionary<string, object> PlantDump(SimEntity e, string source) => new()
+    Dictionary<string, object> PlantDump(SimEntity e, string source) => new()
     {
         ["type"] = e.Type,
         ["typeName"] = e.TypeName,
@@ -614,6 +721,8 @@ public sealed class SimEngine
         ["thePlantHealth"] = e.Hp,
         ["thePlantMaxHealth"] = e.MaxHp,
         ["theShieldHealth"] = 0,
+        ["rpgShieldHp"] = ShieldTotals(e.Ptr).Hp,      // sim-adoption: live sim shield totals
+        ["rpgShieldMax"] = ShieldTotals(e.Ptr).MaxHp,
         ["attackDamage"] = e.Attack,
         ["theLevel"] = 1,
         ["shootingLevel"] = 0,
@@ -629,7 +738,7 @@ public sealed class SimEngine
         ["source"] = source
     };
 
-    static Dictionary<string, object> ZombieDump(SimEntity e, string source) => new()
+    Dictionary<string, object> ZombieDump(SimEntity e, string source) => new()
     {
         ["type"] = e.Type,
         ["typeName"] = e.TypeName,
@@ -641,6 +750,8 @@ public sealed class SimEngine
         ["theFirstArmorMaxHealth"] = e.ArmorMax,
         ["theSecondArmorHealth"] = 0,
         ["theSecondArmorMaxHealth"] = 0,
+        ["rpgShieldHp"] = ShieldTotals(e.Ptr).Hp,      // sim-adoption: live sim shield totals
+        ["rpgShieldMax"] = ShieldTotals(e.Ptr).MaxHp,
         ["theAttackDamage"] = e.Attack,
         ["level"] = 1,
         ["theArmor"] = 0f,

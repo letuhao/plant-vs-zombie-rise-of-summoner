@@ -62,3 +62,27 @@ public static class VfxSkipReasons
     /// <summary>Every renderable spec required an element color and the cue had none.</summary>
     public const string NoElement = "no-element";
 }
+
+/// <summary>Sustained-visual policy — SPEC vfx-v3 §3 (tight budget locked by owner).</summary>
+public static class VfxSustainedRules
+{
+    public const int GlobalCap = 24;
+    public const int PerHostCap = 2;
+    /// <summary>TTL = status duration + this grace; the expire cue normally ends the visual first.</summary>
+    public const double TtlGraceSeconds = 2.0;
+    /// <summary>Statuses with no known duration re-confirm via re-apply within this window.</summary>
+    public const double InfiniteTtlSeconds = 60.0;
+    public const float AuraPulseSeconds = 0.3f;
+    public const int AuraMaxParticles = 6;
+}
+
+/// <summary>Enumerated sustained end reasons — debug.fx.state.ended payload contract.</summary>
+public static class VfxStateEndReasons
+{
+    public const string Expired = "expired";
+    public const string HostGone = "host-gone";
+    public const string TtlCap = "ttl-cap";
+    public const string Evicted = "evicted";
+    public const string MatchEnd = "match-end";
+    public const string Disabled = "disabled";
+}

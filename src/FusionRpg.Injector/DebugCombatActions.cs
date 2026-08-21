@@ -204,11 +204,22 @@ public static class DebugCombatActions
                     ["attackerElements"] = ElementDump(attacker.ElementTypes)
                 });
 
+            // Shield layer above the Funnel — re-routed so the live probe exercises the gate
+            // (shield-system-spec.md §11.3, owner decision 10).
             var funnel2 = Effects.EffectRuntime.Bag.Funnel;
             var applied = 0;
-            if (funnel2 != null && delta != 0)
+            long shieldAbsorbed = 0;
+            var toApply = delta;
+            if (toApply < 0 && Effects.EffectRuntime.Bag.ShieldGate is { } gate)
             {
-                if (funnel2.EnqueueMutation("entity:" + targetPtr, delta, pluginId: "debug"))
+                var afterShield = gate.AbsorbFinalized(toApply, CombatPtr.Normalize(targetPtr), packet, 1);
+                shieldAbsorbed = afterShield - toApply;   // both negative: absorbed magnitude
+                toApply = afterShield;
+            }
+
+            if (funnel2 != null && toApply != 0)
+            {
+                if (funnel2.EnqueueMutation("entity:" + targetPtr, toApply, pluginId: "debug"))
                     applied = 1;
                 funnel2.Flush();
             }
@@ -219,6 +230,8 @@ public static class DebugCombatActions
                 ["targetPtr"] = targetPtr,
                 ["actorPtr"] = actorPtr ?? "",
                 ["amount"] = amount,
+                ["shieldAbsorbed"] = shieldAbsorbed,
+                ["appliedDelta"] = toApply,
                 ["seed"] = seed,
                 ["hit"] = breakdown.Hit,
                 ["crit"] = breakdown.Crit,
@@ -296,13 +309,39 @@ public static class DebugCombatActions
                     channels[id] = v;
             }
 
-            actors.Add(new Dictionary<string, object>
+            var actorRow = new Dictionary<string, object>
             {
                 ["ptr"] = ptr,
                 ["elementPrimary"] = snap.ElementTypes.Primary?.ToString() ?? "",
                 ["elementSecondary"] = snap.ElementTypes.Secondary?.ToString() ?? "",
                 ["channels"] = channels
-            });
+            };
+            var shieldRuntime = Effects.EffectRuntime.Bag.ShieldGate?.Runtime;
+            if (shieldRuntime != null)
+            {
+                var stack = shieldRuntime.GetShields(
+                    EffectOwnerKeys.Entity(CombatPtr.Normalize(ptr)));
+                if (stack.Count > 0)
+                {
+                    var rows = new List<Dictionary<string, object>>(stack.Count);
+                    foreach (var s in stack)
+                    {
+                        rows.Add(new Dictionary<string, object>
+                        {
+                            ["shieldId"] = s.ShieldId,
+                            ["element"] = s.Element?.ToString() ?? "none",
+                            ["hp"] = s.Hp,
+                            ["maxHp"] = s.MaxHp,
+                            ["priority"] = s.Priority,
+                            ["innate"] = s.IsInnate
+                        });
+                    }
+
+                    actorRow["shields"] = rows;
+                }
+            }
+
+            actors.Add(actorRow);
         }
 
         var dump = new Dictionary<string, object>

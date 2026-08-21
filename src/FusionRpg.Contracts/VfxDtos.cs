@@ -23,4 +23,7 @@ public sealed class VfxCueDto
 
     public float ScaleMul { get; set; } = 1f;
     public float LifeMul { get; set; } = 1f;
+
+    /// <summary>Sustained-visual TTL basis (SPEC vfx-v3): status duration in ms; 0 = unknown/infinite.</summary>
+    public int DurationMs { get; set; }
 }

@@ -39,6 +39,24 @@ public sealed class RpgHub : Hub
             Payload = hello
         });
         await PushGrantSnapshotAsync();
+        await PushPatronAsync();
+    }
+
+    /// <summary>A fresh inject/reconnect always receives the current patron designation
+    /// (spec-patron-demon.md) — same rehydrate discipline as the grant snapshot above.</summary>
+    async Task PushPatronAsync()
+    {
+        var cmd = PatronEndpoints.TryBuildPatronCommand(_store);
+        if (cmd == null) return;
+        _inbox.Enqueue(cmd);
+        try
+        {
+            await Clients.Group(RpgConstants.InjectorGroup).SendAsync("Command", cmd);
+        }
+        catch
+        {
+            /* inbox poll */
+        }
     }
 
     /// <summary>W0-E: push session Effect grants so injector bag survives reconnect / re-inject.</summary>

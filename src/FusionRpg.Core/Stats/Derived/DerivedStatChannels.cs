@@ -92,7 +92,23 @@ public static class DerivedStatChannels
     public const string CombatDodgeLight = "combat.dodge.light";
     public const string CombatDodgeDark = "combat.dodge.dark";
 
-    /// <summary>Combat channel family prefixes — 8 families × (omni + roster) slots.</summary>
+    // Shield families (shield-system-spec.md §2.3) — element halves are generated, never hand-listed.
+    public const string CombatShieldCapacityPrefix = "combat.shield.capacity";
+    public const string CombatShieldToughnessPrefix = "combat.shield.toughness";
+    public const string CombatShieldPenPrefix = "combat.shield.pen";
+    public const string CombatShieldRegenPrefix = "combat.shield.regen";
+
+    public const string CombatShieldCapacityOmni = "combat.shield.capacity.omni";
+    public const string CombatShieldToughnessOmni = "combat.shield.toughness.omni";
+    public const string CombatShieldPenOmni = "combat.shield.pen.omni";
+    public const string CombatShieldRegenOmni = "combat.shield.regen.omni";
+
+    public static string CombatShieldCapacity(ElementTypeId e) => $"{CombatShieldCapacityPrefix}.{e.ToElementId()}";
+    public static string CombatShieldToughness(ElementTypeId e) => $"{CombatShieldToughnessPrefix}.{e.ToElementId()}";
+    public static string CombatShieldPen(ElementTypeId e) => $"{CombatShieldPenPrefix}.{e.ToElementId()}";
+    public static string CombatShieldRegen(ElementTypeId e) => $"{CombatShieldRegenPrefix}.{e.ToElementId()}";
+
+    /// <summary>Combat channel family prefixes — 12 families × (omni + roster) slots.</summary>
     public static readonly IReadOnlyList<string> CombatChannelFamilies = new[]
     {
         "combat.power",
@@ -102,12 +118,17 @@ public static class DerivedStatChannels
         "combat.crit.damage",
         "combat.crit.resist.damage",
         "combat.accuracy",
-        "combat.dodge"
+        "combat.dodge",
+        CombatShieldCapacityPrefix,
+        CombatShieldToughnessPrefix,
+        CombatShieldPenPrefix,
+        CombatShieldRegenPrefix
     };
 
     /// <summary>
     /// All overlay combat derived channels — generated family × (omni + ElementRoster) so the
-    /// list is exhaustive by construction (element-hub-ssot.md §6; 8 × 7 = 56 since light/dark).
+    /// list is exhaustive by construction (element-hub-ssot.md §6; 12 × 7 = 84 since the shield
+    /// families, shield-system-spec.md §2.3).
     /// </summary>
     public static readonly IReadOnlyList<string> AllCombatChannelIds = BuildAllCombatChannelIds();
 

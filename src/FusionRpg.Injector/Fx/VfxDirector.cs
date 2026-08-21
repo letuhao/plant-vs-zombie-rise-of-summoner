@@ -20,6 +20,7 @@ public static class VfxDirector
     static readonly VfxAdmission Admission = new(Catalog);
     static readonly List<Floater> Floaters = new();
     static readonly List<Flash> Flashes = new();
+    static readonly VfxStateTracker Sustained = new();
     static double _now;
     static Camera? _cam;
 
@@ -72,15 +73,17 @@ public static class VfxDirector
     {
         if (dt < 0f) dt = 0f;
         _now += dt;
-        // Idle early-out: with nothing queued or live the frame costs one lock + three counts.
+        // Idle early-out: with nothing queued or live the frame costs one lock + four counts.
         bool queued;
         lock (Gate) queued = Pending.Count > 0;
-        if (!queued && Floaters.Count == 0 && Flashes.Count == 0 && BurstPool.LiveCount() == 0)
+        if (!queued && Floaters.Count == 0 && Flashes.Count == 0 && BurstPool.LiveCount() == 0
+            && Sustained.LiveCount == 0)
             return;
         DrainQueue();
         TickFloaters(dt);
         BurstPool.Tick(dt);
         TickFlashes(dt);
+        TickSustained(dt);
     }
 
     /// <summary>Match end / scene teardown — vfx-ssot.md §8.1.</summary>
@@ -91,6 +94,28 @@ public static class VfxDirector
         RestoreAndClearFlashes();
         BurstPool.StopAll();
         Admission.Clear();
+        foreach (var set in Sustained.EndAll())
+            EndSustainedRender(set, VfxStateEndReasons.MatchEnd, emit: false);
+        AuraPool.StopAll();
+        TintCompositor.Clear();
+    }
+
+    /// <summary>Live sustained sets snapshot for the debug board (cueId, ptr, statusId).</summary>
+    public static List<Dictionary<string, object>> SustainedSnapshot()
+    {
+        var list = new List<Dictionary<string, object>>();
+        foreach (var s in Sustained.Live)
+        {
+            list.Add(new Dictionary<string, object>
+            {
+                ["statusId"] = s.StatusId,
+                ["ptr"] = s.HostPtr,
+                ["cueId"] = s.CueId,
+                ["hasMarker"] = s.HasMarker
+            });
+        }
+
+        return list;
     }
 
     static void DrainQueue()
@@ -113,6 +138,23 @@ public static class VfxDirector
         {
             try
             {
+                // Sustained control signals route before admission (not renderable recipes):
+                // expire cues end the set; re-applies refresh TTL even if the transient render
+                // below gets rate-limited (refresh starvation guard, vfx-v3 plan).
+                if (StatusVfxCues.TryParse(cue.CueId, out var statusId, out var isExpire)
+                    && !string.IsNullOrWhiteSpace(cue.TargetPtr))
+                {
+                    if (isExpire)
+                    {
+                        var endedSet = Sustained.End(cue.TargetPtr!, statusId);
+                        if (endedSet != null)
+                            EndSustainedRender(endedSet, VfxStateEndReasons.Expired, emit: true);
+                        continue;
+                    }
+
+                    Sustained.Refresh(cue.TargetPtr!, statusId, cue.DurationMs, _now);
+                }
+
                 Spawn(cue, master, elementOn);
             }
             catch (Exception ex)
@@ -184,6 +226,20 @@ public static class VfxDirector
         {
             EmitSkipped(cue, VfxSkipReasons.Missing);
             return;
+        }
+
+        // Sustained sets start regardless of which transient specs render below.
+        if (decision.Recipe!.HasSustained && follow != null
+            && StatusVfxCues.TryParse(cue.CueId, out var sustainedId, out var sustainedExpire)
+            && !sustainedExpire)
+        {
+            var startedSet = Sustained.Start(
+                cue.TargetPtr!, sustainedId, cue.CueId, decision.Recipe, cue.DurationMs, _now,
+                out var evicted);
+            foreach (var ev in evicted)
+                EndSustainedRender(ev, VfxStateEndReasons.Evicted, emit: true);
+            if (startedSet != null)
+                StartSustainedRender(startedSet, plan, follow);
         }
 
         var cellSize = EstimateCellSize(sizeCol, sizeRow);
@@ -281,6 +337,130 @@ public static class VfxDirector
             if (f.Age >= f.Life || f.Follow == null)
                 Floaters.RemoveAt(i);
         }
+    }
+
+    static void TickSustained(float dt)
+    {
+        if (Sustained.LiveCount == 0) return;
+        if (!CheatState.On("SYS-DAMAGE-FX"))
+        {
+            foreach (var set in Sustained.EndAll())
+                EndSustainedRender(set, VfxStateEndReasons.Disabled, emit: true);
+            return;
+        }
+
+        foreach (var set in Sustained.SweepTtl(_now))
+            EndSustainedRender(set, VfxStateEndReasons.TtlCap, emit: true);
+
+        TintCompositor.Tick(dt);
+
+        List<VfxSustainedSet>? gone = null;
+        foreach (var set in Sustained.Live)
+        {
+            var anchor = AnchorResolver.Resolve(set.HostPtr);
+            if (anchor == null)
+            {
+                (gone ??= new List<VfxSustainedSet>()).Add(set);
+                continue;
+            }
+
+            TickSustainedRender(set, anchor, dt);
+        }
+
+        if (gone == null) return;
+        foreach (var set in gone)
+        {
+            Sustained.End(set.HostPtr, set.StatusId);
+            EndSustainedRender(set, VfxStateEndReasons.HostGone, emit: true);
+        }
+    }
+
+    sealed class SustainedRender
+    {
+        public AuraPool.Lease? Aura;
+        public VfxPrimitiveSpec? AuraSpec;
+        public (byte R, byte G, byte B) AuraRgb;
+        public TintCompositor.Layer? Tint;
+        public AuraPool.Lease? Marker;
+        public (byte R, byte G, byte B) MarkerRgb;
+    }
+
+    static void StartSustainedRender(VfxSustainedSet set, VfxColorPlan plan, Transform follow)
+    {
+        var render = new SustainedRender();
+        foreach (var spec in set.Recipe.Primitives)
+        {
+            if (spec.Kind == VfxPrimitiveKind.Aura && render.Aura == null)
+            {
+                render.AuraSpec = spec;
+                render.AuraRgb = spec.Color == VfxColorSourceKind.Fixed ? spec.FixedRgb : plan.Rgb;
+                render.Aura = AuraPool.Take(FxResources.ParticleMaterial());
+            }
+            else if (spec.Kind == VfxPrimitiveKind.Tint && render.Tint == null)
+            {
+                SpriteRenderer? sr = null;
+                try { sr = follow.GetComponentInChildren<SpriteRenderer>(); } catch { }
+                var rgb = spec.Color == VfxColorSourceKind.Fixed ? spec.FixedRgb : plan.Rgb;
+                render.Tint = TintCompositor.Apply(sr, rgb, spec.TintStrength);
+            }
+            else if (spec.Kind == VfxPrimitiveKind.Marker && render.Marker == null)
+            {
+                render.MarkerRgb = spec.Color == VfxColorSourceKind.Fixed ? spec.FixedRgb : plan.Rgb;
+                render.Marker = AuraPool.Take(FxResources.MarkerMaterial(spec.MarkerShape));
+            }
+        }
+
+        set.RenderState = render;
+        DebugRuntime.Emit("debug.fx.state.started", new Dictionary<string, object>
+        {
+            ["cueId"] = set.CueId,
+            ["statusId"] = set.StatusId,
+            ["ptr"] = set.HostPtr,
+            ["live"] = Sustained.LiveCount
+        });
+    }
+
+    static void TickSustainedRender(VfxSustainedSet set, Transform anchor, float dt)
+    {
+        if (set.RenderState is not SustainedRender render) return;
+        if (render.Aura == null && render.Marker == null) return;
+        Vector3 world;
+        try { world = LawnCoords.BodyWorld(anchor); }
+        catch { return; }
+        var cellSize = EstimateCellSize(CheatState.SpawnCol, CheatState.SpawnRow);
+        var span = Mathf.Max(0.35f, Mathf.Min(cellSize.x, cellSize.y));
+        if (render.Aura != null && render.AuraSpec != null)
+        {
+            var auraSpan = span * (render.AuraSpec.SizeScale > 0f ? render.AuraSpec.SizeScale : 1f);
+            AuraPool.Pulse(render.Aura, world, render.AuraSpec.AuraStyle, render.AuraRgb, auraSpan, dt);
+        }
+
+        if (render.Marker != null)
+            AuraPool.PulseSingle(render.Marker, world, render.MarkerRgb, span * 0.3f, span * 0.85f, dt);
+    }
+
+    static void EndSustainedRender(VfxSustainedSet set, string reason, bool emit)
+    {
+        if (set.RenderState is SustainedRender render)
+        {
+            AuraPool.Release(render.Aura);
+            render.Aura = null;
+            TintCompositor.Remove(render.Tint);
+            render.Tint = null;
+            AuraPool.Release(render.Marker);
+            render.Marker = null;
+        }
+
+        set.RenderState = null;
+        if (!emit) return;
+        DebugRuntime.Emit("debug.fx.state.ended", new Dictionary<string, object>
+        {
+            ["cueId"] = set.CueId,
+            ["statusId"] = set.StatusId,
+            ["ptr"] = set.HostPtr,
+            ["reason"] = reason,
+            ["live"] = Sustained.LiveCount
+        });
     }
 
     static void TickFlashes(float dt)

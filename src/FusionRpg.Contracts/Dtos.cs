@@ -233,7 +233,8 @@ public static class RpgConstants
         string.IsNullOrEmpty(game) || game.StartsWith("pvzrh", StringComparison.Ordinal);
 
     public static bool IsNoisyKind(string? kind) =>
-        kind is "plant.damage" or "zombie.damage" or "bullet.init" or "bullet.place" or "item.drop" or "pet.xp";
+        kind is "plant.damage" or "zombie.damage" or "bullet.init" or "bullet.place" or "item.drop" or "pet.xp"
+            or "shield.absorbed";
 
     public static bool IsDroppableWhenFull(string? kind) => IsNoisyKind(kind);
 }

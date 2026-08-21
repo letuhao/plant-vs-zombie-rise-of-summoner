@@ -425,7 +425,7 @@ Do not port into Element Hub v1:
 - No Chaos mastery SQL / realm progression port
 - No element-triggered status apply in v1
 - No null / drain / reflect / repel / absorb semantics in v1
-- No element-specific shield engine in v1
+- ~~No element-specific shield engine in v1~~ — **unlocked 2026-08-21** by the decisions.md Shield layer row: shields live in their own runtime above the Funnel with their own matrix, see [shield-system-spec.md](shield-system-spec.md). Element Hub itself still owns no shield state.
 - No vanilla `atk` rewrite through Element Hub
 - No direct Unity HP writes from Element Hub
 - No duplicate typed vocab outside Actor Hub catalog and this spec

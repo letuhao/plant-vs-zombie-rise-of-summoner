@@ -20,8 +20,9 @@ public class EffectPluginHostTests
     {
         var h = new FoundationHarness();
         var host = EffectPluginHostFactory.Create(h.Bag);
-        Assert.Equal(2, host.Plugins.Count);
+        Assert.Equal(3, host.Plugins.Count);
         Assert.Contains(host.Plugins, p => p.PluginId == "sec.match.butter");
         Assert.Contains(host.Plugins, p => p.PluginId == "sec.match.passive_atk");
+        Assert.Contains(host.Plugins, p => p.PluginId == "sec.patron.aura");
     }
 }

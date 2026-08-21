@@ -21,14 +21,27 @@ public static class InjectorCombatBridge
         else
             derived = InjectorStatusBridge.ResolveDerived(key, attackerLess: false);
 
-        var elementTypes = InjectorElementOverride.TryGet(key, out var pinnedTypes)
-            ? pinnedTypes
-            : ResolveElementTypesFromHub(key);
+        ActorElementTypes elementTypes;
+        if (InjectorElementOverride.TryGet(key, out var pinnedTypes))
+        {
+            // Pinned prove-pack scenarios isolate their math — the patron aura stays out.
+            elementTypes = pinnedTypes;
+        }
+        else
+        {
+            elementTypes = ResolveElementTypesFromHub(key, out var side);
+            // Patron aura (spec-patron-demon.md): plant-side typed bonus, riding the side the
+            // element resolve already looked up — no extra board scan on the hit path.
+            derived = PatronAuraOverlay.Apply(derived, side);
+        }
 
         return new CombatActorSnapshot(derived, elementTypes);
     }
 
-    static ActorElementTypes ResolveElementTypesFromHub(string key)
+    static ActorElementTypes ResolveElementTypesFromHub(string key) =>
+        ResolveElementTypesFromHub(key, out _);
+
+    static ActorElementTypes ResolveElementTypesFromHub(string key, out string side)
     {
         var hub = CheatState.ActorHub;
         if (!hub.Stats.TryGetBaseline(key, out var baseline)
@@ -36,7 +49,7 @@ public static class InjectorCombatBridge
             baseline = new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 };
 
         var board = InjectorBoardSnapshot.Capture();
-        var side = "plant";
+        side = "plant";
         var typeId = 0;
         foreach (var e in board.Entities)
         {

@@ -35,7 +35,12 @@ public sealed partial class RpgStore
                     _killEarnMemo[key] = counted;
                 }
 
-                delta = SoulEarnPolicy.KillEarn(counted);
+                // Patron bonus (spec-patron-demon.md): +1 on every 10th earning kill, same 50-soul
+                // cap. Gated so the audited unpatroned shape stays byte-identical; the patron
+                // check is a PK point lookup, not a scan (review-C1 discipline).
+                delta = HasPatronUnlocked(db, playerId)
+                    ? Core.Demons.Patron.PatronPolicy.KillEarnWithPatron(counted)
+                    : SoulEarnPolicy.KillEarn(counted);
                 if (delta > 0)
                     _killEarnMemo[key] = counted + 1;
                 reason = SoulEarnPolicy.Reasons.Kill;
@@ -183,14 +188,18 @@ public sealed partial class RpgStore
 
             using (var check = db.CreateCommand())
             {
-                check.CommandText = "SELECT id FROM rpg_soul_ledger WHERE player_id=$p AND reason=$r AND dedupe_key=$dk;";
+                check.CommandText = "SELECT delta FROM rpg_soul_ledger WHERE player_id=$p AND reason=$r AND dedupe_key=$dk;";
                 check.Parameters.AddWithValue("$p", playerId);
                 check.Parameters.AddWithValue("$r", reason);
                 check.Parameters.AddWithValue("$dk", corr);
-                if (check.ExecuteScalar() != null)
+                if (check.ExecuteScalar() is long storedDelta)
                 {
                     tx.Commit();
-                    return (true, "replay", ReadSoulBalanceUnlocked(db, playerId));
+                    // Replay must be the SAME request — a different amount under a reused
+                    // correlation is a caller bug, not an idempotent retry.
+                    return storedDelta == -amount
+                        ? (true, "replay", ReadSoulBalanceUnlocked(db, playerId))
+                        : (false, "correlation.mismatch", ReadSoulBalanceUnlocked(db, playerId));
                 }
             }
 

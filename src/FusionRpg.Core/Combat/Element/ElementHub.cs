@@ -28,6 +28,9 @@ public sealed class ElementHub : IElementHub
         ActorElementTypes defenderTypes,
         double baseOverlayDamage)
     {
+        // Omni fallback: empty payloads are legal untyped attacks — zero matchup by rule.
+        if (components == null || components.Count == 0)
+            return 0.0;
         ElementPayload.Validate(components);
         var total = 0.0;
         foreach (var c in components)

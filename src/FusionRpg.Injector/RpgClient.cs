@@ -90,6 +90,14 @@ public sealed class RpgClient
             _hub.On<CommandDto>("Command", cmd =>
             {
                 try { RpgHost.Log.Info("[cheat-cmd] signalr " + (cmd?.Name ?? "?")); } catch { }
+                // Patron designation is state, not a cheat action — cache it here and keep it
+                // out of the cheat runner (spec-patron-demon.md; applies from the NEXT match).
+                if (string.Equals(cmd?.Name, "patron.aura", StringComparison.OrdinalIgnoreCase))
+                {
+                    try { Effects.PatronCommand.Apply(cmd!); } catch (Exception ex) { RpgHost.Log.Warning("patron.aura: " + ex.Message); }
+                    return;
+                }
+
                 CheatCommandRunner.Enqueue(cmd!);
             });
             _hub.Reconnected += async _ =>

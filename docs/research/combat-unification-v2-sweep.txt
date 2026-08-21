@@ -1,0 +1,52 @@
+== battle goldens v2 ==
+Stomp: CDEC1250791C40587F2CEF69B2F81A9BE240A686434E6B312B706F5328965260
+Close: 886B0EBDF6E4078DB667718AF24114FF0DDFFA14A07108E7248736ADDD8AB1E8
+Wipe: FEA0E5ED5956A8539F3D0DE909F4F35411EAB585C88EE62A6310944A9AA07B02
+SeedSweep: B38AF135F6374BB392CFA73369C37F248C3DDE93AD772B927AB1DC961A79F7EC
+== wipe shapes ==
+wipeOutcome=Defeat cowardRetreated=True
+stompOutcome=Victory
+== expedition goldens v2 ==
+Scout: 8F8623FAA38826F082BC39DB8BC6B26F18A1B76EACD05E202E4A72861AE6624D
+Forage: 50888892407AE206A2505FB8EB96DE428BD30F3C9083B69DC92593AA04D298E2
+Hunt: A4445896ADE17DD6EDE328C82F073D5599D7CC1D89C0B839CD38A6DF699626AA
+Warpath: 1261227BA73392697F5C66BD286BA81BC4EDC31B3C985CA5585DB55ACFB816FA
+== U14 win-rate sweep (64 seeds per cell) ==
+rift-skirmish squad3 @L1: 0/64 = 0.0% (avg 5.7 rounds)
+rift-skirmish squad3 @L3: 64/64 = 100.0% (avg 10.0 rounds)
+rift-skirmish squad4 @L1: 0/64 = 0.0% (avg 9.1 rounds)
+rift-skirmish squad4 @L3: 64/64 = 100.0% (avg 6.4 rounds)
+rift-skirmish squad5 @L1: 47/64 = 73.4% (avg 12.5 rounds)
+rift-skirmish squad5 @L3: 64/64 = 100.0% (avg 4.9 rounds)
+rift-warband squad3 @L2: 0/64 = 0.0% (avg 3.3 rounds)
+rift-warband squad3 @L3: 0/64 = 0.0% (avg 4.2 rounds)
+rift-warband squad3 @L5: 0/64 = 0.0% (avg 7.0 rounds)
+rift-warband squad4 @L2: 0/64 = 0.0% (avg 4.3 rounds)
+rift-warband squad4 @L3: 0/64 = 0.0% (avg 5.5 rounds)
+rift-warband squad4 @L5: 3/64 = 4.7% (avg 12.0 rounds)
+rift-warband squad5 @L2: 0/64 = 0.0% (avg 5.3 rounds)
+rift-warband squad5 @L3: 0/64 = 0.0% (avg 7.6 rounds)
+rift-warband squad5 @L5: 62/64 = 96.9% (avg 12.2 rounds)
+rift-onslaught squad3 @L5: 0/64 = 0.0% (avg 3.2 rounds)
+rift-onslaught squad3 @L6: 0/64 = 0.0% (avg 4.0 rounds)
+rift-onslaught squad3 @L8: 0/64 = 0.0% (avg 5.2 rounds)
+rift-onslaught squad4 @L5: 0/64 = 0.0% (avg 4.4 rounds)
+rift-onslaught squad4 @L6: 0/64 = 0.0% (avg 5.0 rounds)
+rift-onslaught squad4 @L8: 0/64 = 0.0% (avg 7.7 rounds)
+rift-onslaught squad5 @L5: 0/64 = 0.0% (avg 5.3 rounds)
+rift-onslaught squad5 @L6: 0/64 = 0.0% (avg 6.7 rounds)
+rift-onslaught squad5 @L8: 0/64 = 0.0% (avg 12.4 rounds)
+rift-tyrant squad3 @L9: 0/64 = 0.0% (avg 4.0 rounds)
+rift-tyrant squad3 @L10: 0/64 = 0.0% (avg 4.4 rounds)
+rift-tyrant squad3 @L12: 0/64 = 0.0% (avg 6.2 rounds)
+rift-tyrant squad4 @L9: 0/64 = 0.0% (avg 5.4 rounds)
+rift-tyrant squad4 @L10: 0/64 = 0.0% (avg 6.3 rounds)
+rift-tyrant squad4 @L12: 0/64 = 0.0% (avg 8.7 rounds)
+rift-tyrant squad5 @L9: 0/64 = 0.0% (avg 7.0 rounds)
+rift-tyrant squad5 @L10: 0/64 = 0.0% (avg 8.4 rounds)
+rift-tyrant squad5 @L12: 1/64 = 1.6% (avg 12.5 rounds)
+== engine symmetry: mirror matches (wave enemies cloned as squad; 64 seeds) ==
+rift-skirmish mirror: 36/64 = 56.2%
+rift-warband mirror: 36/64 = 56.2%
+rift-onslaught mirror: 31/64 = 48.4%
+rift-tyrant mirror: 32/64 = 50.0%

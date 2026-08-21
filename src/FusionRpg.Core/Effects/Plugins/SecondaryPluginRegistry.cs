@@ -7,5 +7,6 @@ public static class SecondaryPluginRegistry
     {
         yield return new MatchButterSecondaryPlugin();
         yield return new MatchPassiveAtkSecondaryPlugin();
+        yield return new PatronSecondaryPlugin();
     }
 }

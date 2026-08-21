@@ -11,7 +11,7 @@ public class EffectPluginLifecycleTests
     public void BeginMatch_default_plugins_grant_butter_and_passive_with_pluginId()
     {
         var host = new SimEffectHost();
-        Assert.Equal(2, host.Plugins.Plugins.Count);
+        Assert.Equal(3, host.Plugins.Plugins.Count); // butter + passive + patron (grants only when set)
         host.BeginMatch("m-sim");
         var snap = host.Snapshot();
         var butter = Assert.Single(snap.Grants, g => g.GrantId == "golden-butter");

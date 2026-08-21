@@ -282,6 +282,55 @@ describe("lawnProjectorFold", () => {
     expect((z as { def?: unknown } | undefined)?.def).toBeUndefined();
   });
 
+  it("rpg shield folds from rpgShield* keys only; vanilla shield stays armor", () => {
+    const model = foldLawnEvents([
+      evt("plant.spawn", {
+        ptr: "P1",
+        type: 1,
+        row: 0,
+        col: 0,
+        hp: 100,
+        maxHp: 100,
+        theShieldHealth: 40, // vanilla → armor, must NOT leak into the RPG shield bar
+        rpgShieldHp: 75,
+        rpgShieldMax: 120
+      }),
+      evt("zombie.spawn", { ptr: "Z1", type: 0, row: 1, armor: 50 })
+    ]);
+    const plant = findOccupant(model, "P1");
+    expect(plant?.armor).toBe(40); // vanilla mapping unchanged
+    expect(plant?.rpgShield).toBe(75);
+    expect(plant?.rpgShieldMax).toBe(120);
+
+    // No rpgShield* keys → no shield bar; vanilla armor untouched by the new fold.
+    const z = findOccupant(model, "Z1");
+    expect(z?.armor).toBe(50);
+    expect(z?.rpgShield).toBeUndefined();
+  });
+
+  it("explicit rpgShieldMax 0 clears a stale shield bar after break", () => {
+    const model = foldLawnEvents([
+      evt("plant.spawn", {
+        ptr: "P1",
+        type: 1,
+        row: 0,
+        col: 0,
+        hp: 100,
+        maxHp: 100,
+        rpgShieldHp: 75,
+        rpgShieldMax: 120
+      }),
+      // Next dump after the shield broke: injector emits explicit zeros.
+      evt("debug.board-stats", {
+        plants: [{ ptr: "P1", typeId: 1, row: 0, col: 0, hp: 90, maxHp: 100, rpgShieldHp: 0, rpgShieldMax: 0 }],
+        zombies: []
+      })
+    ]);
+    const plant = findOccupant(model, "P1");
+    expect(plant?.rpgShield).toBeUndefined();
+    expect(plant?.rpgShieldMax).toBeUndefined();
+  });
+
   it("board-stats copies atk + zombie armor; plant shield → armor", () => {
     const model = foldLawnEvents([
       evt("debug.board-stats", {

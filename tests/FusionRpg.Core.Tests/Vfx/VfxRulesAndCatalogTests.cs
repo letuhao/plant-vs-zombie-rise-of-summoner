@@ -28,8 +28,8 @@ public class VfxRulesAndCatalogTests
         Assert.True(catalog.TryGet(VfxCueIds.CombatHit, out var hit));
         Assert.True(catalog.TryGet(VfxCueIds.CombatHeal, out var heal));
         Assert.True(catalog.TryGet(VfxCueIds.DebugProbe, out var probe));
-        // 3 combat/debug cues + 21 status.{id}.apply cues (SPEC W5)
-        Assert.Equal(24, catalog.Ids.Count);
+        // 3 combat/debug cues + shield.broken + 21 status.{id}.apply cues (SPEC W5 + shield T14)
+        Assert.Equal(25, catalog.Ids.Count);
 
         // combat.hit = floater + burst + impact flash; heal = floater + rising motes; probe = fixed-color burst.
         Assert.Equal(3, hit.Primitives.Count);

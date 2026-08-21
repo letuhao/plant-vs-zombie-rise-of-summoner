@@ -43,7 +43,8 @@ public sealed class VfxCatalog
         foreach (var p in recipe.Primitives)
         {
             if (p == null) throw new ArgumentException(recipe.CueId + ": null primitive spec");
-            if (p.LifeSeconds <= 0f)
+            // Sustained kinds live apply→expire; LifeSeconds is meaningless for them.
+            if (!p.IsSustained && p.LifeSeconds <= 0f)
                 throw new ArgumentException(recipe.CueId + ": primitive LifeSeconds must be > 0");
             if (p.Count < 1 || p.Count > 64)
                 throw new ArgumentException(recipe.CueId + ": primitive Count must be 1..64");
@@ -59,6 +60,8 @@ public static class VfxCueIds
     public const string CombatHit = "combat.hit";
     public const string CombatHeal = "combat.heal";
     public const string DebugProbe = "debug.probe";
+    /// <summary>Shield pool broke (shield-system-spec.md §2.6) — art/tuning owned by the VFX stream.</summary>
+    public const string ShieldBroken = "shield.broken";
 }
 
 /// <summary>C#-seeded catalog, mirroring EffectSeedCatalog (vfx-ssot.md §6.2).</summary>
@@ -82,32 +85,111 @@ public static class VfxSeedCatalog
         ("spark", 255, 240, 120), ("pact_mark", 170, 90, 220), ("spore", 150, 200, 90)
     };
 
+    /// <summary>One status's while-active composition — aura and/or tint and/or marker (SPEC §4).</summary>
+    public sealed record StatusSustain(
+        string Id,
+        VfxAuraStyle? Aura = null, byte AR = 0, byte AG = 0, byte AB = 0,
+        float Tint = 0f, byte TR = 0, byte TG = 0, byte TB = 0,
+        VfxMarkerShape? Marker = null, byte MR = 0, byte MG = 0, byte MB = 0);
+
+    /// <summary>
+    /// statusId → sustained composition — all 13 custom statuses (vfx-v3, SPEC §4).
+    /// Grammar: Drip = DoT, CrackleJitter = armor/electric, Orbit = passive/link,
+    /// RiseSparkle = buff, PulseRing = active mark; markers only on react-to states.
+    /// Engine-wrapped vanilla statuses never appear here — original visuals untouched.
+    /// </summary>
+    public static readonly StatusSustain[] StatusSustainFx =
+    {
+        new("wither", Aura: VfxAuraStyle.Drip, AR: 150, AG: 120, AB: 95,
+            Tint: 0.25f, TR: 140, TG: 130, TB: 120),
+        new("blight", Aura: VfxAuraStyle.Drip, AR: 130, AG: 180, AB: 60,
+            Tint: 0.20f, TR: 110, TG: 170, TB: 80),
+        new("rot", Aura: VfxAuraStyle.Drip, AR: 120, AG: 90, AB: 50,
+            Tint: 0.20f, TR: 130, TG: 100, TB: 70),
+        new("spark", Aura: VfxAuraStyle.CrackleJitter, AR: 255, AG: 240, AB: 120),
+        new("spore", Aura: VfxAuraStyle.Orbit, AR: 150, AG: 220, AB: 90),
+        new("pact_mark", Aura: VfxAuraStyle.PulseRing, AR: 170, AG: 90, AB: 220,
+            Marker: VfxMarkerShape.Diamond, MR: 170, MG: 90, MB: 220),
+        new("leech", Aura: VfxAuraStyle.StreamOut, AR: 180, AG: 60, AB: 60,
+            Tint: 0.15f, TR: 180, TG: 60, TB: 60),
+        new("expose", Aura: VfxAuraStyle.CrackleJitter, AR: 250, AG: 210, AB: 90,
+            Marker: VfxMarkerShape.TriangleDown, MR: 250, MG: 210, MB: 90),
+        new("shatter", Aura: VfxAuraStyle.CrackleJitter, AR: 200, AG: 235, AB: 255,
+            Tint: 0.15f, TR: 180, TG: 220, TB: 255),
+        new("bond", Aura: VfxAuraStyle.Orbit, AR: 255, AG: 170, AB: 200,
+            Marker: VfxMarkerShape.Ring, MR: 255, MG: 170, MB: 200),
+        new("rally", Aura: VfxAuraStyle.RiseSparkle, AR: 255, AG: 200, AB: 90,
+            Tint: 0.10f, TR: 255, TG: 215, TB: 150),
+        new("command", Aura: VfxAuraStyle.PulseRing, AR: 120, AG: 140, AB: 255,
+            Marker: VfxMarkerShape.Ring, MR: 120, MG: 140, MB: 255),
+        new("charm_pulse", Aura: VfxAuraStyle.Orbit, AR: 240, AG: 120, AB: 240,
+            Tint: 0.15f, TR: 240, TG: 120, TB: 240)
+    };
+
     public static List<VfxRecipe> CreateAll()
     {
         var all = CoreRecipes();
         foreach (var (id, r, g, b) in StatusFx)
         {
+            var specs = new List<VfxPrimitiveSpec>
+            {
+                new()
+                {
+                    Kind = VfxPrimitiveKind.Burst,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (r, g, b),
+                    LifeSeconds = 0.45f,
+                    Count = 14
+                },
+                new()
+                {
+                    Kind = VfxPrimitiveKind.Flash,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (r, g, b),
+                    LifeSeconds = 0.18f
+                }
+            };
+            foreach (var s in StatusSustainFx)
+            {
+                if (!string.Equals(s.Id, id, StringComparison.OrdinalIgnoreCase)) continue;
+                if (s.Aura.HasValue)
+                {
+                    specs.Add(new VfxPrimitiveSpec
+                    {
+                        Kind = VfxPrimitiveKind.Aura,
+                        AuraStyle = s.Aura.Value,
+                        Color = VfxColorSourceKind.Fixed,
+                        FixedRgb = (s.AR, s.AG, s.AB)
+                    });
+                }
+
+                if (s.Tint > 0f)
+                {
+                    specs.Add(new VfxPrimitiveSpec
+                    {
+                        Kind = VfxPrimitiveKind.Tint,
+                        Color = VfxColorSourceKind.Fixed,
+                        FixedRgb = (s.TR, s.TG, s.TB),
+                        TintStrength = s.Tint
+                    });
+                }
+
+                if (s.Marker.HasValue)
+                {
+                    specs.Add(new VfxPrimitiveSpec
+                    {
+                        Kind = VfxPrimitiveKind.Marker,
+                        MarkerShape = s.Marker.Value,
+                        Color = VfxColorSourceKind.Fixed,
+                        FixedRgb = (s.MR, s.MG, s.MB)
+                    });
+                }
+            }
+
             all.Add(new VfxRecipe
             {
                 CueId = StatusVfxCues.CueId(id),
-                Primitives = new[]
-                {
-                    new VfxPrimitiveSpec
-                    {
-                        Kind = VfxPrimitiveKind.Burst,
-                        Color = VfxColorSourceKind.Fixed,
-                        FixedRgb = (r, g, b),
-                        LifeSeconds = 0.45f,
-                        Count = 14
-                    },
-                    new VfxPrimitiveSpec
-                    {
-                        Kind = VfxPrimitiveKind.Flash,
-                        Color = VfxColorSourceKind.Fixed,
-                        FixedRgb = (r, g, b),
-                        LifeSeconds = 0.18f
-                    }
-                }
+                Primitives = specs
             });
         }
 
@@ -159,6 +241,29 @@ public static class VfxSeedCatalog
                     Shape = VfxBurstShape.Rising,
                     LifeSeconds = VfxRules.BurstLifeSeconds,
                     Count = 14
+                }
+            }
+        },
+        new VfxRecipe
+        {
+            CueId = VfxCueIds.ShieldBroken,
+            Primitives = new[]
+            {
+                // Placeholder shatter: pale-blue burst + flash; the VFX stream owns final art.
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Burst,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (200, 230, 255),
+                    LifeSeconds = VfxRules.BurstLifeSeconds,
+                    Count = 20
+                },
+                new VfxPrimitiveSpec
+                {
+                    Kind = VfxPrimitiveKind.Flash,
+                    Color = VfxColorSourceKind.Fixed,
+                    FixedRgb = (200, 230, 255),
+                    LifeSeconds = 0.15f
                 }
             }
         },

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJson, sendJson } from "./rest";
 import type { UniqueActorDto } from "./types";
@@ -38,6 +39,8 @@ export type DemonProfileDto = {
   origin: string;
   nickname?: string | null;
   locked: boolean;
+  star: number;
+  promoted: boolean;
   createdUtc: string;
   revision: number;
 };
@@ -88,6 +91,19 @@ export function useDemonCatalog() {
     queryFn: () => getJson<DemonCatalogDto>("/api/demons/catalog"),
     staleTime: Infinity // code-authored catalog: changes only on redeploy
   });
+}
+
+export type SpeciesIndexEntry = { name: string; side: "plant" | "zombie"; gameTypeId: number };
+
+/** Shared species lookup — one memoized index instead of a copy-pasted map per page. */
+export function useSpeciesIndex(): Map<string, SpeciesIndexEntry> {
+  const catalog = useDemonCatalog();
+  return useMemo(() => {
+    const map = new Map<string, SpeciesIndexEntry>();
+    for (const s of catalog.data?.species ?? [])
+      map.set(s.speciesId, { name: s.name, side: s.side, gameTypeId: s.gameTypeId });
+    return map;
+  }, [catalog.data]);
 }
 
 export function useDemonRoster(playerId: number) {

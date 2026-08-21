@@ -1,6 +1,6 @@
 # Capability map: Standalone-first RPG architecture
 
-Program goal: **invert the architecture's center of gravity** — the RPG (demons, souls, progression, battles) becomes a complete game playable in the web FE with the PvZ game closed; PvZ play becomes an optional *extension* mode. Status: **draft — module boundaries approved via owner decisions 2026-08-21** (gameplay form, authority, PvZ roles below). Module specs live in [demons/](demons/) (existing program) and [standalone/](standalone/) (this program).
+Program goal: **invert the architecture's center of gravity** — the RPG (demons, souls, progression, battles) becomes a complete game playable in the web FE with the PvZ game closed; PvZ play becomes an optional *extension* mode. Status: **wave 1 + expeditions SHIPPED 2026-08-21** — charter, pipeline adaptations, match-source-core (BattleEngine + WebMatchService, goldens locked), and expeditions (the announced ship gate: dispatch→collect playable in the web FE) are implemented with all suites green; module boundaries were approved via owner decisions 2026-08-21. Module specs live in [demons/](demons/) (existing program) and [standalone/](standalone/) (this program).
 
 ## Why this is an inversion, not a rewrite
 
@@ -17,7 +17,11 @@ The stack was built game-agnostic from day one: server and web already speak onl
    - **Shared battles:** ≤2 demon deploys per PvZ run, small additive grants via the existing bounded effect path; specimens on a web expedition are soft-locked from PvZ deploy (Cold-plane flag, not the UniqueActor FSM) and vice versa — no double-dipping.
    - **Trophies:** cosmetic, one-time grants only — never stats, never repeatable faucets.
 
-**Expedition design anchors** (prior-art research; the expeditions spec elaborates): duration tiers 30 min / 4 h / 8 h / 20 h (20 h so daily schedule drift never punishes); parallelism gated by expedition slots (2 → 5 via progression), **no stamina system** — with no monetization a stamina gate has no honest job; recall allowed anytime with rewards pro-rated to completed ticks; outcome sealed at dispatch by recorded seed, revealed at collection; nothing expires if uncollected.
+**Expedition design anchors** (prior-art research + owner decisions 2026-08-21; the expeditions spec elaborates): duration tiers 30 min / 4 h / 8 h / 20 h (20 h so daily schedule drift never punishes); parallelism gated by expedition slots (2 → 5 via progression), **no stamina system** — with no monetization a stamina gate has no honest job; recall allowed anytime with rewards pro-rated to completed ticks; outcome sealed at dispatch by recorded seed, revealed at collection; nothing expires if uncollected.
+
+- **Content shape (locked): chain + events** — each tier resolves a battle chain (30 min = 1 battle … 20 h = 4 + a boss wave using a hypno-ally species as enemy) interleaved with seed-rolled non-combat event ticks (found souls, met a wild demon, took an injury). Ticks = the recall pro-rating boundary.
+- **Rewards (locked): all channels** — Souls + player XP (via the normal pipeline), **specimen XP** per battle won (existing unique-actor XP path), a small seed-rolled **wild-join chance** (a defeated wave demon joins the roster, origin `expedition` — the non-gacha acquisition path that honors vision rule #2 before PvZ capture ships), and **fusion material stubs** (per-player material inventory, unusable until demon-fusion lands — deliberately pre-seeding that economy).
+- **Post-expeditions order (locked): demon-fusion next** (duplicate pressure is already real; fusion is the promised Reserve sink), then contracts, then PvZ capture.
 
 ## Modules
 

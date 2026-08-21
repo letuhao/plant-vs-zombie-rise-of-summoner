@@ -45,11 +45,12 @@ Source vision: the demon gameplay design note (external; its **ideals** are adop
 | `demon-summoning` | Summoning/gacha: banners, Souls-funded pulls, rarity/variant/trait rolls, mint specimens | demon-core, soul-economy | **V1** |
 | `demon-contracts` | Contract rank, loyalty, obedience, personality, capacity; deploy-time obedience gate | demon-core | later |
 | `demon-capture` | In-run encounters, weaken→capture attempt flow (Hot reads, Cold resolution) | demon-core, demon-contracts, soul-economy | later |
-| `demon-fusion` | Roster fusion + trait inheritance + unknown-recipe discovery + ascension | demon-core | later |
+| `demon-fusion` | Star merges (identity-preserving) + discoverable recipes + trait inheritance + capped promotion — **shipped 2026-08-21**, spec in [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) | demon-core, soul-economy, expedition materials | shipped |
+| `patron-demon` | Element aura from one designated demon (stars+rarity+level scaled), soul-priced switching, +1 Soul/10 kills — anchors locked 2026-08-21, spec in [demons/spec-patron-demon.md](demons/spec-patron-demon.md); ends at a LIVE owner gate | demon-fusion, demon-summoning | **next** |
 | `demon-domain-fe` | Web FE: Codex, summon altar, capture UX, fusion lab, contract board (grows out of `#/roster`) | reads all above | incremental |
 | `world-events` | Ecology conditions, roaming/boss encounters, raids, factions, release/legacy/lineage | demon-capture, demon-contracts | last |
 
-Build order: `element-extension` → `demon-core` → `soul-economy` → `demon-summoning` (V1 ships here, with the minimum `demon-domain-fe` screens) → `demon-contracts` → `demon-capture` → `demon-fusion` → `world-events`.
+Build order (revised 2026-08-21; expeditions shipped): `element-extension` → `demon-core` → `soul-economy` → `demon-summoning` (V1 internal gate, shipped) → *(standalone program: match-source + expeditions = announced ship, shipped)* → **`demon-fusion`** (duplicate pressure makes it the next sink) → `patron-demon` → `demon-contracts` → `demon-capture` → `world-events`.
 
 > **Standalone-first program (2026-08-21):** the [standalone RPG map](standalone-rpg-map.md) makes the web RPG the core game and PvZ an extension. Its combined roadmap interleaves with this program: `demon-capture` explicitly becomes the PvZ-mode module (exclusive capture species), and `expeditions` (web battles) becomes the primary consumer of demons. Where the two maps disagree, the combined roadmap in the standalone map wins.
 

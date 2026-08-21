@@ -68,6 +68,7 @@ public static class DebugScenarios
         "debug.fx.list",
         "debug.fx.mute",
         "debug.fx.unmute",
+        "debug.fx.state",
         "pvz.spawn.extra"
     };
 

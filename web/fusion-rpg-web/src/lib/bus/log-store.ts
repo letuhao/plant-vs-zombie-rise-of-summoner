@@ -17,6 +17,15 @@ function isHit(kind: string | undefined): boolean {
   return HIT_KINDS.has(kind ?? "");
 }
 
+/**
+ * The live log + lawn rings are CAPTURE surfaces. Web-mode battles (game `webrpg-1`) resolve in
+ * milliseconds and would render as a capture burst — they stay on their own runs/battle surfaces
+ * (spec-match-source-core precondition 8). Unstamped events are legacy capture traffic.
+ */
+export function isCaptureGame(game: string | undefined | null): boolean {
+  return game == null || game === "" || game.startsWith("pvzrh");
+}
+
 function emit() {
   for (const l of listeners) l();
 }
@@ -60,8 +69,9 @@ export function getLastHitEvent(): EventEnvelope | null {
 }
 
 export function appendLogEvents(items: EventEnvelope[]): void {
-  if (!items.length) return;
-  const newestFirst = [...items].reverse();
+  const capture = items.filter((e) => isCaptureGame(e.game));
+  if (!capture.length) return;
+  const newestFirst = [...capture].reverse();
   events = newestFirst.concat(events).slice(0, CAP);
   const hitChanged = noteHits(newestFirst);
   rebuildMembership();
@@ -70,6 +80,7 @@ export function appendLogEvents(items: EventEnvelope[]): void {
 }
 
 export function appendLogEvent(item: EventEnvelope): void {
+  if (!isCaptureGame(item.game)) return;
   events = [item, ...events].slice(0, CAP);
   const hitChanged = noteHits([item]);
   rebuildMembership();

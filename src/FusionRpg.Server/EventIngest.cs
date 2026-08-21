@@ -62,7 +62,18 @@ public sealed class EventIngest : BackgroundService
         // Guard (audit 2026-08-21): a web battle's board.start/end must never clear the LIVE
         // PvZ match's effect-grant session.
         if (IsPvzGameEvent(env))
+        {
             EffectGrantSessionRecorder.NoteMatchLifecycle(_grants, env.Kind);
+            // Patron aura (spec-patron-demon.md): the marker is a SESSION grant per pvzrh match —
+            // recorded server-side so a mid-match injector reconnect rehydrates it with the rest
+            // of the session, and board.end's lifecycle Clear ends it with the match.
+            if (string.Equals(env.Kind, "board.start", StringComparison.OrdinalIgnoreCase))
+            {
+                var patronGrant = PatronEndpoints.TryBuildPatronSessionGrant(_store);
+                if (patronGrant != null)
+                    _grants.Upsert(patronGrant);
+            }
+        }
         Interlocked.Increment(ref _queued);
         if (!_channel.Writer.TryWrite(env))
         {

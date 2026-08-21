@@ -26,7 +26,9 @@ public enum PerfSection
     PumpMain = 17,
     // v4 — per-record cost decomposition inside the effect pipeline
     CombatDispatch = 18,
-    FunnelFlush = 19
+    FunnelFlush = 19,
+    // shield-system — absorb cascade inside the dispatch (only measured when shields exist)
+    ShieldAbsorb = 20
 }
 
 /// <summary>
@@ -36,7 +38,7 @@ public enum PerfSection
 /// </summary>
 public static class PerfProbe
 {
-    const int SectionCount = 20;
+    const int SectionCount = 21;
 
     static readonly string[] SectionNames =
     {
@@ -59,7 +61,8 @@ public static class PerfProbe
         "poll.board",
         "pump.main",
         "combat.dispatch",
-        "funnel.flush"
+        "funnel.flush",
+        "shield.absorb"
     };
 
     static readonly long[] Counts = new long[SectionCount];

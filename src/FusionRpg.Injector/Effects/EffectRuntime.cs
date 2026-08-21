@@ -70,6 +70,10 @@ public static class EffectRuntime
             {
                 try { VfxDirector.Play(Core.Vfx.StatusVfxCues.Cue(inst)); } catch { }
             };
+            _status.OnEnded = inst =>
+            {
+                try { VfxDirector.Play(Core.Vfx.StatusVfxCues.ExpireCue(inst)); } catch { }
+            };
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
             _bag.Status = _status;
             WireCombatMath(_bag);
@@ -389,7 +393,85 @@ public static class EffectRuntime
         {
             IsEnabled = () => OverlayCombatFeature.Enabled
         };
+        // Shield layer above the Funnel (shield-system-spec.md §2.2) — same resolve as combat.
+        bag.ShieldGate = new FusionRpg.Core.Combat.Shield.ShieldGate(
+            new FusionRpg.Core.Combat.Shield.ShieldRuntime(),
+            InjectorCombatBridge.ResolveActor);
     }
+
+    // ---- Shield tick host — 100 ms grid, own guard (NOT TickDots' status guard) ----
+
+    static float _shieldAccum;
+    static long _shieldTickNo;
+    static readonly Func<string, FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot> ShieldOwnerResolver =
+        ownerKey =>
+        {
+            var ptr = ownerKey.StartsWith("entity:", StringComparison.Ordinal)
+                ? ownerKey.Substring("entity:".Length)
+                : ownerKey;
+            return InjectorCombatBridge.ResolveActor(ptr, attackerLess: false).Derived;
+        };
+
+    /// <summary>
+    /// Shield upkeep (regen → expiry/prune) on the 100 ms grid. Runs AFTER the frame's drain
+    /// dispatch and TickDots so an expiring shield still absorbs its final frame's damage.
+    /// </summary>
+    public static void TickShields(float unscaledDeltaTime)
+    {
+        Ensure();
+        var runtime = Bag.ShieldGate?.Runtime;
+        if (runtime == null || !runtime.HasPendingWork)
+        {
+            _shieldAccum = 0;
+            return;
+        }
+
+        _shieldAccum += unscaledDeltaTime;
+        var ticked = false;
+        while (_shieldAccum >= 0.1f)
+        {
+            _shieldAccum -= 0.1f;
+            runtime.Tick(_shieldTickNo++, 100, ShieldOwnerResolver);
+            ticked = true;
+        }
+
+        // Flush the event window on the same 100 ms grid (absorbed aggregates included).
+        if (ticked && runtime.DrainEvents(_shieldEventScratch) > 0)
+        {
+            foreach (var rec in _shieldEventScratch)
+            {
+                var ptr = rec.OwnerKey.StartsWith("entity:", StringComparison.Ordinal)
+                    ? rec.OwnerKey.Substring("entity:".Length)
+                    : rec.OwnerKey;
+                GameHooks.Emit(rec.Kind, new Dictionary<string, object>
+                {
+                    ["targetPtr"] = ptr,
+                    ["shieldId"] = rec.ShieldId,
+                    ["element"] = rec.Element,
+                    ["amount"] = rec.Amount,
+                    ["hitCount"] = rec.HitCount,
+                    ["hp"] = rec.Hp,
+                    ["maxHp"] = rec.MaxHp
+                });
+                if (rec.Kind == FusionRpg.Core.Combat.Shield.ShieldEventKinds.Broken)
+                {
+                    try
+                    {
+                        VfxDirector.Play(new FusionRpg.Contracts.VfxCueDto
+                        {
+                            CueId = FusionRpg.Core.Vfx.VfxCueIds.ShieldBroken,
+                            TargetPtr = ptr
+                        });
+                    }
+                    catch { }
+                }
+            }
+
+            _shieldEventScratch.Clear();
+        }
+    }
+
+    static readonly List<FusionRpg.Core.Combat.Shield.ShieldEventRec> _shieldEventScratch = new();
 }
 
 /// <summary>Thin injector wrapper — mapping lives in <see cref="EffectEventAdapterCore"/>.</summary>

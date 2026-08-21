@@ -162,6 +162,9 @@ public sealed class EffectBag
     public CombatPolicy CombatPolicy { get; set; } = CombatPolicy.Default;
     public ICombatRng CombatRng { get; set; } = new SeededCombatRng(42);
     public ICombatMath CombatMath { get; set; } = PassThroughCombatMath.Instance;
+
+    /// <summary>Shield layer above the Funnel — null keeps combat byte-identical (no shields).</summary>
+    public FusionRpg.Core.Combat.Shield.ShieldGate? ShieldGate { get; set; }
     public StatusRuntime? Status { get; set; }
     public IStatusRng StatusRng { get; set; } = new FixedStatusRng(0.0);
     public Func<DateTimeOffset> UtcNow { get; set; } = () => DateTimeOffset.UtcNow;
@@ -231,6 +234,7 @@ public sealed class EffectBag
             Withdraw(g.GrantId);
         _proc.Clear();
         Status?.Clear();
+        ShieldGate?.Runtime.Clear();
         _overlayProcs.Clear();
     }
 
@@ -405,6 +409,12 @@ public sealed class EffectBag
                 merged["remove"] = true;
             }
 
+            if (string.Equals(action.Action, EffectActions.GrantShield, StringComparison.OrdinalIgnoreCase))
+            {
+                ExecGrantShield(grant, def, ev, merged);
+                continue;
+            }
+
             if (string.Equals(action.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase))
             {
                 var packet = DamagePacketBuilder.FromOverlay(
@@ -468,7 +478,8 @@ public sealed class EffectBag
                     CombatPolicy,
                     CombatRng,
                     CombatMath,
-                    _lastSkipped);
+                    _lastSkipped,
+                    ShieldGate);
                 continue;
             }
 
@@ -535,7 +546,75 @@ public sealed class EffectBag
             CombatPolicy,
             CombatRng,
             CombatMath,
-            _lastSkipped);
+            _lastSkipped,
+            ShieldGate);
+    }
+
+    /// <summary>
+    /// GrantShield action — bag-side like ApplyResourceDelta (shield state is Core runtime,
+    /// never a Funnel mutation, never a sink plan item). Targets use the damage-packet
+    /// grammar; each resolved owner gets one idempotent ShieldRuntime apply.
+    /// </summary>
+    void ExecGrantShield(EffectGrant grant, EffectDef def, EffectEventDto ev, Dictionary<string, object?> merged)
+    {
+        if (ShieldGate == null)
+        {
+            _lastSkipped.Add(grant.GrantId + ":shield-runtime-missing");
+            return;
+        }
+
+        var baseHp = (long)Math.Abs(JsonOverlay.GetDouble(merged, "amount"));
+        var elementStr = JsonOverlay.GetString(merged, "element");
+        FusionRpg.Core.Stats.Derived.ElementTypeId? element = null;
+        if (!string.IsNullOrWhiteSpace(elementStr))
+        {
+            if (!FusionRpg.Core.Stats.Derived.ElementRoster.TryParse(elementStr, out var parsed))
+            {
+                _lastSkipped.Add(grant.GrantId + ":shield-element");
+                return;
+            }
+
+            element = parsed;
+        }
+
+        var sourceClass = JsonOverlay.GetString(merged, "sourceClass");
+        var isAura = string.Equals(sourceClass, "aura", StringComparison.OrdinalIgnoreCase);
+        var isInnate = string.Equals(sourceClass, "innate", StringComparison.OrdinalIgnoreCase);
+        var priority = merged.ContainsKey("priority")
+            ? JsonOverlay.GetInt(merged, "priority")
+            : isAura ? FusionRpg.Core.Combat.Shield.ShieldPolicy.PriorityAura
+            : isInnate ? FusionRpg.Core.Combat.Shield.ShieldPolicy.PriorityInnate
+            : FusionRpg.Core.Combat.Shield.ShieldPolicy.PrioritySkill;
+        var refill = merged.ContainsKey("refillOnMerge")
+            ? JsonOverlay.GetBool(merged, "refillOnMerge")
+            : !isAura;   // aura re-asserts are idempotent (spec §2.5); skill recasts refill
+        long? durationTicks = merged.ContainsKey("durationTicks")
+            ? (long)JsonOverlay.GetDouble(merged, "durationTicks")
+            : null;
+
+        var packet = DamagePacketBuilder.FromOverlay(merged, ev, grant.GrantId, def.EffectId, grant.PluginId);
+        BindSelected(packet);
+        var resolvedOwners = TargetResolver.Resolve(packet.Target, BoardSnapshot, ev, CombatPolicy, CombatRng);
+        foreach (var raw in resolvedOwners)
+        {
+            var ptr = CombatPtr.Normalize(raw);
+            if (string.IsNullOrWhiteSpace(ptr)) continue;
+            var applied = ShieldGate.ApplyGrant(ptr, new FusionRpg.Core.Combat.Shield.ShieldGrant
+            {
+                SourceId = grant.GrantId,
+                Element = element,
+                BaseHp = baseHp,
+                Priority = priority,
+                DurationTicks = durationTicks,
+                RefillOnMerge = refill,
+                IsInnate = isInnate
+            });
+            // Spec §2.5: drops/rejections are debug-line observability, no event.
+            if (applied.Outcome == FusionRpg.Core.Combat.Shield.ShieldApplyOutcome.Rejected)
+                _lastSkipped.Add(grant.GrantId + ":shield-rejected");
+            else if (applied.Outcome == FusionRpg.Core.Combat.Shield.ShieldApplyOutcome.DroppedWeaker)
+                _lastSkipped.Add(grant.GrantId + ":shield-dropped-weaker");
+        }
     }
 
     public int TickDots()
@@ -553,7 +632,8 @@ public sealed class EffectBag
                 CombatMath,
                 _lastSkipped,
                 effectId: null,
-                pluginId: null);
+                pluginId: null,
+                shieldGate: ShieldGate);
             n = Status.Tick(now, sink, BoardSnapshot, StatusRng);
         }
 

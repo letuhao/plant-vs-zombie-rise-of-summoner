@@ -5,6 +5,7 @@ public static class SealedCompactionPolicy
 {
     public const int ActivityRetainTail = 10_000;
     public const int XpRetainTailPerActor = 5_000;
+    public const int SoulRetainTailPerPlayer = 5_000;
     public const int KeepLastNFullCaptureRuns = 50;
     public const int ActivitySnapshotSchemaVersion = 1;
     public const int XpSnapshotSchemaVersion = 1;

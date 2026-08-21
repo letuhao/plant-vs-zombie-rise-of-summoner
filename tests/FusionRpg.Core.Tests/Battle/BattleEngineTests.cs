@@ -101,14 +101,9 @@ public class BattleEngineTests
         Assert.True(strongWins > weakWins, $"fire-vs-ice won {strongWins}, ice-vs-fire won {weakWins}");
     }
 
-    [Fact]
-    public void ShareMilli_mirrors_the_matchup_policy_constant()
-    {
-        Assert.Equal((int)Math.Round(ElementMatchupPolicy.MatchupShareK * 1000),
-            BattleEngine.ShareMilli(ElementMatchupRelation.Strong));
-        Assert.Equal(-(int)Math.Round(ElementMatchupPolicy.MatchupShareK * 1000),
-            BattleEngine.ShareMilli(ElementMatchupRelation.Weak));
-    }
+    // ShareMilli_mirrors_the_matchup_policy_constant deleted with the symbol itself
+    // (battle-adoption): matchup lives ONLY in the SSOT resolver now — the combat-unification
+    // ban test asserts the duplicate never returns.
 
     [Fact]
     public void Wave_catalog_builds_from_the_species_roster()

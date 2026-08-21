@@ -46,6 +46,152 @@ public sealed partial class RpgStore
             EnforceKeepLastNCore();
             TrimActivityTailsCore();
             TrimXpTailsCore();
+            TrimSoulTailsCore();
+        }
+    }
+
+    /// <summary>D5: soul-ledger tail-trim (XP-ledger pattern). Only rows the watermarked balance
+    /// already covers trim, so balances never change; the overflow lands in a segment archive.</summary>
+    public void TrimSoulLedgerTails(int? retainOverride = null)
+    {
+        lock (_gate)
+        {
+            TrimSoulTailsCore(retainOverride);
+        }
+    }
+
+    void TrimSoulTailsCore(int? retainOverride = null)
+    {
+        var retain = retainOverride ?? SealedCompactionPolicy.SoulRetainTailPerPlayer;
+        List<long> players;
+        using (var db = OpenUnlocked())
+        {
+            players = new List<long>();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT player_id FROM rpg_soul_ledger
+                GROUP BY player_id
+                HAVING COUNT(*) > $n;
+                """;
+            cmd.Parameters.AddWithValue("$n", retain);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                players.Add(r.GetInt64(0));
+        }
+
+        foreach (var playerId in players)
+            TrimSoulPlayerCore(playerId, retain);
+    }
+
+    void TrimSoulPlayerCore(long playerId, int retain)
+    {
+        List<long> ids;
+        long through;
+        using (var db = OpenUnlocked())
+        {
+            long total;
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = "SELECT COUNT(*) FROM rpg_soul_ledger WHERE player_id=$p;";
+                cmd.Parameters.AddWithValue("$p", playerId);
+                total = Convert.ToInt64(cmd.ExecuteScalar() ?? 0L);
+            }
+
+            var overflow = total - retain;
+            if (overflow <= 0)
+                return;
+
+            ids = new List<long>((int)overflow);
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = """
+                    SELECT id FROM rpg_soul_ledger
+                    WHERE player_id=$p
+                    ORDER BY id ASC
+                    LIMIT $n;
+                    """;
+                cmd.Parameters.AddWithValue("$p", playerId);
+                cmd.Parameters.AddWithValue("$n", overflow);
+                using var r = cmd.ExecuteReader();
+                while (r.Read())
+                    ids.Add(r.GetInt64(0));
+            }
+
+            if (ids.Count == 0)
+                return;
+
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = """
+                    SELECT COALESCE(through_ledger_id, 0) FROM rpg_soul_balances
+                    WHERE player_id=$p;
+                    """;
+                cmd.Parameters.AddWithValue("$p", playerId);
+                var v = cmd.ExecuteScalar();
+                through = v is null or DBNull ? 0L : Convert.ToInt64(v);
+            }
+        }
+
+        var maxOverflowId = ids[^1];
+        if (through < maxOverflowId)
+            return; // never trim rows the balance has not folded in
+
+        var minId = ids[0];
+        Directory.CreateDirectory(ArchiveDir);
+        var fileName = $"souls-a{playerId}-{minId}-{maxOverflowId}.sqlite";
+        var absPath = Path.Combine(ArchiveDir, fileName);
+        var relUri = Path.Combine("archive", fileName).Replace('\\', '/');
+        if (File.Exists(absPath))
+            File.Delete(absPath);
+
+        var idList = string.Join(",", ids);
+        WriteSegmentArchiveFile(absPath, "rpg_soul_ledger", idList, ids.Count);
+
+        using (var db = OpenUnlocked())
+        {
+            Exec(db, "BEGIN IMMEDIATE;");
+            try
+            {
+                using (var cmd = db.CreateCommand())
+                {
+                    cmd.CommandText = """
+                        SELECT COALESCE(through_ledger_id, 0) FROM rpg_soul_balances
+                        WHERE player_id=$p;
+                        """;
+                    cmd.Parameters.AddWithValue("$p", playerId);
+                    var v = cmd.ExecuteScalar();
+                    var cover = v is null or DBNull ? 0L : Convert.ToInt64(v);
+                    if (cover < maxOverflowId)
+                    {
+                        Exec(db, "ROLLBACK;");
+                        try { File.Delete(absPath); } catch { /* ignore */ }
+                        return;
+                    }
+                }
+
+                using (var cmd = db.CreateCommand())
+                {
+                    cmd.CommandText = """
+                        INSERT INTO archive_catalog(uri, kind, run_id, player_id, created_utc, meta_json)
+                        VALUES($u, 'souls', NULL, $p, $t, $m);
+                        """;
+                    cmd.Parameters.AddWithValue("$u", relUri);
+                    cmd.Parameters.AddWithValue("$p", playerId);
+                    cmd.Parameters.AddWithValue("$t", DateTime.UtcNow.ToString("o"));
+                    cmd.Parameters.AddWithValue("$m",
+                        $"{{\"minId\":{minId},\"maxId\":{maxOverflowId},\"count\":{ids.Count}}}");
+                    cmd.ExecuteNonQuery();
+                }
+
+                Exec(db, $"DELETE FROM rpg_soul_ledger WHERE id IN ({idList});");
+                Exec(db, "COMMIT;");
+            }
+            catch
+            {
+                try { Exec(db, "ROLLBACK;"); } catch { /* ignore */ }
+                try { File.Delete(absPath); } catch { /* ignore */ }
+                throw;
+            }
         }
     }
 

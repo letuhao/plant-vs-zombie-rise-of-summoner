@@ -15,6 +15,9 @@ public static class FxResources
     static Material? _particleMat;
     static Texture2D? _softDisc;
     static string _matShaderName = "";
+    static readonly Dictionary<Core.Vfx.VfxMarkerShape, Material> MarkerMats = new();
+    static readonly Dictionary<Core.Vfx.VfxMarkerShape, Texture2D> MarkerTextures = new();
+    static string _markerShaderName = "";
 
     /// <summary>Cached particle material, or null when no shipped shader survives stripping.</summary>
     public static Material? ParticleMaterial()
@@ -48,6 +51,94 @@ public static class FxResources
             _particleMat = null;
             _matShaderName = "";
             return null;
+        }
+    }
+
+    /// <summary>Cached material for a procedurally generated marker shape (vfx-v3 M5).</summary>
+    public static Material? MarkerMaterial(Core.Vfx.VfxMarkerShape shape)
+    {
+        var shader = OverlayShaderProbe.DrawShader();
+        var name = OverlayShaderProbe.DrawShaderName();
+        if (shader == null || string.IsNullOrEmpty(name)) return null;
+        if (!string.Equals(_markerShaderName, name, StringComparison.Ordinal))
+        {
+            MarkerMats.Clear();
+            _markerShaderName = name;
+        }
+
+        if (MarkerMats.TryGetValue(shape, out var cached) && cached != null) return cached;
+        try
+        {
+            var mat = new Material(shader)
+            {
+                hideFlags = HideFlags.HideAndDontSave,
+                mainTexture = MarkerTexture(shape)
+            };
+            try { mat.SetColor("_Color", Color.white); } catch { }
+            MarkerMats[shape] = mat;
+            return mat;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    static Texture2D MarkerTexture(Core.Vfx.VfxMarkerShape shape)
+    {
+        if (MarkerTextures.TryGetValue(shape, out var cached) && cached != null) return cached;
+        const int size = 64;
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
+        {
+            hideFlags = HideFlags.HideAndDontSave,
+            wrapMode = TextureWrapMode.Clamp,
+            filterMode = FilterMode.Bilinear,
+            name = "FusionRpgMarker" + shape
+        };
+        var c = (size - 1) * 0.5f;
+        for (var y = 0; y < size; y++)
+        {
+            for (var x = 0; x < size; x++)
+            {
+                var nx = (x - c) / c; // -1..1
+                var ny = (y - c) / c;
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, ShapeAlpha(shape, nx, ny)));
+            }
+        }
+
+        tex.Apply(false, true);
+        MarkerTextures[shape] = tex;
+        return tex;
+    }
+
+    static float ShapeAlpha(Core.Vfx.VfxMarkerShape shape, float nx, float ny)
+    {
+        const float edge = 0.1f;
+        switch (shape)
+        {
+            case Core.Vfx.VfxMarkerShape.Diamond:
+            {
+                var d = MathF.Abs(nx) + MathF.Abs(ny);
+                return Mathf.Clamp01((0.8f - d) / edge);
+            }
+            case Core.Vfx.VfxMarkerShape.TriangleDown:
+            {
+                // apex at (0, -0.8), base from (-0.7, 0.6) to (0.7, 0.6)
+                if (ny > 0.6f || ny < -0.8f) return 0f;
+                var halfWidth = 0.7f * ((ny + 0.8f) / 1.4f);
+                return Mathf.Clamp01((halfWidth - MathF.Abs(nx)) / edge);
+            }
+            case Core.Vfx.VfxMarkerShape.Cross:
+            {
+                if (MathF.Abs(nx) > 0.8f || MathF.Abs(ny) > 0.8f) return 0f;
+                var arm = MathF.Min(MathF.Abs(nx), MathF.Abs(ny));
+                return Mathf.Clamp01((0.18f - arm) / edge);
+            }
+            default: // Ring
+            {
+                var d = MathF.Sqrt(nx * nx + ny * ny);
+                return Mathf.Clamp01((0.12f - MathF.Abs(d - 0.66f)) / edge);
+            }
         }
     }
 

@@ -1,3 +1,4 @@
+using FusionRpg.Contracts;
 using FusionRpg.Core.Demons;
 using FusionRpg.Data;
 using Xunit;
@@ -128,5 +129,40 @@ public class SummonStoreTests : IDisposable
         var (ok, reason, _) = _store.ExecuteSummon(1, SummonBannerCatalog.ElementFocus, 1, "c-f", 7, "42");
         Assert.False(ok);
         Assert.Equal("focus.unknown", reason);
+    }
+
+    [Fact]
+    public void Codex_milestones_pay_at_50_and_90_percent_once()
+    {
+        var all = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
+        var half = (all.Count + 1) / 2;            // ceil 50 %
+        var ninety = (all.Count * 9 + 9) / 10;     // ceil 90 %
+
+        // Pre-discover exactly the half threshold, then one pull triggers the half milestone.
+        foreach (var s in all.Take(half))
+            _store.UpsertDemonCodex(1, s.SpeciesId, DemonCodexStates.Discovered);
+        _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-m1", 3, null);
+        var ledger = _store.ListSoulLedger(1, 300);
+        Assert.Single(ledger.Items, i => i.Reason == SoulEarnPolicy.Reasons.Milestone && i.RefId == "half");
+
+        // Cross the 90 % line: full milestone lands; a further pull re-awards neither.
+        foreach (var s in all.Take(ninety))
+            _store.UpsertDemonCodex(1, s.SpeciesId, DemonCodexStates.Discovered);
+        _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-m2", 4, null);
+        _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-m3", 5, null);
+        ledger = _store.ListSoulLedger(1, 300);
+        Assert.Single(ledger.Items, i => i.Reason == SoulEarnPolicy.Reasons.Milestone && i.RefId == "half");
+        Assert.Single(ledger.Items, i => i.Reason == SoulEarnPolicy.Reasons.Milestone && i.RefId == "full");
+    }
+
+    [Fact]
+    public void Spend_collision_outside_the_summon_log_throws_instead_of_free_pull()
+    {
+        // A summon-reason spend row without a summon-log row (only reachable by misusing the
+        // public spend API) must abort the pull, not mint for free (review S1).
+        _store.TrySpendSouls(1, 100, SoulEarnPolicy.Reasons.Summon, "c-collide");
+        Assert.Throws<InvalidOperationException>(() =>
+            _store.ExecuteSummon(1, SummonBannerCatalog.StandardRift, 1, "c-collide", 7, null));
+        Assert.Empty(_store.ListDemonRoster(1).Items);
     }
 }

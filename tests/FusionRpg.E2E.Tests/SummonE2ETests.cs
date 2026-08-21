@@ -76,6 +76,24 @@ public class SummonE2ETests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Oversized_inputs_are_rejected_with_400()
+    {
+        var longCorr = new string('x', 65);
+        var pull = await _http.PostAsJsonAsync("/api/demons/summon",
+            new { bannerId = "standard-rift", count = 1, correlationId = longCorr });
+        Assert.Equal(HttpStatusCode.BadRequest, pull.StatusCode);
+
+        var ok = await _http.PostAsJsonAsync("/api/demons/summon",
+            new { bannerId = "standard-rift", count = 1, correlationId = Guid.NewGuid().ToString("N") });
+        ok.EnsureSuccessStatusCode();
+        var outcome = await ok.Content.ReadFromJsonAsync<JsonElement>();
+        var id = outcome.GetProperty("specimens")[0].GetProperty("profile").GetProperty("instanceId").GetString();
+        var longNick = await _http.PostAsJsonAsync($"/api/demons/specimen/{id}/nickname",
+            new { nickname = new string('n', 33) });
+        Assert.Equal(HttpStatusCode.BadRequest, longNick.StatusCode);
+    }
+
+    [Fact]
     public async Task Nickname_and_lock_work_on_a_summoned_specimen()
     {
         var pull = await _http.PostAsJsonAsync("/api/demons/summon",

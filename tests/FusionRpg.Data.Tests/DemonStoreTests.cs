@@ -111,4 +111,25 @@ public class DemonStoreTests : IDisposable
         Assert.Throws<ArgumentException>(() =>
             _store.MintDemon(1, new DemonMintSpec { SpeciesId = "x", Side = "mower" }));
     }
+
+    [Fact]
+    public void Mint_enforces_catalog_discipline()
+    {
+        // Review I3: unknown ids reject at the write gate; whitespace species trims to ONE codex key.
+        Assert.Throws<ArgumentException>(() => _store.MintDemon(1, Spec("no-such-species")));
+        var badTrait = Spec();
+        badTrait.TraitIds = new List<string> { "nonsense-trait" };
+        Assert.Throws<ArgumentException>(() => _store.MintDemon(1, badTrait));
+        var badVariant = Spec();
+        badVariant.Variant = "holographic";
+        Assert.Throws<ArgumentException>(() => _store.MintDemon(1, badVariant));
+        var badRarity = Spec();
+        badRarity.Rarity = "mythic";
+        Assert.Throws<ArgumentException>(() => _store.MintDemon(1, badRarity));
+        Assert.Empty(_store.ListDemonRoster(1).Items); // nothing leaked through
+
+        _store.MintDemon(1, Spec("  " + CatalogSpecies.SpeciesId + "  "));
+        _store.MintDemon(1, Spec());
+        Assert.Single(_store.ListDemonCodex(1).Entries); // trimmed — no split codex keys
+    }
 }
