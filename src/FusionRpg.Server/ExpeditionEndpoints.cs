@@ -94,7 +94,7 @@ public sealed class ExpeditionService
         // The stored squad snapshot rule: BuildSquad reads the LIVE roster, which only works
         // because the soft-lock freezes deployment while dispatched; specimen XP from this very
         // collect lands after resolution. Already-logged battles replay their sealed setups.
-        var (squadOk, squadReason, squad) = _webMatch.BuildSquad(playerId, squadIds);
+        var (squadOk, squadReason, squad, _) = _webMatch.BuildSquad(playerId, squadIds);
         if (!squadOk) return (false, squadReason, null);
 
         var resolution = ExpeditionResolver.Resolve(tier.TierId, squad!, row.Seed, elapsed);
@@ -102,6 +102,7 @@ public sealed class ExpeditionService
         // Battles run first — each is correlation-idempotent, so a crashed collect replays them.
         var battleResults = new List<CollectBattleResult>();
         var specimenXp = new Dictionary<string, double>(StringComparer.Ordinal);
+        var victories = 0;
         foreach (var plan in resolution.Battles)
         {
             var (ok, reason, outcome) = await _webMatch
@@ -118,6 +119,7 @@ public sealed class ExpeditionService
             // Specimen XP per battle won: survivors earn the tier rate × their genius multiplier.
             if (report.Outcome == BattleOutcome.Victory)
             {
+                victories++;
                 foreach (var actor in report.Actors)
                 {
                     if (actor.Side != "squad" || !actor.Survived) continue;
@@ -161,6 +163,11 @@ public sealed class ExpeditionService
                 xpAwards,
                 wildMints));
         if (!applied) return (false, applyReason, null);
+
+        // Loyalty for the trip as a whole, not per battle: an expedition credits a win when most
+        // of its battles were victories. A recall before the first battle is neither.
+        if (battleResults.Count > 0)
+            _store.ApplyContractResults(playerId, squadIds, victories * 2 >= battleResults.Count);
 
         // Rewards are committed: notifies are best-effort. A hub fault here must not fail the
         // call — the reveal payload is only deliverable once (state gate refuses retries).

@@ -94,6 +94,15 @@ public sealed partial class RpgStore
             if (!string.Equals(row.Phase, UniqueActorPhases.Roster, StringComparison.Ordinal))
                 return (false, "phase." + row.Phase.ToLowerInvariant(), row, false);
 
+            // Contract gate — demons only. A unique actor without a demon profile predates this
+            // module entirely and deploys exactly as it always did.
+            if (ReadDemonProfileUnlocked(db, id) != null)
+            {
+                var contract = ContractViewUnlocked(db, row.PlayerId, id);
+                if (!contract.Bound) return (false, "contract.unbound", row, false);
+                if (!contract.Deployable) return (false, "contract.insubordinate", row, false);
+            }
+
             var now = DateTime.UtcNow.ToString("o");
             using (var cmd = db.CreateCommand())
             {

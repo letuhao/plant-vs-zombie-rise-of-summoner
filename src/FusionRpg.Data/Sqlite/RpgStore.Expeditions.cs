@@ -61,6 +61,10 @@ public sealed partial class RpgStore
                     return (false, "specimen.deployed", null);
                 if (HasActiveExpeditionMembershipUnlocked(db, id))
                     return (false, "specimen.on-expedition", null);
+                // Contracts gate every path that fields a demon (spec-demon-contracts.md).
+                var contract = ContractViewUnlocked(db, playerId, id);
+                if (!contract.Bound) return (false, "specimen.unbound", null);
+                if (!contract.Deployable) return (false, "specimen.insubordinate", null);
             }
 
             var now = utcNow ?? DateTimeOffset.UtcNow;

@@ -1,6 +1,7 @@
 using System.Reflection;
 using FusionRpg.Injector.Fx;
 using FusionRpg.Injector.Host;
+using FusionRpg.Injector.Hud;
 using MelonLoader;
 using UnityEngine;
 
@@ -57,11 +58,17 @@ public sealed class MelonFusionRpgMod : MelonMod
         InjectorLoop.Tick(Time.unscaledDeltaTime);
     }
 
+    /// <summary>
+    /// Single IMGUI entry (same as BepInEx RpgLoop.OnGUI). Do not dual-subscribe MelonEvents
+    /// with Event.GetHashCode dedupe — Unity reuses one Event object, so Layout+Repaint share
+    /// a hash and Repaint (floaters + shield bars) gets skipped while world VFX still runs.
+    /// </summary>
     public override void OnGUI()
     {
         if (!RpgHost.IsInitialized) return;
         if (RpgHost.Client == null && RpgHost.Harmony == null) return; // skip-harmony stub
         VfxDirector.Draw();
+        OverlaySettingsGui.Draw();
     }
 
     static string ResolveGameRoot()

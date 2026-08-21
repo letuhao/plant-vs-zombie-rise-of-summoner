@@ -86,7 +86,11 @@ public static class BattleEngine
             _apply(instance.HostPtr, (long)Math.Round(amount), "battle.status." + instance.StatusId);
     }
 
-    public static BattleReport Resolve(BattleSetup setup, ulong seed)
+    /// <param name="trace">
+    /// Optional observation for the kernel-adoption parity ladder. Null in production, and every
+    /// record site is null-conditional — tracing cannot change an outcome.
+    /// </param>
+    public static BattleReport Resolve(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace = null)
     {
         if (setup.Squad.Count == 0) throw new ArgumentException("Squad is empty.");
         if (setup.Wave.Count == 0) throw new ArgumentException("Wave is empty.");
@@ -111,7 +115,8 @@ public static class BattleEngine
         }
 
         var initiativeRng = SeededRng.DeriveStream(seed, "initiative");
-        var critRng = new SeededRngCombatAdapter(SeededRng.DeriveStream(seed, "crit")); // hit + crit rolls
+        ICombatRng critRng = new SeededRngCombatAdapter(SeededRng.DeriveStream(seed, "crit")); // hit + crit rolls
+        if (trace != null) critRng = trace.WrapCombat("crit", critRng);
         var essenceRng = SeededRng.DeriveStream(seed, "essence"); // void/chaos rider procs
         var statusRng = new BattleStatusRng(seed);
         var calculator = new OverlayCombatCalculator();
@@ -299,18 +304,28 @@ public static class BattleEngine
                 }
             }
 
+            trace?.Phase(rounds, "status");
             status.Tick(now, pulseSink, board: null, spreadRng: statusRng);
             host.Flush();
+            trace?.Phase(rounds, "post-flush");
             PostFlush(rounds);
             if (!AnyActive(actors, "squad") || !AnyActive(actors, "wave"))
                 break;
 
             // 2) Initiative-ordered attacks: stable order, per-round jitter from the initiative
             //    stream; swift subtracts a full band so it always acts before non-swift kin.
+            trace?.Phase(rounds, "initiative");
             var order = actors
                 .Where(a => a.Active)
-                .OrderBy(a => initiativeRng.NextInt(1000)
-                              - (a.Has("swift") ? TraitBattleCatalog.Get("swift").InitiativeBonusMilli : 0))
+                .OrderBy(a =>
+                {
+                    // Key selectors run once per element in SOURCE order, so the draw sequence
+                    // is "actors list order, filtered to Active" — T5 hazard 1, and note that
+                    // CC-locked actors are Active and therefore DO draw (hazard 4).
+                    var roll = initiativeRng.NextInt(1000);
+                    trace?.Draw("initiative", roll);
+                    return roll - (a.Has("swift") ? TraitBattleCatalog.Get("swift").InitiativeBonusMilli : 0);
+                })
                 .ToList();
 
             foreach (var attacker in order)
@@ -347,7 +362,9 @@ public static class BattleEngine
                 {
                     if (!attacker.Has(essenceId)) continue;
                     var def = TraitBattleCatalog.Get(essenceId);
-                    if (essenceRng.NextPerMille() < def.EssenceProcMilli)
+                    var essenceRoll = essenceRng.NextPerMille();
+                    trace?.Draw("essence", essenceRoll);
+                    if (essenceRoll < def.EssenceProcMilli)
                         rider += Math.Max(1, damage * def.EssenceRiderMilli / 1000);
                 }
 
@@ -404,6 +421,7 @@ public static class BattleEngine
                 }
             }
 
+            trace?.Phase(rounds, "shield-upkeep");
             shields.Tick(rounds, BattleRuleset.RoundDurationMs, ownerKey =>
             {
                 var key = ownerKey.StartsWith("entity:", StringComparison.Ordinal)
@@ -412,6 +430,9 @@ public static class BattleEngine
                 return byKey.TryGetValue(key, out var a) ? a.Derived : ActorDerivedSnapshot.AttackerLess();
             });
             DrainShieldEvents(rounds);
+            if (trace != null)
+                foreach (var a in actors)
+                    trace.State(rounds, a.Setup.Key, a.Hp, a.ShieldAbsorbed);
         }
 
         DrainShieldEvents(rounds);   // trailing grants/absorbs when the loop exits mid-round

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Demons.Contracts;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
@@ -36,7 +37,7 @@ public sealed class WebMatchService
 
         // 1. Server-authoritative setup: squad snapshots from the roster (or a SIM synthetic
         //    squad when the roster is empty), wave from the code-authored catalog.
-        var (squadOk, squadReason, squad) = BuildSquad(playerId, squadInstanceIds);
+        var (squadOk, squadReason, squad, pickedIds) = BuildSquad(playerId, squadInstanceIds);
         if (!squadOk) return (false, squadReason, null);
         var setup = new BattleSetup
         {
@@ -67,6 +68,9 @@ public sealed class WebMatchService
 
         // 3–4. Resolve + dedicated ingest; 5. notify.
         var (report, notify) = ResolveAndIngest(playerId, matchKey, setup, seed);
+        // 4b. The squad lived it: contracted members gain or lose loyalty for the result. Replays
+        //     return above, so a retry never credits a second time.
+        _store.ApplyContractResults(playerId, pickedIds, report.Outcome == BattleOutcome.Victory);
         await BroadcastAsync(playerId, notify).ConfigureAwait(false);
 
         var linked = _store.TryGetWebMatchLog(playerId, corr);
@@ -177,16 +181,26 @@ public sealed class WebMatchService
     }
 
     /// <summary>Server-authoritative squad snapshots from the roster — shared with expeditions.</summary>
-    public (bool Ok, string Reason, List<BattleActorSetup>? Squad) BuildSquad(
+    public (bool Ok, string Reason, List<BattleActorSetup>? Squad, List<string> InstanceIds) BuildSquad(
         long playerId, IReadOnlyList<string>? squadInstanceIds)
     {
         // Own guards, not caller trust: every future battle producer inherits them.
         const int maxSquad = 6;
+        var none = new List<string>();
         if (squadInstanceIds is { Count: > maxSquad })
-            return (false, "squad.toolarge", null);
+            return (false, "squad.toolarge", null, none);
         if (squadInstanceIds != null
             && squadInstanceIds.Distinct(StringComparer.Ordinal).Count() != squadInstanceIds.Count)
-            return (false, "squad.duplicate", null);
+            return (false, "squad.duplicate", null, none);
+
+        // Contracts gate fielding (spec-demon-contracts.md). Settling first is what keeps an
+        // un-migrated player from being refused everything; on any day already settled it is a
+        // single read, so this is not a billing loop on the battle path.
+        _store.SettleContracts(playerId);
+        var contracts = _store.ListContracts(playerId)
+            .ToDictionary(c => c.InstanceId, c => c, StringComparer.Ordinal);
+        bool Bound(string id) => contracts.TryGetValue(id, out var c) && c.Bound;
+        bool Deployable(string id) => contracts.TryGetValue(id, out var c) && c.Deployable;
 
         var roster = _store.ListDemonRoster(playerId).Items;
         List<DemonSpecimenDto> picked;
@@ -197,19 +211,23 @@ public sealed class WebMatchService
             {
                 var specimen = roster.FirstOrDefault(s =>
                     string.Equals(s.Profile.InstanceId, id, StringComparison.Ordinal));
-                if (specimen == null) return (false, "squad.unknown-specimen", null);
+                if (specimen == null) return (false, "squad.unknown-specimen", null, none);
+                if (!Bound(id)) return (false, "squad.unbound", null, none);
+                if (!Deployable(id)) return (false, "squad.insubordinate", null, none);
                 picked.Add(specimen);
             }
         }
         else
         {
-            picked = roster.Take(3).ToList();
+            // Auto-pick skips what cannot serve rather than refusing — the player asked for a
+            // battle, not for a lecture about their roster.
+            picked = roster.Where(s => Deployable(s.Profile.InstanceId)).Take(3).ToList();
         }
 
         if (picked.Count == 0)
         {
             // SIM convenience: an empty roster still gets a deterministic synthetic squad.
-            return (true, "", Enumerable.Range(0, 2).Select(i => Synthetic(i)).ToList());
+            return (true, "", Enumerable.Range(0, 2).Select(i => Synthetic(i)).ToList(), none);
         }
 
         var squad = new List<BattleActorSetup>(picked.Count);
@@ -232,10 +250,13 @@ public sealed class WebMatchService
                 Atk = BattleRuleset.BaseAtk(level),
                 Defense = BattleRuleset.BaseDefense(level),
                 ChannelMods = StarChannelMods(s.Profile.Star, level)
+                    .Concat(LoyaltyChannelMods(
+                        contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
+                    .ToList()
             });
         }
 
-        return (true, "", squad);
+        return (true, "", squad, picked.Select(p => p.Profile.InstanceId).ToList());
     }
 
     /// <summary>
@@ -250,6 +271,28 @@ public sealed class WebMatchService
             BattleRuleset.BaseAtk(level) * star * FusionRpg.Core.Demons.Fusion.StarPolicy.PerStarPowerMilli / 1000);
         var defense = Math.Max(star,
             BattleRuleset.BaseDefense(level) * star * FusionRpg.Core.Demons.Fusion.StarPolicy.PerStarDefenseMilli / 1000);
+        return new[]
+        {
+            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, power),
+            new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, defense)
+        };
+    }
+
+    /// <summary>
+    /// Loyalty reaches battles the same way stars do — flat per-mille shares of the level stats on
+    /// the omni channels, never an engine change (spec-demon-contracts.md G7). The Bound band pays
+    /// +0‰ by design, so a fresh contract cannot move a single golden hash.
+    /// </summary>
+    public static IReadOnlyList<BattleChannelMod> LoyaltyChannelMods(int loyalty, int level)
+    {
+        var rank = ContractPolicy.RankFor(loyalty);
+        var milli = ContractPolicy.RankBonusMilli(rank);
+        if (milli <= 0) return Array.Empty<BattleChannelMod>();
+        // Floored at the rank step (Sworn 1 / Trusted 2 / Devoted 3) exactly like stars: at low
+        // levels a per-mille share truncates to nothing, and every rank would look identical.
+        var floor = (int)rank - 1;
+        var power = Math.Max(floor, BattleRuleset.BaseAtk(level) * milli / 1000);
+        var defense = Math.Max(floor, BattleRuleset.BaseDefense(level) * milli / 1000);
         return new[]
         {
             new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, power),

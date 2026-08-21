@@ -64,6 +64,7 @@ public static class InjectorLoop
         try { using (PerfProbe.Measure(PerfSection.CheatContinuous)) CheatActions.TickContinuous(); } catch { }
         try { using (PerfProbe.Measure(PerfSection.CheatAutoCollect)) CheatActions.AutoCollectTick(); } catch { }
         try { using (PerfProbe.Measure(PerfSection.VfxTick)) VfxDirector.Tick(unscaledDeltaTime); } catch { }
+        try { Hud.OverlayInput.Tick(); } catch { }
         // v2 drain before TickDots so DoT pulses share the drain's board freeze and
         // merge into the same funnel window (plan Task 10).
         try { EventDrainHost.Tick(unscaledDeltaTime); } catch { }

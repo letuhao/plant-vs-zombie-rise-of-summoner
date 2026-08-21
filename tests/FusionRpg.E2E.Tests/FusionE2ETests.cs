@@ -144,6 +144,24 @@ public class FusionE2ETests : IAsyncLifetime
         Assert.Equal("combat.defense.omni", one[1].ChannelId);
     }
 
+    /// <summary>
+    /// G7: the Bound band pays nothing — that is what keeps every golden byte-identical when
+    /// contracts land. The higher bands must still be real, or the feature is decoration.
+    /// </summary>
+    [Fact]
+    public void Loyalty_mods_are_zero_at_bound_and_climb_with_rank()
+    {
+        Assert.Empty(FusionRpg.Server.WebMatchService.LoyaltyChannelMods(
+            FusionRpg.Core.Demons.Contracts.ContractPolicy.BindLoyalty, 5));
+
+        var sworn = FusionRpg.Server.WebMatchService.LoyaltyChannelMods(450, 5);
+        var devoted = FusionRpg.Server.WebMatchService.LoyaltyChannelMods(900, 5);
+        Assert.Equal(2, sworn.Count);
+        Assert.Equal("combat.power.omni", sworn[0].ChannelId);
+        Assert.Equal("combat.defense.omni", sworn[1].ChannelId);
+        Assert.True(devoted[0].Amount > sworn[0].Amount, "devotion must outweigh a sworn oath");
+    }
+
     [Fact]
     public void Stars_swing_battles_statistically()
     {

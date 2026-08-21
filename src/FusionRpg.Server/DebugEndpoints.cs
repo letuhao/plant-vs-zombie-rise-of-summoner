@@ -219,6 +219,12 @@ public static class DebugEndpoints
         MapPost(g, "/combat/silence-vanilla", "debug.combat.silence-vanilla");
         MapPost(g, "/combat/probe", "debug.combat.probe");
         MapPost(g, "/combat/snapshot", "debug.combat.snapshot");
+        MapPost(g, "/shield/grant", "debug.shield.grant");
+        MapPost(g, "/shield/clear", "debug.shield.clear");
+        MapPost(g, "/shield/demo", "debug.shield.demo");
+        MapPost(g, "/shield/demo-all", "debug.shield.demo-all");
+        MapPost(g, "/shield/snapshot", "debug.shield.snapshot");
+        MapPost(g, "/shield/bar-status", "debug.shield.bar-status");
         g.MapPost("/status/apply", async (JsonElement? body, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {
             var b = BodyOrEmpty(body);

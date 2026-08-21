@@ -11,6 +11,7 @@ using FusionRpg.Core.Vfx;
 using FusionRpg.Injector.Effects;
 using FusionRpg.Injector.Fx;
 using FusionRpg.Injector.Host;
+using FusionRpg.Injector.Hud;
 using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector;
@@ -357,6 +358,21 @@ public static class CheatCommandRunner
                 break;
             case "debug.shield.grant":
                 RunShieldGrant(p);
+                break;
+            case "debug.shield.clear":
+                RunShieldClear(p);
+                break;
+            case "debug.shield.demo":
+                RunShieldDemo(p);
+                break;
+            case "debug.shield.demo-all":
+                RunShieldDemoAll(p);
+                break;
+            case "debug.shield.snapshot":
+                RunShieldSnapshot(p);
+                break;
+            case "debug.shield.bar-status":
+                RunShieldBarStatus(p);
                 break;
             case "debug.effect.board-snapshot":
                 EmitBoardSnapshot();
@@ -801,6 +817,375 @@ public static class CheatCommandRunner
             ["hp"] = result.Instance?.Hp ?? 0,
             ["maxHp"] = result.Instance?.MaxHp ?? 0,
             ["evicted"] = result.Evicted?.ShieldId ?? ""
+        });
+    }
+
+    /// <summary>debug.shield.clear — RemoveAll on target/selected (no Funnel write).</summary>
+    static void RunShieldClear(JsonElement p)
+    {
+        var ptr = ResolveDeltaTargetPtr(p);
+        if (string.IsNullOrWhiteSpace(ptr))
+        {
+            CheatState.Error("debug.shield.clear: missing target");
+            DebugRuntime.Emit("debug.effect.error", new Dictionary<string, object>
+            {
+                ["error"] = "missing-target",
+                ["command"] = "debug.shield.clear"
+            });
+            return;
+        }
+
+        Effects.EffectRuntime.Ensure();
+        var runtime = Effects.EffectRuntime.Bag.ShieldGate?.Runtime;
+        if (runtime == null)
+        {
+            CheatState.Error("debug.shield.clear: shield gate missing");
+            return;
+        }
+
+        var ownerKey = EffectOwnerKeys.Entity(CombatPtr.Normalize(ptr!));
+        var before = runtime.GetShields(ownerKey).Count;
+        runtime.RemoveAll(ownerKey);
+        DebugRuntime.Emit("debug.shield.cleared", new Dictionary<string, object>
+        {
+            ["targetPtr"] = ptr!,
+            ["removed"] = before
+        });
+    }
+
+    /// <summary>
+    /// debug.shield.demo — grant up to 3 stacks with distinct sourceIds (default fire/ice/earth)
+    /// so the hybrid multi-stop bar is visible in one call.
+    /// </summary>
+    static void RunShieldDemo(JsonElement p)
+    {
+        var ptr = ResolveDeltaTargetPtr(p);
+        if (string.IsNullOrWhiteSpace(ptr))
+        {
+            CheatState.Error("debug.shield.demo: missing target");
+            DebugRuntime.Emit("debug.effect.error", new Dictionary<string, object>
+            {
+                ["error"] = "missing-target",
+                ["command"] = "debug.shield.demo"
+            });
+            return;
+        }
+
+        var amount = LongProp(p, "amount", 80);
+        if (amount <= 0)
+        {
+            CheatState.Error("debug.shield.demo: amount must be > 0");
+            return;
+        }
+
+        var elements = ParseShieldDemoElements(p);
+        Effects.EffectRuntime.Ensure();
+        Effects.EffectRuntime.FreezeBoard();
+        var gate = Effects.EffectRuntime.Bag.ShieldGate;
+        if (gate == null)
+        {
+            CheatState.Error("debug.shield.demo: shield gate missing");
+            return;
+        }
+
+        var normPtr = CombatPtr.Normalize(ptr!);
+        var granted = new List<object>();
+        for (var i = 0; i < elements.Count; i++)
+        {
+            var elName = elements[i];
+            FusionRpg.Core.Stats.Derived.ElementTypeId? element = null;
+            if (!string.IsNullOrWhiteSpace(elName)
+                && !string.Equals(elName, "none", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!FusionRpg.Core.Stats.Derived.ElementRoster.TryParse(elName, out var parsedEl))
+                {
+                    CheatState.Error("debug.shield.demo: unknown element " + elName);
+                    return;
+                }
+
+                element = parsedEl;
+            }
+
+            var tag = string.IsNullOrWhiteSpace(elName) ? "none" : elName.Trim().ToLowerInvariant();
+            var result = gate.ApplyGrant(normPtr, new FusionRpg.Core.Combat.Shield.ShieldGrant
+            {
+                SourceId = "demo:" + tag,
+                Element = element,
+                BaseHp = amount,
+                Priority = FusionRpg.Core.Combat.Shield.ShieldPolicy.PrioritySkill,
+                RefillOnMerge = true
+            });
+            granted.Add(new Dictionary<string, object>
+            {
+                ["element"] = tag,
+                ["outcome"] = result.Outcome.ToString(),
+                ["shieldId"] = result.Instance?.ShieldId ?? "",
+                ["hp"] = result.Instance?.Hp ?? 0,
+                ["maxHp"] = result.Instance?.MaxHp ?? 0,
+                ["evicted"] = result.Evicted?.ShieldId ?? ""
+            });
+        }
+
+        DebugRuntime.Emit("debug.shield.demo", new Dictionary<string, object>
+        {
+            ["targetPtr"] = ptr!,
+            ["amount"] = amount,
+            ["count"] = granted.Count,
+            ["grants"] = granted
+        });
+    }
+
+    /// <summary>
+    /// debug.shield.demo-all — 3-stack demo on every living plant and zombie (lab setup).
+    /// Does not require select / targetPtr.
+    /// </summary>
+    static void RunShieldDemoAll(JsonElement p)
+    {
+        var amount = LongProp(p, "amount", 80);
+        if (amount <= 0)
+        {
+            CheatState.Error("debug.shield.demo-all: amount must be > 0");
+            return;
+        }
+
+        var elements = ParseShieldDemoElements(p);
+        Effects.EffectRuntime.Ensure();
+        Effects.EffectRuntime.FreezeBoard();
+        var gate = Effects.EffectRuntime.Bag.ShieldGate;
+        if (gate == null)
+        {
+            CheatState.Error("debug.shield.demo-all: shield gate missing");
+            return;
+        }
+
+        var targets = new List<string>();
+        try
+        {
+            // Spawn hooks can lag one step behind run-steps — force a full FindObjects resync
+            // so pea + zombie both receive the 3-stack demo in lab-shield-bar.
+            Effects.InjectorEntityRegistry.Resync(UnityEngine.Time.frameCount);
+            Effects.InjectorEntityRegistry.VisitPlants(plant =>
+            {
+                try
+                {
+                    if (plant == null || plant.Pointer == IntPtr.Zero) return;
+                    targets.Add(CombatPtr.Normalize(plant.Pointer.ToString("X")));
+                }
+                catch { }
+            });
+            Effects.InjectorEntityRegistry.VisitZombies(zombie =>
+            {
+                try
+                {
+                    if (zombie == null || zombie.Pointer == IntPtr.Zero) return;
+                    targets.Add(CombatPtr.Normalize(zombie.Pointer.ToString("X")));
+                }
+                catch { }
+            });
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.shield.demo-all: " + ex.Message);
+            return;
+        }
+
+        var results = new List<object>();
+        foreach (var ptr in targets)
+        {
+            if (string.IsNullOrEmpty(ptr)) continue;
+            gate.Runtime.RemoveAll(EffectOwnerKeys.Entity(ptr));
+            var granted = new List<object>();
+            for (var i = 0; i < elements.Count; i++)
+            {
+                var elName = elements[i];
+                FusionRpg.Core.Stats.Derived.ElementTypeId? element = null;
+                if (!string.IsNullOrWhiteSpace(elName)
+                    && !string.Equals(elName, "none", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!FusionRpg.Core.Stats.Derived.ElementRoster.TryParse(elName, out var parsedEl))
+                    {
+                        CheatState.Error("debug.shield.demo-all: unknown element " + elName);
+                        return;
+                    }
+
+                    element = parsedEl;
+                }
+
+                var tag = string.IsNullOrWhiteSpace(elName) ? "none" : elName.Trim().ToLowerInvariant();
+                var result = gate.ApplyGrant(ptr, new FusionRpg.Core.Combat.Shield.ShieldGrant
+                {
+                    SourceId = "demo:" + tag,
+                    Element = element,
+                    BaseHp = amount,
+                    Priority = FusionRpg.Core.Combat.Shield.ShieldPolicy.PrioritySkill,
+                    RefillOnMerge = true
+                });
+                granted.Add(new Dictionary<string, object>
+                {
+                    ["element"] = tag,
+                    ["outcome"] = result.Outcome.ToString(),
+                    ["shieldId"] = result.Instance?.ShieldId ?? "",
+                    ["hp"] = result.Instance?.Hp ?? 0,
+                    ["maxHp"] = result.Instance?.MaxHp ?? 0
+                });
+            }
+
+            results.Add(new Dictionary<string, object>
+            {
+                ["targetPtr"] = ptr,
+                ["count"] = granted.Count,
+                ["grants"] = granted
+            });
+        }
+
+        DebugRuntime.Emit("debug.shield.demo-all", new Dictionary<string, object>
+        {
+            ["amount"] = amount,
+            ["targetCount"] = results.Count,
+            ["targets"] = results
+        });
+    }
+
+    static List<string> ParseShieldDemoElements(JsonElement p)
+    {
+        var list = new List<string>();
+        if (p.TryGetProperty("elements", out var arr) && arr.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var e in arr.EnumerateArray())
+            {
+                if (e.ValueKind != JsonValueKind.String) continue;
+                var s = e.GetString();
+                if (string.IsNullOrWhiteSpace(s)) continue;
+                list.Add(s.Trim());
+                if (list.Count >= FusionRpg.Core.Combat.Shield.ShieldPolicy.MaxShieldsPerActor)
+                    break;
+            }
+        }
+
+        if (list.Count == 0)
+        {
+            list.Add("fire");
+            list.Add("ice");
+            list.Add("earth");
+        }
+
+        return list;
+    }
+
+    /// <summary>
+    /// debug.shield.snapshot — emit per-stack lines for target, or all live owners with shields.
+    /// </summary>
+    static void RunShieldSnapshot(JsonElement p)
+    {
+        Effects.EffectRuntime.Ensure();
+        var runtime = Effects.EffectRuntime.Bag.ShieldGate?.Runtime;
+        if (runtime == null)
+        {
+            CheatState.Error("debug.shield.snapshot: shield gate missing");
+            return;
+        }
+
+        var owners = new List<object>();
+        var explicitPtr = Str(p, "targetPtr");
+        if (!string.IsNullOrWhiteSpace(explicitPtr)
+            && !string.Equals(explicitPtr, "selected", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(explicitPtr, "entity:selected", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(explicitPtr, "entity:select", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(explicitPtr, "all", StringComparison.OrdinalIgnoreCase))
+        {
+            AppendShieldOwnerSnapshot(owners, runtime, CombatPtr.Normalize(explicitPtr!));
+        }
+        else if (string.Equals(explicitPtr, "all", StringComparison.OrdinalIgnoreCase)
+                 || string.IsNullOrWhiteSpace(explicitPtr))
+        {
+            // Authoritative: every shield owner in runtime (not registry-only — registry can lag).
+            runtime.VisitOwners((ownerKey, _) =>
+            {
+                var hex = CombatPtr.Normalize(ownerKey);
+                if (string.IsNullOrEmpty(hex)) return;
+                AppendShieldOwnerSnapshot(owners, runtime, hex);
+            });
+        }
+        else
+        {
+            var ptr = ResolveDeltaTargetPtr(p);
+            if (string.IsNullOrWhiteSpace(ptr))
+            {
+                CheatState.Error("debug.shield.snapshot: missing target");
+                return;
+            }
+
+            AppendShieldOwnerSnapshot(owners, runtime, CombatPtr.Normalize(ptr!));
+        }
+
+        DebugRuntime.Emit("debug.shield.snapshot", new Dictionary<string, object>
+        {
+            ["owners"] = owners,
+            ["ownerCount"] = owners.Count
+        });
+    }
+
+    /// <summary>
+    /// debug.shield.bar-status — one-shot pipeline audit: shield data + body resolve + last OnGUI draw diag.
+    /// Prefer this over polling many events for HUD proof.
+    /// </summary>
+    static void RunShieldBarStatus(JsonElement p)
+    {
+        _ = p;
+        try
+        {
+            OverlaySettings.ShieldBarEnabled = true;
+        }
+        catch { }
+
+        var status = ShieldBarOverlay.CaptureStatus();
+        DebugRuntime.Emit("debug.shield.bar-status", status);
+        var early = "?";
+        var drawn = 0;
+        if (status.TryGetValue("lastDraw", out var ld) && ld is Dictionary<string, object> d)
+        {
+            if (d.TryGetValue("early", out var e)) early = e?.ToString() ?? "?";
+            if (d.TryGetValue("drawnOwners", out var dr) && dr is int di) drawn = di;
+        }
+        CheatState.Note($"shield.bar-status data={status["dataOwners"]} drawn={drawn} early={early}");
+    }
+
+    static void AppendShieldOwnerSnapshot(
+        List<object> into,
+        FusionRpg.Core.Combat.Shield.ShieldRuntime runtime,
+        string ptrHex)
+    {
+        if (string.IsNullOrEmpty(ptrHex)) return;
+        var ownerKey = EffectOwnerKeys.Entity(ptrHex);
+        var shields = runtime.GetShields(ownerKey);
+        if (shields.Count == 0) return;
+        var totals = runtime.Totals(ownerKey);
+        var stacks = new List<object>(shields.Count);
+        for (var i = 0; i < shields.Count; i++)
+        {
+            var s = shields[i];
+            stacks.Add(new Dictionary<string, object>
+            {
+                ["shieldId"] = s.ShieldId,
+                ["element"] = s.Element is { } el
+                    ? el.ToElementId()
+                    : "none",
+                ["hp"] = s.Hp,
+                ["maxHp"] = s.MaxHp,
+                ["priority"] = s.Priority,
+                ["sourceId"] = s.SourceId,
+                ["innate"] = s.IsInnate
+            });
+        }
+
+        into.Add(new Dictionary<string, object>
+        {
+            ["ptr"] = ptrHex,
+            ["ownerKey"] = ownerKey,
+            ["hp"] = totals.Hp,
+            ["maxHp"] = totals.MaxHp,
+            ["stackCount"] = stacks.Count,
+            ["stacks"] = stacks
         });
     }
 

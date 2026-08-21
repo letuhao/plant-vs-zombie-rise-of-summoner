@@ -248,3 +248,48 @@ Patron demon: element aura into live PvZ, soul-priced switching, kill bonus
 6. **Ceiling — recipes reach legendary:** deep recipes (epic bases + rare materials) mint legendaries as the deterministic path beside pity; capture-only species stay excluded everywhere.
 7. **Merge floor — stars + capped promotion:** sacrifices raise the base's star rank (cap by rarity; per-mille combat channel bonuses per star, deploy-power later in PvZ); a max-star base may promote ONE rarity once, re-rolling trait slots upward.
 8. **Patron demon — after fusion:** un-parked; slots between fusion and contracts (small injector scope; patron effect scales from stars/fused demons).
+
+## WAVE G — demon-contracts (spec: docs/architecture/demons/spec-demon-contracts.md; detail table in demon-standalone-plan.md §Wave G)
+
+Server + web only — no injector slice, no LIVE gate. Full-auto closes this wave.
+
+- [x] G1: `ContractPolicy` + `LoyaltyRank` + `DemonPersonality` (pure Core) — rank bands/‰, personality percentages, upkeep by rarity, ritual, slot ladder, whole-day arithmetic. S
+- [x] G2: Data schema (`rpg_demon_contracts`, `rpg_contract_state`, `Reset()` coverage) + one-shot deterministic migration auto-bind + mint-time auto-bind into a free slot + read model. M
+- [x] G3: `SettleContracts` — 30-day clamp, per-day dedupe spend, insolvent-day decay floored at `DeployFloor`. M
+- [x] G4: bind / release / ritual / buy-slot transactions (pact fee, correlation-idempotent, patron + on-expedition release guards, retirement frees the slot). M
+- [x] G5: **risk slice** — the four fielding gates (`BuildSquad`, expedition dispatch, `TryBeginDeploy` for demon-profile specimens only, `SetPatron`) + `EnsureContractsReady`; full Data + E2E blast-radius sweep. M
+- [x] G6: loyalty movement from battle/expedition results (+15 win / −10 loss, daily gain cap 60, personality gain %). M
+- [x] G7: `BuildSquad` loyalty rank channel mods — Bound = +0‰ so battle + expedition goldens stay byte-identical (proof is the verify step). S
+- [x] G8: `ContractEndpoints` (GET settles first; bind/release/ritual/slots POSTs; hub pushes) + SIM clock hook `/api/test/contracts/settle`. M
+- [x] G9: FE — `bus/contracts.ts`, capacity header, contract badges + bind/release, ritual CTA, picker disable reasons. L
+- [x] G10: Checkpoint G sweep + docs sync + commit draft.
+
+### Checkpoint G — contracts success criteria
+- [x] PASSED 2026-08-21. Capacity server-authoritative on all four fielding paths; a plain unique actor deploys untouched.
+- [x] Settlement idempotent (same day twice = one charge), 30-day clamped with the remainder forgiven; an insolvent day decays and writes no ledger row.
+- [x] Decay never crosses `DeployFloor`; only defeats do (11 losses proven end-to-end through real battles).
+- [x] Migration auto-binds best-first, deterministically, exactly once — plus mint-time binding into a free slot (plan decision 1).
+- [x] Battle + expedition goldens byte-identical (Bound = +0‰, re-run proof); `LoyaltyChannelMods` proven non-trivial at Sworn/Devoted.
+- [x] Suites Core 1456 / Data 183 / E2E 137 / Guard 40 / Launcher 128 / Vitest 220; guards 4/4; FE build clean.
+- Foreign reds excluded (other streams, mid-flight): CheatCore `lab-shield-bar` unknown step `debug.shield.demo-all` (shield/VFX stream); Core/World test file compiled mid-edit twice during the wave (world stream) — green on re-run.
+
+**Open with the owner (built as planned, reversible):** the spec locks auto-bind for *migration*; the build also binds at *mint time when a slot is free* (plan §Wave G decision 1) — free, no pact fee, and it raises the daily tribute silently. One-line revert in `MintDemonUnlocked` if you want the stricter rule.
+
+Commit draft for the owner (Wave G):
+```
+Demon contracts: binding slots, loyalty, daily tribute
+
+  Core: ContractPolicy (rank bands 200/400/600/800 with +0/15/35/60 per-mille own-channel
+  bonuses, five personalities scaling gain/decay/upkeep, rarity-scaled daily upkeep, ritual
+  and slot-price ladders, whole-UTC-day arithmetic clamped to 30). Data: rpg_demon_contracts
+  + rpg_contract_state; lazy day-quantised SettleContracts (one dedupe-keyed ledger row per
+  UTC day, or decay when the balance cannot cover it, floored so time never costs a demon its
+  deployability); one-shot best-first migration plus mint-time binding into a free slot;
+  bind/release/ritual/buy-slot each one transaction, refusals write nothing; consumption frees
+  the slot. Gates: web squads, expedition dispatch, PvZ deploy (demon-profile specimens only)
+  and patron designation refuse unbound/insubordinate demons by name. Results move loyalty —
+  +15 a win under a 60/day window, -10 a loss, the only path under the floor. Server:
+  /api/contracts get/bind/release/ritual/slots-buy + a SIM clock hook. FE: capacity header,
+  contract badges, ritual CTA, gated pickers. Battle and expedition goldens byte-identical —
+  a fresh contract sits in the zero-bonus band by design.
+```

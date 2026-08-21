@@ -75,6 +75,12 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/standalone/audit-2026-08-21.md](architecture/standalone/audit-2026-08-21.md) | Structured multi-perspective review: findings, debates, adjudications behind the spec hardening |
 | [architecture/rpg-mechanism-audit-2026-08-21.md](architecture/rpg-mechanism-audit-2026-08-21.md) | Code-verified audit of the RPG as built: catalogs, loops, findings, doc↔code drift, world/map readiness |
 | [architecture/world-graph-ideal.md](architecture/world-graph-ideal.md) | **Ideal capture (not a spec)** — PvZ multiverse as a living strategy map: sector graph → sector board (construction) → lane board (tower defense); legions, bases, Dave's homeworld |
+| [architecture/world-map-program.md](architecture/world-map-program.md) | World map program: capability map, module build order, wave-1 checkpoint (**specs pending owner review**) |
+| [architecture/world/](architecture/world/spec-world-model.md) | Wave-1 module specs: world-model (storage + catalogs), turn-engine (the SSOT clock), world-movement (march, claim, supply, ZOC) |
+| [architecture/battle-turn-ideal.md](architecture/battle-turn-ideal.md) | **Ideal capture (not a spec)** — one virtual-time battle state machine for every mode: PvZ realtime, synchronous turn-based, hybrid. Virtual clock + scheduler + per-actor FSM + mode profiles; why it precedes enrichment |
+| [architecture/battle-timeline-map.md](architecture/battle-timeline-map.md) | Battle timeline program: capability map, module ids T1–T8, dependency graph, build order; the kernel that combat action management is built on |
+| [architecture\battle\](architecture\battle\spec-virtual-time-core.md) | Module specs: virtual-time-core, turn-fsm, readiness-model, mode-profiles, kernel-adoption (T1–T5) |
+| [architecture/battle/audit-2026-08-21.md](architecture/battle/audit-2026-08-21.md) | Structured review of the timeline specs: four lenses, debates, adjudications, and the amendments they forced |
 | [architecture/demon-system-map.md](architecture/demon-system-map.md) | Demon gameplay program: capability map, vision→stack mapping, module build order |
 | [architecture/demons/](architecture/demons/spec-element-extension.md) | Module specs: element-extension, demon-core, soul-economy, demon-summoning (V1) |
 | [architecture/decisions.md](architecture/decisions.md) | Locked choices |

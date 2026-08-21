@@ -15,9 +15,17 @@ import {
 } from "@/lib/bus/demons";
 import { Page } from "@/layouts/Page";
 import { usePatron, useSetPatron } from "@/lib/bus/patron";
+import {
+  useBindContract,
+  useBuyContractSlot,
+  useContracts,
+  usePerformRitual,
+  useReleaseContract
+} from "@/lib/bus/contracts";
 import { Badge, Banner, Button, EmptyState, Panel, TabList, TextInput, TypeIcon } from "@/ui";
 import { displayName, pityLine, splitRoster } from "./rosterSplit";
 import { auraLabel, auraPreviewMilli } from "./patronView";
+import { capacityLabel, conditionOf, contractIndex, fieldingBlockReason, rankLabel } from "./contractView";
 
 const RARITY_BADGE: Record<string, string> = {
   legendary: "★★★★ Legendary",
@@ -42,6 +50,12 @@ export function DemonsPage() {
   const setLocked = useSetDemonLocked();
   const patron = usePatron(playerId);
   const setPatron = useSetPatron();
+  const contracts = useContracts(playerId);
+  const bindContract = useBindContract();
+  const releaseContract = useReleaseContract();
+  const performRitual = usePerformRitual();
+  const buySlot = useBuyContractSlot();
+  const contractRows = contractIndex(contracts.data);
 
   const [tab, setTab] = useState<"summon" | "roster" | "codex">("summon");
   const [reveal, setReveal] = useState<SummonOutcomeDto | null>(null);
@@ -124,6 +138,62 @@ export function DemonsPage() {
             >
               {s.profile.locked ? "🔒" : "🔓"}
             </Button>
+            {(() => {
+              const c = contractRows[id];
+              const condition = conditionOf(c);
+              if (condition === "unbound") {
+                return (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    title={
+                      contracts.data && contracts.data.capacity.used >= contracts.data.capacity.total
+                        ? "All slots are full — release one or buy another"
+                        : "Signs a contract (costs one day of upkeep)"
+                    }
+                    onClick={() => void bindContract.mutateAsync({ playerId, instanceId: id })}
+                    data-testid={`bind-${id}`}
+                  >
+                    Bind
+                  </Button>
+                );
+              }
+
+              return (
+                <>
+                  <Badge data-testid={`contract-${id}`}>
+                    {rankLabel(c.rank)} · {c.loyalty} · {c.personality} · {c.upkeepPerDay}/day
+                  </Badge>
+                  {condition === "insubordinate" ? (
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      title={fieldingBlockReason(c) ?? ""}
+                      onClick={() =>
+                        void performRitual.mutateAsync({
+                          playerId,
+                          instanceId: id,
+                          correlationId: newCorrelationId()
+                        })
+                      }
+                      data-testid={`ritual-${id}`}
+                    >
+                      Ritual
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      title="Frees the slot; the demon keeps its loyalty"
+                      onClick={() => void releaseContract.mutateAsync({ playerId, instanceId: id })}
+                      data-testid={`release-${id}`}
+                    >
+                      Release
+                    </Button>
+                  )}
+                </>
+              );
+            })()}
             {patron.data?.patron?.instanceId === id ? (
               <Badge data-testid={`patron-${id}`}>
                 patron · {auraLabel(
@@ -227,6 +297,34 @@ export function DemonsPage() {
 
       {tab === "roster" ? (
         <div className="mt-3 flex flex-col gap-3">
+          {contracts.data ? (
+            <Panel title="Contracts">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm" data-testid="contract-capacity">
+                  {capacityLabel(contracts.data)}
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={!contracts.data.capacity.canBuy}
+                  title={
+                    contracts.data.capacity.canBuy
+                      ? `Buy slot ${contracts.data.capacity.total + 1}`
+                      : "Every slot has been bought"
+                  }
+                  onClick={() => void buySlot.mutateAsync({ playerId, correlationId: newCorrelationId() })}
+                  data-testid="buy-slot"
+                >
+                  Buy slot
+                </Button>
+              </div>
+              <p className="mt-1 text-xs opacity-70">
+                Bound demons pay tribute daily and lose loyalty on days it goes unpaid — never below
+                the point where they refuse to serve. Unbound demons cost nothing and keep what they
+                earned.
+              </p>
+            </Panel>
+          ) : null}
           <Panel title={`Active (${split.active.length}/24)`}>
             {split.active.length === 0 ? (
               <EmptyState title="No demons yet" hint="Summon your first demon from the Summon tab." />

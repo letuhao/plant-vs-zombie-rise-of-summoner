@@ -83,6 +83,9 @@ public sealed partial class RpgStore
         }
 
         newlyDiscovered = UpsertCodexUnlocked(db, playerId, spec.SpeciesId, DemonCodexStates.Discovered, now);
+        // Contracts ride the same transaction: a new demon takes a free slot, or arrives unbound
+        // when capacity is full (spec-demon-contracts.md).
+        AutoBindNewSpecimenUnlocked(db, playerId, id, now);
         return new DemonSpecimenDto
         {
             Actor = ReadUniqueActorUnlocked(db, id)!,

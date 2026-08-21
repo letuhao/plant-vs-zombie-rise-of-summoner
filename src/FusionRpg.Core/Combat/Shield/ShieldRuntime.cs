@@ -220,6 +220,14 @@ public sealed class ShieldRuntime
     public IReadOnlyList<ShieldInstance> GetShields(string ownerKey) =>
         _byOwner.TryGetValue(ownerKey, out var stack) ? stack : Array.Empty<ShieldInstance>();
 
+    /// <summary>Walk every owner that currently has a shield stack (HUD / debug census).</summary>
+    public void VisitOwners(Action<string, IReadOnlyList<ShieldInstance>> visit)
+    {
+        if (visit == null) return;
+        foreach (var kv in _byOwner)
+            visit(kv.Key, kv.Value);
+    }
+
     public (long Hp, long MaxHp) Totals(string ownerKey)
     {
         if (!_byOwner.TryGetValue(ownerKey, out var stack))

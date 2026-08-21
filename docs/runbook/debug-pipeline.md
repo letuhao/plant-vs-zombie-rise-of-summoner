@@ -30,6 +30,7 @@ Preferred path for overlay combat / effect proves. Does **not** open a level —
 .\scripts\setup-lab-run.ps1                 # lab-overlay: freeze, clear, pea + ice-tank zombie
 .\scripts\setup-lab-run.ps1 -Scenario lab-empty
 .\scripts\setup-lab-run.ps1 -ThenProve      # then prove-overlay-combat.ps1
+.\scripts\setup-shield-bar-lab.ps1          # freeze + pea/zombie + 3-stack shield bars on both
 ```
 
 If the game looks stuck (“run never starts”), check `board.start`: `levelType=Explore` with `zombieSpeedMultiplier=0` is a bad lab surface — back to menu → Adventure day. See [level-entry.md](../research/level-entry.md).
@@ -100,6 +101,12 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=combat.hit,zombi
 | POST | `/api/debug/combat/silence-vanilla` | Zero plant vanilla ATK (`A-P-ATK%=0`, `P-ATK=0`, reapply living plants). Body `{ plant: true }` default |
 | POST | `/api/debug/combat/probe` | One-shot deterministic overlay hit (`amount`, `targetPtr`, optional `actorPtr`, `elementPayload`, `seed` default 1, `pinTargetElement`, `pinActorProfile` / `pinActorChannels`, `forceHit` / `forceMiss` / `forceCrit`). Emits `debug.combat.probe` + `debug.combat.overlay` when overlay runs |
 | POST | `/api/debug/combat/snapshot` | Living entities + derived/element pins + `lastOverlay` / `lastProbe` / recent overlays (`debug.combat.snapshot`) |
+| POST | `/api/debug/shield/grant` | Grant RPG shield (`amount`, optional `element`, `targetPtr`/`selected`, `sourceId`, `priority`, `durationTicks`) → `debug.shield.granted` |
+| POST | `/api/debug/shield/clear` | Clear shields on target/selected → `debug.shield.cleared` |
+| POST | `/api/debug/shield/demo` | Grant up to 3 stacks (default `fire`/`ice`/`earth`) for hybrid bar proof → `debug.shield.demo` |
+| POST | `/api/debug/shield/demo-all` | Same 3-stack demo on **every** living plant+zombie (no select) → `debug.shield.demo-all` |
+| POST | `/api/debug/shield/snapshot` | Per-stack dump for all runtime shield owners → `debug.shield.snapshot` |
+| POST | `/api/debug/shield/bar-status` | **HUD audit** — dataOwners + body resolve + last OnGUI `lastDraw.early` → `debug.shield.bar-status` |
 | POST | `/api/debug/actor-derived` | Pin / emit derived profile (`ptr`, `derivedProfile` / `channels`) |
 | POST | `/api/debug/effects/reload` | Re-seed catalog (`effects.reload`) |
 | GET | `/api/debug/effects/contract` | Server-local FT*/FA* + `FoundationContractVersion` |
@@ -249,6 +256,36 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=debug.fx.shown,d
 
 ## Injector commands
 
-`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, `debug.combat.pin-element`, `debug.combat.silence-vanilla`, `debug.combat.probe`, `debug.combat.snapshot`, `debug.fx.probe-shaders`, `debug.fx.world-flash`, `debug.fx.play`, `debug.fx.list`, `debug.fx.mute`, `debug.fx.unmute`, plus `pvz.spawn.extra`.
+`debug.run-steps`, `debug.reset-mods`, `debug.session`, `debug.spawn-plant`, `debug.spawn-zombie`, `debug.spawn-bullet`, `debug.set-mods`, `debug.reapply`, `debug.apply-status`, `debug.apply-status-float`, `debug.clear-status`, `debug.arm`, `debug.disarm`, `debug.kill`, `debug.kill-plant`, `debug.wave-freeze`, `debug.ensure-sun`, `debug.economy`, `debug.board-config`, `debug.select`, `debug.spawn-cell`, `debug.reset-board`, `debug.clear-plants`, `debug.clear-zombies`, `debug.snapshot`, `debug.effect.enqueue-delta`, `debug.effect.fire-synthetic`, `debug.effect.board-snapshot`, `debug.effect.dots`, `debug.effect.counters`, `debug.combat.pin-element`, `debug.combat.silence-vanilla`, `debug.combat.probe`, `debug.combat.snapshot`, `debug.shield.grant`, `debug.shield.clear`, `debug.shield.demo`, `debug.shield.demo-all`, `debug.shield.snapshot`, `debug.shield.bar-status`, `debug.fx.probe-shaders`, `debug.fx.world-flash`, `debug.fx.play`, `debug.fx.list`, `debug.fx.mute`, `debug.fx.unmute`, plus `pvz.spawn.extra`.
 
 REST helpers: `POST /api/debug/economy`, `POST /api/debug/board-config`.
+
+## RPG shield bar (live)
+
+**Pipeline:** grant path → `ShieldRuntime` → `VfxDirector.Tick` → `ShieldBarPool` (shader world meshes). Not IMGUI.
+
+```powershell
+.\scripts\probe-live-shield-bar.ps1          # demo-all + bar-status → worldBars/shaderOk
+.\scripts\probe-live-shield-bar.ps1 -Setup   # also runs setup-shield-bar-lab.ps1
+```
+
+Expect bars **under** pea/zombie. Fill length uses **10% visual steps** (`ShieldBarVisual.DisplayRatio` — 89% capacity → 80% bar). F9 / F7. No top-left chip.
+
+**Damage / decay (bar shortens):** lab freezes + silences peas, so shields stay full until you probe.
+
+```powershell
+.\scripts\probe-shield-damage.ps1 -Setup     # lab + OVERLAY-COMBAT + probe -150
+.\scripts\probe-shield-damage.ps1            # hit again / re-demo first if needed
+.\scripts\probe-shield-damage.ps1 -Amount -200
+```
+
+Or manual:
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/cheats/toggle -ContentType application/json `
+  -Body '{"id":"OVERLAY-COMBAT","enabled":true}'
+# then POST /api/debug/combat/probe  body:
+# { "amount": -150, "targetPtr": "<zombie hex>", "forceHit": true, "elementPayload":[{"element":"fire","weightPm":1000}] }
+```
+
+Assert `shieldAbsorbed` &gt; 0 and snapshot `hp` drops; in-game fill length tracks **decade steps** of `hp/maxHp` (not every HP tick).

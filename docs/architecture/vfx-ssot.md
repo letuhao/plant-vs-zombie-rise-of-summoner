@@ -259,6 +259,8 @@ VFX animate on **`unscaledDeltaTime`**, matching today. Deliberate: floaters/bur
 - `OnGUI` runs multiple times per frame (Layout, Repaint, input events). `VfxDirector.Draw()` **must early-return unless `Event.current.type == EventType.Repaint`** — the current `DamageFxOverlay.Draw` does the full label loop on every event and this audit retires that.
 - Use one cached `GUIStyle` (constructed once from `GUI.skin.label`) instead of mutating and restoring the shared skin style per call.
 - `Camera.main` performs a tag lookup per call on this Unity version; the director resolves it **once per Tick**, caches it for the frame, and re-resolves on null (scene change).
+- **Shield bar (world VFX):** `ShieldBarPool` under `VfxDirector.Tick` — shader materials from `FxResources.ParticleMaterial()` / `OverlayShaderProbe`, MeshRenderer track + multi-stop fill. Track = max capacity; **fill length** snaps in **10% steps** via Core `ShieldBarVisual.DisplayRatio` (floor; e.g. 89% → 80% wide) while absorb math stays continuous. Hide when Hp/MaxHp are 0. F9 toggles via `OverlaySettings`; F7 is settings-only. **Never** Unity IMGUI/`GUI.Box` for the bar.
+- **Draw order vs world sprites:** Shield bars use the same particle sorting order as bursts (`ParticleSortingOrder = 80`). Damage floaters remain IMGUI (screen space). Host OnGUI: `VfxDirector.Draw()` (floaters only) → `OverlaySettingsGui`.
 
 ### 8.4 Burst pooling (locked)
 

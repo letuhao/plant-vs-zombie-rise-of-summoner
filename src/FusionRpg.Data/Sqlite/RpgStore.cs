@@ -416,6 +416,27 @@ public sealed partial class RpgStore : IRpgDb
               set_utc TEXT NOT NULL,
               revision INTEGER NOT NULL DEFAULT 0
             );
+            CREATE TABLE IF NOT EXISTS rpg_demon_contracts (
+              instance_id TEXT NOT NULL PRIMARY KEY,
+              player_id INTEGER NOT NULL,
+              bound INTEGER NOT NULL DEFAULT 0,
+              loyalty INTEGER NOT NULL DEFAULT 0,
+              personality TEXT NOT NULL,
+              bound_utc TEXT,
+              released_utc TEXT,
+              gain_day TEXT NOT NULL DEFAULT '',
+              gain_today INTEGER NOT NULL DEFAULT 0,
+              revision INTEGER NOT NULL DEFAULT 0
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_demon_contracts_bound
+              ON rpg_demon_contracts(player_id) WHERE bound = 1;
+            CREATE TABLE IF NOT EXISTS rpg_contract_state (
+              player_id INTEGER NOT NULL PRIMARY KEY,
+              purchased_slots INTEGER NOT NULL DEFAULT 0,
+              last_settled_utc TEXT NOT NULL,
+              migrated_utc TEXT,
+              revision INTEGER NOT NULL DEFAULT 0
+            );
             CREATE TABLE IF NOT EXISTS rpg_soul_ledger (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               player_id INTEGER NOT NULL,
@@ -580,6 +601,7 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_demon_materials;",
                              "DELETE FROM rpg_demon_lineage;", "DELETE FROM rpg_fusion_log;",
                              "DELETE FROM rpg_fusion_discovery;", "DELETE FROM rpg_patron;",
+                             "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
                              "DELETE FROM archive_catalog;",
                              "DELETE FROM players;"

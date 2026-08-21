@@ -425,6 +425,7 @@ public sealed partial class RpgStore
 
             AppendLineageUnlocked(db, id, "consumed-by",
                 JsonSerializer.Serialize(new { consumer = consumerInstanceId }), now);
+            ReleaseContractOnRetireUnlocked(db, id, now);
         }
     }
 

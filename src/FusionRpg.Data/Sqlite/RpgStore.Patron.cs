@@ -34,6 +34,11 @@ public sealed partial class RpgStore
                 || string.Equals(actor.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
                 return (false, "specimen.missing", null);
 
+            // A patron speaks for the summoner: it must be a demon that actually serves.
+            var contract = ContractViewUnlocked(db, playerId, id);
+            if (!contract.Bound) return (false, "patron.unbound", null);
+            if (!contract.Deployable) return (false, "patron.insubordinate", null);
+
             var current = ReadPatronUnlocked(db, playerId);
             if (current != null && string.Equals(current.InstanceId, id, StringComparison.Ordinal))
             {

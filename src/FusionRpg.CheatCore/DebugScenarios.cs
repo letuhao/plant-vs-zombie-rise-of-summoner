@@ -1122,6 +1122,51 @@ public static class DebugScenarios
                 Cmd("debug.board-stats", new { });
                 break;
 
+            // Shield bar HUD lab: freeze + clear + pea + zombie, then 3-stack demo on every living unit.
+            case "lab-shield-bar":
+                Cmd("debug.session", new { op = "start", scenarioId });
+                Cmd("debug.wave-freeze", new { enabled = true });
+                Cmd("debug.set-mods", new
+                {
+                    probePlant = false,
+                    probeBullet = false,
+                    plant = new { attackPercent = 0.0, defensePercent = 1.0 },
+                    zombie = new { defensePercent = 1.0 },
+                    bullet = new { damageSet = -1, damagePercent = 1.0 },
+                    board = new { zombieCountMultiplier = 0.0 },
+                    logDamage = false
+                });
+                Cmd("debug.board-config", new { });
+                Cmd("debug.reset-board", new { });
+                Cmd("debug.ensure-sun", new { value = 9999f });
+                Cmd("debug.spawn-plant", new
+                {
+                    typeId = PeaTypeId,
+                    col = 2,
+                    row = 2,
+                    atk = 0,
+                    hp = 500,
+                    maxHp = 500
+                });
+                Cmd("debug.spawn-zombie", new
+                {
+                    typeId = BasicZombieTypeId,
+                    row = 2,
+                    x = 7.5f,
+                    hp = 5000,
+                    maxHp = 5000
+                });
+                Cmd("debug.combat.silence-vanilla", new { plant = true });
+                // demo-all needs registry populated after spawn — runs as next step on main thread.
+                Cmd("debug.shield.demo-all", new
+                {
+                    amount = 100,
+                    elements = new[] { "fire", "ice", "earth" }
+                });
+                Cmd("debug.shield.snapshot", new { });
+                Cmd("debug.board-stats", new { });
+                break;
+
             default:
                 throw new ArgumentException("unknown scenario: " + id);
         }
@@ -1308,6 +1353,6 @@ public static class DebugScenarios
         "status-l2-butter", "status-l2-freeze", "status-l2-cold", "status-l2-poison",
         "status-l2-hypno", "status-l2-ember", "status-l2-jala", "status-l2-kelp", "status-l2-charm-pulse",
         "status-l2-resist-cc", "status-l2-resist-contagion", "status-l2-poison-immune", "status-l2-actor-derived",
-        "lab-empty", "lab-overlay"
+        "lab-empty", "lab-overlay", "lab-shield-bar"
     };
 }

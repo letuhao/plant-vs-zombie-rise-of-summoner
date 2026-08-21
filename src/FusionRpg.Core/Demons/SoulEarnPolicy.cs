@@ -41,6 +41,10 @@ public static class SoulEarnPolicy
         public const string Expedition = "expedition";
         public const string Fusion = "fusion";
         public const string Patron = "patron";
+        /// <summary>Daily contract tribute, one row per settled UTC day.</summary>
+        public const string Upkeep = "upkeep";
+        public const string ContractSlot = "contract-slot";
+        public const string ContractRitual = "contract-ritual";
         /// <summary>Test/dev bankrolls only — keeps the discovery namespace clean for analytics.</summary>
         public const string Seed = "seed";
     }

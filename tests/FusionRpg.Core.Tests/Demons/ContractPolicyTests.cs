@@ -1,0 +1,178 @@
+using FusionRpg.Core.Demons;
+using FusionRpg.Core.Demons.Contracts;
+using Xunit;
+
+namespace FusionRpg.Core.Tests.Demons;
+
+/// <summary>
+/// spec-demon-contracts.md numbers block. Pure integer policy — every boundary that a store
+/// transaction later leans on is pinned here, where it costs nothing to prove.
+/// </summary>
+public class ContractPolicyTests
+{
+    [Theory]
+    [InlineData(0, LoyaltyRank.Insubordinate)]
+    [InlineData(199, LoyaltyRank.Insubordinate)]
+    [InlineData(200, LoyaltyRank.Bound)]
+    [InlineData(399, LoyaltyRank.Bound)]
+    [InlineData(400, LoyaltyRank.Sworn)]
+    [InlineData(599, LoyaltyRank.Sworn)]
+    [InlineData(600, LoyaltyRank.Trusted)]
+    [InlineData(799, LoyaltyRank.Trusted)]
+    [InlineData(800, LoyaltyRank.Devoted)]
+    [InlineData(1000, LoyaltyRank.Devoted)]
+    public void RankFor_walks_every_band_boundary(int loyalty, LoyaltyRank expected) =>
+        Assert.Equal(expected, ContractPolicy.RankFor(loyalty));
+
+    [Fact]
+    public void Bound_pays_zero_milli_so_adopting_contracts_cannot_move_a_golden()
+    {
+        Assert.Equal(0, ContractPolicy.RankBonusMilli(LoyaltyRank.Insubordinate));
+        Assert.Equal(0, ContractPolicy.RankBonusMilli(LoyaltyRank.Bound));
+        Assert.Equal(15, ContractPolicy.RankBonusMilli(LoyaltyRank.Sworn));
+        Assert.Equal(35, ContractPolicy.RankBonusMilli(LoyaltyRank.Trusted));
+        Assert.Equal(60, ContractPolicy.RankBonusMilli(LoyaltyRank.Devoted));
+        // A fresh contract must land in the zero-bonus band, or every battle hash moves.
+        Assert.Equal(0, ContractPolicy.RankBonusMilli(ContractPolicy.RankFor(ContractPolicy.BindLoyalty)));
+    }
+
+    [Theory]
+    [InlineData(199, false)]
+    [InlineData(200, true)]
+    public void IsDeployable_is_exactly_the_deploy_floor(int loyalty, bool expected) =>
+        Assert.Equal(expected, ContractPolicy.IsDeployable(loyalty));
+
+    [Fact]
+    public void Personality_rate_table_matches_the_spec()
+    {
+        Assert.Equal(new PersonalityRates(120, 80, 100), ContractPolicy.Rates(DemonPersonality.Loyal));
+        Assert.Equal(new PersonalityRates(90, 60, 100), ContractPolicy.Rates(DemonPersonality.Stoic));
+        Assert.Equal(new PersonalityRates(100, 100, 130), ContractPolicy.Rates(DemonPersonality.Proud));
+        Assert.Equal(new PersonalityRates(100, 90, 110), ContractPolicy.Rates(DemonPersonality.Calculating));
+        Assert.Equal(new PersonalityRates(80, 150, 70), ContractPolicy.Rates(DemonPersonality.Feral));
+    }
+
+    [Theory]
+    [InlineData(DemonRarity.Common, 2)]
+    [InlineData(DemonRarity.Rare, 5)]
+    [InlineData(DemonRarity.Epic, 12)]
+    [InlineData(DemonRarity.Legendary, 25)]
+    public void Base_upkeep_is_rarity_scaled(DemonRarity rarity, int expected) =>
+        Assert.Equal(expected, ContractPolicy.BaseUpkeepPerDay(rarity));
+
+    [Fact]
+    public void Upkeep_applies_personality_percent_with_integer_truncation()
+    {
+        // feral legendary: 25 × 70 / 100 = 17.5 → 17. Truncation always favours the player.
+        Assert.Equal(17, ContractPolicy.UpkeepPerDay(DemonRarity.Legendary, DemonPersonality.Feral));
+        Assert.Equal(32, ContractPolicy.UpkeepPerDay(DemonRarity.Legendary, DemonPersonality.Proud));
+        Assert.Equal(2, ContractPolicy.UpkeepPerDay(DemonRarity.Common, DemonPersonality.Loyal));
+        // A cheap demon with a discount personality still costs something: never free, never negative.
+        Assert.Equal(1, ContractPolicy.UpkeepPerDay(DemonRarity.Common, DemonPersonality.Feral));
+    }
+
+    [Fact]
+    public void Decay_scales_with_personality_and_truncates()
+    {
+        Assert.Equal(15, ContractPolicy.DecayPerDayFor(DemonPersonality.Stoic));   // 25 × 60 / 100
+        Assert.Equal(25, ContractPolicy.DecayPerDayFor(DemonPersonality.Proud));
+        Assert.Equal(37, ContractPolicy.DecayPerDayFor(DemonPersonality.Feral));   // 37.5 → 37
+    }
+
+    [Fact]
+    public void Decay_never_crosses_the_deploy_floor()
+    {
+        Assert.Equal(275, ContractPolicy.ApplyDecay(300, DemonPersonality.Proud));
+        // 210 − 25 would be 185; the floor holds it at 200. Time strips what was earned, never access.
+        Assert.Equal(200, ContractPolicy.ApplyDecay(210, DemonPersonality.Proud));
+        Assert.Equal(200, ContractPolicy.ApplyDecay(200, DemonPersonality.Feral));
+        // A demon already under the floor (defeats put it there) is not pushed further down by time.
+        Assert.Equal(150, ContractPolicy.ApplyDecay(150, DemonPersonality.Feral));
+    }
+
+    [Fact]
+    public void Gains_respect_the_personality_rate_and_the_daily_cap()
+    {
+        // loyal: 15 × 120 / 100 = 18 credited, nothing banked yet.
+        Assert.Equal((318, 18), ContractPolicy.ApplyGain(300, 0, ContractPolicy.WinGain, DemonPersonality.Loyal));
+        // Already 55 into the 60/day window: only 5 more lands.
+        Assert.Equal((305, 60), ContractPolicy.ApplyGain(300, 55, ContractPolicy.WinGain, DemonPersonality.Loyal));
+        // Window exhausted: the win still happened, the loyalty did not move.
+        Assert.Equal((300, 60), ContractPolicy.ApplyGain(300, 60, ContractPolicy.WinGain, DemonPersonality.Loyal));
+        // Ceiling clamps.
+        Assert.Equal((1000, 18), ContractPolicy.ApplyGain(995, 0, ContractPolicy.WinGain, DemonPersonality.Loyal));
+    }
+
+    [Fact]
+    public void Losses_are_uncapped_and_may_cross_the_floor()
+    {
+        Assert.Equal(195, ContractPolicy.ApplyLoss(205));
+        Assert.False(ContractPolicy.IsDeployable(ContractPolicy.ApplyLoss(205)));
+        Assert.Equal(0, ContractPolicy.ApplyLoss(5));
+    }
+
+    [Fact]
+    public void Ritual_gain_scales_and_price_is_rarity_only()
+    {
+        Assert.Equal(120, ContractPolicy.RitualGainFor(DemonPersonality.Loyal));  // 100 × 120 / 100
+        Assert.Equal(80, ContractPolicy.RitualGainFor(DemonPersonality.Feral));
+        Assert.Equal(50, ContractPolicy.RitualPrice(DemonRarity.Common));
+        Assert.Equal(100, ContractPolicy.RitualPrice(DemonRarity.Rare));
+        Assert.Equal(200, ContractPolicy.RitualPrice(DemonRarity.Epic));
+        Assert.Equal(400, ContractPolicy.RitualPrice(DemonRarity.Legendary));
+    }
+
+    [Fact]
+    public void Slot_ladder_rises_forever_until_the_ceiling()
+    {
+        Assert.Equal(12, ContractPolicy.Capacity(0));
+        Assert.Equal(300, ContractPolicy.NextSlotPrice(0));
+        Assert.Equal(600, ContractPolicy.NextSlotPrice(1));
+        Assert.Equal(900, ContractPolicy.NextSlotPrice(2));
+        Assert.Equal(48, ContractPolicy.Capacity(36));
+        Assert.True(ContractPolicy.CanBuySlot(35));
+        Assert.False(ContractPolicy.CanBuySlot(36));   // 12 + 36 = the 48 ceiling
+        Assert.Equal(48, ContractPolicy.Capacity(40)); // over-purchase can never exceed the ceiling
+    }
+
+    [Theory]
+    // Day-quantised, not 24-hour windows: one minute past midnight UTC is a new tribute day.
+    [InlineData("2026-08-21T23:59:00Z", "2026-08-22T00:01:00Z", 1)]
+    [InlineData("2026-08-21T00:00:00Z", "2026-08-21T23:59:00Z", 0)]
+    [InlineData("2026-08-31T12:00:00Z", "2026-09-02T01:00:00Z", 2)]   // month boundary
+    [InlineData("2025-12-30T12:00:00Z", "2026-01-02T12:00:00Z", 3)]   // year boundary
+    [InlineData("2024-02-28T12:00:00Z", "2024-03-01T12:00:00Z", 2)]   // leap day counts
+    [InlineData("2026-01-01T00:00:00Z", "2026-12-01T00:00:00Z", 30)]  // long absence clamps
+    [InlineData("2026-08-22T00:00:00Z", "2026-08-21T00:00:00Z", 0)]   // future stamp (SIM travel) never bills
+    public void ElapsedDays_counts_whole_utc_days_and_clamps(string last, string now, int expected) =>
+        Assert.Equal(expected, ContractPolicy.ElapsedDays(
+            DateTimeOffset.Parse(last, null, System.Globalization.DateTimeStyles.AdjustToUniversal),
+            DateTimeOffset.Parse(now, null, System.Globalization.DateTimeStyles.AdjustToUniversal)));
+
+    [Fact]
+    public void Personality_is_derived_from_the_instance_id_and_never_changes()
+    {
+        var first = ContractPolicy.PersonalityFor("demon-abc-123");
+        Assert.Equal(first, ContractPolicy.PersonalityFor("demon-abc-123"));
+        // No distinctness assertion between two arbitrary ids: with five personalities, a collision
+        // is the common case, not a defect. Determinism and full coverage are the real properties.
+
+        // Every personality is reachable — a table nobody can roll is a dead table.
+        var seen = new HashSet<DemonPersonality>();
+        for (var i = 0; i < 400; i++) seen.Add(ContractPolicy.PersonalityFor("instance-" + i));
+        Assert.Equal(5, seen.Count);
+    }
+
+    [Fact]
+    public void Personality_ids_round_trip()
+    {
+        foreach (DemonPersonality p in Enum.GetValues(typeof(DemonPersonality)))
+        {
+            Assert.True(DemonPersonalityIds.TryParse(p.ToId(), out var parsed));
+            Assert.Equal(p, parsed);
+        }
+
+        Assert.False(DemonPersonalityIds.TryParse("smug", out _));
+        Assert.False(DemonPersonalityIds.TryParse(null, out _));
+    }
+}

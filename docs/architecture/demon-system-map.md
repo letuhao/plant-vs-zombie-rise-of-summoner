@@ -43,14 +43,14 @@ Source vision: the demon gameplay design note (external; its **ideals** are adop
 | `demon-core` | Specimen identity superset: species link, rarity, variants, trait slots, element typing, Codex discovery state | element-extension | **V1** |
 | `soul-economy` | Souls ledger: earn rules from Activity facts, spend API, balances | demon-core | **V1** |
 | `demon-summoning` | Summoning/gacha: banners, Souls-funded pulls, rarity/variant/trait rolls, mint specimens | demon-core, soul-economy | **V1** |
-| `demon-contracts` | Contract rank, loyalty, obedience, personality, capacity; deploy-time obedience gate | demon-core | later |
+| `demon-contracts` | Binding slots (Soul-priced capacity) + loyalty with daily upkeep decay, personality rate modifiers, hard deploy refusal for unbound/insubordinate demons — **shipped 2026-08-21**, spec in [demons/spec-demon-contracts.md](demons/spec-demon-contracts.md); server + web only | demon-core, soul-economy, demon-fusion | shipped |
 | `demon-capture` | In-run encounters, weaken→capture attempt flow (Hot reads, Cold resolution) | demon-core, demon-contracts, soul-economy | later |
 | `demon-fusion` | Star merges (identity-preserving) + discoverable recipes + trait inheritance + capped promotion — **shipped 2026-08-21**, spec in [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) | demon-core, soul-economy, expedition materials | shipped |
-| `patron-demon` | Element aura from one designated demon (stars+rarity+level scaled), soul-priced switching, +1 Soul/10 kills — anchors locked 2026-08-21, spec in [demons/spec-patron-demon.md](demons/spec-patron-demon.md); ends at a LIVE owner gate | demon-fusion, demon-summoning | **next** |
+| `patron-demon` | Element aura from one designated demon (stars+rarity+level scaled), soul-priced switching, +1 Soul/10 kills — anchors locked 2026-08-21, spec in [demons/spec-patron-demon.md](demons/spec-patron-demon.md); SIM half shipped 2026-08-21, LIVE owner gate open | demon-fusion, demon-summoning | SIM shipped |
 | `demon-domain-fe` | Web FE: Codex, summon altar, capture UX, fusion lab, contract board (grows out of `#/roster`) | reads all above | incremental |
 | `world-events` | Ecology conditions, roaming/boss encounters, raids, factions, release/legacy/lineage | demon-capture, demon-contracts | last |
 
-Build order (revised 2026-08-21; expeditions shipped): `element-extension` → `demon-core` → `soul-economy` → `demon-summoning` (V1 internal gate, shipped) → *(standalone program: match-source + expeditions = announced ship, shipped)* → **`demon-fusion`** (duplicate pressure makes it the next sink) → `patron-demon` → `demon-contracts` → `demon-capture` → `world-events`.
+Build order (revised 2026-08-21; expeditions shipped): `element-extension` → `demon-core` → `soul-economy` → `demon-summoning` (V1 internal gate, shipped) → *(standalone program: match-source + expeditions = announced ship, shipped)* → **`demon-fusion`** (duplicate pressure makes it the next sink) → `patron-demon` → `demon-contracts` (shipped) → **`demon-capture`** → `world-events`.
 
 > **Standalone-first program (2026-08-21):** the [standalone RPG map](standalone-rpg-map.md) makes the web RPG the core game and PvZ an extension. Its combined roadmap interleaves with this program: `demon-capture` explicitly becomes the PvZ-mode module (exclusive capture species), and `expeditions` (web battles) becomes the primary consumer of demons. Where the two maps disagree, the combined roadmap in the standalone map wins.
 

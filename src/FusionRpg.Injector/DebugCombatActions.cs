@@ -139,7 +139,8 @@ public static class DebugCombatActions
                               || !OverlayCombatFeature.Enabled;
             if (passThrough)
             {
-                // Heal / no payload / OVERLAY-COMBAT off — pass-through (no overlay breakdown).
+                // Heal / no payload / OVERLAY-COMBAT off — still run the shield gate so RPG
+                // shields shrink (bar length) before any HP mutation reaches the Funnel.
                 var funnel = Effects.EffectRuntime.Bag.Funnel;
                 if (funnel == null)
                 {
@@ -147,17 +148,28 @@ public static class DebugCombatActions
                     return;
                 }
 
-                var ok = amount == 0 || funnel.EnqueueMutation("entity:" + targetPtr, amount, pluginId: "debug");
+                var passApply = amount;
+                long passAbsorbed = 0;
+                if (passApply < 0 && Effects.EffectRuntime.Bag.ShieldGate is { } passGate)
+                {
+                    var afterShield = passGate.AbsorbFinalized(passApply, CombatPtr.Normalize(targetPtr!), packet, 1);
+                    passAbsorbed = afterShield - passApply;
+                    passApply = afterShield;
+                }
+
+                var ok = passApply == 0 || funnel.EnqueueMutation("entity:" + targetPtr, passApply, pluginId: "debug");
                 funnel.Flush();
                 var passDump = new Dictionary<string, object>
                 {
                     ["source"] = "probe-passthrough",
-                    ["targetPtr"] = targetPtr,
+                    ["targetPtr"] = targetPtr!,
                     ["actorPtr"] = actorPtr ?? "",
                     ["amount"] = amount,
+                    ["shieldAbsorbed"] = passAbsorbed,
+                    ["appliedDelta"] = passApply,
                     ["ok"] = ok,
                     ["seed"] = seed,
-                    ["hit"] = false,
+                    ["hit"] = amount < 0,
                     ["crit"] = false,
                     ["finalSignedDelta"] = amount,
                     ["overlay"] = false,

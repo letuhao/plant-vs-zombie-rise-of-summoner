@@ -76,14 +76,23 @@ public static class VfxDirector
         // Idle early-out: with nothing queued or live the frame costs one lock + four counts.
         bool queued;
         lock (Gate) queued = Pending.Count > 0;
+        var shieldLive = false;
+        try
+        {
+            shieldLive = ShieldBarPool.WorldBars > 0
+                || (Effects.EffectRuntime.Bag.ShieldGate?.Runtime?.HasAnyInstances() == true);
+        }
+        catch { }
+
         if (!queued && Floaters.Count == 0 && Flashes.Count == 0 && BurstPool.LiveCount() == 0
-            && Sustained.LiveCount == 0)
+            && Sustained.LiveCount == 0 && !shieldLive)
             return;
         DrainQueue();
         TickFloaters(dt);
         BurstPool.Tick(dt);
         TickFlashes(dt);
         TickSustained(dt);
+        try { ShieldBarPool.TickSync(); } catch { }
     }
 
     /// <summary>Match end / scene teardown — vfx-ssot.md §8.1.</summary>
@@ -98,6 +107,7 @@ public static class VfxDirector
             EndSustainedRender(set, VfxStateEndReasons.MatchEnd, emit: false);
         AuraPool.StopAll();
         TintCompositor.Clear();
+        try { ShieldBarPool.StopAll(); } catch { }
     }
 
     /// <summary>Live sustained sets snapshot for the debug board (cueId, ptr, statusId).</summary>

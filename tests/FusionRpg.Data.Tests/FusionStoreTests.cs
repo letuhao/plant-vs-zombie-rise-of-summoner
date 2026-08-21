@@ -107,6 +107,24 @@ public class FusionStoreTests : IDisposable
         Assert.Contains(_store.ListDemonLineage(sacrifices[0]), l => l.Event == "consumed-by");
     }
 
+    /// <summary>G4: a Retired demon still holding a contract would be a slot nobody could reclaim.</summary>
+    [Fact]
+    public void Consumed_sacrifices_release_their_contract_slots()
+    {
+        Bankroll();
+        var baseId = Mint();
+        var sacrifices = new[] { Mint(), Mint() };
+        Assert.Equal(3, _store.CountBoundContracts(1));
+
+        var (ok, reason, _) = _store.ExecuteFusion(1, "merge-slots", new FusionRequest(
+            FusionModes.StarMerge, baseId, sacrifices, null), seed: 7);
+        Assert.True(ok, reason);
+
+        Assert.Equal(1, _store.CountBoundContracts(1));   // only the surviving base holds a slot
+        Assert.All(sacrifices, id => Assert.False(_store.GetContract(id)!.Bound));
+        Assert.True(_store.GetContract(baseId)!.Bound);
+    }
+
     [Fact]
     public void Merge_replay_returns_the_stored_outcome_without_respending()
     {

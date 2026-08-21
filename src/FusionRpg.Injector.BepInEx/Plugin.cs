@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using FusionRpg.Injector.Fx;
 using FusionRpg.Injector.Host;
+using FusionRpg.Injector.Hud;
 using UnityEngine;
 
 namespace FusionRpg.Injector;
@@ -27,7 +28,11 @@ public class Plugin : BasePlugin
     public class RpgLoop : MonoBehaviour
     {
         void Update() => InjectorLoop.TickFromUnity();
-        void OnGUI() => VfxDirector.Draw();
+        void OnGUI()
+        {
+            VfxDirector.Draw();
+            OverlaySettingsGui.Draw();
+        }
     }
 }
 

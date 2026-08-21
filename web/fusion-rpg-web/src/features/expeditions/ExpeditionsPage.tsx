@@ -13,6 +13,8 @@ import {
 import { Page } from "@/layouts/Page";
 import { Badge, Banner, Button, EmptyState, Panel, TypeIcon } from "@/ui";
 import { expeditionProgress, formatRemaining } from "./expeditionTime";
+import { useContracts } from "@/lib/bus/contracts";
+import { conditionOf, contractIndex, fieldingBlockReason } from "../demons/contractView";
 
 /**
  * Expeditions (spec-expeditions.md): dispatch from the Active roster with tier slot gating,
@@ -23,6 +25,9 @@ export function ExpeditionsPage() {
   const playerId = players.data?.currentPlayerId ?? 0;
   const speciesById = useSpeciesIndex();
   const roster = useDemonRoster(playerId);
+  // Contracts gate dispatch server-side; showing the same rule here means the refusal never
+  // arrives as a surprise error banner.
+  const contractRows = contractIndex(useContracts(playerId).data);
   const expeditions = useExpeditions(playerId);
   const materials = useDemonMaterials(playerId);
   const dispatch = useDispatchExpedition();
@@ -202,16 +207,19 @@ export function ExpeditionsPage() {
             const id = s.profile.instanceId;
             const species = speciesById.get(s.profile.speciesId);
             const onExpedition = lockedIds.has(id);
+            const contractBlock = fieldingBlockReason(contractRows[id]);
+            const blocked = onExpedition || contractBlock !== null;
             const picked = squad.includes(id);
             return (
               <button
                 key={id}
                 type="button"
-                disabled={onExpedition}
+                disabled={blocked}
+                title={contractBlock ?? undefined}
                 onClick={() => toggle(id)}
                 className={`flex items-center gap-2 rounded-sm border p-2 text-left text-sm ${
                   picked ? "border-leaf" : "border-border"
-                } ${onExpedition ? "opacity-40" : "cursor-pointer"}`}
+                } ${blocked ? "opacity-40" : "cursor-pointer"}`}
                 data-testid={`squad-pick-${id}`}
               >
                 {species ? <TypeIcon side={species.side} typeId={species.gameTypeId} size={28} /> : null}
@@ -221,7 +229,13 @@ export function ExpeditionsPage() {
                 {s.profile.star > 0 ? (
                   <span className="text-xs text-amber-300">{"★".repeat(s.profile.star)}</span>
                 ) : null}
-                {onExpedition ? <Badge>on expedition</Badge> : picked ? <Badge>picked</Badge> : null}
+                {onExpedition ? (
+                  <Badge>on expedition</Badge>
+                ) : contractBlock ? (
+                  <Badge data-testid={`squad-blocked-${id}`}>{conditionOf(contractRows[id])}</Badge>
+                ) : picked ? (
+                  <Badge>picked</Badge>
+                ) : null}
               </button>
             );
           })}

@@ -38,6 +38,8 @@ public static class InjectorBootstrap
         CheatState.Init(pluginDir);
         CheatState.MenuEnabled = false;
         CheatState.MenuOpen = false;
+        try { Hud.OverlaySettings.Init(pluginDir); }
+        catch (Exception ex) { RpgHost.Log.Warning("OverlaySettings: " + ex.Message); }
         CheatState.PersistEnabled = RpgHost.Config.PersistCheats;
         if (RpgHost.Config.PersistCheats) CheatState.TryLoad();
         CheatState.MenuEnabled = false;
@@ -47,7 +49,7 @@ public static class InjectorBootstrap
         catch (Exception ex) { RpgHost.Log.Warning("EffectRuntime: " + ex.Message); }
 
         SafePatchAll();
-        RpgHost.Log.Info("FusionRpg injector loaded, game=" + RpgHost.GameProfileId + " server=" + RpgHost.ServerUrl + " cheats=web-only gui=off");
+        RpgHost.Log.Info("FusionRpg injector loaded, game=" + RpgHost.GameProfileId + " server=" + RpgHost.ServerUrl + " cheats=web-only overlay-hud=on");
     }
 
     public static void SafePatchAll()

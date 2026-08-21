@@ -9,7 +9,8 @@
 - Sectors have **specific environments**, and not all of them are claimable: base-capable, no-base, boss, unknown, neutral, allied.
 - The map's mobile unit is a **legion**, and the player fields several. **Hero recruitment comes later** — heroes will fill a commander slot that already exists.
 - **The player is Dave, and the capital is his homeworld.** Losing it carries heavy consequences; how heavy is deliberately deferred (§10.5).
-- **Time model: turn-based. Locked.** No real-time timers anywhere in the world model. Existing real-time features (expeditions' `due_utc`) get refactored onto turns **after** the world map is complete.
+- **Time model: turn-based at the SSOT. Locked.** Not "one actor at a time" — a turn resolves **every** entity simultaneously (WEGO / deterministic-lockstep shape), and the turn barrier simply has no deadline: it lasts until every commander (the human, Zomboss, the neutrals) has committed. Removing that lock is precisely what would make it an RTS, so `step` is written never to know why the barrier released (§3). Existing real-time features (expeditions' `due_utc`) get refactored onto turns **after** the world map is complete.
+- **Scope of that clock: the strategy map only.** Combat has its own clock and its own turn management, owned by a different stream — they build turns for *actors in a battle*, we build turns for *commanders on a map*. The two never share a unit and never read each other's internals (§3.13).
 - Assets stay simple. Depth is bought with rules.
 
 ---
@@ -35,25 +36,115 @@ flowchart TB
   L3["L3 — Lane board<br/>5-lane PvZ combat: defense, assault, siege"]
   L1 -->|"a legion arrives"| L2
   L2 -->|"build, extract, recruit"| L2
-  L2 -->|"someone attacks, or you do"| L3
-  L3 -->|"outcome"| L1
+  L2 -->|"battle request"| L3
+  L3 -->|"outcome record"| L1
 ```
 
 **L1 is where you decide. L2 is where you build. L3 is where it is tested.** Every one of them is small, readable, and made of the pieces the codebase already has.
 
+**L1 and L2 are this design's scope. L3 is a neighbour, not a component** — combat runs its own clock and its own turn management under a different stream. This document only specifies what crosses the line between them (§3.13).
+
 ---
 
-## 3. The living world — the turn is the tick
+## 3. The simulation SSOT — a deterministic step behind a command barrier
 
-> **The world advances exactly one deterministic step per turn, and only when the player ends one.** State is a pure function of `(worldSeed, turn number, the ordered commands played)`. There is no wall clock anywhere in the model.
+> **Scope: the strategy map.** Everything in this section is the clock for *commanders moving on a graph*. A battle's internal clock — rounds, initiative, cooldowns, status ticks — is a separate domain with its own turn management, owned by a different stream. The seam between them is §3.13, and it is deliberately narrow: the map hands a battle a request and consumes an outcome. Neither side reads the other's internals.
 
-This is a better deal than the elapsed-time version it replaces, and it costs one real thing.
+**Yes, this works, and it is the standard architecture for exactly what you described.** It has two names in two traditions, and they are the same machine:
 
-**What it removes outright:** the drift horizon (no "what happened over ninety days"), deterministic route functions for enemies (they simply move a step per turn like everything else), `due_utc` timers, clock skew, time-zone questions, and every "compute state on read from wall time" reconciliation. The no-scheduler lock is not merely honored — there is nothing left that could want a scheduler.
+- **WEGO** in wargames: everyone plots orders in a decision phase, then all orders execute *simultaneously* in an execution phase. Combat Mission, Frozen Synapse, Dominions.
+- **Deterministic lockstep** in RTS: the sim is sliced into turns; every commander's inputs for a turn are gathered; once all inputs are in, every peer advances one simulation step with them. Age of Empires ran this at ~200 ms per turn with commands scheduled two turns out — which is why an RTS is not really "real time" either.
 
-**What it gives:** replay becomes trivial and exact. A save is `(worldSeed, command log)`; a golden test is a turn log with an expected end state; a bug report is reproducible by construction. This fits the store discipline the codebase already runs on — **one turn is one transaction**, correlation-idempotent, exactly like a summon or a fusion.
+Our model is that machine with one setting changed: **the barrier has no deadline.**
 
-**What it costs:** the idle loop. Dispatch-and-walk-away is gone; this becomes a session game you sit down to play. Autopilot survives, but its job changes — it exists to make a turn *fast* (auto-resolve a fight you have already won on paper), not to play while you are absent.
+### 3.1 The model in one line
+
+```
+state(turn N+1) = step( state(turn N), commands(N) from every commander )
+```
+
+`commands(N)` is the union of what **all** commanders submitted for turn N — the human, Zomboss, neutral clans, rivals. Nothing in `step` cares who issued what. There is no "active player", no acting-one-at-a-time pipeline, and no wall clock inside the model.
+
+### 3.2 The barrier is the time model — and yes, removing the lock makes it an RTS
+
+The only thing that decides *when* a turn fires is one policy:
+
+| Barrier policy | The game you get |
+|---|---|
+| `fire when every commander has committed` | **turn-based (WEGO)** — our lock; a turn lasts as long as thinking takes |
+| `fire when every commander has committed **or** the deadline elapses` (uncommitted = stand-fast) | **real-time strategy** — the deadline is the tick rate |
+| `fire on the deadline, no waiting` | twitchy RTS with input lag, the AoE model |
+
+So the answer to your question is literally yes: **RTS is this design with a timeout on the barrier.** That is not an analogy — a fixed tick rate is a barrier deadline. Which gives us a strong architectural rule to build under:
+
+> Write `step` so it never knows why the barrier released. Then turn-based today and real-time later is a **policy change, not a rewrite**.
+
+Layers may even choose different policies: the world map runs `wait for all`, while an L3 lane board is naturally a fast local loop. A board is a black box the world consumes the *result* of — so the world's turn stays deterministic even when the board it contains was played by human hands in real time (§3.9).
+
+### 3.3 Two clocks: the turn and the sim step
+
+A turn is not one instant. It is **N deterministic sim steps** executed after the barrier releases — the same way an RTS runs many sim frames, just without a stopwatch pacing them.
+
+| Clock | Scale | Purpose |
+|---|---|---|
+| **Turn** | a day | the barrier unit; where commands are committed and the calendar rolls |
+| **Sim step** | a slice of that day | where movement, interception, and contact actually happen |
+
+Sub-steps are what make simultaneity feel real instead of arbitrary: two legions marching toward each other along one lane **meet in the middle**, at the step where their positions cross, rather than one of them teleporting past the other because it was processed first.
+
+### 3.4 Simultaneity — the part that is actually work
+
+Everything moving at once means conflicts, and conflicts need rules that are stated, not emergent. Order within a turn:
+
+```
+Commit → Reveal → [ sim steps: Move → Contact → Combat ] → Sieges →
+Construction & Production → Growth → Pressure spread → Events/Calendar → Snapshot
+```
+
+**No order may read another commander's orders for the same turn.** Orders are sealed at Commit and revealed together. That is what makes simultaneity fair, and it is also what makes the AI honest — it cannot counter what it has not seen.
+
+Conflicts and their rulings:
+
+| Situation | Ruling |
+|---|---|
+| Two forces enter the same empty sector | they meet — a battle where neither side is "the defender" (no fortification bonus) |
+| Two forces cross on the same lane | they meet at the crossing step and fight *on the lane*, not at either end |
+| A force attacks another that is leaving | zone of control halts the mover on entry, so leaving must be ordered *before* contact — retreat is a decision, not a reflex |
+| Two claims on one slot | higher initiative claims; the loser keeps its movement and is simply blocked |
+| Mutual destruction | allowed. Both sides can lose everything in one turn |
+| Anything still tied | stable sort by entity id — never by dictionary order |
+
+### 3.5 Determinism rules (the same discipline the battle engine already runs)
+
+Integer or fixed-point only in game-affecting branches · stable ordering by entity id, never dictionary enumeration · seeded per-system RNG streams · no wall-clock reads anywhere in `step` · every resolution stamped with `(engineVersion, rulesetVersion, seed)`.
+
+The payoff: a save is `(worldSeed, command log)`, a golden test is a turn log with an expected end state, a bug report is reproducible by construction, and **one turn is one transaction** — correlation-idempotent, exactly like a summon or a fusion today.
+
+### 3.6 Commanders — the human is not special
+
+Zomboss, neutral clans, and rival summoners submit the **same command objects** through the same interface as the player. Consequences, all good:
+
+- The AI is auditable — it cannot cheat without someone writing a cheat, visibly.
+- Difficulty is a *policy*, not hidden bonuses.
+- A headless all-AI game runs in CI: balance sweeps, regression seeds, "does Zomboss win if nobody stops him" as an automated test.
+- The autopilot policy that plays a delve, the defense policy that holds a base, and the Zomboss brain are the same kind of object.
+
+### 3.7 Playback — turn-based truth, real-time feel
+
+Because a turn is many sim steps, the client can **replay those steps as an animation**: legions actually walk their lanes, meet, and fight. That is the WEGO playback trick, and it is how a turn-based SSOT can look alive without a single new asset — the world moves, you just do not fight the clock while deciding.
+
+### 3.8 What must never be written (or the RTS switch closes)
+
+- No code that assumes one entity acts at a time.
+- No code that reads a wall clock inside `step`.
+- No code that assumes the human is the only decision-maker, or that a turn has exactly one author.
+- No per-turn work that could not run a hundred times faster if the deadline shrank.
+
+### 3.9 The one honest caveat
+
+A hand-played L3 board is a human in real time; it is not reproducible from a seed. So the world consumes its **recorded outcome** as an authoritative fact, and world replay uses that record rather than re-simulating the board. Auto-resolved boards stay fully reproducible. That split is normal for this architecture and worth stating plainly rather than discovering later.
+
+### 3.10 What the world does while everyone plots
 
 | Force (world) | Behavior | Counter-force (player) |
 |---|---|---|
@@ -64,19 +155,7 @@ This is a better deal than the elapsed-time version it replaces, and it costs on
 | Era events | timed rule overlays across a cluster | plan around them, or exploit them |
 | Shard gravity | the more shards you hold, the harder Zomboss looks for home | spend, hide, or fortify |
 
-### 3.1 Anatomy of a turn
-
-| Phase | What happens |
-|---|---|
-| **Command** | you move legions, order construction, recruit, set stances, choose which battles to play yourself |
-| **Resolution** | your battles resolve — played on the lane board or auto-resolved; claims and razes apply |
-| **World** | enemy legions move, warcamps spawn, pressure spreads along lanes, tears grow, ongoing sieges advance, drift applies |
-| **Upkeep** | production credited, upkeep paid, construction advances, recruit stock accrues, wounded heal |
-| **Event** | overlays start and expire; at a week or month boundary, the calendar rolls (§3.2) |
-
-Everything in the World phase is one bounded pass over the graph — cheap, ordered, and deterministic. That pass *is* the simulation.
-
-### 3.2 The calendar — day, week, month
+### 3.11 The calendar — day, week, month
 
 A turn is a **day**. Seven days make a **week**, four weeks a **month**, and the boundaries are where the world gets its rhythm — the proven cadence from the genre, and it lands perfectly on systems we already have:
 
@@ -90,11 +169,88 @@ A turn is a **day**. Seven days make a **week**, four weeks a **month**, and the
 
 Weekly recruitment pulses are the single most valuable thing turns buy us: they give the whole game a heartbeat, they make "hold this lair for three more weeks" a real plan, and they let an attack be timed against a known refresh.
 
-### 3.3 Movement and multi-turn work
+### 3.12 Movement and multi-turn work
 
-Legions get **movement points per turn**; lane length and hazard set the cost, corridors are cheaper, ley lanes are cheaper for matching banners, and an enemy's zone of control stops a march dead. Construction, sector projects, sieges, and long delves all span turns — you commit, and the work advances in the Upkeep phase.
+Legions get **movement points per turn**, spent across the turn's sim steps; lane length and hazard set the cost, corridors are cheaper, ley lanes are cheaper for matching banners, and an enemy's zone of control stops a march dead at the step it makes contact. Construction, sector projects, sieges, and long delves span turns — you commit, and the work advances each turn.
 
-Which makes the forecast exact rather than approximate: **"warband of five, fire-typed, arrives in three turns"** is a computed fact, not an estimate.
+Which makes the forecast exact rather than approximate: **"warband of five, fire-typed, arrives on turn 11"** is a computed fact — though only as good as your intel, since it assumes they do not change their orders.
+
+### 3.13 Two clocks that never touch — strategy turns vs combat rounds
+
+Two separate domains, two separate streams, two separate vocabularies:
+
+| | **Strategy clock** (this design) | **Combat clock** (other stream) |
+|---|---|---|
+| Unit | **turn** — a day on the map | **round** — a beat inside one battle |
+| Who acts | commanders: the player, Zomboss, neutrals | actors: individual demons and structures |
+| Question it answers | who moves where, what gets built, what is claimed | who hits whom, in what order, for how much |
+| Barrier | every commander commits (§3.2) | its own, owned by that stream |
+| Owner | this document | the combat/actor stream |
+
+**Vocabulary rule:** a map step is always a **turn**, a battle step is always a **round**. Never "turn" for a battle beat in our docs, never "round" for a map step in theirs. The two streams can then read each other's specs without ambiguity.
+
+**Never convert between them.** One turn is not N rounds. A battle occupies whatever map time the *world* says it does — normally the turn it happened in — no matter whether it internally ran three rounds or thirty. The moment a formula multiplies turns by rounds, the seam has leaked.
+
+#### The seam
+
+```
+world turn  ──BattleRequest──▶  combat domain (its own clock, its own turns)
+            ◀──OutcomeRecord──
+```
+
+**What the map sends:** who is fighting (composition, levels, elements, traits, wounds carried in), the board layout when there is one (base defense or siege), the sector's climate and any active overlay rule ids, the objective (annihilate · hold N · breach), and a **derived seed** so the result is reproducible.
+
+**What the map consumes:** the result (victory · defeat · stalemate · rout), per-actor end state (survivors, HP, wounds, deaths, captures), anything earned (XP, loot, essence), and an event log for presentation. Nothing else.
+
+#### Invariants that keep it clean
+
+1. **Combat is stateless between turns.** Anything that must persist — wall damage, wounds, a depleted garrison — comes back in the outcome and is stored by the **world**. A multi-turn siege is therefore a fresh engagement each turn, built from world-held state, not a battle left paused in memory.
+2. **Combat never writes world state.** It does not claim sectors, spend shards, or move legions. It reports; the world decides consequences. (Same shape as the existing rule that combat effects never write ledgers directly.)
+3. **The world never reads combat internals** — no round counts, no cooldowns, no millisecond durations in any map-side formula. A battle's duration is informational.
+4. **Outcomes are records, not dependencies.** Each is stamped with the combat engine and ruleset version. World replay reuses the stored record rather than re-simulating a battle — which is also what makes a hand-played board legal (§3.9).
+5. **Many battles per turn.** Several engagements can resolve in one turn; they are independent and could run in parallel, with deterministic ordering used only when their world-side effects are applied.
+
+The payoff of the split: the combat stream can change rounds, initiative, cooldowns, or its whole resolution model without touching a line of map code — and this design can go real-time (§3.2) without asking them for anything.
+
+### 3.14 Could this later become an idle/persistent game? (Rise of Kingdoms shape)
+
+**Yes — it is the third barrier policy, not a third architecture.**
+
+| Mode | Barrier policy | Plays like |
+|---|---|---|
+| **Turn** (our default) | fire when every commander has committed | HOMM3, WEGO wargames |
+| **Real-time** | fire on a short deadline; uncommitted = stand fast | RTS |
+| **Idle / persistent** | fire on a **wall-clock period** (a turn every hour, or every four); absent commanders auto-commit their **standing orders** | Rise of Kingdoms, Galaxy Online |
+
+Same `step`, same commands, same determinism. The mode is three stored fields: `turnPeriod` (null = wait for all), `lastAdvancedAtUtc`, `catchUpCap`.
+
+#### Two ways to run idle, and only one needs a scheduler
+
+- **Lazy catch-up (preferred).** On any read, compute `K = min(catchUpCap, floor((now − lastAdvanced) / turnPeriod))` and run K steps with AI and standing-order policies committing for everyone. No background job, fully deterministic, replayable — and it honors the existing lazy-resolution lock untouched.
+- **Scheduled advance.** A recurring job ticks the world on a clock. Only actually needed when the world must move *for other people* while you are away (multiplayer) or when a push notification has to fire with no client present. That would need a decisions.md amendment, so it should be a deliberate choice, not a convenience.
+
+#### What idle mode really costs — design, not plumbing
+
+The hard part is not advancing turns without you. It is **being able to express intent that survives your absence.**
+
+1. **Standing orders become the game.** Build queue, project queue, march queue with waypoints, repeat-recruit, stances like "hold, do not chase". The Rise of Kingdoms loop is literally *keep your queues full* — the player's job shifts from issuing moves to authoring policy.
+2. **Queue count is the progression.** That game unlocks march queues one at a time as your city hall grows; ours already has the same knob in legion capacity and command capacity. How many things you can have running *is* the meta-progression.
+3. **A catch-up cap is mandatory**, and it is a feature. Roughly a day of accumulation is the genre norm: it bounds simulation cost, and it creates a daily rhythm without punishing a missed day. It does reintroduce a small drift horizon — but only in idle mode, and for a good reason.
+4. **Each mode needs its own tuning profile.** Idle turns are numerous and cheap; turn-mode turns are few and deliberate. The same production numbers in both modes make idle trivially rich or turn mode agonisingly slow.
+5. **The absent-player policy is now playing your empire**, so it must be conservative, legible, and *reported* — the turn log is the interface, and "here is what your commanders did while you were away" is the screen the whole mode lives or dies on.
+6. **Notifications need a scheduler or they happen at login.** For single-player, discovering a siege when you open the game is fine. Push is what changes the calculus.
+
+#### What to preserve now to keep the door open (all cheap today)
+
+- `step` never reads a wall clock — already a rule (§3.8).
+- Every commander is a policy object, the human's stand-in included. The autopilot and defense policies we already need make this nearly free.
+- Commands stay plain data, so a queued standing order and a live order are the same object.
+- A turn's cost stays bounded and small, so catch-up of a few hundred steps is uninteresting.
+- Balance constants live in a **profile object**, not scattered through the code, so a mode retunes without a fork.
+
+#### The honest caveats
+
+Switching modes *mid-campaign* is a balance problem, not a technical one — stamp a world with its mode and profile version at creation and treat a switch like a difficulty change, rather than promising it casually. And the genuinely expensive part of the Rise of Kingdoms comparison is not idle turns at all: it is **multiplayer** — shared worlds, alliances, PvP, always-on authority. That is a separate decision an order of magnitude larger than the mode switch, and nothing here commits to it.
 
 ---
 
@@ -393,7 +549,7 @@ Turns make this section short, which is the point.
 | Drift and pressure | one spread pass over lanes per turn | bounded by graph size |
 | Enemy mobiles | one movement step per turn, from their orders — no route functions, no reconciliation | ordinary |
 | Your legions | movement points spent in the Command phase | ordinary |
-| Auto-resolved defenses | deterministic board resolution from the stored layout | why layouts must be data |
+| Battles | **delegated** — a request out, an outcome record in; the map stores the record and never re-simulates (§3.13) | not ours to pay |
 | **The whole world** | `state(turn N+1) = step(state(turn N), commands)` | one bounded pass; a save is the seed plus the command log |
 
 ### 12.6 How much is enough
@@ -418,7 +574,7 @@ Turns make this section short, which is the point.
 
 ## 14. Open threads
 
-1. ~~Time model~~ — **settled: turn-based** (§3). Follow-on questions it opens: does playing a battle yourself cost anything a turn cannot afford? do enemy factions move simultaneously or in sequence after you? how long is a campaign in turns? and what happens to the shipped real-time expedition system (owner: refactor after the world map is complete)?
+1. ~~Time model~~ — **settled: turn-based at the SSOT, simultaneous resolution, no barrier deadline** (§3). Follow-on questions it opens: how many sim steps make a turn (movement granularity)? does a hand-played board cost anything a turn cannot afford? how long is a campaign in turns? do we keep the RTS switch genuinely open, or accept it as a nice property we never use? and what happens to the shipped real-time expedition system (owner: refactor after the world map is complete)?
 2. **What does losing the homeworld actually cost?** (§10.5 menu.) The biggest tone decision left in the design.
 3. **Legion pacing** — how many, how earned, what the commander slot does before heroes exist.
 4. **How strong is the rival summoner** — a racer for shards, or an enemy that takes sectors and holds your old lawn?
@@ -443,6 +599,8 @@ Turns make this section short, which is the point.
 | **Battle Brothers** | locations buy parties with agendas; contracts are readouts of world state | §12.1 grammar |
 | **Loop Hero** | adjacency transforms objects into new objects | §12.4 transformations |
 | **Plants vs. Zombies itself** | a lawn you lay out, waves you can see coming, a mower as the last line | §10 |
+| **Deterministic lockstep RTS** (Age of Empires and successors) | slice the sim into turns, gather every commander's inputs, advance one step when they are all in — an RTS is a barrier with a deadline | §3.1–3.3, §3.5 |
+| **WEGO wargames** (Combat Mission, Frozen Synapse, Dominions) | plot simultaneously, execute simultaneously, watch the playback | §3.4 simultaneity rules, §3.7 playback |
 
 ---
 
@@ -453,6 +611,9 @@ Turns make this section short, which is the point.
 - [HOMM3 adventure map](https://heroes.thelazy.net/index.php/Adventure_map) · [Adventure map structures](https://mightandmagic.fandom.com/wiki/List_of_adventure_map_structures_in_Heroes_III) · [Growth (weekly, special weeks/months)](https://heroes.thelazy.net/index.php/Growth) · [Plague](https://heroes.thelazy.net/index.php/Plague) · [Siege](http://heroes.thelazy.net/index.php/Siege) · [Garrison](https://heroes.thelazy.net/index.php/Garrison) · [Template Editor](https://heroes.thelazy.net/index.php/Template_Editor) · [Template-based map generator (paper)](https://jakubkowalski.tech/Supervising/Skowronek2025DesigningTemplateBased.pdf)
 - [Endless Legend — Cities](https://endlesslegend.wiki.gg/wiki/Cities)
 - [Zone of control](https://en.wikipedia.org/wiki/Zone_of_control)
+- [1500 Archers on a 28.8: Network Programming in Age of Empires and Beyond (discussion)](https://news.ycombinator.com/item?id=34395153) · [Lockstep as the RTS gold standard](https://www.socratopia.app/library/math-for-game-devs-en/chapter-30) · [What every programmer needs to know about game networking](https://gafferongames.com/post/what_every_programmer_needs_to_know_about_game_networking/) · [Age of Empires and networking](https://samu.space/Age-of-Empires-and-networking/)
+- [Turn-based debate: WEGO vs IGOUGO](https://rpgcodex.net/forums/threads/turn-based-debate-wego-vs-igougo.151914/) · [WEGO overview](https://wegowargo.com/about-wargo/)
+- [Rise of Kingdoms march/build/research queues](https://riseofkingdomsguides.com/rise-of-kingdoms-troop-capacity-and-march-queue-guide/) · [RoK city development](https://heaven-guardian.com/rise-of-kingdoms-buildings-guide-city-development/) · [Offline progression math and caps](https://www.geekextreme.com/idle-games-offline-progression-math/) · [Melvor Idle offline progression](https://wiki.melvoridle.com/w/Offline_Progression)
 - [Slay the Spire — Map Generation](https://slaythespire.wiki.gg/wiki/Map_Generation) · [FTL — Beacons](https://ftl.fandom.com/wiki/Beacons) · [FTL — Sectors](https://ftl.fandom.com/wiki/Sectors)
 - [Battle Brothers — Strategic Worldmap](https://battlebrothersgame.com/strategic-worldmap/) · [Dev Blog #19: On Worldmap Locations](https://battlebrothersgame.com/dev-blog-19-on-worldmap-locations/) · [Dev Blog #26: Mercenary Contracts](https://battlebrothersgame.com/dev-blog-26-mercenary-contracts-greenlight-update/)
 - [Loop Hero — Synergy](https://loophero.fandom.com/wiki/Synergy) · [Loop Hero tile combos](https://www.pcgamer.com/loop-hero-combos-cards-tile/)
