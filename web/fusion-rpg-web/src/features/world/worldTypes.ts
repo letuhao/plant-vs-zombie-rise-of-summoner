@@ -111,9 +111,21 @@ export type WorldTurnEntryDto = {
   detail: string;
 };
 
+export type WorldTurnCommandDto = {
+  commanderId: string;
+  commandId: string;
+  kind: string;
+  entityId?: string | null;
+  sectorId?: string | null;
+  /** Null for anything a person filed — the player never explains themselves. */
+  reason?: string | null;
+};
+
 export type WorldTurnReportDto = {
   turn: number;
   stateHash: string;
   phases: string[];
   entries: WorldTurnEntryDto[];
+  /** Survives a trim that empties `entries`: commands are the save and are never trimmed. */
+  commands?: WorldTurnCommandDto[];
 };

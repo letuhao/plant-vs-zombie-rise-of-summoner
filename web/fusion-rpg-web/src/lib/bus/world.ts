@@ -119,7 +119,9 @@ export function useSubmitWorldCommands(worldId: string | null | undefined) {
 export function useCommitWorldTurn(worldId: string | null | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (vars: { commanderId?: string }) =>
+    // `turn` is required by the server: a commit names the turn it means to end, so a resend the
+    // client never saw the answer to is refused rather than resolving the *next* turn.
+    mutationFn: (vars: { turn: number; commanderId?: string }) =>
       sendJson<WorldTurnCommitDto>(`/api/world/${worldId}/commit`, "POST", vars),
     onSuccess: (result) => {
       if (!result.advanced) return;

@@ -20,6 +20,12 @@ public static class OverlaySwitch
     const string PipeName = "FusionRpg.Overlay";
     const int ConnectTimeoutMs = 250;
 
+    /// <summary>
+    /// A named-pipe write has no timeout of its own, so a stalled reader on the launcher side
+    /// would park this thread forever. Async pipes support real cancellation, so bound it.
+    /// </summary>
+    const int WriteTimeoutMs = 1_000;
+
     static readonly OverlaySwitchState State = new();
     static readonly Stopwatch Clock = Stopwatch.StartNew();
 
@@ -44,6 +50,7 @@ public static class OverlaySwitch
     public static void OnMatchEnd()
     {
         State.OnMatchEnd();
+        OverlayPause.Clear(); // never leave a finished board frozen
         // Leaving the lawn should not leave the web UI covering the menu.
         if (InjectorHosted && OverlayViewHost.IsVisible) OverlayViewHost.Hide();
     }
@@ -55,6 +62,8 @@ public static class OverlaySwitch
     public static void Tick()
     {
         var now = Clock.ElapsedMilliseconds;
+
+        ApplyPause();
 
         if (InjectorHosted)
         {
@@ -99,7 +108,9 @@ public static class OverlaySwitch
     {
         State.SettingsEnabled = OverlaySettings.OverlayButtonEnabled;
 
-        if (!_viewStarted)
+        // Starting the view costs a browser process; with the button off there is no other way
+        // to open it in this mode, so do not pay for a feature the player switched off.
+        if (!_viewStarted && State.SettingsEnabled)
         {
             _viewStarted = true;
             OverlayViewHost.Start(RpgHost.ServerUrl);
@@ -121,9 +132,31 @@ public static class OverlaySwitch
         }
     }
 
+    /// <summary>
+    /// Hold the lawn still while the player is in the web UI. The launcher's F10 never reaches the
+    /// injector, so "is the player looking at the game" is the only signal that covers every way in
+    /// — hotkey, in-game button, or the launcher's own Overlay button. It also covers a plain
+    /// alt-tab, which is the same situation: nobody is defending the lawn.
+    /// </summary>
+    static void ApplyPause()
+    {
+        try
+        {
+            var away = !Win32.ForegroundIsThisProcess()
+                       || (InjectorHosted && OverlayViewHost.IsVisible);
+
+            OverlayPause.Apply(OverlayPausePolicy.ShouldPause(
+                enabled: OverlaySettings.PauseWhileAway,
+                matchActive: State.MatchActive,
+                playerAway: away));
+        }
+        catch { }
+    }
+
     /// <summary>Game is quitting — tear the view down so no browser process outlives us.</summary>
     public static void Shutdown()
     {
+        OverlayPause.Clear();
         if (_viewStarted) OverlayViewHost.Shutdown();
     }
 
@@ -166,11 +199,15 @@ public static class OverlaySwitch
     {
         try
         {
-            using var pipe = new NamedPipeClientStream(".", PipeName, PipeDirection.Out);
+            // Asynchronous so the bounded write below can actually be cancelled.
+            using var pipe = new NamedPipeClientStream(
+                ".", PipeName, PipeDirection.Out, PipeOptions.Asynchronous);
             pipe.Connect(ConnectTimeoutMs);
+
+            using var cts = new System.Threading.CancellationTokenSource(WriteTimeoutMs);
             var bytes = Encoding.ASCII.GetBytes(verb + "\n");
-            pipe.Write(bytes, 0, bytes.Length);
-            pipe.Flush();
+            pipe.WriteAsync(bytes, 0, bytes.Length, cts.Token).GetAwaiter().GetResult();
+            pipe.FlushAsync(cts.Token).GetAwaiter().GetResult();
             return true;
         }
         catch

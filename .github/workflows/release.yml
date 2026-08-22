@@ -82,6 +82,14 @@ jobs:
           if (Test-Path $zip) { Remove-Item $zip -Force }
           Compress-Archive -Path "$src\*" -DestinationPath $zip -Force
           Get-Item $zip | Format-List Name, Length
+
+          # Builds are unsigned, so a published hash is the only way anyone can check that what
+          # they downloaded is what CI produced. Emitted as a file and into the release notes.
+          $sha = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$sha  FusionRpg-win-x64.zip" | Set-Content "artifacts/FusionRpg-win-x64.zip.sha256" -NoNewline
+          Write-Host "SHA256 $sha"
+          "PACK_SHA256=$sha" | Out-File -FilePath $env:GITHUB_ENV -Append
+
           if (Test-Path "artifacts/player-pack-smoke.json") {
             Write-Host "Smoke summary:"
             Get-Content "artifacts/player-pack-smoke.json"
@@ -89,12 +97,24 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/FusionRpg-win-x64.zip
+          files: |
+            artifacts/FusionRpg-win-x64.zip
+            artifacts/FusionRpg-win-x64.zip.sha256
           generate_release_notes: true
           body: |
             ## FusionRpg ${{ github.ref_name }}
 
-            **Asset:** `FusionRpg-win-x64.zip` — unzip, double-click `FusionRpg.Launcher.exe`.
+            **Asset:** `FusionRpg-win-x64.zip` — **right-click the zip → Properties → Unblock** before
+            extracting, then double-click `FusionRpg.Launcher.exe`.
+
+            Windows marks downloaded files, and antivirus judges marked files far more harshly —
+            unblocking the zip first is the simplest way to avoid a false-positive quarantine.
+
+            `SHA256` — verify with `Get-FileHash FusionRpg-win-x64.zip`:
+
+            ```
+            ${{ env.PACK_SHA256 }}
+            ```
 
             - Builds are **unsigned hobby OSS** — see Trust & security in the launcher / [players.md](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/blob/main/docs/runbook/players.md#trust--antivirus-unsigned-hobby-builds).
             - Licensed **AGPL-3.0-or-later** (see `LICENSE` in the zip).

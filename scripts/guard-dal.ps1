@@ -35,9 +35,12 @@ Get-ChildItem -Path $Src -Recurse -Filter "*.cs" | ForEach-Object {
     $rel = $full.Substring($Root.Length).TrimStart('\', '/')
     $name = $_.Name
     if ($AllowlistFiles -contains $name) { return }
-    $text = Get-Content -LiteralPath $full -Raw
+    # Comment lines are skipped. A doc comment that explains *why* a file does not read
+    # `PRAGMA table_info` is the correct thing for it to say, and tripping the guard on it teaches
+    # people to stop writing the explanation rather than to stop writing the SQL.
+    $code = (Get-Content -LiteralPath $full | Where-Object { $_.TrimStart() -notmatch '^(//|\*|/\*)' }) -join "`n"
     foreach ($pat in $codePatterns) {
-        if ([regex]::IsMatch($text, $pat, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)) {
+        if ([regex]::IsMatch($code, $pat, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)) {
             $failures += "${rel}: matches /$pat/"
         }
     }

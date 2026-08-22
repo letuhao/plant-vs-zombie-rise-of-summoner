@@ -104,3 +104,5 @@ skills-lock.json
 **/__pycache__/
 src/FusionRpg.Server/wwwroot/
 src/FusionRpg.Server/wwwroot/index.html
+.playwright-mcp/
+node_modules/

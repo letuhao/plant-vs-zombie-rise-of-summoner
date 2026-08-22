@@ -1,0 +1,71 @@
+[
+  { "file": "src/FusionRpg.Core/World/Ai/Hops.cs",
+    "name": "every reachable sector is one hop away",
+    "find": "distance[neighbour] = distance[current] + 1;",
+    "with": "distance[neighbour] = 1;" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/Hops.cs",
+    "name": "somewhere unreachable reports zero rather than nothing",
+    "find": "From(graph, from).TryGetValue(to, out var hops) ? hops : null;",
+    "with": "From(graph, from).TryGetValue(to, out var hops) ? hops : 0;" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/MarchGraph.cs",
+    "name": "the march graph is built on the supply lens",
+    "find": "ClimateOf(view), include, LaneLens.March)",
+    "with": "ClimateOf(view), include, LaneLens.Supply)" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/MarchGraph.cs",
+    "name": "climate is unknown everywhere, so no ley discount is ever expected",
+    "find": "sectorId => view.Believed(sectorId)?.Climate;",
+    "with": "sectorId => null;" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/BelievedSupply.cs",
+    "name": "any owned sector seeds supply, Seat or not",
+    "find": "&& view.Believed(id)!.Slots.Any(s => s.SlotTypeId == SlotTypeCatalog.SeatSlotTypeId))",
+    "with": ")" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/BelievedSupply.cs",
+    "name": "an enemy zone of control does not break the chain",
+    "find": "return !HeldAgainst(view, sectorId);",
+    "with": "return true;" },
+
+  { "file": "src/FusionRpg.Core/World/Movement/SupplyReach.cs",
+    "name": "a one-way link carries supply both ways",
+    "find": "if (!link.OneWay) Add(outgoing, link.ToSectorId, link.FromSectorId);",
+    "with": "Add(outgoing, link.ToSectorId, link.FromSectorId);" },
+
+  { "file": "src/FusionRpg.Core/World/Topology/LaneGraph.cs",
+    "name": "every lane is traversable under both lenses",
+    "find": "return lens == LaneLens.March || type.CarriesSupply;",
+    "with": "return true;" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/ThreatMap.cs",
+    "name": "staleness never costs you confidence",
+    "find": "1000 - age * StaleDecayPerTurn",
+    "with": "1000" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/ThreatMap.cs",
+    "name": "an old sighting never spreads",
+    "find": "Math.Min(age, MaxSpreadHops)",
+    "with": "0" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/ThreatMap.cs",
+    "name": "distance from the sighting costs nothing",
+    "find": "1000 - beyond * ProximityFalloffPerHop",
+    "with": "1000" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/ThreatMap.cs",
+    "name": "your own army is frightening too",
+    "find": "if (!ZoneOfControl.IsHostile(force.OwnerFactionId, view.FactionId)) continue;",
+    "with": "" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/ThreatMap.cs",
+    "name": "defending and attacking read a band the same way",
+    "find": "reading == ThreatReading.Defensive ? force.Defensive : force.Offensive",
+    "with": "force.Offensive" },
+
+  { "file": "src/FusionRpg.Core/World/Ai/ThreatMap.cs",
+    "name": "a dug-in guard's menace travels",
+    "find": "ZoneOfControl.Projects(force.Kind) ? spreadHops + FalloffReach : 0",
+    "with": "spreadHops + FalloffReach" }
+]

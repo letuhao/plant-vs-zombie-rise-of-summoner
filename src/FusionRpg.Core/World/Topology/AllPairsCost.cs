@@ -25,13 +25,9 @@ public sealed class AllPairsCost
         _cost = cost;
     }
 
-    public LaneGraph Graph => _graph;
-
     public bool Reachable(string from, string to) => Between(from, to) < Unreachable;
 
     public int Between(string from, string to) => _cost[_graph.IndexOf(from) * _graph.Count + _graph.IndexOf(to)];
-
-    public int Between(int from, int to) => _cost[from * _graph.Count + to];
 
     public static AllPairsCost Compute(LaneGraph graph)
     {
@@ -69,21 +65,4 @@ public sealed class AllPairsCost
         return new AllPairsCost(graph, cost);
     }
 
-    /// <summary>
-    /// Every ordered pair's cost, summed — the single number <see cref="ReconnectionCost"/> compares
-    /// before and after a sector is removed. Unreachable pairs count at the sentinel, which is what
-    /// makes "the empire split" read as an enormous delta rather than as an absent one.
-    /// </summary>
-    public long TotalPairCost()
-    {
-        long total = 0;
-        var n = _graph.Count;
-
-        for (var i = 0; i < n; i++)
-        for (var j = 0; j < n; j++)
-            if (i != j)
-                total += _cost[i * n + j];
-
-        return total;
-    }
 }

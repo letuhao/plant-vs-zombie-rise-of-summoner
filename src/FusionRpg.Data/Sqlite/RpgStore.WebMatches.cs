@@ -7,7 +7,8 @@ namespace FusionRpg.Data;
 public sealed record WebMatchLogEntry(
     long Id, long PlayerId, string CorrelationId, string MatchKey,
     string SetupJson, ulong Seed, int EngineVersion, int RulesetVersion, int RngAlgoVersion,
-    long? RunId, string T, string? EnvironmentStamp = null, string? SweepRefused = null);
+    long? RunId, string T, string? EnvironmentStamp = null, string? SweepRefused = null,
+    string? ContentHash = null);
 
 public sealed partial class RpgStore
 {
@@ -18,7 +19,8 @@ public sealed partial class RpgStore
     /// </summary>
     public (bool Created, WebMatchLogEntry Entry) AppendWebMatchLog(
         long playerId, string correlationId, string matchKey, string setupJson, ulong seed,
-        int engineVersion, int rulesetVersion, int rngAlgoVersion, string? environmentStamp = null)
+        int engineVersion, int rulesetVersion, int rngAlgoVersion, string? environmentStamp = null,
+        string? contentHash = null)
     {
         if (string.IsNullOrWhiteSpace(correlationId)) throw new ArgumentException("correlationId is required.");
         if (string.IsNullOrWhiteSpace(matchKey)) throw new ArgumentException("matchKey is required.");
@@ -36,8 +38,9 @@ public sealed partial class RpgStore
             cmd.CommandText = """
                 INSERT INTO rpg_web_match_log(
                   player_id, correlation_id, match_key, setup_json, seed,
-                  engine_version, ruleset_version, rng_algo_version, environment_stamp, t)
-                VALUES($p,$c,$k,$s,$seed,$ev,$rv,$av,$env,$t);
+                  engine_version, ruleset_version, rng_algo_version, environment_stamp,
+                  content_hash, t)
+                VALUES($p,$c,$k,$s,$seed,$ev,$rv,$av,$env,$ch,$t);
                 """;
             cmd.Parameters.AddWithValue("$p", playerId);
             cmd.Parameters.AddWithValue("$c", corr);
@@ -48,6 +51,7 @@ public sealed partial class RpgStore
             cmd.Parameters.AddWithValue("$rv", rulesetVersion);
             cmd.Parameters.AddWithValue("$av", rngAlgoVersion);
             cmd.Parameters.AddWithValue("$env", (object?)environmentStamp ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$ch", (object?)contentHash ?? DBNull.Value);
             cmd.Parameters.AddWithValue("$t", DateTime.UtcNow.ToString("o"));
             cmd.ExecuteNonQuery();
             return (true, ReadWebMatchLogUnlocked(db, playerId, corr)!);
@@ -169,7 +173,7 @@ public sealed partial class RpgStore
     const string SelectLog = """
         SELECT id, player_id, correlation_id, match_key, setup_json, seed,
                engine_version, ruleset_version, rng_algo_version, run_id, t, environment_stamp,
-               sweep_refused
+               sweep_refused, content_hash
         FROM rpg_web_match_log
         """;
 
@@ -189,7 +193,8 @@ public sealed partial class RpgStore
         r.GetInt32(6), r.GetInt32(7), r.GetInt32(8),
         r.IsDBNull(9) ? null : r.GetInt64(9), r.GetString(10),
         r.IsDBNull(11) ? null : r.GetString(11),
-        r.IsDBNull(12) ? null : r.GetString(12));
+        r.IsDBNull(12) ? null : r.GetString(12),
+        r.IsDBNull(13) ? null : r.GetString(13));
 
     /// <summary>Defensive: a hand-edited/foreign row must not take down boot (the sweep lists
     /// rows before its per-entry catch). Unparseable seeds map to 0 — deterministic garbage the

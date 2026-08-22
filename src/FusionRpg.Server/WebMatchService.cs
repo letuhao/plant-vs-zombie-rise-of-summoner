@@ -2,6 +2,7 @@ using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
@@ -56,7 +57,7 @@ public sealed class WebMatchService
         var (created, entry) = _store.AppendWebMatchLog(playerId, corr, matchKey,
             JsonSerializer.Serialize(setup), seed,
             BattleRuleset.EngineVersion, BattleRuleset.RulesetVersion, SeededRng.RngAlgoVersion,
-            BattleEnvironment.Stamp);
+            BattleEnvironment.Stamp, _store.ComputeContentHash().ToCompact());
         if (!created)
         {
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
@@ -98,7 +99,7 @@ public sealed class WebMatchService
         var (created, entry) = _store.AppendWebMatchLog(playerId, corr, matchKey,
             JsonSerializer.Serialize(setup), seed,
             BattleRuleset.EngineVersion, BattleRuleset.RulesetVersion, SeededRng.RngAlgoVersion,
-            BattleEnvironment.Stamp);
+            BattleEnvironment.Stamp, _store.ComputeContentHash().ToCompact());
         if (!created)
         {
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
@@ -119,6 +120,10 @@ public sealed class WebMatchService
     public int SweepUnresolved()
     {
         var healed = 0;
+        // Hashed ONCE for the whole sweep. Per entry it would be a full read of every covered
+        // content table per row — the content cannot change while this loop runs.
+        var content = _store.ComputeContentHash();
+
         foreach (var entry in _store.ListUnresolvedWebMatches())
         {
             // A refusal is TERMINAL, not a skip: the row is marked so it leaves the unresolved
@@ -145,6 +150,19 @@ public sealed class WebMatchService
                 _store.MarkWebMatchSweepRefused(entry.Id, why);
                 continue;
             }
+
+            // E8: effect content is rows, so a resolve is only reproducible against the content it
+            // ran on. A REGISTRY change is not a refusal — a table joining the covered set is
+            // expected and attributable — but an edited row under the same registry version is.
+            var contentCheck = ContentHashComparison.Compare(entry.ContentHash, content);
+            if (contentCheck.ShouldRefuse)
+            {
+                Console.Error.WriteLine($"[web-match] sweep refused {entry.MatchKey}: {contentCheck.Reason}");
+                _store.MarkWebMatchSweepRefused(entry.Id, contentCheck.Reason);
+                continue;
+            }
+            if (contentCheck.Verdict == ContentHashVerdict.RegistryChanged)
+                Console.Error.WriteLine($"[web-match] sweep {entry.MatchKey}: {contentCheck.Reason}");
 
             try
             {

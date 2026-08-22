@@ -24,9 +24,15 @@ Turn bindings into something the shipped machine already runs. **Compile what Fo
 This is not a micro-optimisation. It keeps the runner small and keeps the majority of content on a path that has been proven live through L1–L14. **Nothing is ever dropped**: a binding the compiler cannot express falls through to the runner, and a binding neither can handle is a **bind-time rejection**, never a silent no-op.
 
 ```csharp
-Compile(atoms) → (IReadOnlyList<EffectGrantDto> Compiled, IReadOnlyList<RunnerEntry> Runtime)
+Compile(atoms) → CompiledCatalog(Defs, Compiled, CompiledAtomIds, Runtime, Rejected)
 // E7 owns the RunnerEntry contract; E15 consumes it.
 ```
+
+**Corrected while building (2026-08-22):** an earlier draft said this emits `EffectGrantDto` alone. It
+cannot — a grant carries only an overlay and an `effectId`, while **triggers, `EffectType` and actions
+live on `EffectDefDto`**. A compiled ICD group therefore emits **one def plus one grant**. Without the
+def there is nowhere to put the trigger union, and `EffectType = Passive` is unreachable, so every
+triggerless permanent modifier would compile to something that never fires.
 
 ### The classification rule, stated precisely
 
@@ -55,7 +61,6 @@ Compiled output is materialised into the form **E13** chose — no dictionaries,
 
 The compiler emits grant shapes. It does not apply, order, merge, or mitigate anything. It does not call Unity, the Writer, `StatusExecutor`, or `EffectBag.Grant` — Secondary law is unchanged, and `guard-funnel-delta.ps1` / `guard-secondary-no-unity.ps1` keep passing untouched.
 
-**Write it as "the Writer", never the type name.** `guard-funnel-delta.ps1` regex-matches the literal Writer type name against every `.cs` under `src/FusionRpg.Core` — **comments included** — and fails the build. Same trap for `AddPlantHp` / `AddZombieHp` / `targetPtrs`.
 
 **Write it as "the Writer", never the type name.** `guard-funnel-delta.ps1` regex-matches the literal Writer type name against every `.cs` under `src/FusionRpg.Core` — **comments included** — and fails the build. Same trap for `AddPlantHp` / `AddZombieHp` / `targetPtrs`.
 
@@ -72,7 +77,6 @@ dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Atom.Compile
 ```
 src/FusionRpg.Core/Effects/Atoms/AtomCompiler.cs        (new — classify + emit)
 src/FusionRpg.Core/Effects/Atoms/Compilability.cs       (new — the pure classifier)
-src/FusionRpg.Core/Effects/Atoms/RunnerEntry.cs          (new — the contract E15 runs and E19 ships)
 src/FusionRpg.Core/Effects/Atoms/RunnerEntry.cs          (new — the contract E15 runs and E19 ships)
 src/FusionRpg.Core/Effects/Atoms/CompiledCatalog.cs     (new — baked form, int-indexed)
 tests/FusionRpg.Core.Tests/Atoms/AtomCompilerTests.cs

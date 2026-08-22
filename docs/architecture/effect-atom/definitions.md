@@ -578,7 +578,15 @@ so `ExecGrantShield` skips with `shield-runtime-missing`).
 matrix as audited fact and re-verifying against code — this is that re-verification, and it edits
 shipped code plus its tests.
 
-### D7 — E1's param schemas do not match the opcodes they claim — **BUILD TASK (E1), not a spec gap**
+### D7 — E1's param schemas do not match the opcodes they claim — ✅ **FIXED 2026-08-22**
+
+> Re-derived from the executors. `box.set.boxType` → `Int` (read with `GetInt`); `status.apply` →
+> FA2's real names and units (`status`, `duration` in **seconds**, `level`) and **no `target`**, because
+> FA2 has none; the DoT/contagion payload (`statusId`, `periodMs`, `durationMs`, `tickBudget`,
+> `spread`) moved to **`resource.delta`**, the FA10 opcode that actually carries it;
+> `shield.grant.sourceClass` declared, restoring aura priority and the `refillOnMerge` default;
+> `spawn.entity.count` declared. **`G5` is reclassified as a runtime hole** — no load-time param check
+> can close it. 10 new tests pin each schema to its executor.
 
 > The rule is already specified: a schema declares only keys its executor honours. Five schemas do not
 > match theirs. Closing it is **reading five executors and correcting five declarations** — mechanical

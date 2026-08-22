@@ -40,7 +40,26 @@ public static class AtomKindRegistry
         if (kind is null)
             return AtomRejection.Fail(AtomRejectionReason.UnknownKind, kindId ?? "(null)");
 
-        return kind.Params.Validate(parameters ?? new Dictionary<string, object?>());
+        var pars = parameters ?? new Dictionary<string, object?>();
+
+        var shape = kind.Params.Validate(pars);
+        if (!shape.IsOk) return shape;
+
+        // G6: an unknown PRIMARY channel used to pass validation and then write nothing, because
+        // ModifierBag.Upsert only checks for a non-empty name. The registry declared PrimaryChannels
+        // and never read it, which made the list documentation rather than a rule.
+        if (string.Equals(kindId, "stat.modify", StringComparison.Ordinal)
+            && pars.TryGetValue("channel", out var channel))
+        {
+            var name = channel?.ToString();
+            if (!Array.Exists(PrimaryChannels, c => string.Equals(c, name, StringComparison.Ordinal)))
+                return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                    $"channel '{name}' is not one of the {PrimaryChannels.Length} primary channels. " +
+                    "attackInterval / produceInterval / zombieSpeed are cheat-document keys that bypass " +
+                    "the modifier bag; E16 promotes them.");
+        }
+
+        return AtomRejection.Ok;
     }
 
     /// <summary>Validate that a kind may carry a trigger. Unknown or disallowed both reject.</summary>
@@ -94,7 +113,15 @@ public static class AtomKindRegistry
             new("resource.delta", AttachPoint.Resource, new ParamSchema(
                     new ParamDef("amount", ParamKind.Value, Required: true),
                     new ParamDef("element", ParamKind.String),
-                    new ParamDef("target", ParamKind.Object)),
+                    new ParamDef("target", ParamKind.Object),
+                    // D7: the DoT and contagion payload lives HERE, not on status.apply. EffectBag
+                    // calls StatusEffectBridge.TryApplyFromGrant only inside the ApplyResourceDelta
+                    // branch, and these keys are in FA10's allowlist — not FA2's.
+                    new ParamDef("statusId", ParamKind.String),
+                    new ParamDef("periodMs", ParamKind.Value),
+                    new ParamDef("durationMs", ParamKind.Value),
+                    new ParamDef("tickBudget", ParamKind.Int),
+                    new ParamDef("spread", ParamKind.Object)),
                 // D6: Battle was Full. Battle's sink does handle FA10, but no ATOM can reach it —
                 // BattleEngine never grants and never calls OnEvent, so a bound resource.delta is a
                 // silent no-op. Full again when battle grows a grant path.
@@ -118,20 +145,25 @@ public static class AtomKindRegistry
                 "which FA9 does not."),
 
             // ---- Status --------------------------------------------------------------------
+            // D7: re-derived from FA2's allowlist and ExecApplyStatus. The previous schema declared
+            // statusId/durationMs/target and the DoT payload — none of which FA2 carries. FA2 allows
+            // exactly { status, duration, level, chance, icd_ms, max_stacks, filters }, the executor
+            // reads "status" as a string and "duration" as float SECONDS, and the target is resolved
+            // from the event (ResolveStatusTargetPtr), never from a param.
             new("status.apply", AttachPoint.Status, new ParamSchema(
-                    new ParamDef("statusId", ParamKind.String, Required: true),
-                    // G5: an empty target still means "every zombie on the board" in shipped code today
-                    //     (InjectorEffectActionSink: unguarded FindObjectsOfType<Zombie>() loop).
-                    new ParamDef("target", ParamKind.Object, Required: true),
-                    new ParamDef("durationMs", ParamKind.Value),
-                    new ParamDef("periodMs", ParamKind.Value),
-                    new ParamDef("amount", ParamKind.Value),
-                    new ParamDef("tickBudget", ParamKind.Int),
-                    new ParamDef("spread", ParamKind.Object)),
+                    new ParamDef("status", ParamKind.String, Required: true),
+                    // Seconds, not milliseconds. FA2 predates the integer-ms rule and was not changed
+                    // for it; declaring durationMs here would validate a key nothing reads.
+                    new ParamDef("duration", ParamKind.Value),
+                    new ParamDef("level", ParamKind.Int)),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Partial, RuntimeState.PlanOnly),
                 AllTriggers,
                 PowerCategory.Control | PowerCategory.Offense,
-                "FA2 plus StatusRuntime overlay. Contagion spread is data on this kind, not a kind."),
+                "FA2 only. The DoT/contagion payload (statusId, periodMs, tickBudget, spread) lives on " +
+                "FA10 `resource.delta` — StatusEffectBridge.TryApplyFromGrant is called from the " +
+                "ApplyResourceDelta branch, so that content compiles to a different opcode. " +
+                "G5 is a RUNTIME hole: an event resolving to an empty ptr hits the unguarded " +
+                "FindObjectsOfType<Zombie>() loop, and no load-time param check can close it."),
 
             new("status.clear", AttachPoint.Status, new ParamSchema(
                     new ParamDef("statusId", ParamKind.String),
@@ -145,6 +177,10 @@ public static class AtomKindRegistry
             new("shield.grant", AttachPoint.Shield, new ParamSchema(
                     new ParamDef("amount", ParamKind.Value, Required: true),
                     new ParamDef("element", ParamKind.String),
+                    // D7: honoured by ExecGrantShield - it selects PriorityAura/PriorityInnate and flips the
+                    // refillOnMerge default. Undeclared, every atom-granted shield was
+                    // PrioritySkill with refill=true, so the warded family lost a shipped capability.
+                    new ParamDef("sourceClass", ParamKind.String),
                     new ParamDef("priority", ParamKind.Int),
                     new ParamDef("durationTicks", ParamKind.Int),
                     new ParamDef("refillOnMerge", ParamKind.Bool),
@@ -163,6 +199,12 @@ public static class AtomKindRegistry
             new("spawn.entity", AttachPoint.Board, new ParamSchema(
                     new ParamDef("kind", ParamKind.String, Required: true),
                     new ParamDef("typeId", ParamKind.Int),
+                    // D7/D3: E9's spawn price is chance x count x power(body), and count was declared
+                    // nowhere. Floor it at 1 in E4's validator - an omitted count defaulting to 0
+                    // prices the whole spawn at zero, which is the defect the body pricing fixed.
+                    new ParamDef("count", ParamKind.Int,
+                        NotImplementedNote: "the sink spawns one entity per plan item; count is a " +
+                                            "pricing input until the executor loops"),
                     new ParamDef("row", ParamKind.Int),
                     // G1: the sink forwards a different subset per kind and silently drops the rest.
                     new ParamDef("col", ParamKind.Int, HonouredOnlyWhen: "kind=plant"),
@@ -207,7 +249,9 @@ public static class AtomKindRegistry
                 "FA7."),
 
             new("box.set", AttachPoint.Board, new ParamSchema(
-                    new ParamDef("boxType", ParamKind.String, Required: true),
+                    // D7: ExecSetBox reads this with JsonOverlay.GetInt. Declared String, an atom authoring
+                    // boxType: "dirt" validated and then silently set box type 1.
+                    new ParamDef("boxType", ParamKind.Int, Required: true),
                     new ParamDef("row", ParamKind.Int),
                     new ParamDef("col", ParamKind.Int),
                     // G2: allowlisted, but the executor handles a single cell only.

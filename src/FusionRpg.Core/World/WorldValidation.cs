@@ -51,7 +51,16 @@ public static class WorldValidation
         var factionIds = w.Factions.Select(f => f.FactionId).ToHashSet(StringComparer.Ordinal);
 
         foreach (var f in w.Factions)
+        {
             WorldIds.RequireKebab(f.FactionId, "Faction id");
+
+            // A policy id is a catalog reference like a sector or lane type, and it is inside the
+            // state hash. Left unchecked, a typo would look exactly like "somebody is playing this
+            // faction" — so the faction would simply never act, for the whole campaign, silently.
+            if (f.PolicyId != null && !Ai.FactionPolicies.IsKnown(f.PolicyId))
+                throw new InvalidOperationException(
+                    $"Faction '{f.FactionId}' names unknown policy '{f.PolicyId}'.");
+        }
 
         // Ownership is a reference, so it is checked like one — a sector owned by a faction that
         // does not exist would otherwise validate and then break every ownership read downstream.

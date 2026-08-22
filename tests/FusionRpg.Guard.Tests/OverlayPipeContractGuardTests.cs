@@ -61,9 +61,6 @@ public class OverlayPipeContractGuardTests
     public void The_launcher_stays_the_default_host()
     {
         // overlayHost=injector must stay opt-in until the in-game view is proven live.
-        var sel = ReadRepoFile(@"src\FusionRpg.Core\Overlay\OverlaySwitchState.cs");
-        Assert.NotNull(sel);
-
         var mode = ReadRepoFile(@"src\FusionRpg.Core\Overlay\OverlayHostSelection.cs");
         Assert.Contains("Launcher = 0", mode, StringComparison.Ordinal);
         Assert.Contains("return OverlayHostMode.Launcher;", mode, StringComparison.Ordinal);
@@ -99,20 +96,46 @@ public class OverlayPipeContractGuardTests
         }
     }
 
-    [Fact]
-    public void The_webview_payload_stays_trimmed_in_both_hosts()
+    /// <summary>
+    /// Every project that compiles the shared injector sources, discovered rather than listed:
+    /// the game x loader matrix grows a cell at a time, and a host added later would otherwise
+    /// miss the package and fail to compile the moment someone builds that cell.
+    /// </summary>
+    static IEnumerable<string> InjectorHostProjects()
     {
-        // Everything referenced here lands in the player's game folder.
-        foreach (var proj in new[]
-                 {
-                     @"src\FusionRpg.Injector.BepInEx\FusionRpg.Injector.BepInEx.csproj",
-                     @"src\FusionRpg.Injector.MelonLoader\FusionRpg.Injector.MelonLoader.csproj"
-                 })
+        var root = FindRepoRoot();
+        foreach (var proj in Directory.EnumerateFiles(
+                     Path.Combine(root, "src"), "*.csproj", SearchOption.AllDirectories))
         {
-            var text = ReadRepoFile(proj);
-            Assert.Contains("Microsoft.Web.WebView2", text, StringComparison.Ordinal);
-            Assert.Contains("TrimWebView2Payload", text, StringComparison.Ordinal);
-            Assert.Contains("TrimWebView2Natives", text, StringComparison.Ordinal);
+            var text = File.ReadAllText(proj);
+            // The shared-source glob is what makes a project an injector host.
+            if (text.Contains(@"..\FusionRpg.Injector\**\*.cs", StringComparison.Ordinal))
+                yield return proj;
+        }
+    }
+
+    [Fact]
+    public void Every_injector_host_carries_the_webview_payload_rules()
+    {
+        // Everything referenced here lands in the player's game folder. Missing the package on a
+        // host is not a soft failure: the shared sources use WebView2, so that cell stops building.
+        var hosts = InjectorHostProjects().ToList();
+        Assert.True(hosts.Count >= 3,
+            $"expected at least the BepInEx + two MelonLoader hosts, found {hosts.Count}");
+
+        foreach (var proj in hosts)
+        {
+            var text = File.ReadAllText(proj);
+            var name = Path.GetFileName(proj);
+            // Match the reference itself: the trim targets name the WPF/WinForms assemblies, so a
+            // bare Contains("Microsoft.Web.WebView2") stays true even with the package removed.
+            Assert.True(
+                Regex.IsMatch(text, @"PackageReference\s+Include=""Microsoft\.Web\.WebView2"""),
+                $"{name} compiles the shared injector sources but has no WebView2 package reference");
+            Assert.True(text.Contains("TrimWebView2Payload", StringComparison.Ordinal),
+                $"{name} would ship WPF/WinForms wrappers and XML docs into the game folder");
+            Assert.True(text.Contains("TrimWebView2Natives", StringComparison.Ordinal),
+                $"{name} would ship wrong-architecture natives, or bury the loader under runtimes\\");
         }
     }
 
@@ -133,6 +156,49 @@ public class OverlayPipeContractGuardTests
         Assert.True(
             host.Contains("OverlayViewPolicy.ShouldAutoHide", StringComparison.Ordinal),
             "a topmost, non-alt-tabbable window must hide when the game loses foreground");
+    }
+
+    [Fact]
+    public void Time_scale_keeps_exactly_one_writer()
+    {
+        // CheatActions.TickContinuous asserts the timescale every frame (G-TIMEFREEZE / G-TIMESCALE).
+        // A second writer anywhere would be silently overwritten on the next frame whenever a speed
+        // setting is active — precisely how "pause does not work with a speed cheat on" bugs appear.
+        // OverlayPause therefore decides and CheatActions applies.
+        var offenders = new List<string>();
+        var scanned = 0;
+        var writesInTheOwner = 0;
+        var separator = Path.DirectorySeparatorChar;
+
+        foreach (var file in Directory.EnumerateFiles(
+                     Path.Combine(FindRepoRoot(), "src"), "*.cs", SearchOption.AllDirectories))
+        {
+            if (file.Contains($"{separator}obj{separator}", StringComparison.Ordinal)) continue;
+            if (file.Contains($"{separator}bin{separator}", StringComparison.Ordinal)) continue;
+
+            var isOwner = Path.GetFileName(file)
+                .Equals("CheatActions.cs", StringComparison.OrdinalIgnoreCase);
+            scanned++;
+
+            foreach (var raw in File.ReadAllLines(file))
+            {
+                var line = raw.Trim();
+                if (line.StartsWith("//", StringComparison.Ordinal)) continue;
+                if (!Regex.IsMatch(line, @"Time\.timeScale\s*=")) continue;
+
+                if (isOwner) writesInTheOwner++;
+                else offenders.Add(Path.GetFileName(file) + ": " + line);
+            }
+        }
+
+        // A guard that quietly scans nothing passes forever. Anchor it on both counts.
+        Assert.True(scanned > 50, $"expected to scan the injector sources, saw {scanned} files");
+        Assert.True(writesInTheOwner > 0,
+            "CheatActions.cs no longer writes Time.timeScale - this guard watches the wrong file");
+
+        Assert.True(offenders.Count == 0,
+            "Time.timeScale must only be assigned in CheatActions.TickContinuous: " +
+            string.Join(" | ", offenders));
     }
 
     static string PipeNameIn(string relativePath)

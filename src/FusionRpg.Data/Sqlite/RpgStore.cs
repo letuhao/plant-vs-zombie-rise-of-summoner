@@ -536,11 +536,20 @@ public sealed partial class RpgStore : IRpgDb
         // above it would throw "no such table" on every fresh database.
         EnsureColumn(db, "rpg_web_match_log", "environment_stamp", "TEXT");
         EnsureColumn(db, "rpg_web_match_log", "sweep_refused", "TEXT");
+        // E8: the content stamp a resolve ran against, so the boot sweep can refuse to
+        // re-resolve across edited effect content instead of silently producing a different report.
+        EnsureColumn(db, "rpg_web_match_log", "content_hash", "TEXT");
         // World map (spec-world-model.md) — its DDL lives beside its store partial.
         EnsureWorldSchemaUnlocked(db);
         // Atom effect curves (spec-value-spec-and-curve.md, E2) — Core cannot hold SQL, so the
         // table three modules depend on lives beside its store partial.
         EnsureCurveSchemaUnlocked(db);
+        // effect_atom + content_meta (spec-atom-schema.md, E4).
+        EnsureAtomSchemaUnlocked(db);
+        // effect_container + its atom/pool children + rarity (spec-container-schema.md, E5).
+        EnsureContainerSchemaUnlocked(db);
+        // effect_instance / effect_instance_atom / effect_binding (spec-instance-and-binding.md, E6).
+        EnsureAtomInstanceSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)

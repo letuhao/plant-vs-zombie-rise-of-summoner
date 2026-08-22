@@ -13,6 +13,13 @@ public sealed class OverlaySwitchState
     /// <summary>How often to ask whether an overlay host is listening.</summary>
     public const int ProbeIntervalMs = 30_000;
 
+    /// <summary>
+    /// After this long an in-flight send is treated as abandoned. The pipe write has no timeout of
+    /// its own, so a stalled reader on the other end would otherwise leave the gate closed for the
+    /// rest of the session and the button dead. Comfortably longer than a healthy connect + write.
+    /// </summary>
+    public const int SendTimeoutMs = 3_000;
+
     long _lastSendMs;
     bool _hasSent;
     long _lastProbeMs;
@@ -31,6 +38,9 @@ public sealed class OverlaySwitchState
     /// </summary>
     public bool SendInFlight { get; private set; }
 
+    /// <summary>True once an in-flight send has outlived <see cref="SendTimeoutMs"/>.</summary>
+    bool SendAbandoned(long nowMs) => SendInFlight && nowMs - _lastSendMs >= SendTimeoutMs;
+
     /// <summary>
     /// A board is live. The button is in-match chrome: its corner was chosen against the seed bank
     /// and shovel, not against menu screens, so drawing it outside a match risks stealing a menu
@@ -43,6 +53,10 @@ public sealed class OverlaySwitchState
     /// <summary>True when this click should produce a send. Measured from the last send, not the last attempt.</summary>
     public bool TryClick(long nowMs)
     {
+        // An abandoned send must not hold the gate shut forever — the player would be left
+        // clicking a dead button with no way to recover short of restarting the game.
+        if (SendAbandoned(nowMs)) SendInFlight = false;
+
         if (SendInFlight) return false; // refuse before recording: nothing is going out
         if (_hasSent && nowMs - _lastSendMs < DebounceMs) return false;
         _hasSent = true;

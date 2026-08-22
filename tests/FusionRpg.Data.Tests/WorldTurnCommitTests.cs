@@ -31,48 +31,62 @@ public class WorldTurnCommitTests : IDisposable
 
     static readonly string[] AllCommanders = { "dave", "wild", "zomboss" };
 
+    /// <summary>The turn currently open, which is the turn a commit has to name.</summary>
+    int Open => _store.GetWorldHeader("w")!.CurrentTurn;
+
+    WorldTurnCommitResult Commit(string commanderId) => _store.CommitWorldTurn("w", commanderId, Open);
+
     /// <summary>Commits every commander and returns the last result — the turn fires on the last one.</summary>
     WorldTurnCommitResult CommitAll(params string[] commanders)
     {
         // `params` with no arguments is an empty array, not null — spell the default out.
         var who = commanders.Length == 0 ? AllCommanders : commanders;
+        var open = Open;   // they all end the same turn, so read it once
+
+        // The human goes last: a faction with a policy commits itself the moment anyone ends the
+        // turn, so committing Dave first would resolve it before the others got a word in.
         WorldTurnCommitResult last = default!;
-        foreach (var c in who)
-            last = _store.CommitWorldTurn("w", c);
+        foreach (var c in who.Where(c => c != "dave").Concat(who.Where(c => c == "dave")))
+            last = _store.CommitWorldTurn("w", c, open);
         return last;
     }
 
     [Fact]
     public void The_turn_fires_only_when_the_last_commander_commits()
     {
-        var first = _store.CommitWorldTurn("w", "dave");
-        Assert.True(first.Ok);
-        Assert.False(first.Advanced);
+        // The barrier is unchanged — it still wants every commander. What changed in W27 is who
+        // supplies them: a faction with a policy commits itself, so the *human* is the last one
+        // outstanding and their commit is what releases the turn.
+        var wild = Commit("wild");
+        Assert.True(wild.Ok);
+        Assert.False(wild.Advanced);
         Assert.Equal(0, _store.GetActiveWorld(1)!.CurrentTurn);
 
-        var second = _store.CommitWorldTurn("w", "wild");
-        Assert.False(second.Advanced);
-
-        var last = _store.CommitWorldTurn("w", "zomboss");
-        Assert.True(last.Advanced);
+        var human = Commit("dave");
+        Assert.True(human.Advanced);
         Assert.Equal(1, _store.GetActiveWorld(1)!.CurrentTurn);
     }
 
     [Fact]
     public void Committing_twice_is_idempotent_and_does_not_advance_twice()
     {
-        _store.CommitWorldTurn("w", "dave");
-        var repeat = _store.CommitWorldTurn("w", "dave");
+        // Committing the same *open* turn again is absorbed: the commit row is already there and
+        // the barrier has nothing new to weigh.
+        var wild = Commit("wild");
+        Assert.True(wild.Ok);
+        var repeat = Commit("wild");
         Assert.True(repeat.Ok);
         Assert.False(repeat.Advanced);
+        Assert.Equal(0, _store.GetActiveWorld(1)!.CurrentTurn);
 
-        CommitAll("wild", "zomboss");
+        Assert.True(Commit("dave").Advanced);
         Assert.Equal(1, _store.GetActiveWorld(1)!.CurrentTurn);
 
-        // A late duplicate for the turn that already resolved must not roll the world forward.
-        var stale = _store.CommitWorldTurn("w", "dave");
-        Assert.True(stale.Ok);
-        Assert.False(stale.Advanced);
+        // A duplicate for the turn that already resolved is *refused* rather than absorbed. That
+        // distinction is the whole of W25: absorbed, a retry would end the next turn instead.
+        var stale = _store.CommitWorldTurn("w", "dave", 0);
+        Assert.False(stale.Ok);
+        Assert.Equal("turn.stale", stale.Reason);
         Assert.Equal(1, _store.GetActiveWorld(1)!.CurrentTurn);
     }
 
@@ -111,7 +125,9 @@ public class WorldTurnCommitTests : IDisposable
         });
         CommitAll();
 
-        Assert.Single(_store.ListWorldCommands("w", 0));
+        // Dave's own order, filed by hand. The AI factions file their own alongside it, which is
+        // why this counts the player's rather than the turn's.
+        Assert.Single(_store.ListWorldCommands("w", 0).Where(c => c.CommanderId == "dave"));
         Assert.Empty(_store.ListWorldCommands("w", 1)); // the new turn starts clean
     }
 
@@ -149,11 +165,69 @@ public class WorldTurnCommitTests : IDisposable
         Assert.Equal(storedEntries, rederived!.Entries.ToList());
     }
 
+    // ---- W25: a commit names the turn it means to end ---------------------------------
+
+    [Fact]
+    public void A_commit_that_names_the_wrong_turn_is_refused_and_changes_nothing()
+    {
+        var refused = _store.CommitWorldTurn("w", "dave", expectedTurn: 7);
+
+        Assert.False(refused.Ok);
+        Assert.Equal("turn.stale", refused.Reason);
+        Assert.False(refused.Advanced);
+        Assert.Equal(0, _store.GetActiveWorld(1)!.CurrentTurn);
+
+        // And nothing was recorded: the barrier still has nobody in it, so naming the right turn
+        // afterwards behaves exactly as a first commit would — which, with the AI filling for the
+        // other two factions, means it resolves the turn.
+        var proper = Commit("dave");
+        Assert.True(proper.Ok);
+        Assert.True(proper.Advanced);
+    }
+
+    [Fact]
+    public void A_retried_commit_cannot_resolve_a_second_turn()
+    {
+        // The regression this task exists for. Today the barrier needs all three commanders, so a
+        // retry is harmless; once `ai-commander` auto-commits the other two, *any* commit can be
+        // the one that releases it — and a client that never saw its response would resend, read
+        // the new current turn, and burn a turn the player never played.
+        CommitAll();
+        Assert.Equal(1, _store.GetActiveWorld(1)!.CurrentTurn);
+
+        var retry = _store.CommitWorldTurn("w", "dave", expectedTurn: 0);
+
+        Assert.False(retry.Ok);
+        Assert.Equal("turn.stale", retry.Reason);
+        Assert.Equal(1, _store.GetActiveWorld(1)!.CurrentTurn);
+        Assert.Null(_store.GetWorldTurnLog("w", 1));
+    }
+
+    [Fact]
+    public void A_commit_naming_a_turn_that_has_not_happened_yet_is_refused_too()
+    {
+        // Stale in both directions: the check is "the turn I am looking at", not "not the past".
+        var ahead = _store.CommitWorldTurn("w", "dave", expectedTurn: 1);
+
+        Assert.False(ahead.Ok);
+        Assert.Equal("turn.stale", ahead.Reason);
+        Assert.Equal(0, _store.GetActiveWorld(1)!.CurrentTurn);
+    }
+
+    [Fact]
+    public void An_unknown_world_or_commander_is_refused_before_the_turn_is_checked()
+    {
+        // Order matters for the message: "who are you" is more useful than "wrong turn" when both
+        // are true, and a stranger should not learn which turn is open.
+        Assert.Equal("world.unknown", _store.CommitWorldTurn("nope", "dave", 999).Reason);
+        Assert.Equal("commander.unknown", _store.CommitWorldTurn("w", "stranger", 999).Reason);
+    }
+
     [Fact]
     public void An_unknown_world_or_commander_is_refused()
     {
-        Assert.False(_store.CommitWorldTurn("nope", "dave").Ok);
-        Assert.False(_store.CommitWorldTurn("w", "stranger").Ok);
+        Assert.False(_store.CommitWorldTurn("nope", "dave", 0).Ok);
+        Assert.False(_store.CommitWorldTurn("w", "stranger", 0).Ok);
         Assert.Equal(0, _store.GetActiveWorld(1)!.CurrentTurn);
     }
 }

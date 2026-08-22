@@ -63,6 +63,18 @@ See [definitions.md](definitions.md) §14. Without `icd_key` the first would hav
 ICD clocks and fired twice where it fires once today — a behaviour change inside the module whose whole
 acceptance is byte-identical plans.
 
+### The `mods_json` grant migration — inherited from E6
+
+`rpg_unique_stat_mods.mods_json` holds `{ absolutes, grants }` per instance.
+
+- **`grants` move** into `effect_binding`, one row each. Only possible **here**: a binding points at an
+  instance of a container, and a legacy grant names an `effectId` that has no container until this module
+  creates one. E6's spec assigned this to E6, which could not do it.
+- **`absolutes` stay where they are.** They are Tab B/C `Override` writes on a hand-built channel map, and
+  effects cannot emit `Override` at all (E1). Moving them would smuggle a fourth write path into this program.
+
+One-way and **idempotent**: re-running it on an already-migrated instance is a no-op.
+
 ### The 16 defs, plus two irregulars
 
 | Def | Kind it becomes |

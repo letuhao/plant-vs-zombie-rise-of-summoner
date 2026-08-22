@@ -15,7 +15,12 @@ public class ContractGateTests : IDisposable
 {
     readonly string _dir;
     readonly RpgStore _store;
-    static readonly DateTimeOffset Day0 = new(2026, 8, 21, 12, 0, 0, TimeSpan.Zero);
+    // Midday *today*, not a hard-coded date. `Mint` stamps contract state from the real clock, so a
+    // fixed anchor only matches on the day it was written: the day after, every "N days elapsed"
+    // assertion is off by one, and the day after that by two. Relative keeps the intent — "day zero
+    // is the day this state was created" — permanently true.
+    static readonly DateTimeOffset Day0 =
+        new DateTimeOffset(DateTime.UtcNow.Date, TimeSpan.Zero).AddHours(12);
 
     public ContractGateTests()
     {

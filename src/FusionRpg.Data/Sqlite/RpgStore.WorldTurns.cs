@@ -1,5 +1,8 @@
 using System.Text.Json;
+using FusionRpg.Core.Battle;
 using FusionRpg.Core.World;
+using FusionRpg.Core.World.Ai;
+using FusionRpg.Core.World.Intel;
 using FusionRpg.Core.World.Turn;
 using Microsoft.Data.Sqlite;
 
@@ -47,6 +50,11 @@ public sealed partial class RpgStore
               PRIMARY KEY (world_id, turn)
             );
             """);
+
+        // Why an AI filed an order. Nullable because the player never explains themselves, and a
+        // column rather than a field on WorldCommand because that record is the replay unit — an
+        // audit string inside it would travel through the engine and the hash for no reason.
+        EnsureColumn(db, "rpg_world_commands", "reason", "TEXT");
     }
 
     /// <summary>Files one order against the world's open turn.</summary>
@@ -127,7 +135,8 @@ public sealed partial class RpgStore
     }
 
     static void InsertCommandUnlocked(
-        SqliteConnection db, SqliteTransaction tx, string worldId, int turn, WorldCommand command, string now)
+        SqliteConnection db, SqliteTransaction tx, string worldId, int turn, WorldCommand command,
+        string now, string? reason = null)
     {
         long seq;
         using (var next = db.CreateCommand())
@@ -147,8 +156,8 @@ public sealed partial class RpgStore
         ins.Transaction = tx;
         ins.CommandText = """
             INSERT INTO rpg_world_commands (world_id, turn, commander_id, command_id, seq,
-                kind, payload_json, submitted_utc)
-            VALUES ($w, $t, $c, $id, $seq, $kind, $payload, $now);
+                kind, payload_json, submitted_utc, reason)
+            VALUES ($w, $t, $c, $id, $seq, $kind, $payload, $now, $reason);
             """;
         ins.Parameters.AddWithValue("$w", worldId);
         ins.Parameters.AddWithValue("$t", turn);
@@ -159,7 +168,132 @@ public sealed partial class RpgStore
         ins.Parameters.AddWithValue("$payload", JsonSerializer.Serialize(new CommandPayload(
             command.EntityId, command.SectorId, command.SlotIndex, command.LanePath, command.Stance)));
         ins.Parameters.AddWithValue("$now", now);
+        // Bounded at the boundary like every other free-text field: an audit string is not worth
+        // failing a turn over, and an unbounded one is a row nobody budgeted for.
+        ins.Parameters.AddWithValue("$reason", reason is null
+            ? DBNull.Value
+            : reason.Length <= MaxCommandReasonLength ? reason : reason[..MaxCommandReasonLength]);
         ins.ExecuteNonQuery();
+    }
+
+    /// <summary>How much of an AI's reasoning is kept. Long enough to be useful, short enough to bound.</summary>
+    public const int MaxCommandReasonLength = 200;
+
+    /// <summary>
+    /// Every faction with a policy takes its turn (spec-ai-commander.md §The commander loop).
+    ///
+    /// Each one is handed <see cref="BelievedWorldView"/> — its own fog, on the same terms the
+    /// player plays under — files whatever it decides, and commits. Factions are walked in ordinal
+    /// order and each gets its own seed stream, so adding one never shifts another's rolls.
+    ///
+    /// Nothing here is wrapped in a try. A policy is pure integer arithmetic over validated data; if
+    /// it throws, the commit's transaction rolls back and the world is untouched, which is a visible
+    /// bug rather than a faction that quietly stopped playing.
+    /// </summary>
+    static void FillAiCommandersUnlocked(
+        SqliteConnection db, SqliteTransaction tx, string worldId, int turn, WorldState world,
+        ulong worldSeed, string now, Func<string, IFactionPolicy>? policies)
+    {
+        var resolve = policies ?? FactionPolicies.Resolve;
+        var committed = ReadCommittersUnlocked(db, tx, worldId, turn);
+
+        foreach (var faction in world.Factions.OrderBy(f => f.FactionId, StringComparer.Ordinal))
+        {
+            if (faction.PolicyId is not { } policyId) continue;                  // a person plays this one
+            if (committed.Contains(faction.FactionId)) continue;                 // already spoke for itself
+
+            var view = new BelievedWorldView(world, faction.FactionId);
+            var seed = SeededRng.DeriveStream(worldSeed, $"ai:{faction.FactionId}:{turn}").NextULong();
+            var orders = resolve(policyId).Decide(view, seed);
+
+            // One order per entity, and no more orders than the world has entities. The spec makes
+            // this the AI's bound the way MaxCommandsPerSubmit bounds a client — stated but, until
+            // it is checked here, worth nothing: a policy with a runaway loop would fill the command
+            // table from inside a write transaction holding the store's global lock.
+            if (orders.Count > world.Entities.Count + 1)
+                throw new InvalidOperationException(
+                    $"Policy '{policyId}' filed {orders.Count} orders for '{faction.FactionId}'; " +
+                    "at most one per entity is allowed.");
+
+            var subjects = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var order in orders)
+            {
+                // A policy files as the faction whose eyes it was given, full stop. Admission checks
+                // that a commander exists and owns the entity it names, so without this a policy
+                // could file a *legal* order on another faction's behalf — orders that faction never
+                // chose, under its name, and it would still be waiting at the barrier.
+                if (!string.Equals(order.Command.CommanderId, faction.FactionId, StringComparison.Ordinal))
+                    throw new InvalidOperationException(
+                        $"Policy '{policyId}' filed for '{order.Command.CommanderId}' " +
+                        $"while acting as '{faction.FactionId}'.");
+
+                if (order.Command.EntityId is { } subject && !subjects.Add(subject))
+                    throw new InvalidOperationException(
+                        $"Policy '{policyId}' gave '{subject}' two orders in turn {turn}.");
+
+                // Admission is the same gate a person's order passes. A policy that fails it is a
+                // bug in the policy, and a silent `continue` here would hide it forever: the faction
+                // would commit every turn having done nothing, which looks exactly like standing fast.
+                var (admitted, why) = WorldCommandAdmission.Admit(world, order.Command);
+                if (!admitted)
+                    throw new InvalidOperationException(
+                        $"Policy '{policyId}' filed an inadmissible order " +
+                        $"'{order.Command.CommandId}' ({order.Command.Kind}): {why}.");
+
+                if (CommandExistsUnlocked(db, tx, worldId, turn, order.Command)) continue;
+
+                InsertCommandUnlocked(db, tx, worldId, turn, order.Command, now, order.Reason);
+            }
+
+            MarkCommittedUnlocked(db, tx, worldId, turn, faction.FactionId, now);
+        }
+    }
+
+    static void MarkCommittedUnlocked(
+        SqliteConnection db, SqliteTransaction tx, string worldId, int turn, string commanderId, string now)
+    {
+        using var commit = db.CreateCommand();
+        commit.Transaction = tx;
+        commit.CommandText = """
+            INSERT OR IGNORE INTO rpg_world_turn_commits (world_id, turn, commander_id, committed_utc)
+            VALUES ($w, $t, $c, $now);
+            """;
+        commit.Parameters.AddWithValue("$w", worldId);
+        commit.Parameters.AddWithValue("$t", turn);
+        commit.Parameters.AddWithValue("$c", commanderId);
+        commit.Parameters.AddWithValue("$now", now);
+        commit.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// A turn's orders with the reasoning behind them — what the turn report shows so a player can
+    /// tell an AI's mistake from a bug. Commands are never trimmed, so neither is this.
+    /// </summary>
+    public IReadOnlyList<LoggedWorldCommand> ListLoggedWorldCommands(string worldId, int turn)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT commander_id, command_id, kind, payload_json, reason
+                FROM rpg_world_commands
+                WHERE world_id = $w AND turn = $t
+                ORDER BY commander_id, seq;
+                """;
+            cmd.Parameters.AddWithValue("$w", worldId);
+            cmd.Parameters.AddWithValue("$t", turn);
+
+            var list = new List<LoggedWorldCommand>();
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                list.Add(new LoggedWorldCommand(
+                    ReadCommandRow(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3)),
+                    r.IsDBNull(4) ? null : r.GetString(4)));
+
+            return list;
+        }
     }
 
     /// <summary>
@@ -185,19 +319,7 @@ public sealed partial class RpgStore
             using var r = cmd.ExecuteReader();
             while (r.Read())
             {
-                var payload = JsonSerializer.Deserialize<CommandPayload>(r.GetString(3))
-                              ?? new CommandPayload(null, null, null, Array.Empty<string>(), null);
-                list.Add(new WorldCommand
-                {
-                    CommanderId = r.GetString(0),
-                    CommandId = r.GetString(1),
-                    Kind = r.GetString(2),
-                    EntityId = payload.EntityId,
-                    SectorId = payload.SectorId,
-                    SlotIndex = payload.SlotIndex,
-                    Stance = payload.Stance,
-                    LanePath = payload.LanePath ?? Array.Empty<string>()
-                });
+                list.Add(ReadCommandRow(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3)));
             }
 
             return list;
@@ -219,38 +341,50 @@ public sealed partial class RpgStore
     /// <summary>
     /// Marks one commander committed, and — when the barrier releases — resolves the turn in a
     /// single transaction: step the engine, replace the world graph, append the turn log, advance
-    /// the turn counter. A duplicate commit is a no-op, so a retried request cannot double-advance
-    /// the world.
+    /// the turn counter.
+    ///
+    /// <paramref name="expectedTurn"/> is the turn the caller means to end, and it is required
+    /// rather than optional. Once an AI commander commits automatically (`ai-commander`), *any*
+    /// commit can be the one that releases the barrier — so a retried request would read the new
+    /// current turn, commit that instead, and silently resolve a second turn the player never
+    /// played. Naming the turn makes a retry a refusal.
+    ///
+    /// The world is loaded **inside** the lock for the same reason: a pre-lock read could be
+    /// resolved out from under this call, leaving it committing against a world that no longer
+    /// exists.
     /// </summary>
-    public WorldTurnCommitResult CommitWorldTurn(string worldId, string commanderId, DateTimeOffset? utcNow = null)
+    public WorldTurnCommitResult CommitWorldTurn(
+        string worldId, string commanderId, int expectedTurn, DateTimeOffset? utcNow = null,
+        Func<string, IFactionPolicy>? policies = null)
     {
-        var world = LoadWorldState(worldId);
-        if (world is null) return new WorldTurnCommitResult(false, "world.unknown", false, null);
-        if (world.Factions.All(f => !string.Equals(f.FactionId, commanderId, StringComparison.Ordinal)))
-            return new WorldTurnCommitResult(false, "commander.unknown", false, null);
-
-        var header = GetWorldHeader(worldId)!;
-        var turn = world.CurrentTurn;
         var now = (utcNow ?? DateTimeOffset.UtcNow).ToString("o");
 
         lock (_gate)
         {
+            var world = LoadWorldState(worldId);
+            if (world is null) return new WorldTurnCommitResult(false, "world.unknown", false, null);
+            if (world.Factions.All(f => !string.Equals(f.FactionId, commanderId, StringComparison.Ordinal)))
+                return new WorldTurnCommitResult(false, "commander.unknown", false, null);
+
+            var header = GetWorldHeader(worldId)!;
+            var turn = world.CurrentTurn;
+
+            // Checked after "who are you", so a stranger cannot learn which turn is open, and
+            // refused in both directions: the question is "is this the turn you were looking at",
+            // not "is this in the past".
+            if (expectedTurn != turn)
+                return new WorldTurnCommitResult(false, "turn.stale", false, null);
+
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
 
-            using (var commit = db.CreateCommand())
-            {
-                commit.Transaction = tx;
-                commit.CommandText = """
-                    INSERT OR IGNORE INTO rpg_world_turn_commits (world_id, turn, commander_id, committed_utc)
-                    VALUES ($w, $t, $c, $now);
-                    """;
-                commit.Parameters.AddWithValue("$w", worldId);
-                commit.Parameters.AddWithValue("$t", turn);
-                commit.Parameters.AddWithValue("$c", commanderId);
-                commit.Parameters.AddWithValue("$now", now);
-                commit.ExecuteNonQuery();
-            }
+            MarkCommittedUnlocked(db, tx, worldId, turn, commanderId, now);
+
+            // Every commander that is not a person now takes its turn, before the barrier is read.
+            // This is the only place it can happen: the barrier is here, so filling anywhere else
+            // would leave the caller told "waiting" for a turn that in fact resolved — and would
+            // leave every non-HTTP caller unable to advance at all.
+            FillAiCommandersUnlocked(db, tx, worldId, turn, world, header.Seed, now, policies);
 
             var committed = ReadCommittersUnlocked(db, tx, worldId, turn);
             var commanders = world.Factions.Select(f => f.FactionId).ToList();
@@ -398,6 +532,28 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// One stored row back into a command. Shared by both listers: the payload's shape is the thing
+    /// most likely to drift, and it should drift in exactly one place.
+    /// </summary>
+    static WorldCommand ReadCommandRow(string commanderId, string commandId, string kind, string payloadJson)
+    {
+        var payload = JsonSerializer.Deserialize<CommandPayload>(payloadJson)
+                      ?? new CommandPayload(null, null, null, Array.Empty<string>(), null);
+
+        return new WorldCommand
+        {
+            CommanderId = commanderId,
+            CommandId = commandId,
+            Kind = kind,
+            EntityId = payload.EntityId,
+            SectorId = payload.SectorId,
+            SlotIndex = payload.SlotIndex,
+            Stance = payload.Stance,
+            LanePath = payload.LanePath ?? Array.Empty<string>()
+        };
+    }
+
     static List<string> ReadCommittersUnlocked(
         SqliteConnection db, SqliteTransaction tx, string worldId, int turn)
     {
@@ -448,6 +604,9 @@ public sealed partial class RpgStore
         return list;
     }
 }
+
+/// <summary>An order as the log holds it, with the reasoning an AI attached to it.</summary>
+public sealed record LoggedWorldCommand(WorldCommand Command, string? Reason);
 
 /// <summary>Outcome of a commit: did it land, and did it release the turn?</summary>
 public sealed record WorldTurnCommitResult(bool Ok, string Reason, bool Advanced, string? StateHash);

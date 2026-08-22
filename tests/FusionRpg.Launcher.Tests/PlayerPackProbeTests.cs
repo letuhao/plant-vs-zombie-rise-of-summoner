@@ -62,12 +62,33 @@ public class PlayerPackProbeTests
         File.WriteAllText(Path.Combine(pack, "Server", "wwwroot", "index.html"), "<html></html>");
         File.WriteAllText(Path.Combine(pack, "PLAYERS.txt"), "players");
         File.WriteAllText(Path.Combine(pack, "LICENSE"), "AGPL");
+
+        // The launcher's own WebView2, without which the F10 overlay cannot open.
+        File.WriteAllText(Path.Combine(pack, "Microsoft.Web.WebView2.Core.dll"), "wv2");
+        File.WriteAllText(Path.Combine(pack, "WebView2Loader.dll"), "wv2native");
+
         if (includeInjector)
-            File.WriteAllText(Path.Combine(pack, "DropIntoGame", "FusionRpg.Injector.dll"), "inj");
+        {
+            // A shippable drop: the injector, the overlay code it must contain, and WebView2 beside
+            // it — PluginInstaller copies top-level files only. See PlayerPackOverlayProbeTests.
+            WriteInjectorDrop(Path.Combine(pack, "DropIntoGame"));
+            WriteInjectorDrop(Path.Combine(pack, "DropIntoGame", "pvzrh-3.9", "MelonLoader"));
+        }
 
         var manifestSrc = FindLoaderManifest();
         File.Copy(manifestSrc, Path.Combine(pack, "loader-manifest.json"), overwrite: true);
         return pack;
+    }
+
+    static void WriteInjectorDrop(string dir)
+    {
+        Directory.CreateDirectory(dir);
+        var name = dir.Contains("MelonLoader", StringComparison.OrdinalIgnoreCase)
+            ? "FusionRpg.Injector.MelonLoader.39.dll"
+            : "FusionRpg.Injector.dll";
+        File.WriteAllText(Path.Combine(dir, name), "inj OverlayViewHost OverlaySwitchGui");
+        File.WriteAllText(Path.Combine(dir, "Microsoft.Web.WebView2.Core.dll"), "wv2");
+        File.WriteAllText(Path.Combine(dir, "WebView2Loader.dll"), "wv2native");
     }
 
     static string FindLoaderManifest()

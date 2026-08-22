@@ -104,8 +104,8 @@ tests/FusionRpg.Core.Tests/Atoms/AtomKindRegistryTests.cs
 | `spawn.entity` plant with `atk` | rejection `ParamNotImplemented` (G1) — the sink drops `atk` for **every** spawn kind, so it is unimplemented, not conditionally unhonoured |
 | `box.set` with `cells[]` | rejection `ParamNotImplemented` (G2) |
 | `stat.modify` with no channel | rejection `MissingParam` (G7) — never a default to `atk` |
-| `status.apply` with **missing** target | rejection `MissingParam` |
-| `status.apply` with a **present but empty** target object | rejection `AmbiguousTarget` (G5) — this is the case G5 describes; a required-key check does not close it |
+| `status.apply` with no `status` | rejection `MissingParam` — FA2 really does read it |
+| `status.apply` declaring `target` | **rejection `UnknownParam`.** FA2 has no `target` param: the target comes from `ResolveStatusTargetPtr(ctx)`, i.e. from the **event**. **G5 cannot be closed here** — declaring a required `target` would validate a key the executor never reads and leave the board-wide `FindObjectsOfType<Zombie>()` loop exactly as open. It belongs to whoever guards that loop |
 | Trigger count | exactly 7 — guard test. **"No trigger" is not a name**: it is an empty allowed-trigger list on the kind and an omitted `when_json.trigger` key, so it never counts toward the 7 |
 | `stat.modify` / `stat.derived` with **any** trigger | rejection `TriggerNotAllowed` — they are **permanent modifiers**; apply/revert is a runtime lifecycle mechanic, not content ([definitions.md](definitions.md) §14.2). Letting an author write `OnGranted` alone was how a permanent buff could leak |
 | `RuntimeSupportMatrix` | round-trips all four states; `PlanOnly` never reads as `Full` |

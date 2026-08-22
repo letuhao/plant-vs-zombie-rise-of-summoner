@@ -107,6 +107,50 @@ public class OverlaySwitchStateTests
         Assert.False(new OverlaySwitchState().SendInFlight);
     }
 
+    // ---- Prove-It: a send that never completes used to disable the button for the session ----
+
+    [Fact]
+    public void A_send_that_never_completes_does_not_disable_the_button_forever()
+    {
+        // The pipe write has no timeout of its own: if the launcher's reader stalls mid-connection
+        // the completion callback never runs, so the in-flight gate would never clear and the
+        // player would be left clicking a dead button until they restart the game.
+        var s = Reachable();
+        Assert.True(s.TryClick(0));
+        Assert.False(s.TryClick(1_000)); // still legitimately in flight
+
+        Assert.True(
+            s.TryClick(OverlaySwitchState.SendTimeoutMs),
+            "an abandoned send must stop blocking clicks once it is clearly never coming back");
+    }
+
+    [Fact]
+    public void An_abandoned_send_is_not_declared_dead_early()
+    {
+        var s = Reachable();
+        Assert.True(s.TryClick(0));
+        Assert.False(s.TryClick(OverlaySwitchState.SendTimeoutMs - 1));
+    }
+
+    [Fact]
+    public void A_late_completion_after_a_timeout_does_not_corrupt_the_gate()
+    {
+        // The abandoned send can still finish later; that must not cancel a newer one.
+        var s = Reachable();
+        Assert.True(s.TryClick(0));
+        Assert.True(s.TryClick(OverlaySwitchState.SendTimeoutMs)); // second send starts
+        s.MarkSendComplete();                                     // the *first* one finally lands
+        Assert.False(s.SendInFlight);
+        Assert.True(s.TryClick(OverlaySwitchState.SendTimeoutMs + OverlaySwitchState.DebounceMs));
+    }
+
+    [Fact]
+    public void The_send_timeout_is_longer_than_the_pipe_can_legitimately_take()
+    {
+        // 250 ms connect + write; anything under that would abandon healthy sends.
+        Assert.True(OverlaySwitchState.SendTimeoutMs >= 2_000);
+    }
+
     // ---- visibility gate ----
 
     [Fact]

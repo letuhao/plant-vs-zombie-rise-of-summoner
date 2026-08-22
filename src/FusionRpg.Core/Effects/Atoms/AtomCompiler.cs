@@ -1,0 +1,326 @@
+using System.Text.Json;
+using FusionRpg.Contracts;
+
+namespace FusionRpg.Core.Effects.Atoms;
+
+/// <summary>
+/// Turns atoms into something the shipped machine already runs.
+///
+/// <para><b>Compile what Foundation can express; hand the rest to the runner.</b> The output is the
+/// same <c>EffectGrantDto</c> shape the Funnel and the bag already accept, so the sealed layer is
+/// untouched. This is a compiler and never an applier: it does not apply, order, merge, or mitigate,
+/// and it calls neither Unity, the Writer, nor the bag.</para>
+///
+/// <para>Runs <b>server-side</b>. E19 delivers the output; the injector never holds content rows.</para>
+/// </summary>
+public static class AtomCompiler
+{
+    /// <summary>
+    /// Compile one catalog revision.
+    ///
+    /// <para>Atoms are grouped by <c>COALESCE(icd_key, atom_id)</c> first: a group becomes <b>one</b>
+    /// grant carrying the union of its triggers, which is how a multi-trigger def keeps a single ICD
+    /// clock after being split into several atoms (definitions §14.1). The runtime never learns a new
+    /// key — <c>EffectDef.Triggers</c> has always been a list.</para>
+    /// </summary>
+    public static CompiledCatalog Compile(
+        IEnumerable<AtomRow> atoms,
+        RuntimeId runtime,
+        long catalogRevision,
+        Func<string, CurveTable?>? curves = null,
+        Func<string, int>? statusBit = null,
+        Func<string, int>? elementId = null,
+        bool hostIsPlanner = false,
+        int ownerLevel = 1)
+    {
+        var defs = new List<EffectDefDto>();
+        var compiled = new List<EffectGrantDto>();
+        var compiledIds = new List<string>();
+        var runner = new List<RunnerEntry>();
+        var rejected = new List<CompileRejection>();
+
+        // Ordered so the same revision bakes to identical bytes. Without this the grouping would
+        // follow enumeration order and a push could not be compared to what the injector holds.
+        var ordered = atoms.OrderBy(a => a.AtomId, StringComparer.Ordinal).ToList();
+
+        foreach (var group in ordered
+                     .GroupBy(a => a.EffectiveIcdKey(), StringComparer.Ordinal)
+                     .OrderBy(g => g.Key, StringComparer.Ordinal))
+        {
+            var members = group.OrderBy(a => a.AtomId, StringComparer.Ordinal).ToList();
+            var verdicts = members
+                .Select(a => (Atom: a, Verdict: Compilability.Classify(a, runtime, hostIsPlanner)))
+                .ToList();
+
+            foreach (var (atom, verdict) in verdicts.Where(v => v.Verdict.Path == AtomPath.Rejected))
+                rejected.Add(new CompileRejection(atom.AtomId, verdict.Rejection, verdict.Reason));
+
+            var live = verdicts.Where(v => v.Verdict.Path != AtomPath.Rejected).ToList();
+            if (live.Count == 0) continue;
+
+            // A group compiles only if every member does. One member needing the runner sends the
+            // whole group there, because splitting it would split the ICD clock they were grouped to
+            // share — and that is a behaviour change, not an optimisation.
+            var allCompilable = live.All(v => v.Verdict.Path == AtomPath.Compiled);
+
+            if (allCompilable && live.Count > 0)
+            {
+                var compilable = live.Select(v => v.Atom).ToList();
+                var (def, grant) = EmitDefAndGrant(group.Key, compilable, curves, ownerLevel);
+                defs.Add(def);
+                compiled.Add(grant);
+                compiledIds.AddRange(compilable.Select(m => m.AtomId));
+            }
+            else
+                foreach (var (atom, _) in live)
+                    runner.Add(EmitRunnerEntry(atom, group.Key, curves, statusBit, elementId, ownerLevel));
+        }
+
+        return new CompiledCatalog(catalogRevision, defs, compiled, compiledIds, runner, rejected);
+    }
+
+    /// <summary>
+    /// One grant for a whole ICD group, carrying the <b>union</b> of its members' triggers.
+    ///
+    /// <para>A triggerless <c>stat.modify</c> / <c>stat.derived</c> must be emitted as
+    /// <c>EffectType.Passive</c>. <c>EffectDef.EffectType</c> defaults to <c>Triggered</c>, and the
+    /// bag fires the lifecycle pair only when the def is Passive <b>or</b> its trigger list contains
+    /// <c>OnGranted</c> — so a triggerless atom compiled with the default would never apply at all
+    /// (definitions §14.2).</para>
+    /// </summary>
+    static (EffectDefDto Def, EffectGrantDto Grant) EmitDefAndGrant(
+        string icdKey, IReadOnlyList<AtomRow> members, Func<string, CurveTable?>? curves, int ownerLevel)
+    {
+        // The UNION of the group's triggers, on ONE def. This is what keeps a multi-trigger def's
+        // single ICD clock after it was split into several atoms: EffectDef.Triggers has always been
+        // a list, and the bag's ICD key deliberately excludes the trigger (definitions 14.1).
+        var triggers = members
+            .Select(m => TriggerOf(m.WhenJson))
+            .Where(t => !string.IsNullOrEmpty(t))
+            .Select(t => t!)
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(t => t, StringComparer.Ordinal)
+            .ToList();
+
+        // A permanent modifier declares no trigger. EffectType defaults to Triggered, and the bag
+        // fires the lifecycle pair only when the def is Passive OR its triggers contain OnGranted --
+        // so emitting the default here would mean the modifier never applies at all (14.2).
+        var effectType = triggers.Count == 0 ? EffectTypes.Passive : EffectTypes.Triggered;
+
+        var actions = new List<EffectDefActionDto>();
+        var seq = 1;
+        foreach (var member in members)
+        {
+            if (OpcodeOf(member.KindId) is not { } action) continue;
+            actions.Add(new EffectDefActionDto
+            {
+                Seq = seq++,
+                Action = action,
+                Params = ResolvedParams(member, curves, ownerLevel),
+            });
+        }
+
+        var def = new EffectDefDto
+        {
+            EffectId = "atom." + icdKey,
+            EffectType = effectType,
+            Name = members[0].Name,
+            Enabled = true,
+            SourceTag = "atom",
+            Triggers = triggers,
+            Actions = actions,
+        };
+
+        // Chance, ICD and legacy filters ride the overlay, exactly as a hand-authored grant does.
+        var overlay = new Dictionary<string, object?>(StringComparer.Ordinal);
+        var when = Read(members[0].WhenJson);
+
+        if (when.TryGetValue("chance", out var chance) && chance.TryGetInt32(out var c) && c < 1000)
+            overlay["chance"] = c / 1000.0;
+        if (when.TryGetValue("icd_ms", out var icd) && icd.TryGetInt32(out var ms) && ms > 0)
+            overlay["icd_ms"] = ms;
+
+        if (when.TryGetValue("predicate", out var pred) && pred.ValueKind == JsonValueKind.Object)
+        {
+            var filters = LegacyFilters(pred);
+            if (filters.Count > 0) overlay["filters"] = filters;
+        }
+
+        var grant = new EffectGrantDto
+        {
+            GrantId = "atom:" + icdKey,
+            EffectId = def.EffectId,
+            PluginId = "atom",
+            Priority = 0,
+            Overlay = overlay.Count == 0 ? null : overlay,
+        };
+
+        return (def, grant);
+    }
+
+    /// <summary>Kind to the FA opcode its sink implements. Null for kinds with no opcode.</summary>
+    static string? OpcodeOf(string kindId) => kindId switch
+    {
+        "stat.modify" => EffectActions.ModifyStat,
+        "resource.delta" => EffectActions.ApplyResourceDelta,
+        "resource.economy" => EffectActions.Economy,
+        "status.apply" => EffectActions.ApplyStatus,
+        "status.clear" => EffectActions.ClearStatus,
+        "shield.grant" => EffectActions.GrantShield,
+        "spawn.entity" => EffectActions.SpawnEntity,
+        "board.action" => EffectActions.BoardAction,
+        "grid.spawn" => EffectActions.SpawnGridItem,
+        "grid.clear" => EffectActions.ClearGridItem,
+        "box.set" => EffectActions.SetBoxType,
+        _ => null,
+    };
+
+    static RunnerEntry EmitRunnerEntry(
+        AtomRow atom, string icdKey, Func<string, CurveTable?>? curves,
+        Func<string, int>? statusBit, Func<string, int>? elementId, int ownerLevel)
+    {
+        var when = Read(atom.WhenJson);
+
+        ICompiledPredicate predicate = PredicateCompiler.Always;
+        if (when.TryGetValue("predicate", out var predEl) && predEl.ValueKind == JsonValueKind.Object
+            && AtomJson.TryReadPredicate(predEl, out var tree).IsOk && tree is not null)
+        {
+            PredicateCompiler.TryCompile(tree, statusBit, out predicate, elementId);
+        }
+
+        var chance = when.TryGetValue("chance", out var cEl) && cEl.TryGetInt32(out var c) ? c : 1000;
+        var icdMs = when.TryGetValue("icd_ms", out var iEl) && iEl.TryGetInt32(out var i) ? i : 0;
+
+        return new RunnerEntry(
+            atom.AtomId,
+            atom.KindId,
+            TriggerOf(atom.WhenJson),
+            predicate,
+            chance,
+            icdMs,
+            icdKey,
+            BoundsOf(atom, curves, ownerLevel));
+    }
+
+    /// <summary>
+    /// Value bounds with their curve <b>already applied</b>. No curve row travels to the injector, so
+    /// a value it cannot scale must arrive pre-scaled (D9). `input: level` on an OnApply spec is
+    /// refused at E4 load precisely so this stays possible.
+    /// </summary>
+    static Dictionary<string, ValueBounds> BoundsOf(
+        AtomRow atom, Func<string, CurveTable?>? curves, int ownerLevel)
+    {
+        var kind = AtomKindRegistry.Get(atom.KindId);
+        var pars = Read(atom.ParamsJson);
+        var bounds = new Dictionary<string, ValueBounds>(StringComparer.Ordinal);
+        if (kind is null) return bounds;
+
+        foreach (var def in kind.Params.Defs)
+        {
+            if (def.Kind != ParamKind.Value) continue;
+            if (!pars.TryGetValue(def.Name, out var raw)) continue;
+            if (!AtomJson.TryReadValueSpec(raw, out var spec).IsOk) continue;
+
+            bounds[def.Name] = ValueBounds.Of(spec, MultiplierFor(spec, curves, ownerLevel));
+        }
+
+        return bounds;
+    }
+
+    static int MultiplierFor(ValueSpec spec, Func<string, CurveTable?>? curves, int ownerLevel)
+    {
+        if (string.IsNullOrWhiteSpace(spec.CurveId) || curves is null) return 1000;
+
+        var curve = curves(spec.CurveId!);
+        return curve is null ? 1000 : curve.MultiplierAt(ownerLevel);
+    }
+
+    static Dictionary<string, object?> ResolvedParams(
+        AtomRow atom, Func<string, CurveTable?>? curves, int ownerLevel)
+    {
+        var kind = AtomKindRegistry.Get(atom.KindId);
+        var pars = Read(atom.ParamsJson);
+        var result = new Dictionary<string, object?>(StringComparer.Ordinal);
+        if (kind is null) return result;
+
+        foreach (var (key, raw) in pars)
+        {
+            var def = kind.Params.Defs.FirstOrDefault(d =>
+                string.Equals(d.Name, key, StringComparison.OrdinalIgnoreCase));
+
+            if (def is null || def.Kind != ParamKind.Value)
+            {
+                result[key] = Plain(raw);
+                continue;
+            }
+
+            if (!AtomJson.TryReadValueSpec(raw, out var spec).IsOk) continue;
+
+            // Compiled atoms never carry a range — rule 3 sent those to the runner — so one number.
+            result[key] = CurveTable.ApplyMilli(spec.Min, MultiplierFor(spec, curves, ownerLevel));
+        }
+
+        return result;
+    }
+
+    /// <summary>The `filters` block a grant overlay understands: side, typeId, actorIsKiller.</summary>
+    static Dictionary<string, object?> LegacyFilters(JsonElement predicate)
+    {
+        var filters = new Dictionary<string, object?>(StringComparer.Ordinal);
+        Walk(predicate);
+        return filters;
+
+        void Walk(JsonElement node)
+        {
+            if (node.ValueKind != JsonValueKind.Object) return;
+
+            if (node.TryGetProperty("children", out var kids) && kids.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var kid in kids.EnumerateArray()) Walk(kid);
+                return;
+            }
+
+            if (!node.TryGetProperty("leaf", out var leafEl)) return;
+            if (!node.TryGetProperty("value", out var valEl)) return;
+
+            switch (leafEl.GetString()?.ToLowerInvariant())
+            {
+                case "sideis": filters["side"] = valEl.GetString(); break;
+                case "typeidis": filters["typeId"] = valEl.GetInt32(); break;
+                case "actoriskiller": filters["actorIsKiller"] = valEl.ValueKind == JsonValueKind.True
+                    || (valEl.ValueKind == JsonValueKind.Number && valEl.GetInt32() != 0); break;
+            }
+        }
+    }
+
+    static string? TriggerOf(string? whenJson)
+    {
+        var when = Read(whenJson);
+        return when.TryGetValue("trigger", out var t) && t.ValueKind == JsonValueKind.String
+            ? t.GetString()
+            : null;
+    }
+
+    static object? Plain(JsonElement el) => el.ValueKind switch
+    {
+        JsonValueKind.String => el.GetString(),
+        JsonValueKind.Number => el.TryGetInt32(out var i) ? i : el.GetDouble(),
+        JsonValueKind.True => true,
+        JsonValueKind.False => false,
+        _ => el.ToString(),
+    };
+
+    static Dictionary<string, JsonElement> Read(string? json)
+    {
+        var d = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+        if (string.IsNullOrWhiteSpace(json)) return d;
+        try
+        {
+            using var doc = JsonDocument.Parse(json!);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object) return d;
+            foreach (var p in doc.RootElement.EnumerateObject()) d[p.Name] = p.Value.Clone();
+        }
+        catch (JsonException) { /* E4 already refused this row */ }
+        return d;
+    }
+}

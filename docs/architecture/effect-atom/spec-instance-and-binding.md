@@ -28,7 +28,10 @@ Re-running instantiation with the same `(container_id, catalog_revision, roll_se
 
 ### `effect_binding`
 
-Replaces the logical `foundation_effect_grant` and absorbs today's grant blobs out of `rpg_unique_stat_mods.mods_json`.
+Replaces the logical `foundation_effect_grant`. It is the table today's grant blobs move **into** — but the
+move itself is **E11's**, not this module's: a binding points at an instance of a **container**, and a legacy
+grant points at an `effectId` whose def does not become a container until E11. There is nothing here to
+instantiate and nothing to bind. This spec originally assigned the migration to E6; that was an ordering error.
 
 | Column | Notes |
 |---|---|
@@ -36,8 +39,7 @@ Replaces the logical `foundation_effect_grant` and absorbs today's grant blobs o
 | `instance_id` TEXT FK | |
 | `owner_kind` / `owner_key` | see scopes below |
 | `slot` | for items |
-| `priority` | INT, default 0 — **the primary sort key of the actor effect list** (`priority DESC, binding_id ASC`). The one execution-order guarantee in the program needs a column, not just a sentence |
-| `priority` | INT, default 0 — **the primary sort key of the actor effect list** (`priority DESC, binding_id ASC`). The one execution-order guarantee in the program needs a column, not just a sentence |
+| `priority` | INT, default 0 — **the primary sort key of the actor effect list** (`priority DESC, container_id ASC, seq ASC`, ordinal — definitions §5; **never `binding_id`**, which is generated). The one execution-order guarantee in the program needs a column, not just a sentence |
 | `source` | plugin or feature id, for withdraw |
 | `bound_utc`, `revision` | |
 

@@ -38,4 +38,37 @@ public static class OverlayViewPolicy
     public static bool ShouldNavigateOnShow(bool lastNavigationSucceeded) => !lastNavigationSucceeded;
 
     public static int PumpIntervalMs(bool visible) => visible ? VisiblePumpMs : HiddenPumpMs;
+
+    /// <summary>
+    /// Whether a navigation target belongs to our own server. The view runs inside the game
+    /// process, so an off-origin page — an external link in the SPA, or anything a compromised
+    /// page tries — must not load here; it belongs in the player's real browser. Fails closed:
+    /// anything we cannot parse as http(s) on our own origin is refused.
+    /// </summary>
+    public static bool IsSameOrigin(string? serverUrl, string? targetUrl)
+    {
+        if (!TryHttpUri(serverUrl, out var ours)) return false;
+        if (!TryHttpUri(targetUrl, out var theirs)) return false;
+
+        return string.Equals(ours!.Scheme, theirs!.Scheme, StringComparison.OrdinalIgnoreCase)
+               && string.Equals(ours.Host, theirs.Host, StringComparison.OrdinalIgnoreCase)
+               && ours.Port == theirs.Port;
+    }
+
+    /// <summary>
+    /// Whether a URI may be handed to the OS shell. <c>Process.Start</c> with
+    /// <c>UseShellExecute</c> invokes whatever protocol handler is registered, so only http(s)
+    /// links — never <c>file:</c>, <c>javascript:</c> or an arbitrary app scheme — may reach it.
+    /// </summary>
+    public static bool IsExternallyOpenable(string? uri) => TryHttpUri(uri, out _);
+
+    static bool TryHttpUri(string? value, out Uri? uri)
+    {
+        uri = null;
+        if (string.IsNullOrWhiteSpace(value)) return false;
+        if (!Uri.TryCreate(value.Trim(), UriKind.Absolute, out var parsed)) return false;
+        if (parsed.Scheme != Uri.UriSchemeHttp && parsed.Scheme != Uri.UriSchemeHttps) return false;
+        uri = parsed;
+        return true;
+    }
 }

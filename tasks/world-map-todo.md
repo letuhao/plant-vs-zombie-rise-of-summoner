@@ -296,58 +296,59 @@ Settled during the spec audit, so nobody re-litigates it here: the AI runs **out
 
 ## Phase 8 — the turn can end (no intelligence anywhere)
 
-- [ ] **Task W25: `expectedTurn` — a commit means one specific turn**
+- [x] **Task W25: `expectedTurn` — a commit means one specific turn** *(done 2026-08-22 — 9 tests. The check is refused in **both** directions and placed after `commander.unknown`, so a stranger cannot learn which turn is open. The world is now loaded **inside** `_gate` — the pre-lock read could be resolved out from under the call. Caught in passing: four demon-contract test files anchored `Day0` to a hard-coded 2026-08-21 while `Mint` stamps state from the real clock, so every "N days elapsed" assertion drifted by one per day. Not this stream's code; re-anchored to today because it fails a little worse every morning.)*
   - Description: `CommitWorldTurn(worldId, commanderId, int expectedTurn)` — required, no default — re-reading the world's turn **inside `_gate`** and refusing a mismatch as `turn.stale`. `CommitWorldTurnRequest` gains `Turn`; the endpoint 400s without it; `WorldPage` sends the turn it rendered. Ships and is verified **before any AI exists**, because it is the guard rail everything after it leans on.
   - Acceptance: committing the open turn behaves exactly as today; committing a resolved turn is refused `turn.stale` and changes nothing; a commit that lands while another is resolving refuses rather than filing into a closed turn; the endpoint rejects a body with no turn; the FE's End Turn round-trips.
   - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter FullyQualifiedName~WorldTurn`; `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`; `npm run test` in `web/fusion-rpg-web`.
   - Files: `Data/Sqlite/RpgStore.WorldTurns.cs`, `Contracts/WorldDtos.cs`, `Server/WorldEndpoints.cs`, `web/.../features/world/WorldPage.tsx`, tests. Scope: M.
   - Dependencies: none. **Do this one first even if the rest is deferred** — it is a latent bug fix that stands on its own.
 
-- [ ] **Task W26: The policy seam, the catalog, and a policy that decides nothing**
+- [x] **Task W26: The policy seam, the catalog, and a policy that decides nothing** *(done 2026-08-22 — 10 tests, and a guard rule that has been **seen to fail**. The first version of it never compiled — an escaping slip put a bare backslash in a char literal, so the whole Guard project was broken and the rule had never once run while I believed it was passing. It now catches a planted `WorldState` mention, ignores the doc comments that explain why the type is out of bounds, and its verdict is factored out so the proof is a permanent test rather than a plant-and-remember. Also pinned: **`FusionRpg.Core` targets net6.0 / C# 10** — nothing here may use C# 11 or 12 syntax.)*
   - Description: `IFactionPolicy` (`Decide(IWorldView view, ulong seed)` — the view already carries faction and turn, so neither is a parameter), `PolicyOrder(WorldCommand, string Reason)`, `FactionPolicies.Resolve`, `StandFastPolicy` (one entity-less `stand-fast` per faction, so the log distinguishes *chose nothing* from *was never asked*), and `WorldValidation` rejecting a faction whose `PolicyId` is not in the catalog. Plus the guard rule: nothing under `World/Ai/` may mention `WorldState`.
   - Acceptance: a world naming an unknown policy fails validation with the sector-style message; `stand-fast` emits exactly one order per faction with a reason; `Decide` is pure — same view and seed twice gives byte-identical output; the guard rule fails when a `WorldState` mention is planted and passes once removed.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Ai`; `dotnet test tests\FusionRpg.Guard.Tests`.
   - Files: `Core/World/Ai/{IFactionPolicy,FactionPolicies,StandFastPolicy}.cs`, `Core/World/WorldValidation.cs`, `tests/FusionRpg.Guard.Tests/WorldDeterminismGuardTests.cs`, tests. Scope: M.
   - Dependencies: none (Core-only; can start alongside W25).
 
-- [ ] **Task W27: The fill inside the commit, and the claim that justifies the whole design**
+- [x] **Task W27: The fill inside the commit, and the claim that justifies the whole design** *(done 2026-08-22 — 11 tests. The turn now resolves when the human ends it, which nothing in the browser could ever make happen before — the barrier wanted three factions and only one of them was a person. The **replay-swap claim passes**: a stored log reproduces its hashes through the pure engine with no policy involved at all. Five test files changed premise as budgeted, and the fix that keeps the goldens byte-identical is that **an explicit commit speaks for a faction and suppresses the fill** — which is exactly the escape hatch a scripted scenario needs, so the two 20-turn scenarios still drive the wild and Zomboss by hand and still hash to their goldens.)*
   - Description: in `CommitWorldTurn`, after the caller's commit row and before the committers are read — for each faction with a non-null `PolicyId` not yet committed, in ordinal order: resolve, run against `new BelievedWorldView(world, factionId)`, insert commands **and reasons** on the commit's own connection and transaction, insert its commit row. `reason` is a nullable column via `EnsureColumn`, bounded to 200 chars, written only by the fill. Seed is `SeededRng.DeriveStream(worldSeed, $"ai:{factionId}:{turn}")`.
   - Acceptance: **committing as the player alone advances the turn**; ⭐ *replaying a stored command log with a deliberately different policy registered leaves every hash unchanged* — the architectural claim, and the most valuable test in the module; a policy that throws leaves no commit row, no commands, and the turn where it was; a faction with no legions still commits; one reason per AI command, none for a player command, truncated at 200; **no golden moves.**
   - Verify: `dotnet test tests\FusionRpg.Data.Tests`; `dotnet test tests\FusionRpg.Core.Tests`.
   - Files: `Data/Sqlite/RpgStore.WorldTurns.cs`, tests. Scope: M.
   - Dependencies: W25, W26.
 
-- [ ] **Task W28: Reasons on the wire**
+- [x] **Task W28: Reasons on the wire** *(done 2026-08-22 — 2 E2E + 4 web tests. Correction 8 was half wrong: `ListWorldCommands` **was** already public, so only the reason needed a new reader. Commands are read from the log rather than the report, so a turn trimmed out of the hot tail still says what everyone was trying to do. The FE panel leaves out the player's own orders — you know why you gave them — and describes a command kind it has never heard of rather than dropping it, because silence would read as "the AI did nothing", which is the one thing the panel exists to disprove.)*
   - Description: a public per-turn command lister on the store (`ListWorldCommandsUnlocked` is private static with no counterpart), a `Commands` list on `WorldTurnReportDto` carrying commander, kind, subject and reason, and the turn-report panel showing them. The audit trail is a success criterion, so it is not folded into W27.
   - Acceptance: `GET /api/world/{id}/turn/{n}` returns each command with its reason in `(commander, seq)` order; a player command shows a null reason rather than an empty string; a turn whose report has been trimmed still lists its commands, because commands are never trimmed.
   - Verify: E2E World filtered tests; `npm run test`.
   - Files: `Data/Sqlite/RpgStore.WorldTurns.cs`, `Contracts/WorldDtos.cs`, `Server/WorldEndpoints.cs`, `web/.../features/world/*`, tests. Scope: S.
   - Dependencies: W27.
 
-### Checkpoint 8 — End Turn advances, and nothing has an opinion
-- [ ] All five suites and all four guard scripts green.
-- [ ] End Turn advances the world from the browser with no manual commits; pressing it twice refuses instead of burning a turn.
-- [ ] The policy-swap replay test passes — AI work can never break an existing save, proven rather than asserted.
-- [ ] **No golden has moved.** `stand-fast` is a no-op kind and both AI factions already carry that policy id, so a moved hash here means something is wrong.
-- [ ] Owner may stop here and still be ahead: this phase is a latent-bug fix plus a seam, with no behaviour to tune.
+### Checkpoint 8 — End Turn advances, and nothing has an opinion ✅ 2026-08-22
+- [x] Core **2060** · Data **295** · Guard **53** · E2E **169** · web **292**; `npm run build` clean; all four guard scripts green.
+- [x] End Turn advances the world from the browser with no manual commits; pressing it twice is refused `turn.stale` instead of burning a turn.
+- [x] The policy-swap replay test passes: a stored log reproduces its hashes through the pure engine with no policy involved at all.
+- [x] **No golden moved.** Both 20-turn scenarios still hash to their goldens — because an explicit commit speaks for a faction and suppresses the fill, which is the escape hatch a scripted scenario needs.
+- [x] Two bugs found that were nobody's task: a **retried commit could burn a turn** the moment the AI made the barrier reachable, and four demon-contract test files were anchored to a hard-coded date that drifts by one day every morning.
+- [x] Collision, not ours: `FusionRpg.Core` (net6.0 / **C# 10**) briefly stopped compiling when a concurrent stream wrote C# 12 primary constructors into `Effects/Atoms/`. They rewrote them. Worth remembering — **nothing in this module may use C# 11 or 12 syntax**.
 
 ## Phase 9 — the tables (pure over belief, nothing wired, all parallel-safe)
 
-- [ ] **Task W29: The march graph, hop distance, and the fixture `first-light` cannot provide**
+- [x] **Task W29: The march graph, hop distance, and the fixture `first-light` cannot provide** *(done 2026-08-22 — 16 tests. The two lenses became **one builder with a `LaneLens` parameter** rather than two graphs — my first attempt smuggled rifts past the supply filter by inventing a shadow lane-type catalog, which is drift dressed as design. Two of my own tests then contradicted each other and both were right: "a severed lane is not marchable" is a fact about the ground, while "an unseen lane reads open" is a fact about belief — so the first moved to the lens and the second stayed on the view. The ley-discount test pins correction 4: two identical legions price the same lane differently when one has scouted its endpoints.)*
   - Description: `MarchGraph` (every lane a legion can traverse, built from an `IWorldView`) and `Hops` (unweighted BFS from one sector). Plus the two seam overloads the audit found: `LaneGraph.Build(sectorIds, lanes)` and `LaneCost.For(climateLookup, lane, banner)`, with the truth-side callers passing lookups built from `WorldState`.
   - Acceptance: the march graph includes a `deep` rift and a `one-way` current that `LaneGraph` excludes — asserted on a **purpose-built two-lane fixture**, because all six of `first-light`'s lanes carry supply and the two lenses coincide there; hop counts match by hand on path, cycle and barbell; a one-way current is walked one way only; the ley discount is *absent* for a faction that has not scouted the lane's endpoints and present for one that has; `SupplyGraph` and `ReconnectionCost` return exactly what they returned before on every shipped scenario.
   - Verify: Core filtered `~Ai` and `~Topology` and `~Movement`.
   - Files: `Core/World/Ai/{MarchGraph,Hops}.cs`, `Core/World/Topology/LaneGraph.cs`, `Core/World/Movement/LaneCost.cs`, tests. Scope: M.
   - Dependencies: W26 (folder + guard exist).
 
-- [ ] **Task W30: Believed supply, and the traversal both halves share**
+- [x] **Task W30: Believed supply, and the traversal both halves share** *(done 2026-08-22 — 7 tests, and a spec claim disproved. The traversal moved to `SupplyReach` and `SupplyGraph` returns byte-identical answers. The headline test took four attempts and each failure taught something real: **a faction always has full sight of ground it owns**, so every lane inside its own supply chain has both ends visible and can never be the masked one — the "believes a cut lane is intact" divergence the spec promised **cannot happen for supply at all**, only for march planning. The divergence that does happen is ownership: ground taken from you out of sight stays yours in belief, and your chain runs straight through it. The doc comment now says so instead of the opposite. Also flushed out by the failures: `first-light` puts a ZOC-projecting wild pack on ash-waste and a Seat in nearly every sector, so any supply scenario built on it needs both stripped or it proves nothing.)*
   - Description: extract the BFS from `SupplyGraph.ConnectedSectors` into `Movement/SupplyReach.cs` (seeds, adjacency, `usable` predicate, stable id order); `SupplyGraph` becomes its truth-side caller and `Ai/BelievedSupply.cs` its belief-side one.
   - Acceptance: `SupplyGraph.ConnectedSectors` is unchanged on every shipped scenario — the extraction is provably behaviour-preserving; a faction whose chain is cut behind a lane it cannot see **still believes it is supplied**, and finds out by taking attrition; a faction that holds a Seat it has only glimpsed does not count it as a source, because a glimpse carries no slots.
   - Verify: Core filtered `~Movement` and `~Ai`.
   - Files: `Core/World/Movement/{SupplyReach,SupplyGraph}.cs`, `Core/World/Ai/BelievedSupply.cs`, tests. Scope: M.
   - Dependencies: W29 (march/supply lens distinction settled).
 
-- [ ] **Task W31: ThreatMap — fear, spread by ignorance**
+- [x] **Task W31: ThreatMap — fear, spread by ignorance** *(done 2026-08-22 — 13 tests, all 7 mutants caught. Two rules the spec did not name, both following from rules that already exist: **a guard's menace does not travel** (it projects no zone of control, so spreading its threat would make every guarded sector radiate menace it cannot deliver), and **every sector gets an answer including zero** (a missing key and a zero read the same to a person and differently to a caller). Verified in an isolated scratch copy while a concurrent stream had `FusionRpg.Core` uncompilable — their work is untracked, so deleting it in a copy of the tree gives a clean build without touching their files.)*
   - Description: threat per sector from every hostile force in belief, decayed by `StaleDecayPerTurn = 150`, spread over `min(age, MaxSpreadHops = 4)` hops of the **march** graph, falling off 400‰ per hop beyond that. Strength reads `RememberedForce.Defensive` or `.Offensive` — never a band directly.
   - Acceptance: a fresh sighting concentrates on one sector; a three-turn-old one is at full strength across three hops; a seven-turn-old one contributes nothing anywhere; the defensive reading is never below the offensive; **a hostile force across a deep rift raises threat** while contributing nothing to believed supply (the test that fails if anyone builds this on `LaneGraph`); reversing entity order changes nothing.
   - Verify: Core filtered `~Ai`.
@@ -374,6 +375,13 @@ Settled during the spec audit, so nobody re-litigates it here: the AI runs **out
   - Verify: Core filtered `~Ai`; `dotnet test tests\FusionRpg.Guard.Tests`.
   - Files: `Core/World/Ai/Utility/{ResponseCurves,Consideration}.cs`, tests. Scope: S.
   - Dependencies: none — independent of everything, can be built at any point.
+
+- [ ] **Task W39: The turn report's *entries* are still unprojected**
+  - Description: W28's `commands` are filtered by belief (structured `SectorId`); `Entries` are not. They carry free text — `Subject` and `Detail` — so honest filtering needs a nullable `SectorId` on `TurnReportEntry` and a pass over every `report.Add` in the engine to fill it. Deliberately **not** done as a line of string-matching: filtering a sector name out of prose is the kind of fix that works until somebody writes a different sentence.
+  - Acceptance: an entry naming a sector the viewer has never seen does not reach that viewer; `?asFaction=` shows it; the stored `report_json` shape stays backward-compatible (a nullable field reads as null on old rows); re-derivation still reproduces a trimmed report exactly.
+  - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`; the W22 property test extended to the turn endpoint.
+  - Files: `Core/World/Turn/TurnReport.cs` + every `report.Add` call site, `Server/WorldEndpoints.cs`, tests. Scope: M.
+  - Dependencies: none — independent of the AI, and the last hole in the fog.
 
 ### Checkpoint 9 — the tables exist and still nothing has an opinion
 - [ ] Core and Guard green; **no golden moved** and no engine behaviour changed at all.

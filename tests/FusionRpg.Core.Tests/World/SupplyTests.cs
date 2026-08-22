@@ -185,4 +185,67 @@ public class SupplyTests
 
         Assert.DoesNotContain(state.Entities, e => e.EntityId == "e-dave-legion-1");
     }
+
+    // ---- gates ----------------------------------------------------------------------------
+
+    [Fact]
+    public void A_gate_you_have_no_key_to_stops_a_supply_column_as_surely_as_an_army()
+    {
+        // Found by putting the supply filter and the topology filter side by side: topology refused
+        // a shut gate and supply did not, so an empire could be provisioned through a door nobody
+        // could open, while the lifeline overlay simultaneously reported the chain as cut.
+        // The homeworld keeps the only Seat: `first-light` gives nearly every sector one, and a
+        // sector that seeds its own supply can never be cut off from anywhere.
+        var reachable = OnlyHomeworldHasASeat() with { };
+
+        Assert.Contains("ember-hollow", SupplyGraph.ConnectedSectors(reachable, "dave"));
+
+        var barred = reachable with
+        {
+            Lanes = reachable.Lanes
+                .Select(l => l.LaneId == "l-home-ember"
+                    ? l with { TypeId = "gated", GateKeyId = "key-of-ash" }
+                    : l)
+                .ToList()
+        };
+
+        Assert.DoesNotContain("ember-hollow", SupplyGraph.ConnectedSectors(barred, "dave"));
+    }
+
+    [Fact]
+    public void A_gate_standing_open_carries_supply_like_any_other_lane()
+    {
+        var open = OnlyHomeworldHasASeat();
+        open = open with
+        {
+            Lanes = open.Lanes
+                .Select(l => l.LaneId == "l-home-ember" ? l with { TypeId = "gated" } : l)
+                .ToList()
+        };
+
+        Assert.Contains("ember-hollow", SupplyGraph.ConnectedSectors(open, "dave"));
+    }
+
+    /// <summary>
+    /// `first-light` with Dave holding ember-hollow and the homeworld holding the map's only Seat.
+    /// Without the second half, every sector seeds its own supply and nothing is ever cut off —
+    /// which is how a supply test built on this template quietly stops asserting anything.
+    /// </summary>
+    static WorldState OnlyHomeworldHasASeat()
+    {
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
+
+        return world with
+        {
+            Sectors = world.Sectors
+                .Select(s => s with
+                {
+                    OwnerFactionId = s.SectorId == "ember-hollow" ? "dave" : s.OwnerFactionId,
+                    Slots = s.SectorId == "homeworld"
+                        ? s.Slots
+                        : s.Slots.Where(sl => sl.SlotTypeId != SlotTypeCatalog.SeatSlotTypeId).ToList()
+                })
+                .ToList()
+        };
+    }
 }

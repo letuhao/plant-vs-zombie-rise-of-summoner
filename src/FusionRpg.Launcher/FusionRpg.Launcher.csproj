@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <!-- Pins asInvoker so Windows never applies installer-detection heuristics and asks for UAC. -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <RootNamespace>FusionRpg.Launcher</RootNamespace>
     <AssemblyName>FusionRpg.Launcher</AssemblyName>
     <ApplicationTitle>FusionRpg Launcher</ApplicationTitle>

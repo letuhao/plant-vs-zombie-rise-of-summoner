@@ -135,11 +135,21 @@
     in the player's plugin folder looking like something they should worry about.
   -->
   <Target Name="TrimWebView2Natives" AfterTargets="Build">
+    <!--
+      Flatten the x64 loader next to the managed DLL. publish-player copies the plugin folder with
+      a top-level-files-only sweep, so anything under runtimes\ silently misses the player pack and
+      the in-game view degrades to "loader not found". Flat also matches where a reader expects it.
+    -->
     <ItemGroup>
-      <_Wv2UnusedNative Include="$(OutputPath)runtimes\win-arm64\**\*" />
-      <_Wv2UnusedNative Include="$(OutputPath)runtimes\win-x86\**\*" />
+      <_Wv2X64Loader Include="@(RuntimeTargetsCopyLocalItems)"
+                     Condition="'%(Filename)%(Extension)' == 'WebView2Loader.dll' AND $([System.String]::new('%(Identity)').Contains('win-x64'))" />
     </ItemGroup>
-    <Delete Files="@(_Wv2UnusedNative)" ContinueOnError="true" />
-    <RemoveDir Directories="$(OutputPath)runtimes\win-arm64;$(OutputPath)runtimes\win-x86" ContinueOnError="true" />
+    <!-- Sourced from the package, not from $(OutputPath): an incremental build may not re-copy natives. -->
+    <Copy SourceFiles="@(_Wv2X64Loader)" DestinationFolder="$(OutputPath)" ContinueOnError="true" />
+    <ItemGroup>
+      <_Wv2Runtimes Include="$(OutputPath)runtimes\**\*" />
+    </ItemGroup>
+    <Delete Files="@(_Wv2Runtimes)" ContinueOnError="true" />
+    <RemoveDir Directories="$(OutputPath)runtimes" ContinueOnError="true" />
   </Target>
 </Project>

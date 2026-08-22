@@ -65,6 +65,18 @@ public static class OverlaySettings
         }
     }
 
+    /// <summary>Hold the lawn still while the player is in the web UI or has tabbed away.</summary>
+    public static bool PauseWhileAway
+    {
+        get => _state.PauseWhileAway;
+        set
+        {
+            if (_state.PauseWhileAway == value) return;
+            _state.PauseWhileAway = value;
+            Save();
+        }
+    }
+
     public static bool SettingsOpen { get; set; }
 
     public static void Init(string pluginDir)
@@ -90,6 +102,7 @@ public static class OverlaySettings
             if (loaded == null) return;
             _state.ShieldBarEnabled = loaded.ShieldBarEnabled;
             _state.OverlayButtonEnabled = loaded.OverlayButtonEnabled;
+            _state.PauseWhileAway = loaded.PauseWhileAway;
             if (!string.IsNullOrWhiteSpace(loaded.ShieldBarHotKey))
                 _state.ShieldBarHotKey = loaded.ShieldBarHotKey.Trim();
             if (!string.IsNullOrWhiteSpace(loaded.SettingsHotKey))
@@ -119,6 +132,7 @@ public static class OverlaySettings
     {
         public bool ShieldBarEnabled { get; set; } = true;
         public bool OverlayButtonEnabled { get; set; } = true;
+        public bool PauseWhileAway { get; set; } = true;
         public string ShieldBarHotKey { get; set; } = "F9";
         public string SettingsHotKey { get; set; } = "F7";
 

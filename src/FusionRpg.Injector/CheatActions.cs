@@ -15,7 +15,14 @@ public static class CheatActions
     {
         try
         {
-            if (CheatState.On("G-TIMEFREEZE"))
+            // Overlay pause wins: the player is looking at the web UI and must not lose the run.
+            // This is the only writer of Time.timeScale, so Hud.OverlayPause decides and this
+            // applies -- a second writer would be overwritten here on the very next frame.
+            if (Hud.OverlayPause.Active)
+                Time.timeScale = Core.Overlay.OverlayPausePolicy.PausedTimeScale;
+            else if (Hud.OverlayPause.ConsumeRestore(out var resume))
+                Time.timeScale = resume;
+            else if (CheatState.On("G-TIMEFREEZE"))
                 Time.timeScale = 0f;
             else if (CheatState.IsUserSet("G-TIMESCALE"))
                 Time.timeScale = Mathf.Clamp(CheatState.FVal("G-TIMESCALE"), 0f, 10f);

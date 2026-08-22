@@ -23,57 +23,20 @@ public static class SupplyGraph
     {
         var byId = world.Sectors.ToDictionary(s => s.SectorId, StringComparer.Ordinal);
 
-        bool Usable(WorldSector sector) =>
-            string.Equals(sector.OwnerFactionId, factionId, StringComparison.Ordinal)
+        bool Usable(string sectorId) =>
+            byId.TryGetValue(sectorId, out var sector)
+            && string.Equals(sector.OwnerFactionId, factionId, StringComparison.Ordinal)
             && !ZoneOfControl.IsHeldAgainst(world, sector.SectorId, factionId);
 
-        var reached = new HashSet<string>(StringComparer.Ordinal);
-        var frontier = new Queue<string>();
+        // Sources: every Seat this faction still holds. The traversal itself belongs to
+        // `SupplyReach`, because a faction policy asks the same question of what it *believes* —
+        // same rule, different and deliberately less reliable inputs.
+        var seats = world.Sectors
+            .Where(s => Usable(s.SectorId)
+                        && s.Slots.Any(sl => sl.SlotTypeId == SlotTypeCatalog.SeatSlotTypeId))
+            .Select(s => s.SectorId);
 
-        // Sources, in stable order: every Seat this faction still holds.
-        foreach (var sector in world.Sectors)
-        {
-            if (!Usable(sector)) continue;
-            if (sector.Slots.All(sl => sl.SlotTypeId != SlotTypeCatalog.SeatSlotTypeId)) continue;
-            if (reached.Add(sector.SectorId)) frontier.Enqueue(sector.SectorId);
-        }
-
-        if (reached.Count == 0) return reached;
-
-        // Neighbours, walked in lane id order so the traversal is reproducible even though the set
-        // it produces would be the same either way.
-        var outgoing = new Dictionary<string, List<WorldLane>>(StringComparer.Ordinal);
-        foreach (var lane in world.Lanes)
-        {
-            if (lane.State != LaneState.Open) continue;
-            if (!LaneTypeCatalog.Get(lane.TypeId).CarriesSupply) continue;
-
-            Add(outgoing, lane.FromSectorId, lane);
-            Add(outgoing, lane.ToSectorId, lane);
-        }
-
-        while (frontier.Count > 0)
-        {
-            var current = frontier.Dequeue();
-            if (!outgoing.TryGetValue(current, out var lanes)) continue;
-
-            foreach (var lane in lanes)
-            {
-                var type = LaneTypeCatalog.Get(lane.TypeId);
-                // A temporal current only carries supply the way it flows.
-                if (type.OneWay && !string.Equals(lane.FromSectorId, current, StringComparison.Ordinal))
-                    continue;
-
-                var next = string.Equals(lane.FromSectorId, current, StringComparison.Ordinal)
-                    ? lane.ToSectorId
-                    : lane.FromSectorId;
-
-                if (!byId.TryGetValue(next, out var sector) || !Usable(sector)) continue;
-                if (reached.Add(next)) frontier.Enqueue(next);
-            }
-        }
-
-        return reached;
+        return SupplyReach.From(seats, SupplyReach.LinksOf(world.Lanes), Usable);
     }
 
     /// <summary>
@@ -165,9 +128,4 @@ public static class SupplyGraph
         return entity with { Members = members };
     }
 
-    static void Add(Dictionary<string, List<WorldLane>> map, string sectorId, WorldLane lane)
-    {
-        if (!map.TryGetValue(sectorId, out var list)) map[sectorId] = list = new List<WorldLane>();
-        list.Add(lane);
-    }
 }

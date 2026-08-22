@@ -29,8 +29,9 @@ public static class WorldEndpoints
             return header is null ? Results.NotFound() : Results.Ok(Project(header));
         });
 
-        // The only place fog can leak, which is why it takes a viewer and refuses an unknown one
-        // rather than quietly falling back to omniscience.
+        // Takes a viewer and refuses an unknown one rather than quietly falling back to omniscience.
+        // Not the *only* place fog reaches the wire — the turn report projects its commands the same
+        // way, and its entries are a known gap — but this is the one a map view polls.
         g.MapGet("/{worldId}/state", (string worldId, string? asFaction, bool? lifelines, RpgStore store) =>
         {
             var world = store.LoadWorldState(worldId);
@@ -114,7 +115,13 @@ public static class WorldEndpoints
                 : body!.CommanderId!.Trim();
             if (commanderId is null) return Results.BadRequest(new { reason = "commander.unknown" });
 
-            var result = store.CommitWorldTurn(worldId, commanderId);
+            // Required, not optional. A commit that does not name its turn is a commit that can be
+            // retried into the *next* one once the AI releases the barrier automatically, which
+            // costs the player a turn they never played.
+            if (body?.Turn is not { } expectedTurn)
+                return Results.BadRequest(new { reason = "turn.missing" });
+
+            var result = store.CommitWorldTurn(worldId, commanderId, expectedTurn);
             if (!result.Ok) return Results.BadRequest(new { reason = result.Reason });
 
             // Only the commit that actually stepped the world is worth waking every client for.
@@ -130,10 +137,25 @@ public static class WorldEndpoints
             });
         });
 
-        g.MapGet("/{worldId}/turn/{turn:int}", (string worldId, int turn, RpgStore store) =>
+        // Takes a viewer for the same reason /state does. Fog is not a secrecy boundary here —
+        // `?asFaction=` already hands any caller any faction's view, and this is a single-player
+        // game with a trusted client — it is a *rendering* rule: by default you are shown your own
+        // war, and auditing somebody else's is a thing you ask for on purpose.
+        g.MapGet("/{worldId}/turn/{turn:int}", (string worldId, int turn, string? asFaction, RpgStore store) =>
         {
             var log = store.GetWorldTurnLog(worldId, turn);
             if (log is null) return Results.NotFound();
+
+            var world = store.LoadWorldState(worldId);
+            var viewer = string.IsNullOrWhiteSpace(asFaction)
+                ? world?.Factions.FirstOrDefault(f => f.Kind == WorldFactionKind.Player)?.FactionId
+                : asFaction.Trim();
+
+            if (world is not null && (viewer is null
+                || world.Factions.All(f => !string.Equals(f.FactionId, viewer, StringComparison.Ordinal))))
+                return Results.BadRequest(new { reason = "faction.unknown" });
+
+            var believed = world is null || viewer is null ? null : new BelievedWorldView(world, viewer);
 
             // Reports outside the hot tail are re-derived by replay, and re-derivation refuses
             // rather than fabricating across an engine version change — so this can legitimately
@@ -150,9 +172,47 @@ public static class WorldEndpoints
                     {
                         Phase = e.Phase, Kind = e.Kind, Subject = e.Subject, Detail = e.Detail
                     })
-                    .ToList() ?? new List<WorldTurnEntryDto>()
+                    .ToList() ?? new List<WorldTurnEntryDto>(),
+
+                // Read from the command log rather than the report, so a trimmed turn still says
+                // what everyone was trying to do — and why, where an AI was the one trying.
+                Commands = store.ListLoggedWorldCommands(worldId, turn)
+                    .Where(l => VisibleTo(l.Command, viewer, believed))
+                    .Select(l => new WorldTurnCommandDto
+                    {
+                        CommanderId = l.Command.CommanderId,
+                        CommandId = l.Command.CommandId,
+                        Kind = l.Command.Kind,
+                        EntityId = l.Command.EntityId,
+                        SectorId = l.Command.SectorId,
+                        Reason = l.Reason
+                    })
+                    .ToList()
             });
         });
+    }
+
+    /// <summary>
+    /// Whether one order belongs in this viewer's account of the turn.
+    ///
+    /// Your own orders always. Somebody else's only where you have some belief about the ground it
+    /// names — otherwise a turn report would quietly tell you the name of every sector on the map,
+    /// which is the thing the state projection spends its whole existence preventing.
+    ///
+    /// **Known gap:** `Entries` are *not* filtered. They carry free text (`Subject`, `Detail`)
+    /// rather than a sector id, so honest filtering needs a structured field on `TurnReportEntry`
+    /// and a pass over every `report.Add` in the engine. That is a task, not a line — see
+    /// tasks/world-map-todo.md.
+    /// </summary>
+    static bool VisibleTo(WorldCommand command, string? viewer, BelievedWorldView? believed)
+    {
+        if (viewer is null || believed is null) return true;
+        if (string.Equals(command.CommanderId, viewer, StringComparison.Ordinal)) return true;
+
+        // An order that names no ground says only "somebody, somewhere, did nothing".
+        if (command.SectorId is not { } sectorId) return false;
+
+        return believed.Believed(sectorId) is not null;
     }
 
     /// <summary>SIM-only world creation — mapped inside the /api/test group.</summary>

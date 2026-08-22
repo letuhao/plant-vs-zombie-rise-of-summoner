@@ -19,6 +19,9 @@ public class WorldTwentyTurnCheckpointTests : IDisposable
     const int Turns = 20;
     static readonly string[] Commanders = { "dave", "wild", "zomboss" };
 
+    /// <summary>The one commander with no policy — the only one the auto-fill leaves alone.</summary>
+    const string Human = "dave";
+
     readonly string _dir;
     readonly RpgStore _store;
 
@@ -52,9 +55,14 @@ public class WorldTwentyTurnCheckpointTests : IDisposable
         {
             _store.SubmitWorldCommands(worldId, ScriptFor(turn).ToList());
 
+            // Every commander ends the *same* turn. The scripted factions commit **first**: an
+            // explicit commit speaks for a faction and keeps `ai-commander`'s auto-fill out of it,
+            // which is what lets a scenario script what the wild and Zomboss do. The human commits
+            // last, and that is the one that releases the barrier.
+            var open = _store.GetWorldHeader(worldId)!.CurrentTurn;
             WorldTurnCommitResult last = default!;
-            foreach (var commander in Commanders)
-                last = _store.CommitWorldTurn(worldId, commander);
+            foreach (var commander in Commanders.Where(c => c != Human).Concat(new[] { Human }))
+                last = _store.CommitWorldTurn(worldId, commander, open);
 
             Assert.True(last.Advanced, $"turn {turn} did not advance");
             hashes.Add(last.StateHash!);

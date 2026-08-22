@@ -123,7 +123,6 @@ tests/FusionRpg.Core.Tests/Atoms/ContainerValidatorTests.cs
 | Every pool row at `weight = 0` | `UnsatisfiablePool` — silently under-filling is the failure this program exists to remove |
 | Same atom in both fixed core and pool | `DuplicateAtomInContainer` |
 | `rarity` ordinals | explicit and **append-only**; a reordered rarity fails the test, same rule as elements |
-| `rarity` ordinals | explicit and **append-only**; a reordered rarity fails the test, same rule as elements |
 | Container with no pool rows | legal; `pool_rolls` must be 0 |
 | `pool_rolls` exceeding distinct groups | rejected |
 | `pool_rolls = 3`, groups A(weight 10), B(0), C(0) | **rejected** `PoolRollsExceedGroups` — three groups exist but only one is drawable |

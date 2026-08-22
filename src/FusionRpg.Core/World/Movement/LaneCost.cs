@@ -90,7 +90,31 @@ public static class LaneCost
     /// <summary>A matched banner marches a ley lane at this fraction of the cost.</summary>
     public const int LeyDiscountMilli = 800;
 
-    public static int For(WorldState world, WorldLane lane, ElementTypeId? bannerElement)
+    /// <summary>
+    /// The truth-side reading: climates come from the world, so every ley discount that applies is
+    /// found.
+    /// </summary>
+    public static int For(WorldState world, WorldLane lane, ElementTypeId? bannerElement) =>
+        For(lane, bannerElement, sectorId => ClimateOf(world, sectorId));
+
+    static ElementTypeId? ClimateOf(WorldState world, string sectorId)
+    {
+        foreach (var sector in world.Sectors)
+            if (string.Equals(sector.SectorId, sectorId, StringComparison.Ordinal))
+                return sector.Climate;
+
+        return null;
+    }
+
+    /// <summary>
+    /// What a lane costs, given a way to look up a sector's climate.
+    ///
+    /// The lookup is a parameter rather than the world because the *believed* answer differs: a
+    /// faction that has never scouted a ley lane's endpoints does not know its climate, so the
+    /// discount does not apply and the march is over-priced. That is fog reaching into route
+    /// planning, and it is the behaviour we want — an army plans with what it knows.
+    /// </summary>
+    public static int For(WorldLane lane, ElementTypeId? bannerElement, Func<string, ElementTypeId?> climateOf)
     {
         var type = LaneTypeCatalog.Get(lane.TypeId);
 
@@ -98,22 +122,10 @@ public static class LaneCost
         cost = cost * type.CostMultiplierMilli / 1000;
         cost = cost * (1000 + Math.Max(0, lane.HazardMilli)) / 1000;
 
-        if (type.Ley && bannerElement is { } banner && LaneTouchesClimate(world, lane, banner))
+        if (type.Ley && bannerElement is { } banner
+            && (climateOf(lane.FromSectorId) == banner || climateOf(lane.ToSectorId) == banner))
             cost = cost * LeyDiscountMilli / 1000;
 
         return (int)Math.Max(1, Math.Min(int.MaxValue, cost));
-    }
-
-    static bool LaneTouchesClimate(WorldState world, WorldLane lane, ElementTypeId banner)
-    {
-        foreach (var sector in world.Sectors)
-        {
-            if (sector.Climate != banner) continue;
-            if (string.Equals(sector.SectorId, lane.FromSectorId, StringComparison.Ordinal)
-                || string.Equals(sector.SectorId, lane.ToSectorId, StringComparison.Ordinal))
-                return true;
-        }
-
-        return false;
     }
 }

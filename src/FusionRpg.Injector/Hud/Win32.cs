@@ -11,11 +11,18 @@ static class Win32
 {
     public const uint PM_REMOVE = 0x0001;
 
+    /// <summary>Sent to our pumped thread when the registered overlay hotkey fires.</summary>
+    public const uint WM_HOTKEY = 0x0312;
+
+    /// <summary>Our hotkey id. Scoped to this thread, so it cannot clash with the launcher's.</summary>
+    public const int OverlayHotKeyId = 0xF05A;
+
     const int WS_POPUP = unchecked((int)0x80000000);
     const int WS_EX_TOOLWINDOW = 0x00000080; // keep it out of the alt-tab list
     const int SW_HIDE = 0;
     const int SW_SHOWNOACTIVATE = 4;
     const int SW_SHOW = 5;
+    const uint MOD_NOREPEAT = 0x4000;
     const uint SWP_NOACTIVATE = 0x0010;
     const uint SWP_SHOWWINDOW = 0x0040;
     static readonly IntPtr HWND_TOPMOST = new(-1);
@@ -103,6 +110,22 @@ static class Win32
     }
 
     public static void Hide(IntPtr hwnd) => ShowWindow(hwnd, SW_HIDE);
+
+    /// <summary>
+    /// Registers the overlay hotkey against our own pumped window. In injector mode there is no
+    /// launcher to own a global hotkey, so without this the key simply does nothing.
+    /// Fails quietly when another app already owns the combination — the button still works.
+    /// </summary>
+    public static bool TryRegisterOverlayHotKey(IntPtr hwnd, uint virtualKey)
+    {
+        try { return RegisterHotKey(hwnd, OverlayHotKeyId, MOD_NOREPEAT, virtualKey); }
+        catch { return false; }
+    }
+
+    public static void UnregisterOverlayHotKey(IntPtr hwnd)
+    {
+        try { UnregisterHotKey(hwnd, OverlayHotKeyId); } catch { }
+    }
 
     /// <summary>True while the foreground window belongs to the game process (us).</summary>
     public static bool ForegroundIsThisProcess()
@@ -198,6 +221,8 @@ static class Win32
     [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr hWnd);
     [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll", SetLastError = true)] static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+    [DllImport("user32.dll")] static extern bool UnregisterHotKey(IntPtr hWnd, int id);
     [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr hWnd, ref RECT rect);
     [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr hWnd, ref RECT rect);
     [DllImport("user32.dll")] static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int w, int h, uint flags);

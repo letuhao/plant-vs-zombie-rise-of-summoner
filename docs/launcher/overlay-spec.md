@@ -1,6 +1,6 @@
 # Spec: Game / web overlay
 
-Status: **wave 1 built**, pending live verification. **Wave 2 built** (injector-hosted view behind `overlayHost=injector`, default off) — its z-order, focus and crash-teardown behaviour are **unproven**; the spike could not answer them off the lawn. This document is the contract for the feature — update it before changing behavior.
+Status: **wave 1 built and live-verified** (toggle, in-game button — 2026-08-22). **Wave 2 built and opening confirmed** — the in-game view covers the game at correct z-order on 3.9 MelonLoader with no launcher running (2026-08-22). Focus-across-alt-tab and crash teardown remain unverified. This document is the contract for the feature — update it before changing behavior.
 
 ## Objective
 
@@ -111,6 +111,7 @@ The Launcher is not a hub client, and the button must not depend on the server b
 Rules:
 
 - **Never on the Unity main thread.** A click sets an intent flag; a background worker connects (250 ms timeout), writes one line, disposes. A pipe connect that blocks a frame is exactly the class of main-thread stall the perf work removed — do not reintroduce it. Note this is the **first background work in the injector** (no `Task.Run` / `Thread` existed there before), so the worker must swallow every exception and must never touch a Unity API.
+- **Abandoned sends recover.** A pipe write has no timeout of its own, so a stalled reader on the launcher side would leave the in-flight gate shut and the button dead for the session. Two bounds: the write itself is cancellable and capped at 1 s (async pipe), and the state treats a send older than 3 s as abandoned so a click always eventually gets through.
 - **Debounce 300 ms.** A held or double click sends one message. The **in-flight gate comes first**: a connect can take 250 ms, so a send may outlive the window, and a click landing during one is refused *without* being recorded as a send — otherwise a click that never reached the pipe would silently push the window forward and lock the player out for another 300 ms.
 - **Availability probe** — `ping` on match start and every 30 s, off-thread. The cached result drives button visibility. Never probe per frame.
 - **Log on transition only** — one line when the host becomes reachable or unreachable, never per attempt.
@@ -135,7 +136,12 @@ Wave 2 moves the view into the game process so the overlay exists however the ga
 - **Window.** Borderless `WS_POPUP` + `WS_EX_TOOLWINDOW` (kept out of alt-tab), positioned over the largest visible top-level window this process owns, topmost. No game window found → primary display rect rather than a 0×0 window. All P/Invoke stays in `Hud/Win32.cs`, mirroring the Launcher’s `GameWindowInterop` rule.
 - **Native loading.** The SDK imports `WebView2Loader.dll` by bare name and the process search path is rooted at the game exe, not our plugin folder, so the host pre-loads it by absolute path first; the later bare-name import then binds to the already-loaded module.
 - **Payload.** Only `Microsoft.Web.WebView2.Core.dll` + the x64 loader reach the player (~752 KB). The package’s WPF/WinForms wrappers, XML docs and arm64/x86 natives are trimmed by MSBuild targets and guard-pinned — everything referenced lands in the player’s game folder.
-- **Teardown.** Both hosts call `OverlaySwitch.Shutdown()` from `OnApplicationQuit`. An orphaned `msedgewebview2.exe` is the spike’s stated no-go — check it by command line (`*FusionRpg*`), never by process name: a normal desktop runs a dozen unrelated WebView2 processes from Edge.
+- **Own user-data folder.** The in-game view uses `%LocalAppData%\FusionRpg\webview2-game`, **not** the Launcher’s `\webview2`. A WebView2 user-data folder cannot be shared by two processes, and both hosts can be running at once (a player who launched through the Launcher but set `overlayHost=injector`) — sharing it fails init.
+- **Stays on our origin.** `NavigationStarting` cancels anything that is not the server’s own scheme+host+port, and `NewWindowRequested` never opens a second in-process window. Off-origin links are handed to the player’s real browser instead — and only `http(s)` ever reaches the shell, since `Process.Start` with `UseShellExecute` would otherwise invoke whatever handler is registered for `file:`, `javascript:` or an app scheme. Both rules are pure and unit-tested in `OverlayViewPolicy`.
+- **Started only when wanted.** The view is not created while the button toggle is off — in this mode there is no other way to open it, so a browser process would be pure waste.
+- **Getting out.** The view covers the game, so the button that opened it is underneath — wave 1’s three exits (Esc, WPF chrome, launcher hotkey) do not exist here. **Esc and F10 close it** via `AcceleratorKeyPressed`, and the window **auto-hides when the game stops being the foreground process**: it is topmost and `WS_EX_TOOLWINDOW`, so left up over another application it would be unreachable by alt-tab. Both rules live in `OverlayViewPolicy` (unit-tested) and are guard-pinned.
+- **Loading.** Init runs at game start, which can beat the server to listening, so a failed load is retried on the next open; a page that loaded is never re-navigated (that would throw away SPA state, which hide-not-destroy exists to preserve).
+- **Teardown.** Both hosts call `OverlaySwitch.Shutdown()` from `OnApplicationQuit`, which enqueues *and joins* the host thread for up to 2 s — the thread is a background thread, so without the join the process can exit before teardown runs, which is exactly how an orphan happens. An orphaned `msedgewebview2.exe` is the spike’s stated no-go — check it by command line (`*FusionRpg*`), never by process name: a normal desktop runs a dozen unrelated WebView2 processes from Edge.
 - **Degradation.** No Evergreen runtime, no loader, or any init failure → logged once, `Available` stays false, the button hides. Never a crash, never a hang.
 - With `injector`, the button calls the local host directly and the pipe client is bypassed. Behavior contract rules 1–7 are unchanged from the player's side.
 - **Spike must answer, before any build:** does the WebView2 loader initialize in an IL2CPP process; can a borderless window owned by the game HWND stay correctly z-ordered and focused; does input routing survive alt-tab; does teardown run cleanly when the game exits or crashes; what happens with no Evergreen runtime.
@@ -177,6 +183,50 @@ Wave 2 moves the view into the game process so the overlay exists however the ga
       Filter by **our user-data folder, never by process name** — a normal desktop runs a dozen unrelated `msedgewebview2.exe` from Edge, so a bare name check reports a leak every time. Expect no rows. A real leak reverts wave 2.
   15. With no Evergreen runtime (or rename the loader), the game still starts, the button stays hidden, and the log says why once.
 
+  **Pause while away:**
+
+  18. Mid-wave with zombies advancing, press F10 — come back and nothing moved. Repeat with the in-game button.
+  19. Alt-tab to another app mid-wave — the lawn holds; return and it resumes.
+  20. Set a timescale cheat (G-TIMESCALE 2), then toggle the overlay — resumes at 2×, not 1×.
+  21. Turn "Pause while away" off in F7 — the lawn keeps running while the overlay is up.
+  22. Lose or win a board while the overlay is up — the game is not left frozen afterwards.
+  16. **Esc closes the view** (and F10). Then open it and alt-tab away — it hides itself rather than covering the other app.
+  17. Start the game with the server stopped, open the view (error page), start the server, close and reopen — it loads.
+
+## Pause while away
+
+Opening the control room mid-wave must not cost a run. **Decided 2026-08-22** (this was the spec's open question; the boundary said ask first).
+
+- **Rule:** hold the lawn still while a **live board** is running and the player is **not looking at it**. Outside a run nothing is at stake and freezing time would just look broken.
+- **"Not looking" is deliberately broad** — the game window is not the foreground process, or (wave 2) the in-game view is visible. The launcher's F10 never reaches the injector, so foreground is the *only* signal that covers every way in: hotkey, in-game button, and the launcher's own Overlay button. It also covers a plain alt-tab, which is the same situation: nobody is defending the lawn.
+- **One writer.** `CheatActions.TickContinuous` already asserts `Time.timeScale` every frame (G-TIMEFREEZE / G-TIMESCALE). `OverlayPause` therefore **decides and remembers but never writes** — a second writer would be silently overwritten on the next frame whenever a speed setting is active, which is exactly how "pause doesn't work with a speed cheat on" bugs appear. Guard-pinned: `Time.timeScale` may only be assigned in `CheatActions.cs`.
+- **Resume restores what was running**, not a hardcoded `1.0`, so a player's own timescale survives the round trip; a captured `0` or NaN (something else had already frozen time) resumes at normal speed rather than leaving the game stuck.
+- **Cleared** on board end and on shutdown — never leave a finished board frozen.
+- **Player toggle:** "Pause while away" in the F7 panel, default on.
+
+## Shipping the in-game browser
+
+The launcher carries its own WebView2 (that is how F10 works), and the **injector** needs its own
+copy for the in-game view. Those two can drift apart silently, and did:
+
+- **Cloud releases build the injector from a committed fallback.** `release.yml` cannot build it
+  without game interop, so it falls back to `FUSIONRPG_USE_CI_DROP=1` and copies the checked-in
+  `artifacts/ci-drop-into-game/`. That drop predates the in-game overlay and contains no WebView2,
+  so a release would ship a launcher that can open the web UI and an injector that cannot.
+- **The MelonLoader drop is only built when `FUSIONRPG_ML_GAMEDIR` is set**, and the release
+  workflow does not set it — so no release has ever carried a MelonLoader injector.
+- **Nothing in the install path recurses.** `PluginInstaller` uses `Directory.EnumerateFiles` on the
+  drop folder, top level only, and the CI fallback copy is equally shallow. A loader under
+  `runtimes\win-x64
+ative\` reaches nobody, which is why the build flattens it to the plugin root.
+
+**Guard:** `PlayerPackProbe.ProbeOverlayPayload` runs inside `smoke-player-pack.ps1`, which the
+release workflow already invokes before zipping. It fails the release when the launcher lacks its
+own WebView2, when any injector drop is missing WebView2 beside it, when an injector carries none of
+the overlay types (a stale drop), or when no MelonLoader drop exists. Shipping without MelonLoader
+on purpose requires `FUSIONRPG_ALLOW_NO_MELON=1` — deliberate, not silent. Covered by
+`PlayerPackOverlayProbeTests`, including a fixture reproducing the stale-CI-drop release.
+
 ## Boundaries
 
 - **Always:** run launcher unit tests before handing back; keep all Win32 inside `GameWindowInterop`; keep the overlay hide-not-destroy invariant; keep every toggle entry point on one code path; keep pipe I/O off the Unity main thread; log every failure path (no silent no-ops).
@@ -205,7 +255,7 @@ Wave 2 moves the view into the game process so the overlay exists however the ga
 | 16 | Wave 2 spike answered all five questions | ⚠ 2 of 5 answered; 3 need the game |
 | 17 | `overlayHost` resolution: env wins, junk falls through, default launcher | ✅ verified (unit) |
 | 18 | Only Core.dll + x64 loader ship to the player | ✅ verified (build + guard) |
-| 19 | In-game view covers the game window at correct z-order | ⏹ live run |
+| 19 | In-game view covers the game window at correct z-order | ✅ **verified live 2026-08-22** (3.9 MelonLoader, no launcher) |
 | 20 | Focus and input survive alt-tab with the view up | ⏹ live run |
 | 21 | No orphaned `msedgewebview2.exe` **whose command line names our user-data folder** after a normal quit **or a crash** | ⏹ live run — **a leak is a no-go** |
 
@@ -228,7 +278,6 @@ Wave 2 moves the view into the game process so the overlay exists however the ga
 
 ## Open questions
 
-- **Pause on show?** The injector already owns `MatchHost.NotifyPaused`, so pausing the match while the overlay is up is now cheap. The boundary above says ask first — unanswered.
 - **Remember last overlay page** across toggles — still out of scope, but the button makes short visits common enough that it may be worth revisiting.
 
 ## Out of scope v1

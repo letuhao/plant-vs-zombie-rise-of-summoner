@@ -114,7 +114,9 @@ public static class OverlayViewHost
 
             var userData = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "FusionRpg", "webview2");
+                // Deliberately NOT the launcher's "webview2" folder: a WebView2 user-data folder
+                // cannot be shared by two processes, and both hosts can be running at once.
+                "FusionRpg", "webview2-game");
 
             var envTask = CoreWebView2Environment.CreateAsync(userDataFolder: userData);
             if (!PumpUntil(() => envTask.IsCompleted, 60) || envTask.IsFaulted)
@@ -147,6 +149,28 @@ public static class OverlayViewHost
                 catch { }
             };
 
+            // The view runs inside the game process, so an external link must not load here.
+            controller.CoreWebView2.NavigationStarting += (_, e) =>
+            {
+                try
+                {
+                    if (OverlayViewPolicy.IsSameOrigin(_url, e.Uri)) return;
+                    e.Cancel = true;
+                    OpenExternally(e.Uri);
+                }
+                catch { }
+            };
+
+            controller.CoreWebView2.NewWindowRequested += (_, e) =>
+            {
+                try
+                {
+                    e.Handled = true; // never spawn a second in-process window
+                    if (!OverlayViewPolicy.IsSameOrigin(_url, e.Uri)) OpenExternally(e.Uri);
+                }
+                catch { }
+            };
+
             controller.CoreWebView2.NavigationCompleted += (_, e) =>
             {
                 _navigated = e.IsSuccess;
@@ -157,8 +181,13 @@ public static class OverlayViewHost
             Win32.FitToClientArea(hwnd, controller);
             Navigate(controller);
 
+            // In injector mode nothing else owns a global hotkey, so register our own against the
+            // window we already pump. Without this F10 does nothing at all in this mode.
+            var hotKeyOk = Win32.TryRegisterOverlayHotKey(hwnd, (uint)OverlayViewPolicy.VirtualKeyF10);
+
             _available = true;
-            SafeLog($"Overlay view host ready (browser {browserVersion}) — in-game web UI available.");
+            SafeLog((hotKeyOk ? "" : "Overlay hotkey F10 is taken by another app — use the button. ") +
+                    $"Overlay view host ready (browser {browserVersion}) — in-game web UI available.");
 
             RunCommandPump(hwnd, controller);
         }
@@ -173,6 +202,7 @@ public static class OverlayViewHost
             try { controller?.Close(); } catch { }
             if (hwnd != IntPtr.Zero)
             {
+                Win32.UnregisterOverlayHotKey(hwnd);
                 try { Win32.DestroyWindow(hwnd); } catch { }
             }
         }
@@ -223,6 +253,23 @@ public static class OverlayViewHost
 
         PumpOnce();
         return false;
+    }
+
+    /// <summary>Hands an off-origin link to the player's real browser instead of loading it in-game.</summary>
+    static void OpenExternally(string uri)
+    {
+        try
+        {
+            if (!OverlayViewPolicy.IsExternallyOpenable(uri)) return;
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(uri)
+            {
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            SafeLog("Overlay view could not open a link externally: " + ex.Message);
+        }
     }
 
     static void Navigate(CoreWebView2Controller controller)
@@ -287,6 +334,14 @@ public static class OverlayViewHost
     {
         while (Win32.PeekMessage(out var msg, IntPtr.Zero, 0, 0, Win32.PM_REMOVE))
         {
+            // WM_HOTKEY is posted to the thread, not the window, so DefWindowProc never sees it:
+            // it has to be handled here or the key silently does nothing.
+            if (msg.message == Win32.WM_HOTKEY && msg.wParam.ToInt32() == Win32.OverlayHotKeyId)
+            {
+                Commands.Enqueue(Command.Toggle);
+                continue;
+            }
+
             Win32.TranslateMessage(ref msg);
             Win32.DispatchMessage(ref msg);
         }

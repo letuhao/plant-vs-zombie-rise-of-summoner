@@ -62,7 +62,7 @@ Scope key: S = one sitting · M = a few · L = split it first.
   - Accept: overlay tests **115** green (Core), Launcher **155**, Guard **47**; all three projects build; injector redeployed.
   - Files: `src/FusionRpg.Core/Overlay/{OverlaySwitchState.cs,OverlaySwitchLayout.cs}`, `src/FusionRpg.Injector/Hud/{OverlaySwitch.cs,OverlaySwitchGui.cs}`, `src/FusionRpg.Injector/GameHooks.cs`, `src/FusionRpg.Launcher/{Services/OverlayPipeServer.cs,MainWindow.xaml.cs}`, Core + Launcher tests, spec, decisions. Scope: S.
 
-- [ ] **T4: Live verification** — *owner-run, own terminal* (spec §Testing strategy, criteria 3–15)
+- [~] **T4: Live verification** — **run 1 confirmed working 2026-08-22 by the owner**; remaining items pending — *owner-run, own terminal* (spec §Testing strategy, criteria 3–15)
   - Run all 15 checklist items (11 wave-1, 4 wave-2), including the 6 that have been outstanding since 2026-08-20 (overlay covers the game window, focus restore, session survives 3 toggles, Alt+F4 hides, shutdown leaves nothing, missing-runtime instructions) plus the 5 new ones (button toggles, no-launcher hides the button, launcher killed mid-match, debounce, frame-time parity).
   - Assistant does not start the play session: a server started from an assistant tool call dies with the tool call's process tree.
   - Accept: spec success criteria 3–15 flip from ⏳/⏹ to ✅ or to a recorded failure with the observed behavior. Frame-time parity backed by a perf probe capture, not by eye.
@@ -75,6 +75,49 @@ Scope key: S = one sitting · M = a few · L = split it first.
   - Accept: no doc claims a status the code doesn't have; every new file in the spec's project-structure block exists at the stated path.
   - **Done.** `launcher/spec.md` gained the in-game button bullet and the pipe server in its code list; `README.md` row refreshed; the `decisions.md` row still reads true. Spec status moved to "wave 1 built, pending live verification"; criteria 10 and 11 are ✅ (unit), 12 and 13 still need the live run.
   - Files: as listed. Scope: S.
+
+- [x] **T7b-review: Self-review of the wave-2 code** (post-T7)
+  - **Showstopper, fixed:** *the view could not be closed.* It covers the game, so the in-game button — the only source of `Toggle` — sits underneath it. Wave 1 has Esc, WPF chrome and a launcher-registered global hotkey; the in-game host inherits none, and `WS_EX_TOOLWINDOW` keeps it out of alt-tab too. Opening it would have meant killing the game. Esc/F10 now close it via `AcceleratorKeyPressed`.
+  - **Important, fixed:** a topmost, non-alt-tabbable window left up while the player switches apps would cover *that* app unreachably — it now auto-hides when the game stops being the foreground process.
+  - **Important, fixed:** the view navigated once at game start, which can beat the server to listening, leaving a permanent error page; a failed load now retries on next open while a loaded page is never re-navigated.
+  - **Important, fixed:** `Shutdown()` was fire-and-forget on a background thread, so the process could exit before teardown — exactly how an orphaned `msedgewebview2.exe` happens. Now joins for up to 2 s.
+  - **Minor, fixed:** the pump spun at 200 Hz regardless of visibility (now 5 ms visible / 50 ms hidden) and had no guard, so one throw killed the view for the session.
+  - Rules that decide whether a player can get back to their game live in `FusionRpg.Core/Overlay/OverlayViewPolicy.cs` (11 tests) rather than buried in Win32 code, and a guard pins the escape path in place — proven by removing it and watching the guard go red.
+  - Accept: Core overlay **142**, Launcher **155**, Guard **51** green; four boundary guards OK; both loader hosts build; redeployed.
+  - Files: `src/FusionRpg.Core/Overlay/OverlayViewPolicy.cs`, `src/FusionRpg.Injector/Hud/{OverlayViewHost.cs,Win32.cs}`, `tests/FusionRpg.Core.Tests/Overlay/OverlayViewPolicyTests.cs`, `tests/FusionRpg.Guard.Tests/OverlayPipeContractGuardTests.cs`. Scope: M.
+
+- [x] **T7c-test: Prove-It on the send path** (post-review)
+  - **Defect:** `NamedPipeClientStream.Write` has no timeout. `Connect` was bounded at 250 ms but the write was not, so a launcher whose reader stalled mid-connection would park the injector's background thread forever — the completion `finally` never ran, `SendInFlight` never cleared, and the in-game button was dead for the rest of the session with no recovery short of restarting the game.
+  - **Fixed at both levels:** the write now runs on an asynchronous pipe under a 1 s cancellation, so the thread cannot leak; and `OverlaySwitchState` treats a send older than `SendTimeoutMs` (3 s) as abandoned, so even an unforeseen stall cannot hold the gate shut. A late completion from the abandoned send cannot cancel a newer one.
+  - Confirmed red before the fix by removing the recovery line and watching the test fail, then green after.
+  - Accept: Core overlay **146** (4 new), Launcher **155**, Guard **51** green; four boundary guards OK; both loader hosts build.
+  - Files: `src/FusionRpg.Core/Overlay/OverlaySwitchState.cs`, `src/FusionRpg.Injector/Hud/OverlaySwitch.cs`, `tests/FusionRpg.Core.Tests/Overlay/OverlaySwitchStateTests.cs`. Scope: S.
+
+- [x] **T7d-review: Five-axis review of the wave-2 code** (post-test)
+  - **Important, fixed — user-data folder collision.** The in-game view used `%LocalAppData%\FusionRpg\webview2`, byte-identical to the Launcher’s. A WebView2 user-data folder cannot be shared across processes, so with both hosts running (exactly the configuration on this dev box: launcher up from `deploy-play`, injector mode set) the second one fails to initialise. Now `webview2-game`.
+  - **Important, fixed — no navigation boundary.** The view would load *any* URL the page navigated to, inside the game process, and an external link in the SPA would open there rather than in the player’s browser. `NavigationStarting` now cancels off-origin, `NewWindowRequested` never opens a second in-process window, and off-origin links go to the real browser — but only `http(s)` reaches `Process.Start`, since `UseShellExecute` would otherwise run the registered handler for `file:`, `javascript:` or an app scheme.
+  - **Important, fixed — browser process for a disabled feature.** The view span up on the first tick regardless of the button toggle; with the button off there is no other way to open it in this mode, so it was a whole WebView2 process tree for nothing.
+  - **Suggestion, not taken:** `Hud/Win32.cs` does not mirror `GameWindowInterop` in name despite the spec saying it does. Renaming touches every call site for no behaviour change; noted rather than churned.
+  - Verified: 97 overlay tests green (run in isolation — see below), injector + Melon build, redeployed, four boundary guards OK.
+  - **Tree note:** `FusionRpg.Core.Tests` and `FusionRpg.Guard.Tests` were both transiently uncompilable during this pass from other streams’ in-flight files (`World/Ai/PolicySeamTests.cs`, `Effects/Atoms/PredicateCompiler.cs`, `WorldDeterminismGuardTests.cs`). Overlay tests were therefore run through a throwaway project compiling only `src/FusionRpg.Core/Overlay/*.cs` + `tests/.../Overlay/*.cs`; Guard was last green in place at 51/51.
+  - Files: `src/FusionRpg.Core/Overlay/OverlayViewPolicy.cs`, `src/FusionRpg.Injector/Hud/{OverlayViewHost.cs,OverlaySwitch.cs}`, `tests/FusionRpg.Core.Tests/Overlay/OverlayViewPolicyTests.cs`. Scope: M.
+
+- [x] **T8: Pause while away** (owner request, 2026-08-22 — closes the spec's open question)
+  - Opening the control room mid-wave was costing runs. A live board now holds still while the player is not looking at it.
+  - **Signal:** the game window is not the foreground process, or (wave 2) the in-game view is visible. The launcher's F10 never reaches the injector, so foreground is the only signal covering every entry point — hotkey, in-game button, launcher button — and it covers plain alt-tab too, which is the same situation.
+  - **Single writer preserved.** `CheatActions.TickContinuous` already asserts `Time.timeScale` every frame for G-TIMEFREEZE / G-TIMESCALE, so a naive `Time.timeScale = 0` here would have been overwritten on the next frame whenever a speed setting was active. `OverlayPause` decides and remembers; `CheatActions` applies it with priority and hands back the captured scale on resume. Guard-pinned.
+  - Resume restores the *captured* scale, not a hardcoded 1.0, so a player's own timescale survives; a captured 0/NaN resumes at 1.0 rather than leaving the game stuck. Cleared on board end and shutdown.
+  - Player toggle "Pause while away" in the F7 panel, default on.
+  - **Guard bug found and fixed while writing it:** the first version of the single-writer guard was vacuous — the shell had turned `` into a literal backspace byte inside the C# regex, so it matched nothing and passed with a second writer deliberately injected. Rewritten via direct file write, then proven by re-injecting the writer and watching it go red. The guard now also asserts it scanned >50 files and still sees the owner's writes, so it cannot silently watch nothing again.
+  - Accept: 109 overlay tests green (12 new pause-policy), Guard **54**, both loader hosts build, injector redeployed.
+  - Files: `src/FusionRpg.Core/Overlay/OverlayPausePolicy.cs`, `src/FusionRpg.Injector/Hud/{OverlayPause.cs,OverlaySwitch.cs,OverlaySettings.cs,OverlaySettingsGui.cs}`, `src/FusionRpg.Injector/CheatActions.cs`, `tests/FusionRpg.Core.Tests/Overlay/OverlayPausePolicyTests.cs`, `tests/FusionRpg.Guard.Tests/OverlayPipeContractGuardTests.cs`. Scope: M.
+
+- [x] **T9: Deploy to the 3.9 MelonLoader cell** (owner request, 2026-08-22)
+  - Deployed to `H:\Games\PVZ-Fusion-3.9_MelonLoader\Mods` — profile `pvzrh-3.9` (GameAssembly matches the documented 57717248 signature), MelonLoader only, no BepInEx present so no dual-load risk.
+  - **Gap this exposed:** the WebView2 package and trim targets had been added to the BepInEx and 3.8.1 MelonLoader hosts but **not** to `FusionRpg.Injector.MelonLoader.39`, which compiles the same shared sources. That cell would have failed to compile the moment anyone built it. Fixed, and the guard now **discovers** injector hosts by their shared-source glob rather than listing them, so the next matrix cell cannot be missed the same way.
+  - **The guard was vacuous twice before it worked.** First it asserted `Contains("Microsoft.Web.WebView2")`, which stays true with the package removed because the trim targets name the WPF/WinForms assemblies. Now it matches the `PackageReference` itself; proven by removing the package and watching it go red.
+  - Accept: 3.9 host builds clean; `Mods\` carries `Microsoft.Web.WebView2.Core.dll` + flat `WebView2Loader.dll`, no `runtimes\` tree; Guard **54** green.
+  - Files: `src/FusionRpg.Injector.MelonLoader.39/FusionRpg.Injector.MelonLoader.39.csproj`, `tests/FusionRpg.Guard.Tests/OverlayPipeContractGuardTests.cs`. Scope: S.
 
 ### Checkpoint 2 — wave 1 done
 - [ ] Spec criteria 1–15 all ✅; docs sync green; button + hotkey + launcher button all reach the same toggle method.
@@ -93,7 +136,7 @@ Scope key: S = one sitting · M = a few · L = split it first.
 ### Gate
 - [x] Owner signed off 2026-08-22 ("start it") after being shown that 3 of 5 spike questions were unanswered; `decisions.md` row locking `overlayHost` semantics written first. The NuGet dependency in the game process — ask-first per the spec — is covered by that same instruction.
 
-- [x] **T7: Wave 2 build** — code complete, **live-unverified**
+- [x] **T7: Wave 2 build** — **opening verified live 2026-08-22**: the in-game button showed the web view over the game on 3.9 MelonLoader with no launcher, so z-order holds and the spike’s Q2 is answered. Alt-tab focus and crash teardown still unverified.
   - `overlayHost` = `launcher` | `injector` (host config + `FUSIONRPG_OVERLAY_HOST`, env wins). With `injector`: local borderless window + WebView2 in the game process, button calls it directly, pipe client bypassed. Behavior contract rules 1–7 unchanged from the player's side. Default stays `launcher` until a live run says otherwise.
   - Accept: both host modes pass the same live checklist; flipping the default is a separate ask-first decision.
   - Split into five slices, each built and compiled green:

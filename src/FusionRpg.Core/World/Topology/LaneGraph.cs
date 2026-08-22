@@ -1,9 +1,30 @@
+using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.World.Movement;
 
 namespace FusionRpg.Core.World.Topology;
 
 /// <summary>One traversable step between two sectors, and what it costs to walk it.</summary>
 public readonly record struct LaneStepEdge(string FromSectorId, string ToSectorId, int Cost);
+
+/// <summary>
+/// Which question the graph is answering (spec-ai-commander.md §Two graphs, and not confusing them).
+///
+/// The two differ by exactly one rule and are never interchangeable. A deep rift and a temporal
+/// current carry no supply and *are* marchable, so building fear or reach on the supply lens would
+/// leave an enemy two days away invisible because the road between you carries no grain — which is
+/// not how being attacked works.
+///
+/// A lens parameter rather than two builders: the alternative is a second copy of this file
+/// differing by one predicate, which is the version that silently drifts apart.
+/// </summary>
+public enum LaneLens
+{
+    /// <summary>Could this lane hold an empire together? Connectivity, reconnection cost, supply.</summary>
+    Supply,
+
+    /// <summary>Can an army put its feet on it? Threat spread and reach.</summary>
+    March
+}
 
 /// <summary>
 /// The lane network as a plain graph, scoped to a set of sectors (spec-world-topology.md).
@@ -46,11 +67,30 @@ public sealed class LaneGraph
         : throw new KeyNotFoundException($"Sector '{sectorId}' is outside this graph's filter.");
 
     /// <param name="include">Null means every sector; otherwise only these.</param>
-    public static LaneGraph Build(WorldState world, IReadOnlySet<string>? include = null)
+    public static LaneGraph Build(
+        WorldState world, IReadOnlySet<string>? include = null, LaneLens lens = LaneLens.Supply) =>
+        Build(
+            world.Sectors.Select(s => s.SectorId).ToList(),
+            world.Lanes,
+            sectorId => world.Sectors
+                .FirstOrDefault(s => string.Equals(s.SectorId, sectorId, StringComparison.Ordinal))?.Climate,
+            include,
+            lens);
+
+    /// <summary>
+    /// The graph from ids and lanes alone, plus a way to price them.
+    ///
+    /// Split out because a faction policy may not touch <c>WorldState</c> — it holds beliefs, not
+    /// the truth — and this is everything the graph actually reads. The truth-side overload above is
+    /// the same call with the world supplying all three.
+    /// </summary>
+    public static LaneGraph Build(
+        IReadOnlyList<string> sectorIds, IReadOnlyList<WorldLane> lanes,
+        Func<string, ElementTypeId?> climateOf, IReadOnlySet<string>? include = null,
+        LaneLens lens = LaneLens.Supply)
     {
-        var sectors = world.Sectors
-            .Where(s => include is null || include.Contains(s.SectorId))
-            .Select(s => s.SectorId)
+        var sectors = sectorIds
+            .Where(id => include is null || include.Contains(id))
             .OrderBy(id => id, StringComparer.Ordinal)
             .ToList();
 
@@ -58,14 +98,14 @@ public sealed class LaneGraph
         for (var i = 0; i < sectors.Count; i++) index[sectors[i]] = i;
 
         var edges = new List<LaneStepEdge>();
-        foreach (var lane in world.Lanes.OrderBy(l => l.LaneId, StringComparer.Ordinal))
+        foreach (var lane in lanes.OrderBy(l => l.LaneId, StringComparer.Ordinal))
         {
-            if (!IsTraversable(lane)) continue;
+            if (!IsTraversable(lane, lens)) continue;
             if (!index.ContainsKey(lane.FromSectorId) || !index.ContainsKey(lane.ToSectorId)) continue;
 
             // Null banner on purpose: topology is about the ground, not about who happens to be
             // walking it. A ley discount belongs to a particular legion's march, not to the map.
-            var cost = LaneCost.For(world, lane, null);
+            var cost = LaneCost.For(lane, null, climateOf);
 
             edges.Add(new LaneStepEdge(lane.FromSectorId, lane.ToSectorId, cost));
 
@@ -79,12 +119,16 @@ public sealed class LaneGraph
         return new LaneGraph(sectors, edges, index);
     }
 
-    static bool IsTraversable(WorldLane lane)
+    static bool IsTraversable(WorldLane lane, LaneLens lens)
     {
-        if (lane.State != LaneState.Open) return false;
+        // Severed is impassable to both, and a shut gate bars both — these are the same refusals
+        // `MarchResolver` makes, so a route planned through one is a route the engine would drop.
+        if (lane.State == LaneState.Severed) return false;
 
         var type = LaneTypeCatalog.Get(lane.TypeId);
-        if (!type.CarriesSupply) return false;
-        return !(type.Gated && lane.GateKeyId != null);
+        if (type.Gated && lane.GateKeyId != null) return false;
+
+        // The one difference. Grain needs a road; an army only needs somewhere to put its feet.
+        return lens == LaneLens.March || type.CarriesSupply;
     }
 }

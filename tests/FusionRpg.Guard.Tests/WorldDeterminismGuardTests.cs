@@ -67,6 +67,61 @@ public class WorldDeterminismGuardTests
             "world state must stay integer/fixed-point:\n" + string.Join("\n", violations));
     }
 
+    /// <summary>
+    /// W26 (spec-ai-commander.md §Boundaries): a policy reads belief, never the truth.
+    ///
+    /// This is the one rule in the module that no behavioural test can cover. An AI that consulted
+    /// `WorldState` would not give *wrong* answers — it would give suspiciously good ones, and every
+    /// test asserting it plays well would pass. The only way to catch a right answer arrived at by
+    /// cheating is to make the source of the cheat unmentionable.
+    /// </summary>
+    [Fact]
+    public void Nothing_under_World_Ai_may_read_the_world_itself()
+    {
+        var violations = new List<string>();
+
+        foreach (var file in WorldSourceFiles())
+        {
+            if (!file.Replace('\\', '/').Contains("/World/Ai/", StringComparison.Ordinal)) continue;
+
+            var lines = File.ReadAllLines(file);
+            for (var i = 0; i < lines.Length; i++)
+                if (ReadsTheWorldItself(lines[i]))
+                    violations.Add($"{Path.GetFileName(file)}:{i + 1} -> {lines[i].Trim()}");
+        }
+
+        Assert.True(violations.Count == 0,
+            "a faction policy must read IWorldView, never the world itself:\n" + string.Join("\n", violations));
+    }
+
+    /// <summary>
+    /// One line's verdict, factored out so the rule can be proven directly rather than only by
+    /// planting a violation in the tree and remembering to take it out again.
+    /// </summary>
+    static bool ReadsTheWorldItself(string line)
+    {
+        // A comment explaining *why* the type is out of bounds is the one place naming it is not
+        // only allowed but wanted — every file under World/Ai/ says so at the top.
+        var trimmed = line.TrimStart();
+        if (trimmed.StartsWith("//", StringComparison.Ordinal)) return false;
+
+        return line.Contains("WorldState", StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_belief_only_guard_would_actually_catch_a_violation()
+    {
+        // Seen to fail, so it is known to work.
+        Assert.True(ReadsTheWorldItself("    static WorldState? Cheat;"));
+        Assert.True(ReadsTheWorldItself("        var truth = world.Sectors; // WorldState leaked in"));
+
+        // And seen not to fire on the things it must not: the doc comments, and a type whose name
+        // merely starts the same way.
+        Assert.False(ReadsTheWorldItself("/// never touches WorldState — see the spec"));
+        Assert.False(ReadsTheWorldItself("// WorldState is deliberately unreachable from here"));
+        Assert.False(ReadsTheWorldItself("        var view = new BelievedWorldView(...);"));
+    }
+
     [Fact]
     public void The_guard_would_actually_catch_a_violation()
     {

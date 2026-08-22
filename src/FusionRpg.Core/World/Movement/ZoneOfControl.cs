@@ -19,7 +19,14 @@ public static class ZoneOfControl
     /// Guards defend the vein or the lair, not the ground, so they project nothing — marching past
     /// one is free, and taking it is a deliberate `clear` order.
     /// </summary>
-    public static bool Projects(WorldEntity entity) => entity.Kind != WorldEntityKind.Guard;
+    public static bool Projects(WorldEntity entity) => Projects(entity.Kind);
+
+    /// <summary>
+    /// The same rule asked of a kind alone, because a *remembered* force is not a
+    /// <see cref="WorldEntity"/> — belief keeps less than the world does. One rule, two shapes to ask
+    /// it about; a second copy in the AI would be a rule that has to be kept in step by hand.
+    /// </summary>
+    public static bool Projects(WorldEntityKind kind) => kind != WorldEntityKind.Guard;
 
     /// <summary>True when someone hostile to <paramref name="factionId"/> is standing in the sector.</summary>
     public static bool IsHeldAgainst(WorldState world, string sectorId, string factionId)

@@ -45,6 +45,8 @@
     <ProjectReference Include="..\FusionRpg.Core\FusionRpg.Core.csproj" />
     <ProjectReference Include="..\FusionRpg.CheatCore\FusionRpg.CheatCore.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.36" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+    <!-- In-game overlay host (overlayHost=injector). Ships the loader shim only; Chromium is the machine-wide Evergreen runtime. -->
   </ItemGroup>
 
   <ItemGroup Condition="'$(HasMelonRefs)' == 'true'">
@@ -113,4 +115,43 @@
       <Private>false</Private>
     </Reference>
   </ItemGroup>
+  <!--
+    The WebView2 package ships WPF/WinForms wrappers, XML docs and arm64/x86 natives. We use only
+    Core plus the x64 loader, and everything here lands in the player's game folder, so drop the
+    rest rather than shipping ~1.1 MB of unused payload into a modded IL2CPP install.
+  -->
+  <Target Name="TrimWebView2Payload" AfterTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths
+        Remove="@(ReferenceCopyLocalPaths)"
+        Condition="'%(Extension)' == '.xml' AND $([System.String]::new('%(Filename)').StartsWith('Microsoft.Web.WebView2'))" />
+      <ReferenceCopyLocalPaths
+        Remove="@(ReferenceCopyLocalPaths)"
+        Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf' OR '%(Filename)' == 'Microsoft.Web.WebView2.WinForms'" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    RID-specific natives resist item-group filtering (they are injected late by the SDK), so sweep
+    them from the output after the copy. The game is win-x64 only; arm64/x86 loaders would just sit
+    in the player's plugin folder looking like something they should worry about.
+  -->
+  <Target Name="TrimWebView2Natives" AfterTargets="Build">
+    <!--
+      Flatten the x64 loader next to the managed DLL. publish-player copies the plugin folder with
+      a top-level-files-only sweep, so anything under runtimes\ silently misses the player pack and
+      the in-game view degrades to "loader not found". Flat also matches where a reader expects it.
+    -->
+    <ItemGroup>
+      <_Wv2X64Loader Include="@(RuntimeTargetsCopyLocalItems)"
+                     Condition="'%(Filename)%(Extension)' == 'WebView2Loader.dll' AND $([System.String]::new('%(Identity)').Contains('win-x64'))" />
+    </ItemGroup>
+    <!-- Sourced from the package, not from $(OutputPath): an incremental build may not re-copy natives. -->
+    <Copy SourceFiles="@(_Wv2X64Loader)" DestinationFolder="$(OutputPath)" ContinueOnError="true" />
+    <ItemGroup>
+      <_Wv2Runtimes Include="$(OutputPath)runtimes\**\*" />
+    </ItemGroup>
+    <Delete Files="@(_Wv2Runtimes)" ContinueOnError="true" />
+    <RemoveDir Directories="$(OutputPath)runtimes" ContinueOnError="true" />
+  </Target>
 </Project>

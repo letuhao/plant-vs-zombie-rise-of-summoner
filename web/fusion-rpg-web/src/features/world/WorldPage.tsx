@@ -14,6 +14,7 @@ import { Badge, Banner, Button, KeyValue, Panel } from "@/ui";
 import firstLight from "./fixtures/first-light.json";
 import { LaneEdge } from "./LaneEdge";
 import { SectorNode, type SectorNodeProps } from "./SectorNode";
+import { toCommanderIntents } from "./commanderIntent";
 import { stepPlayback, toKeyframes } from "./turnPlayback";
 import type { WorldStateDto } from "./worldTypes";
 import { toGraph } from "./worldViewModel";
@@ -73,6 +74,7 @@ export function WorldPage() {
   const lastTurn = world.currentTurn - 1;
   const report = useWorldTurnReport(worldId, isLive && lastTurn >= 0 ? lastTurn : null);
   const frames = useMemo(() => toKeyframes(report.data), [report.data]);
+  const intents = useMemo(() => toCommanderIntents(report.data), [report.data]);
 
   // The world as it was before the last turn resolved: what makes a march slide along its lane
   // rather than snap to wherever the turn left it.
@@ -157,7 +159,7 @@ export function WorldPage() {
   const endTurn = async () => {
     if (!worldId) return;
     try {
-      const result = await commit.mutateAsync({});
+      const result = await commit.mutateAsync({ turn: world.currentTurn });
       setNotice(
         result.advanced
           ? `turn ${result.currentTurn - 1} resolved`
@@ -329,6 +331,19 @@ export function WorldPage() {
                   ))}
                 </ul>
               )}
+            </Panel>
+          ) : null}
+
+          {intents.length > 0 ? (
+            <Panel title="What they were thinking" testId="world-intents">
+              <ul className="space-y-1 text-xs" data-testid="intent-list">
+                {intents.map((intent) => (
+                  <li key={`${intent.commanderId}/${intent.commandId}`} data-testid={`intent-${intent.commanderId}`}>
+                    <span className="text-text">{intent.action}</span>
+                    <span className="text-muted"> — {intent.reason}</span>
+                  </li>
+                ))}
+              </ul>
             </Panel>
           ) : null}
 

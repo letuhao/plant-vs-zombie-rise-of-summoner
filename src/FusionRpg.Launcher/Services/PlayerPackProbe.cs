@@ -61,6 +61,7 @@ public sealed class PlayerPackProbe
         packDir = Path.GetFullPath(packDir);
         steps.Add(ProbeLayout(packDir));
         steps.Add(ProbeManifest(packDir));
+        steps.Add(ProbeOverlayPayload(packDir));
         steps.Add(ProbeLoaderAndPlugin(packDir));
         steps.Add(ProbeDualLoadRefuse(packDir));
         steps.Add(ProbeUpdatePreserve(packDir));
@@ -86,6 +87,76 @@ public sealed class PlayerPackProbe
         if (missing.Count > 0)
             return new PlayerPackProbeStep("layout", false, "Missing: " + string.Join(", ", missing));
         return new PlayerPackProbeStep("layout", true, "Required pack files present.");
+    }
+
+    /// <summary>Set to 1 to release knowingly without a MelonLoader drop.</summary>
+    public const string AllowNoMelonEnv = "FUSIONRPG_ALLOW_NO_MELON";
+
+    /// <summary>Type names that only exist in an injector carrying the in-game overlay.</summary>
+    static readonly string[] OverlayMarkers = { "OverlayViewHost", "OverlaySwitchGui" };
+
+    /// <summary>
+    /// The in-game browser needs three things to line up, and each can go missing quietly:
+    /// the launcher's own WebView2 (F10 overlay), an injector that actually contains the overlay
+    /// code, and the WebView2 files sitting <b>beside</b> that injector. PluginInstaller copies
+    /// top-level files only, so a loader one folder down reaches nobody.
+    /// A cloud release builds the injector from a committed fallback drop, which is exactly how a
+    /// release can ship a working launcher and a feature-less injector.
+    /// </summary>
+    public PlayerPackProbeStep ProbeOverlayPayload(string packDir)
+    {
+        var problems = new List<string>();
+
+        foreach (var required in new[] { "Microsoft.Web.WebView2.Core.dll", "WebView2Loader.dll" })
+        {
+            if (!File.Exists(Path.Combine(packDir, required)))
+                problems.Add($"launcher is missing {required} (the F10 overlay cannot open)");
+        }
+
+        var dropRoot = Path.Combine(packDir, "DropIntoGame");
+        var drops = Directory.Exists(dropRoot)
+            ? Directory.EnumerateFiles(dropRoot, "FusionRpg.Injector*.dll", SearchOption.AllDirectories)
+                .Where(f => !Path.GetFileNameWithoutExtension(f).EndsWith(".deps", StringComparison.OrdinalIgnoreCase))
+                .ToList()
+            : new List<string>();
+
+        if (drops.Count == 0)
+        {
+            problems.Add("no injector found under DropIntoGame");
+        }
+
+        var sawMelon = false;
+        foreach (var injector in drops)
+        {
+            var dir = Path.GetDirectoryName(injector)!;
+            var where = dir.Substring(packDir.Length).TrimStart(Path.DirectorySeparatorChar);
+            if (dir.Contains("MelonLoader", StringComparison.OrdinalIgnoreCase)) sawMelon = true;
+
+            foreach (var required in new[] { "Microsoft.Web.WebView2.Core.dll", "WebView2Loader.dll" })
+            {
+                if (!File.Exists(Path.Combine(dir, required)))
+                    problems.Add($"{where}: missing {required} beside the injector");
+            }
+
+            // A stale drop is the failure mode that ships silently, so name it plainly.
+            string text;
+            try { text = File.ReadAllText(injector); }
+            catch (Exception ex) { problems.Add($"{where}: could not read the injector ({ex.GetType().Name})"); continue; }
+
+            if (!OverlayMarkers.All(marker => text.Contains(marker, StringComparison.Ordinal)))
+                problems.Add($"{where}: injector has no in-game overlay code — this looks like a stale drop");
+        }
+
+        if (drops.Count > 0 && !sawMelon &&
+            !string.Equals(Environment.GetEnvironmentVariable(AllowNoMelonEnv), "1", StringComparison.Ordinal))
+        {
+            problems.Add($"no MelonLoader drop (set {AllowNoMelonEnv}=1 to ship without one deliberately)");
+        }
+
+        return problems.Count > 0
+            ? new PlayerPackProbeStep("overlay-payload", false, string.Join("; ", problems))
+            : new PlayerPackProbeStep("overlay-payload", true,
+                $"In-game overlay shippable ({drops.Count} injector drop(s), WebView2 beside each).");
     }
 
     PlayerPackProbeStep ProbeManifest(string packDir)

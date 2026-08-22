@@ -27,23 +27,10 @@ The `effect_atom` table: the **SSOT base effect list**. One row is one atom — 
 | `power_override_json` | TEXT | nullable designer override |
 | `power_note` | TEXT | **required when an override is set** |
 | `icd_key` | TEXT, nullable, defaults to `atom_id`. **E7 groups on it at compile time** — atoms sharing a key compile into one grant whose `Triggers` is the union of theirs (definitions §14.1). Not a runtime key |
-| `icd_key` | TEXT, nullable, defaults to `atom_id`. **E7 groups on it at compile time** — atoms sharing a key compile into one grant whose `Triggers` is the union of theirs (definitions §14.1). Not a runtime key |
 | `enabled` | INT | 0/1 |
 | `revision` | INT | cache bust; joins the content hash (E8) |
 
 **E4 also creates `content_meta`** — the one-row table holding `catalog_revision`, the monotonic integer E6 reproduces against and E7 keys its bake cache on. It lands here because E4 is the earliest module in `FusionRpg.Data`, and E14a (the importer) bumps it once per import transaction.
-
-**`icd_key`** — TEXT, nullable, defaulting to `atom_id`. Atoms sharing a key share one ICD clock, which is
-how `fx.shield_grant`'s three triggers stay one clock after the split ([definitions.md](definitions.md) §14.1).
-The cooldown is a named thing, not a property of the grant — the same separation Unreal GAS makes with
-cooldown tags.
-
-**E4 also creates `content_meta`** — the one-row table holding `catalog_revision`, the monotonic integer E6 reproduces against and E7 keys its bake cache on. It lands here because E4 is the earliest module in `FusionRpg.Data`, and E14a (the importer) bumps it once per import transaction.
-
-**`icd_key`** — TEXT, nullable, defaulting to `atom_id`. Atoms sharing a key share one ICD clock, which is
-how `fx.shield_grant`'s three triggers stay one clock after the split ([definitions.md](definitions.md) §14.1).
-The cooldown is a named thing, not a property of the grant — the same separation Unreal GAS makes with
-cooldown tags.
 
 **Unique:** `(family_id, tier, variant)`. *(The earlier `(family_id, tier)` forbade the generation rule outright — `elemental_power` × 7 element slots (6 elements + `omni`) × 5 tiers is 35 rows over 5 tiers, and the key rejected 30 of them.)* `atom_id` is **derived** as `{family_id}[.{variant}].t{tier}` and validated against its columns; a mismatch is `IdMismatch`. **Indexed:** `kind_id`, and the trigger extracted from `when_json` — the bag already keeps a trigger index, and the runner (E15) needs the same shape.
 

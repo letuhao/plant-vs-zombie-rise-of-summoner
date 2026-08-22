@@ -131,18 +131,13 @@ public partial class MainWindow : FluentWindow
         _settings.TrustAcknowledged = true;
         _settings.Save();
         RefreshTrustStatusUi();
-        AppendLog("Trust acknowledged (unsigned hobby OSS).");
+        AppendLog("Trust acknowledged (unsigned hobby OSS). " +
+                  "Optional: Prepare Windows Security (Defender only) — never required to play.");
 
-        var prep = MessageBox.Show(
-            this,
-            "Prepare Microsoft Defender now?\n\n" +
-            WindowsSecurityPrepare.ConfirmDialogText(_baseDir),
-            "Prepare Windows Security?",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-        if (prep == MessageBoxResult.Yes)
-            _ = RunPrepareWindowsSecurityAsync(alreadyConfirmed: true);
-
+        // Deliberately does NOT offer the Defender prepare here. Chaining it onto first run made
+        // the launcher look like it needs administrator rights just to start, and the exclusion is
+        // Defender-only: it does nothing at all for players on Bitdefender, Kaspersky and friends.
+        // The button stays available for anyone who actually wants it.
         return true;
     }
 
@@ -232,13 +227,18 @@ public partial class MainWindow : FluentWindow
         menu.Items.Add("Play", null, (_, _) => Dispatcher.Invoke(() => Play_Click(this, new RoutedEventArgs())));
         menu.Items.Add("Stop all", null, (_, _) => Dispatcher.Invoke(() => StopAll_Click(this, new RoutedEventArgs())));
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Exit", null, (_, _) =>
+        menu.Items.Add("Exit", null, (_, _) => Dispatcher.Invoke(() =>
         {
+            // Same question as closing the window. This used to stop the server and game outright,
+            // with no prompt at all, which killed a match in progress without warning.
+            var choice = AskHowToExit();
+            if (choice == MessageBoxResult.Cancel) return;
+            if (choice == MessageBoxResult.Yes) _session.StopAll();
+
             _forceClose = true;
-            _session.StopAll();
             _tray!.Visible = false;
             Close();
-        });
+        }));
         _tray.ContextMenuStrip = menu;
     }
 
@@ -1020,19 +1020,27 @@ public partial class MainWindow : FluentWindow
         label.Text = on ? $"{name}: online" : $"{name}: stopped";
     }
 
+    /// <summary>
+    /// Asks before taking the game and server down with us. Defaults to <c>No</c>: closing the
+    /// launcher mid-match must never cost a run just because someone hit Enter.
+    /// </summary>
+    MessageBoxResult AskHowToExit() =>
+        System.Windows.MessageBox.Show(
+            this,
+            "Exit launcher only (leave server/game running),\nor stop everything?\n\n" +
+            "Yes = stop server + game and exit\n" +
+            "No = exit launcher only (safe while playing)\n" +
+            "Cancel = stay open",
+            "Close FusionRpg Launcher",
+            MessageBoxButton.YesNoCancel,
+            MessageBoxImage.Question,
+            MessageBoxResult.No);
+
     void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         if (_forceClose) return;
 
-        var result = System.Windows.MessageBox.Show(
-            this,
-            "Exit launcher only (leave server/game running),\nor stop everything?\n\n" +
-            "Yes = stop server + game and exit\n" +
-            "No = exit launcher only\n" +
-            "Cancel = stay open",
-            "Close FusionRpg Launcher",
-            MessageBoxButton.YesNoCancel,
-            MessageBoxImage.Question);
+        var result = AskHowToExit();
 
         if (result == MessageBoxResult.Cancel)
         {

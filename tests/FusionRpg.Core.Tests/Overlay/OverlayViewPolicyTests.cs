@@ -74,6 +74,81 @@ public class OverlayViewPolicyTests
         Assert.False(OverlayViewPolicy.ShouldNavigateOnShow(lastNavigationSucceeded: true));
     }
 
+    // ---- the view runs inside the game process, so keep it on our own origin ----
+
+    [Theory]
+    [InlineData("http://127.0.0.1:5088", "http://127.0.0.1:5088/")]
+    [InlineData("http://127.0.0.1:5088", "http://127.0.0.1:5088/#/roster")]
+    [InlineData("http://127.0.0.1:5088/", "http://127.0.0.1:5088/api/stats")]
+    [InlineData("http://127.0.0.1:5088", "http://127.0.0.1:5088/deep/path?q=1")]
+    public void Our_own_pages_are_allowed(string server, string target)
+    {
+        Assert.True(OverlayViewPolicy.IsSameOrigin(server, target));
+    }
+
+    [Theory]
+    [InlineData("http://127.0.0.1:5088", "https://github.com/letuhao1994/plant-vs-zombie-rise-of-summoner")]
+    [InlineData("http://127.0.0.1:5088", "http://127.0.0.1:9999/")]
+    [InlineData("http://127.0.0.1:5088", "https://127.0.0.1:5088/")]
+    [InlineData("http://127.0.0.1:5088", "http://evil.example/")]
+    public void Anything_off_origin_is_refused(string server, string target)
+    {
+        // An external link must not load inside the game process; it belongs in the real browser.
+        Assert.False(OverlayViewPolicy.IsSameOrigin(server, target));
+    }
+
+    [Theory]
+    [InlineData("about:blank")]
+    [InlineData("edge://settings")]
+    [InlineData("file:///C:/Windows/win.ini")]
+    [InlineData("javascript:alert(1)")]
+    [InlineData("not a url")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void Non_http_and_junk_targets_are_refused(string? target)
+    {
+        Assert.False(OverlayViewPolicy.IsSameOrigin("http://127.0.0.1:5088", target));
+    }
+
+    [Fact]
+    public void Host_comparison_ignores_case()
+    {
+        Assert.True(OverlayViewPolicy.IsSameOrigin("http://LocalHost:5088", "http://localhost:5088/x"));
+    }
+
+    [Fact]
+    public void An_unusable_server_url_refuses_everything()
+    {
+        // Fail closed: if we cannot tell what our origin is, nothing is same-origin.
+        Assert.False(OverlayViewPolicy.IsSameOrigin("", "http://127.0.0.1:5088/"));
+        Assert.False(OverlayViewPolicy.IsSameOrigin("nonsense", "http://127.0.0.1:5088/"));
+    }
+
+    // ---- handing a link to the OS shell ----
+
+    [Theory]
+    [InlineData("https://github.com/letuhao1994/plant-vs-zombie-rise-of-summoner")]
+    [InlineData("http://example.com/docs")]
+    public void Web_links_may_be_opened_in_the_real_browser(string uri)
+    {
+        Assert.True(OverlayViewPolicy.IsExternallyOpenable(uri));
+    }
+
+    [Theory]
+    [InlineData("file:///C:/Windows/System32/cmd.exe")]
+    [InlineData("javascript:alert(1)")]
+    [InlineData("ms-settings:privacy")]
+    [InlineData("steam://run/12345")]
+    [InlineData("not a url")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void Anything_that_is_not_a_web_link_is_never_handed_to_the_shell(string? uri)
+    {
+        // Process.Start with UseShellExecute runs whatever protocol handler is registered,
+        // so only http(s) may ever reach it.
+        Assert.False(OverlayViewPolicy.IsExternallyOpenable(uri));
+    }
+
     // ---- idle cost inside a game process ----
 
     [Fact]

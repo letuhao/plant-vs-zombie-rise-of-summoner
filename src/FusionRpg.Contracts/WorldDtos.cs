@@ -180,6 +180,9 @@ public sealed record WorldCommandResultDto
 public sealed class CommitWorldTurnRequest
 {
     public string? CommanderId { get; set; }
+
+    /// <summary>The turn the caller means to end. Required — a commit without one is refused.</summary>
+    public int? Turn { get; set; }
 }
 
 public sealed record WorldTurnCommitDto
@@ -211,6 +214,24 @@ public sealed record WorldTurnReportDto
     public string StateHash { get; init; } = "";
     public IReadOnlyList<string> Phases { get; init; } = Array.Empty<string>();
     public IReadOnlyList<WorldTurnEntryDto> Entries { get; init; } = Array.Empty<WorldTurnEntryDto>();
+
+    /// <summary>
+    /// The orders the turn was given, and — for the ones an AI gave — why. Reports outside the hot
+    /// tail are re-derived and can come back empty; commands never are, because they *are* the save,
+    /// so this list survives a trim that empties <see cref="Entries"/>.
+    /// </summary>
+    public IReadOnlyList<WorldTurnCommandDto> Commands { get; init; } = Array.Empty<WorldTurnCommandDto>();
+}
+
+/// <summary>One order as the log holds it. `Reason` is null for anything a person filed.</summary>
+public sealed record WorldTurnCommandDto
+{
+    public string CommanderId { get; init; } = "";
+    public string CommandId { get; init; } = "";
+    public string Kind { get; init; } = "";
+    public string? EntityId { get; init; }
+    public string? SectorId { get; init; }
+    public string? Reason { get; init; }
 }
 
 /// <summary>SIM-only creation request.</summary>

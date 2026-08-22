@@ -191,13 +191,29 @@ public class AtomKindRegistryTests
         Assert.Equal(AtomRejectionReason.ParamNotImplemented, r.Reason);
     }
 
-    // G5: an empty target used to mean "every zombie on the board".
+    // G5: an empty target means "every zombie on the board" — and D7 established that this CANNOT be
+    // closed here. FA2 has no `target` param at all; the target comes from ResolveStatusTargetPtr(ctx),
+    // i.e. from the event, at runtime. A required-key check would have declared a key the executor
+    // never reads, so content would validate and the hole would stay open. The fix belongs to whoever
+    // guards the FindObjectsOfType<Zombie>() loop, not to load-time validation.
     [Fact]
-    public void StatusApply_requires_an_explicit_target()
+    public void StatusApply_does_not_pretend_to_close_G5_with_a_param()
     {
-        var r = AtomKindRegistry.Validate("status.apply", P(("statusId", "butter")));
+        Assert.False(
+            AtomKindRegistry.Get("status.apply")!.Params.Defs.Any(d => d.Name == "target"),
+            "FA2 carries no target param; declaring one would validate a key nothing reads");
+
+        // The FA2 shape that really is authorable validates.
+        Assert.True(AtomKindRegistry.Validate("status.apply", P(("status", "butter"))).IsOk);
+    }
+
+    // The counterpart: a missing `status` is a real load-time refusal, because FA2 does read it.
+    [Fact]
+    public void StatusApply_requires_the_status_name_FA2_reads()
+    {
+        var r = AtomKindRegistry.Validate("status.apply", P(("level", 1)));
         Assert.Equal(AtomRejectionReason.MissingParam, r.Reason);
-        Assert.Contains("target", r.Detail);
+        Assert.Contains("status", r.Detail);
     }
 
     [Fact]
@@ -252,5 +268,27 @@ public class AtomKindRegistryTests
         Assert.Contains("arm1Max", AtomKindRegistry.PrimaryChannels);
         Assert.DoesNotContain("attackInterval", AtomKindRegistry.PrimaryChannels);
         Assert.DoesNotContain("zombieSpeed", AtomKindRegistry.PrimaryChannels);
+    }
+
+    // G6: the registry declares PrimaryChannels and, until now, never read it — so `channel: "atkk"`
+    // validated and then wrote nothing. Declared-but-unread is the same silent no-op as an unknown
+    // leaf, which is the failure this module exists to refuse.
+    [Fact]
+    public void An_unknown_primary_channel_is_rejected()
+    {
+        var r = AtomKindRegistry.Validate("stat.modify",
+            P(("channel", "atkk"), ("op", "flat"), ("amount", 10)));
+
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+    }
+
+    [Fact]
+    public void Every_real_primary_channel_is_accepted()
+    {
+        foreach (var channel in AtomKindRegistry.PrimaryChannels)
+            Assert.True(
+                AtomKindRegistry.Validate("stat.modify",
+                    P(("channel", channel), ("op", "flat"), ("amount", 10))).IsOk,
+                channel);
     }
 }
