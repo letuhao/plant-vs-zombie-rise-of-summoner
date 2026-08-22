@@ -157,7 +157,7 @@ public sealed partial class RpgStore
         ins.Parameters.AddWithValue("$seq", seq);
         ins.Parameters.AddWithValue("$kind", command.Kind);
         ins.Parameters.AddWithValue("$payload", JsonSerializer.Serialize(new CommandPayload(
-            command.EntityId, command.SectorId, command.SlotIndex, command.LanePath)));
+            command.EntityId, command.SectorId, command.SlotIndex, command.LanePath, command.Stance)));
         ins.Parameters.AddWithValue("$now", now);
         ins.ExecuteNonQuery();
     }
@@ -186,7 +186,7 @@ public sealed partial class RpgStore
             while (r.Read())
             {
                 var payload = JsonSerializer.Deserialize<CommandPayload>(r.GetString(3))
-                              ?? new CommandPayload(null, null, null, Array.Empty<string>());
+                              ?? new CommandPayload(null, null, null, Array.Empty<string>(), null);
                 list.Add(new WorldCommand
                 {
                     CommanderId = r.GetString(0),
@@ -195,6 +195,7 @@ public sealed partial class RpgStore
                     EntityId = payload.EntityId,
                     SectorId = payload.SectorId,
                     SlotIndex = payload.SlotIndex,
+                    Stance = payload.Stance,
                     LanePath = payload.LanePath ?? Array.Empty<string>()
                 });
             }
@@ -203,8 +204,14 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// Every optional field a command can carry. Adding one to <see cref="WorldCommand"/> and
+    /// forgetting it here loses it in the round trip and the order comes back malformed — which is
+    /// exactly how `stance` was found missing.
+    /// </summary>
     sealed record CommandPayload(
-        string? EntityId, string? SectorId, int? SlotIndex, IReadOnlyList<string>? LanePath);
+        string? EntityId, string? SectorId, int? SlotIndex, IReadOnlyList<string>? LanePath,
+        string? Stance = null);
 
     /// <summary>Reports are kept for the most recent turns; older ones are re-derived on demand.</summary>
     public const int ReportHotTail = 50;
@@ -424,7 +431,7 @@ public sealed partial class RpgStore
         while (r.Read())
         {
             var payload = JsonSerializer.Deserialize<CommandPayload>(r.GetString(3))
-                          ?? new CommandPayload(null, null, null, Array.Empty<string>());
+                          ?? new CommandPayload(null, null, null, Array.Empty<string>(), null);
             list.Add(new WorldCommand
             {
                 CommanderId = r.GetString(0),
@@ -433,6 +440,7 @@ public sealed partial class RpgStore
                 EntityId = payload.EntityId,
                 SectorId = payload.SectorId,
                 SlotIndex = payload.SlotIndex,
+                Stance = payload.Stance,
                 LanePath = payload.LanePath ?? Array.Empty<string>()
             });
         }

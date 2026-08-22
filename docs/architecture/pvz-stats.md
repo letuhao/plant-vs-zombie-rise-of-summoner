@@ -13,6 +13,12 @@ See also: [stat-system.md](stat-system.md), [actor-hub-ssot.md](actor-hub-ssot.m
 | **Cheats** | Global operator overlay (separate forever) |
 | **RPG stats** (later) | Progression/content that **upserts into** PvzStats or **Actor Hub derived catalog** |
 
+> **This row is about the RPG modifying the *game's* stats — not about the RPG storing its own state here.** (Clarified 2026-08-22 after the line was misread twice.) Upserting `pvz_stat_modifiers` is a **command**: "make this plant tougher." It is legitimate and shipped.
+>
+> What is never correct is putting an RPG gameplay concept into the PvZ channel because it looks like a stat. RPG resources, actions, skills, and their pools live entirely in `rpg.*` — the eight `StatChannels` are the game's stats, not ours. The two systems share **no state in either direction**, only messages ([software-architecture.md](software-architecture.md) §3).
+>
+> Rule of thumb: if PvZ would be meaningless without it, it belongs here. If PvZ neither knows nor cares about it, it does not.
+
 ```text
 RPG features (later)
   → upsert pvz_stat_modifiers and/or derived catalog channels

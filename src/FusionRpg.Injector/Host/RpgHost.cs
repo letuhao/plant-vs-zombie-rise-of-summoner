@@ -15,11 +15,14 @@ public static class RpgHost
     static string _pluginDir = "";
     static string _serverUrl = DefaultServerUrl;
     static string _gameProfileId = FusionRpg.Contracts.RpgConstants.GameId381;
+    static FusionRpg.Core.Overlay.OverlayHostMode _overlayHost = FusionRpg.Core.Overlay.OverlayHostMode.Launcher;
 
     public static IRpgLog Log => _log;
     public static IRpgConfig Config => _config;
     public static string PluginDir => _pluginDir;
     public static string ServerUrl => _serverUrl;
+    /// <summary>Which process owns the web overlay window. Default Launcher.</summary>
+    public static FusionRpg.Core.Overlay.OverlayHostMode OverlayHost => _overlayHost;
     /// <summary>Active game profile id (e.g. pvzrh-3.8.1) from compile-time bridge.</summary>
     public static string GameProfileId => _gameProfileId;
     public static RpgClient? Client { get; set; }
@@ -41,6 +44,10 @@ public static class RpgHost
             ? envUrl.Trim().TrimEnd('/')
             : (string.IsNullOrWhiteSpace(cfgUrl) ? DefaultServerUrl : cfgUrl.Trim().TrimEnd('/'));
 
+        _overlayHost = FusionRpg.Core.Overlay.OverlayHostSelection.Resolve(
+            Environment.GetEnvironmentVariable(FusionRpg.Core.Overlay.OverlayHostSelection.EnvVar),
+            _config.OverlayHost);
+
         EnableUnsafeHitPatches = _config.EnableUnsafeHitPatches;
         try { _gameProfileId = Bridges.ZombieCombatFields.ProfileId; }
         catch { _gameProfileId = FusionRpg.Contracts.RpgConstants.GameId381; }
@@ -55,6 +62,7 @@ public static class RpgHost
 public sealed class DefaultRpgConfig : IRpgConfig
 {
     public string ServerUrl => RpgHost.DefaultServerUrl;
+    public string OverlayHost => "launcher";
     public bool PersistCheats => false;
     public bool EnableUnsafeHitPatches => false;
 }

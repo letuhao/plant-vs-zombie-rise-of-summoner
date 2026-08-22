@@ -53,6 +53,18 @@ public static class OverlaySettings
         }
     }
 
+    /// <summary>Draw the in-game overlay switch button. Presentation preference only.</summary>
+    public static bool OverlayButtonEnabled
+    {
+        get => _state.OverlayButtonEnabled;
+        set
+        {
+            if (_state.OverlayButtonEnabled == value) return;
+            _state.OverlayButtonEnabled = value;
+            Save();
+        }
+    }
+
     public static bool SettingsOpen { get; set; }
 
     public static void Init(string pluginDir)
@@ -63,6 +75,8 @@ public static class OverlaySettings
     }
 
     public static void ToggleShieldBar() => ShieldBarEnabled = !ShieldBarEnabled;
+
+    public static void ToggleOverlayButton() => OverlayButtonEnabled = !OverlayButtonEnabled;
 
     public static void ToggleSettingsOpen() => SettingsOpen = !SettingsOpen;
 
@@ -75,6 +89,7 @@ public static class OverlaySettings
             var loaded = JsonSerializer.Deserialize<State>(json, JsonOpts);
             if (loaded == null) return;
             _state.ShieldBarEnabled = loaded.ShieldBarEnabled;
+            _state.OverlayButtonEnabled = loaded.OverlayButtonEnabled;
             if (!string.IsNullOrWhiteSpace(loaded.ShieldBarHotKey))
                 _state.ShieldBarHotKey = loaded.ShieldBarHotKey.Trim();
             if (!string.IsNullOrWhiteSpace(loaded.SettingsHotKey))
@@ -103,6 +118,7 @@ public static class OverlaySettings
     sealed class State
     {
         public bool ShieldBarEnabled { get; set; } = true;
+        public bool OverlayButtonEnabled { get; set; } = true;
         public string ShieldBarHotKey { get; set; } = "F9";
         public string SettingsHotKey { get; set; } = "F7";
 

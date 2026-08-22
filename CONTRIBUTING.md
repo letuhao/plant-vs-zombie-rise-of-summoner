@@ -47,6 +47,10 @@ Never hardcode machine-local paths like `H:\Games\...` in code or player docs.
 
 ## Boundaries
 
+- **Read [docs/DESIGN-GATE.md](docs/DESIGN-GATE.md) before proposing any design change.** It names,
+  per subsystem, the documents you must read first. This repo runs several programs in parallel and
+  its subsystems are deliberately asynchronous — proposals written without reading the relevant
+  architecture are the most common source of wasted review time.
 - Do **not** commit game binaries, BepInEx/MelonLoader runtimes, or large interop dumps.
 - Do **not** add code that downloads or patches the PVZ Fusion game binary. “Update” means FusionRpg only.
 - Dual-loading BepInEx + MelonLoader remains forbidden.

@@ -52,7 +52,9 @@ public class WorldE2ETests : IAsyncLifetime
         Assert.Equal(6, state.GetProperty("sectors").GetArrayLength());
         Assert.Equal(6, state.GetProperty("lanes").GetArrayLength());
         Assert.Equal(3, state.GetProperty("factions").GetArrayLength());
-        Assert.Equal(2, state.GetProperty("entities").GetArrayLength());
+        // `entities` is the viewer's own forces now — everything else is believed, per sector,
+        // at whatever detail it was seen (world-intel).
+        Assert.Equal(1, state.GetProperty("entities").GetArrayLength());
     }
 
     [Fact]

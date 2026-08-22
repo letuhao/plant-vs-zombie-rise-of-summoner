@@ -7,12 +7,14 @@ public sealed class FileRpgConfig : IRpgConfig
     public const string FallbackServerUrl = "http://127.0.0.1:5088";
 
     public string ServerUrl { get; private set; }
+    public string OverlayHost { get; private set; }
     public bool PersistCheats { get; private set; }
     public bool EnableUnsafeHitPatches { get; private set; }
 
     public FileRpgConfig(string cfgPath)
     {
         ServerUrl = FallbackServerUrl;
+        OverlayHost = "launcher";
         PersistCheats = false;
         EnableUnsafeHitPatches = false;
 
@@ -28,6 +30,8 @@ public sealed class FileRpgConfig : IRpgConfig
             var val = line[(eq + 1)..].Trim();
             if (key.Equals("ServerUrl", StringComparison.OrdinalIgnoreCase))
                 ServerUrl = string.IsNullOrWhiteSpace(val) ? FallbackServerUrl : val;
+            else if (key.Equals("OverlayHost", StringComparison.OrdinalIgnoreCase))
+                OverlayHost = val;
             else if (key.Equals("PersistCheats", StringComparison.OrdinalIgnoreCase)
                      && bool.TryParse(val, out var p))
                 PersistCheats = p;

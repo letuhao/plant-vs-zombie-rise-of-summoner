@@ -16,6 +16,7 @@ const links = [
   { to: "/log", label: "Log" },
   { to: "/runs", label: "Runs" },
   { to: "/lawn", label: "Lawn" },
+  { to: "/world", label: "World" },
   { to: "/roster", label: "Roster" },
   { to: "/demons", label: "Demons" },
   { to: "/expeditions", label: "Expeditions" },

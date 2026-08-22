@@ -22,9 +22,17 @@ public static class WorldTemplateCatalog
     public static WorldState Build(string templateId, ulong seed, string worldId = "world-1") =>
         templateId switch
         {
-            FirstLightId => WorldValidation.Validate(FirstLight(seed, worldId)),
+            FirstLightId => WorldValidation.Validate(WithSeededIntel(FirstLight(seed, worldId))),
             _ => throw new ArgumentException($"Unknown world template id '{templateId}'.")
         };
+
+    /// <summary>
+    /// Turns the authored `AuthoredIntel` on each sector into the player faction's opening belief.
+    /// Without it a new map opens completely dark and `first-light`'s carefully written opening
+    /// reads as six identical silhouettes.
+    /// </summary>
+    static WorldState WithSeededIntel(WorldState world) =>
+        world with { Intel = Intel.IntelSeed.ForTemplate(world) };
 
     // Faction ids
     const string Dave = "dave";
@@ -59,7 +67,7 @@ public static class WorldTemplateCatalog
             new()
             {
                 SectorId = "ash-waste", TypeId = "barren", Climate = ElementTypeId.Earth, DangerBand = 2,
-                Phase = SectorPhase.Unknown, Intel = IntelState.Rumored, LayoutX = 4, LayoutY = 0,
+                Phase = SectorPhase.Unknown, AuthoredIntel = IntelState.Rumored, LayoutX = 4, LayoutY = 0,
                 Slots = new WorldSlot[]
                 {
                     new() { SlotIndex = 0, SlotTypeId = "wildland" },
@@ -70,7 +78,7 @@ public static class WorldTemplateCatalog
             new()
             {
                 SectorId = "black-gate", TypeId = "nexus", Climate = ElementTypeId.Dark, DangerBand = 3,
-                Phase = SectorPhase.Unknown, Intel = IntelState.Unknown, LayoutX = 6, LayoutY = 1,
+                Phase = SectorPhase.Unknown, AuthoredIntel = IntelState.Unknown, LayoutX = 6, LayoutY = 1,
                 Slots = new WorldSlot[]
                 {
                     new() { SlotIndex = 0, SlotTypeId = "seat", GuardWaveId = GuardHeavy, GuardState = GuardState.Intact },
@@ -81,7 +89,7 @@ public static class WorldTemplateCatalog
             new()
             {
                 SectorId = "ember-hollow", TypeId = "stable", Climate = ElementTypeId.Fire, DangerBand = 1,
-                Phase = SectorPhase.Unknown, Intel = IntelState.Scouted, LayoutX = 2, LayoutY = -1,
+                Phase = SectorPhase.Unknown, AuthoredIntel = IntelState.Scouted, LayoutX = 2, LayoutY = -1,
                 Slots = new WorldSlot[]
                 {
                     new() { SlotIndex = 0, SlotTypeId = "seat" },
@@ -93,7 +101,7 @@ public static class WorldTemplateCatalog
             new()
             {
                 SectorId = "frost-mire", TypeId = "stable", Climate = ElementTypeId.Ice, DangerBand = 1,
-                Phase = SectorPhase.Unknown, Intel = IntelState.Rumored, LayoutX = 2, LayoutY = 1,
+                Phase = SectorPhase.Unknown, AuthoredIntel = IntelState.Rumored, LayoutX = 2, LayoutY = 1,
                 Slots = new WorldSlot[]
                 {
                     new() { SlotIndex = 0, SlotTypeId = "seat" },
@@ -104,7 +112,7 @@ public static class WorldTemplateCatalog
             new()
             {
                 SectorId = "homeworld", TypeId = "homeworld", Climate = null, DangerBand = 0,
-                Phase = SectorPhase.Held, OwnerFactionId = Dave, Intel = IntelState.Watched,
+                Phase = SectorPhase.Held, OwnerFactionId = Dave, AuthoredIntel = IntelState.Watched,
                 StabilityMilli = 1000, LayoutX = 0, LayoutY = 0,
                 Slots = new WorldSlot[]
                 {
@@ -116,7 +124,7 @@ public static class WorldTemplateCatalog
             new()
             {
                 SectorId = "verdant-shelf", TypeId = "rich", Climate = ElementTypeId.Earth, DangerBand = 3,
-                Phase = SectorPhase.Unknown, Intel = IntelState.Unknown, LayoutX = 6, LayoutY = -1,
+                Phase = SectorPhase.Unknown, AuthoredIntel = IntelState.Unknown, LayoutX = 6, LayoutY = -1,
                 Slots = new WorldSlot[]
                 {
                     new() { SlotIndex = 0, SlotTypeId = "seat" },

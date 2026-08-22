@@ -15,11 +15,11 @@ public class TurnFsmTests
         Assert.Equal(TurnState.Charging, m.State);
         m.TransitionTo(TurnState.Ready);
         m.TransitionTo(TurnState.Committed);
-        Assert.True(m.HoldsSlot);
+        Assert.True(m.IsMidAction);
         m.TransitionTo(TurnState.Resolving);
-        Assert.True(m.HoldsSlot);
+        Assert.True(m.IsMidAction);
         m.TransitionTo(TurnState.Recovering);
-        Assert.False(m.HoldsSlot);
+        Assert.False(m.IsMidAction);
         m.TransitionTo(TurnState.Charging);
     }
 
@@ -157,7 +157,7 @@ public class TurnFsmTests
         var m = M();
         m.TransitionTo(TurnState.Ready);
         m.TransitionTo(TurnState.Charging);
-        Assert.False(m.HoldsSlot);
+        Assert.False(m.IsMidAction);
     }
 
     /// <summary>

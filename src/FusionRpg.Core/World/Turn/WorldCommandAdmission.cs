@@ -39,9 +39,35 @@ public static class WorldCommandAdmission
                 return (false, "entity.not-yours");
         }
 
-        if (command.SectorId is { } sectorId
-            && world.Sectors.All(s => !string.Equals(s.SectorId, sectorId, StringComparison.Ordinal)))
+        var namedSector = command.SectorId is { } sectorId
+            ? world.Sectors.FirstOrDefault(s => string.Equals(s.SectorId, sectorId, StringComparison.Ordinal))
+            : null;
+        if (command.SectorId != null && namedSector is null)
             return (false, "sector.unknown");
+
+        if (command.Kind == WorldCommandKinds.Stance)
+        {
+            if (command.EntityId is null) return (false, "entity.missing");
+            if (!Movement.MovementPolicy.IsKnownStance(command.Stance)) return (false, "stance.unknown");
+        }
+
+        if (command.Kind == WorldCommandKinds.Claim)
+        {
+            if (command.EntityId is null) return (false, "entity.missing");
+            if (namedSector is null) return (false, "sector.missing");
+        }
+
+        if (command.Kind == WorldCommandKinds.Clear)
+        {
+            // `clear` names its target outright — entity, sector, slot. Whether the legion is
+            // actually standing there, and whether the guard is still up, is legality at reveal:
+            // both can change between filing the order and the turn resolving.
+            if (command.EntityId is null) return (false, "entity.missing");
+            if (namedSector is null) return (false, "sector.missing");
+            if (command.SlotIndex is not { } slotIndex
+                || namedSector.Slots.All(sl => sl.SlotIndex != slotIndex))
+                return (false, "slot.unknown");
+        }
 
         foreach (var laneId in command.LanePath)
             if (world.Lanes.All(l => !string.Equals(l.LaneId, laneId, StringComparison.Ordinal)))

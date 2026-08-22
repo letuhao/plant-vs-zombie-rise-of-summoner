@@ -34,7 +34,10 @@ public class KernelStressHarnessTests
     /// that acted. That is the real shape — a scheduler's per-frame cost is dominated by drain
     /// plus re-arm, not by scheduling in bulk.
     /// </summary>
-    static (double TotalMs, long Bytes, int Drained) RunFrames(int frames, bool measureAllocation)
+    readonly record struct HarnessResult(
+        double TotalMs, long Bytes, int Drained, long Transitions, long SlotFailures, long Reschedules);
+
+    static HarnessResult RunFrames(int frames, bool measureAllocation)
     {
         var q = new EventQueue(expectedEvents: Entities * 2);
         var clock = new SimulationClock();
@@ -52,21 +55,42 @@ public class KernelStressHarnessTests
             machines[i] = new ActorTurnMachine(keys[i]);
         }
 
-        var slots = new ActionSlots(Entities);
+        // Width 4, not 200: acquiring and releasing inside one call means the width never binds and
+        // the contention branch is dead code. A narrow pool makes TryAcquire actually fail, which
+        // is the path a stress board exercises and the one worth measuring.
+        var slots = new ActionSlots(4);
+        var transitions = 0L;
+        var slotFailures = 0L;
 
         void DriveActor(long tag)
         {
             var m = machines[tag];
-            if (!m.CanAct) return;
-            // Ready -> Committed -> Resolving -> Recovering -> Charging, taking and releasing a slot.
+
+            // An actor still holding a slot from a previous frame finishes its action first, so
+            // slots are genuinely held ACROSS frames rather than acquired and dropped in place.
+            if (m.State == TurnState.Committed)
+            {
+                m.TransitionTo(TurnState.Resolving);
+                m.TransitionTo(TurnState.Recovering);
+                slots.Release(keys[tag]);
+                m.TransitionTo(TurnState.Charging);
+                transitions += 4;
+                return;
+            }
+
             if (m.State != TurnState.Charging) return;
             m.TransitionTo(TurnState.Ready);
-            if (!slots.TryAcquire(keys[tag], "squad")) { m.TransitionTo(TurnState.Charging); return; }
+            transitions++;
+            if (!slots.TryAcquire(keys[tag], "squad"))
+            {
+                slotFailures++;
+                m.TransitionTo(TurnState.Charging);   // no slot: pass, do not block the clock
+                transitions++;
+                return;
+            }
+
             m.TransitionTo(TurnState.Committed);
-            m.TransitionTo(TurnState.Resolving);
-            m.TransitionTo(TurnState.Recovering);
-            slots.Release(keys[tag]);
-            m.TransitionTo(TurnState.Charging);
+            transitions++;
         }
 
         // Arm every actor with a staggered first event.
@@ -89,7 +113,11 @@ public class KernelStressHarnessTests
         // The instrument is allocated BEFORE the snapshot. Creating it after would charge its own
         // 40 bytes to the kernel — which is precisely what the first run of this harness reported,
         // and a useful demonstration that the gate is sensitive down to a single small object.
+        // Both scratch buffers live ABOVE the snapshot. `live` is 200 EventHandles ≈ 3.2 KB, and
+        // allocating it inside the window charged the kernel for the harness's own bookkeeping —
+        // the same mistake as the Stopwatch, caught the same way.
         var sw = new Stopwatch();
+        var live = new EventHandle[Entities];
 
         long before = 0;
         if (measureAllocation)
@@ -101,6 +129,7 @@ public class KernelStressHarnessTests
         }
 
         var drained = 0;
+        var reschedules = 0L;
         sw.Restart();
         for (var f = 0; f < frames; f++)
         {
@@ -109,16 +138,29 @@ public class KernelStressHarnessTests
             drained += q.PopDue(clock.Now, buffer);
 
             // Drive the actor through its turn and re-arm it, as a live board would.
-            foreach (var e in buffer)
+            for (var i = 0; i < buffer.Count; i++)
             {
-                DriveActor(e.Tag);
-                q.Schedule(clock.Now + 200 + (e.Tag * 13 % 700), "actor", 0, e.Tag);
+                var tag = buffer[i].Tag;
+                DriveActor(tag);
+                live[tag] = q.Schedule(clock.Now + 200 + (tag * 13 % 700), "actor", 0, tag);
+            }
+
+            // Re-time a slice of the board every frame. Haste, slow, and delay all do this, and it
+            // is the operation most likely to run per-frame at scale — so a harness that certifies
+            // the frame slice without it is certifying the wrong loop.
+            //
+            // The new time must sit on the SAME horizon the actor was armed on. An earlier version
+            // pushed every touched event further out each frame, which starved the drain to
+            // 1.1 events/frame and quietly turned this into a reschedule-only benchmark.
+            for (var i = f % 20; i < Entities; i += 20)
+            {
+                if (q.Reschedule(live[i], clock.Now + 180 + (i * 11 % 700))) reschedules++;
             }
         }
 
         sw.Stop();
         var bytes = measureAllocation ? GC.GetAllocatedBytesForCurrentThread() - before : 0;
-        return (sw.Elapsed.TotalMilliseconds, bytes, drained);
+        return new HarnessResult(sw.Elapsed.TotalMilliseconds, bytes, drained, transitions, slotFailures, reschedules);
     }
 
     [Fact]
@@ -126,12 +168,22 @@ public class KernelStressHarnessTests
     {
         // THE GATE. Allocation is the deterministic half and the one that actually causes stutter:
         // "no gen2 GC during a level" is already a stated non-goal in the perf plan.
-        var (_, bytes, drained) = RunFrames(Frames, measureAllocation: true);
+        var r = RunFrames(Frames, measureAllocation: true);
 
-        _out.WriteLine($"{Entities} entities, {Frames} frames: {drained} events drained, {bytes} bytes allocated");
-        Assert.True(drained > 0, "harness drained nothing — it is not exercising the kernel");
-        Assert.True(bytes == 0,
-            $"steady-state stress allocated {bytes} bytes over {Frames} frames; budget is 0");
+        _out.WriteLine(
+            $"{Entities} entities, {Frames} frames: {r.Drained} events ({(double)r.Drained / Frames:F1}/frame), " +
+            $"{r.Reschedules} reschedules, {r.Transitions} transitions, {r.SlotFailures} slot denials, " +
+            $"{r.Bytes} bytes");
+
+        // Liveness first: a zero-byte result means nothing if the work stopped happening. Deleting
+        // DriveActor from the loop entirely used to leave this test green.
+        Assert.True(r.Drained > 0, "harness drained nothing — it is not exercising the kernel");
+        Assert.True(r.Transitions >= Entities * 5, $"FSM barely ran ({r.Transitions} transitions)");
+        Assert.True(r.Reschedules > 0, "no reschedules — the per-frame path is not representative");
+        Assert.True(r.SlotFailures > 0, "slots never contended — the width never binds, so W is untested");
+
+        Assert.True(r.Bytes == 0,
+            $"steady-state stress allocated {r.Bytes} bytes over {Frames} frames; budget is 0");
     }
 
     [Fact]
@@ -140,15 +192,24 @@ public class KernelStressHarnessTests
         // Reported precisely, asserted loosely: the number below is the useful output, and the
         // assertion exists only to catch a catastrophic regression (an accidental O(n^2), say)
         // rather than to police a few microseconds on a shared build agent.
-        var (totalMs, _, drained) = RunFrames(Frames, measureAllocation: false);
-        var perFrame = totalMs / Frames;
+        // Five runs, median reported. A single run straddles the tiered-compilation transition and
+        // spreads over ~5x, so publishing one number as "the measurement" overstates it.
+        var samples = new double[5];
+        for (var i = 0; i < samples.Length; i++)
+        {
+            var run = RunFrames(Frames, measureAllocation: false);
+            samples[i] = run.TotalMs / Frames;
+        }
+
+        Array.Sort(samples);
+        var median = samples[samples.Length / 2];
 
         _out.WriteLine(
-            $"{Entities} entities, {Frames} frames: {drained} events, " +
-            $"{totalMs:F2} ms total, {perFrame:F4} ms/frame (slice budget {KernelSliceMs} ms)");
+            $"{Entities} entities, {Frames} frames, {samples.Length} runs: median {median:F4} ms/frame " +
+            $"(min {samples[0]:F4}, max {samples[^1]:F4}; slice budget {KernelSliceMs} ms)");
 
-        Assert.True(perFrame < KernelSliceMs * 20,
-            $"kernel cost {perFrame:F4} ms/frame is catastrophically over the {KernelSliceMs} ms slice");
+        Assert.True(median < KernelSliceMs * 20,
+            $"kernel cost {median:F4} ms/frame is catastrophically over the {KernelSliceMs} ms slice");
     }
 
     [Fact]
@@ -173,7 +234,8 @@ public class KernelStressHarnessTests
             {
                 buffer.Clear();
                 events += q.PopDue(f * 16, buffer);
-                foreach (var e in buffer) q.Schedule(f * 16 + 300, "a", 0, e.Tag);
+                for (var i = 0; i < buffer.Count; i++)
+                    q.Schedule(f * 16 + 300, "a", 0, buffer[i].Tag);
             }
 
             return events == 0 ? 0 : (double)(q.ComparisonCount - before) / events;

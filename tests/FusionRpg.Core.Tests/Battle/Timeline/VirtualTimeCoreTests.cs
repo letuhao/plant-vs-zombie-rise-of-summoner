@@ -289,6 +289,111 @@ public class TimelinePurityGuardTests
         finally { Cleanup(tmp); }
     }
 
+    [Theory]
+    [InlineData("items.Where (e => e.Alive);", ".Where(")]                       // one space
+    [InlineData("System.Linq.Enumerable.ToList<long>(items);", ".ToList(")]      // generic args
+    [InlineData("var x = items.Select  <int> (i => i);", ".Select(")]            // both
+    public void Whitespace_and_generic_arguments_do_not_defeat_the_tick_path_rules(string bad, string token)
+    {
+        // C# allows whitespace and type arguments between a method name and its argument list, so
+        // a raw substring match on ".Where(" is defeated by ONE KEYSTROKE. Matching the call shape
+        // is the difference between a guard and a formality.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "Sneaky.cs"),
+                new[] { "public sealed class Sneaky { void Go() { " + bad + " } }" });
+
+            Assert.Contains(KernelPurityScan.Scan(tmp), o => o.Contains(token, StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void A_using_static_escape_hatch_is_itself_flagged()
+    {
+        // The worst bypass found: one innocuous line makes every LINQ call non-dotted, so all the
+        // tick-path rules stop matching for the whole file — and the enabling line was invisible.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "Escape.cs"),
+                new[] { "using static System.Linq.Enumerable;",
+                        "public sealed class Escape { object A() { return ToList(items); } }" });
+
+            Assert.Contains(KernelPurityScan.Scan(tmp),
+                o => o.Contains("using static", StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void Block_comments_and_non_LINQ_intrinsics_do_not_raise_false_alarms()
+    {
+        // Every one of these was a false positive before: prose inside /* */, in-place
+        // Array/List reverse, string.Concat. A guard that cries wolf gets disabled, which is the
+        // same outcome as no guard, reached more slowly.
+        var tmp = NewTempDir();
+        try
+        {
+            File.WriteAllLines(Path.Combine(tmp, "Fine.cs"), new[]
+            {
+                "/* never read DateTime here, and the old design used .ToList( */",
+                "public sealed class Fine",
+                "{",
+                "    void A(long[] xs) { Array.Reverse(xs); }",
+                "    string B(string a, string b) { return string.Concat(a, b); }",
+                "    long C(long x) { return Math.Max(0, x - 1); }",
+                "}"
+            });
+
+            Assert.Empty(KernelPurityScan.Scan(tmp));
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void Randomness_and_wall_clock_have_no_side_doors()
+    {
+        var tmp = NewTempDir();
+        try
+        {
+            foreach (var (line, token) in new[]
+                     {
+                         ("var g = Guid.NewGuid();", "Guid.NewGuid"),
+                         ("var t = Environment.TickCount64;", "Environment.Tick"),
+                         ("var h = key.GetHashCode();", ".GetHashCode("),
+                         ("var r = (double)a / b;", "(double)")
+                     })
+            {
+                File.WriteAllLines(Path.Combine(tmp, "Door.cs"),
+                    new[] { "public sealed class Door { void A() { " + line + " } }" });
+                Assert.Contains(KernelPurityScan.Scan(tmp),
+                    o => o.Contains(token, StringComparison.Ordinal));
+            }
+        }
+        finally { Cleanup(tmp); }
+    }
+
+    [Fact]
+    public void The_exemption_is_matched_by_path_not_by_bare_filename()
+    {
+        // Over a recursive scan, matching the bare name lets Nested/BattleTrace.cs inherit the
+        // exemption for free — precisely the silent growth the named list exists to prevent.
+        var tmp = NewTempDir();
+        try
+        {
+            var nested = Path.Combine(tmp, "Nested");
+            Directory.CreateDirectory(nested);
+            File.WriteAllLines(Path.Combine(nested, "BattleTrace.cs"),
+                new[] { "public sealed class BattleTrace { object A() { return items.ToArray(); } }" });
+
+            Assert.Contains(KernelPurityScan.Scan(tmp),
+                o => o.Contains(".ToArray(", StringComparison.Ordinal));
+        }
+        finally { Cleanup(tmp); }
+    }
+
     [Fact]
     public void Math_intrinsics_are_not_mistaken_for_LINQ_but_real_LINQ_still_is()
     {

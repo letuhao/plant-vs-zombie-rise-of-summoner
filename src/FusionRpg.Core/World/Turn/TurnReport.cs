@@ -6,6 +6,7 @@ public static class TurnReportKinds
     public const string CommandDropped = "command.dropped";
     public const string Calendar = "calendar";
     public const string Event = "event";
+    public const string Battle = "battle";
 }
 
 /// <summary>One line of what happened, in the order it happened.</summary>

@@ -91,8 +91,11 @@ public class TurnEngineTests
     {
         var result = TurnEngine.Step(World(), Array.Empty<WorldCommand>(), seed: 1);
 
+        // `Intel` joined the order at RulesetVersion 2, second from last: everything else has
+        // settled by then, so a faction records the world as it ends the turn rather than as it
+        // looked halfway through. Changing this list is changing the ruleset.
         Assert.Equal(
-            new[] { "Reveal", "Movement", "Sieges", "Production", "Growth", "Pressure", "Events", "Snapshot" },
+            new[] { "Reveal", "Movement", "Sieges", "Production", "Growth", "Pressure", "Events", "Intel", "Snapshot" },
             result.Report.Phases);
     }
 

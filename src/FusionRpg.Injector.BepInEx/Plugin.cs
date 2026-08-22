@@ -28,10 +28,17 @@ public class Plugin : BasePlugin
     public class RpgLoop : MonoBehaviour
     {
         void Update() => InjectorLoop.TickFromUnity();
+        /// <summary>Game is closing: tear the in-game web view down so no browser process is orphaned.</summary>
+        void OnApplicationQuit()
+        {
+            try { OverlaySwitch.Shutdown(); } catch { }
+        }
+
         void OnGUI()
         {
             VfxDirector.Draw();
             OverlaySettingsGui.Draw();
+            OverlaySwitchGui.Draw();
         }
     }
 }
@@ -48,12 +55,18 @@ sealed class BepInExRpgLog : IRpgLog
 sealed class BepInExRpgConfig : IRpgConfig
 {
     public string ServerUrl { get; }
+    public string OverlayHost { get; }
     public bool PersistCheats { get; }
     public bool EnableUnsafeHitPatches { get; }
 
     public BepInExRpgConfig(ConfigFile config)
     {
         ServerUrl = config.Bind("General", "ServerUrl", RpgHost.DefaultServerUrl, "RPG server").Value;
+        OverlayHost = config.Bind(
+            "General",
+            "OverlayHost",
+            "launcher",
+            "Who owns the web overlay window: launcher (default) or injector (in-game). FUSIONRPG_OVERLAY_HOST wins.").Value;
         // In-game GUI retired — web FE at ServerUrl is the only cheat UI / monitor (SSOT).
         config.Bind("Cheat", "CheatMenuEnabled", false, "DEPRECATED: in-game menu disabled; use the web UI.");
         PersistCheats = config.Bind("Cheat", "PersistCheats", false, "Load/save cheat-state.json beside plugin").Value;

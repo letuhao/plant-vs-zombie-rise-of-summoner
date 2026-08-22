@@ -9,7 +9,19 @@ public static class WorldCommandKinds
     /// <summary>Do nothing this turn. The default an absent or idle commander submits.</summary>
     public const string StandFast = "stand-fast";
 
-    public static readonly IReadOnlyList<string> All = new[] { StandFast };
+    /// <summary>March a legion along an ordered lane path (world-movement).</summary>
+    public const string Move = "move";
+
+    /// <summary>Attack the guard holding one slot of the sector the legion stands in.</summary>
+    public const string Clear = "clear";
+
+    /// <summary>Take the sector the legion stands in, once nothing is left defending it.</summary>
+    public const string Claim = "claim";
+
+    /// <summary>Change a legion's posture — march, scout or hold (world-movement).</summary>
+    public const string Stance = "stance";
+
+    public static readonly IReadOnlyList<string> All = new[] { StandFast, Move, Clear, Claim, Stance };
 
     public static bool IsKnown(string? kind) =>
         kind != null && All.Contains(kind, StringComparer.Ordinal);
@@ -36,8 +48,13 @@ public sealed record WorldCommand
     /// <summary>Subject of the order, when it has one.</summary>
     public string? EntityId { get; init; }
 
+    /// <summary>Required by `clear`: the sector the order is about, so a stale client is caught.</summary>
     public string? SectorId { get; init; }
+
     public int? SlotIndex { get; init; }
+
+    /// <summary>The posture a `stance` order is asking for.</summary>
+    public string? Stance { get; init; }
 
     /// <summary>Ordered lane ids for a march (W9).</summary>
     public IReadOnlyList<string> LanePath { get; init; } = Array.Empty<string>();

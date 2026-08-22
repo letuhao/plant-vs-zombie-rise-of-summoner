@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.World.Intel;
 
 namespace FusionRpg.Core.World;
 
@@ -32,7 +33,7 @@ public static class WorldCanonical
         {
             Row(sb, "sector", s.SectorId, s.TypeId, s.Climate, s.DangerBand, s.Phase, s.OwnerFactionId,
                 s.StabilityMilli, s.PressureMilli, s.DepletionMilli, s.DevelopmentLevel,
-                s.Intel, s.LastSeenTurn, s.LayoutX, s.LayoutY);
+                s.AuthoredIntel, s.LastSeenTurn, s.LayoutX, s.LayoutY);
 
             foreach (var sl in s.Slots)
                 Row(sb, "slot", s.SectorId, sl.SlotIndex, sl.SlotTypeId, sl.Element, sl.State,
@@ -46,13 +47,32 @@ public static class WorldCanonical
         foreach (var e in w.Entities)
         {
             Row(sb, "entity", e.EntityId, e.Kind, e.OwnerFactionId, e.AtSectorId, e.OnLaneId,
-                e.LaneProgressMilli, e.Stance, e.MovementRemaining);
+                e.OnLaneTowardSectorId, e.LaneProgressMilli, e.Stance, e.MovementRemaining,
+                e.Routed ? 1 : 0);
 
             for (var i = 0; i < e.Members.Count; i++)
             {
                 var m = e.Members[i];
                 Row(sb, "member", e.EntityId, i, m.InstanceId, m.SpeciesId, m.Level, m.Hp, m.Wounds);
             }
+        }
+
+        // Belief is state, so it is hashed like state. Written last so a world with no intel yet
+        // — every wave-1 save — produces exactly the bytes it always did.
+        foreach (var faction in w.Intel)
+        foreach (var snapshot in faction.Sectors)
+        {
+            Row(sb, "intel", faction.FactionId, snapshot.SectorId, snapshot.LastSeenTurn, snapshot.Detail,
+                snapshot.OwnerFactionId, snapshot.Phase, snapshot.Climate, snapshot.DangerBand,
+                snapshot.DevelopmentLevel);
+
+            foreach (var slot in snapshot.Slots)
+                Row(sb, "intel-slot", faction.FactionId, snapshot.SectorId, slot.SlotIndex,
+                    slot.SlotTypeId, slot.Element, slot.GuardWaveId, slot.State, slot.GuardState);
+
+            foreach (var force in snapshot.Forces)
+                Row(sb, "intel-force", faction.FactionId, snapshot.SectorId, force.EntityId,
+                    force.OwnerFactionId, force.Kind, force.Exact ? 1 : 0, force.Strength, force.BandIndex);
         }
 
         return sb.ToString();

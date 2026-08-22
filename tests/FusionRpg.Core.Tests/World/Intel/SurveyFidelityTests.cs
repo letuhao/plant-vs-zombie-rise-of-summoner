@@ -1,0 +1,99 @@
+using FusionRpg.Core.World;
+using FusionRpg.Core.World.Intel;
+using Xunit;
+
+namespace FusionRpg.Core.Tests.World.Intel;
+
+/// <summary>
+/// A survey is supposed to equal the truth. Belief deliberately holds *less* than the world — that
+/// is what stops fog being cosmetic — but every field it does hold has to be right, and every field
+/// the wire exposes has to come from somewhere.
+///
+/// The failure mode this guards against is the quiet one: a DTO field nothing populates, reading as
+/// zero forever, and looking exactly like a sector that genuinely has none.
+/// </summary>
+public class SurveyFidelityTests
+{
+    /// <summary>A world where the homeworld is developed and one of its slots has been claimed.</summary>
+    static WorldState Developed()
+    {
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
+
+        return WorldValidation.Validate(world with
+        {
+            Sectors = world.Sectors
+                .Select(s => s.SectorId == "homeworld"
+                    ? s with
+                    {
+                        DevelopmentLevel = 3,
+                        Slots = s.Slots
+                            .Select(sl => sl.SlotIndex == 1 ? sl with { State = SlotState.Depleted } : sl)
+                            .ToList()
+                    }
+                    : s)
+                .ToList()
+        });
+    }
+
+    static IntelSnapshot Believed(WorldState w, string faction, string sector) =>
+        IntelRecorder.Observe(w, w, turn: 1)
+            .Single(f => f.FactionId == faction)
+            .Of(sector)!;
+
+    [Fact]
+    public void Standing_on_developed_ground_you_can_see_how_developed_it_is()
+    {
+        var world = Developed();
+        var home = Believed(world, "dave", "homeworld");
+
+        Assert.Equal(SectorSight.Full, home.Detail);
+        Assert.Equal(3, home.DevelopmentLevel);
+    }
+
+    [Fact]
+    public void A_survey_records_what_state_each_slot_is_in()
+    {
+        var home = Believed(Developed(), "dave", "homeworld");
+
+        Assert.Equal(SlotState.Depleted, home.Slots.Single(s => s.SlotIndex == 1).State);
+        Assert.Equal(SlotState.Claimed, home.Slots.Single(s => s.SlotIndex == 0).State);
+    }
+
+    [Fact]
+    public void A_glimpse_still_reports_no_slots_and_no_development()
+    {
+        // Development is something you read off the ground, not from one sector away.
+        var ember = Believed(Developed(), "dave", "ember-hollow");
+
+        Assert.Equal(SectorSight.Glimpse, ember.Detail);
+        Assert.Empty(ember.Slots);
+        Assert.Equal(0, ember.DevelopmentLevel);
+    }
+
+    [Fact]
+    public void A_survey_carries_every_field_the_snapshot_claims_to_hold()
+    {
+        var world = Developed();
+        var truth = world.Sectors.Single(s => s.SectorId == "homeworld");
+        var home = Believed(world, "dave", "homeworld");
+
+        Assert.Equal(truth.OwnerFactionId, home.OwnerFactionId);
+        Assert.Equal(truth.Phase, home.Phase);
+        Assert.Equal(truth.Climate, home.Climate);
+        Assert.Equal(truth.DangerBand, home.DangerBand);
+        Assert.Equal(truth.DevelopmentLevel, home.DevelopmentLevel);
+        Assert.Equal(
+            truth.Slots.Select(s => (s.SlotIndex, s.SlotTypeId, s.Element, s.GuardWaveId, s.GuardState, s.State)),
+            home.Slots.Select(s => (s.SlotIndex, s.SlotTypeId, s.Element, s.GuardWaveId, s.GuardState, s.State)));
+    }
+
+    [Fact]
+    public void The_opening_belief_a_template_seeds_is_just_as_faithful()
+    {
+        var world = Developed();
+        var seeded = IntelSeed.ForTemplate(world).Single(f => f.FactionId == "dave").Of("homeworld")!;
+
+        Assert.Equal(3, seeded.DevelopmentLevel);
+        Assert.Equal(SlotState.Depleted, seeded.Slots.Single(s => s.SlotIndex == 1).State);
+    }
+}

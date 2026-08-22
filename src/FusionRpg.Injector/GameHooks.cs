@@ -415,6 +415,7 @@ public static class GameHooks
             try { start["levelType"] = GameAPP.theBoardType.ToString(); } catch { }
             try { start["theTotalNumOfZombie"] = __instance.theTotalNumOfZombie; } catch { }
             Emit("board.start", start);
+            try { Hud.OverlaySwitch.OnMatchStart(); } catch { }
             Emit("board.modifiers", modifiers);
             try { InjectorBootstrap.EnsureCombatHitPatches(); } catch (Exception ex) { RpgHost.Log.Warning("EnsureCombatHitPatches: " + ex.Message); }
             try
@@ -458,6 +459,7 @@ public static class GameHooks
                 ["levelName"] = LevelName(),
                 ["summary"] = summary
             });
+            try { Hud.OverlaySwitch.OnMatchEnd(); } catch { }
             MatchKey = null;
             ClearMatch();
             try { Fx.VfxDirector.ClearAll(); } catch { }

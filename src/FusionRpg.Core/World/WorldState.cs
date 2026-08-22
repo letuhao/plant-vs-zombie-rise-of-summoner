@@ -105,7 +105,14 @@ public sealed record WorldSector
     public int DepletionMilli { get; init; }
     public int DevelopmentLevel { get; init; }
 
-    public IntelState Intel { get; init; } = IntelState.Unknown;
+    /// <summary>
+    /// What the **template author** decided the player already knows when the world is created —
+    /// "you have heard rumours of Frost Mire". It seeds belief at turn zero and is never touched
+    /// again. Live, per-faction intel lives in <see cref="WorldState.Intel"/>; this is not it, and
+    /// the two are named apart on purpose.
+    /// </summary>
+    public IntelState AuthoredIntel { get; init; } = IntelState.Unknown;
+
     public int LastSeenTurn { get; init; }
 
     /// <summary>Authored map position — stored, because a graph you cannot picture is unusable.</summary>
@@ -156,11 +163,28 @@ public sealed record WorldEntity
 
     public string? OnLaneId { get; init; }
 
-    /// <summary>Progress along <see cref="OnLaneId"/> in per-mille, so a march resumes exactly.</summary>
+    /// <summary>
+    /// Which end of <see cref="OnLaneId"/> the legion is marching toward. A lane has a stored
+    /// direction but is travelled both ways, so progress alone is ambiguous — without this, a march
+    /// that ran out of budget travelling against the lane's direction would resume the other way.
+    /// </summary>
+    public string? OnLaneTowardSectorId { get; init; }
+
+    /// <summary>
+    /// Progress toward <see cref="OnLaneTowardSectorId"/> in per-mille, so a march resumes exactly.
+    /// Always 0 for a legion standing in a sector.
+    /// </summary>
     public int LaneProgressMilli { get; init; }
 
     public string Stance { get; init; } = "march";
     public int MovementRemaining { get; init; }
+
+    /// <summary>
+    /// Beaten in the field. A routed force keeps the ground it is on and loses exactly one turn of
+    /// orders: the turn after the battle its commands are dropped, and the same turn clears the
+    /// flag. Stored rather than derived — nothing else in the world remembers that a fight happened.
+    /// </summary>
+    public bool Routed { get; init; }
     public IReadOnlyList<WorldEntityMember> Members { get; init; } = Array.Empty<WorldEntityMember>();
 }
 
@@ -179,4 +203,13 @@ public sealed record WorldState
     public IReadOnlyList<WorldSector> Sectors { get; init; } = Array.Empty<WorldSector>();
     public IReadOnlyList<WorldLane> Lanes { get; init; } = Array.Empty<WorldLane>();
     public IReadOnlyList<WorldEntity> Entities { get; init; } = Array.Empty<WorldEntity>();
+
+    /// <summary>
+    /// What each faction believes, ordered by faction id (world-intel).
+    ///
+    /// The one piece of state here that is **not** derivable from the rest: belief is an
+    /// accumulation of history, not a function of the world as it stands now, so it is stored,
+    /// hashed and replayed like anything else. A faction with no entry believes nothing.
+    /// </summary>
+    public IReadOnlyList<Intel.FactionIntel> Intel { get; init; } = Array.Empty<Intel.FactionIntel>();
 }

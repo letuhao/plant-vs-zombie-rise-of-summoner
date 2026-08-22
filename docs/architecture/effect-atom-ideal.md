@@ -1,6 +1,6 @@
 # The ideal — atom effects, containers, and power as a currency
 
-**Status:** **Ideal capture (2026-08-22)** — a vision document, not a spec. No module ids, no build order, no acceptance criteria, nothing committed. It exists to be argued with, edited, and cut down before anything becomes a capability map. Grounding: the sealed Foundation set ([effect-system.md](effect-system.md), [effect-data.md](effect-data.md), [effect-runtime.md](effect-runtime.md), [effect-funnel.md](effect-funnel.md)) and the code audit in §2. Prior art in §12.
+**Status:** **Ideal capture (2026-08-22)** — a vision document, not a spec. **Superseded in three places by later work** — see the correction note at the end of §13; where this document and [effect-atom/definitions.md](effect-atom/definitions.md) disagree, **the definitions win.** No module ids, no build order, no acceptance criteria, nothing committed. It exists to be argued with, edited, and cut down before anything becomes a capability map. Grounding: the sealed Foundation set ([effect-system.md](effect-system.md), [effect-data.md](effect-data.md), [effect-runtime.md](effect-runtime.md), [effect-funnel.md](effect-funnel.md)) and the code audit in §2. Prior art in §12.
 
 **Owner picks (2026-08-22):**
 
@@ -13,6 +13,23 @@
 - **AI is not ours.** Atoms cover **definition and resolve**. Targeting, retreat, and decision-making need an AI layer spec, and this game has no AI layer yet.
 - **Define ourselves first, then write the track.** Items, traits, statuses, and skills adopt the atom contract when *they* write real specs. We do not design their features for them.
 - **Refactor whatever depends on us.** The power math itself is deliberately **not decided** in this document (§8.6).
+
+**Owner picks — schema round (2026-08-22):**
+
+- **Atoms carry a tier.** Rows are `(family_id, tier)` with that tier's range. **Tier is how strong; rarity is how many and which tiers are allowed** — two axes, never conflated. Loot and capture rarity fall out of tier + pool weights, with no third mechanism.
+- **`scale` is a named curve reference.** A value spec points at a row in a curve table; scaling is data, never a formula string.
+- **Conditions are a typed predicate tree** — AND/OR/NOT over a **closed** leaf list, with a hard depth limit, validation that rejects unknown leaves instead of ignoring them, and no power-pricing recursion past that depth.
+- **Containers are a fixed core plus an optional weighted pool.** Traits, skills, and species passives use the core alone; item templates roll from the pool.
+
+**Owner picks — power and plumbing round (2026-08-22):**
+
+- **The server compiles and pushes compiled output.** The injector never holds content rows; this extends today's `effects.grants.apply` push. Per-hit rolls stay local because they are per-hit.
+- **The contribution seam is declared, its shape deferred.** Damage atoms produce contributions and never apply; the applier spec owns the record's fields.
+- **The display scalar is a geometric mean** over the category vector. The vector stays SSOT.
+- **Coefficients are hand-authored now, fitted later.** A sweep harness follows and reports drift against the authored table.
+- **Multiplicative pairs are priced by a marginal read**, not a smarter formula: stored atom power stays context-free for budgets and display; AI and the balance sweep read `vector(with) − vector(without)`, which captures interaction by construction (§13).
+- **The per-hit path takes no dictionaries, no string comparison, and no recursion** — measured 2026-08-22 (§13). Content compiles at load; the exact encoding is a build-time benchmark.
+- Defaults taken without objection: the **budget curve reads `effect_curve`** like any other scaled value, so "level or rarity" is a data choice; **generation is pool + tier weights**, with the budget as a **validation** check rather than a generation mechanism; **spawn-atom power recursion is depth 1, memoized**.
 
 ---
 
@@ -122,13 +139,48 @@ An atom kind declares an **attach point**: the seam in the machine where its res
 | Attach point | What it does | Existing seam today | Example kinds |
 |---|---|---|---|
 | **Stat** | changes a composed channel while bound | ModifierBag → `EntityApply` → Writer | `stat.modify` (flat / increased / more), `stat.derived` (catalog channels) |
-| **Damage stage** | rides on an outgoing or incoming hit | SSOT damage resolver, above the Funnel | `damage.rider`, `damage.convert`, `damage.mitigate` |
+| **Damage** | a *triggered payload*, not its own seam — see §5.1 | trigger → resource delta → FA10 → Writer Add, **shipped** | expressed as `on.hit` + `resource.delta` with an element payload |
 | **Trigger** | fires a payload on an event | FT1–FT4 + lifecycle | `on.death`, `on.hit`, `on.spawn` wrapping any payload kind |
 | **Board** | mutates the lawn | FA4–FA9 via PvzIntent | `spawn.entity`, `board.action`, `grid.item`, `box.type`, `economy` |
 | **Status** | applies or clears a status instance | StatusRuntime + StatusExecutor | `status.apply`, `status.clear`, `status.spread` |
 | **Resource** | instant current-HP delta | FA10 Writer Add | `resource.delta` |
 
 Every kind declares which **runtimes** can execute it: `lawn` (injector), `battle` (web engine), `world` (later). A container bound in a runtime that cannot execute one of its atoms is a **validation error at bind time**, not a silent no-op. That single rule is what stops the trait catalog from being reinvented.
+
+### 5.1 Dealing damage is a triggered payload — merging sources is someone else's layer
+
+`add 100–200 fire damage on hit` needs **no new attach point**. It is a trigger plus a payload: `OnDamageDealt` fires, a resource-delta atom rolls its range, and the amount travels the shipped path — Funnel → FA10 → Writer Add, with the element payload the calculator already accepts. Foundation does this today.
+
+What does **not** exist is a layer that takes many damage sources aimed at one hit — the vanilla hit itself, riders, statuses, shields, future skills — and decides how they **merge, order, and mitigate**. On the lawn there is no such gameplay layer at all: vanilla peas and bites run Unity `TakeDamage` and are observed only, while `DamageApplyPipeline` is reached from battle, sim, debug, and tests. That layer is undesigned by decision.
+
+**Neither fact blocks an atom.** A single atom dealing damage works now. What waits on that layer is *combining* atoms into one coherent hit. The boundary we hold either way is the same one as with AI: we own **definition and resolve**; a neighbour owns **merge and apply**, writes its own spec, and inherits our contract.
+
+What we owe that layer, in advance:
+
+- A **contribution** is a resolved value plus its provenance. Its exact fields are **deliberately not fixed here** — the applier spec owns them. What is fixed: the value arrives already rolled and already attributed.
+- Atoms **never** order, mitigate, or merge. Those are the applier's rules.
+- One contribution shape serves every source, so the applier never learns where a number came from.
+
+### 5.2 Runtime consumers — what actually exists
+
+Audited 2026-08-22. A kind can only claim a runtime where a **consumer** exists. The honest picture:
+
+| Attach point | Lawn (injector) | Battle (web engine) | Sim / offline |
+|---|---|---|---|
+| **Stat** | FA1 → ModifierBag → `EntityApply` → Writer — shipped, LIVE L1–L14 | `BattleStatComposer` at setup only; the bag sink **ignores** FA1 | plan only |
+| **Damage** | **none** (§5.1) | inlined in the `BattleEngine` attack loop, hardcoded per trait | n/a |
+| **Trigger** (FT*) | `EffectBag.OnEvent` from capture — shipped | **none — the engine never calls `OnEvent`** | `OnEvent` via harness / scenarios |
+| **Board** | FA4–FA9 → PvzIntent — LIVE-proven | inert | recorded plan |
+| **Status** | `StatusExecutor` + `StatusRuntime` — shipped | `StatusRuntime` is mounted, but entered only through scripted `InitialStatuses` — not through FA2 | plan only |
+| **Resource delta** | FA10 → Writer Add — shipped | `BattleEffectSink` — **the only opcode battle consumes** | plan only |
+
+`InjectorEffectActionSink` implements all ten opcodes. `BattleEffectSink` states it outright: *"battle mode consumes FA10 only; other actions are inert here."*
+
+**Consequences for the spec, and they are not small:**
+
+1. **"One vocabulary, many backends" is aspirational for battle**, not a description. Battle consumes one of six attach points and fires zero triggers.
+2. The **bind-time validation error will fire constantly** at wave 1. That is correct behaviour — loud and honest beats silent no-ops — but it means wave 1 must not promise battle support it cannot deliver.
+3. The runtime support matrix is a **living, audited table**, not a design assertion. It grows when a runtime grows a consumer, and it is the thing to re-read before promising any content works anywhere.
 
 ### What is explicitly NOT an atom
 
@@ -139,6 +191,7 @@ The contract we offer that layer, in advance:
 - AI reads **atom-declared tags** on an actor to make decisions; it never reads atom internals.
 - An AI behavior is referenced from a container **by id**, alongside atoms, never instead of the atom schema.
 - Reward and report multipliers get their own attach point when a rewards spec asks for one — not smuggled in as a combat atom.
+- We expose the **power vector** and the **matchup-conditioned read** (§8.7); the AI layer owns normalization, response curves, and weights. It never reads the display scalar.
 
 ---
 
@@ -170,8 +223,10 @@ Six tables. Kind logic stays in code, so there is no `effect_kind` table — the
 |---|---|---|
 | `atom_id` | TEXT PK | stable kebab id (`atom.fire-rider.t3`) |
 | `kind_id` | TEXT | validated against the code registry |
+| `family_id` | TEXT | groups the tiers of one affix (`atom.fire-rider`) |
+| `tier` | INT | strength band within the family; `1` when a family has one tier |
 | `name` | TEXT | display |
-| `when_json` | TEXT | trigger or damage stage, `chance` (‰), `icd_ms`, filters |
+| `when_json` | TEXT | trigger or damage stage, `chance` (‰), `icd_ms`, and the **predicate tree** |
 | `params_json` | TEXT | kind-schema-validated; numeric leaves are **value specs** |
 | `tags_json` | TEXT | element, family, category — for AI, UI, and cost lookup |
 | `power_json` | TEXT | computed category vector (§8), refreshed by tooling |
@@ -179,7 +234,31 @@ Six tables. Kind logic stays in code, so there is no `effect_kind` table — the
 | `power_note` | TEXT | required when an override is set |
 | `enabled`, `revision` | INT | catalog push / cache bust |
 
-A **value spec** is `{ "min": n, "max": n, "roll": "fixed|onInstantiate|onApply", "scale": "…" }`. Anywhere a number could go, a value spec can go.
+A **value spec** is `{ "min": n, "max": n, "roll": "fixed|onInstantiate|onApply", "scale": "curve.id?" }`. Anywhere a number could go, a value spec can go. `scale` names a row in `effect_curve`; omitted means no scaling.
+
+### `effect_curve` — scaling as data
+
+One table serves every scaled value, so scaling is never a formula in a string.
+
+| Column | Type | Notes |
+|---|---|---|
+| `curve_id` | TEXT PK | `curve.atk.level`, `curve.rarity.band` |
+| `input` | TEXT | what the curve reads — `level`, `rarity`, `tier` |
+| `points_json` | TEXT | ordered `(x, multiplierMilli)` points; integer ‰, interpolated between points |
+| `revision` | INT | joins the content hash |
+
+The same table gives the power cost function its **reference scale** (§8.4), so a value and its price read one source.
+
+### `effect_container_pool` — the rolled half of a container
+
+| Column | Type | Notes |
+|---|---|---|
+| `container_id` | TEXT FK | |
+| `atom_id` | TEXT FK | a candidate, usually one tier of a family |
+| `weight` | INT | spawn weight; `0` excludes |
+| `group` | TEXT | optional — roll at most one atom per family/group |
+
+`effect_container` gains `pool_rolls` (how many to draw) and `pool_seed_scope`. A container with no pool rows is a plain fixed list, which is what traits, skills, and species passives use.
 
 ### `effect_container` and `effect_container_atom`
 
@@ -240,7 +319,7 @@ offense · survivability · control · utility · economy
 
 Diablo 3 needed three separate aggregates (Damage / Toughness / Recovery) for exactly this reason, and its sheet numbers are still famously wrong because they omit multiplicative sources. Adding a `+crit rate` atom to a `+crit damage` atom underprices both; adding an offense atom to a defense atom compares things that do not compare.
 
-The **scalar** shown to a player is a combination function over the vector, chosen so a glass cannon does not read as stronger than a balanced actor. Which function is §8.6.
+The **scalar** shown to a player is a **geometric mean over the categories**. A near-zero category drags the product down, which is the honest statement that zero survivability makes offense worthless — and it degrades gracefully as categories are added later. The vector stays SSOT; the scalar is a derived read, never stored as truth.
 
 ### 8.3 Computed base plus stored override
 
@@ -270,17 +349,55 @@ power[category] = coeff(kind, channel, category)
 
 The two directions in that table are a real fork and both are legitimate: **value → power** (WoW: derive the score from what rolled) or **power → value** (D4: the band picks what may roll). They can coexist — derive for scoring, band for generation — but only if the coefficient table is the single source both read.
 
-### 8.6 Deliberately open
+### 8.6 Decided, and the one thing still open
 
-The owner has **not** decided the math, and this document does not sneak it in. Still open:
+**Decided 2026-08-22:** the scalar is a **geometric mean** (§8.2) · coefficients are **hand-authored now, fitted later**, with a sweep harness that reports drift rather than silently rewriting the table · the **budget curve is a row in `effect_curve`**, so whether level or rarity drives it is data, not schema · **generation is pool + tier weights**, and the budget is a **validation** check that fails content over its ceiling, not a generation mechanism.
 
-1. The combination function for the scalar (weighted sum, geometric mean, offense × survivability).
-2. Whether coefficients are hand-authored or calibrated by sweeping the deterministic battle engine and then frozen per ruleset version.
-3. The budget curve's shape, and whether rarity or level drives it.
-4. Whether generation is budget-spend (Last Epoch) or band-lookup (D4).
-5. How multiplicative pairs (crit rate × crit damage, element matchup, shields) get priced without pretending they add.
+**Still open — one item, and it is the hard one:**
 
-Answering 1 and 2 is enough to start a capability map. The rest can resolve inside module specs.
+> How do multiplicative pairs get priced without pretending they add? Crit rate × crit damage, the element matchup ring, and shield layers all multiply. A per-atom cost function prices each in isolation and will therefore underprice both halves of any pair.
+
+Three candidate answers, none chosen: price pairs by **tagging interactions** and applying a joint coefficient when both tags are present on one actor; price at the **actor** level by evaluating the vector twice (with and without the atom) and taking the difference, which captures interaction by construction; or accept the error at atom level and let the **sweep** correct it via the override column. The third is the cheapest and matches the coefficient decision above.
+
+This does not block the spec. It blocks trusting the number for balance.
+
+### 8.7 Power for AI — the reader that actually needs it
+
+**A human barely needs power.** A player compares two items by reading them. The reader that genuinely cannot function without a number is the **AI**: it has to pick a target, decide whether to commit or retreat, choose what to summon, and price a trade — all in code, all now. Game AI research is therefore the honest source for what shape this value takes, and its answer is consistent: **almost never one number.**
+
+| Shape | What it is | Who uses it | Our analogue |
+|---|---|---|---|
+| **Weighted feature vector** | value = Σ (feature × weight); the standard static evaluation | chess engines — material, mobility, king safety | §8.2 category vector |
+| **Position matrix** | value depends on *where* the piece is (piece-square tables, one set per game phase) | chess; material + PSQT alone is already a ~2000–2200 Elo engine | lawn row/column, world sector |
+| **Matchup matrix** | value depends on *against whom*; damage-per-frame and counter matrices, learned from replays | RTS army composition, hard counters | **we already have one** — the element ring ±250‰ and light↔dark |
+| **Influence map** | a spatial grid of summed threat, layered and decayed; strategic maps refresh 0.5–1 Hz, tactical 2–5 Hz | RTS attack/defend/kite decisions | the 5-lane board; later, world sectors |
+| **Search tree** | no static value at all — simulate and back up the result | MCTS in card games, where hand-crafted evaluation is inadequate | our deterministic battle engine, used as evaluator |
+
+The lesson is not "pick one." It is that **the same underlying price is read through different projections**, and the projection is chosen by the question being asked.
+
+**How the numbers get defined.** Three methods, all in use:
+
+1. **Hand-authored weights** — fastest, and where every system starts.
+2. **Regression from outcomes** — chess piece values have been derived by regression analysis; Hearthstone card cost models as a linear model over attributes plus an intrinsic constant, where an ability is priced as a function of the stat it multiplies (charge on a 2-attack minion costs `2 × charge`).
+3. **Fitted from recorded battles** — the StarCraft Lanchester work learned per-unit strength values by **maximum likelihood estimation from past battles**, and beat simulation-based prediction while being faster than it.
+
+Method 3 is the one worth noting: **we can generate that data**. The battle engine is deterministic and seeded, so a sweep produces as many recorded battles as we want. Fitting coefficients rather than arguing about them is available to us in a way it is not to most projects.
+
+**The proc / summon question is recursion, and it resolves cleanly.** "5% on death, spawn 2 zombies with 500 hp / 100 atk" is worth `0.05 × 2 × power(that actor)`. The atom's price therefore calls the *actor* power function, which sums *atom* prices. That is mutually recursive by construction — the same shape as a card-game cost model pricing a summon by the body it makes. It needs exactly two rules: a **depth guard** (a spawned actor's own spawn atoms are priced at depth 1 and then truncated) and **memoized** actor power, or a chain of summoners prices forever.
+
+**AI does not consume raw power.** Utility AI clamps every consideration to `[0,1]` and multiplies them, which is what keeps a decision score bounded no matter how many considerations are added. So power reaches a decision as a *normalized, curved* consideration — never as a raw magnitude. Our contract to the future AI layer is therefore: **we expose the vector and the matchup-conditioned read; the AI layer owns normalization, curves, and weights.** It never sees the display scalar.
+
+**The cautionary reference is Pokémon GO.** `CP = (Atk × √Def × √Sta × CPM²) / 10` is a real, shipped, geometric-shaped scalar with a level multiplier — close to what §8.2's derived scalar would look like. It is also documented as misleading: attack is weighted more heavily because it is not under a square root, so high-CP specimens are often the wrong ones for actual combat, and CP is not comparable across species at all. Worth copying the shape; worth refusing the claim that the scalar means anything precise.
+
+**Net design consequence:** one price, three read shapes.
+
+```text
+power vector       — the SSOT, stored per atom / item / actor      (§8.2)
+matchup-conditioned — vector × element matrix, computed on demand   (AI, difficulty)
+display scalar      — combination function over the vector          (humans, sorting)
+```
+
+The matchup read is the one that would be impossible to retrofit onto a stored scalar, and it is the one the AI will want first — "how strong is this actor **against that one**" is a different question from "how strong is this actor", and our element ring already makes the answer differ by ±250‰.
 
 ---
 
@@ -304,6 +421,8 @@ If adding a normal effect ever costs more than a row, the design has failed and 
 
 Audited 2026-08-22. Each of these adopts the contract when **its own** spec is written; we do not write their features here.
 
+**Live tracker:** [effect-adoption-audit-2026-08-22.md](effect-adoption-audit-2026-08-22.md) — all 11 sites that own effect-shaped logic, what "follows the effect SSOT" means, and a per-stream status table each stream updates itself. The summary below is the short version.
+
 | Dependent | Reality now | Track |
 |---|---|---|
 | **Effect defs** (16) | `EffectSeedCatalog` C# literals; consumed by harness, sim, injector, cheat runner, VFX catalog, 4 test files, **19 JSON fixtures** | First migration and the cheapest. The fixtures are already the data format. Proves the schema against effects Foundation executes today |
@@ -311,6 +430,7 @@ Audited 2026-08-22. Each of these adopts the contract when **its own** spec is w
 | **Battle traits** (13) | Not a stub in wiring: read by `BattleEngine`, `BattleStatComposer`, `ExpeditionResolver`; locked by adoption tests, regression-lock tests, and content-hashed goldens. But 15 hand-coded facet fields, all passive | Split at migration: the 7 funnel-routed traits become containers of atoms; the 6 engine behaviors wait for the AI and rewards layers. Touches `RulesetVersion` and needs a golden re-bless — plan it as its own wave |
 | **Statuses** (21) | Deeply wired; ADR-locked code-first | Status *kind* logic stays code — consistent with this design, since kinds are code everywhere. Only magnitudes would move, and only if a status spec asks. The lock does not need revisiting to start |
 | **Skills** (0) | Unstarted (battle-enrichment wave E2) | Containers from day one. Activation and cooldown belong to the turn kernel ([battle-turn-ideal.md](battle-turn-ideal.md)), not to us |
+| **Damage consumer / applier** (none) | Not designed yet, by decision. No gameplay applier exists for the lawn — vanilla hits are observed only, and the pipeline in `Core/Combat` is reached from battle, sim, debug, and tests, never from lawn gameplay | §5.1 contract, offered in advance: atoms emit resolved contributions; that layer owns merge, order, mitigation, and apply |
 | **AI** (none) | Does not exist | §5 contract, offered in advance |
 
 ---
@@ -340,14 +460,64 @@ Audited 2026-08-22. Each of these adopts the contract when **its own** spec is w
 | **Diablo 2 / 3** | Min–max damage rolled per hit; Toughness as honest effective HP (`DR = armor / (armor + 3500)`) | Sheet DPS — a scalar that omits multiplicative sources |
 | **WoW** | Stat budget `B(x) = a · 1.15^(x/15)`; per-stat cost multipliers; gear score as a slot-weighted sum | Item-level inflation and squishes |
 | **Last Epoch** | Forging potential — a per-item spend budget; tier plus range within tier | Crafting durability RNG as a player-facing cost |
+| **Chess engines** | Evaluation as a weighted linear combination of features; piece-square tables as a *positional* value matrix; piece values by regression | Its search — we are not searching a game tree |
+| **RTS AI** (StarCraft, Lanchester) | Per-unit strength **fitted from recorded battles** by maximum likelihood; counter and damage-per-frame matrices learned from replays; influence maps as spatial threat | Real-time army micro-management |
+| **Utility AI** (IAUS) | Considerations clamped to `[0,1]` and multiplied, so decisions stay bounded as considerations are added | Owning the decision layer ourselves — that is the AI spec's job |
+| **Pokémon GO** | `CP = (Atk × √Def × √Sta × CPM²) / 10` — the shape of a geometric scalar with a level multiplier | Its documented flaws: attack overweighted, meaningless across species |
 
 ---
 
 ## 13. Open questions for the next round
 
-1. **Does the atom library have tiers?** One atom with a tier column and a range per tier (PoE / Last Epoch), or one atom per tier sharing a family tag? Decides how big the library gets.
-2. **Do containers roll their atom list, or is the list fixed?** Item templates that roll *which* affixes appear need a weighted pool table; fixed-list containers do not.
-3. **Where does the compiler run** — server (cold, pushed to the injector like today's grant snapshot) or in Core on both sides? Decides whether the injector ever reads content rows.
-4. **What happens to `mods_json`?** It currently holds grants and absolutes in one blob per instance. Absorbing grants into `effect_binding` leaves the absolutes needing a home.
-5. **Power in the report stamp?** If difficulty and rewards read actor power, the report needs the power that was used, not a power recomputed later.
-6. §8.6 items 1 and 2 — enough to start a capability map.
+**Resolved 2026-08-22 — schema round:** atom tiers → `(family_id, tier)` column · `scale` → `effect_curve` reference · conditions → typed predicate tree over a closed leaf list · containers → fixed core plus optional weighted pool.
+
+**Resolved 2026-08-22 — power and plumbing round:** compiler → server compiles, pushes compiled output · contribution → seam declared, shape deferred to the applier spec · scalar → geometric mean over the category vector · coefficients → hand-authored now, fitted later · budget curve → a row in `effect_curve` · generation → pool + tier weights, budget as validation · spawn power recursion → depth 1, memoized.
+
+**Defaults written unless a stream objects:** stacking sums, with a `unique` flag meaning highest-wins · `mods_json` absolutes stay where they are, only grants move to `effect_binding` · the content hash covers atom, container, container_atom, and curve rows, never instances · the report stamps the power that was used, never a power recomputed later · wave 1 is lawn-only · authoring starts as seed and migration files, with an editor only if a spec asks for one.
+
+**Still open — nothing that blocks the spec.**
+
+**Pricing multiplicative pairs — resolved by adding a read, not a formula (2026-08-22).** Crit rate × crit damage, the element ring, and shield layers all multiply, so a per-atom cost function prices each half in isolation and underprices both. The resolution follows from §8.7's "one price, several read shapes" — add a fourth:
+
+```text
+marginal power = vector(actor WITH the atom) − vector(actor WITHOUT it)
+```
+
+The difference captures whatever multiplies, by construction. **Stored atom power stays context-free** and keeps serving authoring budgets, sorting, and display, where being approximately right is fine. **AI and the balance sweep read marginal power**, where being exactly right matters. It costs close to nothing extra because actor power is memoized and the AI layer already evaluates actor power to make decisions. The sweep's job becomes reporting the gap between the two reads — which is also the list of shapes the cost function is bad at.
+
+### Runtime form — measured 2026-08-22
+
+A micro-benchmark of three representations doing identical work (a 3-leaf predicate tree, a chance gate, and an on-apply range roll), 6 atoms × 200 000 hits:
+
+| Representation | ns/atom | Verdict |
+|---|---|---|
+| `Dictionary<string,object>` + nested-dict tree | **179.4** | out — 25× the cost of a typed graph, and against the probe plan's own "no dictionaries or strings on the record path" |
+| Typed object graph, virtual dispatch | **7.0** | fastest as measured |
+| Int opcode span, recursive walker | **47.2** | lost — recursion and span bounds checks defeat the flat layout |
+
+**What this settles:** no dictionaries, no string comparison, and **no recursion** in the per-hit path. Content is compiled at load into a typed form; the predicate tree is evaluated without recursive descent.
+
+**What it does not settle:** the exact compiled encoding. The benchmark used six identical trees, which is unrealistically kind to branch prediction and cache, and the flat encoding tested was a naive recursive interpreter rather than a flattened one. Choosing between a typed graph and a flattened non-recursive encoding is a **build-time benchmark against real content**, not a decision this document should pretend to make.
+
+**Frame cost context:** even the worst form reaches only ~0.54 ms at 500 hits/frame — against a 1.0 ms budget for the *whole* injector. Compiling is a clear win, not a survival requirement, and the predicate-tree pick from the schema round is affordable either way.
+
+### Ready for the spec
+
+Every question raised in this document is now decided, defaulted, or explicitly scoped to a later spec. The capability map can start.
+
+
+---
+
+## Corrections — what later work overturned in this document
+
+This is a historical capture, so its text is left as written. Three of its conclusions did not survive:
+
+| This document says | Corrected to | Where |
+|---|---|---|
+| Atom rows are keyed `(family_id, tier)` (§1, §13) | **`(family_id, tier, variant)`** — the 2-tuple forbade the generation rule outright, rejecting 30 of `elemental_power`'s 35 rows | [definitions.md](effect-atom/definitions.md) §1 |
+| *"no dictionaries, no string comparison, and **no recursion** in the per-hit path"* (§13) | **no dictionaries, no strings.** Recursion is **not** banned — the 7 ns benchmark winner is a typed object graph whose `AndNode.Evaluate` calls `child.Evaluate`, so a no-recursion law would have disqualified the form the measurement chose. The 47 ns loss is better explained by `ref int pc` plus span bounds checks defeating inlining | [spec-runtime-form-benchmark.md](effect-atom/spec-runtime-form-benchmark.md) |
+| *"the proc / summon question is recursion, and it **resolves cleanly**"* via a marginal read (§12) | **It does not resolve.** `actorPower = Σ atom.power` is additive, so `marginal = p(x)` identically — the marginal read returns the same context-free number it was meant to improve on. Multiplicative pricing is open | [definitions.md](effect-atom/definitions.md) §13 **D2** |
+
+Three more defects in the power model were found in the same pass and are recorded as **D1**, **D3**,
+and **D4** in that section: the display scalar ranks a strictly better vector lower, a summon prices at
+exactly zero, and every passive atom prices at zero.

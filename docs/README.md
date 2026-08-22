@@ -2,10 +2,18 @@
 
 Player-facing name: **Rise of Summoner**. Internal binaries and modules keep the **FusionRpg** prefix.
 
+## ⛔ Before you design anything
+
+**[DESIGN-GATE.md](DESIGN-GATE.md) is binding for every contributor, human or automated.** It carries
+the topic index (*"about to touch X → you must have read Y"*), the load-bearing invariants, the
+evidence rules, and the log of misconceptions that have cost real time. Read it before writing any
+spec, plan, proposal, or ADR — and read the documents its §1 row names for your subsystem.
+
 ## Start here
 
 | Audience | Start |
 |---|---|
+| **Before any design work** | **[DESIGN-GATE.md](DESIGN-GATE.md)** — mandatory reading gate + topic index |
 | **Anyone new** | [architecture/software-architecture.md](architecture/software-architecture.md) (whole system, one page) · [architecture/data-architecture.md](architecture/data-architecture.md) (all data, one page) |
 | **Players** | [runbook/players.md](runbook/players.md) · [SUPPORT.md](../SUPPORT.md) · [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases) |
 | **Contributors** | [../CONTRIBUTING.md](../CONTRIBUTING.md) · [contributing/dev-setup.md](contributing/dev-setup.md) · [contributing/architecture-map.md](contributing/architecture-map.md) |
@@ -46,7 +54,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/data-architecture.md](architecture/data-architecture.md) | **Start here (data)** — physical stores, table inventory, SSOT map, lifecycle, DAL boundary |
 | [architecture/overview.md](architecture/overview.md) | Four modules (Launcher + Injector + Server + Web), v1 scope |
 | [architecture/stat-system.md](architecture/stat-system.md) | Modifier bag, compose, EntityApply / single writer |
-| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | Derived snapshot, progression.power, dynamic ApplyScale — **shipped** (status path); combat channels reserved |
+| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | **Derived-stat SSOT** — derived snapshot, progression.power, dynamic ApplyScale; 99 registered channels (84 combat **shipped**, not reserved); `resource.*` proposed in §3.G |
+| [architecture/resource-hub-ideal.md](architecture/resource-hub-ideal.md) | **Ideal capture (not a spec)** — the five resources (`hp` `stamina` `hunger` `spirit` `qi`) with per-faction display labels, the exhaustion-debuff mechanic, lazy regen, and the scope/class/polarity registry shape |
 | [architecture/status-ssot.md](architecture/status-ssot.md) | StatusRuntime actor instances, ICD, resistance, contagion catalog — **shipped** |
 | [architecture/element-hub-ssot.md](architecture/element-hub-ssot.md) | Element typing, ring-cycle matchup matrix (§8.5), combat derived channels — **design locked** |
 | [architecture/combat-element-implement-plan.md](architecture/combat-element-implement-plan.md) | Overlay combat + Element Hub implement checklist (C0–C4; matrix golden tests) |
@@ -63,6 +72,12 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | RPG overlay damage layer: derived combat + element math → signed HP delta — **partially shipped** (resolver/Funnel); overlay CombatMath **deferred** |
 | [architecture/effect-testing.md](architecture/effect-testing.md) | Offline SimEffectHost / scenarios vs LIVE L1–L14 |
 | [architecture/effect-atom-ideal.md](architecture/effect-atom-ideal.md) | **Ideal capture (not a spec)** — atom effects as the smallest unit, skills/traits/items as containers, values + power in SQLite; roll policy (fixed / on-instantiate / on-apply) and power as a category vector |
+| [architecture/effect-adoption-audit-2026-08-22.md](architecture/effect-adoption-audit-2026-08-22.md) | **Adoption tracker** — the 11 sites that own effect-shaped logic, the runtime consumer matrix, what "follows the effect SSOT" means, and a per-stream status table |
+| [architecture/effect-atom-map.md](architecture/effect-atom-map.md) | **Capability map** — atom effects as the Secondary SSOT: 14 modules in 5 waves, dependency order, checkpoints, four cross-program hazards. Awaiting approval; no build authorized |
+| [architecture/effect-atom/atom-catalog-ssot.md](architecture/effect-atom/atom-catalog-ssot.md) | **SSOT effect list** — the closed vocabulary: 5 attach points, 12 kinds, 7 triggers, 8 primary + 99 derived channels, 21 statuses (13 functional), refused-with-cause list, and the 7 silent failures that become rejections |
+| [architecture/effect-atom/definitions.md](architecture/effect-atom/definitions.md) | **Definitions** — the ~40 values the module specs referenced and never defined: units, tolerances, id grammars, NULL semantics, orderings, hash algorithm, the 30 rejection codes. Wins over any spec until that spec is rewritten |
+| [architecture/effect-atom/atom-family-library.md](architecture/effect-atom/atom-family-library.md) | **Family library** — ~55 authored affix families over the 12 kinds, element families generated not authored, side asymmetry (plant/zombie/demon), and the fire-rate channel gap |
+| [architecture/action-map.md](architecture/action-map.md) | **Capability map** — the action layer joining atoms (what) to the turn kernel (when): 9 modules, targeting, the four resource pools, selection. Blocked on the atom map's Checkpoint B; no build authorized |
 | [architecture/match-runtime.md](architecture/match-runtime.md) | MatchRuntime FSM + MatchState (W1–W5 shipped; bullets/hypno deferred) |
 | [architecture/unique-actor-runtime.md](architecture/unique-actor-runtime.md) | UniqueActor FSM — durable specimens (W4–W5 + W8 equip/XP/roster shipped) |
 | [architecture/overlay-control-loops.md](architecture/overlay-control-loops.md) | Dual authority: Hot / Cold / Intent loops (design lock) |
@@ -105,7 +120,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | File | Contents |
 |---|---|
 | [launcher/spec.md](launcher/spec.md) | WPF player entry: loader install, FusionRpg update, port pick, process dashboard |
-| [launcher/overlay-spec.md](launcher/overlay-spec.md) | Game ⇄ web overlay contract (WebView2 + F10 hotkey) — behavior, boundaries, live checklist |
+| [launcher/overlay-spec.md](launcher/overlay-spec.md) | Game ⇄ web overlay contract (WebView2 + F10 hotkey + in-game button over a local pipe) — behavior, transport, two-wave host plan, live checklist |
+| [research/2026-08-22-overlay-injector-host.md](research/2026-08-22-overlay-injector-host.md) | Wave-2 spike: can the overlay view live in the game process — WebView2 without WPF, apartment constraint, open in-game questions |
 | [injector/spec.md](injector/spec.md) | BepInEx plugin (current host) |
 | [injector/lawn-coords.md](injector/lawn-coords.md) | Unity Mouse box = injector lawn XY (cherry + floaters) |
 | [injector/dual-host-roadmap.md](injector/dual-host-roadmap.md) | BepInEx + MelonLoader dual-artifact port (not dual-load) |

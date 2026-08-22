@@ -111,7 +111,7 @@ On launcher startup, restore `LastPort` into the session if `/health` still answ
 | Open server folder | `Server\` next to the launcher (exe + `data\`) |
 | Log pane | Launcher messages + captured server stdout/stderr |
 
-## Game / web overlay (F10)
+## Game / web overlay (F10 or the in-game button)
 
 The launcher hosts the RPG web UI in an embedded browser so players can flip between the game and the UI without alt-tabbing:
 
@@ -119,10 +119,11 @@ The launcher hosts the RPG web UI in an embedded browser so players can flip bet
 - **Global hotkey** — `RegisterHotKey` on the main window (default **F10**, override via `overlayHotKey` in `%AppData%\FusionRpg\launcher.json`, WPF `Key` names). Works while the game has focus; the **Overlay** button in the actions row does the same. `Esc` or the in-overlay button returns to the game (`SetForegroundWindow`).
 - Toggling **hides** the overlay (never destroys it) so the SPA keeps its SignalR session; Alt+F4 on the overlay also just hides it. The window is destroyed only on launcher shutdown.
 - **WebView2 Runtime** (Evergreen, preinstalled on Win 10/11) — if missing, the overlay shows install instructions (`https://developer.microsoft.com/microsoft-edge/webview2/`) and players can still use **Open RPG UI** in a normal browser. User data dir: `%LocalAppData%\FusionRpg\webview2`.
+- **In-game button** — the injector draws a small **RPG** button in the bottom-right corner of the game and signals the launcher over a local named pipe (`\\.\pipe\FusionRpg.Overlay`). Same toggle path as the hotkey. The button hides itself when no launcher is listening, and players can turn it off in the F7 overlay settings panel.
 - If the hotkey is taken by another app, the launcher logs it and the button remains the fallback.
 - Seamless covering toggle needs the game in **windowed / borderless-fullscreen** mode (Unity 2022 default). **Exclusive fullscreen** is detected (`SHQueryUserNotificationState`) and falls back to a window switch: the game is minimized, the overlay opens maximized, and toggling back restores the game.
 
-Code: `OverlayWindow.xaml(.cs)`, `Services/GameWindowInterop.cs` (Win32 P/Invoke: hotkey, window rect, foreground, fullscreen probe). Contract + live checklist: [overlay-spec.md](overlay-spec.md).
+Code: `OverlayWindow.xaml(.cs)`, `Services/GameWindowInterop.cs` (Win32 P/Invoke: hotkey, window rect, foreground, fullscreen probe), `Services/OverlayPipeServer.cs` (in-game button listener). Contract + live checklist: [overlay-spec.md](overlay-spec.md).
 
 ## Disk thresholds
 

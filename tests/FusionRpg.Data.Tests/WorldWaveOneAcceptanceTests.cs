@@ -1,0 +1,247 @@
+using FusionRpg.Core.World;
+using FusionRpg.Core.World.Turn;
+using FusionRpg.Data;
+using Xunit;
+
+namespace FusionRpg.Data.Tests;
+
+/// <summary>
+/// **Checkpoint 3 — wave-1 acceptance** (world-map-plan.md). Twenty turns that actually play: a
+/// legion marches, clears two guards, claims the sector, meets a warband head-on in the middle of a
+/// lane, pushes on to the frontier, and finally has its supply line cut by a third faction walking
+/// into the sector behind it.
+///
+/// The scenario is scripted rather than improvised, so its value is in the invariants: one turn-log
+/// row per turn, a stable hash sequence, and — the sharp one — the pure engine reproducing the
+/// store's hashes from nothing but (seed, template, command log).
+/// </summary>
+public class WorldWaveOneAcceptanceTests : IDisposable
+{
+    const int Turns = 20;
+    const ulong Seed = 4242;
+    static readonly string[] Commanders = { "dave", "wild", "zomboss" };
+
+    // Re-blessed twice on 2026-08-22, both deliberately, for world-intel:
+    //
+    //   1. W19 — claiming a sector no longer rewrites its *authored* intel. That field is template
+    //      input seeding the player's opening belief; live intel is per-faction now.
+    //   2. W20 — the `Intel` phase landed and RulesetVersion went to 2, so every turn writes each
+    //      faction's belief and the same commands produce a larger state than they did before.
+    //
+    //   3. W22 — every faction now starts believing what it can already see, not just the player,
+    //      and a surveyed slot remembers which encounter dens there. Both were found by the
+    //      projection's own tests: a warband could not describe the ground under its feet until a
+    //      turn had been committed, and `guardState` alone cannot tell "cleared" from "never
+    //      guarded".
+    //
+    //   4. A survey now records a sector's development level and each slot's state. Both were
+    //      fields the wire already carried and nothing populated, so they read as a flat zero that
+    //      looked exactly like a sector that genuinely had none — a trap set for whoever ships
+    //      `sector-development`.
+    //
+    // The plan expected one re-bless. Four were needed, each for a behaviour change rather than a
+    // drift, and each recorded here. Protecting the hash in any of them would have meant shipping
+    // something known to be wrong.
+    const string GoldenFinalHash = "d8a1947a053b2deecf831c53dbd990fc2dae69e884d80d87919f29cf65850c74";
+
+    readonly string _dir;
+    readonly RpgStore _store;
+
+    public WorldWaveOneAcceptanceTests()
+    {
+        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-cp3-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(_dir);
+        _store = new RpgStore(_dir);
+        _store.Init();
+    }
+
+    public void Dispose()
+    {
+        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+    }
+
+    /// <summary>
+    /// `first-light` plus a mid-campaign roster: Dave's legion is a real force rather than the three
+    /// starting conscripts, and Zomboss has a warband on the board. Both are authored here rather
+    /// than played into existence — recruitment belongs to a later wave, and the scenario needs a
+    /// board where every wave-1 verb can actually fire.
+    /// </summary>
+    static WorldState Scenario(string worldId)
+    {
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, Seed, worldId);
+
+        var legion = world.Entities.Single(e => e.EntityId == "e-dave-legion-1") with
+        {
+            Members = Enumerable.Range(0, 5)
+                .Select(_ => new WorldEntityMember { SpeciesId = "peashooterzombie", Level = 3, Hp = 260 })
+                .ToList()
+        };
+
+        var zomboss = new WorldEntity
+        {
+            EntityId = "e-zomboss-band-1",
+            Kind = WorldEntityKind.Warband,
+            OwnerFactionId = "zomboss",
+            AtSectorId = "black-gate",
+            Stance = "march",
+            MovementRemaining = 1000,
+            Members = Enumerable.Range(0, 4)
+                .Select(_ => new WorldEntityMember { SpeciesId = "normalzombie", Level = 4, Hp = 300 })
+                .ToList()
+        };
+
+        return WorldValidation.Validate(world with
+        {
+            Entities = world.Entities
+                .Select(e => e.EntityId == legion.EntityId ? legion : e)
+                .Append(zomboss)
+                .OrderBy(e => e.EntityId, StringComparer.Ordinal)
+                .ToList()
+        });
+    }
+
+    static WorldCommand Cmd(string commander, int turn, string kind) => new()
+    {
+        CommanderId = commander,
+        CommandId = $"t{turn}-{commander}",
+        Kind = kind
+    };
+
+    /// <summary>The script. Anything a commander is not told to do this turn, it stands fast.</summary>
+    static IReadOnlyList<WorldCommand> ScriptFor(int turn)
+    {
+        var dave = Cmd("dave", turn, WorldCommandKinds.StandFast);
+        var wild = Cmd("wild", turn, WorldCommandKinds.StandFast);
+        var zomboss = Cmd("zomboss", turn, WorldCommandKinds.StandFast);
+
+        dave = turn switch
+        {
+            0 => dave with { Kind = WorldCommandKinds.Move, EntityId = "e-dave-legion-1", LanePath = new[] { "l-home-ember" } },
+            1 => dave with { Kind = WorldCommandKinds.Clear, EntityId = "e-dave-legion-1", SectorId = "ember-hollow", SlotIndex = 2 },
+            2 => dave with { Kind = WorldCommandKinds.Clear, EntityId = "e-dave-legion-1", SectorId = "ember-hollow", SlotIndex = 3 },
+            3 => dave with { Kind = WorldCommandKinds.Claim, EntityId = "e-dave-legion-1", SectorId = "ember-hollow" },
+            // Two turns on the ley lane: the first ends in the crossing, the second finishes it.
+            4 or 5 => dave with { Kind = WorldCommandKinds.Move, EntityId = "e-dave-legion-1", LanePath = new[] { "l-ember-ash" } },
+            9 => dave with { Kind = WorldCommandKinds.Clear, EntityId = "e-dave-legion-1", SectorId = "ash-waste", SlotIndex = 2 },
+            10 => dave with { Kind = WorldCommandKinds.Claim, EntityId = "e-dave-legion-1", SectorId = "ash-waste" },
+            _ => dave
+        };
+
+        // The wild pack is dug in where the template left it, so it has to break camp before it can
+        // march — which costs it the turn it gives the order (world-movement §What `hold` is for).
+        if (turn == 3)
+            wild = wild with { Kind = WorldCommandKinds.Stance, EntityId = "e-wild-pack-1", Stance = "march" };
+
+        // Then it marches out to meet the legion head-on in the middle of the ley lane.
+        if (turn == 4)
+            wild = wild with { Kind = WorldCommandKinds.Move, EntityId = "e-wild-pack-1", LanePath = new[] { "l-ember-ash" } };
+
+        // Zomboss comes up the rift behind them and squats on the frontier sector.
+        if (turn is 11 or 12)
+            zomboss = zomboss with { Kind = WorldCommandKinds.Move, EntityId = "e-zomboss-band-1", LanePath = new[] { "l-ash-black" } };
+
+        return new[] { dave, wild, zomboss };
+    }
+
+    List<string> Play(string worldId)
+    {
+        var (ok, reason, _) = _store.CreateWorld(1, Scenario(worldId));
+        Assert.True(ok, reason);
+
+        var hashes = new List<string>();
+        for (var turn = 0; turn < Turns; turn++)
+        {
+            _store.SubmitWorldCommands(worldId, ScriptFor(turn));
+
+            WorldTurnCommitResult last = default!;
+            foreach (var commander in Commanders)
+                last = _store.CommitWorldTurn(worldId, commander);
+
+            Assert.True(last.Advanced, $"turn {turn} did not advance");
+            hashes.Add(last.StateHash!);
+        }
+
+        return hashes;
+    }
+
+    IEnumerable<TurnReportEntry> AllEntries(string worldId) =>
+        Enumerable.Range(0, Turns).SelectMany(t => _store.GetWorldTurnReport(worldId, t)?.Entries ?? Array.Empty<TurnReportEntry>());
+
+    [Fact]
+    public void Every_wave_one_verb_fires_somewhere_in_the_twenty_turns()
+    {
+        Play("cp3-verbs");
+        var entries = AllEntries("cp3-verbs").ToList();
+
+        var verbs = new (string Name, Func<TurnReportEntry, bool> Fired)[]
+        {
+            ("march", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("arrival:")),
+            ("clear", e => e.Kind == TurnReportKinds.Battle && e.Detail.StartsWith("guard:")),
+            ("crossing", e => e.Kind == TurnReportKinds.Battle && e.Detail.StartsWith("lane:")),
+            ("claim", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("claim.held:")),
+            ("zone-of-control", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("halt:zoc:")),
+            ("supply cut", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("supply.cut:")),
+            ("attrition", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("attrition:"))
+        };
+
+        var missing = verbs.Where(v => !entries.Any(v.Fired)).Select(v => v.Name).ToList();
+        Assert.True(missing.Count == 0, "never fired: " + string.Join(", ", missing));
+    }
+
+    [Fact]
+    public void The_scenario_leaves_one_turn_log_row_per_turn_and_nothing_beyond()
+    {
+        Play("cp3-log");
+
+        Assert.Equal(Turns, _store.GetActiveWorld(1)!.CurrentTurn);
+        for (var turn = 0; turn < Turns; turn++)
+            Assert.NotNull(_store.GetWorldTurnLog("cp3-log", turn));
+        Assert.Null(_store.GetWorldTurnLog("cp3-log", Turns));
+    }
+
+    [Fact]
+    public void The_same_script_and_seed_replay_to_the_same_twenty_hashes()
+    {
+        Assert.Equal(Play("cp3-a"), Play("cp3-b"));
+    }
+
+    [Fact]
+    public void The_pure_engine_reproduces_the_stored_hashes_from_the_command_log_alone()
+    {
+        var stored = Play("cp3-replay");
+
+        var world = Scenario("cp3-replay");
+        var replayed = new List<string>();
+        for (var turn = 0; turn < Turns; turn++)
+        {
+            var result = TurnEngine.Step(world, _store.ListWorldCommands("cp3-replay", turn), Seed);
+            world = result.World;
+            replayed.Add(result.StateHash);
+        }
+
+        Assert.Equal(stored, replayed);
+    }
+
+    /// <summary>
+    /// The golden. It has no meaning on its own — it is a tripwire: if the ruleset changes without
+    /// anyone deciding to change it, this is what notices. Re-bless it deliberately, with the reason
+    /// in the commit message, never by pasting whatever the run produced.
+    /// </summary>
+    [Fact]
+    public void The_scenario_hashes_to_its_golden()
+    {
+        Assert.Equal(GoldenFinalHash, Play("cp3-golden").Last());
+    }
+
+    [Fact]
+    public void The_campaign_ends_with_Dave_holding_what_he_took()
+    {
+        Play("cp3-end");
+        var world = _store.LoadWorldState("cp3-end")!;
+
+        var ember = world.Sectors.Single(s => s.SectorId == "ember-hollow");
+        Assert.Equal("dave", ember.OwnerFactionId);
+        Assert.Equal(SectorPhase.Held, ember.Phase);
+        Assert.All(ember.Slots, sl => Assert.Equal(GuardState.Cleared, sl.GuardState));
+    }
+}

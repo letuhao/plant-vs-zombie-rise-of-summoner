@@ -4,6 +4,9 @@ namespace FusionRpg.Injector.Host;
 public interface IRpgConfig
 {
     string ServerUrl { get; }
+
+    /// <summary>"launcher" (default) or "injector". FUSIONRPG_OVERLAY_HOST wins over this.</summary>
+    string OverlayHost { get; }
     bool PersistCheats { get; }
     bool EnableUnsafeHitPatches { get; }
 }

@@ -4,6 +4,19 @@ One-page-per-topic map of how the whole system fits together. Read this first, t
 
 > **The system in one sentence:** a WPF **Launcher** starts a legal PVZ Fusion install with a Harmony **Injector** inside it and an independent **Server** (SQLite + REST + SignalR) beside it; a React **Web** control room (served from the server's `wwwroot`) observes everything and issues commands — the RPG overlay *projects* Unity via capture and *mutates* it only through a small set of guarded apply paths.
 
+### "Layer" means four different things in these docs
+
+Added 2026-08-22, because the word is overloaded and each use has a different owner. When a doc says "layer", check which of these it means:
+
+| Sense | Values | Owner doc |
+|---|---|---|
+| **Ownership prefix** — who may write what | `pvz.*` (game foundation) vs `rpg.*` (our content and progression) | [pvz-middle-layer.md](pvz-middle-layer.md) |
+| **Stat compose passes** — how one number is built | Game base `Y0` → Runtime primary → Derived → Applied | [actor-hub-ssot.md](actor-hub-ssot.md) §2 |
+| **Status apply stages** — where a status is decided | L0 capture · L1 bag · L2 runtime · L2b resistance · L3 combat · L4 apply | [status-ssot.md](status-ssot.md) |
+| **Control loops** — which authority owns a decision | Hot · Cold · Intent | [overlay-control-loops.md](overlay-control-loops.md) |
+
+They are unrelated to each other. In particular, the **ownership** sense is the one that decides where a new concept lives, and it is not a position in any of the other three stacks.
+
 ## 1. Top-level shape
 
 ```mermaid
@@ -47,6 +60,12 @@ flowchart LR
 2. **Mutates** Unity only through Foundation paths: `EntityApply`/`EntityStatWriter` (stats), the Unity CC executor in `InjectorEffectActionSink` (status), FA10 Writer **Add** (HP deltas), and `pvz.*` Intent (spawns).
 
 Two apply pipelines (vanilla vs overlay), **one HP SSOT (Unity)**. Everything in §5–§7 exists to keep that true at 120 fps without crashing the game.
+
+> **Two state machines, no shared state — only messages.** (Stated 2026-08-22 because it was assumed everywhere and written nowhere.) PvZ runs its state machine and the RPG runs its own. Neither reads the other's state. What crosses is messages: **events out** (Harmony capture) and **commands in** (`EntityApply`/Writer, the CC executor, FA10 Add, `pvz.*` Intent). The two directions above describe those messages, not a shared model.
+>
+> The practical test, which has been got wrong twice: **an RPG concept never needs a home in the PvZ channel.** Our resources, actions, and skills live entirely in `rpg.*`; the eight `StatChannels` are the game's stats, not ours. The exception that proves it is `hp`, which is Unity's SSOT in PvZ mode and ours outright in web mode.
+>
+> Do not read [pvz-stats.md](pvz-stats.md)'s *"RPG stats upsert into PvzStats"* as a counter-example. That path is the RPG **modifying the game's own stats** — a command, and a legitimate one. It is not the RPG storing its own gameplay state there, which is never correct.
 
 > Scope note (standalone-first): this overlay principle governs **PvZ mode**. Web-mode matches (`webrpg-1`) have no Unity — the server's battle engine owns their state outright and emits results through the same event pipeline.
 

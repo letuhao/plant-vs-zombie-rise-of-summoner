@@ -1,5 +1,7 @@
+using System.Text.Json;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.World;
+using FusionRpg.Core.World.Intel;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -94,11 +96,27 @@ public sealed partial class RpgStore
               owner_faction_id TEXT NOT NULL,
               at_sector_id TEXT,
               on_lane_id TEXT,
+              on_lane_toward_sector_id TEXT,
               lane_progress_milli INTEGER NOT NULL DEFAULT 0,
               stance TEXT NOT NULL,
               movement_remaining INTEGER NOT NULL DEFAULT 0,
+              routed INTEGER NOT NULL DEFAULT 0,
               revision INTEGER NOT NULL DEFAULT 0,
               PRIMARY KEY (world_id, entity_id)
+            );
+            CREATE TABLE IF NOT EXISTS rpg_world_faction_intel (
+              world_id TEXT NOT NULL,
+              faction_id TEXT NOT NULL,
+              sector_id TEXT NOT NULL,
+              last_seen_turn INTEGER NOT NULL,
+              detail TEXT NOT NULL,
+              owner_faction_id TEXT,
+              phase TEXT NOT NULL,
+              climate TEXT,
+              danger_band INTEGER NOT NULL,
+              slots_json TEXT NOT NULL,
+              forces_json TEXT NOT NULL,
+              PRIMARY KEY (world_id, faction_id, sector_id)
             );
             CREATE TABLE IF NOT EXISTS rpg_world_entity_members (
               world_id TEXT NOT NULL,
@@ -112,6 +130,12 @@ public sealed partial class RpgStore
               PRIMARY KEY (world_id, entity_id, member_index)
             );
             """);
+
+        // Additive columns go through EnsureColumn, not the CREATE above: an existing database
+        // never re-runs CREATE TABLE, so a field added there alone would be missing for anyone who
+        // already has a world.
+        EnsureColumn(db, "rpg_world_entities", "on_lane_toward_sector_id", "TEXT");
+        EnsureColumn(db, "rpg_world_entities", "routed", "INTEGER NOT NULL DEFAULT 0");
 
         EnsureWorldTurnSchemaUnlocked(db);
     }
@@ -187,7 +211,7 @@ public sealed partial class RpgStore
                     ("$climate", (object?)s.Climate?.ToString()), ("$danger", s.DangerBand),
                     ("$phase", s.Phase.ToString()), ("$owner", (object?)s.OwnerFactionId),
                     ("$stab", s.StabilityMilli), ("$press", s.PressureMilli), ("$depl", s.DepletionMilli),
-                    ("$dev", s.DevelopmentLevel), ("$intel", s.Intel.ToString()),
+                    ("$dev", s.DevelopmentLevel), ("$intel", s.AuthoredIntel.ToString()),
                     ("$seen", s.LastSeenTurn), ("$x", s.LayoutX), ("$y", s.LayoutY));
 
                 foreach (var sl in s.Slots)
@@ -201,6 +225,23 @@ public sealed partial class RpgStore
                         ("$state", sl.State.ToString()), ("$owner", (object?)sl.OwnerFactionId),
                         ("$guard", (object?)sl.GuardWaveId), ("$gstate", sl.GuardState.ToString()));
             }
+
+            // Belief. Slots and forces go in as JSON rather than as sub-tables because a snapshot
+            // is always read whole for one sector and never queried by slot — two more tables would
+            // buy nothing and cost a join on every projection.
+            foreach (var intel in world.Intel)
+            foreach (var snap in intel.Sectors)
+                Insert(db, tx, """
+                    INSERT INTO rpg_world_faction_intel (world_id, faction_id, sector_id, last_seen_turn,
+                        detail, owner_faction_id, phase, climate, danger_band, slots_json, forces_json)
+                    VALUES ($w, $f, $s, $turn, $detail, $owner, $phase, $climate, $danger, $slots, $forces);
+                    """,
+                    ("$w", world.WorldId), ("$f", intel.FactionId), ("$s", snap.SectorId),
+                    ("$turn", snap.LastSeenTurn), ("$detail", snap.Detail.ToString()),
+                    ("$owner", (object?)snap.OwnerFactionId), ("$phase", snap.Phase.ToString()),
+                    ("$climate", (object?)snap.Climate?.ToString()), ("$danger", snap.DangerBand),
+                    ("$slots", JsonSerializer.Serialize(snap.Slots)),
+                    ("$forces", JsonSerializer.Serialize(snap.Forces)));
 
             foreach (var l in world.Lanes)
                 Insert(db, tx, """
@@ -217,13 +258,16 @@ public sealed partial class RpgStore
             {
                 Insert(db, tx, """
                     INSERT INTO rpg_world_entities (world_id, entity_id, kind, owner_faction_id,
-                        at_sector_id, on_lane_id, lane_progress_milli, stance, movement_remaining, revision)
-                    VALUES ($w, $e, $kind, $owner, $at, $lane, $prog, $stance, $move, 0);
+                        at_sector_id, on_lane_id, on_lane_toward_sector_id, lane_progress_milli,
+                        stance, movement_remaining, routed, revision)
+                    VALUES ($w, $e, $kind, $owner, $at, $lane, $toward, $prog, $stance, $move, $routed, 0);
                     """,
                     ("$w", world.WorldId), ("$e", e.EntityId), ("$kind", e.Kind.ToString()),
                     ("$owner", e.OwnerFactionId), ("$at", (object?)e.AtSectorId),
-                    ("$lane", (object?)e.OnLaneId), ("$prog", e.LaneProgressMilli),
-                    ("$stance", e.Stance), ("$move", e.MovementRemaining));
+                    ("$lane", (object?)e.OnLaneId), ("$toward", (object?)e.OnLaneTowardSectorId),
+                    ("$prog", e.LaneProgressMilli),
+                    ("$stance", e.Stance), ("$move", e.MovementRemaining),
+                    ("$routed", e.Routed ? 1 : 0));
 
                 for (var i = 0; i < e.Members.Count; i++)
                 {
@@ -246,8 +290,8 @@ public sealed partial class RpgStore
     {
         foreach (var table in new[]
                  {
-                     "rpg_world_entity_members", "rpg_world_entities", "rpg_world_lanes",
-                     "rpg_world_slots", "rpg_world_sectors", "rpg_world_factions"
+                     "rpg_world_faction_intel", "rpg_world_entity_members", "rpg_world_entities",
+                     "rpg_world_lanes", "rpg_world_slots", "rpg_world_sectors", "rpg_world_factions"
                  })
         {
             using var del = db.CreateCommand();
@@ -358,7 +402,7 @@ public sealed partial class RpgStore
                         PressureMilli = r.GetInt32(7),
                         DepletionMilli = r.GetInt32(8),
                         DevelopmentLevel = r.GetInt32(9),
-                        Intel = Enum.Parse<IntelState>(r.GetString(10)),
+                        AuthoredIntel = Enum.Parse<IntelState>(r.GetString(10)),
                         LastSeenTurn = r.GetInt32(11),
                         LayoutX = r.GetInt32(12),
                         LayoutY = r.GetInt32(13),
@@ -425,7 +469,8 @@ public sealed partial class RpgStore
             {
                 cmd.CommandText = """
                     SELECT entity_id, kind, owner_faction_id, at_sector_id, on_lane_id,
-                           lane_progress_milli, stance, movement_remaining
+                           on_lane_toward_sector_id, lane_progress_milli, stance, movement_remaining,
+                           routed
                     FROM rpg_world_entities WHERE world_id = $w ORDER BY entity_id;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -440,14 +485,59 @@ public sealed partial class RpgStore
                         OwnerFactionId = r.GetString(2),
                         AtSectorId = r.IsDBNull(3) ? null : r.GetString(3),
                         OnLaneId = r.IsDBNull(4) ? null : r.GetString(4),
-                        LaneProgressMilli = r.GetInt32(5),
-                        Stance = r.GetString(6),
-                        MovementRemaining = r.GetInt32(7),
+                        OnLaneTowardSectorId = r.IsDBNull(5) ? null : r.GetString(5),
+                        LaneProgressMilli = r.GetInt32(6),
+                        Stance = r.GetString(7),
+                        MovementRemaining = r.GetInt32(8),
+                        Routed = r.GetInt32(9) != 0,
                         Members = membersByEntity.TryGetValue(entityId, out var members)
                             ? members
                             : new List<WorldEntityMember>()
                     });
                 }
+            }
+
+            var intel = new List<FactionIntel>();
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = """
+                    SELECT faction_id, sector_id, last_seen_turn, detail, owner_faction_id, phase,
+                           climate, danger_band, slots_json, forces_json
+                    FROM rpg_world_faction_intel WHERE world_id = $w
+                    ORDER BY faction_id, sector_id;
+                    """;
+                cmd.Parameters.AddWithValue("$w", worldId);
+                using var r = cmd.ExecuteReader();
+
+                var byFaction = new Dictionary<string, List<IntelSnapshot>>(StringComparer.Ordinal);
+                var order = new List<string>();
+                while (r.Read())
+                {
+                    var factionId = r.GetString(0);
+                    if (!byFaction.TryGetValue(factionId, out var list))
+                    {
+                        byFaction[factionId] = list = new List<IntelSnapshot>();
+                        order.Add(factionId);
+                    }
+
+                    list.Add(new IntelSnapshot
+                    {
+                        SectorId = r.GetString(1),
+                        LastSeenTurn = r.GetInt32(2),
+                        Detail = Enum.Parse<SectorSight>(r.GetString(3)),
+                        OwnerFactionId = r.IsDBNull(4) ? null : r.GetString(4),
+                        Phase = Enum.Parse<SectorPhase>(r.GetString(5)),
+                        Climate = r.IsDBNull(6) ? null : Enum.Parse<ElementTypeId>(r.GetString(6)),
+                        DangerBand = r.GetInt32(7),
+                        Slots = JsonSerializer.Deserialize<List<RememberedSlot>>(r.GetString(8))
+                                ?? new List<RememberedSlot>(),
+                        Forces = JsonSerializer.Deserialize<List<RememberedForce>>(r.GetString(9))
+                                 ?? new List<RememberedForce>()
+                    });
+                }
+
+                foreach (var factionId in order)
+                    intel.Add(new FactionIntel { FactionId = factionId, Sectors = byFaction[factionId] });
             }
 
             return new WorldState
@@ -459,6 +549,7 @@ public sealed partial class RpgStore
                 Factions = factions,
                 Sectors = sectors,
                 Lanes = lanes,
+                Intel = intel,
                 Entities = entities
             };
         }

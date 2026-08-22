@@ -58,6 +58,12 @@ public sealed class MelonFusionRpgMod : MelonMod
         InjectorLoop.Tick(Time.unscaledDeltaTime);
     }
 
+    /// <summary>Game is closing: tear the in-game web view down so no browser process is orphaned.</summary>
+    public override void OnApplicationQuit()
+    {
+        try { OverlaySwitch.Shutdown(); } catch { }
+    }
+
     /// <summary>
     /// Single IMGUI entry (same as BepInEx RpgLoop.OnGUI). Do not dual-subscribe MelonEvents
     /// with Event.GetHashCode dedupe — Unity reuses one Event object, so Layout+Repaint share
@@ -69,6 +75,7 @@ public sealed class MelonFusionRpgMod : MelonMod
         if (RpgHost.Client == null && RpgHost.Harmony == null) return; // skip-harmony stub
         VfxDirector.Draw();
         OverlaySettingsGui.Draw();
+        OverlaySwitchGui.Draw();
     }
 
     static string ResolveGameRoot()

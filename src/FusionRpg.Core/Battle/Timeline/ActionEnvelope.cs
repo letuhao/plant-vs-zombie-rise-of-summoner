@@ -137,13 +137,22 @@ public sealed record ActionEnvelope
     /// kernel code is held to a zero-allocation standard by a source guard.</summary>
     static bool OffsetsEqual(IReadOnlyList<long> a, IReadOnlyList<long> b)
     {
-        if (ReferenceEquals(a, b)) return true;
+        if (ReferenceEquals(a, b)) return true;      // also covers null == null
+        if (a is null || b is null) return false;
         if (a.Count != b.Count) return false;
         for (var i = 0; i < a.Count; i++)
             if (a[i] != b[i]) return false;
         return true;
     }
 
+    /// <summary>
+    /// Value-based hash matching <see cref="Equals(ActionEnvelope?)"/>.
+    ///
+    /// <b>Not stable across processes.</b> <c>System.HashCode</c> is seeded per process, so this
+    /// value differs run to run. That is fine for dictionary keying and caches — its only intended
+    /// use — but it must never reach a golden, a persisted record, or anything else the
+    /// byte-identical replay contract covers.
+    /// </summary>
     public override int GetHashCode()
     {
         var hash = new HashCode();
@@ -161,7 +170,10 @@ public sealed record ActionEnvelope
         hash.Add((int)Interruptible);
         hash.Add(InterruptRefundMilli);
         hash.Add((int)Commitment);
-        foreach (var offset in ResolveOffsets) hash.Add(offset);
+        // Indexed, not foreach: iterating an IReadOnlyList<long> boxes its enumerator — 32 bytes
+        // per call, on the operation a cache key uses most. Same reason OffsetsEqual is a manual
+        // loop rather than SequenceEqual.
+        for (var i = 0; i < ResolveOffsets.Count; i++) hash.Add(ResolveOffsets[i]);
         return hash.ToHashCode();
     }
 }

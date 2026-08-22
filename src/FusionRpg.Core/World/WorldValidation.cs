@@ -16,6 +16,7 @@ public static class WorldValidation
         Rule5SeatCounts(world);
         Rule6SlotShape(world);
         Rule7EntityPlacement(world);
+        Rule8BeliefReferences(world);
         return world;
     }
 
@@ -189,6 +190,45 @@ public static class WorldValidation
         }
     }
 
+    /// <summary>
+    /// Belief is the one stored thing that is not derivable from the rest of the world, so it is
+    /// also the one thing that can quietly reference something that no longer exists. A snapshot of
+    /// a sector that was deleted, or held by a faction that was never created, would validate all
+    /// the way to a projection and then fail somewhere far away from the cause.
+    /// </summary>
+    static void Rule8BeliefReferences(WorldState w)
+    {
+        var factionIds = w.Factions.Select(f => f.FactionId).ToHashSet(StringComparer.Ordinal);
+        var sectorIds = w.Sectors.Select(s => s.SectorId).ToHashSet(StringComparer.Ordinal);
+
+        RequireSorted(w.Intel.Select(i => i.FactionId), "faction intel");
+
+        foreach (var intel in w.Intel)
+        {
+            if (!factionIds.Contains(intel.FactionId))
+                throw new InvalidOperationException($"Intel belongs to unknown faction '{intel.FactionId}'.");
+
+            RequireSorted(intel.Sectors.Select(s => s.SectorId), $"intel for '{intel.FactionId}'");
+
+            foreach (var snapshot in intel.Sectors)
+            {
+                if (!sectorIds.Contains(snapshot.SectorId))
+                    throw new InvalidOperationException(
+                        $"Faction '{intel.FactionId}' remembers unknown sector '{snapshot.SectorId}'.");
+
+                if (snapshot.LastSeenTurn < 0)
+                    throw new InvalidOperationException(
+                        $"Faction '{intel.FactionId}' remembers '{snapshot.SectorId}' from turn {snapshot.LastSeenTurn}.");
+
+                // A glimpse cannot carry slot detail — if it does, the fog is leaking at the source
+                // rather than at the projection, which is a far harder leak to find.
+                if (snapshot.Detail != Intel.SectorSight.Full && snapshot.Slots.Count > 0)
+                    throw new InvalidOperationException(
+                        $"Faction '{intel.FactionId}' has slot detail for '{snapshot.SectorId}' from a glimpse.");
+            }
+        }
+    }
+
     static void Rule7EntityPlacement(WorldState w)
     {
         var sectorIds = w.Sectors.Select(s => s.SectorId).ToHashSet(StringComparer.Ordinal);
@@ -206,6 +246,26 @@ public static class WorldValidation
                 throw new InvalidOperationException($"Entity '{e.EntityId}' stands at unknown sector '{e.AtSectorId}'.");
             if (onLane && !laneIds.Contains(e.OnLaneId!))
                 throw new InvalidOperationException($"Entity '{e.EntityId}' marches on unknown lane '{e.OnLaneId}'.");
+            if (atSector && e.LaneProgressMilli != 0)
+                throw new InvalidOperationException(
+                    $"Entity '{e.EntityId}' stands in a sector but carries lane progress {e.LaneProgressMilli}.");
+            if (atSector && e.OnLaneTowardSectorId != null)
+                throw new InvalidOperationException(
+                    $"Entity '{e.EntityId}' stands in a sector but is still heading somewhere.");
+
+            if (onLane)
+            {
+                if (e.OnLaneTowardSectorId is not { } heading)
+                    throw new InvalidOperationException(
+                        $"Entity '{e.EntityId}' is on a lane without a heading — progress alone cannot say which way it is going.");
+
+                var lane = w.Lanes.First(l => string.Equals(l.LaneId, e.OnLaneId, StringComparison.Ordinal));
+                if (!string.Equals(heading, lane.FromSectorId, StringComparison.Ordinal)
+                    && !string.Equals(heading, lane.ToSectorId, StringComparison.Ordinal))
+                    throw new InvalidOperationException(
+                        $"Entity '{e.EntityId}' is heading to '{heading}', which is not an end of lane '{lane.LaneId}'.");
+            }
+
             if (e.LaneProgressMilli is < 0 or > 1000)
                 throw new InvalidOperationException($"Entity '{e.EntityId}' lane progress {e.LaneProgressMilli} is outside 0..1000.");
         }

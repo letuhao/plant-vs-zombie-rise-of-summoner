@@ -47,8 +47,16 @@ public sealed class ActorTurnMachine
     public bool CanAct => State is TurnState.Charging or TurnState.Ready
         or TurnState.Committed or TurnState.Resolving or TurnState.Recovering;
 
-    /// <summary>Currently occupying an action slot.</summary>
-    public bool HoldsSlot => State is TurnState.Committed or TurnState.Resolving;
+    /// <summary>
+    /// Between commit and the end of resolution — the span during which a slot-consuming action
+    /// occupies its slot.
+    ///
+    /// It is deliberately <i>not</i> called <c>HoldsSlot</c>, which is what it was until the
+    /// envelope gained <see cref="ActionEnvelope.SlotConsuming"/>. Movement and periodic pulses are
+    /// mid-action while holding no slot at all, so a state-derived slot claim would have been a
+    /// second, wrong answer to a question <see cref="ActionSlots.Holds"/> already answers exactly.
+    /// </summary>
+    public bool IsMidAction => State is TurnState.Committed or TurnState.Resolving;
 
     public void TransitionTo(TurnState next)
     {

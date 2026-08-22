@@ -1,3 +1,6 @@
+using FusionRpg.Core.World.Intel;
+using FusionRpg.Core.World.Movement;
+
 namespace FusionRpg.Core.World.Turn;
 
 /// <summary>What one turn produced: the new world, what happened, and the drift detector.</summary>
@@ -9,12 +12,18 @@ public sealed record TurnResult(WorldState World, TurnReport Report, string Stat
 ///
 /// The phase order is locked; changing it bumps the ruleset version, so it is written once here and
 /// observable in the report. Movement resolves through a discrete-event queue rather than fixed
-/// sub-steps — wave 1 leaves that queue empty, and <c>world-movement</c> fills it.
+/// sub-steps, so a lane crossing lands where it actually crosses instead of on the nearest sample.
 /// </summary>
 public static class TurnEngine
 {
     public const int EngineVersion = 1;
-    public const int RulesetVersion = 1;
+    /// <summary>
+    /// Bumped to 2 on 2026-08-22 when the `Intel` phase landed: every turn now writes each faction's
+    /// belief, so the same commands produce a different — and larger — state than they did under
+    /// version 1. Stored version-1 reports refuse to re-derive rather than fabricating, which is the
+    /// behaviour this counter exists for.
+    /// </summary>
+    public const int RulesetVersion = 2;
 
     public static class Phases
     {
@@ -25,22 +34,53 @@ public static class TurnEngine
         public const string Growth = "Growth";
         public const string Pressure = "Pressure";
         public const string Events = "Events";
+
+        /// <summary>
+        /// Last but one, deliberately: everything else has settled, so a faction records the world
+        /// as it *ends* the turn rather than as it looked halfway through.
+        /// </summary>
+        public const string Intel = "Intel";
+
         public const string Snapshot = "Snapshot";
     }
 
-    public static TurnResult Step(WorldState world, IReadOnlyList<WorldCommand> commands, ulong seed)
+    /// <summary>
+    /// <paramref name="resolver"/> defaults to the wave-1 placeholder. It is a parameter rather than
+    /// a container registration on purpose: the world module is the only thing that names it, so
+    /// nothing else can start depending on its numbers before the real combat seam lands.
+    /// </summary>
+    public static TurnResult Step(
+        WorldState world, IReadOnlyList<WorldCommand> commands, ulong seed, IBattleResolver? resolver = null)
     {
         var report = new TurnReport();
         var turn = world.CurrentTurn + 1;
+        var battles = resolver ?? PlaceholderBattleResolver.Instance;
 
-        var revealed = Reveal(world, commands, report);
-        var next = Movement(world, revealed, report, seed);
-        next = Sieges(next, report);
+        // A rout is spent at the *top* of the turn it costs, not at the bottom. Clearing it here
+        // rather than in Snapshot is what lets a force that is broken again during this same turn
+        // keep the new rout instead of having it cancelled by the one it was already serving.
+        var recovering = world.Entities
+            .Where(e => e.Routed)
+            .Select(e => e.EntityId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        var opening = recovering.Count == 0
+            ? world
+            : world with
+            {
+                Entities = world.Entities.Select(e => e.Routed ? e with { Routed = false } : e).ToList()
+            };
+
+        var revealed = Reveal(opening, commands, recovering, report);
+        var movement = Movement(opening, revealed, report, turn, battles, seed);
+        var next = movement.World;
+        next = Sieges(next, revealed, report, turn, battles, seed);
         next = Production(next, report);
         next = Growth(next, report);
         next = Pressure(next, report);
         next = Events(next, report, turn, seed);
-        next = Snapshot(next, report, turn);
+        next = Observe(world, next, report, turn, movement.VisitedByFaction);
+        next = Snapshot(next, revealed, report, turn);
 
         return new TurnResult(next, report, StateHasher.Hash(next));
     }
@@ -52,7 +92,9 @@ public static class TurnEngine
     /// Legality is re-checked here because the world may have moved since submission. A stale order
     /// is reported and skipped: one commander's out-of-date plan must never abort everyone's turn.
     /// </summary>
-    static List<WorldCommand> Reveal(WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report)
+    static List<WorldCommand> Reveal(
+        WorldState world, IReadOnlyList<WorldCommand> commands,
+        IReadOnlySet<string> recovering, TurnReport report)
     {
         report.BeginPhase(Phases.Reveal);
 
@@ -71,6 +113,25 @@ public static class TurnEngine
                 continue;
             }
 
+            // A force beaten in the field spends the following turn recovering, so its orders are
+            // dropped here rather than silently ignored downstream.
+            if (command.EntityId is { } subject && recovering.Contains(subject))
+            {
+                report.Add(Phases.Reveal, TurnReportKinds.CommandDropped, command.CommandId, "entity.routed");
+                continue;
+            }
+
+            // A garrison has given up its mobility for the turn; a march order for one is refused
+            // here rather than silently producing a zero-distance move.
+            if (command.Kind == WorldCommandKinds.Move && command.EntityId is { } marcher
+                && world.Entities.Any(e =>
+                    string.Equals(e.EntityId, marcher, StringComparison.Ordinal)
+                    && string.Equals(e.Stance, MovementPolicy.Hold, StringComparison.Ordinal)))
+            {
+                report.Add(Phases.Reveal, TurnReportKinds.CommandDropped, command.CommandId, "entity.held");
+                continue;
+            }
+
             legal.Add(command);
             report.Add(Phases.Reveal, TurnReportKinds.CommandAccepted, command.CommandId, command.Kind);
         }
@@ -79,27 +140,25 @@ public static class TurnEngine
     }
 
     /// <summary>
-    /// Discrete-event movement resolution. Wave 1 has no movement kinds, so the queue drains empty
-    /// and the phase is a no-op — the pipeline exists first so `world-movement` adds rules, not
-    /// plumbing.
+    /// Discrete-event movement, contact, and the fights either one starts. The work lives in
+    /// <see cref="MovementPhase"/>; the engine owns only the fact that it happens here, before
+    /// sieges and after reveal.
     /// </summary>
-    static WorldState Movement(WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report, ulong seed)
+    static MovementResult Movement(
+        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report,
+        int turn, IBattleResolver resolver, ulong seed)
     {
         report.BeginPhase(Phases.Movement);
-
-        var queue = new TurnEventQueue();
-        // world-movement seeds arrivals and crossings here.
-
-        while (queue.TryDequeue(out var next))
-            report.Add(Phases.Movement, TurnReportKinds.Event, next.EntityId, next.Kind);
-
-        return world;
+        return MovementPhase.Run(world, commands, report, Phases.Movement, turn, resolver, seed);
     }
 
-    static WorldState Sieges(WorldState world, TurnReport report)
+    /// <summary>Deliberate attacks on slot guards — never a consequence of walking past one.</summary>
+    static WorldState Sieges(
+        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report,
+        int turn, IBattleResolver resolver, ulong seed)
     {
         report.BeginPhase(Phases.Sieges);
-        return world;
+        return SiegePhase.Run(world, commands, report, Phases.Sieges, turn, resolver, seed);
     }
 
     static WorldState Production(WorldState world, TurnReport report)
@@ -114,10 +173,14 @@ public static class TurnEngine
         return world;
     }
 
+    /// <summary>
+    /// Supply is recomputed here, from scratch, and whatever falls off the chain starves. Nothing
+    /// about it is carried between turns.
+    /// </summary>
     static WorldState Pressure(WorldState world, TurnReport report)
     {
         report.BeginPhase(Phases.Pressure);
-        return world;
+        return SupplyGraph.Run(world, report, Phases.Pressure);
     }
 
     /// <summary>Calendar boundaries are rolled and reported; their effects belong to later modules.</summary>
@@ -137,9 +200,65 @@ public static class TurnEngine
         return world;
     }
 
-    static WorldState Snapshot(WorldState world, TurnReport report, int turn)
+    /// <summary>
+    /// Every faction writes down what it can see. Visibility spans the turn's start *and* end, so a
+    /// legion that marched through somewhere reports on it and a faction driven off its own ground
+    /// remembers it as of this turn — neither needs a special case.
+    /// </summary>
+    static WorldState Observe(
+        WorldState atStart, WorldState world, TurnReport report, int turn,
+        IReadOnlyDictionary<string, IReadOnlySet<string>> marchedThrough)
+    {
+        report.BeginPhase(Phases.Intel);
+
+        var before = world.Intel;
+        var after = IntelRecorder.Observe(atStart, world, turn, marchedThrough);
+
+        // Report only what changed, and only as a count: the map view reads belief from the
+        // projection, and a line per sector per faction would drown every other event in the turn.
+        foreach (var faction in after)
+        {
+            var previously = before.FirstOrDefault(f => f.FactionId == faction.FactionId);
+            var learned = faction.Sectors.Count - (previously?.Sectors.Count ?? 0);
+            if (learned > 0)
+                report.Add(Phases.Intel, TurnReportKinds.Event, faction.FactionId, "intel.new:" + learned);
+        }
+
+        return world with { Intel = after };
+    }
+
+    /// <summary>
+    /// Closes the turn: claims settle, and every legion starts the next one with a full march
+    /// budget. Rout is deliberately untouched here — it was already spent at the top of the turn,
+    /// so anything still flagged was broken during *this* turn and owes next turn's orders.
+    /// </summary>
+    static WorldState Snapshot(
+        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report, int turn)
     {
         report.BeginPhase(Phases.Snapshot);
-        return world with { CurrentTurn = turn };
+
+        // Claims settle here because everything they depend on — who is standing where, who is still
+        // alive, which guards are left — is only decided once the rest of the turn has run.
+        world = ClaimResolver.Run(world, commands, report, Phases.Snapshot, turn);
+
+        // Posture changes land here, then the refill reads them — so a legion keeps the budget it
+        // started the turn with and only pays for its new posture from the next turn. Digging in
+        // *after* marching your full distance must not be free.
+        var postures = commands
+            .Where(c => c.Kind == WorldCommandKinds.Stance && c.EntityId != null && c.Stance != null)
+            .GroupBy(c => c.EntityId!, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Last().Stance!, StringComparer.Ordinal);
+
+        return world with
+        {
+            CurrentTurn = turn,
+            Entities = world.Entities
+                .Select(e =>
+                {
+                    var stance = postures.TryGetValue(e.EntityId, out var ordered) ? ordered : e.Stance;
+                    return e with { Stance = stance, MovementRemaining = MovementPolicy.BudgetFor(stance) };
+                })
+                .ToList()
+        };
     }
 }

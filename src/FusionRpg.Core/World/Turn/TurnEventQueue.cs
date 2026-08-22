@@ -5,6 +5,9 @@ public static class TurnEventKinds
     public const string Arrival = "arrival";
     public const string Contact = "contact";
     public const string Crossing = "crossing";
+
+    /// <summary>A march cut short by a hostile force standing where it was headed.</summary>
+    public const string Halt = "halt";
 }
 
 /// <summary>

@@ -17,9 +17,29 @@ A legion is a `rpg_world_entities` row of kind `legion` with members drawn from 
 | Property | v1 rule |
 |---|---|
 | **Movement points** | a per-turn budget: a base value plus the slowest member's modifier; refilled in the Upkeep phase |
-| **Stance** | `march` · `scout` · `hold` (v1). Scout trades movement for what it reveals; hold converts the legion to a static garrison in place |
+| **Stance** | `march` · `scout` · `hold` (v1). Scout trades movement for what it reveals — priced in [world-intel](spec-world-intel.md) at **half a turn's march for twice the sight**; hold gives up movement entirely for a defensive bonus and, in supply, **recovery** — see *What `hold` is for* |
 | **Supply** | in supply if a chain of friendly-controlled sectors and open lanes connects it to the homeworld; out of supply costs attrition each turn |
 | **State** | `idle` · `marching` · `routed` — routed legions fall back and skip a turn's orders |
+
+### What `hold` is for
+
+Amended 2026-08-22. `hold` was listed as a stance from wave 1, documented as "a static garrison in place", and behaved in code exactly like `march` — full movement, no effect. Pricing `scout` made the gap obvious, and closing it turned out to fix something worse.
+
+**There is currently no way to heal.** Wounds accumulate from battles and from attrition and nothing ever removes them, so every legion in the game is on a one-way trip to death. That is not a balance problem, it is a missing verb.
+
+The prior art is unanimous about where the verb lives. Total War's [encamp](https://totalwarwarhammer.fandom.com/wiki/Encamp) stance disables movement, raises defence, and adds replenishment; Civilization's fortify grants +50% defence for standing still; [Rise of Nations](https://riseofnations.fandom.com/wiki/Healing) makes garrisoning the primary way anything heals at all. Immobility buys defence and recovery, everywhere.
+
+So `hold` is:
+
+| | Effect |
+|---|---|
+| Movement | **0** — it refills to nothing, and a `move` order for a held legion is dropped at reveal |
+| In battle | counts as stationary for the defender bonus even if the attacker also stood still |
+| In the Pressure phase | **recovers `RecoveryMilli = 150` of each member's health per turn — but only in supply** |
+
+Recovery lives in Pressure beside attrition because they are the same thing seen from both sides: supply gives, and its absence takes. Out of supply, a held legion still starves — standing still does not feed anyone.
+
+`RecoveryMilli = 150` against attrition's `50` means roughly seven turns from near-death to whole, and three turns of holding undoes one turn of a bad fight. First guess, per *double it or cut it by half*; the lever is one constant.
 
 ### Lane cost and event-ordered movement
 
@@ -76,11 +96,18 @@ Traversal is a plain breadth-first pass over the graph in stable order — cheap
 | Command | Payload | Legality at Reveal |
 |---|---|---|
 | `move` | entityId, ordered lane path | entity is yours, is idle or marching, path is contiguous from its position |
-| `stance` | entityId, stance | entity is yours |
+| `stance` | entityId, stance | entity is yours; takes effect at the **next** Snapshot refill, so a stance change costs the turn you make it |
 | `clear` | entityId, slotIndex | entity is yours, stands in that sector, and the slot's guard is still intact |
 | `claim` | entityId, sectorId | entity is yours and stands in that sector |
 
 Illegal-at-reveal commands are dropped with a reason into the turn report, never thrown.
+
+**`stance` was never implemented.** Wave 1 shipped `stand-fast`, `move`, `clear` and `claim`; `stance` is in this table
+and is not a command kind, so a legion's stance is whatever the template authored and can never change. Both `scout` and
+`hold` are dead letters until it exists — which makes it wave 2 work, not a nicety.
+
+Taking effect at the *next* refill rather than immediately is what stops a legion marching its full distance and then
+declaring itself dug in for the defensive bonus. Committing to a posture has to cost the turn you commit.
 
 ## Commands
 

@@ -538,6 +538,9 @@ public sealed partial class RpgStore : IRpgDb
         EnsureColumn(db, "rpg_web_match_log", "sweep_refused", "TEXT");
         // World map (spec-world-model.md) — its DDL lives beside its store partial.
         EnsureWorldSchemaUnlocked(db);
+        // Atom effect curves (spec-value-spec-and-curve.md, E2) — Core cannot hold SQL, so the
+        // table three modules depend on lives beside its store partial.
+        EnsureCurveSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)

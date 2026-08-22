@@ -37,6 +37,7 @@ public partial class MainWindow : FluentWindow
     OverlayWindow? _overlay;
     System.Windows.Interop.HwndSource? _hwndSource;
     System.Windows.Input.Key _overlayKey = GameWindowInterop.DefaultOverlayKey;
+    OverlayPipeServer? _overlayPipe;
 
     static readonly SolidColorBrush Green = new(Color.FromRgb(0x3D, 0xD6, 0x8C));
     static readonly SolidColorBrush Red = new(Color.FromRgb(0xE5, 0x5C, 0x5C));
@@ -256,6 +257,10 @@ public partial class MainWindow : FluentWindow
         _overlayKey = GameWindowInterop.ParseOverlayKey(_settings.OverlayHotKey);
         OverlayButton.Content = $"Overlay ({_overlayKey})";
 
+        // Independent of the HWND work below: the in-game button must still reach us when the
+        // window handle or the hotkey is unavailable — that is exactly when it is the only way in.
+        StartOverlayPipe();
+
         var helper = new System.Windows.Interop.WindowInteropHelper(this);
         _hwndSource = System.Windows.Interop.HwndSource.FromHwnd(helper.Handle);
         if (_hwndSource == null)
@@ -267,6 +272,30 @@ public partial class MainWindow : FluentWindow
         else
             AppendLog($"Overlay hotkey {_overlayKey} is taken by another app — use the Overlay button instead " +
                       "(or set overlayHotKey in launcher.json).");
+    }
+
+    /// <summary>Listens for the in-game button. Same toggle path as the hotkey — no second behavior.</summary>
+    void StartOverlayPipe()
+    {
+        _overlayPipe = new OverlayPipeServer(
+            OnOverlayPipeCommand,
+            message => Dispatcher.InvokeAsync(() => AppendLog(message)));
+        _overlayPipe.Start();
+    }
+
+    void OnOverlayPipeCommand(OverlayPipeCommand command)
+    {
+        Dispatcher.InvokeAsync(async () =>
+        {
+            switch (command)
+            {
+                case OverlayPipeCommand.Toggle:
+                    await ToggleOverlayAsync();
+                    break;
+                case OverlayPipeCommand.Ping:
+                    break; // availability probe only — must not move the overlay
+            }
+        });
     }
 
     IntPtr OverlayHotKeyHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -1027,6 +1056,8 @@ public partial class MainWindow : FluentWindow
             _hwndSource.RemoveHook(OverlayHotKeyHook);
             _hwndSource = null;
         }
+        _overlayPipe?.Dispose();
+        _overlayPipe = null;
         _overlay?.ForceClose();
         _overlay = null;
         _forceClose = true;

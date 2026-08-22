@@ -116,6 +116,32 @@ public class KernelAllocationTests
     }
 
     [Fact]
+    public void Envelope_equality_and_hashing_allocate_nothing()
+    {
+        // GetHashCode was boxing an enumerator per call — 32 bytes — by `foreach`-ing an
+        // IReadOnlyList. Exactly the allocation OffsetsEqual was hand-rolled to avoid eight lines
+        // earlier in the same file, and uncovered because no test hashed an envelope. It matters
+        // because the envelope is documented as a cache key, and a cache key's hot operation IS
+        // GetHashCode: 200 actors at 60 fps would be ~384 KB/s against a zero-byte budget.
+        var a = ActionEnvelope.NoOp with { ActionId = "x", ResolveOffsets = new long[] { 0, 100, 250 } };
+        var b = a with { };
+        var sink = 0;
+
+        void Hash()
+        {
+            for (var i = 0; i < 10_000; i++)
+            {
+                sink ^= a.GetHashCode();
+                if (a.Equals(b)) sink++;
+            }
+        }
+
+        var bytes = BytesFor(Hash, Hash);
+        Assert.True(bytes == 0, $"10000 hash+equality calls allocated {bytes} bytes; budget is 0");
+        Assert.True(sink != 0);
+    }
+
+    [Fact]
     public void The_turn_machine_transitions_without_allocating()
     {
         var m = new ActorTurnMachine("squad:0");
@@ -163,6 +189,70 @@ public class KernelAllocationTests
         public ActionIntent TryDeclare(string actorKey, long nowTick) =>
             new("basic-attack", "wave:0", _envelope);
     }
+
+    [Fact]
+    public void A_full_action_lifecycle_allocates_nothing_after_the_first_turn()
+    {
+        // Commit, wind-up, multi-hit resolve, recovery — the path every actor walks every turn.
+        // The runner keeps one reusable run per actor precisely so this stays at zero; a record
+        // per commit would be a heap object per actor per turn on the Unity main thread.
+        var queue = new EventQueue(expectedEvents: 128);
+        var slots = new ActionSlots(8);
+        var cooldowns = new CooldownLedger();
+        var runner = new ActionRunner(queue, slots, cooldowns, _ => true, expectedActors: 8);
+        var buffer = new List<ScheduledEvent>(64);
+
+        var actors = new ActorTurnMachine[8];
+        for (var i = 0; i < actors.Length; i++) actors[i] = new ActorTurnMachine("actor:" + i);
+
+        var envelope = new ActionEnvelope
+        {
+            ActionId = "combo",
+            WindupTicks = 40,
+            RecoveryTicks = 20,
+            ResolveOffsets = new long[] { 0, 15, 30 },
+            Class = CooldownClass.Specific,
+            CooldownTicks = 10,
+            StartsAt = CooldownStart.Resolve
+        };
+
+        long now = 0;
+
+        void Turn()
+        {
+            for (var round = 0; round < 20; round++)
+            {
+                for (var i = 0; i < actors.Length; i++)
+                {
+                    actors[i].TransitionTo(TurnState.Ready);
+                    runner.TryCommit(actors[i], "left", new ActionIntent("combo", "target", envelope), now);
+                }
+
+                now += 500;
+                buffer.Clear();
+                queue.PopDue(now, buffer);
+                for (var i = 0; i < buffer.Count; i++)
+                {
+                    var e = buffer[i];
+                    var actor = actors[(int)(e.OwnerKey[6] - '0')];
+                    if ((TimelineEventKind)e.Kind == TimelineEventKind.Resolve) runner.OnResolveDue(actor, e);
+                    else runner.OnRecoveryDue(actor, e);
+                }
+
+                // Recovery lands on the same drain tick as the last hit here, so pump once more.
+                buffer.Clear();
+                queue.PopDue(now, buffer);
+                for (var i = 0; i < buffer.Count; i++)
+                {
+                    var e = buffer[i];
+                    runner.OnRecoveryDue(actors[(int)(e.OwnerKey[6] - '0')], e);
+                }
+            }
+        }
+
+        var bytes = BytesFor(Turn, Turn);
+        Assert.True(bytes == 0, $"a steady-state action lifecycle allocated {bytes} bytes; budget is 0");
+    }
 }
 
 /// <summary>
@@ -172,36 +262,56 @@ public class KernelAllocationTests
 /// </summary>
 public class KernelComplexityTests
 {
-    /// <summary>Comparisons performed by n reschedules over a queue of n events.</summary>
-    static long RescheduleComparisons(int n)
+    /// <summary>Ordering and lookup work performed by n reschedules over a queue of n events.</summary>
+    static (long Comparisons, long Probes) RescheduleWork(int n)
     {
         var q = new EventQueue(expectedEvents: n);
         var handles = new EventHandle[n];
         for (var i = 0; i < n; i++) handles[i] = q.Schedule(i, "a", 0, i);
 
-        var before = q.ComparisonCount;              // exclude the build phase
+        var c0 = q.ComparisonCount;                  // exclude the build phase
+        var p0 = q.ProbeCount;
         for (var i = 0; i < n; i++)
             q.Reschedule(handles[i], (i * 7919) % (n * 4));
 
-        return q.ComparisonCount - before;
+        return (q.ComparisonCount - c0, q.ProbeCount - p0);
     }
 
     [Fact]
-    public void Reschedule_cost_grows_log_linearly_not_quadratically()
+    public void Reschedule_ordering_cost_grows_log_linearly()
     {
-        // An earlier version of this test returned its own loop counter and asserted 2000 == 2000
-        // — it measured nothing and would have passed against an O(n^3) queue while claiming to
-        // prove O(n log n). Counting real comparisons is what makes the claim mean something.
-        //
-        // Scaling n by 8: O(n log n) work grows ~8 x (log 16000 / log 2000) ≈ 10x.
-        // O(n^2) work grows 64x. The ceiling below sits well between those, so it discriminates.
-        var small = RescheduleComparisons(2_000);
-        var large = RescheduleComparisons(16_000);
+        // Scaling n by 8, log-linear ordering work grows ~6.5x in practice (measured), quadratic
+        // ~64x. The ceiling sits between, so it discriminates — but see the probe test below:
+        // comparisons ALONE cannot see the regression this suite is named after.
+        var small = RescheduleWork(2_000);
+        var large = RescheduleWork(16_000);
 
-        Assert.True(small > 0, "no comparisons counted — the instrument is not wired");
-        Assert.True(large < small * 20,
-            $"reschedule looks super-linear: {small} comparisons at n=2000 vs {large} at n=16000 " +
-            $"({(double)large / small:F1}x for an 8x board; log-linear is ~10x, quadratic ~64x)");
+        Assert.True(small.Comparisons > 0, "no comparisons counted — the instrument is not wired");
+        Assert.True(large.Comparisons < small.Comparisons * 12,
+            $"reschedule ordering looks super-linear: {small.Comparisons} at n=2000 vs " +
+            $"{large.Comparisons} at n=16000 ({(double)large.Comparisons / small.Comparisons:F1}x " +
+            "for an 8x board; log-linear measures ~6.5x, quadratic ~64x)");
+    }
+
+    [Fact]
+    public void Reschedule_lookup_cost_stays_constant_per_call()
+    {
+        // THE test that catches the actual historical regression. Deleting the index map and
+        // finding a heap slot by linear scan leaves the sift work — and therefore the comparison
+        // count — BYTE-IDENTICAL, so the ordering test above sails straight through a 5x
+        // wall-clock blowup. Lookups are the axis that moves, so lookups are what to count.
+        //
+        // Indexed: exactly one probe per Reschedule, regardless of n. Linear scan: ~n/2 each,
+        // so this ratio would be ~8x rather than 1x.
+        var small = RescheduleWork(2_000);
+        var large = RescheduleWork(16_000);
+
+        Assert.Equal(2_000, small.Probes);
+        Assert.Equal(16_000, large.Probes);
+
+        var probesPerCall = (double)large.Probes / 16_000;
+        Assert.True(probesPerCall <= 1.0,
+            $"lookup is no longer O(1): {probesPerCall:F2} probes per reschedule at n=16000");
     }
 
     [Fact]

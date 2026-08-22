@@ -1,0 +1,223 @@
+using FusionRpg.Core.World.Turn;
+
+namespace FusionRpg.Core.World.Movement;
+
+/// <summary>
+/// The Movement phase, end to end (spec-world-movement.md). Orders are re-checked, marches are
+/// walked, head-on meetings on a lane are solved before anyone commits to a position, and whatever
+/// contact that leaves is fought.
+///
+/// It lives here rather than in <see cref="TurnEngine"/> so the engine stays a readable list of
+/// phases: the engine owns the *order* things happen in, this file owns what movement means.
+///
+/// Two bounds keep the turn replayable: everything is walked in ordinal entity-id order, and there
+/// is at most one battle per lane and per sector per turn.
+/// </summary>
+/// <summary>
+/// What the movement phase produced: the new world, and every sector each faction set foot in along
+/// the way. The second part exists because a legion's route is not recoverable from its destination,
+/// and world-intel needs it.
+/// </summary>
+public sealed record MovementResult(
+    WorldState World, IReadOnlyDictionary<string, IReadOnlySet<string>> VisitedByFaction);
+
+public static class MovementPhase
+{
+    public static MovementResult Run(
+        WorldState world,
+        IReadOnlyList<WorldCommand> commands,
+        TurnReport report,
+        string phase,
+        int turn,
+        IBattleResolver resolver,
+        ulong seed)
+    {
+        var orders = commands
+            .Where(c => c.Kind == WorldCommandKinds.Move && c.EntityId != null)
+            .GroupBy(c => c.EntityId!, StringComparer.Ordinal)
+            // A commander who files two marches for one legion gets the later order. Reveal has
+            // already sorted by (commander, command id), so "later" is a stable, replayable choice.
+            .ToDictionary(g => g.Key, g => g.Last(), StringComparer.Ordinal);
+
+        var paths = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        foreach (var entity in world.Entities)
+        {
+            if (!orders.TryGetValue(entity.EntityId, out var order)) continue;
+
+            var refusal = MarchResolver.Validate(world, entity, order.LanePath);
+            if (refusal is { } why)
+            {
+                report.Add(phase, TurnReportKinds.CommandDropped, order.CommandId, why.Reason);
+                continue;
+            }
+
+            paths[entity.EntityId] = order.LanePath;
+        }
+
+        // Who is on which lane this turn, and how fast. Solving crossings *before* anyone commits to
+        // a position is the whole point: two legions closing head-on must agree on where they met,
+        // and that answer cannot depend on which of them was walked first.
+        var steps = new Dictionary<string, LaneStep>(StringComparer.Ordinal);
+        foreach (var entity in world.Entities)
+        {
+            if (!ZoneOfControl.Projects(entity)) continue;
+            paths.TryGetValue(entity.EntityId, out var path);
+            if (entity.OnLaneId is null && path is null) continue;
+            if (MarchResolver.FirstLaneStep(world, entity, path) is { } step)
+                steps[entity.EntityId] = step;
+        }
+
+        var crossings = ContactResolver.LaneContacts(world, steps);
+        var stoppedByCrossing = new Dictionary<string, (LaneContact Contact, bool IsA)>(StringComparer.Ordinal);
+        foreach (var crossing in crossings)
+        {
+            stoppedByCrossing[crossing.EntityA] = (crossing, true);
+            stoppedByCrossing[crossing.EntityB] = (crossing, false);
+        }
+
+        var queue = new TurnEventQueue();
+        var requests = new Dictionary<string, BattleRequest>(StringComparer.Ordinal);
+        var moved = new Dictionary<string, WorldEntity>(StringComparer.Ordinal);
+        // Concrete on the way in, read-only on the way out. Declaring this as the interface and
+        // casting back to mutate it would be a runtime failure waiting for someone to change the
+        // collection type.
+        var visited = new SortedDictionary<string, SortedSet<string>>(StringComparer.Ordinal);
+
+        foreach (var entity in world.Entities)
+        {
+            if (stoppedByCrossing.TryGetValue(entity.EntityId, out var met))
+            {
+                moved[entity.EntityId] = StopAtCrossing(world, entity, steps[entity.EntityId], met.Contact, met.IsA);
+                continue;
+            }
+
+            if (!paths.TryGetValue(entity.EntityId, out var path)) continue;
+
+            var outcome = MarchResolver.March(world, entity, path);
+
+            if (outcome.VisitedSectorIds.Count > 0)
+            {
+                if (!visited.TryGetValue(entity.OwnerFactionId, out var seen))
+                    visited[entity.OwnerFactionId] = seen = new SortedSet<string>(StringComparer.Ordinal);
+                foreach (var sectorId in outcome.VisitedSectorIds) seen.Add(sectorId);
+            }
+
+            moved[entity.EntityId] = entity with
+            {
+                AtSectorId = outcome.AtSectorId,
+                OnLaneId = outcome.OnLaneId,
+                OnLaneTowardSectorId = outcome.OnLaneTowardSectorId,
+                LaneProgressMilli = outcome.LaneProgressMilli,
+                MovementRemaining = outcome.MovementRemaining
+            };
+
+            queue.Schedule(outcome.TimeMilli, entity.EntityId, TurnEventKinds.Arrival,
+                outcome.ArrivedAtSectorId ?? outcome.OnLaneId ?? "");
+
+            if (outcome.HaltedByZoneOfControl)
+                queue.Schedule(outcome.TimeMilli, entity.EntityId, TurnEventKinds.Halt,
+                    "zoc:" + outcome.AtSectorId);
+        }
+
+        foreach (var crossing in crossings)
+        {
+            // Both sides are marching, so neither of them is defending anything.
+            var request = new BattleRequest
+            {
+                BattleId = BattleKinds.IdFor(turn, BattleKinds.Lane, crossing.LaneId, crossing.EntityA, crossing.EntityB),
+                Kind = BattleKinds.Lane,
+                LocationId = crossing.LaneId,
+                TimeMilli = crossing.TimeMilli,
+                AttackerEntityId = crossing.EntityA,
+                DefenderEntityId = crossing.EntityB
+            };
+
+            requests[request.BattleId] = request;
+            queue.Schedule(crossing.TimeMilli, crossing.EntityA, TurnEventKinds.Crossing, request.BattleId);
+        }
+
+        var next = moved.Count == 0
+            ? world
+            : world with
+            {
+                Entities = world.Entities
+                    .Select(e => moved.TryGetValue(e.EntityId, out var updated) ? updated : e)
+                    .ToList()
+            };
+
+        // A force is a defender only if it never budged, so the set is computed from the positions
+        // themselves rather than from who happened to file an order.
+        var movedIds = world.Entities
+            .Where(before => moved.TryGetValue(before.EntityId, out var after) && ChangedPosition(before, after))
+            .Select(e => e.EntityId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        foreach (var contact in ContactResolver.SectorContacts(next, movedIds))
+        {
+            var request = new BattleRequest
+            {
+                BattleId = BattleKinds.IdFor(turn, BattleKinds.Sector, contact.SectorId,
+                    contact.AttackerEntityId, contact.DefenderEntityId),
+                Kind = BattleKinds.Sector,
+                LocationId = contact.SectorId,
+                TimeMilli = TurnEventQueue.TurnEndMilli,
+                AttackerEntityId = contact.AttackerEntityId,
+                DefenderEntityId = contact.DefenderEntityId,
+                DefenderStationary = contact.DefenderStationary
+            };
+
+            requests[request.BattleId] = request;
+            queue.Schedule(TurnEventQueue.TurnEndMilli, contact.AttackerEntityId,
+                TurnEventKinds.Contact, request.BattleId);
+        }
+
+        // Replaying the turn in the order it actually happened — which is why the report reads as a
+        // story rather than as the order the orders were filed in.
+        while (queue.TryDequeue(out var evt))
+        {
+            if (evt.Kind is TurnEventKinds.Contact or TurnEventKinds.Crossing
+                && requests.TryGetValue(evt.Detail, out var request))
+            {
+                next = BattleReporting.Fight(next, request, resolver, report, phase, seed);
+                continue;
+            }
+
+            report.Add(phase, TurnReportKinds.Event, evt.EntityId, evt.Kind + ":" + evt.Detail);
+        }
+
+        return new MovementResult(
+            next,
+            visited.ToDictionary(kv => kv.Key, kv => (IReadOnlySet<string>)kv.Value, StringComparer.Ordinal));
+    }
+
+    /// <summary>
+    /// Freezes a legion at the exact point it met someone. Its progress is measured from its own
+    /// end, so the two sides land on complementary positions and the lane still adds up to 1000.
+    /// </summary>
+    static WorldEntity StopAtCrossing(
+        WorldState world, WorldEntity entity, LaneStep step, LaneContact contact, bool isA)
+    {
+        var stopAt = Math.Clamp(
+            isA ? contact.PositionMilliFromA : LaneCrossing.LaneLengthMilli - contact.PositionMilliFromA,
+            1, 999);
+
+        var lane = world.Lanes.First(l => l.LaneId == step.LaneId);
+        var cost = LaneCost.For(world, lane, BannerElement.Of(entity));
+        var spent = (int)((long)cost * Math.Max(0, stopAt - step.ProgressMilli) / 1000);
+
+        return entity with
+        {
+            AtSectorId = null,
+            OnLaneId = step.LaneId,
+            OnLaneTowardSectorId = step.TowardSectorId,
+            LaneProgressMilli = stopAt,
+            MovementRemaining = Math.Max(0, entity.MovementRemaining - spent)
+        };
+    }
+
+    static bool ChangedPosition(WorldEntity before, WorldEntity after) =>
+        !string.Equals(before.AtSectorId, after.AtSectorId, StringComparison.Ordinal)
+        || !string.Equals(before.OnLaneId, after.OnLaneId, StringComparison.Ordinal)
+        || before.LaneProgressMilli != after.LaneProgressMilli;
+
+}

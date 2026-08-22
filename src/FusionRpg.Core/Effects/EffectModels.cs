@@ -94,11 +94,27 @@ public interface IEffectRandom
     double NextDouble();
 }
 
+/// <summary>
+/// Deterministic effect RNG. Backed by the owned xoshiro256** stream, not System.Random —
+/// SeededRng's own header states the rule: System.Random's seeded sequence is not guaranteed
+/// stable across .NET versions, so a runtime upgrade would silently move every chance-gated
+/// replay with no content change and no contentHash change to make it visible.
+/// </summary>
 public sealed class SeededEffectRandom : IEffectRandom
 {
-    readonly Random _rng;
-    public SeededEffectRandom(int seed) => _rng = new Random(seed);
-    public double NextDouble() => _rng.NextDouble();
+    readonly Battle.SeededRng _rng;
+
+    public SeededEffectRandom(int seed)
+        : this(unchecked((ulong)seed), "effect.proc") { }
+
+    public SeededEffectRandom(ulong runSeed, string streamName)
+        => _rng = Battle.SeededRng.DeriveStream(runSeed, streamName);
+
+    /// <summary>
+    /// [0, 1) from the top 53 bits — the standard IEEE-754 double construction. Built here rather
+    /// than added to SeededRng, which is spec-fixed and integer-only on purpose.
+    /// </summary>
+    public double NextDouble() => (_rng.NextULong() >> 11) * (1.0 / 9007199254740992.0);
 }
 
 public interface IEffectActionSink

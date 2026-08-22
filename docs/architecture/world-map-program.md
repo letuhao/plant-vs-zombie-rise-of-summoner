@@ -25,17 +25,21 @@ This wave builds **the foundation only** — the places and the clock. Objects t
 | `world-model` | The nouns and their storage: worlds, sectors, slots, lanes, factions, entities; code-authored catalogs with validation; one hand-authored starter map | — | **1** |
 | `turn-engine` | The SSOT clock: commands as data, per-turn command log, `WaitForAll` barrier, phase order, sim sub-steps, pure `step()`, turn report, state hash, replay | `world-model` | **1** |
 | `world-movement` | The first verbs: legions, movement points, lane costs, zone of control, contact, claim, supply connectivity | `turn-engine` | **1** |
-| `ai-commander` | Zomboss and neutral factions committing through the same command interface; policies, difficulty as policy | `world-movement` | 2 |
+| `world-intel` | Fog of war for **every** faction: per-faction belief state, visibility rules, remembered snapshots with staleness, per-faction projection of the state endpoint, fog on the map view | `world-movement` | **2** |
+| `world-topology` | Graph analysis of the lane network: all-pairs travel cost, articulation points, **reconnection cost** — what it costs the empire to lose one sector | `world-model` | **2** |
+| `ai-commander` | Zomboss and neutral factions committing through the same command interface; policies over **beliefs**, the value matrix, difficulty as policy | `world-intel`, `world-topology` | 2 |
 | `world-fe` | `#/world`: graph render, sector inspector, order queue, End Turn, turn report playback | `world-movement` | 2 |
 | `sector-development` | Slot buildings, sector projects, production and upkeep, weekly recruit pulses, the calendar's economic half | `world-movement` | 3 |
 | `combat-handoff` | `BattleRequest` / `OutcomeRecord` seam to the combat stream, replacing wave 1's placeholder resolver | `world-movement` + combat stream | 3 |
 | `world-generator` | Templates: typed zones, value budgets, guard bands, connection rules — replaces hand-authored maps | `sector-development` | 4 |
-| `fog-and-intel` | Intel states, watch radius, stale-stamped views, the arrival forecast | `world-generator` | 4 |
+| `fog-and-intel` | ~~Intel states, watch radius, stale-stamped views~~ — **superseded by `world-intel`, pulled forward to wave 2** (owner, 2026-08-22: fog is a prerequisite for a tunable AI, not a later polish). What remains here is the arrival forecast | `world-generator` | 4 |
 | `bases-and-defense` | Base layouts, siege boards, offline defense resolution | `combat-handoff`, combat stream's board model | 5 |
 
-**Build order:** `world-model` → `turn-engine` → `world-movement` → (`ai-commander` ∥ `world-fe`) → `sector-development` ∥ `combat-handoff` → `world-generator` → `fog-and-intel` → `bases-and-defense`.
+**Build order:** `world-model` → `turn-engine` → `world-movement` → `world-fe` → (`world-intel` ∥ `world-topology`) → `ai-commander` → `sector-development` ∥ `combat-handoff` → `world-generator` → `fog-and-intel` → `bases-and-defense`.
 
-Module specs: [world/spec-world-model.md](world/spec-world-model.md) · [world/spec-turn-engine.md](world/spec-turn-engine.md) · [world/spec-world-movement.md](world/spec-world-movement.md).
+Module specs: [world/spec-world-model.md](world/spec-world-model.md) · [world/spec-turn-engine.md](world/spec-turn-engine.md) · [world/spec-world-movement.md](world/spec-world-movement.md) · [world/spec-world-intel.md](world/spec-world-intel.md) · [world/spec-world-topology.md](world/spec-world-topology.md) · [world/spec-ai-commander.md](world/spec-ai-commander.md).
+
+**Status (2026-08-22):** `world-model`, `turn-engine`, `world-movement`, `world-fe`, `world-intel` and `world-topology` are built and green — waves 1 and 2's first half, checkpoints 1–7, with only an owner look left on the map itself. Next in the build order: **`ai-commander`**, whose spec was rewritten against fog and then verified line by line against the shipped code; it is the last module of wave 2 and it is unbuilt.
 
 ## Why the generator is deliberately last of the four
 

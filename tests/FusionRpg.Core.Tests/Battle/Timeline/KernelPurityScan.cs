@@ -27,7 +27,23 @@ static class KernelPurityScan
 {
     /// <summary>Determinism hazards. No file is exempt.</summary>
     public static readonly string[] BannedEverywhere =
-        { "DateTime", "DateTimeOffset", "Random", "float ", "double ", "Stopwatch", ".Keys", ".Values" };
+    {
+        // wall clock
+        "DateTime", "DateTimeOffset", "Stopwatch", "Environment.Tick", "TimeProvider",
+        // randomness — including the ones that do not look like randomness. `.GetHashCode(` is a
+        // CALL: string and object hash codes are seeded per process, so using one as a value makes
+        // a run unreproducible. Written with the leading dot so it does not flag the perfectly
+        // legitimate `override int GetHashCode()` declaration.
+        "Random", "Guid.NewGuid", ".GetHashCode(",
+        // floating point, in every spelling
+        "float ", "double ", "decimal ", "(double)", "(float)", "<double>", "<float>",
+        // dictionary enumeration
+        ".Keys", ".Values",
+        // the escape hatches: a `using static` or a using-alias makes every tick-path rule below
+        // invisible, because the call is no longer dotted. One innocuous-looking line would
+        // otherwise disable all of them for a whole file.
+        "using static", "using System.Linq"
+    };
 
     /// <summary>
     /// Frame-cost hazards on the tick path: LINQ allocates enumerators and delegates, a scene scan
@@ -66,13 +82,18 @@ static class KernelPurityScan
         foreach (var file in Directory.GetFiles(dir, "*.cs", SearchOption.AllDirectories)
                      .OrderBy(f => f, StringComparer.Ordinal))
         {
-            var name = Path.GetFileName(file);
+            // Relative path, not bare filename: over a recursive scan, matching on the name alone
+            // means `Nested/Anything/BattleTrace.cs` silently inherits the exemption — which is
+            // the wildcard growth this list exists to prevent. It also disambiguates offences
+            // between same-named files in different folders.
+            var name = Path.GetRelativePath(dir, file).Replace('\\', '/');
             var tickPathExempt = DiagnosticsExemptFromTickPath.Contains(name, StringComparer.Ordinal);
             var lines = File.ReadAllLines(file);
+            var inBlockComment = false;
 
             for (var i = 0; i < lines.Length; i++)
             {
-                var code = StripComment(lines[i]);
+                var code = StripComment(lines[i], ref inBlockComment);
                 if (code.Length == 0) continue;
 
                 foreach (var token in BannedEverywhere)
@@ -95,30 +116,62 @@ static class KernelPurityScan
     /// suppress the guard — a guard that cries wolf gets disabled, which is the same outcome as
     /// having no guard, arrived at more slowly.
     /// </summary>
-    static readonly string[] SafeReceivers = { "Math", "MathF", "Interlocked", "Volatile" };
+    /// <summary>
+    /// Receivers whose members share a name with a LINQ operator but are cheap, non-allocating
+    /// intrinsics: <c>Math.Max</c>, <c>Array.Reverse</c>, <c>string.Concat</c>, <c>Span.Slice</c>.
+    /// Flagging these trains people to suppress the guard, and a suppressed guard is no guard.
+    /// </summary>
+    static readonly string[] SafeReceivers =
+        { "Math", "MathF", "Array", "string", "String", "Span", "ReadOnlySpan", "Buffer" };
+
+    /// <summary>
+    /// Matches <c>.Name</c> followed by optional whitespace, optional generic arguments, more
+    /// optional whitespace, then <c>(</c> — because C# allows all of that between a method name
+    /// and its argument list. A raw substring match on <c>".Where("</c> is defeated by a single
+    /// space, which is not a theoretical concern: it is one keystroke.
+    /// </summary>
+    static readonly Dictionary<string, System.Text.RegularExpressions.Regex> CallPatterns = new(StringComparer.Ordinal);
+
+    static System.Text.RegularExpressions.Regex PatternFor(string token)
+    {
+        if (CallPatterns.TryGetValue(token, out var cached)) return cached;
+
+        // token looks like ".Where(" or "FindObjectsOfType" or "StatSystem.Resolve"
+        var built = token.EndsWith("(", StringComparison.Ordinal)
+            ? System.Text.RegularExpressions.Regex.Escape(token[..^1]) + @"\s*(<[^>()]*>)?\s*\("
+            : System.Text.RegularExpressions.Regex.Escape(token);
+
+        var regex = new System.Text.RegularExpressions.Regex(built,
+            System.Text.RegularExpressions.RegexOptions.Compiled);
+        CallPatterns[token] = regex;
+        return regex;
+    }
 
     static bool ContainsRealCall(string code, string token)
     {
-        var from = 0;
-        while (true)
+        foreach (System.Text.RegularExpressions.Match m in PatternFor(token).Matches(code))
         {
-            var at = code.IndexOf(token, from, StringComparison.Ordinal);
-            if (at < 0) return false;
-
-            var precededBySafeReceiver = false;
-            foreach (var receiver in SafeReceivers)
-            {
-                if (at >= receiver.Length &&
-                    code.AsSpan(at - receiver.Length, receiver.Length).SequenceEqual(receiver))
-                {
-                    precededBySafeReceiver = true;
-                    break;
-                }
-            }
-
-            if (!precededBySafeReceiver) return true;
-            from = at + 1;
+            if (!PrecededBySafeReceiver(code, m.Index)) return true;
         }
+
+        return false;
+    }
+
+    static bool PrecededBySafeReceiver(string code, int at)
+    {
+        foreach (var receiver in SafeReceivers)
+        {
+            if (at < receiver.Length) continue;
+            if (!code.AsSpan(at - receiver.Length, receiver.Length).SequenceEqual(receiver)) continue;
+
+            // Require a real boundary before the receiver, so a variable named `_fooMath` is not
+            // mistaken for the `Math` intrinsic.
+            var boundary = at - receiver.Length - 1;
+            if (boundary < 0 || !(char.IsLetterOrDigit(code[boundary]) || code[boundary] == '_'))
+                return true;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -126,21 +179,40 @@ static class KernelPurityScan
     /// the doc comments explaining why wall-clock reads are forbidden would otherwise trip the
     /// guard, which would teach people to stop documenting.
     /// </summary>
-    static string StripComment(string line)
+    /// <summary>
+    /// Returns the code portion of a line, with comments removed.
+    ///
+    /// Quote-aware because a naive "cut at the first //" is a bypass, not merely a false positive:
+    /// <c>var s = "a//b"; var t = DateTime.UtcNow;</c> would truncate inside the literal and hide
+    /// what follows. Block-comment aware (state carried across lines by
+    /// <paramref name="inBlockComment"/>) because otherwise prose inside a <c>/* … */</c> reads as
+    /// code — and a guard that flags its own documentation gets suppressed.
+    /// </summary>
+    static string StripComment(string line, ref bool inBlockComment)
     {
-        // Quote-aware, because a naive "cut at the first //" is a bypass, not just a false
-        // positive: a line like  var s = "a//b"; var t = DateTime.UtcNow;  would be truncated
-        // inside the string literal and the violation after it would never be seen.
+        var sb = new System.Text.StringBuilder(line.Length);
         var inString = false;
+
         for (var i = 0; i < line.Length; i++)
         {
+            if (inBlockComment)
+            {
+                if (i + 1 < line.Length && line[i] == '*' && line[i + 1] == '/') { inBlockComment = false; i++; }
+                continue;
+            }
+
             var c = line[i];
-            if (c == '\\') { i++; continue; }                       // skip an escaped character
-            if (c == '"') { inString = !inString; continue; }
-            if (!inString && c == '/' && i + 1 < line.Length && line[i + 1] == '/')
-                return line[..i];
+            if (!inString && c == '/' && i + 1 < line.Length)
+            {
+                if (line[i + 1] == '/') break;                       // line comment: done
+                if (line[i + 1] == '*') { inBlockComment = true; i++; continue; }
+            }
+
+            if (c == '\\' && inString) { i++; continue; }            // escaped char inside a string
+            if (c == '"') inString = !inString;
+            sb.Append(c);
         }
 
-        return line;
+        return sb.ToString();
     }
 }

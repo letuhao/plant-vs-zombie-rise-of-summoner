@@ -1,0 +1,190 @@
+using FusionRpg.Core.World;
+using FusionRpg.Core.World.Intel;
+using Xunit;
+
+namespace FusionRpg.Core.Tests.World.Intel;
+
+/// <summary>
+/// W19 (spec-world-intel.md §Remembering): sight becomes memory, and memory ages.
+///
+/// The two properties that matter most are that a survey equals the truth exactly — belief must
+/// never drift from what you are standing on — and that a glimpse carries a band rather than a
+/// count, because an exact number from next door would make fog cosmetic.
+/// </summary>
+public class IntelRecorderTests
+{
+    static WorldState World() => WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
+
+    static WorldState Remembering(WorldState w, int turn) => w with { Intel = IntelRecorder.Observe(w, w, turn) };
+
+    static IntelSnapshot? Believes(WorldState w, string faction, string sector) =>
+        w.Intel.FirstOrDefault(f => f.FactionId == faction)?.Of(sector);
+
+    static WorldState Place(WorldState w, string entityId, string sectorId) => w with
+    {
+        Entities = w.Entities
+            .Select(e => e.EntityId == entityId
+                ? e with { AtSectorId = sectorId, OnLaneId = null, OnLaneTowardSectorId = null, LaneProgressMilli = 0 }
+                : e)
+            .ToList()
+    };
+
+    [Fact]
+    public void Standing_on_ground_means_believing_it_exactly()
+    {
+        var world = Remembering(World(), turn: 1);
+        var home = Believes(world, "dave", "homeworld")!;
+        var truth = world.Sectors.Single(s => s.SectorId == "homeworld");
+
+        Assert.Equal(SectorSight.Full, home.Detail);
+        Assert.Equal(truth.OwnerFactionId, home.OwnerFactionId);
+        Assert.Equal(truth.Phase, home.Phase);
+        Assert.Equal(truth.DangerBand, home.DangerBand);
+        Assert.Equal(truth.Slots.Count, home.Slots.Count);
+        Assert.Equal(1, home.LastSeenTurn);
+    }
+
+    [Fact]
+    public void A_glimpse_carries_no_slots_at_all()
+    {
+        var world = Remembering(World(), 1);
+        var ember = Believes(world, "dave", "ember-hollow")!;
+        var truth = world.Sectors.Single(s => s.SectorId == "ember-hollow");
+
+        // Ember Hollow has four slots including a Seat and two guarded veins. From next door you
+        // learn none of that — only that it is there, whose it is, and how dangerous it looks.
+        Assert.Equal(SectorSight.Glimpse, ember.Detail);
+        Assert.NotEmpty(truth.Slots);
+        Assert.Empty(ember.Slots);
+        Assert.Equal(truth.OwnerFactionId, ember.OwnerFactionId);
+        Assert.Equal(truth.DangerBand, ember.DangerBand);
+    }
+
+    [Fact]
+    public void What_you_have_never_seen_has_no_entry_at_all()
+    {
+        // An absent snapshot *is* "never heard of it" — there is no separate flag to get wrong.
+        Assert.Null(Believes(Remembering(World(), 1), "dave", "black-gate"));
+    }
+
+    [Fact]
+    public void A_survey_counts_heads_and_a_glimpse_only_bands_them()
+    {
+        var world = Remembering(Place(World(), "e-wild-pack-1", "ember-hollow"), turn: 1);
+
+        // Dave glimpses ember-hollow from the homeworld: he can see a force, not count it.
+        var glimpsed = Believes(world, "dave", "ember-hollow")!.Forces.Single();
+        Assert.False(glimpsed.Exact);
+        Assert.True(glimpsed.BandIndex > 0);
+        Assert.True(glimpsed.Defensive >= glimpsed.Offensive, "the defensive reading must never be the cheaper one");
+
+        // The wild pack is standing in it, and knows exactly what it brought.
+        var surveyed = Believes(world, "wild", "ember-hollow")!.Forces.Single();
+        Assert.True(surveyed.Exact);
+        Assert.Equal(560, surveyed.Strength);   // 2 members × 140 hp × level 2
+    }
+
+    [Fact]
+    public void A_force_on_the_road_is_recorded_against_the_ground_it_is_walking_toward()
+    {
+        var world = World();
+        var marching = world with
+        {
+            Entities = world.Entities
+                .Select(e => e.EntityId == "e-wild-pack-1"
+                    ? e with
+                    {
+                        AtSectorId = null, OnLaneId = "l-ember-ash",
+                        OnLaneTowardSectorId = "ember-hollow", LaneProgressMilli = 400
+                    }
+                    : e)
+                .ToList()
+        };
+
+        var believed = Believes(Remembering(marching, 1), "dave", "ember-hollow")!;
+        var incoming = believed.Forces.Single();
+
+        Assert.Equal("e-wild-pack-1", incoming.EntityId);
+        Assert.False(incoming.Exact, "you can see a column on the road, not read its muster roll");
+    }
+
+    [Fact]
+    public void Leaving_keeps_the_memory_and_the_turn_it_was_taken()
+    {
+        var atHome = Remembering(World(), turn: 1);
+
+        // March away, several turns pass, and nothing looks at the homeworld again.
+        var away = Place(atHome, "e-dave-legion-1", "ash-waste") with
+        {
+            Sectors = atHome.Sectors
+                .Select(s => s.SectorId == "homeworld" ? s with { OwnerFactionId = null } : s)
+                .ToList()
+        };
+        var later = away with { Intel = IntelRecorder.Observe(away, away, turn: 9) };
+
+        var home = Believes(later, "dave", "homeworld")!;
+        Assert.Equal(1, home.LastSeenTurn);
+        Assert.Equal("dave", home.OwnerFactionId);   // still believed his, though it no longer is
+    }
+
+    [Fact]
+    public void A_force_that_dies_in_front_of_you_is_forgotten_rather_than_haunting_the_map()
+    {
+        var withEnemy = Remembering(Place(World(), "e-wild-pack-1", "ember-hollow"), turn: 1);
+        Assert.Single(Believes(withEnemy, "dave", "ember-hollow")!.Forces);
+
+        var destroyed = withEnemy with
+        {
+            Entities = withEnemy.Entities.Where(e => e.EntityId != "e-wild-pack-1").ToList()
+        };
+        var after = destroyed with { Intel = IntelRecorder.Observe(destroyed, destroyed, turn: 2) };
+
+        Assert.Empty(Believes(after, "dave", "ember-hollow")!.Forces);
+    }
+
+    [Fact]
+    public void Every_faction_gets_its_own_belief_and_nobody_shares()
+    {
+        var world = Remembering(World(), turn: 1);
+
+        Assert.Equal(
+            world.Factions.Select(f => f.FactionId).OrderBy(f => f, StringComparer.Ordinal),
+            world.Intel.Select(i => i.FactionId));
+
+        // Zomboss holds nothing and stands nowhere, so he believes nothing.
+        Assert.Empty(world.Intel.Single(i => i.FactionId == "zomboss").Sectors);
+    }
+
+    [Fact]
+    public void Belief_is_written_in_stable_order()
+    {
+        var world = Remembering(World(), turn: 1);
+
+        foreach (var faction in world.Intel)
+            Assert.Equal(
+                faction.Sectors.Select(s => s.SectorId).OrderBy(s => s, StringComparer.Ordinal),
+                faction.Sectors.Select(s => s.SectorId));
+    }
+
+    [Fact]
+    public void Observing_the_same_world_twice_believes_the_same_thing_twice()
+    {
+        var once = Remembering(World(), turn: 3);
+        var twice = Remembering(World(), turn: 3);
+
+        Assert.Equal(WorldCanonical.Write(once), WorldCanonical.Write(twice));
+    }
+
+    [Fact]
+    public void The_ladder_is_derived_from_the_turn_it_was_seen()
+    {
+        var snapshot = new IntelSnapshot { SectorId = "x", LastSeenTurn = 10 };
+
+        Assert.Equal(IntelState.Unknown, IntelLadder.StateOf(null, 10, seenThisTurn: false));
+        Assert.Equal(IntelState.Watched, IntelLadder.StateOf(snapshot, 10, seenThisTurn: true));
+        Assert.Equal(IntelState.Watched, IntelLadder.StateOf(null, 10, seenThisTurn: true));
+        Assert.Equal(IntelState.Scouted, IntelLadder.StateOf(snapshot, 15, seenThisTurn: false));
+        Assert.Equal(IntelState.Rumored, IntelLadder.StateOf(snapshot, 16, seenThisTurn: false));
+        Assert.Equal(6, IntelLadder.AgeOf(snapshot, 16));
+    }
+}

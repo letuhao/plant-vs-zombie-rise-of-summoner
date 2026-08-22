@@ -9,4 +9,12 @@
   <ItemGroup>
     <ProjectReference Include="..\FusionRpg.Contracts\FusionRpg.Contracts.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Timeline kernel instrumentation (EventQueue comparison/probe counters) is internal: it
+         lets tests assert complexity by counting rather than by stopwatch, without putting a
+         test-only counter in the public contract. Mirrors the data-layer project's setup.
+         NOTE: keep the other project's literal name out of this file - the Core/data separation
+         guard substring-scans this csproj and cannot tell a comment from a reference. -->
+    <InternalsVisibleTo Include="FusionRpg.Core.Tests" />
+  </ItemGroup>
 </Project>

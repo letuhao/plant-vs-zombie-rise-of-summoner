@@ -1,4 +1,5 @@
 using FusionRpg.Core.World;
+using FusionRpg.Core.World.Intel;
 using FusionRpg.Data;
 using Xunit;
 
@@ -39,6 +40,65 @@ public class WorldStoreTests : IDisposable
         var loaded = _store.LoadWorldState("w-1");
         Assert.NotNull(loaded);
         Assert.Equal(WorldCanonical.Write(built), WorldCanonical.Write(loaded!));
+    }
+
+    /// <summary>
+    /// W10 added a column, and a column that only exists in `CREATE TABLE` never reaches a database
+    /// that already had a world in it. Round-tripping the flag is the cheapest proof that both the
+    /// create path and the migration path carry it.
+    /// </summary>
+    [Fact]
+    public void A_routed_force_stays_routed_across_a_save()
+    {
+        var built = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 7, worldId: "w-routed");
+        var beaten = built with
+        {
+            Entities = built.Entities
+                .Select(e => e.EntityId == "e-dave-legion-1" ? e with { Routed = true } : e)
+                .ToList()
+        };
+
+        var (ok, reason, _) = _store.CreateWorld(playerId: 1, beaten);
+        Assert.True(ok, reason);
+
+        var loaded = _store.LoadWorldState("w-routed");
+        Assert.NotNull(loaded);
+        Assert.True(loaded!.Entities.Single(e => e.EntityId == "e-dave-legion-1").Routed);
+        Assert.Equal(WorldCanonical.Write(beaten), WorldCanonical.Write(loaded));
+    }
+
+    /// <summary>
+    /// W19: belief is the one stored thing that is not derivable from the rest of the world, so a
+    /// lossy round trip here would be invisible everywhere else — the world would reload looking
+    /// perfectly valid, just with a faction quietly knowing less than it did.
+    /// </summary>
+    [Fact]
+    public void What_a_faction_believes_survives_a_save()
+    {
+        var built = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 3, worldId: "w-intel");
+
+        // The template seeds Dave's opening belief; nobody else has looked at anything.
+        var dave = built.Intel.Single(i => i.FactionId == "dave");
+        Assert.NotEmpty(dave.Sectors);
+        Assert.Empty(built.Intel.Single(i => i.FactionId == "zomboss").Sectors);
+
+        var (ok, reason, _) = _store.CreateWorld(playerId: 1, built);
+        Assert.True(ok, reason);
+
+        var loaded = _store.LoadWorldState("w-intel");
+        Assert.NotNull(loaded);
+        Assert.Equal(WorldCanonical.Write(built), WorldCanonical.Write(loaded!));
+
+        // And the detail survives, not just the shape: a surveyed sector keeps its slots and an
+        // exact head count, a glimpsed one keeps neither.
+        var home = loaded!.Intel.Single(i => i.FactionId == "dave").Of("homeworld")!;
+        Assert.NotEmpty(home.Slots);
+        Assert.All(home.Forces, f => Assert.True(f.Exact));
+
+        var rumoured = loaded.Intel.Single(i => i.FactionId == "dave").Of("ash-waste")!;
+        Assert.Empty(rumoured.Slots);
+        Assert.All(rumoured.Forces, f => Assert.False(f.Exact));
+        Assert.All(rumoured.Forces, f => Assert.True(f.BandIndex > 0));
     }
 
     [Fact]

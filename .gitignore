@@ -102,3 +102,5 @@ src/FusionRpg.CheatCore/artifacts/perf-build/
 skills-lock.json
 .claude/
 **/__pycache__/
+src/FusionRpg.Server/wwwroot/
+src/FusionRpg.Server/wwwroot/index.html

@@ -73,13 +73,21 @@ public sealed class EventQueue
     public int Count => _heap.Count;
 
     /// <summary>
-    /// Total order comparisons performed. Exists so complexity can be asserted by <b>counting</b>
-    /// rather than by stopwatch: a timing test in CI measures the build agent, while a comparison
-    /// count rises only when the algorithm actually degrades. One <c>long</c> increment per
-    /// comparison — no allocation, and cheap enough to leave always-on so Release builds are
-    /// measured too.
+    /// Order comparisons performed — the cost of keeping the heap sorted. Complexity is asserted
+    /// by <b>counting</b> rather than by stopwatch, since a timing test in CI measures the build
+    /// agent while a count rises only when the algorithm actually degrades.
     /// </summary>
-    public long ComparisonCount { get; private set; }
+    internal long ComparisonCount { get; private set; }
+
+    /// <summary>
+    /// Element <i>lookups</i> performed — the cost of finding an event, as opposed to ordering it.
+    ///
+    /// This is a separate counter because <see cref="ComparisonCount"/> alone is blind to the
+    /// regression these counters exist to catch. Deleting the index map and finding a heap slot by
+    /// linear scan leaves the sift work — and therefore the comparison count — <b>byte-identical</b>
+    /// while wall-clock blows up several-fold. Counting probes is what makes an O(n) lookup visible.
+    /// </summary>
+    internal long ProbeCount { get; private set; }
 
     public EventHandle Schedule(long dueTick, string ownerKey, int kind, long tag)
     {
@@ -143,6 +151,7 @@ public sealed class EventQueue
     bool TryIndex(EventHandle handle, out int index)
     {
         index = -1;
+        ProbeCount++;   // one probe per lookup; a linear-scan implementation would count n
         return handle.QueueId == _queueId && _indexOf.TryGetValue(handle.Seq, out index);
     }
 

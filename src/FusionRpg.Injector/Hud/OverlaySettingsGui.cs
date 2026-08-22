@@ -8,7 +8,7 @@ namespace FusionRpg.Injector.Hud;
 public static class OverlaySettingsGui
 {
     const float PanelW = 280f;
-    const float PanelH = 140f;
+    const float PanelH = 168f;
 
     public static void Draw()
     {
@@ -38,6 +38,11 @@ public static class OverlaySettingsGui
             var next = GUI.Toggle(new Rect(x + 12f, cy, PanelW - 24f, 22f), on, " Shield bar");
             if (next != on)
                 OverlaySettings.ShieldBarEnabled = next;
+            cy += 28f;
+            var btn = OverlaySettings.OverlayButtonEnabled;
+            var btnNext = GUI.Toggle(new Rect(x + 12f, cy, PanelW - 24f, 22f), btn, " Web UI button");
+            if (btnNext != btn)
+                OverlaySettings.OverlayButtonEnabled = btnNext;
             cy += 28f;
             GUI.Label(new Rect(x + 12f, cy, PanelW - 24f, 20f),
                 "Toggle bar: " + OverlaySettings.ShieldBarHotKey);
