@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "kind": "enhancement-milestone",
+  "_meta": {
+    "batch": "enh-milestones-wave1",
+    "partition": "enhancement-milestones/all",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "sourceRef": "docs/architecture/item/entry-shapes.md §6; docs/architecture/item/ssot-enhancement.md §5.5",
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z"
+  },
+  "entries": [
+    {
+      "id": "enh.001",
+      "nameKey": "enh.enhance-vigor",
+      "name": "Enhancement Vigor",
+      "runtimeFamily": "atom.enhance-vigor",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "Milestone family for enhanced maximum health. Grants at +4/+16/+20 per base-type track. Powers a steady HP boost across the enhancement ladder, doubling the effect at the highest tiers."
+    },
+    {
+      "id": "enh.002",
+      "nameKey": "enh.enhance-edge",
+      "name": "Enhancement Edge",
+      "runtimeFamily": "atom.enhance-edge",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "atk",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "Milestone family for enhanced attack power. Grants at +8/+20 per base-type track. Provides clean flat damage scaling without compounding against existing affixes."
+    },
+    {
+      "id": "enh.003",
+      "nameKey": "enh.enhance-aegis",
+      "name": "Enhancement Aegis",
+      "runtimeFamily": "atom.enhance-aegis",
+      "kindId": "shield.grant",
+      "params": {
+        "element": "omni",
+        "trigger": "OnSpawn"
+      },
+      "powerBand": "high",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "Milestone family for enhanced shield grant. Grants at +12/+20 per base-type track. Omni element reflects the universal defensive intent; tier progression delivers meaningful incremental shield capacity at major enhancement breakpoints."
+    },
+    {
+      "id": "enh.004",
+      "nameKey": "enh.enhance-quicken",
+      "name": "Enhancement Quicken",
+      "runtimeFamily": "atom.enhance-quicken",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "actionSpeed",
+        "op": "Increased"
+      },
+      "powerBand": "low",
+      "tags": [
+        "utility"
+      ],
+      "notes": "Milestone family for enhanced action speed. Optional milestone for base types with mobility focus. Increased op keeps scaling proportional — a faster character stays relatively faster even after enhancement."
+    },
+    {
+      "id": "enh.005",
+      "nameKey": "enh.enhance-keen",
+      "name": "Enhancement Keen",
+      "runtimeFamily": "atom.enhance-keen",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "crit-rate",
+        "op": "Flat"
+      },
+      "powerBand": "low",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "Milestone family for enhanced critical chance. Optional milestone for base types emphasizing precision builds. Low power band reflects that crit rate's resolver-point scale (sigmoid) means small nominal increases compound meaningfully."
+    },
+    {
+      "id": "enh.006",
+      "nameKey": "enh.enhance-fortify",
+      "name": "Enhancement Fortify",
+      "runtimeFamily": "atom.enhance-fortify",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "maxHp",
+        "op": "Increased"
+      },
+      "powerBand": "low",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "Milestone family for enhanced percentage health scaling. Sibling to enhance-vigor's flat approach; offers a different growth curve for base types where multiplicative HP scaling fits the fantasy better. Triggers at higher enhancement levels (typically +16+) where percentage multipliers compound meaningfully."
+    },
+    {
+      "id": "enh.007",
+      "nameKey": "enh.enhance-savagery",
+      "name": "Enhancement Savagery",
+      "runtimeFamily": "atom.enhance-savagery",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "atk",
+        "op": "Increased"
+      },
+      "powerBand": "trivial",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "Milestone family for enhanced percentage attack scaling. Sibling to enhance-edge's flat approach; provides a secondary damage avenue for base types with exceptional attack scaling identity. Trivial power band keeps percentage gains sensible at low tiers where many base types start enhancement."
+    },
+    {
+      "id": "enh.008",
+      "nameKey": "enh.enhance-hardy",
+      "name": "Enhancement Hardy",
+      "runtimeFamily": "atom.enhance-hardy",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "armor",
+        "op": "Flat"
+      },
+      "powerBand": "medium",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "Milestone family for enhanced armor/damage reduction. Grants raw defense independent of shield mechanics. Useful for base types that emphasize passive mitigation over active shielding, providing a distinct defensive identity at high enhancement tiers (+12 and beyond)."
+    },
+    {
+      "id": "enh.009",
+      "nameKey": "enh.enhance-recovery",
+      "name": "Enhancement Recovery",
+      "runtimeFamily": "atom.enhance-recovery",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "hp",
+        "op": "Flat"
+      },
+      "powerBand": "low",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "Milestone family for enhanced healing grant on trigger. One-time or grant-triggered heal distinct from ongoing regeneration; provides a survival boost without competing with the continuous recomposition of max-HP enhancements. Typically granted mid-ladder (+8+) on sustain-focused bases."
+    },
+    {
+      "id": "enh.010",
+      "nameKey": "enh.enhance-evasion",
+      "name": "Enhancement Evasion",
+      "runtimeFamily": "atom.enhance-evasion",
+      "kindId": "stat.modify",
+      "params": {
+        "channel": "dodge",
+        "op": "Flat"
+      },
+      "powerBand": "low",
+      "tags": [
+        "defensive"
+      ],
+      "notes": "Milestone family for enhanced dodge chance. Resolver-point scale means low power band translates to meaningful percentage chance. Pairs with armor enhancements to offer a full defensive tree — one base type might stack hardy+evasion across enhancement levels for layered mitigation."
+    }
+  ]
+}

@@ -49,7 +49,7 @@ public static class IntelRecorder
                     continue;
                 }
 
-                snapshots.Add(Snapshot(atEnd, sector, level, turn));
+                snapshots.Add(Merge(believed?.Of(sector.SectorId), Snapshot(atEnd, sector, level, turn)));
             }
 
             result.Add(new FactionIntel
@@ -60,6 +60,30 @@ public static class IntelRecorder
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// A fresh sighting, without throwing away what a better one already taught you.
+    ///
+    /// Found by playing the game: a legion surveyed a sector, stepped one lane away, and forgot what
+    /// was in it — because a glimpse produced a whole new snapshot carrying no slots. Surveying was
+    /// nearly worthless. Everything a glimpse *can* see (who holds it, what is standing on it, when
+    /// you last looked) takes the new value; what only a survey can see is kept from the survey.
+    ///
+    /// The nuance worth knowing: after this, `LastSeenTurn` is when you last *looked*, which is not
+    /// necessarily when you last learned what is inside. That is the honest trade — the alternative
+    /// is either forgetting the inside or pretending you have not seen the outside since.
+    /// </summary>
+    static IntelSnapshot Merge(IntelSnapshot? remembered, IntelSnapshot fresh)
+    {
+        if (remembered is null || remembered.Detail <= fresh.Detail) return fresh;
+
+        return fresh with
+        {
+            Detail = remembered.Detail,
+            Slots = remembered.Slots,
+            DevelopmentLevel = remembered.DevelopmentLevel
+        };
     }
 
     static IntelSnapshot Snapshot(WorldState world, WorldSector sector, SectorSight level, int turn) => new()

@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-standard",
+    "partition": "base-types/humanoid-standard",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-banner-001",
+      "nameKey": "base.photocopied-banner",
+      "name": "Photocopied Banner",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "field-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.photocopied-banner",
+      "flavorKey": "flavor.base.photocopied-banner",
+      "flavor": "A once-crisp paper banner, now sun-faded and taped at the corners.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-002",
+      "nameKey": "base.tasselled-flagpole",
+      "name": "Tasselled Flagpole",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "ceremonial-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warding",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tasselled-flagpole",
+      "flavorKey": "flavor.base.tasselled-flagpole",
+      "flavor": "A stately pole crowned with ceremonial cloth and tassels of silver thread.",
+      "tags": [
+        "medium",
+        "metal",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-003",
+      "nameKey": "base.drooping-windsock",
+      "name": "Drooping Windsock",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "field-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.drooping-windsock",
+      "flavorKey": "flavor.base.drooping-windsock",
+      "flavor": "A fabric tube, tired at the seams, that still catches the wind when nobody else does.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-004",
+      "nameKey": "base.fringed-scarecrow",
+      "name": "Fringed Scarecrow",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "ceremonial-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.resilience",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.fringed-scarecrow",
+      "flavorKey": "flavor.base.fringed-scarecrow",
+      "flavor": "A straw-stuffed guardian, dressed in fringed silks — a scarecrow that terrifies with grace.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-005",
+      "nameKey": "base.sunbleached-streamer",
+      "name": "Sunbleached Streamer",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "field-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.sunbleached-streamer",
+      "flavorKey": "flavor.base.sunbleached-streamer",
+      "flavor": "Ribbon strips bleached nearly white by seasons, yet they flutter with the spirit of many summers.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-006",
+      "nameKey": "base.embroidered-mailbox",
+      "name": "Embroidered Mailbox",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "ceremonial-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.embroidered-mailbox",
+      "flavorKey": "flavor.base.embroidered-mailbox",
+      "flavor": "A metal box crowned with embroidered cloth, more monument than message carrier.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-007",
+      "nameKey": "base.windtorn-placard",
+      "name": "Windtorn Placard",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "field-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.resilience",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.windtorn-placard",
+      "flavorKey": "flavor.base.windtorn-placard",
+      "flavor": "A wooden sign worn by wind into softness; the words are faint but the intent remains clear.",
+      "tags": [
+        "light",
+        "organic"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-008",
+      "nameKey": "base.decorated-whirligig",
+      "name": "Decorated Whirligig",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "ceremonial-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warding",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.decorated-whirligig",
+      "flavorKey": "flavor.base.decorated-whirligig",
+      "flavor": "A spinning ornament bedecked with medals and bright paint, a joy to see and a rallying sight.",
+      "tags": [
+        "medium",
+        "metal",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-009",
+      "nameKey": "base.handlettered-yardsign",
+      "name": "Handlettered Yardsign",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "field-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.handlettered-yardsign",
+      "flavorKey": "flavor.base.handlettered-yardsign",
+      "flavor": "A crooked sign marked by hand with a name or order, planted where it needs to be seen.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-banner-010",
+      "nameKey": "base.processional-billboard",
+      "name": "Processional Billboard",
+      "frame": "humanoid",
+      "role": "standard",
+      "class": "ceremonial-standard",
+      "band": "a",
+      "implicit": {
+        "family": "atom.resilience",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.processional-billboard",
+      "flavorKey": "flavor.base.processional-billboard",
+      "flavor": "A grand painted board meant for ceremony, its surface tells the story of who carries it and why.",
+      "tags": [
+        "heavy",
+        "mineral",
+        "defensive"
+      ]
+    }
+  ]
+}

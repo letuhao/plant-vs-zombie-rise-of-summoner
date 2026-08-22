@@ -182,13 +182,19 @@ public class AtomKindRegistryTests
         Assert.Equal(AtomRejectionReason.ParamNotImplemented, r.Reason);
     }
 
-    // G4: capPerMatch appears in the FA9 allowlist and is implemented nowhere in the repo.
+    // G4 CLOSED 2026-08-22. capPerMatch sat in the FA9 allowlist implemented nowhere, so E1 refused
+    // it at load. E15 shipped the counter (AtomRunner + RunnerState + CapPerMatchTests), and leaving
+    // the refusal in place would have made the feature unauthorable by the content it was built for
+    // — a guard outliving its reason is just a silently dead feature.
     [Fact]
-    public void Economy_capPerMatch_rejects_until_the_runner_owns_it()
+    public void Economy_capPerMatch_validates_now_that_the_runner_owns_it()
     {
         var r = AtomKindRegistry.Validate("resource.economy",
             P(("currency", "sun"), ("op", "add"), ("amount", 25), ("capPerMatch", 3)));
-        Assert.Equal(AtomRejectionReason.ParamNotImplemented, r.Reason);
+
+        Assert.True(r.IsOk, r.ToString());
+        Assert.Null(AtomKindRegistry.Get("resource.economy")!.Params.Defs
+            .First(d => d.Name == "capPerMatch").NotImplementedNote);
     }
 
     // G5: an empty target means "every zombie on the board" — and D7 established that this CANNOT be

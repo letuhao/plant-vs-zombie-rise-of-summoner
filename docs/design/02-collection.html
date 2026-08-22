@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collection — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Collection</h1>
+  <p>
+    Creatures, Relics and Fusion — the three layers where an itemisation game is won or lost. All
+    three open over whatever stage the player is on and close back to it. All three are built from
+    one entity ladder, and all three lead with comparison rather than with a table.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 02</span>
+    <span class="tag">GG-1 · GG-25 · GG-47 · GG-48 · GG-50 · GG-51</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="01-shell-home.html">← Sanctum</a>
+  <a href="#a">A · Creatures</a>
+  <a href="#b">B · Relics</a>
+  <a href="#c">C · Fusion</a>
+  <a href="#d">D · Volume</a>
+  <a href="#e">E · Notes</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Creatures <span class="hotkey">C</span></h2>
+  <p class="lede">
+    The bound roster. This is the surface that currently asks the player to type a numeric
+    <code>typeId</code> into a text box under the words <em>"UniqueActor Cold specimens"</em>.
+  </p>
+
+  <div class="spec">
+    <div class="viewport">
+      <div class="frame-row">
+        <nav class="rail">
+          <button><span class="g">&#8962;</span>Sanctum</button>
+          <div class="sep"></div>
+          <button class="is-active"><span class="g">&#10022;</span>Creatures</button>
+          <button><span class="g">&#9672;</span>Relics</button>
+          <button><span class="g">&#9879;</span>Fusion</button>
+          <button><span class="g">&#128121;</span>Pacts</button>
+          <button><span class="g">&#9973;</span>Expeditions</button>
+          <div class="sep"></div>
+          <button><span class="g">&#128214;</span>Almanac</button>
+          <button><span class="g">&#128366;</span>Chronicle</button>
+        </nav>
+        <div class="stagearea">
+          <!-- the sanctum, still mounted, still there -->
+          <div class="sanctum" style="filter:saturate(.6)">
+            <div class="shelf" style="opacity:.5"><header><h3>Your creatures</h3></header></div>
+          </div>
+          <div class="scrim"></div>
+
+          <div style="position:absolute;inset:12px;z-index:var(--band-panel)">
+            <div class="panel-shell" style="height:100%">
+              <header>
+                <div style="flex:1">
+                  <h3>Creatures</h3>
+                  <div class="sub">12 bound · 3 deployed · 2 resting</div>
+                </div>
+                <span class="esc">Esc</span>
+                <button class="btn btn--icon btn--ghost" aria-label="Close">✕</button>
+              </header>
+              <div class="body" style="display:grid;grid-template-rows:auto 1fr;gap:var(--sp-3)">
+                <div class="filterbar">
+                  <input class="input grow" placeholder="Search creatures…">
+                  <span class="seg"><button class="is-active">All</button><button>Plant</button><button>Zombie</button></span>
+                  <span class="row-flex" style="gap:var(--sp-1)">
+                    <span class="el" data-el="fire"><i class="dot"></i></span>
+                    <span class="el" data-el="ice"><i class="dot"></i></span>
+                    <span class="el" data-el="air"><i class="dot"></i></span>
+                    <span class="el" data-el="earth"><i class="dot"></i></span>
+                    <span class="el" data-el="light"><i class="dot"></i></span>
+                    <span class="el" data-el="dark"><i class="dot"></i></span>
+                  </span>
+                  <select class="select"><option>Power, high to low</option><option>Level</option><option>Recently bound</option></select>
+                </div>
+
+                <div class="spec-grid" style="align-content:start;gap:var(--sp-3)">
+                  <div class="card" style="margin:0">
+                    <div class="hd">
+                      <span class="frame frame--card" data-rarity="3">🌻</span>
+                      <div style="min-width:0">
+                        <div class="nm">Emberling</div>
+                        <div class="meta">
+                          <span class="side" data-side="plant"><i class="pip"></i>Plant</span>
+                          <span class="tag">Lv 14</span>
+                          <span class="el" data-el="fire"><i class="dot"></i></span>
+                          <span class="el" data-el="light"><i class="dot"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="meter meter--sm"><span class="cap">Vitality <b>1 800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
+                    <div class="st-tray"><span class="st" data-fn="working">SP</span></div>
+                    <div class="ft"><span class="pw-scalar">18.4 <span class="lbl">power</span></span></div>
+                  </div>
+
+                  <div class="card" style="margin:0;border-color:var(--warn)">
+                    <div class="hd">
+                      <span class="frame frame--card" data-rarity="5">🌵</span>
+                      <div style="min-width:0">
+                        <div class="nm">Thornlet</div>
+                        <div class="meta">
+                          <span class="side" data-side="plant"><i class="pip"></i>Plant</span>
+                          <span class="tag">Lv 31</span>
+                          <span class="tag tag--warn">deployed</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="meter meter--sm"><span class="cap">Vitality <b>3 400</b></span><span class="track"><span class="fill" style="width:88%"></span></span></div>
+                    <div class="st-tray"><span class="st" data-fn="working">CO<i class="stack">2</i></span></div>
+                    <div class="ft"><span class="pw-scalar">31.9 <span class="lbl">power</span></span></div>
+                  </div>
+
+                  <div class="card" style="margin:0">
+                    <div class="hd">
+                      <span class="frame frame--card" data-rarity="4">🧟</span>
+                      <div style="min-width:0">
+                        <div class="nm">Ashkell</div>
+                        <div class="meta">
+                          <span class="side" data-side="zombie"><i class="pip"></i>Zombie</span>
+                          <span class="tag">Lv 41</span>
+                          <span class="el" data-el="dark"><i class="dot"></i></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="meter meter--sm meter--burden"><span class="cap">Hunger <b>820 / 1 000</b></span><span class="track"><span class="fill" style="width:82%"></span></span></div>
+                    <div class="st-tray"><span class="st" data-fn="working">RO</span></div>
+                    <div class="ft"><span class="pw-scalar">44.1 <span class="lbl">power</span></span></div>
+                  </div>
+
+                  <div class="card" style="margin:0;opacity:.72">
+                    <div class="hd">
+                      <span class="frame frame--card is-missing">🍄</span>
+                      <div style="min-width:0">
+                        <div class="nm">Sporeling</div>
+                        <div class="meta"><span class="tag">Lv 9</span><span class="tag tag--info">resting</span></div>
+                      </div>
+                    </div>
+                    <div class="meter meter--sm"><span class="cap">Vitality <b>640</b></span><span class="track"><span class="fill" style="width:22%"></span></span></div>
+                    <div class="ft"><span class="readout">recovers in 42m</span></div>
+                  </div>
+                </div>
+              </div>
+              <footer>
+                <span class="readout" style="margin-right:auto">Click a creature to open it · <span class="hotkey">Esc</span> closes</span>
+                <button class="btn btn--ghost">Bind a creature</button>
+              </footer>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>The stage is still underneath.</strong> Dimmed by the scrim, unmounted by nothing. This
+      panel opens identically over the lawn mid-wave and over the world map mid-march — which is the
+      entire point of GG-1, and the thing the current route-per-screen build cannot do.
+    </div>
+    <div class="note">
+      <strong>What replaced the <code>typeId</code> box.</strong> Binding is a verb in the footer, and
+      it opens a picker of creatures the player has actually encountered — portraits, names, the
+      element they carry. Nobody types an identifier.
+      <span class="ref">GG-24 · GG-25</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Relics <span class="hotkey">R</span></h2>
+  <p class="lede">
+    Held containers, what is equipped, and — the part that matters — what changes if you swap.
+    Comparison is the default view while choosing, not something behind a tooltip.
+    <span class="ref">GG-47</span>
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:1000px">
+      <header>
+        <div style="flex:1"><h3>Relics</h3><div class="sub">Equipping to Emberling · 3 of 3 slots used</div></div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <div class="tabs" style="margin-bottom:var(--sp-4)">
+          <button class="tab is-active">Held</button>
+          <button class="tab">Equipped</button>
+          <button class="tab">Storage</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:var(--sp-5)">
+          <div>
+            <p class="spec-label">Held — pick one to see what it changes</p>
+            <div class="col-flex">
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;border:1px solid var(--sun);border-radius:var(--r-sm)">
+                <span class="frame" data-rarity="4">⚱</span>
+                <span><span class="nm">Ashen Reliquary</span><p class="sub">Relic · Rare</p></span>
+                <span class="pw-scalar">11.1</span>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto">
+                <span class="frame" data-rarity="2">◈</span>
+                <span><span class="nm">Sunworn Charm</span><p class="sub">Relic · Common · <b style="color:var(--muted)">equipped</b></p></span>
+                <span class="pw-scalar">6.2</span>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto">
+                <span class="frame" data-rarity="3">🜄</span>
+                <span><span class="nm">Tidewrack Band</span><p class="sub">Relic · Uncommon</p></span>
+                <span class="pw-scalar">8.7</span>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;opacity:.5">
+                <span class="frame is-missing">?</span>
+                <span><span class="nm">Cracked Seal</span><p class="sub">Relic · needs level 20</p></span>
+                <span class="tag">locked</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="spec-label">Swapping Sunworn Charm → Ashen Reliquary</p>
+            <div class="difflist">
+              <div class="diffrow" data-dir="up"><span class="k">Fire power</span><span class="a">90</span><span class="b">150</span><span class="d">▲ +60</span></div>
+              <div class="diffrow" data-dir="down"><span class="k">Maximum vitality</span><span class="a">320</span><span class="b">240</span><span class="d">▼ −80</span></div>
+              <div class="diffrow" data-dir="new"><span class="k">Wither on hit</span><span class="a">—</span><span class="b">25%</span><span class="d">new</span></div>
+            </div>
+            <div class="pw pw--diff" style="margin-top:var(--sp-3)">
+              <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" data-sign="pos" style="width:20%"></span></span><b data-sign="pos">+34</b></div>
+              <div class="bar" data-c="survivability"><span>Survivability</span><span class="t"><span class="f" data-sign="neg" style="width:7%"></span></span><b data-sign="neg">−12</b></div>
+              <div class="bar" data-c="control"><span>Control</span><span class="t"><span class="f" data-sign="pos" style="width:50%"></span></span><b data-sign="pos">+86</b></div>
+            </div>
+            <div class="row-flex" style="margin-top:var(--sp-4)">
+              <button class="btn">Equip</button>
+              <button class="btn btn--ghost">Compare with another</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>The equipped item stays visible while the candidate is being read.</strong> That single
+      layout decision is most of GG-47: the alternative — click away to check what you have, click
+      back — is how a player ends up making choices from memory.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · Fusion <span class="hotkey">F</span></h2>
+  <p class="lede">
+    Two creatures in, one out, and the two originals are gone. A destructive, irreversible action
+    that must state precisely what is being lost before it happens.
+    <span class="ref">GG-22 · GG-47</span>
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:940px">
+      <header>
+        <div style="flex:1"><h3>The fusion altar</h3><div class="sub">Both parents are consumed</div></div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1.2fr;gap:var(--sp-3);align-items:center">
+          <div class="card" style="margin:0">
+            <div class="hd">
+              <span class="frame frame--card" data-rarity="2">🍄</span>
+              <div><div class="nm">Sporeling</div><div class="meta"><span class="tag">Lv 9</span></div></div>
+            </div>
+            <div class="ft"><span class="pw-scalar">4.1 <span class="lbl">power</span></span></div>
+          </div>
+          <div style="text-align:center;font-size:var(--text-xl);color:var(--faint)">+</div>
+          <div class="card" style="margin:0">
+            <div class="hd">
+              <span class="frame frame--card" data-rarity="2">🍄</span>
+              <div><div class="nm">Mycelia</div><div class="meta"><span class="tag">Lv 12</span></div></div>
+            </div>
+            <div class="ft"><span class="pw-scalar">5.8 <span class="lbl">power</span></span></div>
+          </div>
+          <div style="text-align:center;font-size:var(--text-xl);color:var(--sun)">→</div>
+          <div class="card" style="margin:0;border-color:var(--sun);box-shadow:var(--sh-glow)">
+            <div class="hd">
+              <span class="frame frame--card" data-rarity="4">🌰</span>
+              <div><div class="nm">Blightcap</div><div class="meta"><span class="tag tag--warn">result</span><span class="tag">Lv 1</span></div></div>
+            </div>
+            <div class="col-flex" style="gap:var(--sp-1)">
+              <span class="atom-line"><span class="eff">+240 maximum vitality</span></span>
+              <span class="atom-line"><span class="eff">15% on hit: apply Blight</span></span>
+            </div>
+            <div class="ft"><span class="pw-scalar">14.6 <span class="lbl">power</span></span></div>
+          </div>
+        </div>
+
+        <div class="vs" style="margin-top:var(--sp-5)">
+          <div class="no">
+            <div class="verdict">✕ What you lose</div>
+            <ul style="margin:0;padding-left:var(--sp-4);font-size:var(--text-sm);color:var(--muted)">
+              <li>Sporeling — 9 levels, 1 bound relic (returned to storage)</li>
+              <li>Mycelia — 12 levels, 2 bound relics (returned to storage)</li>
+              <li>Both nicknames</li>
+            </ul>
+          </div>
+          <div class="yes">
+            <div class="verdict">✔ What you gain</div>
+            <ul style="margin:0;padding-left:var(--sp-4);font-size:var(--text-sm);color:var(--muted)">
+              <li>Blightcap at level 1, rarity up two steps</li>
+              <li>Blight on hit — a contagion neither parent had</li>
+              <li>Net power +4.7 once it reaches level 12</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <button class="btn btn--ghost">Cancel</button>
+        <button class="btn btn--danger">Fuse — this cannot be undone</button>
+      </footer>
+    </div>
+
+    <div class="note">
+      <strong>The loss column is not optional.</strong> Fusion destroys levelled creatures; a screen
+      that shows only the result is selling, not informing. Note also the honest projection — the
+      result is <em>weaker right now</em> and stronger later, and saying so is the difference between
+      a player who trusts the screen and one who does not.
+    </div>
+    <div class="note">
+      Fusion is one of the three declared forbidden combinations: a creature that is
+      <b>deployed</b> cannot be fused or released, because the specimen is live in a run and the act
+      has no reversal. The card in that state shows the reason rather than a dead button.
+      <span class="ref">GG-55 · IA §6</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · Volume — the same layer at three magnitudes</h2>
+  <p class="lede">
+    Every collection surface declares what it does at 10, 100 and 1000. This is a component-shape
+    decision, not a performance one — a grid written to map over an array cannot become a windowed
+    list without rewriting every consumer. <span class="ref">GG-50</span>
+  </p>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Count</th><th>Presentation</th><th>Search</th><th>Rendered nodes</th></tr></thead>
+      <tbody>
+        <tr><td><b>≤ 24</b></td><td>Card grid, all rendered</td><td>Present, unused</td><td>= count</td></tr>
+        <tr><td><b>25 – 240</b></td><td>Card grid, windowed</td><td>Present, expected</td><td>≤ 40</td></tr>
+        <tr><td><b>&gt; 240</b></td><td><b>Search-first</b> — the grid starts empty with a prompt, filters are the entry point</td><td>Required</td><td>≤ 40</td></tr>
+      </tbody>
+    </table>
+    <div class="spec-grid wide" style="margin-top:var(--sp-4)">
+      <div>
+        <p class="spec-label">Search-first, above the threshold</p>
+        <div class="state">
+          <span class="glyph">🔍</span>
+          <h4>1 204 creatures</h4>
+          <p>Too many to browse. Search by name, or narrow by side, element or level.</p>
+          <div class="row-flex" style="justify-content:center">
+            <span class="tag">Plant</span><span class="tag">Fire</span><span class="tag">Level 30+</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Filters survive the layer closing</p>
+        <div class="tray">
+          <span class="count">3</span> filters active
+          <span class="tag">Plant</span><span class="tag">Fire</span><span class="tag">Lv 30+</span>
+          <span style="flex:1"></span>
+          <button class="btn btn--sm btn--ghost">Clear</button>
+        </div>
+        <div class="note">
+          Re-applying four filters every time is the friction that stops players opening the panel at
+          all. Query state is part of the layer. <span class="ref">GG-51</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · What this plate settles</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>How is a creature chosen?</td><td>From cards with art, name, element and the two numbers that matter — never a typed id</td></tr>
+      <tr><td>Where does comparison live?</td><td>Beside the candidate, always, whenever a choice is being made</td></tr>
+      <tr><td>What does a destructive action show?</td><td>Both columns — what is lost and what is gained — before the button</td></tr>
+      <tr><td>What happens at 1000 items?</td><td>Search-first; the grid never renders unbounded</td></tr>
+      <tr><td>Do filters persist?</td><td>Yes, for the session, as part of the layer's state</td></tr>
+      <tr><td>Can these open mid-run?</td><td>Yes — all three, from any stage. Only <b>deployed</b> creatures resist fuse and release</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 02 · Collection · draft 2026-08-22 · governed by architecture/game-gui-principles.md
+</footer>
+
+</div>
+</body>
+</html>

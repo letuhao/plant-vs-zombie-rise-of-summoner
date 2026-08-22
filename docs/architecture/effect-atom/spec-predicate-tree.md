@@ -27,6 +27,21 @@ This is the single place in the schema that can quietly become a programming lan
 
 Adding a leaf is a **reviewed code change** — each needs a reader. Same rule as kinds (E1).
 
+#### Two leaves requested by the action program — approved 2026-08-22
+
+Added by the action stream, owner-approved, and recorded here because this list is the SSOT for it. See [action/spec-usability-conditions.md](../action/spec-usability-conditions.md) (A4).
+
+| Leaf | Param | Reads | Why |
+|---|---|---|---|
+| `resourceBelowMilli` | `(resourceId, ‰ of max)` | actor | *"Only usable below half spirit"* |
+| `resourceAboveMilli` | `(resourceId, ‰ of max)` | actor | *"Only while qi is full"* |
+
+**These generalise `hpBelowMilli` / `hpAboveMilli` rather than adding a new idea** — same per-mille shape, same actor read, one extra parameter naming which pool. `hp` is one of the five resources, so the existing pair becomes the special case of the new one; whether to collapse them is an implementation choice, not a vocabulary one.
+
+**Reader requirement:** `EntityFacts` gains resource values, following `HpMilli`'s existing shape. Four ints (`stamina`, `hunger`, `spirit`, `qi` as ‰ of max) — `hp` already has its own. Resource semantics are the [resource hub](../resource-hub-ideal.md)'s; this list only needs the numbers readable.
+
+**Not requested, deliberately:** `cellFree` — it needs a board, the battle board is deferred, and a leaf with nothing to read is a leaf that cannot be tested. It comes with `A10` or not at all.
+
 ### ⚠️ `OnDamageDealt` inverts side and typeId — name it, do not inherit it
 
 On `OnDamageDealt`, today's overlay `filters.side` and `filters.typeId` refer to the **damaged** entity, not the attacker (`EffectProcAndOwner.cs:103–118`, `ResolveFilterTarget` inverts side). That is a live trap and an author will hit it on their first `searing_strike`.

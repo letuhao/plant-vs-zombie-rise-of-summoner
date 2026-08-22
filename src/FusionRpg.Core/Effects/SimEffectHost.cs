@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Plugins;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
@@ -18,16 +19,20 @@ public sealed class SimEffectHost
     readonly ActorDerivedLookup _derived = new();
     long _tick;
 
-    public SimEffectHost(int seed = 42, string matchKey = "sim-match")
+    /// <param name="catalog">
+    /// The defs this host runs. Null takes the seeded ones — E11 passes the compiled atom catalog
+    /// instead, which is how the same fixture can be run down both paths and the plans compared.
+    /// </param>
+    public SimEffectHost(int seed = 42, string matchKey = "sim-match", IEnumerable<EffectDef>? catalog = null)
     {
         MatchKey = matchKey;
         _clock = new FakeEffectClock();
         _rng = new SeededEffectRandom(seed);
         _sink = new RecordingEffectSink();
         _fx = new RecordingDamageFxSink();
-        var catalog = new InMemoryEffectCatalog();
-        catalog.ReplaceAll(EffectSeedCatalog.CreateAll());
-        _bag = new EffectBag(catalog, new InMemoryEffectGrantStore(), new EffectProcPolicy(_clock, _rng), _sink);
+        var defs = new InMemoryEffectCatalog();
+        defs.ReplaceAll(catalog ?? EffectSeedCatalog.CreateAll());
+        _bag = new EffectBag(defs, new InMemoryEffectGrantStore(), new EffectProcPolicy(_clock, _rng), _sink);
         _bag.UtcNow = () => _clock.UtcNow;
         _bag.Status = new StatusRuntime(
             StatusCatalogBootstrap.CreateDefault(),
@@ -37,6 +42,36 @@ public sealed class SimEffectHost
     }
 
     public string MatchKey { get; set; }
+
+    /// <summary>
+    /// The Secondary runner (E15), once bindings are installed. Null until <see cref="UseRunner"/> —
+    /// a host with no runner atoms should carry no runner state at all.
+    /// </summary>
+    public AtomRunner? Runner { get; private set; }
+
+    /// <summary>Supplies HP/element/status facts the board snapshot does not carry. Optional.</summary>
+    public Func<string, int>? HpMilliOf { get; set; }
+    public Func<string, int>? ElementIdOf { get; set; }
+    public Func<string, ulong>? StatusMaskOf { get; set; }
+
+    /// <summary>
+    /// Install runner bindings and build the index. The proc and apply streams are derived from one
+    /// run seed, so a gate roll can never shift a magnitude roll (E2's named streams).
+    /// </summary>
+    public AtomRunner UseRunner(IEnumerable<RunnerBinding> bindings, ulong runSeed = 42)
+    {
+        var index = TriggerIndex.Build(bindings);
+        Runner = new AtomRunner(
+            Funnel, index,
+            new AtomRandom(runSeed, AtomStreams.Proc),
+            new AtomRandom(runSeed, AtomStreams.Apply),
+            NowMs,
+            MatchKey);
+        return Runner;
+    }
+
+    /// <summary>The fake clock in milliseconds — the runner's only notion of time.</summary>
+    public long NowMs() => _clock.UtcNow.ToUnixTimeMilliseconds();
     public EffectPluginHost Plugins { get; }
     public EffectBag Bag => _bag;
     public EffectFunnel Funnel { get; }
@@ -66,6 +101,7 @@ public sealed class SimEffectHost
         if (!string.IsNullOrWhiteSpace(matchKey))
             MatchKey = matchKey;
         ClearAll();
+        Runner?.BeginMatch(MatchKey);
         Plugins.NotifyMatchStart(MatchKey);
     }
 
@@ -118,6 +154,13 @@ public sealed class SimEffectHost
         _fx.Items.Clear();
         if (string.IsNullOrEmpty(ev.MatchKey)) ev.MatchKey = MatchKey;
         if (ev.Tick <= 0) ev.Tick = NextTick();
+        // The runner runs BEFORE the bag, not after. EffectBag.OnEvent calls Funnel.Flush() inside
+        // itself, so a dispatch enqueued afterwards would sit in the mailbox until the next event —
+        // a silent one-event lag on every proc. Secondary enqueues; the bag drains.
+        //
+        // It never touches the bag directly, so Foundation's path is untouched whether a runner
+        // exists or not.
+        Runner?.OnEvent(RunnerEventMapper.From(ev, BoardSnapshot, HpMilliOf, ElementIdOf, StatusMaskOf));
         return _bag.OnEvent(ev);
     }
 

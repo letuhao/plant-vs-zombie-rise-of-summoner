@@ -23,9 +23,23 @@ Seed and migration files under `data/seed/atoms/` and `data/seed/containers/`, l
 
 Files are the right first surface because they diff, review, and version like code, while the *content* still lives in rows at runtime. A designer edits a file, the importer validates and upserts, the content hash moves, and the change is visible in review.
 
+**Built 2026-08-22.** Four folders, not two: `atoms/`, `containers/`, `curves/`, `rarity/`. `effect_curve` and `rarity` are both hashed content tables with an upsert of their own, and leaving either unauthorable would make a covered table reachable only by hand-editing the database — the same shape as E1 refusing `capPerMatch` for a counter E15 had already shipped. An atom that scales through a curve is a validation failure until that curve exists, so the two must land in **one** import, not two.
+
+The importer sweeps exactly those four folders. `data/seed/` also holds the item seed corpus, which is a different format read by `tools/ItemSeedValidator`; a recursive sweep of the whole seed root would refuse all 125 of its files and call the import broken.
+
+Envelope: `{ "schemaVersion": 1, "kind": "atom" | "container" | "curve" | "rarity", "entries": [ … ] }`. The kind comes from the **file**, not the folder — encoding the layout twice means two places to be wrong. A `schemaVersion` this importer does not know is refused rather than read optimistically, or a format that grew a field would import with that field silently dropped.
+
+**JSON columns are stored canonically.** `when`, `params`, `tags`, `power` and `powerOverride` are authored as nested objects and written through `ContentHash.CanonicalJson`, never as the author typed them. Storing raw text would make re-indenting a file differ from the stored column — which bumps `revision`, a hashed column, and so moves the content hash for an edit that changed no content. Format: [data/seed/README.md](../../../data/seed/README.md).
+
 ### The four validations
 
 **1. Schema validation (E14a)** — every row through E1/E2/E3/E4/E5. **Import is all-or-nothing**: one bad row and nothing is imported, because a partial import produces a content hash for a state nobody authored. Per-row rejection at *load* (E4/E5) is a different phase — defence in depth against a database edited outside the importer.
+
+*Built:* validate-first and one transaction are **two** guarantees, and the module needs both. Validating everything before the first write stops a known-bad file from landing half a catalog; the single transaction stops a crash, a locked database or a constraint nobody predicted from doing the same thing. `RpgStore.ImportContent` therefore reads the stored catalog, validates the whole batch against *stored ∪ incoming*, and only then opens one transaction for atoms, containers, curves and bands together — so a container may reference an atom authored in the same import, which is how a new item and its affixes normally arrive.
+
+`--check` runs the whole thing and rolls back. That is not the same as validating the files: it resolves every cross-table reference against the real catalog and lets the database itself refuse a write, which is what an author wants to know before an import lands.
+
+**The revision bump is conditional, not just once.** Once per transaction rather than per row — or a fifty-row file moves it fifty times. And **not at all** when nothing changed: `catalog_revision` is what E6 reproduces against and what E19 negotiates on, so a bump for content that did not change makes every connected receiver re-download the full push. Idempotency needed a prerequisite fix in E4/E5 (skip the update when no column differs) before it was reachable at all.
 
 **2. Budget validation (E14b)** — rarity R may spend at most N power, looked up by the container's `rarity` FK. A content test enumerates every container, sums its atoms' vectors (E9), and **fails naming the offender**. This is the *only* role the budget plays: it never drives generation (E5 does).
 
@@ -59,20 +73,39 @@ Lints **warn**; validations **fail**. Keeping the two separate stops lint noise 
 ## Commands
 
 ```powershell
-dotnet run --project tools\AtomImporter -- data\seed
-dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Authoring|Budget|PowerDrift"
+dotnet run --project tools\AtomImporter -- --check          # resolve everything, write nothing
+dotnet run --project tools\AtomImporter                     # import
+dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~AtomSeedFile"
+dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~AtomImportTests"
+dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Budget|PowerDrift"   # E14b
 ```
+
+Seed root defaults to `data/seed`, found by walking up. Database comes from `--db <dir>`, then `FUSIONRPG_DATA`, then `dist/FusionRpg.Server/data`. Exit codes: `0` imported (or checked clean), `1` refused, `2` could not start — an empty sweep is `1`, never a silent green.
 
 ## Structure
 
+**E14a, built 2026-08-22.** The blind spot is answered by moving, not by discipline. Two reasons,
+and they are not the same one: the write path needs `RpgStore`'s private connection, gate and
+unlocked writers, and `guard-dal.ps1` scans only `src/` — SQL under `tools/` sits outside the rule
+that keeps SQL in one project. *Not* because a tool cannot be tested: `ItemSeedValidator` has a test
+project and so does this one. What is left in the tool is arguments, a report, and `SeedScanner` —
+which is a class, not top-level statements, so a test can hold it to the one thing it must never do.
+
 ```
-data/seed/atoms/*.json                                    (authored content)
-data/seed/containers/*.json
-tools/AtomImporter/                                       (new — validate + upsert + hash)
-   !! guard-dal.ps1 scans only src/, so tools/ is a blind spot: the importer MUST call
-      RpgStore upserts (E4/E5) and open no connection of its own. The guard cannot enforce it here.
-   !! guard-dal.ps1 scans only src/, so tools/ is a blind spot: the importer MUST call
-      RpgStore upserts (E4/E5) and open no connection of its own. The guard cannot enforce it here.
+data/seed/README.md                                       (the format, for authors)
+data/seed/{atoms,containers,curves,rarity}/*.json         (authored content — corpus arrives with E11)
+src/FusionRpg.Core/Effects/Atoms/AtomSeedFile.cs          (the format: files -> rows, cross-file duplicates)
+src/FusionRpg.Data/Sqlite/RpgStore.Import.cs              (validate-all -> one transaction -> one bump)
+tools/AtomImporter/Program.cs                             (arguments + report; no SQL, no connection)
+tools/AtomImporter/SeedScanner.cs                         (which files a sweep takes)
+tests/FusionRpg.Core.Tests/Atoms/AtomSeedFileTests.cs     (25)
+tests/FusionRpg.Data.Tests/AtomImportTests.cs             (17)
+tests/FusionRpg.AtomImporter.Tests/SeedScannerTests.cs    (10 — new project, wired into CI)
+```
+
+E14b (later):
+
+```
 tests/FusionRpg.Core.Tests/Atoms/BudgetValidationTests.cs
 tests/FusionRpg.Core.Tests/Atoms/PowerDriftTests.cs
 tests/FusionRpg.Core.Tests/Atoms/ContentLintTests.cs
@@ -82,15 +115,27 @@ tests/FusionRpg.Core.Tests/Atoms/ContentLintTests.cs
 
 | Case | Expect |
 |---|---|
-| Seed file with one malformed row | import fails, names the row, **imports nothing** (E14a) |
-| Duplicate `atom_id` across two seed files | import fails — last-write-wins would make content order-dependent on filesystem iteration |
+| Seed file with one malformed row | import fails, names the row **and its file**, imports nothing (E14a) ✅ |
+| A bad *container* in the same import as good atoms | the atoms do not land either — the failure is in another table ✅ |
+| Duplicate `atom_id` across two seed files | import fails naming **both** files — last-write-wins would make content order-dependent on filesystem iteration ✅ |
+| A container referencing an atom authored in the same import | accepted — a new item and its affixes arrive together ✅ |
+| An atom scaling through a curve authored in the same import | accepted ✅ |
+| Two rarity bands claiming one ordinal | refused; ordinals are append-only ✅ |
+| A `schemaVersion` the importer does not know | refused, never read optimistically ✅ |
+| Re-indenting a seed file, or reordering keys inside an object | **not** a content change: 0 rows changed, hash held ✅ |
+| An edit to two rows | revision bumps **once**, not twice ✅ |
+| A refused import | revision does not move ✅ |
+| `--check` on a clean tree | reports what would change, writes nothing, revision and hash hold ✅ |
+| A seed root holding `items/` | the item corpus is **never** swept — it is another tool's format ✅ |
+| Files named `_something.json` | skipped as notes, matching the item seed tree's convention ✅ |
+| Any sweep | ordinal-ordered, so a duplicate names the same two files on every machine ✅ |
 | Container over its rarity budget | budget test fails, names the container and the overage |
 | Budget test with no rarity-bearing containers | **reports "0 containers evaluated"** — never a silent green |
 | Atom whose stored power drifts, no note | drift test fails |
 | Same, with a note | reported, not failed |
 | Container whose atoms have no consumer in any runtime | **lint warning**, not a failure |
 | **Add one row, no rebuild** | effect grantable and firing — the Checkpoint D claim |
-| Import twice | idempotent; content hash unchanged the second time |
+| Import twice | idempotent; content hash **and** catalog revision unchanged the second time ✅ |
 | Lint findings | reported, never blocking |
 
 ## Boundaries

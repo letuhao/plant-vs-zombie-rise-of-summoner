@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-retinue-humanoid-b",
+    "partition": "base-types/retinue/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-horn-b-001",
+      "nameKey": "base.absolute-alarm",
+      "name": "Absolute Alarm",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.summoner",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.absolute-alarm",
+      "flavorKey": "flavor.base.absolute-alarm",
+      "flavor": "A final judgment, sounded at maximum volume. Everything stops to listen.",
+      "tags": [
+        "heavy",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-002",
+      "nameKey": "base.unbreakable-siren",
+      "name": "Unbreakable Siren",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.gardener",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.unbreakable-siren",
+      "flavorKey": "flavor.base.unbreakable-siren",
+      "flavor": "It wails in enduring pitch, and what grows survives any counter.",
+      "tags": [
+        "heavy",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-003",
+      "nameKey": "base.irrevocable-drum",
+      "name": "Irrevocable Drum",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.volley",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.irrevocable-drum",
+      "flavorKey": "flavor.base.irrevocable-drum",
+      "flavor": "A contract drummed in thunder. Once the beat is struck, the cascade cannot be recalled.",
+      "tags": [
+        "heavy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-004",
+      "nameKey": "base.official-boombox",
+      "name": "Official Boombox",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cherry-bloom",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.official-boombox",
+      "flavorKey": "flavor.base.official-boombox",
+      "flavor": "Authorized to play only the gravest anthems. Flowers break ground in rhythm with the bass.",
+      "tags": [
+        "heavy",
+        "utility",
+        "mechanical",
+        "organic"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-005",
+      "nameKey": "base.certified-klaxon",
+      "name": "Certified Klaxon",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.dooming",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.certified-klaxon",
+      "flavorKey": "flavor.base.certified-klaxon",
+      "flavor": "A sanctioned blare that darkens the field where it sounds.",
+      "tags": [
+        "medium-heavy",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-006",
+      "nameKey": "base.filed-gong",
+      "name": "Filed Gong",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.firelining",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.filed-gong",
+      "flavorKey": "flavor.base.filed-gong",
+      "flavor": "Its strike records itself in flame. Every ally remembers the moment it was recorded.",
+      "tags": [
+        "heavy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-007",
+      "nameKey": "base.endorsed-bell",
+      "name": "Endorsed Bell",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.flash-freeze",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.endorsed-bell",
+      "flavorKey": "flavor.base.endorsed-bell",
+      "flavor": "Officially cleared to freeze. The ground locks tight where it rings, approved and binding.",
+      "tags": [
+        "heavy",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-008",
+      "nameKey": "base.final-intercom",
+      "name": "Final Intercom",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.gravemaking",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.final-intercom",
+      "flavorKey": "flavor.base.final-intercom",
+      "flavor": "The last broadcast will be transmitted. Graves open where its signal carries.",
+      "tags": [
+        "heavy",
+        "utility",
+        "necrotic",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-009",
+      "nameKey": "base.polished-horn",
+      "name": "Polished Horn",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.gravedigging",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.polished-horn",
+      "flavorKey": "flavor.base.polished-horn",
+      "flavor": "Bright and commanding. Deep paths open beneath the ground in response to its call.",
+      "tags": [
+        "medium-light",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-010",
+      "nameKey": "base.knurled-buzzer",
+      "name": "Knurled Buzzer",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.terraforming",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.knurled-buzzer",
+      "flavorKey": "flavor.base.knurled-buzzer",
+      "flavor": "A textured whine that reshapes the earth. The ground remembers where it vibrated.",
+      "tags": [
+        "light",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-011",
+      "nameKey": "base.substantial-megaphone",
+      "name": "Substantial Megaphone",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.summoner",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.substantial-megaphone",
+      "flavorKey": "flavor.base.substantial-megaphone",
+      "flavor": "Heavy and resonant. Its amplified call brings the army in numbers.",
+      "tags": [
+        "medium-light",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-b-012",
+      "nameKey": "base.worked-chime",
+      "name": "Worked Chime",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.volley",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.worked-chime",
+      "flavorKey": "flavor.base.worked-chime",
+      "flavor": "Carefully crafted to call in perfect unison. The allies arrive as a single unified force.",
+      "tags": [
+        "light",
+        "utility"
+      ]
+    }
+  ]
+}

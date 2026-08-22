@@ -52,25 +52,42 @@ try {
         Where-Object { -not $Set -or $_.BaseName -eq $Set }
     if (-not $sets) { throw "no mutant set matched '$Set'" }
 
+    # A red baseline makes the whole run meaningless: every mutant would report "caught" because the
+    # suite already fails, and a compile error in somebody else's file looks exactly like a test
+    # noticing the defect. Check once, up front, rather than reading a page of false green.
+    Write-Host "checking the baseline is green..." -ForegroundColor DarkGray
+    $baselineArgs = @("test", $Project, "--nologo", "-v", "q")
+    if ($Filter) { $baselineArgs += @("--filter", $Filter) }
+    & dotnet @baselineArgs *> $null
+    if ($LASTEXITCODE -ne 0) {
+        throw "the suite is red before any mutant was applied - fix that first, or every mutant will look caught"
+    }
+
     $survivors = @()
+    $stale = @()
 
     foreach ($file in $sets) {
         Write-Host "`n$($file.BaseName)" -ForegroundColor Cyan
 
         foreach ($mutant in (Get-Content $file.FullName -Raw | ConvertFrom-Json)) {
             $target = Join-Path $repo $mutant.file
-            $source = Get-Content $target -Raw
 
-            if (-not $source.Contains($mutant.find)) {
+            # Normalised for matching: a multi-line anchor written with LF endings never matches a
+            # CRLF file, and the mutant then reports STALE forever while looking like it ran.
+            $source = (Get-Content $target -Raw) -replace "`r`n", "`n"
+            $find = $mutant.find -replace "`r`n", "`n"
+
+            if (-not $source.Contains($find)) {
                 Write-Host ("  {0,-10} {1}" -f "STALE", $mutant.name) -ForegroundColor Yellow
                 Write-Host "             anchor no longer in $($mutant.file) - the mutant needs rewriting"
+                $stale += "$($file.BaseName): $($mutant.name)"
                 continue
             }
 
             Copy-Item $target "$target.bak"
             try {
-                $index = $source.IndexOf($mutant.find)
-                $mutated = $source.Remove($index, $mutant.find.Length).Insert($index, $mutant.with)
+                $index = $source.IndexOf($find)
+                $mutated = $source.Remove($index, $find.Length).Insert($index, ($mutant.with -replace "`r`n", "`n"))
                 Set-Content $target $mutated -NoNewline
 
                 $testArgs = @("test", $Project, "--nologo", "-v", "q")
@@ -94,9 +111,22 @@ try {
     }
 
     Write-Host ""
+    if ($stale) {
+        # Louder than a warning, because a stale mutant is an *untested claim* wearing the colours of
+        # a passing one. The first version of this script printed "every mutant was caught" while
+        # three of them had never run.
+        Write-Host "$($stale.Count) never ran - their anchors no longer match the code:" -ForegroundColor Yellow
+        $stale | ForEach-Object { Write-Host "  $_" }
+    }
+
     if ($survivors) {
         Write-Host "$($survivors.Count) survived - every test passed while the code was wrong:" -ForegroundColor Red
         $survivors | ForEach-Object { Write-Host "  $_" }
+        exit 1
+    }
+
+    if ($stale) {
+        Write-Host "every mutant that ran was caught, but $($stale.Count) did not run" -ForegroundColor Yellow
         exit 1
     }
 

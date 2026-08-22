@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-shoulders-a",
+    "partition": "base-types/ward-array/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-shoulders-a-001",
+      "nameKey": "base.quilted-shrug",
+      "name": "Quilted Shrug",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.quilted-shrug",
+      "flavorKey": "flavor.base.quilted-shrug",
+      "flavor": "Layers stitched for comfort, not survival. It sits loose on the shoulders and moves with each breath.",
+      "tags": ["light", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-002",
+      "nameKey": "base.hemmed-flap",
+      "name": "Hemmed Flap",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.hemmed-flap",
+      "flavorKey": "flavor.base.hemmed-flap",
+      "flavor": "A loose piece of cloth, its edges carefully stitched. Meant to shed water and take the first scratch.",
+      "tags": ["light", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-003",
+      "nameKey": "base.secondhand-shoulder",
+      "name": "Secondhand Shoulder",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.secondhand-shoulder",
+      "flavorKey": "flavor.base.secondhand-shoulder",
+      "flavor": "Salvaged from an older garment, it still carries the creases of its first life. Someone else wore it first.",
+      "tags": ["medium-light", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-004",
+      "nameKey": "base.insulated-screen",
+      "name": "Insulated Screen",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.insulated-screen",
+      "flavorKey": "flavor.base.insulated-screen",
+      "flavor": "Padded and dense cloth, its weight surprising for how it drapes. The insulation works both ways: protection and preservation.",
+      "tags": ["medium-light", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-005",
+      "nameKey": "base.linen-downspout",
+      "name": "Linen Downspout",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.linen-downspout",
+      "flavorKey": "flavor.base.linen-downspout",
+      "flavor": "A tube of rigid linen, guttered and channeled. It diverts the blow, not absorbs it—a practical deflection rather than a wall.",
+      "tags": ["medium-light", "utility"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-006",
+      "nameKey": "base.tattered-cowl",
+      "name": "Tattered Cowl",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.tattered-cowl",
+      "flavorKey": "flavor.base.tattered-cowl",
+      "flavor": "Cloth in pieces, holes throughout its drape. It does not look like it will last, and it will not. But today, it still covers.",
+      "tags": ["medium-light", "defensive", "fragile"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-007",
+      "nameKey": "base.cured-yoke",
+      "name": "Cured Yoke",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.cured-yoke",
+      "flavorKey": "flavor.base.cured-yoke",
+      "flavor": "Leather straps fitted like a yoke across the shoulders, cured until they resist splitting. Built to carry weight without protest.",
+      "tags": ["medium-light", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-008",
+      "nameKey": "base.boiled-brace",
+      "name": "Boiled Brace",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.boiled-brace",
+      "flavorKey": "flavor.base.boiled-brace",
+      "flavor": "Boiled stiff and shaped to cup the shoulders, it is more brittle than it looks. A sacrifice of flexibility for single-blow deflection.",
+      "tags": ["medium-light", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-009",
+      "nameKey": "base.supple-fender",
+      "name": "Supple Fender",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.supple-fender",
+      "flavorKey": "flavor.base.supple-fender",
+      "flavor": "A curved leather shield hung from the shoulders, supple enough to twist and flex. It yields, then rebounds.",
+      "tags": ["medium-heavy", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-010",
+      "nameKey": "base.tooled-bumper",
+      "name": "Tooled Bumper",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tooled-bumper",
+      "flavorKey": "flavor.base.tooled-bumper",
+      "flavor": "Tooled leather hung low over the collarbone, its face beaten smooth by deliberate wear. Built to be hit first.",
+      "tags": ["medium-heavy", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-011",
+      "nameKey": "base.scuffed-shell",
+      "name": "Scuffed Shell",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.scuffed-shell",
+      "flavorKey": "flavor.base.scuffed-shell",
+      "flavor": "A hardened leather shell, its surface scuffed from a hundred small contacts. Every mark is a battle survived.",
+      "tags": ["medium-heavy", "defensive"]
+    },
+    {
+      "id": "item.humanoid-shoulders-a-012",
+      "nameKey": "base.weathered-batten",
+      "name": "Weathered Batten",
+      "frame": "humanoid",
+      "role": "ward-array",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.weathered-batten",
+      "flavorKey": "flavor.base.weathered-batten",
+      "flavor": "Strips of leather battened to a frame, weathered until they are as much gray as brown. Holding together not from strength, but from stubbornness.",
+      "tags": ["medium-heavy", "defensive"]
+    }
+  ]
+}

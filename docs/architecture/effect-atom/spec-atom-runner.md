@@ -1,5 +1,7 @@
 # Spec: atom-runner (E15)
 
+**Status: BUILT 2026-08-22.** Deviations found while building are marked **[built]** below.
+
 Module **E15** in the [atom effect map](../effect-atom-map.md). Depends on **E7**, **E13**, **E3**, **E2** (chance rolls and `OnApply` values use E2's named streams).
 
 > **Reads [definitions.md](definitions.md)** — the shared vocabulary pinned after the 2026-08-22 audit. Where this spec and the definitions disagree, **the definitions win**.
@@ -30,9 +32,8 @@ Items have no behaviour; actors do (definitions §0). The runner holds **runner 
 
 | State | Scope | Note |
 |---|---|---|
-| Grant ICD clocks | per binding | the L1 proc gate — **not** the status ICD, and never merged with it |
+| Grant ICD clocks | per binding | the L1 proc gate — **not** the status ICD, and never merged with it. **The only clock here.** A separate "cooldown" row was struck 2026-08-22: the map's §7 scope table assigns *"action activation, cooldown, wind-up"* to the **turn kernel**, and no kind schema declares a cooldown param. For a triggered atom an ICD *is* the cooldown; a distinct one only means something for an activated ability, which is not this layer's |
 | Counters / charges | per binding | e.g. death-refusal charges, every-N-hits meters |
-| Cooldowns | per binding | distinct from ICD: a cooldown is content, an ICD is a spam guard |
 | **`capPerMatch`** | per binding, per `match_key` | the economy cap that is in the FA9 allowlist today with **no implementation anywhere**. `match_key` is the existing match/session id from `match-runtime`; counters are cleared on `board.end`, alongside every other per-match structure |
 
 All of it is **session RAM**. No durable runtime table (E6) — `entity:{ptr}` state is meaningless across a restart, and per-match counters die with the match by definition.
@@ -83,6 +84,46 @@ Foundation's rule is unchanged: nested `Flush` is a no-op, dispatch happens at *
 
 Per the E13 budget: **≤ 50 ns per atom evaluation, zero allocation.** No dictionaries keyed by string, no LINQ, no per-event lists. The trigger index and the per-binding state arrays are allocated once and reused, exactly as `InjectorEntityRegistry` and the coalescer already do.
 
+### [built] What building it changed
+
+**E7's `RunnerEntry` did not carry the state that routed an atom here.** `Compilability` sends an atom
+to the runner *because* it declares `capPerMatch`, `charges`, `everyHits` or `maxStacks` — and the
+compiler then dropped every one of them, along with all non-value params. The classifier and the
+payload disagreed, so `capPerMatch` was literally unimplementable. `RunnerEntry` now carries
+`Limits` and `Params`, populated from `when_json` and `params_json` alike.
+
+**Absent is not zero, and `new()` is not absent.** `RunnerLimits` encodes absent as `-1`, because a
+cap of 0 ("never dispatch") and 0 charges ("already spent") are both legal content. The first cut
+wrote `None = new()`, which on a record struct calls the implicit parameterless constructor and
+zeroes every field — turning every unlimited atom into the most restrictive one. Positional defaults
+were removed so the trap cannot reappear, and a test pins `default != None`.
+
+**No cooldown field.** The design table lists a cooldown as distinct from an ICD, but no kind schema
+declares a cooldown param and nothing routes on one. Inventing a key would widen a closed vocabulary
+by convenience, so the ICD is the only clock until a schema declares otherwise.
+
+**The `everyHits` meter advances even when it does not fire.** "A pre-proc gate consumes nothing"
+cannot mean the meter freezes, or it never reaches N. It means no ICD stamped and no roll drawn.
+
+**The dispatch overlay carries only the rolled values.** Static params belong on the def's action
+rows, which is where E7 already puts them on the compiled path. Pushing them through the overlay
+sends keys like `element` into an allowlist with no slot for them, and the grant is refused mid-flush
+far from the enqueue that caused it.
+
+**Open, and owned elsewhere: nothing emits a def for a runner atom.** A dispatch names the atom id as
+its `effectId`, and `EffectBag.Grant` throws on an unknown one. E7 emits defs only for the compiled
+path. **E19** must ship one def per runner entry, built from `RunnerEntry.Params` — until then a host
+has to have the def in its catalog already.
+
+**The runner runs BEFORE the bag, not after.** `EffectBag.OnEvent` calls `Funnel.Flush()` inside
+itself, so a dispatch enqueued after the bag has already run sits in the mailbox until the *next*
+event — a silent one-event lag on every proc. Found by a test asserting the funnel was drained rather
+than merely pending; the first wiring had it backwards on both the sim host and the injector.
+
+**The caller is `SimEffectHost`**, the Core-hosted double this spec names: it drives the runner from
+the same event the bag sees, and `BeginMatch` resets the per-match counters. The injector's
+`EffectRuntime` is E19's wiring.
+
 ## Commands
 
 ```powershell
@@ -94,11 +135,14 @@ dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Atom.Runner"
 ## Structure
 
 ```
-src/FusionRpg.Core/Effects/Atoms/AtomRunner.cs           (new — OnEvent, Tick, dispatch)
-src/FusionRpg.Core/Effects/Atoms/RunnerState.cs          (new — ICD, cooldown, charges, caps)
-src/FusionRpg.Core/Effects/Atoms/TriggerIndex.cs         (new — trigger → bindings, no scan)
-tests/FusionRpg.Core.Tests/Atoms/AtomRunnerTests.cs
-tests/FusionRpg.Core.Tests/Atoms/CapPerMatchTests.cs
+src/FusionRpg.Core/Effects/Atoms/AtomRunner.cs           (OnEvent, the gate ladder, dispatch)
+src/FusionRpg.Core/Effects/Atoms/RunnerState.cs          (ICD, charges, meters, caps)
+src/FusionRpg.Core/Effects/Atoms/TriggerIndex.cs         (trigger ordinal → slots, no scan)
+src/FusionRpg.Core/Effects/Atoms/RunnerEventMapper.cs    (event → the flat facts, once per event)
+src/FusionRpg.Core/Effects/Atoms/RunnerEntry.cs          (+ RunnerLimits, + Params — E7's contract)
+src/FusionRpg.Core/Effects/SimEffectHost.cs              (the caller)
+tests/FusionRpg.Core.Tests/Atoms/AtomRunnerTests.cs      (26 tests)
+tests/FusionRpg.Core.Tests/Atoms/CapPerMatchTests.cs     (8 tests)
 ```
 
 ## Testing strategy

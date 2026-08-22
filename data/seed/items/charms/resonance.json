@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "kind": "charm",
+  "_meta": {
+    "partition": "charms/resonance",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "charms-1c",
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-charms.md#6.2",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "charm.res-offense-2",
+      "nameKey": "charm.paired-strikes",
+      "name": "Paired Strikes",
+      "axis": "offense",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.might",
+          "powerBand": "medium"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["offensive"]
+    },
+    {
+      "id": "charm.res-offense-3",
+      "nameKey": "charm.threefold-assault",
+      "name": "Threefold Assault",
+      "axis": "offense",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.might",
+          "powerBand": "high"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["offensive"]
+    },
+    {
+      "id": "charm.res-control-2",
+      "nameKey": "charm.binding-accord",
+      "name": "Binding Accord",
+      "axis": "control",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.freezing",
+          "powerBand": "medium"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"]
+    },
+    {
+      "id": "charm.res-control-3",
+      "nameKey": "charm.tangled-crescendo",
+      "name": "Tangled Crescendo",
+      "axis": "control",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.freezing",
+          "powerBand": "high"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"]
+    },
+    {
+      "id": "charm.res-survivability-2",
+      "nameKey": "charm.rooted-haven",
+      "name": "Rooted Haven",
+      "axis": "survivability",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["defensive"]
+    },
+    {
+      "id": "charm.res-survivability-3",
+      "nameKey": "charm.guardian-trinity",
+      "name": "Guardian Trinity",
+      "axis": "survivability",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "high"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["defensive"]
+    },
+    {
+      "id": "charm.res-utility-2",
+      "nameKey": "charm.rallied-response",
+      "name": "Rallied Response",
+      "axis": "utility",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.rallying",
+          "powerBand": "medium"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"]
+    },
+    {
+      "id": "charm.res-utility-3",
+      "nameKey": "charm.unified-support",
+      "name": "Unified Support",
+      "axis": "utility",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.rallying",
+          "powerBand": "high"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"]
+    },
+    {
+      "id": "charm.res-economy-2",
+      "nameKey": "charm.harvest-blessing",
+      "name": "Harvest Blessing",
+      "axis": "economy",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"]
+    },
+    {
+      "id": "charm.res-economy-3",
+      "nameKey": "charm.golden-crescendo",
+      "name": "Golden Crescendo",
+      "axis": "economy",
+      "charmClass": "minor",
+      "apCost": 1,
+      "frameHint": "any",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "high"
+        }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"]
+    }
+  ]
+}

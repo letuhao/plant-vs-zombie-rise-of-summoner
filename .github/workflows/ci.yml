@@ -36,6 +36,14 @@ jobs:
           dotnet test tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj -c Release --verbosity minimal
           dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal
           dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.ItemSeedValidator.Tests/FusionRpg.ItemSeedValidator.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.AtomImporter.Tests/FusionRpg.AtomImporter.Tests.csproj -c Release --verbosity minimal
+
+      - name: Validate item seed corpus
+        shell: pwsh
+        run: |
+          dotnet run --project tools/ItemSeedValidator -c Release
+          if ($LASTEXITCODE -ne 0) { throw "item seed corpus failed validation" }
 
       - name: Web unit tests
         working-directory: web/fusion-rpg-web

@@ -322,7 +322,11 @@ contentHash = SHA256(concat(tableDigest for each covered table in registry order
 
 ### Canonical row form
 
-Columns in declared order, each **length-prefixed** as `{byteLen}:{bytes}`. A bare `\x1f` separator is **not injective**: `(name="a\x1fb", note="c")` and `(name="a", note="b\x1fc")` canonicalise identically, and `name`/`power_note` are free text. Length-prefixing removes the boundary ambiguity; rejecting control characters below `0x20` at import would also work. Within a JSON column: keys sorted ordinal, no whitespace, **numbers emitted as integers when integral** (`100.0` → `100`), strings NFC-normalised, **NULL as the literal `\x00`** and empty string as empty — the two must not collide. *(A literal `\x00` inside a string still collides with NULL; the length prefix above is what actually separates them.)*
+Columns in declared order, each **length-prefixed** as `{byteLen}:{bytes}`. A bare `\x1f` separator is **not injective**: `(name="a\x1fb", note="c")` and `(name="a", note="b\x1fc")` canonicalise identically, and `name`/`power_note` are free text. Length-prefixing removes the boundary ambiguity.
+
+**NULL is a sentinel, not a payload — corrected 2026-08-22 while building E8.** This section previously encoded NULL as a literal `\x00` byte and argued the length prefix kept it distinct from a string containing one. It does not: a column holding exactly `"\0"` is *also* one byte of `0x00` under prefix `1:`, so the two produce the same digest and a NULL column is forgeable. The form is now `N:` with no payload — `N` is not a digit, so no `{byteLen}` can ever spell it. Pinned by `ContentHashTests.Null_and_a_single_nul_character_string_do_not_collide`, which failed against the original rule.
+
+Within a JSON column: keys sorted ordinal, no whitespace, **numbers emitted as integers when integral** (`100.0` → `100`, `1.50` → `1.5`), strings NFC-normalised. Array order is preserved — curve points are ordered, and sorting them would hide a real edit.
 
 ### Covered tables — a registry, not a list
 

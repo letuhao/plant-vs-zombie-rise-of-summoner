@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flows &amp; Details — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Flows &amp; Details</h1>
+  <p>
+    The surfaces the other six plates <em>referred to</em> without drawing. A design that names a
+    step and never draws it has not designed it — "confirms the loadout" is a sentence, not a screen.
+    This plate closes those, plus the last open rungs of the entity ladder.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 07</span>
+    <span class="tag">GG-43 · GG-45 · GG-19 · GG-57 · GG-53</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="06-system-dev.html">← System</a>
+  <a href="#a">A · Starting a run</a>
+  <a href="#b">B · Deploying</a>
+  <a href="#c">C · The offer</a>
+  <a href="#d">D · First session</a>
+  <a href="#e">E · Focus</a>
+  <a href="#f">F · Last rungs</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Starting a run — the loadout</h2>
+  <p class="lede">
+    Plate 01 said "Confirms the loadout" and stopped. This is that screen. It is a <b>band-3
+    dialog</b>, not a stage, because it is the last thing between the player and travel — and it is
+    the one place where "which creatures do I take" gets its full attention.
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:880px">
+      <header>
+        <div style="flex:1">
+          <h3>Defend the lawn</h3>
+          <div class="sub">Night 15 · your creatures fight alongside the plants you place</div>
+        </div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-5)">
+          <div>
+            <p class="spec-label">Taking — 2 of 3 berths</p>
+            <div class="col-flex">
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;border:1px solid var(--lawn-hot);border-radius:var(--r-sm)">
+                <span class="frame" data-rarity="3">🌻</span>
+                <span><span class="nm">Emberling</span><p class="sub">Lv 14 · <span class="el" data-el="fire"><i class="dot"></i>Fire</span></p></span>
+                <button class="btn btn--sm btn--ghost">Remove</button>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;border:1px solid var(--lawn-hot);border-radius:var(--r-sm)">
+                <span class="frame" data-rarity="5">🌵</span>
+                <span><span class="nm">Thornlet</span><p class="sub">Lv 31 · <span class="el" data-el="earth"><i class="dot"></i>Earth</span></p></span>
+                <button class="btn btn--sm btn--ghost">Remove</button>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;border:1px dashed var(--border-control);border-radius:var(--r-sm);opacity:.8">
+                <span class="frame is-missing">+</span>
+                <span><span class="nm">Empty berth</span><p class="sub">choose from the right</p></span>
+                <span></span>
+              </div>
+            </div>
+
+            <div class="rule-line"></div>
+            <p class="spec-label">What you are taking in</p>
+            <div class="pw">
+              <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" style="width:72%"></span></span><b>131</b></div>
+              <div class="bar" data-c="survivability"><span>Survivability</span><span class="t"><span class="f" style="width:54%"></span></span><b>98</b></div>
+              <div class="bar" data-c="control"><span>Control</span><span class="t"><span class="f" style="width:18%"></span></span><b>32</b></div>
+            </div>
+            <div class="note" style="margin-top:var(--sp-2)">
+              Tonight's waves lean <span class="el" data-el="ice"><i class="dot"></i>Ice</span>.
+              Your <span class="el" data-el="fire"><i class="dot"></i>Fire</span> creature is
+              <span class="matchup matchup--str">strong</span> against them.
+            </div>
+          </div>
+
+          <div>
+            <p class="spec-label">Available</p>
+            <div class="filterbar" style="margin-bottom:var(--sp-2)">
+              <input class="input grow" placeholder="Search…">
+              <select class="select"><option>Power</option><option>Level</option></select>
+            </div>
+            <div class="col-flex">
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto">
+                <span class="frame" data-rarity="4">🧟</span>
+                <span><span class="nm">Ashkell</span><p class="sub">Lv 41 · <span class="el" data-el="dark"><i class="dot"></i>Dark</span></p></span>
+                <button class="btn btn--sm">Take</button>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;opacity:.55">
+                <span class="frame" data-rarity="2">🍄</span>
+                <span><span class="nm">Sporeling</span><p class="sub">recovering · ready in 42m</p></span>
+                <span class="readout">unavailable</span>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;opacity:.55">
+                <span class="frame" data-rarity="3">🌰</span>
+                <span><span class="nm">Blightcap</span><p class="sub">away on the Deepvault descent</p></span>
+                <span class="readout">unavailable</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <button class="btn btn--ghost">Not tonight</button>
+        <button class="btn btn--lg">Begin — 2 creatures</button>
+      </footer>
+    </div>
+
+    <div class="note">
+      <strong>Unavailable creatures stay visible with their reason.</strong> Recovering, away, and
+      deployed all read differently from "you do not own this". Hiding them would make the roster
+      look smaller than it is and hide the fact that time will fix it.
+      <span class="ref">GG-55</span>
+    </div>
+    <div class="note">
+      <strong>The matchup hint is the teaching moment for the ring.</strong> It appears here because
+      here is where it changes a decision — not in a tutorial the player read once and forgot.
+      <span class="ref">GG-45</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Deploying — the targeting mode</h2>
+  <p class="lede">
+    The lawn's interaction FSM has a <code>SpawnTargeting</code> state that no plate had drawn. It is
+    <b>stage chrome</b>, not a layer: the player is choosing a cell on the board, so the board must
+    stay fully visible and fully interactive.
+  </p>
+
+  <div class="spec">
+    <div class="viewport short">
+      <div class="stagebox" style="position:absolute;inset:0;height:auto;border:0;border-radius:0">
+        <div class="hud">
+          <div class="cluster"><span class="frame frame--chip" data-rarity="5">☀</span><span class="val">1 240</span></div>
+          <div class="cluster"><span class="tag tag--warn">Wave 7 of 14</span></div>
+          <span class="spacer"></span>
+          <div class="cluster"><span class="tag tag--info">choosing a place for Emberling</span></div>
+          <div class="cluster"><button class="btn btn--sm btn--ghost">Cancel <span class="hotkey">Esc</span></button></div>
+        </div>
+
+        <div style="position:absolute;inset:52px 12px 76px;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:2px">
+          <div class="cell is-range" style="grid-area:1/1"></div>
+          <div class="cell is-range" style="grid-area:1/2"></div>
+          <div class="cell is-range" style="grid-area:1/3"></div>
+          <div class="cell is-self" style="grid-area:2/2">🌻</div>
+          <div class="cell is-range" style="grid-area:2/1"></div>
+          <div class="cell is-range" style="grid-area:2/3"></div>
+          <div class="cell" style="grid-area:3/2">🌵</div>
+          <div class="cell is-range" style="grid-area:3/1"></div>
+          <div class="cell is-range" style="grid-area:3/3"></div>
+          <div class="cell is-range" style="grid-area:4/1"></div>
+          <div class="cell is-range" style="grid-area:4/2"></div>
+          <div class="cell is-range" style="grid-area:5/1"></div>
+          <div class="cell is-target" style="grid-area:3/7">🧟</div>
+          <div class="cell is-target" style="grid-area:2/8">🧟</div>
+        </div>
+
+        <div style="position:absolute;left:0;right:0;bottom:0;padding:var(--sp-3);z-index:var(--band-hud);
+                    background:linear-gradient(rgb(11 9 7 / 0), rgb(11 9 7 / .92) 40%)">
+          <div class="row-flex" style="gap:var(--sp-4)">
+            <span class="chip" style="padding:2px var(--sp-3) 2px 2px"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span></span>
+            <span class="readout">pick a lit cell · <span class="hotkey">Esc</span> cancels · nothing is spent until you place</span>
+            <span class="spacer" style="flex:1"></span>
+            <span class="tag tag--warn">costs 150 sun</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>The ghost is chrome, not an occupant.</strong> The lit cells and the held creature are
+      UI state only — nothing is spawned, nothing is spent, and the board's living set is untouched
+      until the server admits the placement. That is the architecture's rule about optimistic living
+      entities, drawn. <span class="ref">GG-15</span>
+    </div>
+    <div class="note">
+      <strong>Why this is not a layer.</strong> The player is acting <em>on the stage</em>, so a
+      scrim and a panel would be exactly wrong. Targeting is the one interaction that must never dim
+      the thing it is aiming at.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · The offer — the only other thing that wants to interrupt</h2>
+  <p class="lede">
+    A demon offering a pact is the most tempting candidate for a blocking dialog, and it does not get
+    one. Only run results may take band 3 unprompted; the offer arrives at band 4 and waits.
+    <span class="ref">GG-53 · D6</span>
+  </p>
+
+  <div class="spec">
+    <div class="spec-grid wide">
+      <div>
+        <p class="spec-label">How it arrives — a toast, mid-anything</p>
+        <div class="toast toast--warn"><span>👹</span><span class="msg"><b>Something is offering terms</b><span>It will wait in the sanctum. Pacts <span class="hotkey">P</span></span></span></div>
+        <div class="note" style="margin-top:var(--sp-2)">
+          It does not open itself. A pact is a decision the player should make when they choose to,
+          not one ambushed into them mid-wave.
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">How it reads when opened — the price is the same size as the gift</p>
+        <div class="panel-shell" style="max-width:none">
+          <header style="background:linear-gradient(rgb(201 106 82 / .28), transparent)">
+            <span class="frame frame--card" data-rarity="5">👹</span>
+            <div style="flex:1"><h3>Pact of the Long Winter</h3><div class="sub">offered · expires in 2 nights</div></div>
+          </header>
+          <div class="body">
+            <p class="flavour" style="font-style:italic;color:var(--muted);margin:0 0 var(--sp-3)">
+              "You want the cold to obey you. I want something warm. We can both be satisfied."
+            </p>
+            <div class="vs">
+              <div class="yes">
+                <div class="verdict">✔ It gives</div>
+                <div class="col-flex" style="gap:var(--sp-1)">
+                  <span class="atom-line"><span class="eff">+180 ice power to every bound creature</span></span>
+                  <span class="atom-line"><span class="eff">Freeze lasts 40% longer</span></span>
+                </div>
+              </div>
+              <div class="no">
+                <div class="verdict">✕ It takes</div>
+                <div class="col-flex" style="gap:var(--sp-1)">
+                  <span class="atom-line"><span class="eff">−15% fire power, permanently</span></span>
+                  <span class="atom-line"><span class="eff">600 souls every seven nights</span></span>
+                  <span class="atom-line"><span class="eff">Breaking the pact costs a bound creature</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <footer>
+            <button class="btn btn--ghost">Refuse</button>
+            <button class="btn btn--ghost">Decide later</button>
+            <button class="btn">Accept the terms</button>
+          </footer>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>"Decide later" is a real button.</strong> An offer with only accept and refuse is a
+      trap dressed as a choice, and it converts a mechanic the player should savour into pressure.
+      The expiry is stated so waiting has a known cost.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · The first session, all four beats</h2>
+  <p class="lede">
+    Plate 01 drew beat one and stopped. GG-43 says the first session is <em>authored</em>, so here is
+    the whole script — what appears, what is deliberately absent, and what unlocks at each step.
+  </p>
+
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th style="width:44px">Beat</th><th>What the player sees</th><th>What they do</th><th>What appears afterwards</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>1</b></td>
+          <td>An empty sanctum and one sunflower that "answered". Six of eight rail entries locked.</td>
+          <td>Name it. Bind it.</td>
+          <td>Creatures unlocks. The run prompt appears.</td>
+        </tr>
+        <tr>
+          <td><b>2</b></td>
+          <td>The loadout, with one creature and two empty berths — so the shape of a party is visible before it can be filled.</td>
+          <td>Begin the first night.</td>
+          <td>The lawn stage. No panels are suggested; the rail is present but quiet.</td>
+        </tr>
+        <tr>
+          <td><b>3</b></td>
+          <td>The first wave. When the first zombie takes elemental damage, one line appears beside it: <em>"Fire is strong against Ice."</em> Once.</td>
+          <td>Survive, or not — both are authored outcomes.</td>
+          <td>Run result. Chronicle and Almanac unlock.</td>
+        </tr>
+        <tr>
+          <td><b>4</b></td>
+          <td>Back in the sanctum, the focus card reads <em>"Your first relic fell where you fought."</em></td>
+          <td>Collect it.</td>
+          <td>Relics unlocks. The tutorial is over; nothing further is scripted.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="spec-grid wide" style="margin-top:var(--sp-4)">
+      <div>
+        <p class="spec-label">Beat 3 — teaching at the moment of first encounter</p>
+        <div class="stagebox" style="height:170px">
+          <div style="position:absolute;left:32%;top:38%;">
+            <div class="tip" style="max-width:230px">
+              <h4><span class="el" data-el="fire"><i class="dot"></i>Fire</span> beats <span class="el" data-el="ice"><i class="dot"></i>Ice</span></h4>
+              <p style="margin-top:var(--sp-1)">Your strike did <b class="val">+25%</b> because of it. Every element beats one and loses to another.</p>
+              <p style="margin-top:var(--sp-2);color:var(--faint);font-size:var(--text-xs)">The ring is in the Almanac from now on.</p>
+            </div>
+          </div>
+          <div class="caption">shown once, in place, at the moment it first mattered</div>
+        </div>
+        <div class="note">
+          Not a modal, not a tutorial gate, not a thing to dismiss before playing. It appears beside
+          the event that caused it and never returns. <span class="ref">GG-45</span>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">The unlock ladder, as the player experiences it</p>
+        <div class="timeline">
+          <div class="tl" data-kind="gain"><span class="when">beat 1</span><span class="spine"><i></i></span><span class="what"><b>Creatures</b><span>you have something to keep</span></span></div>
+          <div class="tl" data-kind="gain"><span class="when">beat 3</span><span class="spine"><i></i></span><span class="what"><b>Chronicle · Almanac</b><span>you have a past and things you have met</span></span></div>
+          <div class="tl" data-kind="gain"><span class="when">beat 4</span><span class="spine"><i></i></span><span class="what"><b>Relics</b><span>you have something to equip</span></span></div>
+          <div class="tl"><span class="when">later</span><span class="spine"><i></i></span><span class="what"><b>World map</b><span>first sector contact</span></span></div>
+          <div class="tl"><span class="when">later</span><span class="spine"><i></i></span><span class="what"><b>Fusion</b><span>a second creature of one species</span></span></div>
+          <div class="tl"><span class="when">later</span><span class="spine"><i></i></span><span class="what"><b>Pacts</b><span>the first offer</span></span></div>
+          <div class="tl"><span class="when">later</span><span class="spine"><i></i></span><span class="what"><b>Expeditions</b><span>the first sector held</span></span></div>
+        </div>
+        <div class="note">
+          Each unlock is caused by something the player <em>did</em>, never by a level number. That is
+          what makes the rail feel earned rather than gated.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · Focus and directional input</h2>
+  <p class="lede">
+    GG-19 and GG-57 were declared and never drawn. Focus order is a design decision — left to the DOM
+    it produces the order the markup happened to be written in.
+  </p>
+
+  <div class="spec">
+    <div class="spec-grid wide">
+      <div>
+        <p class="spec-label">Declared focus order for a panel</p>
+        <div class="panel-shell" style="max-width:none">
+          <header>
+            <div style="flex:1"><h3>Creatures</h3></div>
+            <span class="esc">Esc</span>
+          </header>
+          <div class="body">
+            <div class="col-flex" style="gap:var(--sp-2)">
+              <div class="row-flex"><span class="hotkey">1</span><span style="font-size:var(--text-sm)">Search field — <b>initial focus</b></span></div>
+              <div class="row-flex"><span class="hotkey">2</span><span style="font-size:var(--text-sm)">Filters, left to right</span></div>
+              <div class="row-flex"><span class="hotkey">3</span><span style="font-size:var(--text-sm)">The grid — one stop, then arrows move within it</span></div>
+              <div class="row-flex"><span class="hotkey">4</span><span style="font-size:var(--text-sm)">Footer actions</span></div>
+              <div class="row-flex"><span class="hotkey">↺</span><span style="font-size:var(--text-sm)">Tab wraps to 1 — it never escapes the layer</span></div>
+              <div class="row-flex"><span class="hotkey">Esc</span><span style="font-size:var(--text-sm)">Pops, and focus returns to the rail entry that opened it</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="note">
+          <strong>A grid is one tab stop, not four hundred.</strong> Tabbing through a thousand cards
+          is the reason keyboard support gets abandoned. Enter the grid once, then move inside it
+          with arrows. <span class="ref">GG-19 · GG-57</span>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Directional movement inside a grid</p>
+        <div class="grid-board" style="grid-template-columns:repeat(4,56px);width:max-content">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell is-self" style="box-shadow:var(--sh-glow)">◉</div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        </div>
+        <p style="font-size:var(--text-xs);color:var(--muted);margin-top:var(--sp-2)">
+          Arrows move spatially. At an edge, focus stops rather than wrapping — wrapping in two
+          dimensions is disorienting and there is no undo for "where did my selection go".
+        </p>
+        <div class="rule-line"></div>
+        <p class="spec-label">Pointer target minimums</p>
+        <table class="t" style="margin-top:0">
+          <thead><tr><th>Context</th><th>Minimum</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td>Mouse</td><td>32 × 32</td><td>Buttons, rail entries, action slots</td></tr>
+            <tr><td>Touch-capable</td><td>44 × 44</td><td>Everything above, padded</td></tr>
+            <tr><td>Dense developer surfaces</td><td>24 × 24</td><td>Exempt by GG-41</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · The last rungs</h2>
+  <p class="lede">
+    Nine cells of the entity ladder were still marked open. These close them. Each is the same
+    component family as its siblings — that is the test that the ladder was right.
+  </p>
+
+  <div class="spec">
+    <div class="spec-grid wide">
+
+      <div>
+        <p class="spec-label">Container panel — a relic, in full</p>
+        <div class="panel-shell" style="max-width:none">
+          <header>
+            <span class="frame frame--panel" data-rarity="4">⚱</span>
+            <div style="flex:1"><h3>Ashen Reliquary</h3>
+              <div class="sub"><span class="tag" style="color:var(--rarity-4);border-color:var(--rarity-4)">Rare</span> <span class="tag">Relic</span> <span class="tag">equipped · Emberling</span></div></div>
+            <span class="esc">Esc</span>
+          </header>
+          <div class="body">
+            <p class="flavour" style="font-style:italic;color:var(--muted);margin:0 0 var(--sp-3)">
+              Still warm. It has not been near a fire in a hundred years.
+            </p>
+            <p class="spec-label">What it grants</p>
+            <div class="col-flex" style="gap:var(--sp-2)">
+              <span class="chip"><span class="frame frame--chip" data-rarity="3">✦</span><span class="nm">Ember Force</span> <span class="val">+150</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="2">✦</span><span class="nm">Hardened Rind</span> <span class="val">+240<span class="unit">HP</span></span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="4">✦</span><span class="nm">Withering Touch</span> <span class="val">250<span class="unit">‰</span></span></span>
+            </div>
+            <div class="rule-line"></div>
+            <div class="statgrid">
+              <div class="s"><div class="k">Found</div><div class="v" style="font-size:var(--text-md)">Ridgeline</div></div>
+              <div class="s"><div class="k">Nights held</div><div class="v">6</div></div>
+              <div class="s"><div class="k">Power</div><div class="v">11.1</div></div>
+            </div>
+          </div>
+          <footer>
+            <button class="btn btn--ghost">Unequip</button>
+            <button class="btn btn--ghost">Compare</button>
+            <button class="btn btn--danger">Break down</button>
+          </footer>
+        </div>
+      </div>
+
+      <div class="col-flex" style="gap:var(--sp-4)">
+        <div>
+          <p class="spec-label">Contract chip · row · sector chip</p>
+          <div class="col-flex">
+            <div class="row-flex">
+              <span class="chip"><span class="frame frame--chip" data-rarity="5">👹</span><span class="nm">Pact of Cinders</span> <span class="tag tag--bad">overdue</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="4">👹</span><span class="nm">Quiet Root</span> <span class="tag tag--ok">84</span></span>
+            </div>
+            <div class="row-flex">
+              <span class="chip"><span class="frame frame--chip" data-rarity="3">🜂</span><span class="nm">Ashfall</span> <span class="tag tag--warn">contested</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="2">🜃</span><span class="nm">Ridgeline</span> <span class="tag tag--ok">held</span></span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;margin-top:var(--sp-2)">
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) 110px auto">
+                <span class="frame" data-rarity="5">👹</span>
+                <span><span class="nm">Pact of Cinders</span><p class="sub">+120 fire power · 400 souls weekly</p></span>
+                <div class="meter meter--sm is-critical"><span class="track"><span class="fill" style="width:38%"></span></span></div>
+                <span class="tag tag--bad">overdue</span>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) 110px auto;border-bottom:0">
+                <span class="frame" data-rarity="4">👹</span>
+                <span><span class="nm">Pact of the Quiet Root</span><p class="sub">+120 earth power · −40 vitality</p></span>
+                <div class="meter meter--sm"><span class="track"><span class="fill" style="width:84%"></span></span></div>
+                <span class="tag tag--ok">content</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p class="spec-label">Actor editor — the only mutating form a player meets</p>
+          <div class="panel-shell dialog" style="max-width:none">
+            <header><h3>Rename Emberling</h3></header>
+            <div class="body">
+              <div class="field">
+                <label for="rn">Name</label>
+                <input class="input" id="rn" value="Emberling">
+                <span class="hint">Shown wherever this creature appears. You can change it whenever you like.</span>
+              </div>
+            </div>
+            <footer>
+              <button class="btn btn--ghost">Cancel</button>
+              <button class="btn">Save</button>
+            </footer>
+          </div>
+          <div class="note">
+            <strong>Most entities are read-only to the player.</strong> The editor rung exists for
+            exactly two things — a creature's name and a save's name — which is why it is one field
+            and not a form. Authoring atoms, containers and catalogs is a developer surface.
+            <span class="ref">GG-41</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 07 · Flows &amp; Details · draft 2026-08-22 · governed by architecture/game-gui-principles.md
+</footer>
+
+</div>
+</body>
+</html>

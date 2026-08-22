@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "element-matrix",
+  "entries": [
+    {
+      "matrix": "combat",
+      "attacker": "light",
+      "defender": "dark",
+      "unit": 1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "dark",
+      "defender": "light",
+      "unit": 1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "fire",
+      "defender": "ice",
+      "unit": 1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "fire",
+      "defender": "air",
+      "unit": -1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "ice",
+      "defender": "earth",
+      "unit": 1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "ice",
+      "defender": "fire",
+      "unit": -1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "earth",
+      "defender": "air",
+      "unit": 1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "earth",
+      "defender": "ice",
+      "unit": -1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "air",
+      "defender": "fire",
+      "unit": 1
+    },
+    {
+      "matrix": "combat",
+      "attacker": "air",
+      "defender": "earth",
+      "unit": -1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "light",
+      "defender": "dark",
+      "unit": 1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "dark",
+      "defender": "light",
+      "unit": 1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "fire",
+      "defender": "ice",
+      "unit": 1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "fire",
+      "defender": "air",
+      "unit": -1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "ice",
+      "defender": "earth",
+      "unit": 1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "ice",
+      "defender": "fire",
+      "unit": -1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "earth",
+      "defender": "air",
+      "unit": 1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "earth",
+      "defender": "ice",
+      "unit": -1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "air",
+      "defender": "fire",
+      "unit": 1
+    },
+    {
+      "matrix": "shield",
+      "attacker": "air",
+      "defender": "earth",
+      "unit": -1
+    }
+  ]
+}

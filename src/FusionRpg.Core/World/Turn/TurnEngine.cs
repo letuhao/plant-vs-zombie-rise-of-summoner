@@ -18,12 +18,17 @@ public static class TurnEngine
 {
     public const int EngineVersion = 1;
     /// <summary>
+    /// Bumped to 3 on 2026-08-22: `Intel` moved *after* `Snapshot`. Belief is what you know at the
+    /// end of the turn, and the end of the turn is after the turn has finished happening — before
+    /// this, a claim settled in Snapshot was invisible to the faction that made it, which re-filed
+    /// the order and had it dropped as `claim.already-yours`. Found by playing, not by testing.
+    ///
     /// Bumped to 2 on 2026-08-22 when the `Intel` phase landed: every turn now writes each faction's
     /// belief, so the same commands produce a different — and larger — state than they did under
     /// version 1. Stored version-1 reports refuse to re-derive rather than fabricating, which is the
     /// behaviour this counter exists for.
     /// </summary>
-    public const int RulesetVersion = 2;
+    public const int RulesetVersion = 3;
 
     public static class Phases
     {
@@ -35,13 +40,16 @@ public static class TurnEngine
         public const string Pressure = "Pressure";
         public const string Events = "Events";
 
+        /// <summary>Claims settle and postures land, because everything they depend on is decided.</summary>
+        public const string Snapshot = "Snapshot";
+
         /// <summary>
-        /// Last but one, deliberately: everything else has settled, so a faction records the world
-        /// as it *ends* the turn rather than as it looked halfway through.
+        /// **Last**, and it moved here in RulesetVersion 3. A faction records the world as it *ends*
+        /// the turn — which means after claims have settled, so it can see that its own claim
+        /// worked. Recording before Snapshot left a commander unable to observe the one thing it had
+        /// just done.
         /// </summary>
         public const string Intel = "Intel";
-
-        public const string Snapshot = "Snapshot";
     }
 
     /// <summary>
@@ -79,8 +87,14 @@ public static class TurnEngine
         next = Growth(next, report);
         next = Pressure(next, report);
         next = Events(next, report, turn, seed);
-        next = Observe(world, next, report, turn, movement.VisitedByFaction);
+
+        // Snapshot before Intel (RulesetVersion 3): a claim settles in Snapshot, so recording belief
+        // first meant a faction could not see that its *own* claim had succeeded — it re-filed the
+        // order the next turn and the engine dropped it as `claim.already-yours`. Belief is what you
+        // know at the end of the turn, and the end of the turn is after the turn has finished
+        // happening. Found by playing twenty turns and watching Zomboss claim the same sector twice.
         next = Snapshot(next, revealed, report, turn);
+        next = Observe(world, next, report, turn, movement.VisitedByFaction);
 
         return new TurnResult(next, report, StateHasher.Hash(next));
     }

@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "kind": "gem",
+  "_meta": {
+    "batch": "gems-g3",
+    "partition": "gems/3",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "tags": 4,
+      "themes": 1,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "entry-shapes.md#1"
+  },
+  "entries": [
+    {
+      "id": "gem.g3-001",
+      "nameKey": "gem.keen-bloom",
+      "name": "Keen Bloom",
+      "family": "atom.precision",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.keen-bloom",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-002",
+      "nameKey": "gem.cruel-thorn",
+      "name": "Cruel Thorn",
+      "family": "atom.cruelty",
+      "powerBand": "high",
+      "iconKey": "icon.gem.cruel-thorn",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-003",
+      "nameKey": "gem.sharp-spore",
+      "name": "Sharp Spore",
+      "family": "atom.keen_edge",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.sharp-spore",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-004",
+      "nameKey": "gem.feral-essence",
+      "name": "Feral Essence",
+      "family": "atom.ferocity",
+      "powerBand": "high",
+      "iconKey": "icon.gem.feral-essence",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-005",
+      "nameKey": "gem.wild-vine",
+      "name": "Wild Vine",
+      "family": "atom.savagery",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.wild-vine",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-006",
+      "nameKey": "gem.accelerant-seed",
+      "name": "Accelerant Seed",
+      "family": "atom.quickening",
+      "powerBand": "low",
+      "iconKey": "icon.gem.accelerant-seed",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-007",
+      "nameKey": "gem.flourish-bud",
+      "name": "Flourish Bud",
+      "family": "atom.flourishing",
+      "powerBand": "low",
+      "iconKey": "icon.gem.flourish-bud",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-008",
+      "nameKey": "gem.swift-petal",
+      "name": "Swift Petal",
+      "family": "atom.swiftness",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.swift-petal",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-009",
+      "nameKey": "gem.bulwark-core",
+      "name": "Bulwark Core",
+      "family": "atom.bulwark",
+      "powerBand": "high",
+      "iconKey": "icon.gem.bulwark-core",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-010",
+      "nameKey": "gem.durable-rind",
+      "name": "Durable Rind",
+      "family": "atom.shield_toughness",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.durable-rind",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-011",
+      "nameKey": "gem.regenerant-husk",
+      "name": "Regenerant Husk",
+      "family": "atom.shield_regen",
+      "powerBand": "low",
+      "iconKey": "icon.gem.regenerant-husk",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-012",
+      "nameKey": "gem.reinforced-graft",
+      "name": "Reinforced Graft",
+      "family": "atom.plating",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.reinforced-graft",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-013",
+      "nameKey": "gem.chitinous-carapace",
+      "name": "Chitinous Carapace",
+      "family": "atom.carapace",
+      "powerBand": "high",
+      "iconKey": "icon.gem.chitinous-carapace",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-014",
+      "nameKey": "gem.loyal-root",
+      "name": "Loyal Root",
+      "family": "atom.stalwart",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.loyal-root",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-015",
+      "nameKey": "gem.warding-membrane",
+      "name": "Warding Membrane",
+      "family": "atom.stoicism",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.warding-membrane",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-016",
+      "nameKey": "gem.conjuring-bloom",
+      "name": "Conjuring Bloom",
+      "family": "atom.summoner",
+      "powerBand": "high",
+      "iconKey": "icon.gem.conjuring-bloom",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-017",
+      "nameKey": "gem.cultivator-sprout",
+      "name": "Cultivator Sprout",
+      "family": "atom.gardener",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.cultivator-sprout",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g3-018",
+      "nameKey": "gem.evading-shadow",
+      "name": "Evading Shadow",
+      "family": "atom.evasion",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.evading-shadow",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-019",
+      "nameKey": "gem.purifying-sap",
+      "name": "Purifying Sap",
+      "family": "atom.cleansing",
+      "powerBand": "low",
+      "iconKey": "icon.gem.purifying-sap",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g3-020",
+      "nameKey": "gem.shield-capacity-core",
+      "name": "Capacity Core",
+      "family": "atom.shield_capacity",
+      "powerBand": "high",
+      "iconKey": "icon.gem.shield-capacity-core",
+      "tags": ["defensive"]
+    }
+  ]
+}

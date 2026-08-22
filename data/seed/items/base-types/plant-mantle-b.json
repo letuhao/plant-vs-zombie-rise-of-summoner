@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-mantle-b",
+    "partition": "base-types/mantle/plant/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-canopy-b-001",
+      "nameKey": "base.grooved-pergola",
+      "name": "Grooved Pergola",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.grooved-pergola",
+      "flavorKey": "flavor.base.grooved-pergola",
+      "flavor": "Channels flow where grooves have guided them for seasons.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-002",
+      "nameKey": "base.corky-limb",
+      "name": "Corky Limb",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.corky-limb",
+      "flavorKey": "flavor.base.corky-limb",
+      "flavor": "Thick-barked and hollow, it drinks and sweats without breaking.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-003",
+      "nameKey": "base.rough-arbour",
+      "name": "Rough Arbour",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.rough-arbour",
+      "flavorKey": "flavor.base.rough-arbour",
+      "flavor": "Its frame catches and holds, unfinished and weathered by years.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-004",
+      "nameKey": "base.ancient-bough",
+      "name": "Ancient Bough",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.ancient-bough",
+      "flavorKey": "flavor.base.ancient-bough",
+      "flavor": "It remembers every season of the forest it spanned across.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-005",
+      "nameKey": "base.stony-eave",
+      "name": "Stony Eave",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.stony-eave",
+      "flavorKey": "flavor.base.stony-eave",
+      "flavor": "Its wood has turned mineral-hard, an overhang of stone.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-006",
+      "nameKey": "base.warped-bower",
+      "name": "Warped Bower",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.warped-bower",
+      "flavorKey": "flavor.base.warped-bower",
+      "flavor": "Age and heat have twisted it into a shelter that gives without breaking.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-007",
+      "nameKey": "base.lichened-overstory",
+      "name": "Lichened Overstory",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.lichened-overstory",
+      "flavorKey": "flavor.base.lichened-overstory",
+      "flavor": "Living light-filters crown its bark, filtering poison down to safe.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-008",
+      "nameKey": "base.mossy-pergola",
+      "name": "Mossy Pergola",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.mossy-pergola",
+      "flavorKey": "flavor.base.mossy-pergola",
+      "flavor": "Soft green clings to wood, healing what season scours.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-009",
+      "nameKey": "base.oaken-canopy",
+      "name": "Oaken Canopy",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.oaken-canopy",
+      "flavorKey": "flavor.base.oaken-canopy",
+      "flavor": "The trunk's own crown, dense as the heartwood beneath.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-010",
+      "nameKey": "base.gnarled-awning",
+      "name": "Gnarled Awning",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.gnarled-awning",
+      "flavorKey": "flavor.base.gnarled-awning",
+      "flavor": "Twisted by wind and storm, it casts shadow that knows what it shelters.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-011",
+      "nameKey": "base.hoary-arbour",
+      "name": "Hoary Arbour",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.hoary-arbour",
+      "flavorKey": "flavor.base.hoary-arbour",
+      "flavor": "Grey-frosted by age, it has tasted and shedded the rot of ten thousand seasons.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-b-012",
+      "nameKey": "base.sunken-limb",
+      "name": "Sunken Limb",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.sunken-limb",
+      "flavorKey": "flavor.base.sunken-limb",
+      "flavor": "Hollowed by time but still standing, it holds because it has learned to flex.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "kind": "affix-family",
+  "_meta": {
+    "batch": "affix-g-elem-power",
+    "partition": "g.elem-power",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 2,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-opus-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-affixes.md#4.1",
+    "maintenanceNote": "Exemplars are maintained artifacts, not agent output. Their registryVersions track current so the pattern 124 agents copy never demonstrates a stale one."
+  },
+  "entries": [
+    {
+      "id": "atom.elemental-power",
+      "nameKey": "affix.elemental-power",
+      "name": "Elemental Power",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "powerBand": "medium",
+      "nameWords": {
+        "prefix": [
+          "Ember",
+          "Frost",
+          "Gale",
+          "Stone",
+          "Radiant",
+          "Umbral"
+        ]
+      },
+      "displayTemplate": "+{value} {element} power",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "ONE AUTHORED FAMILY, THIRTY-FIVE GENERATED ATOMS. `variants: {generate: \"elements+omni\"}` is what makes that true: the generator expands the family across seven element slots (six elements plus `omni`) and five tiers, emitting `atom.elemental-power.{element}.t{tier}` rows into data/generated/. The element is the `variant` COLUMN, not merely a params key — the atom table's unique key is (family_id, tier, variant), so seven t1 rows would collide if the element lived only inside params. `{variant}` in the channel string is the substitution the generator makes per row. NO NUMBER APPEARS ANYWHERE, and this is the field where a naive author would type one. `powerBand: \"medium\"` is not '+30'. It is tier 3 on bands.v1.json's tierMap, and the magnitude behind it is computed as m_t = round_legible(m_1 x 1.75^(t-1)) with a +/-33% band, where m_1 comes from this channel family's own share and reference base. The band carries NO UNIT on purpose: `combat.power.*` resolves to RESOLVER POINTS on a sigmoid, while `atom.vitality` at the same band resolves to HIT POINTS. Typing '30' here would silently claim those are the same quantity, and they are wrong by an order of magnitude — atom-layer-handoff.md found six of twelve derived families mis-stated exactly this way. The band cannot make that mistake because it has nothing to carry it in. Same reason `amount` is absent from `params`: the kind registry declares channel, op and amount as required params, but `amount` is the magnitude, so the generator supplies it and the author supplies the other two. `op` IS the author's — Flat vs Increased is a design choice, not a number. NO `affixClass`. Prefix-or-suffix is DERIVED from `kindId`: permanent-modifier kinds (stat.modify, stat.derived — which declare no trigger at all) are prefixes; triggered kinds are suffixes. Writing `affixClass: \"prefix\"` here would be correct and would still REJECT, because a derived field in a seed file is a second source of truth. ssot-affixes.md §4.1 lists g.elem-power as a prefix group; that is the registry recording the derivation, not permission to restate it per entry. `roleGroups` IS authored, and it is the field whose absence would make the legality matrix unauthorable — role x family legality is derived from it, roughly 1,100 cells nobody could hand-fill. These six are the roles carrying a non-zero g.elem-power weight in ssot-affixes.md §4.3, translated out of that table's stale role names into core.v1.json ids (`manipulator-offense` -> `manipulator`, `jewel-minor` -> both `jewel-minor-a` and `jewel-minor-b`). The commander-only `standard` role also carries weight there and is deliberately NOT listed: it is not one of the 15 body roles. THE ID IS NOT MINTED. atom.elemental-power is one of the ~70 already-shipped families, so it keeps its existing id unchanged — never re-minted into this partition's `elpw` stem, never re-prefixed. RUNTIME HONESTY: stat.derived is quarantined None/None/None (defect D6) and has no executor in any runtime until E12's BattleStatComposer. These rows import and bind nowhere today. That is a known, scheduled gap, not a reason to author the family differently.",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ]
+    },
+    {
+      "id": "atom.elpw-amplify",
+      "nameKey": "affix.elemental-amplification",
+      "name": "Elemental Amplification",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.{variant}",
+        "op": "Increased"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "powerBand": "low",
+      "nameWords": {
+        "prefix": [
+          "Waxing",
+          "Swelling",
+          "Overwhelming"
+        ]
+      },
+      "displayTemplate": "{value} increased {element} power",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "THE OTHER HALF OF AN AFFIX PARTITION: a family that did not exist before. ssot-affixes.md flags the live gap — roughly 100 families are wanted against ~70 shipped — and closing it is why these 15 partitions exist at all. A NEW family takes `atom.{stem}-{word}`, where the stem is this group's reserved `elpw` (naming.v1.json idNamespaces.affixFamilies) and the word is the author's own choice of a SHORT MECHANICAL identifier. `amplify` qualifies; `Ember` would not — family ids are mechanical, and the flavour vocabulary is a separate table. The anonymous fallback `atom.elpw-x001` exists ONLY as a pre-freeze checkpoint marker and must be replaced with a real word before the partition is treated as final. It is a distinct FAMILY rather than another tier of the one above because `op` differs: Flat adds resolver points, Increased scales them, and they compose differently against everything else on the actor. That is exactly how atom.vitality and atom.fortitude split on the primary side. Note there is no `More` op available here at all — the derived side has Flat, Increased, Replace and Flag only. Same group means the same role matrix row, so `roleGroups` is identical to the entry above; that repetition is correct, not copy-paste sloppiness. `powerBand: \"low\"` against the sibling's `medium` is the author's judgement about which of the two should be the bigger pull, and it is the ONLY strength statement either entry makes.",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,664 @@
+{
+  "schemaVersion": 1,
+  "kind": "recipe",
+  "_meta": {
+    "batch": "recipes-all",
+    "partition": "recipes/all",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-materials-crafting.md#6.1"
+  },
+  "entries": [
+    {
+      "id": "recipe.001",
+      "nameKey": "recipe.forge-humanoid-cloth",
+      "name": "Forge: Cloth Armor",
+      "operation": "forge",
+      "outputKind": "container",
+      "outputRef": "item.humanoid-torso-a-001",
+      "outputQty": 1,
+      "frame": "humanoid",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.crude",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "recipe.002",
+      "nameKey": "recipe.forge-humanoid-leather",
+      "name": "Forge: Leather Gear",
+      "operation": "forge",
+      "outputKind": "container",
+      "outputRef": "item.humanoid-torso-b-001",
+      "outputQty": 1,
+      "frame": "humanoid",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.sound",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": [
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "recipe.003",
+      "nameKey": "recipe.forge-plant-stalk",
+      "name": "Forge: Stalk Bloom",
+      "operation": "forge",
+      "outputKind": "container",
+      "outputRef": "item.plant-stem-a-001",
+      "outputQty": 1,
+      "frame": "plant",
+      "costLines": [
+        {
+          "material": "substrate.plant.crude",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": [
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "recipe.004",
+      "nameKey": "recipe.forge-plant-heartwood",
+      "name": "Forge: Heartwood Branch",
+      "operation": "forge",
+      "outputKind": "container",
+      "outputRef": "item.plant-stem-b-001",
+      "outputQty": 1,
+      "frame": "plant",
+      "costLines": [
+        {
+          "material": "substrate.plant.sound",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": [
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "recipe.005",
+      "nameKey": "recipe.upcycle-humanoid-crude",
+      "name": "Upcycle: Refine Metal Scraps",
+      "operation": "upcycle",
+      "outputKind": "material",
+      "outputRef": "substrate.humanoid.sound",
+      "outputQty": 1,
+      "frame": "humanoid",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.crude",
+          "costBand": "modest"
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "recipe.006",
+      "nameKey": "recipe.upcycle-humanoid-sound",
+      "name": "Upcycle: Polish Metal",
+      "operation": "upcycle",
+      "outputKind": "material",
+      "outputRef": "substrate.humanoid.fine",
+      "outputQty": 1,
+      "frame": "humanoid",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.sound",
+          "costBand": "standard"
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "recipe.007",
+      "nameKey": "recipe.upcycle-plant-crude",
+      "name": "Upcycle: Cure Fibers",
+      "operation": "upcycle",
+      "outputKind": "material",
+      "outputRef": "substrate.plant.sound",
+      "outputQty": 1,
+      "frame": "plant",
+      "costLines": [
+        {
+          "material": "substrate.plant.crude",
+          "costBand": "modest"
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "recipe.008",
+      "nameKey": "recipe.upcycle-plant-sound",
+      "name": "Upcycle: Strengthen Grain",
+      "operation": "upcycle",
+      "outputKind": "material",
+      "outputRef": "substrate.plant.fine",
+      "outputQty": 1,
+      "frame": "plant",
+      "costLines": [
+        {
+          "material": "substrate.plant.sound",
+          "costBand": "standard"
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "recipe.009",
+      "nameKey": "recipe.elevate-to-rare",
+      "name": "Elevate: Forge Rarity",
+      "operation": "elevate",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.crude",
+          "costBand": "standard"
+        },
+        {
+          "material": "shard.common",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "cheap"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": []
+    },
+    {
+      "id": "recipe.010",
+      "nameKey": "recipe.elevate-to-epic",
+      "name": "Elevate: Apex Rarity",
+      "operation": "elevate",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.plant.sound",
+          "costBand": "standard"
+        },
+        {
+          "material": "shard.rare",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "standard"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": []
+    },
+    {
+      "id": "recipe.011",
+      "nameKey": "recipe.elevate-to-legendary",
+      "name": "Elevate: Legendary Crown",
+      "operation": "elevate",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "steep"
+        },
+        {
+          "material": "shard.epic",
+          "costBand": "steep"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "steep"
+        }
+      ],
+      "soulsCostBand": "steep",
+      "tags": []
+    },
+    {
+      "id": "recipe.012",
+      "nameKey": "recipe.temper-enhance-1",
+      "name": "Temper: First Enhancement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.crude",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": []
+    },
+    {
+      "id": "recipe.013",
+      "nameKey": "recipe.temper-enhance-mid",
+      "name": "Temper: Deeper Enhancement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.plant.sound",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "standard"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": []
+    },
+    {
+      "id": "recipe.014",
+      "nameKey": "recipe.temper-enhance-high",
+      "name": "Temper: Ultimate Enhancement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "steep"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "steep"
+        }
+      ],
+      "soulsCostBand": "steep",
+      "tags": []
+    },
+    {
+      "id": "recipe.015",
+      "nameKey": "recipe.reroll-single-common",
+      "name": "Reroll: Reshape Common",
+      "operation": "reroll",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "catalyst.flux",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": []
+    },
+    {
+      "id": "recipe.016",
+      "nameKey": "recipe.reroll-single-elemental",
+      "name": "Reroll: Reweave Element",
+      "operation": "reroll",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "essence.fire",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.flux",
+          "costBand": "standard"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": []
+    },
+    {
+      "id": "recipe.017",
+      "nameKey": "recipe.reroll-all-rare",
+      "name": "Reroll: Rework Rare",
+      "operation": "reroll",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "shard.rare",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.flux",
+          "costBand": "standard"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": []
+    },
+    {
+      "id": "recipe.018",
+      "nameKey": "recipe.reroll-all-epic",
+      "name": "Reroll: Remake Epic",
+      "operation": "reroll",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "shard.epic",
+          "costBand": "steep"
+        },
+        {
+          "material": "catalyst.flux",
+          "costBand": "steep"
+        }
+      ],
+      "soulsCostBand": "steep",
+      "tags": []
+    },
+    {
+      "id": "recipe.019",
+      "nameKey": "recipe.bore-socket-humanoid",
+      "name": "Bore: Open Metal",
+      "operation": "bore",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "humanoid",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.sound",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": []
+    },
+    {
+      "id": "recipe.020",
+      "nameKey": "recipe.bore-socket-plant",
+      "name": "Bore: Split Fiber",
+      "operation": "bore",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "plant",
+      "costLines": [
+        {
+          "material": "substrate.plant.sound",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": []
+    },
+    {
+      "id": "recipe.021",
+      "nameKey": "recipe.bore-socket-fine",
+      "name": "Bore: Carve Deep",
+      "operation": "bore",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "standard"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": []
+    },
+    {
+      "id": "recipe.022",
+      "nameKey": "recipe.socket-insert",
+      "name": "Socket: Gem Setting",
+      "operation": "socket",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [],
+      "soulsCostBand": "cheap",
+      "tags": []
+    },
+    {
+      "id": "recipe.023",
+      "nameKey": "recipe.forge-humanoid-plate",
+      "name": "Forge: Plated Guard",
+      "operation": "forge",
+      "outputKind": "container",
+      "outputRef": "item.humanoid-torso-a-002",
+      "outputQty": 1,
+      "frame": "humanoid",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.fine",
+          "costBand": "steep"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "steep",
+      "tags": [
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "recipe.024",
+      "nameKey": "recipe.forge-plant-root",
+      "name": "Forge: Root Cluster",
+      "operation": "forge",
+      "outputKind": "container",
+      "outputRef": "item.plant-stem-a-002",
+      "outputQty": 1,
+      "frame": "plant",
+      "costLines": [
+        {
+          "material": "substrate.plant.fine",
+          "costBand": "steep"
+        },
+        {
+          "material": "catalyst.forge",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "steep",
+      "tags": [
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "recipe.025",
+      "nameKey": "recipe.elevate-to-legendary-plus",
+      "name": "Elevate: Apex Legacy",
+      "operation": "elevate",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.plant.prime",
+          "costBand": "exorbitant"
+        },
+        {
+          "material": "shard.legendary",
+          "costBand": "exorbitant"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "exorbitant"
+        }
+      ],
+      "soulsCostBand": "exorbitant",
+      "tags": []
+    },
+    {
+      "id": "recipe.026",
+      "nameKey": "recipe.reroll-essence-fire",
+      "name": "Reroll: Fiery Essence",
+      "operation": "reroll",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "essence.fire",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.flux",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": []
+    },
+    {
+      "id": "recipe.027",
+      "nameKey": "recipe.reroll-essence-dark",
+      "name": "Reroll: Shadow Weave",
+      "operation": "reroll",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "essence.dark",
+          "costBand": "modest"
+        },
+        {
+          "material": "catalyst.flux",
+          "costBand": "modest"
+        }
+      ],
+      "soulsCostBand": "modest",
+      "tags": []
+    },
+    {
+      "id": "recipe.028",
+      "nameKey": "recipe.reroll-essence-air",
+      "name": "Reroll: Windward Turn",
+      "operation": "reroll",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "essence.air",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.flux",
+          "costBand": "standard"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": []
+    },
+    {
+      "id": "recipe.029",
+      "nameKey": "recipe.elevate-rare-to-epic",
+      "name": "Elevate: Escalate Rarity",
+      "operation": "elevate",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.humanoid.sound",
+          "costBand": "standard"
+        },
+        {
+          "material": "shard.rare",
+          "costBand": "standard"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "standard"
+        }
+      ],
+      "soulsCostBand": "standard",
+      "tags": []
+    },
+    {
+      "id": "recipe.030",
+      "nameKey": "recipe.temper-enhance-extreme",
+      "name": "Temper: Peak Enhancement",
+      "operation": "temper",
+      "outputKind": "mutation",
+      "outputQty": 1,
+      "frame": "any",
+      "costLines": [
+        {
+          "material": "substrate.plant.prime",
+          "costBand": "exorbitant"
+        },
+        {
+          "material": "catalyst.temper",
+          "costBand": "exorbitant"
+        }
+      ],
+      "soulsCostBand": "exorbitant",
+      "tags": []
+    }
+  ]
+}

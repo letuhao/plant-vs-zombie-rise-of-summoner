@@ -52,7 +52,7 @@ public static class ClaimResolver
             // that keeps firing must not fill the report with refusals.
             if (string.Equals(sector.OwnerFactionId, command.CommanderId, StringComparison.Ordinal))
             {
-                report.Add(phase, TurnReportKinds.Event, command.CommandId, "claim.already-yours:" + sector.SectorId);
+                report.Add(phase, TurnReportKinds.Event, command.CommandId, "claim.already-yours:" + sector.SectorId, sector.SectorId);
                 continue;
             }
 
@@ -83,7 +83,7 @@ public static class ClaimResolver
                     .ToList()
             };
 
-            report.Add(phase, TurnReportKinds.Event, command.CommandId, "claim.held:" + sector.SectorId);
+            report.Add(phase, TurnReportKinds.Event, command.CommandId, "claim.held:" + sector.SectorId, sector.SectorId);
         }
 
         return next;

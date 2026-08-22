@@ -6,6 +6,15 @@ authorized from it. Program prefix: **`item`** (free — no `docs/architecture/i
 `docs/architecture/item-map.md`, module specs go in `docs/architecture/item/`, and tasks are
 `tasks/item-plan.md` / `tasks/item-todo.md`, per the parallel-programs convention in AGENTS.md.
 
+> **Enriched and partly corrected, 2026-08-22.** Seventeen lane SSOTs, four decision documents and a
+> defect register now sit in [item/](item/) — start at [item/README.md](item/README.md). Where a lane
+> document and this one disagree, **the lane wins**: they were written against code, this was written
+> against intent. Four claims here were corrected outright and are marked ⚠ below — §5 (twelve roles →
+> fifteen), §6.2 (unique is not a rarity), §6.3 (the open question is closed), and §6.4 (equipping is
+> two acts, not one). A fifth correction lands upstream: the units premise this document inherited from
+> `definitions.md` §2 is wrong for six of the twelve derived families — see
+> [item/atom-layer-handoff.md](item/atom-layer-handoff.md) §1.
+
 **Inspiration:** the Diablo / Path of Exile line of item systems — base types with implicit modifiers,
 affixes rolled from tiered pools at drop, one modifier per family, rarity governing how many affixes
 and how strong, hand-authored uniques standing beside procedurally rolled rares.
@@ -136,7 +145,15 @@ about two of the three explicitly.
 
 ### 5.1 One role table, two vocabularies
 
-The design that keeps the item database from doubling: **twelve slot roles exist once**, and each frame
+> ⚠ **Superseded by [item/ssot-equip-slots.md](item/ssot-equip-slots.md).** The count is **fifteen**,
+> not twelve. The three added roles were not padding — each took a genuinely homeless affix cluster:
+> `ward-array` (the four shield families plus vanilla armour), `infusion` (the 21 status families, the
+> library's largest orphan), and `retinue` (spawn, board, grid, terrain). `head-guard` was also
+> redefined from "small torso" to disable-resistance, because it failed the merge test as written.
+> Budget weighting is integer per-mille summing to 1000. The table below is kept as the shape of the
+> idea; the role list itself lives in I2.
+
+The design that keeps the item database from doubling: **the slot roles exist once**, and each frame
 names them in its own fiction. Affix families are scoped to the **role**, so they are authored once and
 serve every frame. Only **base types** are frame-specific.
 
@@ -251,8 +268,22 @@ The container schema expresses the Diablo rarity model without inventing anythin
 | Normal | base type and implicit only | `pool_rolls = 0`, no pool rows |
 | Magic | one or two affixes | `pool_rolls = 1..2` |
 | Rare | three to six affixes | `pool_rolls = 3..6`, wider `min_tier`/`max_tier` |
-| Unique | hand-authored, named, fixed identity | fixed core atoms; `pool_rolls = 0` or a small deliberate pool |
-| Set | deferred — §11 | — |
+| ~~Unique~~ | ⚠ **not a rarity — see below** | — |
+| ~~Set~~ | ⚠ **not a rarity either** | — |
+
+> ⚠ **Corrected by [item/ssot-uniques.md](item/ssot-uniques.md) and
+> [item/ssot-rarity.md](item/ssot-rarity.md).** Listing "Unique" and "Set" as rungs on a rarity ladder
+> is a category error, and it propagated from this table into three lane documents before anyone caught
+> it. A unique is a **content class**, orthogonal to rarity: its defining property is that it breaks the
+> rules the generator obeys, which a rarity rung cannot express. The shipped validator already draws
+> that line — `TierOutOfWindow` is applied **only inside the pool loop**, so a container's fixed core is
+> never tier-checked (`ContainerValidator.cs:73-96` versus `:44-57`). Hence the rule:
+> **a unique may break every rule that lives in the generator, and no rule that lives in the machine.**
+
+⚠ Note also that `min_tier`/`max_tier` are **authoring assertions, not runtime filters** — the validator
+rejects the whole container, and `Instantiator.Draw` never consults the window
+([item/ssot-generation.md](item/ssot-generation.md)). Expressing a rarity's tier window therefore needs
+a draw-time parameter that does not exist yet.
 
 `pool_rolls`, `min_tier`, `max_tier`, `rarity`, `weight`, and `group` are **already columns**. The
 validation that makes them safe already exists too: a pool that cannot satisfy its own `pool_rolls`
@@ -269,17 +300,47 @@ A dropped item is one `effect_instance` plus one `effect_instance_atom` per atom
 `OnInstantiate` rolls resolved and frozen and the `roll_seed` recorded. Re-running instantiation with
 the same `(container_id, catalog_revision, roll_seed)` reproduces it byte-identically.
 
-**Open, and it matters for the schema:** is the instance *itself* the item, or is there an `item` row
-above it? An item row earns its place only if items need things an effect instance should not carry —
-a display name, an icon, bind-on-pickup, a stack of charges, a sell value, durability, a favourite flag.
-Several of those are likely. The cheap answer is a thin `item` table keyed on `instance_id`; the wrong
-answer is duplicating rolls into it.
+⚠ **Closed.** The question was: is the instance *itself* the item, or is there an `item` row above it?
+Answered **yes, a thin row** — `rpg_item_instance` keyed on the instance
+([item/ssot-item-categories.md](item/ssot-item-categories.md)), carrying only what an effect instance
+should not: display identity, lock and favourite state, provenance. Rolls are never duplicated into it.
 
-### 6.4 Equipping is a binding
+[item/ssot-inventory.md](item/ssot-inventory.md) adds the half nobody expected: **Normal-rarity items
+need no row at all.** With `pool_rolls = 0` and Fixed-only implicits, the reproduction contract makes
+every copy indistinguishable, so stock gear is a counter plus one shared canonical instance. That is
+what makes a roster of 48 specimens × 15 slots into 720 *cells* rather than 720 *decisions*.
 
-Equipping = create an `effect_binding` from the instance to the wearer's owner scope, with the item's
-role in the binding's `slot` column. Unequipping = withdraw it. The bind gate already rejects for
-runtime support, scope legality, `level_req`, and stale content, with named reason codes.
+### 6.4 Equipping is two acts, not one
+
+> ⚠ **Corrected by [item/decision-d1-durable-ownership.md](item/decision-d1-durable-ownership.md).**
+> "Equipping = create a binding" cannot be right, because **no owner scope durably names a specimen** —
+> `entity:{ptr}` is contractually session-scoped, `plant:N` is type-wide, `player:N` is the account.
+> Five lanes hit this independently.
+
+Equipping is **assign**, then **bind**:
+
+- **Assign** is durable and belongs to the item program — a row saying this player put this item in this
+  role on this specimen. It survives restarts, deployments and recoveries.
+- **Bind** stays session-scoped and belongs to E6 — rebuilt as a **full projection** at deploy, never as
+  a delta.
+
+Adding an `actor:{instanceId}` scope was traced end to end and **rejected because it does not reach the
+actor**: `AtomCompiler.Compile` takes atoms and a runtime but never an owner, and the grant it emits
+leaves `OwnerKind`/`OwnerKey` unset; if something set the key anyway, `StatApplyScope.Matches` falls
+through to `return false` with no log. The scope is **reserved, not added**.
+
+This is not a workaround — it is the shipped architecture. `UpsertUniqueEquipment` already rebuilds
+rather than deltas, and `UniqueOwnerBinder.ToEntityKey` already discards the instance id at deploy. It
+also makes unequip atomic: one row deleted, no second writer.
+
+Unequipping is the deletion of an assignment. The bind gate still rejects for runtime support, scope
+legality, `level_req` and stale content — though note that **`level_req` is currently enforced nowhere**
+(handoff §2, A4).
+
+⚠ **Two blocking amendments before the first item row exists:** the orphan sweep deletes any instance
+with no binding, so unbinding would delete owned gear; and `ResolveBindings` compares
+`catalog_revision` by equality, so one content import would unequip everything every player owns. Both
+are cheap today because nothing calls that code yet.
 
 This retires the stub: `rpg_unique_equipment` and `UniqueEquipmentCatalog`'s `mods_json` grant-folding
 go away, and E6 already migrates `mods_json` grants into `effect_binding` rows.
@@ -310,6 +371,18 @@ an action, not an item that carries atoms directly. Two consequences:
    (self-targeted, instant, no cost) that the action layer later absorbs without a migration.
 2. The classic failure — consumable spam trivialising combat — is solved with charges refilled at rest
    and shared cooldowns, both of which are action-layer concepts, not item-layer ones.
+
+> ⚠ **Refined by [item/ssot-consumables.md](item/ssot-consumables.md), which rejected the degenerate
+> form above.** "Self-targeted, instant, no cost" would ship *a potion that does nothing*, because in
+> battle a bound `resource.delta` is a verified silent no-op under D6. The shipped answer is to
+> degenerate the **use path**, not the effect: spent at a menu before a run, effect lasts the run, with
+> the effect authored as real atoms from day one. That mode also already exists — expeditions seal their
+> outcome at dispatch, so there is no "use" moment to design.
+>
+> It also found that **an instant consumable has no trigger it may legally name**, while `EffectBag`
+> already fires all actions immediately for a `Passive` def — the runtime does it, the schema forbids
+> it. Hence the `OnUse` trigger request in the handoff. And **the atom layer has no binding with a
+> lifetime**, so a timed buff must be a status, using a payload kind that has zero consumers today.
 
 ---
 
@@ -366,7 +439,18 @@ approval.
 
 ## 11. Deliberately open — the next discussion round
 
-The owner scoped these out of this pass. They are written as questions, not as leanings.
+> ✅ **Answered 2026-08-22.** Every question below now has a lane: rarity →
+> [ssot-rarity.md](item/ssot-rarity.md), sockets → [ssot-sockets.md](item/ssot-sockets.md), sets →
+> [ssot-sets.md](item/ssot-sets.md). The questions are kept as the record of what was asked and of what
+> the answers had to cover. Two guesses in this section were wrong and are worth noting: sockets do
+> **not** need new atom-table schema (an insert is its own instance binding on the same owner, so
+> composition happens at the binding layer and the content fingerprint is untouched), and the "socket
+> count by rarity" axis turned out to be layered across base type, rarity and crafting rather than owned
+> by one of them.
+>
+> What remains open is listed in [item/README.md](item/README.md) § *Open — needs the owner*.
+
+The owner scoped these out of the first pass. They are written as questions, not as leanings.
 
 ### Rarity
 - What is the ladder, and how many rungs? The `rarity` table exists with append-only ordinals, so adding
@@ -431,11 +515,34 @@ against a source.**
 [x] I verified claims against CODE, not comments — the equipment stub, the species roster,
     the materials table, and the battle ChannelMods comment were all opened.
 [x] I read the surrounding section of every rule I quoted.
-[ ] I tested (not assumed) any constraint I am reporting. **Gap: no test suite was run for this
-    document.** The constraints in §9 are read from shipped specs and code, not executed. Before
-    any of them is used to justify a build decision, run the suite.
+[x] I tested (not assumed) any constraint I am reporting. **Closed 2026-08-22** by
+    item/defect-register.md: Core 2257, Data 353, Guard 54 — 2664 green, 0 failures, all four
+    boundary guards OK. Nine of ten defect claims confirmed, two refuted, one partial. Three
+    further claims (handoff C1-C3) remain unverified and are marked as such.
 [x] Nothing contradicts a §2 invariant.
-[ ] Corrections propagated to prose, Structure, Testing, Boundaries, map, and tasks.
-    **Gap: no map, plan, or task list exists yet** — this is an ideal, and those artifacts are
-    written when the program graduates.
+[x] Corrections propagated. **Done 2026-08-22:** §5, §6.2, §6.3, §6.4, §7 and §11 carry the lane
+    corrections; upstream corrections owed to definitions.md, atom-family-library.md and
+    spec-action-model.md are collected in item/atom-layer-handoff.md rather than applied here,
+    because they belong to other programs. Still no map, plan, or task list — those are written
+    when the program graduates.
 ```
+
+---
+
+## 14. What the enrichment round changed
+
+Recorded so the next reader knows which parts of this document were written from intent and which
+survived contact with code.
+
+| Claim here | Outcome |
+|---|---|
+| Twelve slot roles | **Fifteen** — three homeless affix clusters had no home (§5) |
+| Unique and Set are rarity rungs | **Wrong.** A category error that propagated into three lanes (§6.2) |
+| Instance-or-item-row is open | **Closed** — a thin row, plus stock items needing no row at all (§6.3) |
+| Equipping is a binding | **Wrong.** Two acts: durable assign, session bind (§6.4) |
+| Consumables ship degenerate | **Refined** — degenerate the use path, never the effect (§7) |
+| Sockets probably need new schema | **Half wrong** — a sidecar, no atom-table change |
+| Rarity picks count and tier window | **Held**, and the tier window turned out not to be enforced at draw time |
+| Frame, not faction, is the key | **Held**, and every lane built on it |
+| Items have no behaviour; actors do | **Held** throughout |
+| Derived magnitudes are resolver points | **Wrong upstream** — six of twelve families are flat game units (handoff §1) |

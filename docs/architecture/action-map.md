@@ -2,7 +2,7 @@
 
 **Status:** **Proposed capability map (2026-08-22)** — module ids, dependency direction, and build order for review. No specs written, no build authorized. **Blocked by owner decision D1: the effect-atom program is specced first** ([effect-atom-map.md](effect-atom-map.md)), so nothing here starts until that map and its module specs exist. Grounding: [effect-atom-ideal.md](effect-atom-ideal.md), [battle-turn-ideal.md](battle-turn-ideal.md), [battle-timeline-map.md](battle-timeline-map.md), the code audit in §2, and the Chaos `action-core` / `combat-core` doc set (§7).
 
-Prefix: `action`. Specs live at `docs/architecture/action/spec-<module-id>.md`; plan and tasks at `tasks/action-plan.md` / `tasks/action-todo.md` (AGENTS.md parallel-programs convention — `SPEC.md` and `tasks/plan.md` belong to other streams).
+Prefix: `action`. Specs live at [`docs/architecture/action/`](action/) — **all ten written**. Plan and tasks at [`tasks/action-plan.md`](../../tasks/action-plan.md) / [`tasks/action-todo.md`](../../tasks/action-todo.md), written 2026-08-22 (AGENTS.md parallel-programs convention; `SPEC.md` and `tasks/plan.md` hold other streams — the latter is Perf v3's).
 
 ---
 
@@ -478,6 +478,89 @@ Usability asks things the effect-atom predicate tree has no leaves for: *is the 
 2. **Time agreement across save/load.** `CooldownLedger` stores absolute ticks and cooldowns keep running while suspended; resources resolve lazily from `(value, lastTick)`. Both are correct alone, and they must agree on what `now` means across a save, a load, and a mode switch — the Chaos grounding carries an explicit mode-switching artifact policy for exactly this.
 3. **Nothing is in `decisions.md`.** AGENTS.md requires a row before behaviour locks. Only the battle time model has one; the resource model, action model, and atom model have none.
 4. **Two sessions are editing this repo.** The second is active on the effect-atom program. A division of files matters more than usual while both are writing architecture.
+
+## 10.5a Verified against the atom program's shipped code (2026-08-22)
+
+The atom program moved from spec to build, so the contract this map depends on is now readable in `src/FusionRpg.Core/Effects/Atoms/` (25 types) and `src/FusionRpg.Data/Sqlite/RpgStore.{Atoms,Containers,AtomInstances}.cs`. Three assumptions confirmed, one broken.
+
+**Confirmed — the seam, in their words, in code.** `ContainerRow`'s own summary:
+
+> *"Containers are mechanism, not content. This holds **what a skill contains** — never **when it fires**. Activation, cooldown, and targeting belong to the turn kernel and the action layer."*
+
+That is the three-program boundary asserted from the other side. It is no longer an interpretation.
+
+**Confirmed — the compiled contract, and what it does not carry.** `RunnerEntry` is what reaches the runner: a **compiled** predicate (never a tree), `ChanceMilli`, `IcdMs`, `IcdKey`, and `Values` as curve-scaled bounds with `OnApply` ranges preserved for per-hit rolls. It has **no target field and no activation field**. Targeting and activation are ours by absence, not just by agreement.
+
+**Confirmed — no change is needed to their closed enum.** `ContainerKind` is `Item · Trait · Skill · SpeciesPassive · Patron · WorldBuff`, and adding one is a reviewed change. There is no `Action` kind and there does not need to be: `A1`'s sketch of a separate `rpg_action` row carrying a `container_id` FK works against `Skill` unchanged. **The dependency on the atom program is now zero API surface** — a foreign key into a table that exists.
+
+**Broken — container order is not execution order.** `ContainerAtomRow.Seq` is documented as:
+
+> *"Authoring order, and stable. **Not an execution guarantee** — execution order belongs to the actor's effect list, which sorts by priority across every container it holds."*
+
+`A1`'s sketch assumed an action's atoms resolve in container order. They do not: ordering is **actor-global by priority**, so a passive trait's atom can land between an action's damage atom and its heal atom.
+
+This is deterministic, so replay is safe, and for independent atoms it does not matter. It matters when an action's atoms are **dependent** — *"heal yourself for the damage this dealt"* requires the heal to observe the strike. Two ways out, and `A1` must pick one:
+
+| Option | Shape | Cost |
+|---|---|---|
+| **Action resolves its own atoms** | The action layer applies its container's atoms directly at its resolve tick, not through the actor's global effect list | Bypasses a shipped ordering rule; needs agreeing with the atom program |
+| **Actions declare a batch** | Atoms belonging to one action resolve as a unit, keeping their relative order inside the global sort | Needs a grouping concept the runner does not have today |
+
+Related note for `A1`: `IcdKey` merges atoms that share a key **into a single grant with a shared clock, by construction**. An action whose atoms merge that way is one grant, not several — which interacts with per-atom target scope (§10.4e) and should be checked rather than assumed.
+
+## 10.7 Spec phase status — 2026-08-22
+
+Seven modules specced, three deliberately not. Specs live at `docs/architecture/action/spec-<module-id>.md`.
+
+| Module | Spec | Note |
+|---|---|---|
+| **A1** `action-model` | ✅ | The foundation — tables, dataflow, six-case corpus |
+| **A2** `targeting` | ✅ | Typed contract; gained `Ordering` after `A5` found the two orders disagree |
+| **A4** `usability-conditions` | ✅ | Five ordered gates, typed refusals; asks `E3` for two resource leaves |
+| **A5** `basic-attack-adoption` | ✅ | The byte-identity gate; seven hazard fixtures |
+| **A3** `action-costs` | ✅ | Five resources, lazy regen, exhaustion-as-status, run lifetime |
+| **A6** `action-catalog` | ✅ | **Shrank in the writing** — actions are server-side, so there is no push |
+| **A7** `action-selection` | ✅ | The stub AI, and the game's first AI layer |
+| **A8** `defence-actions` | ✅ | Stance vs reaction; **builds** after timeline **B6** |
+| **A9** `movement-actions` | ✅ | One row, no new runtime; **builds** after `A10` |
+| **A10** `battle-board` | ✅ | The grid; **builds** with the board map / battle area |
+
+**All ten specced.** An earlier draft held the last three back on the grounds that specs written ahead of their dependencies rot. The owner's standing principle overrides that: *"we can ideal/spec and plan first because easy to reconcile."* Documents reconcile cheaply; code does not — which is the same reasoning that sequenced this whole program behind the atom build. The last three are **specced, not scheduled**: each names the dependency it builds behind.
+
+### What the spec phase changed
+
+Writing the specs against shipped code — rather than against the map — moved four things:
+
+1. **`A5` found a golden-mover the docs could not show.** `SelectTarget` takes the first active enemy in **list order**; `TargetResolver` sorts by **ordinal ptr**. Routing the basic attack through the resolver unchanged would have retargeted it and moved every golden. Resolved by making the choice a data value (`A2`'s `Ordering`) instead of two code paths that silently disagree.
+2. **`A6` shrank to a third of its assumed size.** Actions are battle-mode, battle is server-side, so the injector never needs one. There is no push, and there is no second push mechanism to maintain.
+3. **`A4` needed less from `E3` than expected.** *"Silenced"* is already `HasStatus`. Only two leaves are genuinely missing, and both generalise the existing `HpBelowMilli` shape.
+4. **`A7` is golden-neutral today**, because with no board there is no distance and "nearest" falls back to source order — which is what `SelectTarget` already does. It becomes a mover the moment `A10` lands.
+
+### Cross-program asks — all three cleared 2026-08-22
+
+Owner-approved and **written into the effect-atom docs directly** (that program is in build phase; documents reconcile freely).
+
+| # | Ask | Outcome |
+|---|---|---|
+| 1 | **Does an action apply its own atoms**, outside the actor's effect list? | **Already answered by their sealed docs.** `definitions.md`: *"The attack raises an event. An atom on that actor's effect list responds."* And all seven triggers are reactive — no `OnActionUsed`, no `OnCast` — so an action's atoms *cannot* be list responders; they would have nothing to respond to. Not a preference: the only option the vocabulary supports |
+| 2 | **Two resource predicate leaves** + `EntityFacts` resource values | Approved. Written into [effect-atom/spec-predicate-tree.md](effect-atom/spec-predicate-tree.md) as `resourceBelowMilli` / `resourceAboveMilli` — a generalisation of the existing `hpBelowMilli` pair, not a new idea |
+| 3 | **Action rows join the content hash** | Approved. Written into [effect-atom/spec-content-hash.md](effect-atom/spec-content-hash.md) as a later version registration, matching how `effect_element` and `power_coefficient` already arrive |
+
+**A refinement that came out of closing #1**, and it makes the effect list friendlier than it first looked: their execution order is `(priority DESC, container_id ASC, seq ASC)`, ordinal. Because `container_id` is the second key, **atoms from one container are contiguous and in `seq` order at equal priority**. `seq` is not an execution guarantee across the whole list, but it is one *within* a container — which is precisely the guarantee an action needs.
+
+### Coverage boundary — this program does not prove `W`
+
+`A5`'s basic attack is `slot_consuming = false` (the round loop has no contention) and `A9`'s movement is slot-free deliberately. **No module here exercises a slot-consuming action**, so the action → slot path — commit acquires, resolve releases, fizzle releases, interrupt releases — is unproven by this program.
+
+The kernel's own slot tests are thorough but drive `ActionSlots` directly. The timeline's **B12** — a real action under a real profile — is the natural owner. Recorded as a dependency rather than left as a hole, because "the slot tests pass" is otherwise easy to mistake for coverage that does not exist.
+
+### Spec audit — 2026-08-22
+
+[audit-2026-08-22.md](action/audit-2026-08-22.md): three Critical, six Important, one Minor, all fixed in the specs they affect. Every Critical was found by reading shipped code rather than the specs:
+
+- **C1 — `Core/Actions/` had no determinism guard.** `A1` §9 correctly sites the runtime outside the *tick-path* rules, but that silently dropped the *purity* rules too — so a wall-clock read, an ambient `Random`, or a `double` would compile, pass CI, and break every replay. Fixed: scan the directory with purity rules, tick-path exempt, reusing the mechanism that already exempts `BattleTrace.cs`.
+- **C2 — `Random` targeting had no RNG stream.** The battle names `initiative`, `crit`, `essence`, `status` — there is no `target`. An unnamed draw is nondeterministic; a borrowed one desyncs everything after it, which is worse because the battle still looks plausible.
+- **C3 — a claimed property the code does not have.** `A2` said precompiling `TargetSpec` avoids a per-call dictionary; `FilterPool` re-parses the filter dictionary on **every** resolve, inside the shipped resolver, and `A7` calls it per candidate.
 
 ## 10.6 Seal — pre-spec state, 2026-08-22
 

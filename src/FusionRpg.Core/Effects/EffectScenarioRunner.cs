@@ -85,17 +85,24 @@ public static class EffectScenarioRunner
         AllowTrailingCommas = true
     };
 
-    public static EffectScenarioRunResult RunFile(string path, string? goldenRoot = null)
+    /// <param name="catalog">
+    /// Which defs to run the scenario against. Null means the seeded ones. E11 runs every fixture
+    /// twice — once seeded, once against the compiled atom catalog — and diffs the plans, which is
+    /// the module's whole acceptance and was unreachable while this was hardcoded.
+    /// </param>
+    public static EffectScenarioRunResult RunFile(
+        string path, string? goldenRoot = null, IEnumerable<EffectDef>? catalog = null)
     {
         var dto = JsonSerializer.Deserialize<EffectScenarioDto>(File.ReadAllText(path), JsonOpts)
                   ?? throw new InvalidOperationException("null scenario: " + path);
         goldenRoot ??= Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(path))!, ".."));
-        return Run(dto, goldenRoot);
+        return Run(dto, goldenRoot, catalog);
     }
 
-    public static EffectScenarioRunResult Run(EffectScenarioDto scenario, string? goldenRoot = null)
+    public static EffectScenarioRunResult Run(
+        EffectScenarioDto scenario, string? goldenRoot = null, IEnumerable<EffectDef>? catalog = null)
     {
-        var host = new SimEffectHost(scenario.Seed, scenario.MatchKey);
+        var host = new SimEffectHost(scenario.Seed, scenario.MatchKey, catalog);
         if (scenario.Board is { Count: > 0 })
         {
             host.SetBoard(scenario.Board.Select(b => new BoardEntitySnap

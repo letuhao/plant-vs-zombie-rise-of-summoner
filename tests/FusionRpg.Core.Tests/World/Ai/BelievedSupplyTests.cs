@@ -70,15 +70,18 @@ public class BelievedSupplyTests
         // intact is a march-planning mistake, not a supply one.
         //
         // What *can* diverge is ownership. Dave holds a four-sector chain — homeworld → ember-hollow
-        // → ash-waste → verdant-shelf — and ash-waste is taken from him two lanes out, beyond his
+        // → ash-waste → black-gate — and ash-waste is taken from him two lanes out, beyond his
         // sight. He no longer owns it, so he no longer sees it, so he never learns; his believed
         // chain still runs straight through it to a sector that is now cut off entirely.
+        //
+        // The far end is black-gate rather than verdant-shelf since the 2026-08-22 reshape moved
+        // Verdant Shelf behind it.
         // Two things about `first-light` have to go first, and finding them is half the value of
         // writing this test: the wild pack sits at ash-waste and projects a zone of control, which
         // would break the chain there for reasons that have nothing to do with fog; and almost every
         // sector holds a Seat, so each would seed its own supply and nothing could ever be cut off.
         var world = World();
-        var mine = new[] { "ember-hollow", "ash-waste", "verdant-shelf" };
+        var mine = new[] { "ember-hollow", "ash-waste", "black-gate" };
 
         var wide = world with
         {
@@ -108,13 +111,13 @@ public class BelievedSupplyTests
         // The truth: everything past ash-waste is off the chain, and ash-waste with it.
         var truth = SupplyGraph.ConnectedSectors(lost, "dave");
         Assert.DoesNotContain("ash-waste", truth);
-        Assert.DoesNotContain("verdant-shelf", truth);
+        Assert.DoesNotContain("black-gate", truth);
 
         // The belief: an empire in perfect health. He finds out by taking attrition, which is
         // exactly how it should feel.
         var believed = BelievedSupply.ConnectedSectors(new BelievedWorldView(lost, "dave"));
         Assert.Contains("ash-waste", believed);
-        Assert.Contains("verdant-shelf", believed);
+        Assert.Contains("black-gate", believed);
     }
 
     [Fact]

@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "kind": "display-template",
+  "_meta": {
+    "batch": "display-templates-primary",
+    "partition": "display-templates/1",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-presentation.md #5.3 + entry-shapes.md #10"
+  },
+  "entries": [
+    {
+      "id": "disptpl.p1-001",
+      "nameKey": "disptpl.affix.vitality",
+      "name": "+{value} max health",
+      "runtimeFamily": "atom.vitality",
+      "plantOverrideKey": null,
+      "groupId": "g.life",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-002",
+      "nameKey": "disptpl.affix.fortitude",
+      "name": "{value} increased max health",
+      "runtimeFamily": "atom.fortitude",
+      "plantOverrideKey": null,
+      "groupId": "g.life",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-003",
+      "nameKey": "disptpl.affix.bulwark",
+      "name": "{value} more max health",
+      "runtimeFamily": "atom.bulwark",
+      "plantOverrideKey": null,
+      "groupId": "g.life",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-004",
+      "nameKey": "disptpl.affix.mending",
+      "name": "+{value} health restored on grant",
+      "runtimeFamily": "atom.mending",
+      "plantOverrideKey": null,
+      "groupId": "g.life",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-005",
+      "nameKey": "disptpl.affix.life-graft",
+      "name": "{value} increased health restored on grant",
+      "runtimeFamily": "atom.life-graft",
+      "plantOverrideKey": null,
+      "groupId": "g.life",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-006",
+      "nameKey": "disptpl.affix.life-surge",
+      "name": "{value} more health restored on grant",
+      "runtimeFamily": "atom.life-surge",
+      "plantOverrideKey": null,
+      "groupId": "g.life",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-007",
+      "nameKey": "disptpl.affix.might",
+      "name": "+{value} attack",
+      "runtimeFamily": "atom.might",
+      "plantOverrideKey": null,
+      "groupId": "g.attack",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-008",
+      "nameKey": "disptpl.affix.ferocity",
+      "name": "{value} increased attack",
+      "runtimeFamily": "atom.ferocity",
+      "plantOverrideKey": null,
+      "groupId": "g.attack",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-009",
+      "nameKey": "disptpl.affix.savagery",
+      "name": "×{value} attack",
+      "runtimeFamily": "atom.savagery",
+      "plantOverrideKey": null,
+      "groupId": "g.attack",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-010",
+      "nameKey": "disptpl.affix.warding",
+      "name": "+{value} defense for the whole army",
+      "runtimeFamily": "atom.warding",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-011",
+      "nameKey": "disptpl.affix.resilience",
+      "name": "{value}% increased defense for the whole army",
+      "runtimeFamily": "atom.resilience",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-012",
+      "nameKey": "disptpl.affix.plating",
+      "name": "+{value} armor plating",
+      "runtimeFamily": "atom.plating",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-013",
+      "nameKey": "disptpl.affix.carapace",
+      "name": "+{value} carapace",
+      "runtimeFamily": "atom.carapace",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-014",
+      "nameKey": "disptpl.affix.arm-hardening",
+      "name": "{value}% more defense for the whole army",
+      "runtimeFamily": "atom.arm-hardening",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-015",
+      "nameKey": "disptpl.affix.arm-riveting",
+      "name": "{value}% increased armor plating",
+      "runtimeFamily": "atom.arm-riveting",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-016",
+      "nameKey": "disptpl.affix.arm-welding",
+      "name": "{value}% increased carapace",
+      "runtimeFamily": "atom.arm-welding",
+      "plantOverrideKey": null,
+      "groupId": "g.armour",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-017",
+      "nameKey": "disptpl.affix.quickening",
+      "name": "{value}ms faster between shots",
+      "runtimeFamily": "atom.quickening",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-018",
+      "nameKey": "disptpl.affix.flourishing",
+      "name": "{value}ms faster sun production",
+      "runtimeFamily": "atom.flourishing",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-019",
+      "nameKey": "disptpl.affix.swiftness",
+      "name": "{value} faster zombie advance",
+      "runtimeFamily": "atom.swiftness",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-020",
+      "nameKey": "disptpl.affix.tempo-haste",
+      "name": "{value}% faster attack rate",
+      "runtimeFamily": "atom.tempo-haste",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-021",
+      "nameKey": "disptpl.affix.tempo-yield",
+      "name": "{value}% faster sun production",
+      "runtimeFamily": "atom.tempo-yield",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-022",
+      "nameKey": "disptpl.affix.tempo-surge",
+      "name": "{value}% faster zombie advance",
+      "runtimeFamily": "atom.tempo-surge",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p1-023",
+      "nameKey": "disptpl.affix.tempo-stampede",
+      "name": "{value}% faster zombie advance",
+      "runtimeFamily": "atom.tempo-stampede",
+      "plantOverrideKey": null,
+      "groupId": "g.tempo",
+      "status": "live",
+      "tags": []
+    }
+  ]
+}

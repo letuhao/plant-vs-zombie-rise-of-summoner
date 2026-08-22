@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-retinue-humanoid-a",
+    "partition": "base-types/retinue/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-horn-a-001",
+      "nameKey": "base.slight-whistle",
+      "name": "Slight Whistle",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.summoner",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.shrill-whistle",
+      "flavorKey": "flavor.base.shrill-whistle",
+      "flavor": "One sharp note calls a friend to the board.",
+      "tags": [
+        "light",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-002",
+      "nameKey": "base.engraved-kazoo",
+      "name": "Engraved Kazoo",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.gardener",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.engraved-kazoo",
+      "flavorKey": "flavor.base.engraved-kazoo",
+      "flavor": "A humble toy that grows something where it was played.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-003",
+      "nameKey": "base.modest-rattle",
+      "name": "Modest Rattle",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.volley",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.modest-rattle",
+      "flavorKey": "flavor.base.modest-rattle",
+      "flavor": "When shaken, it calls down a scatter of reinforcements.",
+      "tags": [
+        "light",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-004",
+      "nameKey": "base.dinged-bell",
+      "name": "Dinged Bell",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cherry-bloom",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dinged-bell",
+      "flavorKey": "flavor.base.dinged-bell",
+      "flavor": "It has rung many times. The lawn remembers each one.",
+      "tags": [
+        "medium",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-005",
+      "nameKey": "base.plain-pager",
+      "name": "Plain Pager",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.flash-freeze",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.plain-pager",
+      "flavorKey": "flavor.base.plain-pager",
+      "flavor": "A signal device. The frozen ground is its message.",
+      "tags": [
+        "light",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-006",
+      "nameKey": "base.minute-chime",
+      "name": "Minute Chime",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.dooming",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.slight-chime",
+      "flavorKey": "flavor.base.slight-chime",
+      "flavor": "A delicate call that darkens the board.",
+      "tags": [
+        "light",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-007",
+      "nameKey": "base.twisted-horn",
+      "name": "Twisted Horn",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.firelining",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.twisted-horn",
+      "flavorKey": "flavor.base.twisted-horn",
+      "flavor": "A curved call that leaves embers where allies stand.",
+      "tags": [
+        "medium",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-008",
+      "nameKey": "base.understated-buzzer",
+      "name": "Understated Buzzer",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.gravemaking",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.understated-buzzer",
+      "flavorKey": "flavor.base.understated-buzzer",
+      "flavor": "Quiet and insistent. Graves open where it sounds.",
+      "tags": [
+        "light",
+        "necrotic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-009",
+      "nameKey": "base.bold-megaphone",
+      "name": "Bold Megaphone",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.gravedigging",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.bold-megaphone",
+      "flavorKey": "flavor.base.bold-megaphone",
+      "flavor": "When amplified, it opens paths beneath the ground.",
+      "tags": [
+        "medium",
+        "necrotic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-010",
+      "nameKey": "base.burnished-gong",
+      "name": "Burnished Gong",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.terraforming",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.burnished-gong",
+      "flavorKey": "flavor.base.burnished-gong",
+      "flavor": "A deep resonance reshapes the ground where it sounds.",
+      "tags": [
+        "medium",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-011",
+      "nameKey": "base.spiralled-intercom",
+      "name": "Spiralled Intercom",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.summoner",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.spiralled-intercom",
+      "flavorKey": "flavor.base.spiralled-intercom",
+      "flavor": "A two-way call. What answers is never quite what was sent.",
+      "tags": [
+        "medium",
+        "mechanical",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-horn-a-012",
+      "nameKey": "base.gleaming-rattle",
+      "name": "Gleaming Rattle",
+      "frame": "humanoid",
+      "role": "retinue",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.volley",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.gleaming-rattle",
+      "flavorKey": "flavor.base.gleaming-rattle",
+      "flavor": "Its bright surface catches eyes from across the field, drawing aid.",
+      "tags": [
+        "medium",
+        "utility"
+      ]
+    }
+  ]
+}

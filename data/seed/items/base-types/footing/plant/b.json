@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-roots-b",
+    "partition": "footing/plant/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-roots-b-001",
+      "nameKey": "base.dense-taproot",
+      "name": "Dense Taproot",
+      "frame": "plant",
+      "role": "footing",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.dense-taproot",
+      "flavorKey": "flavor.base.dense-taproot",
+      "flavor": "A shaft of ancient wood driven deep, tight-grained and immovable.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-002",
+      "nameKey": "base.ancient-holdfast",
+      "name": "Ancient Holdfast",
+      "frame": "plant",
+      "role": "footing",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.ancient-holdfast",
+      "flavorKey": "flavor.base.ancient-holdfast",
+      "flavor": "Fingers of wood that grip stone itself, hardened by centuries of holding on.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-003",
+      "nameKey": "base.obdurate-buttress",
+      "name": "Obdurate Buttress",
+      "frame": "plant",
+      "role": "footing",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.obdurate-buttress",
+      "flavorKey": "flavor.base.obdurate-buttress",
+      "flavor": "A buttressing root, stubborn as stone, reinforced by years of bearing weight.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-004",
+      "nameKey": "base.immemorial-pneumatophore",
+      "name": "Immemorial Pneumatophore",
+      "frame": "plant",
+      "role": "footing",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.immemorial-pneumatophore",
+      "flavorKey": "flavor.base.immemorial-pneumatophore",
+      "flavor": "An elder breathing root, woody and complex, as old as the marsh it has crossed.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-005",
+      "nameKey": "base.deepening-root",
+      "name": "Deepening Root",
+      "frame": "plant",
+      "role": "footing",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.deepening-root",
+      "flavorKey": "flavor.base.deepening-root",
+      "flavor": "A thick root that reaches further with each season, always descending.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-006",
+      "nameKey": "base.sunken-rhizome",
+      "name": "Sunken Rhizome",
+      "frame": "plant",
+      "role": "footing",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.sunken-rhizome",
+      "flavorKey": "flavor.base.sunken-rhizome",
+      "flavor": "A horizontal root buried deep, holding fast by staying low and hidden.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-007",
+      "nameKey": "base.abundant-tuber",
+      "name": "Abundant Tuber",
+      "frame": "plant",
+      "role": "footing",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.abundant-tuber",
+      "flavorKey": "flavor.base.abundant-tuber",
+      "flavor": "A swollen root-bulge, full and heavy with reserves that feed endurance.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-008",
+      "nameKey": "base.steadfast-prop",
+      "name": "Steadfast Prop",
+      "frame": "plant",
+      "role": "footing",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.steadfast-prop",
+      "flavorKey": "flavor.base.steadfast-prop",
+      "flavor": "A support root that stands firm, unwavering through every storm.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-009",
+      "nameKey": "base.entrenched-burrow",
+      "name": "Entrenched Burrow",
+      "frame": "plant",
+      "role": "footing",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.entrenched-burrow",
+      "flavorKey": "flavor.base.entrenched-burrow",
+      "flavor": "A root that tunnels deep and wide, carving sanctuary in the soil itself.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-010",
+      "nameKey": "base.gnarled-stolon",
+      "name": "Gnarled Stolon",
+      "frame": "plant",
+      "role": "footing",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.gnarled-stolon",
+      "flavorKey": "flavor.base.gnarled-stolon",
+      "flavor": "A hardened runner, twisted and thick, spreading across stone as if it owns it.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-011",
+      "nameKey": "base.inert-mycelium",
+      "name": "Inert Mycelium",
+      "frame": "plant",
+      "role": "footing",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.inert-mycelium",
+      "flavorKey": "flavor.base.inert-mycelium",
+      "flavor": "A vast fungal network, quiet and still, locked in the earth for ages.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-b-012",
+      "nameKey": "base.petrified-clutch",
+      "name": "Petrified Clutch",
+      "frame": "plant",
+      "role": "footing",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.petrified-clutch",
+      "flavorKey": "flavor.base.petrified-clutch",
+      "flavor": "Roots that grip like stone, fossilized by time into an anchor that will not yield.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    }
+  ]
+}

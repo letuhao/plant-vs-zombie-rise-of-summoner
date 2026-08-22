@@ -550,6 +550,10 @@ public sealed partial class RpgStore : IRpgDb
         EnsureContainerSchemaUnlocked(db);
         // effect_instance / effect_instance_atom / effect_binding (spec-instance-and-binding.md, E6).
         EnsureAtomInstanceSchemaUnlocked(db);
+        // effect_element + both matchup matrices (spec-element-roster-data.md, E18).
+        EnsureElementSchemaUnlocked(db);
+        // power_coefficient + power_trigger_frequency + the sweep's proposal table (E9).
+        EnsurePowerSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.fx-spawn-zombie-ondeath",
+      "tier": 1,
+      "kind": "spawn.entity",
+      "name": "Spawn zombie on death",
+      "icdKey": "fx.spawn_zombie_ondeath",
+      "params": {
+        "kind": "zombie",
+        "typeId": 0,
+        "hp": 100,
+        "maxHp": 100
+      },
+      "when": {
+        "trigger": "OnDeath"
+      }
+    },
+    {
+      "family": "atom.fx-spawn-plant-bullet",
+      "tier": 1,
+      "kind": "spawn.entity",
+      "name": "Spawn plant + bullet",
+      "icdKey": "fx.spawn_plant_bullet",
+      "params": {
+        "kind": "plant",
+        "typeId": 0,
+        "row": 2,
+        "col": 3
+      },
+      "variant": "a",
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-spawn-plant-bullet",
+      "tier": 1,
+      "kind": "spawn.entity",
+      "name": "Spawn plant + bullet",
+      "icdKey": "fx.spawn_plant_bullet",
+      "params": {
+        "kind": "bullet",
+        "typeId": 0,
+        "row": 2,
+        "x": 400
+      },
+      "variant": "b",
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-board-cherry",
+      "tier": 1,
+      "kind": "board.action",
+      "name": "Board cherry bomb",
+      "icdKey": "fx.board_cherry",
+      "params": {
+        "op": "cherry",
+        "row": 2,
+        "col": 4
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-grid-item-cycle",
+      "tier": 1,
+      "kind": "grid.spawn",
+      "name": "Spawn + clear grid item",
+      "icdKey": "fx.grid_item_cycle",
+      "params": {
+        "gridItemType": 7,
+        "row": 2,
+        "col": 3
+      },
+      "variant": "a",
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-grid-item-cycle",
+      "tier": 1,
+      "kind": "grid.clear",
+      "name": "Spawn + clear grid item",
+      "icdKey": "fx.grid_item_cycle",
+      "params": {
+        "selector": "last",
+        "gridItemType": 7
+      },
+      "variant": "b",
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-set-dirt-box",
+      "tier": 1,
+      "kind": "box.set",
+      "name": "Set dirt box",
+      "icdKey": "fx.set_dirt_box",
+      "params": {
+        "boxType": 1,
+        "row": 2,
+        "col": 3
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    }
+  ]
+}

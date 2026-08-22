@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-graft-1-a",
+    "partition": "base-types/jewel-minor-a/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2"
+  },
+  "entries": [
+    {
+      "id": "item.plant-graft-1-a-001",
+      "nameKey": "base.dusted-eye",
+      "name": "Dusted Eye",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "iconKey": "icon.base.dusted-eye",
+      "flavorKey": "flavor.base.dusted-eye",
+      "flavor": "A spore's golden gleam, caught as it falls — ephemeral as the wealth it carries.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-002",
+      "nameKey": "base.released-cutting",
+      "name": "Released Cutting",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "iconKey": "icon.base.released-cutting",
+      "flavorKey": "flavor.base.released-cutting",
+      "flavor": "A severed branch released to air and chance, still bearing the strength of its mother.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-003",
+      "nameKey": "base.alighting-gemma",
+      "name": "Alighting Gemma",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "iconKey": "icon.base.alighting-gemma",
+      "flavorKey": "flavor.base.alighting-gemma",
+      "flavor": "A gemma that lands and takes root, drawing vigor from what it touches.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-004",
+      "nameKey": "base.ephemeral-inlay",
+      "name": "Ephemeral Inlay",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "iconKey": "icon.base.ephemeral-inlay",
+      "flavorKey": "flavor.base.ephemeral-inlay",
+      "flavor": "Inlaid only for a moment, a brief augmentation that fades like morning mist.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-005",
+      "nameKey": "base.stored-node",
+      "name": "Stored Node",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "iconKey": "icon.base.stored-node",
+      "flavorKey": "flavor.base.stored-node",
+      "flavor": "A junction point where vigor gathers and waits, ready to pulse through the plant's tissues.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-006",
+      "nameKey": "base.latent-splice",
+      "name": "Latent Splice",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "iconKey": "icon.base.latent-splice",
+      "flavorKey": "flavor.base.latent-splice",
+      "flavor": "Two tissues joined and dormant, their strength unreleased until the moment demands it.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-007",
+      "nameKey": "base.nourished-bridge",
+      "name": "Nourished Bridge",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "iconKey": "icon.base.nourished-bridge",
+      "flavorKey": "flavor.base.nourished-bridge",
+      "flavor": "A connective tissue kept abundant with care, channelling life between disparate parts.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-008",
+      "nameKey": "base.potent-callus",
+      "name": "Potent Callus",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "iconKey": "icon.base.potent-callus",
+      "flavorKey": "flavor.base.potent-callus",
+      "flavor": "The healed scar tissue where two plants knit — a seat of quiet abundance.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-009",
+      "nameKey": "base.cohered-union",
+      "name": "Cohered Union",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "medium"
+      },
+      "iconKey": "icon.base.cohered-union",
+      "flavorKey": "flavor.base.cohered-union",
+      "flavor": "Two species bonded into one — the older strength of fusion, the graft taken and held.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-010",
+      "nameKey": "base.permanent-ligature",
+      "name": "Permanent Ligature",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "iconKey": "icon.base.permanent-ligature",
+      "flavorKey": "flavor.base.permanent-ligature",
+      "flavor": "The binding that holds forever — sinew and fibre twisted into an unbreakable knot.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-011",
+      "nameKey": "base.ingrown-wedge",
+      "name": "Ingrown Wedge",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "high"
+      },
+      "iconKey": "icon.base.ingrown-wedge",
+      "flavorKey": "flavor.base.ingrown-wedge",
+      "flavor": "A wedge driven deep and sealed by years of growth — immovable, structural, indispensable.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-1-a-012",
+      "nameKey": "base.taken-rootstock",
+      "name": "Taken Rootstock",
+      "frame": "plant",
+      "role": "jewel-minor-a",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "iconKey": "icon.base.taken-rootstock",
+      "flavorKey": "flavor.base.taken-rootstock",
+      "flavor": "The base stock that took the graft — wild power domesticated through careful joining.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    }
+  ]
+}

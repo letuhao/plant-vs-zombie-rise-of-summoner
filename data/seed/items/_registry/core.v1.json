@@ -1,0 +1,577 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "frozen": true,
+  "_meta": {
+    "kind": "core-registry",
+    "purpose": "The three registries every item-partition author validates against: the rarity ladder, the equip roles/frames, and the top-level item category taxonomy. Consumed by ~125 parallel authoring agents.",
+    "immutability": "FROZEN v1 once an owner flips `frozen` to true and authoring begins against it. A rung, role, or category id and its ordinal/position are never renumbered or reused after that point. Any later change is v2, minted only after an explicit owner re-run decision — never an in-place edit of this file.",
+    "appendOnlyRule": "Ordinals (rarity) and list positions (roles, categories) are append-only. A new rung/role/category is added at a free ordinal or at the end of its list; an existing one is never renumbered, and a retired one is marked disabled in its own downstream table, never deleted from here.",
+    "idGrammarNote": "All ids in this file are lowercase-kebab. Downstream authors: `container_id` (seed-contract.md §4) allows NO DOT in its body — separate segments with hyphens, never dots.",
+    "sourceRefs": [
+      "docs/architecture/item/seed-contract.md",
+      "docs/architecture/item/enrichment-contract.md#1",
+      "docs/architecture/item/ssot-rarity.md#3.3",
+      "docs/architecture/item/ssot-equip-slots.md#2.3",
+      "docs/architecture/item/ssot-item-categories.md#5.1"
+    ],
+    "authoredUtc": "2026-08-22T00:00:00Z"
+  },
+  "rarity": {
+    "appendOnly": "rarity_id values and their ordinal are append-only. Ordinals are pre-spaced by 10 precisely so a future rung can be inserted (e.g. at 15 or 85) without renumbering any existing rung.",
+    "axisNote": "Rarity controls count band and tier window only. It never touches a magnitude — that is item level's job, and item-ideal's own boundary (ssot-rarity.md §3.2, §3.6).",
+    "ladder": [
+      {
+        "ordinal": 10,
+        "id": "chaff",
+        "nameKey": "rarity.chaff",
+        "name": "Chaff",
+        "flavor": "husks, clippings, a dented bucket. Salvage fodder.",
+        "colourToken": "#63645d",
+        "pips": 1,
+        "countBand": {
+          "min": 0,
+          "max": 0
+        },
+        "tierWindow": null,
+        "note": "the only rung with no pool — base type plus implicit only."
+      },
+      {
+        "ordinal": 20,
+        "id": "sprout",
+        "nameKey": "rarity.sprout",
+        "name": "Sprout",
+        "flavor": "it works. That is all it does.",
+        "colourToken": "#697a5c",
+        "pips": 2,
+        "countBand": {
+          "min": 1,
+          "max": 2
+        },
+        "tierWindow": {
+          "min": 1,
+          "max": 1
+        }
+      },
+      {
+        "ordinal": 30,
+        "id": "grafted",
+        "nameKey": "rarity.grafted",
+        "name": "Grafted",
+        "flavor": "one graft took and held.",
+        "colourToken": "#509639",
+        "pips": 3,
+        "countBand": {
+          "min": 1,
+          "max": 2
+        },
+        "tierWindow": {
+          "min": 1,
+          "max": 3
+        }
+      },
+      {
+        "ordinal": 40,
+        "id": "cultivated",
+        "nameKey": "rarity.cultivated",
+        "name": "Cultivated",
+        "flavor": "grown on purpose, to a plan.",
+        "colourToken": "#37a39c",
+        "pips": 4,
+        "countBand": {
+          "min": 2,
+          "max": 3
+        },
+        "tierWindow": {
+          "min": 1,
+          "max": 3
+        }
+      },
+      {
+        "ordinal": 50,
+        "id": "fused",
+        "nameKey": "rarity.fused",
+        "name": "Fused",
+        "flavor": "two natures in one object — the game's own word.",
+        "colourToken": "#63a4ed",
+        "pips": 5,
+        "countBand": {
+          "min": 2,
+          "max": 3
+        },
+        "tierWindow": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      {
+        "ordinal": 60,
+        "id": "chimeric",
+        "nameKey": "rarity.chimeric",
+        "name": "Chimeric",
+        "flavor": "the fusion went further than intended.",
+        "colourToken": "#c994ff",
+        "pips": 6,
+        "countBand": {
+          "min": 3,
+          "max": 4
+        },
+        "tierWindow": {
+          "min": 2,
+          "max": 4
+        }
+      },
+      {
+        "ordinal": 70,
+        "id": "heirloom",
+        "nameKey": "rarity.heirloom",
+        "name": "Heirloom",
+        "flavor": "a line kept alive longer than its keepers.",
+        "colourToken": "#ff94d2",
+        "pips": 7,
+        "countBand": {
+          "min": 3,
+          "max": 4
+        },
+        "tierWindow": {
+          "min": 3,
+          "max": 5
+        },
+        "note": "pity-guarded rung (bad-luck protection may key on this ordinal)."
+      },
+      {
+        "ordinal": 80,
+        "id": "firstseed",
+        "nameKey": "rarity.firstseed",
+        "name": "Firstseed",
+        "flavor": "from before the lawn.",
+        "colourToken": "#ffab7a",
+        "pips": 8,
+        "countBand": {
+          "min": 4,
+          "max": 5
+        },
+        "tierWindow": {
+          "min": 3,
+          "max": 5
+        },
+        "note": "promotion ceiling — this is the highest rung an item may be promoted into."
+      },
+      {
+        "ordinal": 90,
+        "id": "sunwoven",
+        "nameKey": "rarity.sunwoven",
+        "name": "Sunwoven",
+        "flavor": "made of sun, not of matter.",
+        "colourToken": "#f9d464",
+        "pips": 9,
+        "countBand": {
+          "min": 4,
+          "max": 5
+        },
+        "tierWindow": {
+          "min": 4,
+          "max": 5
+        },
+        "note": "pity-guarded rung; drop-only, never reached by promotion."
+      },
+      {
+        "ordinal": 100,
+        "id": "almanac",
+        "nameKey": "rarity.almanac",
+        "name": "Almanac",
+        "flavor": "it has a page. Everyone knows its name.",
+        "colourToken": "#f3eaa0",
+        "pips": 10,
+        "countBand": {
+          "min": 5,
+          "max": 6
+        },
+        "tierWindow": {
+          "min": 4,
+          "max": 5
+        },
+        "note": "top rung; deliberately unguarded by pity, but must have at least one deterministic (quest/boss) source."
+      }
+    ]
+  },
+  "roles": {
+    "appendOnly": "roleId values and their list position are append-only.",
+    "frames": [
+      {
+        "id": "humanoid",
+        "meaning": "a human-like body. Carries the full 15 roles. Frame is not faction (a humanoid body can be plant- or zombie-side)."
+      },
+      {
+        "id": "plant",
+        "meaning": "a plant-like body — rooted, handless. Carries the full 15 roles under a parallel, botanically-grounded vocabulary. Frame is not faction."
+      },
+      {
+        "id": "hybrid",
+        "meaning": "a chimera body combining both natures. Carries 13 of the 15 roles (drops ward-array and jewel-minor-b); each remaining role accepts a base type from either pure frame's ladder. The commander never wears this frame — it takes humanoid or plant only."
+      }
+    ],
+    "list": [
+      {
+        "roleId": "armament-primary",
+        "humanoidName": "main-hand",
+        "plantName": "muzzle",
+        "hybridEligible": true,
+        "budgetWeightMilli": 160
+      },
+      {
+        "roleId": "core-guard",
+        "humanoidName": "torso",
+        "plantName": "stem",
+        "hybridEligible": true,
+        "budgetWeightMilli": 120
+      },
+      {
+        "roleId": "ward-array",
+        "humanoidName": "shoulders",
+        "plantName": "sheath",
+        "hybridEligible": false,
+        "hybridDropReason": "a chimera body has no single coherent outer layer to shed as a sheath; its shield families migrate to core-guard at a reduced tier cap instead.",
+        "budgetWeightMilli": 90
+      },
+      {
+        "roleId": "armament-secondary",
+        "humanoidName": "off-hand",
+        "plantName": "thorn",
+        "hybridEligible": true,
+        "budgetWeightMilli": 80
+      },
+      {
+        "roleId": "jewel-major",
+        "humanoidName": "neck",
+        "plantName": "pollen",
+        "hybridEligible": true,
+        "budgetWeightMilli": 80
+      },
+      {
+        "roleId": "manipulator",
+        "humanoidName": "hands",
+        "plantName": "leaves",
+        "hybridEligible": true,
+        "budgetWeightMilli": 70
+      },
+      {
+        "roleId": "mantle",
+        "humanoidName": "back",
+        "plantName": "canopy",
+        "hybridEligible": true,
+        "budgetWeightMilli": 60
+      },
+      {
+        "roleId": "head-guard",
+        "humanoidName": "head",
+        "plantName": "crown",
+        "hybridEligible": true,
+        "budgetWeightMilli": 60
+      },
+      {
+        "roleId": "girdle",
+        "humanoidName": "waist",
+        "plantName": "soil",
+        "hybridEligible": true,
+        "budgetWeightMilli": 60
+      },
+      {
+        "roleId": "sense",
+        "humanoidName": "face",
+        "plantName": "bract",
+        "hybridEligible": true,
+        "budgetWeightMilli": 50
+      },
+      {
+        "roleId": "footing",
+        "humanoidName": "feet",
+        "plantName": "roots",
+        "hybridEligible": true,
+        "budgetWeightMilli": 50
+      },
+      {
+        "roleId": "infusion",
+        "humanoidName": "bandolier",
+        "plantName": "glands",
+        "hybridEligible": true,
+        "budgetWeightMilli": 50
+      },
+      {
+        "roleId": "retinue",
+        "humanoidName": "horn",
+        "plantName": "runner",
+        "hybridEligible": true,
+        "budgetWeightMilli": 40
+      },
+      {
+        "roleId": "jewel-minor-a",
+        "humanoidName": "ring-1",
+        "plantName": "graft-1",
+        "hybridEligible": true,
+        "budgetWeightMilli": 15
+      },
+      {
+        "roleId": "jewel-minor-b",
+        "humanoidName": "ring-2",
+        "plantName": "graft-2",
+        "hybridEligible": false,
+        "hybridDropReason": "a second graft onto a body that is already two natures does not take.",
+        "budgetWeightMilli": 15
+      }
+    ],
+    "budgetWeightMilliTotal": 1000,
+    "commanderOnly": [
+      {
+        "roleId": "standard",
+        "humanoidName": "banner",
+        "plantName": "root-totem",
+        "note": "one slot, not several. Binds at match owner-scope so its atoms reach the whole squad. Priced from a separate 100‰ commander budget, never drawn from the body's 1000‰."
+      }
+    ]
+  },
+  "categories": {
+    "appendOnly": "category ids and their list position are append-only.",
+    "list": [
+      {
+        "id": "equipment",
+        "rollsValues": true,
+        "stacks": false,
+        "stackIntent": "never",
+        "bindsTo": "player, with the instance binding to an actor at equip",
+        "store": "instance",
+        "authorNowV1": true
+      },
+      {
+        "id": "material",
+        "rollsValues": false,
+        "stacks": true,
+        "stackIntent": "by quantity",
+        "bindsTo": "player",
+        "store": "stack",
+        "authorNowV1": true
+      },
+      {
+        "id": "consumable",
+        "rollsValues": false,
+        "stacks": true,
+        "stackIntent": "by quantity, with charges",
+        "bindsTo": "player, with its effect targeting an actor at use",
+        "store": "stack",
+        "authorNowV1": true,
+        "authorNowNote": "Authored at Diablo-2 scale (owner decision 2026-08-22). The consumable lane ships a degenerate use path — spent at a menu before a run, effect lasts the run — with the effect authored as real atoms from day one, so the action layer absorbs it later without a migration. Fleet plan stage 1b carries 3 consumable partitions."
+      },
+      {
+        "id": "quest",
+        "rollsValues": false,
+        "stacks": true,
+        "stackIntent": "by quantity, usually capped at 1",
+        "bindsTo": "player",
+        "store": "stack",
+        "authorNowV1": true
+      },
+      {
+        "id": "currency",
+        "rollsValues": false,
+        "stacks": false,
+        "stackIntent": "ledger, never a bag row",
+        "bindsTo": "player",
+        "store": "ledger",
+        "authorNowV1": true
+      },
+      {
+        "id": "insert",
+        "rollsValues": "maybe",
+        "rollsValuesOwner": "I4",
+        "stacks": true,
+        "stackIntent": "by quantity until socketed",
+        "bindsTo": "player, binding into an item rather than an actor",
+        "store": "stack, becoming instance if rolled",
+        "authorNowV1": true,
+        "authorNowNote": "Authored at Diablo-2 scale (owner decision 2026-08-22), overruling the content-budget recommendation to ship sockets at zero. Fleet plan stage 1a carries 3 gem partitions and stage 1b one socket-word partition."
+      },
+      {
+        "id": "charm",
+        "rollsValues": "maybe",
+        "rollsValuesOwner": "I10",
+        "stacks": false,
+        "stackIntent": "never if rolled",
+        "bindsTo": "player, with the bonus binding at player-scope",
+        "store": "instance if rolled, stack if not",
+        "authorNowV1": true,
+        "authorNowNote": "Authored at Diablo-2 scale (owner decision 2026-08-22), overruling the content-budget recommendation to ship charms at zero. Fleet plan stage 1b carries 3 charm partitions. Note the charm lane's own finding: no runtime today both binds a charm correctly and executes it, so charm rows are content-complete and consumer-pending."
+      },
+      {
+        "id": "cosmetic",
+        "rollsValues": false,
+        "stacks": false,
+        "stackIntent": "never (an unlock row)",
+        "bindsTo": "player",
+        "store": "stack",
+        "authorNowV1": false,
+        "authorNowNote": "declare only — no consumer planned."
+      },
+      {
+        "id": "blueprint",
+        "rollsValues": false,
+        "stacks": false,
+        "stackIntent": "never (quantity 1 = known)",
+        "bindsTo": "player",
+        "store": "stack",
+        "authorNowV1": false,
+        "authorNowNote": "declare only — consumer unbuilt."
+      },
+      {
+        "id": "cache",
+        "rollsValues": false,
+        "stacks": true,
+        "stackIntent": "by quantity",
+        "bindsTo": "player",
+        "store": "stack",
+        "authorNowV1": false,
+        "authorNowNote": "declare only — consumer unbuilt."
+      }
+    ]
+  },
+  "elements": {
+    "_note": "Added wave 0b: element is a VALIDATED field in seed-contract 2.1 but no item registry owned the vocabulary, so the validator was deriving it from themes elementAffinity. Sourced from ElementRoster / element-hub-ssot.md. Six concrete elements plus omni. Ordinals are load-bearing in the shipped code — append-only, never reorder.",
+    "concrete": [
+      {
+        "id": "fire",
+        "ordinal": 1
+      },
+      {
+        "id": "ice",
+        "ordinal": 2
+      },
+      {
+        "id": "air",
+        "ordinal": 3
+      },
+      {
+        "id": "earth",
+        "ordinal": 4
+      },
+      {
+        "id": "light",
+        "ordinal": 5
+      },
+      {
+        "id": "dark",
+        "ordinal": 6
+      }
+    ],
+    "omni": {
+      "id": "omni",
+      "ordinal": 0,
+      "note": "Additive-only. Not part of the matchup ring; it is the untyped slot every generated element family also emits."
+    },
+    "variantSlotCount": 7,
+    "matchupNote": "The ring plus a light/dark mutual counter. Two matrices exist and are asymmetric — the shield matrix is not the combat ring. Item content names an element; it never encodes a matchup."
+  },
+  "powerCategories": {
+    "_note": "The five power-vector categories. Added wave 0c: entry-shapes.md found that charm axes and socket resonances key on this vocabulary and no registry owned it. Distinct from tags.v1.json combat-posture, which is a coarse three-value tagging axis for filters and vendor stock, not the power vector.",
+    "appendOnly": true,
+    "list": [
+      {
+        "id": "offense",
+        "nameKey": "power.offense"
+      },
+      {
+        "id": "survivability",
+        "nameKey": "power.survivability"
+      },
+      {
+        "id": "control",
+        "nameKey": "power.control"
+      },
+      {
+        "id": "utility",
+        "nameKey": "power.utility"
+      },
+      {
+        "id": "economy",
+        "nameKey": "power.economy"
+      }
+    ],
+    "consumers": [
+      "charm axis assignment (ssot-charms.md)",
+      "socket resonance axes (ssot-sockets.md)",
+      "the power vector itself, when E9 ships"
+    ]
+  },
+  "counterPressure": {
+    "_note": "Added wave 0c. ssot-uniques.md requires every unique to carry a drawback, a condition, or deliberate narrowness, and the validator rejects one that does not. But only \"narrow\" was expressible without a number: \"drawback\" wanted a negative magnitude and \"conditional\" wanted a threshold, both banned by seed-contract §3. These closed vocabularies make all three authorable numberlessly.",
+    "kinds": [
+      {
+        "id": "narrow",
+        "meaning": "the item is strong in a deliberately small slice of situations. Needs no further field."
+      },
+      {
+        "id": "drawback",
+        "meaning": "the item is worse at something. Requires severityBand and a channel or family reference."
+      },
+      {
+        "id": "conditional",
+        "meaning": "the item is only strong while a named condition holds. Requires condition."
+      }
+    ],
+    "severityBands": [
+      {
+        "id": "slight"
+      },
+      {
+        "id": "moderate"
+      },
+      {
+        "id": "severe"
+      }
+    ],
+    "conditions": {
+      "_note": "Closed list. A condition an author needs that is absent is a BLOCKED report, never an invented string. Each maps to a predicate-tree leaf the atom layer already ships, so none of these is a promise the runtime cannot keep.",
+      "list": [
+        {
+          "id": "below-half-health",
+          "leaf": "hpBelowMilli"
+        },
+        {
+          "id": "above-half-health",
+          "leaf": "hpAboveMilli"
+        },
+        {
+          "id": "target-is-zombie",
+          "leaf": "sideIs"
+        },
+        {
+          "id": "target-is-plant",
+          "leaf": "sideIs"
+        },
+        {
+          "id": "target-afflicted",
+          "leaf": "hasStatus"
+        },
+        {
+          "id": "target-shares-element",
+          "leaf": "elementIs"
+        },
+        {
+          "id": "actor-is-killer",
+          "leaf": "actorIsKiller"
+        },
+        {
+          "id": "front-row",
+          "leaf": "rowIs"
+        },
+        {
+          "id": "target-mind-controlled",
+          "leaf": "isMindControlled"
+        }
+      ]
+    }
+  },
+  "frozenUtc": "2026-08-22",
+  "frozenNote": "FROZEN v1. Consumed by the wave-1 authoring fleet. No in-place edit from here: a required change is registryVersion 2 plus an explicit decision on which partitions re-run. A silently edited registry splits the corpus into pre-edit and post-edit semantics that nothing downstream can tell apart.",
+  "minCompatibleVersion": 1,
+  "minCompatibleNote": "v1 is current; no breaking change yet.",
+  "stage1aFrozen": "Stage 1a authored and validated at 0 errors (205 entries, 25 files). From here a change to this registry invalidates authored content unless minCompatibleVersion says otherwise."
+}

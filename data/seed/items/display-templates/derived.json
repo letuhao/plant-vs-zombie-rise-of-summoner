@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 1,
+  "kind": "display-template",
+  "_meta": {
+    "partition": "display-templates/2",
+    "batch": "disptpl-g-derived-channels",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-presentation.md §3.2 (units distinction: flat game units vs sigmoid resolver points)"
+  },
+  "entries": [
+    {
+      "id": "disptpl.p2-001",
+      "nameKey": "disptpl.affix.elpw-pierce",
+      "name": "+{value} {element} penetration",
+      "runtimeFamily": "atom.elpw-pierce",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-002",
+      "nameKey": "disptpl.affix.elpw-focus",
+      "name": "{value} increased {element} penetration",
+      "runtimeFamily": "atom.elpw-focus",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-003",
+      "nameKey": "disptpl.affix.elpw-override",
+      "name": "{element} power becomes {value}, overriding weaker sources",
+      "runtimeFamily": "atom.elpw-override",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-004",
+      "nameKey": "disptpl.affix.elpw-attune",
+      "name": "attunes {element} power, enabling it to take effect",
+      "runtimeFamily": "atom.elpw-attune",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-005",
+      "nameKey": "disptpl.affix.elpw-overflow",
+      "name": "+{value} bonus {element} power",
+      "runtimeFamily": "atom.elpw-overflow",
+      "groupId": "g.elem-power",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-006",
+      "nameKey": "disptpl.affix.elemental-defense",
+      "name": "+{value} {element} resistance",
+      "runtimeFamily": "atom.elemental-defense",
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-007",
+      "nameKey": "disptpl.affix.stoicism",
+      "name": "+{value} {element} critical hit resistance",
+      "runtimeFamily": "atom.stoicism",
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-008",
+      "nameKey": "disptpl.affix.padding",
+      "name": "{value} reduced {element} critical damage taken",
+      "runtimeFamily": "atom.padding",
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-009",
+      "nameKey": "disptpl.affix.stalwart",
+      "name": "+{value} status potency",
+      "runtimeFamily": "atom.stalwart",
+      "groupId": "g.ward",
+      "status": "pending",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-010",
+      "nameKey": "disptpl.affix.immunity",
+      "name": "{value} chance to shrug off a status affliction outright",
+      "runtimeFamily": "atom.immunity",
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-011",
+      "nameKey": "disptpl.affix.ward-harden",
+      "name": "{value} increased {element} resistance",
+      "runtimeFamily": "atom.ward-harden",
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-012",
+      "nameKey": "disptpl.affix.ward-brace",
+      "name": "cannot be critically struck by {element} damage",
+      "runtimeFamily": "atom.ward-brace",
+      "groupId": "g.ward",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-013",
+      "nameKey": "disptpl.affix.precision",
+      "name": "+{value} {element} accuracy",
+      "runtimeFamily": "atom.precision",
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-014",
+      "nameKey": "disptpl.affix.keen-edge",
+      "name": "+{value} {element} critical rate",
+      "runtimeFamily": "atom.keen-edge",
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-015",
+      "nameKey": "disptpl.affix.cruelty",
+      "name": "+{value} {element} critical damage",
+      "runtimeFamily": "atom.cruelty",
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-016",
+      "nameKey": "disptpl.affix.prec-fixation",
+      "name": "sets {element} accuracy to {value}, ignoring other modifiers",
+      "runtimeFamily": "atom.prec-fixation",
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-017",
+      "nameKey": "disptpl.affix.prec-verdict",
+      "name": "sets {element} critical rate to {value}, ignoring other modifiers",
+      "runtimeFamily": "atom.prec-verdict",
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-018",
+      "nameKey": "disptpl.affix.prec-reckoning",
+      "name": "sets {element} critical damage to {value}, ignoring other modifiers",
+      "runtimeFamily": "atom.prec-reckoning",
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-019",
+      "nameKey": "disptpl.affix.prec-truesight",
+      "name": "never misses with {element} strikes",
+      "runtimeFamily": "atom.prec-truesight",
+      "groupId": "g.precision",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-020",
+      "nameKey": "disptpl.affix.evasion",
+      "name": "{value} dodge against {element} attacks",
+      "plantOverrideKey": "tpl.affix.evasion.plant",
+      "plantOverrideName": "{value} chance to sway aside from {element} attacks",
+      "runtimeFamily": "atom.evasion",
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-021",
+      "nameKey": "disptpl.affix.evd-flinch",
+      "name": "{value} increased dodge against {element} attacks",
+      "runtimeFamily": "atom.evd-flinch",
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-022",
+      "nameKey": "disptpl.affix.evd-brace",
+      "name": "dodge against {element} attacks never falls below {value}",
+      "runtimeFamily": "atom.evd-brace",
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-023",
+      "nameKey": "disptpl.affix.evd-harden",
+      "name": "{value} increased resistance to {element} critical hits",
+      "runtimeFamily": "atom.evd-harden",
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-024",
+      "nameKey": "disptpl.affix.evd-scar",
+      "name": "resistance to {element} critical hits never falls below {value}",
+      "runtimeFamily": "atom.evd-scar",
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-025",
+      "nameKey": "disptpl.affix.evd-seal",
+      "name": "{value} increased reduction of bonus damage from {element} critical hits",
+      "runtimeFamily": "atom.evd-seal",
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-026",
+      "nameKey": "disptpl.affix.evd-husk",
+      "name": "resistance to bonus damage from {element} critical hits never falls below {value}",
+      "runtimeFamily": "atom.evd-husk",
+      "groupId": "g.evade",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-027",
+      "nameKey": "disptpl.affix.shield-capacity",
+      "name": "+{value} {element} shield capacity",
+      "runtimeFamily": "atom.shield-capacity",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-028",
+      "nameKey": "disptpl.affix.shld-surge",
+      "name": "{value} increased {element} shield capacity",
+      "runtimeFamily": "atom.shld-surge",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-029",
+      "nameKey": "disptpl.affix.shield-pen",
+      "name": "hits deal +{value} damage to {element} shields",
+      "runtimeFamily": "atom.shield-pen",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-030",
+      "nameKey": "disptpl.affix.shld-breach",
+      "name": "{value} increased damage dealt to {element} shields",
+      "runtimeFamily": "atom.shld-breach",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-031",
+      "nameKey": "disptpl.affix.shield-regen",
+      "name": "+{value} {element} shield regeneration per second",
+      "runtimeFamily": "atom.shield-regen",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-032",
+      "nameKey": "disptpl.affix.shld-cycle",
+      "name": "{value} increased {element} shield regeneration",
+      "runtimeFamily": "atom.shld-cycle",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p2-033",
+      "nameKey": "disptpl.affix.shield-toughness",
+      "name": "{element} shields take {value} less damage per hit",
+      "runtimeFamily": "atom.shield-toughness",
+      "groupId": "g.shield-stat",
+      "status": "live",
+      "tags": []
+    }
+  ]
+}

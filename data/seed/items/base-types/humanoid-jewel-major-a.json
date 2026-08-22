@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-neck-a",
+    "partition": "base-types/jewel-major/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.4"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-neck-a-001",
+      "nameKey": "base.notarised-lanyard",
+      "name": "Notarised Lanyard",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.notarised-lanyard",
+      "flavorKey": "flavor.base.notarised-lanyard",
+      "flavor": "A strap and a tag, each stamp a promise. The bureaucracy of survival.",
+      "tags": ["light", "metal", "defensive"]
+    },
+    {
+      "id": "item.humanoid-neck-a-002",
+      "nameKey": "base.signed-dogtag",
+      "name": "Signed Dogtag",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.signed-dogtag",
+      "flavorKey": "flavor.base.signed-dogtag",
+      "flavor": "A name written in someone else's hand. Proof you belonged to something once.",
+      "tags": ["light", "metal", "defensive"]
+    },
+    {
+      "id": "item.humanoid-neck-a-003",
+      "nameKey": "base.certified-brooch",
+      "name": "Certified Brooch",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.certified-brooch",
+      "flavorKey": "flavor.base.certified-brooch",
+      "flavor": "Stamped and sealed. Whoever wore this was trusted to do something specific.",
+      "tags": ["light", "metal", "offensive"]
+    },
+    {
+      "id": "item.humanoid-neck-a-004",
+      "nameKey": "base.official-locket",
+      "name": "Official Locket",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.official-locket",
+      "flavorKey": "flavor.base.official-locket",
+      "flavor": "It opens and closes. The hinges remember something you need to keep safe.",
+      "tags": ["light", "metal", "utility"]
+    },
+    {
+      "id": "item.humanoid-neck-a-005",
+      "nameKey": "base.engraved-pendant",
+      "name": "Engraved Pendant",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.engraved-pendant",
+      "flavorKey": "flavor.base.engraved-pendant",
+      "flavor": "Marks cut into metal, each line deliberate. What did you want the world to know?",
+      "tags": ["light", "metal", "offensive"]
+    },
+    {
+      "id": "item.humanoid-neck-a-006",
+      "nameKey": "base.plain-choker",
+      "name": "Plain Choker",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.plain-choker",
+      "flavorKey": "flavor.base.plain-choker",
+      "flavor": "Pulled tight and tied. No ornament. No pretense. Just grip.",
+      "tags": ["light", "organic", "defensive", "fragile"]
+    },
+    {
+      "id": "item.humanoid-neck-a-007",
+      "nameKey": "base.modest-scarf",
+      "name": "Modest Scarf",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.modest-scarf",
+      "flavorKey": "flavor.base.modest-scarf",
+      "flavor": "Fabric wrapped without fuss. It keeps the cold and the questions off your neck.",
+      "tags": ["medium-light", "organic", "utility"]
+    },
+    {
+      "id": "item.humanoid-neck-a-008",
+      "nameKey": "base.punched-muffler",
+      "name": "Punched Muffler",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.punched-muffler",
+      "flavorKey": "flavor.base.punched-muffler",
+      "flavor": "Holes in the fabric, each one a blow it has already taken. Ready for another.",
+      "tags": ["medium-light", "organic", "defensive"]
+    },
+    {
+      "id": "item.humanoid-neck-a-009",
+      "nameKey": "base.impressed-necklace",
+      "name": "Impressed Necklace",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.impressed-necklace",
+      "flavorKey": "flavor.base.impressed-necklace",
+      "flavor": "Something pressed its form into the metal and never let go. The mark stays.",
+      "tags": ["medium-light", "metal", "offensive"]
+    },
+    {
+      "id": "item.humanoid-neck-a-010",
+      "nameKey": "base.unassuming-clasp",
+      "name": "Unassuming Clasp",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.unassuming-clasp",
+      "flavorKey": "flavor.base.unassuming-clasp",
+      "flavor": "Small enough to miss, strong enough to hold. A fastener with no purpose but to endure.",
+      "tags": ["light", "metal", "utility"]
+    },
+    {
+      "id": "item.humanoid-neck-a-011",
+      "nameKey": "base.filed-collar",
+      "name": "Filed Collar",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.filed-collar",
+      "flavorKey": "flavor.base.filed-collar",
+      "flavor": "Edges worn smooth by work, then sharpened again. Something is always being prepared.",
+      "tags": ["medium-light", "metal", "offensive"]
+    },
+    {
+      "id": "item.humanoid-neck-a-012",
+      "nameKey": "base.unadorned-torc",
+      "name": "Unadorned Torc",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.unadorned-torc",
+      "flavorKey": "flavor.base.unadorned-torc",
+      "flavor": "An ancient ring worn as a collar. No decoration survives what it has carried.",
+      "tags": ["medium", "metal", "utility"]
+    }
+  ]
+}

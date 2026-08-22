@@ -100,6 +100,7 @@ public static class EffectRuntime
     public static void NotifyMatchStart(string matchKey, long playerId = 0)
     {
         Ensure();
+        AtomPushReceiver.NotifyMatchStart(matchKey);
         _plugins!.NotifyMatchStart(matchKey, playerId);
     }
 
@@ -110,6 +111,9 @@ public static class EffectRuntime
     }
 
     public static long NextTick() => Interlocked.Increment(ref _tick);
+
+    /// <summary>Monotonic milliseconds for the Secondary runner's ICD clocks (E19/E15).</summary>
+    public static long NowMs() => Environment.TickCount64;
 
     public static bool HasActiveGrants() => Bag.HasAnyGrant();
 
@@ -182,6 +186,8 @@ public static class EffectRuntime
         lock (Gate)
         {
             Bag.ClearAll();
+            // Compiled output is match-scoped, like the grant session it arrived with (E19).
+            AtomPushReceiver.Clear();
             _dedupe.Clear();
             DealtIdentity.Clear();
         }
@@ -228,6 +234,9 @@ public static class EffectRuntime
         if (!Bag.HasAnyGrant() && !(Bag.Funnel?.HasPending ?? false)) return;
         try
         {
+            // BEFORE the bag: EffectBag.OnEvent flushes the Funnel inside itself, so a Secondary
+            // dispatch enqueued afterwards would wait for the next event (E19).
+            AtomPushReceiver.OnEvent(ev, Bag.BoardSnapshot);
             var plan = Bag.OnEvent(ev);
             MaybeEmitCombatPacketTrace(plan, "drain");
         }
@@ -269,6 +278,7 @@ public static class EffectRuntime
         try
         {
             FreezeBoard();
+            AtomPushReceiver.OnEvent(ev, Bag.BoardSnapshot);
             var plan = Bag.OnEvent(ev);
             MaybeEmitCombatPacketTrace(plan, "capture");
             if (plan.Actions.Count > 0)

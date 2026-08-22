@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "kind": "socket-word",
+  "_meta": {
+    "batch": "socket-words-1c",
+    "partition": "socket-words",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "entry-shapes.md#2"
+  },
+  "entries": [
+    {
+      "id": "sockword.001",
+      "nameKey": "sockword.dual-strike",
+      "name": "Dual Strike",
+      "runtimeId": "gem.word-dual-strike",
+      "hostRole": "armament-primary",
+      "hostFrame": "plant",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.elemental-power", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.elemental-power", "minPowerBand": "high"},
+        {"position": 2, "family": "atom.elemental-power", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.searing-strike", "powerBand": "high", "params": {"element": "fire"}},
+        {"family": "atom.cruelty", "powerBand": "medium", "params": {"element": "ice"}}
+      ]
+    },
+    {
+      "id": "sockword.002",
+      "nameKey": "sockword.inferno-grip",
+      "name": "Inferno Grip",
+      "runtimeId": "gem.word-inferno-grip",
+      "hostRole": "armament-primary",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.searing-strike", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.might", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.searing-strike", "powerBand": "high", "params": {"element": "fire"}},
+        {"family": "atom.ferocity", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.003",
+      "nameKey": "sockword.bastion-core",
+      "name": "Bastion Core",
+      "runtimeId": "gem.word-bastion-core",
+      "hostRole": "core-guard",
+      "hostFrame": "plant",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.bulwark", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.vitality", "minPowerBand": "medium"},
+        {"position": 2, "family": "atom.bulwark", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.warding", "powerBand": "high"},
+        {"family": "atom.mending", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.004",
+      "nameKey": "sockword.vital-bloom",
+      "name": "Vital Bloom",
+      "runtimeId": "gem.word-vital-bloom",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.vitality", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.mending", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.vitality", "powerBand": "high"},
+        {"family": "atom.lifesteal", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.005",
+      "nameKey": "sockword.lightning-cascade",
+      "name": "Lightning Cascade",
+      "runtimeId": "gem.word-lightning-cascade",
+      "hostFrame": "humanoid",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.quickening", "minPowerBand": "medium"},
+        {"position": 1, "family": "atom.volley", "minPowerBand": "medium"},
+        {"position": 2, "family": "atom.hit-followthrough", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.volley", "powerBand": "high"},
+        {"family": "atom.quickening", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.006",
+      "nameKey": "sockword.earthroot",
+      "name": "Earthroot",
+      "runtimeId": "gem.word-earthroot",
+      "hostRole": "footing",
+      "hostFrame": "plant",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.fortitude", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.resilience", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.fortitude", "powerBand": "high"},
+        {"family": "atom.resilience", "powerBand": "high"}
+      ]
+    },
+    {
+      "id": "sockword.007",
+      "nameKey": "sockword.piercing-thorn",
+      "name": "Piercing Thorn",
+      "runtimeId": "gem.word-piercing-thorn",
+      "hostRole": "armament-secondary",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.precision", "minPowerBand": "medium"},
+        {"position": 1, "family": "atom.keen_edge", "minPowerBand": "medium"},
+        {"position": 2, "family": "atom.cruelty", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.cruelty", "powerBand": "high"},
+        {"family": "atom.precision", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.008",
+      "nameKey": "sockword.retaliating-sap",
+      "name": "Retaliating Sap",
+      "runtimeId": "gem.word-retaliating-sap",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.retribution", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.stoicism", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.retribution", "powerBand": "high"},
+        {"family": "atom.warding", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.009",
+      "nameKey": "sockword.rapid-bloom",
+      "name": "Rapid Bloom",
+      "runtimeId": "gem.word-rapid-bloom",
+      "hostFrame": "plant",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.swiftness", "minPowerBand": "medium"},
+        {"position": 1, "family": "atom.flourishing", "minPowerBand": "low"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.swiftness", "powerBand": "medium"},
+        {"family": "atom.quickening", "powerBand": "low"}
+      ]
+    },
+    {
+      "id": "sockword.010",
+      "nameKey": "sockword.venom-strike",
+      "name": "Venom Strike",
+      "runtimeId": "gem.word-venom-strike",
+      "hostRole": "armament-primary",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.searing-strike", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.cruelty", "minPowerBand": "high"},
+        {"position": 2, "family": "atom.ferocity", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.searing-strike", "powerBand": "high", "params": {"element": "dark"}},
+        {"family": "atom.cruelty", "powerBand": "high"}
+      ]
+    },
+    {
+      "id": "sockword.011",
+      "nameKey": "sockword.shield-pact",
+      "name": "Shield Pact",
+      "runtimeId": "gem.word-shield-pact",
+      "hostRole": "ward-array",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.shield_capacity", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.shield_toughness", "minPowerBand": "medium"},
+        {"position": 2, "family": "atom.shield_capacity", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.shield_capacity", "powerBand": "high"},
+        {"family": "atom.plating", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.012",
+      "nameKey": "sockword.mending-harmony",
+      "name": "Mending Harmony",
+      "runtimeId": "gem.word-mending-harmony",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.mending", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.cleansing", "minPowerBand": "low"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.mending", "powerBand": "high"},
+        {"family": "atom.cleansing", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.013",
+      "nameKey": "sockword.evading-root",
+      "name": "Evading Root",
+      "runtimeId": "gem.word-evading-root",
+      "hostFrame": "plant",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.evasion", "minPowerBand": "medium"},
+        {"position": 1, "family": "atom.swiftness", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.evasion", "powerBand": "medium"},
+        {"family": "atom.swiftness", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.014",
+      "nameKey": "sockword.summoner-affinity",
+      "name": "Summoner Affinity",
+      "runtimeId": "gem.word-summoner-affinity",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.summoner", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.gardener", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.summoner", "powerBand": "high"},
+        {"family": "atom.gardener", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.015",
+      "nameKey": "sockword.chitinous-guard",
+      "name": "Chitinous Guard",
+      "runtimeId": "gem.word-chitinous-guard",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.carapace", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.shield_toughness", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.carapace", "powerBand": "high"},
+        {"family": "atom.plating", "powerBand": "high"}
+      ]
+    },
+    {
+      "id": "sockword.016",
+      "nameKey": "sockword.undying-vigor",
+      "name": "Undying Vigor",
+      "runtimeId": "gem.word-undying-vigor",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.vitality", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.lifesteal", "minPowerBand": "medium"},
+        {"position": 2, "family": "atom.mending", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.vitality", "powerBand": "high"},
+        {"family": "atom.lifesteal", "powerBand": "high"}
+      ]
+    },
+    {
+      "id": "sockword.017",
+      "nameKey": "sockword.blaze-tempest",
+      "name": "Blaze Tempest",
+      "runtimeId": "gem.word-blaze-tempest",
+      "hostRole": "armament-secondary",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.searing-strike", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.volley", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.searing-strike", "powerBand": "high", "params": {"element": "fire"}},
+        {"family": "atom.volley", "powerBand": "high"}
+      ]
+    },
+    {
+      "id": "sockword.018",
+      "nameKey": "sockword.steadfast-graft",
+      "name": "Steadfast Graft",
+      "runtimeId": "gem.word-steadfast-graft",
+      "hostFrame": "plant",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.stalwart", "minPowerBand": "medium"},
+        {"position": 1, "family": "atom.fortitude", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.stalwart", "powerBand": "medium"},
+        {"family": "atom.fortitude", "powerBand": "high"}
+      ]
+    },
+    {
+      "id": "sockword.019",
+      "nameKey": "sockword.cruel-precision",
+      "name": "Cruel Precision",
+      "runtimeId": "gem.word-cruel-precision",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.cruelty", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.precision", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.cruelty", "powerBand": "high"},
+        {"family": "atom.keen_edge", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.020",
+      "nameKey": "sockword.regenerative-pulse",
+      "name": "Regenerative Pulse",
+      "runtimeId": "gem.word-regenerative-pulse",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.shield_regen", "minPowerBand": "low"},
+        {"position": 1, "family": "atom.mending", "minPowerBand": "high"},
+        {"position": 2, "family": "atom.shield_regen", "minPowerBand": "low"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.shield_regen", "powerBand": "medium"},
+        {"family": "atom.mending", "powerBand": "high"}
+      ]
+    },
+    {
+      "id": "sockword.021",
+      "nameKey": "sockword.wounding-strike",
+      "name": "Wounding Strike",
+      "runtimeId": "gem.word-wounding-strike",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.searing-strike", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.keen_edge", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.searing-strike", "powerBand": "high", "params": {"element": "light"}},
+        {"family": "atom.cruelty", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.022",
+      "nameKey": "sockword.resilient-bulwark",
+      "name": "Resilient Bulwark",
+      "runtimeId": "gem.word-resilient-bulwark",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.resilience", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.bulwark", "minPowerBand": "high"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.resilience", "powerBand": "high"},
+        {"family": "atom.warding", "powerBand": "high"}
+      ]
+    },
+    {
+      "id": "sockword.023",
+      "nameKey": "sockword.wild-flourish",
+      "name": "Wild Flourish",
+      "runtimeId": "gem.word-wild-flourish",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.flourishing", "minPowerBand": "low"},
+        {"position": 1, "family": "atom.savagery", "minPowerBand": "medium"},
+        {"position": 2, "family": "atom.ferocity", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.ferocity", "powerBand": "high"},
+        {"family": "atom.savagery", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.024",
+      "nameKey": "sockword.twilight-ward",
+      "name": "Twilight Ward",
+      "runtimeId": "gem.word-twilight-ward",
+      "minSockets": 2,
+      "ingredients": [
+        {"position": 0, "family": "atom.warding", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.stoicism", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.stoicism", "powerBand": "high"},
+        {"family": "atom.resilience", "powerBand": "medium"}
+      ]
+    },
+    {
+      "id": "sockword.025",
+      "nameKey": "sockword.endless-onslaught",
+      "name": "Endless Onslaught",
+      "runtimeId": "gem.word-endless-onslaught",
+      "minSockets": 3,
+      "ingredients": [
+        {"position": 0, "family": "atom.might", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.ferocity", "minPowerBand": "high"},
+        {"position": 2, "family": "atom.quickening", "minPowerBand": "medium"}
+      ],
+      "fixedAtoms": [
+        {"family": "atom.ferocity", "powerBand": "high"},
+        {"family": "atom.quickening", "powerBand": "medium"}
+      ]
+    }
+  ]
+}

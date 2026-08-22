@@ -30,8 +30,8 @@ public static class WorldEndpoints
         });
 
         // Takes a viewer and refuses an unknown one rather than quietly falling back to omniscience.
-        // Not the *only* place fog reaches the wire — the turn report projects its commands the same
-        // way, and its entries are a known gap — but this is the one a map view polls.
+        // Not the *only* place fog reaches the wire — the turn report projects its entries and its
+        // commands the same way — but this is the one a map view polls.
         g.MapGet("/{worldId}/state", (string worldId, string? asFaction, bool? lifelines, RpgStore store) =>
         {
             var world = store.LoadWorldState(worldId);
@@ -167,10 +167,15 @@ public static class WorldEndpoints
                 Turn = turn,
                 StateHash = log.StateHash,
                 Phases = report?.Phases.ToList() ?? new List<string>(),
+                // Projected like the commands beside them (W39). Entries carry free text, so the
+                // filtering is on the structured `SectorId` rather than on the prose — matching a
+                // sector name out of a sentence works until somebody writes a different sentence.
                 Entries = report?.Entries
+                    .Where(e => VisibleTo(e.SectorId, believed))
                     .Select(e => new WorldTurnEntryDto
                     {
-                        Phase = e.Phase, Kind = e.Kind, Subject = e.Subject, Detail = e.Detail
+                        Phase = e.Phase, Kind = e.Kind, Subject = e.Subject,
+                        Detail = e.Detail, SectorId = e.SectorId
                     })
                     .ToList() ?? new List<WorldTurnEntryDto>(),
 
@@ -199,11 +204,19 @@ public static class WorldEndpoints
     /// names — otherwise a turn report would quietly tell you the name of every sector on the map,
     /// which is the thing the state projection spends its whole existence preventing.
     ///
-    /// **Known gap:** `Entries` are *not* filtered. They carry free text (`Subject`, `Detail`)
-    /// rather than a sector id, so honest filtering needs a structured field on `TurnReportEntry`
-    /// and a pass over every `report.Add` in the engine. That is a task, not a line — see
-    /// tasks/world-map-todo.md.
     /// </summary>
+    /// <summary>
+    /// Whether one report line belongs in this viewer's account of the turn.
+    ///
+    /// A line about nowhere in particular — a calendar tick, a command refused before it named any
+    /// ground — is shown to everyone, because it reveals nothing about the map.
+    /// </summary>
+    static bool VisibleTo(string? sectorId, BelievedWorldView? believed)
+    {
+        if (believed is null || sectorId is null) return true;
+        return believed.Believed(sectorId) is not null;
+    }
+
     static bool VisibleTo(WorldCommand command, string? viewer, BelievedWorldView? believed)
     {
         if (viewer is null || believed is null) return true;

@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-crown-a",
+    "partition": "plant/crown/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 2,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-opus-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2",
+    "maintenanceNote": "Exemplars are maintained artifacts, not agent output. Their registryVersions track current so the pattern 124 agents copy never demonstrates a stale one."
+  },
+  "entries": [
+    {
+      "id": "item.plant-crown-a-001",
+      "nameKey": "base.downy-blossom",
+      "name": "Downy Blossom",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.downy-blossom",
+      "flavorKey": "flavor.base.downy-blossom",
+      "flavor": "Soft enough that the wind decides which way it faces.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "notes": "The annotated entry of this partition; the three below show the same shape with less commentary. Four things in it are the whole pattern. (1) `role` is the frame-NEUTRAL role id from core.v1.json roles.list — `head-guard`, never the plant display word `crown` and never ssot-item-categories.md's stale `head-protective`. (2) The id uses the OPPOSITE convention: `item.{frame}-{frameRoleName}-{band}-{seq:03}` takes core.v1.json's `plantName` verbatim, which is why the id says `crown` and the field says `head-guard`. Both are correct; they are different columns. (3) `class` is a class-LADDER RUNG id from classes.v1.json (`fibre` `husk` `bark` `heartwood` on armour/plant), not the ladder name `armour`. (4) `implicit.family` must be on this role's slate in classes.v1.json implicitSlates.head-guard — today that slate is exactly atom.vitality and atom.mending, and it is explicitly a stopgap: every family ssot-equip-slots.md names for this role is stat.derived and quarantined until E12. Nothing here is a magnitude: `powerBand` names a band from bands.v1.json powerBand.enum and the base-stat / implicit tier ladder is generated from it."
+    },
+    {
+      "id": "item.plant-crown-a-002",
+      "nameKey": "base.pliant-chaplet",
+      "name": "Pliant Chaplet",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.pliant-chaplet",
+      "flavorKey": "flavor.base.pliant-chaplet",
+      "flavor": "Woven wet, dried on the head it was measured for.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-003",
+      "nameKey": "base.winnowed-calyx",
+      "name": "Winnowed Calyx",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.winnowed-calyx",
+      "flavorKey": "flavor.base.winnowed-calyx",
+      "flavor": "Everything loose was shaken out of it. What is left does not rattle.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "sturdy",
+        "defensive",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.plant-crown-a-004",
+      "nameKey": "base.crackling-rosette",
+      "name": "Crackling Rosette",
+      "frame": "plant",
+      "role": "head-guard",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.crackling-rosette",
+      "flavorKey": "flavor.base.crackling-rosette",
+      "flavor": "It talks in the heat. Nobody has worked out what about.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "fragile",
+        "defensive"
+      ],
+      "notes": "Variation is the point of a partition, and this entry carries all of it at once: the weakest implicit band on the slate paid back with the highest socket ceiling, a `fragile` durability read, and the `husk` rung rather than `fibre`. Three rules it is worth seeing obeyed. Tags: one tag per EXCLUSIVE axis — `light` (mass-class), `organic` (material-nature), `rooted` (origin), `fragile` (durability-class), `defensive` (combat-posture) are five different axes, so they combine; adding `medium` beside `light` would reject. An exclusive axis may also be omitted entirely, as entries 001 and 002 omit durability-class. Words: the adjective comes from classRungAdjectivePools['armour.plant.husk'] and the noun from nounPools['head-guard.plant'], both in words.v1.json; a base-type partition may NOT reach into themeAdjectivePools, conceptPools or uniqueSetSeedPools, because a base type has a class and no theme. Pattern: `compound` (<Adjective> <Base>) is what every entry here uses — `of-construct` needs a Concept, and concepts are theme-owned, so it is effectively closed to base types. `socketMax` is a structural count and therefore authored; every magnitude behind it is not."
+    }
+  ]
+}

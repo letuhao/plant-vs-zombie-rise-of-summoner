@@ -59,6 +59,29 @@ public sealed partial class RpgStore
             """);
     }
 
+    /// <summary>
+    /// Whole-container equality, ignoring <c>revision</c> — that is the field being decided.
+    /// Record equality would compare the child lists by reference and call every write a change.
+    /// </summary>
+    static bool SameContent(ContainerRow? stored, ContainerRow incoming)
+    {
+        if (stored is null) return false;
+
+        if (stored.Kind != incoming.Kind
+            || stored.Slot != incoming.Slot
+            || stored.Rarity != incoming.Rarity
+            || stored.MinTier != incoming.MinTier
+            || stored.MaxTier != incoming.MaxTier
+            || stored.LevelReq != incoming.LevelReq
+            || stored.PoolRolls != incoming.PoolRolls
+            || !string.Equals(stored.TagsJson, incoming.TagsJson, StringComparison.Ordinal)
+            || stored.Enabled != incoming.Enabled)
+            return false;
+
+        return stored.Atoms.SequenceEqual(incoming.Atoms)
+            && stored.Pool.SequenceEqual(incoming.Pool);
+    }
+
     // ---- rarity ---------------------------------------------------------------------------------
 
     /// <summary>
@@ -67,38 +90,60 @@ public sealed partial class RpgStore
     /// </summary>
     public (bool Ok, string Reason) UpsertRarity(RarityRow r)
     {
-        if (string.IsNullOrWhiteSpace(r.RarityId)) return (false, "rarity_id is empty");
-        if (r.MinTier > r.MaxTier) return (false, $"tier window [{r.MinTier}, {r.MaxTier}] is inverted");
-
         lock (_gate)
         {
             using var db = OpenUnlocked();
-
-            using (var check = db.CreateCommand())
-            {
-                check.CommandText = "SELECT rarity_id FROM rarity WHERE ordinal = $o AND rarity_id <> $id;";
-                check.Parameters.AddWithValue("$o", r.Ordinal);
-                check.Parameters.AddWithValue("$id", r.RarityId);
-                if (check.ExecuteScalar() is string taken)
-                    return (false, $"ordinal {r.Ordinal} already belongs to '{taken}' — ordinals are append-only");
-            }
-
-            using var cmd = db.CreateCommand();
-            cmd.CommandText = """
-                INSERT INTO rarity (rarity_id, ordinal, pool_rolls, min_tier, max_tier)
-                VALUES ($id, $o, $rolls, $min, $max)
-                ON CONFLICT(rarity_id) DO UPDATE SET
-                  ordinal = excluded.ordinal, pool_rolls = excluded.pool_rolls,
-                  min_tier = excluded.min_tier, max_tier = excluded.max_tier;
-                """;
-            cmd.Parameters.AddWithValue("$id", r.RarityId);
-            cmd.Parameters.AddWithValue("$o", r.Ordinal);
-            cmd.Parameters.AddWithValue("$rolls", r.PoolRolls);
-            cmd.Parameters.AddWithValue("$min", r.MinTier);
-            cmd.Parameters.AddWithValue("$max", r.MaxTier);
-            cmd.ExecuteNonQuery();
-            return (true, "");
+            return UpsertRarityUnlocked(db, null, r, out _);
         }
+    }
+
+    /// <summary>
+    /// The rarity write, on a caller-owned connection and optional transaction — see
+    /// <see cref="WriteContainerUnlocked"/> for why the import needs one transaction for everything.
+    /// The append-only ordinal check reads the same table, so it must run on this connection.
+    /// </summary>
+    /// <param name="changed">
+    /// How many rows the write altered. A band re-imported unchanged reports 0 — E14a bumps the
+    /// catalog revision only when an import actually changed something, and an unconditional update
+    /// here would make every repeat import look like an edit.
+    /// </param>
+    (bool Ok, string Reason) UpsertRarityUnlocked(
+        SqliteConnection db, SqliteTransaction? tx, RarityRow r, out int changed)
+    {
+        changed = 0;
+        if (string.IsNullOrWhiteSpace(r.RarityId)) return (false, "rarity_id is empty");
+        if (r.MinTier > r.MaxTier) return (false, $"tier window [{r.MinTier}, {r.MaxTier}] is inverted");
+
+        using (var check = db.CreateCommand())
+        {
+            if (tx is not null) check.Transaction = tx;
+            check.CommandText = "SELECT rarity_id FROM rarity WHERE ordinal = $o AND rarity_id <> $id;";
+            check.Parameters.AddWithValue("$o", r.Ordinal);
+            check.Parameters.AddWithValue("$id", r.RarityId);
+            if (check.ExecuteScalar() is string taken)
+                return (false, $"ordinal {r.Ordinal} already belongs to '{taken}' — ordinals are append-only");
+        }
+
+        using var cmd = db.CreateCommand();
+        if (tx is not null) cmd.Transaction = tx;
+        cmd.CommandText = """
+            INSERT INTO rarity (rarity_id, ordinal, pool_rolls, min_tier, max_tier)
+            VALUES ($id, $o, $rolls, $min, $max)
+            ON CONFLICT(rarity_id) DO UPDATE SET
+              ordinal = excluded.ordinal, pool_rolls = excluded.pool_rolls,
+              min_tier = excluded.min_tier, max_tier = excluded.max_tier
+            WHERE rarity.ordinal IS NOT excluded.ordinal
+               OR rarity.pool_rolls IS NOT excluded.pool_rolls
+               OR rarity.min_tier IS NOT excluded.min_tier
+               OR rarity.max_tier IS NOT excluded.max_tier;
+            """;
+        cmd.Parameters.AddWithValue("$id", r.RarityId);
+        cmd.Parameters.AddWithValue("$o", r.Ordinal);
+        cmd.Parameters.AddWithValue("$rolls", r.PoolRolls);
+        cmd.Parameters.AddWithValue("$min", r.MinTier);
+        cmd.Parameters.AddWithValue("$max", r.MaxTier);
+        changed = cmd.ExecuteNonQuery();
+        return (true, "");
     }
 
     /// <summary>Bands in ordinal order — the order rarity means.</summary>
@@ -133,51 +178,71 @@ public sealed partial class RpgStore
         var check = ContainerValidator.Validate(c, id => byId.TryGetValue(id, out var a) ? a : null);
         if (!check.IsOk) return check;
 
+        // An identical write is a no-op, revision included. `revision` is a hashed column, so
+        // bumping it for a container nobody edited would make a repeat import look exactly like a
+        // content edit — the thing the content hash exists to distinguish (E14a).
+        //
+        // The comparison must cover the children: they are replaced wholesale, and a changed atom
+        // list is a content change even when every parent column is identical.
+        if (SameContent(GetContainer(c.ContainerId), c)) return AtomRejection.Ok;
+
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-
-            ExecIn(db, tx, """
-                INSERT INTO effect_container
-                  (container_id, container_kind, slot, rarity, min_tier, max_tier, level_req,
-                   pool_rolls, tags_json, enabled, revision)
-                VALUES ($id, $kind, $slot, $rarity, $min, $max, $lvl, $rolls, $tags, $enabled, 1)
-                ON CONFLICT(container_id) DO UPDATE SET
-                  container_kind = excluded.container_kind, slot = excluded.slot,
-                  rarity = excluded.rarity, min_tier = excluded.min_tier, max_tier = excluded.max_tier,
-                  level_req = excluded.level_req, pool_rolls = excluded.pool_rolls,
-                  tags_json = excluded.tags_json, enabled = excluded.enabled,
-                  revision = effect_container.revision + 1;
-                """,
-                ("$id", c.ContainerId), ("$kind", KindName(c.Kind)),
-                ("$slot", (object?)c.Slot ?? DBNull.Value), ("$rarity", (object?)c.Rarity ?? DBNull.Value),
-                ("$min", (object?)c.MinTier ?? DBNull.Value), ("$max", (object?)c.MaxTier ?? DBNull.Value),
-                ("$lvl", (object?)c.LevelReq ?? DBNull.Value), ("$rolls", c.PoolRolls),
-                ("$tags", c.TagsJson ?? "{}"), ("$enabled", c.Enabled ? 1 : 0));
-
-            // Replace rather than merge: a container's contents are one authored statement, and a
-            // stale child row from a previous revision is content nobody wrote.
-            ExecIn(db, tx, "DELETE FROM effect_container_atom WHERE container_id = $id;", ("$id", c.ContainerId));
-            ExecIn(db, tx, "DELETE FROM effect_container_pool WHERE container_id = $id;", ("$id", c.ContainerId));
-
-            foreach (var a in c.Atoms)
-                ExecIn(db, tx,
-                    "INSERT INTO effect_container_atom (container_id, seq, atom_id, overrides_json) " +
-                    "VALUES ($id, $seq, $atom, $ov);",
-                    ("$id", c.ContainerId), ("$seq", a.Seq), ("$atom", a.AtomId),
-                    ("$ov", (object?)a.OverridesJson ?? DBNull.Value));
-
-            foreach (var p in c.Pool)
-                ExecIn(db, tx,
-                    "INSERT INTO effect_container_pool (container_id, atom_id, weight, group_key) " +
-                    "VALUES ($id, $atom, $w, $g);",
-                    ("$id", c.ContainerId), ("$atom", p.AtomId), ("$w", p.Weight),
-                    ("$g", (object?)p.Group ?? DBNull.Value));
-
+            WriteContainerUnlocked(db, tx, c);
             tx.Commit();
             return AtomRejection.Ok;
         }
+    }
+
+    /// <summary>
+    /// The write half, on a caller-owned transaction. E14a's import needs every atom, container and
+    /// curve in <b>one</b> transaction — a per-container transaction would leave a partial catalog
+    /// behind if the tenth container failed after nine had committed.
+    ///
+    /// <para>Validation and the identical-write check are the caller's: both read other tables, and
+    /// reading through a second connection while this transaction holds the write lock would
+    /// deadlock rather than answer.</para>
+    /// </summary>
+    void WriteContainerUnlocked(SqliteConnection db, SqliteTransaction tx, ContainerRow c)
+    {
+        ExecIn(db, tx, """
+            INSERT INTO effect_container
+              (container_id, container_kind, slot, rarity, min_tier, max_tier, level_req,
+               pool_rolls, tags_json, enabled, revision)
+            VALUES ($id, $kind, $slot, $rarity, $min, $max, $lvl, $rolls, $tags, $enabled, 1)
+            ON CONFLICT(container_id) DO UPDATE SET
+              container_kind = excluded.container_kind, slot = excluded.slot,
+              rarity = excluded.rarity, min_tier = excluded.min_tier, max_tier = excluded.max_tier,
+              level_req = excluded.level_req, pool_rolls = excluded.pool_rolls,
+              tags_json = excluded.tags_json, enabled = excluded.enabled,
+              revision = effect_container.revision + 1;
+            """,
+            ("$id", c.ContainerId), ("$kind", KindName(c.Kind)),
+            ("$slot", (object?)c.Slot ?? DBNull.Value), ("$rarity", (object?)c.Rarity ?? DBNull.Value),
+            ("$min", (object?)c.MinTier ?? DBNull.Value), ("$max", (object?)c.MaxTier ?? DBNull.Value),
+            ("$lvl", (object?)c.LevelReq ?? DBNull.Value), ("$rolls", c.PoolRolls),
+            ("$tags", c.TagsJson ?? "{}"), ("$enabled", c.Enabled ? 1 : 0));
+
+        // Replace rather than merge: a container's contents are one authored statement, and a
+        // stale child row from a previous revision is content nobody wrote.
+        ExecIn(db, tx, "DELETE FROM effect_container_atom WHERE container_id = $id;", ("$id", c.ContainerId));
+        ExecIn(db, tx, "DELETE FROM effect_container_pool WHERE container_id = $id;", ("$id", c.ContainerId));
+
+        foreach (var a in c.Atoms)
+            ExecIn(db, tx,
+                "INSERT INTO effect_container_atom (container_id, seq, atom_id, overrides_json) " +
+                "VALUES ($id, $seq, $atom, $ov);",
+                ("$id", c.ContainerId), ("$seq", a.Seq), ("$atom", a.AtomId),
+                ("$ov", (object?)a.OverridesJson ?? DBNull.Value));
+
+        foreach (var p in c.Pool)
+            ExecIn(db, tx,
+                "INSERT INTO effect_container_pool (container_id, atom_id, weight, group_key) " +
+                "VALUES ($id, $atom, $w, $g);",
+                ("$id", c.ContainerId), ("$atom", p.AtomId), ("$w", p.Weight),
+                ("$g", (object?)p.Group ?? DBNull.Value));
     }
 
     public ContainerRow? GetContainer(string containerId)

@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-ring-1-a",
+    "partition": "base-types/jewel-minor-a/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.5"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-ring-1-a-001",
+      "nameKey": "base.slight-ring",
+      "name": "Slight Ring",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.slight-ring",
+      "flavorKey": "flavor.base.slight-ring",
+      "flavor": "Thin enough to lose, fine enough that you don't want to. A whisper of claim.",
+      "tags": ["light", "metal"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-002",
+      "nameKey": "base.bent-hoop",
+      "name": "Bent Hoop",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.bent-hoop",
+      "flavorKey": "flavor.base.bent-hoop",
+      "flavor": "Stress marks cross its face, each one a story it refuses to abandon. It holds on.",
+      "tags": ["medium", "metal", "offensive"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-003",
+      "nameKey": "base.understated-token",
+      "name": "Understated Token",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.understated-token",
+      "flavorKey": "flavor.base.understated-token",
+      "flavor": "No ornament, no ceremony. Just a marker that you were here, that you belonged to something.",
+      "tags": ["light", "metal", "defensive"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-004",
+      "nameKey": "base.polished-washer",
+      "name": "Polished Washer",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.polished-washer",
+      "flavorKey": "flavor.base.polished-washer",
+      "flavor": "A flat disc that holds things together by its own weight and shine. Pressure with grace.",
+      "tags": ["medium", "metal", "offensive", "sturdy"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-005",
+      "nameKey": "base.scratched-trinket",
+      "name": "Scratched Trinket",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.scratched-trinket",
+      "flavorKey": "flavor.base.scratched-trinket",
+      "flavor": "It has been carried, dropped, snagged on things that mattered. Every mark is a journey.",
+      "tags": ["light", "metal", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-006",
+      "nameKey": "base.knurled-signet",
+      "name": "Knurled Signet",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.knurled-signet",
+      "flavorKey": "flavor.base.knurled-signet",
+      "flavor": "Ridged on the outside for grip. Whatever it marks belongs to someone with work-worn hands.",
+      "tags": ["medium", "metal", "utility", "mechanical"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-007",
+      "nameKey": "base.dinged-clip",
+      "name": "Dinged Clip",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dinged-clip",
+      "flavorKey": "flavor.base.dinged-clip",
+      "flavor": "It was dropped once, gripped, twisted, and kept working. Damage is not a defect — it is a commitment.",
+      "tags": ["light", "metal", "fragile"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-008",
+      "nameKey": "base.spiralled-bead",
+      "name": "Spiralled Bead",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.spiralled-bead",
+      "flavorKey": "flavor.base.spiralled-bead",
+      "flavor": "A sphere carved with grooves that draw the eye inward, always turning. Hypnotic with purpose.",
+      "tags": ["medium", "mineral", "offensive"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-009",
+      "nameKey": "base.worked-spacer",
+      "name": "Worked Spacer",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.worked-spacer",
+      "flavorKey": "flavor.base.worked-spacer",
+      "flavor": "Its only job is to sit between two things and keep them from touching. A small separator doing its whole life's work.",
+      "tags": ["medium", "metal", "defensive", "mechanical"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-010",
+      "nameKey": "base.engraved-loop",
+      "name": "Engraved Loop",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.engraved-loop",
+      "flavorKey": "flavor.base.engraved-loop",
+      "flavor": "Lines cut into the curve. Someone took the time. It was important that these marks be there.",
+      "tags": ["light", "metal", "offensive"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-011",
+      "nameKey": "base.plain-grommet",
+      "name": "Plain Grommet",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.plain-grommet",
+      "flavorKey": "flavor.base.plain-grommet",
+      "flavor": "A hole ringed with metal, the simplest possible joint. It does not need to be more.",
+      "tags": ["medium", "metal", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-1-a-012",
+      "nameKey": "base.substantial-shank",
+      "name": "Substantial Shank",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.substantial-shank",
+      "flavorKey": "flavor.base.substantial-shank",
+      "flavor": "The base of something larger, cut down and made into its own thing. A piece that wants to support.",
+      "tags": ["medium", "metal", "defensive", "sturdy"]
+    }
+  ]
+}

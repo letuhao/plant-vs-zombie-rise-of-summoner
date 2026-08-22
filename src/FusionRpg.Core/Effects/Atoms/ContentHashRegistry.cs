@@ -30,8 +30,8 @@ public sealed record ContentHashTable(string TableName, IReadOnlyList<ContentHas
 /// </summary>
 public static class ContentHashRegistry
 {
-    /// <summary>Bump when a table joins or leaves. E18 → 2, E9 → 3 (map §4 build positions 14, 15).</summary>
-    public const int CurrentSchemaVersion = 1;
+    /// <summary>Bump when a table joins or leaves. E18 → 2 (done), E9 → 3 (done), E16 → 4.</summary>
+    public const int CurrentSchemaVersion = 3;
 
     /// <summary>
     /// Version 1: the tables E2, E4 and E5 actually created. Instances, bindings and
@@ -105,15 +105,67 @@ public static class ContentHashRegistry
     });
 
     /// <summary>The covered set for a version, already in hash order.</summary>
+    /// <summary>
+    /// Version 2 adds E18's three tables: the element roster and both matchup matrices. An element
+    /// addition now changes the content hash <b>and</b> the generated channel count together, so it
+    /// can never be mistaken for a code regression and a golden that moves has an attributable cause.
+    /// </summary>
+    static readonly ContentHashTable[] V2 = Sorted(V1.Concat(new[]
+    {
+        new ContentHashTable("effect_element", new[]
+        {
+            ContentHashColumn.Text("element_id"),
+            ContentHashColumn.Text("display_name"),
+            ContentHashColumn.Text("ordinal"),
+            ContentHashColumn.Text("enabled"),
+            ContentHashColumn.Text("revision"),
+        }),
+        new ContentHashTable("effect_element_matrix_combat", new[]
+        {
+            ContentHashColumn.Text("attacker_element"),
+            ContentHashColumn.Text("defender_element"),
+            ContentHashColumn.Text("unit"),
+        }),
+        new ContentHashTable("effect_element_matrix_shield", new[]
+        {
+            ContentHashColumn.Text("attacker_element"),
+            ContentHashColumn.Text("defender_element"),
+            ContentHashColumn.Text("unit"),
+        }),
+    }).ToArray());
+
+    /// <summary>
+    /// Version 3 adds E9's two authored price tables.
+    ///
+    /// <para><c>power_coefficient_proposal</c> is deliberately <b>absent</b>. A sweep writes
+    /// proposals and never touches what ships; if a proposal moved the stamp, running the sweep would
+    /// make every replay verdict downstream report a content mismatch for a number nobody adopted.</para>
+    /// </summary>
+    static readonly ContentHashTable[] V3 = Sorted(V2.Concat(new[]
+    {
+        new ContentHashTable("power_coefficient", new[]
+        {
+            ContentHashColumn.Text("kind_id"),
+            ContentHashColumn.Text("channel"),
+            ContentHashColumn.Text("coeff_milli"),
+            ContentHashColumn.Text("reference_scale"),
+        }),
+        new ContentHashTable("power_trigger_frequency", new[]
+        {
+            ContentHashColumn.Text("trigger_id"),
+            ContentHashColumn.Text("per_minute"),
+        }),
+    }).ToArray());
+
     public static IReadOnlyList<ContentHashTable> For(int schemaVersion) => schemaVersion switch
     {
         1 => V1,
+        2 => V2,
+        3 => V3,
         _ => throw new ArgumentOutOfRangeException(nameof(schemaVersion),
             $"contentHashSchemaVersion {schemaVersion} is not a known registry version " +
             $"(latest is {CurrentSchemaVersion})"),
     };
-
-    public static bool IsKnownVersion(int schemaVersion) => schemaVersion == 1;
 
     public static IReadOnlyList<ContentHashTable> Current => For(CurrentSchemaVersion);
 

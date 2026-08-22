@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-graft-2-b",
+    "partition": "base-types/graft-2/plant/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/ssot-equip-slots.md§2.5"
+  },
+  "entries": [
+    {
+      "id": "item.plant-graft-2-b-001",
+      "nameKey": "base.scarred-wart",
+      "name": "Scarred Wart",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "spore",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.scarred-wart",
+      "flavorKey": "flavor.base.scarred-wart",
+      "flavor": "A small lesion that became a small strength.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-002",
+      "nameKey": "base.dusted-pin",
+      "name": "Dusted Pin",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "spore",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dusted-pin",
+      "flavorKey": "flavor.base.dusted-pin",
+      "flavor": "A fastener so fine it draws no attention.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-003",
+      "nameKey": "base.floating-tie",
+      "name": "Floating Tie",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "spore",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.floating-tie",
+      "flavorKey": "flavor.base.floating-tie",
+      "flavor": "A binding that held until it did not.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-004",
+      "nameKey": "base.burled-notch",
+      "name": "Burled Notch",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.burled-notch",
+      "flavorKey": "flavor.base.burled-notch",
+      "flavor": "Growth closed over a wound and sealed it with value.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-005",
+      "nameKey": "base.galled-knob",
+      "name": "Galled Knob",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.galled-knob",
+      "flavorKey": "flavor.base.galled-knob",
+      "flavor": "A swollen knot where the plant feeds on its own hurt.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-006",
+      "nameKey": "base.gathered-nodule",
+      "name": "Gathered Nodule",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.gathered-nodule",
+      "flavorKey": "flavor.base.gathered-nodule",
+      "flavor": "Dense with gathered force, waiting.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-007",
+      "nameKey": "base.welded-peg",
+      "name": "Welded Peg",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.welded-peg",
+      "flavorKey": "flavor.base.welded-peg",
+      "flavor": "Fused by heat and pressure into one unbreakable whole.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-008",
+      "nameKey": "base.ingrown-dowel",
+      "name": "Ingrown Dowel",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.ingrown-dowel",
+      "flavorKey": "flavor.base.ingrown-dowel",
+      "flavor": "A peg that the plant grew around, inseparable now.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-009",
+      "nameKey": "base.permanent-outgrowth",
+      "name": "Permanent Outgrowth",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.permanent-outgrowth",
+      "flavorKey": "flavor.base.permanent-outgrowth",
+      "flavor": "Once attached by desperate grafting, now indistinguishable from the whole.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-010",
+      "nameKey": "base.seated-excrescence",
+      "name": "Seated Excrescence",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.seated-excrescence",
+      "flavorKey": "flavor.base.seated-excrescence",
+      "flavor": "An ugly growth, but one the plant has learned to feed through.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-011",
+      "nameKey": "base.meshed-protuberance",
+      "name": "Meshed Protuberance",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.meshed-protuberance",
+      "flavorKey": "flavor.base.meshed-protuberance",
+      "flavor": "Woven so deeply into the host that no one can say where one ends and the other begins.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-graft-2-b-012",
+      "nameKey": "base.bounden-binding",
+      "name": "Bounden Binding",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.bounden-binding",
+      "flavorKey": "flavor.base.bounden-binding",
+      "flavor": "The second graft took. The scar is the strength.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    }
+  ]
+}

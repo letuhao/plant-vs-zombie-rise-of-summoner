@@ -200,7 +200,14 @@ public sealed partial class RpgStore
         foreach (var faction in world.Factions.OrderBy(f => f.FactionId, StringComparer.Ordinal))
         {
             if (faction.PolicyId is not { } policyId) continue;                  // a person plays this one
-            if (committed.Contains(faction.FactionId)) continue;                 // already spoke for itself
+            if (committed.Contains(faction.FactionId)) continue;                 // already ended its turn
+
+            // Orders already filed speak for a faction as loudly as a commit does. Without this the
+            // escape hatch does not work: the *first* commit of a turn fills every AI faction that
+            // has not committed yet, so a scenario scripting two of them has its second one filled
+            // over by whichever commit happened to land first. Found by dumping a scenario's command
+            // log and finding orders in it that nobody had written.
+            if (HasCommandsUnlocked(db, tx, worldId, turn, faction.FactionId)) continue;
 
             var view = new BelievedWorldView(world, faction.FactionId);
             var seed = SeededRng.DeriveStream(worldSeed, $"ai:{faction.FactionId}:{turn}").NextULong();
@@ -248,6 +255,20 @@ public sealed partial class RpgStore
 
             MarkCommittedUnlocked(db, tx, worldId, turn, faction.FactionId, now);
         }
+    }
+
+    /// <summary>Whether this commander has already filed anything for the turn.</summary>
+    static bool HasCommandsUnlocked(
+        SqliteConnection db, SqliteTransaction tx, string worldId, int turn, string commanderId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText =
+            "SELECT 1 FROM rpg_world_commands WHERE world_id = $w AND turn = $t AND commander_id = $c LIMIT 1;";
+        cmd.Parameters.AddWithValue("$w", worldId);
+        cmd.Parameters.AddWithValue("$t", turn);
+        cmd.Parameters.AddWithValue("$c", commanderId);
+        return cmd.ExecuteScalar() != null;
     }
 
     static void MarkCommittedUnlocked(

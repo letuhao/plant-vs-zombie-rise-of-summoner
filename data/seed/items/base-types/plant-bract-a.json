@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-bract-a",
+    "partition": "base-types/sense/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/ssot-equip-slots.md#2.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-bract-a-001",
+      "nameKey": "base.downy-sepal",
+      "name": "Downy Sepal",
+      "frame": "plant",
+      "role": "sense",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.downy-sepal",
+      "flavorKey": "flavor.base.downy-sepal",
+      "flavor": "Covered in soft hair, it feels its surroundings through a thousand tiny sensors.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-002",
+      "nameKey": "base.winnowed-glume",
+      "name": "Winnowed Glume",
+      "frame": "plant",
+      "role": "sense",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.winnowed-glume",
+      "flavorKey": "flavor.base.winnowed-glume",
+      "flavor": "Sifted clean by wind and time, every trace stripped away until only sharpness remains.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-003",
+      "nameKey": "base.pliant-lemma",
+      "name": "Pliant Lemma",
+      "frame": "plant",
+      "role": "sense",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.pliant-lemma",
+      "flavorKey": "flavor.base.pliant-lemma",
+      "flavor": "Supple and bending, it reads movement and intention in every breeze.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-004",
+      "nameKey": "base.slender-palea",
+      "name": "Slender Palea",
+      "frame": "plant",
+      "role": "sense",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.slender-palea",
+      "flavorKey": "flavor.base.slender-palea",
+      "flavor": "Thin as a whisper, the chaff-leaf extends far to catch what others miss.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-005",
+      "nameKey": "base.voided-tepal",
+      "name": "Voided Tepal",
+      "frame": "plant",
+      "role": "sense",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.voided-tepal",
+      "flavorKey": "flavor.base.voided-tepal",
+      "flavor": "Hollowed out and light as thought, it dwells in the spaces between things.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-006",
+      "nameKey": "base.layered-bracteole",
+      "name": "Layered Bracteole",
+      "frame": "plant",
+      "role": "sense",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.layered-bracteole",
+      "flavorKey": "flavor.base.layered-bracteole",
+      "flavor": "Each scale-leaf nested inside the last, creating a mask of many faces for sensing.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-007",
+      "nameKey": "base.tender-stipel",
+      "name": "Tender Stipel",
+      "frame": "plant",
+      "role": "sense",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tender-stipel",
+      "flavorKey": "flavor.base.tender-stipel",
+      "flavor": "Still young and yielding, the leaf-stipule grows only in the warmth of favorable conditions.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-008",
+      "nameKey": "base.greenstick-awn",
+      "name": "Greenstick Awn",
+      "frame": "plant",
+      "role": "sense",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.greenstick-awn",
+      "flavorKey": "flavor.base.greenstick-awn",
+      "flavor": "Still full of living sap, the bristle-like projection bends without breaking.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-009",
+      "nameKey": "base.unhardened-sepal",
+      "name": "Unhardened Sepal",
+      "frame": "plant",
+      "role": "sense",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.unhardened-sepal",
+      "flavorKey": "flavor.base.unhardened-sepal",
+      "flavor": "Not yet set in its final form, the petal-bract remains malleable, sensitive to every pressure.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-010",
+      "nameKey": "base.nodding-glume",
+      "name": "Nodding Glume",
+      "frame": "plant",
+      "role": "sense",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.nodding-glume",
+      "flavorKey": "flavor.base.nodding-glume",
+      "flavor": "Bowing on its stem, the chaff-scale dips and rises, always listening.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-011",
+      "nameKey": "base.filamentous-lemma",
+      "name": "Filamentous Lemma",
+      "frame": "plant",
+      "role": "sense",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.filamentous-lemma",
+      "flavorKey": "flavor.base.filamentous-lemma",
+      "flavor": "Hair-thin threads extend from every surface, each one a strand of pure sensation.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-a-012",
+      "nameKey": "base.crackling-palea",
+      "name": "Crackling Palea",
+      "frame": "plant",
+      "role": "sense",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.crackling-palea",
+      "flavorKey": "flavor.base.crackling-palea",
+      "flavor": "Brittle and vocal, it speaks with every shift, the grass-leaf articulating warnings and whispers.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    }
+  ]
+}

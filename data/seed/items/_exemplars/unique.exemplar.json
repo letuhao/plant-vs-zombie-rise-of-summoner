@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "unique-ember-harvest-30",
+    "partition": "ember-harvest/30",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 2,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-opus-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.5",
+    "maintenanceNote": "Exemplars are maintained artifacts, not agent output. Their registryVersions track current so the pattern 124 agents copy never demonstrates a stale one."
+  },
+  "entries": [
+    {
+      "id": "unique.ember-harvest-30-001",
+      "nameKey": "unique.guttering-coronet",
+      "name": "Guttering Coronet",
+      "frame": "plant",
+      "baseType": "item.plant-crown-a-003",
+      "rarity": "cultivated",
+      "fixedAtoms": [
+        {
+          "family": "atom.searing-strike",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.regeneration",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Deliberately a worse stat stick than a cultivated rare. It carries exactly one raw-stat line, and everything else it does is a rider the stat sheet cannot see."
+      },
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "offensive",
+        "signature"
+      ],
+      "notes": "THIS ENTRY BREAKS A GENERATOR RULE ON PURPOSE. THE RULE IT BREAKS: an affix family illegal for its role — rung 2 of ssot-uniques.md §3.5's rule-breaking ladder. `atom.searing-strike` belongs to affix group `g.on-hit`, and ssot-affixes.md §4.3's matrix gives the head-guard row (published there under its stale name `head-protective`) a weight of ZERO for on-hit. No amount of rolling will ever put a fire-on-hit rider on a crown. This item has one anyway, and a crown that burns what hits it is the entire reason to equip it. WHY THAT IS LEGAL. Role legality is enforced by filtering the drawn pool on `item_base_type.affix_pool_tag`. A unique's fixed atoms are not drawn — they sit in the container's fixed core, where no pool tag applies. So the break costs the architecture nothing: no code change, no schema change, no new validation. This is the line the whole class turns on — a unique may break every rule that lives in the GENERATOR, and no rule that lives in the MACHINE. It is also the point of the class: a bigger number is a better roll, and a verb the generator is not allowed to hand out is a CHOICE. WHAT IT DELIBERATELY DOES NOT BREAK, each one a machine rule: `resource.delta` is one of the 12 shipped kinds and its `OnDamageDealt` trigger is one of the 5 authorable ones. The fixed core is three atoms — the base type's inherited base stat plus these two — inside the cap of 4. One variance slot means pool_rolls = 1, never 2. The role is not `jewel-minor-a` or `jewel-minor-b`, where uniques are forbidden outright. Nothing here touches `atom.plating` or `atom.carapace`: those write arm1/arm2, Unity fields that exist only on zombies, so a plant unique carrying either is not daring, it is dead. And a unique is never a set member. COUNTER-PRESSURE IS A VALIDATED COLUMN, NOT A DISCLAIMER. A unique declaring none is refused. `narrow` is satisfied structurally and from authored inputs alone: a cultivated rung draws two to three affixes in the t1-t3 window, and against that baseline this item offers ONE raw-stat line (`atom.mending` at `low`) plus the base type's inherited guard, which lands the summed raw-stat affix-equivalent under the 60% ceiling the check enforces. The searing-strike rider does not count toward it — a `resource.delta` capability is not a raw stat, which is exactly why it can be generous. Of the three counter-pressure kinds this is the one an author can satisfy WITHOUT typing a number: `drawback` needs a negative magnitude and `conditional` needs a predicate with a threshold in it, and the seed shapes in seed-contract.md §10 give an author no numberless way to express either. Flagged in the README as a contract gap. REFERENCES RESOLVE, THEY ARE NOT INVENTED. `baseType` names a base type frozen in wave 1a (here the sibling base-type exemplar's third entry) — a forward reference rejects. `rarity` is a rung id from core.v1.json, and ordinal 40 `cultivated` sits inside this partition's assigned 30-40 band. `variance: \"narrow\"` is a band from bands.v1.json, not a percentage. The name is `compound`: `guttering` from themeAdjectivePools['ember-harvest'], `coronet` from nounPools['head-guard.plant'] — a unique still occupies a role and should sound like it. A unique partition may use its OWN theme's adjective, concept and seed pools and any noun pool; another theme's pools are closed to it. RUNTIME HONESTY: `resource.delta` is lawn-live and battle-unsupported today, so this item works on the lawn and rejects in battle until battle grows a grant path. Say so; do not quietly author around it."
+    }
+  ]
+}

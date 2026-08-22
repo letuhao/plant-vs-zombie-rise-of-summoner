@@ -29,12 +29,18 @@ public static class BindGate
     /// Judge one binding. <paramref name="atoms"/> is the instance's atom set; every one must be
     /// executable, because a partially-bound instance is the silent no-op this layer refuses.
     /// </summary>
+    /// <param name="overlayKeys">
+    /// What the grant overlay that will carry this binding supplies. <b>Null means the binding has no
+    /// overlay</b> — not "do not check". A magnitude named in neither the row nor an overlay is a
+    /// binding that applies nothing, and that is the silent no-op this gate exists to refuse (D10).
+    /// </param>
     public static AtomRejection Check(
         IReadOnlyList<AtomRow> atoms,
         OwnerScope owner,
         BindContext ctx,
         int? levelReq = null,
-        Func<string, bool>? atomIsLive = null)
+        Func<string, bool>? atomIsLive = null,
+        IReadOnlyCollection<string>? overlayKeys = null)
     {
         if (atoms is null) return AtomRejection.Fail(AtomRejectionReason.BadParamValue, "no atoms");
 
@@ -77,9 +83,59 @@ public static class BindGate
 
             var scope = CheckScope(atom, kind, owner);
             if (!scope.IsOk) return scope;
+
+            var magnitude = CheckOverlayOrParam(atom, kind, overlayKeys);
+            if (!magnitude.IsOk) return magnitude;
         }
 
         return AtomRejection.Ok;
+    }
+
+    /// <summary>
+    /// D10. Some kinds carry a magnitude the executor cannot work without, which the shipped content
+    /// supplies through the grant overlay rather than the row — <c>fx.shield_grant</c> ships with
+    /// empty params, and <c>fx.overlay_damage</c> names a channel and no amount.
+    ///
+    /// <para>Requiring it in the schema would make that content unauthorable. Leaving it merely
+    /// optional would let a binding that names it in neither place bind and then apply nothing. So it
+    /// is checked here, where both halves are finally in view.</para>
+    /// </summary>
+    static AtomRejection CheckOverlayOrParam(
+        AtomRow atom, AtomKind kind, IReadOnlyCollection<string>? overlayKeys)
+    {
+        Dictionary<string, JsonElement>? pars = null;
+
+        foreach (var def in kind.Params.Defs)
+        {
+            if (!def.OverlayOrParam) continue;
+
+            if (overlayKeys is not null &&
+                overlayKeys.Contains(def.Name, StringComparer.OrdinalIgnoreCase))
+                continue;
+
+            pars ??= ReadParams(atom);
+            if (pars.ContainsKey(def.Name)) continue;
+
+            return AtomRejection.Fail(AtomRejectionReason.MissingParam,
+                $"{atom.AtomId}: {atom.KindId} needs '{def.Name}' from the row or the grant overlay; " +
+                "neither supplies it, so the binding would apply nothing");
+        }
+
+        return AtomRejection.Ok;
+    }
+
+    static Dictionary<string, JsonElement> ReadParams(AtomRow atom)
+    {
+        var d = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(atom.ParamsJson)) return d;
+        try
+        {
+            using var doc = JsonDocument.Parse(atom.ParamsJson);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object) return d;
+            foreach (var p in doc.RootElement.EnumerateObject()) d[p.Name] = p.Value.Clone();
+        }
+        catch (JsonException) { /* E4 already refused this row */ }
+        return d;
     }
 
     /// <summary>

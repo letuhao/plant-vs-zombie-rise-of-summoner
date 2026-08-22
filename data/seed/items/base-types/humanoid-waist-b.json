@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-waist-b",
+    "partition": "base-types/girdle/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-waist-b-001",
+      "nameKey": "base.overlapping-hitch",
+      "name": "Overlapping Hitch",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.overlapping-hitch",
+      "flavorKey": "flavor.base.overlapping-hitch",
+      "flavor": "Metal plates lapped across each other, interlocked like roof tiles. Cinches without biting, holds without complaint.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "utility",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-002",
+      "nameKey": "base.stapled-ratchet",
+      "name": "Stapled Ratchet",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.stapled-ratchet",
+      "flavorKey": "flavor.base.stapled-ratchet",
+      "flavor": "A winch mechanism armoured with riveted metal plates. Tightens one notch at a time, never slips.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "mechanical",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-003",
+      "nameKey": "base.shingled-innertube",
+      "name": "Shingled Innertube",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.shingled-innertube",
+      "flavorKey": "flavor.base.shingled-innertube",
+      "flavor": "Rubber tube wrapped in overlapping metal scales, cushioned and covered. Flexes with every breath.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "utility",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-004",
+      "nameKey": "base.articulated-winch",
+      "name": "Articulated Winch",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.articulated-winch",
+      "flavorKey": "flavor.base.articulated-winch",
+      "flavor": "Hinged segments of forged plate joined with precision. A tension harness built like a catapult's arm.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-005",
+      "nameKey": "base.jointed-belt",
+      "name": "Jointed Belt",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.jointed-belt",
+      "flavorKey": "flavor.base.jointed-belt",
+      "flavor": "Metal scales sewn to a base, each scale pivoting on its neighbour. Moves like a real thing's ribs.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-006",
+      "nameKey": "base.netted-buckle",
+      "name": "Netted Buckle",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.netted-buckle",
+      "flavorKey": "flavor.base.netted-buckle",
+      "flavor": "A plate clasp latticed with apertures, all pattern and function. Holds light and shadow both.",
+      "tags": [
+        "heavy",
+        "metal",
+        "utility",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-007",
+      "nameKey": "base.soldered-strap",
+      "name": "Soldered Strap",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.soldered-strap",
+      "flavorKey": "flavor.base.soldered-strap",
+      "flavor": "Steel seams joined by heat and joined again. What's made this way does not come apart.",
+      "tags": [
+        "heavy",
+        "metal",
+        "utility",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-008",
+      "nameKey": "base.rigid-webbing",
+      "name": "Rigid Webbing",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.rigid-webbing",
+      "flavorKey": "flavor.base.rigid-webbing",
+      "flavor": "Interlaced metal strands, each one beaten into straight lines. Looks like it might sing if you pluck it.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-009",
+      "nameKey": "base.ponderous-bungee",
+      "name": "Ponderous Bungee",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.ponderous-bungee",
+      "flavorKey": "flavor.base.ponderous-bungee",
+      "flavor": "Heavy rubber cord wrapped in steel plate that barely flexes. Constrains with all the give of stone.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-010",
+      "nameKey": "base.beaten-sash",
+      "name": "Beaten Sash",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.beaten-sash",
+      "flavorKey": "flavor.base.beaten-sash",
+      "flavor": "Strips of metal hammered flat and overlapped in a wide band. Each blow left marks, each mark a story.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-011",
+      "nameKey": "base.galvanised-drawstring",
+      "name": "Galvanised Drawstring",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.galvanised-drawstring",
+      "flavorKey": "flavor.base.galvanised-drawstring",
+      "flavor": "Metal cord coated in zinc, the silver finish unmarked. Ties precise and never slips or frays.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-b-012",
+      "nameKey": "base.industrial-pouch",
+      "name": "Industrial Pouch",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.industrial-pouch",
+      "flavorKey": "flavor.base.industrial-pouch",
+      "flavor": "A steel-reinforced canvas purse, riveted at every corner. Built to survive a fall from a roof.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "utility",
+        "vendor-stocked"
+      ]
+    }
+  ]
+}

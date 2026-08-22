@@ -64,7 +64,13 @@ public static class VfxCueIds
     public const string ShieldBroken = "shield.broken";
 }
 
-/// <summary>C#-seeded catalog, mirroring EffectSeedCatalog (vfx-ssot.md §6.2).</summary>
+/// <summary>
+/// C#-seeded VFX cue catalog (vfx-ssot.md §6.2).
+///
+/// <para>This said it mirrored the effect-def catalog. It does not, and never did — every row here
+/// keys on a <b>statusId</b>, and the file contains no <c>fx.*</c> id at all. E11 was scheduled
+/// around a coupling that turned out to be a sentence. A comment is not evidence.</para>
+/// </summary>
 public static class VfxSeedCatalog
 {
     /// <summary>Legacy world-flash orange — the pre-VFX-SSOT burst color, kept for continuity.</summary>

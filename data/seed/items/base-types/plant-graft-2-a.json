@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-graft-2-a",
+    "partition": "base-types/jewel-minor-b/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.4"
+  },
+  "entries": [
+    {
+      "id": "item.plant-graft-2-a-001",
+      "nameKey": "base.dusted-wart",
+      "name": "Dusted Wart",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.dusted-wart",
+      "flavorKey": "flavor.base.dusted-wart",
+      "flavor": "A small growth catches the wind. Pollen drifts from something that was never meant to bloom.",
+      "tags": ["light", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-002",
+      "nameKey": "base.floating-pin",
+      "name": "Floating Pin",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.floating-pin",
+      "flavorKey": "flavor.base.floating-pin",
+      "flavor": "A spike held aloft on nothing but itself. Something was grafted here once; it did not quite take.",
+      "tags": ["light", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-003",
+      "nameKey": "base.ephemeral-tie",
+      "name": "Ephemeral Tie",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.ephemeral-tie",
+      "flavorKey": "flavor.base.ephemeral-tie",
+      "flavor": "A tendril wound tight around itself. The knot will not hold through winter.",
+      "tags": ["light", "organic", "rooted", "fragile"]
+    },
+    {
+      "id": "item.plant-graft-2-a-004",
+      "nameKey": "base.strewn-notch",
+      "name": "Strewn Notch",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.strewn-notch",
+      "flavorKey": "flavor.base.strewn-notch",
+      "flavor": "A rough cut, scattered across the stem. Two branches were joined here and then tore free.",
+      "tags": ["light", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-005",
+      "nameKey": "base.stored-scar",
+      "name": "Stored Scar",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.stored-scar",
+      "flavorKey": "flavor.base.stored-scar",
+      "flavor": "A sealed wound. What healed here was never meant to heal; now it holds something else.",
+      "tags": ["medium", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-006",
+      "nameKey": "base.engorged-burl",
+      "name": "Engorged Burl",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.engorged-burl",
+      "flavorKey": "flavor.base.engorged-burl",
+      "flavor": "Swollen with sap and stubborn defiance. The graft took and then kept growing past where it should have stopped.",
+      "tags": ["medium", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-007",
+      "nameKey": "base.nourished-gall",
+      "name": "Nourished Gall",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.nourished-gall",
+      "flavorKey": "flavor.base.nourished-gall",
+      "flavor": "A knot of wood fed from both sides. The host and the graft, learning to feed each other.",
+      "tags": ["medium", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-008",
+      "nameKey": "base.dormant-nodule",
+      "name": "Dormant Nodule",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.dormant-nodule",
+      "flavorKey": "flavor.base.dormant-nodule",
+      "flavor": "A knot under the bark, waiting. No one knows what it was meant to be.",
+      "tags": ["medium", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-009",
+      "nameKey": "base.ingrown-knob",
+      "name": "Ingrown Knob",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.ingrown-knob",
+      "flavorKey": "flavor.base.ingrown-knob",
+      "flavor": "Fused so deep it draws sap from the parent wood. To remove it now would kill the whole branch.",
+      "tags": ["heavy", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-010",
+      "nameKey": "base.indivisible-outgrowth",
+      "name": "Indivisible Outgrowth",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.indivisible-outgrowth",
+      "flavorKey": "flavor.base.indivisible-outgrowth",
+      "flavor": "One flesh now, though it began as two. The scar tissue has become stronger than either parent.",
+      "tags": ["heavy", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-011",
+      "nameKey": "base.permanent-peg",
+      "name": "Permanent Peg",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.permanent-peg",
+      "flavorKey": "flavor.base.permanent-peg",
+      "flavor": "Hammered in so long ago that the wood has healed over it. Pulling it free would splinter the whole limb.",
+      "tags": ["heavy", "organic", "rooted"]
+    },
+    {
+      "id": "item.plant-graft-2-a-012",
+      "nameKey": "base.wedded-dowel",
+      "name": "Wedded Dowel",
+      "frame": "plant",
+      "role": "jewel-minor-b",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.wedded-dowel",
+      "flavorKey": "flavor.base.wedded-dowel",
+      "flavor": "Two pieces of wood joined with a pin no wider than a needle. The union has held for seasons.",
+      "tags": ["heavy", "organic", "rooted"]
+    }
+  ]
+}

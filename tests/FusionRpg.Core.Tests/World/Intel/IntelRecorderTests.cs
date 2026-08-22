@@ -47,17 +47,27 @@ public class IntelRecorderTests
     [Fact]
     public void A_glimpse_carries_no_slots_at_all()
     {
-        var world = Remembering(World(), 1);
-        var ember = Believes(world, "dave", "ember-hollow")!;
-        var truth = world.Sectors.Single(s => s.SectorId == "ember-hollow");
+        // black-gate, not ember-hollow (re-anchored 2026-08-22): the template authors ember-hollow as
+        // `Scouted`, so Dave begins already knowing its insides. This test used to pass only because
+        // the recorder threw that authored survey away on the first turn — the bug `SurveyMemoryTests`
+        // now pins. A sector authored `Unknown` is the only true glimpse there is.
+        var world = Remembering(World() with
+        {
+            Entities = World().Entities
+                .Select(e => e.EntityId == "e-dave-legion-1" ? e with { AtSectorId = "ash-waste" } : e)
+                .ToList()
+        }, 1);
 
-        // Ember Hollow has four slots including a Seat and two guarded veins. From next door you
-        // learn none of that — only that it is there, whose it is, and how dangerous it looks.
-        Assert.Equal(SectorSight.Glimpse, ember.Detail);
+        var gate = Believes(world, "dave", "black-gate")!;
+        var truth = world.Sectors.Single(s => s.SectorId == "black-gate");
+
+        // Black Gate holds a Seat and two guarded slots. From next door you learn none of that —
+        // only that it is there, whose it is, and how dangerous it looks.
+        Assert.Equal(SectorSight.Glimpse, gate.Detail);
         Assert.NotEmpty(truth.Slots);
-        Assert.Empty(ember.Slots);
-        Assert.Equal(truth.OwnerFactionId, ember.OwnerFactionId);
-        Assert.Equal(truth.DangerBand, ember.DangerBand);
+        Assert.Empty(gate.Slots);
+        Assert.Equal(truth.OwnerFactionId, gate.OwnerFactionId);
+        Assert.Equal(truth.DangerBand, gate.DangerBand);
     }
 
     [Fact]
@@ -152,7 +162,13 @@ public class IntelRecorderTests
             world.Intel.Select(i => i.FactionId));
 
         // Zomboss holds nothing and stands nowhere, so he believes nothing.
-        Assert.Empty(world.Intel.Single(i => i.FactionId == "zomboss").Sectors);
+        // Zomboss now has a warband of his own, so his belief is no longer empty — what this
+        // asserts is that it is *his*, built from his own eyes and sharing nothing with Dave.
+        var zomboss = world.Intel.Single(i => i.FactionId == "zomboss").Sectors;
+        var dave = world.Intel.Single(i => i.FactionId == "dave").Sectors;
+        Assert.NotEqual(
+            dave.Select(x => x.SectorId).OrderBy(x => x, StringComparer.Ordinal),
+            zomboss.Select(x => x.SectorId).OrderBy(x => x, StringComparer.Ordinal));
     }
 
     [Fact]

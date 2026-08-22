@@ -85,7 +85,7 @@ Rules:
 - `omni` is an additive baseline for power and resist.
 - Each actor may have **0, 1, or 2** concrete types from the roster.
 - A damage payload may carry **one or more** element components.
-- Code iterates elements via **`ElementRoster.Concrete`** only; the 56 combat channels (8 families × roster + omni) are generated from it. Element name parsing is strict (names only; numeric strings reject).
+- Code iterates elements via **`ElementRoster.Concrete`** only; the **84** combat channels (12 families × (omni + roster)) are generated from it — corrected 2026-08-22; it read 56 before the four `combat.shield.*` families landed. Verified in `DerivedStatChannels.cs` `CombatChannelFamilies` and asserted at `DerivedStatRegistryTests.Combat_channel_count_is_12_families_x_roster_plus_omni`. Element name parsing is strict (names only; numeric strings reject).
 - **Light/dark matchups:** `light ⇄ dark` are a **mutual counter** (each STR vs the other); both are NEU vs the four ring elements in both directions. The ring itself is unchanged. `void`/`chaos` are traits, never elements.
 
 Examples:

@@ -182,7 +182,8 @@ public static class MovementPhase
                 continue;
             }
 
-            report.Add(phase, TurnReportKinds.Event, evt.EntityId, evt.Kind + ":" + evt.Detail);
+            // `Detail` is where a march ended up, which is exactly the ground this line is about.
+            report.Add(phase, TurnReportKinds.Event, evt.EntityId, evt.Kind + ":" + evt.Detail, evt.Detail);
         }
 
         return new MovementResult(

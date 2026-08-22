@@ -10,9 +10,15 @@ public readonly record struct BindRefusal(string BindingId, AtomRejectionReason 
 }
 
 /// <summary>What a host may execute, and what it would not.</summary>
+/// <param name="AtomsByBinding">
+/// The atom rows behind each accepted binding, keyed by <c>binding_id</c>. Carried rather than left
+/// for the caller to fetch: resolving already loads every one of them, and a caller that re-queried
+/// would reopen the N+1 this method was rewritten to close (E19 is the first caller that needs them).
+/// </param>
 public sealed record BindResolution(
     IReadOnlyList<BindingRow> Bindings,
-    IReadOnlyList<BindRefusal> Refused);
+    IReadOnlyList<BindRefusal> Refused,
+    IReadOnlyDictionary<string, IReadOnlyList<AtomRow>>? AtomsByBinding = null);
 
 /// <summary>
 /// An instance attached to an owner. Replaces the logical `foundation_effect_grant`.
@@ -275,6 +281,7 @@ public sealed partial class RpgStore
 
         var ok = new List<BindingRow>();
         var refused = new List<BindRefusal>();
+        var atomsByBinding = new Dictionary<string, IReadOnlyList<AtomRow>>(StringComparer.Ordinal);
 
         foreach (var binding in bindings)
         {
@@ -315,9 +322,10 @@ public sealed partial class RpgStore
             }
 
             ok.Add(binding);
+            atomsByBinding[binding.BindingId] = rows;
         }
 
-        return new BindResolution(ok, refused);
+        return new BindResolution(ok, refused, atomsByBinding);
     }
 
     /// <summary>Every named instance with its atoms, in two queries rather than two per instance.</summary>

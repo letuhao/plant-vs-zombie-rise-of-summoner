@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Atoms;
 using Xunit;
 
@@ -216,7 +217,27 @@ public class AtomCompilerTests
         Assert.Equal(
             new[] { EffectTriggers.OnDamageDealt, EffectTriggers.OnSpawn, EffectTriggers.OnTimer },
             def.Triggers);
-        Assert.Equal(3, def.Actions.Count);
+
+        // ONE action. This asserted 3 until E11 compiled real content: three atoms that differ only
+        // in their trigger are one thing the effect does, fired three ways. `fx.shield_grant` grants
+        // one shield on hit, tick or spawn — three actions would have granted three.
+        Assert.Single(def.Actions);
+    }
+
+    [Fact]
+    public void Members_of_one_group_that_actually_differ_still_get_an_action_each()
+    {
+        // The other half of the dedup rule. Without this, collapsing identical actions could quietly
+        // collapse a group whose members do different things, and the test above would still pass.
+        var spawn = Strike(When(EffectTriggers.OnDamageDealt), "{\"amount\":-5}", icdKey: "combo") with
+        { AtomId = "atom.combo-a.t1", FamilyId = "atom.combo-a" };
+        var other = Strike(When(EffectTriggers.OnDamageDealt), "{\"amount\":-9}", icdKey: "combo") with
+        { AtomId = "atom.combo-b.t1", FamilyId = "atom.combo-b" };
+
+        var def = Assert.Single(Compile(spawn, other).Defs);
+
+        Assert.Equal(2, def.Actions.Count);
+        Assert.Equal(new[] { 1, 2 }, def.Actions.Select(a => a.Seq));
     }
 
     [Fact]
@@ -314,5 +335,69 @@ public class AtomCompilerTests
         var backward = Compile(atoms.Reverse().ToArray());
 
         Assert.Equal(forward.Defs.Select(d => d.EffectId), backward.Defs.Select(d => d.EffectId));
+    }
+    // ---- what a RunnerEntry must carry for E15 to run it ------------------------------------------
+    //
+    // Compilability routes an atom to the runner BECAUSE it holds per-binding state or a non-value
+    // param the overlay cannot express. If the compiler then drops those keys, the runner is handed
+    // an entry it cannot execute — the classifier and the payload disagree.
+
+    [Fact]
+    public void A_runner_entry_carries_the_cap_that_sent_it_to_the_runner()
+    {
+        var atom = Atom("atom.sun-tap", "resource.economy",
+            "{\"currency\":\"sun\",\"op\":\"add\",\"amount\":25,\"capPerMatch\":5}",
+            When(EffectTriggers.OnDamageDealt));
+
+        var entry = Assert.Single(Compile(atom).Runtime);
+
+        Assert.Equal(5, entry.Limits.CapPerMatch);
+    }
+
+    [Fact]
+    public void A_runner_entry_carries_charges_and_every_hits()
+    {
+        var atom = Strike("{\"trigger\":\"OnDamageDealt\",\"charges\":3,\"everyHits\":4}");
+
+        var entry = Assert.Single(Compile(atom).Runtime);
+
+        Assert.Equal(3, entry.Limits.Charges);
+        Assert.Equal(4, entry.Limits.EveryHits);
+    }
+
+    [Fact]
+    public void A_runner_entry_carries_the_non_value_params_a_dispatch_needs()
+    {
+        // `element` is a String param: it never appears in Values, and without it the runner cannot
+        // build the payload at all. An entry that knows the amount but not what kind of damage it is
+        // is not executable.
+        var atom = Strike(
+            "{\"trigger\":\"OnDamageDealt\",\"charges\":2}",
+            "{\"amount\":{\"min\":-120,\"max\":-80,\"roll\":\"onApply\"},\"element\":\"fire\"}");
+
+        var entry = Assert.Single(Compile(atom).Runtime);
+
+        Assert.Equal("fire", entry.Params["element"]);
+        Assert.True(entry.Values.ContainsKey("amount"));
+    }
+
+    [Fact]
+    public void An_atom_with_no_limits_carries_the_none_sentinel_not_zero()
+    {
+        // Zero is a real cap (dispatch never) and a real charge count. "Absent" must be its own value
+        // or every unlimited atom silently becomes a capped one.
+        // An OnApply range is runner work by rule 3 and declares no state key at all — the case
+        // that proves "absent" survives compilation as absent.
+        var atom = Strike(When(EffectTriggers.OnDamageDealt, chance: 250),
+            "{\"amount\":{\"min\":-120,\"max\":-80,\"roll\":\"onApply\"}}");
+        var entry = Assert.Single(Compile(atom).Runtime);
+
+        Assert.Equal(RunnerLimits.None, entry.Limits);
+        Assert.Equal(-1, entry.Limits.CapPerMatch);
+        Assert.False(entry.Limits.HasCap);
+
+        // `default` is NOT absent under this encoding — it is cap 0, charges 0. Pinned so nobody
+        // "simplifies" None back to new() and turns every unlimited atom into a dead one.
+        Assert.NotEqual(default, RunnerLimits.None);
     }
 }

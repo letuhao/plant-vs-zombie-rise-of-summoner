@@ -1,0 +1,388 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 4,
+  "frozen": true,
+  "_meta": {
+    "kind": "tag-registry",
+    "purpose": "The closed VALIDATED tag vocabulary every item seed entry draws `tags` from (seed-contract.md §2.1, §8). Consumed by ~125 parallel authoring agents across base types, uniques, sets, and affix families. An unknown tag id rejects at import.",
+    "immutability": "FROZEN v1 once an owner flips `frozen` to true and authoring begins against it. Unlike `core.v1.json`'s rarity ladder and role list, this vocabulary is NOT append-only even before freezing — it is a fixed, deliberately-sized set for the whole v1 corpus. Adding, renaming, or removing a tag id is a v2 event that requires an explicit owner re-run decision (seed-contract.md §7.3), never an in-place edit of this file.",
+    "closedVocabularyNote": "Authors NAME a tag; they do not MINT one (seed-contract.md §2, the VALIDATED ownership level). A seed file that references a tag id not listed below fails import with an unknown-tag reason code. Do not add a tag 'just in case' — see designNotes.cutRationale for what was already turned away and why.",
+    "idGrammarNote": "Tag ids and axis ids are lowercase-kebab. `nameKey` follows seed-contract.md §6: `^[a-z0-9.-]+$`, pattern `tag.<axis>.<id>`.",
+    "oneAxisPerEntryRule": "For an axis marked `exclusive: true`, a single entry may carry at most one tag from that axis. The validator enforces this per axis, not across the whole `tags` array — an entry may freely combine one tag from `mass-class` with one from `material-nature`, etc. Axes marked `exclusive: false` (`economy-source`) allow zero, one, or more of that axis's values on the same entry.",
+    "appliesToNote": "`appliesTo` on each axis is authoring guidance, not an enforced constraint in this file — it tells an author which entry shapes (seed-contract.md §10) the axis is meaningful for. A physical-property axis like `mass-class` has nothing to say about an affix family, which is not itself a physical object.",
+    "sourceRefs": [
+      "docs/architecture/item/seed-contract.md#2 (ownership levels)",
+      "docs/architecture/item/seed-contract.md#8 (the formulas tags feed)",
+      "docs/architecture/item/seed-contract.md#10 (worked tag examples)",
+      "docs/architecture/item/enrichment-contract.md#1 (SC7 — code or data)",
+      "docs/architecture/item/ssot-item-categories.md#5.2-5.3 (class ladders, base-stat families)",
+      "docs/architecture/item/ssot-inventory.md (loot filters, stock_eligible)",
+      "data/seed/items/_registry/core.v1.json (rarity/roles/categories — a different registry, not duplicated here)",
+      "data/seed/items/_registry/themes.v1.json (named flavor-worlds — a different registry, not duplicated here)"
+    ],
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "designNotes": {
+      "targetCount": 19,
+      "targetCountAcross": 7,
+      "targetCountRationale": "Seven axes, nineteen tags. Small enough that one author can hold the whole vocabulary in working memory while filling in a base type, large enough that the four formulas named in seed-contract.md §8 that read tags (weight, durability, vendor stock, loot filters) each get a real, distinguishable input instead of one overloaded 'flavor' string. Every axis maps to a formula or system named in this repo's own docs — none were added speculatively to round out a category list.",
+      "cutCount": 8,
+      "cutRationale": [
+        {
+          "candidate": "bulk (a second physical-size axis alongside mass-class)",
+          "reason": "No consumer distinct from the weight/encumbrance formula that mass-class already feeds (seed-contract.md §8). Two axes driving the same formula the same way is not two signals, it is one signal with double the chance of disagreeing with itself."
+        },
+        {
+          "candidate": "fungal, floral (as origin-axis values)",
+          "reason": "Fully covered by material-nature=organic plus origin=rooted. No system was found that needs 'fungal' distinguished from 'floral' distinguished from generic organic-and-rooted; adding them would only fragment the loot-filter/vendor-stock grouping the origin axis exists to feed."
+        },
+        {
+          "candidate": "lifecycle: starter",
+          "reason": "Duplicates the DERIVED `stock_eligible` flag (ssot-inventory.md — computed structurally from pool_rolls=0 and Fixed-only implicits). An authored 'starter' tag could silently disagree with that computed truth; the derivation is already the single source."
+        },
+        {
+          "candidate": "lifecycle: chase, legacy",
+          "reason": "No named consumer in seed-contract.md, enrichment-contract.md, or any of the four SSOT docs read for this task. 'Which items are chase items' is a curation/marketing question with no formula or system currently planned to read it — SC7's 'not content, it is a lie in a table' applies directly."
+        },
+        {
+          "candidate": "salvage-rich (economy axis)",
+          "reason": "seed-contract.md §8 states salvage yield's inputs explicitly: rarity band, ilvl, enhancement level. Tags are not among them. A tag whose only plausible formula names inputs that exclude it has zero declared reader."
+        },
+        {
+          "candidate": "elemental (affix-family descriptor)",
+          "reason": "Redundant with the entry's own VALIDATED `element`/`variants` field (seed-contract.md §10's affix-family example already carries `variants.generate: elements+omni`). A second, unenforced tag saying the same thing can drift out of sync with the field a formula would actually read."
+        }
+      ],
+      "leastCertain": [
+        "notability=signature — the weakest-supported tag here. Its consumer (a loot-filter highlight bucket / balance-review curation queue) is plausible but, unlike the other six axes, is not named or evidenced anywhere in the four SSOT docs; it is inferred from the seed-contract.md §10 unique example, which already tags a unique 'signature'. Kept because cutting it would make that worked example in the binding contract doc unauthorable, but it should be the first axis re-examined if a reviewer wants to shrink v1 further.",
+        "economy-source=crafted-only / vendor-stocked — real per seed-contract.md §8's 'vendor stock · loot filters · market value' formula row, but that row's current planned consumers (I3 vendor rotation, I12 drop tables) are both unbuilt. The tag is sound; the systems that would read it are further out than the other five axes' consumers.",
+        "origin (rooted / undead / mechanical) — deliberately kept narrow to avoid re-deriving `themes.v1.json`'s named flavor-worlds or overlapping material-nature's organic/necrotic/metal substance axis. The line between 'origin flavor' and 'material substance' is a real design cut, not an obvious one, and a reviewer could reasonably argue origin should be folded into material-nature instead of standing alone."
+      ]
+    }
+  },
+  "axes": [
+    {
+      "id": "mass-class",
+      "definition": "How much physical mass or bulk this entry reads as carrying on a body.",
+      "exclusive": true,
+      "appliesTo": [
+        "base-type",
+        "unique",
+        "material",
+        "gem"
+      ],
+      "values": [
+        "light",
+        "medium-light",
+        "medium",
+        "medium-heavy",
+        "heavy"
+      ],
+      "v3Note": "Widened from three values to five after the pilot. TWO independent agents on two different partitions each invented the rung they needed — medium-heavy on a plant armour band, medium-light on a humanoid weapon band. When separate authors who cannot see each other reach for the same missing value, the vocabulary is too coarse, not the authors careless. A weapon ladder and an armour ladder both span more than three perceptible weights. Additive: light/medium/heavy keep their exact meaning, so nothing authored under v1 or v2 becomes invalid."
+    },
+    {
+      "id": "material-nature",
+      "definition": "What the entry is physically made of, at the coarsest level a formula needs.",
+      "exclusive": true,
+      "appliesTo": [
+        "base-type",
+        "unique",
+        "material",
+        "gem",
+        "consumable"
+      ],
+      "values": [
+        "organic",
+        "mineral",
+        "metal",
+        "necrotic",
+        "arcane"
+      ]
+    },
+    {
+      "id": "durability-class",
+      "definition": "How the entry wears relative to what its class and rarity alone would predict.",
+      "exclusive": true,
+      "appliesTo": [
+        "base-type",
+        "unique",
+        "material"
+      ],
+      "values": [
+        "sturdy",
+        "fragile"
+      ]
+    },
+    {
+      "id": "combat-posture",
+      "definition": "The entry's primary tactical intent, orthogonal to its equip role.",
+      "exclusive": true,
+      "appliesTo": [
+        "base-type",
+        "unique",
+        "affix-family",
+        "gem",
+        "charm",
+        "consumable"
+      ],
+      "values": [
+        "offensive",
+        "defensive",
+        "utility"
+      ],
+      "v2Note": "Extended wave 0c after the pilot. A gem partition tagged its inserts offensive/defensive and was rejected, with no alternative vocabulary offered — the powerCategories vector is a different thing (it prices an effect; this groups an item for filters and vendor stock). This axis stated its own consumers as vendor-stock and loot-filter grouping, and gems, charms and consumables are all filterable inventory. Excluding them was an oversight, not a rule."
+    },
+    {
+      "id": "origin",
+      "definition": "The entry's biological/thematic origin — independent of what it is physically made of (material-nature) and independent of the named flavor-world it might belong to (themes.v1.json).",
+      "exclusive": true,
+      "appliesTo": [
+        "base-type",
+        "unique",
+        "material",
+        "gem",
+        "charm"
+      ],
+      "values": [
+        "rooted",
+        "undead",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "economy-source",
+      "definition": "Which non-drop distribution channels this entry is meant to be reachable through. Not mutually exclusive — an entry can be neither, either, or both.",
+      "exclusive": false,
+      "appliesTo": [
+        "base-type",
+        "unique"
+      ],
+      "values": [
+        "crafted-only",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "notability",
+      "definition": "Flags an entry as a hand-picked standout among its peers, for curation and display — never a power claim.",
+      "exclusive": true,
+      "appliesTo": [
+        "unique",
+        "set"
+      ],
+      "values": [
+        "signature"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "id": "light",
+      "axis": "mass-class",
+      "nameKey": "tag.mass-class.light",
+      "definition": "Occupies no meaningful mass or bulk on the body — cloth-weight, papery, or effectively weightless. Two agents must agree: if you'd call it 'a few ounces' or lighter, it is light.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)"
+      ]
+    },
+    {
+      "id": "medium",
+      "axis": "mass-class",
+      "nameKey": "tag.mass-class.medium",
+      "definition": "Ordinary mass for handheld or worn equipment of its class — the default when neither `light` nor `heavy` clearly applies. Most base types land here.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)"
+      ]
+    },
+    {
+      "id": "heavy",
+      "axis": "mass-class",
+      "nameKey": "tag.mass-class.heavy",
+      "definition": "Carries substantial mass or bulk — full plate, an oversized launcher, dense heartwood. Should read as physically encumbering if a player picked it up.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)"
+      ]
+    },
+    {
+      "id": "organic",
+      "axis": "material-nature",
+      "nameKey": "tag.material-nature.organic",
+      "definition": "Living or once-living plant or animal tissue — wood, fibre, leaf, growing bone. Decays; does not rust or tarnish.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)",
+        "durability/repair formula (seed-contract.md §8: class · rarity · tags)",
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "mineral",
+      "axis": "material-nature",
+      "nameKey": "tag.material-nature.mineral",
+      "definition": "Stone, crystal, shell, or earth-derived substance — no living tissue, no worked metal.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)",
+        "durability/repair formula (seed-contract.md §8: class · rarity · tags)",
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "metal",
+      "axis": "material-nature",
+      "nameKey": "tag.material-nature.metal",
+      "definition": "Worked or cast metal — plate, blade, chassis. Rusts; does not rot.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)",
+        "durability/repair formula (seed-contract.md §8: class · rarity · tags)",
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "necrotic",
+      "axis": "material-nature",
+      "nameKey": "tag.material-nature.necrotic",
+      "definition": "Dead flesh or bone animated or preserved past its natural end — zombie remains, not living organic growth. Distinct from the `origin=undead` tag, which is about thematic origin, not substance: a necrotic item need not be zombie-sourced, and an undead-origin item need not be physically necrotic.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)",
+        "durability/repair formula (seed-contract.md §8: class · rarity · tags)",
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "arcane",
+      "axis": "material-nature",
+      "nameKey": "tag.material-nature.arcane",
+      "definition": "The entry's substance is magical or energetic rather than ordinary physical matter — a construct of pure effect given form.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)",
+        "durability/repair formula (seed-contract.md §8: class · rarity · tags)",
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "sturdy",
+      "axis": "durability-class",
+      "nameKey": "tag.durability-class.sturdy",
+      "definition": "Wears more slowly, or costs less to repair, than its class and rarity alone would predict.",
+      "consumers": [
+        "durability/repair formula (seed-contract.md §8: class · rarity · tags)"
+      ]
+    },
+    {
+      "id": "fragile",
+      "axis": "durability-class",
+      "nameKey": "tag.durability-class.fragile",
+      "definition": "Wears faster, or costs more to repair, than its class and rarity alone would predict.",
+      "consumers": [
+        "durability/repair formula (seed-contract.md §8: class · rarity · tags)"
+      ]
+    },
+    {
+      "id": "offensive",
+      "axis": "combat-posture",
+      "nameKey": "tag.combat-posture.offensive",
+      "definition": "The entry's primary value is dealing damage or enabling damage to be dealt. Independent of `role` — a jewel can be offensive without occupying an armament role.",
+      "consumers": [
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "defensive",
+      "axis": "combat-posture",
+      "nameKey": "tag.combat-posture.defensive",
+      "definition": "The entry's primary value is survivability — mitigation, healing, protection, shielding.",
+      "consumers": [
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "utility",
+      "axis": "combat-posture",
+      "nameKey": "tag.combat-posture.utility",
+      "definition": "The entry's primary value is neither damage nor survivability — resource generation, mobility, information, or support.",
+      "consumers": [
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "rooted",
+      "axis": "origin",
+      "nameKey": "tag.origin.rooted",
+      "definition": "Grown in place rather than built or scavenged — a plant-sourced origin distinct from the `plant` frame field itself (a plant-frame item need not read as rooted; a hybrid-frame item might).",
+      "consumers": [
+        "vendor stock / loot filters flavor grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "undead",
+      "axis": "origin",
+      "nameKey": "tag.origin.undead",
+      "definition": "Sourced from reanimated or preserved zombie remains, as a thematic origin. Distinct from `material-nature=necrotic`, which is about physical substance, not where the item came from.",
+      "consumers": [
+        "vendor stock / loot filters flavor grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "mechanical",
+      "axis": "origin",
+      "nameKey": "tag.origin.mechanical",
+      "definition": "Built from machine parts, gears, or circuitry rather than grown, dug, or reanimated.",
+      "consumers": [
+        "vendor stock / loot filters flavor grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "crafted-only",
+      "axis": "economy-source",
+      "nameKey": "tag.economy-source.crafted-only",
+      "definition": "Never appears in a drop table; reachable only through a crafting recipe (and through vendor rotation if also tagged `vendor-stocked`).",
+      "consumers": [
+        "drop-table generation, to exclude the entry (I12, unbuilt)",
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "vendor-stocked",
+      "axis": "economy-source",
+      "nameKey": "tag.economy-source.vendor-stocked",
+      "definition": "Eligible for inclusion in a vendor's rotating stock pool.",
+      "consumers": [
+        "vendor stock rotation selection (I3, unbuilt)",
+        "vendor stock / loot filters / market value grouping (seed-contract.md §8: class · tags · derived price)"
+      ]
+    },
+    {
+      "id": "signature",
+      "axis": "notability",
+      "nameKey": "tag.notability.signature",
+      "definition": "A hand-picked, build-defining entry meant to be curated and highlighted ahead of ordinary same-rarity peers. A display and review flag, never a power claim — see seed-contract.md §10's `unique.ember-014` worked example, which uses exactly this tag.",
+      "consumers": [
+        "presentation item card — emphasis and border treatment (G3)",
+        "loot filter defaults — never auto-salvage (I13)"
+      ],
+      "note": "Consumer assigned during wave-0 review: it was authored with none, which by this registry own rule would require cutting it. The presentation and loot-filter readers are real and named, so it is kept rather than cut."
+    },
+    {
+      "id": "medium-light",
+      "axis": "mass-class",
+      "nameKey": "tag.medium-light",
+      "definition": "Lighter than medium but not featherweight — a one-handed tool, a thin plate, a hollow shell.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)"
+      ]
+    },
+    {
+      "id": "medium-heavy",
+      "axis": "mass-class",
+      "nameKey": "tag.medium-heavy",
+      "definition": "Heavier than medium but still wieldable — a two-handed tool, a doubled plate, dense heartwood.",
+      "consumers": [
+        "weight/encumbrance formula (seed-contract.md §8: class · role · frame · tags)"
+      ]
+    }
+  ],
+  "frozenUtc": "2026-08-22",
+  "frozenNote": "FROZEN v2. v1 excluded gem/charm/consumable from combat-posture; corrected after the pilot, before any partition consumed v1 except the pilot itself, which re-runs.",
+  "minCompatibleVersion": 1,
+  "minCompatibleNote": "v2 only WIDENED combat-posture.appliesTo to include gem/charm/consumable. Nothing legal under v1 became illegal, so v1-authored content stays valid.",
+  "v4Note": "Widened four physical axes after stage 1a. A MATERIAL is the most natural thing in the corpus to carry material-nature, mass-class and durability-class — a shard is mineral, a substrate is organic or metal — yet appliesTo listed only base-type and unique. The axes were written before the material kind had a shape, so the omission is an oversight rather than a rule. Additive: nothing legal before became illegal.",
+  "stage1aFrozen": "Stage 1a authored and validated at 0 errors (205 entries, 25 files). From here a change to this registry invalidates authored content unless minCompatibleVersion says otherwise."
+}

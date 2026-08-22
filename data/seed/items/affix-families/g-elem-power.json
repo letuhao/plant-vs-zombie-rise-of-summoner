@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "kind": "affix-family",
+  "_meta": {
+    "batch": "affix-g-elem-power",
+    "partition": "affix-families/g.elem-power",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 3,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-affixes.md#4.1",
+    "partitionScopeNote": "naming.v1.json idNamespaces.affixFamilies.groups (g.elem-power) lists TWO existingFamilies: elemental_power and affliction — confirmed independently at ssot-affixes.md#4.3's group-summary table ('g.elem-power | elemental_power · affliction | stat.derived | quarantined'). This partition's brief named only elemental_power and elpw-amplify as already-authored in the exemplar and scoped this file to '~5 further families beyond the two already in the exemplar', with no mention of affliction. Investigated rather than silently deferred: affliction's channel is status.power.{category} (src/FusionRpg.Core/Status/StatusCategoryRegistry.cs — category is one of exactly three closed values, dot/cc/contagion, keyed off StatusId, not off element). That is a genuinely different variant axis from the 'elements+omni' directive this whole file uses, and no second `variants.generate` directive is defined anywhere in seed-contract.md, entry-shapes.md, or any registry read for this partition — 'elements+omni' is the only one that exists. Authoring affliction here would require either inventing an ungrounded second generate directive (forbidden — an author names a registry value, never invents one) or hand-authoring three category-keyed rows outside the variants mechanism the rest of this file relies on, a shape decision this partition has no authority to make alone. Left out of this file deliberately; flagged for the owner or a follow-up pass to place explicitly, either back into this group with its own variant handling or into a dedicated status-power lane."
+  },
+  "entries": [
+    {
+      "id": "atom.elpw-pierce",
+      "nameKey": "affix.elemental-pierce",
+      "name": "Elemental Pierce",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.pierce.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": ["humanoid", "plant"],
+      "side": "both",
+      "powerBand": "medium",
+      "nameWords": {
+        "prefix": ["Thorned", "Barbed", "Needling"]
+      },
+      "displayTemplate": "+{value} {element} penetration",
+      "tags": ["offensive"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
+      "notes": "NEW family, stem `elpw`, word `pierce` — mechanical (what it does), not a flavour adjective. `combat.power.*` is the only channel family this group owns (atom-family-library.md §3.2's 12-row table gives every other stat.derived channel to a different group), so a genuinely new g.elem-power family has to mint a NEW channel rather than reuse `combat.power.{variant}` under a different op — the same move atom-family-library.md §3.1 already names 'new channel' for `flourishing`/`swiftness` ahead of their own runtime. `combat.power.pierce.{variant}` is this partition's mint: a flat amount that offsets the matching-element `combat.defense.*` term on the far side of the same (power − defense) sum atom-layer-handoff.md §1 grounds this whole group in (OverlayCombatCalculator.cs:84-89) — an attacker-side complement to `elemental_defense` (g.ward), not a restatement of it. `powerBand: medium` mirrors `elemental_power`'s own band: this is a standalone stat carrying its own weight, not a rider on another family. Quarantine applies exactly as it does to the two exemplar entries — `stat.derived` is None/None/None until E12; this row imports and binds nowhere today, which is the known, scheduled state, not a defect of this authoring pass."
+    },
+    {
+      "id": "atom.elpw-focus",
+      "nameKey": "affix.elemental-focus",
+      "name": "Elemental Focus",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.pierce.{variant}",
+        "op": "Increased"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": ["humanoid", "plant"],
+      "side": "both",
+      "powerBand": "low",
+      "nameWords": {
+        "prefix": ["Honing", "Whetted", "Grinding"]
+      },
+      "displayTemplate": "{value} increased {element} penetration",
+      "tags": ["offensive"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
+      "notes": "The Increased sibling of `elpw-pierce`, on the exact same new channel — the identical shape the exemplar itself uses to split `elemental_power` (Flat) from `elpw-amplify` (Increased): two distinct families because `op` changes how they compose (Flat adds resolver-independent game units to the pierce term, Increased scales whatever pierce is already on the actor), never a second tier of one family. `powerBand: low` against the sibling's `medium` repeats the exemplar's own judgement call about which half of a Flat/Increased pair should be the bigger pull — the additive stat is the identity, the multiplier is the rider. Word `honing`/`whetted`/`grinding` deliberately reads as a DIFFERENT axis (sharpening-over-time / process) from `elpw-pierce`'s own words (`thorned`/`barbed`/`needling`, a physical-shape axis) — two families in one group must not share a flavour idea any more than two items in one partition should, per the brief's own adjective-clustering warning."
+    },
+    {
+      "id": "atom.elpw-override",
+      "nameKey": "affix.elemental-override",
+      "name": "Elemental Override",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.{variant}",
+        "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": ["humanoid", "plant"],
+      "side": "both",
+      "powerBand": "high",
+      "nameWords": {
+        "prefix": ["Usurping", "Overgrown", "Engulfing"]
+      },
+      "displayTemplate": "{element} power becomes {value}, overriding weaker sources",
+      "tags": ["offensive"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
+      "notes": "The `Replace` op nobody in this group has used yet — reuses `elemental_power`'s own channel rather than minting a third one, because 'set this channel to a fixed value regardless of what else feeds it' is exactly `elemental_power`'s magnitude with a different composition rule, not a different stat. atom-catalog-ssot.md §... and atom-family-library.md:59 both name `Flat · Increased · Replace · Flag` as the closed derived op set with no `More`; this is the first family in the group to spend `Replace`. Mechanically this is a floor/ceiling guarantee — a graft aggressive enough to crowd out a weaker elemental grant on the same channel rather than stacking with it — which is why it reads as `high` rather than `medium`: a family that can make every other Flat/Increased source on the same channel irrelevant is a strong, deliberately scarcer effect, the same reasoning ssot-uniques.md applies to fixed cores. bands.v1.json's own `flatDerivedChannel` note records that `Replace`/`Flag` 'carry no tier-band magnitude at all' in the additive sense — `powerBand` here still gates which rarity/tier window the family can appear in (§4.6-style item-level gating), it just is not the input to a `lo_t`/`hi_t` roll range the way a Flat family's is."
+    },
+    {
+      "id": "atom.elpw-attune",
+      "nameKey": "affix.elemental-attunement",
+      "name": "Elemental Attunement",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.{variant}",
+        "op": "Flag"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": ["humanoid", "plant"],
+      "side": "both",
+      "powerBand": "trivial",
+      "nameWords": {
+        "prefix": ["Awakened", "Rooted", "Bonded"]
+      },
+      "displayTemplate": "attunes {element} power, enabling it to take effect",
+      "tags": ["offensive"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
+      "notes": "The `Flag` op nobody in this group has used yet. A boolean gate on the SAME channel as `elemental_power` and `elpw-override`, read as a prerequisite unlock rather than a magnitude: some future item design (a graft that has to 'take root' before it channels an element at all) wants a switch, not a number, and `Flag` is the one op that carries no scaled amount by construction — `amount` is still a required param on the `stat.derived` schema (AtomKindRegistry.cs), so the generator supplies a structural on/off rather than a rolled value. `powerBand: trivial` on purpose: a gate does not get stronger with tier the way an additive stat does, and `trivial` is the cheapest rung available rather than an unscored one, since every entry in this file needs a real band for tier-gating even where the op itself ignores the resulting magnitude. Distinct from `susceptibility`'s excluded status (g.ward, zero readers, not authored at all) — this family is authored because the mechanic (a gate on the SAME channel two sibling families already use) is fully expressible in the closed schema, not because a reader exists for it yet; quarantine, not absence, is the honest state."
+    },
+    {
+      "id": "atom.elpw-overflow",
+      "nameKey": "affix.elemental-overflow",
+      "name": "Elemental Overflow",
+      "kindId": "stat.derived",
+      "params": {
+        "channel": "combat.power.overflow.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": ["humanoid", "plant"],
+      "side": "both",
+      "powerBand": "low",
+      "nameWords": {
+        "prefix": ["Overripe", "Brimming", "Gorged"]
+      },
+      "displayTemplate": "+{value} bonus {element} power",
+      "tags": ["offensive"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
+      "notes": "A second new channel, `combat.power.overflow.{variant}`, kept deliberately separate from `combat.power.{variant}` rather than folded into `elemental_power` at a bigger share: a family authored as its own ledger so a later formula is free to treat 'overflow' power differently from base power (an uncapped or late-game-only pool) without that decision being smuggled into `elemental_power`'s own already-shipped semantics. `powerBand: low` keeps it a secondary bonus source rather than a second copy of the group's main stat — the same relative-pull judgement the exemplar makes between `elemental_power` and `elpw-amplify`. Word set (`overripe`/`brimming`/`gorged`) draws on harvest and hunger, the axes the brief names and this file's other four entries do not touch (`pierce`/`focus` sit on shape and sharpening, `override`/`attune` sit on dominance and rooting), keeping the partition's twelve authored flavour words spread across five distinct ideas rather than one repeated with synonyms. `combat.power.*` remains flat game units per bands.v1.json's units-correction ledger — this is another additive damage term, never a resolver-points quantity, and no number appears anywhere in this entry to make that mistake possible."
+    }
+  ]
+}

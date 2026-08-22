@@ -105,6 +105,9 @@ export type WorldStateDto = {
 
 /** One line of a turn report, as the map plays it back. */
 export type WorldTurnEntryDto = {
+  /** Where it happened, when it happened anywhere. Absent means "nowhere in particular". */
+  sectorId?: string | null;
+
   phase: string;
   kind: string;
   subject: string;

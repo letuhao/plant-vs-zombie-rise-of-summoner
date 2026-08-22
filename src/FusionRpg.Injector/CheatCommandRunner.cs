@@ -716,6 +716,31 @@ public static class CheatCommandRunner
         catch { return default; }
     }
 
+    /// <summary>
+    /// The atom half of <c>effects.grants.apply</c> (E19). Absent on the legacy payload, which
+    /// carries <c>grants[]</c> and nothing else — so an older server keeps working unchanged.
+    /// </summary>
+    static int InstallAtomPush(JsonElement p)
+    {
+        var isAtomPush =
+            p.TryGetProperty("runnerBindings", out _) ||
+            p.TryGetProperty("defs", out _) ||
+            p.TryGetProperty("upToDate", out _);
+        if (!isAtomPush) return 0;
+
+        try
+        {
+            var payload = System.Text.Json.JsonSerializer.Deserialize<AtomPushDto>(p.GetRawText());
+            if (payload == null) return 0;
+            return Effects.AtomPushReceiver.Install(payload);
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("effects.grants.apply (atoms): " + ex.Message);
+            return 0;
+        }
+    }
+
     static void RunEffectsGrantsApply(JsonElement p)
     {
         try
@@ -736,10 +761,16 @@ public static class CheatCommandRunner
                 applied++;
             }
 
+            // E19: the same command now also carries compiled defs and runner bindings. The grant
+            // loop above is untouched — it does the owner-key work (entity:selected, instance
+            // refusal) that the receiver must not duplicate or skip.
+            var runnerBindings = InstallAtomPush(p);
+
             DebugRuntime.Emit("debug.effect.rehydrated", new Dictionary<string, object>
             {
                 ["count"] = applied,
-                ["grants"] = Effects.EffectRuntime.Snapshot().Grants.Count
+                ["grants"] = Effects.EffectRuntime.Snapshot().Grants.Count,
+                ["runnerBindings"] = runnerBindings
             });
         }
         catch (Exception ex)

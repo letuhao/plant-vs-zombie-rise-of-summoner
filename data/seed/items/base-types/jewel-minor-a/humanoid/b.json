@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-jewel-minor-a-humanoid-b",
+    "partition": "base-types/jewel-minor-a/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "agent partition: base-types/jewel-minor-a/humanoid/b"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-ring-1-b-001",
+      "nameKey": "base.bent-spacer",
+      "name": "Bent Spacer",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.bent-spacer",
+      "flavorKey": "flavor.base.bent-spacer",
+      "flavor": "Worked from scrap, still holds.",
+      "tags": [
+        "medium",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-002",
+      "nameKey": "base.twisted-washer",
+      "name": "Twisted Washer",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.twisted-washer",
+      "flavorKey": "flavor.base.twisted-washer",
+      "flavor": "Spun tight around the wrist.",
+      "tags": [
+        "medium",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-003",
+      "nameKey": "base.open-shank",
+      "name": "Open Shank",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.open-shank",
+      "flavorKey": "flavor.base.open-shank",
+      "flavor": "Worn loose, waiting to clamp.",
+      "tags": [
+        "medium",
+        "metal",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-004",
+      "nameKey": "base.burnished-grommet",
+      "name": "Burnished Grommet",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.burnished-grommet",
+      "flavorKey": "flavor.base.burnished-grommet",
+      "flavor": "Polished and edged with care.",
+      "tags": [
+        "medium",
+        "metal",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-005",
+      "nameKey": "base.flanged-ferrule",
+      "name": "Flanged Ferrule",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.flanged-ferrule",
+      "flavorKey": "flavor.base.flanged-ferrule",
+      "flavor": "Edges hold firm at wrist and bone.",
+      "tags": [
+        "medium",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-006",
+      "nameKey": "base.substantial-nut",
+      "name": "Substantial Nut",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.substantial-nut",
+      "flavorKey": "flavor.base.substantial-nut",
+      "flavor": "Threaded so nothing spins loose.",
+      "tags": [
+        "medium",
+        "metal",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-007",
+      "nameKey": "base.notarised-shim",
+      "name": "Notarised Shim",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.notarised-shim",
+      "flavorKey": "flavor.base.notarised-shim",
+      "flavor": "Authority bound in metal.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-008",
+      "nameKey": "base.certified-clip",
+      "name": "Certified Clip",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.certified-clip",
+      "flavorKey": "flavor.base.certified-clip",
+      "flavor": "Stamped and bound with intent.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-009",
+      "nameKey": "base.final-bead",
+      "name": "Final Bead",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.final-bead",
+      "flavorKey": "flavor.base.final-bead",
+      "flavor": "The last word on a binding thread.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-010",
+      "nameKey": "base.absolute-ring",
+      "name": "Absolute Ring",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.absolute-ring",
+      "flavorKey": "flavor.base.absolute-ring",
+      "flavor": "No compromise, no exception.",
+      "tags": [
+        "heavy",
+        "metal",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-011",
+      "nameKey": "base.endorsed-token",
+      "name": "Endorsed Token",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.endorsed-token",
+      "flavorKey": "flavor.base.endorsed-token",
+      "flavor": "Approved by those who came before.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-1-b-012",
+      "nameKey": "base.unbreakable-trinket",
+      "name": "Unbreakable Trinket",
+      "frame": "humanoid",
+      "role": "jewel-minor-a",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.unbreakable-trinket",
+      "flavorKey": "flavor.base.unbreakable-trinket",
+      "flavor": "Built to outlast the wearer.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ]
+    }
+  ]
+}

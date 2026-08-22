@@ -279,7 +279,9 @@ Core **1902** · Data **235** · E2E **164** · Guard **47** · web **288**.
 - [x] One test per leak, plus the property test that catches the ones nobody wrote a test for. It found two on its first run.
 - [x] Three re-blesses across wave 2 rather than the planned one — every one a behaviour change with its reason recorded on the golden constant. W23 needed none: the stance order restored exactly what the wild pack used to do implicitly, and the hash did not move.
 - [x] **The mechanical half of the playtest is automated** (`web/.../e2e/world.spec.ts`, 10 Playwright tests): unseen ground renders as a silhouette with no name or slots; ground you stand on renders in full; a remembered sector reads "seen N turns ago"; a counted force shows a number and a glimpsed one shows a band and never a number; the inspector fills in and reports intel age; the lifeline overlay is silent until asked, marks what is load-bearing, and turns off again; an order queues rather than sending and can be taken back. The `data-testid` hooks were already in the components — asking a human to eyeball what they were built for was the wrong call.
-- [ ] **Owner look — the aesthetic half only.** Does it *read*: is the dimming legible at map zoom, is "seen 6 turns ago" findable on a small card, is a map that is 60% dark interesting or merely annoying. No assertion answers that, and it is cheap to change now and expensive once `sector-development` piles more onto the card.
+- [x] **Owner look, 2026-08-22 — confirmed working.** Deployed live (web build → publish → `Start-Process`), a pre-wave-2 world migrated by ending one turn, and the owner marched a legion out and back. Two findings, neither catchable by a test:
+      **(1) the force picker was invisible** — a bare `<button>` styled `text-muted` inside a list, reading as a label, with March/Claim *hidden* rather than disabled when nothing was selected, so nothing said a step had been missed. Now a bordered, hoverable, `aria-pressed` row with a hint line. The Playwright tests drove it by role the whole time and passed: a test proves a control exists, never that a person can find it.
+      **(2) `first-light` cannot stay foggy.** ash-waste is a hub touching four of six sectors and the homeworld is self-visible by ownership, so one march to the centre lights the whole map permanently — memory decays but never returns to `Unknown`. The dark map is a three-turn opening, not a condition. On this map the live tension is **staleness**, not ignorance: `ThreatMap`'s spread carries it, and `Unknown`/curiosity in `ValueMap` will almost never fire. A constraint for `world-generator` (wave 4), and a warning against tuning constants against a map that cannot exercise them.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
 
 *(Not ours: `e2e/audit.spec.ts` fails on a pre-existing locator ambiguity — `getByRole("link", { name: "Stats" })` matches both **Stats** and **PvzStats**, since Playwright's `name` is a substring match. Verified by removing the World nav link and re-running: identical failure. `exact: true` would fix it, but it is another stream's file. It does mean `npm run test:all` is red on `main`.)*
@@ -355,72 +357,107 @@ Settled during the spec audit, so nobody re-litigates it here: the AI runs **out
   - Files: `Core/World/Ai/ThreatMap.cs`, tests. Scope: M.
   - Dependencies: W29.
 
-- [ ] **Task W32: ReachMap and the believed frontier**
+- [x] **Task W32: ReachMap and the believed frontier** *(done 2026-08-22 — 18 tests, all 8 new mutants caught. `LaneGraph.Build` gained an optional `bannerElement` rather than a second builder — the ley discount is per legion, which is the whole reason reach is per entity. Two vacuous assertions of mine caught before they shipped: the ley test used `<=` (it would have passed if the discount never applied) and now picks a lane length of 1200 so the saving straddles a turn boundary and is visible as 1 turn against 2. `FrontierSet` returns three sets rather than one — held, contested, unknown — because under fog the edge of what you hold and the edge of what you know want opposite decisions, and merging them leaves every caller re-splitting the list.)*
   - Description: per-entity Dijkstra over the march graph, banner from `BannerElement.Of`, `turns = ceil(cost / MovementPolicy.BudgetFor(stance))`; `FrontierSet` over belief, which under fog includes **unknown neighbours** — the edge of what you hold and the edge of what you know are different sets.
   - Acceptance: reach matches hand-computed turns on the fixture; a `hold` stance reaches nothing and does not divide by zero; a scout's reach is half a marcher's; an unseen lane is treated as open, so reach is optimistic; the frontier of a faction that holds one sector includes every unknown neighbour of it.
   - Verify: Core filtered `~Ai`.
   - Files: `Core/World/Ai/{ReachMap,FrontierSet}.cs`, tests. Scope: M.
   - Dependencies: W29.
 
-- [ ] **Task W33: ValueMap — worth, relative to this empire**
+- [x] **Task W33: ValueMap — worth, relative to this empire** *(done 2026-08-22 — 21 tests. The overextension penalty is 1400‰ — deliberately more than the whole score, because it has to drive a total **below zero**: the classic 4X failure is blobbing outward until nothing is defensible, and the cure is for bad ground to score worse than nothing rather than merely least-best. `ReconnectionCost` needed the same belief-side overload `LaneGraph` got, which is correction 3 arriving exactly where the spec predicted. Risk with an empty threat map reads **all safe** rather than all-maximally-dangerous — an inverted axis with no data is the classic way to make an AI refuse to move.)*
   - Description: six per-mille axes (yield, strategic, defensibility, cost, risk, curiosity) weighted by the policy, minus an overextension penalty that can drive the total **below zero**; `SlotValueCatalog`, `INeedVector`, `UniformNeeds` as the stub until `sector-development` ships stockpiles.
   - Acceptance: overextension drives a sector below zero — the blobbing cure, and the one axis that must be able to go negative; curiosity makes an unknown sector attractive, loses to a good known target, beats a poor one, and reads zero when nothing is unknown; a Seat outranks a wildland; the strategic axis ranks a barbell join top; a glimpsed sector's yield is zero because a glimpse carries no slots, and that is asserted rather than tolerated.
   - Verify: Core filtered `~Ai`.
   - Files: `Core/World/Ai/{ValueMap,SlotValueCatalog,INeedVector,UniformNeeds}.cs`, tests. Scope: M.
   - Dependencies: W29, W30, W31, W32.
 
-- [ ] **Task W34: Response curves and considerations**
+- [x] **Task W34: Response curves and considerations** *(done 2026-08-22 — 22 tests. Curves are integer-only and there is no logistic: it cannot be done without an approximation nobody would trust, and a curve 2‰ off on one machine is a replay that disagrees with itself. Smoothstep evaluates `3x²−2x³` in one division rather than three per-mille steps, which would round three times and drift off the curve it is named after. `Weakest` breaks ties ordinally so the sentence a turn report prints does not change between runs — the audit trail exists to tell a mistake from a bug, and one that varies is a source of both.)*
   - Description: the IAUS arithmetic, built now and called by nothing: six integer curves `0..1000 -> 0..1000`, the product-of-considerations score, and the compensation factor `1000 - 1000/n`. Wave 3 then inherits a tested scorer and only chooses *which* considerations to write. Momentum is specified and deliberately not implemented — it needs cross-turn memory, which would become hashed state.
   - Acceptance: every curve is monotone in the right direction and exact at both endpoints; the product of considerations is zero if any is zero; compensation raises a three-consideration score without ever exceeding 1000; no floating point anywhere (the guard scan already covers the folder).
   - Verify: Core filtered `~Ai`; `dotnet test tests\FusionRpg.Guard.Tests`.
   - Files: `Core/World/Ai/Utility/{ResponseCurves,Consideration}.cs`, tests. Scope: S.
   - Dependencies: none — independent of everything, can be built at any point.
 
-- [ ] **Task W39: The turn report's *entries* are still unprojected**
+- [x] **Task W39: The turn report's *entries* are still unprojected** *(done 2026-08-22 — 6 E2E tests. `TurnReportEntry` gained a nullable `SectorId` and every `report.Add` that happens *somewhere* now names where — structurally, not in prose, because matching a sector name out of a sentence works until somebody writes a different sentence. A line about nowhere in particular (a calendar tick, a command refused before it named ground) is shown to everyone: dropping those would leave a viewer unable to tell "nothing happened" from "you are not allowed to know". The comment on `/state` claiming to be the only place fog reaches the wire is corrected — it never was.)*
   - Description: W28's `commands` are filtered by belief (structured `SectorId`); `Entries` are not. They carry free text — `Subject` and `Detail` — so honest filtering needs a nullable `SectorId` on `TurnReportEntry` and a pass over every `report.Add` in the engine to fill it. Deliberately **not** done as a line of string-matching: filtering a sector name out of prose is the kind of fix that works until somebody writes a different sentence.
   - Acceptance: an entry naming a sector the viewer has never seen does not reach that viewer; `?asFaction=` shows it; the stored `report_json` shape stays backward-compatible (a nullable field reads as null on old rows); re-derivation still reproduces a trimmed report exactly.
   - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`; the W22 property test extended to the turn endpoint.
   - Files: `Core/World/Turn/TurnReport.cs` + every `report.Add` call site, `Server/WorldEndpoints.cs`, tests. Scope: M.
   - Dependencies: none — independent of the AI, and the last hole in the fog.
 
-### Checkpoint 9 — the tables exist and still nothing has an opinion
-- [ ] Core and Guard green; **no golden moved** and no engine behaviour changed at all.
-- [ ] Every table proven against hand-built fixtures with answers workable on paper, as W15–W18 were. `first-light` is for sanity only — it is too small and too well connected to exercise anything, and on the two-lens question it is actively misleading.
-- [ ] Ordering test in each module: reversing sectors, lanes or entities changes no answer.
-- [ ] Nothing under `World/Ai/` mentions `WorldState`.
+### Checkpoint 9 — the tables exist and still nothing has an opinion ✅ 2026-08-22
+- [x] Core **2337** · Data **353** · Guard **54** · E2E **175**; all four guard scripts green; **no golden moved**, no engine behaviour changed.
+- [x] Every table proven against hand-built fixtures with answers workable on paper. `first-light` is for sanity only — on the two-lens question it is actively misleading, and on supply it silently neuters a test three different ways (a ZOC-projecting wild pack at ash-waste, a Seat in nearly every sector, and a hub that sees the whole map).
+- [x] Ordering test in every module: reversing sectors, lanes or entities changes no answer.
+- [x] Nothing under `World/Ai/` mentions `WorldState` — enforced by a guard that has been seen to fail.
+- [x] **38 mutants, all caught** (`.\scripts\mutate.ps1 -Set world-ai`). Getting there cost six survivors and a retraction: an earlier *"all 22 caught"* was **false**, because a concurrent stream had `Core` uncompilable and `dotnet test` exits non-zero either way, so 22 build failures were counted as 22 tests noticing defects. The script now refuses to start on a red baseline, fails on a stale anchor, and normalises line endings when matching.
+- [x] **A design claim died here.** `FrontierSet.Unknown` — "a neighbour you have never laid eyes on" — cannot be populated: an owned sector is an observation post, so everything adjacent to your territory is always at least glimpsed. Removed; an always-empty set is a lie in a type. That is the fourth claim undone by one fact — **holding ground grants full sight of it** — now written at the top of the capability map so it stops costing an afternoon each time.
 
 ## Phase 10 — the brain
 
-- [ ] **Task W35: `frontier-rules`, rules 1–3, and the one-order invariant**
+- [x] **Task W35: `frontier-rules`, rules 1–3, and the one-order invariant** *(done 2026-08-22 — 26 rule tests across W35+W36. **Five of thirteen mutants survived on vacuous tests, all the same shape:** an ordered `?? ?? ??` chain hides its own bugs, because to test rule N you must build a world where rules 1..N-1 all decline — Take's guard was never exercised (Finish always answered first), Recover's supply check was never consulted (Take claimed the ground first). Two survivors were the code's fault: Defend had a guard redundant with the comparison below it, and Finish/Take can be swapped without changing anything, so the comment claiming otherwise was wrong.)*
   - Description: `FrontierRulesPolicy` walking `OwnForces` in ordinal order, first match wins, at most **one** order per entity, ids `ai-{turn}-{entityId}`. Defend (threat above the garrison already standing there — *not* above zero, which on six sectors fires permanently and deadlocks expansion), Finish (`clear`, lowest believed-guarded slot), Take (`claim`).
   - Acceptance: one scenario fires each rule and one does not; Defend does **not** fire on a Seat whose garrison already covers the threat; Finish picks the lowest guarded slot index; a `claim` filed on believed-stale ground is dropped by the engine with a reason, which is fog working rather than a bug; no entity ever receives two orders in one turn.
   - Verify: Core filtered `~Ai`.
   - Files: `Core/World/Ai/FrontierRulesPolicy.cs`, tests. Scope: M.
   - Dependencies: W33.
 
-- [ ] **Task W36: Rules 4–7, and the stance that costs a turn**
+- [x] **Task W36: Rules 4–7, and the stance that costs a turn** *(done 2026-08-22 — Rules 4-7. **Explore was untestable on the four-sector map and nobody would have noticed:** a scouting legion sees *two* lanes, so everything close enough to reach was already glimpsed and everything unknown was past `ExploreTurns` — scouting revealed the very thing it was going to explore. Three mutants lived in that gap until a six-sector map on shorter lanes made the rule reachable at all.)*
   - Description: Recover (`stance hold` above `RecoverAtMilli = 400`, in believed supply), Explore (`stance scout` if not already scouting, else `move`, within `ExploreTurns = 3`, cheapest legion), Expand (best-value reachable unheld sector scoring above zero), Hold.
   - Acceptance: one scenario fires each and one does not; **a legion already scouting does not re-file the stance** — the oscillation bug, which would otherwise have every move dropped forever; Recover does not fire out of supply; Explore loses to a good known target and beats a poor one; Expand refuses a sector whose value is negative; the one-order invariant still holds across all seven rules over a 20-turn run.
   - Verify: Core filtered `~Ai`.
   - Files: `Core/World/Ai/FrontierRulesPolicy.cs`, tests. Scope: M.
   - Dependencies: W35.
 
-- [ ] **Task W37: Zomboss gets a brain — the wave's one golden re-bless**
+- [x] **Task W37: Zomboss gets a brain — the wave's one golden re-bless** *(done 2026-08-22 — One golden re-blessed, one reason. **The prediction was checked rather than assumed, and the check found a real bug**: dumping the scenario's command log showed orders nobody wrote — the *first* commit of a turn was filling every AI faction that had not committed yet, so a scenario scripting two of them had its second one filled over. Orders already filed now speak for a faction as loudly as a commit does. After the fix the log is byte-identical across the flip, and the hash moves only because `PolicyId` sits in `WorldCanonical`'s faction row — because **`first-light` gives Zomboss no forces at all**, so a brain with nothing to command falls straight through to standing fast.)*
+  - ✅ **Checked before building, and the risk does not materialise.** There is exactly one stored golden — `GoldenFinalHash` in `WorldWaveOneAcceptanceTests` — and that scenario commits for the wild and Zomboss **explicitly**, which suppresses the AI fill. So flipping `PolicyId` moves the hash for one reason only: the field is inside `WorldCanonical`'s faction row. Zomboss's behaviour in that scenario is unchanged, and the command log should come back byte-identical. **Assert that** rather than assuming it — if the log differs, the fill is running where it should not be, and the re-bless would bury the evidence.
+  - ⚠️ **`first-light` will under-exercise the result** (owner playtest): ash-waste is a hub, so the map is fully lit within three turns and **Explore fires ~3 times then never again**, with curiosity reading zero thereafter. A passive-looking Zomboss in the playtest is most likely this, not a broken rule.
   - Description: `first-light` points Zomboss at `frontier-rules`. The wild stay `stand-fast`. Nothing else changes in this task, on purpose: `PolicyId` is inside `WorldCanonical`'s faction row, so this is the only place a hash moves and the reason goes on the golden constant.
   - Acceptance: exactly one re-bless, with the reason recorded; the wild's orders are byte-identical to before; every earlier task's assertion that goldens are unmoved still holds when re-run.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests`; `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`.
   - Files: `Core/World/WorldTemplateCatalog.cs`, golden constants, tests. Scope: S.
   - Dependencies: W36.
 
-- [ ] **Task W38: Acceptance — twenty turns against something that cannot see you**
+- [x] **Task W38: Acceptance — twenty turns against something that cannot see you** *(done 2026-08-22 — 8 tests, twenty turns of live decisions. The fog sweep passes over every order of every turn: nothing ever named ground its commander had not seen. Replay from the command log alone reproduces the stored hashes with no policy involved. The acceptance world **adds a Zomboss warband**, because the shipped map has none — pinned by its own test so a quiet opponent is never mistaken for a broken rule.)*
   - Description: the wave-1 acceptance scenario re-run with Zomboss live, plus the fog-honesty sweep over the whole command log.
   - Acceptance: one turn-log row per turn and one transaction per turn; the run replays **byte-identically** from `(seed, template, command log)`; every AI order carries a reason; ⭐ *every reason names only sectors that faction had already seen* — the success criterion the whole module exists for; Zomboss visibly acts on stale information at least once in twenty turns, captured as a named assertion rather than an anecdote.
   - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`; full suite sweep.
   - Files: `tests/FusionRpg.E2E.Tests/World*.cs`. Scope: S.
   - Dependencies: W37.
 
-### Checkpoint 10 — there is somebody on the other side
-- [ ] All five suites and all four guard scripts green; `npm run build` clean.
-- [ ] Exactly one golden re-bless in the wave, in W37, reason on the constant.
-- [ ] Owner playtest — the only thing tests cannot sign: play ten turns and say whether Zomboss is *legible*. Not whether he is good. Can you tell, from the turn report, why he did what he did — and does watching him act on a six-turn-old report read as a character or as a bug?
+### Checkpoint 10 — there is somebody on the other side ✅ 2026-08-22 (code); owner items open
+- [x] Core **2388** · Data **362** · Guard **54** · E2E **175** · web **292**; all four guard scripts green.
+- [x] Exactly one golden re-blessed, in W37, with its reason on the constant — and the claim that it moved for *one* reason was verified by dumping the command log both ways rather than asserted.
+- [x] **50 mutants across the module, all caught.** Reaching that cost 13 survivors over three rounds and one retraction of a false "all caught" (a red baseline from a concurrent stream made 22 build failures look like 22 tests noticing defects).
+- [ ] **Owner playtest** — the only thing tests cannot sign: play ten turns and say whether Zomboss is *legible*. Not whether he is good. Can you tell from the turn report why he did what he did, and does watching him act on a six-turn-old report read as a character or as a bug?
+      ✅ **Fixed 2026-08-22 — the template now ships `e-zomboss-band-1` at black-gate.** He had a faction, a fortress and no army, so a brain gave him nothing to do; found by playing twenty turns, not by any test. Six tests across four files had quietly been using "zomboss" as their example of a faction that knows nothing, and were re-anchored on a faction id nobody plays.
+- [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
+
+### What this wave learned, in one line each
+- **Holding ground grants full sight of it.** Four separate design claims died on this; it is now at the top of the capability map.
+- **An ordered rule list hides its own bugs.** To test rule N, build a world where rules 1..N−1 decline — otherwise the assertion passes while the code never runs.
+- **A scouting legion sees two lanes**, so on a small map scouting reveals what it set out to explore. Explore was untestable until the fixture grew.
+- **Coverage says what the tests touched; mutation says what they would notice.** The second found five vacuous tests the first called 100%.
+- **`first-light` cannot exercise this module**: no opponent army, a hub that lights the whole map in three turns, a Seat in nearly every sector, and a ZOC-projecting wild pack on the one interesting junction.
+
+## Phase 11 — what playing it found (post-checkpoint, owner-directed 2026-08-22)
+
+Neither of these came from a test. Both came from playing twenty turns and reading the report.
+
+- [x] **Task W40: `Intel` moves after `Snapshot` — `RulesetVersion` 3** *(done 2026-08-22 — one `decisions.md` row, one spec update, no golden moved.)*
+  - Description: at `RulesetVersion 2` the phase order was `… → Intel → Snapshot`, so a claim that settled in `Snapshot` was invisible to its own owner until the next turn. Zomboss re-filed the same claim on ground he already held and had it dropped — a stutter visible in the report as a commander who cannot remember what he just did. Order is now `Reveal → Movement → Sieges → Production → Growth → Pressure → Events → Snapshot → Intel`: belief records the world as it *ends* the turn.
+  - Acceptance: T2 claims black-gate and T3 moves on; the locked-phase-order test names the new list; the row is in `decisions.md` because phase order is locked behaviour.
+  - **The final acceptance golden did not move** — belief converges within a turn, so only intermediate hashes changed. Verified rather than assumed.
+  - Files: `Core/World/Turn/TurnEngine.cs`, `docs/architecture/decisions.md`, `docs/architecture/world/spec-turn-engine.md`, tests.
+
+- [x] **Task W41: `first-light` reshaped so fog can persist** *(done 2026-08-22 — 1 golden re-blessed with its reason, ~8 tests re-pathed, FE fixture regenerated.)*
+  - Description: `l-ash-verdant` becomes `l-black-verdant`, hanging verdant-shelf off black-gate instead of the ash-waste hub. Ash-waste drops from four neighbours to three, the map gains a **second** articulation point, and the richest ground on the board now sits behind Zomboss.
+  - Acceptance: over 14 turns Dave stays at **4 of 6 sectors known** (it used to be 6 of 6 by turn three) and Zomboss reaches 5; `ReconnectionCost` reports two load-bearing sectors instead of one; `Explore` and the curiosity axis stay live past turn three.
+  - **Reverted mid-task, and worth keeping:** I also blamed "a Seat in nearly every sector" and started thinning them. `WorldValidation.Rule5SeatCounts` shows seat count is a consequence of sector *type* — `stable`/`rich`/`nexus`/`homeworld` are base-capable by definition. That is the type system working, not a map bug. Mixing base-capable and barren ground is a **`world-generator`** constraint; noted there, not patched here.
+  - Files: `Core/World/WorldTemplateCatalog.cs`, golden constant, `web/…/world.fixture.json`, tests.
+
+### Checkpoint 11 — the map can exercise the brain ✅ 2026-08-22
+- [x] Core **2404** · Data **366** · Guard **54** · E2E **177** · web **292**; all four guard scripts green; three consecutive clean Core runs.
+- [x] Fog is now a persistent condition rather than an opening move — the property the module was tuned against but the shipped map could not produce.
+- [ ] **Owner decision — the oscillation.** On the reshaped map Zomboss alternates `defend black-gate` (threat 899) / `expand to verdant-shelf` (value 436) from T8 onward. That is the missing **momentum** term: a bonus to last turn's choice, specified in W34 and deliberately unbuilt because it needs cross-turn memory, which becomes hashed replayed state. Now backed by evidence rather than a hunch, so it is a real decision rather than a tuning nit.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).

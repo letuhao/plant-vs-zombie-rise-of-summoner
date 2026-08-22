@@ -39,7 +39,11 @@ This wave builds **the foundation only** — the places and the clock. Objects t
 
 Module specs: [world/spec-world-model.md](world/spec-world-model.md) · [world/spec-turn-engine.md](world/spec-turn-engine.md) · [world/spec-world-movement.md](world/spec-world-movement.md) · [world/spec-world-intel.md](world/spec-world-intel.md) · [world/spec-world-topology.md](world/spec-world-topology.md) · [world/spec-ai-commander.md](world/spec-ai-commander.md).
 
-**Status (2026-08-22):** `world-model`, `turn-engine`, `world-movement`, `world-fe`, `world-intel` and `world-topology` are built and green — waves 1 and 2's first half, checkpoints 1–7, with only an owner look left on the map itself. Next in the build order: **`ai-commander`**, whose spec was rewritten against fog and then verified line by line against the shipped code; it is the last module of wave 2 and it is unbuilt.
+**Status (2026-08-22):** waves 1 and 2 are **complete and green through checkpoint 11**. `ai-commander` is built end to end — the commit seam, every evaluation table, all seven rules, and a 20-turn acceptance run where Zomboss decides for himself from his own fog. Two owner items remain open on it: the legibility playtest, and the momentum decision (see below). Wave 3 (`sector-development`, `combat-handoff`) has not started.
+
+**One fact has now invalidated four separate design claims and is worth reading before proposing anything about fog:** *holding ground grants full sight of it.* `Visibility` makes every owned sector an observation post, so nothing about your own territory is ever uncertain to you — which killed two claims in `spec-ai-commander`'s believed-supply section and one in its frontier section. Fog is about **other people's ground and about the past**, never about where you are standing.
+
+**The starter map could not stay foggy, and was reshaped for it** (owner playtest, 2026-08-22): `first-light`'s ash-waste was a hub touching four of six sectors, so one march to the centre lit the whole map permanently. `l-ash-verdant` became `l-black-verdant` in W41 — verdant-shelf now hangs off black-gate, ash-waste touches three, and the map has two articulation points instead of one. Dave now holds at 4 of 6 known across 14 turns. The general constraint stands for **`world-generator`**: a map one position can see all of makes scouting pointless, and so does a map where every sector is base-capable (that second one is sector *type*, not a lane bug — see W41's reverted half).
 
 ## Why the generator is deliberately last of the four
 

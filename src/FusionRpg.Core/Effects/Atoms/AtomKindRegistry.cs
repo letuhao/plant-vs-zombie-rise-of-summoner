@@ -111,7 +111,14 @@ public static class AtomKindRegistry
 
             // ---- Resource ------------------------------------------------------------------
             new("resource.delta", AttachPoint.Resource, new ParamSchema(
-                    new ParamDef("amount", ParamKind.Value, Required: true),
+                    // D7 (E11, 2026-08-22): `channel` was undeclared, and `ExecApplyResourceDelta`
+                    // reads it (InjectorEffectActionSink.cs:132, defaulting to hp). `fx.overlay_damage`
+                    // is exactly that effect — a channel and no magnitude, because the magnitude is
+                    // per-grant overlay. So `amount` is optional here for the same reason it is on
+                    // shield.grant (D10): a required magnitude makes overlay-driven content
+                    // unauthorable. Absence is checked at BIND, against the overlay that will carry it.
+                    new ParamDef("channel", ParamKind.String),
+                    new ParamDef("amount", ParamKind.Value, OverlayOrParam: true),
                     new ParamDef("element", ParamKind.String),
                     new ParamDef("target", ParamKind.Object),
                     // D7: the DoT and contagion payload lives HERE, not on status.apply. EffectBag
@@ -135,9 +142,11 @@ public static class AtomKindRegistry
                     new ParamDef("currency", ParamKind.String, Required: true),
                     new ParamDef("op", ParamKind.String, Required: true),
                     new ParamDef("amount", ParamKind.Value, Required: true),
-                    // G4: in the legacy allowlist, implemented nowhere. E15 owns the counter.
-                    new ParamDef("capPerMatch", ParamKind.Int,
-                        NotImplementedNote: "per-match caps are runner-owned (E15); not available yet")),
+                    // G4: was in the legacy allowlist and implemented nowhere. E15 shipped the
+                    // counter 2026-08-22 (AtomRunner + RunnerState), so the "not available yet"
+                    // guard is lifted — leaving it would have made the feature unauthorable by the
+                    // very content it was built for.
+                    new ParamDef("capPerMatch", ParamKind.Int)),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
                 AtomTriggers.Events,
                 PowerCategory.Economy,
@@ -165,9 +174,14 @@ public static class AtomKindRegistry
                 "G5 is a RUNTIME hole: an event resolving to an empty ptr hits the unguarded " +
                 "FindObjectsOfType<Zombie>() loop, and no load-time param check can close it."),
 
+            // D7 (E11, 2026-08-22): re-derived from the executor, not the doc. `ExecClearStatus`
+            // reads `status` (InjectorEffectActionSink.cs:260) and `target` as a STRING it may omit,
+            // falling back to the resolved event target. The schema declared `statusId` — a key
+            // nothing reads — and made `target` a required object. Between them, the one shipped
+            // FA3 effect (`fx.clear_butter`, params `{status: butter}`) was unauthorable as an atom.
             new("status.clear", AttachPoint.Status, new ParamSchema(
-                    new ParamDef("statusId", ParamKind.String),
-                    new ParamDef("target", ParamKind.Object, Required: true)),
+                    new ParamDef("status", ParamKind.String, Required: true),
+                    new ParamDef("target", ParamKind.String)),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
                 AtomTriggers.Events,
                 PowerCategory.Utility,
@@ -175,7 +189,11 @@ public static class AtomKindRegistry
 
             // ---- Shield --------------------------------------------------------------------
             new("shield.grant", AttachPoint.Shield, new ParamSchema(
-                    new ParamDef("amount", ParamKind.Value, Required: true),
+                    // D10: optional, not required. `fx.shield_grant` ships with EMPTY params —
+                    // every magnitude is overlay — so a required `amount` would force migration to
+                    // author a number the original never had, which is a behaviour change wearing a
+                    // schema's clothes. Presence is a BIND-time check against the overlay.
+                    new ParamDef("amount", ParamKind.Value, OverlayOrParam: true),
                     new ParamDef("element", ParamKind.String),
                     // D7: honoured by ExecGrantShield - it selects PriorityAura/PriorityInnate and flips the
                     // refillOnMerge default. Undeclared, every atom-granted shield was

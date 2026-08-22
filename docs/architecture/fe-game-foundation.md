@@ -1,6 +1,16 @@
 # FE game foundation — Dual-Plane Lawn Projector (DPLP)
 
 **Status:** Architecture lock / design SSOT. **W6-0 docs shipped.** **W6-A–D monitor + W7 Intent/debug interact shipped** (`phaser@^4.2`, `#/lawn`).  
+> **Revised 2026-08-22 — the lawn is a *stage*, not a route.** The `decisions.md` **Game GUI** row
+> makes the layer model binding: the player is on one **stage** and every other surface is a **layer**
+> over it. For this document that changes exactly one thing — **every lifetime rule that said
+> "while `#/lawn` is mounted" or "on route leave" now reads "while the lawn stage is current" /
+> "on leaving the lawn stage."** The Phaser `Game` is created on **entering** the lawn stage and
+> destroyed on **leaving** it, and **never** when a panel opens over it (GG-11). Everything else here
+> — DPLP, the plane locks, RT-01…RT-15, the system allow-list, the destroy checklist itself, the
+> folder law — is **unchanged and still binding**. Governing docs:
+> [game-gui-principles.md](game-gui-principles.md), [design/information-architecture.md](../design/information-architecture.md).
+
 **Related:** [lawn-projector.md](lawn-projector.md) (projection model + observe≠control), [overlay-control-loops.md](overlay-control-loops.md), [match-runtime.md](match-runtime.md), [unique-actor-runtime.md](unique-actor-runtime.md), [web/spec.md](../web/spec.md), [implementation-roadmap.md](implementation-roadmap.md), [research/architecture-stress/00-index.md](../research/architecture-stress/00-index.md).
 
 W6 monitor implements this foundation. W7 adds Intent chrome only.
@@ -17,7 +27,7 @@ W6 monitor implements this foundation. W7 adds Intent chrome only.
 |---|---|
 | **Projector / read-model** | Observe path: Snapshot/events → fold → `LawnViewModel` (lagged mirror of MatchRuntime) |
 | **Unidirectional data flow (UDF)** | Model flows React→EventBus→Phaser; pick/select flows Phaser→React; mutations leave via Intent only |
-| **Dual-plane hybrid** | React owns chrome/inspector/route; Phaser owns frame loop/sprites/FX; pure TS owns fold |
+| **Dual-plane hybrid** | React owns chrome/inspector/**stage + layer stack**; Phaser owns frame loop/sprites/FX; pure TS owns fold |
 | **Thin client** | Product game logic stays Hot/Cold/Intent on Injector/Server; FE = display + interact chrome |
 | **Lite ECS (registry + systems)** | Inside Phaser only — CapPolicy-scale; no bitECS/YAGE dependency |
 
@@ -33,7 +43,7 @@ Aligns with [lawn-projector.md](lawn-projector.md) (observe≠control, pure `Law
 | **CQRS-lite (observe vs command)** | Observe = projection; Command = Intent/debug via `lib/bus` — never Phaser `fetch` | fold vs inspector/Intent |
 | **Mediator / EventBus** | Decouple React mount from Phaser scenes | `game/EventBus.ts` |
 | **Facade** | `createLawnGame` / host create+destroy `Phaser.Game` | `game/createLawnGame.ts` + React host |
-| **Scene stack** | Boot (assets) → LawnWorld (while route mounted) | `game/scenes/*` |
+| **Scene stack** | Boot (assets) → LawnWorld (while the lawn stage is current) | `game/scenes/*` |
 | **Registry (entity index)** | `ptr → view record + GameObject refs`; diff on model | `game/entities/PtrEntityRegistry.ts` |
 | **System (update pipeline)** | Ordered: Sync → Layout → StatusFx → Pick | `game/systems/*` |
 | **Object pool** | Reuse FX GameObjects/tweens; reset on release | `game/fx/FxPool.ts` |
@@ -119,8 +129,12 @@ Method matches [architecture-stress](../research/architecture-stress/00-index.md
 6. **Monotonic sync:** apply model only if `revision > lastApplied`.
 7. **Feed law:** Snapshot membership overrides event-fold membership when both exist.
 8. **System allow-list:** Sync / Layout / StatusFx / Pick until ADR expands.
-9. **Destroy checklist** mandatory on route leave and StrictMode remount.
+9. **Destroy checklist** mandatory on **leaving the lawn stage** and on StrictMode remount — **not** when a layer opens over the stage (GG-11).
 10. **Folder law:** Phaser under `src/game/`; lawn React under `features/lawn/`.
+11. **Stage lifetime (added 2026-08-22):** the `Game` is created on entering the lawn stage and destroyed on
+    leaving it. **A band-2 layer opening over the stage must not unmount it, destroy the canvas, reset the
+    `LawnViewModel`, or drop the hub subscription** — GG-11. The canvas keeps rendering behind the scrim;
+    whether the *board* advances underneath is the separate pause decision in `overlay-spec.md`.
 
 **Outcome:** DPLP **Holds** if these invariants are enforced in W6 implement. Residual **Bend**: phase-gate races, Binding lag. **Break rejection:** client prediction.
 
@@ -195,8 +209,8 @@ FE owns almost none of the *product* game logic — only **projection + interact
 |---|---|---|---|
 | Hub event ring (`lib/bus`) | Session / ring cap | SignalR | Fold, Log page |
 | React Query caches | Cache TTL / invalidate | REST + hub invalidate | Almanac pages, LawnPage |
-| `LawnViewModel` | While `#/lawn` mounted (reset on leave) | Pure fold from Snapshot/events | Phaser via `lawn:model`; inspector summary |
-| `InteractionMode` + selection | While `#/lawn` mounted | React + Pick events | Inspector, spawn-target UI, Phaser select ring |
+| `LawnViewModel` | While the lawn stage is current (reset on leaving it, not on a layer opening) | Pure fold from Snapshot/events | Phaser via `lawn:model`; inspector summary |
+| `InteractionMode` + selection | While the lawn stage is current | React + Pick events | Inspector, spawn-target UI, Phaser select ring |
 | `PtrEntityRegistry` + GameObjects | Phaser Game lifetime | SyncFromModelSystem | Layout / Fx / Pick systems |
 | FxPool instances | Pooled across frames | StatusFxSystem | Canvas only |
 
@@ -257,7 +271,7 @@ flowchart TB
 
 | Plane | Owns | Must not own |
 |---|---|---|
-| **React Almanac** | Route `#/lawn`, Split chrome, inspector, Intent via `lib/bus` | Sprites, RAF game loop, ptr maps |
+| **React Almanac** | The lawn **stage** (`#/lawn/{matchKey}`), its HUD, inspector, Intent via `lib/bus` | Sprites, RAF game loop, ptr maps |
 | **Pure fold** | Event/Snapshot → `LawnViewModel` (Vitest) | Phaser types, DOM |
 | **Phaser island** | Scenes, GameObjects, update(delta), pick, FX | `fetch` / SignalR / Admit / EffectBag RNG |
 
@@ -315,7 +329,7 @@ Do **not** nest Phaser under `features/lawn/phaser/` (RT-09).
 | Scene | Role |
 |---|---|
 | `BootScene` | Preload icon keys / placeholders; hand off to LawnWorld |
-| `LawnWorldScene` | Persistent while `#/lawn` mounted; runs systems; emits pick |
+| `LawnWorldScene` | Persistent while the lawn stage is current; runs systems; emits pick |
 
 React owns the inspector panel (Almanac kit). No Phaser HUD scene for Almanac chrome.
 
@@ -386,7 +400,7 @@ SpawnTargeting → Idle | SpawnTargeting (selectTile) | OccupantSelected
 | Grid | ~5×9 |
 | Sprites | CapPolicy-scale (e.g. ≤50 plants / ≤80 zombies) |
 | Sync | Diff-by-ptr; monotonic revision; optional rAF coalesce |
-| Unmount | Destroy checklist mandatory |
+| Leaving the stage | Destroy checklist mandatory. A layer opening is **not** a leave |
 
 ---
 

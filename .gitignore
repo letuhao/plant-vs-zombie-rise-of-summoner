@@ -61,8 +61,11 @@ nunit-*.xml
 
 # RPG runtime (never commit)
 # Live DB is next to the server exe: {exe}/data/rpg-hot.sqlite + rpg-media.sqlite
-data/
 dist/
+data/icons/
+data/rpg.sqlite
+data/rpg.sqlite-shm
+data/rpg.sqlite-wal
 
 web/fusion-rpg-web/node_modules/
 web/fusion-rpg-web/dist/

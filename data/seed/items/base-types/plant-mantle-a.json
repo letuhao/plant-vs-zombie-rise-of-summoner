@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-mantle-a",
+    "partition": "base-types/mantle/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-canopy-a-001",
+      "nameKey": "base.downy-parasol",
+      "name": "Downy Parasol",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.downy-parasol",
+      "flavorKey": "flavor.base.downy-parasol",
+      "flavor": "Soft filaments catch what the sun burns, turning poison to harmless light.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-002",
+      "nameKey": "base.filamentous-shade",
+      "name": "Filamentous Shade",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.filamentous-shade",
+      "flavorKey": "flavor.base.filamentous-shade",
+      "flavor": "A net of hair-fine threads that grows denser where the light is strongest.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-003",
+      "nameKey": "base.tender-veil",
+      "name": "Tender Veil",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tender-veil",
+      "flavorKey": "flavor.base.tender-veil",
+      "flavor": "Young growth that shields without stiffening, flexible as the wind that shapes it.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-004",
+      "nameKey": "base.papery-thatch",
+      "name": "Papery Thatch",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.papery-thatch",
+      "flavorKey": "flavor.base.papery-thatch",
+      "flavor": "Thin dried sheaths layered loose enough to let clean air flow through.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-005",
+      "nameKey": "base.wispy-trellis",
+      "name": "Wispy Trellis",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.wispy-trellis",
+      "flavorKey": "flavor.base.wispy-trellis",
+      "flavor": "A framework of gossamer vines that climbs and spreads, finding strength in number.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-006",
+      "nameKey": "base.slender-parasol",
+      "name": "Slender Parasol",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.slender-parasol",
+      "flavorKey": "flavor.base.slender-parasol",
+      "flavor": "A thin canopy that rises on lean stems, shade bought with grace instead of weight.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-007",
+      "nameKey": "base.dried-thatch",
+      "name": "Dried Thatch",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dried-thatch",
+      "flavorKey": "flavor.base.dried-thatch",
+      "flavor": "Bound bundles of stem and leaf that shed their rot before rooting takes hold.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-008",
+      "nameKey": "base.chaffy-lattice",
+      "name": "Chaffy Lattice",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.chaffy-lattice",
+      "flavorKey": "flavor.base.chaffy-lattice",
+      "flavor": "Husks woven grid-tight, each crossing point stronger than the thread alone.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-009",
+      "nameKey": "base.layered-spread",
+      "name": "Layered Spread",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.layered-spread",
+      "flavorKey": "flavor.base.layered-spread",
+      "flavor": "Each husk shell rests on the one below, turning aside what strikes.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-010",
+      "nameKey": "base.winnowed-trellis",
+      "name": "Winnowed Trellis",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.winnowed-trellis",
+      "flavorKey": "flavor.base.winnowed-trellis",
+      "flavor": "Every chaff blown away, leaving only the frame that shelters and sieves.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-011",
+      "nameKey": "base.kilned-veil",
+      "name": "Kilned Veil",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.kilned-veil",
+      "flavorKey": "flavor.base.kilned-veil",
+      "flavor": "Heat-hardened husks woven translucent, letting light pass and poison fail.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-canopy-a-012",
+      "nameKey": "base.desiccated-shade",
+      "name": "Desiccated Shade",
+      "frame": "plant",
+      "role": "mantle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.desiccated-shade",
+      "flavorKey": "flavor.base.desiccated-shade",
+      "flavor": "Completely dried to brittleness and then bound tight, it shelters by refusing to bend.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "kind": "affix-family",
+  "_meta": {
+    "batch": "affix-g-attack",
+    "partition": "affix-families/g.attack",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 3,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-affixes.md#4.1"
+  },
+  "entries": [
+    {
+      "id": "atom.might",
+      "nameKey": "affix.might",
+      "name": "Might",
+      "kindId": "stat.modify",
+      "params": { "channel": "atk", "op": "Flat" },
+      "frames": ["humanoid", "plant"],
+      "side": "both",
+      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "powerBand": "medium",
+      "nameWords": { "prefix": ["Keen", "Strong", "Mighty"] },
+      "displayTemplate": "+{value} attack",
+      "tags": ["offensive"],
+      "notes": "SHIPPED — id, kind and channel kept verbatim per naming.v1.json idNamespaces.affixFamilies (g.attack existingFamilies) and atom-family-library.md §3.1 (`might` = `atk` Flat, category Offense, side both). `roles` is the attack column of ssot-affixes.md §4.3's role x group matrix, translated from the stale 12-role table to core.v1.json's 15 ids: manipulator-offense->manipulator, jewel-major stays, jewel-minor->jewel-minor-a and jewel-minor-b, armament-primary/-secondary stay. sense-utility, head-protective, core-protective, mantle-utility, footing and girdle-resource all carry weight 0 for attack and are correctly absent. The commander-only `standard` row carries weight 2 there and is deliberately excluded — it is not one of the 15 body roles. Every entry in this file shares this identical roles list, matching the pattern g-on-hit.json already established: one row per role per GROUP, not per family. `nameWords.prefix` reuses the shipped band A/B/C words ssot-affixes.md §4.12's sample table already shows for `might` (Keen/Strong/Mighty) — not re-minted. `powerBand: medium` marks this as the group's primary, Flat-op family, the same relative-pull judgement the exemplar makes for elemental_power (its own Flat sibling) against its Increased sibling below."
+    },
+    {
+      "id": "atom.ferocity",
+      "nameKey": "affix.ferocity",
+      "name": "Ferocity",
+      "kindId": "stat.modify",
+      "params": { "channel": "atk", "op": "Increased" },
+      "frames": ["humanoid", "plant"],
+      "side": "both",
+      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "powerBand": "low",
+      "nameWords": { "prefix": ["Angry", "Fierce", "Ferocious"] },
+      "displayTemplate": "{value} increased attack",
+      "tags": ["offensive"],
+      "notes": "SHIPPED, id and channel kept verbatim (atom-family-library.md §3.1: `ferocity` = `atk` Increased). Same roles as `might` — one row per role per GROUP. `nameWords.prefix` reuses the shipped words ssot-affixes.md §4.12 already shows (Angry/Fierce/Ferocious). `powerBand: low` against the sibling `might`'s `medium` mirrors the exemplar's own worked pair exactly: ssot-affixes.md §4.5 names `might` as the family that trips the integer-legibility floor (`m_1 = 4`, a 3-wide tier-1 band) and states outright that the fix is letting the `Increased` sibling — this family — carry the fine grain, at 20x the resolution of `might` at every tier. `low` is the author's judgement that the fine-grain sibling should pull less than the flat headline stat, not a magnitude."
+    },
+    {
+      "id": "atom.savagery",
+      "nameKey": "affix.savagery",
+      "name": "Savagery",
+      "kindId": "stat.modify",
+      "params": { "channel": "atk", "op": "More" },
+      "frames": ["humanoid", "plant"],
+      "side": "both",
+      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "powerBand": "high",
+      "nameWords": { "prefix": ["Feral", "Savage", "Ravening"] },
+      "displayTemplate": "×{value} attack",
+      "tags": ["offensive"],
+      "notes": "SHIPPED, id and channel kept verbatim (atom-family-library.md §3.1: `savagery` = `atk` More, noted 'rare band' there). ssot-affixes.md §4.4 names `savagery` (with `bulwark`) as the worked example of 'rare tier band only': rarity is expressed as a tier floor, never as a depressed pool weight, so W_family stays 1 and the family is simply absent below the ilvl that unlocks its floor tier. `powerBand: high` maps to tier 4 on bands.v1.json's tierMap, which is exactly that floor. `nameWords.prefix` is minted — no shipped word sample exists for `savagery` in ssot-affixes.md §4.12's illustrative table — following the same single-adjective escalation grammar `might`/`ferocity` already use, reaching for hunger/decay flavour (Feral, Savage, Ravening) rather than a strength synonym already spent on the sibling families. `displayTemplate` follows ssot-presentation.md's own convention for the multiplicative `More` op ('x1.15 hp'), distinct from the additive '+' and 'increased' templates on the two Flat/Increased siblings above. STRUCTURAL FINDING, not a guess: `stat.modify`'s channel x op space for `atk` is exactly {Flat, Increased, More} — three combinations, all three already shipped as `might`/`ferocity`/`savagery`. `stat.modify` and `stat.derived` are the only two kinds seed-contract's affixClass derivation treats as triggerless (AtomKindRegistry.cs: every other kind's Triggers is AllTriggers or AtomTriggers.Events), so a prefix-class family in this group has no kind other than these two to use. And every `stat.derived` channel-family that could plausibly mean 'raw attack power' (`combat.power.*`) is already the derived, TYPED half of the fantasy and belongs to `g.elem-power` (elemental_power/affliction), not this group — reaching into it would be inventing a value this partition does not own, exactly what seed-contract §2 forbids. This group's authorable space is therefore three families, not the fleet plan's nominal ~7; the three shipped ones are reported here complete and correct rather than padded with a fourth family that would either duplicate an existing channel/op pair or reassign a channel this partition has no claim to."
+    }
+  ]
+}

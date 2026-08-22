@@ -23,6 +23,16 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// Resolved value bounds per param. An <c>OnApply</c> range stays a range — that is the roll the
 /// runner exists to make — but its curve has already been applied.
 /// </param>
+/// <param name="Limits">
+/// The per-binding state keys that <b>caused</b> this atom to be runner work in the first place
+/// (<see cref="Compilability"/>). Carrying the classification but not the keys would hand E15 an
+/// entry it cannot execute — the classifier and the payload have to agree.
+/// </param>
+/// <param name="Params">
+/// The non-numeric params a dispatch needs — <c>channel</c>, <c>element</c>, <c>currency</c>,
+/// <c>status</c>. <see cref="Values"/> holds only what has a magnitude, so without these the runner
+/// would know how much and not what.
+/// </param>
 public sealed record RunnerEntry(
     string AtomId,
     string KindId,
@@ -31,9 +41,48 @@ public sealed record RunnerEntry(
     int ChanceMilli,
     int IcdMs,
     string IcdKey,
-    IReadOnlyDictionary<string, ValueBounds> Values)
+    IReadOnlyDictionary<string, ValueBounds> Values,
+    RunnerLimits Limits,
+    IReadOnlyDictionary<string, object?> Params)
 {
-    public bool IsUnconditional => ChanceMilli >= 1000 && ReferenceEquals(Predicate, PredicateCompiler.Always);
+    public bool IsUnconditional =>
+        ChanceMilli >= 1000 && Limits == RunnerLimits.None
+        && ReferenceEquals(Predicate, PredicateCompiler.Always);
+}
+
+/// <summary>
+/// Per-binding limits. <see cref="None"/> is the absent set.
+///
+/// <para><b>Absent is not zero.</b> A cap of 0 means "never dispatch" and 0 charges means "already
+/// spent" — both legal content. Absent is <c>-1</c> so an atom that declares nothing does not
+/// silently become the most restrictive one.</para>
+///
+/// <para><c>MaxStacks</c> is carried rather than gated: it routes an atom here (it cannot be an
+/// overlay key on a runner atom) but stacking is the grant's behaviour, not a proc gate. Carrying it
+/// keeps it from being dropped on the way through.</para>
+///
+/// <para><b>No cooldown field.</b> spec-atom-runner.md lists a cooldown as distinct from an ICD, but
+/// no kind schema declares a cooldown param and nothing routes on one — inventing a key here would
+/// widen a closed vocabulary by convenience. Until a schema declares it, an ICD is the only clock.</para>
+///
+/// <para><b>No parameter defaults on purpose.</b> They read as if <c>new()</c> yields "absent", and it
+/// does not — the implicit parameterless constructor of a record struct zeroes every field, which
+/// under this encoding means <i>cap 0, charges 0</i>: the most restrictive limits there are. Every
+/// call site passes all four, and <see cref="None"/> is spelled out.</para>
+/// </summary>
+public readonly record struct RunnerLimits(
+    int CapPerMatch,
+    int Charges,
+    int EveryHits,
+    int MaxStacks)
+{
+    public static readonly RunnerLimits None = new(-1, -1, -1, -1);
+
+    public bool HasCap => CapPerMatch >= 0;
+    public bool HasCharges => Charges >= 0;
+
+    /// <summary>A meter of 1 is every hit, which is the same as no meter at all.</summary>
+    public bool HasEveryHits => EveryHits > 1;
 }
 
 /// <summary>

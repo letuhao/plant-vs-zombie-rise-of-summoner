@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.fx-passive-atk-flat",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Passive ATK +10",
+      "icdKey": "fx.passive_atk_flat",
+      "params": {
+        "channel": "atk",
+        "op": "flat",
+        "amount": 10
+      }
+    },
+    {
+      "family": "atom.fx-economy-sun",
+      "tier": 1,
+      "kind": "resource.economy",
+      "name": "Add sun",
+      "icdKey": "fx.economy_sun",
+      "params": {
+        "currency": "sun",
+        "op": "add",
+        "amount": 25
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-overlay-damage",
+      "tier": 1,
+      "kind": "resource.delta",
+      "name": "Overlay HP delta",
+      "icdKey": "fx.overlay_damage",
+      "params": {
+        "channel": "hp"
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-shield-grant",
+      "tier": 1,
+      "kind": "shield.grant",
+      "name": "Grant shield",
+      "icdKey": "fx.shield_grant",
+      "params": {},
+      "variant": "a",
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-shield-grant",
+      "tier": 1,
+      "kind": "shield.grant",
+      "name": "Grant shield",
+      "icdKey": "fx.shield_grant",
+      "params": {},
+      "variant": "b",
+      "when": {
+        "trigger": "OnTimer"
+      }
+    },
+    {
+      "family": "atom.fx-shield-grant",
+      "tier": 1,
+      "kind": "shield.grant",
+      "name": "Grant shield",
+      "icdKey": "fx.shield_grant",
+      "params": {},
+      "variant": "c",
+      "when": {
+        "trigger": "OnSpawn"
+      }
+    }
+  ]
+}

@@ -62,11 +62,14 @@ public class ArticulationPointsTests
     /// distinction this module exists to draw.
     /// </summary>
     [Fact]
-    public void In_first_light_only_ash_waste_is_load_bearing()
+    public void In_first_light_two_sectors_are_load_bearing()
     {
+        // Was ash-waste alone. Since 2026-08-22 Verdant Shelf hangs off Black Gate instead of Ash
+        // Waste, so black-gate became a chokepoint too — the map now has two places worth holding
+        // rather than one hub that saw and connected everything.
         var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
 
-        Assert.Equal(new[] { "ash-waste" }, Of(world).OrderBy(s => s, StringComparer.Ordinal));
+        Assert.Equal(new[] { "ash-waste", "black-gate" }, Of(world).OrderBy(s => s, StringComparer.Ordinal));
     }
 }
 

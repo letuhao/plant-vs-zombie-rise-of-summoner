@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "container",
+  "entries": [
+    {
+      "id": "patron.aura",
+      "kind": "patron",
+      "poolRolls": 0,
+      "atoms": [],
+      "tags": {
+        "marker": "fx.patron_aura"
+      }
+    }
+  ]
+}

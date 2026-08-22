@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-infusion-humanoid-b",
+    "partition": "base-types/infusion/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.1"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-bandolier-b-001",
+      "nameKey": "base.hemmed-straw",
+      "name": "Hemmed Straw",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.withering",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.hemmed-straw",
+      "flavorKey": "flavor.base.hemmed-straw",
+      "flavor": "Woven edges keep the poison from seeping out everywhere at once.",
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-002",
+      "nameKey": "base.linen-canteen",
+      "name": "Linen Canteen",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.chilling",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.linen-canteen",
+      "flavorKey": "flavor.base.linen-canteen",
+      "flavor": "Tightly woven, it holds the chill without cracking.",
+      "tags": [
+        "light",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-003",
+      "nameKey": "base.oiled-bottle",
+      "name": "Oiled Bottle",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.venomous",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.oiled-bottle",
+      "flavorKey": "flavor.base.oiled-bottle",
+      "flavor": "The oil coating slides poison across whatever it touches.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-004",
+      "nameKey": "base.studded-sprayer",
+      "name": "Studded Sprayer",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sparking",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.studded-sprayer",
+      "flavorKey": "flavor.base.studded-sprayer",
+      "flavor": "Metal studs catch the spark and fling it farther than intended.",
+      "tags": [
+        "medium-light",
+        "metal",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-005",
+      "nameKey": "base.overlapping-canister",
+      "name": "Overlapping Canister",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.buttering",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.overlapping-canister",
+      "flavorKey": "flavor.base.overlapping-canister",
+      "flavor": "Pressure builds behind each scale, waiting for release.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-006",
+      "nameKey": "base.articulated-jug",
+      "name": "Articulated Jug",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.freezing",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.articulated-jug",
+      "flavorKey": "flavor.base.articulated-jug",
+      "flavor": "Hinges let it bend without losing its seal, preserving the frost inside.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-007",
+      "nameKey": "base.interlocked-holster",
+      "name": "Interlocked Holster",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.marking",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.interlocked-holster",
+      "flavorKey": "flavor.base.interlocked-holster",
+      "flavor": "The pattern catches the eye and holds it. Nothing gets past unseen.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-008",
+      "nameKey": "base.clattering-bandolier",
+      "name": "Clattering Bandolier",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.mesmerizing",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.clattering-bandolier",
+      "flavorKey": "flavor.base.clattering-bandolier",
+      "flavor": "Every step makes it ring. The noise alone unravels concentration.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-009",
+      "nameKey": "base.rigid-jerrycan",
+      "name": "Rigid Jerrycan",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.rotting",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.rigid-jerrycan",
+      "flavorKey": "flavor.base.rigid-jerrycan",
+      "flavor": "The metal does not give. Whatever is inside eats through it anyway.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-010",
+      "nameKey": "base.ponderous-tank",
+      "name": "Ponderous Tank",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.blighting",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.ponderous-tank",
+      "flavorKey": "flavor.base.ponderous-tank",
+      "flavor": "It moves like it carries the weight of death. Perhaps it does.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-011",
+      "nameKey": "base.galvanised-cartridge",
+      "name": "Galvanised Cartridge",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bonding",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.galvanised-cartridge",
+      "flavorKey": "flavor.base.galvanised-cartridge",
+      "flavor": "The metal coating holds the charge until impact forces release.",
+      "tags": [
+        "medium-light",
+        "metal",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-bandolier-b-012",
+      "nameKey": "base.leaden-cooler",
+      "name": "Leaden Cooler",
+      "frame": "humanoid",
+      "role": "infusion",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.leaden-cooler",
+      "flavorKey": "flavor.base.leaden-cooler",
+      "flavor": "So heavy it slows you down. So cold it makes you bleed.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World &amp; Commitments — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>World &amp; Commitments</h1>
+  <p>
+    The world map is a <b>stage</b>, not a panel — a place the player acts in over time. Selecting a
+    sector opens an inspector, because inspecting is looking. Around it sit the two layers that spend
+    time and creatures: Expeditions and Pacts.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 03</span>
+    <span class="tag">GG-4 · GG-7 · GG-17 · GG-29 · GG-46</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="02-collection.html">← Collection</a>
+  <a href="#a">A · World stage</a>
+  <a href="#b">B · Sector inspector</a>
+  <a href="#c">C · Expeditions</a>
+  <a href="#d">D · Pacts</a>
+  <a href="#e">E · Notes</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · The world stage</h2>
+  <p class="lede">
+    Reached by travel from the sanctum's map table, or <span class="hotkey">M</span>. Time advances
+    on the player's commit, never on wall-clock — so the map is never a screen that punishes you for
+    reading it.
+  </p>
+
+  <div class="spec">
+    <div class="viewport">
+      <div class="frame-row">
+        <nav class="rail">
+          <button><span class="g">&#8962;</span>Sanctum</button>
+          <div class="sep"></div>
+          <button><span class="g">&#10022;</span>Creatures</button>
+          <button><span class="g">&#9672;</span>Relics</button>
+          <button><span class="g">&#9879;</span>Fusion</button>
+          <button><span class="g">&#128121;</span>Pacts</button>
+          <button><span class="g">&#9973;</span>Expeditions</button>
+          <div class="sep"></div>
+          <button><span class="g">&#128214;</span>Almanac</button>
+          <button><span class="g">&#128366;</span>Chronicle</button>
+        </nav>
+
+        <div class="stagearea">
+          <div class="worldstage">
+            <svg class="mapsvg" viewBox="0 0 900 460" preserveAspectRatio="xMidYMid meet">
+              <!-- lanes -->
+              <g stroke-linecap="round" fill="none">
+                <path d="M180,240 L340,150" stroke="var(--border-control)" stroke-width="3"/>
+                <path d="M180,240 L330,340" stroke="var(--border-control)" stroke-width="3"/>
+                <path d="M340,150 L520,120" stroke="var(--el-air)" stroke-width="3" stroke-dasharray="7 5" opacity=".75"/>
+                <path d="M330,340 L520,330" stroke="var(--border-control)" stroke-width="3"/>
+                <path d="M520,120 L700,230" stroke="var(--el-dark)" stroke-width="3" opacity=".7"/>
+                <path d="M520,330 L700,230" stroke="var(--bad)" stroke-width="3" stroke-dasharray="3 6"/>
+              </g>
+
+              <!-- marching legion, on a lane -->
+              <g transform="translate(430,135)">
+                <circle r="9" fill="var(--ok)" stroke="#0f172a" stroke-width="1.5"/>
+                <text class="node-s" y="-14" fill="var(--ok)">Legion I</text>
+              </g>
+
+              <!-- nodes -->
+              <g transform="translate(180,240)">
+                <rect x="-38" y="-30" width="76" height="60" rx="8" fill="#232c25" stroke="var(--side-plant)" stroke-width="2"/>
+                <text class="node-l" y="-6">Verdant</text><text class="node-l" y="7">Reach</text>
+                <text class="node-s" y="22">held · lv 4</text>
+              </g>
+              <g transform="translate(340,150)">
+                <rect x="-38" y="-30" width="76" height="60" rx="8" fill="#232c25" stroke="var(--side-plant)" stroke-width="2"/>
+                <text class="node-l" y="0">Ridgeline</text>
+                <text class="node-s" y="18">held · lv 2</text>
+              </g>
+              <g transform="translate(330,340)">
+                <rect x="-38" y="-30" width="76" height="60" rx="8" fill="#26232c" stroke="var(--border-control)" stroke-width="2"/>
+                <text class="node-l" y="0">The Divide</text>
+                <text class="node-s" y="18">open</text>
+              </g>
+              <g transform="translate(520,120)">
+                <rect x="-40" y="-32" width="80" height="64" rx="8" fill="#2c2320" stroke="var(--sun)" stroke-width="2.5"/>
+                <text class="node-l" y="-4">Ashfall</text>
+                <text class="node-s" y="9" fill="var(--sun)">contested</text>
+                <text class="node-s" y="22">lv 7</text>
+              </g>
+              <g transform="translate(520,330)">
+                <rect x="-38" y="-30" width="76" height="60" rx="8" fill="#2a2430" stroke="var(--side-zombie)" stroke-width="2"/>
+                <text class="node-l" y="0">Hollowmoor</text>
+                <text class="node-s" y="18">hostile · lv 9</text>
+              </g>
+              <g transform="translate(700,230)" opacity=".42">
+                <rect x="-38" y="-30" width="76" height="60" rx="8" fill="#1b1f24"
+                      stroke="var(--border-control)" stroke-width="2" stroke-dasharray="5 4"/>
+                <text class="node-l" y="4" fill="var(--muted)">?</text>
+                <text class="node-s" y="22">unscouted</text>
+              </g>
+            </svg>
+
+            <div class="hud" style="background:linear-gradient(rgb(11 9 7 / .88), rgb(11 9 7 / 0))">
+              <div class="cluster"><span class="tag tag--warn">Night 14</span></div>
+              <span class="spacer"></span>
+              <div class="cluster">
+                <span class="readout">Legion I marching · arrives in 1 night</span>
+              </div>
+              <div class="cluster">
+                <span class="cluster-box">
+                  <button class="btn--icon" aria-label="Zoom out">−</button>
+                  <span class="readout">78%</span>
+                  <button class="btn--icon" aria-label="Zoom in">+</button>
+                  <span class="div"></span>
+                  <button class="btn--icon" aria-label="Fit">⛶</button>
+                  <button class="btn--icon is-active" aria-label="Layers">☰</button>
+                  <button class="btn--icon" aria-label="Fog">◐</button>
+                </span>
+              </div>
+            </div>
+
+            <div style="position:absolute;left:var(--sp-3);bottom:var(--sp-3);z-index:var(--band-hud)">
+              <div style="background:rgb(11 9 7 / .8);border:1px solid var(--border);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);display:grid;gap:3px;font-size:var(--text-2xs)">
+                <span class="row-flex" style="gap:var(--sp-2)"><i style="width:14px;height:3px;background:var(--border-control);display:block"></i> corridor</span>
+                <span class="row-flex" style="gap:var(--sp-2)"><i style="width:14px;height:3px;background:var(--el-air);display:block"></i> rift</span>
+                <span class="row-flex" style="gap:var(--sp-2)"><i style="width:14px;height:3px;background:var(--el-dark);display:block"></i> ley line</span>
+                <span class="row-flex" style="gap:var(--sp-2)"><i style="width:14px;height:3px;background:var(--bad);display:block"></i> severed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Every colour here is a token.</strong> The current world feature hardcodes a framework
+      palette — <code>#34d399</code>, <code>#a78bfa</code>, <code>#0f172a</code> — which is a second
+      design system living inside the newest surface. Lanes, ownership and fog all resolve to the
+      theme. <span class="ref">GG-29</span>
+    </div>
+    <div class="note">
+      <strong>Fog is a state of a node, not a separate thing.</strong> An unscouted sector renders at
+      reduced opacity with a dashed border and keeps its position, so the shape of the world is
+      legible before its contents are.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Sector inspector</h2>
+  <p class="lede">
+    Selecting a sector opens a band-2 layer. The map stays underneath, the selection stays visible,
+    and Esc returns to the bare map. <span class="ref">GG-1 · GG-11</span>
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:520px">
+      <header>
+        <span class="frame frame--card" data-rarity="5">🜂</span>
+        <div style="flex:1">
+          <h3>Ashfall</h3>
+          <div class="sub"><span class="tag tag--warn">contested</span> <span class="tag">level 7</span></div>
+        </div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <p class="flavour" style="font-style:italic;color:var(--muted);margin:0 0 var(--sp-3)">
+          Ash falls here the way rain falls elsewhere. Nothing green has held it for three seasons.
+        </p>
+
+        <div class="statgrid">
+          <div class="s"><div class="k">Garrison</div><div class="v">6</div></div>
+          <div class="s"><div class="k">Yield</div><div class="v">240<span class="unit">/night</span></div></div>
+          <div class="s"><div class="k">Element</div><div class="v" style="font-size:var(--text-md)"><span class="el" data-el="fire"><i class="dot"></i>Fire</span></div></div>
+        </div>
+
+        <div class="rule-line"></div>
+
+        <p class="spec-label">If you attack with Legion I</p>
+        <div class="difflist">
+          <div class="diffrow" data-dir="up"><span class="k">Your element vs theirs</span><span class="a">Ice</span><span class="b">Fire</span><span class="d">▲ +25%</span></div>
+          <div class="diffrow" data-dir="down"><span class="k">Their garrison advantage</span><span class="a">6</span><span class="b">4</span><span class="d">▼ −2</span></div>
+          <div class="diffrow" data-dir="same"><span class="k">Lane</span><span class="a">rift</span><span class="b">rift</span><span class="d">—</span></div>
+        </div>
+        <div class="note" style="margin-top:var(--sp-3)">
+          <b>+25%</b>, not <b>+0.25</b>. The matchup is a ring multiplier in the model and a
+          percentage on the screen. <span class="ref">GG-46</span>
+        </div>
+      </div>
+      <footer>
+        <button class="btn btn--ghost">Scout</button>
+        <button class="btn">Commit Legion I</button>
+      </footer>
+    </div>
+
+    <div class="spec-grid wide" style="margin-top:var(--sp-4)">
+      <div>
+        <p class="spec-label">Committing is travel — it confirms and it stakes something</p>
+        <div class="panel-shell dialog">
+          <header><h3>Commit Legion I to Ashfall?</h3></header>
+          <div class="body">
+            <p style="margin:0 0 var(--sp-3)">Three creatures march. They are unavailable until the
+              battle resolves, and a loss costs their condition.</p>
+            <div class="row-flex">
+              <span class="chip"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="5">🌵</span><span class="nm">Thornlet</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="4">🧟</span><span class="nm">Ashkell</span></span>
+            </div>
+          </div>
+          <footer>
+            <button class="btn btn--ghost">Not yet</button>
+            <button class="btn">March</button>
+          </footer>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Unscouted — a locked state that teaches</p>
+        <div class="state state--locked">
+          <span class="glyph">🌫</span>
+          <h4>Nothing is known here</h4>
+          <p>Scout from an adjacent held sector to reveal its garrison, element and yield.</p>
+          <button class="btn btn--sm btn--ghost">Scout from Ridgeline</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · Expeditions <span class="hotkey">E</span></h2>
+  <p class="lede">
+    The layer that spends creatures against wall-clock time. Its whole job is to make a wait legible
+    and a return unmissable.
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:860px">
+      <header>
+        <div style="flex:1"><h3>Expeditions</h3><div class="sub">1 returned · 1 away · 2 berths free</div></div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <div class="col-flex" style="gap:var(--sp-3)">
+
+          <div class="card" style="margin:0;border-color:var(--ok)">
+            <div class="hd">
+              <span class="frame frame--card" data-rarity="3">⛵</span>
+              <div style="flex:1">
+                <div class="nm">Ridgeline survey</div>
+                <div class="meta"><span class="tag tag--ok">returned</span><span class="tag">6 hours</span></div>
+              </div>
+              <button class="btn">Collect</button>
+            </div>
+            <div class="row-flex">
+              <span class="chip"><span class="frame frame--chip" data-rarity="2">🍄</span><span class="nm">Sporeling</span> <span class="tag tag--ok">+340 xp</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="4">⚱</span><span class="nm">Ashen Reliquary</span></span>
+              <span class="chip"><span class="nm">340 souls</span></span>
+            </div>
+          </div>
+
+          <div class="card" style="margin:0">
+            <div class="hd">
+              <span class="frame frame--card" data-rarity="2">⛵</span>
+              <div style="flex:1">
+                <div class="nm">Deepvault descent</div>
+                <div class="meta"><span class="tag tag--info">away</span><span class="tag">12 hours</span></div>
+              </div>
+              <span class="readout">returns 03:20</span>
+            </div>
+            <div class="meter"><span class="cap">Progress <b>73%</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
+            <div class="row-flex">
+              <span class="chip"><span class="frame frame--chip" data-rarity="4">🧟</span><span class="nm">Ashkell</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span></span>
+            </div>
+          </div>
+
+          <div class="card" style="margin:0;border-style:dashed;opacity:.85">
+            <div class="hd">
+              <span class="frame frame--card is-missing">+</span>
+              <div style="flex:1">
+                <div class="nm">Empty berth</div>
+                <div class="meta"><span class="tag">2 free</span></div>
+              </div>
+              <button class="btn btn--ghost">Dispatch</button>
+            </div>
+            <p style="margin:0;font-size:var(--text-sm);color:var(--muted)">
+              Creatures sent on an expedition cannot be deployed until they return.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>A returned expedition is a band-4 toast and a rail badge, never a dialog.</strong>
+      Only run results may take a blocking layer unprompted — everything else queues for the sanctum,
+      because a reward the player can collect later is not worth interrupting them for.
+      <span class="ref">GG-53 · D6</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · Pacts <span class="hotkey">P</span></h2>
+  <p class="lede">
+    Demon contracts: loyalty, tribute, terms. The layer where the game's only genuinely adversarial
+    relationship lives, so its tone is different from everything else.
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:860px">
+      <header>
+        <div style="flex:1"><h3>Pacts</h3><div class="sub">2 bound · 1 tribute overdue</div></div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-4)">
+
+          <div class="card" style="margin:0;border-color:var(--bad)">
+            <div class="hd">
+              <span class="frame frame--card" data-rarity="5">👹</span>
+              <div style="min-width:0">
+                <div class="nm">Pact of Cinders</div>
+                <div class="meta"><span class="side" data-side="demon"><i class="pip"></i>Demon</span><span class="tag tag--bad">tribute overdue</span></div>
+              </div>
+            </div>
+            <div class="meter is-critical"><span class="cap">Loyalty <b>38 / 100</b></span><span class="track"><span class="fill" style="width:38%"></span></span></div>
+            <p style="margin:0;font-size:var(--text-sm)">
+              Falling by <b class="val">6</b> each night the tribute goes unpaid. At zero the pact
+              breaks and what it granted is taken back.
+            </p>
+            <div class="ft">
+              <button class="btn btn--sm btn--ghost is-disabled" disabled>Renegotiate</button>
+              <span class="readout">— not while tribute is overdue</span>
+              <span style="flex:1"></span>
+              <button class="btn btn--sm">Pay 400 souls</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin:0">
+            <div class="hd">
+              <span class="frame frame--card" data-rarity="4">👹</span>
+              <div style="min-width:0">
+                <div class="nm">Pact of the Quiet Root</div>
+                <div class="meta"><span class="side" data-side="demon"><i class="pip"></i>Demon</span><span class="tag tag--ok">content</span></div>
+              </div>
+            </div>
+            <div class="meter"><span class="cap">Loyalty <b>84 / 100</b></span><span class="track"><span class="fill" style="width:84%"></span></span></div>
+            <div class="col-flex" style="gap:var(--sp-1)">
+              <span class="atom-line"><span class="eff">+120 earth power to every bound creature</span></span>
+              <span class="atom-line" style="color:var(--muted)"><span class="eff">−40 maximum vitality, as its price</span></span>
+            </div>
+            <div class="ft"><button class="btn btn--sm btn--ghost">Terms</button><span style="flex:1"></span><span class="readout">tribute in 3 nights</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>The disabled button carries its reason inline.</strong> "Renegotiate" is off and the
+      sentence beside it says why — one of the three declared forbidden combinations, not a mystery.
+      An unexplained disabled control is indistinguishable from a broken one.
+      <span class="ref">GG-55 · IA §6</span>
+    </div>
+    <div class="note">
+      A pact states its <b>price</b> in the same list as its benefit, in the same typeface, not in
+      small print. The bargain is the mechanic.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · What this plate settles</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>Is the map a stage or a layer?</td><td>A stage — the player acts in it over time</td></tr>
+      <tr><td>What does selecting a sector do?</td><td>Opens a band-2 inspector; the map stays mounted and selected</td></tr>
+      <tr><td>How does a battle start?</td><td>Committing a legion — a travel act with a confirm that names what is staked</td></tr>
+      <tr><td>How does an expedition announce itself?</td><td>Toast + rail badge; it never blocks</td></tr>
+      <tr><td>Where do map colours come from?</td><td>Theme tokens, including lanes, ownership and fog</td></tr>
+      <tr><td>How is a blocked action shown?</td><td>Disabled with its reason beside it, always</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 03 · World &amp; Commitments · draft 2026-08-22 · governed by architecture/game-gui-principles.md
+</footer>
+
+</div>
+</body>
+</html>

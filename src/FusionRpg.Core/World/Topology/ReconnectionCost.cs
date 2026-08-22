@@ -21,15 +21,29 @@ namespace FusionRpg.Core.World.Topology;
 public static class ReconnectionCost
 {
     /// <param name="include">Null means the whole map; otherwise the empire to ask about.</param>
-    public static IReadOnlyDictionary<string, long> For(WorldState world, IReadOnlySet<string>? include = null)
+    public static IReadOnlyDictionary<string, long> For(WorldState world, IReadOnlySet<string>? include = null) =>
+        For(
+            world.Sectors.Select(s => s.SectorId).ToList(),
+            world.Lanes,
+            sectorId => world.Sectors
+                .FirstOrDefault(s => string.Equals(s.SectorId, sectorId, StringComparison.Ordinal))?.Climate,
+            include);
+
+    /// <summary>
+    /// The same question asked of ids and lanes alone, so a faction policy can ask it of what it
+    /// *believes* — it may not touch <see cref="WorldState"/>, and this is everything the sweep reads.
+    /// </summary>
+    public static IReadOnlyDictionary<string, long> For(
+        IReadOnlyList<string> sectorIds, IReadOnlyList<WorldLane> lanes,
+        Func<string, Stats.Derived.ElementTypeId?> climateOf, IReadOnlySet<string>? include = null)
     {
         var scope = include is null
-            ? world.Sectors.Select(s => s.SectorId).ToHashSet(StringComparer.Ordinal)
+            ? sectorIds.ToHashSet(StringComparer.Ordinal)
             : include.ToHashSet(StringComparer.Ordinal);
 
         var result = new Dictionary<string, long>(StringComparer.Ordinal);
 
-        var whole = AllPairsCost.Compute(LaneGraph.Build(world, scope));
+        var whole = AllPairsCost.Compute(LaneGraph.Build(sectorIds, lanes, climateOf, scope));
         var order = scope.OrderBy(id => id, StringComparer.Ordinal).ToList();
 
         foreach (var lost in order)
@@ -44,7 +58,7 @@ public static class ReconnectionCost
             var survivors = scope.Where(id => !string.Equals(id, lost, StringComparison.Ordinal))
                 .ToHashSet(StringComparer.Ordinal);
 
-            var after = AllPairsCost.Compute(LaneGraph.Build(world, survivors));
+            var after = AllPairsCost.Compute(LaneGraph.Build(sectorIds, lanes, climateOf, survivors));
 
             // Compare like with like: only pairs that survive the loss, measured both before and
             // after. Counting pairs that involved the lost sector would charge the empire for

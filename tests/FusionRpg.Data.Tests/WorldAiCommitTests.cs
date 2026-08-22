@@ -115,6 +115,23 @@ public class WorldAiCommitTests : IDisposable
         Assert.Equal(0, Open);
     }
 
+    [Fact]
+    public void Orders_already_filed_speak_for_a_faction_as_loudly_as_a_commit()
+    {
+        // The escape hatch's real shape, and it was broken. Committing *any* faction runs the fill
+        // for every other AI faction, so a scenario that scripts two of them had its second one
+        // filled over by whichever commit landed first — silently, with orders nobody wrote.
+        _store.SubmitWorldCommand("w", new WorldCommand
+        {
+            CommanderId = "zomboss", CommandId = "scripted", Kind = WorldCommandKinds.StandFast
+        });
+
+        _store.CommitWorldTurn("w", "wild", 0);        // somebody else ends their turn first
+
+        var zomboss = _store.ListWorldCommands("w", 0).Where(c => c.CommanderId == "zomboss").ToList();
+        Assert.Equal(new[] { "scripted" }, zomboss.Select(c => c.CommandId));
+    }
+
     // ---- the claim the whole design rests on ----------------------------------------------
 
     [Fact]

@@ -81,11 +81,16 @@ public class MarchedThroughTests
     public void Marching_through_still_leaves_the_far_side_a_glimpse_at_best()
     {
         // Passing through reveals the ground you crossed, not the country beyond it.
+        //
+        // The far side is black-gate rather than verdant-shelf since the 2026-08-22 reshape: Verdant
+        // Shelf now hangs off Black Gate, two lanes past the end of this march, so it is not
+        // glimpsed at all. That is the reshape working — the far corner stays dark.
         var result = TurnEngine.Step(FastRoad(), new[] { March() }, seed: 1);
         var dave = result.World.Intel.Single(i => i.FactionId == "dave");
 
-        Assert.Equal(SectorSight.Glimpse, dave.Of("verdant-shelf")!.Detail);
+        Assert.Equal(SectorSight.Glimpse, dave.Of("black-gate")!.Detail);
         Assert.Equal(SectorSight.Full, dave.Of("ash-waste")!.Detail);
+        Assert.Null(dave.Of("verdant-shelf"));
     }
 
     [Fact]

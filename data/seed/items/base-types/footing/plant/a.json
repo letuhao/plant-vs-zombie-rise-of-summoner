@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-roots-a",
+    "partition": "footing/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-roots-a-001",
+      "nameKey": "base.fine-radicle",
+      "name": "Fine Radicle",
+      "frame": "plant",
+      "role": "footing",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.fine-radicle",
+      "flavorKey": "flavor.base.fine-radicle",
+      "flavor": "The first hair of root, still learning to dig.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-002",
+      "nameKey": "base.creeping-rootlet",
+      "name": "Creeping Rootlet",
+      "frame": "plant",
+      "role": "footing",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.creeping-rootlet",
+      "flavorKey": "flavor.base.creeping-rootlet",
+      "flavor": "It spreads wide and shallow, always reaching for more.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-003",
+      "nameKey": "base.tender-stolon",
+      "name": "Tender Stolon",
+      "frame": "plant",
+      "role": "footing",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tender-stolon",
+      "flavorKey": "flavor.base.tender-stolon",
+      "flavor": "A runner still soft, its nodes not yet hardened.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-004",
+      "nameKey": "base.viable-mycelium",
+      "name": "Viable Mycelium",
+      "frame": "plant",
+      "role": "footing",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.viable-mycelium",
+      "flavorKey": "flavor.base.viable-mycelium",
+      "flavor": "A living network that feeds as much as it anchors.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-005",
+      "nameKey": "base.sprawling-haustorium",
+      "name": "Sprawling Haustorium",
+      "frame": "plant",
+      "role": "footing",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.sprawling-haustorium",
+      "flavorKey": "flavor.base.sprawling-haustorium",
+      "flavor": "A feeder root that drinks from anything it touches.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-006",
+      "nameKey": "base.pale-hypocotyl",
+      "name": "Pale Hypocotyl",
+      "frame": "plant",
+      "role": "footing",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.pale-hypocotyl",
+      "flavorKey": "flavor.base.pale-hypocotyl",
+      "flavor": "Still underground, still growing toward light it has never seen.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-007",
+      "nameKey": "base.dormant-root",
+      "name": "Dormant Root",
+      "frame": "plant",
+      "role": "footing",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dormant-root",
+      "flavorKey": "flavor.base.dormant-root",
+      "flavor": "Deep and patient. It will wait years for the signal to wake.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-008",
+      "nameKey": "base.coarse-rhizome",
+      "name": "Coarse Rhizome",
+      "frame": "plant",
+      "role": "footing",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.coarse-rhizome",
+      "flavorKey": "flavor.base.coarse-rhizome",
+      "flavor": "A thick stem that doubles as a root, carrying both storage and command.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-009",
+      "nameKey": "base.productive-tuber",
+      "name": "Productive Tuber",
+      "frame": "plant",
+      "role": "footing",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.productive-tuber",
+      "flavorKey": "flavor.base.productive-tuber",
+      "flavor": "Swollen with reserves, a bulge of stored will beneath the ground.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-010",
+      "nameKey": "base.weathered-prop",
+      "name": "Weathered Prop",
+      "frame": "plant",
+      "role": "footing",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.weathered-prop",
+      "flavorKey": "flavor.base.weathered-prop",
+      "flavor": "An aerial root hardened by seasons, stood visible against the wind.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-011",
+      "nameKey": "base.established-burrow",
+      "name": "Established Burrow",
+      "frame": "plant",
+      "role": "footing",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.established-burrow",
+      "flavorKey": "flavor.base.established-burrow",
+      "flavor": "A root that digs deep and wide, tunneling through soil like a living path.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-roots-a-012",
+      "nameKey": "base.living-clutch",
+      "name": "Living Clutch",
+      "frame": "plant",
+      "role": "footing",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.living-clutch",
+      "flavorKey": "flavor.base.living-clutch",
+      "flavor": "A grip of roots that holds together, each strand reinforcing all the others.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    }
+  ]
+}

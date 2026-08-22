@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-pollen-a",
+    "partition": "base-types/jewel-major/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-pollen-a-001",
+      "nameKey": "base.dusted-pollen",
+      "name": "Dusted Pollen",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.dusted-pollen",
+      "flavorKey": "flavor.base.dusted-pollen",
+      "flavor": "Powder on the air, carrying what the bloom intended.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-002",
+      "nameKey": "base.floating-anther",
+      "name": "Floating Anther",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.floating-anther",
+      "flavorKey": "flavor.base.floating-anther",
+      "flavor": "Held aloft by the faintest currents of its own making.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-003",
+      "nameKey": "base.released-ovule",
+      "name": "Released Ovule",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.released-ovule",
+      "flavorKey": "flavor.base.released-ovule",
+      "flavor": "Set loose to drift where winds lead, its journey just beginning.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-004",
+      "nameKey": "base.ephemeral-catkin",
+      "name": "Ephemeral Catkin",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.ephemeral-catkin",
+      "flavorKey": "flavor.base.ephemeral-catkin",
+      "flavor": "A scent that fades even as you catch it — all seduction, no holding.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-005",
+      "nameKey": "base.stored-nectar",
+      "name": "Stored Nectar",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.stored-nectar",
+      "flavorKey": "flavor.base.stored-nectar",
+      "flavor": "Sweetness hoarded against the lean season, waiting to be spent.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-006",
+      "nameKey": "base.latent-floret",
+      "name": "Latent Floret",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.latent-floret",
+      "flavorKey": "flavor.base.latent-floret",
+      "flavor": "A bloom that has not yet opened, charged and ready for the right moment.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-007",
+      "nameKey": "base.engorged-stamen",
+      "name": "Engorged Stamen",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.engorged-stamen",
+      "flavorKey": "flavor.base.engorged-stamen",
+      "flavor": "Swollen with pollen that begs to be delivered, heavy with purpose.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-008",
+      "nameKey": "base.potent-corymb",
+      "name": "Potent Corymb",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.potent-corymb",
+      "flavorKey": "flavor.base.potent-corymb",
+      "flavor": "A cluster of strength, each floret contributing its power to the whole.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-009",
+      "nameKey": "base.cohered-stigma",
+      "name": "Cohered Stigma",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.cohered-stigma",
+      "flavorKey": "flavor.base.cohered-stigma",
+      "flavor": "Fused into one flesh, no longer asking but taking what it needs.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-010",
+      "nameKey": "base.ingrown-pistil",
+      "name": "Ingrown Pistil",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.ingrown-pistil",
+      "flavorKey": "flavor.base.ingrown-pistil",
+      "flavor": "Grown so deep into the plant it cannot be separated — the plant cannot live without it.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-011",
+      "nameKey": "base.permanent-raceme",
+      "name": "Permanent Raceme",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.permanent-raceme",
+      "flavorKey": "flavor.base.permanent-raceme",
+      "flavor": "A flowering branch that will never drop, bound for as long as the plant stands.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-pollen-a-012",
+      "nameKey": "base.indivisible-corolla",
+      "name": "Indivisible Corolla",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.indivisible-corolla",
+      "flavorKey": "flavor.base.indivisible-corolla",
+      "flavor": "Its petals are one piece, one purpose, one breath drawn from the root.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    }
+  ]
+}

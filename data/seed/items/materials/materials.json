@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "kind": "material",
+  "_meta": {
+    "batch": "materials-all",
+    "partition": "materials/all",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 3,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-materials-crafting.md#3.1"
+  },
+  "entries": [
+    {
+      "id": "material.001",
+      "nameKey": "material.essence-fire",
+      "name": "Ember Essence",
+      "runtimeId": "essence.fire",
+      "materialClass": "essence",
+      "element": "fire",
+      "iconKey": "icon.material.essence-fire",
+      "tags": ["arcane"]
+    },
+    {
+      "id": "material.002",
+      "nameKey": "material.essence-ice",
+      "name": "Frost Essence",
+      "runtimeId": "essence.ice",
+      "materialClass": "essence",
+      "element": "ice",
+      "iconKey": "icon.material.essence-ice",
+      "tags": ["arcane"]
+    },
+    {
+      "id": "material.003",
+      "nameKey": "material.essence-air",
+      "name": "Gust Essence",
+      "runtimeId": "essence.air",
+      "materialClass": "essence",
+      "element": "air",
+      "iconKey": "icon.material.essence-air",
+      "tags": ["arcane"]
+    },
+    {
+      "id": "material.004",
+      "nameKey": "material.essence-earth",
+      "name": "Stone Essence",
+      "runtimeId": "essence.earth",
+      "materialClass": "essence",
+      "element": "earth",
+      "iconKey": "icon.material.essence-earth",
+      "tags": ["mineral"]
+    },
+    {
+      "id": "material.005",
+      "nameKey": "material.essence-light",
+      "name": "Radiant Essence",
+      "runtimeId": "essence.light",
+      "materialClass": "essence",
+      "element": "light",
+      "iconKey": "icon.material.essence-light",
+      "tags": ["arcane"]
+    },
+    {
+      "id": "material.006",
+      "nameKey": "material.essence-dark",
+      "name": "Shadow Essence",
+      "runtimeId": "essence.dark",
+      "materialClass": "essence",
+      "element": "dark",
+      "iconKey": "icon.material.essence-dark",
+      "tags": ["necrotic"]
+    },
+    {
+      "id": "material.007",
+      "nameKey": "material.shard-common",
+      "name": "Common Shard",
+      "runtimeId": "shard.common",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-common",
+      "tags": ["mineral"]
+    },
+    {
+      "id": "material.008",
+      "nameKey": "material.shard-rare",
+      "name": "Rare Shard",
+      "runtimeId": "shard.rare",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-rare",
+      "tags": ["mineral"]
+    },
+    {
+      "id": "material.009",
+      "nameKey": "material.shard-epic",
+      "name": "Epic Shard",
+      "runtimeId": "shard.epic",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-epic",
+      "tags": ["mineral"]
+    },
+    {
+      "id": "material.010",
+      "nameKey": "material.shard-legendary",
+      "name": "Legendary Shard",
+      "runtimeId": "shard.legendary",
+      "materialClass": "shard",
+      "iconKey": "icon.material.shard-legendary",
+      "tags": ["mineral"]
+    },
+    {
+      "id": "material.011",
+      "nameKey": "material.substrate-humanoid-crude",
+      "name": "Crude Scrap",
+      "runtimeId": "substrate.humanoid.crude",
+      "materialClass": "substrate",
+      "frame": "humanoid",
+      "grade": 1,
+      "iconKey": "icon.material.substrate-humanoid-crude",
+      "tags": ["metal", "light"]
+    },
+    {
+      "id": "material.012",
+      "nameKey": "material.substrate-humanoid-sound",
+      "name": "Sound Metal",
+      "runtimeId": "substrate.humanoid.sound",
+      "materialClass": "substrate",
+      "frame": "humanoid",
+      "grade": 2,
+      "iconKey": "icon.material.substrate-humanoid-sound",
+      "tags": ["metal", "medium"]
+    },
+    {
+      "id": "material.013",
+      "nameKey": "material.substrate-humanoid-fine",
+      "name": "Fine Plating",
+      "runtimeId": "substrate.humanoid.fine",
+      "materialClass": "substrate",
+      "frame": "humanoid",
+      "grade": 3,
+      "iconKey": "icon.material.substrate-humanoid-fine",
+      "tags": ["metal", "medium-heavy"]
+    },
+    {
+      "id": "material.014",
+      "nameKey": "material.substrate-humanoid-prime",
+      "name": "Prime Forging",
+      "runtimeId": "substrate.humanoid.prime",
+      "materialClass": "substrate",
+      "frame": "humanoid",
+      "grade": 4,
+      "iconKey": "icon.material.substrate-humanoid-prime",
+      "tags": ["metal", "heavy", "sturdy"]
+    },
+    {
+      "id": "material.015",
+      "nameKey": "material.substrate-plant-crude",
+      "name": "Green Scraps",
+      "runtimeId": "substrate.plant.crude",
+      "materialClass": "substrate",
+      "frame": "plant",
+      "grade": 1,
+      "iconKey": "icon.material.substrate-plant-crude",
+      "tags": ["organic", "light", "rooted"]
+    },
+    {
+      "id": "material.016",
+      "nameKey": "material.substrate-plant-sound",
+      "name": "Sound Heartwood",
+      "runtimeId": "substrate.plant.sound",
+      "materialClass": "substrate",
+      "frame": "plant",
+      "grade": 2,
+      "iconKey": "icon.material.substrate-plant-sound",
+      "tags": ["organic", "medium", "rooted"]
+    },
+    {
+      "id": "material.017",
+      "nameKey": "material.substrate-plant-fine",
+      "name": "Fine Grain",
+      "runtimeId": "substrate.plant.fine",
+      "materialClass": "substrate",
+      "frame": "plant",
+      "grade": 3,
+      "iconKey": "icon.material.substrate-plant-fine",
+      "tags": ["organic", "medium-heavy", "rooted"]
+    },
+    {
+      "id": "material.018",
+      "nameKey": "material.substrate-plant-prime",
+      "name": "Prime Heartwood",
+      "runtimeId": "substrate.plant.prime",
+      "materialClass": "substrate",
+      "frame": "plant",
+      "grade": 4,
+      "iconKey": "icon.material.substrate-plant-prime",
+      "tags": ["organic", "heavy", "rooted", "sturdy"]
+    },
+    {
+      "id": "material.019",
+      "nameKey": "material.catalyst-forge",
+      "name": "Forge Flux",
+      "runtimeId": "catalyst.forge",
+      "materialClass": "catalyst",
+      "iconKey": "icon.material.catalyst-forge",
+      "tags": ["arcane"]
+    },
+    {
+      "id": "material.020",
+      "nameKey": "material.catalyst-temper",
+      "name": "Temper Dust",
+      "runtimeId": "catalyst.temper",
+      "materialClass": "catalyst",
+      "iconKey": "icon.material.catalyst-temper",
+      "tags": ["mineral"]
+    },
+    {
+      "id": "material.021",
+      "nameKey": "material.catalyst-flux",
+      "name": "Reflow Catalyst",
+      "runtimeId": "catalyst.flux",
+      "materialClass": "catalyst",
+      "iconKey": "icon.material.catalyst-flux",
+      "tags": ["arcane"]
+    }
+  ]
+}

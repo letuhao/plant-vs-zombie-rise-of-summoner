@@ -1,0 +1,344 @@
+{
+  "schemaVersion": 1,
+  "kind": "consumable",
+  "_meta": {
+    "partition": "consumables/1",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-consumables.md §3.1, §5.2, §7.1, §7.3",
+    "batch": "consumables-wave1"
+  },
+  "entries": [
+    {
+      "id": "consumable.k1-001",
+      "nameKey": "consumable.restore-vital-herb",
+      "name": "Vital Herb",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.vitality",
+      "powerBand": "trivial",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k1-002",
+      "nameKey": "consumable.restore-vital-tonic",
+      "name": "Restorative Tonic",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.vitality",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k1-003",
+      "nameKey": "consumable.restore-vital-elixir",
+      "name": "Vitality Elixir",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.vitality",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "arcane"
+      ]
+    },
+    {
+      "id": "consumable.k1-004",
+      "nameKey": "consumable.restore-fortitude-bark",
+      "name": "Bark Fortitude",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.fortitude",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k1-005",
+      "nameKey": "consumable.restore-fortitude-stone",
+      "name": "Stonebound Draught",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.fortitude",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ]
+    },
+    {
+      "id": "consumable.k1-006",
+      "nameKey": "consumable.restore-mending-bloom",
+      "name": "Bloom Mending",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.mending",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k1-007",
+      "nameKey": "consumable.restore-mending-pulse",
+      "name": "Mending Pulse",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.mending",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "arcane"
+      ]
+    },
+    {
+      "id": "consumable.k1-008",
+      "nameKey": "consumable.restore-bulwark-petal",
+      "name": "Bulwark Petal",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.bulwark",
+      "powerBand": "trivial",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k1-009",
+      "nameKey": "consumable.restore-bulwark-crust",
+      "name": "Crust Shield",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.bulwark",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ]
+    },
+    {
+      "id": "consumable.k1-010",
+      "nameKey": "consumable.ward-omni-amber",
+      "name": "Amber Ward",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.warding",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ]
+    },
+    {
+      "id": "consumable.k1-011",
+      "nameKey": "consumable.ward-omni-skin",
+      "name": "Skinbound Ward",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.warding",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k1-012",
+      "nameKey": "consumable.ward-resilience-brine",
+      "name": "Brine Resilience",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.resilience",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "consumable.k1-013",
+      "nameKey": "consumable.ward-resilience-crust",
+      "name": "Crust Resilience",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.resilience",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ]
+    },
+    {
+      "id": "consumable.k1-014",
+      "nameKey": "consumable.ward-padding-down",
+      "name": "Padding Draft",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.padding",
+      "powerBand": "trivial",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k1-015",
+      "nameKey": "consumable.ward-padding-felt",
+      "name": "Felt Padding",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.padding",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k1-016",
+      "nameKey": "consumable.ward-carapace-shell",
+      "name": "Shell Carapace",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.carapace",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ]
+    },
+    {
+      "id": "consumable.k1-017",
+      "nameKey": "consumable.ward-plating-iron",
+      "name": "Iron Plating",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.plating",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "metal"
+      ]
+    },
+    {
+      "id": "consumable.k1-018",
+      "nameKey": "consumable.ward-plating-silver",
+      "name": "Silver Plating",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.plating",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "metal"
+      ]
+    },
+    {
+      "id": "consumable.k1-019",
+      "nameKey": "consumable.restore-vital-draught",
+      "name": "Life Draught",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.vitality",
+      "powerBand": "high",
+      "manifestCost": 2,
+      "tags": [
+        "defensive",
+        "arcane"
+      ]
+    },
+    {
+      "id": "consumable.k1-020",
+      "nameKey": "consumable.ward-stalwart-root",
+      "name": "Stalwart Root",
+      "classId": "ward",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.stalwart",
+      "powerBand": "high",
+      "manifestCost": 2,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    }
+  ]
+}

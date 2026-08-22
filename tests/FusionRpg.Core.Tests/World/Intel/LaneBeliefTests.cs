@@ -55,7 +55,9 @@ public class LaneBeliefTests
         Assert.Equal(LaneState.Severed, LaneOf(new BelievedWorldView(world, "wild"), "l-ember-ash").State);
 
         // Zomboss is nowhere near either.
-        Assert.Equal(LaneState.Open, LaneOf(new BelievedWorldView(world, "zomboss"), "l-ember-ash").State);
+        // "nobody" is a faction id nobody plays, rather than Zomboss: since 2026-08-22 the template gives him a
+        // warband and a Seat, so he is no longer anybody's example of knowing nothing.
+        Assert.Equal(LaneState.Open, LaneOf(new BelievedWorldView(world, "nobody"), "l-ember-ash").State);
     }
 
     [Fact]

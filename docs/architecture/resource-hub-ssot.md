@@ -1,0 +1,252 @@
+# Resource Hub SSOT — actor pools, scope, accrual, exhaustion
+
+**Status:** Design locked (docs). **Not built** — no `resource.*` channel family exists yet.
+**Parent:** [decisions.md](decisions.md) (ADR row **Resource model**, 2026-08-22).
+**Channels:** [actor-hub-ssot.md](actor-hub-ssot.md) §3.G. **Exhaustion vehicle:**
+[status-ssot.md](status-ssot.md). **Consumers:** [action-map.md](action-map.md),
+[battle-timeline-map.md](battle-timeline-map.md), [effect-atom-map.md](effect-atom-map.md).
+
+**Supersedes** [resource-hub-ideal.md](resource-hub-ideal.md), which is retained only as the
+reasoning trail. That document's §2, its header "refused names" bullet, and its §10.2 table were
+already superseded by its own §10.2a on 2026-08-22 and are **not** authoritative; reading them as
+current is the mistake this file exists to prevent.
+
+---
+
+## 1. The model
+
+**Five actor resources. One shared set. Both factions carry all five.**
+
+| id | Class | Exhaustion | Notes |
+|---|---|---|---|
+| `hp` | body | **none** | Depletion is death, already owned by the turn FSM's `Downed` state |
+| `stamina` | body | ✅ debuff | |
+| `hunger` | energy | ✅ debuff | |
+| `spirit` | essence | ✅ debuff | Extinguished spirit is what the summoner harvests *as* soul. **Never an action cost** |
+| `qi` | essence | ✅ debuff | **Skill fuel** — see §2 |
+
+There is **no faction branch anywhere in the model.** Plants and zombies hold the same five pools
+with the same ids, the same polarity, the same channels and the same mechanics. Everything that
+differs between them is a string chosen at the display layer.
+
+---
+
+## 2. What each resource pays for
+
+**Decided 2026-08-22.** Two pools are action costs and they split by *kind of effort*:
+
+| Pool | Pays for | Exhausted means |
+|---|---|---|
+| `stamina` | **Physical actions** — move, basic attack, guard, reposition | The actor can still act, but the body is failing: derived-stat debuff |
+| `qi` | **Skills and abilities** — anything with a trigger, an element, or a container of atoms behind it | No skills. The actor falls back to physical actions only |
+| `hunger` | Nothing directly. It is **sustain**: it gates regeneration and condition rather than being spent per action | Metabolic failure: derived-stat debuff |
+| `spirit` | **Nothing. `spirit` is never an action cost** — it is what the actor *is*, and what the summoner harvests as soul when it is extinguished | Identity failure: derived-stat debuff |
+| `hp` | Nothing | Death — owned by the turn FSM's `Downed` state, not by exhaustion |
+
+This is the distinction `qi` and `spirit` needed, since both sit in the `essence` class: **`qi` is
+what an actor channels; `spirit` is what an actor is.** One is spendable and refills; the other is
+depleted only by harm and is the thing the summoner mechanism ultimately collects.
+
+**Consumer note.** [action-map.md](action-map.md) currently models a single cost pool. Two cost
+pools means an action declares *which* it draws on. That is a field on the action, not a branch —
+and the "validate all, consume all at commit, roll back on any failure" rule already stated there
+applies unchanged across both.
+
+---
+
+## 3. Display labels — the only faction difference
+
+| id | Plant label | Zombie label |
+|---|---|---|
+| `hp` | HP | HP |
+| `stamina` | Stamina | Stamina |
+| `hunger` | **Sun** | Hunger |
+| `spirit` | Spirit | Spirit |
+| `qi` | **Yang** | **Yin** |
+
+**Labels are content.** They are never a channel id, never a branch, never a key, and never
+serialized into a battle report. A label change is a content edit and moves nothing.
+
+`qi`, `yin` and `yang` were verified against `src/` and the web app and collide with nothing.
+
+---
+
+## 4. The two things called "Sun" — read this before writing any UI
+
+This is the single most confusable point in the hub, and it is not a conflict once stated.
+
+| | Lawn sun | The plant's `hunger` pool |
+|---|---|---|
+| Layer | **`pvz.*`** — the game foundation | **`rpg.*`** — this hub |
+| Scope | **Match** — one shared bank | **Actor** — one pool per creature |
+| What it is | The sunflower → bank → plant economy | Metabolic energy an actor spends on actions and skills |
+| Owned by | `SimEngine` / `SimModels`, untouched by this hub | The Actor Hub |
+| Displayed as | "Sun" on the lawn HUD | "Sun" on a plant's resource meters |
+
+They are two different things that share a word, the way two programs can both have a variable
+called `count`. There is nothing to bridge, and **an RPG resource never reads a PvZ value** — if the
+RPG wants to know something about the lawn it arrives as a captured event fact, like any other
+telemetry.
+
+**Consequence for the GUI:** a surface showing both must distinguish them by *scope*, not by name —
+the match bank belongs to the stage HUD, the actor pool belongs to the actor's meters.
+
+---
+
+## 5. Registry shape
+
+Every resource declares:
+
+| Field | Values | Why it exists |
+|---|---|---|
+| `id` | `hp` · `stamina` · `hunger` · `spirit` · `qi` | Closed set; adding one is an ADR |
+| `scope` | `actor` · `side` · `match` · `player` | Resolves the sun and soul ambiguities without renaming anything |
+| `class` | `body` · `energy` · `essence` | |
+| `polarity` | `asset` · `burden` | Decides what every generic operation means — §6 |
+| `accrual` | `none` · `regen` · `onEvent` · `generated` | §9 |
+| `bounds` | max channel, floor, whether it may exceed max | |
+| `onEmpty` / `onFull` | what happens at the rail | Death at zero `hp`; exhaustion at zero for the rest |
+| `visibility` | which UI surfaces show it | Not every pool is a bar |
+| `labels` | per-faction display strings | §3 — content, never a key |
+
+**The registry is data.** Adding a sixth resource costs a row, not a system. That property is the
+reason this file exists before any of it is built.
+
+---
+
+## 6. Polarity — all five are assets today
+
+`polarity` decides what every generic operation means. Without it, the moment a shared path says
+`Regenerate(resource, amount)`, half the resources would heal and half would get worse.
+
+**Under the locked set, all five resources are `asset`:** they fill up, you spend them, empty is bad.
+`hunger` is a fed/starving gauge in the ordinary survival-game sense — **full is good** — not a
+rising affliction.
+
+The field is retained rather than dropped because it is free now and a rewrite later, and because
+`burden` remains available if a future resource genuinely needs it. **No resource in the locked set
+uses it.** A proposal to add a burden is an ADR, not a content edit, because it changes what every
+generic operation means.
+
+---
+
+## 7. Layer — `rpg.*`, never the PvZ write channel
+
+Resources exist for **our** mechanics: actions, skills, costs, the turn kernel. They are not PvZ
+attributes.
+
+| Layer | Owns | Reaches Unity |
+|---|---|---|
+| `pvz.*` — the game foundation | `StatChannels` (`hp` `maxHp` `atk` `defense` `arm1` `arm1Max` `arm2` `arm2Max`), facts, intents | Yes — `EntityApply` → `EntityStatWriter` is the only write path |
+| `rpg.*` — content and progression | Derived channels in the Actor Hub, overlay combat, status, shields, **and these resources** | **No, by design** |
+
+`hp` is the single exception, and only in PvZ mode, because Unity is SSOT for current HP there.
+In **standalone / web mode there is no Unity at all** and the server's battle engine owns the state
+outright — so the RPG battle is the unconstrained runtime and PvZ mode is the special case, not the
+reference.
+
+Asking whether `stamina` reaches a Unity field is a category error; the layering exists so that it
+does not.
+
+---
+
+## 8. Channels and current values
+
+**Magnitudes are Actor-Hub derived channels:**
+
+```text
+resource.max.{id}      resource.regen.{id}
+```
+
+They form **their own family list and must not join `AllCombatChannelIds`**, which a test asserts is
+exactly **84**. Registration rules are the Actor Hub's ([actor-hub-ssot.md](actor-hub-ssot.md) §3.G):
+unknown channel → reject.
+
+**Current values are not channels.** They are per-actor runtime state resolved **lazily**:
+
+```text
+value + rate × (now − lastTick)
+```
+
+following the standing compute-on-read law. 200 actors × 4 regenerating pools would otherwise be
+800 recurring events against a 0.15 ms kernel slice.
+
+**Therefore exhaustion is re-evaluated on read, not only on write.** A pool that decayed past its
+rail while nothing touched it is exhausted the moment anything looks at it.
+
+---
+
+## 9. Accrual — three shapes
+
+| Shape | Example | Structure | Owner |
+|---|---|---|---|
+| **Regen** | stamina per tick | A rule *on the pool*, driven by the timeline kernel | This hub |
+| **On event** | spirit on kill | A rule *on a trigger* | **The effect-atom program** — resources declare *that* they can be granted; atoms declare *when* |
+| **Generated** | a sunflower producing into a side bank | An actor with an output, writing into a pool it does not own | This hub |
+
+Keeping the second line is what stops this becoming a fifth content system.
+
+---
+
+## 10. Exhaustion
+
+**Every resource except `hp` has an exhaustion mechanism that debuffs derived stats.**
+
+- Expressed as a **status**, reusing `StatusRuntime`'s instances, stacking, resistance, VFX cues and
+  `icd_ms` — the last of which is what stops apply/clear flicker at the rail.
+- The debuff is a **container of atoms**, never a hardcoded channel list.
+- **An exhaustion debuff must never touch a channel feeding its own resource's regen.** That is the
+  only true spiral, and it is rejectable by validation.
+- `hp` is exempt: depletion is death, owned by the turn FSM's `Downed` state.
+
+---
+
+## 11. Persistence
+
+Pools **persist across a run and refill at rest.** They are not per-encounter.
+
+---
+
+## 12. What this hub does not own
+
+| | Why |
+|---|---|
+| **Shields** | Excluded by decision. Nothing pays a shield to act — they are a damage-layer absorption pool, not an action cost. `ShieldRuntime` keeps them, with its own 4 derived families × omni + 6 elements |
+| **`soul`** | **Player-scoped currency**, not an actor pool. `rpg_soul_balances` / `rpg_soul_ledger`, `SoulEarnPolicy`, demon binding, daily tribute, expeditions — all shipped. An actor's extinguished `spirit` is what the summoner harvests *as* soul: a conversion between two named resources at two scopes, not one resource wearing two hats |
+| **`xp`** | Actor-scoped and persistent, but progression, not a spendable pool — `rpg_xp_ledger`, `rpg_actor_progression` |
+| **Demon materials** | Player-scoped fusion inputs — `rpg_demon_materials` |
+| **Lawn sun** | `pvz.*`, match-scoped. §4 |
+
+---
+
+## 13. Cost, stated honestly
+
+Five resources is not five numbers. Each is a max channel, a regen channel, an accrual rule, a
+serialization field, a UI element, a balance axis, and — once it appears in a battle report — a
+**golden-visible number that moves `RulesetVersion`**.
+
+Two mitigations, both already the plan: the registry is data (§5), and resource channels are their
+own family list that never joins the 84 (§8).
+
+---
+
+## 14. Binding for the UI
+
+The GUI binds to the **registry shape**, never to the id list:
+
+```text
+(id, label, value, max, polarity)
+```
+
+`label` is resolved from the actor's faction at the display layer (§3). A resource meter therefore
+has no knowledge of which resources exist, and adding a sixth changes no component.
+
+Design reference: [design/00-foundation.html](../design/00-foundation.html) §C.5 (resource meter),
+[design/07-flows.html](../design/07-flows.html) and the actor panel in §D.2.
+
+---
+
+## 15. Open — genuinely undecided
+
+1. **Whether `burden` is ever used.** The field exists and nothing uses it (§6).
+2. **`resource.*` channel registration.** Designed, not registered — [actor-hub-ssot.md](actor-hub-ssot.md) §3.G.

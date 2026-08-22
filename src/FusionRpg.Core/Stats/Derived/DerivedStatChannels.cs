@@ -1,3 +1,4 @@
+using FusionRpg.Core.Combat.Element;
 namespace FusionRpg.Core.Stats.Derived;
 
 /// <summary>Known derived channel id patterns — see actor-hub-ssot.md §3.</summary>
@@ -126,20 +127,28 @@ public static class DerivedStatChannels
     };
 
     /// <summary>
-    /// All overlay combat derived channels — generated family × (omni + ElementRoster) so the
-    /// list is exhaustive by construction (element-hub-ssot.md §6; 12 × 7 = 84 since the shield
-    /// families, shield-system-spec.md §2.3).
+    /// All overlay combat derived channels — generated family × (omni + roster) so the list is
+    /// exhaustive by construction (element-hub-ssot.md §6; 12 × 7 = 84 today).
+    ///
+    /// <para><b>Generated from the roster TABLE, not the enum</b> (E18). That is what makes a seventh
+    /// element rows plus regeneration: its 12 channels appear here, and every consumer picks them up
+    /// because <c>CombatDerivedReader</c> matches channels by pattern rather than by name. Read
+    /// through <see cref="AllCombatChannelIds"/> rather than cached in a static, because the roster
+    /// is loaded after startup on a host with a database.</para>
     /// </summary>
-    public static readonly IReadOnlyList<string> AllCombatChannelIds = BuildAllCombatChannelIds();
+    public static IReadOnlyList<string> AllCombatChannelIds =>
+        BuildAllCombatChannelIds(ElementTable.Current.Elements.Where(e => e.Enabled).Select(e => e.ElementId));
 
-    static IReadOnlyList<string> BuildAllCombatChannelIds()
+    /// <summary>The channel set for an explicit roster — how a test can add a seventh element.</summary>
+    public static IReadOnlyList<string> BuildAllCombatChannelIds(IEnumerable<string> elementIds)
     {
-        var ids = new List<string>(CombatChannelFamilies.Count * (ElementRoster.Concrete.Count + 1));
+        var roster = elementIds.ToList();
+        var ids = new List<string>(CombatChannelFamilies.Count * (roster.Count + 1));
         foreach (var family in CombatChannelFamilies)
         {
             ids.Add($"{family}.{ElementRoster.OmniId}");
-            foreach (var element in ElementRoster.Concrete)
-                ids.Add($"{family}.{element.ToElementId()}");
+            foreach (var element in roster)
+                ids.Add($"{family}.{element}");
         }
 
         return ids;

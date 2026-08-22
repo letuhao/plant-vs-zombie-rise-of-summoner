@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-manipulator-a",
+    "partition": "base-types/manipulator/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.1"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-hands-a-001",
+      "nameKey": "base.quilted-glove",
+      "name": "Quilted Glove",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.quilted-glove",
+      "flavorKey": "flavor.base.quilted-glove",
+      "flavor": "Padded squares, hand-stitched for bite and grip. Every impact is felt and sent back out.",
+      "tags": ["light", "organic", "offensive"]
+    },
+    {
+      "id": "item.humanoid-hands-a-002",
+      "nameKey": "base.spun-mitt",
+      "name": "Spun Mitt",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.spun-mitt",
+      "flavorKey": "flavor.base.spun-mitt",
+      "flavor": "Twisted thread wound tight. The fine weave hides the strength underneath.",
+      "tags": ["light", "organic", "offensive"]
+    },
+    {
+      "id": "item.humanoid-hands-a-003",
+      "nameKey": "base.cured-finger",
+      "name": "Cured Finger",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.cured-finger",
+      "flavorKey": "flavor.base.cured-finger",
+      "flavor": "Single leather digit, treated to grip. One finger can do the work of five.",
+      "tags": ["light", "organic", "offensive", "fragile"]
+    },
+    {
+      "id": "item.humanoid-hands-a-004",
+      "nameKey": "base.studded-claw",
+      "name": "Studded Claw",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.studded-claw",
+      "flavorKey": "flavor.base.studded-claw",
+      "flavor": "Reinforced leather with raised studs across the knuckles. Strikes and tears in one motion.",
+      "tags": ["medium-light", "metal", "offensive"]
+    },
+    {
+      "id": "item.humanoid-hands-a-005",
+      "nameKey": "base.supple-grip",
+      "name": "Supple Grip",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.supple-grip",
+      "flavorKey": "flavor.base.supple-grip",
+      "flavor": "Soft leather that moves with your hand. Flexibility is its own kind of armor.",
+      "tags": ["light", "organic", "offensive"]
+    },
+    {
+      "id": "item.humanoid-hands-a-006",
+      "nameKey": "base.threadbare-hand",
+      "name": "Threadbare Hand",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.threadbare-hand",
+      "flavorKey": "flavor.base.threadbare-hand",
+      "flavor": "Worn cloth barely holding itself together. What remains works because it has to.",
+      "tags": ["light", "organic", "offensive", "fragile"]
+    },
+    {
+      "id": "item.humanoid-hands-a-007",
+      "nameKey": "base.tanned-wristband",
+      "name": "Tanned Wristband",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.tanned-wristband",
+      "flavorKey": "flavor.base.tanned-wristband",
+      "flavor": "A loop of worked leather around the wrist. Supports the hand through every strike.",
+      "tags": ["light", "organic", "offensive"]
+    },
+    {
+      "id": "item.humanoid-hands-a-008",
+      "nameKey": "base.woven-wrap",
+      "name": "Woven Wrap",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.woven-wrap",
+      "flavorKey": "flavor.base.woven-wrap",
+      "flavor": "Cloth wound and bound around palm and fingers. The tighter the wrap, the sharper the hit.",
+      "tags": ["light", "organic", "offensive"]
+    },
+    {
+      "id": "item.humanoid-hands-a-009",
+      "nameKey": "base.oiled-palm",
+      "name": "Oiled Palm",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.oiled-palm",
+      "flavorKey": "flavor.base.oiled-palm",
+      "flavor": "Leather kept slick and supple. Ready to slide in and strike before anyone sees it coming.",
+      "tags": ["medium-light", "organic", "offensive"]
+    },
+    {
+      "id": "item.humanoid-hands-a-010",
+      "nameKey": "base.creased-knuckle",
+      "name": "Creased Knuckle",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.creased-knuckle",
+      "flavorKey": "flavor.base.creased-knuckle",
+      "flavor": "Leather worn in the shape of a clenched fist. Its folds have hit a thousand times already.",
+      "tags": ["medium-light", "organic", "offensive", "sturdy"]
+    },
+    {
+      "id": "item.humanoid-hands-a-011",
+      "nameKey": "base.faded-tape",
+      "name": "Faded Tape",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.faded-tape",
+      "flavorKey": "flavor.base.faded-tape",
+      "flavor": "Old tape, color long washed out, but still holding. Some things get better with age.",
+      "tags": ["light", "organic", "offensive"]
+    },
+    {
+      "id": "item.humanoid-hands-a-012",
+      "nameKey": "base.boiled-thumb",
+      "name": "Boiled Thumb",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.boiled-thumb",
+      "flavorKey": "flavor.base.boiled-thumb",
+      "flavor": "Hardened leather, shaped and stiffened. A single digit that guides the whole hand's intent.",
+      "tags": ["light", "organic", "offensive"]
+    }
+  ]
+}

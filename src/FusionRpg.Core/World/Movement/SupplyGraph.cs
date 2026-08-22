@@ -54,7 +54,7 @@ public static class SupplyGraph
             if (sector.OwnerFactionId is not { } owner) continue;
             if (!connectedByFaction.TryGetValue(owner, out var connected) || connected.Count == 0) continue;
             if (!connected.Contains(sector.SectorId))
-                report.Add(phase, TurnReportKinds.Event, owner, "supply.cut:" + sector.SectorId);
+                report.Add(phase, TurnReportKinds.Event, owner, "supply.cut:" + sector.SectorId, sector.SectorId);
         }
 
         var survivors = new List<WorldEntity>(world.Entities.Count);
@@ -78,7 +78,8 @@ public static class SupplyGraph
 
             var bitten = Starve(entity);
             report.Add(phase, TurnReportKinds.Event, entity.EntityId,
-                "attrition:" + (bitten.Members.Count == 0 ? "lost" : entity.AtSectorId ?? entity.OnLaneId ?? ""));
+                "attrition:" + (bitten.Members.Count == 0 ? "lost" : entity.AtSectorId ?? entity.OnLaneId ?? ""),
+                entity.AtSectorId);
 
             // A force that starves to nothing leaves the map, the same as one destroyed in a fight.
             if (bitten.Members.Count > 0) survivors.Add(bitten);
@@ -112,7 +113,7 @@ public static class SupplyGraph
 
         if (!mended) return entity;
 
-        report.Add(phase, TurnReportKinds.Event, entity.EntityId, "recovery:" + (entity.AtSectorId ?? ""));
+        report.Add(phase, TurnReportKinds.Event, entity.EntityId, "recovery:" + (entity.AtSectorId ?? ""), entity.AtSectorId);
         return entity with { Members = members };
     }
 

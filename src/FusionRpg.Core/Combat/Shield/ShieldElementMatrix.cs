@@ -1,3 +1,4 @@
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Combat.Shield;
@@ -12,29 +13,17 @@ namespace FusionRpg.Core.Combat.Shield;
 /// </summary>
 public static class ShieldElementMatrix
 {
+    /// <summary>
+    /// Reads the roster's shield matrix (E18) — a separate table from the combat ring, seeded
+    /// identical and independently editable. Verified 2026-08-22: the two are the same in all 36
+    /// pairs today, including light ⇄ dark, so the asymmetry the atom spec warned about is not there.
+    /// </summary>
     public static int RelationUnit(ElementTypeId attacker, ElementTypeId shieldElement)
     {
         if (attacker == shieldElement)
             return 0;
 
-        return (attacker, shieldElement) switch
-        {
-            (ElementTypeId.Light, ElementTypeId.Dark) => 1,
-            (ElementTypeId.Dark, ElementTypeId.Light) => 1,
-
-            (ElementTypeId.Fire, ElementTypeId.Ice) => 1,
-            (ElementTypeId.Fire, ElementTypeId.Air) => -1,
-
-            (ElementTypeId.Ice, ElementTypeId.Earth) => 1,
-            (ElementTypeId.Ice, ElementTypeId.Fire) => -1,
-
-            (ElementTypeId.Earth, ElementTypeId.Air) => 1,
-            (ElementTypeId.Earth, ElementTypeId.Ice) => -1,
-
-            (ElementTypeId.Air, ElementTypeId.Fire) => 1,
-            (ElementTypeId.Air, ElementTypeId.Earth) => -1,
-
-            _ => 0
-        };
+        return ElementTable.Current.ShieldUnit(
+            ElementTable.IdOf(attacker), ElementTable.IdOf(shieldElement));
     }
 }

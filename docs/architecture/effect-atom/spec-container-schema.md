@@ -135,6 +135,7 @@ tests/FusionRpg.Core.Tests/Atoms/ContainerValidatorTests.cs
 | Unknown `atom_id` | container rejected whole |
 | Duplicate `seq` | rejected |
 | Any edit | `revision` bumps; content hash changes |
+| An identical re-write | **nothing happens**. The comparison covers the child rows too: they are replaced wholesale, so a parent-column-only check would miss a changed atom list entirely (E14a) |
 
 ## Boundaries
 

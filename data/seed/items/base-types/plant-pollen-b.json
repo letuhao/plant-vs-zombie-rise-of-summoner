@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-pollen-b",
+    "partition": "base-types/jewel-major/plant/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-pollen-b-001",
+      "nameKey": "base.stored-anther",
+      "name": "Stored Anther",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.stored-anther",
+      "flavorKey": "flavor.base.stored-anther",
+      "flavor": "Preserved from ripeness, holding the capacity to spread.",
+      "tags": ["medium", "organic", "rooted", "offensive"]
+    },
+    {
+      "id": "item.plant-pollen-b-002",
+      "nameKey": "base.engorged-pollen",
+      "name": "Engorged Pollen",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.engorged-pollen",
+      "flavorKey": "flavor.base.engorged-pollen",
+      "flavor": "Swollen with life force, dense and crackling with potential.",
+      "tags": ["medium-heavy", "organic", "rooted", "offensive"]
+    },
+    {
+      "id": "item.plant-pollen-b-003",
+      "nameKey": "base.latent-ovule",
+      "name": "Latent Ovule",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.latent-ovule",
+      "flavorKey": "flavor.base.latent-ovule",
+      "flavor": "The waiting seed sleeps in perfect form. All that will bloom lies dormant within.",
+      "tags": ["medium", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-pollen-b-004",
+      "nameKey": "base.dormant-catkin",
+      "name": "Dormant Catkin",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dormant-catkin",
+      "flavorKey": "flavor.base.dormant-catkin",
+      "flavor": "Asleep against the cold, packed tight and unyielding.",
+      "tags": ["medium", "organic", "rooted", "defensive"],
+      "notes": "Weaker implicit paired with standard socket ceiling for resilience in band-b variety — dormancy itself provides the protection."
+    },
+    {
+      "id": "item.plant-pollen-b-005",
+      "nameKey": "base.nourished-nectar",
+      "name": "Nourished Nectar",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.nourished-nectar",
+      "flavorKey": "flavor.base.nourished-nectar",
+      "flavor": "Tended and thick with sweetness, a bounty held in reserve.",
+      "tags": ["medium", "organic", "rooted", "utility"]
+    },
+    {
+      "id": "item.plant-pollen-b-006",
+      "nameKey": "base.potent-stamen",
+      "name": "Potent Stamen",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.potent-stamen",
+      "flavorKey": "flavor.base.potent-stamen",
+      "flavor": "Packed with the vigor to draw life from the soil itself.",
+      "tags": ["medium-heavy", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-pollen-b-007",
+      "nameKey": "base.cohered-pistil",
+      "name": "Cohered Pistil",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.cohered-pistil",
+      "flavorKey": "flavor.base.cohered-pistil",
+      "flavor": "Once three parts — now one binding truth.",
+      "tags": ["heavy", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-pollen-b-008",
+      "nameKey": "base.ingrown-floret",
+      "name": "Ingrown Floret",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.ingrown-floret",
+      "flavorKey": "flavor.base.ingrown-floret",
+      "flavor": "Grafted so long ago that roots and stock have become indistinguishable.",
+      "tags": ["medium", "organic", "rooted", "offensive"]
+    },
+    {
+      "id": "item.plant-pollen-b-009",
+      "nameKey": "base.knit-perianth",
+      "name": "Knit Perianth",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.knit-perianth",
+      "flavorKey": "flavor.base.knit-perianth",
+      "flavor": "A mesh of petals and sepals woven so tightly nothing passes without consent.",
+      "tags": ["heavy", "organic", "rooted", "offensive"]
+    },
+    {
+      "id": "item.plant-pollen-b-010",
+      "nameKey": "base.sealed-calyx",
+      "name": "Sealed Calyx",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.sealed-calyx",
+      "flavorKey": "flavor.base.sealed-calyx",
+      "flavor": "The sepals lock tight around what they protect, unyielding as stone.",
+      "tags": ["heavy", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-pollen-b-011",
+      "nameKey": "base.permanent-stigma",
+      "name": "Permanent Stigma",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.permanent-stigma",
+      "flavorKey": "flavor.base.permanent-stigma",
+      "flavor": "Once touched, it takes and never yields what it has claimed.",
+      "tags": ["medium-heavy", "organic", "rooted", "utility"]
+    },
+    {
+      "id": "item.plant-pollen-b-012",
+      "nameKey": "base.seated-umbel",
+      "name": "Seated Umbel",
+      "frame": "plant",
+      "role": "jewel-major",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.seated-umbel",
+      "flavorKey": "flavor.base.seated-umbel",
+      "flavor": "The cluster finds its place and draws sustenance from every root that feeds it.",
+      "tags": ["medium-heavy", "organic", "rooted", "utility"]
+    }
+  ]
+}

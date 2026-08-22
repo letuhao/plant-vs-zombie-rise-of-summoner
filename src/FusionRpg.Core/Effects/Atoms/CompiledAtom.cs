@@ -47,6 +47,17 @@ public sealed class FlatPredicate : ICompiledPredicate
 
     public int OpCount => _ops.Length;
 
+    /// <summary>
+    /// The flat form, for E19's wire codec. Every field is already an int — that is what lets a
+    /// compiled predicate travel to the injector without a content row, a status name, or an
+    /// element name going with it.
+    /// </summary>
+    internal Op[] Ops => _ops;
+    internal int Entry => _entry;
+
+    /// <summary>Rebuild from a delivered op array. No validation happens here — the server compiled it.</summary>
+    internal static FlatPredicate FromOps(Op[] ops, int entry) => new(ops, entry);
+
     public bool Evaluate(ref FactReader facts)
     {
         var pc = _entry;

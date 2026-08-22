@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-head-guard-a",
+    "partition": "base-types/head-guard/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-head-a-001",
+      "nameKey": "base.spun-cap",
+      "name": "Spun Cap",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.spun-cap",
+      "flavorKey": "flavor.base.spun-cap",
+      "flavor": "Cotton spun and bound. No armor, just a shield against the sun.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-002",
+      "nameKey": "base.quilted-hood",
+      "name": "Quilted Hood",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.quilted-hood",
+      "flavorKey": "flavor.base.quilted-hood",
+      "flavor": "Layered cloth sewn together with care. Someone wore it every day before you.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-003",
+      "nameKey": "base.woven-brim",
+      "name": "Woven Brim",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.woven-brim",
+      "flavorKey": "flavor.base.woven-brim",
+      "flavor": "A simple interlocked weave. Protective by virtue of how it sits, nothing more.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-004",
+      "nameKey": "base.secondhand-beanie",
+      "name": "Secondhand Beanie",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.secondhand-beanie",
+      "flavorKey": "flavor.base.secondhand-beanie",
+      "flavor": "Cast off by someone else. The stitches are loose but the yarn holds.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-005",
+      "nameKey": "base.boiled-bandana",
+      "name": "Boiled Bandana",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.boiled-bandana",
+      "flavorKey": "flavor.base.boiled-bandana",
+      "flavor": "Boiled leather, hardened but still flexible. Wraps around where cloth would slip.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-006",
+      "nameKey": "base.cured-sunhat",
+      "name": "Cured Sunhat",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.cured-sunhat",
+      "flavorKey": "flavor.base.cured-sunhat",
+      "flavor": "The brim catches the wind. The hide beneath is stiff but not unbearable.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-007",
+      "nameKey": "base.studded-crest",
+      "name": "Studded Crest",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.studded-crest",
+      "flavorKey": "flavor.base.studded-crest",
+      "flavor": "Studs worked into the leather. It stands up without being heavy.",
+      "tags": [
+        "medium-light",
+        "metal",
+        "defensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-008",
+      "nameKey": "base.oiled-hardhat",
+      "name": "Oiled Hardhat",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.oiled-hardhat",
+      "flavorKey": "flavor.base.oiled-hardhat",
+      "flavor": "Coated with oil to shed water and wear. It smells faintly of preservation.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-009",
+      "nameKey": "base.insulated-bucket",
+      "name": "Insulated Bucket",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.insulated-bucket",
+      "flavorKey": "flavor.base.insulated-bucket",
+      "flavor": "A discarded bucket lined with cloth, padded against impacts. Absurd protection.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-010",
+      "nameKey": "base.threadbare-pot",
+      "name": "Threadbare Pot",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.threadbare-pot",
+      "flavorKey": "flavor.base.threadbare-pot",
+      "flavor": "Worn through in places, patched in others. Still covers.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive",
+        "fragile"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-011",
+      "nameKey": "base.supple-helmet",
+      "name": "Supple Helmet",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.supple-helmet",
+      "flavorKey": "flavor.base.supple-helmet",
+      "flavor": "Leather tanned until it moves like skin. Protection without restraint.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-head-a-012",
+      "nameKey": "base.creased-colander",
+      "name": "Creased Colander",
+      "frame": "humanoid",
+      "role": "head-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.creased-colander",
+      "flavorKey": "flavor.base.creased-colander",
+      "flavor": "Folded and worked until the creases hold their shape. Flexible armor.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive",
+        "sturdy"
+      ]
+    }
+  ]
+}

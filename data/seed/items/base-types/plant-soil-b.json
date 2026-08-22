@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-soil-b",
+    "partition": "base-types/girdle/plant/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-soil-b-001",
+      "nameKey": "base.ancient-soil",
+      "name": "Ancient Soil",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.ancient-soil",
+      "flavorKey": "flavor.base.ancient-soil",
+      "flavor": "Ground worked for centuries. It remembers what was planted.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-002",
+      "nameKey": "base.grooved-bed",
+      "name": "Grooved Bed",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.grooved-bed",
+      "flavorKey": "flavor.base.grooved-bed",
+      "flavor": "Furrowed by countless seasons of root and rain. The grooves still channel nutrients.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-003",
+      "nameKey": "base.gnarled-planter",
+      "name": "Gnarled Planter",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.gnarled-planter",
+      "flavorKey": "flavor.base.gnarled-planter",
+      "flavor": "Twisted wood and clay, knotted from generations of root growth.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-004",
+      "nameKey": "base.dense-humus",
+      "name": "Dense Humus",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dense-humus",
+      "flavorKey": "flavor.base.dense-humus",
+      "flavor": "Black loam so rich it barely holds its shape. Life compacted into itself.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-005",
+      "nameKey": "base.mossy-mound",
+      "name": "Mossy Mound",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.mossy-mound",
+      "flavorKey": "flavor.base.mossy-mound",
+      "flavor": "A heap of soil crowned with moss, soft to touch but rooted deep.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-006",
+      "nameKey": "base.sunken-hollow",
+      "name": "Sunken Hollow",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.sunken-hollow",
+      "flavorKey": "flavor.base.sunken-hollow",
+      "flavor": "A depression worn deep by the weight of years and the passage of creatures.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-007",
+      "nameKey": "base.hoary-ridge",
+      "name": "Hoary Ridge",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.hoary-ridge",
+      "flavorKey": "flavor.base.hoary-ridge",
+      "flavor": "A raised line of aged, hardened earth where two beds once divided.",
+      "tags": [
+        "organic",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-008",
+      "nameKey": "base.timeworn-trench",
+      "name": "Timeworn Trench",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.timeworn-trench",
+      "flavorKey": "flavor.base.timeworn-trench",
+      "flavor": "A furrow scored by seasons of water-flow, now a permanent feature.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-009",
+      "nameKey": "base.coarse-substrate",
+      "name": "Coarse Substrate",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.coarse-substrate",
+      "flavorKey": "flavor.base.coarse-substrate",
+      "flavor": "Rock-laden earth that demands strong roots to break and anchor.",
+      "tags": [
+        "mineral",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-010",
+      "nameKey": "base.petrified-pit",
+      "name": "Petrified Pit",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "extreme"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.petrified-pit",
+      "flavorKey": "flavor.base.petrified-pit",
+      "flavor": "A hardened excavation, its sides turned almost to stone by pressure and time.",
+      "tags": [
+        "mineral",
+        "rooted",
+        "heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-011",
+      "nameKey": "base.lichened-furrow",
+      "name": "Lichened Furrow",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.lichened-furrow",
+      "flavorKey": "flavor.base.lichened-furrow",
+      "flavor": "An old planting line, now colonized by lichen and symbiotic growth.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    },
+    {
+      "id": "item.plant-soil-b-012",
+      "nameKey": "base.seasoned-tilth",
+      "name": "Seasoned Tilth",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.seasoned-tilth",
+      "flavorKey": "flavor.base.seasoned-tilth",
+      "flavor": "Worked earth conditioned over many seasons, responsive and rich.",
+      "tags": [
+        "organic",
+        "rooted",
+        "medium-heavy"
+      ]
+    }
+  ]
+}

@@ -74,12 +74,12 @@ public class MovementTurnTests
 
         // A new destination, routed the way the map view builds it: current lane, then onward.
         var accepted = TurnEngine.Step(first.World,
-            new[] { Move("e-dave-legion-1", "l-ember-ash", "l-ash-verdant") }, seed: 1);
+            new[] { Move("e-dave-legion-1", "l-ember-ash", "l-ash-black") }, seed: 1);
         Assert.Empty(accepted.Report.Dropped);
 
         // The same destination without the lane under its feet is what gets refused.
         var refused = TurnEngine.Step(first.World,
-            new[] { Move("e-dave-legion-1", "l-ash-verdant") }, seed: 1);
+            new[] { Move("e-dave-legion-1", "l-ash-black") }, seed: 1);
         Assert.Equal("path.not-contiguous", refused.Report.Dropped.Single().Detail);
     }
 
@@ -114,8 +114,8 @@ public class MovementTurnTests
     [Fact]
     public void A_path_that_does_not_start_where_the_legion_stands_is_dropped_with_a_reason()
     {
-        // l-ash-verdant is nowhere near the homeworld.
-        var result = TurnEngine.Step(World(), new[] { Move("e-dave-legion-1", "l-ash-verdant") }, seed: 1);
+        // l-ash-black is nowhere near the homeworld.
+        var result = TurnEngine.Step(World(), new[] { Move("e-dave-legion-1", "l-ash-black") }, seed: 1);
 
         var dropped = Assert.Single(result.Report.Dropped);
         Assert.Equal("path.not-contiguous", dropped.Detail);

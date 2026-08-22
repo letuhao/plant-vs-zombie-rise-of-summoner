@@ -40,6 +40,14 @@ This file cuts those four, and eight more.
 | **atom / family / tier / variant** | as defined in [../effect-atom/definitions.md](../effect-atom/definitions.md) §1 | anything else |
 | **container / instance / binding** | as defined in definitions §0 and §5 | item row, equip row |
 
+**Never write a bare `D<n>` for a game.** In this folder `D1`–`D4` are the four **decision documents**
+(`decision-d1-durable-ownership.md` … `decision-d4-content-budget.md`). Prior-art games are always
+written in full — **Diablo 2**, **Diablo 4**, **Path of Exile** — never `D2` or `D4`. This rule exists
+because the first draft of the fleet plan said *"D2 scale"* meaning Diablo 2, in a document that also
+cited decision D4, and it was read as a claim about Diablo 4. Same for `E<n>` (effect-atom modules),
+`I<n>` (item lanes) and `G<n>` (gap lanes) — those prefixes are reserved for modules, never for anything
+else.
+
 **Reserved and untouchable — these already mean something else in this tree:**
 
 - `slot:{id}` **owner scope** = a world-map construction slot. Definitions §6: *"unrelated to an item's

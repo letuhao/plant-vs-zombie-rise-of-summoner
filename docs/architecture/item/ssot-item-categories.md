@@ -3,6 +3,18 @@
 **Status:** Lane I3 SSOT, drafted 2026-08-22. Enriches [item-ideal.md](../item-ideal.md); bound by
 [enrichment-contract.md](enrichment-contract.md).
 
+> ⚠ **Role ids in this document are superseded.** Its worked examples and sizing use the ideal's older
+> **12**-role names (`core-protective`, `head-protective`, `jewel-minor`, …), which this document itself
+> flags as interim. The binding set is the **15** roles in
+> [ssot-equip-slots.md](ssot-equip-slots.md), frozen in
+> `data/seed/items/_registry/core.v1.json`.
+>
+> **Authors: take role ids from the registry, never from the examples below.** The mechanics in this
+> document are sound; only the role names are stale. Mapping in brief — `core-protective` → `core-guard`,
+> `head-protective` → `head-guard`, `manipulator-offense` → `manipulator`, `mantle-utility` → `mantle`,
+> `girdle-resource` → `girdle`, `sense-utility` → `sense`, `jewel-minor` → `jewel-minor-a` /
+> `jewel-minor-b`; and three roles are new with no old equivalent: `ward-array`, `infusion`, `retinue`.
+
 ---
 
 ## 2. Scope

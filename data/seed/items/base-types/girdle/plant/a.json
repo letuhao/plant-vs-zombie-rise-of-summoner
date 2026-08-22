@@ -1,0 +1,306 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-soil-a",
+    "partition": "base-types/girdle/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2"
+  },
+  "entries": [
+    {
+      "id": "item.plant-soil-a-001",
+      "nameKey": "base.downy-furrow",
+      "name": "Downy Furrow",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.downy-furrow",
+      "flavorKey": "flavor.base.downy-furrow",
+      "flavor": "Soft ridges that hold the light the way pollen does.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-002",
+      "nameKey": "base.pliant-mulch",
+      "name": "Pliant Mulch",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.pliant-mulch",
+      "flavorKey": "flavor.base.pliant-mulch",
+      "flavor": "Still bending, not yet broken down; the rot takes its time here.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-003",
+      "nameKey": "base.wispy-topsoil",
+      "name": "Wispy Topsoil",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.wispy-topsoil",
+      "flavorKey": "flavor.base.wispy-topsoil",
+      "flavor": "The thinnest edge where the soil keeps the living things alive.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-004",
+      "nameKey": "base.dried-clod",
+      "name": "Dried Clod",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dried-clod",
+      "flavorKey": "flavor.base.dried-clod",
+      "flavor": "Baked hard in the sun, cracking at the edges but still whole.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-005",
+      "nameKey": "base.layered-sod",
+      "name": "Layered Sod",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.layered-sod",
+      "flavorKey": "flavor.base.layered-sod",
+      "flavor": "Turf and root all the way through, each layer holding the last.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-006",
+      "nameKey": "base.crackling-tilth",
+      "name": "Crackling Tilth",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.crackling-tilth",
+      "flavorKey": "flavor.base.crackling-tilth",
+      "flavor": "Prepared ground, worked and ready; it speaks when you walk on it.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-007",
+      "nameKey": "base.parched-hollow",
+      "name": "Parched Hollow",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.parched-hollow",
+      "flavorKey": "flavor.base.parched-hollow",
+      "flavor": "A pocket in the earth that held water once, now dry enough to whisper.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "fragile"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-008",
+      "nameKey": "base.grooved-soil",
+      "name": "Grooved Soil",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.grooved-soil",
+      "flavorKey": "flavor.base.grooved-soil",
+      "flavor": "Channeled by years of rain and roots, each groove a record.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "sturdy",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-009",
+      "nameKey": "base.mossy-planter",
+      "name": "Mossy Planter",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.mossy-planter",
+      "flavorKey": "flavor.base.mossy-planter",
+      "flavor": "Colonised by soft growth; the moss keeps it cool and holds the damp.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-010",
+      "nameKey": "base.hoary-bed",
+      "name": "Hoary Bed",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.hoary-bed",
+      "flavorKey": "flavor.base.hoary-bed",
+      "flavor": "Aged grey with frost and age; a bed that has cradled seasons.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "sturdy",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-011",
+      "nameKey": "base.warped-ridge",
+      "name": "Warped Ridge",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.warped-ridge",
+      "flavorKey": "flavor.base.warped-ridge",
+      "flavor": "Buckled by the weight it has carried; stronger for every bend.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-soil-a-012",
+      "nameKey": "base.gnarled-mound",
+      "name": "Gnarled Mound",
+      "frame": "plant",
+      "role": "girdle",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.gnarled-mound",
+      "flavorKey": "flavor.base.gnarled-mound",
+      "flavor": "Twisted by wind and weather into a shape only earth remembers.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "sturdy"
+      ]
+    }
+  ]
+}

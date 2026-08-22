@@ -91,11 +91,13 @@ public class TurnEngineTests
     {
         var result = TurnEngine.Step(World(), Array.Empty<WorldCommand>(), seed: 1);
 
-        // `Intel` joined the order at RulesetVersion 2, second from last: everything else has
-        // settled by then, so a faction records the world as it ends the turn rather than as it
-        // looked halfway through. Changing this list is changing the ruleset.
+        // `Intel` joined at RulesetVersion 2 and moved to **last** at RulesetVersion 3. Belief is
+        // what you know at the end of the turn, and the end of the turn is after the turn has
+        // finished happening: a claim settles in `Snapshot`, so recording belief before it left a
+        // faction unable to see that its own claim had worked. Changing this list is changing the
+        // ruleset, which is why it is spelled out rather than derived.
         Assert.Equal(
-            new[] { "Reveal", "Movement", "Sieges", "Production", "Growth", "Pressure", "Events", "Intel", "Snapshot" },
+            new[] { "Reveal", "Movement", "Sieges", "Production", "Growth", "Pressure", "Events", "Snapshot", "Intel" },
             result.Report.Phases);
     }
 

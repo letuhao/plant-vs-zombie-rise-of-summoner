@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-manipulator-b",
+    "partition": "humanoid/manipulator/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-hands-b-001",
+      "nameKey": "base.woven-glove",
+      "name": "Woven Glove",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.woven-glove",
+      "flavorKey": "flavor.base.woven-glove",
+      "flavor": "Cloth and cord wound tight. Its grip is the only promise it makes.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-002",
+      "nameKey": "base.studded-knuckle",
+      "name": "Studded Knuckle",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.studded-knuckle",
+      "flavorKey": "flavor.base.studded-knuckle",
+      "flavor": "Reinforced at the striking edge. It remembers what it broke.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-003",
+      "nameKey": "base.bound-claw",
+      "name": "Bound Claw",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.bound-claw",
+      "flavorKey": "flavor.base.bound-claw",
+      "flavor": "Steel claws bound into worn leather. It changes the shape of a fist.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-004",
+      "nameKey": "base.reinforced-palm",
+      "name": "Reinforced Palm",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.reinforced-palm",
+      "flavorKey": "flavor.base.reinforced-palm",
+      "flavor": "Plated scales over the striking face. It remembers force and teaches it.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-005",
+      "nameKey": "base.layered-wrap",
+      "name": "Layered Wrap",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.layered-wrap",
+      "flavorKey": "flavor.base.layered-wrap",
+      "flavor": "Cloth on cloth on cloth. The padding deadens impact and keeps the hand whole.",
+      "tags": [
+        "medium",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-006",
+      "nameKey": "base.hardened-grip",
+      "name": "Hardened Grip",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.hardened-grip",
+      "flavorKey": "flavor.base.hardened-grip",
+      "flavor": "Plate fitted to the hand. It does not bend, and neither will your strike.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-007",
+      "nameKey": "base.taped-pincer",
+      "name": "Taped Pincer",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "leather",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.taped-pincer",
+      "flavorKey": "flavor.base.taped-pincer",
+      "flavor": "Claw and strap. One tears; one holds. Together they keep what they take.",
+      "tags": [
+        "medium-light",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-008",
+      "nameKey": "base.riveted-fist",
+      "name": "Riveted Fist",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.riveted-fist",
+      "flavorKey": "flavor.base.riveted-fist",
+      "flavor": "Steel gauntlet, riveted and rigid. Your hand becomes a hammer.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-009",
+      "nameKey": "base.flexible-mitt",
+      "name": "Flexible Mitt",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.flexible-mitt",
+      "flavorKey": "flavor.base.flexible-mitt",
+      "flavor": "Cloth mitt, loose but strong. It bends to the hand it serves.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-010",
+      "nameKey": "base.segmented-hand",
+      "name": "Segmented Hand",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.segmented-hand",
+      "flavorKey": "flavor.base.segmented-hand",
+      "flavor": "Scales overlapped like fingers. The hand learns to bend where it must.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-011",
+      "nameKey": "base.corded-wrist",
+      "name": "Corded Wrist",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "cloth",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.corded-wrist",
+      "flavorKey": "flavor.base.corded-wrist",
+      "flavor": "Cord wrapped in patterns. It ties the arm to the strike.",
+      "tags": [
+        "medium",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-hands-b-012",
+      "nameKey": "base.plated-grasp",
+      "name": "Plated Grasp",
+      "frame": "humanoid",
+      "role": "manipulator",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.plated-grasp",
+      "flavorKey": "flavor.base.plated-grasp",
+      "flavor": "Plating on every face. The hand becomes an iron vice.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive"
+      ]
+    }
+  ]
+}

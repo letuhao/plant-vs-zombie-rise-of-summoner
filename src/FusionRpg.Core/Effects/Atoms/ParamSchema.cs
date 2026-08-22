@@ -25,12 +25,21 @@ public enum ParamKind
 /// Non-null means the key exists in the legacy allowlist but nothing implements it anywhere.
 /// Declared so the rejection can explain itself instead of reading as an unknown key.
 /// </param>
+/// <param name="OverlayOrParam">
+/// The executor cannot do anything without this key, but the shipped content supplies it through the
+/// grant overlay rather than the row — <c>fx.shield_grant</c> and <c>fx.overlay_damage</c> both ship
+/// with the magnitude on the overlay and nothing in params. Marking it <see cref="Required"/> would
+/// make that content unauthorable; leaving it plainly optional would let a binding that names it
+/// nowhere bind and then do nothing. So it is checked at <b>bind</b>, against params and overlay
+/// together (D10).
+/// </param>
 public sealed record ParamDef(
     string Name,
     ParamKind Kind,
     bool Required = false,
     string? HonouredOnlyWhen = null,
-    string? NotImplementedNote = null);
+    string? NotImplementedNote = null,
+    bool OverlayOrParam = false);
 
 /// <summary>The closed key set for one atom kind. Unknown keys reject; unhonoured keys reject.</summary>
 public sealed class ParamSchema

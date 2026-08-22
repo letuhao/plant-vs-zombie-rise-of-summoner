@@ -151,7 +151,8 @@ public sealed partial class RpgStore
     /// </summary>
     CurveInput? CurveInputOf(string curveId) => GetCurve(curveId)?.Input;
 
-    void UpsertAtomUnlocked(SqliteConnection db, AtomRow row, SqliteTransaction? tx = null)
+    /// <returns>How many rows the write changed — 0 when the row was already identical.</returns>
+    int UpsertAtomUnlocked(SqliteConnection db, AtomRow row, SqliteTransaction? tx = null)
     {
         using var cmd = db.CreateCommand();
         if (tx is not null) cmd.Transaction = tx;
@@ -162,6 +163,11 @@ public sealed partial class RpgStore
             VALUES
               ($id, $kind, $family, $variant, $tier, $name, $when, $params, $tags,
                $power, $override, $note, $icd, $trigger, $enabled, 1)
+            -- The update is SKIPPED when nothing differs, so `revision` counts how many
+            -- times this row CHANGED rather than how many times it was written. It is a
+            -- hashed column: bumping it on an identical re-import made a repeat import
+            -- look exactly like a content edit (E14a: import twice, hash unchanged).
+            -- `IS NOT` is SQLite's null-safe inequality; `<>` would be NULL for NULLs.
             ON CONFLICT(atom_id) DO UPDATE SET
               kind_id = excluded.kind_id, family_id = excluded.family_id,
               variant = excluded.variant, tier = excluded.tier, name = excluded.name,
@@ -170,7 +176,21 @@ public sealed partial class RpgStore
               power_override_json = excluded.power_override_json, power_note = excluded.power_note,
               icd_key = excluded.icd_key, trigger_id = excluded.trigger_id,
               enabled = excluded.enabled,
-              revision = effect_atom.revision + 1;
+              revision = effect_atom.revision + 1
+            WHERE effect_atom.kind_id IS NOT excluded.kind_id
+              OR effect_atom.family_id IS NOT excluded.family_id
+              OR effect_atom.variant IS NOT excluded.variant
+              OR effect_atom.tier IS NOT excluded.tier
+              OR effect_atom.name IS NOT excluded.name
+              OR effect_atom.when_json IS NOT excluded.when_json
+              OR effect_atom.params_json IS NOT excluded.params_json
+              OR effect_atom.tags_json IS NOT excluded.tags_json
+              OR effect_atom.power_json IS NOT excluded.power_json
+              OR effect_atom.power_override_json IS NOT excluded.power_override_json
+              OR effect_atom.power_note IS NOT excluded.power_note
+              OR effect_atom.icd_key IS NOT excluded.icd_key
+              OR effect_atom.trigger_id IS NOT excluded.trigger_id
+              OR effect_atom.enabled IS NOT excluded.enabled;
             """;
         cmd.Parameters.AddWithValue("$id", row.AtomId);
         cmd.Parameters.AddWithValue("$kind", row.KindId);
@@ -187,7 +207,7 @@ public sealed partial class RpgStore
         cmd.Parameters.AddWithValue("$icd", (object?)row.IcdKey ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$trigger", (object?)ExtractTrigger(row.WhenJson) ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$enabled", row.Enabled ? 1 : 0);
-        cmd.ExecuteNonQuery();
+        return cmd.ExecuteNonQuery();
     }
 
     public AtomRow? GetAtom(string atomId)

@@ -57,7 +57,7 @@ public class ContentHashTests
     {
         // The exact pair definitions §8 names as the reason a bare 0x1f separator was rejected:
         // both `name` and `power_note` are free text, so the boundary must not be ambiguous.
-        Assert.NotEqual(Row("ab", "c"), Row("a", "bc"));
+        Assert.NotEqual(Row("a\u001fb", "c"), Row("a", "b\u001fc"));
     }
 
     [Fact]
@@ -73,6 +73,14 @@ public class ContentHashTests
         // from a string containing one. It does not: both are one byte of 0x00 with prefix "1:".
         // A column holding exactly "\0" would forge the digest of a NULL column.
         Assert.NotEqual(Row(null, "x"), Row("\0", "x"));
+    }
+
+    [Fact]
+    public void Null_is_a_sentinel_no_value_length_can_produce()
+    {
+        // "N" is not a digit, so no {byteLen} prefix can ever spell it. That is what makes a NULL
+        // column unforgeable rather than merely unlikely to be forged.
+        Assert.Equal(Sha(Utf8("N:"), Utf8("1:x")), Row(null, "x"));
     }
 
     [Fact]
@@ -227,7 +235,6 @@ public class ContentHashTests
     [Fact]
     public void An_unknown_registry_version_is_refused_rather_than_defaulted()
     {
-        Assert.False(ContentHashRegistry.IsKnownVersion(99));
         Assert.Throws<ArgumentOutOfRangeException>(() => ContentHashRegistry.For(99));
     }
 

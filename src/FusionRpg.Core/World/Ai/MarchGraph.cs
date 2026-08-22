@@ -24,15 +24,15 @@ public static class MarchGraph
     /// <summary>
     /// The believed march graph.
     ///
-    /// The climate lookup is passed but **not consulted here**: <see cref="LaneGraph"/> prices every
-    /// lane with a null banner on purpose, because topology is about the ground rather than who
-    /// happens to be walking it, and the ley discount belongs to a particular legion's march. It is
-    /// handed over so the seam is complete for `ReachMap`, which *is* per-entity and does have a
-    /// banner. Said plainly because a reader would otherwise reasonably assume march costs here are
-    /// fog-affected. They are not.
+    /// With no <paramref name="bannerElement"/> the climate lookup is passed but never consulted:
+    /// pricing falls back to the ground's own cost, because a ley discount belongs to a particular
+    /// legion rather than to the map. <see cref="ReachMap"/> is the caller that has a legion to name,
+    /// and there the lookup decides whether that legion *expects* the discount — which is where fog
+    /// reaches into route planning.
     /// </summary>
-    public static LaneGraph Of(IWorldView view, IReadOnlySet<string>? include = null) =>
-        LaneGraph.Build(view.SectorIds, view.Lanes, ClimateOf(view), include, LaneLens.March);
+    public static LaneGraph Of(IWorldView view, IReadOnlySet<string>? include = null,
+        ElementTypeId? bannerElement = null) =>
+        LaneGraph.Build(view.SectorIds, view.Lanes, ClimateOf(view), include, LaneLens.March, bannerElement);
 
     /// <summary>
     /// What a faction knows about a sector's climate — which is what decides, for a legion carrying a

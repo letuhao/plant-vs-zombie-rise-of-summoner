@@ -84,10 +84,15 @@ public sealed class LaneGraph
     /// the truth — and this is everything the graph actually reads. The truth-side overload above is
     /// the same call with the world supplying all three.
     /// </summary>
+    /// <param name="bannerElement">
+    /// Whose march this is, for ley pricing. Null — the default — is the map's own topology: a ley
+    /// discount belongs to a particular legion, not to the ground. `ReachMap` is the one caller that
+    /// has a legion to name.
+    /// </param>
     public static LaneGraph Build(
         IReadOnlyList<string> sectorIds, IReadOnlyList<WorldLane> lanes,
         Func<string, ElementTypeId?> climateOf, IReadOnlySet<string>? include = null,
-        LaneLens lens = LaneLens.Supply)
+        LaneLens lens = LaneLens.Supply, ElementTypeId? bannerElement = null)
     {
         var sectors = sectorIds
             .Where(id => include is null || include.Contains(id))
@@ -103,9 +108,7 @@ public sealed class LaneGraph
             if (!IsTraversable(lane, lens)) continue;
             if (!index.ContainsKey(lane.FromSectorId) || !index.ContainsKey(lane.ToSectorId)) continue;
 
-            // Null banner on purpose: topology is about the ground, not about who happens to be
-            // walking it. A ley discount belongs to a particular legion's march, not to the map.
-            var cost = LaneCost.For(lane, null, climateOf);
+            var cost = LaneCost.For(lane, bannerElement, climateOf);
 
             edges.Add(new LaneStepEdge(lane.FromSectorId, lane.ToSectorId, cost));
 

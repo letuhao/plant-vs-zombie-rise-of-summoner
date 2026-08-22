@@ -82,12 +82,22 @@ public class WorldFogE2ETests : IAsyncLifetime
     [Fact]
     public async Task A_force_you_cannot_see_is_not_in_the_payload_at_all()
     {
+        // Re-anchored 2026-08-22: Zomboss has a warband now, so "sees nothing" is no longer his to
+        // demonstrate. What still holds — and is the actual claim — is that he sees *his own* corner
+        // and nothing of Dave's, and Dave sees the reverse.
         var zomboss = await StateFor("zomboss");
 
-        // Zomboss holds nothing and stands nowhere: he can see no force anywhere on the map.
-        Assert.All(zomboss.GetProperty("sectors").EnumerateArray(),
-            s => Assert.Empty(s.GetProperty("forces").EnumerateArray()));
-        Assert.Empty(zomboss.GetProperty("entities").EnumerateArray());
+        var seenByZomboss = zomboss.GetProperty("sectors").EnumerateArray()
+            .SelectMany(s => s.GetProperty("forces").EnumerateArray())
+            .Select(f => f.GetProperty("entityId").GetString())
+            .ToList();
+
+        Assert.Contains("e-zomboss-band-1", seenByZomboss);
+        Assert.DoesNotContain("e-dave-legion-1", seenByZomboss);
+
+        // `entities` is the viewer's own forces only — never anybody else's, at any distance.
+        Assert.All(zomboss.GetProperty("entities").EnumerateArray(),
+            e => Assert.Equal("zomboss", e.GetProperty("ownerFactionId").GetString()));
     }
 
     [Fact]

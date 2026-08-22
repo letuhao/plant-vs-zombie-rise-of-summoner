@@ -1,0 +1,289 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-jewel-minor-b-humanoid-a",
+    "partition": "base-types/jewel-minor-b/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "agent-authored"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-ring-2-a-001",
+      "nameKey": "base.slight-tag",
+      "name": "Slight Tag",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.slight-tag",
+      "flavorKey": "flavor.base.slight-tag",
+      "flavor": "A humble paper tag, barely worn at all. Ownership is a whisper.",
+      "tags": [
+        "light",
+        "organic",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-002",
+      "nameKey": "base.engraved-badge",
+      "name": "Engraved Badge",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.engraved-badge",
+      "flavorKey": "flavor.base.engraved-badge",
+      "flavor": "A small badge bearing a single scratched line. The mark means nothing. Yet.",
+      "tags": [
+        "light",
+        "mineral",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-003",
+      "nameKey": "base.modest-mark",
+      "name": "Modest Mark",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.modest-mark",
+      "flavorKey": "flavor.base.modest-mark",
+      "flavor": "A small mark, barely noteworthy. The kind you forget you have until someone else notices.",
+      "tags": [
+        "light",
+        "organic",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-004",
+      "nameKey": "base.plain-ticket",
+      "name": "Plain Ticket",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.plain-ticket",
+      "flavorKey": "flavor.base.plain-ticket",
+      "flavor": "A simple ticket, unadorned and unstamped. Maybe it was never used. Maybe it is still waiting.",
+      "tags": [
+        "light",
+        "organic",
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-005",
+      "nameKey": "base.impressed-receipt",
+      "name": "Impressed Receipt",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.impressed-receipt",
+      "flavorKey": "flavor.base.impressed-receipt",
+      "flavor": "A faded receipt with a seal pressed deep. Someone once paid for something. The debt still echoes.",
+      "tags": [
+        "light",
+        "organic",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-006",
+      "nameKey": "base.understated-seal",
+      "name": "Understated Seal",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.understated-seal",
+      "flavorKey": "flavor.base.understated-seal",
+      "flavor": "An official seal, pressed but not shouted. Certification comes quietly to those who know how to listen.",
+      "tags": [
+        "light",
+        "mineral",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-007",
+      "nameKey": "base.unadorned-license",
+      "name": "Unadorned License",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.unadorned-license",
+      "flavorKey": "flavor.base.unadorned-license",
+      "flavor": "A plain license, stripped of ceremony. Permission needs no ornament to be permission.",
+      "tags": [
+        "light",
+        "organic",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-008",
+      "nameKey": "base.dinged-coupon",
+      "name": "Dinged Coupon",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.dinged-coupon",
+      "flavorKey": "flavor.base.dinged-coupon",
+      "flavor": "A crumpled coupon, dented from a lifetime in a pocket. It still spends. Slightly less than new.",
+      "tags": [
+        "light",
+        "organic",
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-009",
+      "nameKey": "base.minute-label",
+      "name": "Minute Label",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.minute-label",
+      "flavorKey": "flavor.base.minute-label",
+      "flavor": "A tiny label, barely a whisper of text. The message is there for those small enough to read it.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-010",
+      "nameKey": "base.punched-deed",
+      "name": "Punched Deed",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.punched-deed",
+      "flavorKey": "flavor.base.punched-deed",
+      "flavor": "A deed with holes punched through it, certified and filed. The damage proves its legitimacy.",
+      "tags": [
+        "light",
+        "organic",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-011",
+      "nameKey": "base.scratched-warranty",
+      "name": "Scratched Warranty",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.scratched-warranty",
+      "flavorKey": "flavor.base.scratched-warranty",
+      "flavor": "A warranty marked with use. The promise survives its own scars, mostly intact.",
+      "tags": [
+        "light",
+        "organic",
+        "crafted-only"
+      ]
+    },
+    {
+      "id": "item.humanoid-ring-2-a-012",
+      "nameKey": "base.unassuming-bond",
+      "name": "Unassuming Bond",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.unassuming-bond",
+      "flavorKey": "flavor.base.unassuming-bond",
+      "flavor": "A bond, modest and unassuming. The debt it represents is far larger than it appears.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ]
+    }
+  ]
+}

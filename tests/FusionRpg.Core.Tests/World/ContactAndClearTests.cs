@@ -87,7 +87,7 @@ public class ContactAndClearTests
         var world = Place(World(), "e-dave-legion-1", "ash-waste");
 
         var result = TurnEngine.Step(world,
-            new[] { Move("dave", "e-dave-legion-1", "l-ash-verdant") }, seed: 1);
+            new[] { Move("dave", "e-dave-legion-1", "l-ash-black") }, seed: 1);
 
         var legion = Find(result.World, "e-dave-legion-1");
         Assert.NotNull(legion);

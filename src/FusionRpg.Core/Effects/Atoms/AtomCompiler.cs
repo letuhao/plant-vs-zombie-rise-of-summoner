@@ -107,22 +107,36 @@ public static class AtomCompiler
         // so emitting the default here would mean the modifier never applies at all (14.2).
         var effectType = triggers.Count == 0 ? EffectTypes.Passive : EffectTypes.Triggered;
 
+        // One action per DISTINCT action, not per member. Atoms that differ only in their trigger
+        // are one thing the effect does, fired several ways — `fx.shield_grant` is three atoms and
+        // one GrantShield. Emitting per member gave it three, so it granted three shields where it
+        // grants one, inside the module whose entire acceptance is byte-identical plans.
         var actions = new List<EffectDefActionDto>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
         var seq = 1;
         foreach (var member in members)
         {
             if (OpcodeOf(member.KindId) is not { } action) continue;
-            actions.Add(new EffectDefActionDto
-            {
-                Seq = seq++,
-                Action = action,
-                Params = ResolvedParams(member, curves, ownerLevel),
-            });
+
+            var pars = ResolvedParams(member, curves, ownerLevel);
+            if (!seen.Add(action + "|" + Fingerprint(pars))) continue;
+
+            actions.Add(new EffectDefActionDto { Seq = seq++, Action = action, Params = pars });
         }
 
         var def = new EffectDefDto
         {
-            EffectId = "atom." + icdKey,
+            // The ICD key IS the def's identity, verbatim. Two reasons it is not decorated:
+            //
+            // It was decorated, and the decoration was wrong. `icd_key` defaults to `atom_id`, and
+            // `atom_id` already opens with `atom.` (the family-id grammar, validated at E4) — so
+            // prefixing produced `atom.atom.vitality.t1`. Nothing asserted the id, so it shipped.
+            //
+            // And a migrated effect must keep the id its existing grants already name. A player's
+            // stored grant says `fx.butter_on_hit`; if the compiled def answered to anything else,
+            // the grant would resolve to nothing the moment the def became a row. Authoring
+            // `icd_key: fx.butter_on_hit` is how a migration says "this is the same effect".
+            EffectId = icdKey,
             EffectType = effectType,
             Name = members[0].Name,
             Enabled = true,
@@ -191,6 +205,8 @@ public static class AtomCompiler
         var chance = when.TryGetValue("chance", out var cEl) && cEl.TryGetInt32(out var c) ? c : 1000;
         var icdMs = when.TryGetValue("icd_ms", out var iEl) && iEl.TryGetInt32(out var i) ? i : 0;
 
+        var pars = Read(atom.ParamsJson);
+
         return new RunnerEntry(
             atom.AtomId,
             atom.KindId,
@@ -199,7 +215,52 @@ public static class AtomCompiler
             chance,
             icdMs,
             icdKey,
-            BoundsOf(atom, curves, ownerLevel));
+            BoundsOf(atom, curves, ownerLevel),
+            LimitsOf(when, pars),
+            NonValueParams(atom, pars));
+    }
+
+    /// <summary>
+    /// The per-binding state keys, read from <c>when_json</c> and <c>params_json</c> alike —
+    /// <see cref="Compilability"/> routes on either, so reading only one would drop half of them.
+    /// A key declared in both takes its params value, that being the schema-declared home.
+    /// </summary>
+    static RunnerLimits LimitsOf(
+        Dictionary<string, JsonElement> when, Dictionary<string, JsonElement> pars) =>
+        new(Int(when, pars, "capPerMatch"),
+            Int(when, pars, "charges"),
+            Int(when, pars, "everyHits"),
+            Int(when, pars, "maxStacks", "max_stacks"));
+
+    static int Int(
+        Dictionary<string, JsonElement> when, Dictionary<string, JsonElement> pars, params string[] names)
+    {
+        foreach (var name in names)
+            if (pars.TryGetValue(name, out var p) && p.TryGetInt32(out var v)) return v;
+        foreach (var name in names)
+            if (when.TryGetValue(name, out var w) && w.TryGetInt32(out var v)) return v;
+        return -1;
+    }
+
+    /// <summary>
+    /// Everything the schema does not call a <see cref="ParamKind.Value"/>. Those are already in
+    /// <c>Values</c> with their curve applied; these are the strings and flags a dispatch is built
+    /// from, and an entry without them knows a magnitude but not what it is a magnitude of.
+    /// </summary>
+    static Dictionary<string, object?> NonValueParams(AtomRow atom, Dictionary<string, JsonElement> pars)
+    {
+        var kind = AtomKindRegistry.Get(atom.KindId);
+        var result = new Dictionary<string, object?>(StringComparer.Ordinal);
+
+        foreach (var (key, raw) in pars)
+        {
+            var def = kind?.Params.Defs.FirstOrDefault(d =>
+                string.Equals(d.Name, key, StringComparison.OrdinalIgnoreCase));
+            if (def is { Kind: ParamKind.Value }) continue;
+            result[key] = Plain(raw);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -260,8 +321,40 @@ public static class AtomCompiler
             result[key] = CurveTable.ApplyMilli(spec.Min, MultiplierFor(spec, curves, ownerLevel));
         }
 
-        return result;
+        return ToOpcodeShape(atom.KindId, result);
     }
+
+    /// <summary>
+    /// The atom vocabulary spelled the way the opcode reads it.
+    ///
+    /// <para><b>FA1 names the operation with the key, not with a value.</b> It reads <c>flat</c>,
+    /// <c>increased</c> and <c>more</c> (InjectorEffectActionSink.cs:93–101) and knows nothing about
+    /// <c>op</c> or <c>amount</c>. A compiled <c>stat.modify</c> carrying <c>{channel, op, amount}</c>
+    /// matched none of them and fell through to the <c>mods.Count == 0</c> arm — which applies a
+    /// <b>flat zero</b>. Every atom-authored stat modifier was a real modifier of no size, and no
+    /// test noticed because no real content had been compiled yet.</para>
+    ///
+    /// <para>The op vocabulary is validated at load, so an unrecognised one cannot arrive here.</para>
+    /// </summary>
+    static Dictionary<string, object?> ToOpcodeShape(string kindId, Dictionary<string, object?> pars)
+    {
+        if (kindId is not ("stat.modify" or "stat.derived")) return pars;
+        if (!pars.TryGetValue("op", out var opRaw)) return pars;
+        if (!pars.TryGetValue("amount", out var amount)) return pars;
+
+        var op = opRaw?.ToString()?.ToLowerInvariant();
+        if (string.IsNullOrEmpty(op)) return pars;
+
+        pars.Remove("op");
+        pars.Remove("amount");
+        pars[op!] = amount;
+        return pars;
+    }
+
+    /// <summary>Order-independent identity for a param set — two actions are the same action or not.</summary>
+    static string Fingerprint(Dictionary<string, object?> pars) =>
+        string.Join(",", pars.OrderBy(p => p.Key, StringComparer.Ordinal)
+                             .Select(p => p.Key + "=" + p.Value));
 
     /// <summary>The `filters` block a grant overlay understands: side, typeId, actorIsKiller.</summary>
     static Dictionary<string, object?> LegacyFilters(JsonElement predicate)

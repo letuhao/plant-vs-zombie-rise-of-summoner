@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chronicle &amp; Almanac — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Chronicle &amp; Almanac</h1>
+  <p>
+    The two layers read at leisure rather than glanced at under pressure — so by GG-60 this is where
+    the fiction is allowed to win. The Almanac is a book. The Chronicle is a record. Neither is a
+    dashboard, and both are the home of numbers that must be <em>explainable</em>, not merely shown.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 05</span>
+    <span class="tag">GG-26 · GG-28 · GG-45 · GG-46 · GG-49 · GG-60</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="04-run-stages.html">← Run stages</a>
+  <a href="#a">A · Almanac</a>
+  <a href="#b">B · Reference pages</a>
+  <a href="#c">C · Chronicle</a>
+  <a href="#d">D · Ledger</a>
+  <a href="#e">E · Notes</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Almanac <span class="hotkey">A</span></h2>
+  <p class="lede">
+    The reference: creatures, elements, statuses, recipes, effect families. The game's own name for
+    its theme has been "Lawn Almanac" since v1 — the tokens existed and the book was never built.
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:940px">
+      <header>
+        <div style="flex:1"><h3>Almanac</h3><div class="sub">67 creatures recorded of 128 known to exist</div></div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <div class="tabs" style="margin-bottom:var(--sp-4)">
+          <button class="tab is-active">Creatures</button>
+          <button class="tab">Elements</button>
+          <button class="tab">Afflictions</button>
+          <button class="tab">Fusions</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:220px minmax(0,1fr);gap:var(--sp-4)">
+          <div class="col-flex">
+            <input class="input" placeholder="Search the almanac…">
+            <div class="col-flex" style="gap:var(--sp-1)">
+              <span class="chip is-selected"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="2">🌱</span><span class="nm">Thornlet</span></span>
+              <span class="chip"><span class="frame frame--chip" data-rarity="2">🍄</span><span class="nm">Sporeling</span></span>
+              <span class="chip" style="opacity:.5"><span class="frame frame--chip is-missing">?</span><span class="nm">Not yet met</span></span>
+              <span class="chip" style="opacity:.5"><span class="frame frame--chip is-missing">?</span><span class="nm">Not yet met</span></span>
+            </div>
+          </div>
+
+          <div class="almanac-page">
+            <div class="row-flex" style="align-items:flex-start;gap:var(--sp-4)">
+              <span class="frame frame--panel" data-rarity="3">🌻</span>
+              <div style="flex:1;min-width:0">
+                <h3>Emberling</h3>
+                <div class="row-flex" style="margin-top:var(--sp-1)">
+                  <span class="side" data-side="plant"><i class="pip"></i>Plant</span>
+                  <span class="el" data-el="fire"><i class="dot"></i>Fire</span>
+                  <span class="el" data-el="light"><i class="dot"></i>Light</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="flavour" style="margin-top:var(--sp-3)">
+              Turns toward heat rather than light, which its neighbours find rude. Produces sun
+              slowly and reliably, and has never once been asked to stop.
+            </p>
+
+            <div class="rule-line"></div>
+
+            <div class="statgrid">
+              <div class="s"><div class="k">Vitality</div><div class="v">300</div></div>
+              <div class="s"><div class="k">Attack</div><div class="v">20</div></div>
+              <div class="s"><div class="k">Produces</div><div class="v">25<span class="unit">sun</span></div></div>
+              <div class="s"><div class="k">Every</div><div class="v">24<span class="unit">s</span></div></div>
+            </div>
+
+            <div class="rule-line"></div>
+
+            <p class="spec-label">Matchups</p>
+            <div class="row-flex">
+              <span class="row-flex" style="gap:var(--sp-1)">vs <span class="el" data-el="ice"><i class="dot"></i>Ice</span> <span class="matchup matchup--str">+25%</span></span>
+              <span class="row-flex" style="gap:var(--sp-1)">vs <span class="el" data-el="air"><i class="dot"></i>Air</span> <span class="matchup matchup--wek">−25%</span></span>
+              <span class="row-flex" style="gap:var(--sp-1)">vs <span class="el" data-el="earth"><i class="dot"></i>Earth</span> <span class="matchup matchup--neu">even</span></span>
+            </div>
+
+            <div class="rule-line"></div>
+            <p class="spec-label">Fuses into</p>
+            <div class="row-flex">
+              <span class="chip"><span class="frame frame--chip" data-rarity="4">🌰</span><span class="nm">Blightcap</span> <span class="tag">+ Sporeling</span></span>
+              <span class="chip" style="opacity:.5"><span class="frame frame--chip is-missing">?</span><span class="nm">Undiscovered</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>This is where ornament earns its place.</strong> The inner rule, the paper wash, the
+      flavour line in italic — none of it would be acceptable on the battle HUD, and all of it is
+      correct here, because the player is reading at their own pace. That is GG-60 doing its job
+      instead of the argument being settled by taste.
+    </div>
+    <div class="note">
+      <strong>Undiscovered entries are visible and blank.</strong> "67 of 128" is the collection
+      hook; hiding what has not been met would remove it. The <em>silhouette</em> is the reward
+      structure, not an omission. <span class="ref">GG-17</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Reference pages — elements and afflictions</h2>
+  <p class="lede">
+    The teaching surfaces. A mechanic is explained where the player met it, once (GG-45); the Almanac
+    is where they come back to check.
+  </p>
+
+  <div class="spec">
+    <div class="spec-grid wide">
+      <div class="almanac-page">
+        <h3>The ring</h3>
+        <p class="flavour">Fire melts ice; ice cracks earth; earth blocks air; air blows out fire.</p>
+        <div class="rule-line"></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2);font-size:var(--text-sm);text-align:center">
+          <div><span class="el" data-el="fire"><i class="dot"></i>Fire</span></div>
+          <div><span class="el" data-el="ice"><i class="dot"></i>Ice</span></div>
+          <div><span class="el" data-el="earth"><i class="dot"></i>Earth</span></div>
+          <div><span class="el" data-el="air"><i class="dot"></i>Air</span></div>
+        </div>
+        <p style="text-align:center;color:var(--faint);font-size:var(--text-lg);margin:var(--sp-2) 0">↻</p>
+        <p style="text-align:center;font-size:var(--text-sm);color:var(--muted);margin:0">
+          each beats the next for <b class="val">+25%</b>, and loses to the one before for
+          <b class="val">−25%</b>
+        </p>
+        <div class="rule-line"></div>
+        <div class="row-flex" style="justify-content:center">
+          <span class="el" data-el="light"><i class="dot"></i>Light</span>
+          <span style="color:var(--faint)">⇄</span>
+          <span class="el" data-el="dark"><i class="dot"></i>Dark</span>
+          <span class="matchup matchup--str">+25% both ways</span>
+        </div>
+        <p style="font-size:var(--text-xs);color:var(--muted);text-align:center;margin-top:var(--sp-2)">
+          Light and Dark counter each other and are even against the ring.
+        </p>
+      </div>
+
+      <div class="almanac-page">
+        <h3>Afflictions</h3>
+        <p class="flavour">Things that stay with you after the blow has landed.</p>
+        <div class="rule-line"></div>
+        <div class="col-flex" style="gap:var(--sp-3)">
+          <div class="row-flex" style="align-items:flex-start;gap:var(--sp-3)">
+            <span class="st" data-fn="working" style="width:32px;height:32px">WI</span>
+            <div style="flex:1;min-width:0">
+              <b>Wither</b>
+              <p style="margin:2px 0 0;font-size:var(--text-sm);color:var(--muted)">
+                Loses vitality each moment. Stacks — each stack drains faster.
+              </p>
+            </div>
+            <span class="tag tag--info">stacks</span>
+          </div>
+          <div class="row-flex" style="align-items:flex-start;gap:var(--sp-3)">
+            <span class="st" data-fn="working" style="width:32px;height:32px">FZ</span>
+            <div style="flex:1;min-width:0">
+              <b>Freeze</b>
+              <p style="margin:2px 0 0;font-size:var(--text-sm);color:var(--muted)">
+                Cannot act. Broken early by fire.
+              </p>
+            </div>
+            <span class="tag">control</span>
+          </div>
+          <div class="row-flex" style="align-items:flex-start;gap:var(--sp-3)">
+            <span class="st" data-fn="working" style="width:32px;height:32px">SO</span>
+            <div style="flex:1;min-width:0">
+              <b>Spore</b>
+              <p style="margin:2px 0 0;font-size:var(--text-sm);color:var(--muted)">
+                Spreads to whatever stands beside the afflicted.
+              </p>
+            </div>
+            <span class="tag tag--warn">contagious</span>
+          </div>
+        </div>
+        <div class="rule-line"></div>
+        <p style="font-size:var(--text-xs);color:var(--faint);margin:0">
+          The player-facing tray lists only afflictions that <em>do</em> something. The catalog
+          declares twenty-one; eight of them are inert, and the developer tree is where those are
+          visible. <span class="ref">GG-40</span>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · Chronicle <span class="hotkey">H</span></h2>
+  <p class="lede">
+    Everything that has happened to this summoner. Absorbs three of the current build's routes —
+    runs, progression and the PvZ modifier sheet — because they are one question asked three ways.
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:940px">
+      <header>
+        <div style="flex:1"><h3>Chronicle</h3><div class="sub">Ashwarden · level 74 · 218 nights survived</div></div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <div class="tabs" style="margin-bottom:var(--sp-4)">
+          <button class="tab is-active">Recent</button>
+          <button class="tab">Runs</button>
+          <button class="tab">Growth</button>
+          <button class="tab">Ledger</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:var(--sp-5)">
+          <div>
+            <p class="spec-label">Recent</p>
+            <div class="timeline">
+              <div class="tl" data-kind="win">
+                <span class="when">tonight</span><span class="spine"><i></i></span>
+                <span class="what"><b>Held Ashfall</b><span>Legion I · 3 creatures · no losses</span></span>
+              </div>
+              <div class="tl" data-kind="gain">
+                <span class="when">tonight</span><span class="spine"><i></i></span>
+                <span class="what"><b>Emberling reached level 14</b><span>+1 relic slot</span></span>
+              </div>
+              <div class="tl" data-kind="loss">
+                <span class="when">last night</span><span class="spine"><i></i></span>
+                <span class="what"><b>Lost the lawn on wave 12</b><span>Thornlet fell · 2 140 xp kept</span></span>
+              </div>
+              <div class="tl" data-kind="gain">
+                <span class="when">2 nights</span><span class="spine"><i></i></span>
+                <span class="what"><b>Bound Ashkell</b><span>from the Deepvault descent</span></span>
+              </div>
+              <div class="tl">
+                <span class="when">3 nights</span><span class="spine"><i></i></span>
+                <span class="what"><b>Pact of Cinders signed</b><span>+120 fire power · 400 souls each week</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-flex" style="gap:var(--sp-4)">
+            <div>
+              <p class="spec-label">Standing</p>
+              <div class="statgrid">
+                <div class="s"><div class="k">Level</div><div class="v">74</div></div>
+                <div class="s"><div class="k">To next</div><div class="v">97<span class="unit">%</span></div></div>
+                <div class="s"><div class="k">Nights</div><div class="v">218</div></div>
+                <div class="s"><div class="k">Creatures</div><div class="v">12</div></div>
+              </div>
+            </div>
+            <div>
+              <p class="spec-label">Where growth came from</p>
+              <div class="pw">
+                <div class="bar" data-c="offense"><span>Defending</span><span class="t"><span class="f" style="width:78%"></span></span><b>128k</b></div>
+                <div class="bar" data-c="control"><span>Expeditions</span><span class="t"><span class="f" style="width:34%"></span></span><b>56k</b></div>
+                <div class="bar" data-c="utility"><span>Sectors</span><span class="t"><span class="f" style="width:18%"></span></span><b>29k</b></div>
+                <div class="bar" data-c="economy"><span>Fusions</span><span class="t"><span class="f" style="width:8%"></span></span><b>13k</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>A chronicle, not a metrics page.</strong> The same rows exist in the database as
+      <code>runs</code>, XP ledger entries and rollups. Presented as events in a life, they are a
+      record the player recognises; presented as a table with a <code>ts</code> column they are
+      telemetry. The data did not change.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · The ledger — where attribution is repaid</h2>
+  <p class="lede">
+    "Why is my attack what it is?" must be answerable from the interface. This is the surface that
+    answers it in full, for anyone who wants it. <span class="ref">GG-49</span>
+  </p>
+  <div class="spec">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-5)">
+      <div>
+        <p class="spec-label">Emberling · attack, fully attributed</p>
+        <div class="attrib">
+          <div class="line"><span class="op">·</span><span class="src">Species base at level 14</span><span class="amt">96</span></div>
+          <div class="line"><span class="op">+</span><span class="src">Ashen Reliquary</span><span class="amt">+30</span></div>
+          <div class="line"><span class="op">×</span><span class="src">Pact of the Quiet Root</span><span class="amt">+12%</span></div>
+          <div class="line"><span class="op">×</span><span class="src">Ridgeline sector bonus</span><span class="amt">+5%</span></div>
+          <div class="line"><span class="op">−</span><span class="src">Cold <span class="st" data-fn="working" style="width:16px;height:16px;font-size:8px">CO</span></span><span class="amt">−8%</span></div>
+          <div class="total"><span class="op">=</span><span class="src">Attack</span><span class="amt">140</span></div>
+        </div>
+        <div class="note">
+          Order matters and is shown: flat additions, then multipliers, then penalties. A player who
+          can read this can build; one who cannot is guessing.
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">The XP ledger — filterable, paged, attributable</p>
+        <div class="filterbar" style="margin-bottom:var(--sp-2)">
+          <span class="seg"><button class="is-active">All</button><button>Kills</button><button>Runs</button><button>Fusions</button></span>
+          <span class="grow"></span>
+          <span class="readout">1–5 of 4 210</span>
+        </div>
+        <table class="t" style="margin-top:0">
+          <thead><tr><th>When</th><th>Source</th><th>Who</th><th style="text-align:right">XP</th></tr></thead>
+          <tbody>
+            <tr><td>tonight</td><td>Held Ashfall</td><td>Emberling</td><td style="text-align:right"><span class="delta delta--up">+1 240</span></td></tr>
+            <tr><td>tonight</td><td>Defeated Buckethead</td><td>Thornlet</td><td style="text-align:right"><span class="delta delta--up">+86</span></td></tr>
+            <tr><td>tonight</td><td>Defeated Buckethead</td><td>Emberling</td><td style="text-align:right"><span class="delta delta--up">+86</span></td></tr>
+            <tr><td>last night</td><td>Lost the lawn</td><td>—</td><td style="text-align:right"><span class="delta delta--none">0</span></td></tr>
+            <tr><td>2 nights</td><td>Fused Blightcap</td><td>Blightcap</td><td style="text-align:right"><span class="delta delta--down">−520</span></td></tr>
+          </tbody>
+        </table>
+        <div class="note">
+          Four thousand rows, so it is paged and filtered rather than rendered — the &gt;240 rule.
+          <span class="ref">GG-50</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · What this plate settles</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>Where is fiction allowed to lead?</td><td>Here — surfaces read at leisure. Never on a stage HUD</td></tr>
+      <tr><td>What happens to /runs, /rpg-progression, /pvz-stats?</td><td>They become tabs of one Chronicle</td></tr>
+      <tr><td>What happens to /types and /recipes?</td><td>Almanac tabs; recipes also appear inside Fusion</td></tr>
+      <tr><td>Are undiscovered entries hidden?</td><td>No — visible and blank. The silhouette is the hook</td></tr>
+      <tr><td>How is a derived number explained?</td><td>Expandable attribution, in order, including penalties</td></tr>
+      <tr><td>How are inert statuses handled?</td><td>Absent from the player tray, present in the developer tree</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 05 · Chronicle &amp; Almanac · draft 2026-08-22 · governed by architecture/game-gui-principles.md
+</footer>
+
+</div>
+</body>
+</html>

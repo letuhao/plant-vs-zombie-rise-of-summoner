@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run stages — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Run stages — Lawn &amp; Battle</h1>
+  <p>
+    The two stages where the player is under time pressure. Both are places you go <em>to act</em>,
+    so both are stages; neither is ever a panel. This is where GG-60 bites — legibility beats fiction
+    on everything here — and where GG-15's split between acknowledging input and painting authority
+    stops being theoretical.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 04</span>
+    <span class="tag">GG-4 · GG-11 · GG-13 · GG-15 · GG-54 · GG-55 · GG-60</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="03-world.html">← World</a>
+  <a href="#a">A · Lawn</a>
+  <a href="#b">B · Panel over a live board</a>
+  <a href="#c">C · Battle</a>
+  <a href="#d">D · Acting</a>
+  <a href="#e">E · Truth under latency</a>
+  <a href="#f">F · Notes</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Lawn stage</h2>
+  <p class="lede">
+    The PvZ board, projected. The RPG observes it and contributes intent; it never owns this
+    simulation. The canvas is created when this stage is <b>entered</b> and destroyed when it is
+    <b>left</b> — never when a panel opens. <span class="ref">GG-11</span>
+  </p>
+
+  <div class="spec">
+    <div class="viewport">
+      <div class="frame-row">
+        <nav class="rail">
+          <button><span class="g">&#8962;</span>Sanctum</button>
+          <div class="sep"></div>
+          <button><span class="g">&#10022;</span>Creatures</button>
+          <button><span class="g">&#9672;</span>Relics</button>
+          <button><span class="g">&#9879;</span>Fusion</button>
+          <button><span class="g">&#128121;</span>Pacts</button>
+          <button><span class="g">&#9973;</span>Expeditions</button>
+          <div class="sep"></div>
+          <button><span class="g">&#128214;</span>Almanac</button>
+          <button><span class="g">&#128366;</span>Chronicle</button>
+        </nav>
+        <div class="stagearea">
+          <div class="stagebox" style="position:absolute;inset:0;height:auto;border:0;border-radius:0">
+
+            <div class="hud">
+              <div class="cluster">
+                <span class="frame frame--chip" data-rarity="5">☀</span>
+                <span class="val" style="font-size:var(--text-lg)">1 240</span>
+              </div>
+              <div class="cluster">
+                <span class="tag tag--warn">Wave 7 of 14</span>
+                <span class="readout">next in 0:18</span>
+              </div>
+              <span class="spacer"></span>
+              <div class="cluster">
+                <span class="readout">deployed</span>
+                <span class="chip" style="padding:1px var(--sp-2) 1px 1px"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span></span>
+                <span class="chip" style="padding:1px var(--sp-2) 1px 1px"><span class="frame frame--chip" data-rarity="5">🌵</span><span class="nm">Thornlet</span></span>
+              </div>
+              <div class="cluster">
+                <span class="cluster-box">
+                  <button class="btn--icon" aria-label="Pause">❚❚</button>
+                  <span class="div"></span>
+                  <button class="btn--icon is-active" aria-label="Normal speed">1×</button>
+                  <button class="btn--icon" aria-label="Double speed">2×</button>
+                </span>
+                <button class="btn btn--sm btn--ghost">Menu <span class="hotkey">Esc</span></button>
+              </div>
+            </div>
+
+            <!-- board content stand-in -->
+            <div style="position:absolute;inset:56px 12px 60px;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(5,1fr);gap:2px">
+              <div class="cell is-self" style="grid-area:2/2">🌻</div>
+              <div class="cell" style="grid-area:3/2">🌵</div>
+              <div class="cell is-target" style="grid-area:3/7">🧟</div>
+              <div class="cell is-target" style="grid-area:2/8">🧟</div>
+              <div class="cell" style="grid-area:5/9">🧟</div>
+            </div>
+
+            <!-- status ribbon: what the overlay is doing right now -->
+            <div style="position:absolute;left:12px;bottom:12px;z-index:var(--band-hud)" class="row-flex">
+              <span class="st" data-fn="working" title="spark">SP</span>
+              <span class="st" data-fn="working" title="cold">CO<i class="stack">2</i></span>
+              <span class="st" data-fn="working" title="wither">WI<i class="stack">3</i></span>
+              <span class="readout">on the board</span>
+            </div>
+
+            <div style="position:absolute;right:12px;bottom:12px;z-index:var(--band-hud)">
+              <span class="cluster-box"><span class="readout">Emberling · 3 procs this wave</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>No ornament anywhere on this stage.</strong> Sun, wave, timer, deployed creatures,
+      transport. Everything is a plain readout at reading size, because the player is acting under
+      time pressure and GG-60 makes legibility the winner there. The almanac framing lives in the
+      layers, which is where it is looked at rather than glanced at.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · A panel over a live board</h2>
+  <p class="lede">
+    The moment the current build cannot produce at all: checking a creature's relics mid-wave without
+    losing the wave.
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div class="stagebox" style="position:absolute;inset:0;height:auto;border:0;border-radius:0">
+        <div class="hud">
+          <div class="cluster"><span class="frame frame--chip" data-rarity="5">☀</span><span class="val">1 240</span></div>
+          <div class="cluster"><span class="tag tag--warn">Wave 7 of 14</span></div>
+          <span class="spacer"></span>
+          <div class="cluster"><span class="tag tag--info">⏸ held while you are away</span></div>
+        </div>
+        <div class="scrim"></div>
+        <div style="position:absolute;inset:52px 14px 14px;z-index:var(--band-panel)">
+          <div class="panel-shell" style="height:100%">
+            <header>
+              <div style="flex:1"><h3>Relics</h3><div class="sub">Emberling · equipping mid-run</div></div>
+              <span class="esc">Esc</span>
+            </header>
+            <div class="body">
+              <div class="difflist" style="max-width:460px">
+                <div class="diffrow" data-dir="up"><span class="k">Fire power</span><span class="a">90</span><span class="b">150</span><span class="d">▲ +60</span></div>
+                <div class="diffrow" data-dir="down"><span class="k">Maximum vitality</span><span class="a">320</span><span class="b">240</span><span class="d">▼ −80</span></div>
+              </div>
+              <div class="note" style="margin-top:var(--sp-3)">
+                Equipping mid-run takes effect on the next deploy, not on the creature already on the
+                board. The panel says so rather than silently doing nothing.
+              </div>
+            </div>
+            <footer><button class="btn btn--ghost">Close</button><button class="btn">Equip for next deploy</button></footer>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>The pause badge is in the HUD, not in the panel.</strong> "Did the wave keep running
+      while I read this?" must never be a question — so the answer lives on the stage's own chrome,
+      visible past the scrim. The behaviour itself is the one already locked in the overlay spec's
+      pause-while-away rule; this is its presentation.
+      <span class="ref">GG-13</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · Battle stage</h2>
+  <p class="lede">
+    Turn-based, on a virtual-time kernel that advances only when acted upon — so on this stage
+    "does time pass under a panel" has no answer to give, and GG-13 is satisfied for free.
+  </p>
+
+  <div class="spec">
+    <div class="viewport">
+      <div class="frame-row">
+        <nav class="rail">
+          <button><span class="g">&#8962;</span>Sanctum</button>
+          <div class="sep"></div>
+          <button><span class="g">&#10022;</span>Creatures</button>
+          <button><span class="g">&#9672;</span>Relics</button>
+          <button><span class="g">&#9879;</span>Fusion</button>
+          <button><span class="g">&#128121;</span>Pacts</button>
+          <button><span class="g">&#9973;</span>Expeditions</button>
+          <div class="sep"></div>
+          <button><span class="g">&#128214;</span>Almanac</button>
+          <button><span class="g">&#128366;</span>Chronicle</button>
+        </nav>
+        <div class="stagearea" style="background:radial-gradient(ellipse at 50% 40%, #241d18, #14100c 75%)">
+
+          <div class="hud">
+            <div class="cluster"><span class="tag">Ashfall</span><span class="readout">round 3</span></div>
+            <span class="spacer"></span>
+            <div class="cluster">
+              <span class="readout">turn order</span>
+              <span class="initiative">
+                <span class="init-slot is-now">🌻<span class="t">now</span></span>
+                <span class="init-slot" data-side="zombie">🧟<span class="t">+12</span></span>
+                <span class="init-slot">🌵<span class="t">+20</span></span>
+                <span class="init-slot" data-side="zombie">🧟<span class="t">+31</span></span>
+                <span class="init-slot" data-side="zombie">💀<span class="t">+44</span></span>
+              </span>
+            </div>
+            <span class="spacer"></span>
+            <div class="cluster"><button class="btn btn--sm btn--ghost">Menu <span class="hotkey">Esc</span></button></div>
+          </div>
+
+          <!-- grid -->
+          <div style="position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:min(52%,340px)">
+            <div class="grid-board" style="grid-template-columns:repeat(5,1fr)">
+              <div class="cell"></div><div class="cell"></div><div class="cell is-range"></div><div class="cell is-range"></div><div class="cell is-target">🧟</div>
+              <div class="cell"></div><div class="cell is-self">🌻</div><div class="cell is-range"></div><div class="cell is-range"></div><div class="cell"></div>
+              <div class="cell"></div><div class="cell">🌵</div><div class="cell is-range"></div><div class="cell"></div><div class="cell is-target">🧟</div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            </div>
+            <p style="text-align:center;font-size:var(--text-2xs);color:var(--faint);margin-top:var(--sp-2)">
+              range shown from the acting creature · Chebyshev distance
+            </p>
+          </div>
+
+          <!-- acting actor + actions -->
+          <div style="position:absolute;left:0;right:0;bottom:0;z-index:var(--band-hud);padding:var(--sp-3);
+                      background:linear-gradient(rgb(11 9 7 / 0), rgb(11 9 7 / .92) 40%)">
+            <div class="row-flex" style="align-items:flex-end;gap:var(--sp-5)">
+              <div class="row-flex" style="gap:var(--sp-3)">
+                <span class="frame frame--card" data-rarity="3">🌻</span>
+                <div style="min-width:180px" class="col-flex">
+                  <span style="font-weight:800">Emberling</span>
+                  <div class="meter meter--sm"><span class="cap">Vitality <b>1 240 / 1 800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
+                  <div class="meter meter--sm"><span class="cap">Stamina <b>44 / 60</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
+                </div>
+              </div>
+
+              <div class="actionbar">
+                <button class="actionslot is-selected"><span class="key">1</span><span class="g">🔥</span><span class="n">Ember</span><span class="cost">12</span></button>
+                <button class="actionslot"><span class="key">2</span><span class="g">🗡</span><span class="n">Strike</span><span class="cost">6</span></button>
+                <button class="actionslot"><span class="key">3</span><span class="g">🛡</span><span class="n">Guard</span><span class="cost">8</span></button>
+                <button class="actionslot is-unaffordable"><span class="key">4</span><span class="g">☄</span><span class="n">Pyre</span><span class="cost">50</span></button>
+                <button class="actionslot"><span class="key">5</span><span class="g">👣</span><span class="n">Move</span><span class="cost">4</span></button>
+                <button class="actionslot"><span class="cd">2</span><span class="key">6</span><span class="g">✦</span><span class="n">Bloom</span></button>
+              </div>
+
+              <span class="spacer" style="flex:1"></span>
+
+              <div class="tip" style="max-width:250px">
+                <h4>Ember → the zombie at 4,1</h4>
+                <p style="margin-top:var(--sp-1)">
+                  <b class="val">180–240</b> fire damage ·
+                  <span class="matchup matchup--str">STR</span> <b class="val">+25%</b> vs Ice ·
+                  <b class="val">27%</b> to strike critically
+                </p>
+                <p style="margin-top:var(--sp-1);color:var(--faint)">Costs 12 stamina. Leaves you at 32.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Range is shown, not described.</strong> The board paints reachable cells and target
+      cells before the player commits, because an action with a min/max range and a line-of-sight
+      requirement cannot be understood from a number.
+    </div>
+    <div class="note">
+      <strong>Every action slot states its cost, and an unaffordable one says so by shape and colour
+      both</strong> — dashed border, dimmed, red cost. Not colour alone. <span class="ref">GG-27</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · Acting — the four states of one action</h2>
+  <div class="spec">
+    <div class="spec-grid">
+      <div>
+        <p class="spec-label">Available</p>
+        <button class="actionslot"><span class="key">1</span><span class="g">🔥</span><span class="n">Ember</span><span class="cost">12</span></button>
+      </div>
+      <div>
+        <p class="spec-label">Chosen — awaiting a target</p>
+        <button class="actionslot is-selected"><span class="key">1</span><span class="g">🔥</span><span class="n">Ember</span><span class="cost">12</span></button>
+      </div>
+      <div>
+        <p class="spec-label">Unaffordable — reason on hover</p>
+        <button class="actionslot is-unaffordable"><span class="key">4</span><span class="g">☄</span><span class="n">Pyre</span><span class="cost">50</span></button>
+        <div class="tip" style="margin-top:var(--sp-2)"><h4>Pyre</h4><p>Needs 50 stamina. You have 44.</p></div>
+      </div>
+      <div>
+        <p class="spec-label">Cooling — turns remaining, not a bar</p>
+        <button class="actionslot"><span class="cd">2</span><span class="key">6</span><span class="g">✦</span><span class="n">Bloom</span></button>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Never disable without saying why.</strong> Every unaffordable and cooling state carries
+      its reason. A greyed button with no explanation is indistinguishable from a broken one, and it
+      is the most common dead end in game interfaces. <span class="ref">GG-55</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · Truth under latency</h2>
+  <p class="lede">
+    Outcomes here are server-authoritative, and the client is forbidden from predicting them. So
+    responsiveness is bought with acknowledgement, and the gap it opens is designed rather than
+    hidden. <span class="ref">GG-15 · GG-54</span>
+  </p>
+  <div class="spec">
+    <div class="spec-grid wide">
+      <div>
+        <p class="spec-label">1 · Acknowledged — instantly, without claiming a result</p>
+        <div class="row-flex">
+          <button class="actionslot is-selected"><span class="key">1</span><span class="g">🔥</span><span class="n">Ember</span><span class="cost">12</span></button>
+          <div class="col-flex" style="gap:2px">
+            <span class="tag tag--info">resolving…</span>
+            <span class="readout">the strike animation plays; no damage number yet</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">2a · Confirmed — the number lands with the impact</p>
+        <div class="toast toast--ok"><span>✔</span><span class="msg"><b>212 fire damage</b><span>Critical · +25% vs Ice</span></span></div>
+      </div>
+      <div>
+        <p class="spec-label">2b · Reversed — shown and explained, never a silent snap-back</p>
+        <div class="toast toast--bad"><span>↩</span><span class="msg"><b>Ember did not go through</b><span>That zombie was already down when your turn resolved. Your stamina was returned.</span></span></div>
+      </div>
+      <div>
+        <p class="spec-label">3 · Disconnected — the stage holds, it does not lie</p>
+        <div class="state state--error">
+          <span class="glyph">⚠</span>
+          <h4>Lost the thread</h4>
+          <p>The battle is paused where it stands. Nothing was lost — it resumes when the connection returns.</p>
+          <button class="btn btn--sm btn--ghost">Retry now</button>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>The animation is the latency budget.</strong> A strike that takes 400 ms to play is
+      400 ms the round trip can use for free — which is how a game feels instant without predicting
+      anything. That is the honest alternative to client-side prediction, which is banned here for
+      good reasons. <span class="ref">GG-34</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · What this plate settles</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>When is the Phaser canvas created?</td><td>On entering the lawn stage; destroyed on leaving it; never on a panel open</td></tr>
+      <tr><td>Does the board run under a panel?</td><td>No — and the HUD says so, past the scrim</td></tr>
+      <tr><td>Does the battle run under a panel?</td><td>The question does not arise; virtual time advances only on commit</td></tr>
+      <tr><td>How is range communicated?</td><td>Painted on the board before commit, never as a number</td></tr>
+      <tr><td>How does an action show it cannot be used?</td><td>Shape and colour, plus its reason on hover</td></tr>
+      <tr><td>What covers the round trip?</td><td>The acknowledgement animation. No prediction, ever</td></tr>
+      <tr><td>What happens on rejection?</td><td>An explained reversal at band 4, and the cost returned</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 04 · Run stages · draft 2026-08-22 · governed by architecture/game-gui-principles.md
+</footer>
+
+</div>
+</body>
+</html>

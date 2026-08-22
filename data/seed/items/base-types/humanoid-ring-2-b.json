@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-ring-2-b",
+    "partition": "base-types/jewel-minor-b/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "agent-brief-template.md"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-ring-2-b-001",
+      "nameKey": "base.plain-tag",
+      "name": "Plain Tag",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.plain-tag",
+      "flavorKey": "flavor.base.plain-tag",
+      "flavor": "A simple marked item, barely worth filing.",
+      "tags": ["light", "organic", "fragile", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-002",
+      "nameKey": "base.modest-ticket",
+      "name": "Modest Ticket",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.modest-ticket",
+      "flavorKey": "flavor.base.modest-ticket",
+      "flavor": "An entry document so plain no one remembers having received it.",
+      "tags": ["light", "mineral", "fragile", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-003",
+      "nameKey": "base.engraved-stamp",
+      "name": "Engraved Stamp",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.engraved-stamp",
+      "flavorKey": "flavor.base.engraved-stamp",
+      "flavor": "A formal mark of processing, worn from repeated use.",
+      "tags": ["light", "metal", "sturdy", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-004",
+      "nameKey": "base.unadorned-badge",
+      "name": "Unadorned Badge",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "signet",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.unadorned-badge",
+      "flavorKey": "flavor.base.unadorned-badge",
+      "flavor": "No decoration. It is what it is.",
+      "tags": ["light", "metal", "sturdy", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-005",
+      "nameKey": "base.bent-receipt",
+      "name": "Bent Receipt",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.bent-receipt",
+      "flavorKey": "flavor.base.bent-receipt",
+      "flavor": "Folded and creased from years in a merchant's ledger.",
+      "tags": ["medium", "organic", "fragile", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-006",
+      "nameKey": "base.polished-license",
+      "name": "Polished License",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.polished-license",
+      "flavorKey": "flavor.base.polished-license",
+      "flavor": "The shine of an official credential well maintained.",
+      "tags": ["medium", "mineral", "sturdy", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-007",
+      "nameKey": "base.worked-label",
+      "name": "Worked Label",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.worked-label",
+      "flavorKey": "flavor.base.worked-label",
+      "flavor": "Carefully constructed identification, meant to endure the sorting process.",
+      "tags": ["medium", "mineral", "fragile", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-008",
+      "nameKey": "base.twisted-coupon",
+      "name": "Twisted Coupon",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.twisted-coupon",
+      "flavorKey": "flavor.base.twisted-coupon",
+      "flavor": "A tangled redemption promise, half forgotten in a jacket pocket.",
+      "tags": ["medium", "organic", "fragile", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-009",
+      "nameKey": "base.signed-deed",
+      "name": "Signed Deed",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.signed-deed",
+      "flavorKey": "flavor.base.signed-deed",
+      "flavor": "A legally executed document that binds the present to the past.",
+      "tags": ["heavy", "mineral", "sturdy", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-010",
+      "nameKey": "base.certified-warranty",
+      "name": "Certified Warranty",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.certified-warranty",
+      "flavorKey": "flavor.base.certified-warranty",
+      "flavor": "An official guarantee, stamped and sworn to last.",
+      "tags": ["heavy", "mineral", "sturdy", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-011",
+      "nameKey": "base.notarised-bond",
+      "name": "Notarised Bond",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.notarised-bond",
+      "flavorKey": "flavor.base.notarised-bond",
+      "flavor": "A witnessed commitment, sealed beyond dispute or breaking.",
+      "tags": ["heavy", "metal", "sturdy", "utility"]
+    },
+    {
+      "id": "item.humanoid-ring-2-b-012",
+      "nameKey": "base.official-seal",
+      "name": "Official Seal",
+      "frame": "humanoid",
+      "role": "jewel-minor-b",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.official-seal",
+      "flavorKey": "flavor.base.official-seal",
+      "flavor": "The authoritative mark that closes the file and settles the matter.",
+      "tags": ["heavy", "mineral", "sturdy", "utility"]
+    }
+  ]
+}

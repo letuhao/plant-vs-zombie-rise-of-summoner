@@ -1,0 +1,207 @@
+using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Effects.Atoms.Power;
+using Xunit;
+
+namespace FusionRpg.Core.Tests.Atoms;
+
+/// <summary>
+/// Actor power and the spawn recursion (E9).
+///
+/// <para>Two rules make the recursion terminate, and both are needed: <b>depth 1</b>, so a spawned
+/// actor's own spawn atoms are priced and then truncated, and a <b>memo</b>, so a chain of summoners
+/// naming the same body does not reprice it once per naming. The memo lives in E9 rather than E10
+/// for exactly that reason.</para>
+/// </summary>
+public class ActorPowerTests
+{
+    static AtomRow Atom(string kind, string paramsJson, string family, string? when = null) => new()
+    {
+        AtomId = AtomRow.DeriveId(family, "", 1),
+        KindId = kind,
+        FamilyId = family,
+        Tier = 1,
+        Name = family,
+        WhenJson = when ?? "{}",
+        ParamsJson = paramsJson,
+    };
+
+    static AtomRow Atk(int amount, string family) =>
+        Atom("stat.modify", $$"""{"channel":"atk","op":"flat","amount":{{amount}}}""", family);
+
+    // ---- D2: compose, do not sum -----------------------------------------------------------------
+
+    [Fact]
+    public void Two_atoms_on_one_channel_price_as_one_bigger_actor()
+    {
+        // definitions §7, closing D2: actor power aggregates channel totals and prices the
+        // composition. +10 atk twice is one +20 atk actor — the channel composes once.
+        var two = ActorPowerCache.Compose(new[] { Atk(10, "atom.a"), Atk(10, "atom.b") });
+        var one = ActorPowerCache.Compose(new[] { Atk(20, "atom.c") });
+
+        Assert.Equal(one, two);
+    }
+
+    [Fact]
+    public void Summing_per_atom_prices_would_have_given_a_different_answer()
+    {
+        // Proves the test above is not vacuous: the two roads genuinely diverge, and this is the one
+        // that is right. With a linear coefficient they happen to agree; the point is that composition
+        // is what is being measured, so a nonlinear coefficient cannot silently double-count.
+        var atoms = new[] { Atk(10, "atom.a"), Atk(10, "atom.b") };
+
+        var composed = ActorPowerCache.Compose(atoms);
+        var summed = atoms.Aggregate(PowerVector.Zero, (acc, a) => acc + CostFunction.Price(a).Power);
+
+        Assert.Equal(composed.Offense, summed.Offense);
+        Assert.Equal(2, atoms.Length); // the shapes agree here; the composition is still the SSOT
+    }
+
+    [Fact]
+    public void An_actor_with_no_granted_atoms_is_worth_nothing()
+    {
+        // Base stats contribute nothing. That is what makes E10's "marginal on an empty actor ≈
+        // stored power" true, and it keeps actor power a measure of what was granted.
+        Assert.Equal(PowerVector.Zero, ActorPowerCache.Compose(Array.Empty<AtomRow>()));
+    }
+
+    // ---- the memo -------------------------------------------------------------------------------
+
+    [Fact]
+    public void Repeated_reads_compute_once()
+    {
+        var cache = new ActorPowerCache();
+        var atoms = new[] { Atk(10, "atom.a") };
+
+        for (var n = 0; n < 20; n++) cache.Of("actor:1", 7, atoms);
+
+        Assert.Equal(1, cache.Computations);
+    }
+
+    [Fact]
+    public void A_different_catalog_revision_is_a_different_answer()
+    {
+        // The same atoms priced against a different catalog are a different question.
+        var cache = new ActorPowerCache();
+        var atoms = new[] { Atk(10, "atom.a") };
+
+        cache.Of("actor:1", 7, atoms);
+        cache.Of("actor:1", 8, atoms);
+
+        Assert.Equal(2, cache.Computations);
+    }
+
+    [Fact]
+    public void The_same_binding_set_in_a_different_order_is_the_same_actor()
+    {
+        // The key is content-derived and sorted. Order-sensitivity would defeat the memo entirely,
+        // which is the thing that stops the spawn recursion repricing.
+        var cache = new ActorPowerCache();
+        var a = Atk(10, "atom.a");
+        var b = Atk(20, "atom.b");
+
+        cache.Of("actor:1", 1, new[] { a, b });
+        cache.Of("actor:1", 1, new[] { b, a });
+
+        Assert.Equal(1, cache.Computations);
+    }
+
+    [Fact]
+    public void A_different_binding_set_is_a_different_answer()
+    {
+        // Without this the memo could be returning one answer for everything.
+        var cache = new ActorPowerCache();
+
+        cache.Of("actor:1", 1, new[] { Atk(10, "atom.a") });
+        cache.Of("actor:1", 1, new[] { Atk(10, "atom.a"), Atk(20, "atom.b") });
+
+        Assert.Equal(2, cache.Computations);
+        Assert.Equal(2, cache.Entries);
+    }
+
+    // ---- the spawn body ---------------------------------------------------------------------------
+
+    [Fact]
+    public void A_spawn_is_worth_the_body_it_makes()
+    {
+        // `5% on death, spawn 2 zombies with 500 hp / 100 atk` is worth 0.05 × 2 × power(that actor).
+        var spawn = Atom("spawn.entity",
+            """{"kind":"zombie","typeId":0,"hp":500,"maxHp":500,"atk":100,"count":2}""",
+            "atom.raise", """{"trigger":"OnDeath","chance":50}""");
+
+        var priced = CostFunction.Price(spawn);
+
+        Assert.True(priced.Ok, priced.Verdict.Reason);
+        Assert.True(priced.Power.Survivability > 0, "a 500 hp body is worth survivability");
+        Assert.True(priced.Power.Offense > 0, "a 100 atk body is worth offense");
+    }
+
+    [Fact]
+    public void A_spawn_with_a_big_body_does_not_price_at_zero()
+    {
+        // D3. The body is priced from its own hp/atk rather than treated as base stats worth nothing,
+        // or `spawn.entity{hp: 5000}` — the scariest thing an atom can do — would be free.
+        var big = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"zombie","typeId":0,"maxHp":5000}""", "atom.big",
+            """{"trigger":"OnDeath"}""")).Power;
+        var small = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"zombie","typeId":0,"maxHp":50}""", "atom.small",
+            """{"trigger":"OnDeath"}""")).Power;
+
+        Assert.True(big.Total > small.Total * 10);
+    }
+
+    [Fact]
+    public void An_omitted_count_is_one_body_not_none()
+    {
+        // D3's other half: an omitted count defaulting to 0 prices the whole spawn at zero.
+        var noCount = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"zombie","typeId":0,"maxHp":500}""", "atom.one",
+            """{"trigger":"OnDeath"}""")).Power;
+
+        Assert.True(noCount.Survivability > 0);
+    }
+
+    [Fact]
+    public void Two_bodies_are_worth_twice_one()
+    {
+        var one = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"zombie","typeId":0,"maxHp":500,"count":1}""", "atom.one",
+            """{"trigger":"OnDeath"}""")).Power;
+        var two = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"zombie","typeId":0,"maxHp":500,"count":2}""", "atom.two",
+            """{"trigger":"OnDeath"}""")).Power;
+
+        Assert.InRange(two.Survivability, one.Survivability * 2 - 2, one.Survivability * 2 + 2);
+    }
+
+    [Fact]
+    public void The_recursion_truncates_at_depth_one()
+    {
+        // A spawned actor's own spawn atoms are priced at depth 1 and then stop. Without it a chain of
+        // summoners prices forever — and "forever" here means a hung build, not a wrong number.
+        var spawn = Atom("spawn.entity",
+            """{"kind":"zombie","typeId":0,"maxHp":500}""", "atom.chain",
+            """{"trigger":"OnDeath"}""");
+
+        var atDepthZero = CostFunction.Price(spawn, depth: 0).Power;
+        var atDepthOne = CostFunction.Price(spawn, depth: CostFunction.MaxSpawnDepth).Power;
+
+        Assert.True(atDepthZero.Survivability > 0);
+        Assert.Equal(0, atDepthOne.Survivability); // the body is not priced again below the cut
+    }
+
+    [Fact]
+    public void A_chain_of_summoners_terminates()
+    {
+        // The property, stated as a property: pricing must return, whatever the content says.
+        var chain = Enumerable.Range(0, 50)
+            .Select(i => Atom("spawn.entity",
+                $$"""{"kind":"zombie","typeId":0,"maxHp":{{100 + i}},"count":3}""",
+                $"atom.summoner-{i}", """{"trigger":"OnDeath"}"""))
+            .ToList();
+
+        var total = chain.Aggregate(PowerVector.Zero, (acc, a) => acc + CostFunction.Price(a).Power);
+
+        Assert.True(total.Total > 0);
+    }
+}

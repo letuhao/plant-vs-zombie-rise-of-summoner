@@ -42,10 +42,33 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //      looked exactly like a sector that genuinely had none — a trap set for whoever ships
     //      `sector-development`.
     //
+    //   5. W37 — Zomboss's `PolicyId` became `frontier-rules`. `WorldCanonical` writes that field
+    //      into the faction row, so the hash moves. **Nothing else did:** the scenario's command log
+    //      is byte-identical before and after, verified by dumping it both ways, because
+    //      `first-light` gives Zomboss no forces — a brain with nothing to command falls straight
+    //      through to standing fast. That the map ships without an opponent army is a content gap,
+    //      not an AI one; see WorldAiAcceptanceTests.
+    //
+    //   6. **A glimpse no longer erases a survey.** Found by playing twenty turns and reading them:
+    //      a legion surveyed a sector, stepped one lane away, and forgot what was inside, because
+    //      `IntelRecorder` wrote a whole new snapshot at whatever level it currently saw. Worse, the
+    //      same bug destroyed the *template's authored intel* on the very first turn — Dave was
+    //      supposed to start knowing Ember Hollow's insides and did not, past turn zero. Belief is
+    //      hashed state, so keeping what a survey taught moves this.
+    //
+    //   7. **The map changed.** Verdant Shelf now hangs off Black Gate instead of Ash Waste. Ash
+    //      Waste used to touch four of six sectors, so one march to the middle lit the whole map
+    //      permanently and the fog was a three-turn opening rather than a condition — found by
+    //      playing, not by testing. The map now has two chokepoints instead of one hub, and the far
+    //      corner stays dark until somebody goes and looks.
+    //
+    //      (`Intel` also moved after `Snapshot` at RulesetVersion 3, which did *not* move this
+    //      hash: belief converges within a turn, so only the intermediate ones changed.)
+    //
     // The plan expected one re-bless. Four were needed, each for a behaviour change rather than a
     // drift, and each recorded here. Protecting the hash in any of them would have meant shipping
     // something known to be wrong.
-    const string GoldenFinalHash = "d8a1947a053b2deecf831c53dbd990fc2dae69e884d80d87919f29cf65850c74";
+    const string GoldenFinalHash = "ea71c853391ca189230d6b2a9d0cc0c7b002178a01a92e6d1985911217a5f1ac";
 
     readonly string _dir;
     readonly RpgStore _store;
@@ -80,6 +103,9 @@ public class WorldWaveOneAcceptanceTests : IDisposable
                 .ToList()
         };
 
+        // Replaced rather than appended since 2026-08-22: the template ships this band now, and
+        // appending a second one with the same id fails validation. The scenario still wants a
+        // heavier version of it than the map gives a new player.
         var zomboss = new WorldEntity
         {
             EntityId = "e-zomboss-band-1",
@@ -97,7 +123,7 @@ public class WorldWaveOneAcceptanceTests : IDisposable
         {
             Entities = world.Entities
                 .Select(e => e.EntityId == legion.EntityId ? legion : e)
-                .Append(zomboss)
+                .Select(e => e.EntityId == zomboss.EntityId ? zomboss : e)
                 .OrderBy(e => e.EntityId, StringComparer.Ordinal)
                 .ToList()
         });

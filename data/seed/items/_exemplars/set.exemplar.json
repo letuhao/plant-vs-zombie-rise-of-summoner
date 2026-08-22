@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-thorned-chassis",
+    "partition": "thorned-chassis",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 2,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-opus-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-sets.md#3.2",
+    "maintenanceNote": "Exemplars are maintained artifacts, not agent output. Their registryVersions track current so the pattern 124 agents copy never demonstrates a stale one."
+  },
+  "entries": [
+    {
+      "id": "set.thorned-chassis-001",
+      "nameKey": "set.riveted-ironstem",
+      "name": "Riveted Ironstem",
+      "themeKey": "theme.thorned-chassis",
+      "members": [
+        {
+          "role": "core-guard"
+        },
+        {
+          "role": "head-guard"
+        },
+        {
+          "role": "manipulator"
+        },
+        {
+          "role": "armament-secondary"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.retribution",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.might",
+              "powerBand": "low"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        "signature"
+      ],
+      "notes": "A SET IS ALL REFERENCE AND NO INVENTION. Four kinds of reference appear here and every one of them resolves against a frozen registry or a frozen wave. THE CAPABILITY SITS AT THE LOWEST THRESHOLD, and this inverts genre convention deliberately. Diablo 3 put the payoff at the 6-piece, every build became 'the set', and Diablo 4 abandoned sets almost entirely. Here the 2-piece grants the thing rares cannot roll and the higher thresholds grant plain numbers, so a two-piece splash is always worth taking and running two half-sets is a real build rather than a worse version of committing to one. THIS IS NOT ADVICE — a set whose capability is not at its lowest threshold FAILS IMPORT. A capability is an atom of a non-stat kind. `atom.retribution` is `resource.delta` on OnDamageTaken — the thing that hits you takes it back, which is what a chassis wrapped in thorns should do. Every HIGHER threshold is `stat.modify` / `stat.derived` only, and none of them may use a `More`-op family: `atom.bulwark` and `atom.savagery` are the two `More` families and both would reject as SetTierForbiddenAtom. atom.vitality (Flat), atom.fortitude (Increased) and atom.might (Flat) are all safe. `Increased` sums with every other Increased on the actor, so a set built from it is self-diminishing as the rest of the build grows — that is diminishing returns from compose rules that already exist, not a bolt-on curve. MEMBERS ARE ROLES, AND TWO ROLES ARE FORBIDDEN. All four member roles are frame-neutral role ids from core.v1.json, and each must be in the HYBRID ROLE CORE. Two of the fifteen are not: `ward-array` and `jewel-minor-b` both carry hybridEligible=false, so naming either as a member fails SetRoleNotUniversal at load and — because import is all-or-nothing — takes the whole batch down with it. This is the single easiest way to write a set that cannot import. A set may also claim AT MOST ONE of armament-primary / armament-secondary: weapons are where build identity lives, and a set owning both owns the build. This one takes the off-hand only. Four members is the pattern (six is the rare 'grand set'), there is ALWAYS a threshold at 2, and the top threshold may not exceed the member count. The members are declared by role, not by base-type id, because the generator resolves each role to the frame-specific member containers — at most one per (role, frame) — which is how one frame-neutral set is completable by a pure humanoid, a pure plant, or a hybrid mixing both. THEME AND NAME. `themeKey` is the `nameKey` of a theme in themes.v1.json, and only 5 of the 13 themes have a set partition at all: thorned-chassis, verdant-graft, rusted-legion, frostbitten-vanguard, sunwoven-almanac. The theme id is not invented and the theme's own `avoid` list is binding on the flavour — thorned-chassis rejects pristine factory-new metal and rejects pure organic growth with no scrap in it. The name is `compound`: `riveted` from themeAdjectivePools['thorned-chassis'], `ironstem` from uniqueSetSeedPools['thorned-chassis']. A seed word is ATOMIC — the normalizer resolves it whole and must never decompose it into iron + stem, or it would collide with names sharing neither idea. `nameKey` is the name slugged, and it is unique across the ENTIRE corpus, not per kind: if a base-type partition had already claimed this slug, the fix is to append this partition's own token, never to pick a near-miss spelling. Every threshold states a `powerBand` and no set states a magnitude; the per-piece value budget is checked downstream from those bands and the member count."
+    }
+  ]
+}

@@ -158,6 +158,45 @@ public class WorldTurnE2ETests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task The_turn_report_does_not_narrate_ground_the_viewer_has_never_seen()
+    {
+        // W39: the last hole in the fog. `entries` used to be handed to every viewer unprojected,
+        // so a turn report quietly named every sector on the map — the thing the state projection
+        // spends its whole existence preventing.
+        await Create("e2e-fogentries");
+        await Commit("e2e-fogentries", "dave");
+
+        var report = await _http.GetFromJsonAsync<JsonElement>("/api/world/e2e-fogentries/turn/0");
+        var state = await _http.GetFromJsonAsync<JsonElement>("/api/world/e2e-fogentries/state");
+
+        var seen = state.GetProperty("sectors").EnumerateArray()
+            .Where(s => s.GetProperty("intel").GetString() != "Unknown")
+            .Select(s => s.GetProperty("sectorId").GetString())
+            .ToHashSet();
+
+        foreach (var entry in report.GetProperty("entries").EnumerateArray())
+        {
+            if (!entry.TryGetProperty("sectorId", out var sector)) continue;
+            if (sector.ValueKind == JsonValueKind.Null) continue;
+
+            Assert.Contains(sector.GetString(), seen);
+        }
+    }
+
+    [Fact]
+    public async Task A_line_about_nowhere_in_particular_is_shown_to_everyone()
+    {
+        // Calendar ticks and commands refused before they named ground reveal nothing about the map,
+        // and dropping them would leave a viewer unable to tell "nothing happened" from "you are not
+        // allowed to know". The turn always has *some* narrative.
+        await Create("e2e-nowhere");
+        await Commit("e2e-nowhere", "dave");
+
+        var report = await _http.GetFromJsonAsync<JsonElement>("/api/world/e2e-nowhere/turn/0");
+        Assert.NotEmpty(report.GetProperty("entries").EnumerateArray());
+    }
+
+    [Fact]
     public async Task Auditing_another_commander_is_something_you_ask_for_on_purpose()
     {
         // Fog here is a rendering rule, not a secrecy boundary — /state has always let any caller

@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-sheath-a",
+    "partition": "base-types/ward-array/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2"
+  },
+  "entries": [
+    {
+      "id": "item.plant-sheath-a-001",
+      "nameKey": "base.downy-shuck",
+      "name": "Downy Shuck",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.downy-shuck",
+      "flavorKey": "flavor.base.downy-shuck",
+      "flavor": "Soft filaments catch and scatter the first blow. It gives readily, and that is its point.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-002",
+      "nameKey": "base.papery-peel",
+      "name": "Papery Peel",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.papery-peel",
+      "flavorKey": "flavor.base.papery-peel",
+      "flavor": "Thin as paper and just as crackly, it shields more through rustling noise than any real strength.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "fragile"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-003",
+      "nameKey": "base.wispy-cuticle",
+      "name": "Wispy Cuticle",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.wispy-cuticle",
+      "flavorKey": "flavor.base.wispy-cuticle",
+      "flavor": "A wafer-thin outer layer barely distinguishable from the air it replaces.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-004",
+      "nameKey": "base.desiccated-epidermis",
+      "name": "Desiccated Epidermis",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.desiccated-epidermis",
+      "flavorKey": "flavor.base.desiccated-epidermis",
+      "flavor": "Dried to a shell, it guards through emptiness — there is nothing left to harm inside.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-005",
+      "nameKey": "base.voided-pod",
+      "name": "Voided Pod",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.voided-pod",
+      "flavorKey": "flavor.base.voided-pod",
+      "flavor": "Once full of seeds, now just a hollow chamber waiting to be filled with something new.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-006",
+      "nameKey": "base.flaking-capsule",
+      "name": "Flaking Capsule",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.flaking-capsule",
+      "flavorKey": "flavor.base.flaking-capsule",
+      "flavor": "Shedding itself in layers, it erodes even as it shields, paying its own substance for every moment of protection.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "fragile",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-007",
+      "nameKey": "base.grooved-shroud",
+      "name": "Grooved Shroud",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.grooved-shroud",
+      "flavorKey": "flavor.base.grooved-shroud",
+      "flavor": "Deep channels cut into its surface let water and wind channel away harmlessly, each groove a lesson learned.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-008",
+      "nameKey": "base.hoary-hull",
+      "name": "Hoary Hull",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.hoary-hull",
+      "flavorKey": "flavor.base.hoary-hull",
+      "flavor": "Frosted white and lichen-patched, it shows every season it has lived through, worn but unbroken.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-009",
+      "nameKey": "base.warped-casing",
+      "name": "Warped Casing",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.warped-casing",
+      "flavorKey": "flavor.base.warped-casing",
+      "flavor": "Bent out of true by decades of wind and frost, its irregularity is its strength — no two impacts land the same.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-010",
+      "nameKey": "base.gnarled-testa",
+      "name": "Gnarled Testa",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "bark",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.gnarled-testa",
+      "flavorKey": "flavor.base.gnarled-testa",
+      "flavor": "Twisted and knotted from its growth, every gnarl is a place where it learned to heal.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-011",
+      "nameKey": "base.petrified-rind",
+      "name": "Petrified Rind",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "heartwood",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.petrified-rind",
+      "flavorKey": "flavor.base.petrified-rind",
+      "flavor": "Hardened nearly to stone over centuries, it offers the permanence of mineral without surrendering its plant roots.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-sheath-a-012",
+      "nameKey": "base.sunken-periderm",
+      "name": "Sunken Periderm",
+      "frame": "plant",
+      "role": "ward-array",
+      "class": "heartwood",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.sunken-periderm",
+      "flavorKey": "flavor.base.sunken-periderm",
+      "flavor": "Compressed and settled with age, what remains is denser and stronger for having given up the hollow parts.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ]
+    }
+  ]
+}

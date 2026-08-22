@@ -1,0 +1,370 @@
+{
+  "schemaVersion": 1,
+  "kind": "consumable",
+  "_meta": {
+    "partition": "consumables/2",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T12:00:00Z",
+    "sourceRef": "ssot-consumables.md §3.1, §5.2, §7.2",
+    "batch": "consumables-wave1"
+  },
+  "entries": [
+    {
+      "id": "consumable.k2-001",
+      "nameKey": "consumable.draught-might",
+      "name": "Draught of Might",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.might",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive",
+        "organic"
+      ],
+      "notes": "Stat buff via stat.derived, run-scoped binding at dispatch. No element variant."
+    },
+    {
+      "id": "consumable.k2-002",
+      "nameKey": "consumable.draught-swiftness",
+      "name": "Swiftness Brew",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.quickening",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "offensive",
+        "organic"
+      ],
+      "notes": "Tempo family; run-scoped. Lower power band to avoid tempo dominance early."
+    },
+    {
+      "id": "consumable.k2-003",
+      "nameKey": "consumable.draught-fire-element",
+      "name": "Ember Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "fire",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive",
+        "organic"
+      ],
+      "notes": "Elemental-power family with fire variant. Timed by nature (stat.derived), run-scoped."
+    },
+    {
+      "id": "consumable.k2-004",
+      "nameKey": "consumable.draught-frost-element",
+      "name": "Frostbite Essence",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "ice",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ],
+      "notes": "Ice elemental variant. Run-scoped stat.derived binding."
+    },
+    {
+      "id": "consumable.k2-005",
+      "nameKey": "consumable.draught-earth-element",
+      "name": "Earthen Tincture",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "earth",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ],
+      "notes": "Earth element variant. Defensive posture for earth."
+    },
+    {
+      "id": "consumable.k2-006",
+      "nameKey": "consumable.draught-precision",
+      "name": "Keen Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.precision",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "offensive"
+      ],
+      "notes": "Precision family; run-scoped. Lower band for balance."
+    },
+    {
+      "id": "consumable.k2-007",
+      "nameKey": "consumable.draught-resilience",
+      "name": "Resilient Potion",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.resilience",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ],
+      "notes": "Armour family (resilience). Run-scoped stat.derived."
+    },
+    {
+      "id": "consumable.k2-008",
+      "nameKey": "consumable.draught-regeneration",
+      "name": "Regenerative Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.regeneration",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ],
+      "notes": "Sustained/mending class. Run-scoped; does not trigger per-hit."
+    },
+    {
+      "id": "consumable.k2-009",
+      "nameKey": "consumable.draught-vitality",
+      "name": "Vital Infusion",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.vitality",
+      "powerBand": "high",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ],
+      "notes": "Life family. High band reflects the value of extra hp at run start."
+    },
+    {
+      "id": "consumable.k2-010",
+      "nameKey": "consumable.draught-light-element",
+      "name": "Radiant Distillation",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "light",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive",
+        "arcane"
+      ],
+      "notes": "Light variant of elemental power."
+    },
+    {
+      "id": "consumable.k2-011",
+      "nameKey": "consumable.draught-warding",
+      "name": "Warded Essence",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.warding",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ],
+      "notes": "Armour family (warding). Run-scoped binding."
+    },
+    {
+      "id": "consumable.k2-012",
+      "nameKey": "consumable.draught-ferocity",
+      "name": "Ferocity Elixir",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.ferocity",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive",
+        "necrotic"
+      ],
+      "notes": "Attack family variant. Run-scoped."
+    },
+    {
+      "id": "consumable.k2-013",
+      "nameKey": "consumable.draught-shadow-element",
+      "name": "Umbral Distillate",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "dark",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive",
+        "necrotic"
+      ],
+      "notes": "Dark/umbral variant of elemental power."
+    },
+    {
+      "id": "consumable.k2-014",
+      "nameKey": "consumable.draught-evasion",
+      "name": "Phantom Brew",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.evasion",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ],
+      "notes": "Evasion family. Lower band due to mechanical complexity of dodge stacking."
+    },
+    {
+      "id": "consumable.k2-015",
+      "nameKey": "consumable.draught-cleansing",
+      "name": "Purifying Tonic",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.cleansing",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "utility",
+        "organic"
+      ],
+      "notes": "Sustain/utility family. Removes debuffs at run start (or prepares for them)."
+    },
+    {
+      "id": "consumable.k2-016",
+      "nameKey": "consumable.draught-cruelty",
+      "name": "Cruel Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.cruelty",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive"
+      ],
+      "notes": "Precision family variant. Run-scoped."
+    },
+    {
+      "id": "consumable.k2-017",
+      "nameKey": "consumable.draught-omni-element",
+      "name": "Prismatic Essence",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "omni",
+      "powerBand": "high",
+      "manifestCost": 1,
+      "tags": [
+        "offensive",
+        "arcane"
+      ],
+      "notes": "All-element variant. High band reflects covering all damage types."
+    },
+    {
+      "id": "consumable.k2-018",
+      "nameKey": "consumable.draught-shield-capacity",
+      "name": "Bulwark Brew",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.shield-capacity",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ],
+      "notes": "Shield stat family. Run-scoped binding. Note: depends on E7 compiling shield.grant correctly."
+    },
+    {
+      "id": "consumable.k2-019",
+      "nameKey": "consumable.draught-carapace",
+      "name": "Hardened Carapace",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.carapace",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ],
+      "notes": "Advanced armour family. Run-scoped stat.derived binding."
+    },
+    {
+      "id": "consumable.k2-020",
+      "nameKey": "consumable.draught-wind-element",
+      "name": "Zephyr Essence",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "air",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive",
+        "organic"
+      ],
+      "notes": "Air element variant. Thematic fit with plant frame motion."
+    }
+  ]
+}

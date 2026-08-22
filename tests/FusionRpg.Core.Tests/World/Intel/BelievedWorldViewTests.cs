@@ -24,7 +24,9 @@ public class BelievedWorldViewTests
     [Fact]
     public void The_shape_of_the_map_is_public_knowledge()
     {
-        var blind = View(World(), "zomboss");   // holds nothing, stands nowhere, believes nothing
+        // "nobody" is a faction id nobody plays, rather than Zomboss: since 2026-08-22 the template gives him a
+        // warband and a Seat, so he is no longer anybody's example of knowing nothing.
+        var blind = View(World(), "nobody");   // holds nothing, stands nowhere, believes nothing
 
         Assert.Equal(6, blind.SectorIds.Count);
         Assert.Equal(6, blind.Lanes.Count);
@@ -34,7 +36,9 @@ public class BelievedWorldViewTests
     [Fact]
     public void What_is_in_those_sectors_is_not()
     {
-        var blind = View(World(), "zomboss");
+        // "nobody" rather than Zomboss: since 2026-08-22 the template gives him a warband,
+        // so he is no longer anybody's example of a faction that knows nothing.
+        var blind = View(World(), "nobody");
 
         Assert.All(blind.SectorIds, id => Assert.Null(blind.Believed(id)));
         Assert.All(blind.SectorIds, id => Assert.Equal(IntelState.Unknown, blind.StateOf(id)));

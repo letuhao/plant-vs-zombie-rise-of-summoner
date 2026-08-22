@@ -202,6 +202,9 @@ public sealed record WorldTurnCommitDto
 /// <summary>One line of a turn report, as the map view plays it back.</summary>
 public sealed record WorldTurnEntryDto
 {
+    /// <summary>Where it happened, when it happened anywhere. Null means "nowhere in particular".</summary>
+    public string? SectorId { get; init; }
+
     public string Phase { get; init; } = "";
     public string Kind { get; init; } = "";
     public string Subject { get; init; } = "";

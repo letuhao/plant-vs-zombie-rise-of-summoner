@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "frozen": true,
+  "themes": [
+    {
+      "id": "rot-bloom",
+      "nameKey": "theme.rot-bloom",
+      "name": "Rot and Bloom",
+      "identity": "Decay feeds growth in one endless cycle here — rotted matter is the soil the next bloom needs, and nothing is wasted for long. It sits at the seam between zombie corpse and plant root, the place where 'dead' and 'planted' turn out to be the same word.",
+      "elementAffinity": [
+        "earth"
+      ],
+      "frameAffinity": "both",
+      "toneWords": [
+        "grim",
+        "cyclical",
+        "fertile",
+        "mulchy"
+      ],
+      "avoid": [
+        "heroic redemption or triumph framing",
+        "sterile, clean, or polished surfaces",
+        "recycling-bin tidiness instead of actual rot",
+        "reads the same as charnel-bloom's battlefield-specific necrosis"
+      ]
+    },
+    {
+      "id": "ember-harvest",
+      "nameKey": "theme.ember-harvest",
+      "name": "Ember Harvest",
+      "identity": "This is the last harvest before the frost came, and someone chose to burn the fields rather than lose them to the cold. Warmth here is a hoarded, dwindling resource, not a triumphant blaze — every fire is a fire that has to last.",
+      "elementAffinity": [
+        "fire"
+      ],
+      "frameAffinity": "plant",
+      "toneWords": [
+        "smoldering",
+        "autumnal",
+        "desperate",
+        "banked"
+      ],
+      "avoid": [
+        "triumphant volcano or inferno bombast",
+        "anything cold or wintry",
+        "industrial furnace or forge imagery (that belongs to thorned-chassis)",
+        "fire as an unlimited, roaring resource"
+      ]
+    },
+    {
+      "id": "frostbitten-vanguard",
+      "nameKey": "theme.frostbitten-vanguard",
+      "name": "Frostbitten Vanguard",
+      "identity": "An army that stopped retreating the moment the cold caught it mid-stride, and kept marching anyway. Every joint is stiff, every command lands half a second late, and nothing in this theme is ever in a hurry.",
+      "elementAffinity": [
+        "ice"
+      ],
+      "frameAffinity": "humanoid",
+      "toneWords": [
+        "glacial",
+        "martial",
+        "sluggish",
+        "brittle"
+      ],
+      "avoid": [
+        "sleek, elegant ice-queen or crystalline aesthetics",
+        "speed, agility, or quickness flavor",
+        "warmth of any kind"
+      ]
+    },
+    {
+      "id": "thorned-chassis",
+      "nameKey": "theme.thorned-chassis",
+      "name": "Thorned Chassis",
+      "identity": "Scrap armor gets bolted onto a living stem here, because a dented helmet works just as well on a vine as it ever did on a skull. The plating is stolen from somewhere else; the growth underneath it is not.",
+      "elementAffinity": [],
+      "frameAffinity": "both",
+      "toneWords": [
+        "industrial",
+        "improvised",
+        "riveted",
+        "thorny"
+      ],
+      "avoid": [
+        "pristine, factory-new, or magically-forged metal",
+        "pure organic growth with no scrap or armor in it",
+        "military-issue uniformity (that is rusted-legion's register)",
+        "any single dominant element"
+      ]
+    },
+    {
+      "id": "hollow-orchard",
+      "nameKey": "theme.hollow-orchard",
+      "name": "Hollow Orchard",
+      "identity": "An orchard that kept its light after everything around it went dark, tended by something that no longer needs to eat. Sanctity here is a stubborn holdout against the world outside its fence line, not a victory over it.",
+      "elementAffinity": [
+        "light"
+      ],
+      "frameAffinity": "plant",
+      "toneWords": [
+        "sacred",
+        "hushed",
+        "luminous",
+        "solemn"
+      ],
+      "avoid": [
+        "aggressive or militant holy-crusader tone",
+        "decay, rot, or corpse imagery",
+        "loud, showy radiance — this light is quiet",
+        "codified doctrine or teaching framing (that is sunwoven-almanac's register, not this orchard's)"
+      ]
+    },
+    {
+      "id": "umbral-swarm",
+      "nameKey": "theme.umbral-swarm",
+      "name": "Umbral Swarm",
+      "identity": "Numbers, not individuals — a mass that moves and thinks as one smothering tide with no single face to it. Losing any one of them changes nothing, and that facelessness is exactly the point.",
+      "elementAffinity": [
+        "dark"
+      ],
+      "frameAffinity": "humanoid",
+      "toneWords": [
+        "swarming",
+        "faceless",
+        "encroaching",
+        "cold-dark"
+      ],
+      "avoid": [
+        "named-champion or single-hero heroics",
+        "elegant, precise, single-target framing",
+        "any light imagery",
+        "necrotic floral beauty (that is charnel-bloom's register)"
+      ]
+    },
+    {
+      "id": "windswept-spore",
+      "nameKey": "theme.windswept-spore",
+      "name": "Windswept Spore",
+      "identity": "Growth that travels here — spores riding a wind current farther than any root could ever reach on its own. Nothing in this theme holds still, and nothing in it holds ground either.",
+      "elementAffinity": [
+        "air"
+      ],
+      "frameAffinity": "plant",
+      "toneWords": [
+        "airy",
+        "drifting",
+        "dispersive",
+        "restless"
+      ],
+      "avoid": [
+        "heavy armor or bulk of any kind",
+        "rootedness, walls, or fortification (that is earthen-bastion's register)",
+        "ground-based turtling or defensive framing",
+        "anything that reads as deliberate, planned migration rather than drift"
+      ]
+    },
+    {
+      "id": "rusted-legion",
+      "nameKey": "theme.rusted-legion",
+      "name": "Rusted Legion",
+      "identity": "Whatever the quartermaster had left over gets pressed into service here — a flag, a traffic cone, a folding chair repurposed as a shield. Cohesion comes from rank structure and drill, never from any one piece of kit actually being good.",
+      "elementAffinity": [],
+      "frameAffinity": "humanoid",
+      "toneWords": [
+        "scavenged",
+        "regimented",
+        "weary",
+        "practical"
+      ],
+      "avoid": [
+        "cutting-edge or high-tech equipment",
+        "elemental magic of any kind",
+        "anything that looks purpose-designed rather than requisitioned",
+        "plant-flesh fusion (that is verdant-graft's or thorned-chassis's register)"
+      ]
+    },
+    {
+      "id": "verdant-graft",
+      "nameKey": "theme.verdant-graft",
+      "name": "Verdant Graft",
+      "identity": "Flesh and stem are sutured together here until neither one is clearly in charge anymore — the graft took, and it is no longer obvious whose body this is. This is the theme where a hybrid frame stops being a compromise and starts being the whole point.",
+      "elementAffinity": [],
+      "frameAffinity": "both",
+      "toneWords": [
+        "fused",
+        "uncanny",
+        "surgical",
+        "hybrid"
+      ],
+      "avoid": [
+        "pure-frame purity — content that reads as cleanly all-plant or all-zombie",
+        "resolving the ambiguity of which body is 'really' in control",
+        "armor bolted onto an unchanged body (that is thorned-chassis's register)",
+        "any single dominant element"
+      ]
+    },
+    {
+      "id": "sunwoven-almanac",
+      "nameKey": "theme.sunwoven-almanac",
+      "name": "Sunwoven Almanac",
+      "identity": "The garden's accumulated knowledge, copied and passed hand to hand until it has outlived every gardener who ever added a page to it. This is inheritance, not discovery — nothing here is being found for the first time, only recited correctly.",
+      "elementAffinity": [
+        "light"
+      ],
+      "frameAffinity": "plant",
+      "toneWords": [
+        "doctrinal",
+        "radiant",
+        "ancestral",
+        "precise"
+      ],
+      "avoid": [
+        "mystery, unknown-artifact, or first-discovery framing",
+        "wild or untamed growth",
+        "single chosen-one heroics",
+        "a physical sanctuary or place (that is hollow-orchard's register; this theme is a body of knowledge)"
+      ]
+    },
+    {
+      "id": "charnel-bloom",
+      "nameKey": "theme.charnel-bloom",
+      "name": "Charnel Bloom",
+      "identity": "Flowers that only take root where something died, feeding on whatever the battlefield left behind. Beauty and rot share one stem here, and neither is allowed to apologize for the other.",
+      "elementAffinity": [
+        "dark"
+      ],
+      "frameAffinity": "both",
+      "toneWords": [
+        "macabre",
+        "floral",
+        "morbid",
+        "blooming"
+      ],
+      "avoid": [
+        "cheerful or wholesome garden imagery",
+        "bloodless, sanitized death",
+        "generic ecological rot with no battlefield or corpse specificity (that is rot-bloom's broader register)",
+        "faceless-horde framing (that is umbral-swarm's register)"
+      ]
+    },
+    {
+      "id": "gilded-porcelain",
+      "nameKey": "theme.gilded-porcelain",
+      "name": "Gilded Porcelain",
+      "identity": "Painted, jointed, and worth more sitting on a shelf than doing anything useful — until it moves on its own. The value here is decorative first and dangerous second, and it never fully stops being either one.",
+      "elementAffinity": [],
+      "frameAffinity": "humanoid",
+      "toneWords": [
+        "uncanny",
+        "ornamental",
+        "gilded",
+        "unsettling"
+      ],
+      "avoid": [
+        "rugged, battleworn, or scavenged aesthetics",
+        "organic or plant textures",
+        "sincerity — this theme is inherently artificial and knows it"
+      ]
+    },
+    {
+      "id": "earthen-bastion",
+      "nameKey": "theme.earthen-bastion",
+      "name": "Earthen Bastion",
+      "identity": "Roots that grew wide instead of tall, turning one garden bed into a wall that nothing gets through easily. This theme is about holding a single line forever, not about ever advancing it.",
+      "elementAffinity": [
+        "earth"
+      ],
+      "frameAffinity": "plant",
+      "toneWords": [
+        "rooted",
+        "fortified",
+        "patient",
+        "dense"
+      ],
+      "avoid": [
+        "mobility, speed, or flight flavor (that is windswept-spore's register)",
+        "offense-first framing",
+        "airy or dispersive imagery",
+        "cyclical rot/growth framing (that is rot-bloom's register)"
+      ]
+    }
+  ],
+  "designNotes": {
+    "v1Cuts": "field-manual cut (a deliberately generic theme becomes the dumping ground for unplaced content); permafrost-seed merged into frostbitten-vanguard (two ice themes, one with an army and one with patience). Both were the authoring agents own nominated weakest. Owner-authorized 2026-08-22."
+  },
+  "frozenUtc": "2026-08-22",
+  "frozenNote": "FROZEN v1. Consumed by the wave-1 authoring fleet. No in-place edit from here: a required change is registryVersion 2 plus an explicit decision on which partitions re-run. A silently edited registry splits the corpus into pre-edit and post-edit semantics that nothing downstream can tell apart.",
+  "minCompatibleVersion": 1,
+  "minCompatibleNote": "v1 is current. The wave-0 cut from 15 to 13 themes happened before freeze.",
+  "stage1aFrozen": "Stage 1a authored and validated at 0 errors (205 entries, 25 files). From here a change to this registry invalidates authored content unless minCompatibleVersion says otherwise."
+}

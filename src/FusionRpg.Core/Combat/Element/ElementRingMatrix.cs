@@ -11,33 +11,22 @@ namespace FusionRpg.Core.Combat.Element;
 /// </summary>
 public static class ElementRingMatrix
 {
+    /// <summary>
+    /// Reads the roster's combat matrix (E18). It was a <c>switch</c> over the enum; the relations
+    /// are now rows, so a seventh element is rows plus regeneration rather than an edit here.
+    /// <c>Same</c> stays a code distinction — the table carries relations between <i>different</i>
+    /// elements, and "attacking your own element" is a property of the pair, not a row.
+    /// </summary>
     public static ElementMatchupRelation GetRelation(ElementTypeId attacker, ElementTypeId defender)
     {
         if (attacker == defender)
             return ElementMatchupRelation.Same;
 
-        return (attacker, defender) switch
+        return ElementTable.Current.CombatUnit(ElementTable.IdOf(attacker), ElementTable.IdOf(defender)) switch
         {
-            (ElementTypeId.Light, ElementTypeId.Dark) => ElementMatchupRelation.Strong,
-            (ElementTypeId.Dark, ElementTypeId.Light) => ElementMatchupRelation.Strong,
-
-            (ElementTypeId.Fire, ElementTypeId.Ice) => ElementMatchupRelation.Strong,
-            (ElementTypeId.Fire, ElementTypeId.Air) => ElementMatchupRelation.Weak,
-            (ElementTypeId.Fire, ElementTypeId.Earth) => ElementMatchupRelation.Neutral,
-
-            (ElementTypeId.Ice, ElementTypeId.Earth) => ElementMatchupRelation.Strong,
-            (ElementTypeId.Ice, ElementTypeId.Fire) => ElementMatchupRelation.Weak,
-            (ElementTypeId.Ice, ElementTypeId.Air) => ElementMatchupRelation.Neutral,
-
-            (ElementTypeId.Earth, ElementTypeId.Air) => ElementMatchupRelation.Strong,
-            (ElementTypeId.Earth, ElementTypeId.Ice) => ElementMatchupRelation.Weak,
-            (ElementTypeId.Earth, ElementTypeId.Fire) => ElementMatchupRelation.Neutral,
-
-            (ElementTypeId.Air, ElementTypeId.Fire) => ElementMatchupRelation.Strong,
-            (ElementTypeId.Air, ElementTypeId.Earth) => ElementMatchupRelation.Weak,
-            (ElementTypeId.Air, ElementTypeId.Ice) => ElementMatchupRelation.Neutral,
-
-            _ => ElementMatchupRelation.Neutral
+            > 0 => ElementMatchupRelation.Strong,
+            < 0 => ElementMatchupRelation.Weak,
+            _ => ElementMatchupRelation.Neutral,
         };
     }
 

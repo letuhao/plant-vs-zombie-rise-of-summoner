@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-types/sense/humanoid/b",
+    "partition": "base-types/sense/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-face-b-001",
+      "nameKey": "base.overlapping-mouthguard",
+      "name": "Overlapping Mouthguard",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.overlapping-mouthguard",
+      "flavorKey": "flavor.base.overlapping-mouthguard",
+      "flavor": "Segmented plates let it bend without losing grip on the jaw.",
+      "tags": [
+        "medium-heavy",
+        "mineral",
+        "offensive",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-002",
+      "nameKey": "base.netted-visor",
+      "name": "Netted Visor",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.netted-visor",
+      "flavorKey": "flavor.base.netted-visor",
+      "flavor": "Wire mesh catches the light as it catches the gaze.",
+      "tags": [
+        "medium",
+        "metal",
+        "defensive",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-003",
+      "nameKey": "base.shingled-windshield",
+      "name": "Shingled Windshield",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.shingled-windshield",
+      "flavorKey": "flavor.base.shingled-windshield",
+      "flavor": "Angled panes of reinforced material, each one shedding blows meant for the head.",
+      "tags": [
+        "heavy",
+        "mineral",
+        "defensive",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-004",
+      "nameKey": "base.articulated-mask",
+      "name": "Articulated Mask",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.articulated-mask",
+      "flavorKey": "flavor.base.articulated-mask",
+      "flavor": "Jointed sections follow the jaw's motion, never binding, never slipping.",
+      "tags": [
+        "medium-light",
+        "metal",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-005",
+      "nameKey": "base.jointed-respirator",
+      "name": "Jointed Respirator",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.jointed-respirator",
+      "flavorKey": "flavor.base.jointed-respirator",
+      "flavor": "Hinged apertures draw air while keeping debris and worse out.",
+      "tags": [
+        "heavy",
+        "metal",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-006",
+      "nameKey": "base.laced-brow",
+      "name": "Laced Brow",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.laced-brow",
+      "flavorKey": "flavor.base.laced-brow",
+      "flavor": "Crisscrossed strapping spreads each impact across the forehead plate.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-007",
+      "nameKey": "base.splinted-scope",
+      "name": "Splinted Scope",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.splinted-scope",
+      "flavorKey": "flavor.base.splinted-scope",
+      "flavor": "Reinforced ribs run the length of the viewing tube, bristling like a sea urchin.",
+      "tags": [
+        "medium-heavy",
+        "mineral",
+        "offensive",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-008",
+      "nameKey": "base.corrugated-face",
+      "name": "Corrugated Face",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.corrugated-face",
+      "flavorKey": "flavor.base.corrugated-face",
+      "flavor": "Ridged metal flexes and springs back without crumpling.",
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-009",
+      "nameKey": "base.tiled-blinder",
+      "name": "Tiled Blinder",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tiled-blinder",
+      "flavorKey": "flavor.base.tiled-blinder",
+      "flavor": "Overlapping tiles of reinforced material, each one blocking sight and strike alike.",
+      "tags": [
+        "medium-light",
+        "mineral",
+        "defensive",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-010",
+      "nameKey": "base.stapled-visor",
+      "name": "Stapled Visor",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.stapled-visor",
+      "flavorKey": "flavor.base.stapled-visor",
+      "flavor": "Piecemeal construction — salvaged materials riveted together with military precision.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-011",
+      "nameKey": "base.interlocked-mouthguard",
+      "name": "Interlocked Mouthguard",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.interlocked-mouthguard",
+      "flavorKey": "flavor.base.interlocked-mouthguard",
+      "flavor": "Each segment locks into the next, a seamless shell that has taken ten thousand hits.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "defensive",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-b-012",
+      "nameKey": "base.clattering-windshield",
+      "name": "Clattering Windshield",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.clattering-windshield",
+      "flavorKey": "flavor.base.clattering-windshield",
+      "flavor": "Heavy plates sound the alarm before a foe even lands the blow.",
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive",
+        "mechanical"
+      ]
+    }
+  ]
+}

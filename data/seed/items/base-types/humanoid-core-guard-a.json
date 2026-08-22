@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-torso-a",
+    "partition": "base-types/core-guard/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.1"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-torso-a-001",
+      "nameKey": "base.quilted-vest",
+      "name": "Quilted Vest",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.quilted-vest",
+      "flavorKey": "flavor.base.quilted-vest",
+      "flavor": "Stitched and padded for comfort. The quilting catches everything—wind, warmth, and worry.",
+      "tags": ["light", "organic", "defensive"]
+    },
+    {
+      "id": "item.humanoid-torso-a-002",
+      "nameKey": "base.spun-shirt",
+      "name": "Spun Shirt",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.spun-shirt",
+      "flavorKey": "flavor.base.spun-shirt",
+      "flavor": "Woven on a wheel and worn by someone before you. The seams know their job.",
+      "tags": ["light", "organic", "defensive"]
+    },
+    {
+      "id": "item.humanoid-torso-a-003",
+      "nameKey": "base.woven-jersey",
+      "name": "Woven Jersey",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.woven-jersey",
+      "flavorKey": "flavor.base.woven-jersey",
+      "flavor": "Knitted tight, worn soft. The weave holds the body together—literally and metaphorically.",
+      "tags": ["light", "organic", "defensive"]
+    },
+    {
+      "id": "item.humanoid-torso-a-004",
+      "nameKey": "base.secondhand-apron",
+      "name": "Secondhand Apron",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.secondhand-apron",
+      "flavorKey": "flavor.base.secondhand-apron",
+      "flavor": "Someone else's work garment. The stains are old; the wear is familiar.",
+      "tags": ["light", "organic", "defensive", "fragile"]
+    },
+    {
+      "id": "item.humanoid-torso-a-005",
+      "nameKey": "base.insulated-smock",
+      "name": "Insulated Smock",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.insulated-smock",
+      "flavorKey": "flavor.base.insulated-smock",
+      "flavor": "Layered against cold and against harm. The insulation remembers every breath you have taken in it.",
+      "tags": ["light", "organic", "defensive", "sturdy"]
+    },
+    {
+      "id": "item.humanoid-torso-a-006",
+      "nameKey": "base.cured-windbreaker",
+      "name": "Cured Windbreaker",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.cured-windbreaker",
+      "flavorKey": "flavor.base.cured-windbreaker",
+      "flavor": "Treated leather blocks the gale and the worst of the storm. Your shoulders have memorized its shape.",
+      "tags": ["medium-light", "organic", "defensive"]
+    },
+    {
+      "id": "item.humanoid-torso-a-007",
+      "nameKey": "base.boiled-raincoat",
+      "name": "Boiled Raincoat",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.boiled-raincoat",
+      "flavorKey": "flavor.base.boiled-raincoat",
+      "flavor": "Leather treated to shed water and wounds alike. It heals its own cracks before they reach you.",
+      "tags": ["medium-light", "organic", "defensive"]
+    },
+    {
+      "id": "item.humanoid-torso-a-008",
+      "nameKey": "base.tanned-lifejacket",
+      "name": "Tanned Lifejacket",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tanned-lifejacket",
+      "flavorKey": "flavor.base.tanned-lifejacket",
+      "flavor": "Originally built to keep you afloat. Now it keeps you standing.",
+      "tags": ["medium-light", "organic", "defensive", "sturdy"]
+    },
+    {
+      "id": "item.humanoid-torso-a-009",
+      "nameKey": "base.supple-jumpsuit",
+      "name": "Supple Jumpsuit",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.supple-jumpsuit",
+      "flavorKey": "flavor.base.supple-jumpsuit",
+      "flavor": "Leather soft enough to move in, stiff enough to stand against. One piece covers everything.",
+      "tags": ["medium-light", "organic", "defensive"]
+    },
+    {
+      "id": "item.humanoid-torso-a-010",
+      "nameKey": "base.threadbare-harness",
+      "name": "Threadbare Harness",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.threadbare-harness",
+      "flavorKey": "flavor.base.threadbare-harness",
+      "flavor": "Worn leather straps, repurposed and buckled. Thin enough to feel your breath, strong enough to catch your fall.",
+      "tags": ["medium", "organic", "defensive", "fragile"]
+    },
+    {
+      "id": "item.humanoid-torso-a-011",
+      "nameKey": "base.frayed-crate",
+      "name": "Frayed Crate",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.frayed-crate",
+      "flavorKey": "flavor.base.frayed-crate",
+      "flavor": "Wood slats wrapped in fabric and tied to your middle. Ridiculous, but it holds together.",
+      "tags": ["medium", "mineral", "defensive", "fragile"]
+    },
+    {
+      "id": "item.humanoid-torso-a-012",
+      "nameKey": "base.hemmed-cage",
+      "name": "Hemmed Cage",
+      "frame": "humanoid",
+      "role": "core-guard",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.hemmed-cage",
+      "flavorKey": "flavor.base.hemmed-cage",
+      "flavor": "A cage for the chest, padded at the seams. Built to trap harm before it reaches you.",
+      "tags": ["medium", "mineral", "defensive", "sturdy"]
+    }
+  ]
+}

@@ -1,0 +1,1495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foundation plate — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Foundation plate</h1>
+  <p>
+    Every shared component, drawn from the domain rather than from screens. Sections A–C are the
+    building blocks; D is the entity ladder that screens compose from; E is one shell per GG-5 band;
+    F is the control clusters that travel together. Nothing here belongs to a single screen — if it
+    did, it would live on that screen's plate instead.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">2026-08-22</span>
+    <span class="tag">Method: ERM, see README §2</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="#a">A · Foundations</a>
+  <a href="#b">B · Primitives</a>
+  <a href="#c">C · Domain tokens</a>
+  <a href="#d">D · Entity ladders</a>
+  <a href="#e">E · Band shells</a>
+  <a href="#f">F · Control clusters</a>
+  <a href="#g">G · Coverage</a>
+</nav>
+
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Foundations</h2>
+  <p class="lede">
+    Colour, type, space and stacking. These are data, not components — the app's token file is
+    generated from <code>_kit/tokens.css</code> so a change here reaches the product as a value, not
+    as a hand edit.
+  </p>
+
+  <div class="sub">
+    <h3>A.1 Surfaces and ink</h3>
+    <div class="spec">
+      <div class="spec-grid">
+        <div class="sw"><div class="chipc" style="background:var(--soil)"></div><div class="meta"><b>soil</b><span>#16120e · ground</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--soil-raised)"></div><div class="meta"><b>soil-raised</b><span>#221c16 · HUD, rails</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--panel)"></div><div class="meta"><b>panel</b><span>#2a231b · panel fill</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--panel-raised)"></div><div class="meta"><b>panel-raised</b><span>#332b21 · card in panel</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--panel-inset)"></div><div class="meta"><b>panel-inset</b><span>#120f0c · wells, tracks</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--text)"></div><div class="meta"><b>text</b><span>#f2ead8 · 12.94 on panel</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--muted)"></div><div class="meta"><b>muted</b><span>#a89880 · 5.51 on panel</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--faint)"></div><div class="meta"><b>faint</b><span>#7d7060 · decorative only</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>A.2 Status colour — three values changed to pass GG-30</h3>
+    <div class="spec">
+      <div class="spec-grid">
+        <div class="sw"><div class="chipc" style="background:var(--ok)"></div><div class="meta"><b>ok</b><span>#6fbf73 · 6.92 — unchanged</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--warn)"></div><div class="meta"><b>warn</b><span>#d8a94f · 7.17 — was #c4923a</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--bad)"></div><div class="meta"><b>bad</b><span>#d97b7b · 5.22 — was 3.71</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--bad-solid)"></div><div class="meta"><b>bad-solid</b><span>#a33c3c · ink 5.36 — was 3.48</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--border)"></div><div class="meta"><b>border</b><span>#4a4034 · hairline, decorative</span></div></div>
+        <div class="sw"><div class="chipc" style="background:var(--border-control)"></div><div class="meta"><b>border-control</b><span>#7a6d59 · 3.07 — new</span></div></div>
+      </div>
+      <div class="note">
+        <strong>The border split is the important one.</strong> WCAG 1.4.11 wants 3:1 on boundaries
+        the player must <em>find</em> — an input edge, a ghost button, a tab. It does not ask that of
+        a rule between two table rows. One token could not serve both, which is why the shipped
+        palette failed: every control inherited the hairline value at 1.53.
+        <span class="ref">GG-30</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>A.3 Type scale</h3>
+    <div class="spec">
+      <div style="font-family:var(--font-display);font-size:var(--text-hero)">Hero 40 — plate titles</div>
+      <div style="font-family:var(--font-display);font-size:var(--text-display)">Display 28 — stage and panel titles</div>
+      <div style="font-family:var(--font-display);font-size:var(--text-xl)">XL 20 — card and section headings</div>
+      <div style="font-size:var(--text-lg);font-weight:800">LG 16 — emphasis, entity names</div>
+      <div style="font-size:var(--text-md)">MD 14 — body. The reading size; anything a player must read a sentence of uses this or larger.</div>
+      <div style="font-size:var(--text-sm);color:var(--muted)">SM 12 — secondary, table cells, chips</div>
+      <div style="font-size:var(--text-xs);color:var(--muted)">XS 11 — captions and hints</div>
+      <div style="font-size:var(--text-2xs);color:var(--faint);text-transform:uppercase;letter-spacing:.08em">2XS 10 — pips, counters, labels. Never a sentence.</div>
+      <div class="note">
+        Sizes below 12px are for glyphs and counters only. The shipped UI put tab labels and danger
+        button text at 12px on fills that only pass AA at 18px+, which is how two of the three
+        contrast failures happened — a type decision, surfacing as a colour bug.
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>A.4 Bands — the stacking contract</h3>
+    <div class="spec">
+      <table class="t">
+        <thead><tr><th>Band</th><th>Token</th><th>Blocks input below</th><th>Time underneath</th><th>Dismiss</th></tr></thead>
+        <tbody>
+          <tr><td><b>Stage</b></td><td class="mono">--band-stage 0</td><td>—</td><td>running</td><td>never</td></tr>
+          <tr><td><b>HUD</b></td><td class="mono">--band-hud 100</td><td>no</td><td>running</td><td>never</td></tr>
+          <tr><td><b>Panel</b></td><td class="mono">--band-panel 200</td><td>yes</td><td>per band rule</td><td>Esc · close · click-away</td></tr>
+          <tr><td><b>Dialog</b></td><td class="mono">--band-dialog 300</td><td>yes</td><td>paused</td><td>Esc · explicit choice</td></tr>
+          <tr><td><b>Toast</b></td><td class="mono">--band-toast 400</td><td><b>no</b></td><td>running</td><td>auto-expire</td></tr>
+          <tr><td><b>System</b></td><td class="mono">--band-system 500</td><td>yes</td><td>paused</td><td>Esc</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        A component may not set its own stacking order. Six tokens exist; a seventh value in feature
+        code is a defect. <span class="ref">GG-5</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Primitives</h2>
+  <p class="lede">
+    Derived, not invented — each of these exists because a rung in section D needs it. Every one is
+    drawn in all its states, including the states nobody enjoys drawing.
+  </p>
+
+  <div class="sub">
+    <h3>B.1 Button</h3>
+    <div class="spec">
+      <div class="row-flex">
+        <button class="btn">Summon</button>
+        <button class="btn btn--ghost">Inspect</button>
+        <button class="btn btn--danger">Release</button>
+        <button class="btn btn--sm">Small</button>
+        <button class="btn btn--lg">Large</button>
+        <button class="btn btn--icon" aria-label="Close">✕</button>
+        <button class="btn is-disabled" disabled>Unavailable</button>
+        <button class="btn is-busy">Sending</button>
+      </div>
+      <div class="note">
+        <strong>Busy is not disabled.</strong> A busy button keeps its size so the layout cannot jump,
+        and the rest of the surface stays interactive — the network never freezes the interface.
+        <span class="ref">GG-14</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>B.2 Fields</h3>
+    <div class="spec">
+      <div class="spec-grid">
+        <div class="field">
+          <label for="f1">Name</label>
+          <input class="input" id="f1" value="Emberling">
+          <span class="hint">Shown wherever this creature appears.</span>
+        </div>
+        <div class="field is-invalid">
+          <label for="f2">Name</label>
+          <input class="input" id="f2" value="">
+          <span class="err">A name is required.</span>
+        </div>
+        <div class="field">
+          <label for="f3">Side</label>
+          <select class="select" id="f3"><option>Plant</option><option>Zombie</option></select>
+        </div>
+        <div class="field">
+          <label>Deploy cell</label>
+          <span class="stepper"><button aria-label="less">−</button><input value="3"><button aria-label="more">+</button></span>
+        </div>
+        <div class="field">
+          <label>Options</label>
+          <span class="toggle is-on"><span class="track"><span class="knob"></span></span> Pause while away</span>
+          <span class="toggle"><span class="track"><span class="knob"></span></span> Show damage numbers</span>
+        </div>
+        <div class="field">
+          <label for="f4">Search</label>
+          <input class="input" id="f4" placeholder="Search the almanac…">
+        </div>
+      </div>
+      <div class="note">
+        Every control carries a real <code>&lt;label&gt;</code>. Placeholder text is never the label —
+        it disappears exactly when the player needs it. <span class="ref">GG-21</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>B.3 Tabs, segmented, meters, deltas</h3>
+    <div class="spec">
+      <div class="tabs" style="margin-bottom:var(--sp-4)">
+        <button class="tab is-active">Overview</button>
+        <button class="tab">Effects</button>
+        <button class="tab">Gear</button>
+        <button class="tab">History</button>
+      </div>
+      <div class="row-flex" style="margin-bottom:var(--sp-4)">
+        <span class="seg"><button class="is-active">Grid</button><button>List</button><button>Compact</button></span>
+        <span class="delta delta--up">▲ +18</span>
+        <span class="delta delta--down">▼ −240</span>
+        <span class="delta delta--none">— 0</span>
+        <span class="val">1 240<span class="unit">HP</span></span>
+        <span class="val">+150<span class="unit">fire power</span></span>
+        <span class="val">+30<span class="unit">crit rate</span></span>
+        <span class="val">25<span class="unit">%</span></span>
+        <span class="val">4.0<span class="unit">s</span></span>
+      </div>
+      <div class="spec-grid">
+        <div class="meter">
+          <span class="cap">Vitality <b>1 240 / 1 800</b></span>
+          <span class="track"><span class="fill" style="width:69%"></span></span>
+        </div>
+        <div class="meter is-critical">
+          <span class="cap">Vitality <b>110 / 1 800</b></span>
+          <span class="track"><span class="fill" style="width:6%"></span></span>
+        </div>
+        <div class="meter meter--burden">
+          <span class="cap">Hunger <b>820 / 1 000</b></span>
+          <span class="track"><span class="fill" style="width:82%"></span></span>
+        </div>
+        <div class="meter meter--sm">
+          <span class="cap">Stamina <b>44 / 60</b></span>
+          <span class="track"><span class="fill" style="width:73%"></span></span>
+        </div>
+      </div>
+      <div class="note">
+        <strong>Units are not decoration.</strong> Four unit families exist and they are not
+        interchangeable: primary channels in game units, derived channels in <em>resolver points</em>
+        (<code>+150</code> crit rate moves ~7.6% → ~26.9%), chances in integer per-mille, durations in
+        ms. A component that renders a magnitude must be told which family it is in, or it will print
+        <code>+150%</code> for something that is not a percentage.
+        <span class="ref">definitions.md §2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>B.4 The four states — every data surface ships all of them</h3>
+    <div class="spec">
+      <div class="spec-grid wide">
+        <div>
+          <p class="spec-label">Loading</p>
+          <div class="col-flex" style="padding:var(--sp-2)">
+            <div class="skel skel--line" style="width:60%"></div>
+            <div class="skel skel--line" style="width:90%"></div>
+            <div class="skel skel--line" style="width:75%"></div>
+            <div class="skel" style="height:44px"></div>
+          </div>
+        </div>
+        <div>
+          <p class="spec-label">Empty — teaches, and offers the next step</p>
+          <div class="state">
+            <span class="glyph">✧</span>
+            <h4>No creatures bound yet</h4>
+            <p>Bind your first creature to carry it between runs and keep what it learns.</p>
+            <button class="btn btn--sm">Bind a creature</button>
+          </div>
+        </div>
+        <div>
+          <p class="spec-label">Error — says what failed, offers retry</p>
+          <div class="state state--error">
+            <span class="glyph">⚠</span>
+            <h4>Could not reach the sanctum</h4>
+            <p>The roster could not be loaded. Everything else still works.</p>
+            <button class="btn btn--sm btn--ghost">Try again</button>
+          </div>
+        </div>
+        <div>
+          <p class="spec-label">Locked — says what unlocks it</p>
+          <div class="state state--locked">
+            <span class="glyph">🔒</span>
+            <h4>Fusion sealed</h4>
+            <p>Reach summoner level 12 to unlock fusion.</p>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        In a game these are content, not edge cases — the empty roster is a player's first experience
+        of the roster. Today 2 of 20 screens handle a failed query at all.
+        <span class="ref">GG-17</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · Domain tokens</h2>
+  <p class="lede">
+    One token per domain entity, at its smallest useful size. These are the pieces that were entirely
+    missing from the shipped kit — there was no way to draw an element, a status, a tier, a trigger
+    or a power vector, which is why every feature that needed one invented its own.
+  </p>
+
+  <div class="sub">
+    <h3>C.1 Element — 6 concrete + omni</h3>
+    <div class="spec">
+      <div class="row-flex" style="gap:var(--sp-4)">
+        <span class="el" data-el="fire"><i class="dot"></i>Fire</span>
+        <span class="el" data-el="ice"><i class="dot"></i>Ice</span>
+        <span class="el" data-el="air"><i class="dot"></i>Air</span>
+        <span class="el" data-el="earth"><i class="dot"></i>Earth</span>
+        <span class="el" data-el="light"><i class="dot"></i>Light</span>
+        <span class="el" data-el="dark"><i class="dot"></i>Dark</span>
+        <span class="el" data-el="omni"><i class="dot"></i>Omni</span>
+      </div>
+      <p class="spec-label" style="margin-top:var(--sp-4)">Matchup readout — the ring is a real mechanic, so it gets a token</p>
+      <div class="row-flex">
+        <span class="row-flex" style="gap:var(--sp-1)"><span class="el" data-el="fire"><i class="dot"></i>Fire</span> vs <span class="el" data-el="ice"><i class="dot"></i>Ice</span> <span class="matchup matchup--str">STR +0.25</span></span>
+        <span class="row-flex" style="gap:var(--sp-1)"><span class="el" data-el="fire"><i class="dot"></i>Fire</span> vs <span class="el" data-el="air"><i class="dot"></i>Air</span> <span class="matchup matchup--wek">WEK −0.25</span></span>
+        <span class="row-flex" style="gap:var(--sp-1)"><span class="el" data-el="light"><i class="dot"></i>Light</span> vs <span class="el" data-el="earth"><i class="dot"></i>Earth</span> <span class="matchup matchup--neu">NEU 0</span></span>
+      </div>
+      <div class="note">
+        Ring: <code>fire → ice → earth → air → fire</code>; <code>light ⇄ dark</code> mutual counter;
+        both neutral against the ring. <code>omni</code> is an additive baseline and
+        <strong>never an actor slot</strong> — the picker must not offer it where a type slot is
+        being chosen. <span class="ref">element-hub-ssot.md §7</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>C.2 Side, tier, rarity</h3>
+    <div class="spec">
+      <div class="row-flex" style="gap:var(--sp-5)">
+        <span class="side" data-side="plant"><i class="pip"></i>Plant</span>
+        <span class="side" data-side="zombie"><i class="pip"></i>Zombie</span>
+        <span class="side" data-side="demon"><i class="pip"></i>Demon</span>
+        <span class="tier"><i class="on"></i><i></i><i></i><i></i><i></i><b class="n">T1</b></span>
+        <span class="tier"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><b class="n">T3</b></span>
+        <span class="tier"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><b class="n">T5</b></span>
+        <span class="tag tag--bad">authoring surfaces only</span>
+      </div>
+      <p class="lede" style="margin-top:var(--sp-2);margin-bottom:0">
+        <b>The tier token never appears on a player surface.</b> A tier is an authoring band, not a
+        property a player can act on &mdash; the magnitude and the roll bar carry everything they need,
+        and <code>T4</code> invites a wiki. It stays in the kit because the developer tree and the
+        content-authoring views do need it.
+        <span class="ref">item/ssot-presentation.md &sect;2.4</span>
+      </p>
+      <p class="spec-label" style="margin-top:var(--sp-4)">Rarity frame — ordinal-driven, append-only</p>
+      <div class="row-flex">
+        <span class="frame frame--card" data-rarity="1">✦</span>
+        <span class="frame frame--card" data-rarity="2">✦</span>
+        <span class="frame frame--card" data-rarity="3">✦</span>
+        <span class="frame frame--card" data-rarity="4">✦</span>
+        <span class="frame frame--card" data-rarity="5">✦</span>
+        <span class="frame frame--card is-missing">?</span>
+      </div>
+      <div class="note">
+        Rarity ordinals come from the <code>rarity</code> table and are never inferred from
+        declaration order, so the frame binds to <code>ordinal</code> and not to a name. The last
+        frame is the <strong>missing-art</strong> state — currently a broken image with a console 404.
+        <span class="ref">definitions.md §4</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>C.3 Kind, attach point, trigger, runtime support</h3>
+    <div class="spec">
+      <div class="row-flex">
+        <span class="kind">stat.modify</span><span class="kind">resource.delta</span>
+        <span class="kind">status.apply</span><span class="kind">shield.grant</span>
+        <span class="kind">spawn.entity</span><span class="kind">box.set</span>
+        <span class="attach">stat</span><span class="attach">resource</span><span class="attach">status</span>
+        <span class="attach">shield</span><span class="attach">board</span>
+      </div>
+      <div class="row-flex" style="margin-top:var(--sp-3)">
+        <span class="trig">OnSpawn</span><span class="trig">OnDamageDealt</span>
+        <span class="trig">OnDamageTaken</span><span class="trig">OnDeath</span><span class="trig">OnTimer</span>
+      </div>
+      <p class="spec-label" style="margin-top:var(--sp-4)">Runtime support — four states, per host. <code>None</code> is a rejection, not a warning.</p>
+      <div class="row-flex">
+        <span class="support">
+          <span data-s="full">lawn</span><span data-s="none">battle</span><span data-s="planonly">sim</span>
+        </span>
+        <span class="support">
+          <span data-s="full">lawn</span><span data-s="partial">battle</span><span data-s="planonly">sim</span>
+        </span>
+        <span class="support">
+          <span data-s="full">lawn</span><span data-s="full">battle</span><span data-s="full">sim</span>
+        </span>
+      </div>
+      <div class="note">
+        This token is <strong>developer-facing</strong>. A player never sees "battle: None" — they see
+        an effect that is simply absent from a battle. It earns a place in the foundation because the
+        authoring and audit surfaces need it, and because drawing it forces the four-state model
+        (<code>Full · Partial · PlanOnly · None</code>) into the UI rather than a three-flag guess.
+        <span class="ref">definitions.md §9 · GG-41</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>C.4 Status token — 21 declared, 13 functional</h3>
+    <div class="spec">
+      <p class="spec-label">Working (11)</p>
+      <div class="st-tray">
+        <span class="st" data-fn="working" title="butter">BU</span>
+        <span class="st" data-fn="working" title="freeze">FZ</span>
+        <span class="st" data-fn="working" title="cold">CO<i class="stack">2</i></span>
+        <span class="st" data-fn="working" title="poison">PO<i class="stack">5</i></span>
+        <span class="st" data-fn="working" title="hypno">HY</span>
+        <span class="st" data-fn="working" title="wither">WI<i class="stack">3</i></span>
+        <span class="st" data-fn="working" title="blight">BL</span>
+        <span class="st" data-fn="working" title="rot">RO</span>
+        <span class="st" data-fn="working" title="spark">SP</span>
+        <span class="st" data-fn="working" title="pact_mark">PM</span>
+        <span class="st" data-fn="working" title="spore">SO</span>
+      </div>
+      <p class="spec-label" style="margin-top:var(--sp-3)">Partial (2) · Declared but inert (8)</p>
+      <div class="st-tray">
+        <span class="st" data-fn="partial" title="leech">LE</span>
+        <span class="st" data-fn="partial" title="bond">BO</span>
+        <span class="st" data-fn="inert" title="ember">EM</span>
+        <span class="st" data-fn="inert" title="jala">JA</span>
+        <span class="st" data-fn="inert" title="kelp">KE</span>
+        <span class="st" data-fn="inert" title="charm_pulse">CP</span>
+        <span class="st" data-fn="inert" title="rally">RA</span>
+        <span class="st" data-fn="inert" title="expose">EX</span>
+        <span class="st" data-fn="inert" title="command">CM</span>
+        <span class="st" data-fn="inert" title="shatter">SH</span>
+      </div>
+      <div class="note">
+        The stack counter is part of the token, not an addition — statuses stack and the count is the
+        first thing a player reads. <strong>The functional ring is developer-only:</strong> a player
+        must never be shown a status that does nothing, so the player-facing tray filters to
+        functional statuses and the authoring tray does not.
+        <span class="ref">atom-catalog-ssot.md §5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>C.5 Channel and resource</h3>
+    <div class="spec">
+      <div class="spec-grid">
+        <div>
+          <p class="spec-label">Channel token — primary vs derived</p>
+          <div class="col-flex">
+            <span class="chan">maxHp <span class="tag">primary</span></span>
+            <span class="chan">atk <span class="tag">primary</span></span>
+            <span class="chan"><span class="grp">combat.power.</span>fire <span class="tag tag--info">derived</span></span>
+            <span class="chan"><span class="grp">combat.crit.rate.</span>omni <span class="tag tag--info">derived</span></span>
+            <span class="chan"><span class="grp">status.resist.</span>wither <span class="tag tag--info">derived</span></span>
+          </div>
+        </div>
+        <div>
+          <p class="spec-label">Resource meter — registry-driven, list-agnostic</p>
+          <div class="col-flex">
+            <div class="meter"><span class="cap">Vitality <b>1 240 / 1 800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
+            <div class="meter"><span class="cap">Stamina <b>44 / 60</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
+            <div class="meter meter--burden"><span class="cap">Hunger <b>820 / 1 000</b></span><span class="track"><span class="fill" style="width:82%"></span></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>The resource list is still contested and the component does not care.</strong> It
+        takes <code>(id, label, value, max, polarity)</code>. Polarity is the only visual branch:
+        assets fill green and empty is bad; burdens fill red and full is bad. Whether the set is
+        <code>hp/stamina/hunger/spirit/qi</code> or <code>hp/stamina/sun/soul/spirit</code> is data,
+        and the two documents that disagree can be reconciled without touching this component.
+        <span class="ref">README §5, flagged conflict</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>C.6 Power — vector first, scalar second</h3>
+    <div class="spec">
+      <div class="spec-grid wide">
+        <div>
+          <p class="spec-label">Vector — five categories, always all five</p>
+          <div class="pw">
+            <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" style="width:82%"></span></span><b>100</b></div>
+            <div class="bar" data-c="survivability"><span>Survivability</span><span class="t"><span class="f" style="width:14%"></span></span><b>17</b></div>
+            <div class="bar" data-c="control"><span>Control</span><span class="t"><span class="f" style="width:0%"></span></span><b>0</b></div>
+            <div class="bar" data-c="utility"><span>Utility</span><span class="t"><span class="f" style="width:8%"></span></span><b>10</b></div>
+            <div class="bar" data-c="economy"><span>Economy</span><span class="t"><span class="f" style="width:0%"></span></span><b>0</b></div>
+          </div>
+        </div>
+        <div>
+          <p class="spec-label">Scalar — display and sort only</p>
+          <div class="row-flex" style="gap:var(--sp-5)">
+            <span class="pw-scalar" style="font-size:var(--text-2xl)">3.94 <span class="lbl">power</span></span>
+            <span class="pw-scalar" style="font-size:var(--text-2xl)">20.0 <span class="lbl">power</span></span>
+          </div>
+          <div class="note" style="margin-top:var(--sp-3)">
+            The scalar is <code>geomean(vᵢ+1) − 1</code> over all five categories. It is monotone —
+            it never ranks a strictly better thing lower — but it compresses five dimensions into
+            one, so <strong>the vector is the primary display and the scalar is the sort key</strong>.
+            A comparison UI that shows only the scalar is wrong.
+            <span class="ref">definitions.md §7</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sub">
+    <h3>C.7 Text — the same components, holding Chinese</h3>
+    <div class="spec">
+      <div class="spec-grid wide">
+        <div>
+          <p class="spec-label">Latin</p>
+          <div class="col-flex">
+            <span class="chip"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span> <span class="tag">Lv 14</span></span>
+            <div class="card" style="margin:0">
+              <div class="hd">
+                <span class="frame frame--card" data-rarity="3">🌻</span>
+                <div><div class="nm">Emberling</div>
+                  <div class="meta"><span class="side" data-side="plant"><i class="pip"></i>Plant</span><span class="tag">Lv 14</span></div></div>
+              </div>
+              <p style="margin:0;font-size:var(--text-sm);color:var(--muted)">Toughness 270 · Damage 20</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="spec-label">The same components, Chinese</p>
+          <div class="col-flex">
+            <span class="chip"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">余烬向日葵</span> <span class="tag">14级</span></span>
+            <div class="card" style="margin:0">
+              <div class="hd">
+                <span class="frame frame--card" data-rarity="3">🌻</span>
+                <div><div class="nm">余烬向日葵</div>
+                  <div class="meta"><span class="side" data-side="plant"><i class="pip"></i>植物</span><span class="tag">14级</span></div></div>
+              </div>
+              <p style="margin:0;font-size:var(--text-sm);color:var(--muted)">韧性：270 · 伤害：20</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>Not a hypothetical.</strong> The FE's own tests assert on exactly these strings —
+        <code>伤害：</code> and <code>韧性：</code> — because the game's almanac text is Chinese and
+        reaches the browser today. The display face (Lilita One) and the UI face (Nunito) are both
+        Latin-only, so without a declared fallback each glyph resolves independently and the metrics
+        come apart. Entity names therefore render through <code>--font-content</code>, which is
+        CJK-capable, and never through the display face.
+        <span class="ref">GG-56 · D7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------------ C.8 units -->
+  <div class="sub">
+    <h3>C.8 Unit classes &mdash; nine, because four was wrong</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      Every magnitude belongs to exactly one class, and the class decides both how it renders and
+      <em>what it may be compared against</em>. The stack doc committed to four families with a single
+      <code>resolverPoints</code> bucket. Checked against code, <b>six of the twelve combat families are
+      flat game units and six are sigmoid</b> &mdash; <code>CombatDerivedReader.Power</code> has exactly
+      one call site and it never touches <code>Sigmoid</code>. One bucket would render six families
+      <b>10&times; wrong</b> and put <code>+9 hp</code> and <code>+5 accuracy</code> in the same column.
+    </p>
+
+    <div class="spec">
+      <div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden">
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto">
+          <span><span class="uclass">GameUnits</span>
+            <p class="sub"><code>combat.power.fire</code> &mdash; added straight to damage</p></span>
+          <span class="val">+12<span class="unit">fire power</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right">no context part</span>
+        </div>
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto">
+          <span><span class="uclass">GameUnitsPerSecond</span>
+            <p class="sub"><code>combat.shield.regen.ice</code></p></span>
+          <span class="val">+3<span class="unit">shield hp/s</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right">no context part</span>
+        </div>
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto">
+          <span><span class="uclass">SigmoidPoints</span>
+            <p class="sub"><code>combat.crit.rate.omni</code> &mdash; scale 100.0</p></span>
+          <span class="val">+30<span class="unit">crit rate</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right">&asymp; <b>+7.4 pp</b> vs <b>neutral</b></span>
+        </div>
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto">
+          <span><span class="uclass">SigmoidMultiplierPoints</span>
+            <p class="sub"><code>combat.crit.damage.omni</code> &mdash; ceiling is real</p></span>
+          <span class="val">+40<span class="unit">crit damage</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right">&asymp; <b>&times;1.60</b> vs <b>neutral</b>, max &times;2.00</span>
+        </div>
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto">
+          <span><span class="uclass">StatusPotencyPoints</span>
+            <p class="sub"><code>status.power.wither</code> &mdash; context <b>suppressed</b>, see below</p></span>
+          <span class="val">+8<span class="unit">blight potency</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right">pending &mdash; not renderable yet</span>
+        </div>
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto">
+          <span><span class="uclass">PerMilleRatio</span>
+            <p class="sub"><code>op: increased</code> sums once &mdash; <b>never</b> the same glyph as <code>more</code></p></span>
+          <span class="val">+15<span class="unit">% hp</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right"><code>more</code> renders <b>&times;1.15 hp</b></span>
+        </div>
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto">
+          <span><span class="uclass">Milliseconds</span>
+            <p class="sub">seconds at or above 1 s, ms below</p></span>
+          <span class="val">4.0<span class="unit">s</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right">250 ms stays <b>250 ms</b></span>
+        </div>
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto">
+          <span><span class="uclass">Count</span>
+            <p class="sub"><code>count</code>, <code>maxTargets</code></p></span>
+          <span class="val">2<span class="unit">bullets</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right">no context part</span>
+        </div>
+
+        <div class="lrow" style="grid-template-columns:minmax(0,1fr) auto auto;border-bottom:0">
+          <span><span class="uclass">Flag</span>
+            <p class="sub"><code>status.immune.freeze</code> &mdash; present or absent</p></span>
+          <span><span class="tag">Immune to Freeze</span></span>
+          <span class="ctx" style="min-width:150px;text-align:right"><b>never</b> a number</span>
+        </div>
+
+      </div>
+
+      <div class="note">
+        <strong>Why one affix cannot print a percentage.</strong> For the four
+        <span class="uclass">SigmoidPoints</span> channels,
+        <code>p = 1 / (1 + e<sup>&minus;delta/100</sup>)</code>, so the same
+        <b>+10 points</b> is worth <b>+0.73 pp</b> against the shipped lawn baseline and
+        <b>+2.50 pp</b> at neutral &mdash; a <b>3.4&times;</b> spread. Printing one of those numbers
+        asserts an opponent the player has not met. So the points are authoritative, the estimate is
+        secondary, and <b>the reference is named in the line or the estimate does not ship.</b>
+        <br><br>
+        <strong>The one class that renders no estimate at all.</strong>
+        <span class="uclass">StatusPotencyPoints</span> feeds two different things from one number:
+        a sigmoid decides <em>whether</em> a status lands, while
+        <code>netFactor = clamp(delta, 0, 10000)</code> multiplies <em>both</em> its magnitude and its
+        duration. An ungeared actor sits at <code>delta = 1.0</code>, so <b>+1 status power doubles
+        every status the wearer applies</b> and the smallest authorable roll is a 2&times; multiplier.
+        That is either an extraordinary affix class or a normalisation nobody wrote. Until it is
+        answered, the raw magnitude renders and the estimate is suppressed &mdash;
+        <b>this kit does not render a number it cannot explain.</b>
+        <span class="ref">spec-magnitude-and-units.md &sect;3&ndash;&sect;4 &middot;
+        OverlayCombatCalculator.cs:84&ndash;99 &middot; ResistanceEvaluator.cs:155&ndash;217 &middot;
+        StatComposer.cs:24&ndash;31 &middot; ShieldRuntime.cs:121, 403</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · Entity ladders</h2>
+  <p class="lede">
+    The same six rungs for every entity: <b>token → chip → row → card → panel → editor</b>. A screen
+    author picks a density, never a design. Two entities are drawn in full below — the atom effect
+    and the actor — because those are the two the request named as missing, and because everything
+    else follows their pattern.
+  </p>
+
+  <!-- ---------------------------------------------------------- D.1 atom -->
+  <div class="sub">
+    <h3>D.1 Atom effect — the label that did not exist</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      An atom is <code>{family}[.{variant}].t{tier}</code> with a kind, an attach point, a value spec,
+      an optional trigger, and a power vector. Everything a player will ever see is families and tiers
+      on top of that, so this ladder is load-bearing for items, traits, skills, patrons and world
+      buffs alike.
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">Rung 1 — Token (identity only, sits inline in a sentence or a grid)</p>
+      <div class="row-flex">
+        <span class="frame frame--token" data-rarity="3">✦</span>
+        <span class="el" data-el="fire"><i class="dot"></i></span>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Rung 2 — Chip (identity + one value; lists, trays, tooltips)</p>
+      <div class="row-flex">
+        <span class="chip"><span class="frame frame--chip" data-rarity="3">✦</span><span class="nm">Ember Force</span> <span class="val">+150<span class="unit">fire power</span></span></span>
+        <span class="chip"><span class="frame frame--chip" data-rarity="2">✦</span><span class="nm">Hardened Rind</span> <span class="val">+240<span class="unit">HP</span></span></span>
+        <span class="chip"><span class="frame frame--chip" data-rarity="5">✦</span><span class="nm">Killing Instinct</span> <span class="val">+150<span class="unit">crit rate</span></span></span>
+        <span class="chip is-selected"><span class="frame frame--chip" data-rarity="4">✦</span><span class="nm">Withering Touch</span> <span class="val">25<span class="unit">%</span></span></span>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Rung 3 — Row (tables and ledgers; the one that sorts)</p>
+      <div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden">
+        <div class="lrow atom-row">
+          <span class="frame" data-rarity="3">✦</span>
+          <span>
+            <span class="nm">Ember Force</span>
+            <p class="sub">Fire power — added to damage on a fire component</p>
+          </span>
+          <span class="col-flex" style="gap:2px;align-items:flex-end">
+            <span class="val">+150<span class="unit">fire power</span></span>
+            <span class="rollbar" title="rolled 150 of 120–180 — 500‰"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
+          </span>
+          <span class="pw-scalar">3.94 <span class="lbl">pw</span></span>
+        </div>
+        <div class="lrow atom-row">
+          <span class="frame" data-rarity="2">✦</span>
+          <span>
+            <span class="nm">Hardened Rind</span>
+            <p class="sub">Maximum vitality</p>
+          </span>
+          <span class="col-flex" style="gap:2px;align-items:flex-end">
+            <span class="val">+240<span class="unit">HP</span></span>
+          </span>
+          <span class="pw-scalar">2.10 <span class="lbl">pw</span></span>
+        </div>
+        <div class="lrow atom-row" style="border-bottom:0">
+          <span class="frame" data-rarity="4">✦</span>
+          <span>
+            <span class="nm">Withering Touch</span>
+            <p class="sub">Applies <b>Wither</b> on hit · cooldown 4.0 s</p>
+          </span>
+          <span class="col-flex" style="gap:2px;align-items:flex-end">
+            <span class="val">25<span class="unit">%</span></span>
+            <span class="rollbar" title="rolled 25% of 18–30% — 583‰"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>
+          </span>
+          <span class="pw-scalar">5.02 <span class="lbl">pw</span></span>
+        </div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Rung 4 — Card (the whole atom at a glance)</p>
+      <div class="spec-grid wide">
+
+        <div class="card atom-card">
+          <div class="hd">
+            <span class="frame frame--card" data-rarity="4">✦</span>
+            <div style="min-width:0">
+              <div class="nm">Withering Touch</div>
+              <div class="meta">
+                <span class="el" data-el="dark"><i class="dot"></i>Dark</span>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;font-size:var(--text-md)">
+            <span class="eff">25% chance on hit to apply <b>Wither</b></span> for 6 seconds.
+          </p>
+          <div class="atom-line">
+            <span class="rollbar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><span class="q">roll quality 583&#8240; &middot; band 18&ndash;30%</span></span>
+          </div>
+          <div class="cond">
+            <span class="trig">OnDamageDealt</span>
+            <span>cooldown <b class="val">4.0<span class="unit">s</span></b></span>
+          </div>
+          <div class="pw">
+            <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" style="width:40%"></span></span><b>48</b></div>
+            <div class="bar" data-c="control"><span>Control</span><span class="t"><span class="f" style="width:72%"></span></span><b>86</b></div>
+          </div>
+          <div class="ft">
+            <span class="pw-scalar">5.02 <span class="lbl">power</span></span>
+          </div>
+        </div>
+
+        <div class="card atom-card">
+          <div class="hd">
+            <span class="frame frame--card" data-rarity="5">✦</span>
+            <div style="min-width:0">
+              <div class="nm">Killing Instinct</div>
+              <div class="meta">
+                <span class="el" data-el="omni"><i class="dot"></i>Omni</span>
+              </div>
+            </div>
+          </div>
+          <p style="margin:0;font-size:var(--text-md)">
+            <span class="eff">+150 crit rate</span><br>
+            <span class="ctx">&asymp; <b>+31.8 pp</b> vs a <b>neutral</b> opponent</span>
+          </p>
+          <div class="cond"><span class="tag">always active</span></div>
+          <div class="pw">
+            <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" style="width:88%"></span></span><b>106</b></div>
+          </div>
+          <div class="ft"><span class="pw-scalar">1.98 <span class="lbl">power</span></span></div>
+        </div>
+
+        <div class="card atom-card" style="opacity:.72;border-style:dashed">
+          <div class="hd">
+            <span class="frame frame--card is-missing">✕</span>
+            <div style="min-width:0">
+              <div class="nm">Commanding Presence</div>
+              <div class="meta"><span class="tag tag--bad">not available here</span></div>
+            </div>
+          </div>
+          <p style="margin:0;font-size:var(--text-sm);color:var(--muted)">
+            This effect does nothing in a battle. It stays on the creature and works on the lawn.
+          </p>
+          <div class="ft">
+            <span class="support"><span data-s="full">lawn</span><span data-s="none">battle</span><span data-s="planonly">sim</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>Three things this ladder settles that nothing in the shipped kit could.</strong>
+        <br>1 — <b>The value line is generated, not authored.</b> Kind + channel + unit family + sign
+        convention produce the sentence; content supplies numbers. Sign is per kind, not global:
+        a negative <code>resource.delta</code> is damage, and a negative <code>stat.modify</code> on a
+        lower-is-better channel is an <em>improvement</em>.
+        <br>2 — <b>Only a rolled line gets a bar.</b> Five segments, and the three-way split comes
+        straight from <code>RollPolicy</code>: <code>Fixed</code> gets <em>no</em> bar (a full bar
+        would be a lie about the item's luck — nothing could have rolled otherwise),
+        <code>OnInstantiate</code> gets one, and <code>OnApply</code> shows the <em>band</em>, because
+        the item did not roll it, the hit does.
+        <br>3 — <b>Unsupported is a designed state.</b> The third card is what an atom looks like in a
+        host that cannot execute it — visible, explained, in player words, with the developer
+        four-state badge only in the authoring surface.
+        <br>4 — <b>No ids, no tiers, no per-mille, and no unreferenced percentage.</b> A tier is an
+        authoring band and <code>T4</code> invites a wiki; <code>250&#8240;</code> is
+        <code>25%</code>; and <em>&ldquo;raises crit from 7.6% to 26.9%&rdquo;</em> asserts an opponent
+        the player has not met — the same affix is worth <b>+0.73 pp</b> at the lawn baseline and
+        <b>+2.50 pp</b> at neutral, a 3.4&times; spread. The estimate ships only with its reference named.
+        <span class="ref">spec-magnitude-and-units.md §3&ndash;§6 · item/ssot-presentation.md §3.2 ·
+        atom-catalog-ssot.md §2&ndash;§4 · definitions.md §2, §9</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- --------------------------------------------------------- D.2 actor -->
+  <div class="sub">
+    <h3>D.2 Actor — the view panel that can open anywhere</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      One actor representation, used by the roster, the lawn inspector, the battle target readout, the
+      fusion picker, the expedition assignment screen and the contract offer. Not six of them.
+      <span class="ref">GG-9</span>
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">Rungs 1–3 — token, chip, row</p>
+      <div class="row-flex" style="margin-bottom:var(--sp-4)">
+        <span class="frame frame--token" data-rarity="3">🌻</span>
+        <span class="chip"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span> <span class="tag">Lv 14</span></span>
+        <span class="chip"><span class="frame frame--chip" data-rarity="5">🧟</span><span class="nm">Gravewarden Ashkell the Unforgiving</span> <span class="tag">Lv 41</span></span>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden">
+        <div class="lrow actor-row">
+          <span class="frame" data-rarity="3">🌻</span>
+          <span>
+            <span class="nm">Emberling</span>
+            <p class="sub"><span class="side" data-side="plant"><i class="pip"></i>Plant</span> · Sunflower</p>
+          </span>
+          <span class="row-flex" style="gap:var(--sp-1)">
+            <span class="el" data-el="fire"><i class="dot"></i></span>
+            <span class="el" data-el="light"><i class="dot"></i></span>
+          </span>
+          <span class="col-flex" style="gap:2px">
+            <div class="meter meter--sm"><span class="track"><span class="fill" style="width:69%"></span></span></div>
+            <div class="meter meter--sm"><span class="track"><span class="fill" style="width:41%"></span></span></div>
+          </span>
+          <span class="pw-scalar">18.4 <span class="lbl">pw</span></span>
+        </div>
+        <div class="lrow actor-row" style="border-bottom:0">
+          <span class="frame" data-rarity="5">🧟</span>
+          <span>
+            <span class="nm">Gravewarden Ashkell the Unforgiving</span>
+            <p class="sub"><span class="side" data-side="zombie"><i class="pip"></i>Zombie</span> · Buckethead · <span class="tag tag--warn">deployed</span></p>
+          </span>
+          <span class="row-flex" style="gap:var(--sp-1)">
+            <span class="el" data-el="dark"><i class="dot"></i></span>
+          </span>
+          <span class="col-flex" style="gap:2px">
+            <div class="meter meter--sm is-critical"><span class="track"><span class="fill" style="width:9%"></span></span></div>
+            <div class="meter meter--sm meter--burden"><span class="track"><span class="fill" style="width:82%"></span></span></div>
+          </span>
+          <span class="pw-scalar">44.1 <span class="lbl">pw</span></span>
+        </div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Rung 4 — card</p>
+      <div class="spec-grid wide">
+        <div class="card">
+          <div class="hd">
+            <span class="frame frame--card" data-rarity="3">🌻</span>
+            <div style="min-width:0">
+              <div class="nm">Emberling</div>
+              <div class="meta">
+                <span class="side" data-side="plant"><i class="pip"></i>Plant</span>
+                <span class="tag">Lv 14</span>
+                <span class="el" data-el="fire"><i class="dot"></i>Fire</span>
+                <span class="el" data-el="light"><i class="dot"></i>Light</span>
+              </div>
+            </div>
+          </div>
+          <div class="res">
+            <div class="meter"><span class="cap">Vitality <b>1 240 / 1 800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
+            <div class="meter meter--sm"><span class="cap">Stamina <b>44 / 60</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
+          </div>
+          <div class="st-tray">
+            <span class="st" data-fn="working">SP</span>
+            <span class="st" data-fn="working">CO<i class="stack">2</i></span>
+          </div>
+          <div class="ft">
+            <span class="pw-scalar">18.4 <span class="lbl">power</span></span>
+            <span style="flex:1"></span>
+            <button class="btn btn--sm btn--ghost">Inspect</button>
+            <button class="btn btn--sm">Deploy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <p class="spec-label">Same card, awkward data — long name, no art, zero level, empty pools</p>
+          <div class="hd">
+            <span class="frame frame--card is-missing">?</span>
+            <div style="min-width:0">
+              <div class="nm">Gravewarden Ashkell the Unforgiving</div>
+              <div class="meta">
+                <span class="side" data-side="zombie"><i class="pip"></i>Zombie</span>
+                <span class="tag">Lv 1</span>
+              </div>
+            </div>
+          </div>
+          <div class="res">
+            <div class="meter is-critical"><span class="cap">Vitality <b>0 / 900</b></span><span class="track"><span class="fill" style="width:0%"></span></span></div>
+            <div class="meter meter--burden meter--sm"><span class="cap">Hunger <b>1 000 / 1 000</b></span><span class="track"><span class="fill" style="width:100%"></span></span></div>
+          </div>
+          <div class="ft">
+            <span class="tag tag--bad">defeated</span>
+            <span style="flex:1"></span>
+            <button class="btn btn--sm btn--ghost">Inspect</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Rung 5 — panel (band 2, opens over any stage)</p>
+      <div class="panel-shell actor-panel">
+        <header>
+          <span class="frame frame--panel" data-rarity="3">🌻</span>
+          <div style="flex:1;min-width:0">
+            <h3>Emberling</h3>
+            <div class="meta row-flex">
+              <span class="side" data-side="plant"><i class="pip"></i>Plant</span>
+              <span class="tag">Sunflower</span>
+              <span class="tag">Lv 14</span>
+              <span class="el" data-el="fire"><i class="dot"></i>Fire</span>
+              <span class="el" data-el="light"><i class="dot"></i>Light</span>
+            </div>
+          </div>
+          <span class="esc">Esc</span>
+          <button class="btn btn--icon btn--ghost" aria-label="Close">✕</button>
+        </header>
+        <div class="tabs" style="padding:var(--sp-3) var(--sp-4) 0;border-bottom:1px solid var(--border)">
+          <button class="tab is-active">Overview</button>
+          <button class="tab">Effects</button>
+          <button class="tab">Gear</button>
+          <button class="tab">History</button>
+        </div>
+        <div class="body">
+          <div class="actor-body">
+            <div class="col-flex" style="gap:var(--sp-4)">
+              <div class="res col-flex">
+                <div class="meter"><span class="cap">Vitality <b>1 240 / 1 800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
+                <div class="meter"><span class="cap">Stamina <b>44 / 60</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
+                <div class="meter"><span class="cap">Spirit <b>12 / 40</b></span><span class="track"><span class="fill" style="width:30%"></span></span></div>
+              </div>
+              <div>
+                <p class="spec-label">Condition</p>
+                <div class="st-tray">
+                  <span class="st" data-fn="working">SP</span>
+                  <span class="st" data-fn="working">CO<i class="stack">2</i></span>
+                  <span class="st" data-fn="working">PM</span>
+                </div>
+              </div>
+              <div>
+                <p class="spec-label">Standing</p>
+                <div class="pw">
+                  <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" style="width:64%"></span></span><b>77</b></div>
+                  <div class="bar" data-c="survivability"><span>Survivability</span><span class="t"><span class="f" style="width:48%"></span></span><b>58</b></div>
+                  <div class="bar" data-c="control"><span>Control</span><span class="t"><span class="f" style="width:30%"></span></span><b>36</b></div>
+                  <div class="bar" data-c="utility"><span>Utility</span><span class="t"><span class="f" style="width:22%"></span></span><b>26</b></div>
+                  <div class="bar" data-c="economy"><span>Economy</span><span class="t"><span class="f" style="width:12%"></span></span><b>14</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-flex" style="gap:var(--sp-4)">
+              <div>
+                <p class="spec-label">Attributes</p>
+                <div class="statgrid">
+                  <div class="s"><div class="k">Vitality</div><div class="v">1 800</div></div>
+                  <div class="s"><div class="k">Attack</div><div class="v">140</div></div>
+                  <div class="s"><div class="k">Defence</div><div class="v">22</div></div>
+                  <div class="s"><div class="k">Crit rate</div><div class="v">26.9<span class="unit">%</span></div></div>
+                </div>
+              </div>
+              <div>
+                <p class="spec-label">Effects — the atom ladder, reused verbatim</p>
+                <div class="row-flex">
+                  <span class="chip"><span class="frame frame--chip" data-rarity="3">✦</span><span class="nm">Ember Force</span> <span class="val">+150</span></span>
+                  <span class="chip"><span class="frame frame--chip" data-rarity="2">✦</span><span class="nm">Hardened Rind</span> <span class="val">+240<span class="unit">HP</span></span></span>
+                  <span class="chip"><span class="frame frame--chip" data-rarity="5">✦</span><span class="nm">Killing Instinct</span> <span class="val">+150</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer>
+          <button class="btn btn--ghost">Rename</button>
+          <button class="btn btn--danger">Release</button>
+          <button class="btn">Deploy</button>
+        </footer>
+      </div>
+
+      <div class="note">
+        <strong>Why this is one component and not six.</strong> The roster wants the row, the lawn
+        inspector wants the card, the battle target readout wants the chip, and the contract offer
+        wants the panel. They are rungs of one ladder, so an actor cannot look like a different
+        creature depending on which surface found it — and the effects block inside the panel is the
+        atom ladder from D.1 unchanged, not a second rendering of the same data.
+        <span class="ref">GG-9 · README §2.2 step 2</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------- D.3 comparison -->
+  <div class="sub">
+    <h3>D.3 Comparison — a mode of the ladder, not a seventh rung</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      Anything the player can choose between is comparable against what they already have, side by
+      side, as the <em>default</em> presentation while choosing. This is the core loop of an
+      itemisation game, and it is the rule that decides component shape: a card built only to
+      <em>display</em> an entity cannot later be asked to display a <em>difference</em>.
+      <span class="ref">GG-47</span>
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">Equipped vs candidate — the diff carries the decision, not the two absolutes</p>
+      <div class="cmp">
+        <div class="card is-current">
+          <div class="hd">
+            <span class="frame frame--card" data-rarity="2">⚱</span>
+            <div><div class="nm">Sunworn Charm</div>
+              <div class="meta"><span class="tag">Equipped</span></div></div>
+          </div>
+          <div class="col-flex" style="gap:var(--sp-1)">
+            <span class="atom-line"><span class="eff">+90 fire power</span></span>
+            <span class="atom-line"><span class="eff">+320 maximum vitality</span></span>
+          </div>
+          <div class="ft"><span class="pw-scalar">6.20 <span class="lbl">power</span></span></div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="card is-candidate">
+          <div class="hd">
+            <span class="frame frame--card" data-rarity="4">⚱</span>
+            <div><div class="nm">Ashen Reliquary</div>
+              <div class="meta"><span class="tag tag--warn">Considering</span></div></div>
+          </div>
+          <div class="col-flex" style="gap:var(--sp-1)">
+            <span class="atom-line"><span class="eff">+150 fire power</span></span>
+            <span class="atom-line"><span class="eff">+240 maximum vitality</span></span>
+            <span class="atom-line"><span class="eff">25% on hit: apply Wither</span></span>
+          </div>
+          <div class="ft"><span class="pw-scalar">11.10 <span class="lbl">power</span></span></div>
+        </div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">The difference, stated — including what gets worse</p>
+      <div class="difflist" style="max-width:520px">
+        <div class="diffrow" data-dir="up">
+          <span class="k">Fire power</span><span class="a">90</span><span class="b">150</span><span class="d">▲ +60</span>
+        </div>
+        <div class="diffrow" data-dir="down">
+          <span class="k">Maximum vitality</span><span class="a">320</span><span class="b">240</span><span class="d">▼ −80</span>
+        </div>
+        <div class="diffrow" data-dir="new">
+          <span class="k">Wither on hit</span><span class="a">—</span><span class="b">25%</span><span class="d">new</span>
+        </div>
+        <div class="diffrow" data-dir="same">
+          <span class="k">Critical rate</span><span class="a">7.6%</span><span class="b">7.6%</span><span class="d">—</span>
+        </div>
+      </div>
+      <div class="note">
+        <strong>The losses are the point.</strong> A comparison that shows only improvements is an
+        advertisement. The candidate here is stronger overall and <em>worse</em> at survivability —
+        which is exactly the trade the player is being asked to make, and exactly what a single
+        summary number hides. <span class="ref">GG-48</span>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Vector comparison — where the trade actually shows</p>
+      <div class="pw pw--diff" style="max-width:520px">
+        <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" data-sign="pos" style="width:20%"></span></span><b data-sign="pos">+34</b></div>
+        <div class="bar" data-c="survivability"><span>Survivability</span><span class="t"><span class="f" data-sign="neg" style="width:7%"></span></span><b data-sign="neg">−12</b></div>
+        <div class="bar" data-c="control"><span>Control</span><span class="t"><span class="f" data-sign="pos" style="width:50%"></span></span><b data-sign="pos">+86</b></div>
+      </div>
+      <div class="note">
+        <strong>Caught by drawing it.</strong> The first version of this specimen reused the
+        left-anchored bar from C.6, which rendered <code>−12</code> as a long green bar — a loss
+        that read as a gain. Signed values need a zero anchor. This is precisely the class of error
+        a static plate exists to surface before it becomes a component.
+      </div>
+    </div>
+
+    <div class="sub">
+      <h4 class="spec-label" style="font-size:var(--text-md);color:var(--muted)">D.3b Attribution — why is this number what it is</h4>
+      <div class="spec">
+        <div class="spec-grid wide">
+          <div>
+            <p class="spec-label">Tap any derived number to expand its sources</p>
+            <div class="tip" style="display:block;max-width:none">
+              <h4>Critical rate — 26.9%</h4>
+              <div class="attrib" style="margin-top:var(--sp-2)">
+                <div class="line"><span class="op">·</span><span class="src">Base</span><span class="amt">7.6%</span></div>
+                <div class="line"><span class="op">+</span><span class="src">Killing Instinct <span class="tier"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span><span class="amt">+150 pts</span></div>
+                <div class="line"><span class="op">+</span><span class="src">Ashen Reliquary</span><span class="amt">+20 pts</span></div>
+                <div class="line"><span class="op">−</span><span class="src">Cold <span class="st" data-fn="working" style="width:16px;height:16px;font-size:8px">CO</span></span><span class="amt">−15 pts</span></div>
+                <div class="total"><span class="op">=</span><span class="src">Critical rate</span><span class="amt">26.9%</span></div>
+              </div>
+            </div>
+            <div class="note">
+              Flat, increased and more ops, per-channel caps, statuses and container atoms produce
+              numbers no player can reverse-engineer. Unattributable numbers are how a build-centred
+              game loses the players who care most about it. <span class="ref">GG-49</span>
+            </div>
+          </div>
+
+          <div>
+            <p class="spec-label">Units — the same value, rendered wrong and rendered right</p>
+            <div class="vs">
+              <div class="no">
+                <div class="verdict">✕ Not playable</div>
+                <div class="col-flex" style="gap:var(--sp-2)">
+                  <span class="val">+150<span class="unit">crit rate</span></span>
+                  <span class="val">250<span class="unit">chance</span></span>
+                  <span class="val">4000<span class="unit">icd</span></span>
+                  <span class="val">+0.25<span class="unit">matchup</span></span>
+                </div>
+              </div>
+              <div class="yes">
+                <div class="verdict">✔ Playable</div>
+                <div class="col-flex" style="gap:var(--sp-2)">
+                  <span>Critical strikes <b class="val">7.6%</b> → <b class="val">26.9%</b></span>
+                  <span><b class="val">25%</b> chance on hit</span>
+                  <span>at most once every <b class="val">4</b> seconds</span>
+                  <span><span class="matchup matchup--str">STR</span> <b class="val">+25%</b> damage vs Ice</span>
+                </div>
+              </div>
+            </div>
+            <div class="note">
+              Four unit families, none interchangeable: game units, resolver points, integer
+              per-mille, milliseconds. A renderer that is not <em>told</em> its family will print
+              <code>+150%</code> for something that is not a percentage.
+              <span class="ref">GG-46 · definitions.md §2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ------------------------------------------------- D.4 other ladders -->
+  <div class="sub">
+    <h3>D.4 The remaining entities, at their load-bearing rung</h3>
+    <div class="spec">
+      <div class="spec-grid wide">
+
+        <div class="card">
+          <p class="spec-label">Container — item / trait / skill / patron / world-buff</p>
+          <div class="hd">
+            <span class="frame frame--card" data-rarity="4">⚱</span>
+            <div>
+              <div class="nm">Ashen Reliquary</div>
+              <div class="meta"><span class="tag">Relic</span><span class="tag" style="color:var(--rarity-4);border-color:var(--rarity-4)">Rare</span></div>
+            </div>
+          </div>
+          <div class="col-flex" style="gap:var(--sp-1)">
+            <span class="atom-line"><span class="tier"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> <span class="eff">+150 fire power</span></span>
+            <span class="atom-line"><span class="tier"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> <span class="eff">+240 maximum vitality</span></span>
+            <span class="atom-line" style="color:var(--muted)"><span class="tier"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> <span class="eff">25% on hit: apply Wither</span></span>
+          </div>
+          <div class="ft"><span class="pw-scalar">11.1 <span class="lbl">power</span></span></div>
+          <p style="margin:0;font-size:var(--text-xs);color:var(--faint)">
+            A container is a list of atom chips plus rarity. It needs no rendering of its own —
+            which is the test that the ladder is right.
+          </p>
+        </div>
+
+        <div class="card">
+          <p class="spec-label">Sector — world map node</p>
+          <div class="row-flex" style="gap:var(--sp-3)">
+            <span class="sector" data-own="mine"><span class="nm">Verdant Reach</span><span class="tag tag--ok">held</span></span>
+            <span class="sector" data-own="enemy"><span class="nm">Ashfall</span><span class="tag tag--bad">hostile</span></span>
+            <span class="sector" data-own="neutral"><span class="nm">The Divide</span><span class="tag">open</span></span>
+            <span class="sector is-fogged"><span class="nm">?</span><span class="tag">unscouted</span></span>
+          </div>
+          <p style="margin:0;font-size:var(--text-xs);color:var(--faint)">
+            Ownership is the border; fog is a state of the node, not a separate component.
+          </p>
+        </div>
+
+        <div class="card">
+          <p class="spec-label">Contract — demon binding</p>
+          <div class="hd">
+            <span class="frame frame--card" data-rarity="5">👹</span>
+            <div>
+              <div class="nm">Pact of Cinders</div>
+              <div class="meta"><span class="side" data-side="demon"><i class="pip"></i>Demon</span><span class="tag tag--warn">tribute due</span></div>
+            </div>
+          </div>
+          <div class="meter"><span class="cap">Loyalty <b>62 / 100</b></span><span class="track"><span class="fill" style="width:62%"></span></span></div>
+          <div class="ft"><button class="btn btn--sm btn--ghost">Terms</button><button class="btn btn--sm">Pay tribute</button></div>
+        </div>
+
+        <div class="card">
+          <p class="spec-label">Run — a completed match</p>
+          <div class="hd">
+            <div>
+              <div class="nm">Night 14 · Roof</div>
+              <div class="meta"><span class="tag tag--ok">survived</span><span class="tag">12m 04s</span></div>
+            </div>
+          </div>
+          <div class="statgrid">
+            <div class="s"><div class="k">Waves</div><div class="v">14</div></div>
+            <div class="s"><div class="k">Defeated</div><div class="v">218</div></div>
+            <div class="s"><div class="k">XP</div><div class="v">4 120</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · Band shells</h2>
+  <p class="lede">
+    One shell per band, and feature code never builds another. The stage below is a placeholder — what
+    matters is that it stays mounted underneath everything drawn on top of it.
+    <span class="ref">GG-1 · GG-5 · GG-11</span>
+  </p>
+
+  <div class="sub">
+    <h3>E.1 Stage + HUD + a panel over it</h3>
+    <div class="spec">
+      <div class="stagebox">
+        <div class="hud">
+          <div class="cluster">
+            <span class="frame frame--chip" data-rarity="3">🌻</span>
+            <span class="val">1 240<span class="unit">sun</span></span>
+          </div>
+          <div class="cluster">
+            <span class="tag tag--warn">Wave 7 of 14</span>
+          </div>
+          <span class="spacer"></span>
+          <div class="cluster">
+            <span class="st" data-fn="working">SP</span>
+            <span class="st" data-fn="working">CO<i class="stack">2</i></span>
+          </div>
+          <div class="cluster">
+            <button class="btn btn--sm btn--ghost">Menu <span class="hotkey">Esc</span></button>
+          </div>
+        </div>
+        <div class="scrim"></div>
+        <div style="position:absolute;inset:44px 16px 16px auto;width:min(420px,70%);z-index:var(--band-panel)">
+          <div class="panel-shell" style="height:100%">
+            <header>
+              <div style="flex:1">
+                <h3>Sanctum</h3>
+                <div class="sub">Opened over the board — the wave is held, not lost</div>
+              </div>
+              <span class="esc">Esc</span>
+            </header>
+            <div class="body">
+              <div class="row-flex">
+                <span class="chip"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span></span>
+                <span class="chip"><span class="frame frame--chip" data-rarity="2">🌱</span><span class="nm">Thornlet</span></span>
+              </div>
+            </div>
+            <footer><button class="btn btn--ghost">Close</button></footer>
+          </div>
+        </div>
+        <div class="caption">Stage (band 0) · HUD (100) · Panel (200). The stage is never unmounted.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>E.2 Dialog, toast, system sheet</h3>
+    <div class="spec">
+      <div class="spec-grid wide">
+        <div>
+          <p class="spec-label">Dialog — band 3, blocking, focus-trapped</p>
+          <div class="panel-shell dialog">
+            <header><h3>Release Emberling?</h3></header>
+            <div class="body">
+              <p style="margin:0">
+                Emberling will be gone for good, along with its 3 bound effects and 14 levels.
+                This cannot be undone.
+              </p>
+            </div>
+            <footer>
+              <button class="btn btn--ghost">Keep</button>
+              <button class="btn btn--danger">Release</button>
+            </footer>
+          </div>
+        </div>
+        <div>
+          <p class="spec-label">Toast — band 4, never blocks</p>
+          <div class="toast-stack">
+            <div class="toast toast--ok"><span>✔</span><span class="msg"><b>Emberling deployed</b><span>Row 3, column 2</span></span></div>
+            <div class="toast toast--bad"><span>✕</span><span class="msg"><b>Could not deploy</b><span>The sanctum is unreachable. Nothing was changed.</span></span></div>
+            <div class="toast toast--warn"><span>⚠</span><span class="msg"><b>Tribute due</b><span>Pact of Cinders wants payment before the next night.</span></span></div>
+          </div>
+          <div class="note">
+            The failure toast is the component the app has never had. Zero notification surfaces exist
+            today, so a failed mutation is indistinguishable from a slow one.
+            <span class="ref">GG-16</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · Control clusters</h2>
+  <p class="lede">
+    Controls that always travel together. These are what "lawn control menu" and "world map menu"
+    actually are — clusters, not screens. Defining them here means the lawn stage and the map stage
+    do not each invent their own transport bar.
+  </p>
+
+  <div class="sub">
+    <h3>F.1 Stage transport · map controls</h3>
+    <div class="spec">
+      <div class="col-flex" style="gap:var(--sp-4)">
+        <div class="row-flex">
+          <span class="cluster-box">
+            <button class="btn--icon" aria-label="Play">▶</button>
+            <button class="btn--icon is-active" aria-label="Pause">❚❚</button>
+            <span class="div"></span>
+            <button class="btn--icon" aria-label="Half speed">½</button>
+            <button class="btn--icon is-active" aria-label="Normal speed">1×</button>
+            <button class="btn--icon" aria-label="Double speed">2×</button>
+            <span class="div"></span>
+            <span class="readout">Wave 7 · 04:12</span>
+          </span>
+          <span class="readout">stage transport</span>
+        </div>
+        <div class="row-flex">
+          <span class="cluster-box">
+            <button class="btn--icon" aria-label="Zoom out">−</button>
+            <span class="readout">78%</span>
+            <button class="btn--icon" aria-label="Zoom in">+</button>
+            <span class="div"></span>
+            <button class="btn--icon" aria-label="Fit">⛶</button>
+            <button class="btn--icon is-active" aria-label="Layers">☰</button>
+            <span class="div"></span>
+            <button class="btn--icon" aria-label="Toggle fog">◐</button>
+          </span>
+          <span class="readout">map controls</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>F.2 Filter bar · selection tray · menu rail</h3>
+    <div class="spec">
+      <div class="filterbar">
+        <input class="input grow" placeholder="Search creatures…">
+        <span class="seg"><button class="is-active">All</button><button>Plant</button><button>Zombie</button></span>
+        <span class="row-flex" style="gap:var(--sp-1)">
+          <span class="el" data-el="fire"><i class="dot"></i></span>
+          <span class="el" data-el="ice"><i class="dot"></i></span>
+          <span class="el" data-el="air"><i class="dot"></i></span>
+          <span class="el" data-el="earth"><i class="dot"></i></span>
+          <span class="el" data-el="light"><i class="dot"></i></span>
+          <span class="el" data-el="dark"><i class="dot"></i></span>
+        </span>
+        <select class="select"><option>Power, high to low</option><option>Level</option><option>Recently bound</option></select>
+      </div>
+
+      <div class="tray" style="margin-top:var(--sp-3)">
+        <span class="count">2</span> selected
+        <span class="chip"><span class="frame frame--chip" data-rarity="3">🌻</span><span class="nm">Emberling</span></span>
+        <span class="chip"><span class="frame frame--chip" data-rarity="2">🌱</span><span class="nm">Thornlet</span></span>
+        <span style="flex:1"></span>
+        <button class="btn btn--sm btn--ghost">Clear</button>
+        <button class="btn btn--sm">Assign to expedition</button>
+      </div>
+
+      <div class="row-flex" style="margin-top:var(--sp-4);align-items:stretch">
+        <nav class="rail" style="border-radius:var(--r-md);border:1px solid var(--border)">
+          <button class="is-active"><span class="g">⌂</span>Home</button>
+          <button><span class="g">✦</span>Creatures</button>
+          <button><span class="g">◈</span>Relics</button>
+          <button><span class="g">🗺</span>Map</button>
+          <button><span class="g">👹</span>Pacts</button>
+          <button><span class="g">⚙</span>Settings</button>
+        </nav>
+        <div class="spec" style="flex:1;margin:0">
+          <p class="spec-label">Menu rail — six entries, not nineteen</p>
+          <p style="margin:0;font-size:var(--text-sm);color:var(--muted)">
+            The rail opens <em>layers</em>, it does not navigate to screens. Each entry has a
+            direct key, and each key is registered once in the global verb table so no surface can
+            reassign it.
+          </p>
+          <div class="row-flex" style="margin-top:var(--sp-3)">
+            <span class="hotkey">Esc</span><span style="font-size:var(--text-xs);color:var(--muted)">pop one layer</span>
+            <span class="hotkey">C</span><span style="font-size:var(--text-xs);color:var(--muted)">creatures</span>
+            <span class="hotkey">M</span><span style="font-size:var(--text-xs);color:var(--muted)">map</span>
+            <span class="hotkey">P</span><span style="font-size:var(--text-xs);color:var(--muted)">pacts</span>
+          </div>
+          <div class="note">
+            The current sidebar has nineteen flat entries under a heading reading <code>AUDIT</code>,
+            five of which are diagnostic dumps. The rail carries player layers only; the developer
+            tree lives behind its own gate. <span class="ref">GG-40</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ==================================================================== G -->
+<section class="sec" id="g">
+  <h2>G · Coverage</h2>
+  <p class="lede">
+    The matrix from README §2.2 step 2, with what this plate covers and what is deliberately still
+    open. A screen that needs a cell marked <b>—</b> means the matrix was incomplete, not that the
+    screen may invent one.
+  </p>
+  <table class="t">
+    <thead>
+      <tr><th>Entity</th><th>Token</th><th>Chip</th><th>Row</th><th>Card</th><th>Panel</th><th>Editor</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><b>Atom effect</b></td><td>D.1</td><td>D.1</td><td>D.1</td><td>D.1</td><td>n/a</td><td>dev only</td></tr>
+      <tr><td><b>Container</b></td><td>n/a</td><td>D.4</td><td><a href="02-collection.html">p02 B</a></td><td>D.4</td><td><a href="07-flows.html">p07 F</a></td><td>dev only</td></tr>
+      <tr><td><b>Actor</b></td><td>D.2</td><td>D.2</td><td>D.2</td><td>D.2</td><td>D.2</td><td><a href="07-flows.html">p07 F</a></td></tr>
+      <tr><td><b>Status</b></td><td>C.4</td><td>C.4</td><td><a href="05-chronicle-almanac.html">p05 B</a></td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><b>Element</b></td><td>C.1</td><td>C.1</td><td><a href="05-chronicle-almanac.html">p05 B</a></td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><b>Channel</b></td><td>C.5</td><td>C.5 &middot; <b>C.8</b></td><td><a href="05-chronicle-almanac.html">p05 D</a></td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><b>Resource</b></td><td>C.5</td><td>C.5</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><b>Power</b></td><td>C.6</td><td>C.6</td><td>n/a</td><td>C.6</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><b>Sector</b></td><td>D.4</td><td><a href="07-flows.html">p07 F</a></td><td>n/a</td><td>D.4</td><td><a href="03-world.html">p03 B</a></td><td>n/a</td></tr>
+      <tr><td><b>Contract</b></td><td>n/a</td><td><a href="07-flows.html">p07 F</a></td><td><a href="07-flows.html">p07 F</a></td><td>D.4</td><td><a href="07-flows.html">p07 F</a></td><td>n/a</td></tr>
+      <tr><td><b>Run</b></td><td>n/a</td><td>n/a</td><td><a href="05-chronicle-almanac.html">p05 D</a></td><td>D.4</td><td><a href="06-system-dev.html">p06 A</a></td><td>n/a</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note" style="border-left-color:var(--bad);background:rgb(217 123 123 / .07)">
+    <strong>Where the later rules were drawn.</strong> The principles grew to GG-60 after this plate
+    was first drawn; the additions live on the plates that follow, and the foundation carries the
+    pieces they compose from.
+    <b>GG-44</b> unlock states → <a href="01-shell-home.html">plate 01 §E</a> ·
+    <b>GG-50</b> volume at 10 / 100 / 1000 → <a href="02-collection.html">plate 02 §D</a> ·
+    <b>GG-54</b> reversal under latency → <a href="04-run-stages.html">plate 04 §E</a> ·
+    <b>GG-55</b> disabled-with-reason → <a href="04-run-stages.html">plate 04 §D</a> and
+    <a href="03-world.html">plate 03 §D</a> ·
+    <b>GG-56</b> CJK → §C.7 above, with the font stacks in <code>_kit/tokens.css</code>.
+  </div>
+
+  <div class="note">
+    <strong>Every cell is now closed &mdash; for the eleven entities in the inventory.</strong>
+    <strong style="color:var(--bad)">That inventory is incomplete:</strong> step 1 never swept
+    <code>architecture/item/</code> (31 docs) or <code>architecture/action/</code> (11 specs), so 29 entities
+    have no rung at all. See <a href="gap-audit-2026-08-22.md">gap-audit-2026-08-22.md</a>. Within the
+    eleven, a rung marked <code>n/a</code> is a deliberate
+    refusal, not an omission: an atom has no panel because a container <em>is</em> the panel an atom
+    appears in; a resource has no row because a meter is its only useful form; a contract has no
+    token because a pact is never small enough to be one glyph. Where a rung is closed on a later
+    plate, the link says which.
+  </div>
+
+  <div class="note">
+    <strong>What is deliberately not here.</strong> Screen layouts (they get their own plates), the
+    home stage (blocked on the owner decision about what home <em>is</em>), art direction beyond
+    framing and colour, and the developer tree's own kit. Also absent: any component bound to the
+    contested resource list — the meter takes a registry row, so the argument can be settled after
+    the foundation ships.
+  </div>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Foundation plate · draft 2026-08-22 · governed by architecture/game-gui-principles.md ·
+  method in docs/design/README.md §2
+</footer>
+
+</div>
+</body>
+</html>

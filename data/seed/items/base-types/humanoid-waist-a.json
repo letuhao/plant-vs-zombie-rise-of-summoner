@@ -1,0 +1,298 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-waist-a",
+    "partition": "base-types/girdle/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-waist-a-001",
+      "nameKey": "base.quilted-sash",
+      "name": "Quilted Sash",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.quilted-sash",
+      "flavorKey": "flavor.base.quilted-sash",
+      "flavor": "Layered cloth stitched in diamonds. Pockets catch sunlight and hold its warmth.",
+      "tags": [
+        "light",
+        "organic",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-002",
+      "nameKey": "base.spun-drawstring",
+      "name": "Spun Drawstring",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.spun-drawstring",
+      "flavorKey": "flavor.base.spun-drawstring",
+      "flavor": "Simple cord twisted from salvaged thread. Cinches what needs holding, nothing more.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-003",
+      "nameKey": "base.secondhand-pouch",
+      "name": "Secondhand Pouch",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.secondhand-pouch",
+      "flavorKey": "flavor.base.secondhand-pouch",
+      "flavor": "Someone else's carrying solution. The seams are held with care, the straps still sound.",
+      "tags": [
+        "light",
+        "organic",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-004",
+      "nameKey": "base.insulated-ziptie",
+      "name": "Insulated Ziptie",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.insulated-ziptie",
+      "flavorKey": "flavor.base.insulated-ziptie",
+      "flavor": "Thick plastic braid wrapped in cloth padding. Holds tight and keeps the sun off.",
+      "tags": [
+        "light",
+        "organic",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-005",
+      "nameKey": "base.cured-belt",
+      "name": "Cured Belt",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.cured-belt",
+      "flavorKey": "flavor.base.cured-belt",
+      "flavor": "Hide cured by smoke and sun. The brass buckle is old but the leather is steady.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-006",
+      "nameKey": "base.boiled-strap",
+      "name": "Boiled Strap",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.boiled-strap",
+      "flavorKey": "flavor.base.boiled-strap",
+      "flavor": "Leather hardened in hot water, then tooled into something useful. Worn smooth by work.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-007",
+      "nameKey": "base.tanned-band",
+      "name": "Tanned Band",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.tanned-band",
+      "flavorKey": "flavor.base.tanned-band",
+      "flavor": "A wide strip of tanned hide, evenly dyed by seasons of sun. Still flexible, never rigid.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-008",
+      "nameKey": "base.supple-cinch",
+      "name": "Supple Cinch",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.supple-cinch",
+      "flavorKey": "flavor.base.supple-cinch",
+      "flavor": "Leather so soft it moves like cloth. Pulls tight without cutting, holds without complaint.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-009",
+      "nameKey": "base.studded-buckle",
+      "name": "Studded Buckle",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.studded-buckle",
+      "flavorKey": "flavor.base.studded-buckle",
+      "flavor": "Metal studs driven through leather, catching the light. A fastener and a flair.",
+      "tags": [
+        "medium-light",
+        "metal",
+        "utility",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-010",
+      "nameKey": "base.oiled-waist",
+      "name": "Oiled Waist",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sunbloom",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.oiled-waist",
+      "flavorKey": "flavor.base.oiled-waist",
+      "flavor": "Leather coated in oil, kept from cracking by grease and care. Waterproof where it matters.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-011",
+      "nameKey": "base.hidebound-webbing",
+      "name": "Hidebound Webbing",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.hidebound-webbing",
+      "flavorKey": "flavor.base.hidebound-webbing",
+      "flavor": "Hide stretched over cord and sewn tight. The knots are thick and the leather binding holds firm.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-waist-a-012",
+      "nameKey": "base.creased-bungee",
+      "name": "Creased Bungee",
+      "frame": "humanoid",
+      "role": "girdle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.creased-bungee",
+      "flavorKey": "flavor.base.creased-bungee",
+      "flavor": "Leather folded and worked until the creases hold bouncing cord. Pliable restraint.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility",
+        "mechanical"
+      ]
+    }
+  ]
+}

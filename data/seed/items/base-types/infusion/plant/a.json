@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-infusion-plant-a",
+    "partition": "base-types/infusion/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.1"
+  },
+  "entries": [
+    {
+      "id": "item.plant-glands-a-001",
+      "nameKey": "base.filamentous-vesicle",
+      "name": "Filamentous Vesicle",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.buttering",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.filamentous-vesicle",
+      "flavorKey": "flavor.base.filamentous-vesicle",
+      "flavor": "Fine threads catch and hold what was meant to slip away.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-002",
+      "nameKey": "base.downy-trichome",
+      "name": "Downy Trichome",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.freezing",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.downy-trichome",
+      "flavorKey": "flavor.base.downy-trichome",
+      "flavor": "Soft fur holds the cold as it falls.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-003",
+      "nameKey": "base.tender-sac",
+      "name": "Tender Sac",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.chilling",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.tender-sac",
+      "flavorKey": "flavor.base.tender-sac",
+      "flavor": "Barely holding together, yet it never breaks where it counts.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "fragile",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-004",
+      "nameKey": "base.wispy-balsam",
+      "name": "Wispy Balsam",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.venomous",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.wispy-balsam",
+      "flavorKey": "flavor.base.wispy-balsam",
+      "flavor": "A faint scent moves on the air before the plant itself speaks.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-005",
+      "nameKey": "base.pliant-gland",
+      "name": "Pliant Gland",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.mesmerizing",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.pliant-gland",
+      "flavorKey": "flavor.base.pliant-gland",
+      "flavor": "Bends with pressure, yet its grip is absolute.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-006",
+      "nameKey": "base.feathered-sap",
+      "name": "Feathered Sap",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.withering",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.feathered-sap",
+      "flavorKey": "flavor.base.feathered-sap",
+      "flavor": "Spreads in delicate traces across flesh and leaf alike.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-007",
+      "nameKey": "base.slender-resin",
+      "name": "Slender Resin",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.slender-resin",
+      "flavorKey": "flavor.base.slender-resin",
+      "flavor": "Sticky but never heavy, it marks whatever it touches.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-008",
+      "nameKey": "base.papery-latex",
+      "name": "Papery Latex",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.blighting",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.papery-latex",
+      "flavorKey": "flavor.base.papery-latex",
+      "flavor": "Thin as cloth yet holds the blight fast.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-009",
+      "nameKey": "base.nodding-duct",
+      "name": "Nodding Duct",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.rotting",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.nodding-duct",
+      "flavorKey": "flavor.base.nodding-duct",
+      "flavor": "Sways like wheat in wind, delivering its dark gift with each bend.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-010",
+      "nameKey": "base.layered-hydathode",
+      "name": "Layered Hydathode",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sparking",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.layered-hydathode",
+      "flavorKey": "flavor.base.layered-hydathode",
+      "flavor": "Water weeps from its gaps and carries the spark.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-011",
+      "nameKey": "base.crackling-myrrh",
+      "name": "Crackling Myrrh",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.marking",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.crackling-myrrh",
+      "flavorKey": "flavor.base.crackling-myrrh",
+      "flavor": "Splits and spits when heat approaches, scent carrying memory.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-glands-a-012",
+      "nameKey": "base.desiccated-laticifer",
+      "name": "Desiccated Laticifer",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.sporing",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.desiccated-laticifer",
+      "flavorKey": "flavor.base.desiccated-laticifer",
+      "flavor": "Dried to dust yet still it reaches, casting its spores far and wide.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    }
+  ]
+}

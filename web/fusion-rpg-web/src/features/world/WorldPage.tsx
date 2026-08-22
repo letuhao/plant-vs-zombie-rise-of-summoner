@@ -10,6 +10,7 @@ import {
   useWorldTurnReport
 } from "@/lib/bus/world";
 import { Page } from "@/layouts/Page";
+import { cn } from "@/lib/cn";
 import { Badge, Banner, Button, KeyValue, Panel } from "@/ui";
 import firstLight from "./fixtures/first-light.json";
 import { LaneEdge } from "./LaneEdge";
@@ -284,28 +285,59 @@ export function WorldPage() {
 
                 {selected.forces.length > 0 ? (
                   <>
-                    <div className="pt-1 text-xs text-muted">Forces</div>
-                    <ul className="space-y-0.5 text-xs text-text" data-testid="inspector-forces">
-                      {selected.forces.map((force) => (
-                        <li key={force.entityId}>
-                          <button
-                            className={force.entityId === ui.selectedEntityId ? "text-text underline" : "text-muted"}
-                            onClick={() => dispatch({ type: "select-entity", entityId: force.entityId })}
-                          >
-                            {force.entityId} — {force.strength} hp{force.routed ? " (routed)" : ""}
-                          </button>
-                        </li>
-                      ))}
+                    <div className="pt-1 text-xs text-muted">Forces — pick one to give it orders</div>
+                    <ul className="space-y-1 text-xs" data-testid="inspector-forces">
+                      {selected.forces.map((force) => {
+                        const picked = force.entityId === ui.selectedEntityId;
+                        return (
+                          <li key={force.entityId}>
+                            {/* A real control, not a line of text that happens to be clickable. The
+                                first version was a bare <button> styled `text-muted`, which read as
+                                a label — the one person who tried it could not find the picker. */}
+                            <button
+                              type="button"
+                              aria-pressed={picked}
+                              data-testid={`pick-force-${force.entityId}`}
+                              onClick={() => dispatch({ type: "select-entity", entityId: force.entityId })}
+                              className={cn(
+                                "w-full cursor-pointer rounded-sm border px-2 py-1 text-left transition-colors",
+                                picked
+                                  ? "border-lawn bg-lawn/15 text-text"
+                                  : "border-border text-muted hover:border-lawn hover:text-text"
+                              )}
+                            >
+                              <span className="font-semibold">{picked ? "▸ " : ""}{force.entityId}</span>
+                              <span className="text-muted"> — {force.strength} hp</span>
+                              {force.routed ? <span className="text-bad"> (routed)</span> : null}
+                            </button>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </>
                 ) : null}
 
-                {isLive && legion ? (
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    <Button onClick={queueMove}>March here</Button>
-                    <Button onClick={queueClaim} disabled={!selected.claimable}>
-                      Claim
-                    </Button>
+                {isLive ? (
+                  <div className="space-y-1 pt-2">
+                    <div className="flex flex-wrap gap-2">
+                      {/* Shown disabled rather than hidden. An absent button teaches nothing: you
+                          cannot tell "not allowed here" from "you missed a step". */}
+                      <Button
+                        onClick={queueMove}
+                        disabled={!legion}
+                        title={legion ? undefined : "Pick a force first — click the sector it is standing in"}
+                      >
+                        March here
+                      </Button>
+                      <Button onClick={queueClaim} disabled={!legion || !selected.claimable}>
+                        Claim
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted" data-testid="order-hint">
+                      {legion
+                        ? `${legion.entityId} is selected — click a sector, then March here.`
+                        : "No force selected. Click the sector one of yours is standing in, then pick it above."}
+                    </p>
                   </div>
                 ) : null}
               </div>

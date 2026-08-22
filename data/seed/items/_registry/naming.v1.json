@@ -1,0 +1,717 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 4,
+  "frozen": true,
+  "_meta": {
+    "kind": "naming-and-id-namespace-registry",
+    "purpose": "Two things that make ~125 parallel wave-1 authoring agents safe: (A) one id-namespace prefix per partition, so an id collision is structurally impossible rather than merely detected; (B) the closed naming grammar and the collision-normalization algorithm that catches the thematic collisions a namespace cannot (Ashen Fang / Ash Fang / Fang of Ash / Ashfang).",
+    "consumedBy": "~125 wave-1a/1b authoring agents, plus the V1 validator (post-validation safety net) and F1 (reserved word pools, which this file hands a grammar to but does not itself populate).",
+    "immutability": "FROZEN v1 once an owner flips `frozen` to true at the wave-0 freeze gate. After that: no prefix is reassigned, no partition's namespace shrinks, no naming pattern is added or removed in place. A change is v2, minted only after an explicit owner re-run decision.",
+    "doesNotOwn": "The reserved word pools themselves (the actual adjective/noun/concept vocabularies authors draw from) belong to F1. This file specifies the SHAPE a word-pool entry must have for the collision algorithm in §3 to work (a canonical id plus tagged surface forms), and hands that shape to F1 — it does not populate a single word.",
+    "sourceRefs": [
+      "docs/architecture/item/seed-contract.md §4, §5, §6",
+      "docs/architecture/item/authoring-fleet-plan.md §2, §3",
+      "docs/architecture/effect-atom/definitions.md §1",
+      "docs/architecture/item/ssot-equip-slots.md §2.3",
+      "docs/architecture/item/ssot-affixes.md §4.1, §4.12",
+      "docs/architecture/item/ssot-uniques.md §3.6, §4.6",
+      "docs/architecture/item/ssot-sets.md §3.4, §4.3",
+      "docs/architecture/item/ssot-charms.md §3.3, §3.4",
+      "data/seed/items/_registry/core.v1.json (roles, rarity ladder)",
+      "data/seed/items/_registry/themes.v1.json (theme pool)"
+    ],
+    "authoredUtc": "2026-08-22T00:00:00Z"
+  },
+  "idPolicy": {
+    "sequenceDigits": 3,
+    "sequenceRule": "The agent owns only this zero-padded 3-digit sequence, appended last inside its assigned prefix. It never touches the prefix, and it is never asked to check for collision with any other partition, because no other partition can produce the same prefix.",
+    "sequenceRange": {
+      "wave1Batch": "001-899",
+      "handAuthoredCorrections": "900-999",
+      "note": "900-999 is reserved, in every single partition listed in idNamespaces, for later hand-authored corrections or additions to that same partition (seed-contract.md §7.2 'entry is a different thing now → new id'). No wave-1 agent may use 900-999. This reservation is uniform across all 125 partitions so a reviewer never has to look up a partition-specific rule."
+    },
+    "neverReused": "Once an id (in any namespace below) is minted, it is never reused — not after a deletion, not after a rejected review, not ever. A retired entry is disabled (`enabled: false`) with the file kept, per seed-contract.md §7.2. A reused id would silently repoint every reference that already resolved to it.",
+    "noDotInBody": "Wherever a minted id doubles as (or feeds) a container_id — base types and, per the open question in §5 below, uniques and sets — the body after the first dot is `[a-z0-9-]+` with no second dot, per definitions.md §1's container_id grammar `^(item|trait|skill|species-passive|patron|world-buff)\\.[a-z0-9-]+$`. Every template in idNamespaces below is hyphen-only after its leading `<kind>.` segment.",
+    "grammarRefs": {
+      "container_id": "^(item|trait|skill|species-passive|patron|world-buff)\\.[a-z0-9-]+$ (definitions.md §1)",
+      "family_id": "^atom\\.[a-z0-9]+(-[a-z0-9]+)*$ (definitions.md §1)",
+      "curve_id": "^curve\\.[a-z0-9-]+(\\.[a-z0-9-]+)*$ (definitions.md §1)",
+      "nameKey": "^[a-z0-9.-]+$ (seed-contract.md §6)"
+    }
+  },
+  "idNamespaces": {
+    "_readFirst": "Every entry below names an idTemplate. `{seq:03}` is the agent's owned 3-digit sequence (001-899 for the wave-1 batch). Nothing else in a template is the agent's to choose — frame, role, band, theme, axis and slot tokens are all fixed by this file or by the sibling registries it cites.",
+    "baseTypes": {
+      "partitionCount": 60,
+      "agentsEach": "~12 identities",
+      "partitionKey": "(roleId, frame, band)",
+      "idTemplate": "item.{frame}-{frameRoleName}-{band}-{seq:03}",
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "bands": [
+        "a",
+        "b"
+      ],
+      "bandNote": "Symbolic class-band split per seed-contract.md §4's own worked example (`item.plant-crown-a-007`). F4 (class ladders per frame) owns what 'a' vs 'b' means in game terms (e.g. a lighter vs heavier material tier); this file only needs the two bands to be disjoint tokens, which they are.",
+      "roleSource": "data/seed/items/_registry/core.v1.json → roles.list (15 rows, roleId + humanoidName + plantName). This file does not restate role weights or hybrid eligibility — read core.v1.json for those.",
+      "frameRoleNameRule": "frameRoleName is core.v1.json's `humanoidName` when frame=humanoid, `plantName` when frame=plant, taken VERBATIM including any internal hyphen (e.g. 'main-hand', 'ring-1'). This is deliberate: it is what stops a role id (`jewel-minor-a`, frame-neutral, used for effect_container.slot) from ever leaking into a displayed/authored id, and it matches seed-contract's own example exactly (frame 'plant' + role display word 'crown', not the role id 'head-guard').",
+      "totalCombinations": "15 roles × 2 frames × 2 bands = 60",
+      "workedExample": "role head-guard, frame plant (plantName='crown'), band a, 4th entry → item.plant-crown-a-004",
+      "workedExampleTwo": "role armament-primary, frame humanoid (humanoidName='main-hand'), band b, 1st entry → item.humanoid-main-hand-b-001",
+      "standardRoleNote": "The commander-only `standard` role (core.v1.json → roles.commanderOnly) is NOT one of the 60 base-type partitions — it is out of wave-1's 30 role-frames by construction (item-ideal §5.6 / core.v1.json). If a `standard` base type is authored later it takes prefix `item.humanoid-banner-` or `item.plant-root-totem-`, following the same template, and is not pre-allocated here because no fleet-plan partition currently claims it.",
+      "commanderStandardAddendum": {
+        "addedWave": "0b",
+        "reason": "core.v1.json carries 16 roles including the commander-only standard. The base-type allocation covered 15 roles x 2 frames x 2 bands = 60 and omitted it, so commander banners had no namespace and no partition. The affix lane makes standard the only legal home for warding/resilience, so omitting it would have made that capability unauthorable.",
+        "partitions": [
+          {
+            "partitionId": "base.standard.humanoid",
+            "prefix": "item.humanoid-banner",
+            "pattern": "item.humanoid-banner-{seq:03}",
+            "example": "item.humanoid-banner-003",
+            "bands": "single band; commander gear is not ilvl-tiered in v1"
+          },
+          {
+            "partitionId": "base.standard.plant",
+            "prefix": "item.plant-root-totem",
+            "pattern": "item.plant-root-totem-{seq:03}",
+            "example": "item.plant-root-totem-006",
+            "bands": "single band"
+          }
+        ],
+        "v2Correction": "v1 hardcoded the segment as \"standard\" (the roleId) while the general baseTypes idTemplate derives it from frameRoleName. core.v1.json roles.commanderOnly gives banner (humanoid) and root-totem (plant). Two readings of one rule is exactly the ambiguity the pilot exists to catch; corrected before the pilot rather than after.",
+        "superseded": "Superseded wave 0c by idNamespaces.commanderStandards. Kept for provenance; the expander reads the new group."
+      }
+    },
+    "affixFamilies": {
+      "partitionCount": 15,
+      "agentsEach": "~7 families",
+      "partitionKey": "affix group id (ssot-affixes.md §4.1)",
+      "rule": "An EXISTING shipped family (one of the 70 named in atom-family-library.md / ssot-affixes.md §4.1) keeps its existing `atom.<name>` id unchanged — never re-minted, never re-prefixed. This partitioning exists only for the case ssot-affixes.md flags as live (~100 families needed against ~70 shipped): a genuinely NEW family this partition's agent invents must take `atom.{stem}-{word}`, where `{stem}` is this group's reserved stem below and `{word}` is the agent's own free choice of a short mechanical identifier (NOT a display word — family ids are mechanical per definitions.md §1, distinct from the flavour vocabulary F1 owns).",
+      "fallbackIdTemplate": "atom.{stem}-x{seq:03}",
+      "fallbackNote": "Anonymous placeholder only, if no clean word is available before a freeze deadline. Must be replaced with a real word (`atom.{stem}-{word}`) before the partition's output is treated as final — the numeric form is a checkpoint marker, not a shippable family id.",
+      "groups": [
+        {
+          "groupId": "g.life",
+          "stem": "life",
+          "class": "prefix",
+          "existingFamilies": [
+            "vitality",
+            "fortitude",
+            "bulwark",
+            "mending"
+          ]
+        },
+        {
+          "groupId": "g.attack",
+          "stem": "atk",
+          "class": "prefix",
+          "existingFamilies": [
+            "might",
+            "ferocity",
+            "savagery"
+          ]
+        },
+        {
+          "groupId": "g.tempo",
+          "stem": "tempo",
+          "class": "prefix",
+          "existingFamilies": [
+            "quickening",
+            "flourishing",
+            "swiftness"
+          ]
+        },
+        {
+          "groupId": "g.armour",
+          "stem": "arm",
+          "class": "prefix",
+          "existingFamilies": [
+            "warding",
+            "resilience",
+            "plating",
+            "carapace"
+          ]
+        },
+        {
+          "groupId": "g.ward",
+          "stem": "ward",
+          "class": "prefix",
+          "existingFamilies": [
+            "elemental_defense",
+            "stoicism",
+            "padding",
+            "stalwart",
+            "immunity",
+            "susceptibility"
+          ]
+        },
+        {
+          "groupId": "g.elem-power",
+          "stem": "elpw",
+          "class": "prefix",
+          "existingFamilies": [
+            "elemental_power",
+            "affliction"
+          ]
+        },
+        {
+          "groupId": "g.precision",
+          "stem": "prec",
+          "class": "prefix",
+          "existingFamilies": [
+            "precision",
+            "keen_edge",
+            "cruelty"
+          ]
+        },
+        {
+          "groupId": "g.evade",
+          "stem": "evd",
+          "class": "prefix",
+          "existingFamilies": [
+            "evasion"
+          ]
+        },
+        {
+          "groupId": "g.shield-stat",
+          "stem": "shld",
+          "class": "prefix",
+          "existingFamilies": [
+            "shield_capacity",
+            "shield_toughness",
+            "shield_regen",
+            "shield_pen"
+          ]
+        },
+        {
+          "groupId": "g.on-hit",
+          "stem": "hit",
+          "class": "suffix",
+          "existingFamilies": [
+            "searing_strike",
+            "lifesteal",
+            "retribution",
+            "volley"
+          ]
+        },
+        {
+          "groupId": "g.on-death",
+          "stem": "death",
+          "class": "suffix",
+          "existingFamilies": [
+            "deathblast",
+            "martyrdom",
+            "summoner",
+            "gardener"
+          ]
+        },
+        {
+          "groupId": "g.sustain",
+          "stem": "sust",
+          "class": "suffix",
+          "existingFamilies": [
+            "regeneration",
+            "cleansing",
+            "warded"
+          ]
+        },
+        {
+          "groupId": "g.affliction",
+          "stem": "afflict",
+          "class": "suffix",
+          "existingFamilies": [
+            "the 20 status.apply families, per ssot-affixes.md §4.1"
+          ]
+        },
+        {
+          "groupId": "g.board",
+          "stem": "board",
+          "class": "suffix",
+          "existingFamilies": [
+            "cherry_bloom",
+            "dooming",
+            "firelining",
+            "flash_freeze",
+            "gravemaking",
+            "gravedigging",
+            "terraforming"
+          ]
+        },
+        {
+          "groupId": "g.economy",
+          "stem": "econ",
+          "class": "suffix",
+          "existingFamilies": [
+            "sunbloom",
+            "midas"
+          ]
+        }
+      ],
+      "workedExample": "a new family invented by the g.elem-power partition, not among the two existing ones → atom.elpw-embercore  (the existing atom.elemental-power itself is reused as-is, never touched by this partition)."
+    },
+    "gems": {
+      "partitionCount": 3,
+      "agentsEach": "~20 insert definitions",
+      "idTemplate": "gem.g{slot}-{seq:03}",
+      "slots": [
+        1,
+        2,
+        3
+      ],
+      "workedExample": "gem.g2-014",
+      "allocationNote": "ssot-sockets.md does not sub-partition gems by any axis (element, tier, etc.) — the 1/2/3 split here is a bare, meaning-free slot number so the three agents' sequences cannot collide. See openAmbiguities.",
+      "partitionIdTemplate": "gems/{slot}",
+      "partitionIds": [
+        "gems/1",
+        "gems/2",
+        "gems/3"
+      ],
+      "partitionIdNote": "Added wave 0c after the pilot. The registry gave an id template (gem.g{slot}-{seq}) but never stated the canonical partition id that _meta.partition must carry, so a brief said \"gems.g1\" and the validator derived \"gems/1\" — a mismatch neither side was wrong about. Every namespace group must state its partition ids explicitly, not leave them inferable."
+    },
+    "materials": {
+      "partitionCount": 1,
+      "agentsEach": "21 materials",
+      "idTemplate": "material.{seq:03}",
+      "workedExample": "material.007"
+    },
+    "curves": {
+      "partitionCount": 1,
+      "agentsEach": "~25 curves (enhancement, reroll, salvage, drop)",
+      "idTemplate": "curve.{seq:03}",
+      "note": "Matches the shipped curve_id grammar in definitions.md §1 directly — no translation layer needed downstream.",
+      "workedExample": "curve.014"
+    },
+    "attributes": {
+      "partitionCount": 1,
+      "conditional": true,
+      "gatedOn": "the five-or-none decision (ssot-requirements.md) — do not author until that decision lands",
+      "agentsEach": "5 attributes",
+      "idTemplate": "attr.{seq:03}",
+      "workedExample": "attr.003"
+    },
+    "uniques": {
+      "partitionCount": 20,
+      "agentsEach": "~15 uniques",
+      "partitionKey": "(themeId, rungBandLowOrdinal)",
+      "idTemplate": "unique.{themeId}-{rungBandLowOrdinal}-{seq:03}",
+      "themeSource": "data/seed/items/_registry/themes.v1.json (15 themes)",
+      "rungBandSource": "data/seed/items/_registry/core.v1.json → rarity.ladder ordinals",
+      "bandAssignment": [
+        {
+          "rungBandLowOrdinal": 30,
+          "rungBandLabel": "grafted/cultivated (30-40)",
+          "themeIds": [
+            "rot-bloom",
+            "ember-harvest",
+            "frostbitten-vanguard",
+            "thorned-chassis",
+            "hollow-orchard"
+          ]
+        },
+        {
+          "rungBandLowOrdinal": 50,
+          "rungBandLabel": "fused/chimeric (50-60)",
+          "themeIds": [
+            "umbral-swarm",
+            "windswept-spore",
+            "rusted-legion",
+            "verdant-graft",
+            "sunwoven-almanac"
+          ]
+        },
+        {
+          "rungBandLowOrdinal": 70,
+          "rungBandLabel": "heirloom/firstseed (70-80)",
+          "themeIds": [
+            "charnel-bloom",
+            "gilded-porcelain",
+            "earthen-bastion"
+          ]
+        },
+        {
+          "rungBandLowOrdinal": 90,
+          "rungBandLabel": "sunwoven/almanac (90-100), source-locked or deterministic only per ssot-uniques.md §4.5",
+          "themeIds": [
+            "sunwoven-almanac",
+            "hollow-orchard",
+            "verdant-graft",
+            "umbral-swarm",
+            "charnel-bloom"
+          ]
+        }
+      ],
+      "bandAssignmentNote": "15 themes cover bands 30/50/70 once each (15 agents); band 90 (5 agents) revisits 5 themes chosen for a 'legendary' register, at a different rung, which is a legal and expected repeat — see openAmbiguities for why the specific 5 were picked and how a reviewer may swap them. The (themeId, rungBandLowOrdinal) pair is unique across all 20 rows, so no two agents ever share a prefix even where a theme repeats.",
+      "totalCombinations": "20 (matches authoring-fleet-plan.md's 20 agents exactly)",
+      "workedExample": "theme thorned-chassis, band 30 (grafted/cultivated), 4th unique → unique.thorned-chassis-30-004",
+      "idVsContainerIdNote": "This is the authored seed `id` (seed-contract.md §4's subject), NOT necessarily the DB `container_id` a unique ends up with. ssot-uniques.md §3.4 states a unique is an ordinary `effect_container` with `container_kind = 'item'`, whose container_id grammar is `item.<slug>` — it does not have a `unique.` alternative in definitions.md §1's container_id alternation. This file treats `unique.{...}` as the authoring-corpus tracking id (globally unique, structurally collision-safe, matching seed-contract's own `unique.ember-014` example) and leaves the derivation to an `item.` container_id as an open question for wave-1b — flagged in openAmbiguities, not assumed.",
+      "themeCountNote": "13 themes after the wave-0 review cut field-manual and merged permafrost-seed into frostbitten-vanguard. Unique partitions are allocated across the 13 survivors; the two removed ids must never be authored or revived."
+    },
+    "sets": {
+      "partitionCount": 5,
+      "agentsEach": "~6 sets",
+      "partitionKey": "themeId",
+      "idTemplate": "set.{themeId}-{seq:03}",
+      "themeSource": "data/seed/items/_registry/themes.v1.json — 5 of the 15 themes, chosen for a strong 'matching gear' register",
+      "themeIds": [
+        "thorned-chassis",
+        "verdant-graft",
+        "rusted-legion",
+        "frostbitten-vanguard",
+        "sunwoven-almanac"
+      ],
+      "workedExample": "set.thorned-chassis-002 — the item_set.set_id / header row this partition authors.",
+      "tierContainerCompositionNote": "ssot-sets.md §4.3 derives the tier bonus container id as `set.{set_id}-{pieces:D2}`. Composed with this partition's id, that is `set.thorned-chassis-002-02` (2-piece tier) and `set.thorned-chassis-002-04` (4-piece tier) — still a single dot after `set`, still passes definitions.md §1's container_id grammar once `set` joins the alternation (ssot-sets.md §9 item 11's ask-first change). No id-namespace change is needed to support this composition; it falls out of the template for free.",
+      "idVsContainerIdNote": "As with uniques: `set.{themeId}-{seq:03}` is this file's authored/tracking namespace for the item_set header. The set's MEMBER pieces are ordinary base-type containers (drawn from the baseTypes namespace above, per role/frame) — a set does not mint its own base-type ids."
+    },
+    "charms": {
+      "partitionCount": 3,
+      "agentsEach": "~20 charms",
+      "partitionKey": "axisGroupId",
+      "idTemplate": "charm.{axisGroupId}-{seq:03}",
+      "axisSource": "the five power categories in definitions.md §7 / ssot-charms.md §3.4, folded 5-into-3 because the fleet plan gives charms only 3 agents",
+      "axisGroups": [
+        {
+          "axisGroupId": "off-ctrl",
+          "axes": [
+            "offense",
+            "control"
+          ]
+        },
+        {
+          "axisGroupId": "surv-util",
+          "axes": [
+            "survivability",
+            "utility"
+          ]
+        },
+        {
+          "axisGroupId": "econ",
+          "axes": [
+            "economy"
+          ]
+        }
+      ],
+      "workedExample": "charm.surv-util-011",
+      "resonanceNote": "Resonance tier containers (ssot-charms.md §4.2's `charm_resonance` rows, one ordinary `charm.` container per axis per breakpoint) are NOT this partition's to author freely by axis label alone, because resonance is keyed on the single-word axis (`offense`, `survivability`, …), not on an axisGroupId. Reserve `charm.res-{axis}-{countReq}` for those — e.g. `charm.res-offense-2`, `charm.res-offense-3` — a fixed, small, fully-enumerable set (5 axes × 2 breakpoints = 10 ids) that does not need a 3-digit sequence at all. Whichever charm-axis agent is told to author resonance tiers uses this fixed list, not its own `{seq:03}` counter."
+    },
+    "socketWords": {
+      "partitionCount": 1,
+      "agentsEach": "~25 named ordered combinations",
+      "idTemplate": "sockword.{seq:03}",
+      "workedExample": "sockword.019"
+    },
+    "recipes": {
+      "partitionCount": 1,
+      "agentsEach": "~30 craft/salvage/enhance shapes",
+      "idTemplate": "recipe.{seq:03}",
+      "workedExample": "recipe.027"
+    },
+    "enhancementMilestones": {
+      "partitionCount": 1,
+      "agentsEach": "~10 milestones",
+      "idTemplate": "enh.{seq:03}",
+      "workedExample": "enh.005"
+    },
+    "consumables": {
+      "partitionCount": 3,
+      "agentsEach": "~20 each",
+      "partitionKey": "slot",
+      "idTemplate": "consumable.k{slot}-{seq:03}",
+      "slotAssignment": [
+        {
+          "slot": 1,
+          "kind": "instant / potion-style effects (immediate atoms on use)"
+        },
+        {
+          "slot": 2,
+          "kind": "scrolls / toggled or timed effects"
+        },
+        {
+          "slot": 3,
+          "kind": "material-linked consumables (crafting reagents that are also directly usable)"
+        }
+      ],
+      "workedExample": "consumable.k1-013",
+      "allocationNote": "authoring-fleet-plan.md gives 3 agents with no stated sub-split; the kind-based split above is this file's allocation choice. See openAmbiguities."
+    },
+    "dropTables": {
+      "partitionCount": 4,
+      "agentsEach": "~10 each",
+      "partitionKey": "slot",
+      "idTemplate": "droptable.d{slot}-{seq:03}",
+      "slotAssignment": [
+        {
+          "slot": 1,
+          "scope": "general / random table entries"
+        },
+        {
+          "slot": 2,
+          "scope": "source-locked (boss, sector, expedition tier)"
+        },
+        {
+          "slot": 3,
+          "scope": "quest / first-clear"
+        },
+        {
+          "slot": 4,
+          "scope": "deterministic / crafted-recipe-linked"
+        }
+      ],
+      "slotAssignmentNote": "Mirrors the four acquisition channels ssot-uniques.md §4.5 already names, so a drop-table partition and a unique's declared `acquisition` value speak the same vocabulary.",
+      "workedExample": "droptable.d2-006",
+      "allocationNote": "authoring-fleet-plan.md gives 4 agents with no stated sub-split; the channel-based split above is this file's allocation choice. See openAmbiguities."
+    },
+    "displayTemplates": {
+      "partitionCount": 6,
+      "agentsEach": "~18 families",
+      "partitionKey": "slot",
+      "idTemplate": "disptpl.p{slot}-{seq:03}",
+      "slotAssignment": [
+        {
+          "slot": 1,
+          "scope": "base type / affix flavour templates"
+        },
+        {
+          "slot": 2,
+          "scope": "unique flavour templates"
+        },
+        {
+          "slot": 3,
+          "scope": "set flavour templates"
+        },
+        {
+          "slot": 4,
+          "scope": "charm flavour templates"
+        },
+        {
+          "slot": 5,
+          "scope": "consumable flavour templates"
+        },
+        {
+          "slot": 6,
+          "scope": "socket / gem / recipe flavour templates"
+        }
+      ],
+      "workedExample": "disptpl.p3-009",
+      "allocationNote": "authoring-fleet-plan.md gives 6 agents with no stated sub-split; the content-class split above is this file's allocation choice. See openAmbiguities."
+    },
+    "partitionCountCheck": {
+      "baseTypes": 60,
+      "affixFamilies": 15,
+      "gems": 3,
+      "materials": 1,
+      "curves": 1,
+      "attributes": 1,
+      "uniques": 20,
+      "sets": 5,
+      "charms": 3,
+      "socketWords": 1,
+      "recipes": 1,
+      "enhancementMilestones": 1,
+      "consumables": 3,
+      "dropTables": 4,
+      "displayTemplates": 6,
+      "total": 125,
+      "matchesFleetPlan": "authoring-fleet-plan.md §3: stage 1a (81) + stage 1b (44) = 125 agents. 60+15+3+1+1+1 = 81 (stage 1a); 20+5+3+1+1+1+3+4+6 = 44 (stage 1b). Confirmed equal."
+    },
+    "_partitionIdRule": "Every namespace group states the canonical partition id that _meta.partition must equal. Where a group below does not yet list them explicitly, the partition id is the directory plus the partition key, separated by a forward slash. Groups still relying on that fallback: baseTypes, affixFamilies, materials, curves, attributes, uniques, sets, charms, socketWords, recipes, enhancementMilestones, consumables, dropTables, displayTemplates",
+    "_commanderStandardsRemoved": "Removed wave 0c. A top-level group here was the wrong fix: the namespace expander is keyed by kind, and commander base types are kind base-type, so a group with no kind of its own could never be reached and instead reported itself uncovered. The expander now derives commander prefixes directly from core.v1.json roles.commanderOnly, single-banded. The allocation lives in code because it is derived, not authored — which is the same rule the rest of this contract applies to everything else."
+  },
+  "namingGrammar": {
+    "patterns": {
+      "count": 3,
+      "why3": "Three patterns cover every worked example read this session across I3 (base-type names), I8 §4.12 (prefix/suffix flavour words and the magic-item grammar), G1 (unique names — Thornmantle, Windforce-style), I5 (set names — Ember Legion), and I10 (charm names — Hardened Seedcase, Signet of the Hollow Crown), with zero residual case. A 4th 'combination' pattern is deliberately NOT offered to authors — see generatedOnlyPattern below — because offering it would let an author's hand-typed combination collide, un-detectably, with the one the engine already assembles from patterns 1+2. Closing the set at 3 is what keeps 'an author picks a pattern; it never invents one' true rather than aspirational.",
+      "list": [
+        {
+          "id": "compound",
+          "shape": "<Adjective> <Base>",
+          "description": "Two space-separated words; the first modifies the second. The Base half is a noun realizing either a base-type's role-frame identity (e.g. 'Crown', 'Torc') or a unique/set/charm's own invented noun.",
+          "usedFor": [
+            "base-type display names",
+            "unique names",
+            "set names",
+            "charm names",
+            "the left half of a rolled magic-item name (I8 §4.12) — engine-assembled, not separately authored"
+          ],
+          "example": "Heartbloom Crown, Ember Legion, Hardened Seedcase"
+        },
+        {
+          "id": "of-construct",
+          "shape": "<Base> of <Concept>",
+          "description": "A Base noun, the literal connective 'of', and a Concept phrase (1-2 words, optionally itself prefixed with 'the' — see pluralsPossessivesConnectives). 'of' is the only preposition ever legal in an authored name.",
+          "usedFor": [
+            "unique names",
+            "set names",
+            "the suffix half of a rolled magic-item name (I8 §4.12's word table — 'of Embers', 'of the Wellspring') — engine-assembled when used for that purpose, hand-authored when it IS the whole unique/set name"
+          ],
+          "example": "Fang of Ash, Signet of the Hollow Crown"
+        },
+        {
+          "id": "fusion",
+          "shape": "<Fused>",
+          "description": "A single word formed by concatenating EXACTLY two known pool words with no separator and no internal case break. Restricted to exactly two, because the collision-normalization algorithm (§3 below) must be able to decompose it back into its two constituent words unambiguously — a fusion that does not decompose to exactly one known pair at authoring time is rejected before it ever reaches the corpus-wide collision check.",
+          "usedFor": [
+            "unique names (the single most evocative slot)",
+            "occasionally a base-type or set name where a fused word reads better than two separate ones"
+          ],
+          "example": "Ashfang (= Ash + Fang), Thornmantle (= Thorn + Mantle)"
+        }
+      ]
+    },
+    "generatedOnlyPattern": {
+      "shape": "<Adjective> <Base> of <Concept>",
+      "authorable": false,
+      "note": "This is patterns 1+2 concatenated. It is what I8 §4.12's runtime naming function assembles for a Magic-rarity rolled instance ('Sturdy Bark Helm of Embers') from the item's own highest-tier prefix word and highest-tier suffix word. No author ever types this shape directly as a `name` field — an author who wants an unusually elaborate unique/set name picks pattern 'compound' or 'of-construct' for two SEPARATE fields (or accepts a shorter name) rather than hand-typing the combined shape, precisely so the collision check in §3 (which runs over every authored `name`) never has to reconcile a hand-typed 4-part name against an engine-assembled one of the same shape."
+    },
+    "pluralsPossessivesConnectives": {
+      "plurals": "Forbidden in every identity name (base type, unique, set, charm `name` field). An item template names one specific thing; pluralising it implies a category, which is `nameKey`'s job, not `name`'s. Flavour-text prose is exempt — it is free text per seed-contract.md §6 and is not run through this grammar at all.",
+      "possessives": "Forbidden — no `'s`. Two reasons, both structural: (1) an apostrophe is exactly the kind of decoration collision-normalization strips (seed-contract.md §5 step 2), so 'Dragon Fang' and 'Dragon's Fang' already normalize identically — allowing the possessive form would teach authors a name shape the corpus's own dedup logic treats as fake variation; (2) it is one more character class the normalizer's punctuation-stripping step has to handle correctly for zero benefit.",
+      "invatedConnectives": "Forbidden. The only connective words a name may ever contain are `of` and, immediately following it, optionally `the` — and only inside the 'of-construct' pattern (`<Base> of <Concept>` or `<Base> of the <Concept>`). No other connective (`and`, `from`, `at`, `upon`, `&`, a hyphenated compound acting as a connective) may appear in an authored `name`. This is what keeps the dropped-word list in §3 below closed at exactly four entries forever — an author who invents a fifth connective breaks the normalizer's completeness guarantee, not just their own file."
+    },
+    "collisionNormalization": {
+      "purpose": "Reserved word pools (F1's, not this file's) stop THEMATIC collision — two authors both reaching for 'fire' words. They do not stop the SAME idea being spelled four different ways. This algorithm catches that, deterministically, at import — never left to a reviewer's eye.",
+      "algorithm": [
+        "1. Lowercase the full candidate `name` string.",
+        "2. Tokenize on whitespace and punctuation boundaries (space, hyphen, apostrophe, comma) into surface tokens. A 'fusion'-pattern word with no internal boundary is split into its exactly-two constituent pool words instead (this is exactly why pattern 'fusion' is capped at two words — the split must be unambiguous, and it is checked at authoring time, not guessed at comparison time).",
+        "2a. WHOLE-TOKEN RESOLUTION PRECEDES FUSION DECOMPOSITION. Before splitting any token, test the whole token against the registered canonical ids and surface forms in words.v1.json. If it resolves as a whole, it is atomic and is NEVER decomposed. Only an unresolved token is a fusion candidate. Without this an atomic seed such as Thistledown decomposes into unrelated halves and collides with names that share neither idea. Added during wave 0b after F1 hit the case while building the pools.",
+        "3. Resolve every surface token to its RESERVED-WORD-POOL CANONICAL ID via that word's registered surface forms. A word's canonical id is invariant across the pattern-slot it appears in — e.g. if F1's pool registers canonical id `ash` with surface forms {noun: 'Ash', adjective: 'Ashen'}, then both 'Ash' (used as a noun in a fusion or an of-construct) and 'Ashen' (used as an adjective in a compound) resolve to `ash`. A surface token with no pool entry at all (an ordinary base-type noun like 'Crown', not a pool flavour word) resolves to itself, lowercased, as its own canonical id.",
+        "4. Drop any resolved token that is one of the four closed connectives: `of`, `the`, `a`, `and`. This is the complete list — see invatedConnectives above for why it can never grow.",
+        "5. Sort the remaining canonical ids, ordinal (byte) comparison, ascending.",
+        "6. Compare the sorted canonical-id list against every other authored name's sorted list, corpus-wide (not per category, not per partition — see nameKey.globalUniqueness below for the identical rule applied to keys). An exact match rejects every entry but the first one authored, tiebroken by `_meta.authoredUtc` then by id ordinal."
+      ],
+      "wordPoolShapeRequiredForThisToWork": "F1's reserved word pools must register each entry as {canonicalId, surfaceForms: {noun?, adjective?, ofConcept?}} rather than a flat list of interchangeable strings — the noun/adjective surface-form split is what lets step 3 collapse 'Ashen' onto 'ash'. This is the one shape requirement this file hands to F1; F1 still owns every actual word.",
+      "wordPoolDisjointnessIsSeparate": "F1 additionally partitions WHICH canonical ids go to which consuming partition, so two volume agents never reach for the same flavour word at all (thematic collision). That is orthogonal to this algorithm: F1's partitioning prevents two authors from typing 'Ember' in the first place; this algorithm catches the case where two authors, independently and legally, produce names that mean the same thing through different legal patterns.",
+      "wave0RejectionCodeNote": "A `NameCollision` reason code does not exist in definitions.md §10's closed list of 33. Registering it (or folding it into an existing collision-shaped code, per the `ContentRuleViolated` option ssot-uniques.md §6.3 already raises for its own six-code ask) is a request to whoever owns that list next, not a decision this file makes.",
+      "workedExample": {
+        "assumedPoolEntry": "canonical id `ash` → surfaceForms {noun: 'Ash', adjective: 'Ashen'}; canonical id `fang` → surfaceForms {noun: 'Fang'}",
+        "cases": [
+          {
+            "input": "Ashen Fang",
+            "pattern": "compound",
+            "tokens": [
+              "ashen",
+              "fang"
+            ],
+            "canonical": [
+              "ash",
+              "fang"
+            ],
+            "sorted": [
+              "ash",
+              "fang"
+            ]
+          },
+          {
+            "input": "Ash Fang",
+            "pattern": "compound",
+            "tokens": [
+              "ash",
+              "fang"
+            ],
+            "canonical": [
+              "ash",
+              "fang"
+            ],
+            "sorted": [
+              "ash",
+              "fang"
+            ]
+          },
+          {
+            "input": "Fang of Ash",
+            "pattern": "of-construct",
+            "tokens": [
+              "fang",
+              "of",
+              "ash"
+            ],
+            "canonical": [
+              "fang",
+              "ash"
+            ],
+            "sorted": [
+              "ash",
+              "fang"
+            ],
+            "afterDroppingOf": true
+          },
+          {
+            "input": "Ashfang",
+            "pattern": "fusion",
+            "tokens": [
+              "ash",
+              "fang"
+            ],
+            "canonical": [
+              "ash",
+              "fang"
+            ],
+            "sorted": [
+              "ash",
+              "fang"
+            ],
+            "decomposedFromFusion": true
+          }
+        ],
+        "result": "All four sort to the identical canonical key ['ash', 'fang']. Whichever was authored first (by `_meta.authoredUtc`) stands; the other three reject."
+      },
+      "wholeTokenRuleNote": "Rule 2a is load-bearing for uniqueSetSeedPools, whose entries are deliberately atomic compounds. The validator must implement 2a exactly or seed names will false-positive against ordinary two-word names."
+    },
+    "nameKey": {
+      "grammar": "^[a-z0-9.-]+$, per seed-contract.md §6.",
+      "recommendedFormat": "<kindPrefix>.<slug>, matching seed-contract.md's own examples exactly: base.heartbloom-crown, unique.thornmantle, affix.elemental-power, set.ember-legion.",
+      "kindPrefixes": [
+        "base",
+        "unique",
+        "set",
+        "affix",
+        "charm",
+        "gem",
+        "material",
+        "recipe",
+        "consumable",
+        "sockword",
+        "curve",
+        "attr",
+        "droptable",
+        "disptpl",
+        "enh"
+      ],
+      "slugRule": "slug = lowercase(name), spaces and apostrophes → hyphens, all other punctuation stripped, repeated hyphens collapsed to one.",
+      "globalUniqueness": "`nameKey` is unique across the ENTIRE corpus, not per kind and not per partition (seed-contract.md §6 states this explicitly). `base.ember-crown` and `unique.ember-crown` collide even though they are different kinds — a slug derived independently by two different partitions is exactly the case the corpus-wide check must catch, because nothing in the id namespaces above stops two unrelated authors from independently naming two different things 'Ember Crown'.",
+      "disambiguationRule": "If an author's slug collides with an existing nameKey, the fix is to append the author's OWN partition token (already unique, per idNamespaces above) to the slug — e.g. `unique.ember-crown-thorned-chassis` — never to silently pick a near-miss spelling, which is exactly the failure collisionNormalization exists to catch on the `name` side too. The V1 validator is the safety net that catches an author who does not do this."
+    },
+    "perFrameNaming": {
+      "rule": "The same role is `head-guard` (frame-neutral role id, invisible to players) on both frames, `head` on humanoid and `crown` on plant (core.v1.json → roles.list). Naming interacts with this in exactly one place and must not leak it anywhere else.",
+      "whatChanges": [
+        "The noun realizing the role in pattern 'compound' or as the Base of 'of-construct' — 'Heartbloom Crown' (plant) vs the humanoid equivalent for the same role, e.g. 'Heartbloom Helm'. This noun comes from I3's base-type record / F4's class ladder, not from this file.",
+        "Which word-pool surface form applies, where I8 §4.12's `word_plant` override column is populated — a family's flavour word may differ by frame (e.g. band-C `quickening` reads 'Quickening' on humanoid, 'Blooming' on plant) precisely because a rooted, handless body cannot 'quicken' the way a humanoid can (ssot-equip-slots.md §2.6's possession test)."
+      ],
+      "whatDoesNotChange": [
+        "The pattern selected. An author does not invent a plant-specific pattern — the same 3 patterns in §2 above apply on both frames.",
+        "The role_id used for game logic (`effect_container.slot`, `effect_binding.slot`) — it is always the frame-neutral id, never a display word, per ssot-equip-slots.md §2.2.",
+        "Frame-neutral flavour words (most of I8 §4.12's word table works on both frames unchanged, e.g. 'Sturdy', 'Ember', 'of the Wellspring').",
+        "The collision-normalization algorithm. Frame is invisible to it by design: 'Ember Crown' and 'Ember Helm' contain different canonical Base tokens (`crown` vs `helm`), so they correctly do NOT collide — they are different items worn by different bodies, and the algorithm must never merge them."
+      ]
+    }
+  },
+  "handoffToF1": {
+    "whatThisFileFixed": "Three authored name-construction patterns (compound, of-construct, fusion); the closed 4-word connective list (of, the, a, and); the ban on plurals and possessives; the collision-normalization algorithm and the canonical-id/surface-form shape a word-pool entry must have for that algorithm to work; and — separately, in idNamespaces — every partition's id prefix.",
+    "whatF1MustProduce": "The actual reserved word pools: for every consuming partition (base types by role×frame per ssot-equip-slots.md's own note that naming inherits it, affix families' flavour words per I8 §4.12's word table, unique/set/charm names per their assigned theme), a disjoint set of pool entries shaped as {canonicalId, surfaceForms: {noun?, adjective?, ofConcept?}}. F1's disjointness (no two partitions sharing a word) is a DIFFERENT safety net from this file's id-namespace disjointness (no two partitions sharing a prefix) and from collisionNormalization (catching the same idea spelled four ways) — all three run together, none substitutes for another."
+  },
+  "openAmbiguities": [
+    "Uniques/sets — id vs container_id. This file's `unique.{...}` and `set.{...}` ids are the authored seed-corpus tracking namespace (matching seed-contract.md §4's own worked examples). Neither prefix is in definitions.md §1's container_id alternation as written; ssot-uniques.md §3.4 and ssot-sets.md §4.3 both describe the underlying DB row as `container_kind = 'item'` (unique) or a `set`-kind tier container with a DIFFERENT id shape (`set.{set_id}-{pieces:D2}`, no separate 'unique'/'set' alternation needed once `set` joins per ssot-sets.md §9's ask). The exact function from this file's authored `id` to the eventual `container_id` is not specified in anything read this session and should be confirmed before wave-1b (uniques/sets) authoring starts, not assumed by an agent mid-batch.",
+    "Charm axis→partition folding (5 power axes into 3 agent slots: off-ctrl / surv-util / econ) is this file's allocation choice — authoring-fleet-plan.md specifies 3 charm agents 'by axis' but does not say which axes group together. A different, equally valid split exists; this one was picked so no group mixes more than 2 axes.",
+    "Unique band-90 theme repeats (sunwoven-almanac, hollow-orchard, verdant-graft, umbral-swarm, charnel-bloom chosen for the top rung's 'legendary' second pass) is this file's allocation choice, not derived from any source document. A different 5-of-15 pick is equally defensible.",
+    "Gems' 3-way split (g1/g2/g3) has no stated axis anywhere in ssot-sockets.md — it is a bare numbered split with no thematic or mechanical meaning, unlike every other multi-slot partition in this file.",
+    "Consumables (3), drop tables (4), and display templates (6) sub-partition splits are all this file's allocation choices (by usage kind, by acquisition channel, and by content class respectively) — authoring-fleet-plan.md gives only the agent count for each, not the split logic.",
+    "Set theme selection (5 of 15 themes chosen for sets) is this file's allocation choice, made for thematic fit ('matching gear' register) rather than derived from a source document."
+  ],
+  "frozenUtc": "2026-08-22",
+  "frozenNote": "FROZEN v2. v1 was frozen and then superseded before any partition consumed it — zero re-runs required. From here a required change is v3 plus an explicit re-run decision.",
+  "minCompatibleVersion": 2,
+  "minCompatibleNote": "v2 corrected the commander id segment from the roleId to the frame display name (banner/root-totem) — breaking for commander partitions only, and none had been authored. v3 restructured that allocation so the expander could see it, additive. Content authored against v1 must re-run.",
+  "stage1aFrozen": "Stage 1a authored and validated at 0 errors (205 entries, 25 files). From here a change to this registry invalidates authored content unless minCompatibleVersion says otherwise."
+}

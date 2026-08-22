@@ -91,3 +91,59 @@ Two caveats the tools now carry in their own help:
 - **Restoring a mutant leaves MSBuild holding the mutated assembly**, because the restored file has
   the older timestamp. `mutate.ps1` touches every file it restores. Discovered the hard way: a full
   sweep came back with four failures against clean source.
+
+## Second pass, W31–W34: the harness lied to me, then caught itself
+
+Running the same tool over `ThreatMap`, `ReachMap`, `FrontierSet`, `ValueMap` and the utility
+scorer turned up **six survivors out of forty** — and, more importantly, showed that an earlier
+report of *"all 22 caught"* had been false.
+
+**A red baseline makes every mutant look caught.** A concurrent stream had `FusionRpg.Core` briefly
+uncompilable during that run. `dotnet test` exits non-zero either way, so the script counted 22
+build failures as 22 tests noticing 22 defects. `mutate.ps1` now verifies the suite is green
+**before** applying anything and refuses to start otherwise. It fired on its very next run, correctly.
+
+Two more flaws in the tool, both found by using it:
+
+- **A killed run leaves the code mutated.** The first attempt hit the two-minute foreground limit
+  mid-mutant, so its `finally` never ran and `ValueMap` kept a deliberate defect for half an hour.
+  Long sets belong in the background.
+- **A stale anchor was reported and then ignored.** Three mutants whose `find` no longer matched
+  printed `STALE` — and the script still finished with "every mutant was caught". A stale mutant is
+  an untested claim wearing the colours of a passing one; it is now a non-zero exit. The usual cause
+  is a multi-line anchor written with LF against a CRLF file, so matching is normalised.
+
+### The three real test gaps
+
+All three were hedged assertions of mine — the same failure mode as the vacuous tests in the first
+pass, and all three would have looked fine in review:
+
+- **`Contested.Concat(Unknown)`** in the frontier test. A hedge that passes whichever bucket the
+  sector lands in, asserting away the exact distinction the class exists to draw.
+- **A ring where both routes cost the same**, so Dijkstra's relaxation was never exercised: taking
+  the first route found gave the same answer as taking the cheapest.
+- **No test for a sector already in supply**, so the guard that stops an empire's own capital being
+  scored as overextension had nothing holding it up.
+
+### And one design claim killed outright
+
+`FrontierSet.Unknown` — "a neighbour you have never laid eyes on" — **cannot be populated**.
+`Visibility` makes every sector you own an observation post with a one-lane radius, so everything
+adjacent to your territory is always at least glimpsed. The set was removed; a set that is always
+empty is a lie in a type.
+
+That is the **fourth** claim this session undone by one fact: *holding ground grants full sight of
+it.* Two were struck from believed supply, one from the frontier, one from the spec's fog narrative.
+Stated once, plainly, so it stops costing an afternoon each time: **nothing about your own territory
+is ever uncertain to you.** Fog is about other people's ground and about the past.
+
+### Two survivors that should survive
+
+Kept, retired from the mutant set, and explained in comments beside the code rather than left for
+somebody to re-find:
+
+- The `score == 0` short-circuit in `Considerations.Score` is an optimisation. The product reaches
+  zero anyway and compensation cannot lift it off zero, so deleting it changes no answer.
+- The `count <= 1` guard in `Compensate` was **genuinely redundant** — `1000 - 1000/1` is already
+  zero — and is now deleted rather than defended. The doc comment had said so all along; the code
+  disagreed with it.

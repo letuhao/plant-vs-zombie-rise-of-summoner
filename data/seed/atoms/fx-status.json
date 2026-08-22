@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.fx-butter-on-hit",
+      "tier": 1,
+      "kind": "status.apply",
+      "name": "Butter on hit",
+      "icdKey": "fx.butter_on_hit",
+      "params": {
+        "status": "butter",
+        "duration": 4
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-freeze-on-hit",
+      "tier": 1,
+      "kind": "status.apply",
+      "name": "Freeze on hit",
+      "icdKey": "fx.freeze_on_hit",
+      "params": {
+        "status": "freeze",
+        "duration": 3
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-cold-on-hit",
+      "tier": 1,
+      "kind": "status.apply",
+      "name": "Cold on hit",
+      "icdKey": "fx.cold_on_hit",
+      "params": {
+        "status": "cold",
+        "duration": 5
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-poison-on-hit",
+      "tier": 1,
+      "kind": "status.apply",
+      "name": "Poison on hit",
+      "icdKey": "fx.poison_on_hit",
+      "params": {
+        "status": "poison",
+        "duration": 5
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-icd-butter",
+      "tier": 1,
+      "kind": "status.apply",
+      "name": "ICD butter",
+      "icdKey": "fx.icd_butter",
+      "params": {
+        "status": "butter",
+        "duration": 2
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    },
+    {
+      "family": "atom.fx-spawn-butter",
+      "tier": 1,
+      "kind": "status.apply",
+      "name": "Butter on spawn",
+      "icdKey": "fx.spawn_butter",
+      "params": {
+        "status": "butter",
+        "duration": 3
+      },
+      "when": {
+        "trigger": "OnSpawn"
+      }
+    },
+    {
+      "family": "atom.fx-clear-butter",
+      "tier": 1,
+      "kind": "status.clear",
+      "name": "Clear butter",
+      "icdKey": "fx.clear_butter",
+      "params": {
+        "status": "butter"
+      },
+      "when": {
+        "trigger": "OnDamageDealt"
+      }
+    }
+  ]
+}

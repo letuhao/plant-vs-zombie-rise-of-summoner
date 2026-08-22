@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-thorn-a",
+    "partition": "base-types/armament-secondary/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-thorn-a-001",
+      "nameKey": "base.fuming-thorn",
+      "name": "Fuming Thorn",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.fuming-thorn",
+      "flavorKey": "flavor.base.fuming-thorn",
+      "flavor": "Smoke curls from the puncture. Inhale and you understand pain.",
+      "tags": ["light", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-thorn-a-002",
+      "nameKey": "base.vaporous-prickle",
+      "name": "Vaporous Prickle",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.vaporous-prickle",
+      "flavorKey": "flavor.base.vaporous-prickle",
+      "flavor": "A mist guards the smallest points. What dissolves can still defend.",
+      "tags": ["light", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-thorn-a-003",
+      "nameKey": "base.smoking-nettle",
+      "name": "Smoking Nettle",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.smoking-nettle",
+      "flavorKey": "flavor.base.smoking-nettle",
+      "flavor": "Contact feeds it. Every brush draws something back.",
+      "tags": ["light", "organic", "rooted", "utility"]
+    },
+    {
+      "id": "item.plant-thorn-a-004",
+      "nameKey": "base.wafting-gum",
+      "name": "Wafting Gum",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.wafting-gum",
+      "flavorKey": "flavor.base.wafting-gum",
+      "flavor": "Sticky vapor hangs in the air. It does not disperse — it settles.",
+      "tags": ["light", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-thorn-a-005",
+      "nameKey": "base.perfumed-aculeus",
+      "name": "Perfumed Aculeus",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.perfumed-aculeus",
+      "flavorKey": "flavor.base.perfumed-aculeus",
+      "flavor": "A Latin name for the sting. Beauty has teeth.",
+      "tags": ["light", "organic", "rooted", "vendor-stocked"]
+    },
+    {
+      "id": "item.plant-thorn-a-006",
+      "nameKey": "base.aromatic-spine",
+      "name": "Aromatic Spine",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.aromatic-spine",
+      "flavorKey": "flavor.base.aromatic-spine",
+      "flavor": "A scent that draws others near. Prey comes to the fragrance.",
+      "tags": ["light", "organic", "rooted", "utility"]
+    },
+    {
+      "id": "item.plant-thorn-a-007",
+      "nameKey": "base.seeping-bracken",
+      "name": "Seeping Bracken",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.seeping-bracken",
+      "flavorKey": "flavor.base.seeping-bracken",
+      "flavor": "Moisture oozes from every frond. The wound will not close.",
+      "tags": ["medium-light", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-thorn-a-008",
+      "nameKey": "base.dripping-spur",
+      "name": "Dripping Spur",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dripping-spur",
+      "flavorKey": "flavor.base.dripping-spur",
+      "flavor": "Always wet. Always ready. The fluid itself is the shield.",
+      "tags": ["medium-light", "organic", "rooted", "defensive"]
+    },
+    {
+      "id": "item.plant-thorn-a-009",
+      "nameKey": "base.misting-thistle",
+      "name": "Misting Thistle",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.misting-thistle",
+      "flavorKey": "flavor.base.misting-thistle",
+      "flavor": "Fine particles hang in the air where it was struck. What lingers grows.",
+      "tags": ["medium-light", "organic", "rooted", "utility"]
+    },
+    {
+      "id": "item.plant-thorn-a-010",
+      "nameKey": "base.sweetened-goad",
+      "name": "Sweetened Goad",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.sweetened-goad",
+      "flavorKey": "flavor.base.sweetened-goad",
+      "flavor": "It pierces by making the target want to move closer.",
+      "tags": ["medium-light", "organic", "rooted", "fragile"]
+    },
+    {
+      "id": "item.plant-thorn-a-011",
+      "nameKey": "base.clouded-caltrop",
+      "name": "Clouded Caltrop",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.retribution",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.clouded-caltrop",
+      "flavorKey": "flavor.base.clouded-caltrop",
+      "flavor": "The air thickens around the spike. Breath itself becomes an obstacle.",
+      "tags": ["medium-heavy", "organic", "rooted", "defensive", "sturdy"]
+    },
+    {
+      "id": "item.plant-thorn-a-012",
+      "nameKey": "base.weeping-briar",
+      "name": "Weeping Briar",
+      "frame": "plant",
+      "role": "armament-secondary",
+      "class": "censer",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.weeping-briar",
+      "flavorKey": "flavor.base.weeping-briar",
+      "flavor": "Thorns weep resin in constant tears. The shield is the sorrow.",
+      "tags": ["medium-heavy", "organic", "rooted", "defensive"]
+    }
+  ]
+}

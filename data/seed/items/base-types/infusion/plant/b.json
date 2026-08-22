@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-infusion-plant-b",
+    "partition": "base-types/infusion/plant/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.1"
+  },
+  "entries": [
+    {
+      "id": "item.plant-glands-b-001",
+      "nameKey": "base.pooled-exudate",
+      "name": "Pooled Exudate",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.mesmerizing",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.pooled-exudate",
+      "flavorKey": "flavor.base.pooled-exudate",
+      "flavor": "Collected in deep cavities where the plant draws its deepest reserves.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-002",
+      "nameKey": "base.swollen-bladder",
+      "name": "Swollen Bladder",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.blighting",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.swollen-bladder",
+      "flavorKey": "flavor.base.swollen-bladder",
+      "flavor": "Stretched taut with the pressure of what it holds, ready to rupture.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-003",
+      "nameKey": "base.viscous-ooze",
+      "name": "Viscous Ooze",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.rotting",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.viscous-ooze",
+      "flavorKey": "flavor.base.viscous-ooze",
+      "flavor": "So thick it barely flows, clinging to all it touches.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-004",
+      "nameKey": "base.deep-cistern",
+      "name": "Deep Cistern",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.marking",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.deep-cistern",
+      "flavorKey": "flavor.base.deep-cistern",
+      "flavor": "A sunken reservoir at the plant's core, holding all it will ever gather.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-005",
+      "nameKey": "base.congealed-resin",
+      "name": "Congealed Resin",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.freezing",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.congealed-resin",
+      "flavorKey": "flavor.base.congealed-resin",
+      "flavor": "Set solid by age and depth, cracking only under the greatest pressure.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-006",
+      "nameKey": "base.engorged-gland",
+      "name": "Engorged Gland",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.withering",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.engorged-gland",
+      "flavorKey": "flavor.base.engorged-gland",
+      "flavor": "Swollen with production, its walls stretched thin from the volume within.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-007",
+      "nameKey": "base.weeping-sap",
+      "name": "Weeping Sap",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.weeping-sap",
+      "flavorKey": "flavor.base.weeping-sap",
+      "flavor": "Oozing steadily from wounds the plant cannot heal, a slow and relentless drain.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-008",
+      "nameKey": "base.saturated-balsam",
+      "name": "Saturated Balsam",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.chilling",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.saturated-balsam",
+      "flavorKey": "flavor.base.saturated-balsam",
+      "flavor": "No longer fragrant but cloying, every molecule weighted with intention.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-009",
+      "nameKey": "base.distended-laticifer",
+      "name": "Distended Laticifer",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sparking",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.distended-laticifer",
+      "flavorKey": "flavor.base.distended-laticifer",
+      "flavor": "The vessel itself has grown massive from generations of filling and emptying.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-010",
+      "nameKey": "base.matted-duct",
+      "name": "Matted Duct",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "husk",
+      "band": "b",
+      "implicit": {
+        "family": "atom.sporing",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.matted-duct",
+      "flavorKey": "flavor.base.matted-duct",
+      "flavor": "Clogged and tangled, the passage is nearly blocked by its own residue.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-011",
+      "nameKey": "base.curdled-latex",
+      "name": "Curdled Latex",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.bonding",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.curdled-latex",
+      "flavorKey": "flavor.base.curdled-latex",
+      "flavor": "Separated and coagulated, no longer fluid but not quite solid either.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-glands-b-012",
+      "nameKey": "base.stubborn-trichome",
+      "name": "Stubborn Trichome",
+      "frame": "plant",
+      "role": "infusion",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.venomous",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.stubborn-trichome",
+      "flavorKey": "flavor.base.stubborn-trichome",
+      "flavor": "Hardened and thickened, these hairs no longer bend but only break whatever touches them.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    }
+  ]
+}

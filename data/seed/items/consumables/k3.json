@@ -1,0 +1,339 @@
+{
+  "schemaVersion": 1,
+  "kind": "consumable",
+  "_meta": {
+    "batch": "consumables-material-linked",
+    "partition": "consumables/3",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-consumables.md#section-3-taxonomy"
+  },
+  "entries": [
+    {
+      "id": "consumable.k3-001",
+      "nameKey": "consumable.restore-vital-shard",
+      "name": "Shard Vitality",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.vitality",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-002",
+      "nameKey": "consumable.restore-vital-essence",
+      "name": "Essence of Vigor",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.vitality",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "arcane"
+      ]
+    },
+    {
+      "id": "consumable.k3-003",
+      "nameKey": "consumable.restore-vital-heartwood",
+      "name": "Heartwood Draught",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.vitality",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k3-004",
+      "nameKey": "consumable.restore-fortitude-prime",
+      "name": "Prime Fortification",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.fortitude",
+      "powerBand": "high",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "consumable.k3-005",
+      "nameKey": "consumable.restore-mending-catalyst",
+      "name": "Catalyst Mending",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.mending",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "arcane"
+      ]
+    },
+    {
+      "id": "consumable.k3-006",
+      "nameKey": "consumable.restore-bulwark-substrate",
+      "name": "Substrate Bulwark",
+      "classId": "restore",
+      "useContext": [
+        "menu"
+      ],
+      "family": "atom.bulwark",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-007",
+      "nameKey": "consumable.draught-elemental-fire",
+      "name": "Cinder Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "fire",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-008",
+      "nameKey": "consumable.draught-elemental-ice",
+      "name": "Frost Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "ice",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": []
+    },
+    {
+      "id": "consumable.k3-009",
+      "nameKey": "consumable.draught-elemental-air",
+      "name": "Gust Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "air",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "utility"
+      ]
+    },
+    {
+      "id": "consumable.k3-010",
+      "nameKey": "consumable.draught-elemental-earth",
+      "name": "Stone Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-power",
+      "element": "earth",
+      "powerBand": "high",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "mineral"
+      ]
+    },
+    {
+      "id": "consumable.k3-011",
+      "nameKey": "consumable.draught-might-shard-lesser",
+      "name": "Sinew Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.might",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-012",
+      "nameKey": "consumable.draught-might-shard-greater",
+      "name": "Savage Draught",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.might",
+      "powerBand": "high",
+      "manifestCost": 2,
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-013",
+      "nameKey": "consumable.draught-quickening-spore",
+      "name": "Spore Quickening",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.quickening",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "utility",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k3-014",
+      "nameKey": "consumable.draught-precision-keen",
+      "name": "Keen Precision",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.keen-edge",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "offensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-015",
+      "nameKey": "consumable.draught-evasion-light",
+      "name": "Radiant Evasion",
+      "classId": "draught",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.evasion",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-016",
+      "nameKey": "consumable.ward-elemental-defense-cold",
+      "name": "Frost Ward",
+      "classId": "ward",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-defense",
+      "element": "ice",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-017",
+      "nameKey": "consumable.ward-elemental-defense-flame",
+      "name": "Flame Ward",
+      "classId": "ward",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.elemental-defense",
+      "element": "fire",
+      "powerBand": "medium",
+      "manifestCost": 1,
+      "tags": [
+        "defensive"
+      ]
+    },
+    {
+      "id": "consumable.k3-018",
+      "nameKey": "consumable.ward-resilience-catalyst",
+      "name": "Resilience Catalyst",
+      "classId": "ward",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.resilience",
+      "powerBand": "high",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "consumable.k3-019",
+      "nameKey": "consumable.ward-padding-substrate",
+      "name": "Padded Substrate",
+      "classId": "ward",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.padding",
+      "powerBand": "low",
+      "manifestCost": 1,
+      "tags": [
+        "defensive",
+        "organic"
+      ]
+    },
+    {
+      "id": "consumable.k3-020",
+      "nameKey": "consumable.ward-stalwart-prime",
+      "name": "Prime Stalwart",
+      "classId": "ward",
+      "useContext": [
+        "dispatch"
+      ],
+      "family": "atom.stalwart",
+      "powerBand": "high",
+      "manifestCost": 2,
+      "tags": [
+        "defensive",
+        "sturdy",
+        "mineral"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-leaves-a",
+    "partition": "base-types/manipulator/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-leaves-a-001",
+      "nameKey": "base.downy-leaf",
+      "name": "Downy Leaf",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.downy-leaf",
+      "flavorKey": "flavor.base.downy-leaf",
+      "flavor": "Soft with fine hairs, it seems too delicate to harm. It is not.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-002",
+      "nameKey": "base.wispy-stipule",
+      "name": "Wispy Stipule",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "trivial"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.wispy-stipule",
+      "flavorKey": "flavor.base.wispy-stipule",
+      "flavor": "Barely there, a membrane at the leaf's base. It draws blood anyway.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-003",
+      "nameKey": "base.feathered-frond",
+      "name": "Feathered Frond",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.feathered-frond",
+      "flavorKey": "flavor.base.feathered-frond",
+      "flavor": "Delicate as a feather, sharp as a saw. The paradox makes it deadly.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-004",
+      "nameKey": "base.pliant-petiole",
+      "name": "Pliant Petiole",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.pliant-petiole",
+      "flavorKey": "flavor.base.pliant-petiole",
+      "flavor": "Flexible stalk that bends with the plant, strikes with it too.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-005",
+      "nameKey": "base.slender-blade",
+      "name": "Slender Blade",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.slender-blade",
+      "flavorKey": "flavor.base.slender-blade",
+      "flavor": "The leaf itself, sharpened by age and desiccation. It cuts deeper than its width suggests.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-006",
+      "nameKey": "base.tender-tendril",
+      "name": "Tender Tendril",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.tender-tendril",
+      "flavorKey": "flavor.base.tender-tendril",
+      "flavor": "Young and pliable, it coils and strikes before hardening. Rate over weight.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-007",
+      "nameKey": "base.nodding-shoot",
+      "name": "Nodding Shoot",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.nodding-shoot",
+      "flavorKey": "flavor.base.nodding-shoot",
+      "flavor": "A fresh stem that still bows to the wind, but strikes with the force of spring tension.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-008",
+      "nameKey": "base.unhardened-cilia",
+      "name": "Unhardened Cilia",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.unhardened-cilia",
+      "flavorKey": "flavor.base.unhardened-cilia",
+      "flavor": "Tiny hairs still soft enough to bend, but numerous enough to draw blood.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-009",
+      "nameKey": "base.flossy-lamina",
+      "name": "Flossy Lamina",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.flossy-lamina",
+      "flavorKey": "flavor.base.flossy-lamina",
+      "flavor": "The leafy part, dried and stringy. What looks fragile explodes on contact.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-010",
+      "nameKey": "base.papery-midrib",
+      "name": "Papery Midrib",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.papery-midrib",
+      "flavorKey": "flavor.base.papery-midrib",
+      "flavor": "The leaf's spine, dried thin as paper but hard as bone. A striking implement.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-011",
+      "nameKey": "base.greenstick-whorl",
+      "name": "Greenstick Whorl",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "husk",
+      "band": "a",
+      "implicit": {
+        "family": "atom.bloodletting",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.greenstick-whorl",
+      "flavorKey": "flavor.base.greenstick-whorl",
+      "flavor": "Leaves arranged in circles, still fresh enough to flex without snapping. Bends and bleeds in one motion.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-leaves-a-012",
+      "nameKey": "base.filamentous-rachis",
+      "name": "Filamentous Rachis",
+      "frame": "plant",
+      "role": "manipulator",
+      "class": "fibre",
+      "band": "a",
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.filamentous-rachis",
+      "flavorKey": "flavor.base.filamentous-rachis",
+      "flavor": "The primary axis of a compound leaf, split into fine threads. Strikes in a thousand places at once.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-standard",
+    "partition": "base-types/plant-standard",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 3,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-root-totem-001",
+      "nameKey": "base.springy-taprootidol",
+      "name": "Springy Taprootidol",
+      "frame": "plant",
+      "role": "standard",
+      "class": "withy-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warding",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.springy-taprootidol",
+      "flavorKey": "flavor.base.springy-taprootidol",
+      "flavor": "A bannered stalk that yields to the wind without breaking.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-002",
+      "nameKey": "base.twined-grovemark",
+      "name": "Twined Grovemark",
+      "frame": "plant",
+      "role": "standard",
+      "class": "withy-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.resilience",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.twined-grovemark",
+      "flavorKey": "flavor.base.twined-grovemark",
+      "flavor": "Saplings braided together, marking a grove's boundary.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-003",
+      "nameKey": "base.limber-bloomstaff",
+      "name": "Limber Bloomstaff",
+      "frame": "plant",
+      "role": "standard",
+      "class": "withy-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.limber-bloomstaff",
+      "flavorKey": "flavor.base.limber-bloomstaff",
+      "flavor": "A flowering stalk that bends, never breaks, no matter the season.",
+      "tags": [
+        "light",
+        "organic"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-004",
+      "nameKey": "base.yielding-thyrsus",
+      "name": "Yielding Thyrsus",
+      "frame": "plant",
+      "role": "standard",
+      "class": "withy-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.yielding-thyrsus",
+      "flavorKey": "flavor.base.yielding-thyrsus",
+      "flavor": "A soft-wood staff crowned with ivy, rallying those who follow.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-005",
+      "nameKey": "base.greenbound-heartstake",
+      "name": "Greenbound Heartstake",
+      "frame": "plant",
+      "role": "standard",
+      "class": "withy-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warding",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.greenbound-heartstake",
+      "flavorKey": "flavor.base.greenbound-heartstake",
+      "flavor": "A stake driven through living vine, binding them to a common cause.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-006",
+      "nameKey": "base.ringed-pollencrier",
+      "name": "Ringed Pollencrier",
+      "frame": "plant",
+      "role": "standard",
+      "class": "heartwood-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.resilience",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.ringed-pollencrier",
+      "flavorKey": "flavor.base.ringed-pollencrier",
+      "flavor": "Heartwood aged in concentric rings, releasing a pollen that strengthens the grove.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-007",
+      "nameKey": "base.cored-trellismark",
+      "name": "Cored Trellismark",
+      "frame": "plant",
+      "role": "standard",
+      "class": "heartwood-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.cored-trellismark",
+      "flavorKey": "flavor.base.cored-trellismark",
+      "flavor": "A wooden marker that guides climbers, rooted at the garden's heart.",
+      "tags": [
+        "medium",
+        "organic"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-008",
+      "nameKey": "base.deepgrained-boughmark",
+      "name": "Deepgrained Boughmark",
+      "frame": "plant",
+      "role": "standard",
+      "class": "heartwood-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.warding",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.deepgrained-boughmark",
+      "flavorKey": "flavor.base.deepgrained-boughmark",
+      "flavor": "An ancient bough, its grain telling centuries of seasons, now shields the young.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-009",
+      "nameKey": "base.hallowed-seedcairn",
+      "name": "Hallowed Seedcairn",
+      "frame": "plant",
+      "role": "standard",
+      "class": "heartwood-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.hallowed-seedcairn",
+      "flavorKey": "flavor.base.hallowed-seedcairn",
+      "flavor": "A cairn of blessed seeds, speaking of growth and strength to all who see it.",
+      "tags": [
+        "medium",
+        "organic"
+      ]
+    },
+    {
+      "id": "item.plant-root-totem-010",
+      "nameKey": "base.stumpset-vinepennon",
+      "name": "Stumpset Vinepennon",
+      "frame": "plant",
+      "role": "standard",
+      "class": "heartwood-totem",
+      "band": "a",
+      "implicit": {
+        "family": "atom.resilience",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.stumpset-vinepennon",
+      "flavorKey": "flavor.base.stumpset-vinepennon",
+      "flavor": "An old stump crowned with woven vines, a banner rooted deep in the garden.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ]
+    }
+  ]
+}

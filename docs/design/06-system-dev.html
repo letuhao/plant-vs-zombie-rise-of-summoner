@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System, Moments &amp; Developer — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>System, Moments &amp; Developer</h1>
+  <p>
+    The three things left: the moments the game shows the player unprompted, the system layer they
+    reach with Esc, and the developer tree that everything diagnostic moves into. Nine of the current
+    build's twenty routes end up in the last one.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 06</span>
+    <span class="tag">GG-16 · GG-20 · GG-22 · GG-40 · GG-41 · GG-52 · GG-53</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="05-chronicle-almanac.html">← Chronicle</a>
+  <a href="#a">A · Moments</a>
+  <a href="#b">B · Toasts</a>
+  <a href="#c">C · System</a>
+  <a href="#d">D · Controls</a>
+  <a href="#e">E · Developer</a>
+  <a href="#f">F · Notes</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Moments — band 3, and only one class may take it</h2>
+  <p class="lede">
+    Exactly one class of event may open a blocking layer without the player asking: the
+    <b>run result</b>. Everything else — level-ups, drops, contract offers, expedition returns —
+    reports at band 4 and queues for the sanctum. <span class="ref">GG-53 · D6</span>
+  </p>
+
+  <div class="spec">
+    <div class="spec-grid wide">
+      <div>
+        <p class="spec-label">Run result — the one permitted interruption</p>
+        <div class="panel-shell" style="max-width:none">
+          <header style="background:linear-gradient(rgb(61 107 69 / .35), transparent)">
+            <div style="flex:1">
+              <h3>The lawn held</h3>
+              <div class="sub">Night 14 · 14 waves · 12 minutes 4 seconds</div>
+            </div>
+            <span class="tag tag--ok">survived</span>
+          </header>
+          <div class="body">
+            <div class="statgrid" style="margin-bottom:var(--sp-4)">
+              <div class="s"><div class="k">Defeated</div><div class="v">218</div></div>
+              <div class="s"><div class="k">XP earned</div><div class="v">4 120</div></div>
+              <div class="s"><div class="k">Souls</div><div class="v">640</div></div>
+              <div class="s"><div class="k">Lost</div><div class="v">0</div></div>
+            </div>
+            <p class="spec-label">Your creatures</p>
+            <div class="col-flex" style="gap:var(--sp-2)">
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;border-radius:var(--r-sm)">
+                <span class="frame" data-rarity="3">🌻</span>
+                <span><span class="nm">Emberling</span><p class="sub">Lv 13 → <b style="color:var(--sun)">14</b></p></span>
+                <span class="delta delta--up">▲ +1 240 xp</span>
+              </div>
+              <div class="lrow" style="grid-template-columns:var(--icon-row) minmax(0,1fr) auto;border-radius:var(--r-sm);border-bottom:0">
+                <span class="frame" data-rarity="5">🌵</span>
+                <span><span class="nm">Thornlet</span><p class="sub">Lv 31 · 84% to next</p></span>
+                <span class="delta delta--up">▲ +980 xp</span>
+              </div>
+            </div>
+          </div>
+          <footer>
+            <button class="btn btn--ghost">See the full record</button>
+            <button class="btn">Back to the sanctum</button>
+          </footer>
+        </div>
+      </div>
+
+      <div class="col-flex" style="gap:var(--sp-4)">
+        <div>
+          <p class="spec-label">Level-up — a moment, sequenced, skippable</p>
+          <div class="panel-shell dialog" style="max-width:none">
+            <div class="body" style="text-align:center;padding:var(--sp-6)">
+              <span class="frame frame--panel" data-rarity="3" style="margin-bottom:var(--sp-3)">🌻</span>
+              <h3 style="font-family:var(--font-display);font-size:var(--text-2xl);color:var(--sun)">Emberling grew</h3>
+              <p style="color:var(--muted);margin:var(--sp-2) 0 var(--sp-4)">Level 13 → 14</p>
+              <div class="difflist" style="text-align:left;max-width:300px;margin:0 auto">
+                <div class="diffrow" data-dir="up"><span class="k">Vitality</span><span class="a">1 720</span><span class="b">1 800</span><span class="d">▲ +80</span></div>
+                <div class="diffrow" data-dir="up"><span class="k">Attack</span><span class="a">132</span><span class="b">140</span><span class="d">▲ +8</span></div>
+                <div class="diffrow" data-dir="new"><span class="k">Relic slot</span><span class="a">2</span><span class="b">3</span><span class="d">new</span></div>
+              </div>
+            </div>
+            <footer style="justify-content:space-between">
+              <span class="readout">1 of 2</span>
+              <span class="row-flex">
+                <button class="btn btn--ghost btn--sm">Skip all</button>
+                <button class="btn">Next</button>
+              </span>
+            </footer>
+          </div>
+        </div>
+        <div class="note">
+          <strong>Sequenced and countable.</strong> "1 of 2" tells the player how much is left, and
+          "Skip all" respects the hundredth time they have seen it. Three reward dialogs racing to
+          the same band is the failure this replaces. <span class="ref">GG-52</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-grid wide" style="margin-top:var(--sp-4)">
+      <div>
+        <p class="spec-label">Destructive confirm — names exactly what is lost</p>
+        <div class="panel-shell dialog" style="max-width:none">
+          <header><h3>Release Emberling?</h3></header>
+          <div class="body">
+            <p style="margin:0 0 var(--sp-3)">Emberling is gone for good. You keep nothing.</p>
+            <ul style="margin:0;padding-left:var(--sp-4);font-size:var(--text-sm);color:var(--muted)">
+              <li>14 levels and 4 120 experience</li>
+              <li>3 bound relics — <b style="color:var(--text)">returned to storage</b></li>
+              <li>The name you gave it</li>
+            </ul>
+          </div>
+          <footer>
+            <button class="btn btn--ghost">Keep Emberling</button>
+            <button class="btn btn--danger">Release</button>
+          </footer>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">Unrecoverable — band 5, the only full-stop in the game</p>
+        <div class="panel-shell" style="max-width:none;border-color:var(--bad)">
+          <header><h3>Cannot reach the sanctum</h3></header>
+          <div class="body">
+            <p style="margin:0 0 var(--sp-2)">
+              The game's own server is not responding. Nothing has been lost — your save is on disk
+              and everything resumes when it comes back.
+            </p>
+            <p style="margin:0;font-size:var(--text-xs);color:var(--faint)">
+              Retried 4 times over 20 seconds.
+            </p>
+          </div>
+          <footer>
+            <button class="btn btn--ghost">Show details</button>
+            <button class="btn">Retry</button>
+          </footer>
+        </div>
+        <div class="note">
+          Player words first, diagnostics behind a button. "Show details" is the only path from a
+          player surface into developer information, and it is opt-in.
+          <span class="ref">GG-23 · GG-40</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Toasts — band 4, never blocking</h2>
+  <div class="spec">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-5)">
+      <div>
+        <p class="spec-label">The stack — newest at the bottom, max three, then a counter</p>
+        <div class="toast-stack" style="align-items:stretch">
+          <div class="toast toast--ok"><span>✔</span><span class="msg"><b>Ashen Reliquary equipped</b><span>Emberling · takes effect on next deploy</span></span></div>
+          <div class="toast toast--warn"><span>⛵</span><span class="msg"><b>Ridgeline survey returned</b><span>2 relics and 340 souls waiting in the sanctum</span></span></div>
+          <div class="toast toast--bad"><span>✕</span><span class="msg"><b>Could not deploy Thornlet</b><span>It is already on the board. Nothing was changed.</span></span></div>
+          <div class="readout" style="text-align:right">2 more</div>
+        </div>
+      </div>
+      <div>
+        <p class="spec-label">What each one must contain</p>
+        <table class="t" style="margin-top:0">
+          <thead><tr><th>Part</th><th>Rule</th></tr></thead>
+          <tbody>
+            <tr><td>What happened</td><td>In player words, as a completed fact</td></tr>
+            <tr><td>To what</td><td>The entity named, so it is findable</td></tr>
+            <tr><td>What it changed</td><td>Especially on failure — <b>"nothing was changed"</b> is information</td></tr>
+            <tr><td>Never</td><td>An error code, a status number, or a stack trace</td></tr>
+          </tbody>
+        </table>
+        <div class="note">
+          The current build has <b>zero</b> notification surfaces, so a failed mutation is
+          indistinguishable from a slow one — while the FE's own architecture doc names an HTTP error
+          toast as the acknowledgement mechanism. It was specified and never built.
+          <span class="ref">GG-16</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · System <span class="hotkey">Esc</span> on an empty stack</h2>
+  <p class="lede">
+    Band 5. Reached the way every game reaches it — Esc with nothing open. The current build's
+    connection status, API address and injector state live here, where a player can look if they
+    want and never has to.
+  </p>
+
+  <div class="spec">
+    <div class="panel-shell" style="max-width:760px">
+      <header>
+        <div style="flex:1"><h3>Settings</h3></div>
+        <span class="esc">Esc</span>
+      </header>
+      <div class="body">
+        <div class="tabs" style="margin-bottom:var(--sp-3)">
+          <button class="tab is-active">Game</button>
+          <button class="tab">Display</button>
+          <button class="tab">Sound</button>
+          <button class="tab">Controls</button>
+          <button class="tab">Advanced</button>
+        </div>
+
+        <div class="setrow">
+          <div><div class="k">Pause while away</div><div class="d">A live board holds still while the control room is open, so opening it mid-wave cannot cost a run.</div></div>
+          <span class="toggle is-on"><span class="track"><span class="knob"></span></span></span>
+        </div>
+        <div class="setrow">
+          <div><div class="k">Damage numbers</div><div class="d">Show floating numbers on the lawn.</div></div>
+          <span class="toggle is-on"><span class="track"><span class="knob"></span></span></span>
+        </div>
+        <div class="setrow">
+          <div><div class="k">Skip reward moments</div><div class="d">Level-ups and drops report as notifications instead.</div></div>
+          <span class="toggle"><span class="track"><span class="knob"></span></span></span>
+        </div>
+        <div class="setrow">
+          <div><div class="k">Reduce motion</div><div class="d">Follows your system setting by default. Nothing loses meaning when it is on.</div></div>
+          <span class="seg"><button class="is-active">System</button><button>On</button><button>Off</button></span>
+        </div>
+        <div class="setrow">
+          <div><div class="k">Developer mode</div><div class="d">Adds the diagnostics tree on <span class="hotkey">`</span>. Off by default; nothing else changes.</div></div>
+          <span class="toggle"><span class="track"><span class="knob"></span></span></span>
+        </div>
+        <div class="setrow">
+          <div><div class="k">Connection</div><div class="d">Sanctum reachable · live · game connected</div></div>
+          <span class="row-flex"><span class="tag tag--ok">healthy</span><button class="btn btn--sm btn--ghost">Details</button></span>
+        </div>
+      </div>
+      <footer>
+        <button class="btn btn--ghost">Quit to title</button>
+        <button class="btn">Done</button>
+      </footer>
+    </div>
+    <div class="note">
+      <strong>Every player-facing toggle the injector already owns lives here</strong> — pause while
+      away, damage numbers, the overlay button — instead of being tabs of a cheat console. Gameplay
+      cheats stay a developer surface; presentation preferences are the player's.
+      <span class="ref">GG-42</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · Controls — the verb table, rendered</h2>
+  <p class="lede">
+    One keymap module, one table, and <span class="hotkey">?</span> renders it. If this screen and
+    the code ever disagree, the code is wrong. <span class="ref">GG-20</span>
+  </p>
+  <div class="spec">
+    <div class="keymap">
+      <div class="kr"><span class="hotkey">Esc</span><span>Close the top layer · open Settings when nothing is open</span></div>
+      <div class="kr"><span class="hotkey">C</span><span>Creatures</span></div>
+      <div class="kr"><span class="hotkey">R</span><span>Relics</span></div>
+      <div class="kr"><span class="hotkey">F</span><span>Fusion</span></div>
+      <div class="kr"><span class="hotkey">P</span><span>Pacts</span></div>
+      <div class="kr"><span class="hotkey">E</span><span>Expeditions</span></div>
+      <div class="kr"><span class="hotkey">A</span><span>Almanac</span></div>
+      <div class="kr"><span class="hotkey">H</span><span>Chronicle</span></div>
+      <div class="kr"><span class="hotkey">M</span><span>Travel to the world map</span></div>
+      <div class="kr"><span class="hotkey">Space</span><span>Pause or resume a run</span></div>
+      <div class="kr"><span class="hotkey">Tab</span><span>Move through the open layer</span></div>
+      <div class="kr"><span class="hotkey">1</span><span>…<span class="hotkey">9</span> · actions, on a stage that has them</span></div>
+      <div class="kr"><span class="hotkey">?</span><span>This list</span></div>
+      <div class="kr"><span class="hotkey">F10</span><span>Show or hide the control room <span class="tag">reserved</span></span></div>
+      <div class="kr"><span class="hotkey">`</span><span>Developer tree <span class="tag">when enabled</span></span></div>
+    </div>
+    <div class="note">
+      <strong>F10 is reserved and never handled by the app.</strong> It belongs to the launcher and
+      injector, which already own the window toggle. Esc likewise means the same thing in both — one
+      key law across the native overlay and the interface inside it.
+    </div>
+  </div>
+  <div class="sub">
+    <h3>D.2 Rebinding — the table is editable, not decorative</h3>
+    <div class="spec">
+      <div class="spec-grid wide">
+        <div>
+          <p class="spec-label">Normal</p>
+          <div class="setrow"><div><div class="k">Creatures</div><div class="d">Open the roster</div></div>
+            <span class="row-flex"><span class="hotkey">C</span><button class="btn btn--sm btn--ghost">Change</button></span></div>
+          <div class="setrow"><div><div class="k">Almanac</div><div class="d">Open the reference</div></div>
+            <span class="row-flex"><span class="hotkey">A</span><button class="btn btn--sm btn--ghost">Change</button></span></div>
+          <div class="setrow"><div><div class="k">Show or hide the control room</div><div class="d">Owned by the game launcher</div></div>
+            <span class="row-flex"><span class="hotkey">F10</span><span class="readout">reserved</span></span></div>
+        </div>
+        <div>
+          <p class="spec-label">Listening, and refusing a conflict</p>
+          <div class="setrow"><div><div class="k">Creatures</div><div class="d">Press a key…</div></div>
+            <span class="row-flex"><span class="hotkey" style="border-color:var(--sun);color:var(--sun)">▯</span><button class="btn btn--sm btn--ghost">Cancel</button></span></div>
+          <div class="setrow" style="border-color:var(--bad)"><div><div class="k">Creatures</div>
+            <div class="d" style="color:var(--bad)">P is already Pacts. Choosing it will unbind Pacts.</div></div>
+            <span class="row-flex"><span class="hotkey" style="border-color:var(--bad);color:var(--bad)">P</span>
+              <button class="btn btn--sm btn--ghost">Keep C</button><button class="btn btn--sm btn--danger">Take it</button></span></div>
+          <div class="note">
+            A conflict is shown before it is committed, and it names <em>what it will cost</em> — the
+            other binding — rather than silently stealing the key. <span class="ref">GG-22 · GG-55</span>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>Reserved keys are listed and unbindable.</strong> Hiding <code>F10</code> would let a
+        player bind over it and then wonder why the control room stopped toggling; showing it greyed
+        with its owner named is the honest version.
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>D.3 Display and Sound</h3>
+    <div class="spec">
+      <div class="spec-grid wide">
+        <div>
+          <p class="spec-label">Display</p>
+          <div class="setrow"><div><div class="k">Interface scale</div><div class="d">The overlay sizes to the game window, so this is how you make it comfortable at your resolution.</div></div>
+            <span class="seg"><button>90%</button><button class="is-active">100%</button><button>110%</button><button>125%</button></span></div>
+          <div class="setrow"><div><div class="k">Text size</div><div class="d">Independent of interface scale. Layouts reflow rather than clip.</div></div>
+            <span class="seg"><button class="is-active">Normal</button><button>Large</button></span></div>
+          <div class="setrow"><div><div class="k">Colour-blind assist</div><div class="d">Adds a shape to every status colour. Nothing relies on hue alone either way.</div></div>
+            <span class="toggle"><span class="track"><span class="knob"></span></span></span></div>
+          <div class="setrow"><div><div class="k">Language</div><div class="d">Creature and almanac text follows the game's own data.</div></div>
+            <select class="select"><option>English</option><option>中文</option></select></div>
+        </div>
+        <div>
+          <p class="spec-label">Sound</p>
+          <div class="setrow"><div><div class="k">Interface</div><div class="d">Clicks, confirms, notifications</div></div>
+            <span class="row-flex"><div class="meter meter--sm" style="width:120px"><span class="track"><span class="fill" style="width:70%"></span></span></div><span class="readout">70</span></span></div>
+          <div class="setrow"><div><div class="k">World</div><div class="d">The lawn, battles, creatures</div></div>
+            <span class="row-flex"><div class="meter meter--sm" style="width:120px"><span class="track"><span class="fill" style="width:85%"></span></span></div><span class="readout">85</span></span></div>
+          <div class="setrow"><div><div class="k">Music</div><div class="d"></div></div>
+            <span class="row-flex"><div class="meter meter--sm" style="width:120px"><span class="track"><span class="fill" style="width:40%"></span></span></div><span class="readout">40</span></span></div>
+          <div class="setrow"><div><div class="k">Mute when the game has focus</div><div class="d">So the control room never plays over the game you are actually looking at.</div></div>
+            <span class="toggle is-on"><span class="track"><span class="knob"></span></span></span></div>
+          <div class="note">
+            Three independent channels, each persisted, and a default that will not startle. No
+            surface conveys state by sound alone. <span class="ref">GG-35</span>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>Colour-blind assist is a toggle, not a mode.</strong> The palette already avoids
+        hue-only meaning (GG-27); this adds redundancy for anyone who wants it rather than swapping in
+        a second design system.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · Developer tree <span class="hotkey">`</span></h2>
+  <p class="lede">
+    Off by default, absent from player navigation, and governed by its own rules — density beats
+    polish, engine vocabulary is correct, raw JSON is welcome. It still obeys the structural rules:
+    it is a layer, Esc pops it, it is keyboard-operable, and it declares its behaviour at a thousand
+    rows. <span class="ref">GG-40 · GG-41</span>
+  </p>
+
+  <div class="spec">
+    <div class="viewport short">
+      <div class="devshell">
+        <nav class="devnav">
+          <button class="is-active">status</button>
+          <button>log</button>
+          <button>events</button>
+          <button>metrics</button>
+          <button>activity</button>
+          <button>runs</button>
+          <button>types</button>
+          <button>icons</button>
+          <button>almanac raw</button>
+          <button>cheats</button>
+          <button>sim</button>
+          <button>tuning</button>
+          <button>perf</button>
+        </nav>
+        <div class="devbody">
+          <div class="devwarn">Developer mode is on. These surfaces are not player-facing and are exempt from the presentation rules.</div>
+          <table>
+            <tbody>
+              <tr><th>api</th><td>http://127.0.0.1:5088</td></tr>
+              <tr><th>hub</th><td>connected · 1 client · 412 events buffered</td></tr>
+              <tr><th>injector</th><td>connected · BepInEx · pvz 3.8.1</td></tr>
+              <tr><th>source</th><td>lawn</td></tr>
+              <tr><th>matchKey</th><td>7f3a1c2e-88b1-4d0a-9f77-2b1e0c4a9d13</td></tr>
+              <tr><th>ingest</th><td>queued 0 · last flush 3 ms</td></tr>
+              <tr><th>ruleset</th><td>2</td></tr>
+              <tr><th>contentHash</th><td>a41f0c9d3b77e5218ac4</td></tr>
+              <tr><th>statuses</th><td>21 declared · 13 functional · 8 inert</td></tr>
+              <tr><th>atoms</th><td>bound 47 · rejected 0</td></tr>
+            </tbody>
+          </table>
+          <p style="color:var(--faint);margin-top:var(--sp-3)">
+            ` closes · esc closes · ↑↓ moves · / filters
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>This is where nine routes went.</strong> <code>/status</code>, <code>/log</code>,
+      <code>/pvz-activity</code>, <code>/icon-dump</code>, <code>/almanac-dump</code>,
+      <code>/cheats</code>, <code>/sim</code>, <code>/stats</code> and the raw half of
+      <code>/runs</code>. Nothing was deleted; it stopped being the game.
+    </div>
+    <div class="note">
+      <strong>The inert statuses are visible here and nowhere else.</strong> Eight of the
+      twenty-one declared statuses do nothing at runtime. A player must never be shown an affliction
+      that has no effect; an author must never be hidden from one.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · What this plate settles</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>What may interrupt the player?</td><td>Run results only. Everything else is band 4</td></tr>
+      <tr><td>How are rewards presented?</td><td>Sequenced, counted, skippable, one at a time</td></tr>
+      <tr><td>What does a failure toast contain?</td><td>What happened, to what, and what it changed — including "nothing"</td></tr>
+      <tr><td>Where does connection state live?</td><td>Settings → Connection, and the developer tree. Never the top bar</td></tr>
+      <tr><td>How is developer mode reached?</td><td>A settings toggle, persisted, default off; then the backtick key</td></tr>
+      <tr><td>Which cheats are player-facing?</td><td>None. Presentation preferences are, and they live in Settings</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 06 · System, Moments &amp; Developer · draft 2026-08-22 · governed by architecture/game-gui-principles.md
+</footer>
+
+</div>
+</body>
+</html>

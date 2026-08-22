@@ -120,6 +120,7 @@ tests/FusionRpg.Core.Tests/Atoms/AtomRowValidatorTests.cs
 | One bad row in a seed file of 50, **at load** | 49 load, 1 rejected, load succeeds — defence in depth against a database edited outside the importer |
 | The same file **at import** (E14a) | **nothing is imported** — a partial import produces a hash for a state nobody authored. Two phases, not two competing policies |
 | Any row edit | `revision` bumps; content hash (E8) changes |
+| An identical re-write | **nothing happens** — the update is skipped, so `revision` counts changes, not writes. It is a hashed column, and bumping it on a repeat import made the import look like an edit (E14a) |
 | `guard-dal.ps1` | passes — no SQL outside `FusionRpg.Data` |
 
 ## Boundaries

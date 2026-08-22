@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shell &amp; Sanctum — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Shell &amp; Sanctum</h1>
+  <p>
+    The door and the home stage. Everything a player meets before they are playing, and the place
+    every run returns to. This plate answers decision <b>D1</b> — home is the Sanctum — and shows
+    what that means at the two moments that matter most: a brand-new save, and a save with everything
+    unlocked.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 01</span>
+    <span class="tag">GG-1 · GG-2 · GG-3 · GG-4 · GG-43 · GG-44</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="#a">A · Title</a>
+  <a href="#b">B · Save select</a>
+  <a href="#c">C · Sanctum</a>
+  <a href="#d">D · First run</a>
+  <a href="#e">E · The rail</a>
+  <a href="#f">F · Notes</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Title</h2>
+  <p class="lede">
+    Band −1. One of only two surfaces that replace a stage without being travel. It exists to say
+    what this is, and to get out of the way.
+  </p>
+  <div class="spec">
+    <div class="viewport">
+      <div class="title">
+        <div class="logo">Rise of Summoner<small>Plants vs. Zombies</small></div>
+        <div class="menu">
+          <button class="btn btn--lg">Continue <span class="hotkey">Enter</span></button>
+          <button class="btn btn--ghost">New summoner</button>
+          <button class="btn btn--ghost">Saves</button>
+          <button class="btn btn--ghost">Settings <span class="hotkey">Esc</span></button>
+          <button class="btn btn--ghost">Quit</button>
+        </div>
+        <span class="build">v1.0.0 · offline ready</span>
+      </div>
+    </div>
+    <p class="vp-note">1440 × 810 viewport. The overlay sizes itself to the game window, so the
+      title composes from the centre outward and never assumes a width.</p>
+    <div class="note">
+      <strong>Continue is first and largest.</strong> The overwhelmingly common intent is "carry on".
+      Everything else is a ghost button. Note what is <em>absent</em>: no server address, no
+      connection state, no build diagnostics beyond a version string in the corner.
+      <span class="ref">GG-2</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Save select</h2>
+  <p class="lede">
+    A save is chosen once, at the door. This is where the current build's HudBar player picker goes —
+    it is not a dropdown wedged into the top bar of every screen.
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div class="title" style="place-items:center">
+        <div style="width:min(560px,80%)">
+          <h3 style="font-family:var(--font-display);font-size:var(--text-2xl);margin-bottom:var(--sp-3)">Choose a summoner</h3>
+          <div class="slots">
+            <div class="slot is-selected">
+              <span class="frame frame--card" data-rarity="4">🜂</span>
+              <span>
+                <span class="nm">Ashwarden</span>
+                <span class="meta">Level 74 · 12 creatures bound · 4 sectors held · last played 2 hours ago</span>
+              </span>
+              <button class="btn">Continue</button>
+            </div>
+            <div class="slot">
+              <span class="frame frame--card" data-rarity="2">🜃</span>
+              <span>
+                <span class="nm">Second run</span>
+                <span class="meta">Level 8 · 2 creatures bound · last played 6 days ago</span>
+              </span>
+              <button class="btn btn--ghost">Continue</button>
+            </div>
+            <div class="slot is-empty">+ New summoner</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      Each slot states what the player will find there — level, creatures, territory, recency — so
+      the choice is made on content, not on a name they picked once and forgot.
+      <span class="ref">GG-24</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · The Sanctum — home stage</h2>
+  <p class="lede">
+    Band 0. A place, not a menu of places. The player's creatures are on display, the map is on the
+    table, the pacts are on the shelf, and the one thing worth doing next is stated at the top.
+  </p>
+
+  <div class="spec">
+    <div class="viewport">
+      <div class="frame-row">
+
+        <nav class="rail">
+          <button class="is-active"><span class="g">⌂</span>Sanctum</button>
+          <div class="sep"></div>
+          <button><span class="g">✦</span>Creatures</button>
+          <button><span class="g">◈</span>Relics</button>
+          <button><span class="g">⚗</span>Fusion</button>
+          <button><span class="g">👹</span>Pacts<span class="badge">1</span></button>
+          <button><span class="g">⛵</span>Expeditions</button>
+          <div class="sep"></div>
+          <button><span class="g">📖</span>Almanac</button>
+          <button><span class="g">🕮</span>Chronicle</button>
+        </nav>
+
+        <div class="stagearea">
+          <div class="hud" style="background:linear-gradient(rgb(11 9 7 / .9), rgb(11 9 7 / 0))">
+            <div class="cluster">
+              <span class="frame frame--chip" data-rarity="4">🜂</span>
+              <span style="font-weight:800">Ashwarden</span>
+              <span class="tag">Lv 74</span>
+            </div>
+            <div class="cluster">
+              <span class="val">4 120<span class="unit">souls</span></span>
+            </div>
+            <span class="spacer"></span>
+            <div class="cluster">
+              <span class="readout">XP to next 97%</span>
+              <div class="meter meter--sm" style="width:120px"><span class="track"><span class="fill" style="width:97%"></span></span></div>
+            </div>
+            <div class="cluster">
+              <button class="btn btn--sm btn--ghost">Menu <span class="hotkey">Esc</span></button>
+            </div>
+          </div>
+
+          <div class="sanctum" style="padding-top:56px">
+            <div class="focus" style="margin-bottom:var(--sp-4)">
+              <span class="frame frame--panel" data-rarity="5">👹</span>
+              <div>
+                <div class="k">Waiting on you</div>
+                <div class="t">Pact of Cinders wants its tribute</div>
+                <div class="s">Overdue by one night. Loyalty is falling, and the pact cannot be
+                  renegotiated until it is paid.</div>
+              </div>
+              <div class="col-flex">
+                <button class="btn">Pay tribute</button>
+                <button class="btn btn--ghost btn--sm">See terms</button>
+              </div>
+            </div>
+
+            <div class="sanctum-grid">
+              <div class="col-flex" style="gap:var(--sp-4)">
+                <section class="shelf">
+                  <header>
+                    <h3>Your creatures</h3>
+                    <a href="#">All 12 <span class="hotkey">C</span></a>
+                  </header>
+                  <div class="creature-strip">
+                    <div class="pedestal">
+                      <span class="frame frame--card" data-rarity="3">🌻</span>
+                      <span class="base"></span>
+                      <span class="nm">Emberling</span><span class="lv">Lv 14</span>
+                    </div>
+                    <div class="pedestal">
+                      <span class="frame frame--card" data-rarity="5">🌵</span>
+                      <span class="base"></span>
+                      <span class="nm">Thornlet</span><span class="lv">Lv 31</span>
+                    </div>
+                    <div class="pedestal">
+                      <span class="frame frame--card" data-rarity="2">🍄</span>
+                      <span class="base"></span>
+                      <span class="nm">Sporeling</span><span class="lv">Lv 9</span>
+                    </div>
+                    <div class="pedestal">
+                      <span class="frame frame--card" data-rarity="4">🧟</span>
+                      <span class="base"></span>
+                      <span class="nm">Ashkell</span><span class="lv">Lv 41</span>
+                    </div>
+                    <div class="pedestal" style="opacity:.55">
+                      <span class="frame frame--card is-missing">+8</span>
+                      <span class="base"></span>
+                      <span class="nm">and eight more</span><span class="lv">&nbsp;</span>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="shelf" style="padding:0;border:0;background:transparent">
+                  <div class="maptable">
+                    <div class="cta">
+                      <span style="font-family:var(--font-display);font-size:var(--text-xl)">The map table</span>
+                      <span style="font-size:var(--text-sm);color:var(--muted)">4 sectors held · 1 legion marching · Ashfall contested</span>
+                      <button class="btn">Travel to the map <span class="hotkey">M</span></button>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <div class="col-flex" style="gap:var(--sp-4)">
+                <section class="shelf">
+                  <header><h3>Tonight</h3></header>
+                  <div class="tasklist">
+                    <div class="task is-ready"><span class="g">⛵</span>
+                      <span>Ridgeline expedition returned<br><span style="color:var(--muted);font-size:var(--text-xs)">2 relics and 340 souls waiting</span></span>
+                      <button class="btn btn--sm">Collect</button></div>
+                    <div class="task is-waiting"><span class="g">⏳</span>
+                      <span>Deepvault expedition<br><span style="font-size:var(--text-xs)">returns in 3h 20m</span></span>
+                      <span class="readout">3:20</span></div>
+                    <div class="task"><span class="g">⚗</span>
+                      <span>Two Sporelings held<br><span style="color:var(--muted);font-size:var(--text-xs)">they can be fused</span></span>
+                      <button class="btn btn--sm btn--ghost">Fuse</button></div>
+                  </div>
+                </section>
+
+                <section class="shelf">
+                  <header><h3>Start a run</h3></header>
+                  <div class="col-flex">
+                    <button class="btn btn--lg" style="justify-content:space-between">
+                      Defend the lawn <span class="hotkey">↵</span>
+                    </button>
+                    <p style="margin:0;font-size:var(--text-xs);color:var(--muted)">
+                      Plays through the game if it is running, and on its own if it is not.
+                    </p>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Read what the top of this screen says versus the one it replaces.</strong> The shipped
+      build opens on <em>"Ingest queue 0 · last flush 0 ms"</em>. This opens on
+      <em>"Pact of Cinders wants its tribute."</em> Same architecture underneath; one of them is a
+      game. <span class="ref">GG-2 · GG-3</span>
+    </div>
+    <div class="note">
+      The focus card is the only element that changes what it is. It answers "what should I do now"
+      from state — overdue tribute beats a returned expedition beats a fusable pair beats "start a
+      run". When nothing is pending it becomes the run prompt, never an empty box.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · First run — the same stage, authored</h2>
+  <p class="lede">
+    A brand-new save is not this screen with everything empty. It is a written beginning: one
+    creature, one instruction, and everything else genuinely absent.
+    <span class="ref">GG-43 · GG-44</span>
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div class="frame-row">
+        <nav class="rail">
+          <button class="is-active"><span class="g">⌂</span>Sanctum</button>
+          <div class="sep"></div>
+          <button><span class="g">✦</span>Creatures</button>
+          <button class="is-locked"><span class="g">◈</span>Relics</button>
+          <button class="is-locked"><span class="g">⚗</span>Fusion</button>
+          <button class="is-locked"><span class="g">👹</span>Pacts</button>
+          <button class="is-locked"><span class="g">⛵</span>Expeditions</button>
+          <div class="sep"></div>
+          <button class="is-locked"><span class="g">📖</span>Almanac</button>
+          <button class="is-locked"><span class="g">🕮</span>Chronicle</button>
+        </nav>
+        <div class="stagearea">
+          <div class="hud" style="background:linear-gradient(rgb(11 9 7 / .9), rgb(11 9 7 / 0))">
+            <div class="cluster">
+              <span class="frame frame--chip" data-rarity="1">🜁</span>
+              <span style="font-weight:800">A new summoner</span>
+              <span class="tag">Lv 1</span>
+            </div>
+            <span class="spacer"></span>
+            <div class="cluster"><button class="btn btn--sm btn--ghost">Menu <span class="hotkey">Esc</span></button></div>
+          </div>
+          <div class="sanctum" style="padding-top:56px;display:grid;place-items:center">
+            <div style="max-width:520px;text-align:center;display:grid;gap:var(--sp-4);justify-items:center">
+              <span class="frame frame--panel" data-rarity="2">🌻</span>
+              <div>
+                <h3 style="font-family:var(--font-display);font-size:var(--text-2xl)">This one answered</h3>
+                <p style="color:var(--muted);margin-top:var(--sp-2)">
+                  A sunflower has bound itself to you. It will remember what it learns and it will
+                  come back after every night. Give it a name.
+                </p>
+              </div>
+              <div class="row-flex" style="justify-content:center">
+                <input class="input" value="Emberling" style="width:220px">
+                <button class="btn">Bind</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Six of the eight rail entries are locked, and visibly so.</strong> Not hidden — a
+      player who sees the shape of the game wants to reach it — and not present-but-dead. Hovering a
+      locked entry says what unlocks it. This is why GG-44 is an <em>architectural</em> rule: a rail
+      whose entries are a constant list cannot draw this screen at all.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · The rail — every state</h2>
+  <div class="spec">
+    <div class="row-flex" style="align-items:flex-start;gap:var(--sp-5)">
+      <nav class="rail" style="border:1px solid var(--border);border-radius:var(--r-md)">
+        <button class="is-active"><span class="g">⌂</span>Sanctum</button>
+        <div class="sep"></div>
+        <button><span class="g">✦</span>Creatures</button>
+        <button><span class="g">👹</span>Pacts<span class="badge">1</span></button>
+        <button class="is-locked"><span class="g">⚗</span>Fusion</button>
+      </nav>
+      <div style="flex:1;min-width:260px">
+        <table class="t">
+          <thead><tr><th>State</th><th>Reads as</th><th>Rule</th></tr></thead>
+          <tbody>
+            <tr><td>Active</td><td>The layer is open — pressing its key closes it</td><td>GG-6</td></tr>
+            <tr><td>Available</td><td>Openable from any stage</td><td>GG-7</td></tr>
+            <tr><td>Badged</td><td>Something is waiting; the count is the thing, not a dot</td><td>GG-16</td></tr>
+            <tr><td>Locked</td><td>Dimmed, hover says what unlocks it, never a dead click</td><td>GG-17 · GG-44</td></tr>
+          </tbody>
+        </table>
+        <div class="tip" style="margin-top:var(--sp-3)">
+          <h4>Fusion</h4>
+          <p>Hold two creatures of one species to unlock the fusion altar.</p>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      The badge carries a <b>count</b>. A bare dot says "something happened" and forces the player to
+      go and look — which is the friction that trains people to ignore badges.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · What this plate settles</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>What is home?</td><td>The Sanctum</td><td>Default stage; every run returns here; `#/sanctum` is the index route</td></tr>
+      <tr><td>Where does the player picker live?</td><td>Save select, band −1</td><td>The HudBar loses it entirely</td></tr>
+      <tr><td>What is in the top bar?</td><td>Identity, souls, XP, menu</td><td>No API address, no injector dot, no hub state — those are developer surfaces</td></tr>
+      <tr><td>How does the map open?</td><td>Travel, from the map table or `M`</td><td>A stage change with a transition, not a panel</td></tr>
+      <tr><td>How does a run start?</td><td>An explicit button on the sanctum</td><td>Confirms loadout; the lawn stage mounts its canvas on entry</td></tr>
+      <tr><td>What does a new save see?</td><td>An authored one-creature scene</td><td>Rail renders from unlock state, not a constant</td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <strong>Still open on this plate.</strong> Whether the Sanctum gets illustration or stays framed
+    chrome (owner call, §20.2). The layout works either way — art would sit behind the shelves, and
+    nothing here depends on it.
+  </div>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 01 · Shell &amp; Sanctum · draft 2026-08-22 · governed by architecture/game-gui-principles.md
+</footer>
+
+</div>
+</body>
+</html>

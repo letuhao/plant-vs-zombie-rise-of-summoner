@@ -1,0 +1,221 @@
+{
+  "schemaVersion": 1,
+  "kind": "gem",
+  "_meta": {
+    "batch": "gems-g1",
+    "partition": "gems/1",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "tags": 3,
+      "themes": 1,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "entry-shapes.md#1"
+  },
+  "entries": [
+    {
+      "id": "gem.g1-001",
+      "nameKey": "gem.ember-shard",
+      "name": "Ember Shard",
+      "family": "atom.elemental-power",
+      "element": "fire",
+      "powerBand": "medium",
+      "affinityElement": "fire",
+      "iconKey": "icon.gem.ember-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-002",
+      "nameKey": "gem.frost-shard",
+      "name": "Frost Shard",
+      "family": "atom.elemental-power",
+      "element": "ice",
+      "powerBand": "medium",
+      "affinityElement": "ice",
+      "iconKey": "icon.gem.frost-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-003",
+      "nameKey": "gem.stone-shard",
+      "name": "Stone Shard",
+      "family": "atom.elemental-power",
+      "element": "earth",
+      "powerBand": "medium",
+      "affinityElement": "earth",
+      "iconKey": "icon.gem.stone-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-004",
+      "nameKey": "gem.gale-shard",
+      "name": "Gale Shard",
+      "family": "atom.elemental-power",
+      "element": "air",
+      "powerBand": "medium",
+      "affinityElement": "air",
+      "iconKey": "icon.gem.gale-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-005",
+      "nameKey": "gem.radiant-shard",
+      "name": "Radiant Shard",
+      "family": "atom.elemental-power",
+      "element": "light",
+      "powerBand": "medium",
+      "affinityElement": "light",
+      "iconKey": "icon.gem.radiant-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-006",
+      "nameKey": "gem.umbral-shard",
+      "name": "Umbral Shard",
+      "family": "atom.elemental-power",
+      "element": "dark",
+      "powerBand": "medium",
+      "affinityElement": "dark",
+      "iconKey": "icon.gem.umbral-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-007",
+      "nameKey": "gem.primal-shard",
+      "name": "Primal Shard",
+      "family": "atom.elemental-power",
+      "element": "omni",
+      "powerBand": "low",
+      "affinityElement": "omni",
+      "iconKey": "icon.gem.primal-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-008",
+      "nameKey": "gem.vigor-fragment",
+      "name": "Vigor Fragment",
+      "family": "atom.vitality",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.vigor-fragment",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g1-009",
+      "nameKey": "gem.renewal-fragment",
+      "name": "Renewal Fragment",
+      "family": "atom.mending",
+      "powerBand": "high",
+      "iconKey": "icon.gem.renewal-fragment",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g1-010",
+      "nameKey": "gem.aegis-gem",
+      "name": "Aegis Gem",
+      "family": "atom.warding",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.aegis-gem",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g1-011",
+      "nameKey": "gem.lifesteal-gem",
+      "name": "Lifesteal Gem",
+      "family": "atom.lifesteal",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.lifesteal-gem",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g1-012",
+      "nameKey": "gem.retribution-shard",
+      "name": "Retribution Shard",
+      "family": "atom.retribution",
+      "powerBand": "high",
+      "iconKey": "icon.gem.retribution-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-013",
+      "nameKey": "gem.volley-fragment",
+      "name": "Volley Fragment",
+      "family": "atom.volley",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.volley-fragment",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-014",
+      "nameKey": "gem.searing-fragment",
+      "name": "Searing Fragment",
+      "family": "atom.searing-strike",
+      "element": "fire",
+      "powerBand": "high",
+      "affinityElement": "fire",
+      "iconKey": "icon.gem.searing-fragment",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-015",
+      "nameKey": "gem.mending-pulse",
+      "name": "Mending Pulse",
+      "family": "atom.hit-mend",
+      "powerBand": "low",
+      "iconKey": "icon.gem.mending-pulse",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g1-016",
+      "nameKey": "gem.retort-gem",
+      "name": "Retort Gem",
+      "family": "atom.hit-retort",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.retort-gem",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-017",
+      "nameKey": "gem.followthrough-shard",
+      "name": "Follow-Through Shard",
+      "family": "atom.hit-followthrough",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.followthrough-shard",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-018",
+      "nameKey": "gem.might-gem",
+      "name": "Might Gem",
+      "family": "atom.might",
+      "powerBand": "high",
+      "iconKey": "icon.gem.might-gem",
+      "tags": ["offensive"]
+    },
+    {
+      "id": "gem.g1-019",
+      "nameKey": "gem.fortitude-gem",
+      "name": "Fortitude Gem",
+      "family": "atom.fortitude",
+      "powerBand": "medium",
+      "iconKey": "icon.gem.fortitude-gem",
+      "tags": ["defensive"]
+    },
+    {
+      "id": "gem.g1-020",
+      "nameKey": "gem.resilience-gem",
+      "name": "Resilience Gem",
+      "family": "atom.resilience",
+      "powerBand": "high",
+      "iconKey": "icon.gem.resilience-gem",
+      "tags": ["defensive"]
+    }
+  ]
+}

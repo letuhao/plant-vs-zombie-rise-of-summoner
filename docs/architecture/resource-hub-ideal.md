@@ -1,5 +1,10 @@
 # The ideal — one resource hub for every pool in the game
 
+> **⛔ Superseded 2026-08-22 by [resource-hub-ssot.md](resource-hub-ssot.md).** This file is the
+> reasoning trail, not the model. Its **§2**, its header "refused names" bullet, and its **§10.2**
+> table were already superseded by its own **§10.2a** and are **not** authoritative — notably `qi`
+> is in the locked set, and there are no faction-specific ids. Read the SSOT for what is true.
+
 **Status:** **Ideal capture (2026-08-22)** — a vision document, not a spec. No module ids, no build order, no acceptance criteria. It graduates to `resource-hub-ssot.md` when it is locked, matching the convention of [element-hub-ssot.md](element-hub-ssot.md), [actor-hub-ssot.md](actor-hub-ssot.md), and [status-ssot.md](status-ssot.md).
 
 Origin: the owner's faction-resource proposal (2026-08-22), reproduced in §2 and amended in §4–§8. Grounding: [action-map.md](action-map.md) §9, [effect-atom-ideal.md](effect-atom-ideal.md), and the code audit in §3.

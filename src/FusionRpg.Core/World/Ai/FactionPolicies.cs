@@ -13,7 +13,8 @@ public static class FactionPolicies
     static readonly IReadOnlyDictionary<string, IFactionPolicy> ById =
         new Dictionary<string, IFactionPolicy>(StringComparer.Ordinal)
         {
-            [StandFastPolicy.Id] = StandFastPolicy.Instance
+            [StandFastPolicy.Id] = StandFastPolicy.Instance,
+            [FrontierRulesPolicy.Id] = FrontierRulesPolicy.Instance
         };
 
     /// <summary>In ordinal id order, so anything that enumerates policies is reproducible.</summary>

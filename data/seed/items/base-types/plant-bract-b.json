@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-bract-b",
+    "partition": "base-types/sense/plant/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/ssot-equip-slots.md#2.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-bract-b-001",
+      "nameKey": "base.ancient-spathe",
+      "name": "Ancient Spathe",
+      "frame": "plant",
+      "role": "sense",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.ancient-spathe",
+      "flavorKey": "flavor.base.ancient-spathe",
+      "flavor": "A leaf-sheath so old it has become stone-colored, keeping secrets in every crease.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-002",
+      "nameKey": "base.grooved-involucre",
+      "name": "Grooved Involucre",
+      "frame": "plant",
+      "role": "sense",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.grooved-involucre",
+      "flavorKey": "flavor.base.grooved-involucre",
+      "flavor": "Deep channels cut into the bracts, each groove a pathway for signals to follow.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-003",
+      "nameKey": "base.petrified-spadix",
+      "name": "Petrified Spadix",
+      "frame": "plant",
+      "role": "sense",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.petrified-spadix",
+      "flavorKey": "flavor.base.petrified-spadix",
+      "flavor": "The flower spike has hardened into stone, sensing becomes seeing into time itself.",
+      "tags": [
+        "heavy",
+        "mineral",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-004",
+      "nameKey": "base.mossy-hypanthium",
+      "name": "Mossy Hypanthium",
+      "frame": "plant",
+      "role": "sense",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.mossy-hypanthium",
+      "flavorKey": "flavor.base.mossy-hypanthium",
+      "flavor": "Moss grows thick around the receptacle, softening what should be hard, adding a living layer of perception.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-005",
+      "nameKey": "base.hoary-perigone",
+      "name": "Hoary Perigone",
+      "frame": "plant",
+      "role": "sense",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.hoary-perigone",
+      "flavorKey": "flavor.base.hoary-perigone",
+      "flavor": "White-frosted and ancient, the perianth whorls sense what frost remembers.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-006",
+      "nameKey": "base.corky-bract",
+      "name": "Corky Bract",
+      "frame": "plant",
+      "role": "sense",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.corky-bract",
+      "flavorKey": "flavor.base.corky-bract",
+      "flavor": "Spongy cork tissue forms the eye-spot, buoyant and resilient under pressure.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-007",
+      "nameKey": "base.lichened-phyllary",
+      "name": "Lichened Phyllary",
+      "frame": "plant",
+      "role": "sense",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.lichened-phyllary",
+      "flavorKey": "flavor.base.lichened-phyllary",
+      "flavor": "Lichen symbiotes coat the bracts, turning perception into a cooperative sense.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-008",
+      "nameKey": "base.sunken-tropism",
+      "name": "Sunken Tropism",
+      "frame": "plant",
+      "role": "sense",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.sunken-tropism",
+      "flavorKey": "flavor.base.sunken-tropism",
+      "flavor": "The growth response has hollowed inward, creating a sensory void that draws light into itself.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-009",
+      "nameKey": "base.timeworn-involucre",
+      "name": "Timeworn Involucre",
+      "frame": "plant",
+      "role": "sense",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.timeworn-involucre",
+      "flavorKey": "flavor.base.timeworn-involucre",
+      "flavor": "Wrinkled and weathered, decades of seasons have etched a thousand sensations into its surface.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-010",
+      "nameKey": "base.oaken-spathe",
+      "name": "Oaken Spathe",
+      "frame": "plant",
+      "role": "sense",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.oaken-spathe",
+      "flavorKey": "flavor.base.oaken-spathe",
+      "flavor": "Built from old oak-like wood, the leaf-sheath is as solid as the trunk itself, sensing through steadiness.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-011",
+      "nameKey": "base.gnarled-spadix",
+      "name": "Gnarled Spadix",
+      "frame": "plant",
+      "role": "sense",
+      "class": "bark",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "extreme"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.gnarled-spadix",
+      "flavorKey": "flavor.base.gnarled-spadix",
+      "flavor": "Twisted and knotted from decades of growth battles, the flower spike reads trauma as acuity.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-bract-b-012",
+      "nameKey": "base.marrowed-perigone",
+      "name": "Marrowed Perigone",
+      "frame": "plant",
+      "role": "sense",
+      "class": "heartwood",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.marrowed-perigone",
+      "flavorKey": "flavor.base.marrowed-perigone",
+      "flavor": "Filled with marrow-like pith, the perianth acts as a sensory cushion, softer than bark but still unshakeable.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ]
+    }
+  ]
+}

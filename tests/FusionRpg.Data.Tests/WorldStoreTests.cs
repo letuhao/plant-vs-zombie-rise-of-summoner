@@ -80,7 +80,14 @@ public class WorldStoreTests : IDisposable
         // The template seeds Dave's opening belief; nobody else has looked at anything.
         var dave = built.Intel.Single(i => i.FactionId == "dave");
         Assert.NotEmpty(dave.Sectors);
-        Assert.Empty(built.Intel.Single(i => i.FactionId == "zomboss").Sectors);
+        // Zomboss believes what *he* can see, which since 2026-08-22 is his own fortress and its
+        // neighbour — he has a warband on the map now. What matters here is that the two
+        // factions do not share a belief, not that one of them has none.
+        var zomboss = built.Intel.Single(i => i.FactionId == "zomboss");
+        Assert.NotEmpty(zomboss.Sectors);
+        Assert.NotEqual(
+            dave.Sectors.Select(x => x.SectorId).OrderBy(x => x, StringComparer.Ordinal),
+            zomboss.Sectors.Select(x => x.SectorId).OrderBy(x => x, StringComparer.Ordinal));
 
         var (ok, reason, _) = _store.CreateWorld(playerId: 1, built);
         Assert.True(ok, reason);

@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-back-a",
+    "partition": "mantle/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-back-a-001",
+      "nameKey": "base.quilted-cape",
+      "name": "Quilted Cape",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.quilted-cape",
+      "flavorKey": "flavor.base.quilted-cape",
+      "flavor": "Padding that keeps the weather off and the wounds clean.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-002",
+      "nameKey": "base.spun-towel",
+      "name": "Spun Towel",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.spun-towel",
+      "flavorKey": "flavor.base.spun-towel",
+      "flavor": "Absorbent and cheap. Dries quickly and can soak through anything.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-003",
+      "nameKey": "base.woven-poncho",
+      "name": "Woven Poncho",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.woven-poncho",
+      "flavorKey": "flavor.base.woven-poncho",
+      "flavor": "A single piece with a hole for the head. The shedding loose threads catch on things.",
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-004",
+      "nameKey": "base.draped-drape",
+      "name": "Draped Drape",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.draped-drape",
+      "flavorKey": "flavor.base.draped-drape",
+      "flavor": "Excess fabric meant to flatter. Catches on things if you are not careful.",
+      "tags": [
+        "light",
+        "organic"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-005",
+      "nameKey": "base.fringed-shawl",
+      "name": "Fringed Shawl",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.fringed-shawl",
+      "flavorKey": "flavor.base.fringed-shawl",
+      "flavor": "Decorated and light — the fringe swings when you move, giving away position.",
+      "tags": [
+        "light",
+        "organic",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-006",
+      "nameKey": "base.supple-blanket",
+      "name": "Supple Blanket",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.supple-blanket",
+      "flavorKey": "flavor.base.supple-blanket",
+      "flavor": "Heavy enough to drape, light enough to move in.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-007",
+      "nameKey": "base.treated-tarp",
+      "name": "Treated Tarp",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.treated-tarp",
+      "flavorKey": "flavor.base.treated-tarp",
+      "flavor": "Waterproofed hide that sheds mud and worse. The smell fades, eventually.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-008",
+      "nameKey": "base.reinforced-satchel",
+      "name": "Reinforced Satchel",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.reinforced-satchel",
+      "flavorKey": "flavor.base.reinforced-satchel",
+      "flavor": "Carries its weight. The straps hold even when nothing else does.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-009",
+      "nameKey": "base.knotted-trashbag",
+      "name": "Knotted Trashbag",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.knotted-trashbag",
+      "flavorKey": "flavor.base.knotted-trashbag",
+      "flavor": "Sealed at the top with a knot. Whatever is inside stays sealed until it is not.",
+      "tags": [
+        "medium-light",
+        "fragile",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-010",
+      "nameKey": "base.fitted-backpack",
+      "name": "Fitted Backpack",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.fitted-backpack",
+      "flavorKey": "flavor.base.fitted-backpack",
+      "flavor": "Shaped to rest on the shoulders. Takes the weight off the neck.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-011",
+      "nameKey": "base.buckled-duffel",
+      "name": "Buckled Duffel",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.buckled-duffel",
+      "flavorKey": "flavor.base.buckled-duffel",
+      "flavor": "Thick leather and iron fittings. Meant to last through a dozen wars.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "sturdy",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-a-012",
+      "nameKey": "base.stout-cylinder",
+      "name": "Stout Cylinder",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "scale",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.stout-cylinder",
+      "flavorKey": "flavor.base.stout-cylinder",
+      "flavor": "Overlapped scales tubed around the back. Harder to hit than to carry.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "sturdy",
+        "defensive"
+      ]
+    }
+  ]
+}

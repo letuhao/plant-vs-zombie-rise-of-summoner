@@ -59,7 +59,10 @@ public static class WorldTemplateCatalog
         {
             new() { FactionId = Dave, Kind = WorldFactionKind.Player, Name = "Dave" },
             new() { FactionId = Wild, Kind = WorldFactionKind.Wild, Name = "Wild", PolicyId = "stand-fast" },
-            new() { FactionId = Zomboss, Kind = WorldFactionKind.Zomboss, Name = "Dr. Zomboss", PolicyId = "stand-fast" }
+            // The wild keep `stand-fast` on purpose: they are a hazard on the map, not a third empire.
+            // An expansionist wild would race the player for every sector and turn a map with danger
+            // on it into a map with two opponents on it.
+            new() { FactionId = Zomboss, Kind = WorldFactionKind.Zomboss, Name = "Dr. Zomboss", PolicyId = Ai.FrontierRulesPolicy.Id }
         }.OrderBy(f => f.FactionId, StringComparer.Ordinal).ToList(),
 
         Sectors = new WorldSector[]
@@ -139,7 +142,11 @@ public static class WorldTemplateCatalog
         Lanes = new WorldLane[]
         {
             new() { LaneId = "l-ash-black", FromSectorId = "ash-waste", ToSectorId = "black-gate", TypeId = "rift", Length = 1200, Width = 800, HazardMilli = 100 },
-            new() { LaneId = "l-ash-verdant", FromSectorId = "ash-waste", ToSectorId = "verdant-shelf", TypeId = "rift", Length = 1100, Width = 1000 },
+            // Verdant Shelf hangs off Black Gate rather than Ash Waste (2026-08-22). Ash Waste used to
+            // touch four of six sectors, so one march to the middle lit the entire map permanently and
+            // the fog was a three-turn opening rather than a condition. Now the far corner stays dark
+            // until somebody goes and looks, and the richest ground on the map sits behind Zomboss.
+            new() { LaneId = "l-black-verdant", FromSectorId = "black-gate", ToSectorId = "verdant-shelf", TypeId = "rift", Length = 1100, Width = 1000 },
             new() { LaneId = "l-ember-ash", FromSectorId = "ember-hollow", ToSectorId = "ash-waste", TypeId = "ley", Length = 1000, Width = 600 },
             new() { LaneId = "l-frost-ash", FromSectorId = "frost-mire", ToSectorId = "ash-waste", TypeId = "rift", Length = 1000, Width = 1000 },
             new() { LaneId = "l-home-ember", FromSectorId = "homeworld", ToSectorId = "ember-hollow", TypeId = "corridor", Length = 800, Width = 1000 },
@@ -157,6 +164,25 @@ public static class WorldTemplateCatalog
                     new() { SpeciesId = "peashooterzombie", Level = 1, Hp = 110 },
                     new() { SpeciesId = "conezombie", Level = 1, Hp = 110 },
                     new() { SpeciesId = "paperzombie", Level = 1, Hp = 110 }
+                }
+            },
+            // Zomboss's standing force, at the far end of the map behind his own Seat.
+            //
+            // The template shipped without one until 2026-08-22: he had a faction, a fortress and no
+            // army, so once `ai-commander` gave him a brain he had nothing to command and correctly
+            // stood still every turn. Found by playing twenty turns rather than by any test — every
+            // suite agreed the AI worked, and it did; there was simply nobody to be.
+            //
+            // Deliberately smaller than Dave's legion and parked three lanes away. He is meant to be
+            // a presence you meet in the middle of the map, not an opening threat.
+            new()
+            {
+                EntityId = "e-zomboss-band-1", Kind = WorldEntityKind.Warband, OwnerFactionId = Zomboss,
+                AtSectorId = "black-gate", Stance = "march", MovementRemaining = 1000,
+                Members = new WorldEntityMember[]
+                {
+                    new() { SpeciesId = "normalzombie", Level = 3, Hp = 200 },
+                    new() { SpeciesId = "conezombie", Level = 3, Hp = 200 }
                 }
             },
             new()

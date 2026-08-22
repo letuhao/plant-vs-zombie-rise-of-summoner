@@ -1,0 +1,445 @@
+{
+  "schemaVersion": 1,
+  "kind": "display-template",
+  "_meta": {
+    "batch": "display-templates-triggered",
+    "partition": "display-templates/3",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-affixes.md#4.1"
+  },
+  "entries": [
+    {
+      "id": "disptpl.p3-001",
+      "nameKey": "disptpl.affix.searing-strike",
+      "name": "{value} {element} damage on hit",
+      "runtimeFamily": "atom.searing-strike",
+      "plantOverrideKey": null,
+      "groupId": "g.on-hit",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-002",
+      "nameKey": "disptpl.affix.lifesteal",
+      "name": "heal {value}% of damage dealt on hit",
+      "runtimeFamily": "atom.lifesteal",
+      "plantOverrideKey": null,
+      "groupId": "g.on-hit",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-003",
+      "nameKey": "disptpl.affix.retribution",
+      "name": "reflect {value}% of damage taken back at attacker",
+      "runtimeFamily": "atom.retribution",
+      "plantOverrideKey": null,
+      "groupId": "g.on-hit",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-004",
+      "nameKey": "disptpl.affix.volley",
+      "name": "{value}% chance to fire extra bullet on hit",
+      "runtimeFamily": "atom.volley",
+      "plantOverrideKey": null,
+      "groupId": "g.on-hit",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-005",
+      "nameKey": "disptpl.affix.hit-mend",
+      "name": "heal {value}% of damage taken on hit",
+      "runtimeFamily": "atom.hit-mend",
+      "plantOverrideKey": null,
+      "groupId": "g.on-hit",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-006",
+      "nameKey": "disptpl.affix.hit-retort",
+      "name": "{value}% chance to fire bullet back at attacker when hit",
+      "runtimeFamily": "atom.hit-retort",
+      "plantOverrideKey": null,
+      "groupId": "g.on-hit",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-007",
+      "nameKey": "disptpl.affix.hit-followthrough",
+      "name": "{value} bonus damage on hit",
+      "runtimeFamily": "atom.hit-followthrough",
+      "plantOverrideKey": null,
+      "groupId": "g.on-hit",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-008",
+      "nameKey": "disptpl.affix.deathblast",
+      "name": "{value} {element} damage burst on death",
+      "runtimeFamily": "atom.deathblast",
+      "plantOverrideKey": null,
+      "groupId": "g.on-death",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-009",
+      "nameKey": "disptpl.affix.martyrdom",
+      "name": "heal allies {value}% of max health when this dies",
+      "runtimeFamily": "atom.martyrdom",
+      "plantOverrideKey": null,
+      "groupId": "g.on-death",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-010",
+      "nameKey": "disptpl.affix.summoner",
+      "name": "{value}% chance to spawn zombie where this fell",
+      "runtimeFamily": "atom.summoner",
+      "plantOverrideKey": null,
+      "groupId": "g.on-death",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-011",
+      "nameKey": "disptpl.affix.gardener",
+      "name": "{value}% chance to spawn plant where this fell",
+      "runtimeFamily": "atom.gardener",
+      "plantOverrideKey": null,
+      "groupId": "g.on-death",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-012",
+      "nameKey": "disptpl.affix.death-harvest",
+      "name": "heal {value}% of max health when you land killing blow",
+      "runtimeFamily": "atom.death-harvest",
+      "plantOverrideKey": null,
+      "groupId": "g.on-death",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-013",
+      "nameKey": "disptpl.affix.death-glean",
+      "name": "{value}% chance to fire bullet when you land killing blow",
+      "runtimeFamily": "atom.death-glean",
+      "plantOverrideKey": null,
+      "groupId": "g.on-death",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-014",
+      "nameKey": "disptpl.affix.death-salvo",
+      "name": "{value}% chance to fire bullet when this dies",
+      "runtimeFamily": "atom.death-salvo",
+      "plantOverrideKey": null,
+      "groupId": "g.on-death",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-015",
+      "nameKey": "disptpl.affix.regeneration",
+      "name": "heal {value} hp per tick",
+      "runtimeFamily": "atom.regeneration",
+      "plantOverrideKey": null,
+      "groupId": "g.sustain",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-016",
+      "nameKey": "disptpl.affix.cleansing",
+      "name": "{value}% chance to cleanse harmful status when struck",
+      "runtimeFamily": "atom.cleansing",
+      "plantOverrideKey": null,
+      "groupId": "g.sustain",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-017",
+      "nameKey": "disptpl.affix.warded",
+      "name": "{value} {element} shield on spawn",
+      "runtimeFamily": "atom.warded",
+      "plantOverrideKey": null,
+      "groupId": "g.sustain",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-018",
+      "nameKey": "disptpl.affix.sust-husk",
+      "name": "gain {value} shield every tick",
+      "runtimeFamily": "atom.sust-husk",
+      "plantOverrideKey": null,
+      "groupId": "g.sustain",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-019",
+      "nameKey": "disptpl.affix.sust-callus",
+      "name": "gain {value} shield when struck",
+      "runtimeFamily": "atom.sust-callus",
+      "plantOverrideKey": null,
+      "groupId": "g.sustain",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-020",
+      "nameKey": "disptpl.affix.sust-freshgraft",
+      "name": "cleanse all harmful statuses on spawn",
+      "runtimeFamily": "atom.sust-freshgraft",
+      "plantOverrideKey": null,
+      "groupId": "g.sustain",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-021",
+      "nameKey": "disptpl.affix.sust-grit",
+      "name": "{value}% chance to cleanse harmful status when you land hit",
+      "runtimeFamily": "atom.sust-grit",
+      "plantOverrideKey": null,
+      "groupId": "g.sustain",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-022",
+      "nameKey": "disptpl.affix.freezing",
+      "name": "{value}% chance to freeze target on hit",
+      "runtimeFamily": "atom.freezing",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-023",
+      "nameKey": "disptpl.affix.venomous",
+      "name": "{value}% chance to poison target on hit",
+      "runtimeFamily": "atom.venomous",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-024",
+      "nameKey": "disptpl.affix.mesmerizing",
+      "name": "{value}% chance to mesmerize target on hit",
+      "runtimeFamily": "atom.mesmerizing",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-025",
+      "nameKey": "disptpl.affix.withering",
+      "name": "{value}% chance to wither target on hit",
+      "runtimeFamily": "atom.withering",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-026",
+      "nameKey": "disptpl.affix.bloodletting",
+      "name": "{value}% chance to inflict bloodletting on hit",
+      "runtimeFamily": "atom.bloodletting",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-027",
+      "nameKey": "disptpl.affix.sporing",
+      "name": "{value}% chance to infest target with spores on hit",
+      "runtimeFamily": "atom.sporing",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-028",
+      "nameKey": "disptpl.affix.entangling",
+      "name": "{value}% chance to entangle target on hit",
+      "runtimeFamily": "atom.entangling",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "pending",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-029",
+      "nameKey": "disptpl.affix.cherry-bloom",
+      "name": "{value}% chance to burst cherry bloom on hit",
+      "runtimeFamily": "atom.cherry-bloom",
+      "plantOverrideKey": null,
+      "groupId": "g.board",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-030",
+      "nameKey": "disptpl.affix.dooming",
+      "name": "{value}% chance to detonate board on death",
+      "runtimeFamily": "atom.dooming",
+      "plantOverrideKey": null,
+      "groupId": "g.board",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-031",
+      "nameKey": "disptpl.affix.firelining",
+      "name": "{value}% chance to lay line of fire on hit",
+      "runtimeFamily": "atom.firelining",
+      "plantOverrideKey": null,
+      "groupId": "g.board",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-032",
+      "nameKey": "disptpl.affix.flash-freeze",
+      "name": "{value}% chance to flash-freeze attacker when struck",
+      "runtimeFamily": "atom.flash-freeze",
+      "plantOverrideKey": null,
+      "groupId": "g.board",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-033",
+      "nameKey": "disptpl.affix.gravemaking",
+      "name": "{value}% chance to raise grave where target falls",
+      "runtimeFamily": "atom.gravemaking",
+      "plantOverrideKey": null,
+      "groupId": "g.board",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-034",
+      "nameKey": "disptpl.affix.gravedigging",
+      "name": "{value}% chance to clear nearby grave when struck",
+      "runtimeFamily": "atom.gravedigging",
+      "plantOverrideKey": null,
+      "groupId": "g.board",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-035",
+      "nameKey": "disptpl.affix.terraforming",
+      "name": "{value}% chance to scorch ground to lava on hit",
+      "runtimeFamily": "atom.terraforming",
+      "plantOverrideKey": null,
+      "groupId": "g.board",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-036",
+      "nameKey": "disptpl.affix.sunbloom",
+      "name": "+{value} sun per kill",
+      "runtimeFamily": "atom.sunbloom",
+      "plantOverrideKey": null,
+      "groupId": "g.economy",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-037",
+      "nameKey": "disptpl.affix.midas",
+      "name": "+{value} money per kill",
+      "runtimeFamily": "atom.midas",
+      "plantOverrideKey": null,
+      "groupId": "g.economy",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-038",
+      "nameKey": "disptpl.affix.econ-bounty",
+      "name": "+{value} bounty points per kill",
+      "runtimeFamily": "atom.econ-bounty",
+      "plantOverrideKey": null,
+      "groupId": "g.economy",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-039",
+      "nameKey": "disptpl.affix.econ-graze",
+      "name": "+{value} sun per hit landed",
+      "runtimeFamily": "atom.econ-graze",
+      "plantOverrideKey": null,
+      "groupId": "g.economy",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-040",
+      "nameKey": "disptpl.affix.econ-toll",
+      "name": "+{value} money per hit taken",
+      "runtimeFamily": "atom.econ-toll",
+      "plantOverrideKey": null,
+      "groupId": "g.economy",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-041",
+      "nameKey": "disptpl.affix.econ-endure",
+      "name": "+{value} sun per hit taken",
+      "runtimeFamily": "atom.econ-endure",
+      "plantOverrideKey": null,
+      "groupId": "g.economy",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-042",
+      "nameKey": "disptpl.affix.econ-muster",
+      "name": "+{value} points on deployment",
+      "runtimeFamily": "atom.econ-muster",
+      "plantOverrideKey": null,
+      "groupId": "g.economy",
+      "status": "live",
+      "tags": []
+    }
+  ]
+}

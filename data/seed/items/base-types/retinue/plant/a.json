@@ -1,0 +1,304 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-runner-a",
+    "partition": "base-types/retinue/plant/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-runner-a-001",
+      "nameKey": "base.ephemeral-offshoot",
+      "name": "Ephemeral Offshoot",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.summoner",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.ephemeral-offshoot",
+      "flavorKey": "flavor.base.ephemeral-offshoot",
+      "flavor": "Thread-thin runners, ready to root where the wind takes them.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-002",
+      "nameKey": "base.floating-bourgeon",
+      "name": "Floating Bourgeon",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.gardener",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.floating-bourgeon",
+      "flavorKey": "flavor.base.floating-bourgeon",
+      "flavor": "A soft emerging growth, still light enough to drift on the breeze.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-003",
+      "nameKey": "base.adrift-slip",
+      "name": "Adrift Slip",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.volley",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.adrift-slip",
+      "flavorKey": "flavor.base.adrift-slip",
+      "flavor": "A cutting barely formed, delicate enough to travel on air.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility",
+        "fragile"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-004",
+      "nameKey": "base.budding-seedling",
+      "name": "Budding Seedling",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.cherry-bloom",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.budding-seedling",
+      "flavorKey": "flavor.base.budding-seedling",
+      "flavor": "A young shoot thick with stored energy, ready to spread.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-005",
+      "nameKey": "base.weightless-scion",
+      "name": "Weightless Scion",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.dooming",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.weightless-scion",
+      "flavorKey": "flavor.base.weightless-scion",
+      "flavor": "A grafted scion marked by feather-light fronds.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-006",
+      "nameKey": "base.stored-ratoon",
+      "name": "Stored Ratoon",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.firelining",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.stored-ratoon",
+      "flavorKey": "flavor.base.stored-ratoon",
+      "flavor": "A sprouting stem with packed reserves, chasing growth sideways.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-007",
+      "nameKey": "base.dusted-offset",
+      "name": "Dusted Offset",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.flash-freeze",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dusted-offset",
+      "flavorKey": "flavor.base.dusted-offset",
+      "flavor": "A naturally light growth, fine as dust, ready to scatter.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-008",
+      "nameKey": "base.strewn-ramet",
+      "name": "Strewn Ramet",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.gravemaking",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.strewn-ramet",
+      "flavorKey": "flavor.base.strewn-ramet",
+      "flavor": "A tiered offspring, scattered like seeds, each ring a cycle.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-009",
+      "nameKey": "base.charged-propagule",
+      "name": "Charged Propagule",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.gravedigging",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.charged-propagule",
+      "flavorKey": "flavor.base.charged-propagule",
+      "flavor": "A propagation unit heavy with latent power, eager to root.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-010",
+      "nameKey": "base.sifted-spawn",
+      "name": "Sifted Spawn",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "spore",
+      "band": "a",
+      "implicit": {
+        "family": "atom.terraforming",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.sifted-spawn",
+      "flavorKey": "flavor.base.sifted-spawn",
+      "flavor": "Filtered and cleared, each grain ready to take root.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-011",
+      "nameKey": "base.gathering-brood",
+      "name": "Gathering Brood",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.summoner",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.gathering-brood",
+      "flavorKey": "flavor.base.gathering-brood",
+      "flavor": "An accumulating cluster, dense with potential, ready to scatter offspring.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.plant-runner-a-012",
+      "nameKey": "base.nourished-clone",
+      "name": "Nourished Clone",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "a",
+      "implicit": {
+        "family": "atom.gardener",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.nourished-clone",
+      "flavorKey": "flavor.base.nourished-clone",
+      "flavor": "A genetic copy, carefully tended and well-fed—ready to root and claim ground.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility",
+        "sturdy"
+      ]
+    }
+  ]
+}

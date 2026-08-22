@@ -19,7 +19,21 @@ public static class AtomRowValidator
     static readonly Regex FamilyIdRe = new(@"^atom\.[a-z0-9]+(-[a-z0-9]+)*$", RegexOptions.Compiled);
     static readonly Regex VariantRe = new(@"^[a-z0-9]+(-[a-z0-9]+)*$", RegexOptions.Compiled);
     static readonly Regex AtomIdRe = new(@"^atom\.[a-z0-9-]+(\.[a-z0-9-]+)?\.t[1-9][0-9]*$", RegexOptions.Compiled);
-    static readonly Regex IcdKeyRe = new(@"^[a-z0-9]+(-[a-z0-9]+)*$", RegexOptions.Compiled);
+    // Kebab, snake and dotted segments all pass. It was kebab-only, which was right while `icd_key`
+    // was nothing but a grouping key — and wrong the moment E7 made it the compiled def's IDENTITY.
+    // A migrated effect keeps the id its stored grants already name (`fx.butter_on_hit`), and that
+    // id has both a dot and an underscore.
+    static readonly Regex IcdKeyRe = new(@"^[a-z0-9]+([-_.][a-z0-9]+)*$", RegexOptions.Compiled);
+
+    /// <summary>
+    /// FA1 spells the operation as the key: <c>flat</c>, <c>increased</c>, <c>more</c>. The atom
+    /// schema spells it as a value of <c>op</c>, so the compiler translates — and can only translate
+    /// what it recognises. An unvalidated op reached FA1 as neither key and applied a flat zero.
+    /// </summary>
+    public static readonly string[] StatOps = { "flat", "increased", "more" };
+
+    /// <summary>Derived channels compose differently: no <c>more</c>, but <c>replace</c> and <c>flag</c>.</summary>
+    public static readonly string[] DerivedOps = { "flat", "increased", "replace", "flag" };
 
     /// <summary>
     /// Validate one row. <paramref name="curveInput"/> resolves a curve id to the axis it reads;
@@ -65,6 +79,9 @@ public static class AtomRowValidator
 
         var paramCheck = kind.Params.Validate(pars);
         if (!paramCheck.IsOk) return paramCheck;
+
+        var opCheck = ValidateOp(row, pars);
+        if (!opCheck.IsOk) return opCheck;
 
         // E2 wiring: a param the kind declares as a Value carries a value spec, and a spec whose
         // range runs backwards or whose roll policy does not exist must never reach the table.
@@ -181,6 +198,37 @@ public static class AtomRowValidator
             case JsonElement { ValueKind: JsonValueKind.Number } je: return je.TryGetInt32(out result);
             default: result = 0; return false;
         }
+    }
+
+    /// <summary>
+    /// The operation vocabulary, checked at load because the compiler must translate it and cannot
+    /// translate what it does not recognise.
+    ///
+    /// <para>An unrecognised <c>op</c> used to pass validation, compile to a <c>{channel, op,
+    /// amount}</c> action, and reach FA1 — which reads <c>flat</c>/<c>increased</c>/<c>more</c> and
+    /// nothing else. With none of them present the executor applies a <b>flat zero</b>
+    /// (InjectorEffectActionSink.cs:104). Not a no-op: a real modifier of no size.</para>
+    /// </summary>
+    static AtomRejection ValidateOp(AtomRow row, IReadOnlyDictionary<string, object?> pars)
+    {
+        var allowed = row.KindId switch
+        {
+            "stat.modify" => StatOps,
+            "stat.derived" => DerivedOps,
+            _ => null,
+        };
+        if (allowed is null) return AtomRejection.Ok;
+
+        if (!pars.TryGetValue("op", out var raw))
+            return AtomRejection.Ok; // the schema already made it required; that check owns absence
+
+        var op = (raw is JsonElement el && el.ValueKind == JsonValueKind.String ? el.GetString() : raw?.ToString())
+                 ?.ToLowerInvariant();
+
+        return Array.Exists(allowed, o => string.Equals(o, op, StringComparison.Ordinal))
+            ? AtomRejection.Ok
+            : AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                $"{row.AtomId}: op '{op}' is not one of {string.Join(" | ", allowed)}");
     }
 
     static bool TryParseObject(

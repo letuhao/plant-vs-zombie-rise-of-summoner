@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-face-a",
+    "partition": "base-types/sense/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-equip-slots.md#2.3"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-face-a-001",
+      "nameKey": "base.quilted-mask",
+      "name": "Quilted Mask",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.quilted-mask",
+      "flavorKey": "flavor.base.quilted-mask",
+      "flavor": "Layered cloth so tightly stitched that peering through it is almost like peering through fog.",
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-002",
+      "nameKey": "base.spun-goggle",
+      "name": "Spun Goggle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.spun-goggle",
+      "flavorKey": "flavor.base.spun-goggle",
+      "flavor": "Woven fibre lens cups that catch and hold the light just so. Clumsy-looking, but whoever made it saw what they were doing.",
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-003",
+      "nameKey": "base.threadbare-visor",
+      "name": "Threadbare Visor",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.threadbare-visor",
+      "flavorKey": "flavor.base.threadbare-visor",
+      "flavor": "Faded from weather, frayed at the edges where it has started to fray, but the bill still casts a clean shadow.",
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-004",
+      "nameKey": "base.secondhand-spectacle",
+      "name": "Secondhand Spectacle",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.secondhand-spectacle",
+      "flavorKey": "flavor.base.secondhand-spectacle",
+      "flavor": "Someone else wore this before you, and you can see their habits in the wear marks. But what they lost, you might gain.",
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-005",
+      "nameKey": "base.insulated-scope",
+      "name": "Insulated Scope",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.insulated-scope",
+      "flavorKey": "flavor.base.insulated-scope",
+      "flavor": "Padded thick enough that your eyes never quite see the field clearly, but the padding keeps the wind out.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-006",
+      "nameKey": "base.woven-eyepiece",
+      "name": "Woven Eyepiece",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.woven-eyepiece",
+      "flavorKey": "flavor.base.woven-eyepiece",
+      "flavor": "A single lens of tight-woven cloth, so fine it almost looks solid. The weaver must have had steady hands.",
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-007",
+      "nameKey": "base.frayed-brow",
+      "name": "Frayed Brow",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.frayed-brow",
+      "flavorKey": "flavor.base.frayed-brow",
+      "flavor": "A headband of cloth so well-used that its edges have split and curled. The unravelling almost makes it larger.",
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-008",
+      "nameKey": "base.hemmed-mouthguard",
+      "name": "Hemmed Mouthguard",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.hemmed-mouthguard",
+      "flavorKey": "flavor.base.hemmed-mouthguard",
+      "flavor": "Carefully stitched edges, like someone took real care in making it wearable. The work shows.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-009",
+      "nameKey": "base.tattered-blinder",
+      "name": "Tattered Blinder",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.tattered-blinder",
+      "flavorKey": "flavor.base.tattered-blinder",
+      "flavor": "Strips of cloth hang loose, letting light in through the gaps, but what light reaches you is filtered and distorted.",
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-010",
+      "nameKey": "base.faded-lens",
+      "name": "Faded Lens",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.faded-lens",
+      "flavorKey": "flavor.base.faded-lens",
+      "flavor": "The cloth was once dyed deep, but the sun and time have bleached it to almost nothing. You can see through it clearly now.",
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-011",
+      "nameKey": "base.linen-snorkel",
+      "name": "Linen Snorkel",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.linen-snorkel",
+      "flavorKey": "flavor.base.linen-snorkel",
+      "flavor": "A tube of fine linen meant to let you see while breathing through the narrowest gap, angling sight down and forward.",
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-face-a-012",
+      "nameKey": "base.unlined-earplug",
+      "name": "Unlined Earplug",
+      "frame": "humanoid",
+      "role": "sense",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.unlined-earplug",
+      "flavorKey": "flavor.base.unlined-earplug",
+      "flavor": "A single thickness of tight cloth wrapped and tied, sitting light in place. Simple, almost forgotten looking, but effective.",
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ]
+    }
+  ]
+}

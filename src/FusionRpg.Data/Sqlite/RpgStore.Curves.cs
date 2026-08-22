@@ -46,21 +46,39 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            using var cmd = db.CreateCommand();
-            cmd.CommandText = """
-                INSERT INTO effect_curve (curve_id, input, points_json, revision)
-                VALUES ($id, $in, $pts, 1)
-                ON CONFLICT(curve_id) DO UPDATE SET
-                  input = excluded.input,
-                  points_json = excluded.points_json,
-                  revision = effect_curve.revision + 1;
-                """;
-            cmd.Parameters.AddWithValue("$id", curveId);
-            cmd.Parameters.AddWithValue("$in", input.ToString().ToLowerInvariant());
-            cmd.Parameters.AddWithValue("$pts", SerializePoints(points));
-            cmd.ExecuteNonQuery();
+            WriteCurveUnlocked(db, null, curveId, input, points);
             return (true, "");
         }
+    }
+
+    /// <summary>
+    /// The curve write, on a caller-owned connection and optional transaction. E14a imports curves,
+    /// atoms and containers in one transaction — an atom that scales through a curve is only valid
+    /// once that curve exists, so the two cannot commit separately.
+    /// </summary>
+    /// <returns>How many rows the write changed — 0 when the row was already identical.</returns>
+    int WriteCurveUnlocked(
+        SqliteConnection db, SqliteTransaction? tx,
+        string curveId, CurveInput input, IReadOnlyList<CurvePoint> points)
+    {
+        using var cmd = db.CreateCommand();
+        if (tx is not null) cmd.Transaction = tx;
+        cmd.CommandText = """
+            INSERT INTO effect_curve (curve_id, input, points_json, revision)
+            VALUES ($id, $in, $pts, 1)
+            -- Skipped when nothing differs: `revision` is a hashed column, so bumping it on an
+            -- identical re-import would make a repeat import look like a content edit (E14a).
+            ON CONFLICT(curve_id) DO UPDATE SET
+              input = excluded.input,
+              points_json = excluded.points_json,
+              revision = effect_curve.revision + 1
+            WHERE effect_curve.input IS NOT excluded.input
+               OR effect_curve.points_json IS NOT excluded.points_json;
+            """;
+        cmd.Parameters.AddWithValue("$id", curveId);
+        cmd.Parameters.AddWithValue("$in", input.ToString().ToLowerInvariant());
+        cmd.Parameters.AddWithValue("$pts", SerializePoints(points));
+        return cmd.ExecuteNonQuery();
     }
 
     /// <summary>One curve, or null. Rows that fail validation on read are treated as absent.</summary>

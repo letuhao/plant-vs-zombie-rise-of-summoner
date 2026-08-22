@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-jewel-major-b",
+    "partition": "base-types/jewel-major/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "classes": 2,
+      "tags": 4,
+      "themes": 1,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.2"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-neck-b-001",
+      "nameKey": "base.irrevocable-lanyard",
+      "name": "Irrevocable Lanyard",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.irrevocable-lanyard",
+      "flavorKey": "flavor.base.irrevocable-lanyard",
+      "flavor": "Once tied, the knot cannot be undone. You carry a binding that cannot be broken.",
+      "tags": [
+        "heavy",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-002",
+      "nameKey": "base.dated-dogtag",
+      "name": "Dated Dogtag",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.dated-dogtag",
+      "flavorKey": "flavor.base.dated-dogtag",
+      "flavor": "Stamped with a date that will not fade. Once sworn on this day, the claim endures.",
+      "tags": [
+        "heavy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-003",
+      "nameKey": "base.endorsed-brooch",
+      "name": "Endorsed Brooch",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.endorsed-brooch",
+      "flavorKey": "flavor.base.endorsed-brooch",
+      "flavor": "Approved by those who matter, pinned where all can see. The endorsement holds fast.",
+      "tags": [
+        "heavy",
+        "defensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-004",
+      "nameKey": "base.substantial-collar",
+      "name": "Substantial Collar",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.substantial-collar",
+      "flavorKey": "flavor.base.substantial-collar",
+      "flavor": "Wrought heavier than fashion calls for, a weight worn on purpose. What it takes, it gives partway back.",
+      "tags": [
+        "medium",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-005",
+      "nameKey": "base.burnished-locket",
+      "name": "Burnished Locket",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.burnished-locket",
+      "flavorKey": "flavor.base.burnished-locket",
+      "flavor": "Rubbed smooth by a thumb that never stopped worrying it. Whatever it holds has been counted more than once.",
+      "tags": [
+        "medium",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-006",
+      "nameKey": "base.worked-pendant",
+      "name": "Worked Pendant",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.worked-pendant",
+      "flavorKey": "flavor.base.worked-pendant",
+      "flavor": "Hammered past the point a smith would call finished. The extra blows are why it still bites.",
+      "tags": [
+        "medium",
+        "offensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-007",
+      "nameKey": "base.gleaming-necklace",
+      "name": "Gleaming Necklace",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.gleaming-necklace",
+      "flavorKey": "flavor.base.gleaming-necklace",
+      "flavor": "Polished until it throws back more light than it should. Something in the metal keeps mending itself.",
+      "tags": [
+        "medium",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-008",
+      "nameKey": "base.knurled-clasp",
+      "name": "Knurled Clasp",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "torc",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.knurled-clasp",
+      "flavorKey": "flavor.base.knurled-clasp",
+      "flavor": "Cross-cut ridges give the fingers something to grip when the fastening matters most. It has never slipped.",
+      "tags": [
+        "medium",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-009",
+      "nameKey": "base.expired-padlock",
+      "name": "Expired Padlock",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.lifesteal",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.expired-padlock",
+      "flavorKey": "flavor.base.expired-padlock",
+      "flavor": "The contract it guarded is void, but the lock itself remains. What was sealed cannot be forgotten.",
+      "tags": [
+        "heavy",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-010",
+      "nameKey": "base.final-chain",
+      "name": "Final Chain",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.final-chain",
+      "flavorKey": "flavor.base.final-chain",
+      "flavor": "Forged to mark the end of all negotiation. No appeal remains once this is worn.",
+      "tags": [
+        "heavy",
+        "offensive",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-011",
+      "nameKey": "base.absolute-leash",
+      "name": "Absolute Leash",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.midas",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.absolute-leash",
+      "flavorKey": "flavor.base.absolute-leash",
+      "flavor": "The binding is absolute and cannot be reasoned with. Complete subjugation to the terms.",
+      "tags": [
+        "heavy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-neck-b-012",
+      "nameKey": "base.unbreakable-trophy",
+      "name": "Unbreakable Trophy",
+      "frame": "humanoid",
+      "role": "jewel-major",
+      "class": "seal",
+      "band": "b",
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.unbreakable-trophy",
+      "flavorKey": "flavor.base.unbreakable-trophy",
+      "flavor": "A prize that will outlast you. Wearing it declares victory that time itself cannot erase.",
+      "tags": [
+        "heavy",
+        "offensive"
+      ]
+    }
+  ]
+}

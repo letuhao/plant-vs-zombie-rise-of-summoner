@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-back-b",
+    "partition": "base-types/mantle/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "agent-brief-template.md"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-back-b-001",
+      "nameKey": "base.articulated-rig",
+      "name": "Articulated Rig",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.articulated-rig",
+      "flavorKey": "flavor.base.articulated-rig",
+      "flavor": "Fitted to move with you, not against you.",
+      "tags": [
+        "medium-heavy",
+        "mechanical",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-002",
+      "nameKey": "base.jointed-duffel",
+      "name": "Jointed Duffel",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.jointed-duffel",
+      "flavorKey": "flavor.base.jointed-duffel",
+      "flavor": "Heavy enough to trust, flexible enough to live in.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-003",
+      "nameKey": "base.netted-hamper",
+      "name": "Netted Hamper",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.netted-hamper",
+      "flavorKey": "flavor.base.netted-hamper",
+      "flavor": "Something held together by the very grid that binds it.",
+      "tags": [
+        "heavy",
+        "sturdy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-004",
+      "nameKey": "base.stapled-cylinder",
+      "name": "Stapled Cylinder",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.stapled-cylinder",
+      "flavorKey": "flavor.base.stapled-cylinder",
+      "flavor": "A duct in the rough. You become its cargo.",
+      "tags": [
+        "heavy",
+        "mechanical",
+        "fragile"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-005",
+      "nameKey": "base.overlapping-backpack",
+      "name": "Overlapping Backpack",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.overlapping-backpack",
+      "flavorKey": "flavor.base.overlapping-backpack",
+      "flavor": "Each layer sheds the blow that did not kill the one before it.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-006",
+      "nameKey": "base.corrugated-satchel",
+      "name": "Corrugated Satchel",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.corrugated-satchel",
+      "flavorKey": "flavor.base.corrugated-satchel",
+      "flavor": "Carved from the outside, strengthened from within.",
+      "tags": [
+        "medium-heavy",
+        "mechanical",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-007",
+      "nameKey": "base.soldered-burden",
+      "name": "Soldered Burden",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "extreme"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.soldered-burden",
+      "flavorKey": "flavor.base.soldered-burden",
+      "flavor": "One piece, one weight, one purpose. That is all it knows.",
+      "tags": [
+        "heavy",
+        "mechanical",
+        "sturdy",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-008",
+      "nameKey": "base.rigid-ladder",
+      "name": "Rigid Ladder",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.rigid-ladder",
+      "flavorKey": "flavor.base.rigid-ladder",
+      "flavor": "Every rung is a decision that was made long before your war.",
+      "tags": [
+        "heavy",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-009",
+      "nameKey": "base.ponderous-cylinder",
+      "name": "Ponderous Cylinder",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.ponderous-cylinder",
+      "flavorKey": "flavor.base.ponderous-cylinder",
+      "flavor": "Every step reminds you why you carry it.",
+      "tags": [
+        "heavy",
+        "mechanical",
+        "sturdy"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-010",
+      "nameKey": "base.monolithic-hamper",
+      "name": "Monolithic Hamper",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.monolithic-hamper",
+      "flavorKey": "flavor.base.monolithic-hamper",
+      "flavor": "A block that cannot be reshaped because it has never known a different form.",
+      "tags": [
+        "heavy",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-011",
+      "nameKey": "base.bevelled-rig",
+      "name": "Bevelled Rig",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cleansing",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.bevelled-rig",
+      "flavorKey": "flavor.base.bevelled-rig",
+      "flavor": "Edges sharpened so it can cut through the air it parts.",
+      "tags": [
+        "heavy",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-back-b-012",
+      "nameKey": "base.unyielding-ladder",
+      "name": "Unyielding Ladder",
+      "frame": "humanoid",
+      "role": "mantle",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.fortitude",
+        "powerBand": "extreme"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.unyielding-ladder",
+      "flavorKey": "flavor.base.unyielding-ladder",
+      "flavor": "To climb it is to learn what cannot change.",
+      "tags": [
+        "heavy",
+        "sturdy",
+        "vendor-stocked"
+      ]
+    }
+  ]
+}

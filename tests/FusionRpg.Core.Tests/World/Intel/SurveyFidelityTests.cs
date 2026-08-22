@@ -63,11 +63,23 @@ public class SurveyFidelityTests
     public void A_glimpse_still_reports_no_slots_and_no_development()
     {
         // Development is something you read off the ground, not from one sector away.
-        var ember = Believed(Developed(), "dave", "ember-hollow");
+        //
+        // Re-anchored 2026-08-22 from ember-hollow to black-gate. The template authors ember-hollow
+        // as `Scouted`, so Dave *starts* knowing its insides — this test only passed because the
+        // recorder was destroying that authored survey on the first turn, which is the bug
+        // `SurveyMemoryTests` now pins. black-gate is authored `Unknown` and is a true glimpse.
+        var world = Developed() with
+        {
+            Entities = Developed().Entities
+                .Select(e => e.EntityId == "e-dave-legion-1" ? e with { AtSectorId = "ash-waste" } : e)
+                .ToList()
+        };
 
-        Assert.Equal(SectorSight.Glimpse, ember.Detail);
-        Assert.Empty(ember.Slots);
-        Assert.Equal(0, ember.DevelopmentLevel);
+        var glimpsed = Believed(world, "dave", "black-gate");
+
+        Assert.Equal(SectorSight.Glimpse, glimpsed.Detail);
+        Assert.Empty(glimpsed.Slots);
+        Assert.Equal(0, glimpsed.DevelopmentLevel);
     }
 
     [Fact]

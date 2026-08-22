@@ -97,7 +97,7 @@ public class VisibilityTests
     [Fact]
     public void A_force_on_a_lane_sees_both_ends_of_it()
     {
-        var marching = OnLane(World(), "e-wild-pack-1", "l-ash-verdant", "verdant-shelf");
+        var marching = OnLane(World(), "e-wild-pack-1", "l-black-verdant", "verdant-shelf");
         var sight = Wild(marching);
 
         Assert.Equal(SectorSight.Glimpse, sight["ash-waste"]);
@@ -134,7 +134,9 @@ public class VisibilityTests
     [Fact]
     public void A_faction_that_holds_nothing_and_stands_nowhere_sees_nothing()
     {
-        Assert.All(Visibility.SeenBy(World(), "zomboss").Values, v => Assert.Equal(SectorSight.None, v));
+        // "nobody" is a faction id nobody plays, rather than Zomboss: since 2026-08-22 the template gives him a
+        // warband and a Seat, so he is no longer anybody's example of knowing nothing.
+        Assert.All(Visibility.SeenBy(World(), "nobody").Values, v => Assert.Equal(SectorSight.None, v));
     }
 
     /// <summary>

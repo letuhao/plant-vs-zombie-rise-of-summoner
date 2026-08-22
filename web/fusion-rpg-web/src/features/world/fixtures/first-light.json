@@ -245,8 +245,8 @@
       "state": "Open"
     },
     {
-      "laneId": "l-ash-verdant",
-      "fromSectorId": "ash-waste",
+      "laneId": "l-black-verdant",
+      "fromSectorId": "black-gate",
       "toSectorId": "verdant-shelf",
       "typeId": "rift",
       "length": 1100,

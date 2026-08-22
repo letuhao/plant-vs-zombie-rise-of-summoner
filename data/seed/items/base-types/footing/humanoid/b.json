@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-footing-b",
+    "partition": "base-types/footing/humanoid/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "agent-brief-template.md"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-feet-b-001",
+      "nameKey": "base.overlapping-shinguard",
+      "name": "Overlapping Shinguard",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.overlapping-shinguard",
+      "flavorKey": "flavor.base.overlapping-shinguard",
+      "flavor": "Bone scales locked in overlapping rows — each piece moves with the foot but covers the one below.",
+      "tags": [
+        "heavy",
+        "mineral",
+        "sturdy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-002",
+      "nameKey": "base.netted-stilt",
+      "name": "Netted Stilt",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.netted-stilt",
+      "flavorKey": "flavor.base.netted-stilt",
+      "flavor": "Rope wrapped tight around a wooden post — you stand taller on it, slower in it.",
+      "tags": [
+        "heavy",
+        "organic",
+        "fragile",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-003",
+      "nameKey": "base.shingled-gumboot",
+      "name": "Shingled Gumboot",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.shingled-gumboot",
+      "flavorKey": "flavor.base.shingled-gumboot",
+      "flavor": "Plastic roofing shingles sewn onto a rubber boot — waterproof armor for the mire.",
+      "tags": [
+        "medium-heavy",
+        "mineral",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-004",
+      "nameKey": "base.articulated-boot",
+      "name": "Articulated Boot",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.articulated-boot",
+      "flavorKey": "flavor.base.articulated-boot",
+      "flavor": "Metal hinges run the length of the sole — each step is deliberate, each joint remembers.",
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "sturdy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-005",
+      "nameKey": "base.jointed-ski",
+      "name": "Jointed Ski",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.jointed-ski",
+      "flavorKey": "flavor.base.jointed-ski",
+      "flavor": "Wooden planks strapped to wood, each joint a weapon waiting to snap forward.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "fragile",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-006",
+      "nameKey": "base.laced-flipper",
+      "name": "Laced Flipper",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "scale",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.laced-flipper",
+      "flavorKey": "flavor.base.laced-flipper",
+      "flavor": "Bound together with rope and tension — it moves because the parts move with it.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "sturdy",
+        "utility",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-007",
+      "nameKey": "base.soldered-clog",
+      "name": "Soldered Clog",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.soldered-clog",
+      "flavorKey": "flavor.base.soldered-clog",
+      "flavor": "Sheet metal fused by heat into a single unyielding form — you do not walk in this, you plod.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-008",
+      "nameKey": "base.rigid-cleat",
+      "name": "Rigid Cleat",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.rigid-cleat",
+      "flavorKey": "flavor.base.rigid-cleat",
+      "flavor": "Ceramic studs set in ceramic plate — grips the ground because it became the ground.",
+      "tags": [
+        "heavy",
+        "mineral",
+        "sturdy",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-009",
+      "nameKey": "base.ponderous-sneaker",
+      "name": "Ponderous Sneaker",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.ponderous-sneaker",
+      "flavorKey": "flavor.base.ponderous-sneaker",
+      "flavor": "Stuffed with padding until it barely bends — comfort for a soldier who expects to stand a long time.",
+      "tags": [
+        "heavy",
+        "organic",
+        "fragile",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-010",
+      "nameKey": "base.beaten-sandal",
+      "name": "Beaten Sandal",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "high"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.beaten-sandal",
+      "flavorKey": "flavor.base.beaten-sandal",
+      "flavor": "Metal plate hammered into a foot shape — weight for each step, force with each stride.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "offensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-011",
+      "nameKey": "base.galvanised-tread",
+      "name": "Galvanised Tread",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.galvanised-tread",
+      "flavorKey": "flavor.base.galvanised-tread",
+      "flavor": "Industrial metal plate with a rust-resistant sheen — made in bulk for someone's army, worn now for yours.",
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "utility",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-b-012",
+      "nameKey": "base.bevelled-sole",
+      "name": "Bevelled Sole",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "plate",
+      "band": "b",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.bevelled-sole",
+      "flavorKey": "flavor.base.bevelled-sole",
+      "flavor": "Stone ground at an angle — edges catch the earth, corners keep you standing when the ground does not.",
+      "tags": [
+        "heavy",
+        "mineral",
+        "sturdy",
+        "defensive"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # Spec: ai-commander (wave 2)
 
+**Build status (2026-08-22):** W25–W36 built and green — the commit seam, all six evaluation tables, the utility scorer, and `frontier-rules` with all seven rules. **W37 (flip Zomboss, re-bless) and W38 (acceptance) remain**, so the template still points both AI factions at `stand-fast` and nothing decides anything in a shipped world yet.
+
 **Status:** Draft — pending owner review. Fourth pass, 2026-08-22: **audited against the shipped code, symbol by symbol.** The second pass was written against `world-intel`'s and `world-topology`'s *intent*; the third checked its central claims; this one checked the rest and found four more, one of which changes how risky the module is. §Corrections is the list — it is first because each entry is a thing a builder would otherwise hit halfway through. Module id `ai-commander` in the [world map program](../world-map-program.md). Depends on [world-intel](spec-world-intel.md) and [world-topology](spec-world-topology.md), both built and green.
 
 ## Assumptions I am making
@@ -153,7 +155,11 @@ Two inputs, one rule. The traversal moves to `Movement/SupplyReach.cs` — seeds
 
 `ReachMap` is per **entity** — banner element changes ley costs, via `BannerElement.Of` — a Dijkstra over the march graph yielding `turns = ceil(cost / MovementPolicy.BudgetFor(stance))`. Severed and shut-gate lanes are not edges; unseen lanes read `Open` and therefore *are*, which is the same optimism supply has and for the same reason. `MovementRemaining` carries a part-marched legion mid-lane, so `ceil` is the right rounding: a multi-turn march is a real thing the engine already models.
 
-`FrontierSet` is computed over belief, so it includes **unknown neighbours**: the edge of what you hold *and* the edge of what you know. Those are different sets under fog, and both are targets.
+~~`FrontierSet` includes **unknown neighbours**: the edge of what you hold and the edge of what you know are different sets.~~ **Wrong, corrected 2026-08-22 during W32.** `Visibility` makes every sector you own an observation post with a one-lane radius, so everything adjacent to your territory is at all times *at least* glimpsed — a neighbour you have never laid eyes on cannot exist. `FrontierSet` returns two sets, `Held` and `Contested`, and a third would be permanently empty.
+
+Unknown ground is still a target; it is a **reach** question rather than an adjacency one, which is how the Explore rule was already written (*within `ExploreTurns`*, not *adjacent*). Ask `ReachMap` and `IWorldView.Believed`.
+
+This is the fourth claim in this spec undone by the same fact — **holding ground grants full sight of it** — after the two struck from §Believed supply. Worth stating once as a rule: *nothing about your own territory is ever uncertain to you.* Fog is about other people's ground and about the past, never about where you are standing.
 
 ### The decision layer
 

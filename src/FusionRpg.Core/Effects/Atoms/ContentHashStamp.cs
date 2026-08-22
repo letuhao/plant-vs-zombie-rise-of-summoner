@@ -122,9 +122,10 @@ public sealed record ContentHashComparison(
                     Nothing, Nothing, Nothing);
 
             var where = changed.Count > 0 ? " in " + string.Join(", ", changed) : "";
+            // Both hashes in full: the operator has to be able to tell which content each side ran
+            // against, and a six-character prefix is for reading, not for comparing.
             return new ContentHashComparison(ContentHashVerdict.Mismatch,
-                $"content {stored.Short} != {current.Short}{where} " +
-                $"(stored {stored.Hash}, current {current.Hash})",
+                $"content hash moved{where}: stored {stored.Hash}, current {current.Hash}",
                 changed, Nothing, Nothing);
         }
 
@@ -140,7 +141,8 @@ public sealed record ContentHashComparison(
             : "shared tables unchanged";
 
         return new ContentHashComparison(ContentHashVerdict.RegistryChanged,
-            $"contentHashSchemaVersion {stored.SchemaVersion} -> {current.SchemaVersion}; {detail}" +
+            $"contentHashSchemaVersion {stored.SchemaVersion} -> {current.SchemaVersion} " +
+            $"({stored.Short} -> {current.Short}); {detail}" +
             (added.Length > 0 ? $"; added {string.Join(", ", added)}" : "") +
             (removed.Length > 0 ? $"; removed {string.Join(", ", removed)}" : ""),
             changed, added, removed);

@@ -9,8 +9,20 @@ public static class TurnReportKinds
     public const string Battle = "battle";
 }
 
-/// <summary>One line of what happened, in the order it happened.</summary>
-public readonly record struct TurnReportEntry(string Phase, string Kind, string Subject, string Detail);
+/// <summary>
+/// One line of what happened, in the order it happened.
+///
+/// <paramref name="SectorId"/> is what makes the line **projectable**: a turn report reaches a
+/// player, and a report that narrates the far side of the map is a second door into the fog that
+/// the state projection spends its whole existence closing. `Detail` is free text — filtering a
+/// sector name out of prose works until somebody writes a different sentence — so anything that
+/// happened *somewhere* names where, structurally.
+///
+/// Null means "nowhere in particular": a calendar tick, or a command refused before it named ground.
+/// Those are shown to everyone, because they reveal nothing about the map.
+/// </summary>
+public readonly record struct TurnReportEntry(
+    string Phase, string Kind, string Subject, string Detail, string? SectorId = null);
 
 /// <summary>
 /// What a turn did — the presentation feed, the "while you were away" screen, and the record a
@@ -48,6 +60,6 @@ public sealed class TurnReport
 
     internal void BeginPhase(string phase) => _phases.Add(phase);
 
-    internal void Add(string phase, string kind, string subject, string detail) =>
-        _entries.Add(new TurnReportEntry(phase, kind, subject, detail));
+    internal void Add(string phase, string kind, string subject, string detail, string? sectorId = null) =>
+        _entries.Add(new TurnReportEntry(phase, kind, subject, detail, sectorId));
 }

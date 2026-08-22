@@ -1,0 +1,241 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-plant-runner-b",
+    "partition": "base-types/retinue/plant/b",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-item-categories.md#5.3"
+  },
+  "entries": [
+    {
+      "id": "item.plant-runner-b-001",
+      "nameKey": "base.potent-offset",
+      "name": "Potent Offset",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.summoner",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.potent-offset",
+      "flavorKey": "flavor.base.potent-offset",
+      "flavor": "A cutting swollen with potential—ready to break free and establish itself elsewhere.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-002",
+      "nameKey": "base.engorged-runner",
+      "name": "Engorged Runner",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.gardener",
+        "powerBand": "medium"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.engorged-runner",
+      "flavorKey": "flavor.base.engorged-runner",
+      "flavor": "Thick lateral shoots, heavy with stored reserves, already pushing new rootlets into the soil.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-003",
+      "nameKey": "base.stored-propagule",
+      "name": "Stored Propagule",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.volley",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.stored-propagule",
+      "flavorKey": "flavor.base.stored-propagule",
+      "flavor": "A dormant disseminule, carefully preserved against the season when it will disperse.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-004",
+      "nameKey": "base.husbanded-scion",
+      "name": "Husbanded Scion",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.cherry-bloom",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.husbanded-scion",
+      "flavorKey": "flavor.base.husbanded-scion",
+      "flavor": "A carefully tended cutting from proven stock, nurtured until it thrives on its own terms.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-005",
+      "nameKey": "base.cohered-ratoon",
+      "name": "Cohered Ratoon",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.dooming",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.cohered-ratoon",
+      "flavorKey": "flavor.base.cohered-ratoon",
+      "flavor": "Shoots sprung from a root crown long settled—the plant itself unified around them.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-006",
+      "nameKey": "base.adopted-ramet",
+      "name": "Adopted Ramet",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.firelining",
+        "powerBand": "medium"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.adopted-ramet",
+      "flavorKey": "flavor.base.adopted-ramet",
+      "flavor": "A clone fragment that has taken fully to new soil, indistinguishable now from the colony it joins.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-007",
+      "nameKey": "base.wedded-spawn",
+      "name": "Wedded Spawn",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.flash-freeze",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.wedded-spawn",
+      "flavorKey": "flavor.base.wedded-spawn",
+      "flavor": "Offspring that has rooted beside the parent and grown into its embrace.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-008",
+      "nameKey": "base.seated-brood",
+      "name": "Seated Brood",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.gravemaking",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.seated-brood",
+      "flavorKey": "flavor.base.seated-brood",
+      "flavor": "A generation settled into the ground, their roots tangled beneath the parent's canopy.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-009",
+      "nameKey": "base.permanent-sobole",
+      "name": "Permanent Sobole",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.gravedigging",
+        "powerBand": "low"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.permanent-sobole",
+      "flavorKey": "flavor.base.permanent-sobole",
+      "flavor": "A basal shoot that became so vigorous it overshadowed what came before.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-010",
+      "nameKey": "base.charged-bourgeon",
+      "name": "Charged Bourgeon",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "bulb",
+      "band": "b",
+      "implicit": {
+        "family": "atom.terraforming",
+        "powerBand": "high"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.charged-bourgeon",
+      "flavorKey": "flavor.base.charged-bourgeon",
+      "flavor": "A bud swollen with the force of growth, straining against its constraints.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-011",
+      "nameKey": "base.unremovable-clone",
+      "name": "Unremovable Clone",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.summoner",
+        "powerBand": "medium"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.unremovable-clone",
+      "flavorKey": "flavor.base.unremovable-clone",
+      "flavor": "A perfect genetic duplicate, grafted in so long ago the line between copy and origin is invisible.",
+      "tags": ["organic", "rooted"]
+    },
+    {
+      "id": "item.plant-runner-b-012",
+      "nameKey": "base.inseparable-colony",
+      "name": "Inseparable Colony",
+      "frame": "plant",
+      "role": "retinue",
+      "class": "graft",
+      "band": "b",
+      "implicit": {
+        "family": "atom.gardener",
+        "powerBand": "high"
+      },
+      "socketMax": 2,
+      "iconKey": "icon.base.inseparable-colony",
+      "flavorKey": "flavor.base.inseparable-colony",
+      "flavor": "A settlement of clones so thoroughly established that removing one would collapse them all.",
+      "tags": ["organic", "rooted"]
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "schemaVersion": 1,
+  "kind": "base-type",
+  "_meta": {
+    "batch": "base-humanoid-footing-a",
+    "partition": "base-types/footing/humanoid/a",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "agent-brief-template.md"
+  },
+  "entries": [
+    {
+      "id": "item.humanoid-feet-a-001",
+      "nameKey": "base.quilted-sock",
+      "name": "Quilted Sock",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.quilted-sock",
+      "flavorKey": "flavor.base.quilted-sock",
+      "flavor": "Padded in layers for long days on scavenged ground.",
+      "tags": [
+        "light",
+        "organic",
+        "sturdy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-002",
+      "nameKey": "base.spun-slipper",
+      "name": "Spun Slipper",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.spun-slipper",
+      "flavorKey": "flavor.base.spun-slipper",
+      "flavor": "Loose and breathable, it does not hold heat from the ground.",
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-003",
+      "nameKey": "base.secondhand-sneaker",
+      "name": "Secondhand Sneaker",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.secondhand-sneaker",
+      "flavorKey": "flavor.base.secondhand-sneaker",
+      "flavor": "A sole that found its owner; a toe that knows the fit.",
+      "tags": [
+        "light",
+        "organic",
+        "sturdy",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-004",
+      "nameKey": "base.threadbare-boot",
+      "name": "Threadbare Boot",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.threadbare-boot",
+      "flavorKey": "flavor.base.threadbare-boot",
+      "flavor": "Worn to almost nothing, it has learned to hold together by habit.",
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-005",
+      "nameKey": "base.insulated-clog",
+      "name": "Insulated Clog",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.insulated-clog",
+      "flavorKey": "flavor.base.insulated-clog",
+      "flavor": "A thick sole keeps what matters warm and stable.",
+      "tags": [
+        "light",
+        "organic",
+        "sturdy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-006",
+      "nameKey": "base.woven-shoe",
+      "name": "Woven Shoe",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "cloth",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.woven-shoe",
+      "flavorKey": "flavor.base.woven-shoe",
+      "flavor": "Made of grass and luck, it bends with every step.",
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-007",
+      "nameKey": "base.cured-sandal",
+      "name": "Cured Sandal",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.cured-sandal",
+      "flavorKey": "flavor.base.cured-sandal",
+      "flavor": "A simple strap on shaped hide; the first thing a scavenger ties to bare feet.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "sturdy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-008",
+      "nameKey": "base.supple-flipper",
+      "name": "Supple Flipper",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.supple-flipper",
+      "flavorKey": "flavor.base.supple-flipper",
+      "flavor": "Does not tell you whether it belonged to fish or to fate. Bends either way.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "fragile",
+        "mechanical"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-009",
+      "nameKey": "base.oiled-cleat",
+      "name": "Oiled Cleat",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.oiled-cleat",
+      "flavorKey": "flavor.base.oiled-cleat",
+      "flavor": "The grip comes from the studs; the oil comes from rain and time.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "sturdy",
+        "vendor-stocked"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-010",
+      "nameKey": "base.boiled-sole",
+      "name": "Boiled Sole",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.boiled-sole",
+      "flavorKey": "flavor.base.boiled-sole",
+      "flavor": "Hard as the kitchen it came from, shaped to a foot that trusted it.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "sturdy",
+        "utility"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-011",
+      "nameKey": "base.studded-tread",
+      "name": "Studded Tread",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "trivial"
+      },
+      "socketMax": 1,
+      "iconKey": "icon.base.studded-tread",
+      "flavorKey": "flavor.base.studded-tread",
+      "flavor": "Metal nubs catch on everything — pavement, rust, the day's last inch of hope.",
+      "tags": [
+        "medium-light",
+        "metal",
+        "fragile",
+        "defensive"
+      ]
+    },
+    {
+      "id": "item.humanoid-feet-a-012",
+      "nameKey": "base.weathered-skate",
+      "name": "Weathered Skate",
+      "frame": "humanoid",
+      "role": "footing",
+      "class": "leather",
+      "band": "a",
+      "implicit": {
+        "family": "atom.regeneration",
+        "powerBand": "low"
+      },
+      "socketMax": 0,
+      "iconKey": "icon.base.weathered-skate",
+      "flavorKey": "flavor.base.weathered-skate",
+      "flavor": "The blade keeps the polish. The leather gives it character. You take the one and keep the other.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "sturdy",
+        "mechanical"
+      ]
+    }
+  ]
+}

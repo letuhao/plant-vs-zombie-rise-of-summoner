@@ -1,0 +1,153 @@
+/* ---------------------------------------------------------------------------
+   Foundation tokens — Rise of Summoner
+   Source of truth for the design plates. web/fusion-rpg-web/src/theme/tokens.css
+   is regenerated from this file, not hand-edited alongside it.
+
+   Contrast: every pair marked AA below was measured, not eyeballed. The values
+   that changed from the shipped palette are marked FIXED with the old ratio.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* --- surfaces (darkest to lightest) ------------------------------------- */
+  --soil:          #16120e;   /* app ground */
+  --soil-raised:   #221c16;   /* HUD, rails */
+  --panel:         #2a231b;   /* panel fill */
+  --panel-raised:  #332b21;   /* card inside a panel */
+  --panel-inset:   #120f0c;   /* wells: log, json, meter track */
+  --scrim:         rgb(11 9 7 / 0.72);  /* behind band 2+ layers */
+
+  /* --- ink ---------------------------------------------------------------- */
+  --text:          #f2ead8;   /* 12.94 on panel — AA */
+  --muted:         #a89880;   /*  5.51 on panel — AA */
+  --faint:         #7d7060;   /* decorative only, never body text */
+  --ink-dark:      #16120e;   /* ink for use on bright fills */
+
+  /* --- brand / world ------------------------------------------------------ */
+  --almanac:       #e4d5b5;   /* paper accent */
+  --lawn:          #3d6b45;   /* primary fill  — --text on it = 5.18 AA */
+  --lawn-hot:      #5a8f62;   /* hover fill    — --ink-dark on it = 4.92 AA */
+  --zombie:        #6e5a7a;
+  --sun:           #e0b44b;   /* 7.97 on panel — AA */
+
+  /* --- status ------------------------------------------------------------- */
+  --ok:            #6fbf73;   /* 6.92 on panel — AA */
+  --warn:          #d8a94f;   /* 7.17 on panel — AA   FIXED (was #c4923a) */
+  --bad:           #d97b7b;   /* 5.22 on panel — AA   FIXED (was #c45c5c, 3.71) */
+  --bad-solid:     #a33c3c;   /* filled danger — --text on it = 5.36 AA
+                                 FIXED: --text on the old #c45c5c was 3.48 */
+  --info:          #7fa8c9;
+
+  /* --- lines -------------------------------------------------------------- */
+  --border:         #4a4034;  /* decorative hairline: panel edge, table rule.
+                                 1.53 on panel — exempt, it separates nothing
+                                 interactive */
+  --border-control: #7a6d59;  /* interactive boundary: input, ghost button, tab.
+                                 3.07 on panel — meets WCAG 1.4.11
+                                 FIXED: controls previously used --border */
+  --border-strong:  #9c8c72;  /* focused / selected boundary */
+
+  /* --- elements — 6 concrete + omni (element-hub-ssot.md) ------------------ */
+  --el-fire:   #e0703c;
+  --el-ice:    #6fc4d9;
+  --el-air:    #b7c9d6;
+  --el-earth:  #b08a4f;
+  --el-light:  #efdca0;
+  --el-dark:   #8b7bab;
+  --el-omni:   #a89880;
+
+  /* --- sides -------------------------------------------------------------- */
+  --side-plant:  #6fbf73;
+  --side-zombie: #9b7fb0;
+  --side-demon:  #c96a52;
+
+  /* --- rarity — ordinals are data; these are the first five slots --------- */
+  --rarity-1: #8f8878;
+  --rarity-2: #6fbf73;
+  --rarity-3: #6fa8d9;
+  --rarity-4: #b98ede;
+  --rarity-5: #e0b44b;
+
+  /* --- power categories (definitions.md §7) ------------------------------- */
+  --pw-offense:       #d97b7b;
+  --pw-survivability: #6fbf73;
+  --pw-control:       #b98ede;
+  --pw-utility:       #6fa8d9;
+  --pw-economy:       #e0b44b;
+
+  /* --- type --------------------------------------------------------------- */
+  /* GG-56 / D7 — every stack declares a CJK fallback. Lilita One and Nunito are
+     Latin-only, so without these a Chinese creature name falls back glyph by
+     glyph to whatever the system happens to have, with mismatched metrics.
+     The game's almanac text is already Chinese: see lib/almanacText. */
+  --cjk: "Noto Sans SC", "Source Han Sans SC", "PingFang SC",
+         "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+
+  /* Chrome titles only. Never used for content the player did not write. */
+  --font-display: "Lilita One", "Segoe UI", system-ui, var(--cjk);
+  /* Body, labels, controls. */
+  --font-ui:      "Nunito", "Segoe UI", system-ui, var(--cjk);
+  /* Entity names and any string that came from game data — CJK-capable first,
+     because this is the stack most likely to hold non-Latin text. */
+  --font-content: "Nunito", "Segoe UI", var(--cjk);
+  --font-mono:    ui-monospace, Consolas, "Cascadia Mono", monospace, var(--cjk);
+
+  --text-2xs:     0.625rem;   /* 10px — pips and counters only */
+  --text-xs:      0.6875rem;  /* 11px */
+  --text-sm:      0.75rem;    /* 12px */
+  --text-md:      0.875rem;   /* 14px — body */
+  --text-lg:      1rem;
+  --text-xl:      1.25rem;
+  --text-2xl:     1.5rem;
+  --text-display: 1.75rem;
+  --text-hero:    2.5rem;
+
+  --lh-tight: 1.15;
+  --lh-body:  1.45;
+
+  /* --- space — 4px grid --------------------------------------------------- */
+  --sp-1: 0.25rem;  --sp-2: 0.5rem;   --sp-3: 0.75rem;  --sp-4: 1rem;
+  --sp-5: 1.25rem;  --sp-6: 1.5rem;   --sp-8: 2rem;     --sp-10: 3rem;
+  --sp-12: 4rem;
+
+  /* --- radius ------------------------------------------------------------- */
+  --r-sm: 0.25rem;  --r-md: 0.5rem;  --r-lg: 0.75rem;  --r-pill: 999px;
+
+  /* --- elevation ---------------------------------------------------------- */
+  --sh-panel:  0 2px 8px rgb(0 0 0 / 0.35);
+  --sh-layer:  0 12px 32px rgb(0 0 0 / 0.5);
+  --sh-inset:  inset 0 1px 3px rgb(0 0 0 / 0.45);
+  --sh-glow:   0 0 0 2px rgb(224 180 75 / 0.35);
+
+  /* --- bands — GG-5. Nothing outside this list may set a stacking order --- */
+  --band-stage:  0;
+  --band-hud:   100;
+  --band-panel: 200;
+  --band-dialog:300;
+  --band-toast: 400;
+  --band-system:500;
+
+  /* --- motion — GG-31 ----------------------------------------------------- */
+  --dur-instant: 80ms;
+  --dur-quick:   120ms;
+  --dur-layer:   180ms;
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* --- sizes -------------------------------------------------------------- */
+  --icon-token: 20px;
+  --icon-chip:  24px;
+  --icon-row:   32px;
+  --icon-card:  56px;
+  --icon-panel: 88px;
+  --control-h:  32px;
+  --meter-h:    8px;
+}
+
+/* GG-32 — reduced motion collapses transitions, never meaning */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
