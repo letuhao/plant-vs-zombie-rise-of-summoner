@@ -66,11 +66,36 @@ class LoadTests(unittest.TestCase):
 
         corpus = Corpus.load(self.root)
 
-        exemplar = corpus.by_id("widget.exemplar-001")
+        exemplar = corpus.by_exemplar_id("widget.exemplar-001")
         real = corpus.by_id("widget.a-001")
         self.assertIsNotNone(exemplar)
         self.assertTrue(exemplar.is_exemplar)
         self.assertFalse(real.is_exemplar)
+
+    def test_exemplar_never_occupies_a_slot_in_the_cross_row_ledger(self) -> None:
+        # The exact incident spec-foundation §1 names: an exemplar reusing a real id (a
+        # worked example of a SHIPPED row) must never shadow or be confused with that real
+        # entry in by_id/by_kind/by_partition — reproduced against the live item corpus during
+        # S2 review, where 6 of 8 exemplar entries share an id with real content.
+        write_seed_file(self.root, "_exemplars/widget.json", "widget",
+                        [{"id": "widget.a-001", "color": "EXEMPLAR-VALUE"}])
+        write_seed_file(self.root, "widgets/a.json", "widget",
+                        [{"id": "widget.a-001", "color": "real-value"}])
+
+        corpus = Corpus.load(self.root)
+
+        self.assertEqual(corpus.by_id("widget.a-001").data["color"], "real-value")
+        self.assertEqual(corpus.by_exemplar_id("widget.a-001").data["color"], "EXEMPLAR-VALUE")
+        self.assertEqual(len(corpus.by_kind("widget")), 1)
+        self.assertEqual({e.id for e in corpus.by_partition("a")}, {"widget.a-001"})
+
+    def test_two_real_entries_sharing_an_id_raises(self) -> None:
+        write_seed_file(self.root, "widgets/a.json", "widget", [{"id": "widget.a-001"}])
+        write_seed_file(self.root, "widgets/b.json", "widget", [{"id": "widget.a-001"}])
+
+        with self.assertRaises(CorpusLoadError) as ctx:
+            Corpus.load(self.root)
+        self.assertIn("widget.a-001", str(ctx.exception))
 
     def test_invalid_json_raises_corpus_load_error_naming_the_file(self) -> None:
         path = self.root / "widgets" / "broken.json"

@@ -35,15 +35,15 @@ This is the GG-11 proof and the single highest-risk item in the initiative — d
 against the *existing* page rather than a redesigned one.
 
 **Acceptance:**
-- [ ] Opening and closing a panel leaves the Phaser `Game` **instance identical by reference**
-- [ ] The `LawnViewModel` is not reset and no hub re-subscription occurs
-- [ ] The canvas keeps rendering behind the scrim
-- [ ] Leaving the lawn stage still runs the full destroy checklist
+- [x] Opening and closing a panel leaves the Phaser `Game` **instance identical by reference** — `createLawnGame` mocked and asserted called exactly once across an open→close cycle, same returned reference both times
+- [x] The `LawnViewModel` is not reset and no hub re-subscription occurs — `LawnGameHost`'s own mount effect (`[]` deps) never re-runs because `LawnPage`'s component instance is never recreated; `LawnStage.test.tsx` asserts `getStageMountCount("lawn") === 1` through the whole cycle
+- [x] The canvas keeps rendering behind the scrim — confirmed live: the projector grid, sidebar and nav are all still present in the DOM (marked `aria-hidden` by Radix's dismissable layer, not removed) while the panel is open, verified via accessibility snapshot in a real browser
+- [x] Leaving the lawn stage still runs the full destroy checklist — `LawnStage.test.tsx`'s second test unmounts `LawnStage` and asserts `destroyLawnGame` was called
 
 **Verify:**
-- [ ] `npm test` — assert `gameRef.current` identity across an open/close cycle, and mount count stays 1
-- [ ] Manual: `deploy-play.ps1 -NoServer`, open a panel mid-wave, confirm the board is untouched
-- [ ] `npm run build`
+- [x] `npm test` — `src/stages/lawn/LawnStage.test.tsx`, 2 new tests; full suite 350/350 green
+- [x] Manual, live in a real browser (`npm run dev`, no server/injector needed for this proof — GG-14 holds, the shell renders through the "SignalR disconnected" state): navigated to `/lawn`, clicked **Board panel**, confirmed the projector/inspector/nav stayed intact behind the panel via a11y snapshot, pressed **Escape**, confirmed the panel closed and focus returned to the trigger button (`document.activeElement` verified as `lawn-stage-open-panel` via `evaluate_script`) — screenshots at 1440×900 and at the declared 1280×720 floor (no horizontal overflow, shell stays within `min(720px,82vh)`)
+- [x] `npm run build` — clean
 
 **Dependencies:** T1 · **Files:** `src/stages/lawn/LawnStage.tsx`, `src/features/lawn/LawnGameHost.tsx`, `src/shell/stageHost.tsx`, one test · **Scope:** M
 

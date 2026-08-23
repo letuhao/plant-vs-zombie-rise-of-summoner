@@ -35,9 +35,9 @@ export function PanelShell({
 
   useEffect(() => {
     if (!open) return;
-    push({ id, band: "panel" });
+    push({ id, band: "panel", close: () => onOpenChange(false) });
     return () => pop(id);
-  }, [open, id, push, pop]);
+  }, [open, id, push, pop, onOpenChange]);
 
   // Radix restores focus to its own Trigger by default; PanelShell is fully
   // controlled and has no Dialog.Trigger, so that default is a no-op. Capture
@@ -59,6 +59,13 @@ export function PanelShell({
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             openerRef.current?.focus();
+          }}
+          onEscapeKeyDown={(event) => {
+            // GG-6: the stack is the single source of truth for Esc. The
+            // global keymap (useGlobalKeys) owns it and calls this shell's
+            // registered `close`; Radix's own built-in Escape handling would
+            // race it, so it's suppressed here.
+            event.preventDefault();
           }}
           className={cn(
             "band-panel fixed left-1/2 top-1/2 flex w-[min(640px,92vw)] -translate-x-1/2 -translate-y-1/2",

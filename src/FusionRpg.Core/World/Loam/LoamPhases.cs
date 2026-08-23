@@ -35,7 +35,7 @@ public static class LoamPhases
 
             // The cap throttles new accrual only — it never claws back stock already held, the same
             // fix the economy harness (L9) needed for its own local ledger.
-            var room = Math.Max(0, LoamPolicy.LoamCapacity - decremented.LoamStock);
+            var room = Math.Max(0, EffectiveCapacity(decremented) - decremented.LoamStock);
             var added = Math.Min(room, yield);
             var overflow = yield - added;
 
@@ -46,6 +46,28 @@ public static class LoamPhases
         }
 
         return world with { Sectors = sectors };
+    }
+
+    /// <summary>
+    /// <see cref="LoamPolicy.LoamCapacity"/>, plus any active granary's <c>CapacityBonus</c>
+    /// (spec-loam-texture.md) — additive to the shape `LoamProduction`'s own well multiplier already
+    /// uses. Public and shared with <see cref="LoamForecast.ProjectedStock"/> so the engine and the
+    /// player-facing forecast read the same ceiling rather than risking two copies drifting apart.
+    /// </summary>
+    public static long EffectiveCapacity(WorldSector sector)
+    {
+        long bonus = 0;
+        foreach (var slot in sector.Slots)
+        {
+            if (slot.StructureId is not { } id) continue;
+            if (slot.ConstructionTurnsRemaining is > 0) continue;
+            if (!StructureCatalog.IsKnown(id)) continue;
+
+            var structure = StructureCatalog.Get(id);
+            if (structure.Kind == StructureKind.Storage) bonus += structure.CapacityBonus;
+        }
+
+        return LoamPolicy.LoamCapacity + bonus;
     }
 
     /// <summary>Every slot still under construction counts down by one, this pass, before anything reads it.</summary>

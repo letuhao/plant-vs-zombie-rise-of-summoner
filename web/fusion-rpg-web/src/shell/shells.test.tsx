@@ -5,8 +5,11 @@ import userEvent from "@testing-library/user-event";
 import { DialogShell } from "./DialogShell";
 import { PanelShell } from "./PanelShell";
 import { useLayerStack } from "./layerStack";
+import { resetKeymapForTests } from "./keymap";
+import { useGlobalKeys } from "./useGlobalKeys";
 
 function OpenerHarness({ Shell, band }: { Shell: typeof PanelShell; band: "panel" | "dialog" }) {
+  useGlobalKeys();
   const [open, setOpen] = useState(false);
   return (
     <div>
@@ -33,6 +36,7 @@ describe.each([
 ])("$name", ({ Shell, band }) => {
   beforeEach(() => {
     useLayerStack.setState({ layers: [] });
+    resetKeymapForTests();
   });
 
   it("renders title, body and footer when open", () => {

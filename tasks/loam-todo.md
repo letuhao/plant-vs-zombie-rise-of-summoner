@@ -1073,7 +1073,17 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
   - Files: `LoamPhases.cs`, `tests/.../LoamStructuresTests.cs`. Scope: S.
   - Dependencies: L35.
 
-- [ ] **L37: The range rule (G5), and the accepted lockout**
+- [x] **L37: The range rule (G5), and the accepted lockout** ✅ 2026-08-23 —
+  `BuildResolver.WithinWaystationRange` gates only Seat-founded structures (a well never needs it —
+  a Rootbed is already its own source) via `Hops.Between` (unweighted, per `Hops.cs`'s own doc
+  comment, not `AllPairsCost`). Proven: fires (succeeds) on unmodified `two-hearths` (Dave founding
+  on `d-outpost`, 2 hops from `d-home`'s own rootbed); declines beyond range (a dedicated 7-sector
+  chain, since the shipped map's every Seat sits close to its own side by design — no natural far
+  target exists to exercise the decline on unmodified terrain); the accepted lockout proven directly
+  on unmodified `two-hearths` too — stripping Dave of both his starting rootbeds (`d-home`,
+  `d-flank-1`) leaves even his own one-hop-away `d-outpost` permanently unbuildable, asserted as
+  intended per the spec's own resolution, not patched around. Core 2931, Data 463, E2E World 40 —
+  all green; all 4 guard scripts green; `AbandonRuleTests`/`TwoHearthsCampaignTests` reconfirmed.
   - Description: a waystation may only be founded on a Seat within `WaystationRangeHops` (unweighted,
     via `Hops.Between`, not `AllPairsCost`) of a sector the founder already holds that is itself
     currently habitable. `Build` refuses beyond range, with a report entry naming the sector.
@@ -1086,14 +1096,14 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     `tests/.../LoamStructuresTests.cs`. Scope: S.
   - Dependencies: L36.
 
-### Checkpoint 9 — `loam-structures` built
-- [ ] Well multiplies, un-welled rootbeds unchanged; waystation grants zero-yield habitability.
-- [ ] Construction gates both effects until its exact completion turn; can be lost mid-build via new,
+### Checkpoint 9 — `loam-structures` built ✅ PASSED 2026-08-23
+- [x] Well multiplies, un-welled rootbeds unchanged; waystation grants zero-yield habitability.
+- [x] Construction gates both effects until its exact completion turn; can be lost mid-build via new,
   tested code (not assumed pre-existing behavior).
-- [ ] `Build` re-validates ownership at resolution; the range rule fires/declines against unmodified
+- [x] `Build` re-validates ownership at resolution; the range rule fires/declines against unmodified
   `two-hearths`; the homeworld-loss lockout is proven, not merely asserted in prose.
-- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
-- [ ] All four guard scripts green.
+- [x] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
+- [x] All four guard scripts green.
 
 ## Phase 10 — `loam-texture`
 

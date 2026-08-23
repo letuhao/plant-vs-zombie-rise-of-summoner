@@ -107,4 +107,43 @@ public static class LoamPolicy
     /// founder already holds that is itself currently habitable.
     /// </summary>
     public const int WaystationRangeHops = 3;
+
+    // ---- loam-texture (spec-loam-texture.md) ----
+
+    /// <summary>What a granary costs to build.</summary>
+    public const long GranaryCostMilli = 150;
+
+    /// <summary>How much a granary raises a sector's storage cap by, on top of <see cref="LoamCapacity"/>.</summary>
+    public const long GranaryCapacityBonus = 300;
+
+    /// <summary>How many `Production` passes a granary takes to finish.</summary>
+    public const int GranaryBuildTurns = 2;
+
+    /// <summary>How much an actively-fading sector raises `PressureMilli` on each lane-adjacent sector, per turn.</summary>
+    public const int ContagionPressurePerTurn = 60;
+
+    /// <summary>The ceiling `PressureMilli` can reach — contagion is a live signal, not an unbounded ratchet.</summary>
+    public const int MaxPressureMilli = 300;
+
+    /// <summary>How fast `PressureMilli` decays back toward zero for a sector with no fading neighbour this turn.</summary>
+    public const int PressureDecayPerTurn = 40;
+
+    /// <summary>
+    /// Per-mille scale on `DecayFor`'s pre-clamp sum while the turn's `CalendarRoll` includes
+    /// `Plague`. Applied to the input, never the clamped output — a surge pushes more sectors
+    /// toward `MaxDecayMilli`, never past it.
+    /// </summary>
+    public const int SurgeDecayMultiplierMilli = 1500;
+
+    /// <summary>
+    /// How many consecutive turns a `Lost`, barren sector sits neglected before the Unmade spawn
+    /// onto it.
+    /// </summary>
+    public const int UnmadeSpawnAfterTurns = 5;
+
+    /// <summary>How tough a freshly-spawned Unmade warband is, per member.</summary>
+    public const int UnmadeMemberHp = 120;
+
+    /// <summary>How many members a freshly-spawned Unmade warband has.</summary>
+    public const int UnmadeMemberCount = 2;
 }

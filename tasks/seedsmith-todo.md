@@ -2,8 +2,8 @@
 
 Plan: [seedsmith-plan.md](seedsmith-plan.md) · Map: [../docs/architecture/seedsmith-map.md](../docs/architecture/seedsmith-map.md)
 
-Status: **S0, S1 done (56/56 tests green, CP-A reached).** S2 next. Specs complete and audited
-(66 findings, 11 blockers, all closed).
+Status: **S0, S1, S2 done (73/73 tests green, CP-A and CP-B reached).** S3 next. Specs complete
+and audited (66 findings, 11 blockers, all closed).
 
 ---
 
@@ -129,27 +129,89 @@ excluding the top-level `id` field unconditionally, with a regression test
 ### S2 — `adapter-items`
 `tools/seedsmith/seedsmith/adapters/items/`
 
-Declare the 14 kinds, the dimensions (role, frame, band, element, rarity, class), the legality
+Declare the kinds, the dimensions (role, frame, band, element, rarity, class), the legality
 function, the registries and the channels. Read from `data/seed/items/_registry/`; transcribe
 nothing.
 
-- [ ] 14 `KindSpec`s matching `KindCatalog.cs`
-- [ ] `legal_combinations` encodes: `hybridEligible` false for `ward-array`/`jewel-minor-b`;
-      uniques barred from `jewel-minor`; commander `standard` role
-- [ ] `channels()` returns the 14 primary families with `reference_base` reading `BattleRuleset`
-- [ ] Registry versions reported, not assumed
+> **Numbers corrected during this task, verified fresh against the live corpus and
+> `tools/ItemSeedValidator --list-partitions` rather than carried over from an earlier session
+> (see below) — this section states 14 kinds and 1,438 entries because that is what the plan
+> inherited; both were stale.**
+
+- [x] **15** `KindSpec`s matching `KindCatalog.cs` — not 14: the catalog also carries `attribute`
+      (`ShapeDefined: false`), which the "14 shipped kinds" corpus-stats table omits because it
+      has zero rows. It is still a real, allocated kind and one of the nine empty partitions.
+- [x] `legal_combinations` encodes `frame=hybrid` excluding `ward-array`, `jewel-minor-b`, and the
+      commander `standard` role — read from core.v1.json's frame-vocabulary prose (the one fact in
+      this adapter transcribed rather than parsed, pinned by a test asserting the source sentence
+      is still present). **"Uniques barred from jewel-minor" dropped from this task's scope**: it
+      is a cross-entry constraint (a unique's `baseType` reference must not resolve to a
+      jewel-minor role), not a same-row dimension pair — already enforced by
+      `UniqueRuleCheck.cs`, and spec-metrics.md §3 says this family does not re-implement what C#
+      already owns. Encoding it here would have been scope-duplication, not a gap.
+- [x] `channels()` returns the 14 primary families (`bands.v1.json`'s `primaryChannel.memberFamilies`,
+      not "14 kinds" — a different registry list) with `reference_base` transcribed from
+      `BattleRuleset.BaseHp`/`BaseAtk`/`RoundDurationMs` (`BattleModels.cs:57-63` — there is no
+      JSON export of that C# class to read instead), grouped by each channel's own name (HP-shaped
+      vs ATK-shaped vs interval-shaped) — a semantic read, not a balance choice: no number here
+      was invented, all three are copied verbatim from the C# source.
+- [x] Registry versions reported, not assumed — measured fresh: naming/tags at v4, classes at v3,
+      bands/core/themes at v1. A single hardcoded constant would already be wrong for three of six.
 
 **Acceptance**
-- [ ] `seedsmith check --adapter items` loads **1,438 entries across 125 files**
-- [ ] `Coverage/EmptyPartition` reports **exactly nine**: `attributes`, four base-type partitions,
-      `gems/2`, three display-template partitions — and nothing else
-- [ ] `attributes` is flagged as the deferred one, not silently equal to the other eight
+- [x] `seedsmith check --adapter items` loads **1,430 entries across 121 files** — not 1,438/125.
+      The 1,438 figure counted 8 `_exemplars/` entries as corpus content; 121/1,430 is real,
+      non-exemplar content only, which is what `Coverage/EmptyPartition` and every other metric
+      must reason about (see the exemplar-collision defect below for why this distinction turned
+      out to matter more than just arithmetic).
+- [x] `Coverage/EmptyPartition` reports **exactly nine**: `attributes`,
+      `base-types/footing/plant/{a,b}`, `base-types/manipulator/humanoid/b`,
+      `base-types/mantle/humanoid/a`, `display-templates/{4,5,6}`, `gems/2` — and nothing else.
+      Cross-checked against `tools/ItemSeedValidator --list-partitions`' own 126-partition
+      allocation ledger, not re-derived by hand.
+- [x] `attributes` is flagged as the deferred one (`KindSpec.required == {"id","nameKey","name"}`,
+      i.e. common fields only — no authored shape), not silently equal to the other eight.
 
-**Verify** `python -m seedsmith check --adapter items --metric Coverage/EmptyPartition`
+**Verify** `python -m seedsmith check --adapter items --metric Coverage/EmptyPartition` (run from
+`tools/seedsmith/`, corpus root `../../data/seed/items`) → exit `1`, exactly the nine findings
+above (2026-08-23).
+
+**Built:** `seedsmith/adapters/items/{__init__,kinds,channels,registries}.py` ·
+`seedsmith/adapters/items/_registry_snapshot/allocated_partitions.json` (126-partition ledger
+snapshotted from the C# tool's own `--list-partitions`, with a regeneration command in its
+`_meta`, rather than re-implementing per-kind partition-allocation rules a second time in Python)
+· `tests/test_items_adapter.py` (15 tests: KindSpec shape, registry versions, legal-combinations
+including the citation pin, channel identity, and a live-corpus integration suite).
+
+**Two real defects found and fixed during S2's own review pass, not left for later:**
+
+1. **`discover_edges` (actually an S1 defect, caught while building S2's `legal_combinations`
+   tests):** already fixed in S1 — noted here only because re-verification during S2 confirmed it
+   stayed fixed against real item-shaped data.
+2. **Exemplar entries silently overwrote real entries in `Corpus.entries`.** Loading the real
+   corpus first surfaced this: `_exemplars/` holds 8 entries, 6 of which intentionally reuse a
+   real shipped id (4 base-type, 1 set, 1 unique) — an exemplar's whole purpose is showing the
+   shape of a real row. `Corpus.add()`'s dict write (`self.entries[entry.id] = entry`) let
+   whichever loaded last — exemplar or real, depending on path sort order — silently win, with no
+   signal either way. This is the exact "exemplar squatting in a cross-row ledger" incident
+   spec-foundation §1 names as having happened twice already in the agentic build; it would have
+   happened a third time here, inside the tool built specifically to catch this class of defect.
+   **Fixed**: `Corpus` now keeps exemplars in their own `exemplars` dict, never merged into
+   `entries`/`by_kind`/`by_partition`; a genuine real-vs-real id collision (a different, more
+   serious defect) now raises `CorpusLoadError` instead of silently overwriting either.
+   Regression tests: `test_exemplar_never_occupies_a_slot_in_the_cross_row_ledger`,
+   `test_two_real_entries_sharing_an_id_raises` (`tests/test_corpus.py`).
+
+**Verify (full suite)** `python -m pytest tools/seedsmith/tests/ -v` → **73 passed** (2026-08-23,
+includes S0+S1's 56).
+
+**S2 status: DONE.**
 
 ---
 
 **⭐ CP-B — measurement beats memory.** One command rediscovers what took three waves to notice.
+**Reached (2026-08-23)** — and rediscovered a defect *this session's own tooling* had just
+introduced, before it could ship.
 
 ---
 

@@ -1,10 +1,12 @@
 import { Outlet } from "react-router-dom";
 import { useHealth, useHubStatus, usePlayers } from "@/lib/bus";
+import { useGlobalKeys } from "@/shell/useGlobalKeys";
 import { Banner } from "@/ui";
 import { AuditNav } from "./AuditNav";
 import { HudBar } from "./HudBar";
 
 export function AppShell() {
+  useGlobalKeys();
   const health = useHealth();
   const players = usePlayers();
   const hub = useHubStatus();

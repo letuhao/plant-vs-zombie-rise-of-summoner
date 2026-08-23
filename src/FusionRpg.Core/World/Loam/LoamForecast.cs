@@ -34,7 +34,7 @@ public static class LoamForecast
         {
             var sector = world.Sectors.First(s => string.Equals(s.SectorId, id, StringComparison.Ordinal));
             var yield = LoamProduction.For(sector);
-            var room = Math.Max(0, LoamPolicy.LoamCapacity - sector.LoamStock);
+            var room = Math.Max(0, LoamPhases.EffectiveCapacity(sector) - sector.LoamStock);
             total += sector.LoamStock + Math.Min(room, yield);
         }
 

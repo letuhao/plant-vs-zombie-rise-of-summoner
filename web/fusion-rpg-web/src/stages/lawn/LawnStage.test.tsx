@@ -3,6 +3,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "@/test/render";
 import { getStageMountCount, resetStageMountCounts } from "@/shell/stageHost";
+import { resetKeymapForTests } from "@/shell/keymap";
 import { LawnStage } from "./LawnStage";
 
 const mutateAsync = vi.fn();
@@ -32,11 +33,12 @@ describe("LawnStage — GG-11 keystone proof", () => {
     createLawnGame.mockClear();
     destroyLawnGame.mockClear();
     resetStageMountCounts();
+    resetKeymapForTests();
   });
 
   it("opening and closing a panel leaves the Phaser Game instance identical and never unmounts the stage", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<LawnStage />);
+    renderWithProviders(<LawnStage />, { withGlobalKeys: true });
 
     await waitFor(() => expect(createLawnGame).toHaveBeenCalledTimes(1));
     const gameBeforeOpen = createLawnGame.mock.results[0]!.value;

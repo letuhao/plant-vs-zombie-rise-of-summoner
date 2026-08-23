@@ -1,115 +1,126 @@
 <div align="center">
 
-<img src="docs/assets/banner.svg" alt="Rise of Summoner — an RPG expansion for Plants vs. Zombies Fusion. Command demons. Hold the lawn. Take back the multiverse." width="100%">
+<img src="docs/assets/banner.svg" alt="Rise of Summoner — a persistent RPG built on your PvZ Fusion runs. Command demons. Hold the lawn. Take back the multiverse." width="100%">
 
 <br>
 
 [![License: AGPL v3+](https://img.shields.io/badge/license-AGPL--3.0--or--later-3d6b45?style=for-the-badge)](LICENSE) [![CI](https://img.shields.io/github/actions/workflow/status/letuhao/plant-vs-zombie-rise-of-summoner/ci.yml?branch=main&style=for-the-badge&label=build)](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/actions/workflows/ci.yml) [![Platform](https://img.shields.io/badge/platform-Windows-2a231b?style=for-the-badge)](#play-it) [![Status](https://img.shields.io/badge/status-pre--release-e0b44b?style=for-the-badge)](#play-it)
 
-**[What is this?](#an-rpg-layer-for-a-game-that-already-plays-great)** · **[Features](#what-you-get)** · **[Play it](#play-it)** · **[Roadmap](#roadmap)** · **[Under the hood](#under-the-hood)** · **[Docs](docs/README.md)**
+**[What is this?](#turn-your-fusion-runs-into-a-persistent-rpg)** · **[Features](#what-you-get)** · **[Play it](#play-it)** · **[Roadmap](#roadmap)** · **[Under the hood](#under-the-hood)** · **[Docs](docs/README.md)**
 
 </div>
 
 ---
 
-## An RPG layer for a game that already plays great
+## Turn your Fusion runs into a persistent RPG
 
-**Plants vs. Zombies Fusion** took the lawn everyone knows and put a combinatorial engine on top of it. Two plants combine into a third that inherits from both, and the recipe tree runs deep enough that mapping it is a game in itself. The lane defense underneath is as sharp as it ever was.
+**Play the lawn. Build your roster. Summon demons. Discover fusions. Conquer the rift.**
 
-Fusion is excellent on its own, and **Rise of Summoner does not change a frame of it.** Every plant, every fusion, every wave plays exactly the way its creators built it.
+Rise of Summoner takes everything you do in a Plants vs. Zombies Fusion run and gives it a life beyond the level. Plants, zombies, kills, placements and fusions become persistent progress, feeding a roster, an almanac, an economy, and a growing war across the multiverse.
 
-What this adds is a second layer *around* the lawn — the part that keeps going after the level ends. Every plant you place, every zombie you drop, every fusion you discover gets recorded and turned into something you keep: a roster, an economy, an almanac that fills itself in, and a war map sitting above it all.
-
-You are Crazy Dave. The Fracture scattered Zomboss's time machine across the eras, and where a shard landed, plant and zombie **fused**. Those fusions became demons. Some of them will fight for you — if you can weaken them, bind them, and keep them loyal.
+The lawn is where you fight. The world is what you build afterward.
 
 > **The loop:** hold the lawn → harvest souls → summon and bind demons → fuse them into something stronger → march a legion across the rift map → do it again on ground that fights back.
 
-Your install stays untouched. No binary is patched, no game file is written, and uninstalling is deleting a folder.
-
 ---
 
-## Two ways to play, one save file
+## One run becomes a world
 
-Play the lawn, or play the RPG between lawns. Both write to the same roster.
+A normal lawn run ends when the wave ends. Here it leaves something behind.
+
+Every plant you place, every zombie you meet, every kill you land and every fusion you discover becomes part of a game that keeps running after the level does.
 
 <table>
 <tr>
-<th width="50%">🌱 &nbsp;Overlay mode</th>
-<th width="50%">👹 &nbsp;Standalone mode</th>
+<th width="50%">🌱 &nbsp;Play the lawn</th>
+<th width="50%">👹 &nbsp;Play the RPG</th>
 </tr>
 <tr>
 <td valign="top">
 
-PVZ Fusion is open. Harmony hooks read the live board every frame and mirror it into a browser control room you keep on a second monitor.
+Keep playing Fusion and let Rise of Summoner follow along.
 
-Your real runs feed the RPG: kills become souls, placements become XP, the zombies you meet fill an almanac that remembers what you have seen.
+Kills become souls. Plants and zombies feed progression. Encounters fill your almanac. Specimens gain levels off the work they actually did.
 
-Deploy a bound demon into an actual lawn and watch it fight.
+Bound demons deploy back into the lawn and fight for you.
 
 </td>
 <td valign="top">
 
-You are away from the lawn — the RPG keeps running without it.
+Away from the lawn, your world keeps moving.
 
-Send squads out on expeditions that resolve while you are gone. Summon at the altar, run the fusion lab, work the contract board, push legions across the rift map.
+Summon at the altar. Manage contracts and loyalty. Fuse specimens into stronger forms. Send squads on expeditions. Develop territory and push your legion across the rift.
 
-Same roster, same souls, same ledgers — one economy, written by whichever mode you happened to be playing.
+Advance the whole war without starting a run.
 
 </td>
 </tr>
 </table>
 
-Nothing is locked behind either mode. Play only the lawn and you miss nothing; play only the browser and you miss nothing. Fusion runs make the RPG richer — they are never a toll gate in front of it.
+Then go back to the lawn with everything you have built. **Same roster, same souls, same world** — whichever side you are playing from.
 
 ---
 
 ## What you get
 
-### ⚔️ An elemental layer over the fight
+### ⚔️ A combat system your roster grows into
 
-Vanilla damage resolves the way it always has. On top of it sits a full elemental system.
+Six elements — **fire, ice, air, earth, light, dark** — plus `omni`, arranged in a ring where every matchup is a real number rather than a flavour label. Light and dark counter each other and nothing else.
 
-Six elements — **fire, ice, air, earth, light, dark** — plus `omni`, arranged in a ring where every matchup is a real number, not a flavour label. Light and dark counter each other and nothing else. On top of that: layered shields, crit, resistances with two-phase rolls, internal cooldowns so nothing chain-procs into soup, and statuses that actually resolve instead of sitting in a table looking decorative.
+Around them: layered shields, critical hits, two-phase resistance rolls, internal cooldowns that stop interactions chaining into soup, and statuses that actually resolve.
 
-Damage is one signed number produced by one resolver. The live lawn and the server's own battle engine run the same math, and the goldens keep them honest.
+One resolver produces the damage number, and both sides use it — the live lawn and the server's own battle engine run the same math, with goldens keeping them honest. The roster you build is the roster that performs, wherever you take it.
 
-### 👹 Demons that are individuals
+### 👹 Demons are persistent individuals
 
-Every demon is a **specimen**: its own id, level, gear, traits, element, rarity, variant, and history. Duplicates are not dust — they are fusion material and trait donors.
+A demon is not another copy of a unit. Every one is a **specimen** carrying its own id, level, gear, traits, element, rarity, variant and history. Duplicates are not dust — they have a job.
 
-- **Summon** at the altar with souls you earned. Gacha is *a* path, never the only one.
-- **Bind** them to contract slots. Loyalty decays with daily upkeep; an insubordinate demon simply refuses to deploy.
-- **Fuse** them into star merges that keep their identity, inherit traits, and unlock recipes you discover rather than read.
-- **Patron** one of them to bathe your whole army in its element.
+**Summon.** Spend the souls you earned to pull new demons into the roster. Gacha is one path, never the only one.
 
-### 🗺️ A war map above the lawn
+**Bind.** Assign demons to contract slots and keep them loyal. Loyalty decays under daily upkeep, and a demon you neglect long enough will refuse to deploy.
 
-Sectors are nodes on a rift graph. Legions march between them. Each sector is its own board where you build economy, defenses, and bases on ground that has a **loam** rating — fertile land feeds an empire, barren land bleeds you dry until the Fracture takes it back.
+**Fuse.** Merge specimens into star merges that preserve identity, inherit traits, and open recipes you find by experimenting rather than by reading a list.
 
-**Dr. Zomboss plays too.** He is a real commander with his own fog of war, his own evaluation tables, and no access to your state. He decides. Twenty turns of him deciding sit in the test suite.
+**Patron.** Name one demon your patron and let its element colour your entire army.
 
-Win by finding and taking his fortress. Lose by letting the homeworld fall.
+### 🗺️ Build a legion across the rift
 
-### 📈 Progression that survives the run
+The world is a network of sectors joined by rift lanes. Legions march between them, claim ground, raise economy and defenses, and fight for control.
 
-Per-save XP and levels for the player, every plant type, and every zombie type — driven from typed play facts, backed by an append-only ledger, with demotion debt so nothing is ever silently lost.
+Ground is not neutral. Every sector carries a **loam** rating — fertile land supports an expanding empire, barren land drains one, and territory you neglect gets taken back by the Fracture.
 
-The almanac fills itself: click a card in-game and the overlay captures its portrait, its pedia text, its cost, and files it into a dossier you can actually browse.
+**Dr. Zomboss runs his own war.** He is a real commander with his own evaluation tables and his own fog, and no access to your state. He decides for himself; twenty turns of him doing it sit in the test suite.
 
-### 🖥️ A control room on your second monitor
+Find his fortress and take it before your homeworld falls.
 
-Twenty screens served from `http://127.0.0.1:5088`. No install, no Node, no npm.
+### 📈 Progress that survives the run
+
+Nothing you earn disappears with the level. Persistent progression covers the player, every plant type, every zombie type, and every specimen in your roster — levels, gear and traits included — with an append-only ledger behind it, so every change stays explicit and recoverable.
+
+### 📖 An almanac that builds itself
+
+See something in the game and the overlay captures it: portrait, pedia text, cost, type information. What you meet during play turns into a browsable set of dossiers, and the fusion recipes you uncover get catalogued beside them.
+
+You end up with a record of your own playthrough instead of a wiki somebody else wrote.
+
+### 🖥️ Your control room
+
+A browser command center running on your own machine. No account, no cloud, no external service, and nothing to install — no Node, no npm.
 
 | | | | |
 |---|---|---|---|
 | **Lawn** — live 12×5 mirror | **Roster** — specimens + gear | **Demons** — codex + altar | **Fusion** — the lab |
-| **Expeditions** — dispatch/collect | **World** — the rift map | **Progression** — almanac dossiers | **Status** — what is connected |
-| **Cheats** — the sandbox page | **Stats** — derived sheets | **Activity** — typed play facts | **Runs** — match history |
+| **Expeditions** — dispatch/collect | **World** — the rift map | **Progression** — almanac dossiers | **Status** — connection state |
+| **Cheats** — the sandbox page | **Stats** — derived sheets | **Activity** — recorded play facts | **Runs** — match history |
 | **Types** · **Recipes** · **Log** | **Storage** — archive + purge | **Sim** — play with no game | **Icon / Almanac dump** |
 
-### 🎛️ A sandbox you can trust
+Twenty screens, all of it at `http://127.0.0.1:5088`.
 
-Testing a build, tuning a fight, or just messing around? Every knob lives on one web page, and that page is the only source of truth — there is no in-game menu to drift out of sync with it. An empty field means unset, not a `1` quietly left behind by a build from three versions ago. Clear removes. **Reset all** actually resets.
+### 🎛️ A sandbox for building and testing
+
+Trying a build, tuning a fight, or just messing around? The sandbox hands you direct control over the systems Rise of Summoner exposes. It sits deliberately outside the normal loop and is off by default.
+
+Every control means exactly one thing: empty is unset, Clear clears, **Reset all** resets. No mystery values left behind by a build from three versions ago.
 
 <!-- SCREENSHOT SLOT — drop real captures here once you have them, e.g.
      <p align="center">
@@ -133,7 +144,9 @@ Testing a build, tuning a fight, or just messing around? Every knob lives on one
 2. Unzip anywhere → double-click **`FusionRpg.Launcher.exe`**.
 3. **Browse** to your legal game folder → install **one** loader (BepInEx 6 IL2CPP *or* MelonLoader — never both) → **Play**.
 
-The launcher starts the server, copies the plugin, starts the game, and opens the UI. You do not install Node, npm, a .NET SDK, or the Desktop Runtime. Builds are unsigned hobby builds, so read the **Trust & security** panel on first run — [the player runbook](docs/runbook/players.md) explains exactly what your antivirus is likely to say and why.
+The launcher starts the server, copies the plugin, starts the game, and opens the UI. You do not install Node, npm, a .NET SDK, or the Desktop Runtime.
+
+Your Fusion install stays untouched throughout — no binary patched, no game file written, and uninstalling is deleting a folder. Builds are unsigned hobby builds, so read the **Trust & security** panel on first run — [the player runbook](docs/runbook/players.md) explains exactly what your antivirus is likely to say and why.
 
 ### Running it from source, right now
 

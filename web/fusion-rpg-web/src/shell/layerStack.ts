@@ -10,6 +10,13 @@ export type Band = "shell" | "hud" | "panel" | "dialog" | "toast" | "system";
 export type LayerEntry = {
   id: string;
   band: Band;
+  /**
+   * Tells the layer to close itself. The stack only tracks existence and
+   * order; each shell still owns its own `open` boolean (T1). Esc (T3) calls
+   * this rather than popping the array directly, so there is exactly one
+   * path to "this layer closes" regardless of who triggered it.
+   */
+  close: () => void;
 };
 
 type LayerStackState = {

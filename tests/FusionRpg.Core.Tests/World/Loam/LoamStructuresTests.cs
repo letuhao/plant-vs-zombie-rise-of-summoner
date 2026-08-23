@@ -1,3 +1,4 @@
+using FusionRpg.Core.Tests.World.Topology;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Movement;
@@ -368,5 +369,94 @@ public class LoamStructuresTests
         Assert.Equal("waystation", S(withSustain).Slots[0].StructureId);
         Assert.Equal(0, S(withSustain).Slots[0].ConstructionTurnsRemaining);
         Assert.True(Habitability.For(S(withSustain)));
+    }
+
+    // ---- L37: the range rule (G5), and the accepted lockout -----------------------------------
+
+    static WorldEntity FounderAt(string sectorId, long carriedLoam) => new()
+    {
+        EntityId = "founder", Kind = WorldEntityKind.Legion, OwnerFactionId = "dave", AtSectorId = sectorId,
+        CarriedLoam = carriedLoam, Members = new[] { new WorldEntityMember { SpeciesId = "grunt" } }
+    };
+
+    static WorldCommand BuildWaystation(string sectorId) => new()
+    {
+        CommanderId = "dave", CommandId = "b1", Kind = WorldCommandKinds.Build,
+        EntityId = "founder", SectorId = sectorId, SlotIndex = 0, StructureId = "waystation"
+    };
+
+    [Fact]
+    public void A_waystation_founds_within_range_on_unmodified_two_hearths()
+    {
+        // "d-outpost" is Dave's own empty-Seat ground, two hops from "d-home" (his rootbed anchor)
+        // via l-dh-df2 + l-df2-do — well inside `WaystationRangeHops`. The map itself is untouched;
+        // only the founding legion (not part of the shipped scenario's forces) is added.
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.TwoHeartsId, seed: 1) with
+        {
+            Entities = new[] { FounderAt("d-outpost", LoamPolicy.WaystationCostMilli) }
+        };
+
+        var result = BuildResolver.Run(world, new[] { BuildWaystation("d-outpost") }, new TurnReport(), "snapshot");
+
+        var slot = result.Sectors.Single(s => s.SectorId == "d-outpost").Slots.Single(sl => sl.SlotIndex == 0);
+        Assert.Equal("waystation", slot.StructureId);
+    }
+
+    [Fact]
+    public void A_waystation_declines_beyond_range()
+    {
+        // Unmodified two-hearths has no natural far-away, founder-owned, empty-Seat target to test
+        // the decline half against — by design, every Seat on the map sits close to its own side's
+        // home cluster, and the corridor spine between them carries no Seat at all
+        // (spec-loam-structures.md's own note on this). A dedicated shape exercises it directly.
+        var shape = GraphShapes.From(600, "a-b", "b-c", "c-d", "d-e", "e-f", "f-g");
+        var world = shape with
+        {
+            Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
+            Sectors = shape.Sectors
+                .Select(s => s.SectorId switch
+                {
+                    "a" => s with { OwnerFactionId = "dave", Slots = new[] { Rootbed() } },
+                    "g" => s with { OwnerFactionId = "dave", Slots = new[] { Seat() } },
+                    _ => s with { OwnerFactionId = "dave" }
+                })
+                .ToList(),
+            Entities = new[] { FounderAt("g", LoamPolicy.WaystationCostMilli) }
+        };
+
+        var report = new TurnReport();
+        var result = BuildResolver.Run(world, new[] { BuildWaystation("g") }, report, "snapshot");
+
+        Assert.Null(result.Sectors.Single(s => s.SectorId == "g").Slots[0].StructureId);
+        Assert.Contains(report.Entries, e =>
+            e.Kind == TurnReportKinds.CommandDropped && e.Detail == "build.out-of-range:g");
+    }
+
+    [Fact]
+    public void A_faction_that_has_lost_its_only_habitable_anchors_is_permanently_locked_out_everywhere()
+    {
+        // Resolved, an audit finding accepted as intended (spec-loam-structures.md): losing every
+        // Rootbed leaves a faction with zero eligible anchors, forever — not a bug to soften. "d-home"
+        // and "d-flank-1" are the *only* two Rootbeds Dave starts with on this map; both lost (fade or
+        // conquest, simulated here) leaves "d-outpost" — his own ground, one hop from where his
+        // capital used to stand — permanently unbuildable too.
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.TwoHeartsId, seed: 1);
+        var strandedDave = world with
+        {
+            Sectors = world.Sectors
+                .Select(s => s.SectorId is "d-home" or "d-flank-1" ? s with { OwnerFactionId = null } : s)
+                .ToList(),
+            Entities = new[] { FounderAt("d-outpost", LoamPolicy.WaystationCostMilli) }
+        };
+
+        Assert.DoesNotContain(strandedDave.Sectors, s =>
+            string.Equals(s.OwnerFactionId, "dave", StringComparison.Ordinal) && Habitability.For(s));
+
+        var report = new TurnReport();
+        var result = BuildResolver.Run(strandedDave, new[] { BuildWaystation("d-outpost") }, report, "snapshot");
+
+        Assert.Null(result.Sectors.Single(s => s.SectorId == "d-outpost").Slots[0].StructureId);
+        Assert.Contains(report.Entries, e =>
+            e.Kind == TurnReportKinds.CommandDropped && e.Detail == "build.out-of-range:d-outpost");
     }
 }

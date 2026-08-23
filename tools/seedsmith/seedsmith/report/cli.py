@@ -24,6 +24,7 @@ from ..adapters.registry import known_adapter_names, resolve_adapter
 from ..corpus import Corpus, CorpusLoadError
 from ..metrics import Ctx, MetricRegistry, Severity, run_all
 from ..metrics.coverage import EmptyPartitionMetric
+from ..metrics.linkage import ALL_LINKAGE_METRICS
 
 EXIT_CLEAN = 0
 EXIT_GAP = 1
@@ -38,6 +39,8 @@ def build_registry() -> MetricRegistry:
     metric, never a rewrite of this function."""
     registry = MetricRegistry()
     registry.register(EmptyPartitionMetric())
+    for metric_cls in ALL_LINKAGE_METRICS:
+        registry.register(metric_cls())
     return registry
 
 

@@ -6,7 +6,10 @@ namespace FusionRpg.Core.World;
 /// </summary>
 public enum StructureKind
 {
-    LoamSource
+    LoamSource,
+
+    /// <summary>Raises capacity — a real third thing a structure can do (spec-loam-texture.md).</summary>
+    Storage
 }
 
 /// <summary>One structure type. Mirrors <see cref="SlotTypeDef"/>'s own shape exactly.</summary>
@@ -33,6 +36,9 @@ public sealed record StructureDef
     /// is active (spec-loam-structures.md). Zero means never under construction — instant.
     /// </summary>
     public int BuildTurns { get; init; }
+
+    /// <summary>Read only by `Storage`-kind structures — how much a granary raises a sector's cap by (spec-loam-texture.md).</summary>
+    public long CapacityBonus { get; init; }
 }
 
 /// <summary>
@@ -86,6 +92,18 @@ public static class StructureCatalog
             // 1000 (unchanged) rather than a special case in LoamProduction's formula.
             YieldMultiplierMilli = 1000,
             BuildTurns = Loam.LoamPolicy.WaystationBuildTurns
+        },
+        new()
+        {
+            StructureId = "granary",
+            Name = "Granary",
+            Kind = StructureKind.Storage,
+            RequiredSlotKind = SlotKind.Wildland,
+            CostMilli = Loam.LoamPolicy.GranaryCostMilli,
+            // Unused for Storage-kind structures — a granary does not produce, it raises capacity.
+            YieldMultiplierMilli = 1000,
+            BuildTurns = Loam.LoamPolicy.GranaryBuildTurns,
+            CapacityBonus = Loam.LoamPolicy.GranaryCapacityBonus
         }
     };
 

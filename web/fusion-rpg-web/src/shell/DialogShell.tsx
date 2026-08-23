@@ -33,9 +33,9 @@ export function DialogShell({
 
   useEffect(() => {
     if (!open) return;
-    push({ id, band: "dialog" });
+    push({ id, band: "dialog", close: () => onOpenChange(false) });
     return () => pop(id);
-  }, [open, id, push, pop]);
+  }, [open, id, push, pop, onOpenChange]);
 
   // See PanelShell for why this is needed: Radix's default onCloseAutoFocus
   // targets its own Trigger, which this fully-controlled shell never renders.
@@ -55,6 +55,11 @@ export function DialogShell({
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             openerRef.current?.focus();
+          }}
+          onEscapeKeyDown={(event) => {
+            // See PanelShell — the global keymap (T3) is the single owner of
+            // Esc; Radix's own built-in handling is suppressed so it can't race it.
+            event.preventDefault();
           }}
           className={cn(
             "band-dialog fixed left-1/2 top-1/2 flex w-[min(440px,92vw)] -translate-x-1/2 -translate-y-1/2",

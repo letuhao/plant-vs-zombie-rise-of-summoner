@@ -76,17 +76,38 @@ def _iter_string_leaves(value, path: str):
 @dataclass
 class Corpus:
     entries: dict[str, Entry] = field(default_factory=dict)
+    exemplars: dict[str, Entry] = field(default_factory=dict)
     by_kind_index: dict[str, list[Entry]] = field(default_factory=dict)
     by_partition_index: dict[str, list[Entry]] = field(default_factory=dict)
     _minted_ids: set[str] = field(default_factory=set)
 
     def add(self, entry: Entry) -> None:
+        """An exemplar and real content routinely share an id on purpose — an exemplar's whole
+        job is to show the shape of a real, shipped row, and this corpus genuinely has four
+        base-type, one set, and one unique exemplar doing exactly that (confirmed 2026-08-23).
+        So exemplars go into their OWN ledger, never `entries` — the literal reading of
+        spec-foundation §1's "must never occupy a slot in any cross-row ledger." A real id
+        colliding with ANOTHER real id is a different and genuinely serious defect (two shipped
+        rows silently overwriting each other on lookup), so THAT case still raises.
+        """
+        if entry.is_exemplar:
+            self.exemplars[entry.id] = entry
+            return
+        if entry.id in self.entries:
+            raise CorpusLoadError(
+                Path(entry.path),
+                f"duplicate id {entry.id!r} — already loaded from "
+                f"{self.entries[entry.id].path!r}",
+            )
         self.entries[entry.id] = entry
         self.by_kind_index.setdefault(entry.kind, []).append(entry)
         self.by_partition_index.setdefault(entry.partition, []).append(entry)
 
     def by_id(self, entry_id: str) -> Entry | None:
         return self.entries.get(entry_id)
+
+    def by_exemplar_id(self, entry_id: str) -> Entry | None:
+        return self.exemplars.get(entry_id)
 
     def by_kind(self, kind: str) -> list[Entry]:
         return self.by_kind_index.get(kind, [])
