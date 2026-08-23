@@ -309,7 +309,23 @@ and rejection — and a failure says what changed, including "nothing".
 **Verify:** `npm test`; compare against plate 02 §C.
 **Dependencies:** T14 · **Files:** `src/layers/fusion/*` · **Scope:** S
 
-### Task 16: World map stage as SVG
+### Task 16: World map stage as SVG — ⛔ EXCLUDED THIS PHASE, 2026-08-23
+
+**Owner decision:** the World stage is a large, largely-unbuilt design surface in its own right
+(`world-map-program.md`, `world-graph-ideal.md` — waves 1–2 built server-side, unbuilt in the FE) and
+is deliberately parked out of this refactor. *"Map GUI is exclude this phase, just keep it as is —
+we will have other plan for it because that is huge design, should make new GUI solid foundation
+before we move to the map."* Kept in the task list, not deleted, because the module boundary
+(`src/stages/world/*`) and its acceptance criteria are still the right target **when its own plan
+lands** — this row is a placeholder for that future plan, not dead content.
+
+**What "keep it as is" means concretely:** the current `/world` route stays exactly what it is today
+(pre-refactor) until its own dedicated plan is written. It does **not** get swept into the developer
+tree (T12) and does **not** get a stage/layer treatment in this pass — it is simply left alone.
+
+**Acceptance / Verify / Dependencies below are the ORIGINAL scope, retained for the future plan to
+start from, not a task to run now:**
+
 **Acceptance:** nodes, lanes, ownership, fog and legions render from tokens only; pan/zoom works; no `@xyflow/react` import; selecting a sector opens the inspector as a band-2 layer with the map still mounted.
 **Verify:** `npm test` — map stays mounted across inspector open/close; hex guard passes. Compare against plate 03 §A–B.
 **Dependencies:** T9 · **Files:** `src/stages/world/*`, `src/layers/sector/*` · **Scope:** L — split if it exceeds 5 files
@@ -317,12 +333,25 @@ and rejection — and a failure says what changed, including "nothing".
 ### Task 17: Expeditions and Pacts
 **Acceptance:** a returned expedition is a toast plus a rail badge, never a dialog; the overdue pact's Renegotiate is disabled **with its reason inline**.
 **Verify:** `npm test` — disabled-reason scan. Compare against plate 03 §C–D.
-**Dependencies:** T11, T16 · **Files:** `src/layers/expeditions/*`, `src/layers/pacts/*` · **Scope:** M
+**Dependencies:** T11 (T16 dropped, 2026-08-23 — Expeditions and Pacts are stage-independent band-2
+layers per [information-architecture.md](../docs/design/information-architecture.md), openable over
+any stage; nothing in either layer's own code needs the World stage to exist). **One real gap this
+leaves, named rather than hidden:** Expeditions' own unlock condition is *"first sector held"* —
+a live end-to-end demonstration of that unlock firing needs a real sector claim, which needs World.
+The layer itself is buildable and testable against fixture data regardless; only the live unlock
+demo is blocked. · **Files:** `src/layers/expeditions/*`, `src/layers/pacts/*` · **Scope:** M
 
 ### Task 18: Battle stage
 **Acceptance:** grid with painted range and targets; initiative track; action bar with cost, unaffordable and cooling states each carrying a reason; acknowledgement is immediate and no authoritative state paints before the response.
 **Verify:** `npm test` — the four action states; assert no optimistic authoritative write. Fixture-driven e2e (see plan open question 3). Compare against plate 04 §C–E.
 **Dependencies:** T9 · **Files:** `src/stages/battle/*` · **Scope:** L — split if it exceeds 5 files
+
+**Entry-point note, 2026-08-23:** [information-architecture.md](../docs/design/information-architecture.md)
+names two ways into Battle — *"commit a legion on the world map"* and *"an expedition resolving into
+a fight."* With T16 excluded this phase, the **first** entry path has no stage to launch from. The
+**second** (expedition → battle) does not require World and stays a real, demonstrable path — T18
+builds and is fixture-e2e-tested through it. The world-map entry point returns when T16's own plan
+does; this task's own scope and acceptance criteria are unchanged.
 
 ### Task 19: Almanac, Chronicle and the chart primitives
 **Acceptance:** four chart shapes (horizontal bar, sparkline, meter, zero-anchored diverging bar) built from tokens; signed deltas are zero-anchored and coloured by sign; ledger paged above 240 rows; attribution expands a derived number into its sources.
@@ -336,11 +365,16 @@ and rejection — and a failure says what changed, including "nothing".
 
 ---
 
-### ✅ Checkpoint F — every surface exists
-- [ ] Reachability matrix passes: every (stage, layer) pair opens, or is one of the three declared exceptions
+### ✅ Checkpoint F — every surface *in this phase's scope* exists
+- [ ] Reachability matrix passes: every (stage, layer) pair **excluding World** opens, or is one of
+      the three declared exceptions ([information-architecture.md](../docs/design/information-architecture.md)
+      D8) — World is a **fourth**, phase-scoped exception (T16, 2026-08-23), not one of the three
+      permanent behavioural ones, and the distinction matters: D8's three are rules about *when*
+      travel is forbidden; this one is *"the stage does not exist yet in this build."*
 - [ ] Viewport sweep passes at every declared width
 - [ ] axe scan clean per layer
-- [ ] All old routes redirect; none 404
+- [ ] All old routes redirect; none 404 — **except `/world`**, which stays on its pre-refactor route
+      until T16's own plan lands (T12's sweep does not touch it)
 
 ---
 

@@ -3,6 +3,15 @@
 **Status:** audit, 2026-08-23. Read against `src/` and the running suites, not against the specs.
 Scope: all 21 rows of [tasks/effect-atom-todo.md](../../../tasks/effect-atom-todo.md), every one marked `[x]`.
 
+**✅ Closed same-day.** Every finding in this document is resolved — A1–A3, B1–B5, and C1–C5 with
+implementation and test evidence; A4 deliberately out of scope, explicitly recorded (see §7 and the
+map). B2's `EffectSeedCatalog` sub-finding took two passes: reported partial first, on a claim ("no
+DTO→domain converter exists") that turned out to be wrong on closer reading of
+`MigrationParityTests.cs` — `AtomPushCodec.ToDef` (E19) was already that converter. C1–C5 were outside
+wave 6's own §7 scope table and closed anyway, after review found "not wave 6's job" was not the same
+claim as "resolved." Full account, module by module, in
+[tasks/effect-atom-todo.md](../../../tasks/effect-atom-todo.md).
+
 Map: [effect-atom-map.md](../effect-atom-map.md) · Definitions: [definitions.md](definitions.md)
 
 ---
@@ -180,18 +189,25 @@ that is correct and documented. E13's ≤ 50 ns/atom budget is enforced by `Atom
 
 ## 4. Minor
 
-- **C1.** `ClearSessionScopedBindings` and `CountOrphanInstances` have no callers — housekeeping
-  declared, never scheduled. Moot while A4 holds; a leak the moment it does not.
-- **C2.** Nothing checks that a status carrying a `stat` overlay declares `ModifyStat`. The shipped
-  `blight-row.overlay.json` carries one on a DoT status, and it validates.
-- **C3.** `SeedScanner.OwnedFolders` declares `curves` and `rarity`; neither folder exists. Harmless
-  (`Where(exists)`), but two hash-covered tables have no authored content at all.
-- **C4.** `UpsertPowerTables` and `UpsertChannelPolicies` do not bump `catalog_revision`. Consistent
-  with E8's deliberate "not cached on the revision" decision, but it means an E19 receiver will not
-  re-negotiate after a policy edit.
-- **C5.** E10's BigInteger exactness is justified in-code by "this number is stamped into hashed
-  reports". Nothing stamps `PowerScalar` anywhere. The implementation is right; the rationale is
-  unearned and will mislead the next reader.
+- **C1.** ✅ **Closed 2026-08-23.** `ClearSessionScopedBindings`/`CountOrphanInstances` now run from
+  the server boot sweep (`Program.cs`, right after `LoadContentIntoRuntime()`) — a fresh boot is
+  exactly the moment every `entity:` binding is guaranteed stale (IL2CPP pointer reuse), whether the
+  last shutdown was clean or a crash. A no-op today (A4 still holds), now correctly wired for the
+  day it doesn't.
+- **C2.** ✅ **Closed 2026-08-23.** `StatusEffectBridge.TryApplyFromGrant` refuses a `stat` overlay on
+  a status that never declared `ModifyStat`, beside the existing `unknown-statusId` refusal. The
+  shipped `blight-row.overlay.json` **was** the violation — its `stat` block moved to a new
+  `expose-row.overlay.json` naming a status that actually declares it.
+- **C3.** ✅ **Closed 2026-08-23.** `data/seed/curves/README.md` and `data/seed/rarity/README.md`
+  added — real files making the empty-folder state explicit rather than indistinguishable from
+  forgotten; invisible to the importer by construction (`*.json`-only glob).
+- **C4.** ✅ **Closed 2026-08-23.** `UpsertPowerTables` and `UpsertChannelPolicies` both bump
+  `catalog_revision` now.
+- **C5.** ✅ **Closed 2026-08-23.** The false "stamped into hashed reports" claim is corrected in
+  `PowerReads.cs` — `PowerScalar.Of` has no production caller today, and the comment says so.
+
+Full account for all five, including test evidence, in
+[tasks/effect-atom-todo.md](../../../tasks/effect-atom-todo.md) "Minor findings."
 
 ---
 

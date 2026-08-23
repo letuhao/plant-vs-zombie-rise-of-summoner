@@ -183,11 +183,17 @@ public static partial class WorldTemplateCatalog
             {
                 EntityId = "e-dave-legion-1", Kind = WorldEntityKind.Legion, OwnerFactionId = Dave,
                 AtSectorId = "homeworld", Stance = "march", MovementRemaining = 1000,
+                // L27 (spec-loam-legions.md): one bearer, and a generous starting reserve — the
+                // same "minimum edit to keep the template functional under a new mechanic" shape
+                // G-D used for the homeworld's starting `LoamStock` (both placeholders, not
+                // harness-tuned). A legion with no reserve at all would be destroyed the instant it
+                // steps off owned ground, before it can clear or claim anything.
+                CarriedLoam = 500,
                 Members = new WorldEntityMember[]
                 {
                     new() { SpeciesId = "peashooterzombie", Level = 1, Hp = 110 },
                     new() { SpeciesId = "conezombie", Level = 1, Hp = 110 },
-                    new() { SpeciesId = "paperzombie", Level = 1, Hp = 110 }
+                    new() { SpeciesId = "paperzombie", Level = 1, Hp = 110, Role = WorldEntityMemberRole.Bearer }
                 }
             },
             // Zomboss's standing force, at the far end of the map behind his own Seat.

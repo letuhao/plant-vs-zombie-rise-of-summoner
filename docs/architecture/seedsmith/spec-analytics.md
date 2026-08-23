@@ -100,7 +100,7 @@ band from what a healthy corpus actually looks like.
 ### 2.1 Allocation coverage
 
 Set difference between allocated partitions and partitions holding ≥1 entry. This is the check that
-would have caught the nine empty partitions on day one. O(n), trivial, and its absence cost three
+would have caught all nine empty partitions on day one. O(n), trivial, and its absence cost three
 waves.
 
 ### 2.2 Combinatorial (t-way) coverage

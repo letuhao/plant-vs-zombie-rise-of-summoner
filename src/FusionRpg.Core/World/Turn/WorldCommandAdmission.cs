@@ -57,6 +57,12 @@ public static class WorldCommandAdmission
             if (namedSector is null) return (false, "sector.missing");
         }
 
+        if (command.Kind == WorldCommandKinds.Sustain)
+        {
+            if (command.EntityId is null) return (false, "entity.missing");
+            if (command.Amount is not { } amount || amount <= 0) return (false, "amount.invalid");
+        }
+
         if (command.Kind == WorldCommandKinds.Clear)
         {
             // `clear` names its target outright — entity, sector, slot. Whether the legion is

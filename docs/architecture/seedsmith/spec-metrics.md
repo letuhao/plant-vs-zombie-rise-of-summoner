@@ -92,12 +92,22 @@ Ten families, each answering one question. Algorithms in analytics; this is the 
 | **SemanticDedup** | Do two entries say the same thing? | CLOSED | §6 |
 | **Quality** | Is the writing present, varied, on-theme? | **OPEN** | §7 |
 
-**Constraint deserves its own note.** It is the family with no clever algorithm and the highest
-historical defect count: the `jewel-minor` ban, the 8-of-15 role quota, the one-per-(role, band,
-axis) rule, the 6-role set cap, the hybrid-core requirement. Every one lived only in prose, every one
-was violated, and each is a five-line predicate. The family exists to make "a rule that is written
-down but not checked" impossible to leave lying around — a constraint metric is the cheapest thing
-in this document and it prevented none of those defects only because nobody wrote it.
+**Constraint deserves its own note**, and a correction the audit forced.
+
+It is the family with no clever algorithm and the highest historical defect count. The `jewel-minor`
+ban, the 8-of-15 role quota, the one-per-(role, band, axis) rule, the 6-role set cap and the
+hybrid-core requirement each lived only in prose for the whole agentic build, and were violated 28,
+10 and 1 times respectively before anyone wrote a predicate.
+
+**All five now ship as C#** — `UniqueRuleCheck.cs`, `SetRuleCheck.cs`, wired at `Validator.cs:70-71`
+with tests. An earlier draft of this section listed them as *"never enforced"*, which was already
+false when written. So this family does **not** re-implement them.
+
+What it owns is the *class*: **a rule stated in a lane document with no corresponding check in either
+tool.** That is a different and harder question than any individual predicate, because it requires
+knowing what the documents claim — which is why the metric is expressed as a manifest of
+rule → check bindings, and a documented rule with no binding is the finding. Each binding is still a
+five-line predicate; the value is in noticing the missing one.
 
 ---
 
@@ -131,7 +141,7 @@ declares `covers`, and a test asserts:
 - Unclaimed rows are printed by `seedsmith metrics --coverage` as **known gaps**, not silently
   absent.
 
-That last point is the whole discipline. The nine empty partitions were invisible for three waves
+That last point is the whole discipline. The eight accidentally-empty partitions were invisible for three waves
 because nothing enumerated what *should* have been checked. The catalogue's own coverage is a
 first-class output, so a missing metric is visible the same day rather than three waves later.
 

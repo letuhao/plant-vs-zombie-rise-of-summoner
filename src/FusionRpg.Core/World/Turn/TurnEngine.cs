@@ -33,8 +33,13 @@ public static class TurnEngine
     /// belief, so the same commands produce a different — and larger — state than they did under
     /// version 1. Stored version-1 reports refuse to re-derive rather than fabricating, which is the
     /// behaviour this counter exists for.
+    ///
+    /// Bumped to 5 on 2026-08-23 (L27, spec-loam-legions.md): `Pressure` retires wound-based
+    /// attrition and wires `LegionSupply.Resolve` in its place — a legion beyond supply now burns
+    /// carried loam and is destroyed outright rather than bled slowly, a real change to what the
+    /// same command log produces, not a field-only addition.
     /// </summary>
-    public const int RulesetVersion = 4;
+    public const int RulesetVersion = 5;
 
     public static class Phases
     {
@@ -91,7 +96,7 @@ public static class TurnEngine
         next = Sieges(next, revealed, report, turn, battles, seed);
         next = Production(next, report);
         next = Growth(next, report);
-        next = Pressure(next, report);
+        next = Pressure(next, revealed, report);
         next = Events(next, report, turn, seed);
 
         // Snapshot before Intel (RulesetVersion 3): a claim settles in Snapshot, so recording belief
@@ -195,15 +200,20 @@ public static class TurnEngine
     }
 
     /// <summary>
-    /// Supply is recomputed here, from scratch, and whatever falls off the chain starves. Nothing
-    /// about it is carried between turns. Loam's upkeep and fade run *after*, so garrison upkeep
-    /// reads the garrison that survived this turn's attrition.
+    /// `Sustain` resolves first, at the very top: its spend must already be sitting in a sector's
+    /// stock before the component's automatic accounting runs this same turn (spec-loam-legions.md).
+    /// Supply is recomputed next, from scratch, and nothing about it is carried between turns.
+    /// Loam's upkeep and fade run *after*, so garrison upkeep reads the garrison that survived this
+    /// turn's supply pass. `LegionSupply.Resolve` runs last: sector upkeep first, legion top-up
+    /// and burn second, from whatever the same pool has left.
     /// </summary>
-    static WorldState Pressure(WorldState world, TurnReport report)
+    static WorldState Pressure(WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report)
     {
         report.BeginPhase(Phases.Pressure);
-        var afterSupply = SupplyGraph.Run(world, report, Phases.Pressure);
-        return LoamPhases.Pressure(afterSupply, report, Phases.Pressure);
+        var afterSustain = SustainResolver.Run(world, commands, report, Phases.Pressure);
+        var afterSupply = SupplyGraph.Run(afterSustain, report, Phases.Pressure);
+        var afterPressure = LoamPhases.Pressure(afterSupply, report, Phases.Pressure);
+        return LegionSupply.Resolve(afterPressure, report, Phases.Pressure);
     }
 
     /// <summary>Calendar boundaries are rolled and reported; their effects belong to later modules.</summary>

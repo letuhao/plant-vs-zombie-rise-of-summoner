@@ -22,6 +22,7 @@ for (var i = 0; i < args.Length; i++)
     if (args[i] == "--trait-check") { mode = "trait-check"; continue; }
     if (args[i] == "--emit" && i + 1 < args.Length) { mode = "emit"; emitPath = args[++i]; continue; }
     if (args[i] == "--trait-emit" && i + 1 < args.Length) { mode = "trait-emit"; emitPath = args[++i]; continue; }
+    if (args[i] == "--effect-emit" && i + 1 < args.Length) { mode = "effect-emit"; emitPath = args[++i]; continue; }
     positional.Add(args[i]);
 }
 
@@ -30,6 +31,39 @@ if (seedRoot is null || !Directory.Exists(seedRoot))
 {
     Console.Error.WriteLine("could not locate data/seed; pass the seed root explicitly");
     return 2;
+}
+
+if (mode == "effect-emit")
+{
+    var atomsDir = Path.Combine(seedRoot, "atoms");
+    var files = Directory.GetFiles(atomsDir, "fx-*.json", SearchOption.AllDirectories)
+        .OrderBy(f => f, StringComparer.Ordinal)
+        .Select(f => (f, File.ReadAllText(f)))
+        .ToArray();
+
+    var collected = AtomSeedFile.Collect(files);
+    if (!collected.IsOk)
+    {
+        Console.Error.WriteLine("data/seed/atoms/fx-*.json did not parse:");
+        foreach (var e in collected.Errors) Console.Error.WriteLine("  " + e);
+        return 2;
+    }
+
+    var compiled = FusionRpg.Core.Effects.Atoms.AtomCompiler.Compile(
+        collected.Content.Atoms, FusionRpg.Core.Effects.Atoms.RuntimeId.Lawn, 1, hostIsPlanner: true);
+    if (compiled.Rejected.Count > 0 || compiled.Runtime.Count > 0)
+    {
+        Console.Error.WriteLine(
+            $"refusing to emit: {compiled.Rejected.Count} rejected atom(s), {compiled.Runtime.Count} " +
+            "routed to the runner — the retired EffectSeedCatalog's replacement must compile whole");
+        return 1;
+    }
+
+    var defs = compiled.Defs.Select(FusionRpg.Core.Effects.Atoms.AtomPushCodec.ToDef).ToList();
+    var source = EffectCatalogGen.GenerateSource(defs);
+    File.WriteAllText(emitPath!, source);
+    Console.WriteLine($"wrote {emitPath} ({defs.Count} def(s))");
+    return 0;
 }
 
 if (mode is "trait-check" or "trait-emit")

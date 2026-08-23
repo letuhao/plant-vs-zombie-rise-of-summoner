@@ -82,7 +82,14 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
 
-            foreach (var row in rows) UpsertChannelPolicyRowUnlocked(db, tx, row);
+            var changed = 0;
+            foreach (var row in rows) changed += UpsertChannelPolicyRowUnlocked(db, tx, row);
+
+            // C4 (completeness-audit.md): bump only when something actually changed, matching the
+            // import path's rule — a bump on a no-op call would make every connected E19 receiver
+            // re-download the full push for content that did not move.
+            if (changed > 0)
+                ExecIn(db, tx, "UPDATE content_meta SET catalog_revision = catalog_revision + 1 WHERE id = 1;");
 
             tx.Commit();
             return (true, "");

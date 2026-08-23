@@ -151,4 +151,41 @@ public class SeedScannerTests : IDisposable
 
         Assert.Single(files);
     }
+
+    // ---- the real repo: curves/ and rarity/ (completeness-audit.md C3) -------------------------------
+
+    [Fact]
+    public void The_real_curves_and_rarity_folders_exist_and_document_why_they_are_empty()
+    {
+        // C3: two owned folders declared with no content looked identical to two forgotten ones.
+        // The README in each is the distinction — a real, checked-in file, not a synthetic fixture.
+        var root = RepoRoot();
+
+        Assert.True(Directory.Exists(Path.Combine(root, "data", "seed", "curves")), "data/seed/curves missing");
+        Assert.True(Directory.Exists(Path.Combine(root, "data", "seed", "rarity")), "data/seed/rarity missing");
+        Assert.True(File.Exists(Path.Combine(root, "data", "seed", "curves", "README.md")));
+        Assert.True(File.Exists(Path.Combine(root, "data", "seed", "rarity", "README.md")));
+    }
+
+    [Fact]
+    public void The_real_sweep_finds_zero_json_in_curves_and_rarity_the_readmes_do_not_count()
+    {
+        var root = RepoRoot();
+        var roots = SeedScanner.Roots(Path.Combine(root, "data", "seed"), explicitRoot: false, Directory.Exists);
+        var files = SeedScanner.Files(roots);
+
+        Assert.DoesNotContain(files, f => f.Replace('\\', '/').Contains("/curves/", StringComparison.Ordinal));
+        Assert.DoesNotContain(files, f => f.Replace('\\', '/').Contains("/rarity/", StringComparison.Ordinal));
+    }
+
+    static string RepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (Directory.Exists(Path.Combine(dir.FullName, "data", "seed"))) return dir.FullName;
+            dir = dir.Parent;
+        }
+        throw new DirectoryNotFoundException("data/seed");
+    }
 }

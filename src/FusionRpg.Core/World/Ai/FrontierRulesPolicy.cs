@@ -28,6 +28,16 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
     /// <summary>How far a legion will travel to look at ground nobody has seen.</summary>
     public const int ExploreTurns = 3;
 
+    /// <summary>
+    /// The reconnection-cost floor a `Sever` target must clear to be worth attacking
+    /// (spec-loam-ai.md), harness-tuned via `SeveranceThresholdTests`. Comfortably below a genuine
+    /// articulation point's cost (which runs into
+    /// <see cref="FusionRpg.Core.World.Topology.AllPairsCost.Unreachable"/>-scale territory the
+    /// moment cutting it splits the enemy's holdings) and comfortably above a redundant sector's
+    /// near-zero one.
+    /// </summary>
+    public const long SeveranceThresholdCost = 10_000;
+
     public string PolicyId => Id;
 
     public IReadOnlyList<PolicyOrder> Decide(IWorldView view, ulong seed)
@@ -50,6 +60,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
                         ?? Abandon(view, entity)
                         ?? Finish(view, entity)
                         ?? Take(view, entity)
+                        ?? Sever(view, entity, reach)
                         ?? Recover(view, entity, supplied)
                         ?? Explore(view, entity, reach)
                         ?? Expand(view, entity, value, reach)
@@ -249,7 +260,42 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         return Order(view, entity, WorldCommandKinds.Claim, $"claim {here}", sectorId: here);
     }
 
-    // ---- 5. Recover --------------------------------------------------------------------------
+    // ---- 5. Sever (spec-loam-ai.md) -----------------------------------------------------------
+
+    /// <summary>
+    /// The reachable enemy sector whose loss would hurt them the worst, if it clears
+    /// <see cref="SeveranceThresholdCost"/>. Sits above <see cref="Take"/> — claiming free,
+    /// undefended ground is strictly lower-risk than attacking an enemy-held junction, so it still
+    /// wins when both are available — and above <see cref="Recover"/> and routine expansion: a cut
+    /// this good is worth pre-empting mere self-maintenance for.
+    /// </summary>
+    static PolicyOrder? Sever(IWorldView view, WorldEntity entity, IReadOnlyDictionary<string, int> reach)
+    {
+        string? best = null;
+        long bestScore = SeveranceThresholdCost;
+
+        foreach (var sectorId in view.SectorIds.OrderBy(id => id, StringComparer.Ordinal))
+        {
+            if (!reach.ContainsKey(sectorId)) continue;
+            if (view.Believed(sectorId) is not { OwnerFactionId: { } owner } believed) continue;
+            if (string.Equals(owner, view.FactionId, StringComparison.Ordinal)) continue;
+
+            var score = SeveranceScore.For(view, owner, sectorId);
+            if (score <= bestScore) continue;
+
+            bestScore = score;
+            best = sectorId;
+        }
+
+        if (best is null) return null;
+
+        var path = Route(view, entity, best);
+        return path is null
+            ? null
+            : Order(view, entity, WorldCommandKinds.Move, $"sever {best}, severance {bestScore}", lanePath: path);
+    }
+
+    // ---- 6. Recover --------------------------------------------------------------------------
 
     /// <summary>Badly hurt, in supply, and not already dug in.</summary>
     static PolicyOrder? Recover(IWorldView view, WorldEntity entity, IReadOnlySet<string> supplied)
@@ -287,7 +333,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         return (int)(wounds * 1000 / Math.Max(1, hp));
     }
 
-    // ---- 6. Explore --------------------------------------------------------------------------
+    // ---- 7. Explore --------------------------------------------------------------------------
 
     /// <summary>
     /// Ground nobody has seen, close enough to be worth the trip.
@@ -314,7 +360,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         return path is null ? null : Order(view, entity, WorldCommandKinds.Move, $"explore {target}", lanePath: path);
     }
 
-    // ---- 7. Expand ---------------------------------------------------------------------------
+    // ---- 8. Expand ---------------------------------------------------------------------------
 
     /// <summary>The best-valued reachable ground I do not hold, if it is worth having at all.</summary>
     static PolicyOrder? Expand(
@@ -351,7 +397,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
                 $"expand to {best}, {value[best].Explain()}", lanePath: path);
     }
 
-    // ---- 8. Hold -----------------------------------------------------------------------------
+    // ---- 9. Hold -----------------------------------------------------------------------------
 
     static PolicyOrder Hold(IWorldView view, WorldEntity entity) =>
         Order(view, entity, WorldCommandKinds.StandFast, "nothing worth doing");

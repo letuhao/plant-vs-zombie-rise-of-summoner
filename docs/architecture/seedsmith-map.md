@@ -65,8 +65,8 @@ frames, rung bands or drop tables. Everything item-shaped lives in `adapter-item
 | id | Capability | Depends on |
 |---|---|---|
 | `corpus` | Load a seed folder into a typed, queryable graph; ids, kinds, partitions, edges | — |
-| `numerics` | Deterministic value resolution: band → number, base stats, curve evaluation, budget-weight math. **P1 lives here.** | `corpus` |
-| `budget` | Declarative targets — expected counts and distributions per kind, role, frame, band, element | `corpus` |
+| `numerics` | Deterministic value resolution: band → number, base stats, curve evaluation, budget-weight math. **P1 lives here.** | `corpus`, `adapter` |
+| `budget` | Declarative targets — expected counts and distributions per kind, role, frame, band, element | `corpus`, `adapter` |
 | `metrics` | The check catalogue: coverage, linkage, distribution, balance. Emits typed findings with severity and loop-kind | `corpus`, `budget`, `numerics` |
 | `report` | Human CLI, CI gate, machine-readable findings for the planner, **deterministic sampling** for open-loop verdicts | `metrics` |
 | `planner` | **Deterministic** findings → work order: partitions, ordering, model tier, constraints. Refuses provably-unsatisfiable orders | `metrics`, `budget` |
@@ -77,9 +77,9 @@ frames, rung bands or drop tables. Everything item-shaped lives in `adapter-item
 **Dependency direction** is strictly downward in that table; nothing depends on `pipeline`.
 
 ```
-corpus ─┬─ numerics ─┐
-        ├─ budget ───┼─ metrics ─┬─ report
-        └─ adapter-items ────────┴─ planner ── briefkit ── pipeline
+corpus ── adapter ─┬─ numerics ─┐
+                   ├─ budget ───┼─ metrics ─┬─ report
+                   └────────────┴───────────┴─ planner ── briefkit ── pipeline
 ```
 
 ---
@@ -119,7 +119,7 @@ Not the spec — the shape, so the map can be judged. Each is closed-loop unless
 
 | Family | Asks |
 |---|---|
-| **Coverage** | Does every allocated partition have content? Every role×frame? Every element? *(This is the family that would have caught the nine empty partitions on day one.)* |
+| **Coverage** | Does every allocated partition have content? Every role×frame? Every element? *(This is the family that would have caught all nine empty partitions on day one.)* |
 | **Linkage** | Is everything reachable and completable? *(Today's `seed_graph` checks.)* |
 | **Distribution** | Is any kind, role, band or element over- or under-represented against `budget`? |
 | **Balance** | Do resolved magnitudes sit inside their declared budget envelope? Are rarity rungs monotonic? |
@@ -189,13 +189,13 @@ This is the completeness test for the catalogue: **an unclaimed row is a coverag
 | 4 | Reference derived from a pattern instead of looked up (`item.humanoid-core-a-001`) | Referential | C# (exists) |
 | 5 | Reference invisible to the resolver (snake_case vs kebab) | Referential | C# (fixed) |
 | 6 | Tracking id vs runtime id confused — **four separate times** | Referential | C# (fixed) |
-| 7 | Content rules that live only in a lane document, never enforced (jewel-minor ban, 8-of-15 role quota, one-per-(role,band,axis)) | **Constraint** | seedsmith |
+| 7 | Content rules that live only in a lane document until something violates them — the class, not any one rule (see note below) | **Constraint** | seedsmith |
 | 8 | An allocation that is **arithmetically unsatisfiable** before a single agent runs | **Feasibility** | seedsmith |
 | 9 | An exemplar propagating a wrong shape to every agent that reads it — **three times** | **Exemplar conformance** | seedsmith |
 | 10 | Content that ships unreachable — no drop path, no recipe | Linkage | absorbed from `seed_graph` |
 | 11 | A set nothing can complete — members declared by role, never pinned | Linkage | absorbed |
 | 12 | A whole feature unbound — 10 milestones, no base type granting them | Linkage | absorbed |
-| 13 | **Allocated partition with zero entries** — nine of them, unnoticed for three waves | **Coverage** | seedsmith |
+| 13 | **Allocated partition with zero entries** — nine, of which eight were accidental, unnoticed for three waves | **Coverage** | seedsmith |
 | 14 | Distribution skew — humanoid uniques half of plant across four roles; top rarity band entirely dark/light | **Distribution** | seedsmith |
 | 15 | Rarity ladder not monotonic — a band-90 unique reading flatter than its own band-50 | **Balance** | seedsmith |
 | 16 | Two entries rendering identically for mechanically different families (`Increased` vs `More`) | **Semantic dedup** | seedsmith |
@@ -205,6 +205,21 @@ This is the completeness test for the catalogue: **an unclaimed row is a coverag
 | 20 | A material that drops and nothing consumes | Linkage *(note)* | absorbed |
 
 Twelve of twenty rows are seedsmith's to own; the rest are already gated and stay where they are.
+
+> **Correction, 2026-08-23 audit.** Row 7 originally named the jewel-minor ban, the 8-of-15 role
+> quota and the one-per-(role, band, axis) rule as *"never enforced"*. That was **false when
+> written**: `UniqueRuleCheck.cs` and `SetRuleCheck.cs` enforce all of them, wired at
+> `Validator.cs:70-71` and covered by tests — code added earlier the same day, by the same author as
+> this map. The grounding reviewer caught it.
+>
+> The defect class is real; the examples were stale. Those rules lived only in prose for the whole
+> agentic build and were violated 28 + 10 + 1 times before anyone wrote a predicate. What `Constraint`
+> owns is **the recurrence** — the next rule that exists only in a lane document — not re-implementing
+> five checks that now ship in C#. Seedsmith's job there is to notice that a documented rule has no
+> corresponding check *at all*, in either tool.
+>
+> Worth keeping visible because it is the exact failure this map warns about elsewhere: asserting the
+> state of the codebase from memory rather than reading it.
 
 ---
 
@@ -220,3 +235,42 @@ Twelve of twenty rows are seedsmith's to own; the rest are already gated and sta
 | `corpus` `adapter` `report` `briefkit` | [spec-foundation.md](seedsmith/spec-foundation.md) | the interfaces and the feature seam |
 
 Next: `tasks/seedsmith-plan.md` and `tasks/seedsmith-todo.md`, then build W1.
+
+---
+
+## 9. Audit — 2026-08-23
+
+Five adversarial reviewers, one lens each: methodology, grounding, buildability, game design, gaps.
+**66 findings, 11 of them BLOCKER.** Reports in [review/](seedsmith/review/).
+
+The audit paid for itself twice over on its first two findings, both of which were mine and both of
+which would have shipped:
+
+- **The overlap guardrail was inverted.** `spec-numerics` asserted `hi_t < lo_(t+1)` — "so tier
+  windows do not overlap into ambiguity". `bands.v1.json` `tierScaling.overlap` requires the exact
+  opposite and proves it with the same arithmetic, because overlap is design guarantee **OD4**: a
+  well-rolled lower rung must be able to beat a badly-rolled higher one. The guardrail would have
+  raised on the first resolve of every channel. Written one paragraph after the spec congratulated
+  itself on reading the registry first.
+- **`metrics` had no spec at all.** The map listed it, six documents referenced it, nothing defined
+  it.
+
+### Owner decisions, resolving four blockers
+
+| # | Blocker | Decision |
+|---|---|---|
+| 1 | Multi-set membership risks set jail; audit wanted a structural cap | **No cap.** The problem is the missing pipeline, not the absence of a rule — see [spec-planner §8](seedsmith/spec-planner.md#8-generation-pipelines--the-architecture-the-agentic-build-never-had). A planner that resolves member demands with sight of every set spreads them deliberately; a cap only refuses at an arbitrary number. |
+| 2 | `opWeight[More] = 0.55` stands in for a non-constant relationship | **Ship it.** An adjustable tuning number, revisited for balance later. |
+| 3 | Appendix A omits its own most frequent defect class | **Pipelines plus ordering plus validators.** Correct for the ordering half; the residue — logic bugs *inside* a check — is answered by mutation testing (`scripts/mutate.ps1`), now scoped into W1. |
+| 4 | Calibrating a budget threshold is the same motion as editing a target to hide a failure | **Not material.** `budget` is a config file set before a run, not a live gate being negotiated. |
+
+Decision 1 and decision 3 turned out to be the same decision. Both blockers traced to one absent
+thing — **dependency-correct generation order** — and the set case showed that ordering is needed
+not only *between* kinds but *inside* one: a set is five ordered stages, three of them deterministic,
+and the agentic build asked a single agent to do all five at once.
+
+### Still open
+
+Buildability B1–B4 (undefined interface types, item vocabulary inside the feature-agnostic modules,
+no CLI specification, no CI cutover for absorbing `seed_graph`) and the grounding corrections — all
+spec work, no decisions needed.

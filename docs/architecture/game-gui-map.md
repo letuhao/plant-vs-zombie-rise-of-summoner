@@ -1,13 +1,20 @@
 # Capability map — Game GUI refactor
 
-**Status: awaiting approval. No build authorized.**
+**Status: approved 2026-08-23. Build authorized, World stage (`fe-world`'s stage half) excluded
+this phase — see the note on that row below.**
 **Parent:** [decisions.md](decisions.md) row **Game GUI** (2026-08-22).
-**Rules:** [game-gui-principles.md](game-gui-principles.md) (GG-1…GG-60).
+**Rules:** [game-gui-principles.md](game-gui-principles.md) (GG-1…GG-61).
 **Map of the surfaces:** [design/information-architecture.md](../design/information-architecture.md).
 **Stack + gap register:** [design/tech-stack.md](../design/tech-stack.md).
-**Visual reference:** eight plates, [design/README.md](../design/README.md).
-**Module specs:** `docs/architecture/game-gui/spec-<module-id>.md` — none written yet.
-**Plan / tasks:** `tasks/game-gui-plan.md` · `tasks/game-gui-todo.md` — not written yet.
+**Visual reference:** eight plates, [design/README.md](../design/README.md), plus the entity-ladder
+work in [00-foundation.html](../design/00-foundation.html) §C.8–C.9, §D.5–D.8, §F.3–F.4.
+**Module spec:** [web/spec.md](../web/spec.md) — complete, all six spec-driven-development areas.
+**Entity coverage:** [design/gap-audit-2026-08-22.md](../design/gap-audit-2026-08-22.md) — closed
+2026-08-23, nine detail-design documents. **Responsive + scroll:**
+[design/responsive-and-scroll-audit-2026-08-23.md](../design/responsive-and-scroll-audit-2026-08-23.md).
+**Plan / tasks:** [`tasks/game-gui-plan.md`](../../tasks/game-gui-plan.md) ·
+[`tasks/game-gui-todo.md`](../../tasks/game-gui-todo.md) — 24 tasks, 7 checkpoints, T16 excluded
+this phase.
 
 *Path note: `SPEC.md` holds vfx-v3 and `tasks/plan.md` / `tasks/todo.md` hold perf v3, so this
 initiative uses the prefixed paths above per AGENTS.md.*
@@ -45,7 +52,7 @@ initiative uses the prefixed paths above per AGENTS.md.*
 | `fe-devtree` | The developer tree, its gate, and the sweep of nine diagnostic routes into it | `fe-shell` |
 | `fe-sanctum` | Title, save select, the Sanctum stage, the rail with unlock states, the stage HUD | `fe-shell`, `fe-kit` |
 | `fe-collection` | Creatures, Relics, Fusion; equipped-vs-candidate comparison; virtualization | `fe-kit`, `fe-shell` |
-| `fe-world` | World map stage as SVG, sector inspector, Expeditions, Pacts | `fe-kit`, `fe-shell`, `fe-bundle` |
+| `fe-world` | World map stage as SVG, sector inspector, Expeditions, Pacts. **The World-stage half (stage + sector inspector) is excluded this phase, 2026-08-23 — owner decision, its own plan to follow.** Expeditions and Pacts are stage-independent layers and are unaffected; they build on schedule under T17 | `fe-kit`, `fe-shell`, `fe-bundle` |
 | `fe-run-stages` | Lawn stage re-hosted under the stage model (Phaser lazy); Battle stage | `fe-shell`, `fe-bundle` |
 | `fe-reference` | Almanac, Chronicle, the four chart primitives that replace recharts | `fe-kit` |
 | `fe-system` | Settings, keymap, rebinding, Display and Sound tabs | `fe-shell` |
@@ -176,4 +183,6 @@ deliberately **no `fe-guards` module** — a checks-at-the-end module is how che
 ## Out of scope for this initiative
 
 Illustration and final art · audio assets · a second locale · the sector-graph authoring tool ·
-React 19 · any server API change beyond fixture emission · new gameplay of any kind.
+React 19 · any server API change beyond fixture emission · new gameplay of any kind · **the World
+stage itself** (T16, excluded 2026-08-23 — a deliberate phase boundary, not a permanent exclusion:
+build the rest of the GUI foundation solid first, plan the World stage separately once it is).

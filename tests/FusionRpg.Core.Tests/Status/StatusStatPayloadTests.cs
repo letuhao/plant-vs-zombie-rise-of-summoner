@@ -45,10 +45,11 @@ public class StatusStatPayloadTests
     [Fact]
     public void The_shipped_example_overlay_validates()
     {
-        // docs/architecture/examples/status/blight-row.overlay.json carried a `stat` block and was
-        // rejected. It was the only shipped use of the key, and it did not work.
+        // docs/architecture/examples/status/expose-row.overlay.json — split out of blight-row's (E17
+        // originally carried the `stat` block there; C2 found blight never declares ModifyStat, so
+        // the block moved to a status that actually does).
         var path = Path.Combine(RepoRoot(), "docs", "architecture", "examples", "status",
-            "blight-row.overlay.json");
+            "expose-row.overlay.json");
         using var doc = JsonDocument.Parse(File.ReadAllText(path));
 
         var overlay = doc.RootElement.GetProperty("overlay")

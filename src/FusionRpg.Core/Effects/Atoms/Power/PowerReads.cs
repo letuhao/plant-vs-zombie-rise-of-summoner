@@ -13,10 +13,13 @@ namespace FusionRpg.Core.Effects.Atoms.Power;
 /// to 0. The <c>+1</c> makes an untouched category a factor of one rather than an annihilator.</para>
 ///
 /// <para><b>Integer, and exact.</b> A fifth root by <c>Math.Pow</c> is not bit-reproducible across
-/// runtimes, and this number is stamped into hashed reports — two machines disagreeing in the last
-/// digit would move a stamp with no content change. The root is computed by integer binary search
-/// instead: the largest <c>r</c> with <c>r⁵ ≤ product</c>, which is the same answer everywhere,
-/// forever.</para>
+/// runtimes — two machines could disagree in the last digit for identical content. The root is
+/// computed by integer binary search instead: the largest <c>r</c> with <c>r⁵ ≤ product</c>, which is
+/// the same answer everywhere, forever. <b>Correction (completeness-audit.md C5):</b> nothing stamps
+/// this scalar into a hashed report today — <c>PowerScalar.Of</c> has no production caller. The
+/// reproducibility guarantee is still the right property for a number a UI or an API will eventually
+/// display to a player, where two runs of the same content must show the same figure; it is just not
+/// yet load-bearing anywhere. Do not restate the old claim without a real caller to point at.</para>
 ///
 /// <para><b>What it does not mean.</b> Two things touching a different <i>number</i> of categories
 /// are scored on different bases and are <b>not</b> meaningfully comparable. Pokémon GO's CP has

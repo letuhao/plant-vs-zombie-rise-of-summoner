@@ -276,11 +276,14 @@ public static partial class WorldTemplateCatalog
             {
                 EntityId = "e-dave-legion-1", Kind = WorldEntityKind.Legion, OwnerFactionId = Dave,
                 AtSectorId = "d-home", Stance = "march", MovementRemaining = 1000,
+                // L27 (spec-loam-legions.md): same minimum edit as first-light's own legion — one
+                // bearer plus a generous starting reserve (placeholder, not harness-tuned).
+                CarriedLoam = 500,
                 Members = new WorldEntityMember[]
                 {
                     new() { SpeciesId = "peashooterzombie", Level = 1, Hp = 110 },
                     new() { SpeciesId = "conezombie", Level = 1, Hp = 110 },
-                    new() { SpeciesId = "paperzombie", Level = 1, Hp = 110 }
+                    new() { SpeciesId = "paperzombie", Level = 1, Hp = 110, Role = WorldEntityMemberRole.Bearer }
                 }
             },
             new()

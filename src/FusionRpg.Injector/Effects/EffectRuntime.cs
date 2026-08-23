@@ -52,7 +52,7 @@ public static class EffectRuntime
         {
             if (_bag != null) return;
             var catalog = new InMemoryEffectCatalog();
-            catalog.ReplaceAll(EffectSeedCatalog.CreateAll());
+            catalog.ReplaceAll(EffectAtomCatalog.CreateAll());
             var grants = new InMemoryEffectGrantStore();
             var proc = new EffectProcPolicy(new SystemEffectClock(), new SeededEffectRandom(Environment.TickCount));
             _status = InjectorStatusBridge.CreateRuntime();

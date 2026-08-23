@@ -124,7 +124,6 @@ public static class GameHooks
         catch (Exception ex) { RpgHost.Log.Warning("catalog grid: " + ex.Message); }
         try { EnqueueEnumSide("mower", typeof(MowerType)); }
         catch (Exception ex) { RpgHost.Log.Warning("catalog mowers: " + ex.Message); }
-        EnqueueRecipes();
     }
 
     static int EnqueueEnumSide(string side, Type enumType)
@@ -228,18 +227,32 @@ public static class GameHooks
         {
             PlantMixTreeManager.Init();
             var dict = PlantMixTreeManager.ChildToParents;
-            if (dict == null) return;
+            if (dict == null)
+            {
+                RpgHost.Log.Warning("catalog recipes: ChildToParents is null (PlantMixTreeManager not initialized?)");
+                return;
+            }
+            if (RpgHost.Client == null)
+                RpgHost.Log.Warning("catalog recipes: RpgHost.Client is null — entries will be computed but never sent");
             const int chunk = 200;
             var entries = new List<Dictionary<string, object>>(chunk);
+            var pairCount = 0;
+            var castFailures = 0;
             foreach (var pair in dict)
             {
+                pairCount++;
                 var list = pair.Value;
                 if (list == null) continue;
                 foreach (var info in list)
                 {
                     int a = 0, b = 0, r = 0;
                     try { a = (int)info.ParentA; b = (int)info.ParentB; r = (int)info.Result; }
-                    catch { continue; }
+                    catch (Exception castEx)
+                    {
+                        castFailures++;
+                        RpgHost.Log.Warning("catalog recipes: entry cast failed: " + castEx.Message);
+                        continue;
+                    }
                     entries.Add(new Dictionary<string, object>
                     {
                         ["parentA"] = a,
@@ -258,6 +271,7 @@ public static class GameHooks
             }
             if (entries.Count > 0)
                 RpgHost.Client?.Enqueue("catalog.recipes", new Dictionary<string, object> { ["entries"] = entries });
+            RpgHost.Log.Info($"[catalog] recipes: {pairCount} parent groups, {castFailures} cast failures, client={(RpgHost.Client != null)}");
             _recipesDumped = true;
         }
         catch (Exception ex)
@@ -281,13 +295,13 @@ public static class GameHooks
             foreach (var (id, name) in EnumerateEnum(typeof(PlantType)))
             {
                 if (string.Equals(name, "Nothing", StringComparison.Ordinal)) continue;
-                AlmanacTextCapture.TryCapture("plant", id, (PlantType)id, null);
+                AlmanacTextCapture.TryCapture("plant", id, (PlantType)id, null, includeWindowText: false);
                 n++;
             }
             foreach (var (id, name) in EnumerateEnum(typeof(ZombieType)))
             {
                 if (string.Equals(name, "Nothing", StringComparison.Ordinal)) continue;
-                AlmanacTextCapture.TryCapture("zombie", id, null, (ZombieType)id);
+                AlmanacTextCapture.TryCapture("zombie", id, null, (ZombieType)id, includeWindowText: false);
                 n++;
             }
             _almanacTextDumped = true;

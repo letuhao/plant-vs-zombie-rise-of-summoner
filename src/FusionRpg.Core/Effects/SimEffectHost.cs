@@ -31,7 +31,7 @@ public sealed class SimEffectHost
         _sink = new RecordingEffectSink();
         _fx = new RecordingDamageFxSink();
         var defs = new InMemoryEffectCatalog();
-        defs.ReplaceAll(catalog ?? EffectSeedCatalog.CreateAll());
+        defs.ReplaceAll(catalog ?? EffectAtomCatalog.CreateAll());
         _bag = new EffectBag(defs, new InMemoryEffectGrantStore(), new EffectProcPolicy(_clock, _rng), _sink);
         _bag.UtcNow = () => _clock.UtcNow;
         _bag.Status = new StatusRuntime(

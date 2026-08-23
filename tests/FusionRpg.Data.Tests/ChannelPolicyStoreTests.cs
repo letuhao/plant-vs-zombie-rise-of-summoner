@@ -128,4 +128,33 @@ public class ChannelPolicyStoreTests : IDisposable
 
         Assert.Equal(hash, _store.ComputeContentHash().Hash);
     }
+
+    // ---- the revision ------------------------------------------------------------------------------
+
+    [Fact]
+    public void A_real_edit_bumps_the_catalog_revision()
+    {
+        // C4 (completeness-audit.md): this direct API had no revision bump at all — an E19 receiver
+        // would never re-negotiate after a policy edit made through it.
+        var before = _store.GetCatalogRevision();
+
+        Assert.True(_store.UpsertChannelPolicies(new[]
+        {
+            RpgStore.ShippedPolicy(StatChannels.Defense) with { CapMilli = 950 },
+        }).Ok);
+
+        Assert.True(_store.GetCatalogRevision() > before);
+    }
+
+    [Fact]
+    public void Writing_the_same_policy_twice_does_not_bump_the_revision_the_second_time()
+    {
+        var policy = new[] { RpgStore.ShippedPolicy(StatChannels.Defense) with { CapMilli = 950 } };
+        _store.UpsertChannelPolicies(policy);
+        var revision = _store.GetCatalogRevision();
+
+        _store.UpsertChannelPolicies(policy);
+
+        Assert.Equal(revision, _store.GetCatalogRevision());
+    }
 }

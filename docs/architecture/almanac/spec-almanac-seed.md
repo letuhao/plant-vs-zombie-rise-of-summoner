@@ -86,26 +86,35 @@ flagged as a known gap, not solved here.
 **Split by side — the source values are not the same list for plants and zombies**
 ([game-types-381.md](../../research/game-types-381.md)): plant capture sources are `start` /
 `setPlantAttributes`; zombie capture sources are `start` / `initHealth` / `setHealthInTravel` /
-`setZombieHealth` / `reinforce`. `initHealth` never appears on a plant row and is meaningless there
-— using one shared `IN ('start','initHealth')` list for both sides is misleading, even though it's
-harmless (the extra value just never matches on the plant side). Two queries:
+`setZombieHealth` / `reinforce`. `initHealth` never appears on a plant row (plants only have one
+spawn-time hook, `Plant.Start`) so it is meaningless on that side. Two queries:
 
 ```sql
 -- plant
 SELECT stats_json FROM spawn_stats WHERE side='plant' AND type=$t AND source='start'
 ORDER BY captured_utc ASC LIMIT 1;
 -- zombie
-SELECT stats_json FROM spawn_stats WHERE side='zombie' AND type=$t AND source='initHealth'
+SELECT stats_json FROM spawn_stats WHERE side='zombie' AND type=$t AND source IN ('start','initHealth')
 ORDER BY captured_utc ASC LIMIT 1;
 ```
 
-Picking `start`/`initHealth` specifically (rather than any source) is a deliberate choice to prefer
-the spawn-time event over `reinforce`/`setHealthInTravel`/etc., which fire mid-match after a buff has
-already applied — **not** because `hpBase`/`attackBase` are guaranteed to differ by source (that
-claim was checked and is unconfirmed either way; `game-types-381.md`'s "values before our slider"
-describes the `*Base` key naming, not a promise that every source populates it identically). If a
-live check later shows `start`/`initHealth` are ever absent for a type that has other sources, that's
-a real gap this design doesn't yet cover — not assumed away.
+**Corrected 2026-08-23, live evidence during implementation:** an earlier draft of this spec
+restricted the zombie query to `source='initHealth'` only, reasoning that `Zombie.InitHealth()`
+always wins the race against `Zombie.Start()` for the `EntityApply.RunZombie` `Applied.Add(ptr)`
+first-write gate ([GameHooks.cs:678-701](../../../src/FusionRpg.Injector/GameHooks.cs) — both
+`Zombie.Start` and `Zombie.InitHealth` are separately Harmony-patched and both call `ApplyZombie`,
+but only the one that fires first for a given `ptr` actually writes). Live sampling of 14 real runs'
+`spawn_stats` (via `GET /api/runs/{id}/spawns`) found this assumption false in a small minority of
+cases: **zombie type 0 (base `Zombie`, run 15, 2026-08-16) has a row with `source='start'`** — 1 hit
+out of ~4300 sampled zombie spawn rows (~0.02%), but on a mainstream type, not an obscure one. A
+query restricted to `initHealth` alone would silently report `stats_observed=false` for any zombie
+type whose only spawn-time capture happened to win that race the other way, even though a legitimate
+baseline row exists under `source='start'`. Both `start` and `initHealth` are genuine
+first-sight-of-the-entity captures (as opposed to `reinforce`/`cheat.reapply`/`debug.spawn`, which
+reflect mid-match or debug-injected state) — the fix is to accept either for zombies, exactly as an
+even earlier draft of this spec already had it before a prior correction pass narrowed it down for
+the wrong reason (that pass correctly identified plants never populate `initHealth`, but
+over-applied the fix by dropping `start` from the zombie side too).
 
 `hp`/`attack` are read from `stats_json`'s `hpBase`/`attackBase` keys — present in both plant and
 zombie captures ([GameDumps.cs:58-62](../../../src/FusionRpg.Injector/GameDumps.cs) (plant),

@@ -136,6 +136,60 @@ public class AtomInstanceStoreTests : IDisposable
         Assert.Equal(5, bindings[0].Priority);
     }
 
+    // ---- session-scoped housekeeping (completeness-audit.md C1) --------------------------------------
+
+    [Fact]
+    public void ClearSessionScopedBindings_removes_entity_bindings_and_their_now_orphaned_instance()
+    {
+        // The boot-sweep sequence Program.cs now runs: entity: bindings are never durable — IL2CPP
+        // reuses the pointer — so a fresh boot treats every one as stale, whether the last shutdown
+        // was clean or a crash.
+        var inst = SaveInstance();
+        var bound = _store.Bind(new BindingRow { InstanceId = inst, OwnerKind = OwnerKind.Entity, OwnerKey = "abc123" });
+        Assert.True(bound.IsOk, bound.ToString());
+        Assert.NotEmpty(_store.ListBindings(new OwnerScope(OwnerKind.Entity, "abc123")));
+
+        var cleared = _store.ClearSessionScopedBindings();
+
+        Assert.Equal(1, cleared);
+        Assert.Empty(_store.ListBindings(new OwnerScope(OwnerKind.Entity, "abc123")));
+        // The instance had no other binding, so it was collected as part of the same sweep — not
+        // left behind for CountOrphanInstances to keep reporting forever.
+        Assert.Equal(0, _store.CountOrphanInstances());
+        Assert.Null(_store.GetInstance(inst));
+    }
+
+    [Fact]
+    public void ClearSessionScopedBindings_leaves_durable_owner_scopes_alone()
+    {
+        var inst = SaveInstance();
+        var bound = _store.Bind(new BindingRow { InstanceId = inst, OwnerKind = OwnerKind.Player, OwnerKey = "1" });
+        Assert.True(bound.IsOk, bound.ToString());
+
+        _store.ClearSessionScopedBindings();
+
+        Assert.NotEmpty(_store.ListBindings(new OwnerScope(OwnerKind.Player, "1")));
+        Assert.NotNull(_store.GetInstance(inst));
+    }
+
+    [Fact]
+    public void CountOrphanInstances_reports_an_instance_no_binding_reaches_without_deleting_it()
+    {
+        // A read-only diagnostic, deliberately: the delete half lives in the sweep methods
+        // (ClearSessionScopedBindings, Withdraw), not here. "Orphan" means exactly what the SQL
+        // says — zero bindings right now — not "used to have one and lost it": a freshly-saved,
+        // never-bound instance already counts, which is the correct definition (E6's own model is
+        // that an instance is reachable only *through* a binding).
+        var neverBound = SaveInstance();
+        Assert.Equal(1, _store.CountOrphanInstances());
+
+        var bound = _store.Bind(new BindingRow { InstanceId = neverBound, OwnerKind = OwnerKind.Entity, OwnerKey = "def456" });
+        Assert.True(bound.IsOk, bound.ToString());
+        // Now bound — the count drops back, and the read itself deleted nothing.
+        Assert.Equal(0, _store.CountOrphanInstances());
+        Assert.NotNull(_store.GetInstance(neverBound));
+    }
+
     [Fact]
     public void A_malformed_owner_key_never_binds()
     {

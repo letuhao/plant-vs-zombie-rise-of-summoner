@@ -10,9 +10,6 @@
     "periodMs": 1000,
     "durationMs": 5000,
     "tickBudget": 5,
-    "stat": {
-      "atk": { "more": -0.1 }
-    },
     "target": {
       "mode": "EventTarget",
       "filters": { "side": "zombie" }

@@ -12,7 +12,8 @@ public static class AlmanacTextCapture
 {
     static readonly ConcurrentDictionary<string, byte> Sent = new(StringComparer.OrdinalIgnoreCase);
 
-    public static void TryCapture(string side, int typeId, PlantType? plantType, ZombieType? zombieType)
+    public static void TryCapture(string side, int typeId, PlantType? plantType, ZombieType? zombieType,
+        bool includeWindowText = true)
     {
         if (typeId < 0) return;
         if (side is not ("plant" or "zombie")) return;
@@ -37,7 +38,8 @@ public static class AlmanacTextCapture
                 CaptureZombie(zt, fields, sources);
             }
 
-            CaptureWindowTmp(side, fields, sources);
+            if (includeWindowText)
+                CaptureWindowTmp(side, fields, sources);
 
             if (fields.Count == 0)
             {

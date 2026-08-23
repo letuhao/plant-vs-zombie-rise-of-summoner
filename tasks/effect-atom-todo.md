@@ -325,9 +325,14 @@ Plan: [effect-atom-plan.md](effect-atom-plan.md) · Map: [../docs/architecture/e
     `data/seed/channel-policy/defaults.json` (new), tests as above.
   - Dependencies: E20 (shares the boot call and the reader-guard map).
 
-- [~] **E23: content-codegen** — PARTIALLY BUILT 2026-08-23. Closes two of three named debts under B2;
-  the third (`EffectSeedCatalog` deletion) is explicitly **not done**, with a concrete reason recorded
-  below rather than silently dropped.
+- [x] **E23: content-codegen** — BUILT 2026-08-23. Closes all three named debts under B2, including
+  `EffectSeedCatalog` deletion — reversed from an earlier PARTIALLY-BUILT status in this same session
+  after a Stop-hook challenge forced re-investigation. **That investigation found my own prior claim
+  wrong**: I had written *"no `EffectDefDto → EffectDef` converter exists"* — `AtomPushCodec.ToDef`
+  already shipped one at E19, and `MigrationParityTests.MigratedCatalog()` was already calling it.
+  Re-reading the actual test body I had summarized from memory, not from the file, is what found this
+  — the exact DESIGN-GATE failure mode ("a comment is not evidence... open the file and check") this
+  repo's own binding rules name.
   - **Delivered — `tools/ElementEnumGen` (precedent: `tools/DemonCatalogGen`), two independent checks:**
     - `--check`/`--emit`: does `ElementTypeId` — and the **three** companion switches the todo's
       original description missed (`ElementRoster.Concrete`/`TryParse`, `ElementTypeIdExtensions
@@ -344,24 +349,43 @@ Plan: [effect-atom-plan.md](effect-atom-plan.md) · Map: [../docs/architecture/e
       against `Shipped()` before checking `IsMigrated` threw — `ModsFor`'s fallback path reads
       `TraitBattleCatalog.Get`, which throws on an unknown id. Caught by the checker's own RED-first
       test, fixed by reordering the check before the read.
-  - **Deliberately not done — `EffectSeedCatalog` deletion (E11 Step 4).** Investigated concretely,
-    not assumed blocked:
-    1. **The RuntimeId question resolves.** All five call sites (`BattleEffects.cs`,
+  - **`EffectSeedCatalog` deletion (E11 Step 4) — done.**
+    1. **RuntimeId.Lawn generalises safely.** All five call sites (`BattleEffects.cs`,
        `SimEffectHost.cs`, `EffectRuntime.cs`, `CheatCommandRunner.cs`, `FoundationHarness.cs`) load
        `EffectDef`s unconditionally — none runtime-gates at load time, matching `EffectSeedCatalog`'s
        pre-E1 heritage as raw Foundation defs. `MigrationParityTests` already compiles with
-       `RuntimeId.Lawn` — the most permissive matrix column — and that choice generalises safely to
-       all five, since a Lawn-compiled def is a superset of what any stricter runtime would accept.
-    2. **The real blocker: no `EffectDefDto → EffectDef` converter exists.** `EffectSeedCatalog
-       .CreateAll()` returns `IReadOnlyList<EffectDef>` (the Core-internal domain type
-       `EffectBag.ReplaceAll` consumes) — not `EffectDefDto` (the wire shape `AtomCompiler.Compile`
-       produces). `EffectDef.ToDto()` exists; **the reverse direction does not.**
-       `MigrationParityTests`'s 73 tests only ever compare `EffectDefDto` shapes against each other —
-       none has ever loaded a compiled atom into a real, executing `EffectBag`. Replacing the five call
-       sites needs that converter **built and proven correct** first — a new piece of Core plumbing
-       feeding Foundation's own hot dispatch path, not a codegen exercise. Attempting it inside this
-       session risked exactly the kind of rushed, under-verified change this whole audit exists to
-       catch. Recorded here as the concrete next step, not "still owed" restated.
+       `RuntimeId.Lawn`, the most permissive matrix column, which is a superset of what any stricter
+       runtime would accept.
+    2. **The converter already existed: `AtomPushCodec.ToDef(EffectDefDto)` (E19).** Built, tested, and
+       already the exact call `MigrationParityTests.MigratedCatalog()` uses to turn compiled DTOs into
+       loadable `EffectDef`s — 73 tests already run through it. My first pass at this module never
+       opened that file closely enough to see it.
+    3. **What DTO comparison never proved: execution.** `MigrationParityTests` compares serialized
+       `EffectDefDto` shapes — never loads a compiled atom into a real `EffectBag` and runs a scenario.
+       New: `EffectCatalogExecutionParityTests.cs` runs all 19 `effect-*.json` fixtures through the
+       real `EffectScenarioRunner` against `AtomCompiler.Compile(..., RuntimeId.Lawn, ...)` →
+       `AtomPushCodec.ToDef` — **20/20 green on the first run**, proving the swap safe before making it.
+    4. **Generated the replacement and swapped all five call sites.** `EffectCatalogGen.GenerateSource`
+       (literal C# object construction, same style as `DemonSpeciesCatalog.Generated.cs` — the real 16
+       defs' `Params` values are only `string`/`int`/`double`, confirmed by inspection, so no runtime
+       JSON parsing is needed) emits `EffectAtomCatalog.CreateAll()` into a checked-in generated file.
+       `EffectAtomCatalogGeneratedTests.cs` proves it 20/20 before the swap; all five call sites
+       repointed from `EffectSeedCatalog.CreateAll()` to `EffectAtomCatalog.CreateAll()`.
+    5. **`EffectSeedCatalog` retired from production, kept as a test fixture.** Deleting it outright
+       would have broken six *unrelated* test files (`EffectBagTests`, `EffectFunnelTests`,
+       `EffectBagAuditTests`, `AtomRunnerTests`, `EffectBagMergedElementPayloadTests`, plus
+       `MigrationParityTests` itself) that use it purely as a convenient known-good `EffectDef`
+       fixture, predating and independent of the atom migration. Moved byte-for-byte to
+       `tests/FusionRpg.Core.Tests/Atoms/EffectSeedFixtureOracle.cs`, same namespace
+       (`FusionRpg.Core.Effects`), doc-commented as a frozen oracle nothing in `src/` reads. This
+       closes the audit's actual concern — **drift between two live sources** — since a frozen test
+       fixture cannot drift; only the generated side can change now, and the parity tests still catch
+       it if it does.
+    6. **Zero golden movement, verified three ways**: `BattleGoldenTests` (5/5), the full
+       `MigrationParityTests` suite (73/73) now comparing against the moved fixture, and the new
+       execution-parity suite (20/20) — all green with the swap live. Injector built clean against the
+       real game interop DLLs (output redirected to a scratch dir since the game was running live and
+       had the plugin folder locked — never touched the owner's running session or its files).
   - Test coverage delivered:
     - **Unit** (`tests/FusionRpg.ElementEnumGen.Tests/ElementEnumCheckTests.cs`, **7 tests**;
       `TraitSourceCheckTests.cs`, **7 tests**): fabricated mismatches (reordered roster, extra/missing
@@ -369,17 +393,33 @@ Plan: [effect-atom-plan.md](effect-atom-plan.md) · Map: [../docs/architecture/e
       atom, a non-trait container correctly ignored) each caught; `GenerateSource` content checked for
       both.
     - **Seam**: one test per checker running the real `data/seed/**` through `AtomSeedFile.Collect`
-      and asserting `IsOk` — the same real files the CLI checks.
-    - **Regression guard**: `--check`/`--trait-check` run as real CLI invocations against the live
-      repo (not simulated) as part of this verification; wired into CI via
+      and asserting `IsOk`; `EffectCatalogExecutionParityTests.cs` (**20 tests**, `Core.Tests`) runs
+      every real `effect-*.json` scenario against the compiled catalog before generation;
+      `EffectAtomCatalogGeneratedTests.cs` (**20 tests**) runs them again against the checked-in
+      generated file after generation — the seam is proven twice, once per side of the swap.
+    - **Regression guard**: `--check`/`--trait-check`/`--effect-emit` run as real CLI invocations
+      against the live repo; `MigrationParityTests` (73 tests) and `BattleGoldenTests` (5 tests) now
+      exercise the swap as their standing regression check; wired into CI via
       `tests/FusionRpg.ElementEnumGen.Tests` (`.github/workflows/ci.yml`).
   - Verify: `dotnet run --project tools\ElementEnumGen -- --check` +
     `dotnet run --project tools\ElementEnumGen -- --trait-check` +
-    `dotnet test tests\FusionRpg.ElementEnumGen.Tests`. 14/14 tests green; both CLI checks clean
-    against the real repo.
+    `dotnet test tests\FusionRpg.ElementEnumGen.Tests` (14/14) +
+    `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~EffectCatalog|FullyQualifiedName~Migration|FullyQualifiedName~BattleGolden"`
+    (73+20+20+5 = 118, all green) + injector build against real interop DLLs, 0 errors (scratch output
+    dir, game running live was never touched). Full Core.Tests regression: 2846/2846 green outside the
+    `World` namespace, which has unrelated, actively-changing uncommitted content from a different,
+    concurrently-running stream — confirmed by `git status`/mtimes showing files change *during* this
+    session's own test runs, not by this session.
   - Files: `tools/ElementEnumGen/{ElementEnumGen.csproj,Program.cs,ElementEnumCheck.cs,
-    TraitSourceCheck.cs}` (new), `tests/FusionRpg.ElementEnumGen.Tests/` (new, wired into `ci.yml`).
-  - Dependencies: none — reads only what E11/E12/E18 already ship.
+    TraitSourceCheck.cs,EffectCatalogGen.cs}`, `tests/FusionRpg.ElementEnumGen.Tests/` (wired into
+    `ci.yml`), `tests/FusionRpg.Core.Tests/Atoms/{EffectCatalogExecutionParityTests.cs,
+    EffectAtomCatalogGeneratedTests.cs,EffectSeedFixtureOracle.cs}`,
+    `src/FusionRpg.Core/Effects/EffectAtomCatalog.Generated.cs` (new, checked-in generated file),
+    `src/FusionRpg.Core/Effects/FoundationHarness.cs` (`EffectSeedCatalog` removed),
+    `src/FusionRpg.Core/Battle/BattleEffects.cs`, `src/FusionRpg.Core/Effects/SimEffectHost.cs`,
+    `src/FusionRpg.Injector/Effects/EffectRuntime.cs`, `src/FusionRpg.Injector/CheatCommandRunner.cs`
+    (five call sites repointed).
+  - Dependencies: none — reads only what E11/E12/E18/E19 already ship.
 
 - [x] **E24: validation-in-ci** — BUILT 2026-08-23. Closes B4 (`ContentValidation` ran only inside its
   own tests — no `--validate` flag, no CI step) and B5 (`Server.Tests`/`E2E.Tests` outside `ci.yml`).
@@ -458,6 +498,71 @@ Plan: [effect-atom-plan.md](effect-atom-plan.md) · Map: [../docs/architecture/e
   - Files: `src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs` (cache + `IsCombatChannel`),
     `src/FusionRpg.Core/Status/StatusStatPayload.cs` (`IsKnownChannel` reads the O(1) path), tests.
   - Dependencies: none.
+
+## Deliberately out of scope, tracked
+
+- **A4 — a producer of instances/bindings.** Completeness-audit.md's one finding wave 6 does not
+  close: nothing in this program calls `Instantiator`, `RpgStore.SaveInstance`, or `Bind` with a real
+  owner, so `ResolveBindings` returns empty for every owner and `AtomPushService`/`AtomRunner`
+  (E6/E7/E15/E19 — all built, all tested end to end) are **unreachable end to end in production**.
+  Not a gap in this program: per the map §1/§7, items/skills/traits have no *features* here by design
+  — a container's content is this program's contract, binding one to an actor is the feature program's
+  job. Recorded explicitly (map §7, this line) so the next reader is not misled by every other row
+  reading `[x]`. Closes when the first item/skill/trait program calls `Bind`.
+
+## Minor findings (completeness-audit.md §4, C1–C5) — all closed 2026-08-23
+
+Wave 6's own §7 table scoped itself to A1–A4/B1–B5 only — these five were never assigned a module
+there. Closed anyway, in the same session, after review found "outside wave 6's stated scope" was not
+the same claim as "resolved," and the audit document itself still owns them.
+
+- **C1 — `ClearSessionScopedBindings`/`CountOrphanInstances` had no caller.** ✅ Closed. Wired into the
+  server boot sweep in `Program.cs`, right after `LoadContentIntoRuntime()`: a fresh boot is exactly
+  the moment every `entity:` binding from the previous process is guaranteed stale (IL2CPP pointer
+  reuse), whether the last shutdown was clean or a crash — arguably a *more* correct trigger than
+  `board.end` alone, which cannot see a crash-restart. A no-op today (A4 — nothing binds one yet), the
+  cheap place for this to already be correct once something does. **4 new tests**
+  (`AtomInstanceStoreTests`: clears entity bindings + collects the now-orphaned instance, leaves
+  durable owner scopes alone, `CountOrphanInstances` is read-only and correctly counts a never-bound
+  instance as an orphan by the query's own definition) + **3 guard tests**
+  (`ServerBootSweepGuardTests`, text-scanning `Program.cs` since it's top-level statements) proving
+  both calls exist and run in the stated order. `Server.Tests` (15/15) re-run clean — the real boot
+  path exercised, not simulated.
+- **C2 — nothing checked a status carrying a `stat` overlay also declared `ModifyStat`.** ✅ Closed.
+  `StatusEffectBridge.TryApplyFromGrant` now refuses (`skipped.Add(...":status-stat-overlay-without-
+  ModifyStat")`) right beside the existing `unknown-statusId`/`status-no-target` refusals, gated on
+  the overlay actually carrying `stat` (a status with no such overlay is unaffected). The shipped
+  `blight-row.overlay.json` **was** the exact violation — `blight` is real (Contagion/PulseHp/Spread),
+  never declared `ModifyStat` — so its `stat` block moved to a new `expose-row.overlay.json` (`expose`
+  *does* declare `ModifyStat`), and `StatusStatPayloadTests.The_shipped_example_overlay_validates` now
+  reads that file. **3 new tests** in `StatusEffectBridgeTests`: the violation is refused, the correct
+  status applies normally, a status with no `stat` overlay at all is unaffected. No shipped seed
+  content or scenario fixture uses the `stat` key today (checked), so this is zero-blast-radius
+  against real content. Full non-`World` Core.Tests regression: 2284/2284.
+- **C3 — `SeedScanner.OwnedFolders` declared `curves`/`rarity`; neither folder existed.** ✅ Closed.
+  `data/seed/curves/README.md` and `data/seed/rarity/README.md` added — real, checked-in files (not
+  synthetic fixtures) making the empty-folder state explicitly intentional rather than
+  indistinguishable from forgotten, with a pointer to the format each already documents in
+  `data/seed/README.md`. `.md` files are invisible to the importer by construction (`Directory.GetFiles(r,
+  "*.json", ...)`), verified again by **2 new tests** in `SeedScannerTests` against the real repo
+  (folders + READMEs exist; the real sweep still finds zero JSON in either). Real CLI import against
+  the full `data/seed/**` re-run clean with the new files present.
+- **C4 — `UpsertPowerTables`/`UpsertChannelPolicies` didn't bump `catalog_revision`.** ✅ Closed.
+  `UpsertPowerTables` bumps unconditionally (no changed-count tracking exists for it, unlike the import
+  path); `UpsertChannelPolicies` bumps only when a row actually changed, matching the import path's
+  rule. **2 new tests** (`PowerStoreTests.UpsertPowerTables_bumps_the_catalog_revision`,
+  `ChannelPolicyStoreTests.A_real_edit_bumps_the_catalog_revision` +
+  `Writing_the_same_policy_twice_does_not_bump_the_revision_the_second_time`); both files' full suites
+  re-run clean (`PowerStoreTests` 13, `ChannelPolicyStoreTests` 11); `guard-dal.ps1` OK.
+- **C5 — `PowerScalar`'s BigInteger-exactness rationale ("stamped into hashed reports") was unearned.**
+  ✅ Closed. Comment corrected: nothing stamps `PowerScalar` anywhere today (`PowerScalar.Of` has zero
+  production callers, confirmed by grep); the implementation stays right, the doc comment now says so
+  instead of claiming a caller that doesn't exist, and names the correction so a future edit can't
+  quietly re-add the false claim.
+
+All five verified together: full injector build against the real game interop DLLs (0 errors, real
+deploy — the plugin folder was no longer locked once the owner's game session ended) + all four
+boundary guards green + the full non-`World`/non-`Loam` regression sweep across every touched suite.
 
 ## Unowned, tracked
 

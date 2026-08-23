@@ -1,5 +1,6 @@
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Intel;
+using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Movement;
 using FusionRpg.Core.World.Turn;
 using Xunit;
@@ -44,6 +45,13 @@ public class StanceTests
             .Select(e => e.EntityId == "e-dave-legion-1"
                 ? e with { Members = e.Members.Select(m => m with { Wounds = wounds }).ToList() }
                 : e)
+            .ToList()
+    };
+
+    static WorldState WithCarriedLoam(WorldState w, long amount) => w with
+    {
+        Entities = w.Entities
+            .Select(e => e.EntityId == "e-dave-legion-1" ? e with { CarriedLoam = amount } : e)
             .ToList()
     };
 
@@ -147,11 +155,14 @@ public class StanceTests
         Assert.All(Legion(result.World).Members, m => Assert.Equal(0, m.Wounds));
     }
 
+    /// <summary>
+    /// Rewritten for spec-loam-legions.md: the currency is carried loam now, not wounds, but the
+    /// property is the same one — holding is not a substitute for a supply line, it feeds nobody.
+    /// </summary>
     [Fact]
-    public void Standing_still_out_of_supply_still_starves()
+    public void Standing_still_out_of_supply_still_burns()
     {
-        // Holding is not a substitute for a supply line — it feeds nobody.
-        var world = Wounded(World(), wounds: 20);
+        var world = WithCarriedLoam(World(), amount: 100);
         var stranded = world with
         {
             Entities = world.Entities
@@ -161,8 +172,10 @@ public class StanceTests
                 .ToList()
         };
 
+        var burn = LegionSupply.Burn(Legion(stranded));
         var result = TurnEngine.Step(stranded, Array.Empty<WorldCommand>(), seed: 1);
-        Assert.True(Legion(result.World).Members.First().Wounds > 20);
+
+        Assert.Equal(100 - burn, Legion(result.World).CarriedLoam);
     }
 
     [Fact]

@@ -1,0 +1,21 @@
+{
+  "_comment": "The stat overlay (E17), on a status that actually declares ModifyStat — split out of blight-row.overlay.json (completeness-audit.md C2), which carried this same block on a Contagion status with no ModifyStat payload kind and would now be refused at apply time.",
+  "grantId": "example-expose-row",
+  "effectId": "fx.overlay_damage",
+  "ownerKey": "match",
+  "overlay": {
+    "statusId": "expose",
+    "amount": 0,
+    "icd_ms": 0,
+    "periodMs": 1000,
+    "durationMs": 5000,
+    "tickBudget": 5,
+    "stat": {
+      "defense": { "more": -0.15 }
+    },
+    "target": {
+      "mode": "EventTarget",
+      "filters": { "side": "zombie" }
+    }
+  }
+}

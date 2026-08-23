@@ -9,7 +9,7 @@ anyone writes a component.
 behaviour. Plates are static. Interaction lives in the app.
 
 **Binding rules.** Every plate obeys [architecture/game-gui-principles.md](../architecture/game-gui-principles.md)
-(GG-1 … GG-60). A plate that violates a GG rule is wrong even if it looks good.
+(GG-1 … GG-61). A plate that violates a GG rule is wrong even if it looks good.
 
 ---
 

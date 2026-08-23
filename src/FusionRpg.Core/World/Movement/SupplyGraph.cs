@@ -11,9 +11,6 @@ namespace FusionRpg.Core.World.Movement;
 /// </summary>
 public static class SupplyGraph
 {
-    /// <summary>What an unsupplied force loses each turn, as a fraction of each member's health.</summary>
-    public const int AttritionWoundMilli = 50;
-
     /// <summary>
     /// Sectors this faction can still reach from a Seat it holds. A faction with no Seat of its own
     /// has no supply network at all — the wild do not starve for want of a capital they never had —
@@ -41,7 +38,11 @@ public static class SupplyGraph
 
     /// <summary>
     /// The Pressure phase's supply pass: report every holding that has fallen off the chain, and
-    /// bleed every force that is standing outside one. Exactly once, because it runs exactly once.
+    /// mend every garrison that is holding one. Exactly once, because it runs exactly once.
+    ///
+    /// What happens to a force standing *outside* supply is no longer this method's job
+    /// (spec-loam-legions.md): `LegionSupply.Resolve` runs after `LoamPhases.Pressure` and owns the
+    /// whole burn/destroy decision now that carried loam has replaced wound-based attrition.
     /// </summary>
     public static WorldState Run(WorldState world, TurnReport report, string phase)
     {
@@ -76,20 +77,14 @@ public static class SupplyGraph
                 continue;
             }
 
-            var bitten = Starve(entity);
-            report.Add(phase, TurnReportKinds.Event, entity.EntityId,
-                "attrition:" + (bitten.Members.Count == 0 ? "lost" : entity.AtSectorId ?? entity.OnLaneId ?? ""),
-                entity.AtSectorId);
-
-            // A force that starves to nothing leaves the map, the same as one destroyed in a fight.
-            if (bitten.Members.Count > 0) survivors.Add(bitten);
+            survivors.Add(entity);
         }
 
         return world with { Entities = survivors };
     }
 
     /// <summary>A force on a lane counts as supplied if either end of it still is.</summary>
-    static bool InSupply(WorldState world, WorldEntity entity, IReadOnlySet<string> connected)
+    public static bool InSupply(WorldState world, WorldEntity entity, IReadOnlySet<string> connected)
     {
         if (entity.AtSectorId is { } at) return connected.Contains(at);
         if (entity.OnLaneId is not { } laneId) return false;
@@ -116,17 +111,4 @@ public static class SupplyGraph
         report.Add(phase, TurnReportKinds.Event, entity.EntityId, "recovery:" + (entity.AtSectorId ?? ""), entity.AtSectorId);
         return entity with { Members = members };
     }
-
-    static WorldEntity Starve(WorldEntity entity)
-    {
-        var members = new List<WorldEntityMember>(entity.Members.Count);
-        foreach (var m in entity.Members)
-        {
-            var wounds = m.Wounds + Math.Max(1, (int)((long)m.Hp * AttritionWoundMilli / 1000));
-            if (wounds < m.Hp) members.Add(m with { Wounds = wounds });
-        }
-
-        return entity with { Members = members };
-    }
-
 }

@@ -33,9 +33,11 @@ public class LoamPhasesTests
     static WorldSector Find(WorldState world, string id) => world.Sectors.Single(s => s.SectorId == id);
 
     [Fact]
-    public void L15_ruleset_version_is_4_now_that_production_and_pressure_are_not_pass_throughs()
+    public void L15_ruleset_version_has_moved_past_3_now_that_production_and_pressure_are_not_pass_throughs()
     {
-        Assert.Equal(4, TurnEngine.RulesetVersion);
+        // >= rather than a hardcoded value: later modules (L27) bump it again for their own real
+        // behaviour changes, and this fact — L15's own — stays true regardless.
+        Assert.True(TurnEngine.RulesetVersion >= 4);
     }
 
     // ---- Production (L12) ----

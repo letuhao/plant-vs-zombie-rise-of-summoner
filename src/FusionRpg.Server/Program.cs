@@ -69,6 +69,17 @@ if (sweptMatches > 0)
 var portraits = app.Services.GetRequiredService<TypeIconStore>().BackfillPortraitsFromDumps();
 if (portraits > 0)
     Console.WriteLine($"[icons] backfilled {portraits} portraits from dump layer 'image'");
+// C1 (completeness-audit.md): entity: bindings are never durable — IL2CPP reuses the pointer, so
+// one surviving a restart would attach to whatever object takes its address next. A fresh boot is
+// exactly the moment every entity: binding from the previous process is guaranteed stale, whether
+// the last shutdown was clean or a crash. A no-op today (nothing binds one yet — completeness-audit
+// A4), and the cheap place for this to already be correct once something does.
+var clearedBindings = app.Services.GetRequiredService<RpgStore>().ClearSessionScopedBindings();
+if (clearedBindings > 0)
+    Console.WriteLine($"[atoms] boot sweep cleared {clearedBindings} stale session-scoped binding(s)");
+var orphanInstances = app.Services.GetRequiredService<RpgStore>().CountOrphanInstances();
+if (orphanInstances > 0)
+    Console.WriteLine($"[atoms] {orphanInstances} orphan instance(s) remain after the boot sweep");
 app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -467,6 +478,44 @@ app.MapPut("/api/almanac/dump/{side}/{typeId:int}", async (string side, int type
         return Results.BadRequest(new { error = ex.Message });
     }
 });
+app.MapGet("/api/almanac/seed", (RpgStore store, string? side) =>
+    Results.Ok(new { contractVersion = RpgStore.AlmanacSeedContractVersion, items = store.ListAlmanacSeed(side) }));
+
+app.MapGet("/api/almanac/seed/{side}/{typeId:int}", (string side, int typeId, RpgStore store) =>
+{
+    if (!TypeIconStore.IsValidSide(side) || typeId < 0) return Results.BadRequest();
+    var dto = store.GetAlmanacSeed(side, typeId);
+    return dto is null ? Results.NotFound() : Results.Ok(dto);
+});
+
+app.MapPost("/api/almanac/seed/rebuild", (RpgStore store) => Results.Ok(store.RebuildAlmanacSeed()));
+
+app.MapPost("/api/almanac/seed/enrich", (RpgStore store) =>
+{
+    var dir = new DirectoryInfo(AppContext.BaseDirectory);
+    while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "data", "seed", "external-reference", "almanac-enrichment", "pvz-fusion-almanac-3.6.1.json")))
+        dir = dir.Parent;
+    if (dir is null)
+        return Results.Problem("enrichment export file not found (data/seed/external-reference/almanac-enrichment/pvz-fusion-almanac-3.6.1.json)", statusCode: 404);
+
+    var path = Path.Combine(dir.FullName, "data", "seed", "external-reference", "almanac-enrichment", "pvz-fusion-almanac-3.6.1.json");
+    List<AlmanacEnrichmentImportRow>? rows;
+    try
+    {
+        var json = File.ReadAllText(path);
+        rows = JsonSerializer.Deserialize<List<AlmanacEnrichmentImportRow>>(json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem("failed to read/parse enrichment export: " + ex.Message, statusCode: 400);
+    }
+    if (rows is null) return Results.Problem("enrichment export deserialized to null", statusCode: 400);
+
+    var summary = store.ImportAlmanacEnrichment(rows, "pvz-fusion-almanac-3.6.1");
+    return Results.Ok(new { matched = summary.Matched, unmatched = summary.Unmatched });
+});
+
 app.MapGet("/api/runs/{id:long}/spawns", (long id, RpgStore store) => new { items = store.ListSpawnStats(id) });
 app.MapGet("/api/metrics", (RpgStore store) => new { items = store.ListMetrics() });
 app.MapPost("/api/heartbeat", (HeartbeatDto? body, RpgStore store) =>

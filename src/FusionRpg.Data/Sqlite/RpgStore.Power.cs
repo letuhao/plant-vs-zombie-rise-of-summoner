@@ -75,6 +75,10 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
             WritePowerTablesUnlocked(db, tx, tables);
+            // C4 (completeness-audit.md): this direct API has no production caller today and no
+            // skip-when-identical tracking to bump conditionally on, unlike the import path — bump
+            // unconditionally so an E19 receiver actually re-negotiates after a policy edit through it.
+            ExecIn(db, tx, "UPDATE content_meta SET catalog_revision = catalog_revision + 1 WHERE id = 1;");
             tx.Commit();
             return (true, "");
         }

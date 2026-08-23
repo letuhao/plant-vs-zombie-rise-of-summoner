@@ -228,4 +228,16 @@ public class PowerStoreTests : IDisposable
 
         Assert.NotEqual(before, _store.ComputeContentHash().Hash);
     }
+
+    [Fact]
+    public void UpsertPowerTables_bumps_the_catalog_revision()
+    {
+        // C4 (completeness-audit.md): this direct API had no production caller and no revision bump
+        // — an E19 receiver would never re-negotiate after a policy edit made through it.
+        var before = _store.GetCatalogRevision();
+
+        Assert.True(_store.UpsertPowerTables(PowerTables.Authored()).Ok);
+
+        Assert.True(_store.GetCatalogRevision() > before);
+    }
 }

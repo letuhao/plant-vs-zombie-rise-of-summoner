@@ -763,7 +763,12 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
 
 ## Phase 6 — `loam-legions`
 
-- [ ] **L25: Post-gate state — every module's new field, one golden move**
+- [x] **L25: Post-gate state — every module's new field, one golden move** ✅ 2026-08-23 — all fields
+  hashed/persisted (`WorldCanonical` rows for sector/slot/entity/member + `RememberedSlot`), `Rule14`
+  fires/accepts (`WorldInvariantTests`), `StructureCatalog` validates at static init
+  (`StructureCatalogTests`), one batched golden re-bless (`GoldenFinalHash` → `bef207...`, entry #10),
+  `decisions.md` updated. Core 2831, Data 426, E2E World 40, Guard 70 — all green; all 4 guard scripts
+  green.
   - Description: land the hashed fields all five post-gate modules need, together, before any
     module's behavior is built — the audit-driven fix for the golden-move budget. `WorldEntityMember.
     Role`, `WorldEntity.CarriedLoam` (legions); `WorldSlot.StructureId` (structure-substrate);
@@ -781,7 +786,11 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     `WorldDtos.cs`, `decisions.md`. Scope: M.
   - Dependencies: none — every field is additive to already-shipped records.
 
-- [ ] **L26: `LegionSupply` calculators, and the harness that tunes them**
+- [x] **L26: `LegionSupply` calculators, and the harness that tunes them** ✅ 2026-08-23 —
+  `CarryPerBearer=200`/`BurnPerMember=10` tuned so 3 representative compositions all leash in 4-8
+  turns (`LegionSupplyEconomyTests`); bearer-heavy > bearer-light at equal headcount proven; equal
+  bearer count/different size shares capacity but not burn/leash (degeneracy proven absent); exact
+  reproducibility and the zero-bearer/empty-legion edges covered. Core 2859 green.
   - Description: pure capacity/burn/leash math (`Capacity = BearerCount × CarryPerBearer`,
     `Burn = MemberCount × BurnPerMember`, leash `= Capacity / Burn`), unwired, plus
     `LegionSupplyEconomyTests` tuning both constants against the ideal's 4–8 turn leash target — the
@@ -795,7 +804,20 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     `BurnPerMember`), `tests/.../LegionSupplyEconomyTests.cs` (new). Scope: M.
   - Dependencies: L25.
 
-- [ ] **L27: Wire `LegionSupply` into `Pressure`; retire attrition**
+- [x] **L27: Wire `LegionSupply` into `Pressure`; retire attrition** ✅ 2026-08-23 —
+  `LegionSupply.Resolve` runs after `LoamPhases.Pressure` (sector upkeep first, legion top-up/burn
+  second); `SupplyGraph.Starve`/`AttritionWoundMilli` removed, `Recover` untouched; destruction is
+  outright (no wound fallback), proven exact-leash-turns in `LegionSupplyResolveTests`; pooled
+  top-up proven bounded by available stock; `SupplyTests.cs`'s two salvageable properties rewritten
+  against carried loam, the two wound-math cases removed; `StanceTests.cs`'s hold-still-starves case
+  rewritten to burn. **Real gaps found and fixed along the way**: (1) giving `e-dave-legion-1` a
+  bearer/CarriedLoam=500 bootstrap in both templates — a zero-reserve legion died the instant it left
+  supply, breaking ~21 unrelated movement/claim/combat tests before every offensive action could even
+  resolve; (2) `LegionSupply.Resolve`'s new fields (`CarriedLoam`, `Role`) were never wired into
+  `RpgStore`'s SQLite persistence (6 new columns added via `EnsureColumn`, write+read paths updated) —
+  caught by `LoamPersistenceTests`/`WorldStoreTests` failing once a non-default `CarriedLoam` existed
+  to round-trip. `RulesetVersion` 4→5 (real behaviour change), golden re-bled, `decisions.md` updated.
+  Core 2882, Data 429, E2E World 40 — all green; all 4 guard scripts green.
   - Description: the burn/top-up pass, resolving *after* `LoamPhases.Pressure`'s sector-upkeep draw
     (the resolved draw order — sector upkeep first, legion top-up second, from the shared pool).
     Removes `SupplyGraph.Starve`/`AttritionWoundMilli`; keeps `SupplyGraph.Recover` exactly where it is.
@@ -810,7 +832,15 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
   - Files: `LegionSupply.cs`, `SupplyGraph.cs`, `TurnEngine.cs`, `tests/.../SupplyTests.cs`. Scope: M.
   - Dependencies: L26.
 
-- [ ] **L28: `Sustain` — G1's bootstrap spend**
+- [x] **L28: `Sustain` — G1's bootstrap spend** ✅ 2026-08-23 — `WorldCommandKinds.Sustain` +
+  `WorldCommand.Amount`, admitted (entity + positive amount required), resolved via
+  `SustainResolver.Run` at the very top of `Pressure`, before `SupplyGraph.Run`/`LoamPhases.Pressure`.
+  Proven end-to-end: a 3-unit component shortfall picks "poor" as weakest and fades it
+  (`loam.shortfall:3`) with no Sustain; the same fixture with a 10-loam Sustain spend closes the gap
+  entirely (no shortfall, full recovery instead) — the literal acceptance criterion, not an inference.
+  Spend bounded by `CarriedLoam` (never over-promises); routed/non-owner/gone-entity/zero-carry all
+  drop cleanly with a named reason. Core 2892, Data 462, E2E World 40 — all green; all 4 guard
+  scripts green.
   - Description: a new, explicit, player-issued `WorldCommandKinds.Sustain`, spending the issuing
     legion's `CarriedLoam` 1:1 into its current sector's `FadePolicy` balance for the turn. Resolves
     **before** `LoamPhases.Pressure`'s own accounting (the audit-corrected timing — the opposite order
@@ -823,17 +853,32 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     (new). Scope: S.
   - Dependencies: L27 (needs the phase ordering L27 establishes).
 
-### Checkpoint 6 — `loam-legions` built
-- [ ] Leash legible and reproducible; bearers change it, headcount alone does not.
-- [ ] Attrition fully retired — no wound-based path remains anywhere in `SupplyGraph.cs`.
-- [ ] `Sustain` and the burn/top-up pass resolve in the audit-corrected order, proven by a test that
-  would fail under the original (contradictory) ordering.
-- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
-- [ ] All four guard scripts green.
+### Checkpoint 6 — `loam-legions` built ✅ PASSED 2026-08-23
+- [x] Leash legible and reproducible; bearers change it, headcount alone does not.
+  (`LegionSupplyEconomyTests`)
+- [x] Attrition fully retired — no wound-based path remains anywhere in `SupplyGraph.cs`.
+  (`Starve`/`AttritionWoundMilli` deleted; `grep` confirms no reference left in `src/`)
+- [x] `Sustain` and the burn/top-up pass resolve in the audit-corrected order, proven by a test that
+  would fail under the original (contradictory) ordering. (`SustainResolverTests`'s weakest-selection
+  pair proves `Sustain`'s ordering; `LegionSupplyResolveTests.A_legion_in_supply_tops_up_from_what_
+  the_pool_has_left_after_upkeep` proves the top-up pass's — both numerically exact, both would fail
+  under a swapped order.)
+- [x] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
+- [x] All four guard scripts green.
 
 ## Phase 7 — `loam-ai`
 
-- [ ] **L29: The habitability gate on `ValueMap`**
+- [x] **L29: The habitability gate on `ValueMap`** ✅ 2026-08-23 — second post-hoc multiplicative
+  gate (`HabitabilityPenaltyMilli`), applied to the same pre-gate `total` as `Overextension` (not
+  chained after it, to avoid an already-negative overextended total flipping back positive). Fires
+  only once a sector is actually surveyed (`believed.Slots.Count > 0`) and lacks a rootbed — unseen
+  or glimpsed ground stays governed by curiosity, never penalized for what nobody has looked at.
+  Proven: a surveyed-barren candidate flips from clearly-positive to clearly-negative purely from
+  the gate; a surveyed-habitable one is untouched; unsurveyed/glimpsed ground never gates. **Real
+  regression found and fixed**: a pre-existing overextension test dressed "your own capital" with a
+  bare Seat and no rootbed — legitimately barren under the new rule — fixed by giving it a rootbed
+  too (Rule11's own real-world requirement), restoring the fixture to what it always meant to prove.
+  Core 2897, Guard 73 — all green.
   - Description: a second post-hoc multiplicative gate, mirroring `Overextension`'s exact shape
     (applied last, can drive `Total` negative), collapsing a barren sector's `Total` toward zero. Does
     not touch `Sever`'s separate score.

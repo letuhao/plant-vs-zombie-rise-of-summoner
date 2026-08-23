@@ -113,6 +113,53 @@ a model at all** — most of the closed-loop findings this session did not, and 
 the ones needing prose or judgement. A pipeline for work a script can do is a slow, expensive,
 non-reproducible script.
 
+### 5.1 Don't build a model-calling client — reuse one that already works
+
+**Owner direction, 2026-08-23.** `D:\Works\source\lore-weave\scripts\i18n_translate.py` is a proven
+local-model tool from another repo: an OpenAI-compatible LM Studio endpoint, `google/gemma-4-26b-a4b-qat`
+by default, translating a JSON corpus with a verify + self-heal loop. It already implements most of
+§3's guardrails, so `pipeline` should adopt its shape rather than re-derive one:
+
+| §3 guardrail | Where `i18n_translate.py` already does it |
+|---|---|
+| 3.1 Structured output | `extract_json()` strips fences/prose and parses the first `{...}`, with a regex fallback for the one common LLM-JSON slip (an unescaped `"` inside a value) |
+| 3.5 Validate before accept | `verify_chunk()` returns `(hard, soft)` failures — missing key, empty value, placeholder drift are hard; "looks untranslated" is soft — before anything is written |
+| 3.6 Bounded retry with the error attached | `translate_chunk()`'s self-heal loop re-prompts with the *named* defects (`f"- {k}: {r}"` per key), up to `max_heal` rounds — the same "name the exact defects" design as this section |
+| 3.7 Preserve the escape hatch | exhausted heal rounds fall back to the source value, recorded in a per-run report (`_FAILED.json`), never blank and never silently dropped |
+
+**Disabling reasoning mode** (the concrete ask): two redundant fields on every call, because
+different servers honor different ones —
+
+```python
+body = json.dumps({
+    "model": MODEL, "temperature": temperature,
+    "reasoning_effort": "none",
+    "chat_template_kwargs": {"enable_thinking": False, "thinking": False},
+    ...
+})
+```
+
+`reasoning_effort: "none"` is the OpenAI-style field some servers read directly. `chat_template_kwargs`
+is passed straight through to the model's own Jinja chat template — reasoning-capable open models gate
+a `<think>...</think>` block on a template variable usually named `enable_thinking` or `thinking`;
+setting it `False` means the template never inserts the scaffold, so no reasoning tokens are generated
+at all, not merely shortened. Both keys are sent unconditionally because "llama.cpp/LM Studio ignore
+whichever key the model's template doesn't use" — harmless to send both, and it covers whichever
+mechanism a given local build actually reads. If a specific model still emits reasoning tokens, check
+that model's Jinja template (LM Studio exposes it) for the variable name it branches on and add that
+exact key.
+
+**What to port vs. what to change:**
+- Port as-is: `call_model()`'s reasoning-disable flags, `extract_json()`, the hard/soft `verify` split,
+  the self-heal retry loop, the resumable per-namespace plan/write cycle, the chunk-level thread pool.
+- Change for seedsmith: the JSON Schema per pipeline (§3.1) should be passed as LM Studio's
+  `response_format: {type: json_schema, ...}` for grammar-constrained decoding where the loaded model
+  supports it — `i18n_translate.py` doesn't do this because free-form prose translation has no fixed
+  schema; a seedsmith pipeline's schema is fixed per metric, so this is a real strengthening, not a gap
+  it inherits. `verify()`'s check functions and `system` prompt are per-pipeline, one set per metric
+  family — `translate_chunk()` already takes `system` as a parameter for exactly this reuse (the
+  same repo's `motif_translate.py` reuses the identical loop with its own domain prompt).
+
 ---
 
 ## 6. Open-loop pipelines and the review queue

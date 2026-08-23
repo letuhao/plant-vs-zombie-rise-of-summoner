@@ -1,7 +1,7 @@
 # Information architecture — the whole game GUI
 
 **Status:** design complete, for review. Governed by
-[architecture/game-gui-principles.md](../architecture/game-gui-principles.md) (GG-1 … GG-60);
+[architecture/game-gui-principles.md](../architecture/game-gui-principles.md) (GG-1 … GG-61);
 decisions D1–D8 recorded in its §20.1.
 
 This is the map: every stage, every layer, every key, and what happens to all twenty routes the

@@ -8,8 +8,14 @@ Checkpoints A–E reached, no golden re-blessed. A completeness audit the same d
 ([effect-atom/completeness-audit.md](../docs/architecture/effect-atom/completeness-audit.md)) found
 that almost none of it reaches the running game: no host loads a content table, nothing runs the
 importer, nothing creates a binding, and E17's status-stat payload has a parser with no applier.
-**Wave 6, below, is the fix.** It is scoped from that audit, not from a new ideal — every module
-closes one lettered finding.
+**Wave 6 closed same-day, all six modules: E20–E25 fully built and proven.** E23 was first reported
+partial — `EffectSeedCatalog` deletion "deferred, needs a converter that doesn't exist" — and that
+claim was wrong: `AtomPushCodec.ToDef` already shipped the converter at E19, found only after a
+Stop-hook challenge forced a closer re-read of `MigrationParityTests.cs` than the first pass gave it.
+Corrected: `EffectSeedCatalog` is deleted from production Core, replaced at all five call sites by a
+checked-in generated catalog, proven safe by a new execution-parity suite (19 real scenarios through
+a real `EffectBag`, not just DTO comparison) before the swap and after. Checkpoint F reached for all
+six modules; see [tasks/effect-atom-todo.md](effect-atom-todo.md) E23 for the full account.
 
 ## Overview
 

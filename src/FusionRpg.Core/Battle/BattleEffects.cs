@@ -29,7 +29,7 @@ public sealed class BattleEffectHost
         _sink = new BattleEffectSink(resolveActor);
         Clock = new FakeEffectClock();
         var catalog = new InMemoryEffectCatalog();
-        catalog.ReplaceAll(EffectSeedCatalog.CreateAll());
+        catalog.ReplaceAll(EffectAtomCatalog.CreateAll());
         Bag = new EffectBag(catalog, new InMemoryEffectGrantStore(),
             new EffectProcPolicy(Clock, new BattleEffectRandom(rngSeed)), _sink);
         Bag.UtcNow = () => Clock.UtcNow;

@@ -41,15 +41,22 @@ public class SupplyTests
             .ToList()
     };
 
+    static WorldState WithCarriedLoam(WorldState w, string entityId, long amount) => w with
+    {
+        Entities = w.Entities
+            .Select(e => e.EntityId == entityId ? e with { CarriedLoam = amount } : e)
+            .ToList()
+    };
+
+    static long CarriedLoam(WorldState w, string entityId) =>
+        w.Entities.Single(e => e.EntityId == entityId).CarriedLoam;
+
     /// <summary>
     /// Moves the wild pack off the frontier. Every sector but ash-waste carries a Seat, and a Seat
     /// you hold is a supply source in its own right — so ash-waste is the only holding that can be
     /// cut off at all, and these tests need it empty.
     /// </summary>
     static WorldState Banish(WorldState w) => Place(w, "e-wild-pack-1", "black-gate");
-
-    static int Wounds(WorldState w, string entityId) =>
-        w.Entities.Single(e => e.EntityId == entityId).Members.Sum(m => m.Wounds);
 
     static WorldCommand Stand() => new()
     {
@@ -115,41 +122,38 @@ public class SupplyTests
         Assert.DoesNotContain("ash-waste", connected);   // the only way there ran through ember-hollow
     }
 
+    /// <summary>
+    /// Rewritten for spec-loam-legions.md: the currency is carried loam now, not wounds, but the
+    /// property the old test proved is the same one — a faction with no supply network at all is
+    /// exempt from the mechanic entirely, per this program's own G-C precedent (an exemption is
+    /// re-proven at every place its logic moves, not assumed to survive a refactor untested).
+    /// </summary>
     [Fact]
-    public void A_faction_with_no_seat_of_its_own_has_no_supply_and_never_starves()
+    public void A_faction_with_no_seat_of_its_own_has_no_supply_and_never_burns()
     {
-        var world = World();
+        var world = WithCarriedLoam(World(), "e-wild-pack-1", amount: 5);
         Assert.Empty(SupplyGraph.ConnectedSectors(world, "wild"));
 
-        var before = Wounds(world, "e-wild-pack-1");
         var result = TurnEngine.Step(world, new[] { Stand() }, seed: 1);
 
-        Assert.Equal(before, Wounds(result.World, "e-wild-pack-1"));
+        Assert.Contains(result.World.Entities, e => e.EntityId == "e-wild-pack-1");
+        Assert.Equal(5, CarriedLoam(result.World, "e-wild-pack-1"));
     }
 
+    /// <summary>
+    /// Rewritten for spec-loam-legions.md: an in-supply legion tops up for free and never burns —
+    /// the replacement for the old "takes no attrition" property.
+    /// </summary>
     [Fact]
-    public void A_legion_out_of_supply_takes_attrition_once_a_turn()
+    public void A_legion_standing_in_supply_never_burns()
     {
-        // verdant-shelf is unowned and empty — starvation with nothing else happening in it.
-        var world = Place(World(), "e-dave-legion-1", "verdant-shelf");
+        var world = WithCarriedLoam(World(), "e-dave-legion-1", amount: 5);
+        var result = TurnEngine.Step(world, new[] { Stand() }, seed: 1);
 
-        var first = TurnEngine.Step(world, new[] { Stand() }, seed: 1);
-        var afterOne = Wounds(first.World, "e-dave-legion-1");
-        Assert.True(afterOne > 0, "an unsupplied legion should be bleeding");
-
-        var second = TurnEngine.Step(first.World, new[] { Stand() }, seed: 1);
-        var afterTwo = Wounds(second.World, "e-dave-legion-1");
-
-        // One turn, one bite — not one per member, per event, or per phase.
-        Assert.Equal(afterOne * 2, afterTwo);
-        Assert.Contains(first.Report.Entries, e => e.Detail.StartsWith("attrition"));
-    }
-
-    [Fact]
-    public void A_legion_standing_in_supply_takes_none()
-    {
-        var result = TurnEngine.Step(World(), new[] { Stand() }, seed: 1);
-        Assert.Equal(0, Wounds(result.World, "e-dave-legion-1"));
+        Assert.Contains(result.World.Entities, e => e.EntityId == "e-dave-legion-1");
+        // In supply, so it can only ever top up toward capacity, never burn down.
+        Assert.True(CarriedLoam(result.World, "e-dave-legion-1") >= 5);
+        Assert.DoesNotContain(result.Report.Entries, e => e.Detail.StartsWith("legion.starved") || e.Detail.StartsWith("legion.burn"));
     }
 
     [Fact]
@@ -173,17 +177,6 @@ public class SupplyTests
         // Nothing was stored, so cutting the lane between turns changes the answer immediately.
         var second = TurnEngine.Step(Sever(first.World, "l-ember-ash"), new[] { Stand() }, seed: 1);
         Assert.Contains(second.Report.Entries, e => e.Detail == "supply.cut:ash-waste");
-    }
-
-    [Fact]
-    public void Attrition_eventually_finishes_a_stranded_legion()
-    {
-        var state = Place(World(), "e-dave-legion-1", "verdant-shelf");
-
-        for (var turn = 0; turn < 40 && state.Entities.Any(e => e.EntityId == "e-dave-legion-1"); turn++)
-            state = TurnEngine.Step(state, Array.Empty<WorldCommand>(), seed: 1).World;
-
-        Assert.DoesNotContain(state.Entities, e => e.EntityId == "e-dave-legion-1");
     }
 
     // ---- gates ----------------------------------------------------------------------------

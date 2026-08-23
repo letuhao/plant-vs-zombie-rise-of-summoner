@@ -62,14 +62,29 @@ hard blocker — see the map's "Why this shape" section for the hard-vs-soft dis
 
 ## Verification checkpoints
 
-1. After T1-T3 (Module 1): injector builds clean; guards pass; live — sweep produces zero
-   cross-contaminated `uiXxx` entries, `GET /api/recipes` non-empty from inside a level.
-2. After T4-T7 (Module 2 core): `FusionRpg.Data.Tests` + `FusionRpg.E2E.Tests` green; `guard-dal.ps1`
-   green; manual `POST /api/almanac/seed/rebuild` then spot-check `GET /api/almanac/seed/plant/0`
-   against the live samples recorded in the spec.
-3. After T8 (enrichment): full suites green; owner reviews the enrichment export file content before
-   it's committed (fan-tool data, hand-reviewed per the spec's own boundary).
-4. End to end: `dotnet test tests\FusionRpg.Core.Tests tests\FusionRpg.Data.Tests
-   tests\FusionRpg.Guard.Tests`; `.\scripts\guard-dal.ps1`; `.\scripts\deploy-play.ps1 -NoServer`;
-   browse a handful of `GET /api/almanac/seed/{side}/{typeId}` results against the raw in-game
-   almanac card.
+1. **DONE 2026-08-23.** After T1-T3 (Module 1): injector builds clean; guards pass; live — sweep
+   produces zero cross-contaminated `uiXxx` entries (900/900 sweep entries capped ≤6 fields, no
+   window text ever computed — proven live against the owner's own open almanac window), `GET
+   /api/recipes` non-empty from inside a level (5000+ real fusion entries; the auto-latch fix alone
+   resolved the original empty-recipes bug, confirmed live).
+2. **DONE 2026-08-23.** After T4-T7 (Module 2 core): `FusionRpg.Data.Tests` (459/459) +
+   `FusionRpg.E2E.Tests` (193/193) green; `guard-dal.ps1` green; `POST /api/almanac/seed/rebuild` →
+   `GET /api/almanac/seed/plant/0` verified via E2E test against the live samples recorded in the
+   spec (Peashooter, cost 100, cooldown 7.5s) — the live *production* server spot-check was
+   deliberately deferred (see Checkpoint 2 note in the todo file: redeploying would drop the owner's
+   actively-connected game session; the E2E suite runs the identical `Program.cs` pipeline).
+3. **DONE 2026-08-23**, with one owner-only item left open on purpose. After T8 (enrichment): full
+   suites green. Real data extracted from the fan tool this session (617 plants + 164 zombies, one
+   broad `evaluate_script` pull per the risk mitigation below — no fabricated content). **Owner still
+   needs to review the enrichment export file content before treating it as committed-quality data**
+   (fan-tool data, hand-review is explicitly the spec's own boundary, not something an agent can
+   self-certify) — file is at
+   `data/seed/external-reference/almanac-enrichment/pvz-fusion-almanac-3.6.1.json`.
+4. **DONE 2026-08-23** (production-server spot-check deferred, see #2): `dotnet test
+   tests\FusionRpg.Core.Tests tests\FusionRpg.Data.Tests tests\FusionRpg.Guard.Tests` — 2882/2882 +
+   459/459 + 70/70 green; `.\scripts\guard-dal.ps1`,
+   `.\scripts\guard-single-writer.ps1`,`.\scripts\guard-secondary-no-unity.ps1`,
+   `.\scripts\guard-funnel-delta.ps1` — all green; injector deployed live via `deploy-play.ps1
+   -NoServer` for T1-T3; browsing `GET /api/almanac/seed/{side}/{typeId}` against the raw in-game
+   almanac card on the live production server is the one remaining deferred step (owner's terminal
+   only, per CLAUDE.md's server-lifetime rule, and to avoid dropping the owner's active session).

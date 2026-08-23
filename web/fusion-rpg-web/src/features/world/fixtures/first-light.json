@@ -132,7 +132,8 @@
           "state": "Intact",
           "ownerFactionId": null,
           "guardWaveId": null,
-          "guardState": "Cleared"
+          "guardState": "Cleared",
+          "structureId": null
         },
         {
           "slotIndex": 1,
@@ -141,7 +142,8 @@
           "state": "Intact",
           "ownerFactionId": null,
           "guardWaveId": null,
-          "guardState": "Cleared"
+          "guardState": "Cleared",
+          "structureId": null
         },
         {
           "slotIndex": 2,
@@ -150,7 +152,8 @@
           "state": "Intact",
           "ownerFactionId": null,
           "guardWaveId": "guard-light",
-          "guardState": "Intact"
+          "guardState": "Intact",
+          "structureId": null
         },
         {
           "slotIndex": 3,
@@ -159,7 +162,8 @@
           "state": "Intact",
           "ownerFactionId": null,
           "guardWaveId": "guard-light",
-          "guardState": "Intact"
+          "guardState": "Intact",
+          "structureId": null
         }
       ],
       "forces": [],
@@ -235,7 +239,8 @@
           "state": "Claimed",
           "ownerFactionId": null,
           "guardWaveId": null,
-          "guardState": "Cleared"
+          "guardState": "Cleared",
+          "structureId": null
         },
         {
           "slotIndex": 1,
@@ -244,7 +249,8 @@
           "state": "Claimed",
           "ownerFactionId": null,
           "guardWaveId": null,
-          "guardState": "Cleared"
+          "guardState": "Cleared",
+          "structureId": null
         },
         {
           "slotIndex": 2,
@@ -253,7 +259,8 @@
           "state": "Claimed",
           "ownerFactionId": null,
           "guardWaveId": null,
-          "guardState": "Cleared"
+          "guardState": "Cleared",
+          "structureId": null
         },
         {
           "slotIndex": 3,
@@ -262,7 +269,8 @@
           "state": "Claimed",
           "ownerFactionId": null,
           "guardWaveId": null,
-          "guardState": "Cleared"
+          "guardState": "Cleared",
+          "structureId": null
         }
       ],
       "forces": [

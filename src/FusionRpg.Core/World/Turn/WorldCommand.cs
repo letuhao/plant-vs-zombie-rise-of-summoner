@@ -21,7 +21,13 @@ public static class WorldCommandKinds
     /// <summary>Change a legion's posture — march, scout or hold (world-movement).</summary>
     public const string Stance = "stance";
 
-    public static readonly IReadOnlyList<string> All = new[] { StandFast, Move, Clear, Claim, Stance };
+    /// <summary>
+    /// Spend a legion's own carried loam into the sector it stands on, 1:1 (spec-loam-legions.md,
+    /// G1's bootstrap spend) — a player-issued choice, not an automatic stance effect.
+    /// </summary>
+    public const string Sustain = "sustain";
+
+    public static readonly IReadOnlyList<string> All = new[] { StandFast, Move, Clear, Claim, Stance, Sustain };
 
     public static bool IsKnown(string? kind) =>
         kind != null && All.Contains(kind, StringComparer.Ordinal);
@@ -58,4 +64,7 @@ public sealed record WorldCommand
 
     /// <summary>Ordered lane ids for a march (W9).</summary>
     public IReadOnlyList<string> LanePath { get; init; } = Array.Empty<string>();
+
+    /// <summary>How much carried loam a `sustain` order spends (spec-loam-legions.md).</summary>
+    public long? Amount { get; init; }
 }

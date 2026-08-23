@@ -186,8 +186,44 @@ public sealed partial class RpgStore : IRpgDb
               value REAL NOT NULL,
               ts TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS almanac_seed (
+              side               TEXT NOT NULL,
+              type_id            INTEGER NOT NULL,
+              type_name          TEXT,
+              display_name       TEXT,
+              flavor_info        TEXT,
+              flavor_introduce   TEXT,
+              sun_cost           INTEGER,
+              cooldown_sec       REAL,
+              cost_status        TEXT NOT NULL DEFAULT 'absent',
+              hp                 INTEGER,
+              attack             INTEGER,
+              armor              INTEGER,
+              armor_max          INTEGER,
+              stats_observed     INTEGER NOT NULL DEFAULT 0,
+              stats_sample_utc   TEXT,
+              almanac_captured_utc TEXT,
+              contract_version   INTEGER NOT NULL,
+              rebuilt_utc        TEXT NOT NULL,
+              PRIMARY KEY (side, type_id)
+            );
+            CREATE TABLE IF NOT EXISTS almanac_seed_enrichment (
+              side              TEXT NOT NULL,
+              type_id           INTEGER NOT NULL,
+              qualities_json    TEXT,
+              unlock_condition  TEXT,
+              type_class        TEXT,
+              weaknesses_text   TEXT,
+              damage_vs_text    TEXT,
+              description_text  TEXT,
+              source            TEXT NOT NULL,
+              matched_by        TEXT NOT NULL,
+              imported_utc      TEXT NOT NULL,
+              PRIMARY KEY (side, type_id)
+            );
             PRAGMA journal_mode=WAL;
             """);
+        EnsureColumn(db, "almanac_seed_enrichment", "description_text", "TEXT");
         EnsureColumn(db, "events", "player_id", "INTEGER");
         EnsureColumn(db, "events", "run_id", "INTEGER");
         EnsureColumn(db, "events", "match_key", "TEXT");
@@ -607,6 +643,7 @@ public sealed partial class RpgStore : IRpgDb
                          {
                              "DELETE FROM events;", "DELETE FROM entities;", "DELETE FROM spawn_stats;", "DELETE FROM mowers;",
                              "DELETE FROM types;", "DELETE FROM recipes;", "DELETE FROM runs;", "DELETE FROM metrics;", "DELETE FROM settings;",
+                             "DELETE FROM almanac_seed;", "DELETE FROM almanac_seed_enrichment;",
                              "DELETE FROM pvz_stat_contributions;", "DELETE FROM pvz_stat_snapshots;",
                              "DELETE FROM pvz_stat_modifiers;", "DELETE FROM pvz_stat_revisions;",
                              "DELETE FROM pvz_activity_facts;", "DELETE FROM pvz_activity_rollups;",
@@ -2382,6 +2419,7 @@ public sealed partial class RpgStore : IRpgDb
                 break;
             case "catalog.recipes":
                 if (pvzGame) ProjectRecipes(db, payload);
+                else Console.WriteLine("[recipes] catalog.recipes event dropped: pvzGame=false");
                 break;
             case "pet.spawn":
                 if (pvzGame) UpsertTypeFromSpawn(db, payload, t, "pet");
@@ -2469,7 +2507,12 @@ public sealed partial class RpgStore : IRpgDb
         {
             using var doc = JsonDocument.Parse(payload);
             if (!doc.RootElement.TryGetProperty("entries", out var entries) || entries.ValueKind != JsonValueKind.Array)
+            {
+                Console.WriteLine("[recipes] ProjectRecipes: payload has no 'entries' array — dropped: " +
+                    (payload.Length > 200 ? payload[..200] : payload));
                 return;
+            }
+            var written = 0;
             foreach (var item in entries.EnumerateArray())
             {
                 using var cmd = db.CreateCommand();
@@ -2489,9 +2532,14 @@ public sealed partial class RpgStore : IRpgDb
                 cmd.Parameters.AddWithValue("$bn", (object?)JsonStr(item, "parentBName") ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("$rn", (object?)JsonStr(item, "resultName") ?? DBNull.Value);
                 cmd.ExecuteNonQuery();
+                written++;
             }
+            Console.WriteLine($"[recipes] ProjectRecipes: wrote {written} rows this batch");
         }
-        catch { /* malformed */ }
+        catch (Exception ex)
+        {
+            Console.WriteLine("[recipes] ProjectRecipes: malformed payload — " + ex.Message);
+        }
     }
 
     public List<RecipeItem> ListRecipes()

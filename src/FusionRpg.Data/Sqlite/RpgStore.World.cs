@@ -143,6 +143,17 @@ public sealed partial class RpgStore
         EnsureColumn(db, "rpg_world_sectors", "fracture_intensity_milli", "INTEGER NOT NULL DEFAULT 1000");
         EnsureColumn(db, "rpg_world_factions", "upkeep_handicap_milli", "INTEGER NOT NULL DEFAULT 1000");
 
+        // Post-gate L25 (spec-loam-legions.md, spec-structure-substrate.md, spec-loam-texture.md):
+        // an existing saved world reads every one of these back at its shipped default — no
+        // structure, no construction in progress, no warden, no neglect — exactly the world before
+        // this batch of fields existed.
+        EnsureColumn(db, "rpg_world_slots", "structure_id", "TEXT");
+        EnsureColumn(db, "rpg_world_slots", "construction_turns_remaining", "INTEGER");
+        EnsureColumn(db, "rpg_world_sectors", "warden_binding_id", "TEXT");
+        EnsureColumn(db, "rpg_world_sectors", "neglected_turns", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_world_entities", "carried_loam", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_world_entity_members", "role", "TEXT NOT NULL DEFAULT 'Fighter'");
+
         EnsureWorldTurnSchemaUnlocked(db);
     }
 
@@ -210,9 +221,9 @@ public sealed partial class RpgStore
                     INSERT INTO rpg_world_sectors (world_id, sector_id, type_id, climate, danger_band,
                         phase, owner_faction_id, stability_milli, pressure_milli, depletion_milli,
                         development_level, intel, last_seen_turn, layout_x, layout_y,
-                        loam_stock, fracture_intensity_milli, revision)
+                        loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns, revision)
                     VALUES ($w, $s, $type, $climate, $danger, $phase, $owner, $stab, $press, $depl,
-                            $dev, $intel, $seen, $x, $y, $loam, $intensity, 0);
+                            $dev, $intel, $seen, $x, $y, $loam, $intensity, $warden, $neglected, 0);
                     """,
                     ("$w", world.WorldId), ("$s", s.SectorId), ("$type", s.TypeId),
                     ("$climate", (object?)s.Climate?.ToString()), ("$danger", s.DangerBand),
@@ -220,18 +231,23 @@ public sealed partial class RpgStore
                     ("$stab", s.StabilityMilli), ("$press", s.PressureMilli), ("$depl", s.DepletionMilli),
                     ("$dev", s.DevelopmentLevel), ("$intel", s.AuthoredIntel.ToString()),
                     ("$seen", s.LastSeenTurn), ("$x", s.LayoutX), ("$y", s.LayoutY),
-                    ("$loam", s.LoamStock), ("$intensity", s.FractureIntensityMilli));
+                    ("$loam", s.LoamStock), ("$intensity", s.FractureIntensityMilli),
+                    ("$warden", (object?)s.WardenBindingId), ("$neglected", s.NeglectedTurns));
 
                 foreach (var sl in s.Slots)
                     Insert(db, tx, """
                         INSERT INTO rpg_world_slots (world_id, sector_id, slot_index, slot_type_id,
-                            element, state, owner_faction_id, guard_wave_id, guard_state, revision)
-                        VALUES ($w, $s, $i, $type, $elem, $state, $owner, $guard, $gstate, 0);
+                            element, state, owner_faction_id, guard_wave_id, guard_state,
+                            structure_id, construction_turns_remaining, revision)
+                        VALUES ($w, $s, $i, $type, $elem, $state, $owner, $guard, $gstate,
+                                $structure, $construction, 0);
                         """,
                         ("$w", world.WorldId), ("$s", s.SectorId), ("$i", sl.SlotIndex),
                         ("$type", sl.SlotTypeId), ("$elem", (object?)sl.Element?.ToString()),
                         ("$state", sl.State.ToString()), ("$owner", (object?)sl.OwnerFactionId),
-                        ("$guard", (object?)sl.GuardWaveId), ("$gstate", sl.GuardState.ToString()));
+                        ("$guard", (object?)sl.GuardWaveId), ("$gstate", sl.GuardState.ToString()),
+                        ("$structure", (object?)sl.StructureId),
+                        ("$construction", (object?)sl.ConstructionTurnsRemaining));
             }
 
             // Belief. Slots and forces go in as JSON rather than as sub-tables because a snapshot
@@ -267,27 +283,29 @@ public sealed partial class RpgStore
                 Insert(db, tx, """
                     INSERT INTO rpg_world_entities (world_id, entity_id, kind, owner_faction_id,
                         at_sector_id, on_lane_id, on_lane_toward_sector_id, lane_progress_milli,
-                        stance, movement_remaining, routed, revision)
-                    VALUES ($w, $e, $kind, $owner, $at, $lane, $toward, $prog, $stance, $move, $routed, 0);
+                        stance, movement_remaining, routed, carried_loam, revision)
+                    VALUES ($w, $e, $kind, $owner, $at, $lane, $toward, $prog, $stance, $move, $routed,
+                            $carried, 0);
                     """,
                     ("$w", world.WorldId), ("$e", e.EntityId), ("$kind", e.Kind.ToString()),
                     ("$owner", e.OwnerFactionId), ("$at", (object?)e.AtSectorId),
                     ("$lane", (object?)e.OnLaneId), ("$toward", (object?)e.OnLaneTowardSectorId),
                     ("$prog", e.LaneProgressMilli),
                     ("$stance", e.Stance), ("$move", e.MovementRemaining),
-                    ("$routed", e.Routed ? 1 : 0));
+                    ("$routed", e.Routed ? 1 : 0), ("$carried", e.CarriedLoam));
 
                 for (var i = 0; i < e.Members.Count; i++)
                 {
                     var m = e.Members[i];
                     Insert(db, tx, """
                         INSERT INTO rpg_world_entity_members (world_id, entity_id, member_index,
-                            instance_id, species_id, level, hp, wounds)
-                        VALUES ($w, $e, $i, $inst, $sp, $lvl, $hp, $wounds);
+                            instance_id, species_id, level, hp, wounds, role)
+                        VALUES ($w, $e, $i, $inst, $sp, $lvl, $hp, $wounds, $role);
                         """,
                         ("$w", world.WorldId), ("$e", e.EntityId), ("$i", i),
                         ("$inst", (object?)m.InstanceId), ("$sp", m.SpeciesId),
-                        ("$lvl", m.Level), ("$hp", m.Hp), ("$wounds", m.Wounds));
+                        ("$lvl", m.Level), ("$hp", m.Hp), ("$wounds", m.Wounds),
+                        ("$role", m.Role.ToString()));
                 }
             }
         }
@@ -362,7 +380,7 @@ public sealed partial class RpgStore
             {
                 cmd.CommandText = """
                     SELECT sector_id, slot_index, slot_type_id, element, state, owner_faction_id,
-                           guard_wave_id, guard_state
+                           guard_wave_id, guard_state, structure_id, construction_turns_remaining
                     FROM rpg_world_slots WHERE world_id = $w ORDER BY sector_id, slot_index;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -380,7 +398,9 @@ public sealed partial class RpgStore
                         State = Enum.Parse<SlotState>(r.GetString(4)),
                         OwnerFactionId = r.IsDBNull(5) ? null : r.GetString(5),
                         GuardWaveId = r.IsDBNull(6) ? null : r.GetString(6),
-                        GuardState = Enum.Parse<GuardState>(r.GetString(7))
+                        GuardState = Enum.Parse<GuardState>(r.GetString(7)),
+                        StructureId = r.IsDBNull(8) ? null : r.GetString(8),
+                        ConstructionTurnsRemaining = r.IsDBNull(9) ? null : r.GetInt32(9)
                     });
                 }
             }
@@ -392,7 +412,7 @@ public sealed partial class RpgStore
                     SELECT sector_id, type_id, climate, danger_band, phase, owner_faction_id,
                            stability_milli, pressure_milli, depletion_milli, development_level,
                            intel, last_seen_turn, layout_x, layout_y,
-                           loam_stock, fracture_intensity_milli
+                           loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns
                     FROM rpg_world_sectors WHERE world_id = $w ORDER BY sector_id;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -418,6 +438,8 @@ public sealed partial class RpgStore
                         LayoutY = r.GetInt32(13),
                         LoamStock = r.GetInt64(14),
                         FractureIntensityMilli = r.GetInt32(15),
+                        WardenBindingId = r.IsDBNull(16) ? null : r.GetString(16),
+                        NeglectedTurns = r.GetInt32(17),
                         Slots = slotsBySector.TryGetValue(sectorId, out var slots)
                             ? slots
                             : new List<WorldSlot>()
@@ -455,7 +477,7 @@ public sealed partial class RpgStore
             using (var cmd = db.CreateCommand())
             {
                 cmd.CommandText = """
-                    SELECT entity_id, member_index, instance_id, species_id, level, hp, wounds
+                    SELECT entity_id, member_index, instance_id, species_id, level, hp, wounds, role
                     FROM rpg_world_entity_members WHERE world_id = $w ORDER BY entity_id, member_index;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -471,7 +493,8 @@ public sealed partial class RpgStore
                         SpeciesId = r.GetString(3),
                         Level = r.GetInt32(4),
                         Hp = r.GetInt32(5),
-                        Wounds = r.GetInt32(6)
+                        Wounds = r.GetInt32(6),
+                        Role = Enum.Parse<WorldEntityMemberRole>(r.GetString(7))
                     });
                 }
             }
@@ -482,7 +505,7 @@ public sealed partial class RpgStore
                 cmd.CommandText = """
                     SELECT entity_id, kind, owner_faction_id, at_sector_id, on_lane_id,
                            on_lane_toward_sector_id, lane_progress_milli, stance, movement_remaining,
-                           routed
+                           routed, carried_loam
                     FROM rpg_world_entities WHERE world_id = $w ORDER BY entity_id;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -502,6 +525,7 @@ public sealed partial class RpgStore
                         Stance = r.GetString(7),
                         MovementRemaining = r.GetInt32(8),
                         Routed = r.GetInt32(9) != 0,
+                        CarriedLoam = r.GetInt64(10),
                         Members = membersByEntity.TryGetValue(entityId, out var members)
                             ? members
                             : new List<WorldEntityMember>()

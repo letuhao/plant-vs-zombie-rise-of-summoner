@@ -142,4 +142,87 @@ public class StatusEffectBridgeTests
         Assert.Contains(skipped, s => s.EndsWith(":status-icd", StringComparison.OrdinalIgnoreCase));
         Assert.Empty(rt.ResistedEvents);
     }
+
+    // ---- C2 (completeness-audit.md): a stat overlay on a status that never declared ModifyStat -------
+
+    [Fact]
+    public void A_stat_overlay_on_a_status_without_ModifyStat_is_refused_not_silently_dropped()
+    {
+        // blight is a real, registered status — Contagion/PulseHp/Spread, never ModifyStat. This is
+        // the exact shape the shipped blight-row.overlay.json carried before C2: an overlay that
+        // parsed and validated at the allowlist stage and then did nothing at apply time.
+        var rt = Runtime();
+        var skipped = new List<string>();
+        var grant = new EffectGrant
+        {
+            GrantId = "g1",
+            EffectId = "fx.overlay_damage",
+            OwnerKey = EffectOwnerKeys.Match,
+            Overlay = new Dictionary<string, object?>
+            {
+                ["statusId"] = "blight",
+                ["amount"] = -12L,
+                ["stat"] = System.Text.Json.JsonDocument.Parse("""{"atk":{"more":-0.1}}""").RootElement,
+            },
+        };
+        var ev = new EffectEventDto { TargetPtr = "Z1" };
+
+        var handled = StatusEffectBridge.TryApplyFromGrant(
+            rt, grant, ev, grant.Overlay, BoardSnapshot.Empty, new FixedStatusRng(0), DateTimeOffset.UtcNow, skipped);
+
+        Assert.True(handled);
+        Assert.Contains(skipped, s => s.EndsWith(":status-stat-overlay-without-ModifyStat", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_stat_overlay_on_a_status_that_declares_ModifyStat_applies_normally()
+    {
+        // expose declares ModifyStat (E17) — the same block on the right status must not be refused.
+        var rt = Runtime();
+        var skipped = new List<string>();
+        var grant = new EffectGrant
+        {
+            GrantId = "g1",
+            EffectId = "fx.overlay_damage",
+            OwnerKey = EffectOwnerKeys.Match,
+            Overlay = new Dictionary<string, object?>
+            {
+                ["statusId"] = "expose",
+                ["amount"] = 0L,
+                ["stat"] = System.Text.Json.JsonDocument.Parse("""{"defense":{"more":-0.15}}""").RootElement,
+            },
+        };
+        var ev = new EffectEventDto { TargetPtr = "Z1" };
+
+        StatusEffectBridge.TryApplyFromGrant(
+            rt, grant, ev, grant.Overlay, BoardSnapshot.Empty, new FixedStatusRng(0), DateTimeOffset.UtcNow, skipped);
+
+        Assert.DoesNotContain(skipped, s => s.Contains("status-stat-overlay-without-ModifyStat", StringComparison.Ordinal));
+        var instance = Assert.Single(rt.ForHost("Z1"));
+        Assert.Equal("expose", instance.StatusId);
+        Assert.NotEmpty(instance.StatMods);
+    }
+
+    [Fact]
+    public void A_status_without_a_stat_overlay_at_all_is_unaffected_by_the_C2_check()
+    {
+        // The check must gate on the OVERLAY carrying `stat`, not on what the status merely could
+        // carry — blight applies fine as long as nothing asks it to modify a stat.
+        var rt = Runtime();
+        var skipped = new List<string>();
+        var grant = new EffectGrant
+        {
+            GrantId = "g1",
+            EffectId = "fx.overlay_damage",
+            OwnerKey = EffectOwnerKeys.Match,
+            Overlay = new Dictionary<string, object?> { ["statusId"] = "blight", ["amount"] = -12L },
+        };
+        var ev = new EffectEventDto { TargetPtr = "Z1" };
+
+        StatusEffectBridge.TryApplyFromGrant(
+            rt, grant, ev, grant.Overlay, BoardSnapshot.Empty, new FixedStatusRng(0), DateTimeOffset.UtcNow, skipped);
+
+        Assert.DoesNotContain(skipped, s => s.Contains("status-stat-overlay-without-ModifyStat", StringComparison.Ordinal));
+        Assert.NotEmpty(rt.ForHost("Z1"));
+    }
 }

@@ -68,4 +68,16 @@ public static class LoamPolicy
     /// A short horizon so the AI does not evacuate ground that could still recover on its own.
     /// </summary>
     public const int AbandonmentHorizonTurns = 3;
+
+    // ---- LegionSupply (spec-loam-legions.md) ----
+
+    /// <summary>
+    /// What one bearer contributes to a legion's carrying capacity. Tuned by
+    /// `LegionSupplyEconomyTests` against the ideal's 4-8 turn leash target for representative
+    /// legion compositions — the same L9-style harness discipline as every other constant here.
+    /// </summary>
+    public const long CarryPerBearer = 200;
+
+    /// <summary>What one member, fighter or bearer, burns per turn beyond supply. Harness-tuned alongside <see cref="CarryPerBearer"/>.</summary>
+    public const long BurnPerMember = 10;
 }

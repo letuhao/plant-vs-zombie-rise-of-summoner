@@ -88,10 +88,31 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //      `RulesetVersion` unchanged and needed no re-bless of its own reasoning here beyond entry
     //      #8 above.
     //
+    //   10. **Post-gate L25, 2026-08-23** — `WorldCanonical` gains one field per new post-gate
+    //       record slot, landed together as this program's third and last budgeted golden move
+    //       (after `loam-model`'s and `loam-turn`'s): `WorldEntityMember.Role`, `WorldEntity.
+    //       CarriedLoam`, `WorldSlot.StructureId`/`ConstructionTurnsRemaining`, `WorldSector.
+    //       WardenBindingId`/`NeglectedTurns`, and `RememberedSlot.StructureId` on the belief side.
+    //       Every field sits at its default (Fighter/0/null) for this scenario — no post-gate
+    //       behaviour is wired yet, so nothing about the *play* changed, only the row shape the hash
+    //       is taken over. `RulesetVersion` is unchanged, matching `loam-model`'s own precedent for
+    //       a field-only addition (entry #8 above).
+    //
+    //   11. **L27, 2026-08-23 (`RulesetVersion` 4 -> 5)** — `Pressure` retires wound-based attrition:
+    //       `SupplyGraph.Starve`/`AttritionWoundMilli` are gone, and `LegionSupply.Resolve` now runs
+    //       after `LoamPhases.Pressure`'s sector-upkeep draw, burning a legion's own `CarriedLoam`
+    //       while it stands outside its faction's supply and destroying it outright (not wounding
+    //       it) the turn that reserve would go negative. A real behaviour change, not a field
+    //       addition — Dave's legion, out of supply for stretches of this same 20-turn scenario,
+    //       now burns/tops up loam instead of accumulating wounds. `first-light`'s and `two-hearths`'
+    //       own `e-dave-legion-1` gained one bearer and a starting `CarriedLoam` (500, a placeholder
+    //       bootstrap the same shape as G-D's homeworld stock) as the template-side minimum edit a
+    //       zero-reserve legion would otherwise need to survive stepping off owned ground at all.
+    //
     // The plan expected one re-bless. Four were needed for world-intel, each for a behaviour change
     // rather than a drift, and each recorded here. Protecting the hash in any of them would have
     // meant shipping something known to be wrong.
-    const string GoldenFinalHash = "0ac049f4522eeb8eaa98ab7f9271a2f63584c85c65d8ca99ff1dbb62142b0f68";
+    const string GoldenFinalHash = "b548a9ee0495880ac7327aca04b9b52868aa7923c5146d4bdcd2f845b25b8f22";
 
     readonly string _dir;
     readonly RpgStore _store;
@@ -238,7 +259,11 @@ public class WorldWaveOneAcceptanceTests : IDisposable
             ("claim", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("claim.held:")),
             ("zone-of-control", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("halt:zoc:")),
             ("supply cut", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("supply.cut:")),
-            ("attrition", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("attrition:"))
+            // spec-loam-legions.md (L27): wound-based attrition is retired; a legion beyond supply
+            // now burns carried loam (surviving on its reserve) or, if that reserve runs out, is
+            // destroyed outright rather than bled slowly.
+            ("legion burns or starves", e => e.Kind == TurnReportKinds.Event
+                && (e.Detail.StartsWith("legion.burn:") || e.Detail.StartsWith("legion.starved:")))
         };
 
         var missing = verbs.Where(v => !entries.Any(v.Fired)).Select(v => v.Name).ToList();

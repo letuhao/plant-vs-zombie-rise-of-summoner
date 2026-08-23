@@ -1,4 +1,5 @@
 using FusionRpg.Core.World.Intel;
+using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Topology;
 
 namespace FusionRpg.Core.World.Ai;
@@ -18,12 +19,14 @@ public sealed record ValueWeights
 
 /// <summary>What one sector is worth, and why.</summary>
 public readonly record struct SectorValue(
-    long Total, int Yield, int Strategic, int Defensibility, int Cost, int Risk, int Curiosity, long Overextension)
+    long Total, int Yield, int Strategic, int Defensibility, int Cost, int Risk, int Curiosity,
+    long Overextension, long HabitabilityPenalty = 0)
 {
     /// <summary>The line a turn report shows: enough to argue with, short enough to read.</summary>
     public string Explain() =>
         $"value {Total} (yield {Yield}, strategic {Strategic}, risk {Risk}, cost {Cost})"
-        + (Overextension > 0 ? $" − overextended {Overextension}" : "");
+        + (Overextension > 0 ? $" − overextended {Overextension}" : "")
+        + (HabitabilityPenalty > 0 ? $" − barren {HabitabilityPenalty}" : "");
 }
 
 /// <summary>
@@ -45,6 +48,13 @@ public static class ValueMap
 
     /// <summary>What holding ground outside your own supply costs you, per-mille of the whole.</summary>
     public const int OverextensionPenaltyMilli = 1400;
+
+    /// <summary>
+    /// What barren ground costs an `Expand`/`Take` decision, per-mille of the whole (spec-loam-ai.md).
+    /// Same starting placeholder as <see cref="OverextensionPenaltyMilli"/> — the shape is mirrored
+    /// deliberately, the value is its own independently-tunable lever, not borrowed from it.
+    /// </summary>
+    public const int HabitabilityPenaltyMilli = 1400;
 
     public static IReadOnlyDictionary<string, SectorValue> For(
         IWorldView view,
@@ -102,8 +112,20 @@ public static class ValueMap
                 ? total * OverextensionPenaltyMilli / 1000
                 : 0;
 
+            // A second post-hoc gate, mirroring Overextension's own shape and applied to the same
+            // base `total` rather than chained after it — chaining would let an already-negative,
+            // overextended total flip back toward positive once multiplied a second time.
+            // Fires only once the sector has actually been surveyed (its slots are known): unseen
+            // or merely-glimpsed ground stays governed by the curiosity axis, exactly as it already
+            // is for `yield` — penalizing what you have not looked at would kill exploration outright.
+            var habitabilityPenalty = believed is { Slots.Count: > 0 } surveyed
+                                       && !Habitability.For(surveyed.Slots.Select(sl => sl.SlotTypeId))
+                ? total * HabitabilityPenaltyMilli / 1000
+                : 0;
+
             result[sectorId] = new SectorValue(
-                total - overextension, yield, strategicAxis, defensibility, cost, risk, curiosity, overextension);
+                total - overextension - habitabilityPenalty,
+                yield, strategicAxis, defensibility, cost, risk, curiosity, overextension, habitabilityPenalty);
         }
 
         return result;

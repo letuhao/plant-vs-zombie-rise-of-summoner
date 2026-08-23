@@ -91,7 +91,7 @@ public static class CheatCommandRunner
         }
         if (name is "effects.reload")
         {
-            Effects.EffectRuntime.ReplaceCatalog(FusionRpg.Core.Effects.EffectSeedCatalog.CreateAll());
+            Effects.EffectRuntime.ReplaceCatalog(FusionRpg.Core.Effects.EffectAtomCatalog.CreateAll());
             return;
         }
         if (name is "effects.grants.apply")

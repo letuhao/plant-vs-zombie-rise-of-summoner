@@ -6,10 +6,13 @@ Vite + React + TypeScript in `web/fusion-rpg-web`.
 > numbered screens behind `HashRouter`, an `AuditNav` sidebar, and a `HudBar` player picker. The
 > `decisions.md` **Game GUI** row replaced that with stages and layers. This file is the **module
 > spec** — what the code is and where it lives. The *rules* are
-> [architecture/game-gui-principles.md](../architecture/game-gui-principles.md) (GG-1…GG-60), the
+> [architecture/game-gui-principles.md](../architecture/game-gui-principles.md) (GG-1…GG-61), the
 > *map* is [design/information-architecture.md](../design/information-architecture.md), the *stack*
 > is [design/tech-stack.md](../design/tech-stack.md), and the *visual reference* is the eight plates
 > in [design/README.md](../design/README.md).
+>
+> **Approved 2026-08-23.** All six spec-driven-development areas complete (§12–§14 close the gap a
+> prior pass left open); World stage build excluded this phase, owner decision, §10.
 
 **Players:** `npm run build` output is copied to `FusionRpg.Server/wwwroot`. The server hosts it at
 `http://127.0.0.1:5088`. The UI uses the **same origin** (relative `/api` and `/hub/rpg`). No Node on
@@ -234,6 +237,13 @@ what changed — including "nothing". If the API is down, the shell still runs; 
 Auth, per-type stat editors, additional locales at launch, audio assets, illustration beyond framed
 chrome, and the sector-graph authoring tool.
 
+**The World stage — owner decision, 2026-08-23, phase-scoped not permanent:** *"Map GUI is exclude
+this phase, just keep it as is — we will have other plan for it because that is huge design, should
+make new GUI solid foundation before we move to the map."* `#/world` stays on its pre-refactor route,
+untouched, until its own dedicated plan exists. Every other stage, all nine player layers, and the
+developer tree are unaffected — detail in
+[`tasks/game-gui-plan.md`](../../tasks/game-gui-plan.md)'s World-exclusion section.
+
 ---
 
 ## 11. Tests
@@ -244,6 +254,151 @@ with REST mocked from the shared fixtures.
 v1's coverage scope was 9.3% of the FE with the *game* modules at 0%; v2 rewrites the include list
 around `shell/`, `stages/`, `layers/`, `ui/`, `lib/bus/` and `i18n/`. The twenty rule-checks — band
 lint, stage-persistence, reachability matrix, Esc/focus, mutation feedback, four-states, axe, banned
-vocabulary, hex, contrast, viewport sweep, bundle budget, unit families, volume fixtures, CJK,
-catalog completeness — are listed in
-[game-gui-principles.md §19](../architecture/game-gui-principles.md).
+vocabulary, hex, contrast, viewport sweep, **shell-height fixtures**, bundle budget, unit families,
+volume fixtures, CJK, catalog completeness — are listed in
+[game-gui-principles.md §19](../architecture/game-gui-principles.md) (verified by direct count against
+the current table, not carried over from the prior draft).
+
+---
+
+## 12. Commands
+
+```powershell
+cd web/fusion-rpg-web
+npm run dev              # :5173, API :5088 in DEV
+npm run build             # tsc --noEmit + vite build — player output
+npm run preview           # :5173, serves the build
+npm test                  # vitest run
+npm run test:coverage     # vitest run --coverage
+npm run test:e2e          # playwright, against vite preview :4173
+npm run test:all          # coverage + build + e2e
+```
+
+Design plates (visual reference, not the app): `start docs/design/00-foundation.html`.
+
+---
+
+## 13. Code style
+
+**No linter is configured yet** — `web/fusion-rpg-web` has no `.eslintrc`/`eslint.config.*` and no
+Prettier config. Stated honestly rather than assumed: the conventions below are read off the shipped
+code, not enforced by tooling. Adding one is in scope for the refactor (a natural home is the phase
+that rewrites the coverage include list, §11), not a precondition for starting it.
+
+`tsconfig.json` already carries real teeth: `strict`, `noUnusedLocals`, `noUnusedParameters`,
+`noFallthroughCasesInSwitch`. Nothing here should propose loosening any of them.
+
+**Representative sample**, [`AlmanacDumpPage.tsx`](../../web/fusion-rpg-web/src/features/almanac-dump/AlmanacDumpPage.tsx):
+
+```tsx
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getJson } from "@/lib/bus/rest";
+import { Page } from "@/layouts/Page";
+import { EmptyState, HelpText, Panel, Select, TextInput } from "@/ui";
+
+type AlmanacDump = {
+  side: string;
+  typeId: number;
+  displayName?: string | null;
+};
+
+export function AlmanacDumpPage() {
+  const [side, setSide] = useState("");
+  const dumps = useQuery({
+    queryKey: ["almanacDumps", side],
+    queryFn: () => getJson<{ items: AlmanacDump[] }>(/* … */)
+  });
+  // …
+}
+```
+
+| Convention | Rule |
+|---|---|
+| Imports | `@/*` path alias for everything under `src/`; relative imports only for same-folder siblings |
+| Exports | Named exports for components and hooks — `export function AlmanacDumpPage()`, never `export default` |
+| Types | `type`, not `interface`, for props and data shapes; optional fields as `?: T \| null` when the API can genuinely omit or null them, not `?: T` alone |
+| Strings | Double quotes |
+| Data fetching | `useQuery`/`useMutation` only — **feature code never calls `fetch` or the SignalR client directly** (§1's own rule, restated because it is the one most likely to be broken by habit) |
+| Formatting | 2-space indent, semicolons, trailing commas in multiline literals |
+
+**Two rules this refactor adds, that the sample above predates and does not follow:**
+
+- **No bare numeric magnitude.** Every rendered number is a tagged `Magnitude` through
+  `formatMagnitude` (§6) — a raw `{value}` interpolated into JSX is a review rejection, not a style
+  nit, because it is the literal mechanism GG-46 depends on.
+- **No component builds its own modal, band, or z-index.** `PanelShell` / `DialogShell` / `Toast` /
+  `SystemSheet` / `HudCluster` (§4) are the only band shells; a component setting `z-index` or
+  rendering a fixed-position overlay directly is out of contract regardless of how it looks.
+
+---
+
+## 14. Boundaries
+
+Repo-wide boundaries (git hands-off, no watermarks, hard architectural boundaries) are
+[AGENTS.md](../../AGENTS.md)'s and apply unchanged here. These are the ones specific to this program.
+
+**Always:**
+- Bind every magnitude through `formatMagnitude` (§6) — never interpolate a raw number.
+- Route every mutation through the data bus (§5) and render its band-4 result, success or failure
+  (§9) — a silent mutation is a defect, not an oversight.
+- Give every shell a bound and let its body scroll (GG-61) — copy the `PanelShell` contract, never a
+  bespoke fixed-height div.
+- Cite the governing GG rule or design document in review when a layout decision is non-obvious —
+  the nine detail-design documents and the responsive/scroll audit exist so a reviewer can check the
+  claim, not just trust it.
+
+**Ask first:**
+- Adding a dependency to the entry bundle (§7's budget is a CI gate, not a guideline).
+- Introducing a twelfth band or a stacking mechanism outside the six declared bands (§2).
+- Any change to the sealed contract types in `lib/bus/` — item 2 of `game-gui-map.md`'s open
+  questions, still unresolved as of the responsive/scroll audit.
+- Configuring a linter/formatter for the first time (§13) — a real decision (which rules, `strict`
+  presets or hand-picked) that should be made once, deliberately, not as a side effect of one PR.
+
+**Never:**
+- A second modal/overlay implementation outside the five band shells (§4).
+- A raw hex colour outside `src/theme/` (§3, CI-guarded).
+- Engine vocabulary (`typeId`, `Intent`, `UniqueActor`, `mods_json`) on a player-facing surface (§9)
+  — the developer tree (§8) is the only place it is correct.
+- A route added for something that is a layer, or a layer's content duplicated as a route (§2's whole
+  point, and the failure the entire v1→v2 rewrite exists to reverse).
+
+---
+
+## 15. Success criteria
+
+**Scoped to this phase — World excluded (§10).** Checked against
+[`tasks/game-gui-todo.md`](../../tasks/game-gui-todo.md)'s seven checkpoints, which are the
+executable form of this list; this is what "done" means in prose.
+
+1. **The reachability matrix passes** for every (stage, layer) pair **except World** — Sanctum, Lawn
+   and Battle each reach all nine player layers, or the pair is one of the three permanent
+   behavioural exceptions (IA §6, D8). Automated, not eyeballed (Checkpoint F).
+2. **GG-11 holds**: opening a band-2 panel over the live Lawn stage does not remount, reset, or drop
+   the Phaser `Game` instance — asserted by reference identity, not by the screen looking right
+   (Task 2, the keystone, checked before anything else is built on top of it).
+3. **Zero horizontal scroll and zero shell-height violations** at the declared viewport contract
+   (1280×720 / 1440×900 / 1920×1080, GG-36) across every stage and every layer — not just the ones
+   this session's plates happened to demonstrate.
+4. **The entry bundle holds its budget** (≤180 KB gz, §7) with Phaser absent from it, verified by CI,
+   not by a one-time measurement that goes stale.
+5. **No bare numeric magnitude reaches the DOM.** Every rendered number is a tagged `Magnitude`
+   through `formatMagnitude` (§6, §13) — enforced by the unit-family guard, not by review vigilance.
+6. **Every mutation reports its result.** Success or failure, band-4, including "nothing changed" —
+   zero silent mutations, asserted by forcing failure on every mutation path in tests (§9).
+7. **All nine detail-design documents' components exist as real code**, not just as design plates —
+   the item card's eleven blocks, the derived-stat sheet's six states, the shield stack's per-layer
+   readout, the action bar's five typed refusals, traceable back to the `spec-*.md` document that
+   designed each one.
+8. **Old routes redirect**, except `/world`, which is deliberately untouched (§10). A 404 on any
+   pre-refactor route is a regression, not an acceptable gap.
+9. **The nine diagnostic routes are behind the gated developer tree**, default off, reachable on
+   `` ` `` — and absent from player navigation (§8, Checkpoint at Task 12).
+
+**What this list does not claim.** It is not "the game is finished" — Battle has no live backend yet
+(§ open question 3 in the plan), the World stage is explicitly deferred, and several components (the
+gap board, the charm pouch UI, band-3 dialog load-testing) were named in the detail-design documents
+as designed-but-not-built-this-phase. Success here means the *foundation* is solid enough that the
+World stage, Battle's real backend, and the deferred components each become an addition to a working
+shell, not a redesign of it.

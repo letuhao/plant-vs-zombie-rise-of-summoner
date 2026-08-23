@@ -294,6 +294,18 @@ public static class StatusEffectBridge
             return true;
         }
 
+        // C2 (completeness-audit.md): an overlay carrying `stat` on a status that never declared
+        // ModifyStat parsed and validated silently before this check — the exact "documentation of a
+        // capability that did not exist" shape E17 was written to close for the four statuses that
+        // DO declare it. Refuse rather than silently drop the block, matching the
+        // unknown-statusId/status-no-target refusals right beside this one.
+        if (overlay.TryGetValue("stat", out var statOverlay) && statOverlay is not null
+            && !statusDef.PayloadKinds.Contains(StatusPayloadKind.ModifyStat))
+        {
+            skipped.Add(grant.GrantId + ":status-stat-overlay-without-ModifyStat");
+            return true;
+        }
+
         var hostPtrs = ResolveHostPtrs(overlay, ev, board);
         if (hostPtrs.Count == 0)
         {

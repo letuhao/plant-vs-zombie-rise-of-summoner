@@ -139,8 +139,26 @@ Cheap invariants, checked before any value is returned:
 
 - **Monotonicity** — `m_1 < m_2 < … < m_5` per channel. Violation means a bad ratio or a rounding
   collision at small magnitudes; §5 of the analytics spec checks the same property on the corpus.
-- **Band containment** — `lo_t ≤ m_t ≤ hi_t`, and `hi_t < lo_{t+1}` so tier windows do not overlap
-  into ambiguity.
+- **Band containment** — `lo_t ≤ m_t ≤ hi_t`.
+- **Band OVERLAP is required, not forbidden** — `hi_t ≥ lo_(t+1)` for every adjacent pair.
+
+  > An earlier draft of this spec asserted `hi_t < lo_(t+1)`, "so tier windows do not overlap into
+  > ambiguity". That is backwards, and it would have raised on the first resolve of every channel.
+  > `bands.v1.json` `tierScaling.overlap` states the requirement and proves it with the same
+  > arithmetic: `1330/670 ≈ 1.985 > 1.750`, so `hi_t = 1.33·m_t` always clears
+  > `lo_(t+1) = 0.67·1.75·m_t = 1.1725·m_t`.
+  >
+  > Overlap is **design guarantee OD4** — a well-rolled lower rung must be able to beat a
+  > badly-rolled higher one, or the rarity ladder becomes a strict staircase and every drop below
+  > your current rung is instantly worthless. The bands are built to overlap *by construction, not
+  > by luck*, and a validator that forbade it would have destroyed the property the ladder exists
+  > for. Ties count: `might` resolves `hi_1 = lo_2 = 5` and the registry accepts that explicitly,
+  > so the comparison is `≥`, never `>`.
+  >
+  > Recorded rather than quietly corrected because of how it happened. §1 of this document opens by
+  > noting that reading first avoided inventing a parallel system — and then the one invariant the
+  > module asserts on every resolve contradicted the registry it had just finished quoting. Reading
+  > a file is not the same as reading the section that governs the line you are writing.
 - **Apportionment closure** — role shares resolve to integers summing exactly to the budget, via
   largest-remainder. Naive rounding drifts and every downstream check inherits the error.
 - **Integer-only output** — per-mille integers throughout; no float reaches a comparison.
@@ -233,6 +251,178 @@ for §5's monotonicity check to pass on real content.
 sockets and charms. Those stack on top, so a fully-optimised endgame character lands nearer 5–5.5×.
 The 4.5× target describes *base gear*, because that is the part `baseShare` controls; folding the
 extras in would make one constant answerable for four systems.
+
+### 6.0 Superseded — the item system is scale-free, so this question moved
+
+**Owner decision, 2026-08-23** ([ssot-power-scale.md](../power/ssot-power-scale.md)): item content
+declares **relative** ranges, and a separate power scale converts them to absolute at drop time,
+from map depth and run count.
+
+That dissolves the blocker §6.1 was wrestling with rather than answering it. "How strong is endgame
+gear against endgame content?" is a **power-program** question now, because the multiplier lives
+there. `baseShare` reverts to what it should always have been: an **internal relative constant** —
+how much one affix is worth against base *at the calibration point*, used only to keep channels
+comparable to each other.
+
+The item corpus can therefore be finished, validated and balanced against itself with no progression
+design in existence. §6.1 and §6.2 below are kept because their reasoning still governs the
+calibration point and the seam, and because the two mistakes they record are worth not repeating.
+§6.3's rule — never resolve at a hardcoded level — is unchanged and now doubly true: the caller
+supplies the point, and the power scale is applied on top of what this module returns.
+
+---
+
+### 6.1 Audit correction — a multiplier is the wrong unit
+
+The audit's game-design lens raised a BLOCKER: 4.5× is solved from player-side terms only, so it
+cannot be checked against what the player is actually fighting. Chasing it produced something worse
+than a missing cross-reference — **the unit itself is wrong.**
+
+`WaveCatalog.cs:61-63` builds enemies from the *same* `BattleRuleset.BaseHp/BaseAtk/BaseDefense(level)`
+the player uses. There is no monster table; both sides are one curve, and that curve is **linear in
+level**. A multiplier on a linear base is therefore not a level-invariant statement of power:
+
+| gear multiplier | at L1 | at L5 | at L10 | at L20 | at L30 |
+|---|---|---|---|---|---|
+| 1.80× | +2.9 lv | +6.1 | +10.1 | +18.1 | +26.1 |
+| **4.35×** | **+12.3 lv** | **+25.7** | **+42.4** | **+75.9** | **+109.4** |
+
+The same 4.35× is worth twelve levels early and seventy-six at the reference level. "Endgame = 4.5×
+naked" does not describe one relationship; it describes a different one at every level, so no amount
+of monster data could have validated it as stated. Solving for it accurately was solving the wrong
+equation.
+
+**Correction: the target is an effective-level delta, and `baseShare` is solved from it.**
+
+```
+solve_base_share(target_level_delta, reference_level)
+```
+
+A level delta is level-invariant *because both sides share the curve* — it says "full gear is worth
+fighting N levels above you", which is a sentence a designer can hold an opinion about and a wave
+table can falsify. Its multiplier equivalent falls out per level rather than being the input:
+
+| level delta | at L1 | at L10 | at L20 | at L30 |
+|---|---|---|---|---|
+| +10 lv | 3.73× | 1.79× | 1.44× | 1.31× |
+| +20 lv | 6.45× | 2.58× | 1.88× | 1.61× |
+
+**And the target is now checkable, which is the part that matters.** Shipped content tops out at
+`rift-tyrant`, **level 10, six enemies** — 380 hp each, 2,280 total. A geared level-20 character at
+4.35× carries 2,958 hp and 400 attack against that. So the current anchor is **not supported by any
+content that exists**; it was calibrated against an endgame that has not been built.
+
+### 6.2 Owner decision — do not pin the anchor; make it swappable
+
+**The power-scale and progression systems are not designed yet.** `WaveCatalog` is a stub — four
+waves at levels 1, 3, 6 and 10 with hardcoded enemy counts — and the real progression design will
+replace it. Owner direction, 2026-08-23:
+
+> *Choose an architecture that can extend later. We will migrate the item system once the
+> progression design is complete.*
+
+That reframes the blocker correctly, and it is a better answer than the one §6.1 was reaching for.
+§6.1 was still hunting for the right number; the requirement is that **nothing structural depends on
+the number being right yet.** Two consequences.
+
+**1. The progression model becomes a dependency, not an assumption.**
+
+`numerics` currently bakes in a specific world: base stats linear in level, one shared curve for both
+sides, level as the difficulty axis. All three are true of `BattleRuleset` today and none is
+guaranteed to survive a progression redesign — a future model might scale exponentially, or replace
+level with a stage or ascension axis entirely.
+
+So they move behind one small seam:
+
+```python
+class ProgressionModel(Protocol):
+    def reference_base(self, channel: str, point: ProgressionPoint) -> int: ...
+    def axis(self) -> str: ...                      # "level" today; may become stage, tier, …
+    def content_ladder(self) -> list[Encounter] | None: ...   # None while progression is a stub
+```
+
+`BattleRulesetProgression` implements it today by reading `BaseHp/BaseAtk/BaseDefense`. When the real
+design lands, a second implementation replaces it and **no formula, no metric and no content
+changes.** The seam is one protocol and one class — the minimum that makes the swap possible, not a
+framework for imagined futures.
+
+**2. An unvalidatable target reports `NOT_MEASURED`, never a pass.**
+
+`content_ladder()` returning `None` — which is the honest answer while progression is a stub — means
+the Balance family cannot check whether gear is correctly scaled, so it reports `NOT_MEASURED`
+(spec-metrics §2) rather than green. The corpus still resolves, still validates for coverage,
+linkage and distribution, and simply does not claim its power curve is right. That is the same
+discipline that would have caught nine empty partitions: **absence of a check must never read as a
+passing check.**
+
+`baseShare = 35‰` therefore stays, explicitly as a **working value chosen to make the corpus
+resolvable**, not as a balance decision. It is internally coherent, it is one function call to
+recompute, and it is labelled so nobody later mistakes it for a validated constant.
+
+### 6.3 Unbounded levels — why the share formulation survives, and what breaks if misread
+
+Owner constraint, 2026-08-23: **the game has no level cap. Power grows without bound.**
+
+That is fatal to one reading of the locked formula and harmless to another, so the distinction has
+to be written down rather than left to whoever implements it.
+
+**The failure mode.** `referenceLevel = 20` appears in the formula as
+`referenceBaseGameUnits(referenceLevel)`. Read as *"evaluate every magnitude at level 20"*, a Flat
+affix is a constant while the base grows linearly forever:
+
+| player level | base HP | a fixed +105 HP affix | as a share of base |
+|---|---|---|---|
+| 20 | 680 | +105 | 15.4% |
+| 100 | 3,080 | +105 | 3.4% |
+| 1,000 | 30,080 | +105 | **0.3%** |
+
+Gear decays to decoration. Every Flat channel dies this way; only `Increased` and `More` survive,
+because a per-mille ratio is scale-free by construction. A corpus where half the channels quietly
+stop mattering past some level is not a balance bug that shows up in a test — it shows up in a
+player review two years later.
+
+**Why the formulation is already right.** `sharePermille` is defined as *a fraction of the
+channel's reference base*, not as an absolute quantity. So evaluating at the actual progression
+point instead of a fixed one keeps gear at a constant share of base, forever:
+
+```
+m1(point) = share × referenceBase(channel, point) / 1000
+```
+
+`m1(L)/base(L) = share/1000` for every `L`, whatever shape the base curve has. Linear today,
+exponential after a progression redesign — the ratio holds either way. This is the property that
+makes the share-based formulation the correct one for an uncapped game, and it is the strongest
+argument yet for `numerics` never storing a resolved number.
+
+**Therefore, binding:**
+
+- **`referenceLevel = 20` is a CALIBRATION anchor, never an evaluation point.** It is the level at
+  which shares were chosen and at which two worked examples are quoted. Resolving a shipping
+  magnitude at a hardcoded 20 is a defect, and it is the single easiest mistake to make while
+  reading `bands.v1.json` literally.
+- **Magnitudes resolve at a `ProgressionPoint`** — supplied by the caller: the item's level, the
+  content level that dropped it (`loam`/`loot_source.content_level`, ssot-generation §4.1), or the
+  wearer's. Which of the three is a generation decision, not a numerics one; `numerics` takes the
+  point and applies the formula.
+- **The five tiers stay five.** With unbounded levels, tier is *quality at a level*, not absolute
+  power — a t5 affix is the best roll available, not a fixed number. This is what lets a locked
+  five-rung ladder coexist with infinite progression, and it means the tier ladder never needs
+  extending no matter how high levels go.
+- **A guardrail:** `numerics` asserts that no resolve is called with the literal calibration level
+  unless the caller explicitly asks for the calibration case. Cheap, and it catches the exact
+  misreading above.
+
+**A consequence worth flagging to whoever designs progression.** Because a share is scale-free,
+gear's *relative* contribution is constant at every level — which means gear alone can never make a
+character outgrow content that scales at the same rate. Growth has to come from somewhere: more
+affixes, higher rungs, sockets, sets, the `+X` track. That is a healthy structure and it is worth
+knowing it was a consequence of this formulation rather than a separate decision.
+
+**Migration, when progression is designed.** Swap the `ProgressionModel` implementation, run
+`solve_base_share` against the real ladder, publish a new tier-bands version, re-resolve. **No seed
+file changes** — magnitudes were never stored in them. That property has now paid for itself three
+times: rebalancing, the ruleset dependency, and now an entire progression redesign, none of which
+touch a single authored row.
 
 **The knob stays live.** `solve_base_share(target_multiplier)` is part of the module, so the
 argument is always about the target — a number with game meaning — and never about 35 itself.

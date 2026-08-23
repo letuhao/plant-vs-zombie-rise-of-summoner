@@ -94,4 +94,85 @@ public class WorldInvariantTests
 
         WorldValidation.Validate(cleared); // must not throw — "what was here" is worth remembering
     }
+
+    [Fact]
+    public void Rule14_accepts_a_structure_on_the_slot_kind_it_was_built_for()
+    {
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
+        var sectorIndex = world.Sectors.ToList().FindIndex(s => s.SectorId == "homeworld");
+
+        var withStructure = world with
+        {
+            Sectors = world.Sectors
+                .Select((s, i) => i != sectorIndex
+                    ? s
+                    : s with
+                    {
+                        // Slot 3 is the homeworld's rootbed (Rule11) — the exact slot kind the
+                        // catalog's one seed row requires.
+                        Slots = s.Slots
+                            .Select(sl => sl.SlotIndex != 3
+                                ? sl
+                                : sl with { StructureId = "loam-source-placeholder" })
+                            .ToList()
+                    })
+                .ToList()
+        };
+
+        WorldValidation.Validate(withStructure); // must not throw — a matching pairing is legal
+    }
+
+    [Fact]
+    public void Rule14_rejects_a_structure_on_the_wrong_slot_kind()
+    {
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
+        var sectorIndex = world.Sectors.ToList().FindIndex(s => s.SectorId == "homeworld");
+
+        var broken = world with
+        {
+            Sectors = world.Sectors
+                .Select((s, i) => i != sectorIndex
+                    ? s
+                    : s with
+                    {
+                        // Slot 0 is the homeworld's Seat, not a Rootbed — the placeholder structure
+                        // requires Rootbed, so this pairing must fail.
+                        Slots = s.Slots
+                            .Select(sl => sl.SlotIndex != 0
+                                ? sl
+                                : sl with { StructureId = "loam-source-placeholder" })
+                            .ToList()
+                    })
+                .ToList()
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => WorldValidation.Validate(broken));
+        Assert.Contains("homeworld", ex.Message);
+    }
+
+    [Fact]
+    public void Rule14_rejects_an_unknown_structure_id()
+    {
+        var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1);
+        var sectorIndex = world.Sectors.ToList().FindIndex(s => s.SectorId == "homeworld");
+
+        var broken = world with
+        {
+            Sectors = world.Sectors
+                .Select((s, i) => i != sectorIndex
+                    ? s
+                    : s with
+                    {
+                        Slots = s.Slots
+                            .Select(sl => sl.SlotIndex != 3
+                                ? sl
+                                : sl with { StructureId = "not-a-real-structure" })
+                            .ToList()
+                    })
+                .ToList()
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => WorldValidation.Validate(broken));
+        Assert.Contains("not-a-real-structure", ex.Message);
+    }
 }

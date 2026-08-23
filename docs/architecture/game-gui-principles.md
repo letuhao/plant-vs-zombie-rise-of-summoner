@@ -467,8 +467,31 @@ player can resize to suit us. Measured today: the sidebar is a fixed `w-44` that
 of ~50 components use any breakpoint, and at 800px wide the page scrolls sideways with chart labels
 clipped.
 
-**Testable as.** Playwright runs of every layer at the declared viewport set, asserting
-`scrollWidth <= clientWidth`.
+**The declared range, corrected 2026-08-23 — this rule named a range and never stated one.**
+[`OverlaySwitchLayout.cs`](../../src/FusionRpg.Core/Overlay/OverlaySwitchLayout.cs) is the one place
+in the codebase that already reasons about the game's real display floor and ceiling — its own comment
+says *"never shrink: the button is already small, and a 720p target would be unhittable,"* pins
+`ReferenceHeight = 1080f`, and caps `MaxScale` at `3f` (headroom to roughly 4K-class panels). That is
+the evidence this rule borrows rather than a number invented for the FE:
+
+| Bound | Value | Source |
+|---|---|---|
+| **Height floor** | 720 CSS px | `OverlaySwitchLayout.MinScale`'s own stated reason |
+| **Height reference** | 1080 CSS px | `OverlaySwitchLayout.ReferenceHeight` |
+| **Height ceiling** | none declared — more room is never a defect | `MaxScale = 3` shows the injector already treats headroom as generous, not a case to design against |
+| **Width floor** | 1280 CSS px | the height floor at 16:9, the narrowest common desktop ratio |
+| **Width reference / content max** | 1440 CSS px, centred (GG-37) | no wider content column existed to cite; declared here so GG-37's *"centred and bounded"* has a number |
+| **Width ceiling** | none — ultrawide gets more room, never less | ultrawide (21:9+) is a *must-not-break* case, not a primary target: chrome may cap at the reference width and centre, it must never assume the extra width is unused |
+
+**CSS pixels, not device pixels — stated so nobody re-derives it from a 4K bug report.** WebView2 is a
+Chromium host and inherits standard OS DPI scaling, so a 4K panel at Windows' common 200% default
+already presents roughly the same CSS-pixel viewport as a 1080p panel at 100%. The floor and reference
+above are CSS pixels: what the layout actually measures against, not raw device resolution.
+
+**Testable as.** Playwright runs of every layer at **1280×720** (floor), **1440×900** (reference), and
+**1920×1080** (headroom), asserting `scrollWidth <= clientWidth`. The design plates in this session were
+additionally swept at 800×900 as deliberate extra headroom below the evidenced floor — a bonus margin,
+not the declared contract; do not mistake 800px for the official minimum when writing the real test.
 
 ### GG-37 — Anchor to the edges that matter
 
@@ -742,6 +765,42 @@ work is bounded, and heavy work is deferred until after the stage's frame.
 **Why.** Performance here is settled as a main-thread problem. In the browser the stage and the
 chrome share one thread exactly as they do in the game.
 
+### GG-61 — A dense entity scrolls inside its own shell; the shell never grows to swallow the viewport
+
+**Rule.** Every band-2/3 shell (`PanelShell`, `DialogShell`) declares a bounded height against the
+GG-36 viewport contract. The shell's body scrolls internally when its content exceeds that height.
+The shell itself never grows past the space the band model gives it, and the stage behind it never
+scrolls to compensate.
+
+**This is not GG-50.** GG-50 is about *many entities* — a list of 1,000 items — and its answer is
+virtualization or a search-first threshold. This rule is about *one entity's own content* — one
+actor's 99-channel derived-stat sheet, one item's affix list once enhancement, sockets and a set
+block are all present, one comparison table. The entity is singular and bounded; its own detail is
+still taller than a 720px-floor viewport can show at once. Confusing the two produces the wrong fix:
+virtualizing a single actor's stat rows solves nothing, because the actor is not the list.
+
+**Found while auditing, not while designing, and it was already live.** `PanelShell`'s own base rule
+set `overflow: auto` on its body with **no height on the shell to make that overflow ever trigger** —
+inert without a bound, and only one demonstration anywhere in the design set (the band-shell example
+under GG-1/GG-5/GG-11) gave the shell a real height. The fully-built item card (document 2's eleven
+blocks, all populated) was **already** taller than any reasonable panel bound — 945px of content
+against a 720px cap — and its own `overflow: hidden` shorthand, appearing later in the same rule than
+an attempted fix, was silently winning the cascade: the bottom 226px of a real item's card, including
+its footer, was being **clipped with no scrollbar and no visual sign anything was missing.** Not a
+design risk stated for later — a defect already sitting in the shipped plate, caught by measuring
+`scrollHeight` against `clientHeight` rather than by eyeballing a screenshot that looked fine because
+the clipped region was, by definition, not visible in it.
+
+**Why.** A panel that grows past the viewport either clips its own footer (the commit button on a
+salvage preview, the deploy button on an actor panel) or forces the *page* to scroll, which drags the
+stage and the band-1 HUD out of view behind it — the exact failure GG-11 exists to prevent for the
+canvas, arriving instead through a panel that simply got too tall.
+
+**Testable as.** A volume fixture per dense-entity surface — an actor at 141 derived channels, an
+item at the authored affix ceiling, a comparison at every channel family present — asserting the
+shell's own `clientHeight` never exceeds its band-declared maximum and `scrollHeight > clientHeight`
+triggers the body's scrollbar, not the page's.
+
 ---
 
 ## 15. Arbitration — when two rules pull apart
@@ -777,9 +836,9 @@ page is the point.
 
 ---
 
-## 17. Priority — not all sixty rules are gates
+## 17. Priority — not all sixty-one rules are gates
 
-Sixty rules is a reference, not a checklist. Nobody runs a sixty-item gate, and a document that
+Sixty-one rules is a reference, not a checklist. Nobody runs a sixty-item gate, and a document that
 pretends otherwise gets skimmed instead of used. So the rules are tiered.
 
 **Tier 1 — hard gates.** Break one and the work does not merge. These are the rules that are
@@ -797,6 +856,7 @@ expensive or impossible to retrofit, because they decide *structure*.
 | **GG-46** numbers state meaning | Whether the game is readable |
 | **GG-47** choosable is comparable | The shape of every collection component |
 | **GG-50** volume declared | Whether components are virtualization-ready |
+| **GG-61** dense entity scrolls internally | Whether a shell can hold real content without growing past the viewport |
 
 **Tier 2 — review findings.** Break one and it is a review comment with a fix, not a blocked merge:
 GG-2, 3, 6, 7, 8, 9, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 29, 30, 36, 38, 39, 41, 42, 48, 49, 51,
@@ -865,7 +925,8 @@ done.
 | Vocabulary guard | GG-23 | Banned engine terms in player-facing strings; developer tree allow-listed |
 | Hex guard | GG-29 | No colour literals outside `src/theme/` |
 | Contrast test | GG-30 | Token pair matrix vs WCAG thresholds |
-| Viewport sweep | GG-36 | Every layer at the declared viewport set; no horizontal scroll |
+| Viewport sweep | GG-36 | Every layer at 1280×720 / 1440×900 / 1920×1080; no horizontal scroll |
+| Shell-height fixtures | GG-61 | A dense-entity fixture (max derived channels, max affixes) per shell; assert body scrolls, shell height never exceeds its band bound |
 | Bundle budget | GG-38 | Entry chunk ceiling; heavy deps must not be in the entry chunk |
 | Unit-family guard | GG-46 | Magnitude renderer refuses an unlabelled unit; golden per family |
 | Diff-state matrix | GG-47 | Every picker surface renders a comparison state in its tests |
@@ -921,6 +982,21 @@ list and adding a sixth resource changes nothing. One rule does fall out of the 
 here: the plant pool labelled **"Sun" is `hunger` at actor scope** and is *not* the lawn's sun bank,
 which is `pvz.*` and match-scoped. A surface showing both must separate them by scope — the bank
 belongs to the stage HUD, the pool belongs to the actor's meters.
+
+### 20.4 Viewport contract and internal scroll — added 2026-08-23
+
+**GG-36 named "a declared range of viewports" from the day this file shipped and never declared one.**
+Corrected in place rather than left as a cross-reference to nowhere: floor **1280×720 CSS px**,
+reference **1440×900**, headroom to **1920×1080** and beyond with no ceiling — evidenced from
+[`OverlaySwitchLayout.cs`](../../src/FusionRpg.Core/Overlay/OverlaySwitchLayout.cs)'s own stated
+720p-unhittable floor and 1080p reference height, the one place in the codebase that already reasoned
+about this. Full detail in GG-36 itself.
+
+**GG-61 is new**, not a correction — no rule previously covered a single dense entity (one actor's
+stat sheet, one item's full affix list) outstripping its own panel's height. GG-50 covers *many*
+entities; nothing covered *one entity, a lot of content*. Found auditing `PanelShell`'s own CSS: its
+body declares `overflow: auto` with no height on the shell to ever trigger it, and only one
+demonstration in the whole design set gives a shell a real height. Detail in GG-61.
 
 ---
 

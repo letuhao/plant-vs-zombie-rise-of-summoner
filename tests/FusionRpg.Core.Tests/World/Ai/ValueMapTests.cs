@@ -89,9 +89,16 @@ public class ValueMapTests
     {
         // The sector you are standing in is in supply by definition. Penalising it would make an
         // empire's own capital score negative, and every rule that compares values would invert.
-        var view = View(new[] { "a" }, new Dictionary<string, WorldSlot[]> { ["a"] = new[] { Slot(0, "seat") } });
+        // A real capital always carries a rootbed too (Rule11), so this dresses one here — a bare
+        // Seat alone is genuinely barren under L29's gate, which is a different (and correct)
+        // concern this fixture is not testing.
+        var view = View(new[] { "a" }, new Dictionary<string, WorldSlot[]>
+        {
+            ["a"] = new[] { Slot(0, "seat"), Slot(1, SlotTypeCatalog.RootbedSlotTypeId) }
+        });
 
         Assert.Equal(0, Value(view)["a"].Overextension);
+        Assert.Equal(0, Value(view)["a"].HabitabilityPenalty);
         Assert.True(Value(view)["a"].Total > 0);
     }
 
@@ -114,6 +121,46 @@ public class ValueMapTests
         var view = new BelievedWorldView(world with { Intel = IntelRecorder.Observe(world, world, 0) }, "zomboss");
 
         Assert.All(Value(view).Values, v => Assert.Equal(0, v.Overextension));
+    }
+
+    // ---- L29: the habitability gate (spec-loam-ai.md) -------------------------------------------
+
+    [Fact]
+    public void A_surveyed_barren_sector_scores_worse_than_it_would_habitable()
+    {
+        // Same ground, same everything else — the only thing that differs is what is actually
+        // standing in the one slot, and that alone is enough to flip a clearly-viable pick into a
+        // clearly-nonviable one.
+        var barren = Value(View(new[] { "a" }, new Dictionary<string, WorldSlot[]>
+        {
+            ["a"] = new[] { Slot(0, "wildland") }
+        }))["a"];
+
+        var habitable = Value(View(new[] { "a" }, new Dictionary<string, WorldSlot[]>
+        {
+            ["a"] = new[] { Slot(0, SlotTypeCatalog.RootbedSlotTypeId) }
+        }))["a"];
+
+        Assert.True(barren.HabitabilityPenalty > 0);
+        Assert.Equal(0, habitable.HabitabilityPenalty);
+        Assert.True(barren.Total < 0, $"a surveyed-barren pick scored {barren.Total}, expected worse than nothing");
+        Assert.True(habitable.Total > 0);
+        Assert.True(barren.Total < habitable.Total);
+    }
+
+    [Fact]
+    public void An_unsurveyed_sector_is_never_gated_on_habitability()
+    {
+        // A glimpse (adjacent, no slot detail) and total ignorance (three lanes out) must not be
+        // penalised for something nobody has actually looked at yet — that is curiosity's job, not
+        // this gate's.
+        var view = View(new[] { "a" }, new Dictionary<string, WorldSlot[]> { ["a"] = new[] { Slot(0, "seat") } });
+
+        Assert.Equal(SectorSight.Glimpse, view.Believed("b")!.Detail);
+        Assert.Equal(0, Value(view)["b"].HabitabilityPenalty);
+
+        Assert.Null(view.Believed("d"));
+        Assert.Equal(0, Value(view)["d"].HabitabilityPenalty);
     }
 
     // ---- yield, and what a glimpse is allowed to claim -----------------------------------------
