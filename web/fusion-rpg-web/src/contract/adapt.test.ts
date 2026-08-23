@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 import type { ContractRowDto } from "@/lib/bus/contracts";
 import type { DemonProfileDto } from "@/lib/bus/demons";
 import type { RunItem, UniqueActorDto } from "@/lib/bus/types";
+import type { RelicDto } from "@/lib/bus/types";
 import { mockUniqueActor } from "@/test/mocks";
-import { adaptActor, adaptContract, adaptRun } from "./adapt";
+import { adaptActor, adaptContract, adaptRelic, adaptRun } from "./adapt";
 import { assertNoEmptyPendingReasons } from "./contractGuard";
 
 describe("adaptActor against the shared server fixture (T5)", () => {
@@ -113,5 +114,46 @@ describe("adaptContract", () => {
 
   it("every pending field carries a non-empty reason", () => {
     expect(() => assertNoEmptyPendingReasons(adaptContract(row, profile))).not.toThrow();
+  });
+});
+
+describe("adaptRelic (T14)", () => {
+  const relic: RelicDto = {
+    id: "relic.ashen_reliquary",
+    name: "Ashen Reliquary",
+    rarity: 4,
+    slot: "weapon",
+    description: "A reliquary warm to the touch. Channels raw offense.",
+    effectId: "fx.passive_atk_flat"
+  };
+
+  it("maps into the Container entity's item kind — not a separate rung", () => {
+    const view = adaptRelic(relic);
+    expect(view.kind).toBe("item");
+    expect(view.instanceId).toBe("relic.ashen_reliquary");
+    expect(view.header.name).toBe("Ashen Reliquary");
+    expect(view.header.baseTypeAndClassNoun).toBe("Relic · Weapon");
+    expect(view.flavour).toBe(relic.description);
+  });
+
+  it("maps the four seed rarities onto the real ten-rung ladder's first four rungs", () => {
+    expect(adaptRelic({ ...relic, rarity: 1 }).header.rarity.id).toBe("chaff");
+    expect(adaptRelic({ ...relic, rarity: 2 }).header.rarity.id).toBe("sprout");
+    expect(adaptRelic({ ...relic, rarity: 3 }).header.rarity.id).toBe("grafted");
+    expect(adaptRelic({ ...relic, rarity: 4 }).header.rarity.id).toBe("cultivated");
+  });
+
+  it("honestly declares an unformatted implicit rather than faking a magnitude, and no other field is silently missing a reason", () => {
+    const view = adaptRelic(relic);
+    expect(view.implicit.state).toBe("pending");
+    expect(() => assertNoEmptyPendingReasons(view)).not.toThrow();
+  });
+
+  it("leaves affixes, sockets, sets and enhancement honestly absent — this catalog has none of those systems", () => {
+    const view = adaptRelic(relic);
+    expect(view.affixes).toEqual({ state: "absent" });
+    expect(view.sockets).toEqual({ state: "absent" });
+    expect(view.set).toEqual({ state: "absent" });
+    expect(view.enhancement).toEqual({ state: "absent" });
   });
 });

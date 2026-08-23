@@ -5,7 +5,8 @@
 #   .\scripts\deploy-play.ps1 -NoGame
 #   .\scripts\deploy-play.ps1 -RebuildUi
 # Server data (rpg-hot / rpg-media) lives next to the published exe: dist\FusionRpg.Server\data\
-# Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1 before build.
+# Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1
+# + guard-overflow.ps1 before build.
 param(
     [ValidateSet("BepInEx", "MelonLoader")]
     [string]$LoaderHost = "BepInEx",
@@ -82,6 +83,10 @@ if ($LASTEXITCODE -ne 0) { throw "secondary no-Unity guard failed" }
 Write-Host "==> Funnel delta guard"
 & (Join-Path $Root "scripts\guard-funnel-delta.ps1")
 if ($LASTEXITCODE -ne 0) { throw "funnel delta guard failed" }
+
+Write-Host "==> Overflow guard"
+& (Join-Path $Root "scripts\guard-overflow.ps1")
+if ($LASTEXITCODE -ne 0) { throw "overflow guard failed" }
 
 Write-Host "==> Building $LoaderHost injector ($GameProfile) into $PluginDir"
 & (Join-Path $Root "scripts\guard-game-profile.ps1") -GameDir $GameDir -ExpectedProfile $GameProfile

@@ -22,19 +22,31 @@ export type RailEntry = {
 export type RailUnlockInputs = {
   currentStageId: "sanctum" | "world" | "lawn" | "battle";
   hasCompletedARun: boolean;
-  hasDuplicateSpecies: boolean;
+  /** T15: fusion is real demon fusion (spec-demon-fusion.md), not creature fusion — star merge
+   * and promotion both need at least one demon in the roster (recipe fusion needs two, but the
+   * lab itself is reachable with one so a player can see what it needs). */
+  hasAnyDemon: boolean;
   hasAnyContract: boolean;
-  /** Not derivable without World (T16, excluded this phase) — always locked honestly until then. */
-  hasHeldASector: boolean;
+  /** T14: the relic catalog is real but has no acquisition system yet, so every player holds
+   * it in full — this is always true today, but still threaded through real query data rather
+   * than hardcoded, so it stays correct once holding a relic becomes an earned event. */
+  hasAnyRelic: boolean;
+  /** T17: expeditions field demons, not creatures — real requirement is a bound demon (World's
+   * "held sector" never applied; the previous condition was wrong-domain, not just hard to
+   * live-demo, and has been replaced). */
+  hasAnyBoundDemon: boolean;
+  /** T17: dispatched expeditions whose due time has passed but aren't collected yet — GG-53's
+   * rail badge. */
+  returnedExpeditionCount: number;
   unreadResultCount: number;
 };
 
 const UNLOCK_LADDER: Record<RailLayerId, { label: string; key: string; reason: string }> = {
   creatures: { label: "Creatures", key: "C", reason: "Unlocks at session start" },
   relics: { label: "Relics", key: "R", reason: "Unlocks when you hold your first item" },
-  fusion: { label: "Fusion", key: "F", reason: "Unlocks with a second creature of one species" },
+  fusion: { label: "Fusion", key: "F", reason: "Unlocks once you have a demon to fuse" },
   pacts: { label: "Pacts", key: "P", reason: "Unlocks when a contract is first offered" },
-  expeditions: { label: "Expeditions", key: "E", reason: "Unlocks when you hold your first sector" },
+  expeditions: { label: "Expeditions", key: "E", reason: "Unlocks once you have a bound demon to field" },
   almanac: { label: "Almanac", key: "A", reason: "Unlocks after your first run" },
   chronicle: { label: "Chronicle", key: "H", reason: "Unlocks after your first run" }
 };
@@ -44,13 +56,13 @@ function isUnlocked(id: RailLayerId, inputs: RailUnlockInputs): boolean {
     case "creatures":
       return true; // GG-44: unlocks at session start, same as Sanctum
     case "relics":
-      return false; // no container/inventory endpoint yet — see game-gui-map.md's contract gaps
+      return inputs.hasAnyRelic;
     case "fusion":
-      return inputs.hasDuplicateSpecies;
+      return inputs.hasAnyDemon;
     case "pacts":
       return inputs.hasAnyContract;
     case "expeditions":
-      return inputs.hasHeldASector;
+      return inputs.hasAnyBoundDemon;
     case "almanac":
     case "chronicle":
       return inputs.hasCompletedARun;
@@ -70,8 +82,10 @@ export function deriveRailEntries(inputs: RailUnlockInputs): RailEntry[] {
     if (!isUnlocked(id, inputs)) {
       return { id, label, key, state: "locked", lockedReason: reason };
     }
-    if (id === "chronicle" && inputs.unreadResultCount > 0) {
-      return { id, label, key, state: "badged", badgeCount: inputs.unreadResultCount };
+    const badgeCount =
+      id === "chronicle" ? inputs.unreadResultCount : id === "expeditions" ? inputs.returnedExpeditionCount : 0;
+    if (badgeCount > 0) {
+      return { id, label, key, state: "badged", badgeCount };
     }
     return { id, label, key, state: "available" };
   });

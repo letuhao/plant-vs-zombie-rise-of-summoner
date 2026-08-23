@@ -8,27 +8,33 @@ public static class SoulEarnPolicy
 {
     public const int PolicyVersion = 2;
 
-    /// <summary>+1 per kill, capped — kills the stall-farm exploit (uncapped pay rewards match length).</summary>
-    public const int KillDelta = 1;
-    public const int KillCapPerMatch = 50;
+    static SoulEarnTuning? _tuning;
+
+    /// <summary>Host-only (Injector/Server startup, or a test's inline construction).</summary>
+    public static void Configure(SoulEarnTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static SoulEarnTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "SoulEarnPolicy.Configure(...) has not run. Every soul-earn rule reads data/tuning/" +
+        "souls.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    /// <summary>+1 per kill, capped — kills the stall-farm exploit (uncapped pay rewards match length).
+    /// killCapPerMatch is named for deletion by caps-reconcile (power-plan.md T3.6, not yet
+    /// authorized; SSOT §11.7a — audit F11 covers `victoryFullPerDay` alongside it).</summary>
+    public static int KillDelta => Tuning.Kill.KillDelta;
+    public static int KillCapPerMatch => Tuning.Kill.KillCapPerMatch;
 
     /// <summary>Victory pays full for the first wins of the (UTC) day, then decays 50%.</summary>
-    public const int VictoryDelta = 100;
-    public const int VictoryFullPerDay = 3;
-    public const int DefeatDelta = 25;
+    public static int VictoryDelta => Tuning.MatchEnd.VictoryDelta;
+    public static int VictoryFullPerDay => Tuning.MatchEnd.VictoryFullPerDay;
+    public static int DefeatDelta => Tuning.MatchEnd.DefeatDelta;
 
     /// <summary>Codex discovery faucet — first-ever discovery of a species, by rarity.</summary>
-    public static int DiscoveryDelta(DemonRarity rarity) => rarity switch
-    {
-        DemonRarity.Common => 25,
-        DemonRarity.Rare => 75,
-        DemonRarity.Epic => 200,
-        DemonRarity.Legendary => 500,
-        _ => 0
-    };
+    public static int DiscoveryDelta(DemonRarity rarity) =>
+        Tuning.DiscoveryDelta.TryGetValue(rarity, out var v) ? v : 0;
 
-    public const int CodexHalfMilestone = 500;   // 50 % of the catalog discovered
-    public const int CodexFullMilestone = 1500;  // 100 % (claimable at 90 % once capture-exclusives exist)
+    public static int CodexHalfMilestone => Tuning.Codex.HalfMilestone;   // 50 % of the catalog discovered
+    public static int CodexFullMilestone => Tuning.Codex.FullMilestone;  // 100 % (claimable at 90 % once capture-exclusives exist)
 
     public static class Reasons
     {

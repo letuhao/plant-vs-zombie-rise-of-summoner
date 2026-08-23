@@ -55,7 +55,8 @@ public static class DemonPersonalityIds
 
 /// <summary>
 /// Contract rules (spec-demon-contracts.md, owner locks 2026-08-21). Pure integers, no clock of its
-/// own — the store passes the time in. Numbers are spec-locked; tuning is ask-first.
+/// own — the store passes the time in. Numbers live in <c>data/tuning/contracts.v{n}.json</c>
+/// (tunables-ssot.md T1); <see cref="Configure"/> must run before any rule below is read.
 ///
 /// The one property worth stating out loud: a fresh contract lands in the <see cref="LoyaltyRank.Bound"/>
 /// band, which pays +0‰. Adopting contracts therefore cannot move a single battle or expedition
@@ -65,62 +66,68 @@ public static class ContractPolicy
 {
     public const int PolicyVersion = 1;
 
-    public const int LoyaltyMax = 1000;
+    static ContractTuning? _tuning;
+
+    /// <summary>Host-only (Injector/Server startup, or a test's inline construction) — never called
+    /// from Core itself (tunables-ssot.md §7.2: Core takes a loaded object, it does not load one).</summary>
+    public static void Configure(ContractTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static ContractTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "ContractPolicy.Configure(...) has not run. Every contract rule reads data/tuning/" +
+        "contracts.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    public static int LoyaltyMax => Tuning.Loyalty.Max;
     /// <summary>Below this a demon cannot be fielded. Decay stops here; only defeats cross it.</summary>
-    public const int DeployFloor = 200;
-    public const int BindLoyalty = 300;
+    public static int DeployFloor => Tuning.Loyalty.DeployFloor;
+    public static int BindLoyalty => Tuning.Loyalty.BindLoyalty;
 
-    public const int WinGain = 15;
-    public const int LossPenalty = 10;
-    public const int DailyGainCap = 60;
-    public const int DecayPerDay = 25;
-    public const int RitualGain = 100;
+    public static int WinGain => Tuning.Loyalty.WinGain;
+    public static int LossPenalty => Tuning.Loyalty.LossPenalty;
+    public static int DailyGainCap => Tuning.Loyalty.DailyGainCap;
+    public static int DecayPerDay => Tuning.Loyalty.DecayPerDay;
+    public static int RitualGain => Tuning.Loyalty.RitualGain;
 
-    public const int BaseSlots = 12;
-    public const int MaxSlots = 48;
-    public const int SlotPriceStep = 300;
+    public static int BaseSlots => Tuning.Slots.BaseSlots;
+    public static int MaxSlots => Tuning.Slots.MaxSlots;
+    public static int SlotPriceStep => Tuning.Slots.SlotPriceStep;
 
     /// <summary>A six-month absence settles thirty days: bounded work, bounded bill.</summary>
-    public const int MaxSettleDays = 30;
+    public static int MaxSettleDays => Tuning.Settlement.MaxSettleDays;
 
     public static LoyaltyRank RankFor(int loyalty) => loyalty switch
     {
-        < DeployFloor => LoyaltyRank.Insubordinate,
-        < 400 => LoyaltyRank.Bound,
-        < 600 => LoyaltyRank.Sworn,
-        < 800 => LoyaltyRank.Trusted,
+        _ when loyalty < DeployFloor => LoyaltyRank.Insubordinate,
+        _ when loyalty < Tuning.Loyalty.SwornThreshold => LoyaltyRank.Bound,
+        _ when loyalty < Tuning.Loyalty.TrustedThreshold => LoyaltyRank.Sworn,
+        _ when loyalty < Tuning.Loyalty.DevotedThreshold => LoyaltyRank.Trusted,
         _ => LoyaltyRank.Devoted
     };
 
     /// <summary>Per-mille bonus on the demon's OWN combat channels, applied at squad build.</summary>
     public static int RankBonusMilli(LoyaltyRank rank) => rank switch
     {
-        LoyaltyRank.Sworn => 15,
-        LoyaltyRank.Trusted => 35,
-        LoyaltyRank.Devoted => 60,
+        LoyaltyRank.Sworn => Tuning.Loyalty.RankBonusSwornMilli,
+        LoyaltyRank.Trusted => Tuning.Loyalty.RankBonusTrustedMilli,
+        LoyaltyRank.Devoted => Tuning.Loyalty.RankBonusDevotedMilli,
         _ => 0
     };
 
     public static bool IsDeployable(int loyalty) => loyalty >= DeployFloor;
 
-    public static PersonalityRates Rates(DemonPersonality personality) => personality switch
+    public static PersonalityRates Rates(DemonPersonality personality)
     {
-        DemonPersonality.Loyal => new PersonalityRates(120, 80, 100),
-        DemonPersonality.Stoic => new PersonalityRates(90, 60, 100),
-        DemonPersonality.Proud => new PersonalityRates(100, 100, 130),
-        DemonPersonality.Calculating => new PersonalityRates(100, 90, 110),
-        DemonPersonality.Feral => new PersonalityRates(80, 150, 70),
-        _ => throw new ArgumentOutOfRangeException(nameof(personality), personality, null)
-    };
+        if (!Tuning.PersonalityRates.TryGetValue(personality, out var r))
+            throw new ArgumentOutOfRangeException(nameof(personality), personality, null);
+        return new PersonalityRates(r.GainPct, r.DecayPct, r.UpkeepPct);
+    }
 
-    public static int BaseUpkeepPerDay(DemonRarity rarity) => rarity switch
+    public static int BaseUpkeepPerDay(DemonRarity rarity)
     {
-        DemonRarity.Common => 2,
-        DemonRarity.Rare => 5,
-        DemonRarity.Epic => 12,
-        DemonRarity.Legendary => 25,
-        _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, null)
-    };
+        if (!Tuning.BaseUpkeepPerDay.TryGetValue(rarity, out var v))
+            throw new ArgumentOutOfRangeException(nameof(rarity), rarity, null);
+        return v;
+    }
 
     /// <summary>Daily tribute for one bound demon. Truncation favours the player, but never to zero —
     /// a free demon would make the whole capacity economy optional.</summary>
@@ -150,14 +157,12 @@ public static class ContractPolicy
     public static int RitualGainFor(DemonPersonality personality) =>
         RitualGain * Rates(personality).GainPct / 100;
 
-    public static long RitualPrice(DemonRarity rarity) => rarity switch
+    public static long RitualPrice(DemonRarity rarity)
     {
-        DemonRarity.Common => 50,
-        DemonRarity.Rare => 100,
-        DemonRarity.Epic => 200,
-        DemonRarity.Legendary => 400,
-        _ => throw new ArgumentOutOfRangeException(nameof(rarity), rarity, null)
-    };
+        if (!Tuning.RitualPriceSouls.TryGetValue(rarity, out var v))
+            throw new ArgumentOutOfRangeException(nameof(rarity), rarity, null);
+        return v;
+    }
 
     public static int Capacity(int purchasedSlots) =>
         Math.Min(MaxSlots, BaseSlots + Math.Max(0, purchasedSlots));

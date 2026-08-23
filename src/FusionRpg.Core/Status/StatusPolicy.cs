@@ -3,21 +3,31 @@ namespace FusionRpg.Core.Status;
 /// <summary>Design defaults — actor-hub-ssot.md §5.</summary>
 public static class StatusPolicy
 {
-    public const double CategoryResistCap = 0.95;
-    public const double ApplyScaleK = 100.0;
-    public const double ApplyScaleFloor = 1.0;
-    public const double ResistFromPowerRatio = 0.0;
-    public const double MinNetFactor = 0.0;
-    public const double MaxNetFactor = 10_000.0;
-    public const double ProgressionPowerStubDefault = 1.0;
-    public const int ProcDepthLimitDefault = 6;
+    static StatusTuning? _tuning;
+
+    /// <summary>Host-only (Injector/Server startup, or a test's inline construction).</summary>
+    public static void Configure(StatusTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static StatusTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "StatusPolicy.Configure(...) has not run. Every status rule reads data/tuning/" +
+        "status.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    public static double CategoryResistCap => Tuning.CategoryResistCap;
+    public static double ApplyScaleK => Tuning.ApplyScaleK;
+    public static double ApplyScaleFloor => Tuning.ApplyScaleFloor;
+    public static double ResistFromPowerRatio => Tuning.ResistFromPowerRatio;
+    public static double MinNetFactor => Tuning.MinNetFactor;
+    public static double MaxNetFactor => Tuning.MaxNetFactor;
+    public static double ProgressionPowerStubDefault => Tuning.ProgressionPowerStubDefault;
+    public static int ProcDepthLimitDefault => Tuning.ProcDepthLimitDefault;
 
     /// <summary>P1: tierPower feeds ApplyScale and delta totals.</summary>
     public const bool IncludeTierPowerInDelta = true;
 
     public static double ApplyScaleKForCategory(string category) => ApplyScaleK;
 
-    public static double ApplySteepnessForCategory(string category) => 1.0;
+    public static double ApplySteepnessForCategory(string category) => Tuning.ApplySteepnessDefault;
 }
 
 public static class StatusL2bCategory

@@ -178,7 +178,7 @@ public sealed class SimEffectHost
         string attackerSide = "plant",
         int? typeId = 0,
         int? targetTypeId = 0,
-        int damage = 20)
+        long damage = 20)
     {
         return OnEvent(new EffectEventDto
         {

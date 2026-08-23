@@ -22,6 +22,47 @@ builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
      .AllowAnyMethod()
      .AllowCredentials()));
 builder.Services.AddSignalR().AddJsonProtocol();
+
+// tunables-ssot.md §7.2: hosts load and inject; Core stays file-I/O-free. Migrated domains are
+// copied next to the exe by FusionRpg.Server.csproj (M.1 contracts, M.2 loam).
+var tuningDir = Path.Combine(AppContext.BaseDirectory, "data", "tuning");
+FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
+    FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "contracts.v1.json"))));
+FusionRpg.Core.World.Loam.LoamPolicy.Configure(
+    FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "loam.v1.json"))));
+FusionRpg.Core.World.WorldTuningHub.Configure(
+    FusionRpg.Core.World.WorldTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "world.v1.json"))));
+FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
+    FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "souls.v1.json"))));
+FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
+    FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "patron.v1.json"))));
+FusionRpg.Core.Combat.Shield.ShieldPolicy.Configure(
+    FusionRpg.Core.Combat.Shield.ShieldTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "shield.v1.json"))));
+FusionRpg.Core.Combat.CombatPolicy.Configure(
+    FusionRpg.Core.Combat.CombatTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "combat.v1.json"))));
+FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
+    FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "fusion.v1.json"))));
+FusionRpg.Core.Status.StatusPolicy.Configure(
+    FusionRpg.Core.Status.StatusTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "status.v1.json"))));
+FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
+    FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "overlay.v1.json"))));
+FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
+    FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "stats.v1.json"))));
+FusionRpg.Core.Expeditions.ExpeditionTuningHub.Configure(
+    FusionRpg.Core.Expeditions.ExpeditionTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "expeditions.v1.json"))));
+
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
 if (string.IsNullOrWhiteSpace(dataDir))
@@ -86,6 +127,7 @@ app.UseStaticFiles();
 
 app.MapStorageEndpoints();
 app.MapUniqueActors();
+app.MapRelics();
 app.MapDemons();
 app.MapSouls();
 app.MapExpeditions();

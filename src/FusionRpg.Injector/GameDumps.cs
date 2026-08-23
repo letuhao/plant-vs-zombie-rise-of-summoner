@@ -37,7 +37,7 @@ internal static class GameDumps
         return EnumName(type);
     }
 
-    public static Dictionary<string, object> Plant(Plant p, string source, long hpBase, long maxHpBase, int attackBase)
+    public static Dictionary<string, object> Plant(Plant p, string source, long hpBase, long maxHpBase, long attackBase)
     {
         var d = new Dictionary<string, object> { ["source"] = source };
         Try(d, "type", () => (int)p.thePlantType);
@@ -86,7 +86,7 @@ internal static class GameDumps
         catch { }
     }
 
-    public static Dictionary<string, object> Zombie(Zombie z, string source, long hpBase, long maxHpBase, int attackBase, int armorBase, int armorMaxBase)
+    public static Dictionary<string, object> Zombie(Zombie z, string source, long hpBase, long maxHpBase, long attackBase, long armorBase, long armorMaxBase)
     {
         var d = new Dictionary<string, object> { ["source"] = source };
         Try(d, "type", () => (int)z.theZombieType);

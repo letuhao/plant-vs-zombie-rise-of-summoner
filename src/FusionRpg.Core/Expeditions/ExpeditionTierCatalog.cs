@@ -12,16 +12,33 @@ public sealed record ExpeditionTierDef(
 
 public static class ExpeditionTierCatalog
 {
-    public static readonly IReadOnlyList<ExpeditionTierDef> All = new[]
+    /// <summary>Ids/names/hasBossWave stay here (schema); the numeric fields are loaded
+    /// (tunables-ssot.md T1) — see <see cref="ExpeditionTuningHub"/>.</summary>
+    public static IReadOnlyList<ExpeditionTierDef> All
     {
-        new ExpeditionTierDef("scout-30m", "Scouting Sortie", 30, 6, 1, 2, false),
-        new ExpeditionTierDef("forage-4h", "Soul Foraging", 240, 8, 2, 3, false),
-        new ExpeditionTierDef("hunt-8h", "Rift Hunt", 480, 8, 3, 4, false),
-        new ExpeditionTierDef("warpath-20h", "Warpath", 1200, 10, 4, 5, true)
-    };
+        get
+        {
+            var t = ExpeditionTuningHub.Tuning.Tiers;
+            ExpeditionTierDef Row(string id, string name, bool hasBossWave)
+            {
+                var n = t[id];
+                return new ExpeditionTierDef(id, name, n.DurationMinutes, n.TickCount, n.BattleCount, n.SquadSlots, hasBossWave);
+            }
+            return new[]
+            {
+                Row("scout-30m", "Scouting Sortie", hasBossWave: false),
+                Row("forage-4h", "Soul Foraging", hasBossWave: false),
+                Row("hunt-8h", "Rift Hunt", hasBossWave: false),
+                Row("warpath-20h", "Warpath", hasBossWave: true)
+            };
+        }
+    }
 
-    static readonly Dictionary<string, ExpeditionTierDef> ById =
-        All.ToDictionary(t => t.TierId, StringComparer.Ordinal);
+    // Not a static-readonly field: it would evaluate All (and so Tuning) at type-load, which can
+    // run before a host's Configure(...) call. Lazy like the other migrated catalogs' _all/_byId.
+    static Dictionary<string, ExpeditionTierDef>? _byId;
+    static Dictionary<string, ExpeditionTierDef> ById =>
+        _byId ??= All.ToDictionary(t => t.TierId, StringComparer.Ordinal);
 
     public static bool IsKnown(string? tierId) => tierId != null && ById.ContainsKey(tierId);
 

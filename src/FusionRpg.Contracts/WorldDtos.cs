@@ -166,7 +166,7 @@ public sealed record WorldEntityMemberDto
     public string? InstanceId { get; init; }
     public string SpeciesId { get; init; } = "";
     public int Level { get; init; }
-    public int Hp { get; init; }
+    public long Hp { get; init; }
     public int Wounds { get; init; }
 }
 

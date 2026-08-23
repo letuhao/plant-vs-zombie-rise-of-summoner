@@ -24,17 +24,17 @@ public readonly struct OverlayButtonRect
 /// </summary>
 public static class OverlaySwitchLayout
 {
-    public const float BaseButtonW = 72f;
-    public const float BaseButtonH = 28f;
-    public const float BaseMargin = 16f;
+    public static float BaseButtonW => OverlayTuningHub.Tuning.SwitchLayout.BaseButtonW;
+    public static float BaseButtonH => OverlayTuningHub.Tuning.SwitchLayout.BaseButtonH;
+    public static float BaseMargin => OverlayTuningHub.Tuning.SwitchLayout.BaseMargin;
 
     /// <summary>Height the base sizes were chosen against.</summary>
-    public const float ReferenceHeight = 1080f;
+    public static float ReferenceHeight => OverlayTuningHub.Tuning.SwitchLayout.ReferenceHeight;
 
     /// <summary>Never shrink: the button is already small, and a 720p target would be unhittable.</summary>
-    public const float MinScale = 1f;
+    public static float MinScale => OverlayTuningHub.Tuning.SwitchLayout.MinScale;
 
-    public const float MaxScale = 3f;
+    public static float MaxScale => OverlayTuningHub.Tuning.SwitchLayout.MaxScale;
 
     public static float ScaleFor(int screenHeight)
     {

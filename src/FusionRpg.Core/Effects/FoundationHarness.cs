@@ -121,7 +121,10 @@ public sealed class FoundationHarness
     /// <summary>Grant a shield to a board ptr (normalized like dispatcher targets are).</summary>
     public Combat.Shield.ShieldApplyResult GrantShield(
         string ptr, long baseHp, ElementTypeId? element = null,
-        int priority = Combat.Shield.ShieldPolicy.PrioritySkill,
+        // Not `= ShieldPolicy.PrioritySkill`: PrioritySkill is config-loaded now (tunables-ssot.md
+        // T1), and a default parameter value must be a compile-time constant. Null resolves to it
+        // below instead, so the six existing callers relying on the default need no change.
+        int? priority = null,
         string sourceId = "test-shield", long? durationTicks = null, bool refillOnMerge = true)
     {
         if (ShieldRuntime == null)
@@ -133,7 +136,7 @@ public sealed class FoundationHarness
             SourceId = sourceId,
             Element = element,
             BaseHp = baseHp,
-            Priority = priority,
+            Priority = priority ?? Combat.Shield.ShieldPolicy.PrioritySkill,
             DurationTicks = durationTicks,
             RefillOnMerge = refillOnMerge
         }, _derived.Resolve(CombatPtr.Normalize(ptr), attackerLess: false), nowTick: 0);

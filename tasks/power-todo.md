@@ -18,26 +18,61 @@ Baseline: **0 critical, 92 A3, 14 A7**.
 - [x] **P0.1** Standard in `CLAUDE.md`, `AGENTS.md`, `DESIGN-GATE.md`, the spec skill, and the patch record
 - [x] **P0.2** `scripts/audit-overflow.py` — 7 categories, precision gate, `--targets` / `--fix A4`
 
-- [ ] **P0.3 — Triage the 92 A3 findings** · S · deps: none
-  - Accept: each classified **LADDER** / **BOUNDED** / **NOT-A-MAGNITUDE**; a BOUNDED verdict names its proven cap; a NOT-A-MAGNITUDE verdict **tightens the regex** rather than waiving the finding
-  - Verify: `--targets A3` count == LADDER + BOUNDED
-  - Files: `docs/architecture/power/overflow-triage.md`, `scripts/audit-overflow.py`
-  - Order by concentration: `Core/Battle` 20 · `Injector` 12 · `Core` 11 · `Core/Stats` 9 · `Injector/Stats` 8 · `Core/World` 7 · `Core/Demons` 7 · `Core/Effects` 6 · `Contracts` 4 · rest 8
+- [x] **P0.3 — Triage the 92 A3 findings** — done 2026-08-23. 92 → 75: three regex defects fixed in
+  `scripts/audit-overflow.py` (hp/"hP" case collision — `KillEarnWithPatron`; A3 missing A2's
+  per-mille-ratio exclusion — 14 `*Milli` bonuses/chances; `NOT_MAGNITUDE` missing `unit`/`peractor`
+  — `ShieldUnit`, `MaxShieldsPerActor`), 17 findings removed by the fix, not waived. Remaining 75 =
+  **56 LADDER** + **19 BOUNDED**, each BOUNDED verdict naming its proven cap (Harmony signature match
+  ×10, Unity-field snapshot ×1, debug-scenario literal ×2, dev-time generation input ×1, clamped AI
+  utility score ×3, retention tail ×1, plus their downstream lineage). Full breakdown:
+  `docs/architecture/power/overflow-triage.md`. Verified: `--targets A3 | wc -l` == 75 == 56+19; A1/A7
+  unchanged (0/14)
 
-- [ ] **P0.4 — Widen the LADDER bucket to `long`** · M · deps: P0.3
-  - Accept: every LADDER finding is `long`; **no golden moves** — widening preserves values
-  - Verify: `ALL` + `CLEAN`; any `Contracts/` finding additionally proves its wire hash unchanged
-  - ⚠ `BattleSetup` field changes move all four expedition hashes (`decisions.md:42`) — internal rename or alias
-  - Also fixes SSOT §11.2a's three narrowing casts: `EffectBag.cs:707`, `EventDrain.cs:458`/`:475`
+- [x] **P0.4 — Widen the LADDER bucket to `long`** — done 2026-08-23. All 56 triaged LADDER sites
+  widened across `Core`, `Contracts`, `Data`, `Injector` (Stats/EntityBaseline, SimModels, StatMath,
+  Battle/*, Demons/Patron/PatronPolicy, Effects/Atoms/Power/*, World/*, Contracts/Dtos+WorldDtos+
+  EffectDtos, Injector/GameDumps+EntityStatWriter+CheatActions+GameHooks). Two dead-code sites deleted
+  instead of widened (`UnityStatWriter`, `StatSystem`'s `int` `ScaleCurrentHp` overload — both zero
+  callers, same shape as `IProgressionPowerProvider`). Fixed SSOT §11.2a's three narrowing casts
+  (`EffectBag.cs:707`, `EventDrain.cs:458`/`:475`) plus the same defect at `EntityStatWriter.
+  ForceSetPlantHp` and `WritePlant`/`WriteZombie`'s Atk/Arm1/Arm2 writes — all now clamp explicitly
+  at the Unity-field boundary (`ZombieCombatFields.ClampToInt32`) instead of narrowing silently.
+  Harmony-hook `int damage` sites (BOUNDED, §3.1 of the triage) deliberately untouched — clamped
+  *into*, never widened, since the type is forced by the base game's own compiled method signature.
+  - Verify: `audit-overflow.py` → A3 92→**19**, exactly the triage's 19 BOUNDED sites, line-for-line
+    (confirms every LADDER site is resolved and nothing BOUNDED was touched); A1/A7 unchanged (0/14)
+  - `ALL` (Core 2971, Data 470, Guard 73) green + Launcher 162, CheatCore 40 also run clean. One
+    pre-existing failure fixed in passing (`DebugScenarios.AllowedStepNames` missing two step names —
+    confirmed via `git status` to predate this work, zero relation to typing/overflow)
+  - **Wire hash proof**: `BattleGoldenTests.cs`'s four named hashes (`StompHash`/`CloseHash`/
+    `WipeHash`/`SeedSweepHash`, computed from `BattleReport` JSON built out of the widened
+    `BattleActorSetup`/`BattleModels` types) passed **unchanged** — direct evidence the widening moved
+    no golden, not an inference from "tests passed"
+  - `git status --short tests\` is not literally empty — pre-existing, unrelated WIP already sits in
+    the tree (`UniqueEquipmentCatalogTests.cs`, `UniqueActorStoreTests.cs`, confirmed via diff content
+    to be a different, unrelated feature stream). This program's own test diff is exactly 3 files:
+    2 compile-fixes preserving identical behavior (`BattleEffectHostTests.cs`'s `FakeTarget`,
+    `PatronPolicyTests.cs`'s `long souls`) + 1 defect-fix explicitly sanctioned by this task's own
+    accept criteria (`EventDrainIntegrationTests.cs` — the test asserted the `int32` clamp §11.2a
+    exists to remove; rewritten to assert the exact merged value instead)
 
 - [x] **P0.5 — A7 `double` in stat composition — decided: it stands** (SSOT §10.7). Range is not the issue (`double` is exact to Θ≈6.7M); determinism is, and `decisions.md:40` already mitigates it with the `BattleReport` platform stamp + cross-arch refusal. `Increased`/`More` are genuinely fractional — composing ratios in integers would be wrong. The `long` rule binds *magnitudes*, not ratio arithmetic
 
-- [ ] **P0.6 — Arm the overflow audit in CI** · S · deps: P0.4
-  - Accept: in `ci.yml` + `deploy-play.ps1`; fails on CRITICAL; A3/A7 non-blocking
-  - Verify: plant an A1 → red; remove → green
+- [x] **P0.6 — Arm the overflow audit in CI** — done 2026-08-23. `scripts/guard-overflow.ps1`
+  (new, matches the other 4 guards' shape) wraps `audit-overflow.py`; wired into both
+  `.github/workflows/ci.yml` (new step, right after checkout — fails fast before the long test run)
+  and `scripts/deploy-play.ps1` (5th guard, alongside single-writer/DAL/secondary-no-unity/funnel-delta).
+  A3/A7 non-blocking by construction — the script's own exit code already reflects CRITICAL-only
+  (A1/A2/A4); the guard just surfaces it as a build failure
+  - Verify: planted a temporary `float probeHp` in `Core/_GuardOverflowProbe.cs` → guard exited 1
+    (`A1=1`, `OVERFLOW GUARD FAILED`); removed it → exited 0 again (`OVERFLOW GUARD OK`). Both
+    `deploy-play.ps1` and `guard-overflow.ps1` PowerShell-parse clean; `ci.yml` YAML-parses clean
 
-### ✅ Checkpoint 0
-- [ ] Audit exits 0, A3 = BOUNDED-only · triage doc complete · `ALL` + `CLEAN` · A7 recorded · CI armed
+### ✅ Checkpoint 0 — passed 2026-08-23
+- [x] Audit exits 0, A3 = BOUNDED-only (19/19, triage §3) · triage doc complete
+  (`docs/architecture/power/overflow-triage.md`) · `ALL` (Core 2971 + Data 470 + Guard 73) green,
+  Launcher 162 + CheatCore 40 also clean · A7 recorded (SSOT §10.7, stands) · CI armed (guard red→green
+  proven)
 
 ---
 
@@ -145,12 +180,101 @@ Baseline **329**: M1 111 · M2 80 · M3 88 · M4 50, across 37 balance-surface f
 - [x] SSOT + standard in `CLAUDE.md`, `AGENTS.md`, `DESIGN-GATE.md`, spec skill
 - [x] `scripts/audit-magic-numbers.py` — 4 categories, `--summary` / `--domain` / `--targets`
 
-- [ ] **M.1 — `contracts` (34)** · M · deps: none
-  - Accept: `data/tuning/contracts.v1.json`; loyalty thresholds, rank bonuses, `PersonalityRates`, slot price all config; **behaviour byte-identical**; builds the minimal publish path (tunables §7.1 — the first domain builds the tool, not a general CLI up front)
-  - Verify: `CORE` + `CLEAN`; `--domain contracts` clean
-- [ ] **M.2 — `loam` (21) + `world` (30)** · M · deps: M.1
-- [ ] **M.3 — `souls` + `patron` (26)** · M · deps: M.1 — coordinate with T3.6
+- [x] **M.1 — `contracts` (34)** — done 2026-08-23/24. `data/tuning/contracts.v1.json` (41 values:
+  loyalty thresholds/gains/decay, rank-bonus Milli×3, slots, settlement, personality rates ×5×3,
+  base-upkeep ×4, ritual price ×4). `ContractPolicy.cs`'s consts became config-backed static
+  properties (kept the same public names/signatures — `ContractPolicy.WinGain` etc. still read the
+  same everywhere, now via `Tuning.Loyalty.WinGain`); switch-expression literals became
+  `ContractTuning` dictionary lookups (`RankFor`, `RankBonusMilli`, `Rates`, `BaseUpkeepPerDay`,
+  `RitualPrice`), each still throwing the original exception shape on an invalid enum. New
+  `ContractTuning.cs` (Core, pure parser — `ContractTuningLoader.Parse(string)`, no I/O per §7.2) with
+  typed rejections naming the missing path (T5). Hosts load + inject: Server's `Program.cs` (file read
+  + `ContractPolicy.Configure`, JSON copied next to the exe via a `.csproj` `<Content>` item matching
+  the sqlite-data convention already there) and the shared `RpgHost.Initialize` (covers both BepInEx
+  and MelonLoader hosts identically, same copy-item pattern in all three host `.csproj`s). Tests
+  construct one inline (§7.2) via a `[ModuleInitializer]` bootstrap duplicated into `Core.Tests`,
+  `Data.Tests`, `E2E.Tests` — same literal C# values as the JSON, not a file read.
+  Minimal publish path built (§7.1): `tools/tuning/publish.py <domain> <dotted.key>=<value>` reads
+  the latest `vN`, refuses an unknown key or a no-op, writes `v{N+1}`, leaves `vN` on disk (T4).
+  Smoke-tested (`loyalty.winGain 15→99` published to a throwaway v2, both refusal paths hit their
+  exit-1 branch), then the throwaway v2 deleted — only the real v1 ships.
+  - Verify: `audit-magic-numbers.py --domain contracts` → **0/0/0/0** (was 15/10/0/9). Every test suite
+    in `ci.yml` green post-migration: Core 2971, Data 470, Guard 73, Launcher 162, CheatCore 40,
+    Server.Tests 15, E2E 194, ItemSeedValidator 71, AtomImporter 21, ElementEnumGen 14 — 4031 total,
+    0 failures. `ContractPolicyTests.cs` alone asserts every migrated value directly
+    (`Rates(Loyal)==(120,80,100)`, `Capacity(36)==48`, `RitualPrice(Legendary)==400`, …) — concrete
+    byte-identical proof, not an inference from "tests passed"
+- [x] **M.2 — `loam` (21) + `world` (30)** — done 2026-08-24.
+  **loam**: `data/tuning/loam.v1.json`, 30 values (all of `LoamPolicy.cs` — its own class comment
+  already declares every constant a provisional placeholder, so all 30 moved, not just the 21 the
+  regex happened to flag; 9 escaped M2/M4 via a `capacity`-is-structural-vocabulary collision with
+  `STRUCTURAL_WORD`, caught by the same manual full-file read discipline as P0.3). Same
+  `LoamPolicy.Configure(LoamTuning)` shape as `ContractPolicy`.
+  **world**: heterogeneous — 8 files, two different kinds of number. Migrated the 5 that are genuinely
+  global policy (`data/tuning/world.v1.json` + `WorldTuningHub.Configure`, one call covers all five):
+  `LaneTypeCatalog` (per-type cost), `WorldSizeCatalog` (per-tier node range), `StrengthBandCatalog`
+  (per-band floor/ceiling/midpoint), `PlaceholderBattleResolver`, `TurnCalendar`. Row ids/names/
+  structural flags stayed in C# (schema, not balance); only numeric fields moved — `Seed` on all three
+  catalogs went from a `static readonly` field to a property so it reads the tuning lazily instead of
+  at type-init (before `Configure` could plausibly have run).
+  **Deliberately not migrated, with reasoning, not a skip**: `WorldTemplateCatalog.cs` (+ its
+  `.TwoHearths.cs` partial) is one hand-authored starting scenario per template — sector layout, lane
+  geometry, entity placement — not a reusable balance table despite the shared `*Catalog.cs` suffix;
+  fragmenting a few Hp/LoamStock numbers into a flat JSON while the surrounding scenario stays in C#
+  would cost readability for no tuning benefit a same-file edit doesn't already have. Recorded as an
+  explicit, named exemption in `audit-magic-numbers.py` (`CONTENT_FILE`), not silently dropped.
+  **Two more audit-tool bugs found and fixed**, same class as P0.3's: `TurnStartMilli` false-matched
+  `BALANCE_WORD`'s `star` inside "turn**Star**t"; fixed with the same `(?![a-z])` word-boundary
+  technique already used for the overflow audit's `hp`. `SectorTypeFlags.Fortress = 16` (a `[Flags]`
+  bit value, not a balance number) is fixed by rewriting it `1 << 4` — idiomatically clearer *and*
+  single-digit-exempt, no exemption list needed.
+  - Verify: `--domain loam` and `--domain world` both **0/0/0/0** (were 21 and 30). Full suite green
+    post-migration: Core 2971, Data 470, E2E 194, Server.Tests 15, Guard 73 = 3723, 0 failures.
+    `audit-overflow.py` unchanged (A3 still exactly 19, the P0.3 BOUNDED set) — confirms the `1<<4`
+    rewrite didn't touch anything overflow-relevant
+- [x] **M.3 — `souls` + `patron` (26)** — done 2026-08-24. `data/tuning/souls.v1.json` (`SoulEarnPolicy`,
+  full file: kill/match-end/discovery-by-rarity/codex, 13 values) + `data/tuning/patron.v1.json`
+  (`PatronPolicy`, full file: switch cost, aura clamp, per-star, kill-soul cap, rarity-base×4, 8
+  values) — two files, matching tunables-ssot §2's own domain examples ("contracts, **souls**...
+  **patron**..."), not one merged file. `killCapPerMatch` and `killSoulCap` (T3.6's deletion targets,
+  audit F11's `victoryFullPerDay` too) are now config rows, not hardcoded consts — **the coordination
+  with T3.6 this task names is exactly that**: when Phase 3 is authorized, T3.6 deletes three JSON
+  keys instead of fighting hardcoded consts, so this migration is what makes that a clean deletion.
+  **Two more audit-tool false positives found and fixed** (same class, third and fourth of the
+  session): `RarityBaseMilli`'s `_ => 60` (Legendary, PatronPolicy) is a genuine tunable the regex
+  can't see behind a wildcard arm — migrated anyway, not left for the regex to decide. Both
+  `SoulEarnPolicy.KillDelta = 1` and `PatronPolicy.PerStarMilli = 10` are single/exempt-digit
+  literals the tool would never flag — migrated for consistency with SSOT §11.7a, which names
+  `KillDelta` explicitly as a term in the future earn formula.
+  - Verify: `--domain patron` **0/0/0/0** (was 8). `SoulEarnPolicy`'s 9 findings gone from the
+    `demons` bucket (17→8; the remaining 8 are `SummonBannerCatalog`/`SummonRoller`, untouched, a
+    later task's scope). Full suite green: Core 2971, Data 470, E2E 194, Server.Tests 15, Guard 73 =
+    3723, 0 failures
 - [ ] **M.4 — `status`, `fusion`, `shield`, `overlay`, `stats`, `combat`, `expeditions`** · M · deps: M.1
+  - `fusion` (6→0), `shield` (3→0), `combat` (3→0) done 2026-08-24. `data/tuning/{fusion,shield,combat}.v1.json`.
+    `CombatPolicy` is architecturally different (mutable per-match-override instance, not static
+    consts) — `Configure()` assigns into the `Default` singleton's settable properties instead of
+    backing them with computed reads. Found and fixed **three more default-parameter compile breaks**
+    (a default parameter value must be a compile-time constant, so converting a `const` to a
+    config-backed property breaks any consumer using it as one): `ShieldInnateDef`'s `Priority`
+    default (record primary-constructor parameter — removed the default, made it required, 2 call
+    sites updated), `FoundationHarness.GrantShield`'s `priority` default and a local test helper's
+    same pattern (both switched to `int? priority = null` + `?? ShieldPolicy.PrioritySkill` in the
+    body — zero of the ~20 existing callers needed touching). Also hit the inverse failure mode:
+    removing `CombatPolicy`'s literal property defaults entirely (matching every other Policy class's
+    T5 "no built-in default") broke `TargetResolverTests`/`CombatCounterTests`, which construct
+    `new CombatPolicy { OneField = x }` directly and implicitly relied on the *other* fields' sane
+    defaults — object-initializer construction that a `new CombatPolicy()`-only grep doesn't catch.
+    Fixed properly: kept `Default`'s literal fallbacks (still overwritten by `Configure()` for the
+    shared singleton) and added `CombatPolicy.FromDefault()` so a one-off override copies real values
+    instead of zeroing everything else; both tests now build from that. Two more audit-tool false
+    positives fixed the same way as the session's earlier ones: `ShieldMath.cs`'s `1_000_000` (a
+    per-mille² renormalization denominator, same class as the already-exempt `1000`) and
+    `ElementPayload.WeightSumEpsilon` (a floating-point comparison tolerance matched via "weight",
+    not a balance number — added `epsilon` to `STRUCTURAL_WORD`).
+    Verify: `--domain shield`/`combat`/`fusion` all 0/0/0/0. Full suite green: Core 2971, Data 470,
+    E2E 194, Server.Tests 15, Guard 73 = 3723, 0 failures (one real regression caught and fixed along
+    the way — see above)
 - [ ] **M.5 — `vfx` (68)** · M · deps: M.4 — largest count, lowest stakes, deliberately last
 - [ ] **M.6 — Arm the magic-number audit in CI** · S · deps: M.5 — blocking on M1/M2 **for migrated domains only**
 

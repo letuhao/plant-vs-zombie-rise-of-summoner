@@ -45,9 +45,9 @@ public static class BattleEngine
         public ActorDerivedSnapshot Derived { get; }
         public ActorElementTypes ElementTypes { get; }
         public ElementPayloadComponent[] AttackComponents { get; }
-        public int Hp { get; set; }
-        public int MaxHp => Setup.MaxHp;
-        public int DamageDealt;
+        public long Hp { get; set; }
+        public long MaxHp => Setup.MaxHp;
+        public long DamageDealt;
         public int Kills;
         public long ShieldAbsorbed;
         public bool Retreated;

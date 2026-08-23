@@ -285,7 +285,7 @@ public static class ContentValidation
     static string Key((string Family, string Variant) k) =>
         k.Variant.Length == 0 ? k.Family : $"{k.Family}|{k.Variant}";
 
-    static int? Magnitude(AtomRow atom)
+    static long? Magnitude(AtomRow atom)
     {
         var kind = AtomKindRegistry.Get(atom.KindId);
         if (kind is null) return null;

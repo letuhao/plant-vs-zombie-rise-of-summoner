@@ -1,8 +1,8 @@
 import type { ContractRowDto } from "@/lib/bus/contracts";
 import type { DemonProfileDto } from "@/lib/bus/demons";
-import type { RunItem, UniqueActorDto } from "@/lib/bus/types";
+import type { RelicDto, RunItem, UniqueActorDto } from "@/lib/bus/types";
 import { absent, pendingWithReason, type Pending } from "./pending";
-import type { ActorPhase, ActorView, ContractView, RunResult, RunView } from "./types";
+import type { ActorPhase, ActorView, ContainerView, ContractView, Rarity, RunResult, RunView } from "./types";
 
 /**
  * The DTO→view adapter (T4). Filling a field later touches one file: this
@@ -64,6 +64,59 @@ export function adaptRun(dto: RunItem): RunView {
     summary: dto.summary === undefined || dto.summary === null
       ? absent()
       : pendingWithReason("Run summary is an opaque payload — its shape isn't specced yet (match-runtime.md)")
+  };
+}
+
+/**
+ * T14's four seed relics use only the first four rungs of the real ten-rung ladder
+ * (`docs/architecture/item/ssot-rarity.md` §3.3) — colours and pip counts are the
+ * ladder's own, generated into `--color-rarity-*` (T7), not invented here.
+ */
+const RELIC_RARITY_LADDER: { id: Rarity["id"]; ordinal: number; display: string; colour: string; pips: number }[] = [
+  { id: "chaff", ordinal: 10, display: "Chaff", colour: "var(--color-rarity-chaff)", pips: 1 },
+  { id: "sprout", ordinal: 20, display: "Sprout", colour: "var(--color-rarity-sprout)", pips: 2 },
+  { id: "grafted", ordinal: 30, display: "Grafted", colour: "var(--color-rarity-grafted)", pips: 3 },
+  { id: "cultivated", ordinal: 40, display: "Cultivated", colour: "var(--color-rarity-cultivated)", pips: 4 }
+];
+
+function rarityFromRelicTier(tier: number): Rarity {
+  const clamped = Math.min(Math.max(Math.trunc(tier), 1), RELIC_RARITY_LADDER.length);
+  return RELIC_RARITY_LADDER[clamped - 1]!;
+}
+
+function toSlotNoun(slot: string): string {
+  return slot.length > 0 ? `Relic · ${slot[0]!.toUpperCase()}${slot.slice(1)}` : "Relic";
+}
+
+/**
+ * Relics are the Container entity's "item" kind (docs/design/README.md §6) — not a
+ * separate rung. Most of `ContainerView`'s richer blocks (affixes, sockets, sets,
+ * enhancement) genuinely don't apply to this small, real, seeded catalog (T14's honest
+ * scoping note): they're `absent`, not faked. `implicit` is `pending` rather than
+ * `absent` — the relic's granted effect is real (verifiable via the equip API's
+ * `mods_json`), just not yet expressible as a formatted `DisplayLine` magnitude.
+ */
+export function adaptRelic(dto: RelicDto): ContainerView {
+  return {
+    instanceId: dto.id,
+    kind: "item",
+    header: {
+      name: dto.name,
+      rarity: rarityFromRelicTier(dto.rarity),
+      baseTypeAndClassNoun: toSlotNoun(dto.slot)
+    },
+    requirements: absent(),
+    baseStats: [],
+    implicit: pendingWithReason(
+      "This relic's granted effect isn't expressed as a numeric magnitude yet — equipping it is real, describing its size isn't"
+    ),
+    affixes: absent(),
+    enhancement: absent(),
+    sockets: absent(),
+    set: absent(),
+    grantedAction: absent(),
+    flavour: dto.description,
+    footer: absent()
   };
 }
 

@@ -32,7 +32,7 @@ public sealed class CheatScaleStatPlugin : IStatModifierPlugin
             bag.Upsert(_mods.More(Id, kind, src, channel, more));
         }
 
-        void Flat(string channel, int flat)
+        void Flat(string channel, long flat)
         {
             if (flat == 0) return;
             bag.Upsert(_mods.Flat(Id, kind, src, channel, flat));

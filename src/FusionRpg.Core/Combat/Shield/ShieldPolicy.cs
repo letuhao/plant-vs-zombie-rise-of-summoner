@@ -6,19 +6,29 @@ namespace FusionRpg.Core.Combat.Shield;
 /// </summary>
 public static class ShieldPolicy
 {
+    static ShieldTuning? _tuning;
+
+    /// <summary>Host-only (Injector/Server startup, or a test's inline construction).</summary>
+    public static void Configure(ShieldTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static ShieldTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "ShieldPolicy.Configure(...) has not run. Every shield rule reads data/tuning/shield.v{n}.json " +
+        "(tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
     /// <summary>Matchup share K at permille scale (0.25). Own constant, decoupled from combat MatchupShareK.</summary>
-    public const long MatchupShareKPm = 250;
+    public static long MatchupShareKPm => Tuning.MatchupShareKPm;
 
     /// <summary>Chip floor (0.10× input): toughness saturates at 10× efficiency — immunity impossible.</summary>
-    public const long ChipFloorKPm = 100;
+    public static long ChipFloorKPm => Tuning.ChipFloorKPm;
 
     /// <summary>Pen cap (3× input): pen at best triples shield burn.</summary>
-    public const long PenCapKPm = 3000;
+    public static long PenCapKPm => Tuning.PenCapKPm;
 
-    public const int MaxShieldsPerActor = 3;
+    public static int MaxShieldsPerActor => Tuning.MaxShieldsPerActor;
 
     // Default drain priorities (HIGHER drains first) — outer-to-core, owner decision 9.
-    public const int PriorityAura = 30;
-    public const int PrioritySkill = 20;
-    public const int PriorityInnate = 10;
+    public static int PriorityAura => Tuning.DrainPriority.Aura;
+    public static int PrioritySkill => Tuning.DrainPriority.Skill;
+    public static int PriorityInnate => Tuning.DrainPriority.Innate;
 }

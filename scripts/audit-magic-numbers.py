@@ -28,23 +28,49 @@ from collections import defaultdict
 BALANCE_FILE = re.compile(r"(Policy|Rules|Ruleset|Catalog|Math)\.cs$")
 
 # Never a magic number: identity, arithmetic, per-mille denominator, common small factors.
-EXEMPT_LITERALS = {"0", "1", "-1", "2", "10", "100", "1000", "1_000", "60", "24", "1024", "4096"}
+# 1_000_000 = 1000^2, the same per-mille-squared renormalization denominator "1000" already covers,
+# just for compound per-mille * per-mille arithmetic (ShieldMath.cs — two Pm quantities multiplied
+# together land at per-million scale, and this divides back down). Found via the M.4 migration,
+# 2026-08-23.
+EXEMPT_LITERALS = {"0", "1", "-1", "2", "10", "100", "1000", "1_000", "1_000_000", "60", "24", "1024", "4096"}
 
 # Balance vocabulary — a const named with one of these is tunable until argued otherwise (T1).
+#
+# "star" and "xp" are matched only when they end their camelCase word (not followed by a lowercase
+# letter) — the overflow audit's "hp"/"WithPatron" lesson applies here too: bare "star" also matches
+# inside "TurnStartMilli" (Turn-STARt-Milli, a turn-timeline bound), and bare "xp" matches inside
+# "MaxExponent" (MaxE-XP-onent, an unrelated exponent — and, as it happens, the retired POC power
+# curve's own constant, not something this migration needed to chase). Found via the M.2 (world) and
+# M.4 (stats) migrations, 2026-08-23. Genuine hits (PerStarMilli, StarCap, XpMilli) are unaffected —
+# the word there is always followed by an uppercase letter or the end of the identifier.
 BALANCE_WORD = re.compile(
     r"(cost|price|rate|chance|odds|gain|loss|decay|yield|reward|bonus|penalty|malus|"
     r"damage|heal|regen|drain|threshold|weight|multiplier|scale|factor|step|tier|band|"
     r"duration|cooldown|interval|delay|upkeep|tribute|earn|award|drop|proc|crit|"
-    r"loyalty|soul|essence|loam|xp|level|slot|star|rarity)", re.I)
+    r"loyalty|soul|essence|loam|xp(?![a-z])|level|slot|star(?![a-z])|rarity)", re.I)
 
 # Structural vocabulary — correctness, not feel. Exempt from T1, still subject to T2.
+#
+# "epsilon" added via the M.4 migration, 2026-08-23: ElementPayload.WeightSumEpsilon matched
+# "weight" (BALANCE_WORD) even though a floating-point comparison tolerance is never something a
+# balance pass tunes — moving it to a tuning file would misrepresent it as a balance knob.
 STRUCTURAL_WORD = re.compile(
     r"(version|capacity|buffer|queue|mailbox|ring|depth|nodes|json|hash|seed|"
     r"namespace|floor_?id|offset|bytes?|width|precision|encoding|schema|"
-    r"maxsegments|pool|dispose|timeout_?ms|port)", re.I)
+    r"maxsegments|pool|dispose|timeout_?ms|port|epsilon)", re.I)
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}
 SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$|Tests?\.cs$", re.I)
+
+# "*Catalog.cs" is usually a reusable balance table — LaneTypeCatalog, WorldSizeCatalog — where a row
+# applies to every instance of its kind and M1's bare-literal check is exactly right. WorldTemplateCatalog
+# (world domain, M.2 migration, 2026-08-23) is different in kind despite the shared suffix: it is one
+# hand-authored, one-off starting scenario per template (sector layout, lane geometry, entity
+# placement) — level-design content, not a table a balance pass tunes independently of its neighbours.
+# Forcing its numbers into a flat tuning file would fragment one coherent scenario across two files for
+# no benefit a JSON sibling wouldn't also need. Named explicitly, not folded into the generic Catalog
+# pattern, so this stays a deliberate, reviewable exception rather than a silent broadening.
+CONTENT_FILE = re.compile(r"WorldTemplateCatalog(\.\w+)?\.cs$")
 
 # Contexts where a literal is structure, not balance.
 SKIP_LINE = re.compile(
@@ -89,7 +115,7 @@ def scan(paths):
                 if not fn.endswith(".cs") or SKIP_FILE.search(fn):
                     continue
                 fp = os.path.join(dirpath, fn).replace("\\", "/")
-                is_balance = bool(BALANCE_FILE.search(fn))
+                is_balance = bool(BALANCE_FILE.search(fn)) and not CONTENT_FILE.search(fn)
                 try:
                     lines = io.open(fp, encoding="utf-8-sig").read().splitlines()
                 except (UnicodeDecodeError, OSError):

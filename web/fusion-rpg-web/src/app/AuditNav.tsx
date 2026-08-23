@@ -5,6 +5,11 @@ import { cn } from "@/lib/cn";
  * T12: the nine developer surfaces (status, stats, pvz-activity, icon-dump,
  * almanac-dump, cheats, sim, log, runs) are gone from here — they're
  * reached through the developer tree (`` ` ``), not player navigation.
+ * T15/T17: Fusion and Expeditions are gone too — conditionally locked (rail
+ * entries unlock from real state, GG-44), same treatment Relics already got:
+ * reachable from the Sanctum rail once unlocked, not a standing nav link.
+ * Pacts never had a standalone route to begin with. Roster stays, since
+ * Creatures (unlike these) is unconditionally available from session start.
  */
 const links = [
   { to: "/pvz-stats", label: "PvzStats" },
@@ -15,8 +20,6 @@ const links = [
   { to: "/world", label: "World" },
   { to: "/roster", label: "Roster" },
   { to: "/demons", label: "Demons" },
-  { to: "/expeditions", label: "Expeditions" },
-  { to: "/fusion", label: "Fusion" },
   { to: "/storage", label: "Storage" }
 ] as const;
 

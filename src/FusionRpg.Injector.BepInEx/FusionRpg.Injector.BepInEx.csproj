@@ -43,6 +43,14 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
   </ItemGroup>
   <ItemGroup>
+    <!-- tunables-ssot.md §7.2: the injector loads data/tuning/ and injects it (RpgHost.Initialize);
+         Core never reads a file. Copied next to the built DLL, same as the game-side plugin itself. -->
+    <Content Include="..\..\data\tuning\**\*.json">
+      <Link>data\tuning\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>$(BepGameDir)\BepInEx\core\0Harmony.dll</HintPath>
       <Private>false</Private>

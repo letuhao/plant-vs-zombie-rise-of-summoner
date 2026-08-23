@@ -77,7 +77,11 @@ export function useExpeditions(playerId: number) {
   return useQuery({
     queryKey: expeditionKeys.list(playerId),
     queryFn: () => getJson<ExpeditionListDto>(`/api/expeditions/${playerId}`),
-    enabled: playerId > 0
+    enabled: playerId > 0,
+    // Expeditions run for minutes to hours on a real wall clock; a light poll keeps the rail
+    // badge and the return-toast watcher (T17) honest without the player needing to reopen the
+    // layer, while staying far under anything that would look like a live countdown feed.
+    refetchInterval: 30_000
   });
 }
 

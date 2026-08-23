@@ -6,10 +6,10 @@ namespace FusionRpg.Core.Overlay;
 /// </summary>
 public static class OverlayPausePolicy
 {
-    public const float PausedTimeScale = 0f;
+    public static float PausedTimeScale => OverlayTuningHub.Tuning.Pause.PausedTimeScale;
 
     /// <summary>Ceiling on a restored scale, matching the existing G-TIMESCALE clamp.</summary>
-    public const float MaxResumeScale = 10f;
+    public static float MaxResumeScale => OverlayTuningHub.Tuning.Pause.MaxResumeScale;
 
     /// <summary>
     /// Pause only inside a live run: freezing time in menus or the almanac would just look broken,

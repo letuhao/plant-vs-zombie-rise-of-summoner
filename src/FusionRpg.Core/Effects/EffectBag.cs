@@ -704,7 +704,7 @@ public sealed class EffectBag
                         TargetPtr = n.TargetPtr,
                         TypeId = n.TypeId,
                         TargetTypeId = n.TargetTypeId,
-                        Damage = (int)Math.Min(int.MaxValue, Math.Abs(n.Amount)),
+                        Damage = Math.Abs(n.Amount),
                         Tick = 0,
                         ScenarioId = n.ScenarioId,
                         ChainDepth = n.ChainDepth + 1,

@@ -46,15 +46,24 @@ public static class LaneTypeCatalog
             ? def
             : throw new ArgumentException($"Unknown lane type id '{laneTypeId}'.");
 
-    static readonly IReadOnlyList<LaneTypeDef> Seed = new LaneTypeDef[]
+    /// <summary>Ids/names/structural flags stay here (schema); the per-mille cost is loaded
+    /// (tunables-ssot.md T1) — see <see cref="WorldTuningHub"/>.</summary>
+    static IReadOnlyList<LaneTypeDef> Seed
     {
-        new() { LaneTypeId = RiftLaneTypeId, Name = "Rift Lane", CostMultiplierMilli = 1000 },
-        new() { LaneTypeId = CorridorLaneTypeId, Name = "Corridor", CostMultiplierMilli = 700 },
-        new() { LaneTypeId = "ley", Name = "Ley Lane", CostMultiplierMilli = 900, Ley = true },
-        new() { LaneTypeId = "deep", Name = "Deep Rift", CostMultiplierMilli = 1600, CarriesSupply = false },
-        new() { LaneTypeId = "one-way", Name = "Temporal Current", CostMultiplierMilli = 800, OneWay = true, CarriesSupply = false },
-        new() { LaneTypeId = "gated", Name = "Gated Rift", CostMultiplierMilli = 1000, Gated = true }
-    };
+        get
+        {
+            var cost = WorldTuningHub.Tuning.LaneCostMultiplierMilli;
+            return new LaneTypeDef[]
+            {
+                new() { LaneTypeId = RiftLaneTypeId, Name = "Rift Lane", CostMultiplierMilli = cost["rift"] },
+                new() { LaneTypeId = CorridorLaneTypeId, Name = "Corridor", CostMultiplierMilli = cost["corridor"] },
+                new() { LaneTypeId = "ley", Name = "Ley Lane", CostMultiplierMilli = cost["ley"], Ley = true },
+                new() { LaneTypeId = "deep", Name = "Deep Rift", CostMultiplierMilli = cost["deep"], CarriesSupply = false },
+                new() { LaneTypeId = "one-way", Name = "Temporal Current", CostMultiplierMilli = cost["one-way"], OneWay = true, CarriesSupply = false },
+                new() { LaneTypeId = "gated", Name = "Gated Rift", CostMultiplierMilli = cost["gated"], Gated = true }
+            };
+        }
+    }
 
     static Dictionary<string, LaneTypeDef> ByIdMap()
     {

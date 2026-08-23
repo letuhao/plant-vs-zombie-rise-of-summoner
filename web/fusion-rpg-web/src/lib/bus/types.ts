@@ -420,6 +420,19 @@ export type UniqueEquipmentListDto = {
   modsJson: string;
 };
 
+export type RelicDto = {
+  id: string;
+  name: string;
+  rarity: number;
+  slot: string;
+  description: string;
+  effectId: string;
+};
+
+export type RelicCatalogListDto = {
+  items: RelicDto[];
+};
+
 export const emptyMod = (): StatMod => ({
   hpPercent: 1,
   hpFlat: 0,

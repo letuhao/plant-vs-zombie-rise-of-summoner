@@ -8,9 +8,9 @@ public class BattleEffectHostTests
 {
     sealed class FakeTarget : IBattleHpTarget
     {
-        public FakeTarget(int hp, int maxHp) { Hp = hp; MaxHp = maxHp; }
-        public int Hp { get; set; }
-        public int MaxHp { get; }
+        public FakeTarget(long hp, long maxHp) { Hp = hp; MaxHp = maxHp; }
+        public long Hp { get; set; }
+        public long MaxHp { get; }
     }
 
     static (BattleEffectHost Host, Dictionary<string, FakeTarget> Actors) NewHost(params (string Key, int Hp, int MaxHp)[] actors)

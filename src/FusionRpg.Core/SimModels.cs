@@ -2,11 +2,11 @@ namespace FusionRpg.Core;
 
 public static class SimDefaults
 {
-    public const int PlantHp = 300;
-    public const int PlantAttack = 20;
-    public const int ZombieHp = 270;
-    public const int ZombieAttack = 50;
-    public const int HitDamage = 50;
+    public const long PlantHp = 300;
+    public const long PlantAttack = 20;
+    public const long ZombieHp = 270;
+    public const long ZombieAttack = 50;
+    public const long HitDamage = 50;
     public const string LevelName = "Sim";
     public const string PlantTypeName = "Peashooter";
     public const string ZombieTypeName = "Zombie";
@@ -22,11 +22,11 @@ public sealed class SimEntity
     public long Hp { get; set; }
     public long MaxHpBase { get; set; }
     public long MaxHp { get; set; }
-    public int AttackBase { get; set; }
-    public int Attack { get; set; }
-    public int ArmorBase { get; set; }
-    public int Armor { get; set; }
-    public int ArmorMax { get; set; }
+    public long AttackBase { get; set; }
+    public long Attack { get; set; }
+    public long ArmorBase { get; set; }
+    public long Armor { get; set; }
+    public long ArmorMax { get; set; }
     public int Col { get; set; }
     public int Row { get; set; }
 }

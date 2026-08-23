@@ -20,12 +20,22 @@ public static class ActorDerivedProfiles
     public const string CombatIceTank = "combat-ice-tank";
     public const string CombatGlass = "combat-glass";
 
+    // Proof-board fixture values (class doc: "status prove boards"), not balance surface — a
+    // balance pass never tunes what a *named test scenario* reports as its input, only what real
+    // content specifies. tunables-ssot.md T1's test ("would a balance pass change this?") reads no
+    // here, unlike genuine content/policy defaults.
     public const double IronOmniResist = 1_000_000;
+    // Proof-board fixture, not balance surface (see above).
     public const double CasterPower = 100;
+    // Proof-board fixture, not balance surface (see above).
     public const double CombatFirePower = 50;
+    // Proof-board fixture, not balance surface (see above).
     public const double CombatIceDefense = 30;
+    // Proof-board fixture, not balance surface (see above).
     public const double CombatHighAccuracy = 500;
+    // Proof-board fixture, not balance surface (see above).
     public const double CombatLowAccuracy = -500;
+    // Proof-board fixture, not balance surface (see above).
     public const double CombatHighDodge = 500;
 
     public static ActorDerivedSnapshot Get(string? profile)

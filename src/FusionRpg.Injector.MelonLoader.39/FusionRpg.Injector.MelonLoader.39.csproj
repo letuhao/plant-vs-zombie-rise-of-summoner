@@ -47,6 +47,11 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.36" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
     <!-- In-game overlay host (overlayHost=injector). Ships the loader shim only; Chromium is the machine-wide Evergreen runtime. -->
+    <!-- tunables-ssot.md §7.2: RpgHost.Initialize loads data/tuning/ next to the built mod. -->
+    <Content Include="..\..\data\tuning\**\*.json">
+      <Link>data\tuning\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup Condition="'$(HasMelonRefs)' == 'true'">

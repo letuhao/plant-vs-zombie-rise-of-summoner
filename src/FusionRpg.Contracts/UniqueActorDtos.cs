@@ -86,3 +86,20 @@ public sealed class AwardUniqueActorXpRequest
     [JsonPropertyName("delta")] public double Delta { get; set; }
     [JsonPropertyName("reason")] public string? Reason { get; set; }
 }
+
+/// <summary>A real, seeded relic definition (T14). Equipping goes through the existing
+/// per-actor `rpg_unique_equipment` pipeline — see <see cref="UniqueEquipmentSlotDto"/>.</summary>
+public sealed class RelicDto
+{
+    [JsonPropertyName("id")] public string Id { get; set; } = "";
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("rarity")] public int Rarity { get; set; } = 1;
+    [JsonPropertyName("slot")] public string Slot { get; set; } = "";
+    [JsonPropertyName("description")] public string Description { get; set; } = "";
+    [JsonPropertyName("effectId")] public string EffectId { get; set; } = "";
+}
+
+public sealed class RelicCatalogListDto
+{
+    [JsonPropertyName("items")] public List<RelicDto> Items { get; set; } = new();
+}

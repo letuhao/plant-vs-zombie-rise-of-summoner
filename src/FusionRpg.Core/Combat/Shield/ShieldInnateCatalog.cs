@@ -2,11 +2,13 @@ using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Combat.Shield;
 
-/// <summary>Innate shield content row — validated at registration (spec §2.1).</summary>
+/// <summary>Innate shield content row — validated at registration (spec §2.1). Priority has no
+/// default: ShieldPolicy.PriorityInnate is config-loaded now (tunables-ssot.md T1), and a default
+/// parameter value must be a compile-time constant — callers pass it explicitly instead.</summary>
 public sealed record ShieldInnateDef(
     long BaseHp,
     ElementTypeId? Element,
-    int Priority = ShieldPolicy.PriorityInnate);
+    int Priority);
 
 /// <summary>
 /// Content rows for innate shields, keyed by (side, typeId) — code-first in-memory registry

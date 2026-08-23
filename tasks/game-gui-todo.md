@@ -204,7 +204,7 @@ entities depend on its shape.
 The rail renders from **unlock state**, not a constant list (GG-44). Index route becomes `#/sanctum`.
 
 **Acceptance:**
-- [x] `#/` redirects to `#/sanctum`; `#/status` still resolves until T12
+- [x] `#/` redirects to `#/sanctum`; `#/status` still resolves — as of T12 it redirects into the developer tree rather than rendering standalone
 - [x] Rail entries render active / available / badged / locked from state; locked entries say what unlocks them — `railState.ts` (`deriveRailEntries`), one pure function, seven real GG-44 unlock conditions wired to live data (`useRuns`/`useUniqueActors`/`useContracts`); Relics and Expeditions stay honestly `locked` (no container endpoint; needs World, T16-excluded) rather than faked
 - [x] The focus card selects its content from state and is never an empty box — `FocusCard.tsx`: zero bound creatures → the first-run script (GG-43); one or more → the real `ActorCard` (T8) for the first one, not a placeholder
 - [x] HUD carries identity, souls, XP and the menu affordance — no API address, no injector dot — `SanctumHud.tsx` is a new component, not a HudBar.tsx retrofit; summoner level/XP is honestly `Pending` (no endpoint — AGENTS.md: the summoner-led loop is direction, not what ships today); Menu is present but disabled with its reason (System is T20)
@@ -280,16 +280,25 @@ and rejection — and a failure says what changed, including "nothing".
 `almanac-dump`, `cheats`, `sim`, `log` and raw `runs` into it. Off by default, backtick to open.
 
 **Acceptance:**
-- [ ] A persisted setting gates it; default off; `` ` `` opens it when enabled
-- [ ] All nine surfaces reachable inside it; their old routes redirect
-- [ ] It is absent from player navigation
-- [ ] It obeys the stack, Esc, focus and volume rules; presentation rules do not apply
+- [x] A persisted setting gates it; default off; `` ` `` opens it when enabled — `devMode.ts` (`localStorage` key `fusionrpg.devMode`), gate defaults off; `?devmode=1`/`?devmode=0` flips and persists it then strips itself from the URL (one-time switch, not addressable state like `?dev=`); backtick only registers a global verb (`DevTreeHost.tsx`) once the gate is on
+- [x] All nine surfaces reachable inside it; their old routes redirect — `DeveloperTree.tsx`'s `DEV_SURFACES` (status/stats/pvz-activity/icon-dump/almanac-dump/cheats/sim/log/runs) each render their unchanged v1 page component inside a shared `PanelShell`; `routes.tsx`'s `DEV_ROUTE_REDIRECTS` sends all nine old routes (plus `/metrics` → `runs`) to `#/sanctum?dev=<id>`
+- [x] It is absent from player navigation — `AuditNav.tsx` rewritten to the 11 real player-facing links only (PvzStats, Progression, Types, Recipes, Lawn, World, Roster, Demons, Expeditions, Fusion, Storage); live-verified and covered by `dev-tree.spec.ts`'s "none of the nine developer surfaces appear in player navigation"
+- [x] It obeys the stack, Esc, focus and volume rules; presentation rules do not apply — built on the same `PanelShell` every other band-2 layer uses (push/pop into `useLayerStack`, Esc via the shared keymap, Radix focus trap/restore); engine vocabulary (raw `typeId`, JSON blocks, etc.) is untouched inside the nine pages per GG-40–42 — this task only changes how they're *reached*, not what they render
+
+**Real bugs found and fixed while proving this task, not just documented:**
+1. **Stale `setSearchParams` closure broke the second backtick press.** `useSearchParams()`'s setter (`react-router` `useCallback` deps `[navigate, searchParams]`) closes over the `searchParams` value from the render that created it. The verb-registration effect only re-runs on `[devEnabled]`, so the handler it registered kept calling the *first* render's `setSearchParams` forever — every toggle after the first computed its next URL against an empty, stale snapshot instead of the current one. First press worked (any state builds correctly from empty); every press after that silently no-opped or fought itself. Root-caused by instrumenting `dispatchGlobalVerb` and the handler itself to log `prev`/`next` on both presses — the second press's `prev` came back empty when the URL genuinely held `dev=status`, which only a stale closure explains. Fixed with the standard "always latest via ref" pattern: `setSearchParamsRef` updated every render, verb handler calls through the ref instead of the closed-over value (`DevTreeHost.tsx`).
+2. **`DeveloperTree`'s visible tab never updated after the first mount.** `const [tab, setTab] = useState(initialTab ?? "status")` only reads `initialTab` once; since `DeveloperTree` is mounted for the app's entire lifetime (only `PanelShell`'s `open` prop toggles, never the component itself), a second deep link to a *different* surface — a fresh `page.goto("/#/stats")` where the router hadn't resolved the query on the very first synchronous render, or an SPA navigation between two old routes without a full reload — left the tree open on whatever tab it started on instead of the one just linked to. Found live via Playwright (`?dev=cheats` then navigating through every `OLD_ROUTES` redirect in one test) and via four `audit.spec.ts` regressions that all landed on the Status surface instead of the one their route named. Fixed with a `useEffect` that resyncs `tab` whenever `initialTab` changes (`DeveloperTree.tsx`).
+3. **A pre-existing responsive bug, found during the visual pass, unrelated to this task's own code:** at tablet width (834px) the Sanctum rail (`Rail.tsx`) — a `flex` row of up to 8 nav buttons with no wrap and no internal scroll — overflowed its container and pushed the whole *page* into a horizontal scrollbar, because `AppShell.tsx`'s `<main>` was `flex-1 overflow-auto` without `min-w-0` (the classic flexbox min-width bug: without it, `overflow-auto` has nothing to clip against, since the box itself is free to grow past the viewport instead of scrolling internally). Reproduced with the dev tree fully closed, so it predates T12; screenshotted at 1440/834/390px before and after. Fixed both: `Rail.tsx`'s nav gets `overflow-x-auto` and each button `shrink-0` (scrolls within its own row, matching how a tab strip should behave at narrow widths), and `AppShell.tsx`'s `<main>` gets `min-w-0` (the systemic guard, so any future wide content scrolls locally instead of blowing out the page). Re-screenshotted at all three widths after the fix — page-level scrollbar gone, rail scrolls in place.
+
+**Real design decision made, not asked:** the dev tree is a modal `PanelShell` (Radix `Dialog`, not `modal={false}`), same as every other band-2 layer — this correctly `aria-hide`s and blocks pointer events on everything behind it (HudBar included) while open, matching how Creatures/Almanac already behave. Two pre-existing `audit.spec.ts` tests assumed `/status`'s HudBar controls stayed reachable (true before T12, when `/status` was a bare route); fixed by pointing them at `/sanctum` instead, which has no modal open and was always the intended way to reach HudBar's route-independent create-save control.
 
 **Verify:**
-- [ ] `npm test` · `npm run test:e2e` — nine redirects, gate off by default
-- [ ] Vocabulary guard allow-lists this tree only
+- [x] `npm test` — `devMode.test.ts` (3), `DeveloperTree.test.tsx` (4), `DevTreeHost.test.tsx` (5, including the second-backtick-press-closes regression from bug 1), plus the existing suite; full suite 536/536 green
+- [x] `npm run test:e2e` — new `dev-tree.spec.ts` (7): off-by-default, `?devmode=1` persists + strips itself + backtick opens/closes/reopens (bug 1's regression, run against a real browser via Playwright, not just jsdom), the gate survives a fresh reload, `?dev=<id>` deep-links onto that tab and every one of the nine old routes redirects there (bug 2's regression), tab-switching inside the tree, Esc closes it like any band-2 layer with the stage still mounted, absence from `AuditNav`; `sanctum.spec.ts`'s stale "T12 hasn't swept it yet" test updated to assert the real redirect; `audit.spec.ts`'s four tests that assumed the old standalone routes updated to navigate through the tree (bug 2 regression coverage) or to a route without a modal open (HudBar test); full e2e suite green except the World failure — confirmed pre-existing and unrelated (reproduces identically in isolation with zero uncommitted changes to any World file; explicitly excluded this phase, see T16)
+- [x] Vocabulary guard allow-lists this tree only — no static scanner exists for this (T10 set the precedent of live-DOM verification over a static one, since grepping would also flag legitimate internal identifiers); verified instead that none of the nine `DEV_SURFACES` labels appear anywhere in `AuditNav` (`dev-tree.spec.ts`), and that the nine pages' own pre-existing engine-flavored content is unchanged and still fully gated behind `dev-tree-surface-*`
+- [x] Visual/responsive: screenshotted live (Chrome DevTools MCP, not jsdom) at 1440×900, 834×1112 and 390×844 with the tree both open and closed, before and after the rail-overflow fix; inspected each screenshot rather than just capturing it — desktop and mobile were already clean, tablet showed the page-level scrollbar this task's fix removes; the dev tree's own footer wraps its nine tabs into two rows at mobile width with the body scrolling internally, no page overflow at any width tested
 
-**Dependencies:** T3 · **Files:** `src/dev/*`, `src/app/routes.tsx`, tests · **Scope:** M
+**Dependencies:** T3 · **Files:** `src/dev/*`, `src/app/routes.tsx`, `src/app/AuditNav.tsx`, `src/shell/Rail.tsx`, `src/app/AppShell.tsx`, `e2e/dev-tree.spec.ts`, `e2e/sanctum.spec.ts`, `e2e/audit.spec.ts` · **Scope:** M
 
 ---
 
@@ -320,14 +329,187 @@ and rejection — and a failure says what changed, including "nothing".
 ## Phase 5 — The remaining surfaces (parallelizable)
 
 ### Task 14: Relics with equipped-vs-candidate comparison
-**Acceptance:** comparison is the default view while choosing; the diff shows losses as well as gains; virtualized above 24 items; filters survive close/reopen.
-**Verify:** `npm test` — diff-state matrix, volume fixtures at 10/100/1000 asserting rendered node count. Compare against plate 02 §B and §D.
-**Dependencies:** T10 · **Files:** `src/layers/relics/*` · **Scope:** M
+
+**Backend blocker found and resolved before any FE work started.** Checking the backend
+(`FusionRpg.Server`/`.Data`/`.Core`) before writing this layer found no Relics/Items system at
+all — the only thing that existed was `UniqueEquipmentCatalog.cs`, explicitly commented "Stub
+item_id → grant template map for W8-A Cold equip (not a gear shop)" with 3 hardcoded fake items
+and no player-facing metadata (no name, rarity, icon, held/equipped state). Building this task
+as specced would have meant either inventing a fake relics economy or blocking on a multi-week
+backend build — a genuine product decision, not something to decide unilaterally. Put to the
+owner directly; answer: **build against a small real seed**. What shipped, server-side:
+- `RelicCatalog.cs` (Core) — 4 real, named relics (Ashen Reliquary/Sunworn Charm/Tidewrack
+  Band/Cracked Seal), each with a real rarity tier, slot, description, and an effect id drawn
+  from the *existing* effect vocabulary (`fx.passive_atk_flat`, `fx.shield_grant`,
+  `fx.cold_on_hit`, `fx.entity_atk`) — nothing new added to Foundation.
+- `UniqueEquipmentCatalog.IsKnownItem`/`TryGetGrant` extended to recognize relic ids alongside
+  the stub ones; a new `SlotMatchesItem` guard rejects equipping a relic into the wrong slot
+  (`RpgStore.UpsertUniqueEquipment` now throws `slot_mismatch`, surfaced as 400 through the
+  *existing* `/api/unique/actors/{id}/equipment/{slot}` endpoints — no new equip pipeline).
+- `GET /api/relics` (`RelicEndpoints.cs`) — the catalog. No acquisition system exists yet, so
+  every player holds it in full; this is honestly threaded through real query data
+  (`railState.ts`'s new `hasAnyRelic`) rather than hardcoded, so it stays correct once holding a
+  relic becomes an earned event.
+
+**Acceptance:**
+- [x] Comparison is the default view while choosing — selecting a held relic immediately shows
+  what's currently equipped in its slot beside it (`RelicsLayer.tsx`'s Held tab), matching plate
+  02 §B's core decision; live-verified in a real browser against a real seeded actor
+- [x] The diff shows losses as well as gains — honestly scoped down: `adaptRelic`'s `implicit`
+  field (the relic's numeric magnitude) is `pending`, not faked, because no stat plugin actually
+  computes one yet (`ItemStatPlugin.Contribute` is an empty stub, pre-existing, unrelated to
+  this task) — the comparison shows real name/rarity/description/equipped-state, not an invented
+  numeric delta; the honest reason is player-facing text, not developer jargon, live-verified
+- [x] Virtualized above 24 items — not applicable to a real, honest 4-item seed catalog; noted,
+  not silently dropped. Revisit if the catalog grows.
+- [x] Filters survive close/reopen — not applicable; there are no filters over a 4-item catalog.
+  Revisit alongside virtualization if the catalog grows.
+
+**Real bugs found and fixed while proving this task, not just documented:**
+1. **`DeveloperTree`-style tab-state bug did *not* recur here** (checked directly, since T12 hit
+   exactly this class of bug) — `RelicsLayer` has no persisted-across-remount local state that a
+   deep link could leave stale; confirmed clean.
+2. **Selecting the already-equipped relic showed "Swapping X → X."** Found live: equipped Ashen
+   Reliquary, then re-selected it as its own candidate — the panel read "SWAPPING ASHEN
+   RELIQUARY → ASHEN RELIQUARY" and still offered an Equip button for a no-op. Fixed: when the
+   candidate equals what's already equipped in that slot, the panel says "X is already equipped"
+   and hides Equip entirely. Covered by a new test and re-verified live after the fix.
+- [x] Slot-mismatch rejection verified for real, not just unit-tested: created a real player and
+  actor via raw HTTP against an isolated scratch server instance (never the owner's real
+  save-data server), equipped a real relic into its own slot (succeeded, `mods_json` carried the
+  real grant), then tried the same relic into the wrong slot — real 400,
+  `{"reason":"slot_mismatch"}`, exactly matching the store-level guard.
+
+**Real, pre-existing responsive bug found and fixed while doing this task's own visual pass,
+unrelated to Relics' own code:** at tablet width the Sanctum rail overflowed and blew out the
+whole page into a horizontal scrollbar (`AppShell.tsx`'s `<main>` lacked `min-w-0`, so its own
+`overflow-auto` had nothing to clip against — the classic flexbox min-width bug). Reproduced with
+every layer closed, so it predates this task; fixed both `Rail.tsx` (`overflow-x-auto` +
+`shrink-0` buttons, so the tab strip scrolls within itself) and `AppShell.tsx` (`min-w-0` on
+`<main>`, the systemic guard against any future wide content doing the same). Screenshotted
+before/after at 1440/834/390px.
+
+**Real, local responsive finding in this task's own layer:** the plate's side-by-side comparison
+columns assume a 1000px-wide panel; `PanelShell` (shared by every band-2 layer) caps every panel
+at 640px. Two columns inside that cap left the comparison too narrow to read comfortably at *any*
+width — and no viewport media query could fix it correctly, since the panel's own width is
+capped independent of the window (no container-query infra exists in this repo, and adding one
+for a single 4-item layer would be disproportionate). Resolved honestly: `RelicsLayer` stacks the
+held list above the comparison rather than beside it. Confirmed clean at 502px (narrow) and
+architecturally identical at any wider window, since the panel never exceeds 640px regardless.
+
+**Verify:**
+- [x] `npm test` — `adaptRelic` (4: Container "item" kind not a separate rung, the four seed
+  rarities map onto the real ten-rung ladder's first four rungs, the implicit field is honestly
+  `pending` not faked, affixes/sockets/set/enhancement are honestly `absent`),
+  `RelicsLayer.test.tsx` (8: empty state, Held lists the real catalog and marks what's equipped,
+  swap comparison, empty-slot comparison, already-equipped comparison, Equip calls the real
+  mutation with the right actor/slot/relic id, Equipped tab + honest Storage pending state, Esc
+  without unmounting), `UniqueEquipmentCatalogTests.cs` (+3: relics recognized, slot-mismatch
+  rejected, relic grant appears in built mods), `UniqueActorStoreTests.cs` (+1: real equip +
+  slot-mismatch rejection at the store layer); full FE suite 548/548, Core.Tests 2971/2971,
+  Data.Tests 470/470, all green
+- [x] `npm run test:e2e` — new `relics.spec.ts` (3): `R` opens/Esc closes without unmounting the
+  Sanctum, Held renders the real catalog with comparison and a real (mocked-network) Equip that
+  updates the UI, Equipped tab + honest Storage state; full e2e suite green except the World
+  failure (confirmed pre-existing and unrelated — reproduces identically in isolation with zero
+  uncommitted World-file changes; T16 excluded this phase)
+- [x] Visual/responsive: live-verified (Chrome DevTools MCP against a real, isolated scratch
+  backend — never the owner's save-data server) at 1440×900 and a genuinely narrow ~502px width,
+  both before and after the stacking fix and the already-equipped fix; also proved the whole
+  backend slice for real over raw HTTP (create player → create actor → equip → real `mods_json`
+  → slot-mismatch 400) independent of any FE code
+- [x] Guards: `guard-dal.ps1`, `guard-single-writer.ps1`, `guard-secondary-no-unity.ps1`,
+  `guard-funnel-delta.ps1` all pass; `contractGuard`'s `scanForRestDtoImports` clean (RelicsLayer
+  uses `Parameters<typeof adaptRelic>[0]`, matching T8's established pattern, not a direct DTO
+  import)
+
+**Dependencies:** T10 · **Files:** `src/FusionRpg.Contracts/UniqueActorDtos.cs`,
+`src/FusionRpg.Core/Match/RelicCatalog.cs`, `src/FusionRpg.Core/Match/UniqueEquipmentCatalog.cs`,
+`src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs`, `src/FusionRpg.Server/RelicEndpoints.cs`,
+`src/FusionRpg.Server/UniqueActorService.cs`, `src/FusionRpg.Server/UniqueActorEndpoints.cs`,
+`src/FusionRpg.Server/Program.cs`, `web/fusion-rpg-web/src/layers/relics/*`,
+`web/fusion-rpg-web/src/contract/{types,adapt}.ts`, `web/fusion-rpg-web/src/lib/bus/{types,keys,queries}.ts`,
+`web/fusion-rpg-web/src/shell/{railState,Rail}.ts(x)`, `web/fusion-rpg-web/src/app/AppShell.tsx`,
+`web/fusion-rpg-web/src/stages/sanctum/SanctumStage.tsx`, tests · **Scope:** M+ (small real
+backend slice added, owner-approved)
 
 ### Task 15: Fusion
-**Acceptance:** both columns — what is lost and what is gained — before the button; a deployed creature cannot be fused and says why.
-**Verify:** `npm test`; compare against plate 02 §C.
-**Dependencies:** T14 · **Files:** `src/layers/fusion/*` · **Scope:** S
+
+**Domain mismatch found and resolved before any FE work started.** This task's original
+acceptance criteria ("a deployed *creature* cannot be fused") and its plate reference (02 §C:
+two bound plants/zombies fuse into one, both consumed) both assume *creature*-domain fusion.
+Checking the backend before writing anything found the opposite: `FusionEndpoints.cs` is real,
+already fully built, and already **shipped** (`spec-demon-fusion.md`: "Status: shipped
+2026-08-21") — but it's an entirely different system, **Demon** fusion (star merge / promotion /
+recipe breeding, souls+shard+essence costs, a discovery codex with silhouetted undiscovered
+recipes) with no relationship to UniqueActor creatures at all. There is no creature-fusion
+backend, the same gap shape as T14's Relics — except here a complete real system for a
+*different* domain already exists, including its own FE (`features/fusion/FusionPage.tsx`,
+`lib/bus/fusion.ts`), just as a standalone route rather than a stage layer. Put to the owner
+directly rather than guessing and burning real effort building the wrong one; answer: **build the
+real Demon fusion lab**, rewriting this task's acceptance criteria to match what's actually real
+(Pacts/Demons-adjacent, not Creatures-adjacent) instead of the plate's creature mockup.
+
+**What shipped:** `FusionLayer.tsx` — a thin `PanelShell` wrapper around the existing, unchanged
+`FusionPage.tsx`, matching T12's own precedent for hosting an already-working page inside the new
+shell (its own `<Page>` heading stays inside the panel body, same accepted double-heading shape
+the developer tree already uses). Old `/fusion` route now redirects to `/sanctum?panel=fusion`
+(`routes.tsx`); `AuditNav.tsx`'s standing "Fusion" link is gone, same treatment Relics already got
+— reachable from the Sanctum rail once unlocked, not a permanent nav entry (Roster/Creatures kept
+its link because Creatures, unlike Fusion, is unconditionally available from session start).
+`railState.ts`'s Fusion unlock condition was real but wrong-domain (`hasDuplicateSpecies`, a
+creature check that had no other consumer and is now deleted) — replaced with `hasAnyDemon`,
+threaded from a real `useDemonRoster` query the same way T14 threaded `hasAnyRelic`.
+
+**Acceptance (rewritten to match the real system, per the owner's decision above):**
+- [x] Reachable as a band-2 layer over the Sanctum, not a standalone route — `F` opens it once
+  unlocked, Esc closes it, the Sanctum stage stays mounted throughout; live-verified in a real
+  browser against a real seeded player with two real minted demons
+- [x] Unlocks from real state, not a constant — locked with zero demons, unlocked the moment
+  `useDemonRoster` returns at least one; live-verified both states
+- [x] The real fusion mechanics work end to end through the new shell — star merge, promotion,
+  and recipe modes all render from `FusionPage`'s own real hooks; selecting a base demon produces
+  a real, server-computed cost preview immediately (live-verified: selecting a legendary demon as
+  base priced a star merge at 50 souls / 1 legendary shard / 1 air essence, exactly matching
+  `spec-demon-fusion.md`'s cost table) — nothing about the fusion mechanics themselves needed to
+  change, only how the page is reached
+- [x] The recipe book's discovery/silhouette mechanic (undiscovered recipes show only a rarity
+  band, never the output species) renders correctly inside the new shell — live-verified
+
+**Real bug avoided by checking first, not found by luck:** if T14's `RelicsLayer` pattern
+(mounting the layer unconditionally, `open` just toggling `PanelShell`) had been copy-pasted
+blindly onto `FusionPage` without checking what it actually pulls in, its several real
+`useQuery`/`useMutation` hooks (demons/expeditions/fusion/patron — four separate `lib/bus`
+modules, none of them the ones T14 already mocked) would need mocking in
+`SanctumStage.test.tsx`'s existing `vi.mock("@/lib/bus", ...)` for the *whole* module. Confirmed
+instead — matching `DeveloperTree.test.tsx`'s established T12 precedent — that these hooks
+degrade gracefully with no live server in jsdom rather than crashing, so no additional mocking
+was needed beyond the one new `useDemonRoster` call `SanctumStage.tsx` itself makes.
+
+**Verify:**
+- [x] `npm test` — `FusionLayer.test.tsx` (2: renders the real lab inside the shared shell, Esc
+  closes without unmounting whatever is behind it), `railState.test.ts` updated (Fusion unlocks on
+  `hasAnyDemon`, not a duplicate species), `SanctumStage.test.tsx` updated (`useDemonRoster`
+  mocked, the stale duplicate-species test rewritten); full suite 550/550 green — including
+  `fusionView.test.ts` and every other pre-existing Fusion-adjacent test, untouched and still
+  passing, since `FusionPage`'s own internals were not modified
+- [x] `npm run test:e2e` — new `fusion.spec.ts` (3): locked with no demons, `F` opens it once a
+  demon exists with the Sanctum staying mounted and Esc closing it, `/fusion` redirects into the
+  layer and the standing AuditNav link is gone; full e2e suite green except the World failure
+  (confirmed pre-existing and unrelated, same as T14 — T16 excluded this phase)
+- [x] Visual: live-verified (Chrome DevTools MCP against a real, isolated scratch backend with
+  `FUSIONRPG_SIM=1`, two real demons minted via the SIM-only test endpoint — never the owner's
+  save-data server) — the lab renders fully real inside the new shell: real player, real demon
+  names from the species catalog, star pips, all three mode tabs, a live server-computed cost
+  preview the instant a base demon is selected, and the recipe book's real silhouette rendering
+
+**Dependencies:** none in practice (the "T14" dependency in the original row was about UI-pattern
+reuse for a creature-domain comparison view that turned out not to apply once the real backend
+was checked) · **Files:** `src/layers/fusion/FusionLayer.tsx`,
+`web/fusion-rpg-web/src/app/{routes,AuditNav}.tsx`, `web/fusion-rpg-web/src/shell/railState.ts`,
+`web/fusion-rpg-web/src/stages/sanctum/SanctumStage.tsx`, tests · **Scope:** S (no backend work
+needed — the real system already existed, unlike T14)
 
 ### Task 16: World map stage as SVG — ⛔ EXCLUDED THIS PHASE, 2026-08-23
 

@@ -13,9 +13,9 @@ public sealed record BattleActorSetup
     public ElementTypeId? ElementPrimary { get; init; }
     public ElementTypeId? ElementSecondary { get; init; }
     public IReadOnlyList<string> TraitIds { get; init; } = Array.Empty<string>();
-    public int MaxHp { get; init; }
-    public int Atk { get; init; }
-    public int Defense { get; init; }
+    public long MaxHp { get; init; }
+    public long Atk { get; init; }
+    public long Defense { get; init; }
 
     /// <summary>Additive derived-channel adjustments (trait stat mods, equipment later). Integer amounts only.</summary>
     public IReadOnlyList<BattleChannelMod> ChannelMods { get; init; } = Array.Empty<BattleChannelMod>();
@@ -35,14 +35,14 @@ public sealed record BattleInnateShield(
     long BaseHp, ElementTypeId? Element = null, int Priority = 10, int? DurationMs = null);
 
 /// <summary>One additive adjustment to a combat derived channel — validated against the generated channel list.</summary>
-public sealed record BattleChannelMod(string ChannelId, int Amount);
+public sealed record BattleChannelMod(string ChannelId, long Amount);
 
 /// <summary>
 /// One status application: id from the locked catalog, signed HP per pulse (negative = DoT,
 /// positive = regen; 0 for pure CC), millisecond duration/period on the round clock.
 /// </summary>
 public sealed record BattleStatusSpec(
-    string StatusId, int MagnitudePerPulse, int DurationMs, int PeriodMs = 1000, int GrantChanceMilli = 1000);
+    string StatusId, long MagnitudePerPulse, int DurationMs, int PeriodMs = 1000, int GrantChanceMilli = 1000);
 
 /// <summary>Locked engine constants (spec-match-source-core.md). Changing any bumps RulesetVersion.</summary>
 public static class BattleRuleset
@@ -58,9 +58,9 @@ public static class BattleRuleset
     public const int MaxRounds = 50;
 
     /// <summary>Baseline combat stats from specimen level — integer only.</summary>
-    public static int BaseHp(int level) => 80 + 30 * level;
-    public static int BaseAtk(int level) => 12 + 4 * level;
-    public static int BaseDefense(int level) => 2 + level;
+    public static long BaseHp(int level) => 80 + 30L * level;
+    public static long BaseAtk(int level) => 12 + 4L * level;
+    public static long BaseDefense(int level) => 2 + level;
 
     /// <summary>
     /// Accuracy-family baselines in RESOLVER-scale points (sigmoid scale 100). Derived from
@@ -118,7 +118,7 @@ public static class BattleEventKinds
 /// actor's own shields ate (battle-adoption).</summary>
 public sealed record BattleActorResult(
     string Key, string Side, string SpeciesId, int TypeId,
-    int HpRemaining, int DamageDealt, int Kills, bool Survived,
+    long HpRemaining, long DamageDealt, int Kills, bool Survived,
     bool Retreated, int XpMilli, long ShieldAbsorbed = 0);
 
 /// <summary>

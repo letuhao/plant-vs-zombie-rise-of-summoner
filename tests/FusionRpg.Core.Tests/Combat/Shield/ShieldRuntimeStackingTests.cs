@@ -9,13 +9,16 @@ public class ShieldRuntimeStackingTests
 {
     static readonly ActorDerivedSnapshot Neutral = ActorDerivedSnapshot.StubNeutral();
 
+    // priority: not `= ShieldPolicy.PrioritySkill` — PrioritySkill is config-loaded now
+    // (tunables-ssot.md T1), and a default parameter value must be a compile-time constant.
     static ShieldGrant Grant(string owner = "entity:1", string source = "g1", ElementTypeId? el = null,
-        long baseHp = 100, int priority = ShieldPolicy.PrioritySkill, long? duration = null,
+        long baseHp = 100, int? priority = null, long? duration = null,
         bool refill = true, bool innate = false) =>
         new()
         {
             OwnerKey = owner, SourceId = source, Element = el, BaseHp = baseHp,
-            Priority = priority, DurationTicks = duration, RefillOnMerge = refill, IsInnate = innate
+            Priority = priority ?? ShieldPolicy.PrioritySkill,
+            DurationTicks = duration, RefillOnMerge = refill, IsInnate = innate
         };
 
     [Fact]

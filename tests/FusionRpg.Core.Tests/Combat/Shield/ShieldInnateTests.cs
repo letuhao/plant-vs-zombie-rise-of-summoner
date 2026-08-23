@@ -124,8 +124,8 @@ public class ShieldInnateTests
     {
         ShieldInnateCatalog.Clear();
         Assert.Throws<ArgumentOutOfRangeException>(() =>
-            ShieldInnateCatalog.Register("zombie", 7, new ShieldInnateDef(0, null)));
-        ShieldInnateCatalog.Register("zombie", 7, new ShieldInnateDef(150, ElementTypeId.Dark));
+            ShieldInnateCatalog.Register("zombie", 7, new ShieldInnateDef(0, null, ShieldPolicy.PriorityInnate)));
+        ShieldInnateCatalog.Register("zombie", 7, new ShieldInnateDef(150, ElementTypeId.Dark, ShieldPolicy.PriorityInnate));
         Assert.True(ShieldInnateCatalog.TryGet("ZOMBIE", 7, out var def));
         Assert.Equal(150, def.BaseHp);
         Assert.Equal(ShieldPolicy.PriorityInnate, def.Priority);

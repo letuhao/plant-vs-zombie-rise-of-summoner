@@ -16,16 +16,16 @@ public sealed class PlaceholderBattleResolver : IBattleResolver
     public static readonly IBattleResolver Instance = new PlaceholderBattleResolver();
 
     /// <summary>Standing on the ground when someone arrives is worth a quarter again.</summary>
-    public const int DefenderBonusMilli = 1250;
+    public static int DefenderBonusMilli => World.WorldTuningHub.Tuning.PlaceholderBattle.DefenderBonusMilli;
 
     /// <summary>A losing side this much lighter than the winner is wiped out rather than routed.</summary>
-    public const int WipeoutRatioMilli = 250;
+    public static int WipeoutRatioMilli => World.WorldTuningHub.Tuning.PlaceholderBattle.WipeoutRatioMilli;
 
     /// <summary>What a rout costs each surviving member, as a fraction of its health.</summary>
-    public const int RoutWoundMilli = 750;
+    public static int RoutWoundMilli => World.WorldTuningHub.Tuning.PlaceholderBattle.RoutWoundMilli;
 
     /// <summary>What clearing a guard costs each member, as a fraction of its health.</summary>
-    public const int GuardWoundMilli = 100;
+    public static int GuardWoundMilli => World.WorldTuningHub.Tuning.PlaceholderBattle.GuardWoundMilli;
 
     public BattleOutcome Resolve(BattleRequest request, IReadOnlyList<WorldEntity> combatants, ulong seed) =>
         request.Kind == BattleKinds.Guard

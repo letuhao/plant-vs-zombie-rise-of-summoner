@@ -105,8 +105,13 @@ public class EventDrainIntegrationTests
     }
 
     [Fact]
-    public void Extreme_merged_amounts_clamp_without_overflow()
+    public void Extreme_merged_amounts_preserve_the_exact_value()
     {
+        // P0.4 (power overflow audit): EffectEventDto.Damage is long, so a merged amount past
+        // int32 range is no longer clamped at this boundary — it is exact, the same way a single
+        // RPG-scaled hit already was. This test used to assert the clamp itself
+        // (`Assert.Equal(int.MinValue, seen.Damage)`); that assertion encoded the defect the
+        // widening fixes, not a property worth keeping.
         var h = CounterHarness();
         EffectEventDto? seen = null;
         var drain = new EventDrain(dto => { seen = dto; h.OnEvent(dto); });
@@ -116,7 +121,7 @@ public class EventDrainIntegrationTests
         drain.Drain(long.MaxValue);
 
         Assert.NotNull(seen);
-        Assert.Equal(int.MinValue, seen!.Damage); // clamped, no wraparound
+        Assert.Equal(-2L * int.MaxValue, seen!.Damage); // exact merged sum, well inside long
         Assert.Equal(2, seen.HitCount);
     }
 

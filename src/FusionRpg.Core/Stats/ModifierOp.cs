@@ -54,7 +54,7 @@ public static class StatChannels
     /// infinite fire rate; neither is shippable, and both are reachable from ordinary content
     /// (`More` −100% on an interval) rather than from a hostile edit.
     /// </summary>
-    public const double MinimumInterval = 0.01;
+    public static double MinimumInterval => Derived.StatsTuningHub.Tuning.MinimumInterval;
 
     public static ChannelDirection DirectionOf(string? channel)
     {

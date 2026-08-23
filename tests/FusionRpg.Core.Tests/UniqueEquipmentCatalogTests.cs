@@ -26,6 +26,36 @@ public class UniqueEquipmentCatalogTests
     }
 
     [Fact]
+    public void IsKnownItem_and_TryGetGrant_recognize_real_relics()
+    {
+        Assert.True(UniqueEquipmentCatalog.IsKnownItem("relic.ashen_reliquary"));
+        Assert.True(UniqueEquipmentCatalog.TryGetGrant("relic.ashen_reliquary", out var grant));
+        Assert.Equal("fx.passive_atk_flat", grant.EffectId);
+        Assert.Equal("equip-relic-ashen_reliquary", grant.GrantId);
+    }
+
+    [Fact]
+    public void SlotMatchesItem_rejects_a_relic_in_the_wrong_slot_but_allows_stub_items_anywhere()
+    {
+        Assert.True(UniqueEquipmentCatalog.SlotMatchesItem("weapon", "relic.ashen_reliquary"));
+        Assert.False(UniqueEquipmentCatalog.SlotMatchesItem("armor", "relic.ashen_reliquary"));
+        Assert.True(UniqueEquipmentCatalog.SlotMatchesItem("armor", "stub.atk_ring"));
+    }
+
+    [Fact]
+    public void BuildModsJson_includes_a_relic_grant()
+    {
+        var json = UniqueEquipmentCatalog.BuildModsJson(
+            "{}",
+            new[] { ("weapon", "relic.ashen_reliquary") });
+        using var doc = JsonDocument.Parse(json);
+        var grants = doc.RootElement.GetProperty("grants");
+        Assert.Equal(1, grants.GetArrayLength());
+        Assert.Equal("equip-relic-ashen_reliquary:weapon", grants[0].GetProperty("grantId").GetString());
+        Assert.Equal("fx.passive_atk_flat", grants[0].GetProperty("effectId").GetString());
+    }
+
+    [Fact]
     public void BuildModsJson_preserves_nested_and_flat_absolutes()
     {
         var json = UniqueEquipmentCatalog.BuildModsJson(

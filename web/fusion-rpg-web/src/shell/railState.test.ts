@@ -4,9 +4,11 @@ import { deriveRailEntries, type RailUnlockInputs } from "./railState";
 const allLocked: RailUnlockInputs = {
   currentStageId: "sanctum",
   hasCompletedARun: false,
-  hasDuplicateSpecies: false,
+  hasAnyDemon: false,
   hasAnyContract: false,
-  hasHeldASector: false,
+  hasAnyRelic: false,
+  hasAnyBoundDemon: false,
+  returnedExpeditionCount: 0,
   unreadResultCount: 0
 };
 
@@ -44,20 +46,16 @@ describe("deriveRailEntries — GG-44, renders from state", () => {
     }
   });
 
-  it("Relics has no server-backed unlock signal yet and stays honestly locked", () => {
-    const fullyPlayed: RailUnlockInputs = {
-      currentStageId: "sanctum",
-      hasCompletedARun: true,
-      hasDuplicateSpecies: true,
-      hasAnyContract: true,
-      hasHeldASector: true,
-      unreadResultCount: 0
-    };
-    expect(deriveRailEntries(fullyPlayed).find((e) => e.id === "relics")!.state).toBe("locked");
+  it("Relics unlocks once the player holds at least one relic (T14)", () => {
+    expect(deriveRailEntries(allLocked).find((e) => e.id === "relics")!.state).toBe("locked");
+    expect(deriveRailEntries({ ...allLocked, hasAnyRelic: true }).find((e) => e.id === "relics")!.state).toBe(
+      "available"
+    );
   });
 
-  it("Fusion unlocks on a duplicate species", () => {
-    const entries = deriveRailEntries({ ...allLocked, hasDuplicateSpecies: true });
+  it("Fusion unlocks once the player has a demon to fuse (T15)", () => {
+    expect(deriveRailEntries(allLocked).find((e) => e.id === "fusion")!.state).toBe("locked");
+    const entries = deriveRailEntries({ ...allLocked, hasAnyDemon: true });
     expect(entries.find((e) => e.id === "fusion")!.state).toBe("available");
   });
 
@@ -66,8 +64,22 @@ describe("deriveRailEntries — GG-44, renders from state", () => {
     expect(entries.find((e) => e.id === "pacts")!.state).toBe("available");
   });
 
-  it("Expeditions stays locked without a held sector (World excluded this phase)", () => {
+  it("Expeditions unlocks once the player has a bound demon to field (T17)", () => {
     expect(deriveRailEntries(allLocked).find((e) => e.id === "expeditions")!.state).toBe("locked");
+    const entries = deriveRailEntries({ ...allLocked, hasAnyBoundDemon: true });
+    expect(entries.find((e) => e.id === "expeditions")!.state).toBe("available");
+  });
+
+  it("Expeditions badges with the returned-but-uncollected count once unlocked", () => {
+    const entries = deriveRailEntries({ ...allLocked, hasAnyBoundDemon: true, returnedExpeditionCount: 2 });
+    const expeditions = entries.find((e) => e.id === "expeditions")!;
+    expect(expeditions.state).toBe("badged");
+    expect(expeditions.badgeCount).toBe(2);
+  });
+
+  it("a returned-expedition count does not badge a still-locked Expeditions", () => {
+    const entries = deriveRailEntries({ ...allLocked, returnedExpeditionCount: 2 });
+    expect(entries.find((e) => e.id === "expeditions")!.state).toBe("locked");
   });
 
   it("Almanac and Chronicle unlock together on the first completed run", () => {

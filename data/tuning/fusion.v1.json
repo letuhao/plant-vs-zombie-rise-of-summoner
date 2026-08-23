@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/demons/spec-demon-fusion.md",
+    "note": "Extracted byte-identical from StarPolicy.cs (tunables-ssot.md M.4, 2026-08-23). SacrificesForStar's 1..5 bound and StarCap's rarity->cap shape stay structural (the star system's own range), only the numbers a balance pass would tune moved.",
+    "rebalance": "Never hand-edit this file. python tools/tuning/publish.py fusion <dotted.key>=<value> [...] writes fusion.v{n+1}.json; the old version stays on disk for revert."
+  },
+  "perStarPowerMilli": 30,
+  "perStarDefenseMilli": 30,
+  "starCap": {
+    "common": 3,
+    "rare": 4,
+    "epic": 5,
+    "legendary": 5
+  },
+  "starMergeCost": { "souls": 50, "shardCount": 1, "essenceCount": 1 },
+  "promotionCost": { "souls": 200, "shardCount": 3, "essenceCount": 3 },
+  "recipeCost": {
+    "rare":      { "souls": 150,  "shardRarity": "common", "shardCount": 2, "essenceCount": 2 },
+    "epic":      { "souls": 400,  "shardRarity": "rare",   "shardCount": 3, "essenceCount": 4 },
+    "legendary": { "souls": 1000, "shardRarity": "epic",   "shardCount": 4, "essenceCount": 8 }
+  }
+}

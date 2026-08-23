@@ -769,7 +769,7 @@ public static class CheatActions
         }
     }
 
-    public static void SetSelectedZombieHealth(int hp)
+    public static void SetSelectedZombieHealth(long hp)
     {
         foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
         {

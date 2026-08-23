@@ -588,9 +588,9 @@ public static class GameHooks
     static long _dmgScalePvzRev = long.MinValue;
     static bool _dmgScaleActive;
     static float _plantDefPct = 1f;
-    static int _plantDefFlat;
+    static long _plantDefFlat;
     static float _zombieDefPct = 1f;
-    static int _zombieDefFlat;
+    static long _zombieDefFlat;
 
     static void EnsureDamageScaleCache(StatsConfig s)
     {
@@ -625,7 +625,11 @@ public static class GameHooks
             var before = damage;
             EnsureDamageScaleCache(s);
             if (_dmgScaleActive)
-                damage = StatMath.ScaleIncoming(damage, _plantDefPct, _plantDefFlat);
+                // ScaleIncoming now works in long (defense flat rides the same RPG-scaled channel
+                // as Atk/Hp); damage is Harmony's own int parameter on Plant.TakeDamage and cannot
+                // widen, so the result is clamped back at this boundary — never a silent narrow.
+                damage = Bridges.ZombieCombatFields.ClampToInt32(
+                    StatMath.ScaleIncoming(damage, _plantDefPct, _plantDefFlat));
             // v2 record path (Task 9) — mirrors ZombieTakeDamage; melee bites consume the
             // AttackPlant prefix's pending pair id inside TryRecordTaken.
             var telemetry = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive;
@@ -730,7 +734,10 @@ public static class GameHooks
             var before = theDamage;
             EnsureDamageScaleCache(s);
             if (_dmgScaleActive)
-                theDamage = StatMath.ScaleIncoming(theDamage, _zombieDefPct, _zombieDefFlat);
+                // Same boundary as PlantTakeDamage — theDamage is Harmony's own int on
+                // Zombie.TakeDamage; clamp back rather than narrow silently.
+                theDamage = Bridges.ZombieCombatFields.ClampToInt32(
+                    StatMath.ScaleIncoming(theDamage, _zombieDefPct, _zombieDefFlat));
             // v2 record path (Task 9): telemetry/session keeps the legacy dict path for
             // fidelity; otherwise grants get compact records via the drain host.
             var telemetry = s.LogDamage || (RpgHost.Client?.Stats.LogDamage ?? false) || DebugRuntime.SessionActive;

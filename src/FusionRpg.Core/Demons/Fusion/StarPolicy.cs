@@ -7,15 +7,22 @@ namespace FusionRpg.Core.Demons.Fusion;
 /// </summary>
 public static class StarPolicy
 {
-    public const int PerStarPowerMilli = 30;
-    public const int PerStarDefenseMilli = 30;
+    static FusionTuning? _tuning;
 
-    public static int StarCap(DemonRarity rarity) => rarity switch
-    {
-        DemonRarity.Common => 3,
-        DemonRarity.Rare => 4,
-        _ => 5
-    };
+    /// <summary>Host-only (Injector/Server startup, or a test's inline construction) — also
+    /// configures <see cref="FusionCostTable"/>, which reads the same tuning file.</summary>
+    public static void Configure(FusionTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    internal static FusionTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "StarPolicy.Configure(...) has not run. Every fusion rule reads data/tuning/fusion.v{n}.json " +
+        "(tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    public static int PerStarPowerMilli => Tuning.PerStarPowerMilli;
+    public static int PerStarDefenseMilli => Tuning.PerStarDefenseMilli;
+
+    public static int StarCap(DemonRarity rarity) =>
+        Tuning.StarCap.TryGetValue(rarity, out var v) ? v : Tuning.StarCap[DemonRarity.Legendary];
 
     /// <summary>Same-rarity sacrifices consumed to reach star n (n+1 curve).</summary>
     public static int SacrificesForStar(int targetStar)
@@ -35,16 +42,23 @@ public sealed record FusionCost(long Souls, DemonRarity ShardRarity, int ShardCo
 
 public static class FusionCostTable
 {
-    public static FusionCost StarMerge(DemonRarity baseRarity) => new(50, baseRarity, 1, 1);
-
-    public static FusionCost Promotion(DemonRarity newRarity) => new(200, newRarity, 3, 3);
-
-    public static FusionCost Recipe(DemonRarity resultRarity) => resultRarity switch
+    public static FusionCost StarMerge(DemonRarity baseRarity)
     {
-        DemonRarity.Rare => new FusionCost(150, DemonRarity.Common, 2, 2),
-        DemonRarity.Epic => new FusionCost(400, DemonRarity.Rare, 3, 4),
-        DemonRarity.Legendary => new FusionCost(1000, DemonRarity.Epic, 4, 8),
-        _ => throw new ArgumentOutOfRangeException(nameof(resultRarity), resultRarity,
-            "recipes only produce rare and above")
-    };
+        var c = StarPolicy.Tuning.StarMergeCost;
+        return new FusionCost(c.Souls, baseRarity, c.ShardCount, c.EssenceCount);
+    }
+
+    public static FusionCost Promotion(DemonRarity newRarity)
+    {
+        var c = StarPolicy.Tuning.PromotionCost;
+        return new FusionCost(c.Souls, newRarity, c.ShardCount, c.EssenceCount);
+    }
+
+    public static FusionCost Recipe(DemonRarity resultRarity)
+    {
+        if (!StarPolicy.Tuning.RecipeCost.TryGetValue(resultRarity, out var c))
+            throw new ArgumentOutOfRangeException(nameof(resultRarity), resultRarity,
+                "recipes only produce rare and above");
+        return new FusionCost(c.Souls, c.ShardRarity, c.ShardCount, c.EssenceCount);
+    }
 }

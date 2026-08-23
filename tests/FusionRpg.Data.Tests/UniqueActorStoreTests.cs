@@ -339,6 +339,20 @@ public class UniqueActorStoreTests : IDisposable
     }
 
     [Fact]
+    public void Equipment_equips_a_real_relic_and_rejects_wrong_slot()
+    {
+        var a = _store.CreateUniqueActor(_playerId, "plant", 1);
+        var eq = _store.UpsertUniqueEquipment(a.InstanceId, "weapon", "relic.ashen_reliquary");
+        Assert.Contains(eq.Items, x => x.Slot == "weapon" && x.ItemId == "relic.ashen_reliquary");
+        Assert.Contains("fx.passive_atk_flat", eq.ModsJson, StringComparison.Ordinal);
+
+        var mismatch = Assert.Throws<ArgumentException>(() =>
+            _store.UpsertUniqueEquipment(a.InstanceId, "armor", "relic.ashen_reliquary"));
+        Assert.Equal("itemId", mismatch.ParamName);
+        Assert.StartsWith("slot_mismatch", mismatch.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Equipment_same_stub_two_slots_unique_grantIds()
     {
         var a = _store.CreateUniqueActor(_playerId, "zombie", 2);

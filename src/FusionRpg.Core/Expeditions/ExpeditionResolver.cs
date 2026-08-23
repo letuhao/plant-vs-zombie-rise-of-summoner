@@ -48,12 +48,15 @@ public static class ExpeditionResolver
 {
     // Event roll CEILINGS (‰, cumulative): quiet <400, found-souls <750, wild-demon-met <900,
     // injury ≥900 — i.e. band widths 400/350/150/100. Edit widths by moving every later ceiling.
-    const int QuietCeilMilli = 400;
-    const int FoundSoulsCeilMilli = 750;
-    const int WildCeilMilli = 900;
-    const int WildJoinMilli = 250;
-    const int ShinyDie = 64;
-    const int InjuryPowerDivisor = 4; // −25% Atk per injury on the omni power channel
+    // Loaded (tunables-ssot.md T1) — see ExpeditionTuningHub. −25% Atk per injury, on the omni
+    // power channel, is InjuryPowerDivisor's shape (divide by 4).
+    static ExpeditionEventRollTuning R => ExpeditionTuningHub.Tuning.EventRoll;
+    static int QuietCeilMilli => R.QuietCeilMilli;
+    static int FoundSoulsCeilMilli => R.FoundSoulsCeilMilli;
+    static int WildCeilMilli => R.WildCeilMilli;
+    static int WildJoinMilli => R.WildJoinMilli;
+    static int ShinyDie => R.ShinyDie;
+    static int InjuryPowerDivisor => R.InjuryPowerDivisor;
 
     public static ExpeditionResolution Resolve(
         string tierId, IReadOnlyList<BattleActorSetup> squad, ulong seed, int elapsedTicks)

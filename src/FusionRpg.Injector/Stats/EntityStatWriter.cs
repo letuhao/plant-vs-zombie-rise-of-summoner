@@ -17,7 +17,7 @@ public static class EntityStatWriter
     {
         public long Hp;
         public long MaxHp;
-        public int Atk;
+        public long Atk;
         public string Source = "";
         public DateTime Utc = DateTime.UtcNow;
     }
@@ -47,7 +47,7 @@ public static class EntityStatWriter
             p.thePlantMaxHealth = max;
             p.thePlantHealth = hp;
             if (!CheatState.On("D-PROBE-BULLET"))
-                p.attackDamage = y.Atk;
+                p.attackDamage = ZombieCombatFields.ClampToInt32(y.Atk);
 
             // E16: fire rate and sun rate, composed. A zero means the baseline had none, so there
             // is nothing to write — never a zero interval, which is a divide-by-zero or an infinite
@@ -78,11 +78,11 @@ public static class EntityStatWriter
             var hp = StatSystem.CurrentHpForWrite(preserve, previousHp, previousMax, y.Hp, y.MaxHp);
             ZombieCombatFields.SetMaxHp(z, max);
             ZombieCombatFields.SetHp(z, hp);
-            if (y.Arm1Max > 0) z.theFirstArmorMaxHealth = y.Arm1Max;
-            if (y.Arm1 > 0) z.theFirstArmorHealth = y.Arm1;
-            if (y.Arm2Max > 0) z.theSecondArmorMaxHealth = y.Arm2Max;
-            if (y.Arm2 > 0) z.theSecondArmorHealth = y.Arm2;
-            z.theAttackDamage = Math.Max(1, y.Atk);
+            if (y.Arm1Max > 0) z.theFirstArmorMaxHealth = ZombieCombatFields.ClampToInt32(y.Arm1Max);
+            if (y.Arm1 > 0) z.theFirstArmorHealth = ZombieCombatFields.ClampToInt32(y.Arm1);
+            if (y.Arm2Max > 0) z.theSecondArmorMaxHealth = ZombieCombatFields.ClampToInt32(y.Arm2Max);
+            if (y.Arm2 > 0) z.theSecondArmorHealth = ZombieCombatFields.ClampToInt32(y.Arm2);
+            z.theAttackDamage = ZombieCombatFields.ClampToInt32(Math.Max(1L, y.Atk));
             if (y.ZombieSpeed > 0) z.uniqueSpeed = (float)y.ZombieSpeed;
             try { z.UpdateHealthText(); } catch { }
 
@@ -212,17 +212,21 @@ public static class EntityStatWriter
         }
     }
 
-    public static void ForceSetPlantHp(Plant p, int hp, string source)
+    public static void ForceSetPlantHp(Plant p, long hp, string source)
     {
         if (p == null) return;
         try
         {
-            var max = Math.Max(p.thePlantMaxHealth, hp);
+            // hp arrives long (RPG-scaled); thePlantHealth is Unity's own int field, so it is
+            // clamped at the write boundary — the same pattern WritePlant already uses — instead
+            // of the implicit narrowing cast this signature used to hide.
+            var max = ZombieCombatFields.ClampToInt32(Math.Max(p.thePlantMaxHealth, hp));
+            var clamped = ZombieCombatFields.ClampToInt32(hp);
             p.thePlantMaxHealth = max;
-            p.thePlantHealth = hp;
+            p.thePlantHealth = clamped;
             try { p.UpdateText(); } catch { }
-            Remember(p.Pointer, hp, max, p.attackDamage, source);
-            ProofWrite("plant", p.Pointer, source, hp, max, p.attackDamage, hp, max, p.attackDamage);
+            Remember(p.Pointer, clamped, max, p.attackDamage, source);
+            ProofWrite("plant", p.Pointer, source, clamped, max, p.attackDamage, clamped, max, p.attackDamage);
         }
         catch (Exception ex) { CheatState.Error("force plant hp: " + ex.Message); }
     }
@@ -300,7 +304,7 @@ public static class EntityStatWriter
         catch (Exception ex) { CheatState.Error("scale zombie: " + ex.Message); }
     }
 
-    static void Remember(IntPtr ptr, long hp, long maxHp, int atk, string source)
+    static void Remember(IntPtr ptr, long hp, long maxHp, long atk, string source)
     {
         Registry[ptr] = new AppliedFinal
         {
@@ -314,8 +318,8 @@ public static class EntityStatWriter
 
     static void ProofWrite(
         string side, IntPtr ptr, string source,
-        long hpBefore, long maxBefore, int atkBefore,
-        long hpAfter, long maxAfter, int atkAfter)
+        long hpBefore, long maxBefore, long atkBefore,
+        long hpAfter, long maxAfter, long atkAfter)
     {
         if (!(CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))) return;
         try
@@ -430,14 +434,4 @@ public static class EntityStatWriter
             catch { }
         }
     }
-}
-
-/// <summary>Backward-compatible alias — all combat writes go through EntityStatWriter.</summary>
-public static class UnityStatWriter
-{
-    public static void WritePlant(Plant p, EntityFinal y, int previousHp, int previousMax, bool preserveHpRatio) =>
-        EntityStatWriter.WritePlant(p, y, previousHp, previousMax, preserveHpRatio, "legacy");
-
-    public static void WriteZombie(Zombie z, EntityFinal y, int previousHp, int previousMax, bool preserveHpRatio) =>
-        EntityStatWriter.WriteZombie(z, y, previousHp, previousMax, preserveHpRatio, "legacy");
 }

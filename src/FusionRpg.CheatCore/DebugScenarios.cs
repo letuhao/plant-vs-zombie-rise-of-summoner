@@ -62,6 +62,8 @@ public static class DebugScenarios
         "debug.combat.silence-vanilla",
         "debug.combat.probe",
         "debug.combat.snapshot",
+        "debug.shield.demo-all",
+        "debug.shield.snapshot",
         "debug.fx.probe-shaders",
         "debug.fx.world-flash",
         "debug.fx.play",

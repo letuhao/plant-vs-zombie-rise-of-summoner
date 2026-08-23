@@ -3,6 +3,7 @@ namespace FusionRpg.Core.Combat.Element;
 /// <summary>Weighted element component list — weights must be positive and sum to 1.</summary>
 public sealed class ElementPayload
 {
+    // structural: floating-point comparison tolerance, not a balance number (tunables-ssot.md T2).
     public const double WeightSumEpsilon = 1e-6;
 
     readonly IReadOnlyList<ElementPayloadComponent> _components;

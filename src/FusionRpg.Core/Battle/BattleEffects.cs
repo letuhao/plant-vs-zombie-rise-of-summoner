@@ -6,8 +6,8 @@ namespace FusionRpg.Core.Battle;
 /// <summary>HP surface the battle sink mutates — implemented by engine actor state (and test fakes).</summary>
 public interface IBattleHpTarget
 {
-    int Hp { get; set; }
-    int MaxHp { get; }
+    long Hp { get; set; }
+    long MaxHp { get; }
 }
 
 /// <summary>One FA10 window result: the clamped delta actually applied to an actor.</summary>

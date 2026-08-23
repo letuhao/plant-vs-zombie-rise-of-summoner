@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/combat-damage-ssot.md",
+    "note": "Extracted byte-identical from CombatPolicy.cs (tunables-ssot.md M.4, 2026-08-23). lastCol/lastRow are board geometry (Lawn.LawnCoordMath), not balance, and stay in code.",
+    "rebalance": "Never hand-edit this file. python tools/tuning/publish.py combat <dotted.key>=<value> [...] writes combat.v{n+1}.json; the old version stays on disk for revert."
+  },
+  "procDepthLimit": 6,
+  "defaultMaxTargets": 8,
+  "areaDefaultSquareSize": 3,
+  "areaDefaultRectangleWidth": 3,
+  "areaDefaultRectangleHeight": 3,
+  "dotDefaultPeriodMs": 1000,
+  "dotDefaultDurationMs": 5000
+}

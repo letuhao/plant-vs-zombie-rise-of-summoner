@@ -44,7 +44,7 @@ public sealed record TraitBattleDef
 public static class TraitBattleMath
 {
     /// <summary>Berserker damage multiplier (‰) from own HP — staged, integer-only.</summary>
-    public static int BerserkerRampMilli(TraitBattleDef def, int hp, int maxHp)
+    public static int BerserkerRampMilli(TraitBattleDef def, long hp, long maxHp)
     {
         if (maxHp <= 0) return 1000;
         if (hp * 4 < maxHp) return 1000 + def.BerserkRampQuarterMilli;

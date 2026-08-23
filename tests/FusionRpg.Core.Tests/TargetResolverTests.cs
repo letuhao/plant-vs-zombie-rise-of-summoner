@@ -101,7 +101,8 @@ public class TargetResolverTests
     [Fact]
     public void Area_square_default_size_from_policy()
     {
-        var policy = new CombatPolicy { AreaDefaultSquareSize = 3 };
+        var policy = CombatPolicy.FromDefault();
+        policy.AreaDefaultSquareSize = 3;
         var spec = new TargetSpec
         {
             Mode = TargetModes.Area,

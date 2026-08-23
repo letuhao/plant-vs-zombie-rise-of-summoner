@@ -8,12 +8,19 @@ const mockUsePlayers = vi.fn();
 const mockUseUniqueActors = vi.fn();
 const mockUseRuns = vi.fn();
 const mockUseSoulBalance = vi.fn();
+const mockUseRelics = vi.fn();
+const mockUseDemonRoster = vi.fn();
 
 vi.mock("@/lib/bus", () => ({
   usePlayers: () => mockUsePlayers(),
   useUniqueActors: () => mockUseUniqueActors(),
   useRuns: () => mockUseRuns(),
-  useSoulBalance: () => mockUseSoulBalance()
+  useSoulBalance: () => mockUseSoulBalance(),
+  useRelics: () => mockUseRelics(),
+  useDemonRoster: () => mockUseDemonRoster(),
+  useSpeciesIndex: () => new Map(),
+  useUniqueEquipment: () => ({ data: { items: [] } }),
+  usePutUniqueEquipment: () => ({ mutate: vi.fn(), isPending: false })
 }));
 
 vi.mock("@/lib/bus/contracts", () => ({
@@ -25,7 +32,10 @@ vi.mock("@/lib/bus/contracts", () => ({
       deployFloor: 0,
       loyaltyMax: 0
     }
-  })
+  }),
+  useBuyContractSlot: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+  usePerformRitual: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
+  useReleaseContract: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false })
 }));
 
 const noActors = { playerId: 1, items: [] as unknown[] };
@@ -43,6 +53,8 @@ beforeEach(() => {
   mockUseSoulBalance.mockReturnValue({
     data: { playerId: 1, balance: 250, earnedTotal: 250, spentTotal: 0, revision: 1, updatedUtc: "" }
   });
+  mockUseRelics.mockReturnValue({ data: { items: [] } });
+  mockUseDemonRoster.mockReturnValue({ data: { items: [] } });
 });
 
 describe("SanctumStage", () => {
@@ -128,15 +140,9 @@ describe("SanctumStage — with a bound creature", () => {
     expect(screen.getByTestId("focus-card-count")).toHaveTextContent("1 creature bound");
   });
 
-  it("Fusion unlocks once two actors share a species", () => {
-    mockUseUniqueActors.mockReturnValue({
-      data: {
-        playerId: 1,
-        items: [
-          { instanceId: "a1", playerId: 1, side: "plant", typeId: 3, phase: "Roster", level: 5, xp: 10, revision: 1 },
-          { instanceId: "a2", playerId: 1, side: "plant", typeId: 3, phase: "Roster", level: 2, xp: 0, revision: 1 }
-        ]
-      }
+  it("Fusion unlocks once the player has a demon to fuse (T15)", () => {
+    mockUseDemonRoster.mockReturnValue({
+      data: { items: [{ profile: { instanceId: "d1" }, actor: { level: 1 } }] }
     });
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
     expect(screen.getByTestId("rail-fusion")).not.toBeDisabled();

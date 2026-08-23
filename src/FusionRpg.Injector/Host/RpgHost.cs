@@ -51,6 +51,47 @@ public static class RpgHost
         EnableUnsafeHitPatches = _config.EnableUnsafeHitPatches;
         try { _gameProfileId = Bridges.ZombieCombatFields.ProfileId; }
         catch { _gameProfileId = FusionRpg.Contracts.RpgConstants.GameId381; }
+
+        // tunables-ssot.md §7.2: the injector loads data/tuning/ and injects it; Core never reads a
+        // file. Copied next to the built plugin DLL by the host .csproj (BepInEx / MelonLoader).
+        var tuningDir = System.IO.Path.Combine(_pluginDir, "data", "tuning");
+        FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
+            FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "contracts.v1.json"))));
+        FusionRpg.Core.World.Loam.LoamPolicy.Configure(
+            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "loam.v1.json"))));
+        FusionRpg.Core.World.WorldTuningHub.Configure(
+            FusionRpg.Core.World.WorldTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "world.v1.json"))));
+        FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
+            FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "souls.v1.json"))));
+        FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
+            FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "patron.v1.json"))));
+        FusionRpg.Core.Combat.Shield.ShieldPolicy.Configure(
+            FusionRpg.Core.Combat.Shield.ShieldTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "shield.v1.json"))));
+        FusionRpg.Core.Combat.CombatPolicy.Configure(
+            FusionRpg.Core.Combat.CombatTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "combat.v1.json"))));
+        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "fusion.v1.json"))));
+        FusionRpg.Core.Status.StatusPolicy.Configure(
+            FusionRpg.Core.Status.StatusTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "status.v1.json"))));
+        FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
+            FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "overlay.v1.json"))));
+        FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
+            FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "stats.v1.json"))));
+        FusionRpg.Core.Expeditions.ExpeditionTuningHub.Configure(
+            FusionRpg.Core.Expeditions.ExpeditionTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "expeditions.v1.json"))));
+
         IsInitialized = true;
     }
 

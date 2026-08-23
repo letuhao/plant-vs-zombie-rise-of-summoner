@@ -28,7 +28,8 @@ import type {
   TypeItem,
   UniqueActorDto,
   UniqueActorListDto,
-  UniqueEquipmentListDto
+  UniqueEquipmentListDto,
+  RelicCatalogListDto
 } from "./types";
 
 function hubConnected(status: string): boolean {
@@ -337,6 +338,16 @@ export function useUniqueEquipment(instanceId: string | null | undefined) {
     enabled: id.length > 0,
     staleTime: 5_000,
     retry: false
+  });
+}
+
+/** T14: the seeded relic catalog — small and real, no acquisition system yet (every
+ * player holds it in full), so this rarely changes and needs no refetch interval. */
+export function useRelics() {
+  return useQuery({
+    queryKey: queryKeys.relics,
+    queryFn: () => getJson<RelicCatalogListDto>("/api/relics"),
+    staleTime: 60_000
   });
 }
 

@@ -28,6 +28,12 @@ jobs:
           cache: npm
           cache-dependency-path: web/fusion-rpg-web/package-lock.json
 
+      - name: Numeric-overflow guard (power-plan.md P0.6)
+        shell: pwsh
+        run: |
+          python scripts/audit-overflow.py
+          if ($LASTEXITCODE -ne 0) { throw "overflow audit found a critical finding — see output above" }
+
       - name: Restore / test (.NET)
         shell: pwsh
         run: |

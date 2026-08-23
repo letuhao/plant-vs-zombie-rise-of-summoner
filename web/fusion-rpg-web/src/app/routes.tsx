@@ -1,8 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { CatalogPage } from "@/features/catalog/CatalogPage";
 import { DemonsPage } from "@/features/demons/DemonsPage";
-import { ExpeditionsPage } from "@/features/expeditions/ExpeditionsPage";
-import { FusionPage } from "@/features/fusion/FusionPage";
 import { LawnStage } from "@/stages/lawn/LawnStage";
 import { SanctumStage } from "@/stages/sanctum/SanctumStage";
 import { ActorLadderDemoPage } from "@/ui/actor/ActorLadderDemoPage";
@@ -46,8 +44,9 @@ export function AppRoutes() {
         <Route path="world" element={<WorldPage />} />
         <Route path="roster" element={<Navigate to="/sanctum?panel=creatures" replace />} />
         <Route path="demons" element={<DemonsPage />} />
-        <Route path="expeditions" element={<ExpeditionsPage />} />
-        <Route path="fusion" element={<FusionPage />} />
+        <Route path="expeditions" element={<Navigate to="/sanctum?panel=expeditions" replace />} />
+        <Route path="fusion" element={<Navigate to="/sanctum?panel=fusion" replace />} />
+        <Route path="pacts" element={<Navigate to="/sanctum?panel=pacts" replace />} />
         <Route path="*" element={<Navigate to="/sanctum" replace />} />
       </Route>
     </Routes>

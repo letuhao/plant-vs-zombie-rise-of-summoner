@@ -62,7 +62,7 @@ public sealed class EffectEventDto
     [JsonPropertyName("targetPtr")] public string? TargetPtr { get; set; }
     [JsonPropertyName("typeId")] public int? TypeId { get; set; }
     [JsonPropertyName("targetTypeId")] public int? TargetTypeId { get; set; }
-    [JsonPropertyName("damage")] public int? Damage { get; set; }
+    [JsonPropertyName("damage")] public long? Damage { get; set; }
     [JsonPropertyName("killerPtr")] public string? KillerPtr { get; set; }
     [JsonPropertyName("tick")] public long Tick { get; set; }
     [JsonPropertyName("scenarioId")] public string? ScenarioId { get; set; }

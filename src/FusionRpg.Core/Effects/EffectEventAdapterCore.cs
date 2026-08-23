@@ -64,7 +64,7 @@ public static class EffectEventAdapterCore
             TargetPtr = Str(p, "targetPtr"),
             TypeId = IntOrNull(p, "fromType"),
             TargetTypeId = IntOrNull(p, "targetType"),
-            Damage = IntOrNull(p, "damage"),
+            Damage = LongOrNull(p, "damage"),
             Tick = tick,
             ScenarioId = Str(p, "scenarioId")
         };
@@ -82,7 +82,7 @@ public static class EffectEventAdapterCore
             TargetPtr = Str(p, "ptr"),
             TypeId = IntOrNull(p, "type") ?? IntOrNull(p, "typeId"),
             TargetTypeId = IntOrNull(p, "type") ?? IntOrNull(p, "typeId"),
-            Damage = IntOrNull(p, "damage"),
+            Damage = LongOrNull(p, "damage"),
             Tick = tick,
             ScenarioId = Str(p, "scenarioId")
         };
@@ -135,6 +135,15 @@ public static class EffectEventAdapterCore
     {
         if (!p.TryGetValue(key, out var v) || v == null) return null;
         try { return Convert.ToInt32(v, System.Globalization.CultureInfo.InvariantCulture); }
+        catch { return null; }
+    }
+
+    /// <summary>Damage is a magnitude, not an id — parsed to <c>long</c> so a power-scaled hit
+    /// doesn't silently truncate through the same path <see cref="IntOrNull"/> uses for type ids.</summary>
+    static long? LongOrNull(Dictionary<string, object> p, string key)
+    {
+        if (!p.TryGetValue(key, out var v) || v == null) return null;
+        try { return Convert.ToInt64(v, System.Globalization.CultureInfo.InvariantCulture); }
         catch { return null; }
     }
 }

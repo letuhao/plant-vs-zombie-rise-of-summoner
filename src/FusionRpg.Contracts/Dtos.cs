@@ -5,11 +5,11 @@ namespace FusionRpg.Contracts;
 public sealed class StatMod
 {
     [JsonPropertyName("hpPercent")] public float HpPercent { get; set; } = 1f;
-    [JsonPropertyName("hpFlat")] public int HpFlat { get; set; }
+    [JsonPropertyName("hpFlat")] public long HpFlat { get; set; }
     [JsonPropertyName("attackPercent")] public float AttackPercent { get; set; } = 1f;
-    [JsonPropertyName("attackFlat")] public int AttackFlat { get; set; }
+    [JsonPropertyName("attackFlat")] public long AttackFlat { get; set; }
     [JsonPropertyName("defensePercent")] public float DefensePercent { get; set; } = 1f;
-    [JsonPropertyName("defenseFlat")] public int DefenseFlat { get; set; }
+    [JsonPropertyName("defenseFlat")] public long DefenseFlat { get; set; }
 }
 
 public sealed class StatsConfig

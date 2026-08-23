@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/demons/spec-patron-demon.md",
+    "note": "Extracted byte-identical from PatronPolicy.cs (tunables-ssot.md M.3, 2026-08-23). killSoulCap is named for deletion by caps-reconcile (power-plan.md T3.6, not yet authorized) — config-driven now so T3.6 only has to delete a row.",
+    "rebalance": "Never hand-edit this file. python tools/tuning/publish.py patron <dotted.key>=<value> [...] writes patron.v{n+1}.json; the old version stays on disk for revert."
+  },
+  "switchCostSouls": 100,
+  "auraClampMilli": 150,
+  "perStarMilli": 10,
+  "killSoulCap": 50,
+  "rarityBaseMilli": {
+    "common": 20,
+    "rare": 30,
+    "epic": 45,
+    "legendary": 60
+  }
+}

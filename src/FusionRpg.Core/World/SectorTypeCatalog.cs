@@ -12,7 +12,7 @@ public enum SectorTypeFlags
     Boss = 4,
     /// <summary>A chokepoint joining clusters.</summary>
     Nexus = 8,
-    Fortress = 16
+    Fortress = 1 << 4
 }
 
 /// <summary>One sector type. Core is net6 / C# 10 — no <c>required</c>; Validate() rejects bad rows.</summary>

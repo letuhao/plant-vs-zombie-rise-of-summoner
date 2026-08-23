@@ -31,6 +31,9 @@ public readonly record struct TurnEvent(int TimeMilli, string EntityId, string K
 /// </summary>
 public sealed class TurnEventQueue
 {
+    // structural, not tunable — tunables-ssot.md T2: these are the definitional bounds of "a turn's
+    // own timeline" (0..1000 per-mille), not a balance number a rebalance would move independently
+    // of the per-mille convention every other fraction in this repo already uses.
     public const int TurnStartMilli = 0;
     public const int TurnEndMilli = 1000;
 

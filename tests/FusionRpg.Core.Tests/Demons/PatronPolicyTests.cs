@@ -59,7 +59,7 @@ public class PatronPolicyTests
     public void Patron_kill_earn_respects_the_soul_cap_boundary()
     {
         // Total souls across a whole match can never pass 50 — walk the full sequence.
-        var souls = 0;
+        long souls = 0;
         var counted = 0;
         for (var kill = 0; kill < 200; kill++)
         {

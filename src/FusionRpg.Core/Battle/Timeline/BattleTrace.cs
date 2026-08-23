@@ -57,7 +57,7 @@ public sealed class BattleTrace
         _lines.Add($"phase {round} {phase}");
     }
 
-    public void State(int round, string actorKey, int hp, long shieldAbsorbed) =>
+    public void State(int round, string actorKey, long hp, long shieldAbsorbed) =>
         _lines.Add($"state {round} {actorKey} hp={hp} abs={shieldAbsorbed}");
 
     /// <summary>

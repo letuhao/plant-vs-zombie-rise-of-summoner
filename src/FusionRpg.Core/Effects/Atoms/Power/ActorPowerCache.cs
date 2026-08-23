@@ -57,7 +57,7 @@ public sealed class ActorPowerCache
 
         // Channel-writing kinds are aggregated; everything else is priced per atom, because two
         // status applications are two effects rather than one bigger one.
-        var byChannel = new Dictionary<(string Kind, string Channel), int>();
+        var byChannel = new Dictionary<(string Kind, string Channel), long>();
 
         foreach (var atom in atoms)
         {
@@ -106,7 +106,7 @@ public sealed class ActorPowerCache
     /// not about a body an effect conjures. A 5000 hp summon is worth 5000 hp of survivability to
     /// whoever summoned it, and treating it as base would price the whole spawn at zero (D3).</para>
     /// </summary>
-    public static PowerVector PriceBody(int hp, int atk, PowerTables? tables = null)
+    public static PowerVector PriceBody(long hp, long atk, PowerTables? tables = null)
     {
         var t = tables ?? PowerTables.Current;
         var body = PowerVector.Zero;

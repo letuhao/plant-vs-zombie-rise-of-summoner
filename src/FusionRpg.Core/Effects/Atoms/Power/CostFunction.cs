@@ -178,7 +178,7 @@ public static class CostFunction
     /// one fixed at 150 are priced alike, which is wrong in the direction that does not matter for a
     /// budget.</para>
     /// </summary>
-    public static int MeanMagnitude(
+    public static long MeanMagnitude(
         AtomRow atom, AtomKind kind, IReadOnlyDictionary<string, JsonElement> pars)
     {
         foreach (var def in kind.Params.Defs)
@@ -187,7 +187,7 @@ public static class CostFunction
             if (!pars.TryGetValue(def.Name, out var raw)) continue;
             if (!AtomJson.TryReadValueSpec(raw, out var spec).IsOk) continue;
 
-            return (int)PowerMath.DivRound((long)spec.Min + spec.Max, 2);
+            return PowerMath.DivRound((long)spec.Min + spec.Max, 2);
         }
 
         // No magnitude at all — a status application, a board op, a shield whose amount rides the

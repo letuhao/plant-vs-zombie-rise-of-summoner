@@ -8,17 +8,17 @@ namespace FusionRpg.Core.Overlay;
 public sealed class OverlaySwitchState
 {
     /// <summary>A held or double click inside this window sends once.</summary>
-    public const int DebounceMs = 300;
+    public static int DebounceMs => OverlayTuningHub.Tuning.SwitchState.DebounceMs;
 
     /// <summary>How often to ask whether an overlay host is listening.</summary>
-    public const int ProbeIntervalMs = 30_000;
+    public static int ProbeIntervalMs => OverlayTuningHub.Tuning.SwitchState.ProbeIntervalMs;
 
     /// <summary>
     /// After this long an in-flight send is treated as abandoned. The pipe write has no timeout of
     /// its own, so a stalled reader on the other end would otherwise leave the gate closed for the
     /// rest of the session and the button dead. Comfortably longer than a healthy connect + write.
     /// </summary>
-    public const int SendTimeoutMs = 3_000;
+    public static int SendTimeoutMs => OverlayTuningHub.Tuning.SwitchState.SendTimeoutMs;
 
     long _lastSendMs;
     bool _hasSent;

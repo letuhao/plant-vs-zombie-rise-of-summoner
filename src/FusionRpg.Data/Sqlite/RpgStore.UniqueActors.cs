@@ -625,9 +625,13 @@ public sealed partial class RpgStore
         var id = instanceId.Trim();
         var s = FusionRpg.Core.Match.UniqueEquipmentCatalog.NormalizeSlot(slot);
         var item = (itemId ?? "").Trim();
-        if (!string.IsNullOrEmpty(item) &&
-            !FusionRpg.Core.Match.UniqueEquipmentCatalog.IsKnownItem(item))
-            throw new ArgumentException("unknown_item", nameof(itemId));
+        if (!string.IsNullOrEmpty(item))
+        {
+            if (!FusionRpg.Core.Match.UniqueEquipmentCatalog.IsKnownItem(item))
+                throw new ArgumentException("unknown_item", nameof(itemId));
+            if (!FusionRpg.Core.Match.UniqueEquipmentCatalog.SlotMatchesItem(s, item))
+                throw new ArgumentException("slot_mismatch", nameof(itemId));
+        }
         lock (_gate)
         {
             using var db = OpenUnlocked();

@@ -126,5 +126,5 @@ public static class UniqueActorEndpoints
     }
 
     static bool IsValidationReason(string reason) =>
-        reason is "bad_delta" or "bad_args" or "bad_slot" or "unknown_item";
+        reason is "bad_delta" or "bad_args" or "bad_slot" or "unknown_item" or "slot_mismatch";
 }

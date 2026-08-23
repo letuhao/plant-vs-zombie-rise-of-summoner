@@ -34,17 +34,31 @@ public static class StrengthBandCatalog
 
     public static IReadOnlyList<StrengthBand> All => _all ??= Validate(Seed);
 
-    static readonly IReadOnlyList<StrengthBand> Seed = new StrengthBand[]
+    static readonly string[] Names = { "empty", "skirmish", "warband", "host", "legion", "horde" };
+
+    /// <summary>Indices/names stay here (schema); floor/ceiling/midpoint per band are loaded
+    /// (tunables-ssot.md T1) — see <see cref="World.WorldTuningHub"/>. Open-ended top band: anything
+    /// this large is simply "more than you want to meet", and the ceiling is twice the floor so a
+    /// defender still has a number to plan against.</summary>
+    static IReadOnlyList<StrengthBand> Seed
     {
-        new() { Index = 0, Name = "empty",    Floor = 0,      Ceiling = 0,      Midpoint = 0 },
-        new() { Index = 1, Name = "skirmish", Floor = 1,      Ceiling = 499,    Midpoint = 250 },
-        new() { Index = 2, Name = "warband",  Floor = 500,    Ceiling = 1_499,  Midpoint = 1_000 },
-        new() { Index = 3, Name = "host",     Floor = 1_500,  Ceiling = 3_999,  Midpoint = 2_750 },
-        new() { Index = 4, Name = "legion",   Floor = 4_000,  Ceiling = 9_999,  Midpoint = 7_000 },
-        // Open-ended: anything this large is simply "more than you want to meet", and the ceiling is
-        // twice the floor so a defender still has a number to plan against.
-        new() { Index = 5, Name = "horde",    Floor = 10_000, Ceiling = 20_000, Midpoint = 20_000 }
-    };
+        get
+        {
+            var bands = World.WorldTuningHub.Tuning.StrengthBands;
+            if (bands.Count != Names.Length)
+                throw new World.WorldTuningRejection(
+                    $"world tuning: 'strengthBands' has {bands.Count} entries, expected {Names.Length} " +
+                    $"({string.Join(", ", Names)}) — the band names are structural, not part of the tuning file");
+            var result = new StrengthBand[bands.Count];
+            for (var i = 0; i < bands.Count; i++)
+                result[i] = new StrengthBand
+                {
+                    Index = i, Name = Names[i],
+                    Floor = bands[i].Floor, Ceiling = bands[i].Ceiling, Midpoint = bands[i].Midpoint
+                };
+            return result;
+        }
+    }
 
     public static StrengthBand Of(long strength)
     {

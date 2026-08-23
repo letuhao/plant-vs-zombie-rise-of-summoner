@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/demons/spec-demon-contracts.md",
+    "note": "Extracted byte-identical from ContractPolicy.cs (tunables-ssot.md M.1, 2026-08-23). Working values carried over as-is — not yet a validated balance decision.",
+    "rebalance": "Never hand-edit this file. python tools/tuning/publish.py contracts <dotted.key>=<value> [...] writes contracts.v{n+1}.json; the old version stays on disk for revert."
+  },
+  "loyalty": {
+    "max": 1000,
+    "deployFloor": 200,
+    "bindLoyalty": 300,
+    "swornThreshold": 400,
+    "trustedThreshold": 600,
+    "devotedThreshold": 800,
+    "winGain": 15,
+    "lossPenalty": 10,
+    "dailyGainCap": 60,
+    "decayPerDay": 25,
+    "ritualGain": 100,
+    "rankBonusSwornMilli": 15,
+    "rankBonusTrustedMilli": 35,
+    "rankBonusDevotedMilli": 60
+  },
+  "slots": {
+    "baseSlots": 12,
+    "maxSlots": 48,
+    "slotPriceStep": 300
+  },
+  "settlement": {
+    "maxSettleDays": 30
+  },
+  "personalityRates": {
+    "loyal":       { "gainPct": 120, "decayPct": 80,  "upkeepPct": 100 },
+    "stoic":       { "gainPct": 90,  "decayPct": 60,  "upkeepPct": 100 },
+    "proud":       { "gainPct": 100, "decayPct": 100, "upkeepPct": 130 },
+    "calculating": { "gainPct": 100, "decayPct": 90,  "upkeepPct": 110 },
+    "feral":       { "gainPct": 80,  "decayPct": 150, "upkeepPct": 70 }
+  },
+  "baseUpkeepPerDay": {
+    "common": 2,
+    "rare": 5,
+    "epic": 12,
+    "legendary": 25
+  },
+  "ritualPriceSouls": {
+    "common": 50,
+    "rare": 100,
+    "epic": 200,
+    "legendary": 400
+  }
+}

@@ -84,7 +84,9 @@ public class CombatCounterTests
     public void Proc_depth_limit_skips_burst()
     {
         var h = GrantCounter(CounterScopes.Target);
-        h.Bag.CombatPolicy = new CombatPolicy { ProcDepthLimit = 1 };
+        var policy = CombatPolicy.FromDefault();
+        policy.ProcDepthLimit = 1;
+        h.Bag.CombatPolicy = policy;
         for (var i = 0; i < 5; i++)
             h.OnEvent(Hit("Z1"));
         Assert.Contains(h.Bag.LastSkipped, s => s.Contains("proc-depth", StringComparison.OrdinalIgnoreCase));

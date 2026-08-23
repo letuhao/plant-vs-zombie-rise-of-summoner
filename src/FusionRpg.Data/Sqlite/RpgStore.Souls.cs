@@ -21,7 +21,7 @@ public sealed partial class RpgStore
     void ApplySoulEarnFromActivityUnlocked(
         SqliteConnection db, long playerId, long runId, string t, string factKind, string payload, long factId)
     {
-        int delta;
+        long delta;
         string reason;
         switch (factKind)
         {

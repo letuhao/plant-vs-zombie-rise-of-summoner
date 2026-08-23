@@ -174,10 +174,6 @@ public sealed class StatSystem
         return Math.Max(1L, (long)Math.Round(newMax * ratio));
     }
 
-    /// <summary>Int overload kept for plant / legacy call sites.</summary>
-    public static int ScaleCurrentHp(int previousHp, int previousMax, int newMax) =>
-        (int)ScaleCurrentHp((long)previousHp, previousMax, newMax);
-
     /// <summary>
     /// pushScales / reapply keep Unity-owned current HP (ratio-remap when max changes).
     /// Spawn / absolute / ForceSet keep composed <c>y.Hp</c>.

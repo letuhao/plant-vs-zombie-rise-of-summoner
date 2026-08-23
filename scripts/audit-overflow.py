@@ -33,8 +33,14 @@ from collections import defaultdict
 # that cries wolf gets ignored, so the bar here is precision, not coverage.
 
 # Something the power ladder can multiply.
-MAGNITUDE = (r"hp|atk|attack|damage|defen[cs]e|armou?r|arm1|arm2|magnitude|"
-             r"yield|stock|loam|souls?|essence|shield|heal|absorb|potency")
+#
+# "hp" is matched case-SENSITIVELY as Hp/HP/hp (never hP) — under a case-INsensitive scan, the
+# bare 2-letter token also matches the accidental "hP" that appears whenever some word ending in
+# "h" abuts a word starting with "P" (KillEarnWithPatron -> "...Wit-hP-atron..."). Genuine hp
+# usage is always Hp (capital H, lowercase p) or all-lowercase hp; "hP" never occurs by design, so
+# excluding it loses no real finding. Found via PatronPolicy.cs:55 in the P0.3 triage.
+MAGNITUDE = (r"(?:Hp|HP|hp)|(?i:atk|attack|damage|defen[cs]e|armou?r|arm1|arm2|magnitude|"
+             r"yield|stock|loam|souls?|essence|shield|heal|absorb|potency)")
 
 # Bounded 0..1000 (or otherwise capped) — per-mille here means "a fraction", never "a quantity".
 RATIO = re.compile(
@@ -49,10 +55,15 @@ RATIO = re.compile(
 UNBOUNDED_MILLI = re.compile(r"(stock|total|sum|balance|treasury|banked|accrued|lifetime|cumulative)", re.I)
 
 # Not a magnitude at all: identifiers, counts, positions, timings.
+#
+# "unit" and "peractor" added by the P0.3 triage: ElementTable.ShieldUnit returns an elemental
+# matchup tier (-1/0/1/2), not a shield amount; ShieldPolicy.MaxShieldsPerActor is a slot count.
+# Both end in a word this list already exists to catch, so no new mechanism, just two more entries.
 NOT_MAGNITUDE = re.compile(
     r"(id|ids|index|idx|count|len|length|size|version|revision|seed|hash|ms|millis|sec|seconds|"
     r"time|deltatime|unscaleddeltatime|tick|ticks|frame|fps|row|col|column|lane|slot|port|"
-    r"priority|ordinal|rank|tier|band|level|x|y|z|width|height|capacity|cap|max|min|limit)$", re.I)
+    r"priority|ordinal|rank|tier|band|level|x|y|z|width|height|capacity|cap|max|min|limit|"
+    r"unit|units|peractor)$", re.I)
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}
 SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$", re.I)
@@ -81,16 +92,22 @@ CATEGORIES = {
 
 def rules():
     m = MAGNITUDE
+    # A1/A3/A7 don't pass re.I: MAGNITUDE now handles its own case sensitivity (hp is
+    # case-sensitive; the rest is wrapped in an inline (?i:...) group), and "float"/"int"/"double"
+    # are always-lowercase C# keywords, so a blanket re.I here would just re-fold "hp" back open.
     return [
-        ("A1", re.compile(r"\bfloat\s+(\w*(?:%s)\w*)\b" % m, re.I)),
+        ("A1", re.compile(r"\bfloat\s+(\w*(?:%s)\w*)\b" % m)),
         ("A2", re.compile(r"\bint\s+(\w*(?:milli|permille)\w*)\b", re.I)),
         ("A3", re.compile(r"\b(?:public|private|internal|protected)?\s*(?:readonly\s+)?"
-                          r"int\s+(\w*(?:%s)\w*)\b" % m, re.I)),
+                          r"int\s+(\w*(?:%s)\w*)\b" % m)),
         ("A4", re.compile(r"\((?:long|ulong)\)\s*\([^()]*\*[^()]*\)")),
         ("A5", re.compile(r"\blong\s+\w+\s*=\s*(?!\(long\))[A-Za-z_]\w*\s*\*\s*[A-Za-z_]\w*\s*;")),
         ("A6", re.compile(r"\bunchecked\b")),
-        ("A7", re.compile(r"\bdouble\s+(\w*(?:%s)\w*)\b" % m, re.I)),
+        ("A7", re.compile(r"\bdouble\s+(\w*(?:%s)\w*)\b" % m)),
     ]
+
+
+MILLI_SUFFIX = re.compile(r"(?:milli|permille)$", re.I)
 
 
 def keep(cat, name, path, line):
@@ -100,6 +117,15 @@ def keep(cat, name, path, line):
     if cat == "A2":
         # Ratios are bounded and safe forever; only an accumulating total can overflow.
         if RATIO.search(name) or not UNBOUNDED_MILLI.search(name):
+            return False
+    if cat == "A3":
+        # A3's identifier must contain a magnitude word (hp/damage/soul/...), but that word can
+        # still name a per-mille RATIO rather than a magnitude: DefenseMilli, SoulLootMilli,
+        # EssenceProcMilli are bonuses/chances bounded 0..~a few thousand, not accumulating
+        # totals. A2 already draws exactly this line for pure "*Milli" names; A3 needs the same
+        # exclusion because its own regex can match a magnitude word THEN a Milli suffix on one
+        # identifier. Found via the P0.3 triage (SoulLootMilli and five siblings).
+        if MILLI_SUFFIX.search(name) and not UNBOUNDED_MILLI.search(name):
             return False
     if cat == "A1":
         if RATIO.search(name) or FLOAT_OK_PATH.search(path) or FLOAT_OK_NAME.search(name):

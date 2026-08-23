@@ -19,14 +19,14 @@ public readonly record struct CalendarRoll(
 /// </summary>
 public static class TurnCalendar
 {
-    public const int DaysPerWeek = 7;
-    public const int WeeksPerMonth = 4;
-    public const int DaysPerMonth = DaysPerWeek * WeeksPerMonth;
+    public static int DaysPerWeek => World.WorldTuningHub.Tuning.Calendar.DaysPerWeek;
+    public static int WeeksPerMonth => World.WorldTuningHub.Tuning.Calendar.WeeksPerMonth;
+    public static int DaysPerMonth => DaysPerWeek * WeeksPerMonth;
 
     // Genre-proven rates: a quarter of weeks are special, plague is rare enough to be a story.
-    public const int SpecialWeekChanceMilli = 250;
-    public const int SpecialMonthChanceMilli = 400;
-    public const int PlagueChanceMilli = 100;
+    public static int SpecialWeekChanceMilli => World.WorldTuningHub.Tuning.Calendar.SpecialWeekChanceMilli;
+    public static int SpecialMonthChanceMilli => World.WorldTuningHub.Tuning.Calendar.SpecialMonthChanceMilli;
+    public static int PlagueChanceMilli => World.WorldTuningHub.Tuning.Calendar.PlagueChanceMilli;
 
     public static CalendarRoll Roll(int turn, ulong seed)
     {

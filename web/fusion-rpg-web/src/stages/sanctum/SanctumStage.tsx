@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { usePlayers, useRuns, useSoulBalance, useUniqueActors } from "@/lib/bus";
+import { useDemonRoster, usePlayers, useRelics, useRuns, useSoulBalance, useUniqueActors } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
 import { adaptActor } from "@/contract/adapt";
 import { pendingWithReason } from "@/contract/pending";
@@ -10,18 +10,26 @@ import { StageHost, useStageMountGuard } from "@/shell/stageHost";
 import { Rail } from "@/shell/Rail";
 import { deriveRailEntries, type RailEntry, type RailUnlockInputs } from "@/shell/railState";
 import { CreaturesLayer } from "@/layers/creatures/CreaturesLayer";
+import { RelicsLayer } from "@/layers/relics/RelicsLayer";
+import { FusionLayer } from "@/layers/fusion/FusionLayer";
+import { ExpeditionsLayer } from "@/layers/expeditions/ExpeditionsLayer";
+import { useExpeditionReturnWatcher } from "@/layers/expeditions/expeditionReturnWatcher";
+import { PactsLayer } from "@/layers/pacts/PactsLayer";
 import type { ActorRungState } from "@/ui/actor";
 import { FocusCard } from "./FocusCard";
 import { SanctumHud } from "./SanctumHud";
 
-const LAYER_TITLES: Record<Exclude<RailEntry["id"], "sanctum" | "creatures">, string> = {
-  relics: "Relics",
-  fusion: "Fusion",
-  pacts: "Pacts",
-  expeditions: "Expeditions",
+const PLACED_LAYER_IDS = ["sanctum", "creatures", "relics", "fusion", "pacts", "expeditions"] as const;
+type PlacedLayerId = (typeof PLACED_LAYER_IDS)[number];
+
+const LAYER_TITLES: Record<Exclude<RailEntry["id"], PlacedLayerId>, string> = {
   almanac: "Almanac",
   chronicle: "Chronicle"
 };
+
+function isPlaced(id: Exclude<RailEntry["id"], "sanctum">): boolean {
+  return (PLACED_LAYER_IDS as readonly string[]).includes(id);
+}
 
 const LAYER_KEYS: Record<Exclude<RailEntry["id"], "sanctum">, string> = {
   creatures: "c",
@@ -78,21 +86,17 @@ export function SanctumStage() {
   }
 
   const actors = actorsQuery.data?.items ?? [];
-  const hasDuplicateSpecies = useMemo(() => {
-    const seen = new Set<number>();
-    for (const actor of actors) {
-      if (seen.has(actor.typeId)) return true;
-      seen.add(actor.typeId);
-    }
-    return false;
-  }, [actors]);
-
+  const relicsQuery = useRelics();
+  const demonRosterQuery = useDemonRoster(playerId);
+  const { returnedCount } = useExpeditionReturnWatcher(playerId);
   const railInputs: RailUnlockInputs = {
     currentStageId: "sanctum",
     hasCompletedARun: (runsQuery.data?.length ?? 0) > 0,
-    hasDuplicateSpecies,
+    hasAnyDemon: (demonRosterQuery.data?.items.length ?? 0) > 0,
     hasAnyContract: (contractsQuery.data?.contracts.length ?? 0) > 0,
-    hasHeldASector: false, // not derivable without World (T16, excluded this phase)
+    hasAnyRelic: (relicsQuery.data?.items.length ?? 0) > 0,
+    hasAnyBoundDemon: (contractsQuery.data?.contracts.some((c) => c.bound) ?? false),
+    returnedExpeditionCount: returnedCount,
     unreadResultCount: 0 // no "unread results" concept exists server-side yet
   };
   const railEntries = deriveRailEntries(railInputs);
@@ -143,17 +147,29 @@ export function SanctumStage() {
         onSelect={selectCreature}
       />
 
-      <PanelShell
-        open={openLayer !== null && openLayer !== "creatures"}
+      <RelicsLayer
+        open={openLayer === "relics"}
         onOpenChange={(open) => !open && closeLayer()}
-        title={openLayer && openLayer !== "creatures" ? LAYER_TITLES[openLayer] : ""}
+        playerId={playerId}
+      />
+
+      <FusionLayer open={openLayer === "fusion"} onOpenChange={(open) => !open && closeLayer()} />
+
+      <ExpeditionsLayer open={openLayer === "expeditions"} onOpenChange={(open) => !open && closeLayer()} />
+
+      <PactsLayer open={openLayer === "pacts"} onOpenChange={(open) => !open && closeLayer()} />
+
+      <PanelShell
+        open={openLayer !== null && !isPlaced(openLayer)}
+        onOpenChange={(open) => !open && closeLayer()}
+        title={openLayer && !isPlaced(openLayer) ? LAYER_TITLES[openLayer as keyof typeof LAYER_TITLES] : ""}
         subtitle="Arrives in a later pass of this refactor"
         testId="sanctum-layer-placeholder"
       >
         <p className="text-sm text-muted">
-          {openLayer && openLayer !== "creatures" ? LAYER_TITLES[openLayer] : ""} is unlocked and
-          reachable from the rail — its own designed layer lands in a later task. This placeholder
-          exists so the rail's reachability is real today rather than a dead button.
+          {openLayer && !isPlaced(openLayer) ? LAYER_TITLES[openLayer as keyof typeof LAYER_TITLES] : ""} is
+          unlocked and reachable from the rail — its own designed layer lands in a later task. This
+          placeholder exists so the rail's reachability is real today rather than a dead button.
         </p>
       </PanelShell>
     </StageHost>

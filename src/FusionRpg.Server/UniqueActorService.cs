@@ -50,7 +50,7 @@ public sealed class UniqueActorService
         catch (ArgumentException ex)
         {
             if (string.Equals(ex.ParamName, "itemId", StringComparison.Ordinal))
-                return (false, "unknown_item", null);
+                return (false, ex.Message.StartsWith("slot_mismatch", StringComparison.Ordinal) ? "slot_mismatch" : "unknown_item", null);
             return (false, "bad_slot", null);
         }
         catch (InvalidOperationException)

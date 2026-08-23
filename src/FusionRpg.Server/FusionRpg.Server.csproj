@@ -24,4 +24,13 @@
     <ProjectReference Include="..\FusionRpg.CheatCore\FusionRpg.CheatCore.csproj" />
     <ProjectReference Include="..\FusionRpg.Data\FusionRpg.Data.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- tunables-ssot.md §7.2: the server loads data/tuning/ and injects it; Core never reads a file.
+         Copied next to the exe the same way the sqlite data dir already resolves relative to it. -->
+    <Content Include="..\..\data\tuning\**\*.json">
+      <Link>data\tuning\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

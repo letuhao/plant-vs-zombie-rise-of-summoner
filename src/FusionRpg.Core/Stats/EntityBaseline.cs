@@ -5,11 +5,11 @@ public sealed class EntityBaseline
 {
     public long Hp { get; init; }
     public long MaxHp { get; init; }
-    public int Atk { get; init; }
-    public int Arm1 { get; init; }
-    public int Arm1Max { get; init; }
-    public int Arm2 { get; init; }
-    public int Arm2Max { get; init; }
+    public long Atk { get; init; }
+    public long Arm1 { get; init; }
+    public long Arm1Max { get; init; }
+    public long Arm2 { get; init; }
+    public long Arm2Max { get; init; }
 
     /// <summary>
     /// E16's three, as the game reports them. Zero means "this entity has no such stat" — a zombie
@@ -26,15 +26,15 @@ public sealed class EntityFinal
 {
     public long Hp { get; init; }
     public long MaxHp { get; init; }
-    public int Atk { get; init; }
-    public int Arm1 { get; init; }
-    public int Arm1Max { get; init; }
-    public int Arm2 { get; init; }
-    public int Arm2Max { get; init; }
+    public long Atk { get; init; }
+    public long Arm1 { get; init; }
+    public long Arm1Max { get; init; }
+    public long Arm2 { get; init; }
+    public long Arm2Max { get; init; }
 
     /// <summary>Composed defense view for ScaleIncoming (percent like legacy StatMod, flat).</summary>
     public float DefensePercent { get; init; } = 1f;
-    public int DefenseFlat { get; init; }
+    public long DefenseFlat { get; init; }
 
     /// <summary>
     /// E16's three. Composed like any other channel, then floored: an interval of zero is a

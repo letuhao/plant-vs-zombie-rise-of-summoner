@@ -4,12 +4,24 @@ namespace FusionRpg.Core.World.Loam;
 /// Every tunable loam constant, in one place with its reasoning — the `MovementPolicy` precedent.
 /// Every number here is a provisional placeholder: L9's economy harness, not this file, decides
 /// what they should actually be. Picking them here is what makes the harness have something to run
-/// against; picking them *well* is L9's job, not L7's.
+/// against; picking them *well* is L9's job, not L7's. Values live in
+/// <c>data/tuning/loam.v{n}.json</c> (tunables-ssot.md T1); <see cref="Configure"/> must run before
+/// any rule below is read.
 /// </summary>
 public static class LoamPolicy
 {
+    static LoamTuning? _tuning;
+
+    /// <summary>Host-only (Injector/Server startup, or a test's inline construction).</summary>
+    public static void Configure(LoamTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static LoamTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "LoamPolicy.Configure(...) has not run. Every loam rule reads data/tuning/loam.v{n}.json " +
+        "(tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
     /// <summary>What one rootbed slot seeps per turn, untended (map finding A10, wave 1's only source).</summary>
-    public const long SeepPerTurn = 50;
+    public static long SeepPerTurn => Tuning.Upkeep.SeepPerTurn;
 
     /// <summary>
     /// Per-sector storage ceiling (spec-loam-model.md: "a single policy constant applied
@@ -18,19 +30,19 @@ public static class LoamPolicy
     /// applies it locally to demonstrate why an uncapped producer would otherwise show a
     /// perpetually-positive net flow, which P1 calls unhealthy on its own.
     /// </summary>
-    public const long LoamCapacity = 300;
+    public static long LoamCapacity => Tuning.Upkeep.LoamCapacity;
 
     /// <summary>What holding any sector costs, before garrison, development or danger are counted.</summary>
-    public const long BaseUpkeepPerSector = 10;
+    public static long BaseUpkeepPerSector => Tuning.Upkeep.BaseUpkeepPerSector;
 
     /// <summary>What one standing garrison member costs per turn — more mouths, more upkeep.</summary>
-    public const long GarrisonUpkeepPerMember = 2;
+    public static long GarrisonUpkeepPerMember => Tuning.Upkeep.GarrisonUpkeepPerMember;
 
     /// <summary>What one level of development adds — a built-up sector costs more to sustain.</summary>
-    public const long DevelopmentUpkeepPerLevel = 5;
+    public static long DevelopmentUpkeepPerLevel => Tuning.Upkeep.DevelopmentUpkeepPerLevel;
 
     /// <summary>What one band of danger adds — dangerous ground costs more to hold, not just to take.</summary>
-    public const long DangerUpkeepPerBand = 3;
+    public static long DangerUpkeepPerBand => Tuning.Upkeep.DangerUpkeepPerBand;
 
     /// <summary>
     /// The `f(DevelopmentLevel, DangerBand)` term from spec-loam-calc.md #3. Its own named function
@@ -43,23 +55,23 @@ public static class LoamPolicy
     // ---- FadePolicy (spec-loam-calc.md #5) ----
 
     /// <summary>What a surplus sector recovers each turn, fixed — never the fast side of the pair.</summary>
-    public const int RecoveryMilli = 20;
+    public static int RecoveryMilli => Tuning.Fade.RecoveryMilli;
 
     /// <summary>The minimum decay any shortfall causes, even a shortfall of one unit.</summary>
-    public const int BaseDecayMilli = 40;
+    public static int BaseDecayMilli => Tuning.Fade.BaseDecayMilli;
 
     /// <summary>How much extra decay each unit of deficit adds, before the ceiling.</summary>
-    public const int DecayPerDeficitUnitMilli = 1;
+    public static int DecayPerDeficitUnitMilli => Tuning.Fade.DecayPerDeficitUnitMilli;
 
     /// <summary>How many loam units of deficit one extra milli of decay costs.</summary>
-    public const long DecayScaleDivisor = 5;
+    public static long DecayScaleDivisor => Tuning.Fade.DecayScaleDivisor;
 
     /// <summary>
     /// The ceiling on a single turn's decay — a deficit does not get to zero a sector's stability
     /// in one step no matter how deep it runs; that is what makes the fade a countdown a player can
     /// react to rather than a trap that springs once.
     /// </summary>
-    public const int MaxDecayMilli = 300;
+    public static int MaxDecayMilli => Tuning.Fade.MaxDecayMilli;
 
     /// <summary>
     /// The `Abandon` rule's horizon (spec-loam-ai-survival.md, "still open" — found by measurement,
@@ -67,7 +79,7 @@ public static class LoamPolicy
     /// component's weakest holding is worth releasing early rather than left to fade on its own.
     /// A short horizon so the AI does not evacuate ground that could still recover on its own.
     /// </summary>
-    public const int AbandonmentHorizonTurns = 3;
+    public static int AbandonmentHorizonTurns => Tuning.Fade.AbandonmentHorizonTurns;
 
     // ---- LegionSupply (spec-loam-legions.md) ----
 
@@ -76,10 +88,10 @@ public static class LoamPolicy
     /// `LegionSupplyEconomyTests` against the ideal's 4-8 turn leash target for representative
     /// legion compositions — the same L9-style harness discipline as every other constant here.
     /// </summary>
-    public const long CarryPerBearer = 200;
+    public static long CarryPerBearer => Tuning.LegionSupply.CarryPerBearer;
 
     /// <summary>What one member, fighter or bearer, burns per turn beyond supply. Harness-tuned alongside <see cref="CarryPerBearer"/>.</summary>
-    public const long BurnPerMember = 10;
+    public static long BurnPerMember => Tuning.LegionSupply.BurnPerMember;
 
     // ---- loam-structures (spec-loam-structures.md) ----
 
@@ -88,62 +100,62 @@ public static class LoamPolicy
     /// placeholder like every other constant here, not yet harness-measured against a stated target
     /// (the spec names none for this one, unlike the legion leash's explicit 4-8 turn range).
     /// </summary>
-    public const int WellYieldMultiplierMilli = 2000;
+    public static int WellYieldMultiplierMilli => Tuning.Structures.WellYieldMultiplierMilli;
 
     /// <summary>What a well costs to build, spent from the founding legion's own `CarriedLoam`.</summary>
-    public const long WellCostMilli = 200;
+    public static long WellCostMilli => Tuning.Structures.WellCostMilli;
 
     /// <summary>What a waystation costs to build. Same spend path as a well's.</summary>
-    public const long WaystationCostMilli = 300;
+    public static long WaystationCostMilli => Tuning.Structures.WaystationCostMilli;
 
     /// <summary>How many `Production` passes a well takes to finish, decrementing to zero.</summary>
-    public const int WellBuildTurns = 2;
+    public static int WellBuildTurns => Tuning.Structures.WellBuildTurns;
 
     /// <summary>How many `Production` passes a waystation takes to finish — riskier ground, longer build.</summary>
-    public const int WaystationBuildTurns = 4;
+    public static int WaystationBuildTurns => Tuning.Structures.WaystationBuildTurns;
 
     /// <summary>
     /// A waystation may only be founded within this many unweighted hops (G5) of a sector the
     /// founder already holds that is itself currently habitable.
     /// </summary>
-    public const int WaystationRangeHops = 3;
+    public static int WaystationRangeHops => Tuning.Structures.WaystationRangeHops;
 
     // ---- loam-texture (spec-loam-texture.md) ----
 
     /// <summary>What a granary costs to build.</summary>
-    public const long GranaryCostMilli = 150;
+    public static long GranaryCostMilli => Tuning.Structures.GranaryCostMilli;
 
     /// <summary>How much a granary raises a sector's storage cap by, on top of <see cref="LoamCapacity"/>.</summary>
-    public const long GranaryCapacityBonus = 300;
+    public static long GranaryCapacityBonus => Tuning.Structures.GranaryCapacityBonus;
 
     /// <summary>How many `Production` passes a granary takes to finish.</summary>
-    public const int GranaryBuildTurns = 2;
+    public static int GranaryBuildTurns => Tuning.Structures.GranaryBuildTurns;
 
     /// <summary>How much an actively-fading sector raises `PressureMilli` on each lane-adjacent sector, per turn.</summary>
-    public const int ContagionPressurePerTurn = 60;
+    public static int ContagionPressurePerTurn => Tuning.Texture.ContagionPressurePerTurn;
 
     /// <summary>The ceiling `PressureMilli` can reach — contagion is a live signal, not an unbounded ratchet.</summary>
-    public const int MaxPressureMilli = 300;
+    public static int MaxPressureMilli => Tuning.Texture.MaxPressureMilli;
 
     /// <summary>How fast `PressureMilli` decays back toward zero for a sector with no fading neighbour this turn.</summary>
-    public const int PressureDecayPerTurn = 40;
+    public static int PressureDecayPerTurn => Tuning.Texture.PressureDecayPerTurn;
 
     /// <summary>
     /// Per-mille scale on `DecayFor`'s pre-clamp sum while the turn's `CalendarRoll` includes
     /// `Plague`. Applied to the input, never the clamped output — a surge pushes more sectors
     /// toward `MaxDecayMilli`, never past it.
     /// </summary>
-    public const int SurgeDecayMultiplierMilli = 1500;
+    public static int SurgeDecayMultiplierMilli => Tuning.Texture.SurgeDecayMultiplierMilli;
 
     /// <summary>
     /// How many consecutive turns a `Lost`, barren sector sits neglected before the Unmade spawn
     /// onto it.
     /// </summary>
-    public const int UnmadeSpawnAfterTurns = 5;
+    public static int UnmadeSpawnAfterTurns => Tuning.Texture.UnmadeSpawnAfterTurns;
 
     /// <summary>How tough a freshly-spawned Unmade warband is, per member.</summary>
-    public const int UnmadeMemberHp = 120;
+    public static long UnmadeMemberHp => Tuning.Texture.UnmadeMemberHp;
 
     /// <summary>How many members a freshly-spawned Unmade warband has.</summary>
-    public const int UnmadeMemberCount = 2;
+    public static int UnmadeMemberCount => Tuning.Texture.UnmadeMemberCount;
 }

@@ -34,16 +34,29 @@ public static class UniqueEquipmentCatalog
     public static bool IsKnownItem(string? itemId)
     {
         if (string.IsNullOrWhiteSpace(itemId)) return false;
-        return Items.ContainsKey(itemId.Trim());
+        var id = itemId.Trim();
+        return Items.ContainsKey(id) || RelicCatalog.IsKnownRelic(id);
     }
 
     public static bool TryGetGrant(string? itemId, out EffectGrantDto grant)
     {
         grant = null!;
         if (string.IsNullOrWhiteSpace(itemId)) return false;
-        if (!Items.TryGetValue(itemId.Trim(), out var g) || g is null) return false;
-        grant = Clone(g);
-        return true;
+        var id = itemId.Trim();
+        if (Items.TryGetValue(id, out var g) && g is not null)
+        {
+            grant = Clone(g);
+            return true;
+        }
+        return RelicCatalog.TryGetGrant(id, out grant);
+    }
+
+    /// <summary>True unless the item is a known relic declared for a different slot.
+    /// Stub items (<see cref="Items"/>) carry no slot of their own, so any allowed slot fits them.</summary>
+    public static bool SlotMatchesItem(string normalizedSlot, string itemId)
+    {
+        if (!RelicCatalog.TryGetRelic(itemId, out var relic)) return true;
+        return string.Equals(relic.Slot, normalizedSlot, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>Normalize to lowercase allowlisted slot; throws on empty/unknown.</summary>

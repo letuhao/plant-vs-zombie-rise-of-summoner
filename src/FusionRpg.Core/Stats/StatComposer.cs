@@ -54,11 +54,11 @@ public sealed class StatComposer
                 {
                     Hp = Math.Max(1L, baseline.Hp),
                     MaxHp = Math.Max(1L, baseline.MaxHp),
-                    Atk = Math.Max(1, baseline.Atk),
-                    Arm1 = Math.Max(0, baseline.Arm1),
-                    Arm1Max = Math.Max(0, baseline.Arm1Max),
-                    Arm2 = Math.Max(0, baseline.Arm2),
-                    Arm2Max = Math.Max(0, baseline.Arm2Max),
+                    Atk = Math.Max(1L, baseline.Atk),
+                    Arm1 = Math.Max(0L, baseline.Arm1),
+                    Arm1Max = Math.Max(0L, baseline.Arm1Max),
+                    Arm2 = Math.Max(0L, baseline.Arm2),
+                    Arm2Max = Math.Max(0L, baseline.Arm2Max),
                     DefensePercent = 1f,
                     DefenseFlat = 0,
                     AttackInterval = baseline.AttackInterval,
@@ -74,8 +74,8 @@ public sealed class StatComposer
         long ChanHp(string channel, long y0, long min = 1) =>
             Math.Max(min, (long)Math.Round(_strategy.ComposeChannel(y0, all.Where(m => m.Channel == channel))));
 
-        int Chan(string channel, int y0, int min = 1) =>
-            Math.Max(min, (int)Math.Round(_strategy.ComposeChannel(y0, all.Where(m => m.Channel == channel))));
+        long Chan(string channel, long y0, long min = 1) =>
+            Math.Max(min, (long)Math.Round(_strategy.ComposeChannel(y0, all.Where(m => m.Channel == channel))));
 
         double Real(string channel, double y0, double min)
         {
@@ -114,7 +114,7 @@ public sealed class StatComposer
     /// DEF for ScaleIncoming: percent from Increased/More/Override on baseline 1 via strategy;
     /// Flat summed separately. Override replaces the whole defense view (percent = value, flat = 0).
     /// </summary>
-    void ComposeDefense(IReadOnlyList<StatModifier> all, out float defensePercent, out int defenseFlat)
+    void ComposeDefense(IReadOnlyList<StatModifier> all, out float defensePercent, out long defenseFlat)
     {
         var def = all.Where(m => m.Channel == StatChannels.Defense).ToList();
         var ov = def.Where(m => m.Op == ModifierOp.Override)
@@ -128,7 +128,7 @@ public sealed class StatComposer
             return;
         }
 
-        defenseFlat = (int)Math.Round(def.Where(m => m.Op == ModifierOp.Flat).Sum(m => m.Value));
+        defenseFlat = (long)Math.Round(def.Where(m => m.Op == ModifierOp.Flat).Sum(m => m.Value));
         var pctMods = def.Where(m => m.Op is ModifierOp.Increased or ModifierOp.More);
         var pct = _strategy.ComposeChannel(1.0, pctMods);
         defensePercent = (float)Math.Max(0.0001, pct);

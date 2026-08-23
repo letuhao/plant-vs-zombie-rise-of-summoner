@@ -36,20 +36,29 @@ public static class WorldSizeCatalog
 
     public static IReadOnlyList<WorldSizeDef> All => _all ??= Validate(Seed);
 
-    static readonly IReadOnlyList<WorldSizeDef> Seed = new WorldSizeDef[]
+    /// <summary>Ids/names/availability stay here (schema); the node range per tier is loaded
+    /// (tunables-ssot.md T1) — see <see cref="WorldTuningHub"/>.</summary>
+    static IReadOnlyList<WorldSizeDef> Seed
     {
-        new() { SizeId = SmallId, DisplayName = "Pocket", MinNodes = 6, MaxNodes = 10, Available = true },
-        new() { SizeId = MediumId, DisplayName = "Fragment", MinNodes = 14, MaxNodes = 18, Available = true },
+        get
+        {
+            var nodes = WorldTuningHub.Tuning.WorldSizeNodes;
+            return new WorldSizeDef[]
+            {
+                new() { SizeId = SmallId, DisplayName = "Pocket", MinNodes = nodes["small"].Min, MaxNodes = nodes["small"].Max, Available = true },
+                new() { SizeId = MediumId, DisplayName = "Fragment", MinNodes = nodes["medium"].Min, MaxNodes = nodes["medium"].Max, Available = true },
 
-        // Declared and unavailable — see the class doc for why hand-authoring stops here.
-        new() { SizeId = LargeId, DisplayName = "Expanse", MinNodes = 28, MaxNodes = 36, Available = false },
-        // A5 (loam-map.md finding): measured 2026-08-23 at 64 nodes, ~52-80ms — comfortably shippable
-        // once `world-generator` exists to actually produce a map this size.
-        new() { SizeId = HugeId, DisplayName = "Abyss", MinNodes = 56, MaxNodes = 72, Available = false },
-        // A5: measured at 128 nodes, ~0.6-0.7s — needs the Tarjan-first optimisation
-        // (spec-world-topology.md) before it can be offered regardless of who generates the map.
-        new() { SizeId = GiantId, DisplayName = "Maelstrom", MinNodes = 112, MaxNodes = 144, Available = false }
-    };
+                // Declared and unavailable — see the class doc for why hand-authoring stops here.
+                new() { SizeId = LargeId, DisplayName = "Expanse", MinNodes = nodes["large"].Min, MaxNodes = nodes["large"].Max, Available = false },
+                // A5 (loam-map.md finding): measured 2026-08-23 at 64 nodes, ~52-80ms — comfortably shippable
+                // once `world-generator` exists to actually produce a map this size.
+                new() { SizeId = HugeId, DisplayName = "Abyss", MinNodes = nodes["huge"].Min, MaxNodes = nodes["huge"].Max, Available = false },
+                // A5: measured at 128 nodes, ~0.6-0.7s — needs the Tarjan-first optimisation
+                // (spec-world-topology.md) before it can be offered regardless of who generates the map.
+                new() { SizeId = GiantId, DisplayName = "Maelstrom", MinNodes = nodes["giant"].Min, MaxNodes = nodes["giant"].Max, Available = false }
+            };
+        }
+    }
 
     public static bool IsKnown(string? sizeId) =>
         sizeId != null && ByIdMap().ContainsKey(sizeId);
