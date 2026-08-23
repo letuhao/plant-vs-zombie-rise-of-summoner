@@ -204,3 +204,82 @@ well/waystation `CostMilli`/`BuildTurns`, `WaystationRangeHops` (L33–L37); `Gr
 `CapacityBonus`, `ContagionPressurePerTurn`/`MaxPressureMilli`, `SurgeDecayMultiplierMilli`, Unmade
 spawn rate/strength (L38–L43). Same discipline as the pre-gate slice: each is measured against its
 own spec's stated target when its task lands, not chosen here.
+
+---
+
+# Plan: loam and the Fracture — loam-fe-2 (wave 6)
+
+**Gate: none — this is a wire/UI wave, not a new mechanic.** Authorized by the owner request that
+produced [spec-loam-fe-2.md](../docs/architecture/loam/spec-loam-fe-2.md) ("make spec for it now,"
+2026-08-23), itself triggered by the post-Checkpoint-10 completeness audit finding that every mechanic
+`loam-legions` through `loam-texture` built is real and tested but **unreachable from the actual web
+client**. Two open questions in that spec (Ward's low-Souls confirmation, the Build structure
+picker's placement) were resolved by the owner before this plan was written — the spec has no open
+items left.
+
+**Spec in scope (one, sealed pending its own review, no open items):**
+[spec-loam-fe-2.md](../docs/architecture/loam/spec-loam-fe-2.md). Not yet added to `loam-map.md`'s
+module table — do that once this plan is approved, matching the module-spec convention (register on
+approval, not before).
+
+## Overview
+
+Seven tasks (L44–L50), one phase. Everything here is **additive and read/UI-only except one new
+Core command** (`Ward`) — no existing mechanic changes behavior, and per the spec's own §1, none of
+the five wire fields are calculators: they are straight projections of state `loam-legions` through
+`loam-texture` already computed and hashed. The one exception is Wardens (L47–L49), which needs a
+brand-new `WorldCommandKinds.Ward` end to end because binding a warden was never wired to any player
+action at all, not even a raw one — see the spec's §4.
+
+## Architecture decisions carried in from the spec (and this session's own code reading)
+
+| Decision | Consequence for this plan |
+|---|---|
+| **All five wire fields land in one task (L44), not five** | Same batching logic L25 already established for hashed fields, applied here to projection code: one `world.fixture.json` regen, one fog-property test pass, not five |
+| **Wardens split Core → Server → UI across three tasks (L47–L49)**, a deliberate horizontal slice | Matches this plan's own precedent ("Slicing note" in the pre-gate section): a permanent, two-store, irreversible action needs each layer proven alone before composing them, the same reason Sustain/Build were originally built Core-only long before any UI called them — which is the exact gap this plan closes |
+| **No rollback for Ward's two-step endpoint failure** | The spec states this as an accepted risk, not a bug to design around; L48's tests assert the *reported* behavior (both outcomes visible), not a transaction that does not exist |
+| **The TS mirror types (`worldTypes.ts`) are already behind the C# DTOs** | Found while reading code for this plan, not assumed: `WorldSlotDto` in `worldTypes.ts` has no `structureId`, though the C# `WorldSlotDto` has carried it since L32. L44's acceptance criterion catches this up alongside the five new fields — the same drift, not a separate task |
+| **`Prospecting.Reveal` stays uncomputed until read** | L50 computes it at projection time in `WorldEndpoints.cs`, same as every other derived field — no new persisted or hashed state, matching the spec's own "no golden move" finding |
+
+## Dependency graph
+
+```
+L44 wire the five fields + TS catch-up ─┐
+L45 turn-playback narration             ├─ independent of each other
+L46 Sustain + Build command UI          │
+L50 Prospecting wire + UI               ┘
+
+L47 Ward — Core (command, admission, resolver) ─→ L48 Ward — Server (bind-warden endpoint) ─→ L49 Ward — Web UI
+     │
+     └─ depends only on L25 (already shipped) — not on L44–L46/L50
+
+Phase 12 checkpoint (loam-fe-2)
+```
+
+L44, L45, L46, and L50 have no technical dependency on one another or on the L47→L48→L49 chain — they
+may build in any order or in parallel. The L-number order below is a sequencing convenience (smallest,
+most self-contained first), not a dependency order; only L47→L48→L49 is a real chain.
+
+## Risks and mitigations
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| **A sixth field or command quietly needs the same treatment** (e.g. a future mechanic ships without wire exposure again) | Med | L44's acceptance criterion is a completeness sweep — every `WorldEntity`/`WorldSlot`/`WorldSector` field with no DTO counterpart, not just the five named in the spec — so this wave catches any other drift found along the way, named explicitly rather than silently expanding scope |
+| **Ward's two-step endpoint is tested only for the happy path** | High | L48's acceptance criterion names both orderings explicitly: world-command leg succeeds, and world-command leg fails after the contract bind already succeeded — the accepted-risk case is a required test, not an afterthought |
+| **The confirm dialog ships without the low-Souls second step the owner asked for** | Med | L49's acceptance criterion names the two-step confirmation explicitly, quoting the decided text from the spec rather than re-deriving "some kind of warning" |
+| **Turn-playback translations drift from the actual engine strings** (e.g. `legion.runway` vs `legion.runaway`) | Med | L45's tests assert against the literal detail-string constants already defined in `LoamPhases.cs`/`LegionSupply.cs`/`MovementPhase.cs`, not against a hand-copied string |
+| **The two long-run regression properties silently break** | High | Named on the Phase 12 checkpoint below — this wave touches no calculator, so a break here would mean a wiring mistake in the projection path, not a design defect, and is worth catching precisely because it would be surprising |
+
+## Checkpoints
+
+11. **`loam-fe-2` built** — after L50. Every field in the spec's §1 table is on the wire and
+    fog-tested; the TS mirror has no field the C# DTO carries that it does not; the turn-playback rail
+    never prints a raw engine detail string for any loam/legion/Unmade event; a player can Sustain,
+    Build, and Bind a Warden entirely from `#/world`, with the Ward confirm dialog matching the spec's
+    decided two-step-on-low-Souls behavior exactly; a dowser's revealed sectors render with their own
+    distinct treatment; both long-run regression properties still pass; all four guard scripts green.
+
+## Open
+
+None. Both of `spec-loam-fe-2.md`'s open questions were resolved by the owner before this plan was
+written (Ward's low-Souls second confirmation: yes; the Build structure picker: inline dropdown).

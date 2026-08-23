@@ -1,20 +1,16 @@
 import { NavLink } from "react-router-dom";
-import { useSimState } from "@/lib/bus";
 import { cn } from "@/lib/cn";
 
+/**
+ * T12: the nine developer surfaces (status, stats, pvz-activity, icon-dump,
+ * almanac-dump, cheats, sim, log, runs) are gone from here — they're
+ * reached through the developer tree (`` ` ``), not player navigation.
+ */
 const links = [
-  { to: "/status", label: "Status" },
-  { to: "/stats", label: "Stats" },
   { to: "/pvz-stats", label: "PvzStats" },
-  { to: "/pvz-activity", label: "PvzActivity" },
   { to: "/rpg-progression", label: "Progression" },
-  { to: "/icon-dump", label: "IconDump" },
-  { to: "/almanac-dump", label: "AlmanacText" },
-  { to: "/cheats", label: "Cheats" },
   { to: "/types", label: "Types" },
   { to: "/recipes", label: "Recipes" },
-  { to: "/log", label: "Log" },
-  { to: "/runs", label: "Runs" },
   { to: "/lawn", label: "Lawn" },
   { to: "/world", label: "World" },
   { to: "/roster", label: "Roster" },
@@ -25,9 +21,6 @@ const links = [
 ] as const;
 
 export function AuditNav() {
-  const sim = useSimState();
-  const simOn = sim.data != null;
-
   return (
     <nav
       className="flex w-44 shrink-0 flex-col gap-1 border-r border-border bg-soil-raised/60 p-3"
@@ -43,27 +36,13 @@ export function AuditNav() {
           className={({ isActive }) =>
             cn(
               "rounded-sm border border-transparent px-2.5 py-1.5 text-sm font-semibold text-muted transition-colors",
-              isActive && "z-nav-active border-lawn-hot bg-lawn text-text"
+              isActive && "border-lawn-hot bg-lawn text-text"
             )
           }
         >
           {link.label}
         </NavLink>
       ))}
-      {simOn ? (
-        <NavLink
-          to="/sim"
-          data-testid="nav-sim"
-          className={({ isActive }) =>
-            cn(
-              "rounded-sm border border-transparent px-2.5 py-1.5 text-sm font-semibold text-muted transition-colors",
-              isActive && "z-nav-active border-lawn-hot bg-lawn text-text"
-            )
-          }
-        >
-          Sim
-        </NavLink>
-      ) : null}
     </nav>
   );
 }

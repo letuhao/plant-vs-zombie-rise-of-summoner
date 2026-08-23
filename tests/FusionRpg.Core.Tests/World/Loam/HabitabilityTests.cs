@@ -50,6 +50,19 @@ public class HabitabilityTests
     }
 
     [Fact]
+    public void An_unknown_structure_id_never_makes_ground_habitable()
+    {
+        // Coverage found this branch of IsSource's short-circuit (StructureCatalog.IsKnown returning
+        // false) had never actually run — every prior fixture used a real, known structure id.
+        var sector = new WorldSector
+        {
+            SectorId = "s", TypeId = "stable",
+            Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.WildlandSlotTypeId, StructureId = "not-a-real-structure" } }
+        };
+        Assert.False(Habitability.For(sector));
+    }
+
+    [Fact]
     public void A_granary_never_makes_ground_habitable_on_its_own()
     {
         // A mutation pass (2026-08-23, loam-texture Checkpoint 10) found that "any known structure

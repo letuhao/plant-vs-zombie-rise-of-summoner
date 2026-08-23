@@ -41,6 +41,13 @@ Every place/spawn awards (not once-per-type-per-run). Kill ledger `payload_json`
 
 **Power-scaled kill XP is reserved:** scaler stub returns 1.0 until zombie power SSOT exists. Do not treat flat awards as final combat-coupled design.
 
+> **⚠ ADR P1 amended 2026-08-23.** The zombie power SSOT now exists: it is `Θ_content`
+> ([power/ssot-power-scale.md](power/ssot-power-scale.md) §5). `RpgXpPowerScale` is **retired** — its
+> documented future job is exactly what `Θ_content` does, and a stub whose replacement exists is dead
+> code. The POC curve `2^min(level,12)` is retired with it; `progression.power` becomes linear `Θ`.
+> Spec: [power/spec-status-contest.md](power/spec-status-contest.md). **Specced, not built** — the
+> stub descriptions above remain accurate until wave 3.
+
 ## Combat power (design — not shipped)
 
 RpgProgression **levels** are the future input for combat **`progression.power`** on the Actor Hub derived catalog — separate from XP awards and separate from **`progression.bonus.*`** combat flats.
@@ -50,7 +57,7 @@ RpgProgression **levels** are the future input for combat **`progression.power`*
 | **`RpgXpPowerScale.ForKill`** | Kill XP audit multiplier (stub **1.0**) | May read zombie tier for XP only — **not** status ApplyScale |
 | **`progression.power`** | Not in code | Derived channel from type level × realm; v1 Actor Hub stub **1.0** hardcoded |
 | **`progression.bonus.*`** | Not in code | Flat HP/ATK/defense at AppliedCombat merge — separate power ADR |
-| **`IProgressionPowerProvider.UpdatePower`** | Not in code | Replaces stub when level→power curve lands |
+| **`IProgressionPowerProvider.UpdatePower`** | **In code** since ADR P1 — `IProgressionPowerProvider.cs:15`. This row said *"Not in code"* and was wrong | **Superseded** by `IPowerIndexProvider` (ADR P1 amendment, 2026-08-23) |
 
 **Grain for power:** same as progression PK — `(player_id, kind, type_id)`. Plant on lawn uses plant type level; zombie defender uses zombie type level. Player actor level may add summoner-wide omni later.
 

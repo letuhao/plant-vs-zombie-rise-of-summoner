@@ -2,6 +2,7 @@ import { I18nProvider } from "@lingui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { HubProvider } from "@/lib/bus";
+import { createMutationFeedbackCache } from "@/lib/bus/mutationFeedback";
 import { i18n } from "@/i18n";
 import { ErrorBoundary } from "./ErrorBoundary";
 
@@ -9,6 +10,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
   const [client] = useState(
     () =>
       new QueryClient({
+        mutationCache: createMutationFeedbackCache(),
         defaultOptions: {
           queries: {
             staleTime: 5000,

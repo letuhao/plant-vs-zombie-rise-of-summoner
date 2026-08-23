@@ -1,3 +1,4 @@
+using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Turn;
 
 namespace FusionRpg.Core.World.Movement;
@@ -94,6 +95,14 @@ public static class MovementPhase
             if (!paths.TryGetValue(entity.EntityId, out var path)) continue;
 
             var outcome = MarchResolver.March(world, entity, path);
+
+            // The march-loam gate's soft half (spec-loam-ai.md): pure reporting over already-carried
+            // state, alongside every admitted march order — not a supply-connectivity simulation, just
+            // "at your current burn rate, here is your ceiling," the same honesty LeashTurns already
+            // gives a legion that never leaves supply at all.
+            if (LegionSupply.TurnsUntilExhausted(entity) is { } turnsLeft)
+                report.Add(phase, TurnReportKinds.Event, entity.EntityId,
+                    "legion.runway:" + (turn + turnsLeft), outcome.AtSectorId ?? outcome.OnLaneId);
 
             if (outcome.VisitedSectorIds.Count > 0)
             {

@@ -36,6 +36,20 @@ public static class LegionSupply
     }
 
     /// <summary>
+    /// The march-loam gate's soft half (spec-loam-ai.md §"the march loam gate"): turns of runway
+    /// left in what this legion is *actually carrying* right now, at its current burn rate — not
+    /// <see cref="LeashTurns"/>'s full-tank ceiling. Pure reporting over already-carried state, no
+    /// supply-connectivity lookup: it does not ask whether the legion is in supply this turn (that
+    /// answer changes every turn it marches), only what its own numbers already say. Null for the
+    /// same reason <see cref="LeashTurns"/> is: nothing to burn means nothing to run out on.
+    /// </summary>
+    public static int? TurnsUntilExhausted(WorldEntity entity)
+    {
+        var burn = Burn(entity);
+        return burn <= 0 ? null : (int)(Math.Max(0, entity.CarriedLoam) / burn);
+    }
+
+    /// <summary>
     /// The Pressure phase's legion pass (spec-loam-legions.md), resolved *after*
     /// <see cref="LoamPhases.Pressure"/>'s own sector-upkeep draw — sector upkeep first, legion
     /// top-up second, from whatever the same pool has left. A legion inside its faction's supply

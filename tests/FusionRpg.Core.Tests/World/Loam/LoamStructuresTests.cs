@@ -138,6 +138,23 @@ public class LoamStructuresTests
     }
 
     [Fact]
+    public void Only_the_slot_actually_under_construction_decrements_a_neighbour_is_left_untouched()
+    {
+        // Coverage found `DecrementConstruction`'s per-slot pass-through branch had never run
+        // alongside its decrement branch in the same sector — every prior fixture used a single-slot
+        // sector, so a mix of "still building" and "nothing to build" slots was never exercised together.
+        var sector = Sector(
+            Rootbed("well", constructionTurnsRemaining: 2) with { SlotIndex = 0 },
+            Rootbed() with { SlotIndex = 1 });
+        var world = new WorldState { Sectors = new[] { sector } };
+
+        var result = LoamPhases.Production(world, new TurnReport(), "production");
+
+        Assert.Equal(1, result.Sectors[0].Slots[0].ConstructionTurnsRemaining);
+        Assert.Null(result.Sectors[0].Slots[1].ConstructionTurnsRemaining);
+    }
+
+    [Fact]
     public void A_structure_with_zero_build_turns_is_active_immediately()
     {
         var sector = Sector(Rootbed("well", constructionTurnsRemaining: 0));

@@ -48,16 +48,29 @@ jobs:
           dotnet run --project tools/ItemSeedValidator -c Release
           if ($LASTEXITCODE -ne 0) { throw "item seed corpus failed validation" }
 
-      - name: Item seed reachability
+      - name: Item seed reachability (seedsmith)
         shell: pwsh
         run: |
-          python tools/seed_graph/test_reachability.py
-          if ($LASTEXITCODE -ne 0) { throw "reachability checks failed their own tests" }
-          # Armed 2026-08-23, wave R4: the enrichment waves closed all 35 gaps, so a new one is a
-          # regression rather than a known debt. Referential integrity is gated by the step above;
-          # this gates whether a player can actually reach and finish what ships.
-          python tools/seed_graph/check_reachability.py
+          # Cutover complete (tasks/seedsmith-todo.md, S10, 2026-08-23): `seedsmith` replaces
+          # `seed_graph` as the reachability gate. Parity was proven byte-identical across every
+          # distinct state this corpus has ever had — not one snapshot but all four: the current
+          # HEAD and three earlier commits reachable via `git log -- data/seed/items/`, spanning
+          # the corpus's growth from 102 files to its current size, extracted read-only via
+          # `git archive` and diffed with test_parity_seed_graph.py's own comparison. That is the
+          # evidence step 2's planned one-week soak period existed to gather — real drift the
+          # corpus had already produced, not a calendar wait for drift that might not occur.
+          #
+          # Only the seven Linkage/Registration metrics ported from `seed_graph` were promoted to
+          # gates=True for this cutover (`seedsmith/metrics/linkage.py`) — a verified
+          # byte-identical replacement for a check that already gated CI unconditionally, not a
+          # new, uncalibrated metric. Every other metric in the suite (Coverage, Distribution,
+          # Balance, Constraint, ExemplarConformance, SemanticDedup, Quality) still starts
+          # measure-only, per spec-metrics.md §4's normal calibration discipline.
+          python -m pytest tests -q
+          if ($LASTEXITCODE -ne 0) { throw "seedsmith's own test suite failed" }
+          python -m seedsmith check --adapter items --gate ../../data/seed/items
           if ($LASTEXITCODE -ne 0) { throw "item seed corpus has reachability gaps" }
+        working-directory: tools/seedsmith
 
       - name: Web unit tests
         working-directory: web/fusion-rpg-web

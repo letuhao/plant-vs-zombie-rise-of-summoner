@@ -226,24 +226,32 @@ test.describe("audit shell e2e", () => {
   });
 
   test("loads status and navigates audit pages", async ({ page }) => {
+    // Status/Stats/Cheats/Log/Runs are dev-tree surfaces as of T12 (see dev-tree.spec.ts for
+    // the tree's own contract) — this test still exercises them as regression coverage that
+    // the pages themselves render inside their new home. Types/Recipes stay real AuditNav
+    // links (players reach them directly, unlike the developer-only pages).
+    // The dev tree is a modal panel: Radix correctly aria-hides the rest of the page (including
+    // HudBar's "Rise of Summoner" heading) while it's open, so that heading isn't asserted here.
     await page.goto("./#/status");
-    await expect(page.getByRole("heading", { name: "Rise of Summoner" })).toBeVisible();
+    await expect(page.getByTestId("dev-tree-surface-status")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Status" })).toBeVisible();
     await expect(page.getByText("Connection")).toBeVisible();
 
-    await page.getByRole("link", { name: "Stats" }).click();
-    await expect(page).toHaveURL(/#\/stats/);
-    await expect(page.getByRole("heading", { name: "Stats" })).toBeVisible();
+    await page.getByTestId("dev-tree-tab-stats").click();
+    await expect(page.getByTestId("dev-tree-surface-stats")).toBeVisible();
     await expect(page.getByText("Plants")).toBeVisible();
     await expect(page.getByRole("button", { name: /Save and push/i })).toBeVisible();
 
-    await page.getByRole("link", { name: "Cheats" }).click();
-    await expect(page).toHaveURL(/#\/cheats/);
+    await page.getByTestId("dev-tree-tab-cheats").click();
     await expect(page.getByTestId("page-cheats")).toBeVisible();
     await expect(page.getByTestId("cheat-tab-A")).toBeVisible();
     await expect(page.getByTestId("panel-probe-packs")).toBeVisible();
     await page.getByTestId("cheat-tab-B").click();
     await expect(page.getByText("P-GOD — Plant godmode")).toBeVisible();
+
+    // The dev tree is a modal panel — close it before touching AuditNav underneath.
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("dev-tree")).not.toBeVisible();
 
     await page.getByRole("link", { name: "Types" }).click();
     await expect(page.getByText("Peashooter")).toBeVisible();
@@ -251,16 +259,17 @@ test.describe("audit shell e2e", () => {
     await page.getByRole("link", { name: "Recipes" }).click();
     await expect(page.getByText(/SunPea \(3\)/)).toBeVisible();
 
-    await page.getByRole("link", { name: "Log" }).click();
+    await page.goto("./#/log");
     await expect(page.getByRole("heading", { name: "Live log" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
 
-    await page.getByRole("link", { name: "Runs" }).click();
-    await expect(page.getByText("Lawn")).toBeVisible();
-    await page.getByText("#7").click();
-    await expect(page.getByText("Run #7")).toBeVisible();
-    await expect(page.getByText("Result").locator("..").getByText("victory")).toBeVisible();
-    await expect(page.getByText(/0xabc/)).toBeVisible();
+    await page.getByTestId("dev-tree-tab-runs").click();
+    const runsSurface = page.getByTestId("dev-tree-surface-runs");
+    await expect(runsSurface.getByText("Lawn")).toBeVisible();
+    await runsSurface.getByText("#7").click();
+    await expect(runsSurface.getByText("Run #7")).toBeVisible();
+    await expect(runsSurface.getByText("Result").locator("..").getByText("victory")).toBeVisible();
+    await expect(runsSurface.getByText(/0xabc/)).toBeVisible();
   });
 
   test("creates a player save from HudBar", async ({ page }) => {
@@ -274,7 +283,9 @@ test.describe("audit shell e2e", () => {
       await fulfillJson(route, players);
     });
 
-    await page.goto("./#/status");
+    // HudBar is route-independent, unlike the dev tree — go to a route that doesn't open a
+    // modal panel over it (Status now does, as of T12).
+    await page.goto("./#/sanctum");
     await page.getByPlaceholder("New save").fill("NewSave");
     await page.getByRole("button", { name: "Create" }).click();
     await expect.poll(() => created).toBe(true);

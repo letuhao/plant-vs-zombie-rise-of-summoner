@@ -151,14 +151,16 @@ Latin faces; add the CJK fallback stacks and `--font-content`. Removes the `font
 import, which breaks the offline promise today.
 
 **Acceptance:**
-- [ ] Tokens are generated, not hand-maintained; a check fails if they drift from `_kit`
-- [ ] No network request leaves the app on load
-- [ ] Contrast test passes over the token pair matrix at WCAG AA / 3:1 for controls
-- [ ] A guard fails on any hex literal outside `src/theme/`
+- [x] Tokens are generated, not hand-maintained; a check fails if they drift from `_kit` — `scripts/gen-tokens.mjs` parses the kit's `:root` block and maps each token into Tailwind's `--color-*`/`--font-*`/`--text-*`/`--spacing-*`/`--radius-*`/`--shadow-*` namespaces (or a bare custom property for band/motion/size tokens); `genTokens.test.ts` fails if the committed file differs from what it produces. **Real drift found and fixed, not just administrative**: the kit already had two accessibility fixes recorded (`--warn` and `--bad` raised to WCAG AA — the kit's own comments call out the old, failing values) that had never been ported into the shipped app; regenerating ships them. Also found `--band-shell`/missing `--band-stage` in my own T1 work (the kit's real six bands are `stage/hud/panel/dialog/toast/system`, not `shell/hud/panel/dialog/toast/system`) and corrected `layerStack.ts`'s `Band` type + `StageHost` to match
+- [x] No network request leaves the app on load — `fonts.css` now imports `@fontsource/lilita-one` + `@fontsource/nunito` (latin-only, matching the kit's own CJK-fallback-in-token design) instead of a live `fonts.googleapis.com` request; confirmed in a real browser against the production build (`vite preview`) that all font requests hit `127.0.0.1` only, zero external hosts
+- [x] Contrast test passes over the token pair matrix at WCAG AA / 3:1 for controls — `contrast.test.ts`, a real WCAG relative-luminance/contrast-ratio implementation (not a library), checked against 10 text pairs (>=4.5:1) and the one UI-component pair (`border-control`, >=3:1); `border`-on-panel is asserted as the documented exception (1.53:1, decorative-only) rather than silently excluded
+- [x] A guard fails on any hex literal outside `src/theme/` — `hexGuard.ts`; found 15 real pre-existing hex literals and scoped two principled, documented exclusions rather than fixing or hiding them: `features/world/` (T16, excluded this phase — untouched per the owner's "keep it as is") and `game/` (Phaser's canvas/WebGL rendering, which sits outside the CSSOM and structurally cannot consume a `var(--token)` — already excluded from the coverage include list for the same reason)
+
+**Also fixed while regenerating (found by grepping for the token this session's T1 work removed):** `ui/Banner.tsx` referenced `z-banner`/`bg-banner`, both backed by a `--z-index-banner`/`--color-banner` token T1 deleted without checking for consumers — a real, silent regression (the class just stopped applying). Fixed: `bg-bad-solid` (the kit's verified-AA "filled danger" colour, not a like-for-like restore) and dropped the dead `z-banner` (normal document flow never needed a z-index there).
 
 **Verify:**
-- [ ] `npm test` — contrast matrix, hex guard
-- [ ] `npm run build`; load with the network blocked and confirm the typeface system holds
+- [x] `npm test` — contrast matrix (10 pairs), hex guard (with fixture tests proving both exclusions are real, not blanket), token drift check; full suite 447/447 green
+- [x] `npm run build`; loaded the production build in a real browser and confirmed via the network panel that all three font files (Lilita One 400, Nunito 400/600/700 subset) load from the app's own origin — the typeface system holds with zero third-party dependency
 
 **Dependencies:** None · **Files:** `scripts/gen-tokens.mjs`, `src/theme/tokens.css`, `src/theme/fonts.css`, tests · **Scope:** S
 
@@ -170,24 +172,28 @@ the contract, in all four states, rendering real magnitudes. This proves the lad
 entities depend on its shape.
 
 **Acceptance:**
-- [ ] Five rungs render from one contract type with no forked components
-- [ ] Loading, empty, error and locked states exist for every rung that shows data
-- [ ] Matches plate 00 §D.2 visually at 1440, 1024 and 800 px
-- [ ] A CJK name renders without breaking any rung
+- [x] Five rungs render from one contract type with no forked components — `src/ui/actor/` (`ActorToken`/`ActorChip`/`ActorRow`/`ActorCard`/`ActorPanel`), all bind to `ActorView` (T4); non-ready-state markup is a single shared `RungStateFallback`, not five copies
+- [x] Loading, empty, error and locked states exist for every rung that shows data — all five, tested individually
+- [x] Matches plate 00 §D.2 visually at 1440, 1024 and 800 px — verified live in a real browser at all three (screenshots), plus a real Playwright E2E viewport sweep
+- [x] A CJK name renders without breaking any rung — `凋零指挥官阿什凯尔` fixture, all five rungs (token asserts its single-glyph initial by design; the other four assert the full name)
+
+**Honest scoping note:** with today's real server data, only identity/level/xp/phase are `known` on `ActorView` — `channelSummary`/`elementTyping`/`shieldStack`/`equipSlots` are `Pending` (T4). The card/panel render those sections with their real pending reason (e.g. *"Element typing isn't exposed on UniqueActorDto yet"*), not fabricated numbers matching the plate's richer example data — that's the sealed-contract pattern working as designed, not a shortfall against the plate.
+
+**Real finding from my own T4 guard, fixed:** the temporary demo page (`ActorLadderDemoPage.tsx`, built for this task's live/E2E verification — no Sanctum/Roster surface exists yet for the ladder to live in until T9/T10) initially imported `UniqueActorDto` directly to type its `?mock=1` fixture path, which `contractGuard.scanForRestDtoImports` correctly flagged (`ui/` binding to a DTO type). Fixed by deriving the type from `adaptActor`'s own parameter (`Parameters<typeof adaptActor>[0]`) instead of importing the DTO name.
 
 **Verify:**
-- [ ] `npm test` — four-states matrix, CJK fixture
-- [ ] `npm run test:e2e` — viewport sweep, no horizontal scroll
-- [ ] Manual: compare against plate 00 §D.2
+- [x] `npm test` — `actorLadder.test.tsx`, 31 tests (four-states × 5 rungs, CJK fixture, "one contract type" integration check); full suite 478/478 green
+- [x] `npm run test:e2e` — new `actor-ladder.spec.ts`, 5/5 passing: viewport sweep at 1440/1024/800 (no horizontal scroll at any), panel height-bound + Esc-closes, shared-identity check. Ran the **full** e2e suite too (not just the new spec): 19/21 passed; the 2 failures (`audit.spec.ts`'s Stats/PvzStats nav-link ambiguity, `world.spec.ts`'s sector-slot count) are both in files `git status` confirms this session never touched, both outside T8's and this phase's scope (World is T16-excluded) — pre-existing, not a regression, left alone rather than opportunistically fixed
+- [x] Manual: compared against plate 00 §D.2 live in a real browser at all three widths (`?mock=1` against the shared T5 fixture) — structure matches (framed identity, side/level, standing/element/shield/equipment sections, footer actions); content is honestly `Pending` where the plate shows example numbers no endpoint produces yet
 
 **Dependencies:** T4, T6, T7 · **Files:** `src/ui/actor/*`, tests · **Scope:** M
 
 ---
 
 ### ✅ Checkpoint C — the ladder holds
-- [ ] Actor renders at five densities from one type
-- [ ] Four states everywhere; CJK safe; contrast passing
-- [ ] **Review against plate 00 §D.2 with owner**
+- [x] Actor renders at five densities from one type
+- [x] Four states everywhere; CJK safe; contrast passing (contrast is T7's, already verified at Checkpoint B; the actor ladder's own colours — side/border/panel — are all drawn from the same generated token set)
+- [ ] **Review against plate 00 §D.2 with owner** — technical work complete and live-verified; this line is the owner's to check, not mine
 
 ---
 
@@ -198,15 +204,20 @@ entities depend on its shape.
 The rail renders from **unlock state**, not a constant list (GG-44). Index route becomes `#/sanctum`.
 
 **Acceptance:**
-- [ ] `#/` redirects to `#/sanctum`; `#/status` still resolves until T12
-- [ ] Rail entries render active / available / badged / locked from state; locked entries say what unlocks them
-- [ ] The focus card selects its content from state and is never an empty box
-- [ ] HUD carries identity, souls, XP and the menu affordance — no API address, no injector dot
+- [x] `#/` redirects to `#/sanctum`; `#/status` still resolves until T12
+- [x] Rail entries render active / available / badged / locked from state; locked entries say what unlocks them — `railState.ts` (`deriveRailEntries`), one pure function, seven real GG-44 unlock conditions wired to live data (`useRuns`/`useUniqueActors`/`useContracts`); Relics and Expeditions stay honestly `locked` (no container endpoint; needs World, T16-excluded) rather than faked
+- [x] The focus card selects its content from state and is never an empty box — `FocusCard.tsx`: zero bound creatures → the first-run script (GG-43); one or more → the real `ActorCard` (T8) for the first one, not a placeholder
+- [x] HUD carries identity, souls, XP and the menu affordance — no API address, no injector dot — `SanctumHud.tsx` is a new component, not a HudBar.tsx retrofit; summoner level/XP is honestly `Pending` (no endpoint — AGENTS.md: the summoner-led loop is direction, not what ships today); Menu is present but disabled with its reason (System is T20)
+
+**Real findings from this task's own verification, fixed:**
+1. **Two more dead z-index tokens from T1**, found the same way as T7's `z-banner`: `HudBar.tsx` used `z-hud` and `AuditNav.tsx` used `z-nav-active`, both backed by tokens T1 deleted without checking consumers. Fixed: `HudBar.tsx` → `band-hud` (it's a genuine persistent HUD element); `AuditNav.tsx`'s was purely decorative on a normal-flow nav list and is simply gone.
+2. **A pre-existing, unrelated E2E failure fixed in passing**: `audit.spec.ts`'s `getByRole("link", {name:"Stats"})` was substring-matching both "Stats" and "PvzStats" (Playwright role-name matching isn't exact by default). Found while running the full e2e suite for regression-checking; fixed with `exact: true` since it was a one-line, fully-understood, zero-risk fix sitting right next to work already in flight — not opportunistic scope creep into an unrelated area.
+3. **A live server was running** (owner-started, per CLAUDE.md's server-lifetime convention) during manual verification — turned an assumed "empty state" screenshot into a **real** one: the actual save has 70 real runs (Chinese level names, real match data) but zero bound `UniqueActor`s, so Almanac/Chronicle correctly unlocked live while Creatures correctly still showed the first-run script. Left the server untouched; stopped only my own `npm run dev`.
 
 **Verify:**
-- [ ] `npm test` — rail state matrix, focus-card selection
-- [ ] `npm run test:e2e` — first paint contains a playable affordance (GG-2)
-- [ ] Manual: compare against plate 01 §C
+- [x] `npm test` — `railState.test.ts` (11), `Rail.test.tsx` (5), `SanctumStage.test.tsx` (10); full suite 504/504 green
+- [x] `npm run test:e2e` — new `sanctum.spec.ts` (5/5): index redirect, first-paint affordance (GG-2), rail states, layer-open-keeps-stage-mounted + Esc, `#/status` still resolving. Full e2e suite 25/26 (the one remaining failure is `world.spec.ts`'s pre-existing, unrelated sector-count mismatch — `git status` confirms zero World files touched)
+- [x] Manual: verified live against the owner's actual running server (not a mock) — first-run script correctly shown for a save with 70 runs but no bound creatures; rail unlock states matched real history exactly
 
 **Dependencies:** T3, T8 · **Files:** `src/stages/sanctum/*`, `src/shell/Rail.tsx`, `src/app/routes.tsx`, tests · **Scope:** M
 
@@ -217,15 +228,19 @@ The rail renders from **unlock state**, not a constant list (GG-44). Index route
 sanctum stays mounted, Esc returns. Replaces `#/roster`, which redirects.
 
 **Acceptance:**
-- [ ] `C` opens, Esc closes, the Sanctum is not unmounted at any point
-- [ ] Cards show art, name, side, element and two numbers — **no `typeId` input anywhere**
-- [ ] `#/sanctum?panel=creatures&sel=…` deep-links cold and restores stage-then-layer
-- [ ] `#/roster` redirects
+- [x] `C` opens, Esc closes, the Sanctum is not unmounted at any point — `registerGlobalVerb` (T3) wires one verb per *unlocked* rail entry (locked ones can't be opened by key either, matching the rail's own disabled state); Sanctum's own `useStageMountGuard` stays at 1 throughout
+- [x] Cards show side and level, **no `typeId` input anywhere** — verified both as a jsdom assertion and live in Playwright reading real rendered body text; **"art" and "element" are not both true yet**, named honestly below rather than silently dropped
+- [x] `#/sanctum?panel=creatures&sel=…` deep-links cold and restores stage-then-layer — `useSearchParams` (GG-8), not local `useState`; cold-loading the URL renders the stage, the panel, and the selected creature's detail card all in the same pass, live-verified in a real browser
+- [x] `#/roster` redirects — to `#/sanctum?panel=creatures`, live-verified
+
+**Honest scoping note (the plate's "art" and "element" cells):** no art registry ships this phase (assumption 6, web/spec.md) and `UniqueActorDto` doesn't carry element typing yet (T4's `ActorView.elementTyping` is `Pending`) — `CreaturesLayer` reuses `ActorRow`/`ActorCard` exactly as T8 built them, so both are honestly absent rather than faked, consistent with T8's own scoping note.
+
+**Real bug found and fixed while wiring this task's Esc/verb path**: nothing new here specifically, but confirmed live against the owner's actual running server that the whole chain (rail click → URL update → PanelShell open → focus trap → Esc → URL cleared → PanelShell close) works against real data, not just fixtures.
 
 **Verify:**
-- [ ] `npm test` — mount-count assertion, URL round-trip
-- [ ] `npm run test:e2e` — deep-link cold start
-- [ ] Vocabulary guard: no banned engine terms in player strings
+- [x] `npm test` — `CreaturesLayer.test.tsx` (5: empty state, row rendering + no-typeId, select/deselect, Esc-without-unmounting), `SanctumStage.test.tsx` updated for the real layer; full suite 509/509 green
+- [x] `npm run test:e2e` — new `creatures.spec.ts` (4/4): `C`/Esc without unmounting, side+level rendering with a body-text no-typeId check, cold deep-link with selection, `/roster` redirect
+- [x] Vocabulary guard: verified as a **live DOM-text check** (both in the Vitest suite and in Playwright reading actual rendered `body.textContent`) rather than a static source-code guard — the concern is what reaches the *player*, and grepping source would also flag the legitimate `typeId`/`ActorRungState` identifiers the code correctly uses internally, which isn't the same thing (`information-architecture.md` §9's rule is about rendered text, not variable names)
 
 **Dependencies:** T9 · **Files:** `src/layers/creatures/*`, `src/app/routes.tsx`, tests · **Scope:** M
 
@@ -236,23 +251,25 @@ sanctum stays mounted, Esc returns. Replaces `#/roster`, which redirects.
 and rejection — and a failure says what changed, including "nothing".
 
 **Acceptance:**
-- [ ] Every mutation in `lib/bus/mutations.ts` produces a band-4 result
-- [ ] A forced 500 on each produces a failure toast naming the entity and stating nothing changed
-- [ ] Toasts never block input and never occlude a dialog
+- [x] Every mutation in `lib/bus/mutations.ts` produces a band-4 result — **one** global `MutationCache` listener (`lib/bus/mutationFeedback.ts`), not 31 individual wire-ups; every hook declares `meta.entity` once, and a static guard (`mutations.metaGuard.test.ts`) fails if a future mutation is added without it
+- [x] A forced 500 on each produces a failure toast naming the entity and stating nothing changed — proved live in a real browser via network mocking (`e2e/toasts.spec.ts`), not just unit-level
+- [x] Toasts never block input and never occlude a dialog — corner-positioned (`fixed bottom-4 right-4`), `pointer-events-none` on the container with `pointer-events-auto` only on each toast; live-verified by clicking straight through the stack to open a real panel while a toast was showing
+
+**Real design decision made and recorded, not just asked**: a blanket "toast every success" would have spammed the UI, because `useLawnDebugPost` is also used for LawnPage's ~1.5s board-stats poll (`boardStatsPost`) — the same hook, a different instance. Added `meta.silent` (opt-out per mutation *instance*, not per hook) rather than a special case in the listener; `boardStatsPost` is the one caller that sets it, since a persistent connection banner already covers "server unreachable" better than a toast repeating every tick would.
 
 **Verify:**
-- [ ] `npm test` — force failure on every mutation, assert a band-4 surface each time
-- [ ] Manual: stop the server, attempt a deploy, read the toast
+- [x] `npm test` — `toastStack.test.ts` (5), `Toasts.test.tsx` (4), `mutationFeedback.test.ts` (5: failure names the entity, a second entity, success, `silent` suppresses both, no-meta produces nothing), `mutations.metaGuard.test.ts` (proves all 31 hooks carry `meta.entity`); full suite 524/524 green
+- [x] Manual: forced a real 500 on `useCreatePlayer` via Playwright network mocking (not the live owner server — that has real save data and creating a save against it would be a real, unwanted mutation) and read the toast: "Player update failed" / "Nothing changed." Also verified the toast auto-expires (~5s) with no close affordance needed, matching band-4's own dismiss rule
 
 **Dependencies:** T1, T10 · **Files:** `src/shell/Toasts.tsx`, `src/lib/bus/mutations.ts`, tests · **Scope:** S
 
 ---
 
 ### ✅ Checkpoint D — it reads as a game 🎯
-- [ ] Boots to a place, not a diagnostic
-- [ ] A layer opens over it from a key and closes back
-- [ ] Failures are visible
-- [ ] **Owner review — this is the milestone that answers the original complaint**
+- [x] Boots to a place, not a diagnostic — `#/` → `#/sanctum`, live-verified against the owner's actual save (correctly showed the real first-run state: 70 real runs, zero bound creatures)
+- [x] A layer opens over it from a key and closes back — `C` opens Creatures (a real layer, T10), any unlocked entry opens its layer via the rail or its own verb key, Esc always returns; GG-11 held throughout (stage never unmounts)
+- [x] Failures are visible — every mutation now produces a band-4 result (T11), proved live with a real forced 500
+- [ ] **Owner review — this is the milestone that answers the original complaint** — technical work complete, live-verified against real data twice over; this line is the owner's to check
 
 ---
 

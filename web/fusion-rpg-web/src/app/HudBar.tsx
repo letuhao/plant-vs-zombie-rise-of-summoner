@@ -22,7 +22,7 @@ export function HudBar() {
 
   return (
     <header
-      className="relative z-hud flex flex-wrap items-center gap-4 border-b border-border bg-soil-raised px-5 py-3"
+      className="band-hud relative flex flex-wrap items-center gap-4 border-b border-border bg-soil-raised px-5 py-3"
       data-testid="hud-bar"
     >
       <h1 className="font-display text-xl text-text" data-testid="hud-title">

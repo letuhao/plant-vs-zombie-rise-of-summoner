@@ -1,6 +1,8 @@
 import { Outlet } from "react-router-dom";
 import { useHealth, useHubStatus, usePlayers } from "@/lib/bus";
+import { DevTreeHost } from "@/dev/DevTreeHost";
 import { useGlobalKeys } from "@/shell/useGlobalKeys";
+import { Toasts } from "@/shell/Toasts";
 import { Banner } from "@/ui";
 import { AuditNav } from "./AuditNav";
 import { HudBar } from "./HudBar";
@@ -29,10 +31,12 @@ export function AppShell() {
       <HudBar />
       <div className="flex min-h-0 flex-1" data-testid="shell-body">
         <AuditNav />
-        <main className="flex-1 overflow-auto p-5" data-testid="page-outlet">
+        <main className="min-w-0 flex-1 overflow-auto p-5" data-testid="page-outlet">
           <Outlet />
         </main>
       </div>
+      <Toasts />
+      <DevTreeHost />
     </div>
   );
 }

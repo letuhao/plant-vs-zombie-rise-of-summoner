@@ -105,6 +105,30 @@ public class LegionSupplyResolveTests
     }
 
     [Fact]
+    public void A_top_ups_rounding_remainder_goes_to_the_first_legion_in_ordinal_order()
+    {
+        // Coverage found `DistributeToLegions`'s remainder-settlement line (mirroring
+        // `LoamPhases.DrawProportionally`'s own) had never actually run: every prior test used a
+        // single legion, so an even 50/50 split with one unit of drawn stock left over — the exact
+        // case that line exists for — was never exercised.
+        var legionA = Legion("legion-a", atSectorId: "home", fighters: 0, bearers: 1, carriedLoam: 0);
+        var legionB = Legion("legion-b", atSectorId: "home", fighters: 0, bearers: 1, carriedLoam: 0);
+        var demandEach = LegionSupply.Capacity(legionA);
+        var totalDemand = demandEach * 2;
+
+        // One short of covering both in full — the even split truncates, leaving exactly one unit
+        // of drawn stock unaccounted for by the proportional shares alone.
+        var world = Fixture(homeStock: totalDemand - 1) with { Entities = new[] { legionB, legionA } };
+
+        var result = LegionSupply.Resolve(world, new TurnReport(), "pressure");
+
+        var a = result.Entities.Single(e => e.EntityId == "legion-a").CarriedLoam;
+        var b = result.Entities.Single(e => e.EntityId == "legion-b").CarriedLoam;
+        Assert.Equal(totalDemand - 1, a + b);
+        Assert.True(a > b, "the remainder must land on the first entity in ordinal id order, not array order");
+    }
+
+    [Fact]
     public void An_in_supply_legion_never_burns_even_with_no_bearers()
     {
         var legion = Legion("legion", atSectorId: "home", fighters: 3, bearers: 0, carriedLoam: 5);

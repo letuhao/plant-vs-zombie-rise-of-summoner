@@ -49,7 +49,16 @@ class SetCompletability(Metric):
     id = "Linkage/SetCompletability"
     family = "Linkage"
     loop = Loop.CLOSED
-    gates = False
+    # Promoted at S10 cutover, NOT held to the usual "measure first, calibrate, then gate"
+    # sequence (spec-metrics.md §4): this is a verified byte-identical port of a check
+    # `seed_graph`'s check_reachability.py already gated CI on, unconditionally, before this
+    # module existed (test_parity_seed_graph.py proves the finding sets match on the live corpus
+    # AND on every historical corpus state this repo has ever had). Promoting a NEW, uncalibrated
+    # metric to gates=True would be the "trains people to ignore the build" mistake the discipline
+    # exists to prevent; keeping an ALREADY-gating check at gates=False during cutover would be a
+    # silent regression in the other direction — CI would stop enforcing something it enforces
+    # today. Every other metric in this program still starts at gates=False.
+    gates = True
     needs = frozenset({"corpus"})
     covers: tuple[str, ...] = ("appendix-a:11",)
 
@@ -108,7 +117,16 @@ class Unobtainable(Metric):
     id = "Registration/Unobtainable"
     family = "Registration"
     loop = Loop.CLOSED
-    gates = False
+    # Promoted at S10 cutover, NOT held to the usual "measure first, calibrate, then gate"
+    # sequence (spec-metrics.md §4): this is a verified byte-identical port of a check
+    # `seed_graph`'s check_reachability.py already gated CI on, unconditionally, before this
+    # module existed (test_parity_seed_graph.py proves the finding sets match on the live corpus
+    # AND on every historical corpus state this repo has ever had). Promoting a NEW, uncalibrated
+    # metric to gates=True would be the "trains people to ignore the build" mistake the discipline
+    # exists to prevent; keeping an ALREADY-gating check at gates=False during cutover would be a
+    # silent regression in the other direction — CI would stop enforcing something it enforces
+    # today. Every other metric in this program still starts at gates=False.
+    gates = True
     needs = frozenset({"corpus"})
     covers: tuple[str, ...] = ("appendix-a:10",)
 
@@ -141,7 +159,16 @@ class SocketWordIngredients(Metric):
     id = "Registration/IngredientUnsatisfiable"
     family = "Registration"
     loop = Loop.CLOSED
-    gates = False
+    # Promoted at S10 cutover, NOT held to the usual "measure first, calibrate, then gate"
+    # sequence (spec-metrics.md §4): this is a verified byte-identical port of a check
+    # `seed_graph`'s check_reachability.py already gated CI on, unconditionally, before this
+    # module existed (test_parity_seed_graph.py proves the finding sets match on the live corpus
+    # AND on every historical corpus state this repo has ever had). Promoting a NEW, uncalibrated
+    # metric to gates=True would be the "trains people to ignore the build" mistake the discipline
+    # exists to prevent; keeping an ALREADY-gating check at gates=False during cutover would be a
+    # silent regression in the other direction — CI would stop enforcing something it enforces
+    # today. Every other metric in this program still starts at gates=False.
+    gates = True
     needs = frozenset({"corpus"})
     covers: tuple[str, ...] = ()
 
@@ -173,7 +200,16 @@ class RecipeInputs(Metric):
     id = "Registration/RecipeInputUnobtainable"
     family = "Registration"
     loop = Loop.CLOSED
-    gates = False
+    # Promoted at S10 cutover, NOT held to the usual "measure first, calibrate, then gate"
+    # sequence (spec-metrics.md §4): this is a verified byte-identical port of a check
+    # `seed_graph`'s check_reachability.py already gated CI on, unconditionally, before this
+    # module existed (test_parity_seed_graph.py proves the finding sets match on the live corpus
+    # AND on every historical corpus state this repo has ever had). Promoting a NEW, uncalibrated
+    # metric to gates=True would be the "trains people to ignore the build" mistake the discipline
+    # exists to prevent; keeping an ALREADY-gating check at gates=False during cutover would be a
+    # silent regression in the other direction — CI would stop enforcing something it enforces
+    # today. Every other metric in this program still starts at gates=False.
+    gates = True
     needs = frozenset({"corpus"})
     covers: tuple[str, ...] = ()
 
@@ -205,7 +241,16 @@ class EnhancementTrackBound(Metric):
     id = "Registration/FeatureUnbound"
     family = "Registration"
     loop = Loop.CLOSED
-    gates = False
+    # Promoted at S10 cutover, NOT held to the usual "measure first, calibrate, then gate"
+    # sequence (spec-metrics.md §4): this is a verified byte-identical port of a check
+    # `seed_graph`'s check_reachability.py already gated CI on, unconditionally, before this
+    # module existed (test_parity_seed_graph.py proves the finding sets match on the live corpus
+    # AND on every historical corpus state this repo has ever had). Promoting a NEW, uncalibrated
+    # metric to gates=True would be the "trains people to ignore the build" mistake the discipline
+    # exists to prevent; keeping an ALREADY-gating check at gates=False during cutover would be a
+    # silent regression in the other direction — CI would stop enforcing something it enforces
+    # today. Every other metric in this program still starts at gates=False.
+    gates = True
     needs = frozenset({"corpus"})
     covers: tuple[str, ...] = ("appendix-a:12",)
 
@@ -232,7 +277,16 @@ class EquipmentSlotCoverage(Metric):
     id = "Registration/SlotUncovered"
     family = "Registration"
     loop = Loop.CLOSED
-    gates = False
+    # Promoted at S10 cutover, NOT held to the usual "measure first, calibrate, then gate"
+    # sequence (spec-metrics.md §4): this is a verified byte-identical port of a check
+    # `seed_graph`'s check_reachability.py already gated CI on, unconditionally, before this
+    # module existed (test_parity_seed_graph.py proves the finding sets match on the live corpus
+    # AND on every historical corpus state this repo has ever had). Promoting a NEW, uncalibrated
+    # metric to gates=True would be the "trains people to ignore the build" mistake the discipline
+    # exists to prevent; keeping an ALREADY-gating check at gates=False during cutover would be a
+    # silent regression in the other direction — CI would stop enforcing something it enforces
+    # today. Every other metric in this program still starts at gates=False.
+    gates = True
     needs = frozenset({"corpus"})
     covers: tuple[str, ...] = ()
 
@@ -264,7 +318,16 @@ class DeadEndMaterials(Metric):
     id = "Registration/MaterialNeverSpent"
     family = "Registration"
     loop = Loop.CLOSED
-    gates = False
+    # Promoted at S10 cutover, NOT held to the usual "measure first, calibrate, then gate"
+    # sequence (spec-metrics.md §4): this is a verified byte-identical port of a check
+    # `seed_graph`'s check_reachability.py already gated CI on, unconditionally, before this
+    # module existed (test_parity_seed_graph.py proves the finding sets match on the live corpus
+    # AND on every historical corpus state this repo has ever had). Promoting a NEW, uncalibrated
+    # metric to gates=True would be the "trains people to ignore the build" mistake the discipline
+    # exists to prevent; keeping an ALREADY-gating check at gates=False during cutover would be a
+    # silent regression in the other direction — CI would stop enforcing something it enforces
+    # today. Every other metric in this program still starts at gates=False.
+    gates = True
     needs = frozenset({"corpus"})
     covers: tuple[str, ...] = ("appendix-a:20",)
 

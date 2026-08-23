@@ -14,9 +14,18 @@ import type {
   UniqueEquipmentListDto
 } from "./types";
 
+/**
+ * `meta.entity` on every mutation below (T11) is what the toast layer
+ * (`shell/Toasts.tsx`) names in a failure — "Creature update failed —
+ * nothing changed", not just "Something went wrong". A global
+ * `MutationCache` listener (`app/providers.tsx`) reads it, so every
+ * mutation gets a band-4 result without each call site wiring its own.
+ */
+
 export function useSaveStats() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Stats" },
     mutationFn: async (stats: StatsConfig) => {
       await sendJson("/api/stats", "PUT", stats);
       await sendJson("/api/commands/reload-stats", "POST", {});
@@ -51,6 +60,7 @@ function patchCheatEntry(
 export function useSaveCheats() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Cheats" },
     mutationFn: (snap: CheatSnapshot) => sendJson("/api/cheats", "PUT", snap),
     onSuccess: (_data, snap) => {
       qc.setQueryData(queryKeys.cheats, snap);
@@ -61,6 +71,7 @@ export function useSaveCheats() {
 export function useToggleCheat() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Cheat" },
     mutationFn: (body: { id: string; enabled: boolean }) => sendJson("/api/cheats/toggle", "POST", body),
     onMutate: async (body) => {
       await qc.cancelQueries({ queryKey: queryKeys.cheats });
@@ -77,6 +88,7 @@ export function useToggleCheat() {
 export function useSetCheatFloat() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Cheat" },
     mutationFn: (body: { id: string; value: number }) => sendJson("/api/cheats/set-float", "POST", body),
     onMutate: async (body) => {
       await qc.cancelQueries({ queryKey: queryKeys.cheats });
@@ -100,6 +112,7 @@ export function useSetCheatFloat() {
 export function useClearCheatField() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Cheat" },
     mutationFn: (body: { id: string }) => sendJson("/api/cheats/clear-field", "POST", body),
     onMutate: async (body) => {
       await qc.cancelQueries({ queryKey: queryKeys.cheats });
@@ -125,6 +138,7 @@ export function useClearCheatField() {
 export function useCheatAction() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Cheat" },
     mutationFn: (body: Record<string, unknown>) => sendJson("/api/cheats/action", "POST", body),
     onSuccess: (_d, body) => {
       const a = body.action;
@@ -136,6 +150,7 @@ export function useCheatAction() {
 
 export function useRunProbePack() {
   return useMutation({
+    meta: { entity: "Probe" },
     mutationFn: (body: { packId: string; probeId?: string }) =>
       sendJson<ProbeRunResult>("/api/cheats/probe", "POST", body)
   });
@@ -143,6 +158,7 @@ export function useRunProbePack() {
 
 export function useEndProbe() {
   return useMutation({
+    meta: { entity: "Probe" },
     mutationFn: (body: { probeId?: string; reason?: string } = {}) =>
       sendJson("/api/cheats/probe/end", "POST", body)
   });
@@ -151,6 +167,7 @@ export function useEndProbe() {
 export function useCreatePlayer() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Player" },
     mutationFn: (name: string) => sendJson("/api/players", "POST", { name }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.players });
@@ -161,6 +178,7 @@ export function useCreatePlayer() {
 export function useSelectPlayer() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Player" },
     mutationFn: (id: number) => sendJson("/api/players/current", "PUT", { id }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.players });
@@ -173,6 +191,7 @@ export function useSelectPlayer() {
 export function useSimCommand() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Simulation" },
     mutationFn: ({ path, body = {} }: { path: string; body?: unknown }) =>
       sendJson("/api/sim" + path, "POST", body),
     onSuccess: () => {
@@ -189,6 +208,7 @@ export function useSimCommand() {
 export function useResetSim() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Simulation" },
     mutationFn: () => sendJson("/api/test/reset", "POST", {}),
     onSuccess: () => {
       clearLogEvents();
@@ -210,6 +230,7 @@ export function useResetSim() {
 export function useSeedPvzStatsDemo() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "PvzStats" },
     mutationFn: (playerId?: number) =>
       sendJson("/api/test/seed-pvz-stats-demo", "POST", playerId != null ? { playerId } : {}),
     onSuccess: () => {
@@ -222,6 +243,7 @@ export function useSeedPvzStatsDemo() {
 export function useResetPvzStats() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "PvzStats" },
     mutationFn: (playerId: number) =>
       sendJson(`/api/pvz-stats/${playerId}/modifiers/reset`, "POST", {}),
     onSuccess: (_data, playerId) => {
@@ -234,6 +256,7 @@ export function useResetPvzStats() {
 export function useWithdrawPvzStat() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "PvzStats" },
     mutationFn: (body: {
       playerId: number;
       sourceKind?: string;
@@ -255,6 +278,7 @@ export function useWithdrawPvzStat() {
 export function useSeedPvzActivityDemo() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "PvzActivity" },
     mutationFn: (playerId?: number) =>
       sendJson("/api/test/seed-pvz-activity-demo", "POST", playerId != null ? { playerId } : {}),
     onSuccess: () => {
@@ -267,6 +291,7 @@ export function useSeedPvzActivityDemo() {
 export function useSpawnExtraIntent() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Board" },
     mutationFn: (body: {
       typeId: number;
       row?: number;
@@ -283,9 +308,15 @@ export function useSpawnExtraIntent() {
   });
 }
 
-/** Thin debug POST for lawn inspector (W7). Path is `/api/debug/{path}`. */
-export function useLawnDebugPost() {
+/**
+ * Thin debug POST for lawn inspector (W7). Path is `/api/debug/{path}`.
+ * `silent: true` is for the ~1.5s board-stats poll (LawnPage) — a failure
+ * still surfaces, but a poll succeeding every tick isn't a "you did
+ * something" moment and would spam the toast stack (T11).
+ */
+export function useLawnDebugPost(options?: { silent?: boolean }) {
   return useMutation({
+    meta: { entity: "Board", silent: options?.silent },
     mutationFn: (args: { path: string; body?: Record<string, unknown> }) => {
       const path = args.path.replace(/^\//, "");
       return sendJson(`/api/debug/${path}`, "POST", args.body ?? {});
@@ -312,6 +343,7 @@ function invalidateUniqueActors(
 export function useCreateUniqueActor() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Creature" },
     mutationFn: (body: { side: string; typeId: number; playerId?: number }) =>
       sendJson<UniqueActorDto>("/api/unique/actors", "POST", body),
     onSuccess: (actor) => {
@@ -323,6 +355,7 @@ export function useCreateUniqueActor() {
 export function useDeployUniqueActor() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Creature" },
     mutationFn: (args: {
       instanceId: string;
       col?: number;
@@ -351,6 +384,7 @@ export function useDeployUniqueActor() {
 export function useRetireUniqueActor() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Creature" },
     mutationFn: (args: { instanceId: string; playerId?: number }) =>
       sendJson<UniqueActorDto>(
         `/api/unique/actors/${encodeURIComponent(args.instanceId)}/retire`,
@@ -366,6 +400,7 @@ export function useRetireUniqueActor() {
 export function usePutUniqueEquipment() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Equipment" },
     mutationFn: (args: { instanceId: string; slot: string; itemId: string; playerId?: number }) =>
       sendJson<UniqueEquipmentListDto>(
         `/api/unique/actors/${encodeURIComponent(args.instanceId)}/equipment/${encodeURIComponent(args.slot)}`,
@@ -382,6 +417,7 @@ export function usePutUniqueEquipment() {
 export function useClearUniqueEquipment() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Equipment" },
     mutationFn: (args: { instanceId: string; slot: string; playerId?: number }) =>
       sendJson<UniqueEquipmentListDto>(
         `/api/unique/actors/${encodeURIComponent(args.instanceId)}/equipment/${encodeURIComponent(args.slot)}`,
@@ -397,6 +433,7 @@ export function useClearUniqueEquipment() {
 export function useAwardUniqueActorXp() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Creature" },
     mutationFn: (args: { instanceId: string; delta: number; reason?: string; playerId?: number }) =>
       sendJson<UniqueActorDto>(
         `/api/unique/actors/${encodeURIComponent(args.instanceId)}/xp`,
@@ -412,6 +449,7 @@ export function useAwardUniqueActorXp() {
 export function useSeedRpgProgressionDemo() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Progression" },
     mutationFn: (playerId?: number) =>
       sendJson("/api/test/seed-rpg-progression-demo", "POST", playerId != null ? { playerId } : {}),
     onSuccess: () => {
@@ -427,6 +465,7 @@ export function useSeedRpgProgressionDemo() {
 export function useClearRpgDemotion() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Progression" },
     mutationFn: (args: { playerId: number; kind: string; typeId: number }) =>
       sendJson(`/api/rpg/progression/${args.playerId}/${args.kind}/${args.typeId}/clear-demotion`, "POST", {}),
     onSuccess: (_data, args) => {
@@ -453,6 +492,7 @@ function invalidateStorage(qc: ReturnType<typeof useQueryClient>) {
 export function useDeleteArchives() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Storage" },
     mutationFn: (uris: string[]) =>
       sendJson<StoragePurgeResult>("/api/storage/archives/delete", "POST", { uris }),
     onSuccess: () => invalidateStorage(qc)
@@ -462,6 +502,7 @@ export function useDeleteArchives() {
 export function usePurgeRunCapture() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Storage" },
     mutationFn: (runIds: number[]) =>
       sendJson<StoragePurgeResult>("/api/storage/runs/purge-capture", "POST", { runIds }),
     onSuccess: () => invalidateStorage(qc)
@@ -471,6 +512,7 @@ export function usePurgeRunCapture() {
 export function useDeleteClosedRuns() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Storage" },
     mutationFn: (runIds: number[]) =>
       sendJson<StoragePurgeResult>("/api/storage/runs/delete", "POST", { runIds }),
     onSuccess: () => invalidateStorage(qc)
@@ -480,6 +522,7 @@ export function useDeleteClosedRuns() {
 export function useTrimHotTails() {
   const qc = useQueryClient();
   return useMutation({
+    meta: { entity: "Storage" },
     mutationFn: () => sendJson<{ ok: boolean }>("/api/storage/trim-tails", "POST", {}),
     onSuccess: () => invalidateStorage(qc)
   });

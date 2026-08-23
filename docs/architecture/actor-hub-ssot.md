@@ -119,6 +119,17 @@ Hardcoded stub keeps StatusRuntime / Actor Hub testable before level→power cur
 
 **Tier power (locked):** use **`progression.tierPower = progression.power × progression.realm`** everywhere `progression.power` appears in delta and ApplyScale formulas. v1 stub: both **1.0** → `tierPower = 1.0`.
 
+> **⚠ ADR P1 amended 2026-08-23 — this section describes what ships today, which is about to change.**
+> The POC curve `2^min(level,12)` is **retired**: it is geometric on a difference-based contest, and
+> two identical level-12 actors measured `netFactor = 4096` (a base-20 status dealing 81,920).
+> `progression.power` becomes **`Θ`** from `IPowerIndexProvider` (linear); `ResistFromPowerRatio`
+> moves 0 → 1.0; `effectiveApplyScale` drops its `× matchPower`; `netFactor` becomes
+> `1 + delta/NetFactorScale`. **`progression.realm` stays 1.0 permanently** — realm advancement is
+> additive in `Θ`, never a contest multiplier.
+> SSOT: [power/ssot-power-scale.md](power/ssot-power-scale.md) §6 · spec:
+> [power/spec-status-contest.md](power/spec-status-contest.md). **Specced, not built** — the stub
+> descriptions below remain accurate until wave 3 lands.
+
 ### C. Status attacker power (attacker ActorPtr at Apply)
 
 | Channel id | Compose | Default | Cap | Consumer |

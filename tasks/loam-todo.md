@@ -1297,6 +1297,221 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
 
 ---
 
+## Post-Checkpoint-10 completeness audit (2026-08-23, owner request)
+
+A dedicated audit re-read every `spec-loam-*.md` against this file's evidence paragraphs, re-ran
+coverage on `FusionRpg.Core.World.Loam`, and did a live run against a real, running server (not just
+fixtures) with `FUSIONRPG_SIM=1`, a fresh player and world so Player 1's real save was never touched.
+
+- [x] **The march-loam gate's soft half** ✅ 2026-08-23 — found by the audit: `spec-loam-ai.md`
+  explicitly names a "loam-legions follow-up item" (a projected-exhaustion figure — *"this legion runs
+  dry on turn 14"* — reported alongside an admitted march order) that fell through the hand-off
+  between `spec-loam-legions.md` (sealed first) and `spec-loam-ai.md` (which surfaced the gap but
+  wasn't the one to build it) and was never tracked as a task anywhere in this file. Built:
+  `LegionSupply.TurnsUntilExhausted` (mirrors `LeashTurns`, but reads `CarriedLoam` — what is
+  *actually carried* — not `Capacity`'s full-tank ceiling); `MovementPhase.Run` reports
+  `legion.runway:<absolute turn>` alongside every admitted march order, pure reporting over
+  already-carried state, no supply-connectivity simulation added. Proven live, not just in a fixture:
+  submitted a real march order for `e-dave-legion-1` against the running sim server, committed the
+  turn, and the turn-0 report came back with `{"phase":"Movement","subject":"e-dave-legion-1","detail":
+  "legion.runway:17"}` — the exact end-to-end pipeline a player's client would read from. Also unit/
+  integration-tested: `LegionSupplyEconomyTests.cs` (3 new), `MarchLoamGateTests.cs` (new, 3 tests,
+  including that a Reveal-dropped order never gets a runway line). Files:
+  `World/Loam/LegionSupply.cs`, `World/Movement/MovementPhase.cs`,
+  `tests/.../LegionSupplyEconomyTests.cs`, `tests/.../MarchLoamGateTests.cs` (new).
+- [x] **Mutation/coverage sweep, real gaps closed** ✅ 2026-08-23 — `coverage.ps1 -Namespace
+  FusionRpg.Core.World.Loam` found real, previously-invisible holes coverage alone (not mutation)
+  surfaces: `LegionSupply.DistributeToLegions`'s rounding-remainder line had never run (every prior
+  fixture used exactly one topping-up legion) — fixed with
+  `A_top_ups_rounding_remainder_goes_to_the_first_legion_in_ordinal_order`; `Habitability.IsSource`'s
+  "unknown structure id" and "any known structure, not just LoamSource-kind" branches were untested —
+  fixed with two new `HabitabilityTests.cs` cases; `LoamPhases.DecrementConstruction`'s per-slot
+  pass-through had never run *alongside* its decrement branch in the same sector — fixed with
+  `Only_the_slot_actually_under_construction_decrements_a_neighbour_is_left_untouched`. The three
+  remaining sub-100% branches (`LegionSupply` 91%, `LoamPhases` 98%) are all structurally unreachable
+  defensive guards — e.g. `connectedByFaction.TryGetValue` can never actually miss, because the
+  dictionary is built from `world.Factions` two lines above every place that reads it — not real gaps,
+  left unforced rather than padded with a test that asserts nothing. Final: `FusionRpg.Core.World.Loam`
+  100% line across all 10 classes. Full regression after every fix: Core 2968/2968, Data 469/469, E2E
+  World 40/40, all 4 guards green, the two long-run regressions green.
+- [ ] **A real, unresolved gap: the post-gate mechanics are largely invisible on the wire.** Confirmed
+  live against the running server, not inferred from reading code: `WorldEntityDto` has no
+  `CarriedLoam` or per-member `Role` field (L26/27 — a player cannot see how much loam their own legion
+  is carrying, or which members are bearers, anywhere in the API response); `WorldSlotDto` has no
+  `ConstructionTurnsRemaining` (L35 — a player cannot tell a well/waystation/granary mid-build from an
+  active one); `WorldSectorDto` has no `WardenBindingId` or `NeglectedTurns` (L41/42 — a player cannot
+  see a sector is warded, or how close it is to spawning the Unmade). `StructureId` itself **is**
+  exposed (L32/33 wired that part). Every one of these mechanics is fully correct and fully tested at
+  the Core/Data layer — this is a wire-contract gap, not a simulation bug — but it means a real player
+  using the actual web client cannot currently observe legion supply, construction progress, wardens,
+  or Unmade-related state at all. Separately, and more fundamentally: **`BindAsWarden` and
+  `Prospecting.Reveal` have no live-reachable path at all** — no `WorldCommandKinds.Ward`, no server
+  endpoint calls `RpgStore.BindAsWarden`, and nothing calls `Prospecting.Reveal` from any endpoint —
+  a player cannot actually bind a warden or see a dowser's results in this build, only a test can.
+  **Not fixed here** — this is a genuine scope change (new DTO fields + endpoint wiring + likely a new
+  `WorldCommandKinds.Ward` + admission/resolver code + web UI work), materially larger than the
+  march-loam-gate's one-line fix above, and left for the owner to prioritize rather than built
+  unilaterally. **Specced 2026-08-23**: [spec-loam-fe-2.md](../docs/architecture/loam/spec-loam-fe-2.md),
+  module id `loam-fe-2`, both open questions resolved by the owner. Planned below as L44–L50.
+
+---
+
+## Phase 12 — `loam-fe-2` (wave 6): make everything since the gate actually playable
+
+Plan: [tasks/loam-plan.md](loam-plan.md)'s `loam-fe-2` section. Spec:
+[spec-loam-fe-2.md](../docs/architecture/loam/spec-loam-fe-2.md). Seven tasks, one phase — see that
+plan's dependency graph for which of L44–L50 are independent versus chained (only L47→L48→L49 is a
+real chain; L44, L45, L46, L50 have no technical dependency on one another).
+
+- [ ] **L44: Wire the five missing fields, and catch up the TS mirror**
+  - Description: `carriedLoam` + per-member `role` on `WorldEntityDto`/`WorldEntityMemberDto`;
+    `constructionTurnsRemaining` on `WorldSlotDto`; `wardenBindingId` + `neglectedTurns` on
+    `WorldSectorDto` — all computed by `WorldEndpoints.cs`'s existing projection code reading straight
+    off Core state, no new calculator. **Also**: `worldTypes.ts` (the hand-written TS mirror) is
+    already missing `structureId` on its `WorldSlotDto`, though the C# DTO has carried it since L32 —
+    found while planning this task, not assumed. Catch up both the five new fields and this
+    pre-existing drift in the same pass, and sweep for any other field the C# DTOs carry that the TS
+    mirror does not, naming anything else found rather than silently leaving it.
+  - Acceptance: every field in `spec-loam-fe-2.md` §1's table round-trips through `/api/world/.../state`
+    and is typed in `worldTypes.ts`; the fog rule holds as a property (owner-only fields read
+    zero/false/null for a non-owner; scouted-visible fields — `constructionTurnsRemaining`,
+    `wardenBindingId`'s presence — reach anyone who has scouted the slot/sector, not only the owner);
+    `world.fixture.json` regenerated once, not per-field.
+  - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`;
+    `cd web/fusion-rpg-web; npm test`; a live check against a running `FUSIONRPG_SIM=1` server
+    confirming the fields actually appear in a real response, the same live-run discipline the audit
+    that found this gap used.
+  - Files: `src/FusionRpg.Contracts/WorldDtos.cs`, `src/FusionRpg.Server/WorldEndpoints.cs`,
+    `web/fusion-rpg-web/src/features/world/worldTypes.ts`, `web/.../world.fixture.json`,
+    `tests/FusionRpg.E2E.Tests/World*.cs`. Scope: M.
+  - Dependencies: none (L25's hashed fields already shipped).
+
+- [ ] **L45: Turn-playback narration for the loam/legion/Unmade vocabulary**
+  - Description: `turnPlayback.ts`'s `classify()`/`describe()` recognize only wave-1/2 event prefixes
+    (`arrival:`, `halt:`, `zoc:`, `claim.`, `supply.cut:`, `attrition:`, `battle`, `calendar`) and fall
+    through to a raw `` `${subject} ${detail}` `` for everything since — `legion.burn:`,
+    `legion.starved:`, `legion.topup:`, `legion.runway:`, `loam.overflow:`, `loam.lost:`,
+    `loam.shortfall:`, `loam.shortfall.unresolved:`, `loam.handicap:`, `unmade.spawned:`. Add a
+    `"loam"` `KeyframeKind` and a player-words translation for each, per `spec-loam-fe-2.md` §2's table.
+  - Acceptance: the playback rail never prints a raw engine detail string for any of the ten event
+    prefixes above; one test per prefix, asserting player words appear and the raw detail string does
+    not.
+  - Verify: `cd web/fusion-rpg-web; npm test -- turnPlayback`.
+  - Files: `web/fusion-rpg-web/src/features/world/turnPlayback.ts`,
+    `web/fusion-rpg-web/src/features/world/turnPlayback.test.ts`. Scope: S.
+  - Dependencies: none.
+
+- [ ] **L46: Sustain and Build command UI**
+  - Description: `WorldCommandKinds.Sustain`/`.Build` and their resolvers are fully built and tested;
+    only the client never learned to issue them. `queueSustain`/`queueBuild` in `WorldPage.tsx`,
+    following `queueMove`/`queueClaim`'s exact shape (`WorldPage.tsx:106-143`), rendered as two more
+    buttons in the existing `Panel title="Sector"` layer next to "March here"/"Claim"
+    (`WorldPage.tsx:333-342`), disabled-with-reason per the shipped pattern
+    (`WorldPage.tsx:331-336`'s own comment). Build needs an inline structure-type dropdown (owner
+    decision: inline, not a popover) offering only structures whose `RequiredSlotKind` matches an
+    empty slot on the selected sector.
+  - Acceptance: Sustain is enabled exactly when a legion is selected, stands at the selected sector,
+    and carries loam > 0, and spends its full carried amount (no amount picker — not this task's
+    mechanic to invent); Build is enabled exactly when a legion is selected, stands at the selected
+    sector, and an eligible empty slot exists, with the dropdown showing only structures whose
+    `RequiredSlotKind` matches; both report their refusal reason through the existing `sendOrders`
+    notice mechanism.
+  - Verify: `cd web/fusion-rpg-web; npm test`; `dotnet test tests\FusionRpg.E2E.Tests --filter
+    FullyQualifiedName~World` (regression — no server-side change, but the client now exercises
+    `Sustain`/`Build` end to end for the first time).
+  - Files: `web/fusion-rpg-web/src/features/world/WorldPage.tsx`, its test file. Scope: M.
+  - Dependencies: none.
+
+- [ ] **L47: Ward — Core (command, admission, resolver)**
+  - Description: `WorldCommandKinds.Ward` + `WorldCommand.WardenBindingId` (`string?`, caller-supplied,
+    not validated against a real contract — Core never touches `RpgStore`); admission
+    (`WorldCommandAdmission.cs`) requires entity owns the sector, sector has no existing
+    `WardenBindingId`, and the supplied id is non-empty; a new `WardResolver.cs` (mirrors
+    `BuildResolver.cs`'s shape) sets `sector.WardenBindingId`, run in `Snapshot` alongside
+    `BuildResolver`.
+  - Acceptance: a `Ward` command against an owned, unwarded sector sets `WardenBindingId` exactly;
+    against an already-warded sector, an unowned sector, or an empty id, it is refused with a named
+    reason and changes nothing.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Ward`.
+  - Files: `src/FusionRpg.Core/World/Turn/WorldCommand.cs`,
+    `src/FusionRpg.Core/World/Turn/WorldCommandAdmission.cs`,
+    `src/FusionRpg.Core/World/Movement/WardResolver.cs` (new),
+    `src/FusionRpg.Core/World/Turn/TurnEngine.cs`,
+    `tests/FusionRpg.Core.Tests/World/Movement/WardResolverTests.cs` (new). Scope: S.
+  - Dependencies: L25 (already shipped — `WorldSector.WardenBindingId` exists since then).
+
+- [ ] **L48: Ward — Server endpoint**
+  - Description: `POST /api/contracts/bind-warden` (mirrors `ContractEndpoints.cs`'s `/bind` shape,
+    `ContractEndpoints.cs:26-35`), body `{playerId?, instanceId, worldId, sectorId}`. Calls
+    `store.BindAsWarden(pid, instanceId)` first; on refusal, stops and returns that reason. On success,
+    submits a `Ward` `WorldCommand` for `worldId`/`sectorId` with that `instanceId`. If the world-command
+    leg is refused, both outcomes are reported — the contract bind stands (already consumed the
+    binding slot), the sector is not warded. No rollback (accepted risk, per the spec).
+  - Acceptance: both orderings are tested explicitly — world-command leg succeeds (normal case), and
+    world-command leg fails after the contract bind already succeeded (the accepted-risk case) —
+    asserting the response names both outcomes rather than picking one.
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter FullyQualifiedName~Warden`;
+    `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`.
+  - Files: `src/FusionRpg.Server/ContractEndpoints.cs`,
+    `tests/FusionRpg.Data.Tests/WardenContractTests.cs` or a new endpoint-level test file. Scope: S.
+  - Dependencies: L47.
+
+- [ ] **L49: Ward — Web UI**
+  - Description: a "Bind Warden" button in the Sector inspector (next to Sustain/Build), enabled when
+    the player owns the sector and it has no `wardenBindingId`. Opens a band-3 confirm dialog (GG-22 —
+    destructive/irreversible actions confirm and name exactly what is lost) listing the player's
+    eligible demons (bound, not already a warden — reusing `useContracts`'s existing data,
+    `contracts.ts:38`), stating plainly *"binds {demon} to {sector} permanently — it can never be
+    released, fielded, or fused again."* **Owner decision**: if the player's Souls balance is below
+    the bind fee, the dialog shows a second, explicit low-balance confirmation step before the action
+    fires — not merely a disabled button. `useBindAsWarden()` mirrors `useBindContract()`'s shape
+    (`contracts.ts:59-61`) exactly.
+  - Acceptance: the dialog names the exact demon and sector before firing; the low-Souls case shows
+    its own second confirmation step, asserted as a distinct test from the ordinary-affordability path;
+    a successful bind updates both the contracts view and the world view (`onSuccess` invalidates both
+    query keys, mirroring `useContractMutation`'s existing invalidation list at `contracts.ts:51-55`
+    plus `["world"]`).
+  - Verify: `cd web/fusion-rpg-web; npm test`.
+  - Files: `web/fusion-rpg-web/src/lib/bus/contracts.ts`,
+    `web/fusion-rpg-web/src/features/world/WorldPage.tsx`, new dialog component + test. Scope: M.
+  - Dependencies: L48.
+
+- [ ] **L50: Prospecting — wire and UI**
+  - Description: `WorldStateDto` gains `IReadOnlyList<string> ProspectedSectorIds`, computed at
+    projection time in `WorldEndpoints.cs` by calling `Prospecting.Reveal(world, viewerFactionId)` —
+    no new persisted or hashed state, same "computed, never stored" discipline as every other derived
+    field. Web: sectors in that list get their own distinct map highlight — never reusing the
+    "habitable" or "scouted" treatment, per `spec-loam-fe.md`'s own "fading and barren must not look
+    alike" logic applied to a third state. A stance picker (next to the existing March/Claim controls)
+    lets the player set `dowse` on a selected legion — no new command, `Stance` is already generic
+    (`WorldCommand.cs:22`).
+  - Acceptance: a dowser's revealed sectors render distinctly from both habitable and scouted ground;
+    `ProspectedSectorIds` is gated to the viewer's own faction (property-tested, not spot-checked);
+    setting `dowse` via the stance picker round-trips through the existing `Stance` command field with
+    no new admission rule needed.
+  - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`;
+    `cd web/fusion-rpg-web; npm test`.
+  - Files: `src/FusionRpg.Contracts/WorldDtos.cs`, `src/FusionRpg.Server/WorldEndpoints.cs`,
+    `web/fusion-rpg-web/src/features/world/worldTypes.ts`,
+    `web/fusion-rpg-web/src/features/world/WorldPage.tsx`, `web/fusion-rpg-web/src/features/world/SectorNode.tsx`
+    (or wherever map highlight treatments live). Scope: M.
+  - Dependencies: none (`Prospecting.Reveal` shipped at L43).
+
+### Checkpoint 11 — `loam-fe-2` built
+- [ ] Every field in `spec-loam-fe-2.md` §1's table is on the wire, fog-tested, and typed in the TS
+  mirror; no field the C# DTOs carry is missing from `worldTypes.ts`.
+- [ ] The turn-playback rail never prints a raw engine detail string for any loam/legion/Unmade event.
+- [ ] A player can Sustain, Build, and Bind a Warden entirely from `#/world`, with no raw API call.
+- [ ] The Ward confirm dialog matches the owner-decided two-step-on-low-Souls behavior exactly.
+- [ ] A dowser's revealed sectors render with their own distinct treatment.
+- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass —
+  this wave touches projection code, not calculators, so a break here would be a wiring mistake worth
+  catching precisely because it would be surprising.
+- [ ] All four guard scripts green.
+- [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
+
+---
+
 ## Hand-off — L41 through Checkpoint 10 (the Unmade, wardens, prospecting, mutation hardening)
 
 Suggested commit message:
@@ -1343,3 +1558,38 @@ slice (`web/fusion-rpg-web/src/i18n/**`, `web/fusion-rpg-web/src/contract/**`,
 `tools/seedsmith/seedsmith/{numerics,metrics,budget}/**`, and others) that this session did not touch
 or stage. Flagging it since a mixed staging area this size is easy to commit unintentionally — worth
 reviewing `git status` before committing either this slice or that other work.
+
+---
+
+## Hand-off — post-Checkpoint-10 completeness audit
+
+Suggested commit message:
+
+> Close the march-loam gate's soft half; harden loam test coverage
+>
+> A completeness audit against every spec-loam-*.md found one requirement that fell through a
+> hand-off between two sealed specs: spec-loam-ai.md names a player-facing "runs dry on turn N"
+> report as a loam-legions follow-up item, never picked up as a task. Built and proven live against
+> a running sim server, not just fixtures. Also closed three coverage gaps a mutation/coverage sweep
+> found in already-shipped loam code (a rounding-remainder line, two Habitability structure-kind
+> branches, and a mixed-slot construction-decrement case) — all real, previously-unexercised paths,
+> none behavioral changes. Confirmed, but deliberately not fixed here: the post-gate mechanics
+> (legion supply, construction progress, wardens, prospecting) are largely invisible on the wire and
+> two of them (wardens, prospecting) have no live-reachable path at all — flagged in loam-todo.md as
+> a real, separately-scoped gap for the owner to prioritize.
+
+Paths touched this round:
+
+- `src/FusionRpg.Core/World/Loam/LegionSupply.cs` — `TurnsUntilExhausted`
+- `src/FusionRpg.Core/World/Movement/MovementPhase.cs` — `legion.runway:` report line
+- `tests/FusionRpg.Core.Tests/World/Loam/LegionSupplyEconomyTests.cs` — `TurnsUntilExhausted` tests
+- `tests/FusionRpg.Core.Tests/World/Movement/MarchLoamGateTests.cs` — new
+- `tests/FusionRpg.Core.Tests/World/Loam/LegionSupplyResolveTests.cs` — rounding-remainder test
+- `tests/FusionRpg.Core.Tests/World/Loam/HabitabilityTests.cs` — two structure-kind branch tests
+- `tests/FusionRpg.Core.Tests/World/Loam/LoamStructuresTests.cs` — mixed-slot decrement test
+- `tasks/loam-todo.md` — this audit's findings and evidence
+
+Quick verify: `dotnet test tests\FusionRpg.Core.Tests`, `.\scripts\coverage.ps1 -Namespace
+FusionRpg.Core.World.Loam` (should read 100% line across all 10 classes). The live-run check itself
+is not repeatable from a script — it was done by hand against a running server with `FUSIONRPG_SIM=1`,
+a throwaway player/world, restored to normal (`FUSIONRPG_SIM` unset, current player back to 1) afterward.

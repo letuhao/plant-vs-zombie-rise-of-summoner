@@ -105,4 +105,29 @@ public class LegionSupplyEconomyTests
 
         Assert.Null(LegionSupply.LeashTurns(legion));
     }
+
+    // ---- The march-loam gate's soft half (spec-loam-ai.md): TurnsUntilExhausted -----------------
+
+    [Fact]
+    public void TurnsUntilExhausted_reads_what_is_actually_carried_not_the_full_tank_ceiling()
+    {
+        var legion = Legion(fighters: 2, bearers: 1) with { CarriedLoam = LegionSupply.Burn(Legion(2, 1)) * 3 };
+
+        Assert.Equal(3, LegionSupply.TurnsUntilExhausted(legion));
+        Assert.NotEqual(LegionSupply.LeashTurns(legion), LegionSupply.TurnsUntilExhausted(legion));
+    }
+
+    [Fact]
+    public void A_legion_already_carrying_less_than_one_turns_burn_shows_zero_turns_left()
+    {
+        var legion = Legion(fighters: 2, bearers: 1) with { CarriedLoam = 1 };
+        Assert.Equal(0, LegionSupply.TurnsUntilExhausted(legion));
+    }
+
+    [Fact]
+    public void An_empty_legion_has_no_runway_figure_to_speak_of()
+    {
+        var legion = Legion(fighters: 0, bearers: 0) with { CarriedLoam = 500 };
+        Assert.Null(LegionSupply.TurnsUntilExhausted(legion));
+    }
 }

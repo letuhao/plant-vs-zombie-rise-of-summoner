@@ -1,0 +1,209 @@
+#!/usr/bin/env python3
+"""
+Magic-number audit — the balance surface must be config, not code.
+
+Standard: docs/architecture/tunables-ssot.md
+
+    T1  a number a balance pass would change lives in config
+    T2  a structural const says why it is not tunable
+    T3  no bare numeric literal in a balance-surface file
+    T6  every tunable carries its unit
+
+Precision over coverage. `audit-overflow.py`'s first run reported 121 critical findings and every
+one was a false positive; the exempt lists below are the lesson from that, not timidity.
+
+Usage (repo root):
+    python scripts/audit-magic-numbers.py                  # full report
+    python scripts/audit-magic-numbers.py --domain contracts
+    python scripts/audit-magic-numbers.py --category M1
+    python scripts/audit-magic-numbers.py --targets M1     # bare file:line list
+    python scripts/audit-magic-numbers.py --summary        # per-domain counts only
+
+Exit codes: 0 = clean, 1 = HIGH findings present, 2 = usage error.
+"""
+import argparse, io, os, re, sys
+from collections import defaultdict
+
+# A file whose whole job is balance. A literal here is a magic number by definition (T3).
+BALANCE_FILE = re.compile(r"(Policy|Rules|Ruleset|Catalog|Math)\.cs$")
+
+# Never a magic number: identity, arithmetic, per-mille denominator, common small factors.
+EXEMPT_LITERALS = {"0", "1", "-1", "2", "10", "100", "1000", "1_000", "60", "24", "1024", "4096"}
+
+# Balance vocabulary — a const named with one of these is tunable until argued otherwise (T1).
+BALANCE_WORD = re.compile(
+    r"(cost|price|rate|chance|odds|gain|loss|decay|yield|reward|bonus|penalty|malus|"
+    r"damage|heal|regen|drain|threshold|weight|multiplier|scale|factor|step|tier|band|"
+    r"duration|cooldown|interval|delay|upkeep|tribute|earn|award|drop|proc|crit|"
+    r"loyalty|soul|essence|loam|xp|level|slot|star|rarity)", re.I)
+
+# Structural vocabulary — correctness, not feel. Exempt from T1, still subject to T2.
+STRUCTURAL_WORD = re.compile(
+    r"(version|capacity|buffer|queue|mailbox|ring|depth|nodes|json|hash|seed|"
+    r"namespace|floor_?id|offset|bytes?|width|precision|encoding|schema|"
+    r"maxsegments|pool|dispose|timeout_?ms|port)", re.I)
+
+SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}
+SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$|Tests?\.cs$", re.I)
+
+# Contexts where a literal is structure, not balance.
+SKIP_LINE = re.compile(
+    r"^\s*(//|///|\*|/\*)"                       # comments
+    r"|\[.*\]"                                    # attributes
+    r"|\bnameof\b|\bTypeId\b|\bGameTypeId\b"      # ids
+    r"|^\s*case\s|^\s*=>\s*\d+\s*,?\s*$"          # switch arms over enums
+    r"|\bnew\s+\w*Version\b|\bEngineVersion\b|\bPolicyVersion\b|\bRulesetVersion\b"
+    r"|\.Substring\(|\[\d+\]|\bToString\(",       # indices / formatting
+    re.I)
+
+CATEGORIES = {
+    "M1": ("HIGH",   "bare numeric literal in a balance-surface file (T3)"),
+    "M2": ("HIGH",   "const with balance vocabulary - belongs in config (T1)"),
+    "M3": ("MEDIUM", "const with no comment and no structural role (T2)"),
+    "M4": ("LOW",    "tunable with no unit in its name (T6)"),
+}
+
+UNIT = re.compile(r"(milli|permille|ms$|ms[A-Z]|seconds?|minutes?|days?|permatch|perday|"
+                  r"perkill|perturn|perlevel|perstar|kpm|pct|percent)", re.I)
+
+CONST_RE  = re.compile(r"\bconst\s+(?:int|long|double|float|decimal)\s+(\w+)\s*=\s*([-\d_\.]+)")
+LITERAL_RE = re.compile(r"(?<![\w.\"])(-?\d[\d_]*(?:\.\d+)?)(?![\w.\"])")
+
+
+def domain_of(path):
+    p = path.replace("\\", "/")
+    for key in ("Contracts", "Loam", "Patron", "Fusion", "Shield", "Vfx", "Status", "Battle",
+                "Overlay", "Ai", "Match", "Combat", "Expeditions", "Progression", "Demons",
+                "World", "Effects", "Stats"):
+        if "/%s/" % key in p or p.endswith("/%s.cs" % key):
+            return key.lower()
+    return os.path.basename(os.path.dirname(p)).lower()
+
+
+def scan(paths):
+    found = []
+    for root in paths:
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
+            for fn in filenames:
+                if not fn.endswith(".cs") or SKIP_FILE.search(fn):
+                    continue
+                fp = os.path.join(dirpath, fn).replace("\\", "/")
+                is_balance = bool(BALANCE_FILE.search(fn))
+                try:
+                    lines = io.open(fp, encoding="utf-8-sig").read().splitlines()
+                except (UnicodeDecodeError, OSError):
+                    continue
+                for i, raw in enumerate(lines, 1):
+                    # Strip trailing comments and string literals BEFORE scanning. A number inside
+                    # `// extra damage below 50% own HP` is prose, not a magic number, and the first
+                    # version of this tool flagged several of them.
+                    code = re.sub(r'"[^"]*"', '""', raw)
+                    code = re.sub(r"//.*$", "", code)
+                    line = code.strip()
+                    if not line or SKIP_LINE.search(code):
+                        continue
+
+                    m = CONST_RE.search(line)
+                    if m:
+                        name, val = m.group(1), m.group(2)
+                        structural = bool(STRUCTURAL_WORD.search(name))
+                        balance = bool(BALANCE_WORD.search(name))
+                        prev = lines[i - 2].strip() if i >= 2 else ""
+                        documented = prev.startswith(("//", "///", "*", "/>"))
+                        if balance and not structural:
+                            found.append(("M2", fp, i, line[:110], domain_of(fp)))
+                            if not UNIT.search(name):
+                                found.append(("M4", fp, i, line[:110], domain_of(fp)))
+                        elif not structural and not documented and val not in EXEMPT_LITERALS:
+                            found.append(("M3", fp, i, line[:110], domain_of(fp)))
+                        continue
+
+                    if is_balance:
+                        for lit in LITERAL_RE.findall(line):
+                            bare = lit.replace("_", "").lstrip("-")
+                            # Single digits inline are arithmetic, not balance: `hp * 4 < maxHp`
+                            # means "a quarter". Real balance values are 2+ digits (20, 250, 400).
+                            # A meaningful single digit belongs in a named const anyway, where M2/M3
+                            # catch it.
+                            if len(bare.split(".")[0]) < 2:
+                                continue
+                            if bare in {x.replace("_", "") for x in EXEMPT_LITERALS}:
+                                continue
+                            found.append(("M1", fp, i, line[:110], domain_of(fp)))
+                            break
+    return found
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Magic-number audit (tunables-ssot.md).")
+    ap.add_argument("--paths", nargs="*", default=["src"])
+    ap.add_argument("--category")
+    ap.add_argument("--domain")
+    ap.add_argument("--targets", metavar="CAT")
+    ap.add_argument("--summary", action="store_true")
+    a = ap.parse_args()
+
+    paths = [p for p in a.paths if os.path.isdir(p)]
+    if not paths:
+        print("no such path(s): %s" % a.paths, file=sys.stderr)
+        return 2
+
+    found = scan(paths)
+    if a.domain:
+        found = [f for f in found if f[4] == a.domain.lower()]
+
+    if a.targets:
+        for cat, fp, ln, _, _ in found:
+            if cat == a.targets:
+                print("%s:%d" % (fp, ln))
+        return 0
+
+    if a.summary:
+        per = defaultdict(lambda: defaultdict(int))
+        for cat, _, _, _, dom in found:
+            per[dom][cat] += 1
+        print("%-16s %5s %5s %5s %5s   total" % ("domain", "M1", "M2", "M3", "M4"))
+        print("-" * 52)
+        for dom in sorted(per, key=lambda d: -sum(per[d].values())):
+            c = per[dom]
+            print("%-16s %5d %5d %5d %5d   %5d"
+                  % (dom, c["M1"], c["M2"], c["M3"], c["M4"], sum(c.values())))
+        print("-" * 52)
+        print("%-16s %5d %5d %5d %5d   %5d" % ("TOTAL",
+              *[sum(1 for f in found if f[0] == k) for k in ("M1", "M2", "M3", "M4")], len(found)))
+        return 1 if any(f[0] in ("M1", "M2") for f in found) else 0
+
+    buckets = defaultdict(list)
+    for f in found:
+        buckets[f[0]].append(f)
+
+    print("Magic-number audit  —  scanned: %s" % ", ".join(paths))
+    print("Standard: docs/architecture/tunables-ssot.md")
+    print("=" * 100)
+    high = 0
+    for cat in sorted(CATEGORIES):
+        if a.category and cat != a.category:
+            continue
+        sev, desc = CATEGORIES[cat]
+        rows = buckets.get(cat, [])
+        print("\n%s  [%s]  %s" % (cat, sev, desc))
+        print("-" * 100)
+        if not rows:
+            print("  clean")
+            continue
+        if sev == "HIGH":
+            high += len(rows)
+        for _, fp, ln, txt, dom in rows[:30]:
+            print("  %s:%d  [%s]\n      %s" % (fp, ln, dom, txt))
+        if len(rows) > 30:
+            print("  ... and %d more (--targets %s)" % (len(rows) - 30, cat))
+
+    print("\n" + "=" * 100)
+    print("  ".join("%s=%d" % (c, len(buckets.get(c, []))) for c in sorted(CATEGORIES)))
+    print("total %d finding(s), %d high" % (len(found), high))
+    return 1 if high else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

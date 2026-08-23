@@ -104,7 +104,7 @@ export function LawnPage() {
 
   const spawnExtra = useSpawnExtraIntent();
   const debugPost = useLawnDebugPost();
-  const boardStatsPost = useLawnDebugPost();
+  const boardStatsPost = useLawnDebugPost({ silent: true });
 
   useEffect(() => {
     if (!shouldPollBoardStats(model.phase)) return;

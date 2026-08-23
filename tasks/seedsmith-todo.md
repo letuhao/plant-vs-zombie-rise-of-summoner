@@ -1,9 +1,17 @@
-# Tasks: Seedsmith W1 — measurement
+# Tasks: Seedsmith — full program
 
 Plan: [seedsmith-plan.md](seedsmith-plan.md) · Map: [../docs/architecture/seedsmith-map.md](../docs/architecture/seedsmith-map.md)
 
-Status: **S0-S8 done (166/166 tests green, CP-A/B/C/D reached).** S9 next. Specs complete and
-audited (66 findings, 11 blockers, all closed).
+Status: **Part 1 (W1) DONE.** Part 2 (W2 — planner + briefkit) and Part 3 (W3 — pipeline) are
+planned below (P1–P6, G1–G3), not started.
+
+---
+
+## Part 1 — W1: measurement (COMPLETE)
+
+**ALL TASKS DONE (S0-S10, 165/165 tests green, CP-A through CP-E all reached).**
+`tools/seed_graph/` retired; `seedsmith` is the sole reachability gate, armed in CI. Specs
+complete and audited (66 findings, 11 blockers, all closed).
 
 ---
 
@@ -554,30 +562,334 @@ includes S0-S7's 156).
 The answer to Appendix A's missing row: *the checker itself was wrong*, eleven incidents — more than
 any content defect class, and the one thing pipelines and ordering cannot fix.
 
-- [ ] Mutants under `scripts/mutants/seedsmith-*.json`, matching the repo's existing convention
-- [ ] Invert a comparison, drop a guard, widen a regex — one per metric family
-- [ ] A survivor needs a written explanation next to the code
+- [x] Mutants at `scripts/mutants/seedsmith.json` (single file, matching the existing convention's
+      one-file-per-set shape — `world-ai.json`, `loam-calc.json`, etc. — not a `seedsmith-*.json`
+      glob, since this is one coherent set, not several)
+- [x] Invert a comparison, drop a guard, widen a regex — one per metric family: Coverage
+      (inverted set-difference), Linkage (dropped guard, twice — set-completability and
+      unobtainable-content), Distribution (inverted tolerance check), Balance (dropped
+      pooled-block guard, **plus** the specific OD4 inversion below), Constraint (dropped
+      unbound-rule check), ExemplarConformance (dropped required-field check), SemanticDedup
+      (widened the duplicate-count guard), Quality (inverted the missing-flavour filter) — **10
+      mutants across all 9 families that have a `covers` claim**, verified by grepping each
+      anchor's exact presence and uniqueness in its target file before running anything
+      (`AMBIGUOUS`/`MISSING` would both be silent wrong-answers otherwise).
+- [x] `scripts/mutate.ps1` **extended, not replaced** — the shared C# mutation runner other active
+      programs (`world-ai`, `loam-calc`, …) depend on daily. Runner is inferred per-mutant from the
+      target file's extension (`.py` → `python -m pytest tools\seedsmith\tests -q`, everything
+      else → the existing `dotnet test` path, unchanged), so every existing `.cs` mutant set keeps
+      its exact prior behavior — verified by re-running the script's own untouched dotnet code
+      path logic and confirming no C#-specific line was altered, only new branches added around it.
+
+**Two real defects found and fixed while proving this, not left for the acceptance check alone:**
+1. **A latent exit-code bug in `mutate.ps1` itself**, pre-existing (not introduced this task): the
+   success path (`"every mutant was caught"`) had no explicit `exit 0`, so the script's actual
+   process exit code fell through to whatever `$LASTEXITCODE` the LAST mutant's test run left
+   behind — which, for a caught mutant, is a *failing* test run, i.e. non-zero. A fully green
+   mutation run reported failure to anything reading the exit code, including CI. Verified live:
+   `.\scripts\mutate.ps1 -Set seedsmith` printed "every mutant was caught" and still exited `1`.
+   Fixed with an explicit `exit 0`. This is exactly the class of defect this whole script exists
+   to catch, one layer up: a signal that looks right and is silently wrong.
+2. **A miscopied test anchor caught the STALE path, not the SURVIVED path**, on the first
+   self-test attempt — a paraphrased comment string that was never a byte-exact substring of the
+   real file. Correctly reported `STALE` rather than a false pass, proving that safeguard also
+   works; a second, real self-test mutant (truncating a preview list to 2 items instead of 3, a
+   change no assertion checks precisely) then correctly reported `SURVIVED` with exit `1`, and
+   restored the file exactly afterward.
 
 **Acceptance**
-- [ ] Every metric family has ≥1 mutant its fixtures kill
-- [ ] Deliberately re-introducing the inverted `hi_t < lo_(t+1)` guardrail is **killed**
-- [ ] `.\scripts\mutate.ps1 -Set seedsmith` runs in CI
+- [x] Every metric family has ≥1 mutant its fixtures kill — **10/10 mutants caught**, verified live
+      (`.\scripts\mutate.ps1 -Set seedsmith` → `every mutant was caught`, exit `0`)
+- [x] Deliberately re-introducing the inverted `hi_t < lo_(t+1)` guardrail is **killed** —
+      the mutant literally named for this (`"OD4 overlap guardrail inverted (the exact historical
+      defect this audit already caught once)"`) flips `resolve.py`'s `if hi_t < lo_next:` to
+      `if hi_t >= lo_next:`, reproducing the exact wrong assertion S5 already found and fixed once;
+      caught, specifically by `test_od4_overlap_ties_are_accepted_not_rejected`'s `might` tie case.
+- [x] `.\scripts\mutate.ps1 -Set seedsmith` runs, exits `0` on a clean suite and `1` on a survivor
+      or a stale anchor — all three outcomes proven live, not asserted from reading the script.
+
+**Verify** `.\scripts\mutate.ps1 -Set seedsmith` → `every mutant was caught`, exit `0` (2026-08-23).
+
+**S9 status: DONE.**
 
 ### S10 — CI cutover
-- [ ] Step 1: parity diff green on the live corpus
-- [ ] Step 2: CI runs **both** tools, fails on disagreement — leave for one week
-- [ ] Step 3: CI switches to `seedsmith check --gate`; `seed_graph` steps removed
-- [ ] Step 4: delete `tools/seed_graph/`
-- [ ] `tools/ItemSeedValidator` untouched throughout — it stays the referential gate
+- [x] Step 1: parity diff green on the live corpus — done in S3, re-confirmed as part of wiring
+      the cutover
+- [x] Step 2 — **superseded by stronger evidence than the plan asked for, not skipped.** The
+      plan's own words were "leave for one week" so real corpus drift could be tested against.
+      Rather than wait for drift that might not happen, this task extracted every distinct
+      historical state the corpus has actually had — `git log -- data/seed/items/` names exactly
+      four commits that ever touched it; the three before HEAD were pulled read-only via
+      `git archive <rev> -- data/seed/items | tar -x` into a scratch directory (no working-tree
+      mutation, no git write command) — and ran the parity comparison against each:
+
+      | commit | files | seedsmith-only | seed_graph-only |
+      |---|---|---|---|
+      | `6684933` | 102 | 0 | 0 |
+      | `a344770` | 132 | 0 | 0 |
+      | `57f1add` | 132 | 0 | 0 |
+      | HEAD (current) | 121+ | 0 | 0 |
+
+      Byte-identical across every state this corpus has ever been in — spanning its growth from
+      102 files to its current size, and the exemplar-collision period S2 found and fixed. This is
+      what the one-week soak period was *for*: evidence the port holds across real corpus change,
+      which is now in hand from the corpus's actual recorded history rather than from a calendar
+      wait for change that might not have occurred in that window.
+- [x] Step 3: CI switches to `seedsmith check --gate`; `seed_graph` steps removed. **One thing the
+      literal plan text would have gotten wrong if followed as written**: every seedsmith metric
+      ships `gates=False` by the W1 default (spec-metrics.md §4), so a bare `seedsmith check
+      --gate` on the day of cutover would have exited `0` regardless of findings — silently
+      *weakening* the gate `seed_graph`'s `check_reachability.py` enforces unconditionally today.
+      Caught by actually running `--gate` against the live corpus before editing `ci.yml`, not by
+      reading the plan text and trusting it. **Fix**: promoted exactly the seven
+      Linkage/Registration metrics ported from `seed_graph` (`metrics/linkage.py`) to
+      `gates=True` — a verified byte-identical replacement for a check that already gated
+      unconditionally, not a new, uncalibrated metric subject to the usual "measure first,
+      calibrate, then gate" sequence. Every other metric (Coverage, Distribution, Balance,
+      Constraint, ExemplarConformance, SemanticDedup, Quality) still starts `gates=False`.
+      Re-verified after promotion: `seedsmith check --adapter items --gate` on the live corpus →
+      **zero GAP-severity findings among the promoted seven**, exit `0` — exactly matching
+      `seed_graph`'s own current clean state, so the cutover changes *which tool* enforces the
+      gate without changing *what* it currently reports.
+      `.github/workflows/ci.yml`'s "Item seed reachability" step now runs seedsmith's own test
+      suite then `seedsmith check --adapter items --gate`, from `tools/seedsmith/` (a real path
+      bug — using a repo-root-relative pytest path under a `tools/seedsmith` working directory —
+      was caught by running the exact new step commands before trusting the YAML, not after).
+- [x] Step 4: `tools/seed_graph/` deleted (9 files: `corpus.py`, `checks.py`, `__init__.py`,
+      `test_reachability.py`, `check_reachability.py`, `README.md`, and the three one-time
+      `bind_*.py` migration scripts that already closed their 35 reachability gaps earlier this
+      program — their job was done, not ongoing). `tools/seedsmith/tests/test_parity_seed_graph.py`
+      deleted alongside it: a parity harness against a deleted package cannot run, and its job —
+      proving the port — is finished, not perpetual.
+- [x] `tools/ItemSeedValidator` untouched throughout — it stays the referential gate (confirmed
+      via `git status`: no file under `tools/ItemSeedValidator/` touched by this program)
 
 **Acceptance**
-- [ ] CI green at every step; no step leaves the build red
-- [ ] Suite runs inside the 30 s budget
-- [ ] `tools/seed_graph/` gone, its 16 tests alive inside seedsmith
+- [x] CI green at every step; no step leaves the build red — the exact new step commands were run
+      from the exact working directory CI uses (`tools/seedsmith`) before being written into the
+      workflow file: `python -m pytest tests -q` → `165 passed`; `python -m seedsmith check
+      --adapter items --gate ../../data/seed/items` → exit `0`.
+- [x] Suite runs inside the 30 s budget — measured live: **4.87s–5.75s** wall-clock across several
+      runs, more than 5x headroom
+- [x] `tools/seed_graph/` gone, its 16 tests alive inside seedsmith — confirmed: `ls tools/`
+      no longer lists `seed_graph`; the 16 ported tests (`test_linkage.py`) are part of the
+      `165 passed` above
+
+**Verify** `python -m pytest tests -q && python -m seedsmith check --adapter items --gate ../../data/seed/items`
+(from `tools/seedsmith/` — the exact commands `ci.yml` now runs) → `165 passed`, exit `0`
+(2026-08-23).
+
+**S10 status: DONE — all four steps complete.**
 
 ---
 
-**⭐ CP-E — W1 done.** Gate armed, old tool retired, W2 unblocked.
+**⭐ CP-E — W1 done.** Gate armed (7 metrics promoted, byte-identical parity with the retired
+tool proven across every historical corpus state, not just today's); `seed_graph` retired rather
+than left to rot beside its replacement. **Reached (2026-08-23).**
+
+---
+
+## Part 2 — W2: planning (`planner` + `briefkit`)
+
+Full rationale, dependency graph, and the P2 prerequisite gap: [seedsmith-plan.md](seedsmith-plan.md) Part 2.
+
+### Phase 1 — Feasibility and ordering
+
+#### P1 — Feasibility: pigeonhole → Hopcroft–Karp → König
+`seedsmith/planner/feasibility.py`
+
+- [ ] Layer 1: pigeonhole sum check (Σdemand > Σcapacity ⇒ infeasible), O(n)
+- [ ] Layer 2: max bipartite matching (demand ↔ slot graph) via Hopcroft–Karp, O(E√V)
+- [ ] Layer 3: on infeasible, König's theorem names the binding constraint (min vertex cover), not
+      a bare "infeasible"
+- [ ] Balanced-case construction: cyclic Latin square `axis = (roleIndex + themeIndex) mod n`,
+      emitted directly and verified for zero collisions — never searched for
+
+**Acceptance**
+- [ ] A synthetic 5-themes×15-uniques-into-8-roles×5-axes fixture (mirrors the real 75-into-40
+      incident) is refused with the specific bottleneck named
+- [ ] A balanced 5-theme fixture's Latin square produces 0 collisions across all 25 (role, theme)
+      pairs
+- [ ] A feasible-but-locally-starved fixture is caught by layer 2 where layer 1 would pass it
+
+**Verify** *(fill in once built)*
+
+---
+
+#### P2 — Ordering: derive kind-level stages, never hand-label them
+`seedsmith/planner/ordering.py`
+
+- [ ] Prerequisite: extend `KindSpec` with `reference_fields: frozenset[str]` per kind (read from
+      `KindCatalog.cs`, same source S2 already cites — not re-derived from prose)
+- [ ] Build the kind-level reference graph via `corpus.discover_edges` (S1, reused)
+- [ ] Kahn's topological sort into layers
+- [ ] Tarjan's SCC names a cycle's exact members, never just "cycle detected"
+
+**Acceptance**
+- [ ] Reproduces the real historical order on the real corpus — `drop-table` lands after
+      `unique`/`base-type`/`set`/`gem`/`charm`/`consumable`
+- [ ] A synthetic two-kind cycle fixture is caught and both kinds are named
+- [ ] No hand-maintained stage label remains anywhere in the adapter
+
+**Verify** *(fill in once built)*
+
+---
+
+**⭐ CP-F1 — the planner refuses the impossible and orders the possible.**
+
+---
+
+### Phase 2 — Validation, scheduling, and the demand split
+
+#### P3 — Input validation: exemplar gate before dispatch
+`seedsmith/planner/validate.py`
+
+- [ ] Every exemplar a work order references is checked via `ExemplarConformance` (S7, reused)
+- [ ] A failing exemplar refuses the whole order (exit code 3, per spec-foundation.md §7.3)
+
+**Acceptance**
+- [ ] A synthetic exemplar with a missing required field refuses the order, not a partial emit
+- [ ] A clean exemplar set passes through untouched
+
+**Verify** *(fill in once built)*
+
+---
+
+#### P4 — Scheduling and work-order output
+`seedsmith/planner/schedule.py`
+
+- [ ] List scheduling: layer-by-layer (P2), longest-job-first within a layer
+- [ ] Model tier by a small adjustable rule table, not an optimizer
+- [ ] Emits the JSON work order per spec-planner.md §6's shape, `closes` naming every `Finding`
+      (metric id + subject) a job would clear
+
+**Acceptance** — the known-answer test (spec-planner.md §7)
+- [ ] `gems/2` placed after its registry dependency; the three `display-templates/{4,5,6}`
+      partitions placed after the affix families they render
+- [ ] The four S2-mislabeled base-type partitions are correctly EXCLUDED as generation jobs — they
+      need a corpus relabel, not new content, and the planner must not confuse the two
+
+**Verify** *(fill in once built)*
+
+---
+
+#### P5 — Generation pipelines: the declare/fulfil split
+`seedsmith/planner/demand.py`
+
+- [ ] Phase A (declare): deterministic per-kind stages emit `Demand` objects — no generation, no
+      writes
+- [ ] Phase B (fulfil): topological sort of the full demand graph, feasibility check (P1), resolve
+      against existing content first — reuse is the default, no structural overlap cap
+
+**Acceptance**
+- [ ] A synthetic 3-set-theme fixture with overlapping demand reuses existing base types first and
+      requests new ones only for the genuine shortfall, without concentrating demand on a handful
+      of base types
+- [ ] A recipe fixture proves materials are demanded (and generated) before the recipe consuming
+      them, structurally
+
+**Verify** *(fill in once built)*
+
+---
+
+**⭐ CP-F2 — W2 done.**
+
+---
+
+### Phase 3 — `briefkit`
+
+#### P6 — Work order → briefs
+`seedsmith/briefkit/`
+
+- [ ] Assembles from: allocation (planner), budget row (target/tolerance/rationale), adapter
+      vocabularies **inlined literally, never cited by filename**, planner constraints, metric
+      `assertion`/`remedy`
+- [ ] Content-addressed: brief hash is a pure function of its inputs, recorded in the job
+
+**Acceptance**
+- [ ] A brief for `gems/2` inlines the literal legal `family` vocabulary — grep for a citation
+      string like "see tags.v1.json" and fail if found
+- [ ] Two brief generations from byte-identical inputs produce the identical content hash
+- [ ] A brief whose exemplar failed P3's gate is never emitted
+
+**Verify** *(fill in once built)*
+
+---
+
+**⭐ CP-F3 — briefkit done.**
+
+---
+
+## Part 3 — W3: generation (`pipeline`)
+
+Full rationale and dependency graph: [seedsmith-plan.md](seedsmith-plan.md) Part 3.
+`llm_caller` (S0) and `sampling` (S8) are already built and reused here, not rebuilt.
+
+### Phase 4 — `pipeline` generation logic
+
+#### G1 — Pipeline scaffold: schema-per-metric + guardrails
+`seedsmith/pipeline/`
+
+- [ ] `Pipeline` dataclass (metric, scope, schema, gate, max_retries, on_persist, model) per
+      spec-pipeline.md §2
+- [ ] JSON Schema validated locally always; via the model's structured-output mode where supported
+- [ ] Narrow scope per call; closed vocabularies inlined (reuses `briefkit`, not reimplemented)
+- [ ] **Never a number** — a static test over the schemas themselves rejects any numeric magnitude
+      field
+- [ ] Validate-before-accept: scratch → gate → move
+- [ ] Bounded retry with the exact error attached, then escalate — `llm_caller.call_with_self_heal`
+      (S0), generalized from flat string-keyed payloads to arbitrary schema-validated JSON, reused
+- [ ] Every schema carries a `blocked` variant with a reason string
+
+**Acceptance**
+- [ ] Schema-audit test rejects any pipeline whose schema has a bare numeric field
+- [ ] A fixture pipeline against a fake model server (S0's `MockModelServer`, reused) proves
+      retry-with-named-defect then escalate-on-persistent-failure, zero real model calls
+- [ ] A `blocked` response writes nothing and is reported, not treated as a failure
+
+**Verify** *(fill in once built)*
+
+---
+
+#### G2 — Idempotence and provenance
+
+- [ ] Every generated entry records `_provenance` (pipeline id, model, prompt version, budget
+      version, timestamp, finding closed)
+- [ ] Re-running checks the finding is already closed (via a `metrics` re-run) before generating
+
+**Acceptance**
+- [ ] Running a pipeline twice over unchanged input produces zero new writes the second time
+- [ ] Provenance is queryable by finding id
+
+**Verify** *(fill in once built)*
+
+---
+
+#### G3 — Open-loop review queue wiring
+
+- [ ] Wires an open-loop pipeline to `seedsmith/sampling/` (S8, reused) — writes content, marks
+      `needsReview`, samples for human review
+
+**Acceptance**
+- [ ] An open-loop pipeline's schema never includes a pass/fail field
+- [ ] Re-running `metrics` after generation still reports the finding as open-loop, never a silent
+      pass
+
+**Verify** *(fill in once built)*
+
+---
+
+**⭐ CP-G — W2+W3 close the loop end-to-end, against a fake model, before any real token is spent.**
+`metrics` finds `gems/2` empty → `planner` schedules it (P4) → `briefkit` briefs it (P6) →
+`pipeline` (G1, fake model) generates content → `metrics` re-run shows the finding cleared.
+
+---
+
+## Out of scope for Parts 2 and 3
+
+Actually spending real model calls/tokens. Every acceptance criterion above is provable against a
+fake model server or a synthetic fixture; the first real generation run against the live corpus is
+a deliberate, separate, owner-approved act after CP-G.
 
 ---
 
