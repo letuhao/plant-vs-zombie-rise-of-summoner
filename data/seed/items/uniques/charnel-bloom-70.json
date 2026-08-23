@@ -26,95 +26,84 @@
       "nameKey": "unique.carrion-spitter",
       "name": "Carrion Spitter",
       "frame": "plant",
-      "baseType": "item.plant-muzzle-b-005",
-      "theme": "charnel-bloom",
-      "rarity": "heirloom",
+      "baseType": "item.plant-muzzle-a-004",
+      "rarity": "firstseed",
       "powerAxis": "offense",
       "fixedAtoms": [
         {
-          "family": "atom.searing-strike",
-          "powerBand": "medium",
-          "params": {
-            "element": "dark"
-          }
+          "family": "atom.venomous",
+          "powerBand": "medium"
         },
         {
-          "family": "atom.ferocity",
+          "family": "atom.bloodletting",
           "powerBand": "low"
         }
       ],
       "varianceSlot": {
-        "family": "atom.keen-edge",
-        "variance": "narrow",
-        "params": {
-          "element": "dark"
-        }
+        "family": "atom.ferocity",
+        "variance": "normal"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line (ferocity, low) plus the narrow crit-rate variance slot; searing-strike is a resource.delta proc, not a raw stat, so the rot-on-hit does not count toward the ceiling."
+        "note": "Both fixed atoms are on-hit affliction capabilities (poison, leech), not a raw attack stat; the muzzle carries no Flat/Increased/More atk line at all, so it sits well under a rolled rare's raw-stat baseline."
       },
       "tags": [
-        "heavy",
-        "necrotic",
+        "medium",
+        "organic",
         "rooted",
         "offensive",
         "signature"
       ],
-      "flavorKey": "flavor.carrion-spitter",
-      "flavor": "Feeds where it fires. Every seed it launches was grown on something that stopped moving first.",
-      "iconKey": "icon.unique.carrion-spitter"
+      "iconKey": "icon.unique.carrion-spitter",
+      "flavorKey": "flavor.unique.carrion-spitter",
+      "flavor": "It doesn't wait for the battlefield to finish. It roots in mid-fight and blooms before the body is cold.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.charnel-bloom-70-002",
-      "nameKey": "unique.bole-of-the-cerement",
-      "name": "Bole of the Cerement",
-      "frame": "plant",
-      "baseType": "item.plant-stem-a-011",
-      "theme": "charnel-bloom",
+      "nameKey": "unique.vest-of-the-ossuary",
+      "name": "Vest of the Ossuary",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-torso-a-007",
       "rarity": "heirloom",
       "powerAxis": "survivability",
       "fixedAtoms": [
         {
-          "family": "atom.warded",
-          "powerBand": "medium",
-          "params": {
-            "element": "dark"
-          }
+          "family": "atom.fortitude",
+          "powerBand": "medium"
         },
         {
-          "family": "atom.fortitude",
+          "family": "atom.regeneration",
           "powerBand": "low"
         }
       ],
       "varianceSlot": {
-        "family": "atom.regeneration",
+        "family": "atom.mending",
         "variance": "narrow"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line (fortitude, low) plus a narrow regeneration variance slot; the warded shell is a shield.grant, not a stat line, so it sits outside the ceiling entirely."
+        "note": "One Increased-maxHp line at medium plus a low, timer-gated regeneration tick; a rolled heirloom rare stacks two to three defensive lines in the same tier window, so this stays under that raw-stat ceiling on its own stat sheet."
       },
       "tags": [
-        "medium-light",
-        "organic",
-        "rooted",
+        "heavy",
+        "necrotic",
+        "undead",
         "defensive",
-        "sturdy",
         "signature"
       ],
-      "flavorKey": "flavor.bole-of-the-cerement",
-      "flavor": "Mourners wrap the newly dead in cerement before the ground takes them. This stem wrapped itself the same way, and never stopped growing.",
-      "iconKey": "icon.unique.bole-of-the-cerement"
+      "iconKey": "icon.unique.vest-of-the-ossuary",
+      "flavorKey": "flavor.unique.vest-of-the-ossuary",
+      "flavor": "Stitched from grave-linen and stiffened with what the linen used to hold.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.charnel-bloom-70-003",
-      "nameKey": "unique.yoke-of-the-ossuary",
-      "name": "Yoke of the Ossuary",
-      "frame": "humanoid",
-      "baseType": "item.humanoid-shoulders-b-004",
-      "theme": "charnel-bloom",
-      "rarity": "firstseed",
+      "nameKey": "unique.mournvine",
+      "name": "Mournvine",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-a-005",
+      "rarity": "heirloom",
       "powerAxis": "control",
       "fixedAtoms": [
         {
@@ -122,204 +111,192 @@
           "powerBand": "medium"
         },
         {
-          "family": "atom.shield-toughness",
-          "powerBand": "low",
+          "family": "atom.withering",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.stalwart",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Both fixed atoms are status-application capabilities (root, wither) rather than a defense or health stat line; the sheath carries no stat.modify atom at all."
+      },
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.mournvine",
+      "flavorKey": "flavor.unique.mournvine",
+      "flavor": "It grows toward whatever screamed last.",
+      "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.charnel-bloom-70-004",
+      "nameKey": "unique.flowering-pollen",
+      "name": "Flowering Pollen",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-a-006",
+      "rarity": "firstseed",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.gravedigging",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.cleansing",
+        "variance": "wide"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A board-state trigger and an on-death bounty payout are both capability atoms, never a raw stat channel, so the necklace carries zero raw-stat affix-equivalent to weigh against the rung baseline."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.flowering-pollen",
+      "flavorKey": "flavor.unique.flowering-pollen",
+      "flavor": "Breathe it in and the battlefield smells like a garden for exactly one second.",
+      "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.charnel-bloom-70-005",
+      "nameKey": "unique.mask-of-the-wake",
+      "name": "Mask of the Wake",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-face-b-008",
+      "rarity": "heirloom",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.econ-toll",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.econ-graze",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Both fixed lines pay currency on a trigger; neither is a stat.modify channel, so there is no raw-stat line for the 60% ceiling to even measure."
+      },
+      "tags": [
+        "light",
+        "necrotic",
+        "undead",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.mask-of-the-wake",
+      "flavorKey": "flavor.unique.mask-of-the-wake",
+      "flavor": "Worn to the vigil, kept after everyone else went home.",
+      "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.charnel-bloom-70-006",
+      "nameKey": "unique.blighted-taproot",
+      "name": "Blighted Taproot",
+      "frame": "plant",
+      "baseType": "item.plant-roots-a-009",
+      "rarity": "heirloom",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.might",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.searing-strike",
+          "powerBand": "medium",
           "params": {
             "element": "dark"
           }
         }
       ],
       "varianceSlot": {
-        "family": "atom.shield-regen",
-        "variance": "narrow",
-        "params": {
-          "element": "dark"
-        }
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (shield-toughness, low) plus a narrow shield-regen variance slot; entangling is a status.apply, not a raw stat, so it does not count toward the ceiling."
-      },
-      "tags": [
-        "heavy",
-        "metal",
-        "mechanical",
-        "utility",
-        "sturdy",
-        "signature"
-      ],
-      "flavorKey": "flavor.yoke-of-the-ossuary",
-      "flavor": "Scavenged from a cart that once hauled the dead to the ossuary. It still remembers how to hold something down.",
-      "iconKey": "icon.unique.yoke-of-the-ossuary",
-      "notes": "Deliberate rung-2 break (ssot-uniques.md #3.5 ladder): atom.entangling's roles list (g-affliction.json) does not include ward-array. Legal because a unique's fixedAtoms sit in the fixed core, never drawn from the role-filtered pool, so role x family legality does not apply to them (seed-contract.md #10 / unique.exemplar.json precedent). No schema or generator rule is touched."
-    },
-    {
-      "id": "unique.charnel-bloom-70-004",
-      "nameKey": "unique.petalled-thorn",
-      "name": "Petalled Thorn",
-      "frame": "plant",
-      "baseType": "item.plant-thorn-b-007",
-      "theme": "charnel-bloom",
-      "rarity": "heirloom",
-      "powerAxis": "utility",
-      "fixedAtoms": [
-        {
-          "family": "atom.cleansing",
-          "powerBand": "medium"
-        },
-        {
-          "family": "atom.fortitude",
-          "powerBand": "low"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.hit-mend",
+        "family": "atom.evasion",
         "variance": "narrow"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line (fortitude, low) plus a narrow hit-mend variance slot; cleansing is a status.clear proc and never counts as a raw stat."
+        "note": "The one raw-stat line (Flat atk, low) is deliberately the smaller of the two fixed atoms; the dark on-hit rider is a triggered capability and does not count toward the raw-stat sum."
       },
       "tags": [
-        "heavy",
+        "medium",
         "organic",
         "rooted",
-        "utility",
-        "signature"
-      ],
-      "flavorKey": "flavor.petalled-thorn",
-      "flavor": "Every barb blooms once it draws blood, and every bloom is a small apology it does not mean.",
-      "iconKey": "icon.unique.petalled-thorn"
-    },
-    {
-      "id": "unique.charnel-bloom-70-005",
-      "nameKey": "unique.pistil-of-bonemeal",
-      "name": "Pistil of Bonemeal",
-      "frame": "plant",
-      "baseType": "item.plant-pollen-b-002",
-      "theme": "charnel-bloom",
-      "rarity": "heirloom",
-      "powerAxis": "economy",
-      "fixedAtoms": [
-        {
-          "family": "atom.gravemaking",
-          "powerBand": "medium"
-        },
-        {
-          "family": "atom.econ-graze",
-          "powerBand": "low"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.midas",
-        "variance": "narrow"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (econ-graze, low) plus a narrow midas variance slot; gravemaking is a grid.spawn effect, not a stat line, so it never touches the ceiling."
-      },
-      "tags": [
-        "medium-heavy",
-        "organic",
-        "rooted",
-        "utility",
-        "signature"
-      ],
-      "flavorKey": "flavor.pistil-of-bonemeal",
-      "flavor": "Ground bone makes rich soil. Rich soil makes a flower worth more than the field it grew in.",
-      "iconKey": "icon.unique.pistil-of-bonemeal"
-    },
-    {
-      "id": "unique.charnel-bloom-70-006",
-      "nameKey": "unique.blightfist",
-      "name": "Blightfist",
-      "frame": "humanoid",
-      "baseType": "item.humanoid-hands-b-008",
-      "theme": "charnel-bloom",
-      "rarity": "heirloom",
-      "powerAxis": "offense",
-      "fixedAtoms": [
-        {
-          "family": "atom.lifesteal",
-          "powerBand": "medium"
-        },
-        {
-          "family": "atom.might",
-          "powerBand": "low"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.cruelty",
-        "variance": "narrow",
-        "params": {
-          "element": "dark"
-        }
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (might, low) plus a narrow crit-damage variance slot; lifesteal is a resource.delta proc and does not count as a raw stat."
-      },
-      "tags": [
-        "medium-heavy",
-        "metal",
-        "mechanical",
         "offensive",
         "signature"
       ],
-      "flavorKey": "flavor.blightfist",
-      "flavor": "The glove rotted first. The hand inside it, somehow, held on longer.",
-      "iconKey": "icon.unique.blightfist"
+      "iconKey": "icon.unique.blighted-taproot",
+      "flavorKey": "flavor.unique.blighted-taproot",
+      "flavor": "It doesn't grip the soil so much as remember what's buried in it.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.charnel-bloom-70-007",
-      "nameKey": "unique.sepulchral-canopy",
-      "name": "Sepulchral Canopy",
-      "frame": "plant",
-      "baseType": "item.plant-canopy-b-004",
-      "theme": "charnel-bloom",
+      "nameKey": "unique.bloodgarland",
+      "name": "Bloodgarland",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-bandolier-a-010",
       "rarity": "heirloom",
       "powerAxis": "survivability",
       "fixedAtoms": [
         {
-          "family": "atom.bulwark",
-          "powerBand": "medium"
-        },
-        {
           "family": "atom.mending",
           "powerBand": "low"
+        },
+        {
+          "family": "atom.cleansing",
+          "powerBand": "medium"
         }
       ],
       "varianceSlot": {
-        "family": "atom.stoicism",
-        "variance": "narrow",
-        "params": {
-          "element": "dark"
-        }
+        "family": "atom.immunity",
+        "variance": "normal"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line (mending, low) plus a narrow crit-resist variance slot; bulwark's More-op maxHp line is the item's only other stat, kept below the ceiling by the low band on mending."
+        "note": "A low Flat-hp tick and a damage-taken cleanse trigger; neither is an Increased/More maxHp line, so the bandolier's raw-stat total stays well under a rolled rare's baseline."
       },
       "tags": [
-        "heavy",
-        "organic",
-        "rooted",
+        "medium-light",
+        "necrotic",
+        "undead",
         "defensive",
-        "sturdy",
         "signature"
       ],
-      "flavorKey": "flavor.sepulchral-canopy",
-      "flavor": "It has shaded more graves than gardens, and grown thick on the difference.",
-      "iconKey": "icon.unique.sepulchral-canopy"
+      "iconKey": "icon.unique.bloodgarland",
+      "flavorKey": "flavor.unique.bloodgarland",
+      "flavor": "A wreath meant for a grave, repurposed for a body that isn't ready for one yet.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.charnel-bloom-70-008",
-      "nameKey": "unique.hood-of-the-requiem",
-      "name": "Hood of the Requiem",
-      "frame": "humanoid",
-      "baseType": "item.humanoid-head-b-006",
-      "theme": "charnel-bloom",
-      "rarity": "firstseed",
+      "nameKey": "unique.runner-of-the-barrow",
+      "name": "Runner of the Barrow",
+      "frame": "plant",
+      "baseType": "item.plant-runner-a-011",
+      "rarity": "heirloom",
       "powerAxis": "control",
       "fixedAtoms": [
         {
@@ -327,32 +304,29 @@
           "powerBand": "medium"
         },
         {
-          "family": "atom.evasion",
-          "powerBand": "low",
-          "params": {
-            "element": "dark"
-          }
+          "family": "atom.freezing",
+          "powerBand": "low"
         }
       ],
       "varianceSlot": {
-        "family": "atom.stalwart",
+        "family": "atom.quickening",
         "variance": "narrow"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line (evasion, low) plus a narrow status-resist variance slot; mesmerizing is a status.apply proc and never counts as a raw stat."
+        "note": "Both fixed atoms are status-application capabilities (hypnosis, freeze); the runner carries no raw stat line at all."
       },
       "tags": [
-        "heavy",
+        "light",
         "organic",
+        "rooted",
         "utility",
-        "sturdy",
         "signature"
       ],
-      "flavorKey": "flavor.hood-of-the-requiem",
-      "flavor": "The mask was carved for a funeral rite. Whoever wears it now conducts a different kind of service.",
-      "iconKey": "icon.unique.hood-of-the-requiem",
-      "notes": "Deliberate rung-2 break, same shape as entry 003: atom.mesmerizing's roles list (g-affliction.json) does not include head-guard. Legal for the same reason - fixedAtoms are the fixed core, never drawn from the role-filtered pool."
+      "iconKey": "icon.unique.runner-of-the-barrow",
+      "flavorKey": "flavor.unique.runner-of-the-barrow",
+      "flavor": "Send it ahead. It already knows where the ground gives way.",
+      "acquisition": "source-locked"
     }
   ]
 }

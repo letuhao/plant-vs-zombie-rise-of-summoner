@@ -68,6 +68,10 @@ public static class OwnershipCheck
         // field as socketMax — it counts a structural thing, it is not a balance magnitude.
         "minSockets", "maxSockets", "apCost", "apCapacity", "manifestCost", "outputQty", "inputQty",
         "charges", "maxCharges", "slots", "count", "tier", "band", "threshold",
+        // `atLevel` is an enhancement milestone rung — one of the five fixed steps
+        // +4/+8/+12/+16/+20 (ssot-enhancement.md §5.4), the same species of value as a set
+        // threshold's `pieces`. It names a rung; it does not scale anything.
+        "atLevel",
         // entry-shapes.md's own field tables name these "AUTHORED (structural count)" too:
         // a curve's points[].atOrdinal (§5 — explicitly NOT covered by the curve's
         // multiplierPerMille exemption below), a socket-word's ingredients[].position (§2), and a

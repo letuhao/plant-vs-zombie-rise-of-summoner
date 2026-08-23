@@ -40,6 +40,20 @@
       "tags": [
         "heavy",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -61,6 +75,20 @@
       "tags": [
         "heavy",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -83,6 +111,20 @@
         "heavy",
         "defensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -104,6 +146,20 @@
       "tags": [
         "medium",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -125,6 +181,20 @@
       "tags": [
         "medium",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -147,6 +217,20 @@
         "medium",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -168,6 +252,20 @@
       "tags": [
         "medium",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -189,6 +287,20 @@
       "tags": [
         "medium",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -210,6 +322,20 @@
       "tags": [
         "heavy",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -232,6 +358,20 @@
         "heavy",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -253,6 +393,20 @@
       "tags": [
         "heavy",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -274,6 +428,20 @@
       "tags": [
         "heavy",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     }
   ]

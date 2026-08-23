@@ -6,6 +6,11 @@ Plan: [effect-atom-plan.md](effect-atom-plan.md) · Map: [../docs/architecture/e
 
 > ✅ Committed by the owner at `842907f` — the untracked-spec risk is closed.
 
+> ⚠ **All 21 rows below are `[x]` and every suite is green — and a completeness audit (2026-08-23)
+> found that most of this layer does not reach the running game:** no host loads a content table, nothing
+> runs the importer, nothing creates a binding, and E17's stat payload has a parser with no applier.
+> Findings and a proposed wave 6: [completeness-audit.md](../docs/architecture/effect-atom/completeness-audit.md).
+
 ## Wave 1 — the spine (Checkpoint A: nothing in the game changes)
 
 - [x] **E1: atom-kind-registry** — accepted 2026-08-22. 12 kinds, 5 attach points, 7 triggers, 33 reason codes, four-state runtime matrix.
@@ -172,6 +177,287 @@ Plan: [effect-atom-plan.md](effect-atom-plan.md) · Map: [../docs/architecture/e
   - **`poison`'s three-way inconsistency resolved at its actual cause.** It is `Kind=UnityCc, family=elemental, category=dot`, and `IsCcLocked` tested **`Kind`** — so poison locked an actor out of its turn because of *how it is delivered*, not what it does. `StatusKind` conflates semantic role with execution path. The check now reads the **category**: of the nine statuses the old test caught, **eight are `cc` and exactly one — poison — is not**, so the fix un-locks poison and nothing else. Measured: zero goldens moved.
   - The `ModifyStat` payload had **4 declarations and 0 consumers**; the `stat` overlay key is allowlisted **with** its consumer, and the shipped `blight-row.overlay.json` — which failed validation with *"unknown overlay key 'stat'"* — now parses, pinned by a test that reads the real file.
   - **"Sealed Foundation" was my over-reading too.** `FoundationContractVersion` is documented as *"bump when EffectEvent / IntentPlan / Grant DTO shapes break"*; an additive permitted key on an existing `Dictionary<string, object?>` breaks no shape.
+
+## Wave 6 — the seams (Checkpoint F: the layer is live, not just tested)
+
+> Scoped from [completeness-audit.md](../docs/architecture/effect-atom/completeness-audit.md)
+> (2026-08-23), not from a new ideal. Every module below closes one lettered finding. **Test coverage
+> mandate** (plan.md): every module ships a **unit** test (the new code alone), a **seam** test (an
+> actual boot/import/compose proving the thing the audit found missing), and a **regression guard**
+> (fails if this exact gap reopens). "New class has tests" is not done; "an inert capability is now
+> demonstrably live" is done.
+
+- [x] **E20: content-boot** — BUILT 2026-08-23. Closes A2 (no host loads a content table) and A3 (the
+  importer never runs). `RpgStore.LoadContentIntoRuntime()` calls `ElementTable.Use`/`PowerTables.Use`
+  from the store's own `GetElementTable()`/`GetPowerTables()`; `Program.cs` calls it right after
+  `store.Init()`; `deploy-play.ps1` runs `tools/AtomImporter` against `$DataDir` before the server
+  starts. **5 new tests** (3 Data unit, 2 E2E seam) + **2 guard tests**, all green; full `Data.Tests`
+  (426), `Guard.Tests` (63) and `E2E.Tests` (185) suites re-run clean with no pollution from the new
+  tests. `deploy-play.ps1` parses clean (`Parser.ParseFile`). Files:
+  `src/FusionRpg.Data/Sqlite/RpgStore.ContentBoot.cs`, `src/FusionRpg.Server/Program.cs`,
+  `scripts/deploy-play.ps1`, `tests/FusionRpg.Data.Tests/ContentBootTests.cs`,
+  `tests/FusionRpg.E2E.Tests/ContentBootE2ETests.cs`, `tests/FusionRpg.Guard.Tests/ContentTableReaderGuardTests.cs`.
+  - Description: `RpgStore.LoadContentIntoRuntime()` (Data) reads the roster, both matrices, and the
+    power tables via the store's existing `GetElementTable()` / `GetPowerTables()` and calls
+    `ElementTable.Use(...)` / `PowerTables.Use(...)`. Called once from `Program.cs` right after
+    `store.Init()`. `deploy-play.ps1` gains an import step — `dotnet run --project tools/AtomImporter
+    -- data/seed --db <server data dir>` — run before the server starts, so the tables the loader
+    reads are not empty.
+  - Acceptance: a clean `deploy-play.ps1` run against a fresh data dir imports `data/seed/**`, boots
+    the server, and `ElementTable.Current` / `PowerTables.Current` reflect the imported rows, not the
+    shipped code fallback. Re-running the deploy is idempotent (E14a's existing skip-when-identical
+    guards already cover this — this module must not regress it).
+  - Test coverage:
+    - **Unit** (`FusionRpg.Data.Tests`): `LoadContentIntoRuntime()` against a store seeded with a
+      roster containing an element the shipped table does not have; assert `ElementTable.Current`
+      picks it up. Same for a power coefficient. Run in a **dedicated xunit collection** (not
+      parallel with anything else reading `.Current`), reset via `ElementTable.ResetToShipped()` /
+      `PowerTables.ResetToAuthored()` in a `finally`.
+    - **Seam** (`FusionRpg.E2E.Tests`): run the real `AtomImporter` against a temp SQLite file with
+      the real `data/seed/**`, then `LoadContentIntoRuntime()`, then assert a composed value that
+      only the imported content could produce (e.g. `critical-hunter`'s crit-rate mod appears through
+      the loaded path, not the `TraitAtomSource.Shipped()` literal).
+    - **Guard** (`FusionRpg.Guard.Tests`): `ContentTableReaderGuardTests` — a maintained map of
+      `ContentHashRegistry` table name → the file/method that reads it in a running host
+      (`element roster → RpgStore.LoadContentIntoRuntime`, etc.). Assert every table name in
+      `ContentHashRegistry.Current` has an entry. This is the standing version of this whole audit —
+      it must fail the day a table is registered with no reader, the way `effect_channel_policy`
+      shipped in E16 without one.
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ContentBoot"` +
+    `dotnet test tests\FusionRpg.E2E.Tests --filter "FullyQualifiedName~ContentBoot"` +
+    `dotnet test tests\FusionRpg.Guard.Tests --filter "FullyQualifiedName~ContentTableReader"`.
+  - Files: `src/FusionRpg.Data/Sqlite/RpgStore.ContentBoot.cs` (new), `src/FusionRpg.Server/Program.cs`,
+    `scripts/deploy-play.ps1`, tests as above. Scope: M.
+  - Dependencies: none — every table it loads is already written by an existing store method.
+
+- [x] **E21: status-stat-applier** — BUILT 2026-08-23. Closes A1 (`StatusStatPayload.ToModifiers`/
+  `SourceIdOf` had zero production callers; `rally`/`expose`/`command`/`shatter` changed no stat).
+  - **Read-before-build finding: no plugin was needed.** `StatSystem.Resolve` already runs two
+    mechanisms — a fresh-per-call `IStatModifierPlugin.Contribute` pass, and a persistent
+    `_sessionBag` reached via `Upsert`/`WithdrawSource`. `ExecModifyStat` (FA1's `stat.modify`
+    executor) already uses the session-bag path for effect-granted mods — `Upsert` on apply,
+    `WithdrawSource("effect", "effect:"+grantId)` on remove, then `CheatActions.ReapplyLivingForOwner`
+    to force the recompute+write. `StatusStatPayload.ToModifiers`/`SourceIdOf` already produce exactly
+    that shape with `SourceKind="status"`. The fix is two calls in `EffectRuntime.OnApplied`/`OnEnded`
+    mirroring `ExecModifyStat`, not a new Core type.
+  - **Bug found by the seam test, not by inspection.** `ToModifiers` set `ApplyOwnerKey =
+    instance.HostPtr` — a bare pointer. `StatApplyScope.Matches` only recognises the `entity:`-prefixed
+    grammar; every other owner key in the codebase already arrives pre-formatted that way, and
+    `ToModifiers` was the one place building one raw. The bare form falls through to `Matches`'s final
+    `return false`, so the contribution silently composed nothing. `StatusStatPayloadTests`'s own
+    assertion (`Assert.Equal("Z1", mod.ApplyOwnerKey)`) had encoded the bug — the same shape E11's
+    `Assert.Equal(3, def.Actions.Count)` did. Fixed to `"entity:" + instance.HostPtr`; the existing
+    assertion updated to `"entity:Z1"`.
+  - Acceptance: a live `rally`-shaped instance with a `more:+0.1` `atk` mod raises the **real**
+    `StatSystem`/`StatComposer`-composed `atk` from 100 to 110; withdrawing it returns to 100; two
+    stacks compound to 121 and withdrawing one leaves 110; a mod on one host does not leak into
+    another host's resolve. All four proven against the actual production classes, not fakes.
+  - Test coverage:
+    - **Unit**: pre-existing (`StatusStatPayloadTests`, 18 tests, one assertion corrected).
+    - **Seam** (`Core.Tests/Status/StatusStatApplierSeamTests.cs`, **4 new tests**): the real
+      `StatSystem` → `Upsert` → `Resolve` → `WithdrawSource` → `Resolve` chain, unmockable because
+      `StatSystem`/`StatContext`/`StatComposer` are pure Core — no Unity needed for this half. RED on
+      first run (caught the `ApplyOwnerKey` bug), GREEN after the one-line fix.
+    - **Regression guard** (`Guard.Tests/StatusStatApplierGuardTests.cs`, **4 new tests**): the
+      injector-side half (`EffectRuntime.cs`'s `OnApplied`/`OnEnded`) can't be unit-tested outside the
+      game process, so this reads it as text — proving `ToModifiers`/`Upsert` on apply,
+      `SourceIdOf`/`WithdrawSource("status", ...)` on end, `ReapplyLivingForOwner` on **both** halves
+      (Upsert/WithdrawSource alone only touch the session bag — nothing re-composes and writes without
+      this), and the `StatMods.Count > 0` gate so most statuses (pure CC/VFX) don't trigger a needless
+      recompute.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~StatusStatApplier|FullyQualifiedName~StatusStatPayload"`
+    + `dotnet test tests\FusionRpg.Guard.Tests --filter "FullyQualifiedName~StatusStatApplierGuard"`.
+    Full regressions re-run clean: Core.Tests 2808, Guard.Tests 67, all four boundary guards OK.
+    Injector built with `FUSIONRPG_GAME_DIR` set — 0 errors.
+  - Files: `src/FusionRpg.Core/Status/StatusStatPayload.cs` (the `ApplyOwnerKey` fix),
+    `src/FusionRpg.Injector/Effects/EffectRuntime.cs` (the two calls),
+    `tests/FusionRpg.Core.Tests/Status/{StatusStatApplierSeamTests.cs,StatusStatPayloadTests.cs}`,
+    `tests/FusionRpg.Guard.Tests/StatusStatApplierGuardTests.cs`.
+  - Dependencies: none.
+
+- [x] **E22: channel-policy-reader** — BUILT 2026-08-23. Closes B1 (`effect_channel_policy` hashed at
+  registry v4, zero readers, no author path).
+  - **Read-before-build finding: the plan's own target consumer doesn't exist.** `DerivedStatRegistry`
+    registers only **derived** channel ids (`combat.status.resist.dot` etc.); `effect_channel_policy`
+    is validated against `StatChannels.All`, the **primary** channels — the two never overlap, so
+    `DerivedStatRegistry` structurally cannot read this table no matter how it's wired. Checked
+    further: `default_value`/`cap_milli`/`compose_kind` have **no consumer anywhere**, for any
+    channel — `StatComposer` applies no per-channel cap to primary channels at all. The one column
+    with a real, already-tested consumer is `direction` (`StatChannels.IsLowerBetter`, read by
+    `CostFunction`'s pricing and `StatComposer`'s interval floor). E22 makes the true claim — direction
+    is live — instead of the aspirational one the plan first wrote.
+  - Description: `ChannelPolicyTable` (Core, `Stats/ChannelPolicyTable.cs`) — same
+    `Current`/`Use`/`UseScoped`/`ResetToEmpty` shape as `ElementTable`/`PowerTables`, holding only a
+    channel→direction map. `StatChannels.DirectionOf` checks it first, falling through to the
+    unchanged code switch when empty. `RpgStore.LoadContentIntoRuntime()` grows a third call.
+    **Also built the seed-import half the original plan promised but the read-before-build note
+    hadn't yet scoped**: `SeedEntryKind.ChannelPolicy`, `ChannelPolicySeedRow` (Core), a
+    `channel-policy` seed folder + `data/seed/channel-policy/defaults.json` (documents the two
+    already-lower-is-better channels as data — zero design decision, verified idempotent), and
+    `RpgStore.ImportContent` wired to validate and write policy rows in the same transaction
+    (`UpsertChannelPolicies` refactored into `ValidateChannelPolicyRows` + `UpsertChannelPolicyRowUnlocked`,
+    mirroring the container/curve/rarity extraction pattern from E14a).
+  - Acceptance: an imported `atk` row with `direction: 1` flips `StatChannels.DirectionOf("atk")` to
+    `LowerIsBetter`; an empty table changes nothing; the shipped `channel-policy/defaults.json`
+    imports clean via the real `tools/AtomImporter` CLI (`21 atom(s) ... 2 channel policy row(s)`,
+    `--check: clean`) with zero errors; an unknown channel (`fireRate`) is refused by the real import,
+    not silently accepted. Existing `ChannelPolicyStoreTests` (8 tests, E16) pass unchanged.
+  - Test coverage:
+    - **Unit** (`Core.Tests/Stats/ChannelPolicyTableTests.cs`, **5 tests**): empty-table fallthrough,
+      stored-direction override, `IsLowerBetter` reads through, `UseScoped` nesting/restore,
+      out-of-range direction defensively treated as higher-is-better rather than thrown.
+    - **Seam** (`E2E.Tests/ChannelPolicyE2ETests.cs`, **3 tests**): the shipped seed file through the
+      real chain on the shared fixture's store (safe — it's a no-op); a fictional `atk` flip through a
+      throwaway temp store (kept off the shared fixture, matching E20's pattern); an unknown channel
+      refused by the real transaction, not a unit-level validator call.
+    - **Regression guard**: extended E20's `ContentTableReaderGuardTests` (now **3 tests**, up from 2)
+      to assert `ChannelPolicyTable.Use`/`GetChannelPolicies()` in the loader and
+      `ChannelPolicyTable.Current.TryGetDirection` in `StatChannels.DirectionOf`, and widened the
+      "known registry tables" trip-wire to all twelve.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ChannelPolicyTable"`
+    + `dotnet test tests\FusionRpg.E2E.Tests --filter "FullyQualifiedName~ChannelPolicyE2E"` +
+    `dotnet test tests\FusionRpg.Guard.Tests --filter "FullyQualifiedName~ContentTableReader"` +
+    `dotnet run --project tools\AtomImporter -- --check`. Full regressions re-run clean: Core.Tests
+    2813, Data.Tests 426, E2E.Tests 188, Guard.Tests 68, AtomImporter.Tests 10; `guard-dal.ps1` OK.
+  - Files: `src/FusionRpg.Core/Stats/ChannelPolicyTable.cs` (new), `src/FusionRpg.Core/Stats/ModifierOp.cs`,
+    `src/FusionRpg.Core/Effects/Atoms/AtomSeedFile.cs`, `src/FusionRpg.Data/Sqlite/{RpgStore.ChannelPolicy.cs,
+    RpgStore.Import.cs,RpgStore.ContentBoot.cs}`, `tools/AtomImporter/{SeedScanner.cs,Program.cs}`,
+    `data/seed/channel-policy/defaults.json` (new), tests as above.
+  - Dependencies: E20 (shares the boot call and the reader-guard map).
+
+- [~] **E23: content-codegen** — PARTIALLY BUILT 2026-08-23. Closes two of three named debts under B2;
+  the third (`EffectSeedCatalog` deletion) is explicitly **not done**, with a concrete reason recorded
+  below rather than silently dropped.
+  - **Delivered — `tools/ElementEnumGen` (precedent: `tools/DemonCatalogGen`), two independent checks:**
+    - `--check`/`--emit`: does `ElementTypeId` — and the **three** companion switches the todo's
+      original description missed (`ElementRoster.Concrete`/`TryParse`, `ElementTypeIdExtensions
+      .ToElementId`, and `ElementTable.IdOf` — four hand-kept mirrors of the roster, not one) — still
+      agree with `data/seed/elements/roster.json`? Run against the real repo: clean, `6 element(s)`.
+      `--emit` reproduces the current hand-written definitions' content exactly (compared by hand:
+      identical modulo the generated-file header and `partial`).
+    - `--trait-check`/`--trait-emit`: does `TraitAtomSource.Shipped()` still agree with the migrated
+      trait containers? Built by **reusing `TraitAtomSource.FromContainers` directly** — the exact
+      resolution `TraitMigrationParityTests` already exercises — rather than re-deriving it, so the
+      tool cannot disagree with the test suite about what "migrated" means. Run against the real repo:
+      clean, `TraitAtomSource.Shipped() agrees with the migrated trait containers`.
+    - **A real bug found and fixed while building the trait checker**: comparing an invented trait id
+      against `Shipped()` before checking `IsMigrated` threw — `ModsFor`'s fallback path reads
+      `TraitBattleCatalog.Get`, which throws on an unknown id. Caught by the checker's own RED-first
+      test, fixed by reordering the check before the read.
+  - **Deliberately not done — `EffectSeedCatalog` deletion (E11 Step 4).** Investigated concretely,
+    not assumed blocked:
+    1. **The RuntimeId question resolves.** All five call sites (`BattleEffects.cs`,
+       `SimEffectHost.cs`, `EffectRuntime.cs`, `CheatCommandRunner.cs`, `FoundationHarness.cs`) load
+       `EffectDef`s unconditionally — none runtime-gates at load time, matching `EffectSeedCatalog`'s
+       pre-E1 heritage as raw Foundation defs. `MigrationParityTests` already compiles with
+       `RuntimeId.Lawn` — the most permissive matrix column — and that choice generalises safely to
+       all five, since a Lawn-compiled def is a superset of what any stricter runtime would accept.
+    2. **The real blocker: no `EffectDefDto → EffectDef` converter exists.** `EffectSeedCatalog
+       .CreateAll()` returns `IReadOnlyList<EffectDef>` (the Core-internal domain type
+       `EffectBag.ReplaceAll` consumes) — not `EffectDefDto` (the wire shape `AtomCompiler.Compile`
+       produces). `EffectDef.ToDto()` exists; **the reverse direction does not.**
+       `MigrationParityTests`'s 73 tests only ever compare `EffectDefDto` shapes against each other —
+       none has ever loaded a compiled atom into a real, executing `EffectBag`. Replacing the five call
+       sites needs that converter **built and proven correct** first — a new piece of Core plumbing
+       feeding Foundation's own hot dispatch path, not a codegen exercise. Attempting it inside this
+       session risked exactly the kind of rushed, under-verified change this whole audit exists to
+       catch. Recorded here as the concrete next step, not "still owed" restated.
+  - Test coverage delivered:
+    - **Unit** (`tests/FusionRpg.ElementEnumGen.Tests/ElementEnumCheckTests.cs`, **7 tests**;
+      `TraitSourceCheckTests.cs`, **7 tests**): fabricated mismatches (reordered roster, extra/missing
+      element, a mis-cased id, a wrong trait amount, an invented trait id, a non-`stat.derived` trait
+      atom, a non-trait container correctly ignored) each caught; `GenerateSource` content checked for
+      both.
+    - **Seam**: one test per checker running the real `data/seed/**` through `AtomSeedFile.Collect`
+      and asserting `IsOk` — the same real files the CLI checks.
+    - **Regression guard**: `--check`/`--trait-check` run as real CLI invocations against the live
+      repo (not simulated) as part of this verification; wired into CI via
+      `tests/FusionRpg.ElementEnumGen.Tests` (`.github/workflows/ci.yml`).
+  - Verify: `dotnet run --project tools\ElementEnumGen -- --check` +
+    `dotnet run --project tools\ElementEnumGen -- --trait-check` +
+    `dotnet test tests\FusionRpg.ElementEnumGen.Tests`. 14/14 tests green; both CLI checks clean
+    against the real repo.
+  - Files: `tools/ElementEnumGen/{ElementEnumGen.csproj,Program.cs,ElementEnumCheck.cs,
+    TraitSourceCheck.cs}` (new), `tests/FusionRpg.ElementEnumGen.Tests/` (new, wired into `ci.yml`).
+  - Dependencies: none — reads only what E11/E12/E18 already ship.
+
+- [x] **E24: validation-in-ci** — BUILT 2026-08-23. Closes B4 (`ContentValidation` ran only inside its
+  own tests — no `--validate` flag, no CI step) and B5 (`Server.Tests`/`E2E.Tests` outside `ci.yml`).
+  - Description: `tools/AtomImporter -- --validate` runs `ContentValidation.Lint` +
+    `ContentValidation.Drift` over the just-imported batch (real production calls, not a re-derived
+    check). `ValidationGate.Decide` (new, extracted the same way `SeedScanner` was so it has a test
+    independent of stdin/stdout/exit codes) turns the two `ContentReport`s into a pass/fail plus the
+    printed lines. `ci.yml` gained two lines: `Server.Tests` and `E2E.Tests`, beside the existing
+    seven — neither needs game interop, so nothing else in the workflow had to change.
+  - **Budget is deliberately not run.** `ContentValidation.Budget` needs `ceilingFor(rarityId)`, and
+    the `rarity` table has no ceiling/budget column anywhere in the schema — every real call would
+    return `null` and evaluate nothing while looking clean. `--validate` prints
+    `"budget: skipped — no ceiling data source exists yet"` rather than fabricating a check with
+    nothing behind it, consistent with the audit's own "no silent caps" principle.
+  - Acceptance: `dotnet run --project tools/AtomImporter -- --check --validate` against the real
+    `data/seed/**` exits 0, prints `lint: 23 evaluated, 0 failure(s), 20 warning(s)` (orphan-atom
+    warnings — the migrated `fx-*` defs are not container-referenced, which is expected and non-
+    blocking) and `power drift: 0 evaluated` (freshly-parsed atoms carry no stored `power_json` until
+    backfilled, so there is nothing to drift-check yet — also correct, not a bug). A synthetic atom
+    with a stored power 10,000,000‰ off its recomputed price fails the real gate; the same atom with a
+    `PowerNote` passes, because a note is permission, not a fix.
+  - Test coverage:
+    - **Unit** (`AtomImporter.Tests/ValidationGateTests.cs`, **6 tests**): clean passes, a lint warning
+      alone does not fail, a drift failure fails, the gate does not hardcode which report failed,
+      every pass prints its evaluated count, a failing gate names the offender.
+    - **Seam** (`AtomImporter.Tests/ValidationGateSeamTests.cs`, **3 tests**): real `AtomRow`s through
+      the real `ContentValidation.Lint`/`Drift`/`ValidationGate.Decide` chain — the exact calls
+      `Program.cs` makes — proving a real drift fails, the same drift with a note passes, and a
+      correctly-priced atom passes.
+    - **Regression guard** (`Guard.Tests/CiWiringGuardTests.cs`, **2 tests**): `Server.Tests`/
+      `E2E.Tests` named in `ci.yml`, **plus a general form** — every `*.Tests.csproj` under `tests/`
+      must appear somewhere in `ci.yml`, so a *future* new test project cannot go unwired the same way
+      twice (the exact "this suite exists, surely it runs" mistake E14a's own build log records).
+  - Verify: `dotnet run --project tools\AtomImporter -- --check --validate` +
+    `dotnet test tests\FusionRpg.AtomImporter.Tests --filter "FullyQualifiedName~ValidationGate"` +
+    `dotnet test tests\FusionRpg.Guard.Tests --filter "FullyQualifiedName~CiWiring"`. Full regressions
+    re-run clean: Guard.Tests 70, AtomImporter.Tests 19. `ci.yml` re-parsed as valid YAML.
+  - Files: `tools/AtomImporter/{Program.cs,ValidationGate.cs}` (new), `.github/workflows/ci.yml`,
+    `tests/FusionRpg.AtomImporter.Tests/{ValidationGateTests.cs,ValidationGateSeamTests.cs}` (new),
+    `tests/FusionRpg.Guard.Tests/CiWiringGuardTests.cs` (new).
+  - Dependencies: none.
+
+- [x] **E25: compose-channel-cache** — BUILT 2026-08-23. Closes B3 (`AllCombatChannelIds` rebuilt 84
+  interpolated strings uncached on every read; `BattleStatComposer.Compose` built a fresh set from it
+  per actor; `StatusStatPayload.IsKnownChannel` did an `O(n)` scan per channel parsed).
+  - **Simpler than planned: no version counter needed.** `ElementTable` is already fully immutable —
+    `Use`/`UseScoped` always assign a *new* instance, never mutate one in place — so caching by
+    **reference equality** against `ElementTable.Current` is exactly as fresh as a version counter
+    would be, without touching `ElementTable.cs` at all. Fewer moving parts, same guarantee.
+  - Description: `DerivedStatChannels` holds a lock-guarded `(source, list, set)` triple, rebuilt only
+    when `ElementTable.Current` is a different reference than what the cache was last built from.
+    `IsCombatChannel(channel)` (new) reads the same cached `HashSet` in O(1); `StatusStatPayload
+    .IsKnownChannel` now calls it instead of `AllCombatChannelIds.Contains(...)`.
+  - Acceptance: repeated reads with no roster change return the **same list instance** (`Assert.Same`);
+    a roster swap via `UseScoped` invalidates immediately and the output changes; restoring the outer
+    scope reproduces the outer roster's channel set by value (a fresh rebuild, since the single cache
+    slot was overwritten by the inner scope — the correctness guarantee is per-call freshness, not
+    per-scope memoization); the cached output is byte-identical to an uncached `BuildAllCombatChannelIds`
+    call; `BattleStatComposer.Compose` still produces correct results across a real roster swap.
+  - Test coverage:
+    - **Unit** (`Core.Tests/Stats/ChannelCacheTests.cs`, **5 tests**): same-instance on repeat, swap
+      invalidates and un-invalidates by value, cached output matches an uncached rebuild,
+      `IsCombatChannel` agrees with `AllCombatChannelIds` for every id it generates (and correctly
+      rejects a non-channel), `IsCombatChannel` also invalidates on a roster swap.
+    - **Seam** (`Core.Tests/Stats/ChannelCacheSeamTests.cs`, **2 tests**): the real
+      `BattleStatComposer.Compose` — the actual consumer, not a fabricated one — across a real
+      seventh-element roster swap (reusing E18's fixture shape) and across repeated composes with no
+      swap.
+    - **Regression guard** (`Core.Tests/Stats/ChannelCacheBudgetGuardTests.cs`, **2 tests**, beside
+      `AtomBenchGuardTests`): 10⁴ warm reads of `AllCombatChannelIds`/`IsCombatChannel` allocate under
+      64/16 bytes-per-call respectively — generous headroom over "should be ~0", but would fail loudly
+      if the cache were ever accidentally removed (back to ~84 allocations per call).
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ChannelCache"`. Full
+    Core.Tests regression re-run clean (2822, up from 2813). Injector rebuilt with `FUSIONRPG_GAME_DIR`
+    set — 0 errors, confirming the shared `Stats`/`Status` edits don't break the injector-side consumer.
+  - Files: `src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs` (cache + `IsCombatChannel`),
+    `src/FusionRpg.Core/Status/StatusStatPayload.cs` (`IsKnownChannel` reads the O(1) path), tests.
+  - Dependencies: none.
 
 ## Unowned, tracked
 

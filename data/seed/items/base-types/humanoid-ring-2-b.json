@@ -37,7 +37,22 @@
       "iconKey": "icon.base.plain-tag",
       "flavorKey": "flavor.base.plain-tag",
       "flavor": "A simple marked item, barely worth filing.",
-      "tags": ["light", "organic", "fragile", "utility"]
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-002",
@@ -55,7 +70,22 @@
       "iconKey": "icon.base.modest-ticket",
       "flavorKey": "flavor.base.modest-ticket",
       "flavor": "An entry document so plain no one remembers having received it.",
-      "tags": ["light", "mineral", "fragile", "utility"]
+      "tags": [
+        "light",
+        "mineral",
+        "fragile",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-003",
@@ -73,7 +103,22 @@
       "iconKey": "icon.base.engraved-stamp",
       "flavorKey": "flavor.base.engraved-stamp",
       "flavor": "A formal mark of processing, worn from repeated use.",
-      "tags": ["light", "metal", "sturdy", "utility"]
+      "tags": [
+        "light",
+        "metal",
+        "sturdy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-004",
@@ -91,7 +136,22 @@
       "iconKey": "icon.base.unadorned-badge",
       "flavorKey": "flavor.base.unadorned-badge",
       "flavor": "No decoration. It is what it is.",
-      "tags": ["light", "metal", "sturdy", "utility"]
+      "tags": [
+        "light",
+        "metal",
+        "sturdy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-005",
@@ -109,7 +169,22 @@
       "iconKey": "icon.base.bent-receipt",
       "flavorKey": "flavor.base.bent-receipt",
       "flavor": "Folded and creased from years in a merchant's ledger.",
-      "tags": ["medium", "organic", "fragile", "utility"]
+      "tags": [
+        "medium",
+        "organic",
+        "fragile",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-006",
@@ -127,7 +202,22 @@
       "iconKey": "icon.base.polished-license",
       "flavorKey": "flavor.base.polished-license",
       "flavor": "The shine of an official credential well maintained.",
-      "tags": ["medium", "mineral", "sturdy", "utility"]
+      "tags": [
+        "medium",
+        "mineral",
+        "sturdy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-007",
@@ -145,7 +235,22 @@
       "iconKey": "icon.base.worked-label",
       "flavorKey": "flavor.base.worked-label",
       "flavor": "Carefully constructed identification, meant to endure the sorting process.",
-      "tags": ["medium", "mineral", "fragile", "utility"]
+      "tags": [
+        "medium",
+        "mineral",
+        "fragile",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-008",
@@ -163,7 +268,22 @@
       "iconKey": "icon.base.twisted-coupon",
       "flavorKey": "flavor.base.twisted-coupon",
       "flavor": "A tangled redemption promise, half forgotten in a jacket pocket.",
-      "tags": ["medium", "organic", "fragile", "utility"]
+      "tags": [
+        "medium",
+        "organic",
+        "fragile",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-009",
@@ -181,7 +301,22 @@
       "iconKey": "icon.base.signed-deed",
       "flavorKey": "flavor.base.signed-deed",
       "flavor": "A legally executed document that binds the present to the past.",
-      "tags": ["heavy", "mineral", "sturdy", "utility"]
+      "tags": [
+        "heavy",
+        "mineral",
+        "sturdy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-010",
@@ -199,7 +334,22 @@
       "iconKey": "icon.base.certified-warranty",
       "flavorKey": "flavor.base.certified-warranty",
       "flavor": "An official guarantee, stamped and sworn to last.",
-      "tags": ["heavy", "mineral", "sturdy", "utility"]
+      "tags": [
+        "heavy",
+        "mineral",
+        "sturdy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-011",
@@ -217,7 +367,22 @@
       "iconKey": "icon.base.notarised-bond",
       "flavorKey": "flavor.base.notarised-bond",
       "flavor": "A witnessed commitment, sealed beyond dispute or breaking.",
-      "tags": ["heavy", "metal", "sturdy", "utility"]
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-2-b-012",
@@ -235,7 +400,22 @@
       "iconKey": "icon.base.official-seal",
       "flavorKey": "flavor.base.official-seal",
       "flavor": "The authoritative mark that closes the file and settles the matter.",
-      "tags": ["heavy", "mineral", "sturdy", "utility"]
+      "tags": [
+        "heavy",
+        "mineral",
+        "sturdy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     }
   ]
 }

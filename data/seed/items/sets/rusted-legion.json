@@ -27,10 +27,26 @@
       "name": "Ranked Garrison",
       "themeKey": "theme.rusted-legion",
       "members": [
-        { "role": "armament-primary" },
-        { "role": "head-guard" },
-        { "role": "core-guard" },
-        { "role": "footing" }
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-a-006"
+        },
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-b-007"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-011"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-011"
+        }
       ],
       "thresholds": [
         {
@@ -43,14 +59,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "low" },
-            { "family": "atom.vitality", "powerBand": "low" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "low"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -63,10 +88,26 @@
       "name": "Battered Outpost",
       "themeKey": "theme.rusted-legion",
       "members": [
-        { "role": "armament-secondary" },
-        { "role": "mantle" },
-        { "role": "girdle" },
-        { "role": "jewel-major" }
+        {
+          "role": "armament-secondary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-off-hand-b-008"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-b-008"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-b-008"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-b-002"
+        }
       ],
       "thresholds": [
         {
@@ -79,14 +120,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.mending", "powerBand": "low" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.mending",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -99,10 +149,26 @@
       "name": "Sentry of the Barracks",
       "themeKey": "theme.rusted-legion",
       "members": [
-        { "role": "core-guard" },
-        { "role": "manipulator" },
-        { "role": "sense" },
-        { "role": "jewel-minor-a" }
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-b-003"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-b-009"
+        },
+        {
+          "role": "sense",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-face-a-010"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-ring-1-b-009"
+        }
       ],
       "thresholds": [
         {
@@ -115,14 +181,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" },
-            { "family": "atom.life-graft", "powerBand": "low" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.life-graft",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -135,10 +210,26 @@
       "name": "Detail of the Depot",
       "themeKey": "theme.rusted-legion",
       "members": [
-        { "role": "armament-primary" },
-        { "role": "mantle" },
-        { "role": "footing" },
-        { "role": "infusion" }
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-a-009"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-b-010"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-b-005"
+        },
+        {
+          "role": "infusion",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-bandolier-b-002"
+        }
       ],
       "thresholds": [
         {
@@ -151,14 +242,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "medium" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" },
-            { "family": "atom.might", "powerBand": "low" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.might",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -171,10 +271,26 @@
       "name": "Standing of the Cohort",
       "themeKey": "theme.rusted-legion",
       "members": [
-        { "role": "head-guard" },
-        { "role": "girdle" },
-        { "role": "retinue" },
-        { "role": "jewel-major" }
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-b-011"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-b-011"
+        },
+        {
+          "role": "retinue",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-horn-b-007"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-b-006"
+        }
       ],
       "thresholds": [
         {
@@ -187,14 +303,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.mending", "powerBand": "medium" }
+            {
+              "family": "atom.mending",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.life-graft", "powerBand": "low" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.life-graft",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -207,12 +332,36 @@
       "name": "Trained Flagpost",
       "themeKey": "theme.rusted-legion",
       "members": [
-        { "role": "armament-secondary" },
-        { "role": "core-guard" },
-        { "role": "head-guard" },
-        { "role": "mantle" },
-        { "role": "sense" },
-        { "role": "footing" }
+        {
+          "role": "armament-secondary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-off-hand-b-012"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-b-008"
+        },
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-b-012"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-b-012"
+        },
+        {
+          "role": "sense",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-face-b-001"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-b-007"
+        }
       ],
       "thresholds": [
         {
@@ -225,19 +374,33 @@
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" },
-            { "family": "atom.fortitude", "powerBand": "low" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.fortitude",
+              "powerBand": "low"
+            }
           ]
         },
         {
           "pieces": 6,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" },
-            { "family": "atom.ferocity", "powerBand": "medium" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
+      "tags": [
+        "signature"
+      ],
       "notes": "Compound name: adjective 'Trained' from themeAdjectivePools['rusted-legion'], Base noun 'Flagpost' - the whole-token atomic seed from uniqueSetSeedPools['rusted-legion'], used as the compound's Base exactly as the exemplar's own 'Riveted Ironstem' pairs an adjective with a seed-pool Base; never decomposed into 'flag' + 'post'. This partition's one grand (6-piece) set, per ssot-sets.md 3.4's 'exception, not the pattern' - it carries the mandatory thresholds at 2 and 4 plus a top threshold at 6, equal to its member count, so SetThresholdUnreachable does not apply. Capability atom.retribution (resource.delta, OnDamageTaken) is powerBand medium rather than low, matching the grand-set convention already used on this fleet's thorned-chassis sibling's own 6-piece entry - the six-slot commitment earns a stronger splash than a typical 4-piece set. Claims armament-secondary only, never armament-primary in this entry. Six distinct member roles (armament-secondary, core-guard, head-guard, mantle, sense, footing), all in the hybrid role core, none repeated within this entry. Tagged 'signature' (notability axis, tags.v1.json) as the partition's flagship - a curation flag, not a power claim. Higher tiers (vitality, fortitude, might, ferocity) are Flat/Increased stat.modify only, no More-op family."
     }
   ]

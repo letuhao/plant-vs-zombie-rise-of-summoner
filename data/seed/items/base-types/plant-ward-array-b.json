@@ -29,12 +29,34 @@
       "role": "ward-array",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.grooved-shuck",
       "flavorKey": "flavor.base.grooved-shuck",
       "flavor": "A weathered husk split by seasons. Its ridges catch and slow what passes through.",
-      "tags": ["heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-002",
@@ -44,12 +66,35 @@
       "role": "ward-array",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.corky-casing",
       "flavorKey": "flavor.base.corky-casing",
       "flavor": "Sponge-light yet unyielding, pocked with tiny chambers. It absorbs harm without breaking.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "fragile"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-003",
@@ -59,12 +104,35 @@
       "role": "ward-array",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.rough-carapace",
       "flavorKey": "flavor.base.rough-carapace",
       "flavor": "Bark so coarse it seems to have been scraped clean by time. Splinters repel more than they hurt.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-004",
@@ -74,12 +142,34 @@
       "role": "ward-array",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.warped-hull",
       "flavorKey": "flavor.base.warped-hull",
       "flavor": "Twisted by heat and drought, impossible angles make it strong exactly where it bends.",
-      "tags": ["medium-heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-005",
@@ -89,12 +179,34 @@
       "role": "ward-array",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.lichened-shroud",
       "flavorKey": "flavor.base.lichened-shroud",
       "flavor": "Grey-green growth has woven a net across the bark. The symbiosis makes it stronger than either alone.",
-      "tags": ["medium-heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-006",
@@ -104,12 +216,35 @@
       "role": "ward-array",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.mossy-pod",
       "flavorKey": "flavor.base.mossy-pod",
       "flavor": "Soft moss clings to hardwood underneath, a living seal against decay and damage both.",
-      "tags": ["medium-heavy", "organic", "rooted", "defensive", "sturdy"]
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-007",
@@ -119,12 +254,35 @@
       "role": "ward-array",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "trivial" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.gnarled-rind",
       "flavorKey": "flavor.base.gnarled-rind",
       "flavor": "Twisted beyond all recognition by decades of wind and ice. What looks like damage is precisely the protection.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "fragile"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-008",
@@ -134,12 +292,35 @@
       "role": "ward-array",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.hoary-armature",
       "flavorKey": "flavor.base.hoary-armature",
       "flavor": "Frost-white with age, its lattice frame has outlasted the wood it once supported. Now it stands alone.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-009",
@@ -149,12 +330,34 @@
       "role": "ward-array",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.seasoned-sheath",
       "flavorKey": "flavor.base.seasoned-sheath",
       "flavor": "Each year adds a ring of hardness. This bark has weathered a century of storms without flinching.",
-      "tags": ["medium-heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-010",
@@ -164,12 +367,35 @@
       "role": "ward-array",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "trivial" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.cracked-capsule",
       "flavorKey": "flavor.base.cracked-capsule",
       "flavor": "Fractured from dryness but sealed shut by its own contraction. Nothing passes through the cracks.",
-      "tags": ["medium", "organic", "rooted", "defensive", "fragile"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "defensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-011",
@@ -179,12 +405,34 @@
       "role": "ward-array",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.scabrous-testa",
       "flavorKey": "flavor.base.scabrous-testa",
       "flavor": "Roughened by age and use, its surface is a maze that confuses any blade seeking purchase.",
-      "tags": ["heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.plant-sheath-b-012",
@@ -194,12 +442,35 @@
       "role": "ward-array",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.inert-periderm",
       "flavorKey": "flavor.base.inert-periderm",
       "flavor": "No longer living, yet unbreakable. It has given up growth to become something harder and colder.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     }
   ]
 }

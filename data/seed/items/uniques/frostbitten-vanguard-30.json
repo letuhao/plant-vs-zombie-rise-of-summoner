@@ -23,187 +23,321 @@
   "entries": [
     {
       "id": "unique.frostbitten-vanguard-30-001",
-      "nameKey": "unique.arrested-sledge",
-      "name": "Arrested Sledge",
+      "nameKey": "unique.frostbitten-sledge",
+      "name": "Frostbitten Sledge",
       "frame": "humanoid",
+      "themeKey": "theme.frostbitten-vanguard",
       "baseType": "item.humanoid-main-hand-b-003",
-      "rarity": "cultivated",
+      "rarity": "grafted",
       "powerAxis": "control",
       "fixedAtoms": [
-        { "family": "atom.freezing", "powerBand": "medium" },
-        { "family": "atom.might", "powerBand": "low" }
+        {
+          "family": "atom.freezing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.ferocity",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.retribution", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.might",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "Exactly one stat.modify line in the whole item (atom.might, low). atom.freezing (status.apply) and atom.retribution (resource.delta) are capabilities, not raw stat, so they sit outside the AE sum against cultivated's 2-3-affix rolled baseline."
+        "note": "One raw-stat line (atom.ferocity, low, atk Increased) plus the inherited base stat is the only stat-sheet contribution; atom.freezing is status.apply, not a raw stat, so it does not count toward the ceiling. Comfortably under the 60% baseline a grafted-rung rolled rare carries."
       },
-      "tags": ["heavy", "metal", "offensive", "sturdy"],
-      "iconKey": "icon.unique.arrested-sledge",
-      "flavorKey": "flavor.unique.arrested-sledge",
-      "flavor": "It never finishes the swing. The cold does that part for it.",
-      "notes": "Row 1 of the partition table: armament-primary / control. baseType resolves to item.humanoid-main-hand-b-003 (Lumbering Sledge, base-types/humanoid-armament-primary-b.json), role armament-primary confirmed on the entry itself. atom.freezing (C, shipped per atom-family-library.md 3.4) and atom.might are both role-legal for armament-primary already (g-affliction.json / g-attack.json roles lists) - no rule-break needed here; the item earns its slot on capability sequencing (freeze-lock, then a plain retribution rider) rather than on an illegal family. Name is themeAdjectivePools['frostbitten-vanguard'] canonical 'arrested' + nounPools['armament-primary.humanoid'] canonical 'sledge', pattern compound. Element omitted - freezing and retribution take no variant param."
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "mechanical",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.frostbitten-sledge",
+      "flavorKey": "flavor.unique.frostbitten-sledge",
+      "flavor": "It swings on the half-beat, same as everyone else in the column.",
+      "notes": "control axis, armament-primary (main-hand), row 1 of the eight allocated to this partition. baseType item.humanoid-main-hand-b-003 (Lumbering Sledge) resolves in humanoid-armament-primary-b.json; role armament-primary is on the AllowedRoles list and is not jewel-minor. Core is 2 fixed atoms + 1 variance slot (3 total, under the 4-atom cap including the inherited base stat). Name is themeAdjectivePools['frostbitten-vanguard']('frostbitten') + nounPools['armament-primary.humanoid']('sledge'), a pattern base types never draw from (base types are barred from theme pools). Tagged 'signature' as this partition's one flagship entry (notability axis, tags.v1.json) - a curation flag, not a power claim. Not a set member: sets/frostbitten-vanguard.json's armament-primary members (Stillmarch, Winterhold) name a role only, never a pinned baseType, so no collision is possible.",
+      "acquisition": "drop"
     },
     {
       "id": "unique.frostbitten-vanguard-30-002",
-      "nameKey": "unique.harness-of-the-muster",
-      "name": "Harness of the Muster",
+      "nameKey": "unique.stiffened-harness",
+      "name": "Stiffened Harness",
       "frame": "humanoid",
-      "baseType": "item.humanoid-torso-a-010",
-      "rarity": "grafted",
+      "themeKey": "theme.frostbitten-vanguard",
+      "baseType": "item.humanoid-torso-b-006",
+      "rarity": "cultivated",
       "powerAxis": "utility",
       "fixedAtoms": [
-        { "family": "atom.cleansing", "powerBand": "low" },
-        { "family": "atom.vitality", "powerBand": "low" }
+        {
+          "family": "atom.cleansing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.regeneration", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One stat.modify line only (atom.vitality, low). atom.cleansing (status.clear) and atom.regeneration (resource.delta) are both capabilities and sit outside the raw-stat sum, keeping the item well under grafted's thin 1-2-affix baseline even with two capability lines."
+        "note": "atom.fortitude (low, maxHp Increased) is the only raw-stat line; atom.cleansing is status.clear, not a raw stat. One low-band line stays well inside the 60% ceiling against a cultivated-rung rolled baseline of 2-3 affixes."
       },
-      "tags": ["medium", "organic", "utility", "fragile"],
-      "iconKey": "icon.unique.harness-of-the-muster",
-      "flavorKey": "flavor.unique.harness-of-the-muster",
-      "flavor": "Rank insignia long since illegible. The straps still hold a line.",
-      "notes": "Row 2: core-guard / utility. baseType item.humanoid-torso-a-010 (Threadbare Harness, base-types/humanoid-core-guard-a.json), role core-guard confirmed. Both fixed families and the variance family are role-legal for core-guard already (g-sustain.json). Combat-posture tag set to 'utility' rather than the base type's own 'defensive', since the unique's identity capability (cleanse) reads as logistics support, not raw mitigation; kept 'fragile' from the base for the worn-thin flavour ('Threadbare'). Name is nounPools['core-guard.humanoid'] canonical 'harness' + conceptPools['frostbitten-vanguard'] canonical 'muster', pattern of-construct with the optional 'the'."
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "sturdy",
+        "utility"
+      ],
+      "iconKey": "icon.unique.stiffened-harness",
+      "flavorKey": "flavor.unique.stiffened-harness",
+      "flavor": "The straps never loosened. Neither did anything else.",
+      "notes": "utility axis, core-guard (torso), row 2. baseType item.humanoid-torso-b-006 (Ponderous Cage) resolves in humanoid-core-guard-b.json. Name is themeAdjectivePools['frostbitten-vanguard']('stiffened') + nounPools['core-guard.humanoid']('harness'); the noun pool is drawn independently of the specific baseType chosen, per poolAccess.uniquePartition ('any nounPools entry'). Core is 2 fixed atoms + 1 variance slot. Sets claim core-guard by role only (Stillmarch, Icebound) - no pinned baseType to collide with.",
+      "acquisition": "drop"
     },
     {
       "id": "unique.frostbitten-vanguard-30-003",
-      "nameKey": "unique.marching-yoke",
-      "name": "Marching Yoke",
+      "nameKey": "unique.arrested-yoke",
+      "name": "Arrested Yoke",
       "frame": "humanoid",
-      "baseType": "item.humanoid-shoulders-b-005",
-      "rarity": "cultivated",
+      "themeKey": "theme.frostbitten-vanguard",
+      "baseType": "item.humanoid-shoulders-b-007",
+      "rarity": "grafted",
       "powerAxis": "economy",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "medium" },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.ward-harden",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.econ-muster", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.elemental-defense",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One stat.modify line only (atom.fortitude, low). atom.sunbloom and atom.econ-muster are both resource.economy, not raw stat, so neither counts toward the AE sum against cultivated's baseline."
+        "note": "atom.ward-harden (low, combat.crit.resist Increased) is the sole raw-stat line; atom.midas is resource.economy, not a combat raw stat, so its generosity is free per the same device the exemplar uses. Under the 60% ceiling."
       },
-      "tags": ["medium-heavy", "metal", "mechanical", "utility"],
-      "iconKey": "icon.unique.marching-yoke",
-      "flavorKey": "flavor.unique.marching-yoke",
-      "flavor": "Every step it takes is billed to someone still owed.",
-      "notes": "Row 3: ward-array / economy. baseType item.humanoid-shoulders-b-005 (Articulated Yoke, base-types/humanoid-ward-array-b.json), role ward-array confirmed. DELIBERATE RULE BREAK, ladder rung 2: ward-array has no role-legal resource.economy family at all (atom.sunbloom / atom.econ-muster are girdle/jewel-major/jewel-minor-only per g-economy.json) and no role-legal stat.modify raw-stat family either - the only stat.modify roles list naming ward-array's normal survivability lever (atom.warding / atom.resilience) is commander-only ('standard' role), so atom.fortitude is also off the generator's legal list for this role. All three fixed/variance atoms sit in the item's own container, not a drawn pool, so none of this costs the architecture anything (same device the exemplar uses for atom.searing-strike on a head-guard role). Currency families read as pure economy mechanics (game currency 'sun'), not a thermal/warmth flavour cue, so the theme's own 'avoid warmth of any kind' line is not in tension with using them. Name is themeAdjectivePools['frostbitten-vanguard'] canonical 'marching' + nounPools['ward-array.humanoid'] canonical 'yoke', pattern compound."
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "mechanical",
+        "utility"
+      ],
+      "iconKey": "icon.unique.arrested-yoke",
+      "flavorKey": "flavor.unique.arrested-yoke",
+      "flavor": "Meant to carry the load forward. It carries it in place.",
+      "notes": "economy axis, ward-array (shoulders), row 3 - the one role of the eight that no set in sets/frostbitten-vanguard.json claims at all. baseType item.humanoid-shoulders-b-007 (Soldered Girder) resolves in humanoid-ward-array-b.json. atom.midas's own roles list (girdle/jewel-major/jewel-minor) does not include ward-array, which is legal here per ssot-uniques.md \u00a73.5 rung 2: fixed atoms sit outside the drawn pool, so no affix_pool_tag filters them. Name is themeAdjectivePools('arrested') + nounPools['ward-array.humanoid']('yoke') - a yoke also reads as logistics/burden-bearing, which is the economy-axis tie-in.",
+      "acquisition": "drop"
     },
     {
       "id": "unique.frostbitten-vanguard-30-004",
-      "nameKey": "unique.halfstep",
-      "name": "Halfstep",
+      "nameKey": "unique.frozen-torc",
+      "name": "Frozen Torc",
       "frame": "humanoid",
-      "baseType": "item.humanoid-off-hand-b-009",
+      "themeKey": "theme.frostbitten-vanguard",
+      "baseType": "item.humanoid-neck-b-004",
       "rarity": "cultivated",
       "powerAxis": "offense",
       "fixedAtoms": [
-        { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "ice" } },
-        { "family": "atom.might", "powerBand": "low" }
+        {
+          "family": "atom.searing-strike",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.keen-edge",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.lifesteal", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One stat.modify line only (atom.might, low). atom.searing-strike (resource.delta, elemental on-hit rider) and atom.lifesteal (resource.delta) are both capabilities, so the raw-stat sum stays a single low-band line against cultivated's baseline."
+        "note": "atom.keen-edge (low, combat.crit.rate Flat) is the only raw-stat line; atom.searing-strike is resource.delta (OnDamageDealt), not a raw stat, so it can be generous per the exemplar's own device. Under the 60% ceiling for a cultivated rung."
       },
-      "tags": ["medium-light", "metal", "offensive"],
-      "iconKey": "icon.unique.halfstep",
-      "flavorKey": "flavor.unique.halfstep",
-      "flavor": "One foot forward, frozen, and forward again. It has never once stepped back.",
-      "notes": "Row 4: armament-secondary / offense. baseType item.humanoid-off-hand-b-009 (Crushing Hubcap, base-types/humanoid-armament-secondary-b.json), role armament-secondary confirmed. All three families (searing-strike, might, lifesteal) are role-legal for armament-secondary already (g-on-hit.json / g-attack.json / g-on-hit.json), no rule-break required. element 'ice' matches the theme's sole elementAffinity (core.v1.json elements + themes.v1.json). Name is uniqueSetSeedPools['frostbitten-vanguard'] canonical 'halfstep', used atomically as a whole-token fusion name per naming.v1.json's collision-normalization rule 2a - not decomposed into two separately-drawn pool words, the same convention data/seed/items/sets/frostbitten-vanguard.json already uses for its own six set names. Not one of the six seed words that file consumed (stillmarch, coldstride, rimeguard is unused, frostcolumn, halfstep was unused there too before this entry, icebound, winterhold, latecommand unused, glacierward) - grepped both sets/ and charms/ before committing; no collision found."
+      "tags": [
+        "medium",
+        "metal",
+        "offensive"
+      ],
+      "iconKey": "icon.unique.frozen-torc",
+      "flavorKey": "flavor.unique.frozen-torc",
+      "flavor": "Command passed through it once. It has not passed since.",
+      "notes": "offense axis, jewel-major (neck), row 4. baseType item.humanoid-neck-b-004 (Substantial Collar) resolves in humanoid-jewel-major-b.json. element 'ice' is themes.v1.json's sole elementAffinity for frostbitten-vanguard and one of the six concrete elements in core.v1.json - resolves the atom.searing-strike '{variant}' placeholder, the only field a fixedAtoms entry needs to supply for a variant family. Name is themeAdjectivePools('frozen') + nounPools['jewel-major.humanoid']('torc'); 'torc' is also a class-ladder adjective-pool key (jewel.humanoid.torc) but here it is used as the NOUN from nounPools['jewel-major.humanoid'], a distinct pool.",
+      "acquisition": "drop"
     },
     {
       "id": "unique.frostbitten-vanguard-30-005",
-      "nameKey": "unique.unthawed-torc",
-      "name": "Unthawed Torc",
+      "nameKey": "unique.numbed-visor",
+      "name": "Numbed Visor",
       "frame": "humanoid",
-      "baseType": "item.humanoid-neck-a-012",
+      "themeKey": "theme.frostbitten-vanguard",
+      "baseType": "item.humanoid-face-b-008",
       "rarity": "grafted",
       "powerAxis": "survivability",
       "fixedAtoms": [
-        { "family": "atom.warded", "powerBand": "medium", "params": { "element": "ice" } },
-        { "family": "atom.mending", "powerBand": "low" }
+        {
+          "family": "atom.warded",
+          "powerBand": "medium",
+          "params": {
+            "element": "ice"
+          }
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.martyrdom", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.evasion",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One stat.modify line only (atom.mending, low). atom.warded (shield.grant) and atom.martyrdom (resource.delta) are capabilities, keeping the raw-stat sum well under grafted's 1-2-affix baseline."
+        "note": "atom.fortitude (low, maxHp Increased) is the only raw-stat line; atom.warded is shield.grant (OnSpawn), not a raw stat. Under the 60% ceiling against a grafted-rung rolled baseline."
       },
-      "tags": ["medium", "metal", "defensive"],
-      "iconKey": "icon.unique.unthawed-torc",
-      "flavorKey": "flavor.unique.unthawed-torc",
-      "flavor": "The ice around it has not moved in years. Neither has the will wearing it.",
-      "notes": "Row 5: jewel-major / survivability. baseType item.humanoid-neck-a-012 (Unadorned Torc, base-types/humanoid-jewel-major-a.json), role jewel-major confirmed. All three families (warded, mending, martyrdom) are role-legal for jewel-major already (g-sustain.json / g-on-death.json), no rule-break required. element 'ice' matches the theme's elementAffinity, same params.element pattern the exemplar and the set file both already use for atom.warded. Combat-posture tag set to 'defensive' (the shield-granting capability), diverging from the base type's own 'utility' tag deliberately - the two vocabularies are independent per entry-shapes.md's own finding. Name is themeAdjectivePools['frostbitten-vanguard'] canonical 'unthawed' + nounPools['jewel-major.humanoid'] canonical 'torc', pattern compound."
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive"
+      ],
+      "iconKey": "icon.unique.numbed-visor",
+      "flavorKey": "flavor.unique.numbed-visor",
+      "flavor": "Nothing gets in past the ice. Nothing gets out either.",
+      "notes": "survivability axis, sense (face), row 5. baseType item.humanoid-face-b-008 (Corrugated Face) resolves in humanoid-sense-b.json. element 'ice' fills atom.warded's variant placeholder, matching the theme's sole elementAffinity - the same family/params pairing sets/frostbitten-vanguard.json's Coldstride threshold already uses on a different container. Name is themeAdjectivePools('numbed') + nounPools['sense.humanoid']('visor').",
+      "acquisition": "drop"
     },
     {
       "id": "unique.frostbitten-vanguard-30-006",
-      "nameKey": "unique.claw-of-the-standstill",
-      "name": "Claw of the Standstill",
+      "nameKey": "unique.brittle-tread",
+      "name": "Brittle Tread",
       "frame": "humanoid",
-      "baseType": "item.humanoid-hands-a-004",
-      "rarity": "grafted",
+      "themeKey": "theme.frostbitten-vanguard",
+      "baseType": "item.humanoid-feet-b-011",
+      "rarity": "cultivated",
       "powerAxis": "control",
       "fixedAtoms": [
-        { "family": "atom.mesmerizing", "powerBand": "medium" },
-        { "family": "atom.ferocity", "powerBand": "low" }
+        {
+          "family": "atom.entangling",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.venomous", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.evd-brace",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One stat.modify line only (atom.ferocity, low). atom.mesmerizing and atom.venomous are both status.apply capabilities, not raw stat, keeping the item under grafted's thin baseline."
+        "note": "atom.fortitude (low, maxHp Increased) is the only raw-stat line; atom.entangling is status.apply, not a raw stat. Under the 60% ceiling for a cultivated rung."
       },
-      "tags": ["medium-light", "metal", "offensive"],
-      "iconKey": "icon.unique.claw-of-the-standstill",
-      "flavorKey": "flavor.unique.claw-of-the-standstill",
-      "flavor": "It does not grip to hold. It grips to make you forget why you were moving.",
-      "notes": "Row 6: manipulator / control. baseType item.humanoid-hands-a-004 (Studded Claw, base-types/humanoid-manipulator-a.json), role manipulator confirmed. All three families (mesmerizing, ferocity, venomous) are role-legal for manipulator already (g-affliction.json / g-attack.json), no rule-break required - the control identity comes from stacking two C-category statuses (hypno then poison) rather than from an illegal family. Name is nounPools['manipulator.humanoid'] canonical 'claw' + conceptPools['frostbitten-vanguard'] canonical 'standstill', pattern of-construct with the optional 'the'."
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "utility"
+      ],
+      "iconKey": "icon.unique.brittle-tread",
+      "flavorKey": "flavor.unique.brittle-tread",
+      "flavor": "One more step and it would have shattered. It never took the step.",
+      "notes": "control axis, footing (feet), row 6. baseType item.humanoid-feet-b-011 (Galvanised Tread) resolves in base-types/footing/humanoid/b.json. Distinct role/axis pair from row 1 (armament-primary/control), so no UniqueAxisCollision at this rung band. Name is themeAdjectivePools('brittle') + nounPools['footing.humanoid']('tread'); a different adjective from 'unique.umbral-swarm-50-006' Massed Tread (a different rung band's own partition), so no name collision.",
+      "acquisition": "drop"
     },
     {
       "id": "unique.frostbitten-vanguard-30-007",
-      "nameKey": "unique.numbline",
-      "name": "Numbline",
+      "nameKey": "unique.torpid-canteen",
+      "name": "Torpid Canteen",
       "frame": "humanoid",
-      "baseType": "item.humanoid-back-b-005",
-      "rarity": "cultivated",
+      "themeKey": "theme.frostbitten-vanguard",
+      "baseType": "item.humanoid-bandolier-b-012",
+      "rarity": "grafted",
       "powerAxis": "utility",
       "fixedAtoms": [
-        { "family": "atom.gravedigging", "powerBand": "low" },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.sust-freshgraft",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.deathblast", "variance": "narrow", "params": { "element": "ice" } },
+      "varianceSlot": {
+        "family": "atom.regeneration",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One stat.modify line only (atom.fortitude, low). atom.gravedigging (grid.clear) and atom.deathblast (resource.delta) are capabilities, keeping the raw-stat sum to a single low line against cultivated's baseline."
+        "note": "atom.fortitude (low, maxHp Increased) is the only raw-stat line; atom.sust-freshgraft is status.clear (OnSpawn), not a raw stat. Under the 60% ceiling against a grafted-rung rolled baseline."
       },
-      "tags": ["medium-heavy", "organic", "sturdy", "utility"],
-      "iconKey": "icon.unique.numbline",
-      "flavorKey": "flavor.unique.numbline",
-      "flavor": "Marked ground, six paces back from wherever the column stopped counting.",
-      "notes": "Row 7: mantle / utility. baseType item.humanoid-back-b-005 (Overlapping Backpack, base-types/humanoid-back-b.json; mantle's humanoid name is 'back', file named accordingly), role mantle confirmed on the entry itself. DELIBERATE RULE BREAK, ladder rung 2: atom.gravedigging is retinue/jewel-major/jewel-minor-only per g-board.json, not legal for mantle in the generator's draw pool; both atoms sit in the item's own fixed container, not a drawn pool, so the break costs the architecture nothing. Considered atom.terraforming for the variance slot (same engineer-satchel read) but its family is fixed to boxType 'Lava' (g-board.json) - a scorched-earth/heat effect that collides with the theme's own avoid-list line 'warmth of any kind', so atom.deathblast with params.element 'ice' was used instead: an on-death frost burst, consistent with the theme's element affinity and with no thermal-flavour conflict. Name is uniqueSetSeedPools['frostbitten-vanguard'] canonical 'numbline', used atomically per naming.v1.json rule 2a - not one of the six seed words data/seed/items/sets/frostbitten-vanguard.json already spent, grepped before committing."
+      "tags": [
+        "heavy",
+        "metal",
+        "utility"
+      ],
+      "iconKey": "icon.unique.torpid-canteen",
+      "flavorKey": "flavor.unique.torpid-canteen",
+      "flavor": "Whatever is inside stopped moving before the marching did.",
+      "notes": "utility axis, infusion (bandolier), row 7. baseType item.humanoid-bandolier-b-012 (Leaden Cooler) resolves in base-types-infusion-humanoid-b.json. Name is themeAdjectivePools('torpid') + nounPools['infusion.humanoid']('canteen').",
+      "acquisition": "drop"
     },
     {
       "id": "unique.frostbitten-vanguard-30-008",
-      "nameKey": "unique.stiffened-crest",
-      "name": "Stiffened Crest",
+      "nameKey": "unique.horn-of-muster",
+      "name": "Horn of Muster",
       "frame": "humanoid",
-      "baseType": "item.humanoid-head-a-007",
-      "rarity": "grafted",
+      "themeKey": "theme.frostbitten-vanguard",
+      "baseType": "item.humanoid-horn-a-004",
+      "rarity": "cultivated",
       "powerAxis": "economy",
       "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "medium" },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.econ-muster",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.ferocity",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.econ-bounty", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.might",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One stat.modify line only (atom.fortitude, low). atom.midas and atom.econ-bounty are both resource.economy, not raw stat, keeping the item under grafted's thin 1-2-affix baseline."
+        "note": "atom.ferocity (low, atk Increased) is the only raw-stat line; atom.econ-muster is resource.economy, not a raw stat. Under the 60% ceiling for a cultivated rung."
       },
-      "tags": ["medium-light", "metal", "defensive", "sturdy"],
-      "iconKey": "icon.unique.stiffened-crest",
-      "flavorKey": "flavor.unique.stiffened-crest",
-      "flavor": "Rank was worth something once. The coin it still finds proves it still is.",
-      "notes": "Row 8: head-guard / economy. baseType item.humanoid-head-a-007 (Studded Crest, base-types/humanoid-head-guard-a.json), role head-guard confirmed. DELIBERATE RULE BREAK, ladder rung 2: both atom.midas and atom.econ-bounty are girdle/jewel-major/jewel-minor-only per g-economy.json, not legal for head-guard in the generator's draw pool; both sit in the item's own fixed container, not a drawn pool, so the break costs the architecture nothing - the same device the exemplar documents for atom.searing-strike on a crown/head-guard role. atom.fortitude is role-legal for head-guard already (g-life.json). Kept combat-posture tag 'defensive' from the base type since the piece is still physically head armour regardless of its economy rider. Name is themeAdjectivePools['frostbitten-vanguard'] canonical 'stiffened' + nounPools['head-guard.humanoid'] canonical 'crest', pattern compound."
+      "tags": [
+        "medium",
+        "metal",
+        "utility"
+      ],
+      "iconKey": "icon.unique.horn-of-muster",
+      "flavorKey": "flavor.unique.horn-of-muster",
+      "flavor": "It calls the roll. Fewer answer every winter.",
+      "notes": "economy axis, retinue (horn), row 8 of 8 - the last of the eight roles allocated to this partition (UniqueRuleCheck.AllowedRoles). baseType item.humanoid-horn-a-004 (Dinged Bell) resolves in base-types/retinue/humanoid/a.json. Name uses the <Base> of <Concept> pattern: nounPools['retinue.humanoid']('horn') + conceptPools['frostbitten-vanguard']('muster') - atom.econ-muster's own family id happens to share the word, which is the intentional tie-in, not a coincidence to flag.",
+      "acquisition": "drop"
     }
   ]
 }

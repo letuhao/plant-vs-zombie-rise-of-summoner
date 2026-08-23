@@ -17,6 +17,7 @@ public sealed record ImportOutcome(
     int Curves,
     int Rarities,
     int Elements,
+    int ChannelPolicies,
     int RowsChanged,
     long CatalogRevision,
     ContentHashStamp? ContentHash)
@@ -91,9 +92,10 @@ public sealed partial class RpgStore
             var rosterToWrite = elementTable is not null && !SameRoster(GetElementTable(), elementTable)
                 ? elementTable
                 : null;
+            var policyRows = ValidateChannelPolicyContent(content, errors);
 
             if (errors.Count > 0)
-                return new ImportOutcome(false, errors, 0, 0, 0, 0, 0, 0, GetCatalogRevision(), null);
+                return new ImportOutcome(false, errors, 0, 0, 0, 0, 0, 0, 0, GetCatalogRevision(), null);
 
             // ---- write --------------------------------------------------------------------------
 
@@ -132,6 +134,9 @@ public sealed partial class RpgStore
                     changed++;
                 }
 
+                foreach (var row in policyRows)
+                    changed += UpsertChannelPolicyRowUnlocked(db, tx, row);
+
                 if (changed > 0)
                     ExecIn(db, tx,
                         "UPDATE content_meta SET catalog_revision = catalog_revision + 1 WHERE id = 1;");
@@ -148,7 +153,8 @@ public sealed partial class RpgStore
             return new ImportOutcome(
                 !dryRun, errors,
                 content.Atoms.Count, content.Containers.Count, content.Curves.Count, content.Rarities.Count,
-                content.Elements.Count, changed, GetCatalogRevision(), ComputeContentHash());
+                content.Elements.Count, content.ChannelPolicies.Count, changed,
+                GetCatalogRevision(), ComputeContentHash());
         }
     }
 
@@ -295,6 +301,23 @@ public sealed partial class RpgStore
             content.Elements,
             content.ElementMatrix.Where(m => m.Matrix == "combat").Select(m => m.Row).ToList(),
             content.ElementMatrix.Where(m => m.Matrix == "shield").Select(m => m.Row).ToList());
+    }
+
+    /// <summary>
+    /// The channel policy rows an import carries (E22), converted to the Data-side row and checked
+    /// against the same rule <c>UpsertChannelPolicies</c> enforces outside an import.
+    /// </summary>
+    static List<ChannelPolicyRow> ValidateChannelPolicyContent(SeedContent content, List<SeedError> errors)
+    {
+        var rows = content.ChannelPolicies
+            .Select(r => new ChannelPolicyRow(r.ChannelId, r.Direction, r.DefaultValue, r.CapMilli, r.ComposeKind))
+            .ToList();
+
+        var reason = ValidateChannelPolicyRows(rows);
+        if (reason is not null)
+            errors.Add(Error(content, "(channel-policy)", AtomRejection.Fail(AtomRejectionReason.BadParamValue, reason)));
+
+        return rows;
     }
 
     /// <summary>

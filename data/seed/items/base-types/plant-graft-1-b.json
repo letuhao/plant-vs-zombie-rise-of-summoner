@@ -41,6 +41,16 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -63,6 +73,16 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -85,6 +105,16 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -107,6 +137,16 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -129,6 +169,16 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -151,6 +201,16 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -173,6 +233,16 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -195,6 +265,16 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -211,12 +291,22 @@
       },
       "iconKey": "icon.base.knit-splice",
       "flavorKey": "flavor.base.knit-splice",
-      "flavor": "Two tissues woven together so tightly they breathe as one — inseparable and drawing life from both.",
+      "flavor": "Two tissues woven together so tightly they breathe as one \u2014 inseparable and drawing life from both.",
       "tags": [
         "heavy",
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -239,6 +329,16 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -255,12 +355,22 @@
       },
       "iconKey": "icon.base.meshed-callus",
       "flavorKey": "flavor.base.meshed-callus",
-      "flavor": "Scar tissue so densely interwoven it becomes stronger than the tissue it mended — a monument to endurance.",
+      "flavor": "Scar tissue so densely interwoven it becomes stronger than the tissue it mended \u2014 a monument to endurance.",
       "tags": [
         "heavy",
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -277,12 +387,22 @@
       },
       "iconKey": "icon.base.seated-wedge",
       "flavorKey": "flavor.base.seated-wedge",
-      "flavor": "A wedge so firmly set it becomes the foundation itself — the anchor point that holds everything else in place.",
+      "flavor": "A wedge so firmly set it becomes the foundation itself \u2014 the anchor point that holds everything else in place.",
       "tags": [
         "heavy",
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     }
   ]

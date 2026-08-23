@@ -41,6 +41,20 @@
         "light",
         "organic",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -63,6 +77,20 @@
         "light",
         "organic",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -86,6 +114,20 @@
         "organic",
         "fragile",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -107,6 +149,20 @@
       "tags": [
         "light",
         "organic"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -124,11 +180,25 @@
       "socketMax": 2,
       "iconKey": "icon.base.fringed-shawl",
       "flavorKey": "flavor.base.fringed-shawl",
-      "flavor": "Decorated and light — the fringe swings when you move, giving away position.",
+      "flavor": "Decorated and light \u2014 the fringe swings when you move, giving away position.",
       "tags": [
         "light",
         "organic",
         "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -151,6 +221,20 @@
         "medium-light",
         "organic",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -174,6 +258,20 @@
         "organic",
         "sturdy",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -196,6 +294,20 @@
         "medium-light",
         "organic",
         "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -218,6 +330,20 @@
         "medium-light",
         "fragile",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -240,6 +366,20 @@
         "medium-heavy",
         "organic",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -263,6 +403,20 @@
         "organic",
         "sturdy",
         "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -286,6 +440,20 @@
         "metal",
         "sturdy",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     }
   ]

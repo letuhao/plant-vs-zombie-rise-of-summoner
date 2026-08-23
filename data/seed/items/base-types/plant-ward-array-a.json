@@ -42,6 +42,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -65,6 +79,20 @@
         "organic",
         "rooted",
         "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -88,6 +116,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -105,12 +147,26 @@
       "socketMax": 1,
       "iconKey": "icon.base.desiccated-epidermis",
       "flavorKey": "flavor.base.desiccated-epidermis",
-      "flavor": "Dried to a shell, it guards through emptiness — there is nothing left to harm inside.",
+      "flavor": "Dried to a shell, it guards through emptiness \u2014 there is nothing left to harm inside.",
       "tags": [
         "medium-light",
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -134,6 +190,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -158,6 +228,20 @@
         "rooted",
         "fragile",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -182,6 +266,20 @@
         "rooted",
         "defensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -205,6 +303,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -222,12 +334,26 @@
       "socketMax": 2,
       "iconKey": "icon.base.warped-casing",
       "flavorKey": "flavor.base.warped-casing",
-      "flavor": "Bent out of true by decades of wind and frost, its irregularity is its strength — no two impacts land the same.",
+      "flavor": "Bent out of true by decades of wind and frost, its irregularity is its strength \u2014 no two impacts land the same.",
       "tags": [
         "medium-heavy",
         "organic",
         "rooted",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -252,6 +378,20 @@
         "rooted",
         "defensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -275,6 +415,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     },
     {
@@ -299,6 +453,20 @@
         "rooted",
         "defensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
       ]
     }
   ]

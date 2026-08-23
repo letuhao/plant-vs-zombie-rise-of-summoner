@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "registryVersion": 2,
+  "registryVersion": 3,
   "frozen": true,
   "_meta": {
     "purpose": "Frozen v1 registry consumed by the 60 base-type authoring partitions. Owns two things: the VALIDATED `class` ladders (seed-contract.md §2), and the legal-implicit slate per role. No magnitudes anywhere in this file (seed-contract.md §3) — rungs, orderings, references and tags only.",
@@ -989,7 +989,7 @@
       "tierEqual": true,
       "excludedForRole": [
         {
-          "family": "atom.elemental_defense",
+          "family": "atom.elemental-defense",
           "reason": "stat.derived, quarantined (D6) — re-open when its first consumer ships."
         }
       ]
@@ -999,5 +999,6 @@
   "frozenNote": "FROZEN v2. v1 omitted the commander standard role entirely; added wave 0c after the pilot exposed it.",
   "minCompatibleVersion": 1,
   "minCompatibleNote": "v2 only ADDED the commander standard ladder and slate. No existing ladder, rung or slate changed.",
-  "stage1aFrozen": "Stage 1a authored and validated at 0 errors (205 entries, 25 files). From here a change to this registry invalidates authored content unless minCompatibleVersion says otherwise."
+  "stage1aFrozen": "Stage 1a authored and validated at 0 errors (205 entries, 25 files). From here a change to this registry invalidates authored content unless minCompatibleVersion says otherwise.",
+  "v3Note": "v3 (2026-08-23, owner-approved): atom.elemental_defense -> atom.elemental-defense. The registry carried snake_case where every authored id is kebab-case. The same split already produced ten invisible broken references in gems and socket-words, because ReferenceCheck's id pattern did not match an underscore and so never resolved them at all. Additive spelling correction; no vocabulary added or removed, so minCompatibleVersion is unchanged."
 }

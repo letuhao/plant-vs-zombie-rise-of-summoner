@@ -221,7 +221,7 @@
           <span class="cap">Vitality <b>110 / 1 800</b></span>
           <span class="track"><span class="fill" style="width:6%"></span></span>
         </div>
-        <div class="meter meter--burden">
+        <div class="meter">
           <span class="cap">Hunger <b>820 / 1 000</b></span>
           <span class="track"><span class="fill" style="width:82%"></span></span>
         </div>
@@ -231,12 +231,17 @@
         </div>
       </div>
       <div class="note">
-        <strong>Units are not decoration.</strong> Four unit families exist and they are not
-        interchangeable: primary channels in game units, derived channels in <em>resolver points</em>
-        (<code>+150</code> crit rate moves ~7.6% → ~26.9%), chances in integer per-mille, durations in
-        ms. A component that renders a magnitude must be told which family it is in, or it will print
-        <code>+150%</code> for something that is not a percentage.
-        <span class="ref">definitions.md §2</span>
+        <strong>Units are not decoration.</strong> <b>Nine</b> unit classes exist and they are not
+        interchangeable &mdash; see §C.8 for the ledger. A component that renders a magnitude must be
+        told which class it is in, or it will print <code>+150%</code> for something that is not a
+        percentage.
+        <br><br>
+        <b>Corrected 2026-08-22:</b> this said <em>four</em> families, with every derived channel
+        collapsed into &ldquo;resolver points&rdquo;. Six of the twelve combat families are flat game
+        units and six are sigmoid, so one bucket rendered half of them <b>10&times; wrong</b> — and
+        the bare <code>~7.6% &rarr; ~26.9%</code> printed here named no reference, which is the one
+        thing a sigmoid estimate may never do.
+        <span class="ref">spec-magnitude-and-units.md §2–§3</span>
       </div>
     </div>
   </div>
@@ -459,17 +464,29 @@
           <div class="col-flex">
             <div class="meter"><span class="cap">Vitality <b>1 240 / 1 800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
             <div class="meter"><span class="cap">Stamina <b>44 / 60</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
-            <div class="meter meter--burden"><span class="cap">Hunger <b>820 / 1 000</b></span><span class="track"><span class="fill" style="width:82%"></span></span></div>
+            <div class="meter"><span class="cap">Sun <b>820 / 1 000</b></span><span class="track"><span class="fill" style="width:82%"></span></span></div>
+            <div class="meter"><span class="cap">Spirit <b>310 / 400</b></span><span class="track"><span class="fill" style="width:78%"></span></span></div>
+            <div class="meter"><span class="cap">Yang <b>90 / 240</b></span><span class="track"><span class="fill" style="width:38%"></span></span></div>
           </div>
         </div>
       </div>
       <div class="note">
-        <strong>The resource list is still contested and the component does not care.</strong> It
-        takes <code>(id, label, value, max, polarity)</code>. Polarity is the only visual branch:
-        assets fill green and empty is bad; burdens fill red and full is bad. Whether the set is
-        <code>hp/stamina/hunger/spirit/qi</code> or <code>hp/stamina/sun/soul/spirit</code> is data,
-        and the two documents that disagree can be reconciled without touching this component.
-        <span class="ref">README §5, flagged conflict</span>
+        <strong>Five ids, one shared set, both factions, no branch anywhere.</strong> The meter takes
+        <code>(id, label, value, max, polarity)</code> and knows none of them. Drawn above is a
+        <b>plant</b>: <code>hunger</code> is labelled <b>Sun</b>, <code>qi</code> is labelled
+        <b>Yang</b>. The same five on a zombie read <b>Hunger</b> and <b>Yin</b>. <b>Labels are
+        content</b> — never a key, never a branch, never serialized into a report.
+        <br><br>
+        <strong>All five are <code>asset</code>: full is good, hunger included.</strong> Corrected
+        2026-08-22 — this drew hunger with a <code>burden</code> fill and called the list
+        &ldquo;contested&rdquo;. It is locked, and <code>burden</code> has <b>no member</b> in the set;
+        the field survives only so a future resource could use it, which would be an ADR.
+        <br><br>
+        <strong>Two different things are called &ldquo;Sun&rdquo;, told apart by <em>scope</em>, not
+        by name.</strong> The meter above is the actor-scoped <code>rpg.*</code> pool. The lawn's sun
+        bank is <code>pvz.*</code>, match-scoped, and belongs to the stage HUD — §E.1, where it sits.
+        An RPG resource never reads a PvZ value.
+        <span class="ref">resource-hub-ssot.md §1, §3, §4, §6, §14</span>
       </div>
     </div>
   </div>
@@ -946,7 +963,7 @@
           </span>
           <span class="col-flex" style="gap:2px">
             <div class="meter meter--sm is-critical"><span class="track"><span class="fill" style="width:9%"></span></span></div>
-            <div class="meter meter--sm meter--burden"><span class="track"><span class="fill" style="width:82%"></span></span></div>
+            <div class="meter meter--sm"><span class="track"><span class="fill" style="width:82%"></span></span></div>
           </span>
           <span class="pw-scalar">44.1 <span class="lbl">pw</span></span>
         </div>
@@ -997,7 +1014,7 @@
           </div>
           <div class="res">
             <div class="meter is-critical"><span class="cap">Vitality <b>0 / 900</b></span><span class="track"><span class="fill" style="width:0%"></span></span></div>
-            <div class="meter meter--burden meter--sm"><span class="cap">Hunger <b>1 000 / 1 000</b></span><span class="track"><span class="fill" style="width:100%"></span></span></div>
+            <div class="meter meter--sm"><span class="cap">Hunger <b>1 000 / 1 000</b></span><span class="track"><span class="fill" style="width:100%"></span></span></div>
           </div>
           <div class="ft">
             <span class="tag tag--bad">defeated</span>
@@ -1064,15 +1081,18 @@
                   <div class="s"><div class="k">Vitality</div><div class="v">1 800</div></div>
                   <div class="s"><div class="k">Attack</div><div class="v">140</div></div>
                   <div class="s"><div class="k">Defence</div><div class="v">22</div></div>
-                  <div class="s"><div class="k">Crit rate</div><div class="v">26.9<span class="unit">%</span></div></div>
+                  <div class="s"><div class="k">Crit rate</div><div class="v">150<span class="unit">pts</span></div></div>
                 </div>
+                <p class="statenote" style="margin-top:4px">Sigmoid points, not a percentage — §C.8. The
+                probability against a specific opponent lives on D.3b's attribution panel, opened by
+                tapping this cell.</p>
               </div>
               <div>
                 <p class="spec-label">Effects — the atom ladder, reused verbatim</p>
                 <div class="row-flex">
-                  <span class="chip"><span class="frame frame--chip" data-rarity="3">✦</span><span class="nm">Ember Force</span> <span class="val">+150</span></span>
+                  <span class="chip"><span class="frame frame--chip" data-rarity="3">✦</span><span class="nm">Ember Force</span> <span class="val">+150<span class="unit">fire power</span></span></span>
                   <span class="chip"><span class="frame frame--chip" data-rarity="2">✦</span><span class="nm">Hardened Rind</span> <span class="val">+240<span class="unit">HP</span></span></span>
-                  <span class="chip"><span class="frame frame--chip" data-rarity="5">✦</span><span class="nm">Killing Instinct</span> <span class="val">+150</span></span>
+                  <span class="chip"><span class="frame frame--chip" data-rarity="5">✦</span><span class="nm">Killing Instinct</span> <span class="val">+150<span class="unit">crit rate</span></span></span>
                 </div>
               </div>
             </div>
@@ -1138,26 +1158,48 @@
         </div>
       </div>
 
-      <p class="spec-label" style="margin-top:var(--sp-4)">The difference, stated — including what gets worse</p>
+      <p class="spec-label" style="margin-top:var(--sp-4)">Dominance &mdash; four verdicts, word and shape, never colour alone</p>
+      <div class="row-flex" style="margin-bottom:var(--sp-3)">
+        <span class="verdict-badge" data-v="better">&#9650; Strictly better</span>
+        <span class="verdict-badge" data-v="worse">&#9660; Strictly worse</span>
+        <span class="verdict-badge" data-v="side">&#9670; Sidegrade</span>
+        <span class="verdict-badge" data-v="none">&#9671; Not comparable</span>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">The difference, stated — grouped by unit class, never by row</p>
+      <div class="row-flex" style="margin-bottom:var(--sp-3)">
+        <span class="verdict-badge" data-v="side">&#9670; Sidegrade</span>
+      </div>
       <div class="difflist" style="max-width:520px">
+        <div class="diffgrp-hd">Damage and hit points (game units)</div>
         <div class="diffrow" data-dir="up">
           <span class="k">Fire power</span><span class="a">90</span><span class="b">150</span><span class="d">▲ +60</span>
         </div>
         <div class="diffrow" data-dir="down">
           <span class="k">Maximum vitality</span><span class="a">320</span><span class="b">240</span><span class="d">▼ −80</span>
         </div>
+        <div class="diffgrp-hd">Chance (per-mille)</div>
         <div class="diffrow" data-dir="new">
           <span class="k">Wither on hit</span><span class="a">—</span><span class="b">25%</span><span class="d">new</span>
         </div>
+        <div class="diffgrp-hd">Probability (sigmoid points)</div>
         <div class="diffrow" data-dir="same">
-          <span class="k">Critical rate</span><span class="a">7.6%</span><span class="b">7.6%</span><span class="d">—</span>
+          <span class="k">Critical rate</span><span class="a">0</span><span class="b">0</span><span class="d">— +0 pts</span>
         </div>
+      </div>
+      <div class="trade">
+        <div class="gain"><b>You gain</b><br>+60 fire power &middot; Wither on hit (25%)</div>
+        <div class="lose"><b>You give up</b><br>−80 maximum vitality</div>
       </div>
       <div class="note">
         <strong>The losses are the point.</strong> A comparison that shows only improvements is an
         advertisement. The candidate here is stronger overall and <em>worse</em> at survivability —
         which is exactly the trade the player is being asked to make, and exactly what a single
         summary number hides. <span class="ref">GG-48</span>
+      </div>
+      <div class="footnote-permanent">
+        There is no single score. 60 fire power and 80 maximum vitality are not the same currency —
+        this footnote does not go away once you have seen it.
       </div>
 
       <p class="spec-label" style="margin-top:var(--sp-4)">Vector comparison — where the trade actually shows</p>
@@ -1181,19 +1223,26 @@
           <div>
             <p class="spec-label">Tap any derived number to expand its sources</p>
             <div class="tip" style="display:block;max-width:none">
-              <h4>Critical rate — 26.9%</h4>
+              <h4>Critical rate <span class="unit">sigmoid points</span></h4>
               <div class="attrib" style="margin-top:var(--sp-2)">
-                <div class="line"><span class="op">·</span><span class="src">Base</span><span class="amt">7.6%</span></div>
+                <div class="line"><span class="op">·</span><span class="src">Opposed baseline <span class="statenote">(vs Frost Peashooter)</span></span><span class="amt">&minus;250 pts</span></div>
                 <div class="line"><span class="op">+</span><span class="src">Killing Instinct <span class="tier"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span><span class="amt">+150 pts</span></div>
                 <div class="line"><span class="op">+</span><span class="src">Ashen Reliquary</span><span class="amt">+20 pts</span></div>
-                <div class="line"><span class="op">−</span><span class="src">Cold <span class="st" data-fn="working" style="width:16px;height:16px;font-size:8px">CO</span></span><span class="amt">−15 pts</span></div>
-                <div class="total"><span class="op">=</span><span class="src">Critical rate</span><span class="amt">26.9%</span></div>
+                <div class="line"><span class="op">&minus;</span><span class="src">Cold <span class="st" data-fn="working" style="width:16px;height:16px;font-size:8px">CO</span></span><span class="amt">&minus;15 pts</span></div>
+                <div class="total"><span class="op">=</span><span class="src">total delta</span><span class="amt">&minus;95 pts</span></div>
+                <div class="total final"><span class="op">&asymp;</span><span class="src">Critical rate</span><span class="amt">27.9%<span class="ref">vs Frost Peashooter</span></span></div>
               </div>
             </div>
             <div class="note">
               Flat, increased and more ops, per-channel caps, statuses and container atoms produce
               numbers no player can reverse-engineer. Unattributable numbers are how a build-centred
               game loses the players who care most about it. <span class="ref">GG-49</span>
+              <br><br>
+              <strong>Points sum. Sigmoid applies exactly once, at the end.</strong> An earlier draft
+              of this panel added <code>7.6%</code> to raw point deltas and called the sum a
+              percentage &mdash; percent and points are not the same currency, and the total it
+              produced (26.9%) was never independently checked against this chain&rsquo;s own delta.
+              Recomputed: <code>p(&minus;95) = 1 / (1 + e<sup>0.95</sup>) &asymp; 27.9%</code>.
             </div>
           </div>
 
@@ -1212,7 +1261,7 @@
               <div class="yes">
                 <div class="verdict">✔ Playable</div>
                 <div class="col-flex" style="gap:var(--sp-2)">
-                  <span>Critical strikes <b class="val">7.6%</b> → <b class="val">26.9%</b></span>
+                  <span>Critical strikes <b class="val">7.6%</b> → <b class="val">27.9%</b> <span class="statenote">vs Frost Peashooter</span></span>
                   <span><b class="val">25%</b> chance on hit</span>
                   <span>at most once every <b class="val">4</b> seconds</span>
                   <span><span class="matchup matchup--str">STR</span> <b class="val">+25%</b> damage vs Ice</span>
@@ -1253,8 +1302,10 @@
           </div>
           <div class="ft"><span class="pw-scalar">11.1 <span class="lbl">power</span></span></div>
           <p style="margin:0;font-size:var(--text-xs);color:var(--faint)">
-            A container is a list of atom chips plus rarity. It needs no rendering of its own —
-            which is the test that the ladder is right.
+            A trait, skill, patron, or world-buff container is a list of atom chips plus rarity — it
+            needs no rendering of its own, which is the test that the ladder is right.
+            <b style="color:var(--muted)">Equipment is the exception</b> and needs the full eleven-block
+            card at &sect;D.7.
           </p>
         </div>
 
@@ -1535,6 +1586,233 @@
       </div>
     </div>
   </div>
+  <!-- ---------------------------------------------------------- D.7 item card -->
+  <div class="sub">
+    <h3>D.7 Container &mdash; the item card <span class="tag">Equipment only</span></h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      &sect;D.4 draws a trait/skill/patron/world-buff container correctly &mdash; it really is just atom
+      chips plus rarity. <b>Equipment is the one container kind that needs more</b>: eleven blocks, two
+      zones, and a rule that decides what may ever hide.
+      <b>Identity (blocks 1&ndash;6) never collapses.</b>
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">Rarity &mdash; the real ten-rung ladder, three redundant channels</p>
+      <div class="col-flex" style="gap:5px">
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-chaff)"><span class="raritypips"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="raritylabel">Chaff</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-sprout)"><span class="raritypips"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="raritylabel">Sprout</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-grafted)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="raritylabel">Grafted</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-cultivated)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="raritylabel">Cultivated</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-fused)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></span><span class="raritylabel">Fused</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-chimeric)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></span><span class="raritylabel">Chimeric</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-heirloom)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span><span class="raritylabel">Heirloom</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-firstseed)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="raritylabel">Firstseed</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-sunwoven)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="raritylabel">Sunwoven</span></span></div>
+        <div class="row-flex" style="gap:var(--sp-2)"><span class="raritychip" style="--rc:var(--rarity-almanac)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span class="raritylabel">Almanac</span></span></div>
+      </div>
+      <p class="statenote" style="margin-top:var(--sp-2)">
+        Lightness is the ordering channel &mdash; strictly increasing, monotone under a deuteranope
+        simulation. Pip count is what a colour-blind player reads. The name is always in text.
+        <b>Never colour alone.</b> The kit's existing five-token scale
+        (<code>--rarity-1</code>&hellip;<code>-5</code>, used on ~90 tags across all eight plates) is a
+        sparse approximation of this and is left as-is &mdash; remapping every usage is its own migration.
+      </p>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">The card &mdash; blocks 1&ndash;6 built, 7/8/9/11 placeholders</p>
+      <div class="itemcard">
+        <div class="blk">
+          <div class="blk-lbl">1 &middot; Header &mdash; never collapses</div>
+          <div class="hd">
+            <span class="frame frame--card" data-rarity="4">&#9670;</span>
+            <div class="hd-txt">
+              <span class="raritychip" style="--rc:var(--rarity-chimeric)"><span class="raritypips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i></span><span class="raritylabel">Chimeric</span></span>
+              <div class="nm"><span class="plus">+12</span> Sturdy Bark Helm of Embers</div>
+              <div class="sub2">Plated Helm &middot; Armour &middot; <b>Core-protective</b> &middot; ilvl 64</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk-lbl">2 &middot; Requirements &mdash; names which number gates</div>
+          <div class="req-line is-unmet">
+            <span>Sinew 32 <span class="statenote">(29 + 3)</span></span>
+            <span>29 gates &mdash; need 32</span>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk-lbl">3 &middot; Base stats &mdash; Fixed, no bar</div>
+          <div class="basestat">+180 armour</div>
+        </div>
+
+        <div class="blk">
+          <div class="blk-lbl">4 &middot; Implicit &mdash; italic, no bar</div>
+          <div class="implicit">+8 might (attack)</div>
+        </div>
+
+        <div class="blk">
+          <div class="blk-lbl">5 &middot; Affixes &mdash; prefix then suffix, roll bar per line</div>
+          <div class="grp-hd">Prefix</div>
+          <div class="affixline"><span>Vitality</span>
+            <span><span class="rollbar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span> +62 hp</span></div>
+          <div class="grp-hd">Suffix</div>
+          <div class="affixline"><span>Regeneration</span>
+            <span><span class="rollbar"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span> 14 hp / 3.0 s</span></div>
+        </div>
+
+        <div class="blk">
+          <div class="blk-lbl">6 &middot; Enhancement &mdash; one block, previews the next milestone</div>
+          <div class="enh-milestone">
+            <div>+12 <b>enhance-aegis t1</b> &mdash; 60 hp shield <code>OnSpawn</code></div>
+            <div class="locked">+16 <b>enhance-vigor t3</b> &mdash; +35 hp (replaces t1) &mdash; locked</div>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk-lbl">7 &middot; Sockets &mdash; one evaluator produces all four states</div>
+          <div class="row-flex" style="gap:5px;margin-bottom:6px">
+            <span class="sockcell" data-el="earth" style="color:var(--el-earth);border-color:var(--el-earth)">&#9670;</span>
+            <span class="sockcell" data-el="earth" style="color:var(--el-earth);border-color:var(--el-earth)">&#9670;</span>
+            <span class="sockcell" data-el="fire" style="color:var(--el-fire);border-color:var(--el-fire)">&#9670;</span>
+            <span class="sockcell is-empty">+</span>
+          </div>
+          <div class="combo" data-state="active">
+            <span class="cb-nm">Pure Earth</span>
+            <span class="support" style="margin-left:auto"><span data-s="full">lawn</span></span>
+          </div>
+          <div class="combo-detail cb-atoms">+8% maximum vitality &middot; +6 hp / 5.0 s</div>
+          <div class="combo" data-state="active" style="margin-top:4px">
+            <span class="cb-nm">Fire power (insert)</span>
+            <span class="support" style="margin-left:auto"><span data-s="none">battle</span><span data-s="planonly">sim</span></span>
+          </div>
+          <div class="combo-detail cb-atoms">+30 fire power &mdash; quarantined, same badge as D.1</div>
+          <div class="combo" data-state="one-away" style="margin-top:4px">
+            <span class="cb-nm">Ring: Fire &rarr; Earth</span>
+            <span class="cb-need" style="margin-left:auto">needs 1 more Air or Fire-adjacent insert</span>
+          </div>
+        </div>
+
+        <div class="blk">
+          <div class="blk-lbl">8 &middot; Set &mdash; the whole ladder always renders</div>
+          <div class="sub2" style="margin-bottom:6px">Ember Legion &middot; 2 / 4</div>
+          <div class="setladder">
+            <div class="setrung is-active">
+              <span class="req">2 pieces</span>
+              <span class="grant"><b>120 shield</b> on spawn <span class="cap-badge">capability</span></span>
+            </div>
+            <div class="setrung">
+              <span class="req">4 pieces</span>
+              <span class="grant">+35 atk &middot; +45 hp &middot; +30 fire power
+                <span class="support"><span data-s="none">battle</span></span></span>
+            </div>
+          </div>
+        </div>
+        <div class="blk">
+          <div class="blk-lbl">9 &middot; Granted action &mdash; states the runtime honestly</div>
+          <div class="req-line" style="align-items:flex-start">
+            <span><b>Ember Lance</b><br><span class="statenote">A forward spear of fire, striking every enemy in a line.</span></span>
+            <span class="tag tag--warn" style="white-space:nowrap">battle-only</span>
+          </div>
+          <p class="statenote" style="margin-top:6px">Does nothing on the lawn today &mdash; 11 of 12
+          atom kinds have no battle consumer and this action has no lawn counterpart. Stated here, not
+          discovered by a player mid-match.</p>
+        </div>
+        <div class="blk placeholder">11 &middot; Footer, salvage &mdash; document 5</div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">A unique &mdash; two kinds of line that must never look the same</p>
+      <div class="itemcard" style="max-width:420px">
+        <div class="blk">
+          <div class="blk-lbl"><code>sourceKind: unique-identity</code> &mdash; no bar, even though it rolled</div>
+          <div class="affixline"><span>Windforce</span><span>250&ndash;350% enhanced damage</span></div>
+        </div>
+        <div class="blk">
+          <div class="blk-lbl"><code>sourceKind: unique-variance</code> &mdash; the ONLY line with a bar</div>
+          <div class="affixline"><span>Tempest Ward</span>
+            <span><span class="rollbar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span> +80 shield capacity</span></div>
+        </div>
+        <div class="blk">
+          <div class="flavour">&ldquo;It does not blow. It decides.&rdquo;</div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>The one collision, resolved.</strong> Enhancement picked <code>+12</code> as a name
+        prefix because the left edge is what gets scanned; rarity&rsquo;s pips also want the left edge.
+        <b>Pips first, then <code>+12</code>, then the name.</b> The pips are the ladder&rsquo;s
+        accessibility channel and must not be displaced by an optional token.
+        <br><br>
+        <strong>A unique may break every rule that lives in the generator, and no rule that lives in
+        the machine.</strong> Pool tag, tier window, count band &mdash; breakable. The 12 kinds, 5
+        attach points, 7 triggers &mdash; never. <code>unique-identity</code> lines render without a
+        bar even though they rolled within &plusmn;15% of their midpoint: the item is Windforce at
+        both ends of its range, and a bar would say otherwise. The single <code>unique-variance</code>
+        draw is the only line that gets one.
+        <br><br>
+        <strong><code>Sinew 32 (29 + 3) &mdash; 29 gates.</code></strong> The gate reads the
+        <em>unassisted</em> value &mdash; composed from every source except the four equippable kinds
+        (item, gem, set, charm), so two items cannot cycle-unlock each other. Showing only the
+        composed total would let a player believe a swap is legal when it is not.
+        <span class="ref">spec-item-card.md &sect;1, &sect;4, &sect;6, &sect;7 &middot;
+        ssot-rarity.md &sect;3.3, &sect;4.5 &middot; ssot-requirements.md &sect;2.7 &middot;
+        ssot-uniques.md &sect;3.5&ndash;3.6</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------------- D.8 paper-doll -->
+  <div class="sub">
+    <h3>D.8 The paper-doll &mdash; fifteen roles, two vocabularies, one unlock ladder</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      Rendered as a weight-sorted list, not illustrated body art &mdash; consistent with the
+      foundation&rsquo;s own exclusion of art direction beyond framing and colour (README &sect;5).
+      One id, <code>role_id</code>, drives both the humanoid and plant label &mdash; an affix pool
+      authored for &ldquo;helmets&rdquo; is authored exactly once for <code>head-guard</code>,
+      whichever vocabulary renders it.
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">Humanoid &middot; level 14 &mdash; weight-sorted, locked slots state their unlock level</p>
+      <div class="col-flex" style="gap:1px;max-width:620px">
+        <div class="dollrow"><span class="rank">1</span><span class="rolenm">Main-hand <span class="alt">&middot; Muzzle</span></span><span class="wbar"><span style="width:100%"></span></span><span class="wt">160&#8240; </span></div>
+        <div class="dollrow"><span class="rank">2</span><span class="rolenm">Torso <span class="alt">&middot; Stem</span></span><span class="wbar"><span style="width:75%"></span></span><span class="wt">120&#8240; </span></div>
+        <div class="dollrow is-locked"><span class="rank">3</span><span class="rolenm">Shoulders <span class="alt">&middot; Sheath</span></span><span class="wbar"><span style="width:56%"></span></span><span class="wt">90&#8240; <span class="lvltag">Unlocks at level 24</span></span></div>
+        <div class="dollrow"><span class="rank">4</span><span class="rolenm">Off-hand <span class="alt">&middot; Thorn</span></span><span class="wbar"><span style="width:50%"></span></span><span class="wt">80&#8240; </span></div>
+        <div class="dollrow is-locked"><span class="rank">5</span><span class="rolenm">Neck <span class="alt">&middot; Pollen</span></span><span class="wbar"><span style="width:50%"></span></span><span class="wt">80&#8240; <span class="lvltag">Unlocks at level 20</span></span></div>
+        <div class="dollrow"><span class="rank">6</span><span class="rolenm">Hands <span class="alt">&middot; Leaves</span></span><span class="wbar"><span style="width:44%"></span></span><span class="wt">70&#8240; </span></div>
+        <div class="dollrow is-locked"><span class="rank">7</span><span class="rolenm">Back <span class="alt">&middot; Canopy</span></span><span class="wbar"><span style="width:38%"></span></span><span class="wt">60&#8240; <span class="lvltag">Unlocks at level 17</span></span></div>
+        <div class="dollrow"><span class="rank">8</span><span class="rolenm">Head <span class="alt">&middot; Crown</span></span><span class="wbar"><span style="width:38%"></span></span><span class="wt">60&#8240; </span></div>
+        <div class="dollrow"><span class="rank">9</span><span class="rolenm">Waist <span class="alt">&middot; Soil</span></span><span class="wbar"><span style="width:38%"></span></span><span class="wt">60&#8240; </span></div>
+        <div class="dollrow"><span class="rank">10</span><span class="rolenm">Face <span class="alt">&middot; Bract</span></span><span class="wbar"><span style="width:31%"></span></span><span class="wt">50&#8240; </span></div>
+        <div class="dollrow"><span class="rank">11</span><span class="rolenm">Feet <span class="alt">&middot; Roots</span></span><span class="wbar"><span style="width:31%"></span></span><span class="wt">50&#8240; </span></div>
+        <div class="dollrow is-locked"><span class="rank">12</span><span class="rolenm">Bandolier <span class="alt">&middot; Glands</span></span><span class="wbar"><span style="width:31%"></span></span><span class="wt">50&#8240; <span class="lvltag">Unlocks at level 28</span></span></div>
+        <div class="dollrow is-locked"><span class="rank">13</span><span class="rolenm">Horn <span class="alt">&middot; Runner</span></span><span class="wbar"><span style="width:25%"></span></span><span class="wt">40&#8240; <span class="lvltag">Unlocks at level 32</span></span></div>
+        <div class="dollrow"><span class="rank">14</span><span class="rolenm">Ring 1 <span class="alt">&middot; Graft 1</span></span><span class="wbar"><span style="width:9%"></span></span><span class="wt">15&#8240; </span></div>
+        <div class="dollrow is-locked"><span class="rank">15</span><span class="rolenm">Ring 2 <span class="alt">&middot; Graft 2</span></span><span class="wbar"><span style="width:9%"></span></span><span class="wt">15&#8240; <span class="lvltag">Unlocks at level 36</span></span></div>
+      </div>
+
+      <div class="note">
+        <strong>A locked slot is <code>default</code>, not absent.</strong> The same state
+        <a href="#d">D.5</a> already gives a stat that exists but hasn&rsquo;t been reached &mdash;
+        dimmed, real, and it says <em>when</em>, never just <em>that it&rsquo;s locked</em>. A new
+        specimen opens with four slots (355&#8240; of budget, live from level 1); the ladder runs to
+        level 36 and then stops &mdash; nothing unlocks after that until a level cap is set above it.
+        <br><br>
+        <strong>A hybrid&rsquo;s missing two slots are a different state from locked, and must never
+        share a rendering.</strong> <code>ward-array</code> and <code>jewel-minor-b</code> do not open
+        at any level on a hybrid frame &mdash; the shield families move to <code>core-guard</code> at
+        a lower tier cap instead. A hybrid player hunting for the level that opens
+        <code>ward-array</code> would be hunting forever if the two states looked the same.
+        <br><br>
+        <strong>Two independent derivations, cross-checked.</strong> A hybrid's 13-role budget is
+        <b>895&#8240;</b>; summing its roll counts by weight band gives <b>56</b> against a pure
+        frame's <b>63</b> &mdash; <code>56/63 = 88.9%</code>, matching <code>895/1000 = 89.5%</code>
+        within 0.6pp. Two numbers derived two different ways landing on the same answer is the check.
+        <span class="ref">spec-equip-and-paperdoll.md &sect;2&ndash;&sect;4 &middot;
+        ssot-equip-slots.md &sect;2.3, &sect;2.10, &sect;4.2</span>
+      </div>
+    </div>
+  </div>
 </section>
 
 
@@ -1731,6 +2009,172 @@
       </div>
     </div>
   </div>
+
+  <div class="sub">
+    <h3>F.3 The workshop &mdash; cost vocabulary, reroll operations, salvage guards</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      Five spends, three verbs, and none of them are interchangeable &mdash; a shard buys a
+      <em>ceiling</em>, not volume; an essence names a <em>direction</em>, not a quantity. Every
+      operation below spends from this one vocabulary, so a player who learns it once reads every
+      recipe in the game.
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">Cost vocabulary &mdash; five classes, never substitutable for one another</p>
+      <div class="row-flex">
+        <span class="costchip" data-cls="souls"><span class="g">&#9670;</span>Souls &mdash; permission</span>
+        <span class="costchip" data-cls="substrate"><span class="g">&#9634;</span>Substrate &mdash; body</span>
+        <span class="costchip" data-cls="shard"><span class="g">&#9671;</span>Shard &mdash; ceiling</span>
+        <span class="costchip" data-cls="essence"><span class="g">&#10022;</span>Essence &mdash; direction</span>
+        <span class="costchip" data-cls="catalyst"><span class="g">&#9679;</span>Catalyst &mdash; verb</span>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Reroll &mdash; three operations, one price function</p>
+      <div class="spec-grid wide">
+        <div class="opcard">
+          <div class="op-nm">Temper</div>
+          <div class="op-feel">Re-draws the value of one affix, inside its own range. Cheap, low
+          variance &mdash; the on-ramp.</div>
+          <div class="op-cost">
+            <span class="costchip" data-cls="souls"><span class="g">&#9670;</span>40</span>
+            <span class="costchip" data-cls="catalyst"><span class="g">&#9679;</span>1&times; flux</span>
+          </div>
+        </div>
+        <div class="opcard">
+          <div class="op-nm">Reforge</div>
+          <div class="op-feel">Re-draws identity, tier, and value of a chosen subset. Everything
+          untargeted is anchored &mdash; anchoring is the price.</div>
+          <div class="op-cost">
+            <span class="costchip" data-cls="souls"><span class="g">&#9670;</span>180</span>
+            <span class="costchip" data-cls="catalyst"><span class="g">&#9679;</span>3&times; flux</span>
+            <span class="costchip" data-cls="shard"><span class="g">&#9671;</span>1&times; rare</span>
+          </div>
+        </div>
+        <div class="opcard">
+          <div class="op-nm">Imprint</div>
+          <div class="op-feel">No draw &mdash; places a chosen family at the window&rsquo;s floor.
+          Guaranteed, and deliberately the worst legal version.</div>
+          <div class="op-cost">
+            <span class="costchip" data-cls="souls"><span class="g">&#9670;</span>320</span>
+            <span class="costchip" data-cls="essence"><span class="g">&#10022;</span>1&times; fire</span>
+          </div>
+        </div>
+      </div>
+      <div class="row-flex" style="margin-top:var(--sp-3)">
+        <span class="tag tag--warn">Recall &mdash; +1 recall token, one revert, until your next operation</span>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Salvage preview &mdash; every exclusion named, before commit</p>
+      <div class="col-flex" style="gap:6px">
+        <div class="row-flex" style="justify-content:space-between">
+          <span><b>41</b> items matched &middot; yield <span class="costchip" data-cls="substrate" style="margin:0 2px"><span class="g">&#9634;</span>&times;180</span> <span class="costchip" data-cls="essence"><span class="g">&#10022;</span>&times;24</span></span>
+          <button class="btn btn--sm">Commit salvage</button>
+        </div>
+        <div class="guardlist">
+          <div class="guardrow"><span class="gid">G-A</span><span class="gexcl">6 excluded &mdash; assigned: Emberling&rsquo;s Sunworn Charm, 5 more</span></div>
+          <div class="guardrow"><span class="gid">G-B</span><span class="gexcl">2 excluded &mdash; locked: Ashen Reliquary, Tempest Ward</span></div>
+          <div class="guardrow"><span class="gid">G-C</span><span class="gexcl">3 excluded &mdash; in a loadout: Frostbite Set (3 pieces)</span></div>
+          <div class="guardrow"><span class="gid">G-D</span><span class="gexcl">9 excluded &mdash; best-in-role, unreviewed: Windforce, 8 more</span></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>The cost vocabulary is closed and none of it substitutes.</strong> You cannot buy a
+        rarity ceiling with volume (shard), and an element is not a quantity (essence) &mdash; a UI
+        that let one class stand in for another would be lying about what the game&rsquo;s economy
+        actually gates.
+        <br><br>
+        <strong>&ldquo;Reroll one affix&rdquo; is Reforge with one target, not a fourth button.</strong>
+        The anchor multiplier already prices it correctly, so there is nothing for a separate operation
+        to disagree with the shared price function about.
+        <br><br>
+        <strong>G-D is the guard that prevents the actual disaster.</strong> Players do not lock what
+        they have not looked at, and the item they lose to a bulk salvage is always the one they never
+        opened. Naming the excluded items, not just the count, is what makes the guard trustworthy
+        enough that a player commits without re-checking every row by hand.
+        <span class="ref">spec-inventory-and-workshop.md &sect;1.2, &sect;2, &sect;3 &middot;
+        ssot-reroll.md &sect;3.1&ndash;3.2 &middot; ssot-inventory.md &sect;5.7 &middot;
+        ssot-materials-crafting.md &sect;3.1&ndash;3.2</span>
+      </div>
+    </div>
+  </div>
+  <div class="sub">
+    <h3>F.4 The action bar &mdash; costs, targeting, and honest refusal</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      The shipped <code>.actionslot</code> (plate 04) only ever shows two states &mdash; affordable, or
+      a bare-number <code>is-unaffordable</code> &mdash; with no resource identity and no way to say
+      <em>why</em> an action is refused. Five typed refusals exist in the spec; the slot below shows
+      four of them, additive to the existing component.
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">Five gates, cheapest first &mdash; every refusal named, none of them a bare disabled look</p>
+      <div class="actionbar" style="margin-bottom:34px">
+        <button class="actionslot"><span class="key">1</span><span class="g">&#128293;</span><span class="n">Ember</span><span class="cost">12</span></button>
+        <button class="actionslot is-refused" data-refuse="cooldown"><span class="cd">2</span><span class="key">2</span><span class="g">&#9876;</span><span class="n">Strike</span>
+          <span class="refuse-reason">Cooldown</span></button>
+        <button class="actionslot is-refused" data-refuse="cost"><span class="key">3</span><span class="g">&#9760;</span><span class="n">Pyre</span>
+          <span class="refuse-reason">No qi</span></button>
+        <button class="actionslot is-refused" data-refuse="range"><span class="key">4</span><span class="g">&#127993;</span><span class="n">Lance</span>
+          <span class="refuse-reason">Too far</span></button>
+        <button class="actionslot is-refused" data-refuse="condition"><span class="key">5</span><span class="g">&#9995;</span><span class="n">Rally</span>
+          <span class="refuse-reason">Unmet</span></button>
+      </div>
+      <div class="guardlist" style="max-width:460px;margin-bottom:var(--sp-3)">
+        <div class="guardrow"><span class="gid">Strike</span><span class="gexcl"><code>OnCooldown</code> &mdash; 1 turn remaining</span></div>
+        <div class="guardrow"><span class="gid">Pyre</span><span class="gexcl"><code>CannotAfford(qi)</code> &mdash; needs 50, has 12</span></div>
+        <div class="guardrow"><span class="gid">Lance</span><span class="gexcl"><code>OutOfRange</code> &mdash; target is 4 cells away, MaxRange 2</span></div>
+        <div class="guardrow"><span class="gid">Rally</span><span class="gexcl"><code>ConditionFailed</code> &mdash; needs an ally below half HP; none in range</span></div>
+      </div>
+
+      <p class="spec-label">Cost cluster &mdash; a list, not one pool; <code>perTick</code> drains, <code>onCommit</code> pays once</p>
+      <div class="costcluster" style="max-width:340px">
+        <div class="costline"><span class="pool">Stamina</span><span class="bar"><span style="width:60%"></span></span><span class="amt">&minus;12</span></div>
+        <div class="costline is-perTick"><span class="pool">Qi</span><span class="bar"><span></span></span><span class="amt">&minus;4/tick</span></div>
+      </div>
+      <p class="statenote" style="margin-top:6px">Stamina pays once at commit. Qi drains per resolve
+      offset &mdash; if it projects to run dry before the last offset, the action ends early through
+      the interrupt path. Both have already paid; nothing here refunds a missed hit.</p>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Targeting &mdash; Chebyshev, never a circle; two range bands, never one colour</p>
+      <div class="row-flex" style="gap:var(--sp-6);align-items:flex-start">
+        <div class="rangegrid">
+        <span class="rc"></span><span class="rc"></span><span class="rc"></span><span class="rc"></span><span class="rc"></span><span class="rc"></span><span class="rc"></span>
+        <span class="rc"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc"></span>
+        <span class="rc"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc"></span>
+        <span class="rc"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc is-caster"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc is-move"></span>
+        <span class="rc"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc"></span>
+        <span class="rc"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc in-range"></span><span class="rc"></span>
+        <span class="rc"></span><span class="rc"></span><span class="rc"></span><span class="rc"></span><span class="rc"></span><span class="rc"></span><span class="rc"></span>
+        </div>
+        <div class="col-flex" style="gap:4px;font-size:var(--text-xs);color:var(--muted)">
+          <span class="row-flex" style="gap:6px"><span class="rangegrid" style="grid-template-columns:20px"><span class="rc is-caster"></span></span> caster</span>
+          <span class="row-flex" style="gap:6px"><span class="rangegrid" style="grid-template-columns:20px"><span class="rc in-range"></span></span> attack range &mdash; MaxRange 2</span>
+          <span class="row-flex" style="gap:6px"><span class="rangegrid" style="grid-template-columns:20px"><span class="rc is-move"></span></span> move range only &mdash; cannot attack from here without moving first</span>
+        </div>
+      </div>
+
+      <div class="note">
+        <strong>With no board, every one of these range checks passes.</strong> The grid above is what
+        the range parameters become <em>once</em> the battle grid (A10) lands &mdash; today, with no
+        board, targeting behaves exactly as it does now and excludes nobody. That is not a fallback
+        drawn apologetically; it is the specific rule that keeps the basic attack byte-identical while
+        the grid does not exist yet. The one loud exception: an <code>Area</code>-mode action is
+        <b>rejected at bind time</b> while no board exists &mdash; shown as a real disabled state, never
+        a silently empty target list.
+        <br><br>
+        <strong>Attack range and move range answer different questions</strong> &mdash;
+        <em>can I reach this target</em> versus <em>can I stand here</em> &mdash; and rendering both as
+        one colour would conflate them. The diamond shape is not a style choice: the shipped
+        <code>Square</code> area of size <em>n</em> literally <b>is</b> a Chebyshev ball of radius
+        <code>(n&minus;1)/2</code>, so a circular range ring would promise cells the resolver does not
+        grant.
+        <span class="ref">spec-action-layer.md &sect;0, &sect;3&ndash;&sect;5 &middot;
+        action/spec-targeting.md &sect;2, &sect;4 &middot;
+        action/spec-usability-conditions.md &sect;2 &middot; action/spec-action-costs.md &sect;3</span>
+      </div>
+    </div>
+  </div>
 </section>
 
 
@@ -1748,7 +2192,7 @@
     </thead>
     <tbody>
       <tr><td><b>Atom effect</b></td><td>D.1</td><td>D.1</td><td>D.1</td><td>D.1</td><td>n/a</td><td>dev only</td></tr>
-      <tr><td><b>Container</b></td><td>n/a</td><td>D.4</td><td><a href="02-collection.html">p02 B</a></td><td>D.4</td><td><a href="07-flows.html">p07 F</a></td><td>dev only</td></tr>
+      <tr><td><b>Container</b></td><td>n/a</td><td>D.4</td><td><a href="02-collection.html">p02 B</a></td><td>D.4 &middot; <b>D.7</b></td><td><a href="07-flows.html">p07 F</a></td><td>dev only</td></tr>
       <tr><td><b>Actor</b></td><td>D.2</td><td>D.2</td><td>D.2</td><td>D.2</td><td>D.2</td><td><a href="07-flows.html">p07 F</a></td></tr>
       <tr><td><b>Status</b></td><td>C.4</td><td>C.4</td><td><a href="05-chronicle-almanac.html">p05 B</a></td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
       <tr><td><b>Element</b></td><td>C.1</td><td>C.1</td><td><a href="05-chronicle-almanac.html">p05 B</a></td><td>n/a</td><td>n/a</td><td>n/a</td></tr>

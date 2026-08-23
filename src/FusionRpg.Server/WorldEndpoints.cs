@@ -321,7 +321,8 @@ public static class WorldEndpoints
                 Element = sl.Element?.ToString(),
                 State = sl.State.ToString(),
                 GuardWaveId = sl.GuardWaveId,
-                GuardState = sl.GuardState.ToString()
+                GuardState = sl.GuardState.ToString(),
+                StructureId = sl.StructureId
             }).ToList(),
 
             LifelineCost = lifelines.Cost.TryGetValue(sector.SectorId, out var cost) ? cost : 0,

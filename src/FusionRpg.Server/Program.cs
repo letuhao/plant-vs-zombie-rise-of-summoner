@@ -53,6 +53,10 @@ if (SimFlags.Enabled)
 
 var app = builder.Build();
 app.Services.GetRequiredService<RpgStore>().Init();
+// E20: without this, ElementTable/PowerTables.Current never move off their shipped code copy, and
+// an imported roster or coefficient row changes the content hash and nothing else (completeness
+// audit A2). A store with nothing imported behaves exactly as before.
+app.Services.GetRequiredService<RpgStore>().LoadContentIntoRuntime();
 // Fail fast on demon content errors: the catalogs are lazy, and a bad species surfacing on the
 // first request would permanently poison WaveCatalog's static initializer (review I6).
 _ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;

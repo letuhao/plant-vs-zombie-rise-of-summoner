@@ -611,12 +611,445 @@ done, hand over a commit message and the paths touched.
   pre-existing unrelated `/favicon.ico` 404. Cleanup: switched current player back to 1, stopped and
   restarted the server **without** `FUSIONRPG_SIM`, confirmed `simEnabled:false` again — the running
   server and its data are in the same state this check found them in, plus the L24 code.)*
-- [ ] **Owner playtest** — ten turns on `two-hearths`, against the brief written into `spec-loam-maps.md`. Three questions: is choosing what to let go a real decision · does the fade read as tense or as bookkeeping · is a split economy frightening.
-  - **How to actually get a `two-hearths` save running** (the brief says what to play, not how to start it — closing that gap here since this session had to work it out to do its own live checks):
-    1. Publish + start the server once, normally: `dotnet publish src/FusionRpg.Server/FusionRpg.Server.csproj -c Release -o dist/FusionRpg.Server` then `Start-Process dist/FusionRpg.Server/FusionRpg.Server.exe` from `dist/FusionRpg.Server` (or just use the player-facing Launcher, which does the same thing).
-    2. `two-hearths` isn't reachable from the normal UI yet — `first-light` stays the default template until the gate passes (`spec-loam-maps.md`'s own decision), and the sim-only world-creation route is gated behind `FUSIONRPG_SIM=1`. Set that env var before starting the server for **this playtest only** — set `$env:FUSIONRPG_SIM = "1"` before the `Start-Process` line above.
-    3. Create your own save for it rather than reusing an existing one: `curl -X POST http://127.0.0.1:5088/api/players -d '{"name":"loam-gate"}'` (note the returned `id`), then `curl -X POST http://127.0.0.1:5088/api/test/world/create -d '{"playerId":<id>,"worldId":"loam-gate","templateId":"two-hearths","seed":"7"}'`.
-    4. `curl -X PUT http://127.0.0.1:5088/api/players/current -d '{"id":<id>}'`, then open `#/world` in the browser — it's turn 0 on `two-hearths`, ready to play. Restart the server without `FUSIONRPG_SIM` afterward if you want the sim-only route closed again for normal play.
-- [ ] **Read the verdict correctly.** *"It works but feels pointless"* is the **expected** result — the reward layer does not exist yet. The mechanic is condemned only by *"I did not care which sector I lost"* or *"I could not tell what was happening."*
+- [x] **Coverage + mutation pass, and an automated combined campaign (owner request, 2026-08-23)**.
+  `.\scripts\coverage.ps1 -Namespace FusionRpg.Core.World.Loam`: 100% line, 100%/97% branch across all
+  9 classes (`LoamForecast` included at 100%/100%). Coverage alone doesn't say the tests would *notice*
+  a wrong answer, so ran `.\scripts\mutate.ps1 -Set loam-calc` next — it found two real gaps mutation
+  testing exists to find and line coverage cannot: `LoamForecast.Weakest`'s own early-return guard
+  (`available >= upkeep`) was never exercised directly — both its call sites (`Pressure`, which only
+  calls it once a shortfall is already known, and `WillRelease`, whose own downstream `FadePolicy`
+  check happens to swallow the same bug) accidentally hide a broken guard — and `ProjectedStock`'s
+  per-sector cap was never exercised by a sector actually near `LoamCapacity`, so removing the cap
+  entirely changed nothing in any existing fixture. Added
+  `Weakest_returns_null_when_the_pool_can_cover_its_own_upkeep` and
+  `ProjectedStock_caps_new_accrual_at_capacity_per_sector` to `LoamForecastTests.cs`; all 21
+  `loam-calc` mutants now caught. `.\scripts\mutate.ps1 -Set world-ai` re-run for regression: no new
+  survivors; the one pre-existing survivor (`Expand marches at ground worth nothing`) was
+  re-investigated by hand (manually applied the mutation, ran the one test that should catch it,
+  confirmed it still passes for a reason unrelated to loam — reverted immediately, `git diff` confirmed
+  byte-identical) and left as the prior task's own documented, out-of-scope decision; chasing it
+  further belongs to `world-ai`/`ai-commander`, not this program. New
+  `TwoHearthsCampaignTests.A_sixty_turn_campaign_dave_pushes_the_corridor_while_zombosss_ai_reacts`:
+  a stand-in for the owner's playtest that goes considerably further than any single-sided test here
+  so far — Dave scripted into the same aggressive corridor-to-`hot-ground` push
+  `TwoHearthsStoryTests` already proved reachable, **and** Zomboss driven every turn by his actual
+  `FrontierRulesPolicy.Instance.Decide` (not a hand-picked order), both together, for sixty turns.
+  Findings, observed rather than assumed: Dave takes and holds `hot-ground` by turn 9, splitting his
+  own territory into two components (his capital plus the now-isolated, self-sufficient prize) that
+  stays stable for the remaining fifty turns with zero stock ever going negative; Zomboss's AI takes
+  no action at all across the whole run — his four-sector, one-component capital sits completely
+  passive, matching `spec-loam-maps.md`'s own anticipated "artefact" (his one survival rule not firing
+  because nothing threatens him) rather than a bug. **Important scope note for reading this
+  alongside the owner's own playtest**: this is not what the owner will see live today — nothing in
+  `WorldEndpoints`'s `/commit` route invokes `FrontierRulesPolicy` for a non-player faction, so
+  Zomboss will not react to anything during a real session until the (specced, unbuilt) AI commander
+  driver exists; this test drives his policy directly, the only way to exercise it at all right now.
+  Full re-run after all of the above: Core.Tests 2800/2800, Data.Tests 423/423, E2E.Tests 183/183, all
+  four guard scripts OK.
+- [x] **Metric proxies for the three playtest questions, not a claim they're untestable (owner
+  pushback, 2026-08-23)**. Said the three questions "cannot" be automated; the owner was right to push
+  back — the honest position is that the *subjective feeling* has no test, but each question has a
+  measurable stand-in the engine can actually report, and I hadn't tried building one. New
+  `LoamPlaytestSignalTests.cs`, four instrumented measurements against real engine mechanics, not
+  fixtures asserting a foregone conclusion:
+  - **Q2/Q3 proxy — how many turns of visible warning before an actual loss.** Logged
+    `componentNet`/`stability`/`willReleaseNextTurn` every turn from the moment a supply line is
+    severed to the sector actually being lost. Moderate deficit: **22 turns**. A severe one (20
+    garrisoned members, development 5, danger 5 — near the harsh end of what the map's own numbers
+    can produce): **18 turns**. The window barely narrows between "moderate" and "severe" because
+    `FadePolicy.DecayFor` grows only `deficit/5`, not proportionally — it would need a deficit in the
+    thousands to approach `MaxDecayMilli`'s ~4-turn theoretical floor, far past anything the map's
+    validated bounds produce. **What this tells the owner**: on raw *time*, this is not a shock — a
+    player has nearly three weeks' worth of turns of a visibly dimming card before anything is lost.
+    Whether that reads as "tense" or "so slow I stopped watching" is still the owner's own call; what
+    it rules out is the failure mode named in the brief itself — *"I could not tell what was
+    happening"* has a real, generous number behind it now, not a guess.
+  - **A specific, honest caveat found in that same log**: the discrete `willReleaseNextTurn` alarm
+    (L24's own release marker) only ever turned true on the *last* turn before the loss, both times —
+    it is a precise one-turn-ahead forecast, not an early-warning system; the 22/18-turn runway comes
+    entirely from the continuously dimming `stabilityMilli`/`anchorState`, not from that flag. A
+    player who ignores the fading visual and waits for the marker gets exactly one turn's notice. Not
+    a bug — `WillRelease` is deliberately exact about "next turn," per its own docs — but worth the
+    owner knowing which signal is actually carrying the warning.
+  - **Q1 proxy — does a player's own choice actually change which sector goes?** The engine picks the
+    weakest sector itself right now (pinning is post-gate), so the real question is whether anything
+    the player currently controls moves that pick. Checked `DevelopmentLevel` first and found it is
+    grep-confirmed authored-only in this wave (no live command sets it; `loam-structures`, which
+    would, is unspecced) — an early draft of this test claimed a lever that doesn't exist yet and was
+    rewritten before being kept. The real, currently-live lever is garrison placement:
+    `LoamUpkeep.For`'s truth side already sums `world.Entities` standing at a sector, and marching
+    troops there is an ordinary Move order today. Measured: two identically-balanced sectors, tied at
+    -10 each; garrisoning one with a single unit alone flips it to -12, making it the sector the
+    engine would sacrifice first. **What this tells the owner**: the "choice" upstream of the
+    automatic pick is mechanically real today — where you park a legion changes who takes the fall —
+    even though there is no direct point-and-pick UI for it yet (that's pinning, explicitly deferred).
+  Full re-run: Core.Tests 2803/2803.
+- [x] ~~**Owner playtest**~~ **Superseded 2026-08-23 (owner decision): "I don't need to play the game
+  myself — use test suite to cover it."** The manual ten-turn session is replaced by
+  `LoamPlaytestSignalTests.cs` (four tests) plus everything above it in this checkpoint. The old
+  "how to start a two-hearths save" runbook is kept below only because it is still the fastest way for
+  anyone who *wants* to look at the map by hand later — it is no longer a required step.
+  1. Publish + start the server once, normally: `dotnet publish src/FusionRpg.Server/FusionRpg.Server.csproj -c Release -o dist/FusionRpg.Server` then `Start-Process dist/FusionRpg.Server/FusionRpg.Server.exe` from `dist/FusionRpg.Server` (or just use the player-facing Launcher, which does the same thing).
+  2. `two-hearths` isn't reachable from the normal UI — `first-light` stays the default template (`spec-loam-maps.md`'s own decision), and the sim-only world-creation route is gated behind `FUSIONRPG_SIM=1`. Set that env var before starting the server, for this one session only.
+  3. Create your own save: `curl -X POST http://127.0.0.1:5088/api/players -d '{"name":"loam-gate"}'` (note the returned `id`), then `curl -X POST http://127.0.0.1:5088/api/test/world/create -d '{"playerId":<id>,"worldId":"loam-gate","templateId":"two-hearths","seed":"7"}'`.
+  4. `curl -X PUT http://127.0.0.1:5088/api/players/current -d '{"id":<id>}'`, then open `#/world` — turn 0 on `two-hearths`. Restart the server without `FUSIONRPG_SIM` afterward to close the sim-only route again.
+- [x] **The suite's verdict, in place of a human's** *(2026-08-23)*.
+  - **Q1, "is choosing what to let go a real decision?" — real, but indirect.** The engine picks
+    automatically today (no pin UI — deferred). Garrison placement provably moves that pick
+    (`The_engines_weakest_pick_responds_to_where_a_player_garrisons_troops`): identical sectors, tied,
+    flip apart the instant one is garrisoned. So there is a lever, and it is one an ordinary Move order
+    already operates — but it is upstream and indirect, not a moment of "pick one of these to lose."
+    **Risk flagged, not hidden**: without pinning, the felt sense of "I chose" may be weaker than the
+    brief's question assumes, since the actual sacrifice is still automatic.
+  - **Q2, "does the fade read as tense, or as bookkeeping?" — mechanically not a shock; genuinely
+    unresolved which way it reads.** 18–22 turns of continuously dimming stability before an actual
+    loss, across both a moderate and a severe deficit (`Severing_a_supply_line_gives_several_turns_
+    of_visible_warning...`, `The_warning_window_shrinks_under_a_severe_deficit...`) — nobody loses
+    ground with zero notice. **Risk flagged, not resolved**: the same generous window that rules out
+    "shock" could just as easily read as "so slow nobody watches it," which is the *other* way this
+    question fails. No metric distinguishes "tense" from "ignored" — both produce a long, quiet decline
+    on paper. Also found: the discrete `willReleaseNextTurn` marker only ever fires one turn ahead —
+    the dimming visual carries the actual warning, not that flag.
+  - **Q3, "is a split economy frightening?" — the signal is immediate; whether that reads as
+    frightening is exactly the part with no proxy.** A severed lane produces two components with an
+    accurately negative net on the very next read, no turn of lag
+    (`A_severed_lane_shows_up_as_two_components_on_the_very_same_read...`), and the gauge/sector panel
+    (L24) already surface that plainly. What no test can measure: whether seeing it lands as alarming
+    or as just another number changing.
+  - **Overall**: nothing here found a defect serious enough to block the mechanic, and two real design
+    risks were surfaced *by name* rather than smoothed over — worth a look before any post-gate program
+    is specced, but not a reason to hold this gate.
+- [x] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**). See below.
+- [x] **Decide: does the post-gate program happen?** *(2026-08-23 — yes, owner decision, then
+  extended: "add spec for missing/gap/open items... so we will clear every missing.")* All five
+  post-gate modules (`loam-legions`, `loam-ai`, `structure-substrate`, `loam-structures`,
+  `loam-texture`) are authorized to be specced and built, in the build order declared in
+  `docs/architecture/loam-map.md` §3. **All five are now sealed**, every open design call resolved
+  with reasoning rather than left for a second round:
+  [spec-loam-legions](../docs/architecture/loam/spec-loam-legions.md) ·
+  [spec-loam-ai](../docs/architecture/loam/spec-loam-ai.md) ·
+  [spec-structure-substrate](../docs/architecture/loam/spec-structure-substrate.md) ·
+  [spec-loam-structures](../docs/architecture/loam/spec-loam-structures.md) ·
+  [spec-loam-texture](../docs/architecture/loam/spec-loam-texture.md). Two real, code-verified gaps
+  surfaced along the way and are recorded in the specs that found them rather than papered over:
+  parts of `empire-economy-ideal.md`'s §8.1–§8.4 (chain-to-homeworld, anchor-distance upkeep) are
+  stale, superseded by this program's own S3/S6 and A3 resolutions (`spec-loam-structures` says so
+  explicitly); and `two-hearths` has no `Wild` faction row, which `loam-texture`'s Unmade mechanic
+  needs (`spec-loam-texture` schedules adding one as part of that module's own change, not a
+  follow-up). **This is Phase 1 (Specify) only** — Phase 2 (Plan/Tasks) has not started for any of
+  the five, and none of them are implemented. Planning and tasks for this new phase belong in a fresh
+  pass once the owner reviews all five sealed specs — this file was scoped "24 tasks, 5 phases, ending
+  at the gate" (`loam-map.md` §3) and the post-gate work is genuinely a new planning pass, not an
+  extension of the L1-L24 list above.
+- [x] **Adversarial audit of all five post-gate specs** *(2026-08-23, owner: "audit the spec, debate
+  and strengthen")*. Three independent audit passes found and fixed one real safety bug
+  (`FadePolicy.DecayFor`'s surge term would have scaled past the `MaxDecayMilli` clamp as originally
+  worded) plus five further real gaps across the five specs (golden-move budget reopened without
+  addressing the plan's own closure; a habitability claim belief data can't yet support; an internal
+  `Sustain`-timing contradiction; a misdescribed `Lost`-handling claim; an unbuildable march-loam-gate
+  algorithm) and three risks now explicitly accepted rather than left implicit (severance under fog,
+  homeworld-loss lockout, warden-vs-capture). Full findings and fixes recorded in
+  `docs/architecture/loam-map.md`'s post-gate section and in each affected spec's own "Resolved" text.
+
+---
+
+# Tasks: loam and the Fracture — the post-gate build
+
+Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
+[loam/](../docs/architecture/loam/) `spec-loam-legions`, `spec-loam-ai`, `spec-structure-substrate`,
+`spec-loam-structures`, `spec-loam-texture` — all sealed and audited 2026-08-23.
+**Start at L25.** Same standing rules as the pre-gate slice above: integer math only · stable ordering
+· no wall clock or unowned RNG in `Step` · SQL only in `FusionRpg.Data` · **git hands-off**.
+
+## Phase 6 — `loam-legions`
+
+- [ ] **L25: Post-gate state — every module's new field, one golden move**
+  - Description: land the hashed fields all five post-gate modules need, together, before any
+    module's behavior is built — the audit-driven fix for the golden-move budget. `WorldEntityMember.
+    Role`, `WorldEntity.CarriedLoam` (legions); `WorldSlot.StructureId` (structure-substrate);
+    `WorldSlot.ConstructionTurnsRemaining` (loam-structures); `WorldSector.WardenBindingId` and an
+    Unmade neglect-turn counter (loam-texture). Also lands `StructureCatalog` (`StructureKind.
+    LoamSource`, `StructureDef`) and `WorldValidation.Rule14StructureSlotKindMatches`, since both are
+    needed before any later task and neither depends on behavior not yet built.
+  - Acceptance: every field hashes, persists, and round-trips on the DTO where the owning spec says it
+    should be visible; `Rule14` fires on a slot-kind mismatch and accepts a correct pairing;
+    `StructureCatalog` validates at static init against one placeholder row; exactly **one** golden
+    move for the whole post-gate program, reason recorded.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests`, `dotnet test tests\FusionRpg.Data.Tests`,
+    `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`, all four guard scripts.
+  - Files: `WorldState.cs`, `WorldCanonical.cs`, `StructureCatalog.cs` (new), `WorldValidation.cs`,
+    `WorldDtos.cs`, `decisions.md`. Scope: M.
+  - Dependencies: none — every field is additive to already-shipped records.
+
+- [ ] **L26: `LegionSupply` calculators, and the harness that tunes them**
+  - Description: pure capacity/burn/leash math (`Capacity = BearerCount × CarryPerBearer`,
+    `Burn = MemberCount × BurnPerMember`, leash `= Capacity / Burn`), unwired, plus
+    `LegionSupplyEconomyTests` tuning both constants against the ideal's 4–8 turn leash target — the
+    same L9-precedent harness discipline this program has used for every number since wave 1.
+  - Acceptance: leash length is exact and reproducible for known inputs; a bearer-heavy legion and a
+    bearer-light legion of equal size have different leashes; two legions of equal bearer count but
+    different total size have the same capacity but different burn (the degeneracy this spec exists to
+    avoid, proven absent).
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~LegionSupply`.
+  - Files: `World/Loam/LegionSupply.cs` (new, calculators only), `LoamPolicy.cs` (`CarryPerBearer`,
+    `BurnPerMember`), `tests/.../LegionSupplyEconomyTests.cs` (new). Scope: M.
+  - Dependencies: L25.
+
+- [ ] **L27: Wire `LegionSupply` into `Pressure`; retire attrition**
+  - Description: the burn/top-up pass, resolving *after* `LoamPhases.Pressure`'s sector-upkeep draw
+    (the resolved draw order — sector upkeep first, legion top-up second, from the shared pool).
+    Removes `SupplyGraph.Starve`/`AttritionWoundMilli`; keeps `SupplyGraph.Recover` exactly where it is.
+    Destruction outright (no wound-based fallback) when carried loam would go negative covering burn.
+  - Acceptance: a legion beyond supply survives exactly `Capacity / Burn` turns; a legion inside supply
+    tops up for free and never burns; the two salvageable `SupplyTests.cs` properties (in-supply takes
+    no burn; a faction with no seat is exempt) are rewritten against the new mechanic, not deleted; the
+    two wound-math-specific `SupplyTests.cs` cases are removed since they assert a mechanic that no
+    longer exists.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Supply`,
+    `dotnet test tests\FusionRpg.Core.Tests` (full, for the two long-run regression properties).
+  - Files: `LegionSupply.cs`, `SupplyGraph.cs`, `TurnEngine.cs`, `tests/.../SupplyTests.cs`. Scope: M.
+  - Dependencies: L26.
+
+- [ ] **L28: `Sustain` — G1's bootstrap spend**
+  - Description: a new, explicit, player-issued `WorldCommandKinds.Sustain`, spending the issuing
+    legion's `CarriedLoam` 1:1 into its current sector's `FadePolicy` balance for the turn. Resolves
+    **before** `LoamPhases.Pressure`'s own accounting (the audit-corrected timing — the opposite order
+    from L27's burn/top-up pass, and for a stated reason: `Sustain` must be visible to this same turn's
+    weakest-sector selection to do what G1 asks of it).
+  - Acceptance: a legion `Sustain`-ing a sector changes whether that sector is picked as the
+    component's weakest this same turn; the spend is bounded by what the legion actually carries.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Sustain`.
+  - Files: `World/Movement/SustainResolver.cs` (new), `TurnEngine.cs`, `tests/.../SustainResolverTests.cs`
+    (new). Scope: S.
+  - Dependencies: L27 (needs the phase ordering L27 establishes).
+
+### Checkpoint 6 — `loam-legions` built
+- [ ] Leash legible and reproducible; bearers change it, headcount alone does not.
+- [ ] Attrition fully retired — no wound-based path remains anywhere in `SupplyGraph.cs`.
+- [ ] `Sustain` and the burn/top-up pass resolve in the audit-corrected order, proven by a test that
+  would fail under the original (contradictory) ordering.
+- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
+- [ ] All four guard scripts green.
+
+## Phase 7 — `loam-ai`
+
+- [ ] **L29: The habitability gate on `ValueMap`**
+  - Description: a second post-hoc multiplicative gate, mirroring `Overextension`'s exact shape
+    (applied last, can drive `Total` negative), collapsing a barren sector's `Total` toward zero. Does
+    not touch `Sever`'s separate score.
+  - Acceptance: a barren candidate that would otherwise be the top pick drops out of `Expand`/`Take`'s
+    consideration; a habitable candidate is unaffected.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~ValueMap`.
+  - Files: `World/Ai/ValueMap.cs`, `tests/.../ValueMapTests.cs`. Scope: S.
+  - Dependencies: L25 (no legions dependency — this task could run any time after state lands, but
+    follows the declared build order).
+
+- [ ] **L30: `SeveranceScore` and the `Sever` rule**
+  - Description: `SeveranceScore.For(view, targetFactionId, sectorId)`, `ReconnectionCost.For` pointed
+    at an enemy's believed holdings. New `Sever` rule in `FrontierRulesPolicy`'s chain, position 5
+    (after `Take`, before `Recover`). `SeveranceThresholdTests` harness-tunes the fire threshold.
+  - Acceptance: `Sever` fires against a genuine enemy articulation point, declines elsewhere and when a
+    higher rule already claimed the turn; a fixture with the enemy's territory *mostly unscouted*
+    proves `SeveranceScore` reads near-zero there (the accepted, scouting-gated behavior — a **passing**
+    test, not a bug report); a fixture with the target well-scouted proves the score responds.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Severance`,
+    `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~FrontierRules`.
+  - Files: `World/Ai/SeveranceScore.cs` (new), `FrontierRulesPolicy.cs`,
+    `tests/.../SeveranceScoreTests.cs` (new), `tests/.../SeveranceThresholdTests.cs` (new),
+    `tests/.../FrontierRulesTests.cs`. Scope: M.
+  - Dependencies: L29 (both touch `World/Ai`'s scoring surface; sequencing avoids the two changes
+    colliding in review).
+
+- [ ] **L31: The AI-side march-loam gate**
+  - Description: a filter inside `FrontierRulesPolicy`'s own route selection (`Expand`, `Sever`) — one
+    pass over an already-known lane path, partitioned into contiguous out-of-supply runs, requiring
+    `Capacity ≥ BurnPerMember × MemberCount ×` the longest run. Not a turn-by-turn simulator — the
+    audit-corrected, actually-buildable version.
+  - Acceptance: a route with one long out-of-supply stretch beyond the leash is refused even when a
+    *longer* route with a shorter worst stretch (because part of it passes through supply) would
+    succeed — proving the check measures the worst run, not total length.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~FrontierRules`.
+  - Files: `FrontierRulesPolicy.cs`, `tests/.../FrontierRulesTests.cs`. Scope: S.
+  - Dependencies: L27 (needs `LegionSupply`'s capacity/burn already wired), L30 (touches the same
+    file's route-selection code `Sever` just added).
+
+### Checkpoint 7 — `loam-ai` built
+- [ ] Habitability collapses `Total` for barren ground without suppressing `SeveranceScore`.
+- [ ] `Sever` fires/declines correctly, including the accepted fog-degenerate case as a passing test.
+- [ ] No AI-chosen route ever exhausts a legion's leash before arrival.
+- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
+- [ ] All four guard scripts green, including the `World/Ai`-reads-belief-only guard.
+
+## Phase 8 — `structure-substrate`
+
+- [ ] **L32: Validate the plumbing end to end**
+  - Description: `structure-substrate` is deliberately content-light — its state and catalog already
+    landed in L25. This task proves the mechanism works on its own terms: a placeholder structure
+    validates, `Rule14` fires/declines, the DTO round-trips owner-agnostically.
+  - Acceptance: matches `spec-structure-substrate.md`'s own success criteria exactly; no new
+    `WorldCanonical` field (all landed in L25).
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Structure`.
+  - Files: `tests/.../StructureCatalogTests.cs` (new), `tests/.../WorldValidationTests.cs`. Scope: S.
+  - Dependencies: L25.
+
+### Checkpoint 8 — `structure-substrate` built
+- [ ] Catalog validates at static init; `Rule14` fires and declines correctly.
+- [ ] `WorldSlotDto.StructureId` round-trips.
+- [ ] No behavior yet — confirmed by design, not an oversight.
+- [ ] All four guard scripts green.
+
+## Phase 9 — `loam-structures`
+
+- [ ] **L33: The well — multiply, don't replace**
+  - Description: `StructureDef("well", LoamSource, RequiredSlotKind: Rootbed, YieldMultiplierMilli)`.
+    `LoamProduction.For` extends additively: base yield × the active structure's multiplier if present,
+    else unchanged.
+  - Acceptance: a rootbed with a well yields more than one without; a rootbed with no well is
+    byte-identical to today (regression, not just new coverage).
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Loam`.
+  - Files: `StructureCatalog.cs` (well row), `LoamPolicy.cs` (`WellYieldMultiplierMilli`, `*CostMilli`,
+    harness-tuned), `LoamProduction.cs`, `tests/.../LoamStructuresTests.cs` (new). Scope: S.
+  - Dependencies: L32.
+
+- [ ] **L34: The waystation, and widening belief to support it**
+  - Description: `StructureDef("waystation", LoamSource, RequiredSlotKind: Seat)`. Two changes in one
+    task, per the audit finding that they cannot ship separately: (1) widen `Habitability.For`'s belief
+    overload signature to carry structure id + active/under-construction status, updating **every**
+    existing call site in the same change; (2) extend `Habitability.For` (both overloads) to
+    *"Rootbed, or an active `LoamSource` structure."*
+  - Acceptance: a Seat with an active waystation is habitable and yields exactly `0`; every pre-existing
+    caller of the belief overload still compiles and passes against the widened signature.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests`, `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`.
+  - Files: `StructureCatalog.cs` (waystation row), `Habitability.cs`, `Intel/IntelRecorder.cs`,
+    `Intel/IntelSeed.cs`, `Intel/FactionIntel.cs`, every grep-confirmed call site of the belief overload
+    (`WorldEndpoints.cs`, `FrontierRulesPolicy.cs`, at minimum). Scope: M.
+  - Dependencies: L33.
+
+- [ ] **L35: Construction — `Build`, and the exact activation turn**
+  - Description: `WorldCommandKinds.Build`, cost spent from the issuing legion's own `CarriedLoam`
+    (G1's bootstrap spend). `ConstructionTurnsRemaining` decrements first, then that same `Production`
+    pass reads the post-decrement value — active starting the `BuildTurns`-th decrementing pass, same
+    turn, not the turn after (the audit-resolved ordering). `BuildResolver` re-validates the founder
+    still owns the sector at resolution (`Snapshot`, confirmed the same phase `Claim` already resolves
+    in), mirroring `ClaimResolver`'s own re-check pattern.
+  - Acceptance: a structure with `BuildTurns = N` is inert through its `N`th decrementing pass and
+    active on that same pass, proven exactly, not approximately; a `Build` order admitted against a
+    sector lost to fade later the same turn is refused at resolution, not silently applied.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Loam`.
+  - Files: `LoamPolicy.cs` (`*BuildTurns`, harness-tuned), `LoamPhases.cs` (decrement + active check),
+    `World/Movement/BuildResolver.cs` (new), `TurnEngine.cs`, `tests/.../LoamStructuresTests.cs`. Scope: M.
+  - Dependencies: L34, L28 (`Sustain`, for the "keeps a construction site alive" scenario).
+
+- [ ] **L36: `Lost` actually clears structure state — new code, not a description**
+  - Description: the audit found `LoamPhases.Pressure`'s `Lost` branch never touches `s.Slots` today.
+    This task adds that: the branch maps over slots, clearing `StructureId`/`ConstructionTurnsRemaining`
+    on every one, in the same `with` expression that already clears ownership.
+  - Acceptance: a sector lost mid-construction has both fields cleared the same turn ownership clears —
+    no partial refund; a `Sustain`-ing legion on a construction site survives to completion, the same
+    scenario without `Sustain` fades and loses the half-built structure.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Loam`.
+  - Files: `LoamPhases.cs`, `tests/.../LoamStructuresTests.cs`. Scope: S.
+  - Dependencies: L35.
+
+- [ ] **L37: The range rule (G5), and the accepted lockout**
+  - Description: a waystation may only be founded on a Seat within `WaystationRangeHops` (unweighted,
+    via `Hops.Between`, not `AllPairsCost`) of a sector the founder already holds that is itself
+    currently habitable. `Build` refuses beyond range, with a report entry naming the sector.
+  - Acceptance: fires and declines correctly against unmodified `two-hearths`; a faction that has lost
+    its only habitable anchor is confirmed **permanently** unable to found a new waystation anywhere —
+    asserted as intended (per the spec's own accepted-risk resolution), not treated as a bug to fix.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Loam`,
+    `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`.
+  - Files: `LoamPolicy.cs` (`WaystationRangeHops`, harness-tuned), `BuildResolver.cs`,
+    `tests/.../LoamStructuresTests.cs`. Scope: S.
+  - Dependencies: L36.
+
+### Checkpoint 9 — `loam-structures` built
+- [ ] Well multiplies, un-welled rootbeds unchanged; waystation grants zero-yield habitability.
+- [ ] Construction gates both effects until its exact completion turn; can be lost mid-build via new,
+  tested code (not assumed pre-existing behavior).
+- [ ] `Build` re-validates ownership at resolution; the range rule fires/declines against unmodified
+  `two-hearths`; the homeworld-loss lockout is proven, not merely asserted in prose.
+- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
+- [ ] All four guard scripts green.
+
+## Phase 10 — `loam-texture`
+
+- [ ] **L38: The granary**
+  - Description: `StructureKind.Storage`, `StructureDef("granary", Storage, RequiredSlotKind: Wildland,
+    CapacityBonus)`. `LoamPhases.Production`'s cap becomes `EffectiveCapacity(sector)` — base plus any
+    active granary's bonus. Overflow above the raised cap is still lost and still reported.
+  - Acceptance: a sector with a granary accepts more stock before overflowing; overflow above the
+    raised cap is still reported by sector, matching the standing overflow rule.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Loam`.
+  - Files: `StructureCatalog.cs`, `LoamPolicy.cs` (`GranaryCostMilli`, `CapacityBonus`, harness-tuned),
+    `LoamPhases.cs`, `tests/.../LoamTextureTests.cs` (new). Scope: S.
+  - Dependencies: L37.
+
+- [ ] **L39/L40: Fade contagion and Fracture surges — built and proven together, on purpose**
+  - Description: both extend `FadePolicy.DecayFor`'s **pre-clamp** input, never its output — the exact
+    bug the audit caught in this spec's first draft. Contagion: `PressureMilli` raised on lane-adjacent
+    sectors of any actively-fading sector, decaying back to baseline otherwise, added into the pre-clamp
+    deficit sum. Surges: while the turn's `CalendarRoll` includes `Plague`, `SurgeDecayMultiplierMilli`
+    scales the pre-clamp sum, still followed by the one existing `Max(0, Min(MaxDecayMilli, scaled))`
+    clamp.
+  - Acceptance: **the single most important test in this phase** — a sector already at `MaxDecayMilli`
+    under contagion, with a `Plague` surge also active the same turn, still clamps at exactly
+    `MaxDecayMilli`, not past it. Built as one task specifically so this combined case is tested from
+    the start, not discovered as a gap after each shipped separately.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~FadePolicy`.
+  - Files: `FadePolicy.cs`, `LoamPolicy.cs` (`ContagionPressurePerTurn`, `MaxPressureMilli`,
+    `SurgeDecayMultiplierMilli`, harness-tuned), `LoamPhases.cs` (contagion spread pass; surge read from
+    `CalendarRoll`), `tests/.../LoamTextureTests.cs`. Scope: M.
+  - Dependencies: L38.
+
+- [ ] **L41: The Unmade**
+  - Description: `Wild`-owned `WorldEntity` spawned onto neglected, `Lost`, barren ground, using the
+    already-shipped `StandFastPolicy` — no new AI. `two-hearths` gains an explicit `Wild` faction row
+    (map-authoring, part of this task, not a follow-up).
+  - Acceptance: spawns on a map with a `Wild` faction; provably does **not** spawn on one without
+    (re-proven explicitly, per this program's own G-C lesson about exemptions).
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Loam`.
+  - Files: `LoamPolicy.cs` (spawn rate/strength, harness-tuned), `LoamPhases.cs` (neglect counter, spawn),
+    `WorldTemplateCatalog.TwoHearths.cs` (`Wild` row), `tests/.../LoamTextureTests.cs`. Scope: M.
+  - Dependencies: L40.
+
+- [ ] **L42: Wardens**
+  - Description: `BindAsWarden`, capacity-gated by `ContractPolicy.Capacity()` exactly as an ordinary
+    bind; the resulting binding is unconditionally non-releasable. `WorldSector.WardenBindingId` exempts
+    a sector from `FadePolicy` (never rises, never falls) — its upkeep still counts against its
+    component's pool. `LoamForecast.Weakest` excludes warded sectors from candidacy; a fully-warded,
+    unpayable component applies no fade and reports the unresolved shortfall rather than crashing.
+    Capture releases the binding permanently — no transfer, no refund.
+  - Acceptance: a warded sector never fades regardless of component solvency, but still costs the pool;
+    a fully-warded component with a shortfall applies no fade to anyone; capturing a warded sector ends
+    the binding.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Loam`.
+  - Files: `WorldState.cs` (already has the field from L25), `LoamForecast.cs`, `LoamPhases.cs`,
+    `RpgStore.Contracts.cs` (`BindAsWarden`, `ReleaseContract`'s warden refusal),
+    `tests/.../LoamTextureTests.cs`. Scope: M.
+  - Dependencies: L41.
+
+- [ ] **L43: Prospecting**
+  - Description: a dowser stance revealing rootbed/well/waystation-bearing slots at range, inside
+    `IntelRecorder`/`IntelState` — an intel-layer feature, not a change under `World/Loam`.
+  - Acceptance: reveals loam-source slots at range beyond ordinary scouting; reveals nothing else a
+    normal scout would not already see.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Intel`.
+  - Files: `Intel/IntelRecorder.cs`, `tests/.../IntelRecorderTests.cs`. Scope: S.
+  - Dependencies: L42 (last, per the declared build order — no real technical dependency on wardens).
+
+### Checkpoint 10 — `loam-texture` built, ⭐ POST-GATE COMPLETE
+- [ ] All six mechanics (granary, contagion, surges, the Unmade, wardens, prospecting) pass their named
+  tests.
+- [ ] The decay-clamp stacking test (contagion + surge, already-severe deficit) proves the ceiling holds
+  — the audit's central finding, closed with evidence, not just a corrected sentence.
+- [ ] A fully-warded, unpayable component applies no fade and does not crash.
+- [ ] `two-hearths` has its `Wild` faction row.
+- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass —
+  the widest-reaching regression bar in this program, since this phase touches `FadePolicy` and
+  `LoamPhases` directly.
+- [ ] All four guard scripts green.
+- [ ] Mutation testing (`scripts/mutate.ps1`) extended to cover every new calculator this slice added,
+  on a verified-green baseline, same discipline as `loam-calc`'s own mutant set.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
-- [ ] **Decide:** does the post-gate program happen? `loam-legions`, `loam-ai`, `structure-substrate`, `loam-structures`, `loam-texture` are unspecced and unplanned on purpose.

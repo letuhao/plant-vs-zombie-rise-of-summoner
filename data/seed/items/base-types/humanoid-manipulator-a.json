@@ -37,7 +37,25 @@
       "iconKey": "icon.base.quilted-glove",
       "flavorKey": "flavor.base.quilted-glove",
       "flavor": "Padded squares, hand-stitched for bite and grip. Every impact is felt and sent back out.",
-      "tags": ["light", "organic", "offensive"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-002",
@@ -55,7 +73,25 @@
       "iconKey": "icon.base.spun-mitt",
       "flavorKey": "flavor.base.spun-mitt",
       "flavor": "Twisted thread wound tight. The fine weave hides the strength underneath.",
-      "tags": ["light", "organic", "offensive"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-003",
@@ -73,7 +109,26 @@
       "iconKey": "icon.base.cured-finger",
       "flavorKey": "flavor.base.cured-finger",
       "flavor": "Single leather digit, treated to grip. One finger can do the work of five.",
-      "tags": ["light", "organic", "offensive", "fragile"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-004",
@@ -91,7 +146,25 @@
       "iconKey": "icon.base.studded-claw",
       "flavorKey": "flavor.base.studded-claw",
       "flavor": "Reinforced leather with raised studs across the knuckles. Strikes and tears in one motion.",
-      "tags": ["medium-light", "metal", "offensive"]
+      "tags": [
+        "medium-light",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-005",
@@ -109,7 +182,25 @@
       "iconKey": "icon.base.supple-grip",
       "flavorKey": "flavor.base.supple-grip",
       "flavor": "Soft leather that moves with your hand. Flexibility is its own kind of armor.",
-      "tags": ["light", "organic", "offensive"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-006",
@@ -127,7 +218,26 @@
       "iconKey": "icon.base.threadbare-hand",
       "flavorKey": "flavor.base.threadbare-hand",
       "flavor": "Worn cloth barely holding itself together. What remains works because it has to.",
-      "tags": ["light", "organic", "offensive", "fragile"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-007",
@@ -145,7 +255,25 @@
       "iconKey": "icon.base.tanned-wristband",
       "flavorKey": "flavor.base.tanned-wristband",
       "flavor": "A loop of worked leather around the wrist. Supports the hand through every strike.",
-      "tags": ["light", "organic", "offensive"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-008",
@@ -163,7 +291,25 @@
       "iconKey": "icon.base.woven-wrap",
       "flavorKey": "flavor.base.woven-wrap",
       "flavor": "Cloth wound and bound around palm and fingers. The tighter the wrap, the sharper the hit.",
-      "tags": ["light", "organic", "offensive"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-009",
@@ -181,7 +327,25 @@
       "iconKey": "icon.base.oiled-palm",
       "flavorKey": "flavor.base.oiled-palm",
       "flavor": "Leather kept slick and supple. Ready to slide in and strike before anyone sees it coming.",
-      "tags": ["medium-light", "organic", "offensive"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-010",
@@ -199,7 +363,26 @@
       "iconKey": "icon.base.creased-knuckle",
       "flavorKey": "flavor.base.creased-knuckle",
       "flavor": "Leather worn in the shape of a clenched fist. Its folds have hit a thousand times already.",
-      "tags": ["medium-light", "organic", "offensive", "sturdy"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "offensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-011",
@@ -217,7 +400,25 @@
       "iconKey": "icon.base.faded-tape",
       "flavorKey": "flavor.base.faded-tape",
       "flavor": "Old tape, color long washed out, but still holding. Some things get better with age.",
-      "tags": ["light", "organic", "offensive"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-hands-a-012",
@@ -235,7 +436,25 @@
       "iconKey": "icon.base.boiled-thumb",
       "flavorKey": "flavor.base.boiled-thumb",
       "flavor": "Hardened leather, shaped and stiffened. A single digit that guides the whole hand's intent.",
-      "tags": ["light", "organic", "offensive"]
+      "tags": [
+        "light",
+        "organic",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

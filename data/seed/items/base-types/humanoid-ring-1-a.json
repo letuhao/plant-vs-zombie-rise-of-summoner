@@ -37,7 +37,20 @@
       "iconKey": "icon.base.slight-ring",
       "flavorKey": "flavor.base.slight-ring",
       "flavor": "Thin enough to lose, fine enough that you don't want to. A whisper of claim.",
-      "tags": ["light", "metal"]
+      "tags": [
+        "light",
+        "metal"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-002",
@@ -55,7 +68,21 @@
       "iconKey": "icon.base.bent-hoop",
       "flavorKey": "flavor.base.bent-hoop",
       "flavor": "Stress marks cross its face, each one a story it refuses to abandon. It holds on.",
-      "tags": ["medium", "metal", "offensive"]
+      "tags": [
+        "medium",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-003",
@@ -73,7 +100,21 @@
       "iconKey": "icon.base.understated-token",
       "flavorKey": "flavor.base.understated-token",
       "flavor": "No ornament, no ceremony. Just a marker that you were here, that you belonged to something.",
-      "tags": ["light", "metal", "defensive"]
+      "tags": [
+        "light",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-004",
@@ -91,7 +132,22 @@
       "iconKey": "icon.base.polished-washer",
       "flavorKey": "flavor.base.polished-washer",
       "flavor": "A flat disc that holds things together by its own weight and shine. Pressure with grace.",
-      "tags": ["medium", "metal", "offensive", "sturdy"]
+      "tags": [
+        "medium",
+        "metal",
+        "offensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-005",
@@ -109,7 +165,21 @@
       "iconKey": "icon.base.scratched-trinket",
       "flavorKey": "flavor.base.scratched-trinket",
       "flavor": "It has been carried, dropped, snagged on things that mattered. Every mark is a journey.",
-      "tags": ["light", "metal", "utility"]
+      "tags": [
+        "light",
+        "metal",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-006",
@@ -127,7 +197,22 @@
       "iconKey": "icon.base.knurled-signet",
       "flavorKey": "flavor.base.knurled-signet",
       "flavor": "Ridged on the outside for grip. Whatever it marks belongs to someone with work-worn hands.",
-      "tags": ["medium", "metal", "utility", "mechanical"]
+      "tags": [
+        "medium",
+        "metal",
+        "utility",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-007",
@@ -144,8 +229,22 @@
       "socketMax": 1,
       "iconKey": "icon.base.dinged-clip",
       "flavorKey": "flavor.base.dinged-clip",
-      "flavor": "It was dropped once, gripped, twisted, and kept working. Damage is not a defect — it is a commitment.",
-      "tags": ["light", "metal", "fragile"]
+      "flavor": "It was dropped once, gripped, twisted, and kept working. Damage is not a defect \u2014 it is a commitment.",
+      "tags": [
+        "light",
+        "metal",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-008",
@@ -163,7 +262,21 @@
       "iconKey": "icon.base.spiralled-bead",
       "flavorKey": "flavor.base.spiralled-bead",
       "flavor": "A sphere carved with grooves that draw the eye inward, always turning. Hypnotic with purpose.",
-      "tags": ["medium", "mineral", "offensive"]
+      "tags": [
+        "medium",
+        "mineral",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-009",
@@ -181,7 +294,22 @@
       "iconKey": "icon.base.worked-spacer",
       "flavorKey": "flavor.base.worked-spacer",
       "flavor": "Its only job is to sit between two things and keep them from touching. A small separator doing its whole life's work.",
-      "tags": ["medium", "metal", "defensive", "mechanical"]
+      "tags": [
+        "medium",
+        "metal",
+        "defensive",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-010",
@@ -199,7 +327,21 @@
       "iconKey": "icon.base.engraved-loop",
       "flavorKey": "flavor.base.engraved-loop",
       "flavor": "Lines cut into the curve. Someone took the time. It was important that these marks be there.",
-      "tags": ["light", "metal", "offensive"]
+      "tags": [
+        "light",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-011",
@@ -217,7 +359,21 @@
       "iconKey": "icon.base.plain-grommet",
       "flavorKey": "flavor.base.plain-grommet",
       "flavor": "A hole ringed with metal, the simplest possible joint. It does not need to be more.",
-      "tags": ["medium", "metal", "utility"]
+      "tags": [
+        "medium",
+        "metal",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.humanoid-ring-1-a-012",
@@ -235,7 +391,22 @@
       "iconKey": "icon.base.substantial-shank",
       "flavorKey": "flavor.base.substantial-shank",
       "flavor": "The base of something larger, cut down and made into its own thing. A piece that wants to support.",
-      "tags": ["medium", "metal", "defensive", "sturdy"]
+      "tags": [
+        "medium",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     }
   ]
 }

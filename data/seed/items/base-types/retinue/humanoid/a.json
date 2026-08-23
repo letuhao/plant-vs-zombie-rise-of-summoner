@@ -40,6 +40,20 @@
       "tags": [
         "light",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -62,6 +76,20 @@
         "light",
         "organic",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -83,6 +111,20 @@
       "tags": [
         "light",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -104,6 +146,20 @@
       "tags": [
         "medium",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -125,6 +181,20 @@
       "tags": [
         "light",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -146,6 +216,20 @@
       "tags": [
         "light",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -167,6 +251,20 @@
       "tags": [
         "medium",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -189,6 +287,20 @@
         "light",
         "necrotic",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -211,6 +323,20 @@
         "medium",
         "necrotic",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -232,6 +358,20 @@
       "tags": [
         "medium",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -254,6 +394,20 @@
         "medium",
         "mechanical",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -275,6 +429,20 @@
       "tags": [
         "medium",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     }
   ]

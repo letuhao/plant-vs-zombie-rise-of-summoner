@@ -540,14 +540,37 @@ reference to a `curve` entry rather than a literal `min`/`max`.
 | `nameKey`, `name` | AUTHORED | required | §6 — the table itself is not player-facing, but the envelope requires a key + string |
 | `sourceAllow` | VALIDATED | required | closed set `web` \| `injector` \| `sim` — **must contain `web`**, the standalone-first rule (ssot-generation.md §4.6 rule 2) |
 | `groups[].groupKey` | AUTHORED (reference id) | required | free identifier, unique within the file |
-| `groups[].entries[].entryKind` | VALIDATED | required | closed 7-value enum: `equipment` `material` `currency` `insert` `charm` `table` `nothing` |
+| `groups[].entries[].entryKind` | VALIDATED | required | closed 9-value enum: `equipment` `material` `currency` `insert` `charm` `consumable` `unique` `table` `nothing` |
 | `groups[].entries[].role` / `.frame` | VALIDATED | required for `entryKind = equipment` | `core.v1.json` |
-| `groups[].entries[].ref` | AUTHORED (reference) | required for `material`/`currency`/`insert`/`charm`/`table` | resolves to a `material.runtimeId`, a currency id (`souls`), a sibling `gem.*`/`charm.*` id, or another `droptable.*` id |
+| `groups[].entries[].ref` | AUTHORED (reference) | required for `material`/`currency`/`insert`/`charm`/`consumable`/`unique`/`table` | resolves to a `material.runtimeId`, a currency id (`souls`), a sibling `gem.*`/`charm.*`/`consumable.*`/`unique.*` id, or another `droptable.*` id |
 | `groups[].entries[].dropBand` | AUTHORED (band) | required | `bands.v1.json` → `dropBand.enum` |
 | `groups[].entries[].qtyCurve` | AUTHORED (reference to a `curve` entry) | optional, only for stacking classes | resolves to a `curve.*` id whose `input` the generator applies |
 | `groups[].entries[].rarityFloor` | VALIDATED | optional | a `rarity_id` (never an ordinal) from `core.v1.json` → `rarity.ladder` |
 | `tags` | VALIDATED | optional | `tags.v1.json` |
 | *(GENERATED, never authored)* | `weight` (a plain integer), `min_count`/`max_count`, `rarity_weight_shift_json` | — | resolved from `dropBand`'s weight table and `qtyCurve`'s points, exactly the way `costBand` resolves a recipe's raw quantity |
+
+> **Added 2026-08-23 (wave R2).** `unique` and `consumable` join the enum. Before them the corpus
+> had 144 uniques, 70 charms and 60 consumables that no table could yield — every one referentially
+> perfect and unobtainable, which is the class of defect `tools/seed_graph` exists to catch.
+> `charm` was already in the enum and simply never used.
+>
+> A unique is granted **by id and never categorically**. `ssot-uniques.md` §4.5 puts it plainly —
+> *"a drop-table entry naming a unique's container is the same entry shape as one naming a base
+> type"* — and a categorical grant would make every unique in a rung band interchangeable, which is
+> exactly the convergence §3.7 spends three rules preventing. Consumables and charms may be granted
+> by id too; they carry no identity that a category would flatten.
+>
+> The band → channel mapping the corpus uses, from §4.5 and its rung table:
+>
+> | Rung band | `acquisition` | Channel |
+> |---|---|---|
+> | 30 | `drop` | d1, general table, low weight |
+> | 50 | `source-locked` | d2 — §4.5 calls this *the primary channel* |
+> | 70 | `source-locked` | d2 |
+> | 90 | `deterministic` | d4, crafted — I1 requires the top rung have a deterministic source |
+>
+> `acquisition = 'drop'` at ordinal ≥ 90 is the refusal `UniqueUnreachable`, so band 90 never
+> appears in d1.
 
 **Rejects:** `sourceAllow` omitting `web`; an entry reachable only from `injector`/`sim` and not from
 `web` (`StandaloneRuleViolation`); `entryKind = equipment` with no `role`/`frame`; `ref` unresolved

@@ -42,6 +42,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -65,6 +79,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -89,6 +117,20 @@
         "rooted",
         "utility",
         "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -112,6 +154,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -135,6 +191,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -158,6 +228,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -181,6 +265,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -204,6 +302,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -227,6 +339,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -251,6 +377,20 @@
         "rooted",
         "utility",
         "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -274,6 +414,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -291,13 +445,27 @@
       "socketMax": 1,
       "iconKey": "icon.base.nourished-clone",
       "flavorKey": "flavor.base.nourished-clone",
-      "flavor": "A genetic copy, carefully tended and well-fed—ready to root and claim ground.",
+      "flavor": "A genetic copy, carefully tended and well-fed\u2014ready to root and claim ground.",
       "tags": [
         "light",
         "organic",
         "rooted",
         "utility",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
       ]
     }
   ]

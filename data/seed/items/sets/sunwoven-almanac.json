@@ -27,10 +27,26 @@
       "name": "Ancestral Bine",
       "themeKey": "theme.sunwoven-almanac",
       "members": [
-        { "role": "core-guard" },
-        { "role": "sense" },
-        { "role": "girdle" },
-        { "role": "jewel-major" }
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-b-009"
+        },
+        {
+          "role": "sense",
+          "frame": "plant",
+          "baseType": "item.plant-bract-a-010"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-a-001"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-a-003"
+        }
       ],
       "thresholds": [
         {
@@ -43,20 +59,29 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.mending", "powerBand": "low" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.mending",
+              "powerBand": "low"
+            }
           ]
         }
       ],
       "iconKey": "icon.set.ancestral-bine",
       "flavorKey": "flavor.set.ancestral-bine",
-      "flavor": "Trained around the same stake for a hundred seasons, the bine no longer needs the stake — it remembers the shape on its own and curls back into it every spring."
+      "flavor": "Trained around the same stake for a hundred seasons, the bine no longer needs the stake \u2014 it remembers the shape on its own and curls back into it every spring."
     },
     {
       "id": "set.sunwoven-almanac-002",
@@ -64,10 +89,26 @@
       "name": "Indexed Lamina",
       "themeKey": "theme.sunwoven-almanac",
       "members": [
-        { "role": "manipulator" },
-        { "role": "jewel-minor-a" },
-        { "role": "infusion" },
-        { "role": "sense" }
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-a-002"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "plant",
+          "baseType": "item.plant-graft-1-a-002"
+        },
+        {
+          "role": "infusion",
+          "frame": "plant",
+          "baseType": "item.plant-glands-a-006"
+        },
+        {
+          "role": "sense",
+          "frame": "plant",
+          "baseType": "item.plant-bract-a-011"
+        }
       ],
       "thresholds": [
         {
@@ -80,14 +121,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "medium" },
-            { "family": "atom.warding", "powerBand": "low" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.warding",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -101,10 +151,26 @@
       "name": "Lattice of the Page",
       "themeKey": "theme.sunwoven-almanac",
       "members": [
-        { "role": "mantle" },
-        { "role": "footing" },
-        { "role": "girdle" },
-        { "role": "retinue" }
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-a-003"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-003"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-a-003"
+        },
+        {
+          "role": "retinue",
+          "frame": "plant",
+          "baseType": "item.plant-runner-a-010"
+        }
       ],
       "thresholds": [
         {
@@ -112,27 +178,40 @@
           "capability": {
             "family": "atom.warded",
             "powerBand": "low",
-            "params": { "element": "light" }
+            "params": {
+              "element": "light"
+            }
           }
         },
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.resilience", "powerBand": "medium" }
+            {
+              "family": "atom.resilience",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.vitality", "powerBand": "low" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "low"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
+      "tags": [
+        "signature"
+      ],
       "iconKey": "icon.set.lattice-of-the-page",
       "flavorKey": "flavor.set.lattice-of-the-page",
-      "flavor": "Grown to hold up pages too heavy to stand on their own, the lattice does not care what is written on them — only that the binding never sags."
+      "flavor": "Grown to hold up pages too heavy to stand on their own, the lattice does not care what is written on them \u2014 only that the binding never sags."
     },
     {
       "id": "set.sunwoven-almanac-004",
@@ -140,10 +219,26 @@
       "name": "Root of the Solstice",
       "themeKey": "theme.sunwoven-almanac",
       "members": [
-        { "role": "footing" },
-        { "role": "core-guard" },
-        { "role": "jewel-major" },
-        { "role": "manipulator" }
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-005"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-001"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-a-008"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-a-004"
+        }
       ],
       "thresholds": [
         {
@@ -156,14 +251,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.mending", "powerBand": "medium" },
-            { "family": "atom.fortitude", "powerBand": "low" }
+            {
+              "family": "atom.mending",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.fortitude",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -177,10 +281,26 @@
       "name": "Firstedition",
       "themeKey": "theme.sunwoven-almanac",
       "members": [
-        { "role": "armament-secondary" },
-        { "role": "sense" },
-        { "role": "jewel-minor-a" },
-        { "role": "infusion" }
+        {
+          "role": "armament-secondary",
+          "frame": "plant",
+          "baseType": "item.plant-thorn-a-005"
+        },
+        {
+          "role": "sense",
+          "frame": "plant",
+          "baseType": "item.plant-bract-b-006"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "plant",
+          "baseType": "item.plant-graft-1-a-005"
+        },
+        {
+          "role": "infusion",
+          "frame": "plant",
+          "baseType": "item.plant-glands-a-011"
+        }
       ],
       "thresholds": [
         {
@@ -193,14 +313,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "medium" },
-            { "family": "atom.warding", "powerBand": "low" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.warding",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -214,10 +343,26 @@
       "name": "Copyhand",
       "themeKey": "theme.sunwoven-almanac",
       "members": [
-        { "role": "mantle" },
-        { "role": "girdle" },
-        { "role": "retinue" },
-        { "role": "jewel-major" }
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-a-006"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-a-006"
+        },
+        {
+          "role": "retinue",
+          "frame": "plant",
+          "baseType": "item.plant-runner-b-004"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-a-010"
+        }
       ],
       "thresholds": [
         {
@@ -230,20 +375,29 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.resilience", "powerBand": "medium" },
-            { "family": "atom.mending", "powerBand": "low" }
+            {
+              "family": "atom.resilience",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.mending",
+              "powerBand": "low"
+            }
           ]
         }
       ],
       "iconKey": "icon.set.copyhand",
       "flavorKey": "flavor.set.copyhand",
-      "flavor": "It has never once composed a line of its own, only reproduced the last hand's exactly — and a garden grown from a faithful copy still grows."
+      "flavor": "It has never once composed a line of its own, only reproduced the last hand's exactly \u2014 and a garden grown from a faithful copy still grows."
     }
   ]
 }

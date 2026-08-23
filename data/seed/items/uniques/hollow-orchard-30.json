@@ -23,199 +23,328 @@
   "entries": [
     {
       "id": "unique.hollow-orchard-30-001",
-      "nameKey": "unique.tended-lampfruit",
-      "name": "Tended Lampfruit",
+      "nameKey": "unique.votive-gourd",
+      "name": "Votive Gourd",
       "frame": "plant",
-      "theme": "hollow-orchard",
       "baseType": "item.plant-muzzle-a-005",
-      "rarity": "grafted",
+      "rarity": "cultivated",
       "powerAxis": "economy",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "medium" },
-        { "family": "atom.mending", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.might", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "The identity is a resource.economy capability with no raw-stat weight of its own; the raw-stat lines (mending low plus a narrow might slot) stay well under the grafted rung's rolled baseline."
+        "note": "It throws like any other gourd and lands like one that never ripened. Whatever this weapon is good at happens after the throw, when the kill pays out instead of the wound."
       },
-      "iconKey": "icon.unique.tended-lampfruit",
-      "flavorKey": "flavor.unique.tended-lampfruit",
-      "flavor": "Every fruit it drops is already counted. Whoever keeps this orchard's books never once seems to blink.",
-      "tags": ["light", "organic", "fragile", "utility", "rooted", "signature"],
-      "notes": "Role armament-primary (muzzle), rung band 30, axis economy. Compound name: adjective 'Tended' from themeAdjectivePools['hollow-orchard'], Base noun 'Lampfruit' from uniqueSetSeedPools['hollow-orchard'] (atomic seed, used whole per naming.v1.json rule 2a, never decomposed). baseType item.plant-muzzle-a-005 ('Lobbed Gourd', seedpod, band a) is an existing plant armament-primary base type; a fruit-flinging muzzle repurposed to also harvest sun quietly. atom.sunbloom and atom.mending are both outside classes.v1.json's excludedFamilies.global, so both bind today."
+      "iconKey": "icon.unique.votive-gourd",
+      "flavorKey": "flavor.unique.votive-gourd",
+      "flavor": "Every gourd the orchard drops is already a kind of tithe. This one never forgets the exchange: what leaves the vine comes back as coin, not blood.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "drop"
     },
     {
       "id": "unique.hollow-orchard-30-002",
-      "nameKey": "unique.vigilant-bole",
-      "name": "Vigilant Bole",
+      "nameKey": "unique.stalk-of-dawn",
+      "name": "Stalk of Dawn",
       "frame": "plant",
-      "theme": "hollow-orchard",
-      "baseType": "item.plant-stem-b-007",
-      "rarity": "cultivated",
-      "powerAxis": "offense",
-      "fixedAtoms": [
-        { "family": "atom.retribution", "powerBand": "medium" },
-        { "family": "atom.fortitude", "powerBand": "low" }
-      ],
-      "varianceSlot": { "family": "atom.vitality", "variance": "narrow" },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "Retribution is an on-hit reflect capability, not a raw magnitude; the raw-stat total (fortitude low plus a narrow vitality slot) sits well under the cultivated rung's higher rolled baseline."
-      },
-      "iconKey": "icon.unique.vigilant-bole",
-      "flavorKey": "flavor.unique.vigilant-bole",
-      "flavor": "It does not swing first. It has never needed to.",
-      "tags": ["heavy", "organic", "sturdy", "offensive", "rooted", "signature"],
-      "notes": "Role core-guard (stem), rung band 30, axis offense. Compound name: adjective 'Vigilant' from themeAdjectivePools['hollow-orchard'], Base noun 'Bole' from the core-guard.plant noun pool (any noun pool is open to a unique partition per words.v1.json poolAccess.uniquePartition). baseType item.plant-stem-b-007 ('Dense Trunk', heartwood, band b). atom.retribution and atom.fortitude are both outside classes.v1.json's excludedFamilies.global."
-    },
-    {
-      "id": "unique.hollow-orchard-30-003",
-      "nameKey": "unique.cloistered-sheath",
-      "name": "Cloistered Sheath",
-      "frame": "plant",
-      "theme": "hollow-orchard",
-      "baseType": "item.plant-sheath-a-002",
-      "rarity": "grafted",
-      "powerAxis": "survivability",
-      "fixedAtoms": [
-        { "family": "atom.warded", "powerBand": "medium" },
-        { "family": "atom.fortitude", "powerBand": "low" }
-      ],
-      "varianceSlot": { "family": "atom.vitality", "variance": "narrow" },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "atom.warded is a shield.grant capability, not a raw magnitude; the raw-stat total (fortitude low plus a narrow vitality slot) stays well under the grafted rung's rolled baseline."
-      },
-      "iconKey": "icon.unique.cloistered-sheath",
-      "flavorKey": "flavor.unique.cloistered-sheath",
-      "flavor": "Grown around the shoulder like a vow taken and never once broken.",
-      "tags": ["light", "organic", "fragile", "defensive", "rooted", "signature"],
-      "notes": "Role ward-array (sheath), rung band 30, axis survivability. Compound name: adjective 'Cloistered' from themeAdjectivePools['hollow-orchard'], Base noun 'Sheath' from the ward-array.plant noun pool. baseType item.plant-sheath-a-002 ('Papery Peel', fibre, band a). Deliberately NOT atom.warding: classes.v1.json excludedFamilies.global flags it as legal only at commander/match-owner scope (G8), so a per-item copy on a body role would bind nowhere. atom.warded is its own shield.grant family and is explicitly carved out as unaffected by that exclusion, so it carries the identity instead; the raw defense line uses atom.fortitude."
-    },
-    {
-      "id": "unique.hollow-orchard-30-004",
-      "nameKey": "unique.votive-aculeus",
-      "name": "Votive Aculeus",
-      "frame": "plant",
-      "theme": "hollow-orchard",
-      "baseType": "item.plant-thorn-a-005",
-      "rarity": "cultivated",
-      "powerAxis": "control",
-      "fixedAtoms": [
-        { "family": "atom.mesmerizing", "powerBand": "medium" },
-        { "family": "atom.might", "powerBand": "low" }
-      ],
-      "varianceSlot": { "family": "atom.ferocity", "variance": "narrow" },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "Mesmerizing is a status.apply control capability, not a raw magnitude; the raw-stat total (might low plus a narrow ferocity slot) sits well under the cultivated rung's rolled baseline."
-      },
-      "iconKey": "icon.unique.votive-aculeus",
-      "flavorKey": "flavor.unique.votive-aculeus",
-      "flavor": "The censer never smokes loudly. It only ever holds your attention a little too long.",
-      "tags": ["light", "organic", "fragile", "defensive", "rooted", "signature"],
-      "notes": "Role armament-secondary (thorn), rung band 30, axis control. Compound name: adjective 'Votive' from themeAdjectivePools['hollow-orchard'], Base noun 'Aculeus' from the armament-secondary.plant noun pool. baseType item.plant-thorn-a-005 ('Perfumed Aculeus', censer, band a) — its own censer class is exactly what makes a hushed, hypnotic capability read as native rather than bolted on. Deliberately NOT atom.entangling for the control identity: classes.v1.json excludedFamilies.global flags it as needing a Unity CC branch for 'kelp' that does not exist yet. atom.mesmerizing is not on that list and carries the same control-axis intent (denial, not damage) without the dead binding."
-    },
-    {
-      "id": "unique.hollow-orchard-30-005",
-      "nameKey": "unique.nectar-of-the-benediction",
-      "name": "Nectar of the Benediction",
-      "frame": "plant",
-      "theme": "hollow-orchard",
-      "baseType": "item.plant-pollen-a-005",
-      "rarity": "grafted",
-      "powerAxis": "utility",
-      "fixedAtoms": [
-        { "family": "atom.cleansing", "powerBand": "medium" },
-        { "family": "atom.mending", "powerBand": "low" }
-      ],
-      "varianceSlot": { "family": "atom.fortitude", "variance": "narrow" },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "Cleansing is a status.clear utility capability, not a raw magnitude; the raw-stat total (mending low plus a narrow fortitude slot) stays well under the grafted rung's rolled baseline."
-      },
-      "iconKey": "icon.unique.nectar-of-the-benediction",
-      "flavorKey": "flavor.unique.nectar-of-the-benediction",
-      "flavor": "One drop clears the throat of everything but the quiet.",
-      "tags": ["light", "organic", "fragile", "utility", "rooted", "signature"],
-      "notes": "Role jewel-major (pollen), rung band 30, axis utility. Of-construct name: Base 'Nectar' from the jewel-major.plant noun pool, Concept 'Benediction' from conceptPools['hollow-orchard']. baseType item.plant-pollen-a-005 ('Stored Nectar', bulb, band a) shares the same head noun as the base type's own name, which is deliberate. atom.cleansing and atom.mending are both outside classes.v1.json's excludedFamilies.global."
-    },
-    {
-      "id": "unique.hollow-orchard-30-006",
-      "nameKey": "unique.gentle-frond",
-      "name": "Gentle Frond",
-      "frame": "plant",
-      "theme": "hollow-orchard",
-      "baseType": "item.plant-leaves-b-005",
-      "rarity": "cultivated",
-      "powerAxis": "economy",
-      "fixedAtoms": [
-        { "family": "atom.midas", "powerBand": "medium" },
-        { "family": "atom.vitality", "powerBand": "low" }
-      ],
-      "varianceSlot": { "family": "atom.mending", "variance": "narrow" },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "Midas is a resource.economy capability, not a raw magnitude; the raw-stat total (vitality low plus a narrow mending slot) sits well under the cultivated rung's rolled baseline."
-      },
-      "iconKey": "icon.unique.gentle-frond",
-      "flavorKey": "flavor.unique.gentle-frond",
-      "flavor": "It never grips the fruit. It only ever agrees to carry it home.",
-      "tags": ["medium-heavy", "organic", "sturdy", "utility", "rooted", "signature"],
-      "notes": "Role manipulator (leaves), rung band 30, axis economy. Compound name: adjective 'Gentle' from themeAdjectivePools['hollow-orchard'], Base noun 'Frond' from the manipulator.plant noun pool. baseType item.plant-leaves-b-005 ('Oaken Frond', heartwood, band b) shares its own head noun, deliberately. atom.midas and atom.vitality are both outside classes.v1.json's excludedFamilies.global."
-    },
-    {
-      "id": "unique.hollow-orchard-30-007",
-      "nameKey": "unique.bough-of-dawn",
-      "name": "Bough of Dawn",
-      "frame": "plant",
-      "theme": "hollow-orchard",
-      "baseType": "item.plant-canopy-b-004",
+      "baseType": "item.plant-stem-a-008",
       "rarity": "grafted",
       "powerAxis": "offense",
       "fixedAtoms": [
         {
-          "family": "atom.searing-strike",
+          "family": "atom.deathblast",
           "powerBand": "medium",
-          "params": { "element": "light" }
+          "params": {
+            "element": "light"
+          }
         },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.might", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "The on-hit light proc is a capability, not a raw magnitude; the raw-stat total (fortitude low plus a narrow might slot) stays well under the grafted rung's rolled baseline."
+        "note": "This stalk has never won a fight it was still standing up for. Everything it does, it does on the way down."
       },
-      "iconKey": "icon.unique.bough-of-dawn",
-      "flavorKey": "flavor.unique.bough-of-dawn",
-      "flavor": "Whatever brushes past it in the dark leaves a little less dark behind.",
-      "tags": ["heavy", "organic", "sturdy", "offensive", "rooted", "signature"],
-      "notes": "Role mantle (canopy), rung band 30, axis offense. Of-construct name: Base 'Bough' from the mantle.plant noun pool, Concept 'Dawn' from conceptPools['hollow-orchard']. baseType item.plant-canopy-b-004 ('Ancient Bough', heartwood, band b) shares its own head noun, deliberately. The element is 'light' per themes.v1.json's elementAffinity for hollow-orchard, kept deliberately understated (a mote, not a blaze) per the theme's own avoid-list against loud, showy radiance. atom.searing-strike takes a variant element per seed-contract.md §10's affix-family shape and is used exactly as the exemplar demonstrates; atom.fortitude is outside classes.v1.json's excludedFamilies.global."
+      "iconKey": "icon.unique.stalk-of-dawn",
+      "flavorKey": "flavor.unique.stalk-of-dawn",
+      "flavor": "It stands through the whole night no differently than any other stem, quiet and unremarkable, until the moment it falls and gives back every hour of light it was ever owed.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive",
+        "signature"
+      ],
+      "acquisition": "drop"
     },
     {
-      "id": "unique.hollow-orchard-30-008",
-      "nameKey": "unique.lastorchard",
-      "name": "Lastorchard",
+      "id": "unique.hollow-orchard-30-003",
+      "nameKey": "unique.solemn-shroud",
+      "name": "Solemn Shroud",
       "frame": "plant",
-      "theme": "hollow-orchard",
-      "baseType": "item.plant-crown-b-002",
+      "baseType": "item.plant-sheath-a-007",
       "rarity": "cultivated",
       "powerAxis": "survivability",
       "fixedAtoms": [
-        { "family": "atom.regeneration", "powerBand": "medium" },
-        { "family": "atom.vitality", "powerBand": "low" }
+        {
+          "family": "atom.shld-cycle",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        },
+        {
+          "family": "atom.shield-capacity",
+          "powerBand": "low",
+          "params": {
+            "element": "light"
+          }
+        }
       ],
-      "varianceSlot": { "family": "atom.fortitude", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.shield-toughness",
+        "variance": "narrow",
+        "params": {
+          "element": "light"
+        }
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "below-half-health",
+        "note": "It barely stirs above half health. Whatever this shroud is holding back, it is saving all of it for later."
+      },
+      "iconKey": "icon.unique.solemn-shroud",
+      "flavorKey": "flavor.unique.solemn-shroud",
+      "flavor": "The orchard's own fence line wore thinner shrouds than this. It does not flare until the wearer is truly failing, solemn and unhurried, exactly as reluctant to act as everything else that keeps this ground quiet.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "sturdy",
+        "defensive",
+        "signature"
+      ],
+      "acquisition": "drop"
+    },
+    {
+      "id": "unique.hollow-orchard-30-004",
+      "nameKey": "unique.hushblossom",
+      "name": "Hushblossom",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-a-002",
+      "rarity": "grafted",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.mesmerizing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.life-graft",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "front-row",
+        "note": "The pollen drifts no farther than arm's reach. Whatever it settles over the back ranks, it never touches at all."
+      },
+      "iconKey": "icon.unique.hushblossom",
+      "flavorKey": "flavor.unique.hushblossom",
+      "flavor": "It opens once, and only the nearest ranks ever smell it. Everything past the first row never even notices the orchard has spoken.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "drop"
+    },
+    {
+      "id": "unique.hollow-orchard-30-005",
+      "nameKey": "unique.bract-of-quietude",
+      "name": "Bract of Quietude",
+      "frame": "plant",
+      "baseType": "item.plant-bract-a-009",
+      "rarity": "cultivated",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.cleansing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "Regeneration is an OnTimer resource.delta capability, not a raw magnitude; the raw-stat total (vitality low plus a narrow fortitude slot) sits well under the cultivated rung's rolled baseline."
+        "note": "It only ever clears what is already on the wearer. It has nothing to say about the sting that hasn't landed yet."
       },
-      "iconKey": "icon.unique.lastorchard",
-      "flavorKey": "flavor.unique.lastorchard",
-      "flavor": "Everything past the fence line went quiet years ago. This did not.",
-      "tags": ["medium-heavy", "organic", "sturdy", "defensive", "rooted", "signature"],
-      "notes": "Role head-guard (crown), rung band 30, axis survivability. Fusion name: single atomic seed 'Lastorchard' from uniqueSetSeedPools['hollow-orchard'], used whole per naming.v1.json rule 2a (never decomposed into 'last' + 'orchard'). baseType item.plant-crown-b-002 ('Lichened Corona', bark, band b). atom.regeneration and atom.vitality are both outside classes.v1.json's excludedFamilies.global."
+      "iconKey": "icon.unique.bract-of-quietude",
+      "flavorKey": "flavor.unique.bract-of-quietude",
+      "flavor": "It senses affliction the way it senses weather, early and without alarm, and settles what it finds back into the same hush the rest of the orchard keeps.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "drop"
+    },
+    {
+      "id": "unique.hollow-orchard-30-006",
+      "nameKey": "unique.vigilroot",
+      "name": "Vigilroot",
+      "frame": "plant",
+      "baseType": "item.plant-roots-a-009",
+      "rarity": "grafted",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.mending",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "It has no stake in the fight itself; nothing it does makes a strike land any harder. The payout only ever arrives after."
+      },
+      "iconKey": "icon.unique.vigilroot",
+      "flavorKey": "flavor.unique.vigilroot",
+      "flavor": "It keeps watch the way a root keeps watch, by staying exactly where it is, and every kill made anywhere near it comes back down through the soil as banked sun.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "sturdy",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "drop"
+    },
+    {
+      "id": "unique.hollow-orchard-30-007",
+      "nameKey": "unique.resin-of-benediction",
+      "name": "Resin of Benediction",
+      "frame": "plant",
+      "baseType": "item.plant-glands-a-009",
+      "rarity": "cultivated",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.elpw-focus",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "moderate",
+        "family": "atom.vitality",
+        "note": "The gland gives everything it has to the strike and keeps nothing back for the plant that grew it. What it hits harder with, it stands weaker for."
+      },
+      "iconKey": "icon.unique.resin-of-benediction",
+      "flavorKey": "flavor.unique.resin-of-benediction",
+      "flavor": "What it secretes was never meant as a weapon; it is exactly what the orchard uses to consecrate its own ground. Turned outward, that same blessing burns.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive",
+        "signature"
+      ],
+      "acquisition": "drop"
+    },
+    {
+      "id": "unique.hollow-orchard-30-008",
+      "nameKey": "unique.luminous-scion",
+      "name": "Luminous Scion",
+      "frame": "plant",
+      "baseType": "item.plant-runner-a-005",
+      "rarity": "grafted",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.life-graft",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "It only mends what has already taken root. Nothing about it slows a blow on the way in."
+      },
+      "iconKey": "icon.unique.luminous-scion",
+      "flavorKey": "flavor.unique.luminous-scion",
+      "flavor": "Every runner the orchard sends out carries a little of its light forward with it. This one took, and kept growing, long after the branch that grew it had every reason to stop.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "acquisition": "drop"
     }
   ]
 }

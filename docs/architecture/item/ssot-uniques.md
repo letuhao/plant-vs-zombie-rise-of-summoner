@@ -522,7 +522,16 @@ Rule: **an identity atom whose magnitude is outside the shared band must be a pr
 nothing. So the cheapest uniques (§7.2's Understudy's Pot) cost 7 rows and the most rule-breaking
 (§7.1's Kiln Nozzle) cost 14 — the row cost *is* the rule-breaking budget, made visible.
 
-**v1 count: 20 uniques.**
+> ⚠ **Superseded 2026-08-23 by owner decision — the shipped count is 144, not 20.**
+> This section was written before the owner set Diablo-2 as the content scale (D2 shipped on the
+> order of 350 uniques). The corpus ships **8 uniques per partition across 18 partitions**, and the
+> per-band counts below are stale by the same factor. What is NOT stale, and still binding, is
+> everything §3.7 says about *shape*: the `jewel-minor` ban, the 8-of-15 role quota, and one unique
+> per `(role, rung band, power axis)`. At 144 the axis grid is exactly saturated — 8 roles × 18
+> partitions — which is why the allocation had to become a Latin square rather than a guideline.
+> See [build-log.md](build-log.md) decisions 26–27.
+
+**v1 count: 20 uniques.** *(historical — see the banner above)*
 
 | Rung band | Count | Spread |
 |---|---|---|

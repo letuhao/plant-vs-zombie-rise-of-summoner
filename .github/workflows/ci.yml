@@ -38,12 +38,26 @@ jobs:
           dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal
           dotnet test tests/FusionRpg.ItemSeedValidator.Tests/FusionRpg.ItemSeedValidator.Tests.csproj -c Release --verbosity minimal
           dotnet test tests/FusionRpg.AtomImporter.Tests/FusionRpg.AtomImporter.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj -c Release --verbosity minimal
 
       - name: Validate item seed corpus
         shell: pwsh
         run: |
           dotnet run --project tools/ItemSeedValidator -c Release
           if ($LASTEXITCODE -ne 0) { throw "item seed corpus failed validation" }
+
+      - name: Item seed reachability
+        shell: pwsh
+        run: |
+          python tools/seed_graph/test_reachability.py
+          if ($LASTEXITCODE -ne 0) { throw "reachability checks failed their own tests" }
+          # Armed 2026-08-23, wave R4: the enrichment waves closed all 35 gaps, so a new one is a
+          # regression rather than a known debt. Referential integrity is gated by the step above;
+          # this gates whether a player can actually reach and finish what ships.
+          python tools/seed_graph/check_reachability.py
+          if ($LASTEXITCODE -ne 0) { throw "item seed corpus has reachability gaps" }
 
       - name: Web unit tests
         working-directory: web/fusion-rpg-web

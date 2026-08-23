@@ -27,10 +27,26 @@
       "name": "Stillmarch",
       "themeKey": "theme.frostbitten-vanguard",
       "members": [
-        { "role": "armament-primary" },
-        { "role": "core-guard" },
-        { "role": "jewel-major" },
-        { "role": "footing" }
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-b-011"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-002"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-a-003"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-003"
+        }
       ],
       "thresholds": [
         {
@@ -43,14 +59,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" },
-            { "family": "atom.might", "powerBand": "low" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.might",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -63,10 +88,26 @@
       "name": "Coldstride",
       "themeKey": "theme.frostbitten-vanguard",
       "members": [
-        { "role": "armament-secondary" },
-        { "role": "mantle" },
-        { "role": "head-guard" },
-        { "role": "sense" }
+        {
+          "role": "armament-secondary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-off-hand-b-008"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-b-008"
+        },
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-b-008"
+        },
+        {
+          "role": "sense",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-face-a-002"
+        }
       ],
       "thresholds": [
         {
@@ -74,20 +115,31 @@
           "capability": {
             "family": "atom.warded",
             "powerBand": "low",
-            "params": { "element": "ice" }
+            "params": {
+              "element": "ice"
+            }
           }
         },
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "medium" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" },
-            { "family": "atom.fortitude", "powerBand": "low" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.fortitude",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -100,10 +152,26 @@
       "name": "Frostcolumn",
       "themeKey": "theme.frostbitten-vanguard",
       "members": [
-        { "role": "manipulator" },
-        { "role": "girdle" },
-        { "role": "infusion" },
-        { "role": "retinue" }
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-b-009"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-b-009"
+        },
+        {
+          "role": "infusion",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-bandolier-a-003"
+        },
+        {
+          "role": "retinue",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-horn-a-010"
+        }
       ],
       "thresholds": [
         {
@@ -111,25 +179,36 @@
           "capability": {
             "family": "atom.searing-strike",
             "powerBand": "low",
-            "params": { "element": "ice" }
+            "params": {
+              "element": "ice"
+            }
           }
         },
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "medium" },
-            { "family": "atom.vitality", "powerBand": "low" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "low"
+            }
           ]
         }
       ],
       "tags": [],
-      "notes": "Whole-token fusion name 'Frostcolumn' from uniqueSetSeedPools['frostbitten-vanguard']. Capability atom.searing-strike (resource.delta, OnDamageDealt) carries params.element 'ice' - a bonus-element rider on every hand and hand-adjacent role in the column, the same family/params pairing already shipped on unique.frozen-pitchfork. Claims neither armament role, so §3.5's weapon rule is trivially satisfied. Member roles (manipulator, girdle, infusion, retinue) are all in the hybrid role core. Higher tiers (might, ferocity, vitality) are Flat/Increased only, no More-op families."
+      "notes": "Whole-token fusion name 'Frostcolumn' from uniqueSetSeedPools['frostbitten-vanguard']. Capability atom.searing-strike (resource.delta, OnDamageDealt) carries params.element 'ice' - a bonus-element rider on every hand and hand-adjacent role in the column, the same family/params pairing already shipped on unique.frozen-pitchfork. Claims neither armament role, so \u00a73.5's weapon rule is trivially satisfied. Member roles (manipulator, girdle, infusion, retinue) are all in the hybrid role core. Higher tiers (might, ferocity, vitality) are Flat/Increased only, no More-op families."
     },
     {
       "id": "set.frostbitten-vanguard-004",
@@ -137,10 +216,26 @@
       "name": "Icebound",
       "themeKey": "theme.frostbitten-vanguard",
       "members": [
-        { "role": "jewel-minor-a" },
-        { "role": "core-guard" },
-        { "role": "head-guard" },
-        { "role": "footing" }
+        {
+          "role": "jewel-minor-a",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-ring-1-b-010"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-006"
+        },
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-b-010"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-006"
+        }
       ],
       "thresholds": [
         {
@@ -153,19 +248,28 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" },
-            { "family": "atom.mending", "powerBand": "low" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.mending",
+              "powerBand": "low"
+            }
           ]
         }
       ],
       "tags": [],
-      "notes": "Whole-token fusion name 'Icebound' from uniqueSetSeedPools['frostbitten-vanguard']. Capability atom.regeneration (resource.delta, OnTimer) reads as the cold slowing the bleeding along with everything else about the wearer - no offensive rider, matching the theme's own 'sluggish' and 'brittle' tone words rather than a burst effect. Member roles (jewel-minor-a, core-guard, head-guard, footing) are all hybrid-eligible - jewel-minor-a is included, jewel-minor-b is not, per §3.7's SetRoleNotUniversal split. Claims no armament role at all. Higher tiers (fortitude, vitality, mending) are Flat/Increased stat.modify only."
+      "notes": "Whole-token fusion name 'Icebound' from uniqueSetSeedPools['frostbitten-vanguard']. Capability atom.regeneration (resource.delta, OnTimer) reads as the cold slowing the bleeding along with everything else about the wearer - no offensive rider, matching the theme's own 'sluggish' and 'brittle' tone words rather than a burst effect. Member roles (jewel-minor-a, core-guard, head-guard, footing) are all hybrid-eligible - jewel-minor-a is included, jewel-minor-b is not, per \u00a73.7's SetRoleNotUniversal split. Claims no armament role at all. Higher tiers (fortitude, vitality, mending) are Flat/Increased stat.modify only."
     },
     {
       "id": "set.frostbitten-vanguard-005",
@@ -173,10 +277,26 @@
       "name": "Winterhold",
       "themeKey": "theme.frostbitten-vanguard",
       "members": [
-        { "role": "armament-primary" },
-        { "role": "mantle" },
-        { "role": "jewel-major" },
-        { "role": "sense" }
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-a-005"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-b-011"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-a-009"
+        },
+        {
+          "role": "sense",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-face-a-005"
+        }
       ],
       "thresholds": [
         {
@@ -189,14 +309,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.ferocity", "powerBand": "low" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.ferocity",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -209,12 +338,36 @@
       "name": "Glacierward",
       "themeKey": "theme.frostbitten-vanguard",
       "members": [
-        { "role": "armament-secondary" },
-        { "role": "girdle" },
-        { "role": "infusion" },
-        { "role": "retinue" },
-        { "role": "jewel-minor-a" },
-        { "role": "manipulator" }
+        {
+          "role": "armament-secondary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-off-hand-b-012"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-b-012"
+        },
+        {
+          "role": "infusion",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-bandolier-a-007"
+        },
+        {
+          "role": "retinue",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-horn-b-001"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-ring-1-b-012"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-b-012"
+        }
       ],
       "thresholds": [
         {
@@ -227,21 +380,38 @@
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.might", "powerBand": "medium" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 6,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "high" },
-            { "family": "atom.ferocity", "powerBand": "medium" },
-            { "family": "atom.mending", "powerBand": "medium" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.mending",
+              "powerBand": "medium"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
-      "notes": "Whole-token fusion name 'Glacierward' from uniqueSetSeedPools['frostbitten-vanguard']. This is the partition's one grand (6-piece) set, per ssot-sets.md §3.4's 'exception, not the pattern' - it carries the mandatory thresholds at 2 and 4 plus a top threshold at 6, equal to its member count (SetThresholdUnreachable does not apply). Capability atom.retribution (resource.delta, OnDamageTaken, reflect) sits at the lowest threshold, powerBand medium rather than low, because the grand commitment (6 of ~13-15 slots) earns a stronger splash than a typical 4-piece set. Claims armament-secondary only. Six distinct member roles (armament-secondary, girdle, infusion, retinue, jewel-minor-a, manipulator), all in the hybrid role core, none repeated within this entry. Tagged 'signature' (notability axis, tags.v1.json) as the partition's flagship - a curation flag, not a power claim. Higher tiers use only Flat/Increased families (fortitude, might, vitality, ferocity, mending), no More-op family."
+      "tags": [
+        "signature"
+      ],
+      "notes": "Whole-token fusion name 'Glacierward' from uniqueSetSeedPools['frostbitten-vanguard']. This is the partition's one grand (6-piece) set, per ssot-sets.md \u00a73.4's 'exception, not the pattern' - it carries the mandatory thresholds at 2 and 4 plus a top threshold at 6, equal to its member count (SetThresholdUnreachable does not apply). Capability atom.retribution (resource.delta, OnDamageTaken, reflect) sits at the lowest threshold, powerBand medium rather than low, because the grand commitment (6 of ~13-15 slots) earns a stronger splash than a typical 4-piece set. Claims armament-secondary only. Six distinct member roles (armament-secondary, girdle, infusion, retinue, jewel-minor-a, manipulator), all in the hybrid role core, none repeated within this entry. Tagged 'signature' (notability axis, tags.v1.json) as the partition's flagship - a curation flag, not a power claim. Higher tiers use only Flat/Increased families (fortitude, might, vitality, ferocity, mending), no More-op family."
     }
   ]
 }

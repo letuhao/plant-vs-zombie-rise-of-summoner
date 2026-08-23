@@ -41,6 +41,20 @@
         "light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -63,6 +77,20 @@
         "light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -85,6 +113,20 @@
         "light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -107,6 +149,20 @@
         "light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -129,6 +185,20 @@
         "light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -151,6 +221,20 @@
         "light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -173,6 +257,20 @@
         "medium-light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -195,6 +293,20 @@
         "medium-light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -217,6 +329,20 @@
         "medium-light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -239,6 +365,20 @@
         "medium-light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -261,6 +401,20 @@
         "medium-light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -283,6 +437,20 @@
         "medium-light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     }
   ]

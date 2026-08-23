@@ -37,7 +37,25 @@
       "iconKey": "icon.base.notarised-lanyard",
       "flavorKey": "flavor.base.notarised-lanyard",
       "flavor": "A strap and a tag, each stamp a promise. The bureaucracy of survival.",
-      "tags": ["light", "metal", "defensive"]
+      "tags": [
+        "light",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-002",
@@ -55,7 +73,25 @@
       "iconKey": "icon.base.signed-dogtag",
       "flavorKey": "flavor.base.signed-dogtag",
       "flavor": "A name written in someone else's hand. Proof you belonged to something once.",
-      "tags": ["light", "metal", "defensive"]
+      "tags": [
+        "light",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-003",
@@ -73,7 +109,25 @@
       "iconKey": "icon.base.certified-brooch",
       "flavorKey": "flavor.base.certified-brooch",
       "flavor": "Stamped and sealed. Whoever wore this was trusted to do something specific.",
-      "tags": ["light", "metal", "offensive"]
+      "tags": [
+        "light",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-004",
@@ -91,7 +145,25 @@
       "iconKey": "icon.base.official-locket",
       "flavorKey": "flavor.base.official-locket",
       "flavor": "It opens and closes. The hinges remember something you need to keep safe.",
-      "tags": ["light", "metal", "utility"]
+      "tags": [
+        "light",
+        "metal",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-005",
@@ -109,7 +181,25 @@
       "iconKey": "icon.base.engraved-pendant",
       "flavorKey": "flavor.base.engraved-pendant",
       "flavor": "Marks cut into metal, each line deliberate. What did you want the world to know?",
-      "tags": ["light", "metal", "offensive"]
+      "tags": [
+        "light",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-006",
@@ -127,7 +217,26 @@
       "iconKey": "icon.base.plain-choker",
       "flavorKey": "flavor.base.plain-choker",
       "flavor": "Pulled tight and tied. No ornament. No pretense. Just grip.",
-      "tags": ["light", "organic", "defensive", "fragile"]
+      "tags": [
+        "light",
+        "organic",
+        "defensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-007",
@@ -145,7 +254,25 @@
       "iconKey": "icon.base.modest-scarf",
       "flavorKey": "flavor.base.modest-scarf",
       "flavor": "Fabric wrapped without fuss. It keeps the cold and the questions off your neck.",
-      "tags": ["medium-light", "organic", "utility"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-008",
@@ -163,7 +290,25 @@
       "iconKey": "icon.base.punched-muffler",
       "flavorKey": "flavor.base.punched-muffler",
       "flavor": "Holes in the fabric, each one a blow it has already taken. Ready for another.",
-      "tags": ["medium-light", "organic", "defensive"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-009",
@@ -181,7 +326,25 @@
       "iconKey": "icon.base.impressed-necklace",
       "flavorKey": "flavor.base.impressed-necklace",
       "flavor": "Something pressed its form into the metal and never let go. The mark stays.",
-      "tags": ["medium-light", "metal", "offensive"]
+      "tags": [
+        "medium-light",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-010",
@@ -199,7 +362,25 @@
       "iconKey": "icon.base.unassuming-clasp",
       "flavorKey": "flavor.base.unassuming-clasp",
       "flavor": "Small enough to miss, strong enough to hold. A fastener with no purpose but to endure.",
-      "tags": ["light", "metal", "utility"]
+      "tags": [
+        "light",
+        "metal",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-011",
@@ -217,7 +398,25 @@
       "iconKey": "icon.base.filed-collar",
       "flavorKey": "flavor.base.filed-collar",
       "flavor": "Edges worn smooth by work, then sharpened again. Something is always being prepared.",
-      "tags": ["medium-light", "metal", "offensive"]
+      "tags": [
+        "medium-light",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-neck-a-012",
@@ -235,7 +434,25 @@
       "iconKey": "icon.base.unadorned-torc",
       "flavorKey": "flavor.base.unadorned-torc",
       "flavor": "An ancient ring worn as a collar. No decoration survives what it has carried.",
-      "tags": ["medium", "metal", "utility"]
+      "tags": [
+        "medium",
+        "metal",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

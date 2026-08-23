@@ -1,8 +1,8 @@
 namespace FusionRpg.Core.World;
 
 /// <summary>
-/// The seven creation rules (spec-world-model.md §Creation and validation). A malformed world must
-/// never reach the turn engine, so this throws loudly at the gate rather than returning a flag.
+/// The fourteen creation rules (spec-world-model.md §Creation and validation). A malformed world
+/// must never reach the turn engine, so this throws loudly at the gate rather than returning a flag.
 /// </summary>
 public static class WorldValidation
 {
@@ -35,6 +35,7 @@ public static class WorldValidation
         Rule11HomeworldHasARootbed(world);
         Rule12HandicapBounded(world);
         Rule13TemplateSizeMatchesItsDeclaredTier(world);
+        Rule14StructureSlotKindMatches(world);
         return world;
     }
 
@@ -349,5 +350,29 @@ public static class WorldValidation
         if (w.Sectors.Count < size.MinNodes || w.Sectors.Count > size.MaxNodes)
             throw new InvalidOperationException(
                 $"Template '{w.TemplateId}' has {w.Sectors.Count} sectors, outside its declared '{sizeId}' range {size.MinNodes}..{size.MaxNodes}.");
+    }
+
+    /// <summary>
+    /// A structure only sits on the ground it was built for (spec-structure-substrate.md) — same
+    /// shape as <see cref="Rule6SlotShape"/>'s sector-type/slot-type pairing, one level down.
+    /// </summary>
+    static void Rule14StructureSlotKindMatches(WorldState w)
+    {
+        foreach (var s in w.Sectors)
+            foreach (var slot in s.Slots)
+            {
+                if (slot.StructureId is null) continue;
+
+                if (!StructureCatalog.IsKnown(slot.StructureId))
+                    throw new InvalidOperationException(
+                        $"Sector '{s.SectorId}' slot {slot.SlotIndex} carries unknown structure '{slot.StructureId}'.");
+
+                var structure = StructureCatalog.Get(slot.StructureId);
+                var slotKind = SlotTypeCatalog.Get(slot.SlotTypeId).Kind;
+                if (slotKind != structure.RequiredSlotKind)
+                    throw new InvalidOperationException(
+                        $"Sector '{s.SectorId}' slot {slot.SlotIndex} ({slotKind}) cannot carry structure " +
+                        $"'{slot.StructureId}', which requires {structure.RequiredSlotKind}.");
+            }
     }
 }

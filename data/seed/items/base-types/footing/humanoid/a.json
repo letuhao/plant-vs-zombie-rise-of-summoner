@@ -42,6 +42,20 @@
         "organic",
         "sturdy",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -65,6 +79,20 @@
         "organic",
         "fragile",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -88,6 +116,20 @@
         "organic",
         "sturdy",
         "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -111,6 +153,20 @@
         "organic",
         "fragile",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -134,6 +190,20 @@
         "organic",
         "sturdy",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -157,6 +227,20 @@
         "organic",
         "fragile",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -180,6 +264,20 @@
         "organic",
         "sturdy",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -203,6 +301,20 @@
         "organic",
         "fragile",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -226,6 +338,20 @@
         "organic",
         "sturdy",
         "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -249,6 +375,20 @@
         "organic",
         "sturdy",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -266,12 +406,26 @@
       "socketMax": 1,
       "iconKey": "icon.base.studded-tread",
       "flavorKey": "flavor.base.studded-tread",
-      "flavor": "Metal nubs catch on everything — pavement, rust, the day's last inch of hope.",
+      "flavor": "Metal nubs catch on everything \u2014 pavement, rust, the day's last inch of hope.",
       "tags": [
         "medium-light",
         "metal",
         "fragile",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     },
     {
@@ -295,6 +449,20 @@
         "organic",
         "sturdy",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-evasion"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
       ]
     }
   ]

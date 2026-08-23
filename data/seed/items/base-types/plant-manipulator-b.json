@@ -36,13 +36,27 @@
       "socketMax": 1,
       "iconKey": "icon.base.dense-midrib",
       "flavorKey": "flavor.base.dense-midrib",
-      "flavor": "The vein itself becomes the weapon — weight concentrated where a leaf channels water.",
+      "flavor": "The vein itself becomes the weapon \u2014 weight concentrated where a leaf channels water.",
       "tags": [
         "medium-heavy",
         "organic",
         "rooted",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -67,6 +81,20 @@
         "rooted",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -90,6 +118,20 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -107,13 +149,27 @@
       "socketMax": 1,
       "iconKey": "icon.base.ancient-cladode",
       "flavorKey": "flavor.base.ancient-cladode",
-      "flavor": "A flattened stem branch that has outlasted three forests — it falls with the weight of ages.",
+      "flavor": "A flattened stem branch that has outlasted three forests \u2014 it falls with the weight of ages.",
       "tags": [
         "medium-heavy",
         "organic",
         "rooted",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -138,6 +194,20 @@
         "rooted",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -155,12 +225,26 @@
       "socketMax": 1,
       "iconKey": "icon.base.stony-whorl",
       "flavorKey": "flavor.base.stony-whorl",
-      "flavor": "Leaves arranged in a circle, each one hardened like stone — together they fall in rings.",
+      "flavor": "Leaves arranged in a circle, each one hardened like stone \u2014 together they fall in rings.",
       "tags": [
         "medium-heavy",
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -178,12 +262,26 @@
       "socketMax": 1,
       "iconKey": "icon.base.marrowed-sucker",
       "flavorKey": "flavor.base.marrowed-sucker",
-      "flavor": "A shoot meant to climb and feed becomes a draw itself — soft in name, dense in strike.",
+      "flavor": "A shoot meant to climb and feed becomes a draw itself \u2014 soft in name, dense in strike.",
       "tags": [
         "medium-heavy",
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -208,6 +306,20 @@
         "rooted",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -225,12 +337,26 @@
       "socketMax": 2,
       "iconKey": "icon.base.unsplit-venation",
       "flavorKey": "flavor.base.unsplit-venation",
-      "flavor": "The vein-map of a leaf becomes a pattern of strikes — each line reinforces the whole.",
+      "flavor": "The vein-map of a leaf becomes a pattern of strikes \u2014 each line reinforces the whole.",
       "tags": [
         "medium-heavy",
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -248,13 +374,27 @@
       "socketMax": 1,
       "iconKey": "icon.base.inert-rachis",
       "flavorKey": "flavor.base.inert-rachis",
-      "flavor": "The central axis of a compound leaf, rigid and unmoving — it will not bend before it falls.",
+      "flavor": "The central axis of a compound leaf, rigid and unmoving \u2014 it will not bend before it falls.",
       "tags": [
         "medium-heavy",
         "organic",
         "rooted",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -278,6 +418,20 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -302,6 +456,20 @@
         "rooted",
         "offensive",
         "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     }
   ]

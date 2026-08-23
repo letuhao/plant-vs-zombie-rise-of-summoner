@@ -69,10 +69,33 @@ public static class EffectRuntime
             _status.OnApplied = inst =>
             {
                 try { VfxDirector.Play(Core.Vfx.StatusVfxCues.Cue(inst)); } catch { }
+                // E21: StatusStatPayload.ToModifiers/SourceIdOf had zero production callers (audit
+                // finding A1) — rally/expose/command/shatter created instances and changed no stat.
+                // Same source-tagged path ExecModifyStat already uses for effect-granted mods
+                // ("effect:" + grantId): Upsert here, WithdrawSource on end, both source-kind "status"
+                // so a stack expiring cannot withdraw another stack's contribution.
+                try
+                {
+                    if (inst.StatMods.Count > 0)
+                    {
+                        CheatState.Stats.Upsert(Core.Status.StatusStatPayload.ToModifiers(inst));
+                        CheatActions.ReapplyLivingForOwner("entity:" + inst.HostPtr);
+                    }
+                }
+                catch (Exception ex) { CheatState.Error("status stat apply: " + ex.Message); }
             };
             _status.OnEnded = inst =>
             {
                 try { VfxDirector.Play(Core.Vfx.StatusVfxCues.ExpireCue(inst)); } catch { }
+                try
+                {
+                    if (inst.StatMods.Count > 0)
+                    {
+                        CheatState.Stats.WithdrawSource("status", Core.Status.StatusStatPayload.SourceIdOf(inst));
+                        CheatActions.ReapplyLivingForOwner("entity:" + inst.HostPtr);
+                    }
+                }
+                catch (Exception ex) { CheatState.Error("status stat withdraw: " + ex.Message); }
             };
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
             _bag.Status = _status;

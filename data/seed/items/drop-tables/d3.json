@@ -25,13 +25,380 @@
       "id": "droptable.d3-001",
       "nameKey": "droptable.bramble-windfall",
       "name": "Bramble Windfall",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-001-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "girdle", "frame": "plant", "dropBand": "frequent", "rarityFloor": "grafted" },
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "girdle",
+              "frame": "plant",
+              "dropBand": "frequent",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "r2-charm",
+          "entries": [
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-001",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-002",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-003",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-004",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-005",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-006",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-007",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-008",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-009",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-010",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-011",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-012",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-013",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-014",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-015",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-016",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-017",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-018",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-019",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.econ-020",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-001",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-002",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-003",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-004",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-005",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-006",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-007",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-008",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-009",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-010",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-011",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-012",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-013",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-014",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-015",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-016",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-017",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-018",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-019",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.off-ctrl-020",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-offense-2",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-offense-3",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-control-2",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-control-3",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-survivability-2",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-survivability-3",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-utility-2",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-utility-3",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-economy-2",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.res-economy-3",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-001",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-002",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-003",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-004",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-005",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-006",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-007",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-008",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-009",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-010",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-011",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-012",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-013",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-014",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-015",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-016",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-017",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-018",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-019",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "charm",
+              "ref": "charm.surv-util-020",
+              "dropBand": "seldom"
+            }
           ]
         }
       ],
@@ -41,13 +408,24 @@
       "id": "droptable.d3-002",
       "nameKey": "droptable.withered-tribute",
       "name": "Withered Tribute",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-002-reward",
           "entries": [
-            { "entryKind": "material", "ref": "essence.dark", "dropBand": "staple", "qtyCurve": "curve.019" },
-            { "entryKind": "insert", "ref": "gem.g1-016", "dropBand": "seldom" }
+            {
+              "entryKind": "material",
+              "ref": "essence.dark",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-016",
+              "dropBand": "seldom"
+            }
           ]
         }
       ],
@@ -57,13 +435,26 @@
       "id": "droptable.d3-003",
       "nameKey": "droptable.grafted-endowment",
       "name": "Grafted Endowment",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-003-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "core-guard", "frame": "plant", "dropBand": "occasional", "rarityFloor": "cultivated" },
-            { "entryKind": "material", "ref": "substrate.plant.sound", "dropBand": "frequent", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "equipment",
+              "role": "core-guard",
+              "frame": "plant",
+              "dropBand": "occasional",
+              "rarityFloor": "cultivated"
+            },
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.sound",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -73,13 +464,23 @@
       "id": "droptable.d3-004",
       "nameKey": "droptable.fallow-allotment",
       "name": "Fallow Allotment",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-004-reward",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" },
-            { "entryKind": "insert", "ref": "gem.g3-005", "dropBand": "occasional" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-005",
+              "dropBand": "occasional"
+            }
           ]
         }
       ],
@@ -89,13 +490,24 @@
       "id": "droptable.d3-005",
       "nameKey": "droptable.budding-largesse",
       "name": "Budding Largesse",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-005-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "head-guard", "frame": "plant", "dropBand": "occasional", "rarityFloor": "grafted" },
-            { "entryKind": "nothing", "dropBand": "seldom" }
+            {
+              "entryKind": "equipment",
+              "role": "head-guard",
+              "frame": "plant",
+              "dropBand": "occasional",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "seldom"
+            }
           ]
         }
       ],
@@ -105,13 +517,25 @@
       "id": "droptable.d3-006",
       "nameKey": "droptable.compost-dividend",
       "name": "Compost Dividend",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-006-reward",
           "entries": [
-            { "entryKind": "material", "ref": "substrate.plant.crude", "dropBand": "staple", "qtyCurve": "curve.019" },
-            { "entryKind": "material", "ref": "catalyst.flux", "dropBand": "seldom", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.crude",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.flux",
+              "dropBand": "seldom",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -121,13 +545,25 @@
       "id": "droptable.d3-007",
       "nameKey": "droptable.thorned-grant",
       "name": "Thorned Grant",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-007-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "manipulator", "frame": "hybrid", "dropBand": "occasional", "rarityFloor": "fused" },
-            { "entryKind": "currency", "ref": "souls", "dropBand": "frequent" }
+            {
+              "entryKind": "equipment",
+              "role": "manipulator",
+              "frame": "hybrid",
+              "dropBand": "occasional",
+              "rarityFloor": "fused"
+            },
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "frequent"
+            }
           ]
         }
       ],
@@ -137,13 +573,24 @@
       "id": "droptable.d3-008",
       "nameKey": "droptable.mycelial-bounty",
       "name": "Mycelial Bounty",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-008-reward",
           "entries": [
-            { "entryKind": "insert", "ref": "gem.g1-014", "dropBand": "occasional" },
-            { "entryKind": "material", "ref": "catalyst.temper", "dropBand": "seldom", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-014",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.temper",
+              "dropBand": "seldom",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -153,13 +600,26 @@
       "id": "droptable.d3-009",
       "nameKey": "droptable.sunken-stipend",
       "name": "Sunken Stipend",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-009-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "footing", "frame": "humanoid", "dropBand": "occasional", "rarityFloor": "grafted" },
-            { "entryKind": "material", "ref": "shard.common", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "equipment",
+              "role": "footing",
+              "frame": "humanoid",
+              "dropBand": "occasional",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "material",
+              "ref": "shard.common",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -169,13 +629,25 @@
       "id": "droptable.d3-010",
       "nameKey": "droptable.rootbound-cache",
       "name": "Rootbound Cache",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d3-010-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "jewel-major", "frame": "plant", "dropBand": "seldom", "rarityFloor": "fused" },
-            { "entryKind": "insert", "ref": "gem.g3-012", "dropBand": "exceptional" }
+            {
+              "entryKind": "equipment",
+              "role": "jewel-major",
+              "frame": "plant",
+              "dropBand": "seldom",
+              "rarityFloor": "fused"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-012",
+              "dropBand": "exceptional"
+            }
           ]
         }
       ],

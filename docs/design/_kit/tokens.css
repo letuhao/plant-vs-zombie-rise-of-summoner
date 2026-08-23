@@ -60,12 +60,30 @@
   --side-zombie: #9b7fb0;
   --side-demon:  #c96a52;
 
-  /* --- rarity — ordinals are data; these are the first five slots --------- */
+  /* --- rarity (legacy 5-slot) — a sparse approximation of the real ladder
+     below, used by ~90 data-rarity="1".."5" call sites across all eight
+     plates. Left untouched: remapping every usage is its own migration,
+     out of scope for spec-item-card.md §4. --------------------------------- */
   --rarity-1: #8f8878;
   --rarity-2: #6fbf73;
   --rarity-3: #6fa8d9;
   --rarity-4: #b98ede;
   --rarity-5: #e0b44b;
+
+  /* --- rarity (real ladder) — ssot-rarity.md §3.3. Ten rungs, ordinals
+     spaced by 10 so a rung can insert without renumbering. L* is strictly
+     increasing and monotone under deuteranope simulation (§4.5) — that
+     progression, not the hue, is the ordering channel. -------------------- */
+  --rarity-chaff:      #63645d;  /* ord 10 · 1 pip · L* 42.1 */
+  --rarity-sprout:     #697a5c;  /* ord 20 · 2 pip · L* 49.1 */
+  --rarity-grafted:    #509639;  /* ord 30 · 3 pip · L* 55.9 */
+  --rarity-cultivated: #37a39c;  /* ord 40 · 4 pip · L* 61.1 */
+  --rarity-fused:      #63a4ed;  /* ord 50 · 5 pip · L* 66.0 */
+  --rarity-chimeric:   #c994ff;  /* ord 60 · 6 pip · L* 70.0 */
+  --rarity-heirloom:   #ff94d2;  /* ord 70 · 7 pip · L* 74.2 */
+  --rarity-firstseed:  #ffab7a;  /* ord 80 · 8 pip · L* 77.2 */
+  --rarity-sunwoven:   #f9d464;  /* ord 90 · 9 pip · L* 86.1 */
+  --rarity-almanac:    #f3eaa0;  /* ord 100 · 10 pip · L* 91.9 */
 
   /* --- power categories (definitions.md §7) ------------------------------- */
   --pw-offense:       #d97b7b;

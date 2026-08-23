@@ -56,11 +56,20 @@ public static class StatChannels
     /// </summary>
     public const double MinimumInterval = 0.01;
 
-    public static ChannelDirection DirectionOf(string? channel) => channel switch
+    public static ChannelDirection DirectionOf(string? channel)
     {
-        AttackInterval or ProduceInterval => ChannelDirection.LowerIsBetter,
-        _ => ChannelDirection.HigherIsBetter,
-    };
+        // E22: an imported effect_channel_policy row overrides the code default for an EXISTING
+        // channel — E1's code-or-data rule applied to itself (a value change with a live consumer,
+        // not a new channel). An empty table (nothing imported) falls through unchanged.
+        if (channel is not null && ChannelPolicyTable.Current.TryGetDirection(channel, out var stored))
+            return stored;
+
+        return channel switch
+        {
+            AttackInterval or ProduceInterval => ChannelDirection.LowerIsBetter,
+            _ => ChannelDirection.HigherIsBetter,
+        };
+    }
 
     public static bool IsLowerBetter(string? channel) =>
         DirectionOf(channel) == ChannelDirection.LowerIsBetter;

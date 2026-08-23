@@ -132,12 +132,46 @@ public static class DerivedStatChannels
     ///
     /// <para><b>Generated from the roster TABLE, not the enum</b> (E18). That is what makes a seventh
     /// element rows plus regeneration: its 12 channels appear here, and every consumer picks them up
-    /// because <c>CombatDerivedReader</c> matches channels by pattern rather than by name. Read
-    /// through <see cref="AllCombatChannelIds"/> rather than cached in a static, because the roster
-    /// is loaded after startup on a host with a database.</para>
+    /// because <c>CombatDerivedReader</c> matches channels by pattern rather than by name.</para>
+    ///
+    /// <para><b>Cached by reference to the source table</b> (E25, completeness-audit.md B3). The
+    /// stated reason for never caching — "the roster is loaded after startup" — stopped being a
+    /// reason once E20 shipped: <see cref="ElementTable.Use"/>/<see cref="ElementTable.UseScoped"/>
+    /// always assign a <b>new</b> immutable instance rather than mutating one in place, so comparing
+    /// <see cref="ElementTable.Current"/> by reference against what this cache was last built from is
+    /// exactly as fresh as rebuilding every call, at 84 fewer string allocations per read.
+    /// <see cref="BattleStatComposer.Compose"/> called this once per actor composed.</para>
     /// </summary>
-    public static IReadOnlyList<string> AllCombatChannelIds =>
-        BuildAllCombatChannelIds(ElementTable.Current.Elements.Where(e => e.Enabled).Select(e => e.ElementId));
+    public static IReadOnlyList<string> AllCombatChannelIds
+    {
+        get { lock (CacheGate) { EnsureCacheUnlocked(); return _cacheList!; } }
+    }
+
+    /// <summary>
+    /// O(1) membership over the same cached generation <see cref="AllCombatChannelIds"/> uses — the
+    /// other half of E25: <c>StatusStatPayload.IsKnownChannel</c> used to <c>.Contains</c> a freshly
+    /// allocated 84-element list on every channel it parsed.
+    /// </summary>
+    public static bool IsCombatChannel(string channel)
+    {
+        lock (CacheGate) { EnsureCacheUnlocked(); return _cacheSet!.Contains(channel); }
+    }
+
+    static void EnsureCacheUnlocked()
+    {
+        var current = ElementTable.Current;
+        if (ReferenceEquals(_cacheSource, current)) return;
+
+        _cacheSource = current;
+        var built = BuildAllCombatChannelIds(current.Elements.Where(e => e.Enabled).Select(e => e.ElementId));
+        _cacheList = built;
+        _cacheSet = new HashSet<string>(built, StringComparer.Ordinal);
+    }
+
+    static readonly object CacheGate = new();
+    static ElementTable? _cacheSource;
+    static IReadOnlyList<string>? _cacheList;
+    static HashSet<string>? _cacheSet;
 
     /// <summary>The channel set for an explicit roster — how a test can add a seventh element.</summary>
     public static IReadOnlyList<string> BuildAllCombatChannelIds(IEnumerable<string> elementIds)

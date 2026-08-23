@@ -50,7 +50,10 @@ public static class KindCatalog
         // Shapes seed-contract.md §10 actually specifies.
         Defined("base-type", "base-types", "baseTypes", "1b",
             required: new[] { "frame", "role", "class", "band", "iconKey", "tags" },
-            extra: new[] { "frame", "role", "class", "band", "implicit", "socketMax" }),
+            // `enhanceTrack` is entry-shapes.md §6's `item_enhance_track`, scoped onto this kind
+            // rather than onto the milestone: the family says what the +X grants, the base type
+            // says who grants it and at which rung.
+            extra: new[] { "frame", "role", "class", "band", "implicit", "socketMax", "enhanceTrack" }),
         // "roles" is not in this required list even though it is effectively mandatory: the
         // requirement is "roles" OR the pre-rename "roleGroups", and the generic single-key
         // RequiredFields check has no OR — ReferenceCheck.CheckRoles enforces the real rule
@@ -124,7 +127,13 @@ public static class KindCatalog
                 "classId", "useContext", "family", "element", "powerBand", "manifestCost",
                 "grantsActionId", "cooldownKey",
             }),
-        Defined("drop-table", "drop-tables", "dropTables", "1c",
+        // Stage 1d, alone. A drop table is the only kind that references *every* other kind —
+        // base types, uniques, sets, gems, charms, consumables — so it cannot share a stage with
+        // its own targets: `SameStageReference` exists precisely because same-stage partitions are
+        // authored in parallel and cannot see each other. Drop tables were always dispatched last
+        // for this reason; the stage label simply had not caught up, and ssot-uniques.md §4.5
+        // requires "a drop-table entry naming a unique's container", which is a 1c target.
+        Defined("drop-table", "drop-tables", "dropTables", "1d",
             required: new[] { "sourceAllow", "groups" },
             extra: new[] { "sourceAllow", "groups" }),
         Defined("display-template", "display-templates", "displayTemplates", "1c",

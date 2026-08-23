@@ -77,5 +77,30 @@
   { "file": "src/FusionRpg.Core/World/Loam/LoamPolicy.cs",
     "name": "development and danger upkeep multiplies instead of adding",
     "find": "(long)developmentLevel * DevelopmentUpkeepPerLevel + (long)dangerBand * DangerUpkeepPerBand;",
-    "with": "(long)developmentLevel * DevelopmentUpkeepPerLevel * ((long)dangerBand * DangerUpkeepPerBand);" }
+    "with": "(long)developmentLevel * DevelopmentUpkeepPerLevel * ((long)dangerBand * DangerUpkeepPerBand);" },
+
+  { "file": "src/FusionRpg.Core/World/Loam/LoamForecast.cs",
+    "name": "a solvent component still gets a weakest contributor named",
+    "find": "if (available >= upkeep) return null;",
+    "with": "if (false) return null;" },
+
+  { "file": "src/FusionRpg.Core/World/Loam/LoamForecast.cs",
+    "name": "the strongest contributor is picked instead of the weakest",
+    "find": ".OrderBy(id => LoamBalance.PerSector(world, world.Sectors.First(s => s.SectorId == id)))",
+    "with": ".OrderByDescending(id => LoamBalance.PerSector(world, world.Sectors.First(s => s.SectorId == id)))" },
+
+  { "file": "src/FusionRpg.Core/World/Loam/LoamForecast.cs",
+    "name": "the forecast's production cap never throttles new accrual",
+    "find": "total += sector.LoamStock + Math.Min(room, yield);",
+    "with": "total += sector.LoamStock + yield;" },
+
+  { "file": "src/FusionRpg.Core/World/Loam/LoamForecast.cs",
+    "name": "release is forecast for a deficit that would not actually zero the sector",
+    "find": "return FadePolicy.Apply(weakestSector.StabilityMilli, -shortfall) == 0 ? weakest : null;",
+    "with": "return FadePolicy.Apply(weakestSector.StabilityMilli, -shortfall) >= 0 ? weakest : null;" },
+
+  { "file": "src/FusionRpg.Core/World/Loam/LoamForecast.cs",
+    "name": "the forecast never names a release candidate at all",
+    "find": "var weakest = Weakest(world, component, projected, upkeep);\n        if (weakest is null) return null;",
+    "with": "return null;" }
 ]

@@ -25,12 +25,224 @@
       "id": "droptable.d4-001",
       "nameKey": "droptable.reclaimed-mulch",
       "name": "Reclaimed Mulch",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-001-yield",
           "entries": [
-            { "entryKind": "material", "ref": "substrate.plant.crude", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.crude",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
+          ]
+        },
+        {
+          "groupKey": "r2-unique",
+          "entries": [
+            {
+              "entryKind": "unique",
+              "ref": "unique.charnel-bloom-90-001",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.charnel-bloom-90-002",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.charnel-bloom-90-003",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.charnel-bloom-90-004",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.charnel-bloom-90-005",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.charnel-bloom-90-006",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.charnel-bloom-90-007",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.charnel-bloom-90-008",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-90-001",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-90-002",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-90-003",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-90-004",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-90-005",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-90-006",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-90-007",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-90-008",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.sunwoven-almanac-90-001",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.sunwoven-almanac-90-002",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.sunwoven-almanac-90-003",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.sunwoven-almanac-90-004",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.sunwoven-almanac-90-005",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.sunwoven-almanac-90-006",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.sunwoven-almanac-90-007",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.sunwoven-almanac-90-008",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.umbral-swarm-90-001",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.umbral-swarm-90-002",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.umbral-swarm-90-003",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.umbral-swarm-90-004",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.umbral-swarm-90-005",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.umbral-swarm-90-006",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.umbral-swarm-90-007",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.umbral-swarm-90-008",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.verdant-graft-90-001",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.verdant-graft-90-002",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.verdant-graft-90-003",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.verdant-graft-90-004",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.verdant-graft-90-005",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.verdant-graft-90-006",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.verdant-graft-90-007",
+              "dropBand": "exceptional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.verdant-graft-90-008",
+              "dropBand": "exceptional"
+            }
           ]
         }
       ],
@@ -40,12 +252,19 @@
       "id": "droptable.d4-002",
       "nameKey": "droptable.salvaged-scrap",
       "name": "Salvaged Scrap",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-002-yield",
           "entries": [
-            { "entryKind": "material", "ref": "substrate.humanoid.crude", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "substrate.humanoid.crude",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -55,12 +274,19 @@
       "id": "droptable.d4-003",
       "nameKey": "droptable.seasoned-bark",
       "name": "Seasoned Bark",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-003-yield",
           "entries": [
-            { "entryKind": "material", "ref": "substrate.plant.sound", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.sound",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -70,12 +296,19 @@
       "id": "droptable.d4-004",
       "nameKey": "droptable.riveted-ingot",
       "name": "Riveted Ingot",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-004-yield",
           "entries": [
-            { "entryKind": "material", "ref": "substrate.humanoid.sound", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "substrate.humanoid.sound",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -85,12 +318,19 @@
       "id": "droptable.d4-005",
       "nameKey": "droptable.kindled-cask",
       "name": "Kindled Cask",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-005-yield",
           "entries": [
-            { "entryKind": "material", "ref": "essence.fire", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "essence.fire",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -100,12 +340,19 @@
       "id": "droptable.d4-006",
       "nameKey": "droptable.shadow-extract",
       "name": "Shadow Extract",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-006-yield",
           "entries": [
-            { "entryKind": "material", "ref": "essence.dark", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "essence.dark",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -115,12 +362,19 @@
       "id": "droptable.d4-007",
       "nameKey": "droptable.squall-vessel",
       "name": "Squall Vessel",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-007-yield",
           "entries": [
-            { "entryKind": "material", "ref": "essence.air", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "essence.air",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -130,12 +384,19 @@
       "id": "droptable.d4-008",
       "nameKey": "droptable.molten-anvil",
       "name": "Molten Anvil",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-008-yield",
           "entries": [
-            { "entryKind": "material", "ref": "catalyst.forge", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "catalyst.forge",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -145,12 +406,19 @@
       "id": "droptable.d4-009",
       "nameKey": "droptable.budding-geode",
       "name": "Budding Geode",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-009-yield",
           "entries": [
-            { "entryKind": "material", "ref": "shard.rare", "dropBand": "staple", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "shard.rare",
+              "dropBand": "staple",
+              "qtyCurve": "curve.019"
+            }
           ]
         }
       ],
@@ -160,12 +428,18 @@
       "id": "droptable.d4-010",
       "nameKey": "droptable.layered-cutting",
       "name": "Layered Cutting",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "d4-010-yield",
           "entries": [
-            { "entryKind": "insert", "ref": "gem.g1-001", "dropBand": "staple" }
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-001",
+              "dropBand": "staple"
+            }
           ]
         }
       ],

@@ -2,14 +2,14 @@
   "schemaVersion": 1,
   "kind": "unique",
   "_meta": {
-    "batch": "uniques-1c",
     "partition": "uniques/sunwoven-almanac/50",
     "contractVersion": 1,
     "exemplarVersion": 1,
     "promptVersion": 1,
+    "batch": "uniques-1c",
     "model": "claude-sonnet-5",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "ssot-uniques.md#3.7",
+    "sourceRef": "docs/architecture/item/ssot-uniques.md#3.7",
     "registryVersions": {
       "core": 1,
       "bands": 1,
@@ -23,203 +23,320 @@
   "entries": [
     {
       "id": "unique.sunwoven-almanac-50-001",
-      "nameKey": "unique.spitter-of-the-ledger",
-      "name": "Spitter of the Ledger",
+      "nameKey": "unique.goldenmargin",
+      "name": "Goldenmargin",
       "frame": "plant",
-      "baseType": "item.plant-muzzle-b-001",
+      "baseType": "item.plant-muzzle-b-009",
       "rarity": "fused",
       "powerAxis": "economy",
       "fixedAtoms": [
-        { "family": "atom.might", "powerBand": "low" },
-        { "family": "atom.midas", "powerBand": "medium" }
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "low"
+        }
       ],
       "varianceSlot": {
-        "family": "atom.ferocity",
+        "family": "atom.sunbloom",
         "variance": "narrow"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line (atom.might, low) against a fused rare's two-to-three affixes. The midas rider turns hits into tallied sun rather than damage, so it never adds to the raw-stat total the 60% ceiling checks."
+        "note": "It logs a kill in the ledger long before it ever lands one \u2014 the attack line is deliberately the almanac's weakest entry, and the margin note is the only reason to carry it."
       },
-      "tags": ["medium", "organic", "utility", "rooted", "signature"],
-      "flavorKey": "flavor.unique.spitter-of-the-ledger",
-      "flavor": "Every seed it fires gets a line in the margin. The almanac keeps its own accounts.",
-      "notes": "role armament-primary (muzzle), axis economy. baseType item.plant-muzzle-b-001 grepped from data/seed/items/base-types/plant-armament-primary-b.json (nozzle class, frame plant, band b)."
+      "iconKey": "icon.unique.goldenmargin",
+      "flavorKey": "flavor.unique.goldenmargin",
+      "flavor": "Every seed it flings is logged in the margin first \u2014 what the field spends, what the field is owed back in sun.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.sunwoven-almanac-50-002",
-      "nameKey": "unique.doctrinal-bole",
-      "name": "Doctrinal Bole",
+      "nameKey": "unique.catalogued-culm",
+      "name": "Catalogued Culm",
       "frame": "plant",
-      "baseType": "item.plant-stem-b-001",
+      "baseType": "item.plant-stem-a-003",
       "rarity": "chimeric",
       "powerAxis": "offense",
       "fixedAtoms": [
-        { "family": "atom.vitality", "powerBand": "low" },
-        { "family": "atom.retribution", "powerBand": "medium" }
+        {
+          "family": "atom.retribution",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "low"
+        }
       ],
       "varianceSlot": {
-        "family": "atom.fortitude",
-        "variance": "normal"
+        "family": "atom.ferocity",
+        "variance": "narrow"
       },
       "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (atom.vitality, low) against a chimeric rare's three-to-four affixes. The retribution rider only pays back what the stem already absorbed, so it is not a second stat line."
+        "kind": "conditional",
+        "condition": "below-half-health",
+        "note": "The retort only fires once the reader is already losing the argument \u2014 full health gets no answer at all."
       },
-      "tags": ["medium-heavy", "organic", "offensive", "rooted", "signature"],
-      "flavorKey": "flavor.unique.doctrinal-bole",
-      "flavor": "The lesson was 'stand and take it.' What the almanac never wrote down is what standing there does back.",
-      "notes": "role core-guard (stem), axis offense. baseType item.plant-stem-b-001 grepped from data/seed/items/base-types/plant-stem-b.json (bark class, frame plant, band b)."
+      "iconKey": "icon.unique.catalogued-culm",
+      "flavorKey": "flavor.unique.catalogued-culm",
+      "flavor": "The almanac keeps one page on wounds: what was dealt, returned, entry for entry.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive",
+        "signature"
+      ],
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.sunwoven-almanac-50-003",
-      "nameKey": "unique.inherited-rind",
-      "name": "Inherited Rind",
+      "nameKey": "unique.shroud-of-the-litany",
+      "name": "Shroud of the Litany",
       "frame": "plant",
-      "baseType": "item.plant-sheath-b-002",
+      "baseType": "item.plant-sheath-b-006",
       "rarity": "fused",
       "powerAxis": "survivability",
       "fixedAtoms": [
-        { "family": "atom.fortitude", "powerBand": "low" },
-        { "family": "atom.bulwark", "powerBand": "medium" }
-      ],
-      "varianceSlot": {
-        "family": "atom.vitality",
-        "variance": "normal"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (atom.fortitude, low) against a fused rare's two-to-three affixes. The bulwark line is the same life-group family the base stat already shares, not a second independent stack."
-      },
-      "tags": ["heavy", "organic", "sturdy", "defensive", "rooted", "signature"],
-      "flavorKey": "flavor.unique.inherited-rind",
-      "flavor": "Passed down grove to grove, sheath to sheath, until nobody remembers which trunk grew it first.",
-      "notes": "role ward-array (sheath), axis survivability. baseType item.plant-sheath-b-002 grepped from data/seed/items/base-types/plant-ward-array-b.json (heartwood class, frame plant, band b). Avoids atom.warding/atom.resilience as identity atoms per ssot-uniques.md §6.1 ScopeUnsupported (stat.modify on defense is match-scope only)."
-    },
-    {
-      "id": "unique.sunwoven-almanac-50-004",
-      "nameKey": "unique.palisade-of-the-precept",
-      "name": "Palisade of the Precept",
-      "frame": "plant",
-      "baseType": "item.plant-thorn-b-001",
-      "rarity": "chimeric",
-      "powerAxis": "control",
-      "fixedAtoms": [
-        { "family": "atom.might", "powerBand": "low" },
-        { "family": "atom.entangling", "powerBand": "medium" }
-      ],
-      "varianceSlot": {
-        "family": "atom.ferocity",
-        "variance": "narrow"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (atom.might, low) against a chimeric rare's three-to-four affixes. The entangling rider holds a line rather than adding damage, so it does not enter the raw-stat sum."
-      },
-      "tags": ["medium", "organic", "utility", "rooted", "signature"],
-      "flavorKey": "flavor.unique.palisade-of-the-precept",
-      "flavor": "The rule was written once, in the margin of a page nobody re-reads. The hedge still enforces it.",
-      "notes": "role armament-secondary (thorn), axis control. baseType item.plant-thorn-b-001 grepped from data/seed/items/base-types/plant-armament-secondary-b.json (thornguard class, frame plant, band b)."
-    },
-    {
-      "id": "unique.sunwoven-almanac-50-005",
-      "nameKey": "unique.perianth-of-the-appendix",
-      "name": "Perianth of the Appendix",
-      "frame": "plant",
-      "baseType": "item.plant-pollen-b-002",
-      "rarity": "fused",
-      "powerAxis": "utility",
-      "fixedAtoms": [
-        { "family": "atom.mending", "powerBand": "low" },
-        { "family": "atom.cleansing", "powerBand": "medium" }
-      ],
-      "varianceSlot": {
-        "family": "atom.vitality",
-        "variance": "wide"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (atom.mending, low) against a fused rare's two-to-three affixes. The cleansing rider clears a state rather than adding a stat, so it sits outside the raw-stat sum."
-      },
-      "tags": ["light", "organic", "utility", "rooted", "signature"],
-      "flavorKey": "flavor.unique.perianth-of-the-appendix",
-      "flavor": "A footnote nobody asked for, worn around the neck anyway. It answers the question before it is raised.",
-      "notes": "role jewel-major (pollen), axis utility. baseType item.plant-pollen-b-002 grepped from data/seed/items/base-types/plant-pollen-b.json (bulb class, frame plant, band b)."
-    },
-    {
-      "id": "unique.sunwoven-almanac-50-006",
-      "nameKey": "unique.longlineage",
-      "name": "Longlineage",
-      "frame": "plant",
-      "baseType": "item.plant-leaves-b-002",
-      "rarity": "chimeric",
-      "powerAxis": "economy",
-      "fixedAtoms": [
-        { "family": "atom.flourishing", "powerBand": "low" },
-        { "family": "atom.sunbloom", "powerBand": "medium" }
-      ],
-      "varianceSlot": {
-        "family": "atom.swiftness",
-        "variance": "narrow"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (atom.flourishing, low) against a chimeric rare's three-to-four affixes. The sunbloom rider banks sun rather than adding a combat stat, so it does not count toward the raw-stat total."
-      },
-      "tags": ["light", "organic", "utility", "rooted", "signature"],
-      "flavorKey": "flavor.unique.longlineage",
-      "flavor": "Every cutting remembers the hand that planted the first one. The ledger of who grew what is longer than any one gardener.",
-      "notes": "role manipulator (leaves), axis economy. baseType item.plant-leaves-b-002 grepped from data/seed/items/base-types/plant-manipulator-b.json (heartwood class, frame plant, band b). Name is a standalone uniqueSetSeedPools['sunwoven-almanac'] fusion entry, unused elsewhere in this theme (checked against data/seed/items/sets/sunwoven-almanac.json and the charms partitions)."
-    },
-    {
-      "id": "unique.sunwoven-almanac-50-007",
-      "nameKey": "unique.catalogued-overstory",
-      "name": "Catalogued Overstory",
-      "frame": "plant",
-      "baseType": "item.plant-canopy-b-002",
-      "rarity": "fused",
-      "powerAxis": "offense",
-      "fixedAtoms": [
-        { "family": "atom.might", "powerBand": "low" },
-        { "family": "atom.volley", "powerBand": "medium" }
-      ],
-      "varianceSlot": {
-        "family": "atom.ferocity",
-        "variance": "normal"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (atom.might, low) against a fused rare's two-to-three affixes. The volley rider is a triggered on-hit capability, not a stat line, so it stays outside the raw-stat sum."
-      },
-      "tags": ["medium", "organic", "offensive", "rooted", "signature"],
-      "flavorKey": "flavor.unique.catalogued-overstory",
-      "flavor": "Every branch numbered, every gap in the shade accounted for. Somewhere under all that indexing, it still throws thorns.",
-      "notes": "role mantle (canopy), axis offense. baseType item.plant-canopy-b-002 grepped from data/seed/items/base-types/plant-mantle-b.json (heartwood class, frame plant, band b)."
-    },
-    {
-      "id": "unique.sunwoven-almanac-50-008",
-      "nameKey": "unique.coronet-of-the-equinox",
-      "name": "Coronet of the Equinox",
-      "frame": "plant",
-      "baseType": "item.plant-crown-b-002",
-      "rarity": "chimeric",
-      "powerAxis": "survivability",
-      "fixedAtoms": [
-        { "family": "atom.vitality", "powerBand": "low" },
-        { "family": "atom.regeneration", "powerBand": "medium" }
+        {
+          "family": "atom.warded",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "low"
+        }
       ],
       "varianceSlot": {
         "family": "atom.fortitude",
-        "variance": "normal"
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "slight",
+        "family": "atom.vitality",
+        "note": "The recitation holds the line by borrowing from the root underneath it, and the root is never repaid in full."
+      },
+      "iconKey": "icon.unique.shroud-of-the-litany",
+      "flavorKey": "flavor.unique.shroud-of-the-litany",
+      "flavor": "Recited correctly, the same shield rises twice in the same season. It has never once explained where the second one comes from.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.sunwoven-almanac-50-004",
+      "nameKey": "unique.indexed-stamen",
+      "name": "Indexed Stamen",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-b-007",
+      "rarity": "chimeric",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.mesmerizing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.withering",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.venomous",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "target-afflicted",
+        "note": "It does not confuse the healthy. The stamen only enforces an entry already written against something already failing."
+      },
+      "iconKey": "icon.unique.indexed-stamen",
+      "flavorKey": "flavor.unique.indexed-stamen",
+      "flavor": "Every affliction the garden has ever recorded is filed here, in order, waiting to be read back to whatever earns the page.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.sunwoven-almanac-50-005",
+      "nameKey": "unique.pagelight",
+      "name": "Pagelight",
+      "frame": "plant",
+      "baseType": "item.plant-bract-b-001",
+      "rarity": "fused",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.gardener",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "narrow"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line (atom.vitality, low) against a chimeric rare's three-to-four affixes. The regeneration rider ticks on a timer rather than adding a stat line, so it does not enter the raw-stat sum."
+        "note": "One line, and it is not a combat line \u2014 the almanac never needed this slot to fight, only to keep growing something useful nearby."
       },
-      "tags": ["medium-light", "organic", "sturdy", "defensive", "rooted", "signature"],
-      "flavorKey": "flavor.unique.coronet-of-the-equinox",
-      "flavor": "Grown on the one day of the year when light and dark hold even. It has kept that balance ever since.",
-      "notes": "role head-guard (crown), axis survivability. baseType item.plant-crown-b-002 grepped from data/seed/items/base-types/plant-head-guard-b.json (bark class, frame plant, band b)."
+      "iconKey": "icon.unique.pagelight",
+      "flavorKey": "flavor.unique.pagelight",
+      "flavor": "It reads by its own glow, one page at a time, and has never once needed to ask what the light outside is doing.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.sunwoven-almanac-50-006",
+      "nameKey": "unique.root-of-the-equinox",
+      "name": "Root of the Equinox",
+      "frame": "plant",
+      "baseType": "item.plant-roots-b-007",
+      "rarity": "chimeric",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.regeneration",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Twice a year the almanac names a day worth digging for. The rest of the year this root holds exactly the ground it already has, and nothing more."
+      },
+      "iconKey": "icon.unique.root-of-the-equinox",
+      "flavorKey": "flavor.unique.root-of-the-equinox",
+      "flavor": "The almanac names the day. The root only ever needed telling once.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.sunwoven-almanac-50-007",
+      "nameKey": "unique.transcribed-resin",
+      "name": "Transcribed Resin",
+      "frame": "plant",
+      "baseType": "item.plant-glands-b-007",
+      "rarity": "fused",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.searing-strike",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        },
+        {
+          "family": "atom.deathblast",
+          "powerBand": "low",
+          "params": {
+            "element": "omni"
+          }
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "wide"
+      },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "slight",
+        "family": "atom.vitality",
+        "note": "The gland does not distinguish the page from the wound \u2014 every exact copy it fires costs the plant a little of what it copied from."
+      },
+      "iconKey": "icon.unique.transcribed-resin",
+      "flavorKey": "flavor.unique.transcribed-resin",
+      "flavor": "An exact copy of a procedure meant to record a wound, applied instead to cause one. The almanac was never wrong \u2014 only ever misread on purpose.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "offensive",
+        "signature"
+      ],
+      "acquisition": "source-locked"
+    },
+    {
+      "id": "unique.sunwoven-almanac-50-008",
+      "nameKey": "unique.longlineage",
+      "name": "Longlineage",
+      "frame": "plant",
+      "baseType": "item.plant-runner-a-011",
+      "rarity": "chimeric",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.regeneration",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.mending",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "below-half-health",
+        "note": "Every clone before this one is still counted. It only asserts itself once the original is already failing."
+      },
+      "iconKey": "icon.unique.longlineage",
+      "flavorKey": "flavor.unique.longlineage",
+      "flavor": "Cut the line at any point and the total does not change. Only which page carries it forward.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "acquisition": "source-locked"
     }
   ]
 }

@@ -18,7 +18,7 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "docs/architecture/item/ssot-equip-slots.md§2.5"
+    "sourceRef": "docs/architecture/item/ssot-equip-slots.md\u00a72.5"
   },
   "entries": [
     {
@@ -41,6 +41,16 @@
         "light",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -64,6 +74,16 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -87,6 +107,16 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -109,6 +139,16 @@
         "medium",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -132,6 +172,16 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -155,6 +205,16 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -178,6 +238,16 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -200,6 +270,16 @@
         "heavy",
         "organic",
         "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -223,6 +303,16 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -246,6 +336,16 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -269,6 +369,16 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     },
     {
@@ -292,6 +402,16 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
       ]
     }
   ]

@@ -45,6 +45,12 @@ public sealed record RememberedSlot
     public SlotState State { get; init; } = SlotState.Intact;
 
     public GuardState GuardState { get; init; }
+
+    /// <summary>
+    /// As visible as the slot itself (spec-structure-substrate.md) — not owner-gated, so it is
+    /// captured on any survey the same way <see cref="SlotTypeId"/> already is.
+    /// </summary>
+    public string? StructureId { get; init; }
 }
 
 /// <summary>

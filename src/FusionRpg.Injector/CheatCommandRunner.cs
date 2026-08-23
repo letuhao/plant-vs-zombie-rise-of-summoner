@@ -631,6 +631,9 @@ public static class CheatCommandRunner
             case "recipes":
                 CheatActions.DumpRecipes();
                 break;
+            case "almanac-dump-all":
+                CheatActions.DumpAlmanacAll();
+                break;
             case "reinforce":
                 CheatActions.ReinforceSelected();
                 break;

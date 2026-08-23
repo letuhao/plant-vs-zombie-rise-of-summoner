@@ -2,9 +2,14 @@
   "schemaVersion": 1,
   "kind": "unique",
   "_meta": {
-    "batch": "uniques-1c",
     "partition": "uniques/sunwoven-almanac/90",
     "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "uniques-1c",
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/ssot-uniques.md#3.7",
     "registryVersions": {
       "core": 1,
       "bands": 1,
@@ -13,271 +18,325 @@
       "classes": 2,
       "naming": 4,
       "words": 5
-    },
-    "exemplarVersion": 1,
-    "promptVersion": 1,
-    "model": "claude-sonnet-5",
-    "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "ssot-uniques.md#3.7"
+    }
   },
   "entries": [
     {
       "id": "unique.sunwoven-almanac-90-001",
-      "nameKey": "unique.sunlit-maw",
-      "name": "Sunlit Maw",
+      "nameKey": "unique.radiant-thresher",
+      "name": "Radiant Thresher",
       "frame": "plant",
-      "baseType": "item.plant-muzzle-b-007",
+      "baseType": "item.plant-muzzle-b-011",
+      "rarity": "almanac",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.might",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.searing-strike",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "front-row",
+        "note": "The almanac only trusts what stands at the fence line to carry that much sun \u2014 a step behind the front row and the thresher carries nothing but its own weight."
+      },
+      "iconKey": "icon.unique.radiant-thresher",
+      "flavorKey": "flavor.unique.radiant-thresher",
+      "flavor": "Every stalk it threshes earns a page before the husk even hits the ground \u2014 the same sunlight that ripens the field now rides the blade back out through it.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive",
+        "signature"
+      ],
+      "acquisition": "deterministic"
+    },
+    {
+      "id": "unique.sunwoven-almanac-90-002",
+      "nameKey": "unique.cortex-of-the-canon",
+      "name": "Cortex of the Canon",
+      "frame": "plant",
+      "baseType": "item.plant-stem-b-007",
+      "rarity": "sunwoven",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.fortitude",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.warded",
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "wide"
+      },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "moderate",
+        "family": "atom.ferocity",
+        "note": "A trunk grown to recite the same defense forever has no bark left over for striking anything \u2014 what the canon spends on holding, it never spends on hitting back."
+      },
+      "iconKey": "icon.unique.cortex-of-the-canon",
+      "flavorKey": "flavor.unique.cortex-of-the-canon",
+      "flavor": "The canon does not explain itself twice. Grown to the letter of a rule copied out a hundred seasons running, this bark holds exactly the line it was told to and asks nothing else of the plant underneath it.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "acquisition": "deterministic"
+    },
+    {
+      "id": "unique.sunwoven-almanac-90-003",
+      "nameKey": "unique.wovenpage",
+      "name": "Wovenpage",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-b-009",
+      "rarity": "almanac",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.dooming",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.stoicism",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.evasion",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "target-afflicted",
+        "note": "It has nothing to say about a wound that was never written down \u2014 only what already carries a mark gets edited out of the record."
+      },
+      "iconKey": "icon.unique.wovenpage",
+      "flavorKey": "flavor.unique.wovenpage",
+      "flavor": "Thin as a leaf pressed flat and bound between two others, it reads whatever affliction already marks the field and unmakes the entry, page by page, the moment the ink is fresh enough to lift.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "acquisition": "deterministic"
+    },
+    {
+      "id": "unique.sunwoven-almanac-90-004",
+      "nameKey": "unique.pollen-of-the-appendix",
+      "name": "Pollen of the Appendix",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-a-001",
+      "rarity": "sunwoven",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.flourishing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.quickening",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "It was never bound into the main text. What it offers is real, and it is exactly one appendix's worth of use \u2014 no more, on purpose."
+      },
+      "iconKey": "icon.unique.pollen-of-the-appendix",
+      "flavorKey": "flavor.unique.pollen-of-the-appendix",
+      "flavor": "Every almanac needs a page nobody reads until the season it suddenly matters. This pollen is that page, drifting loose at the back of the garden's record, useful the instant anyone remembers to open it.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility"
+      ],
+      "acquisition": "deterministic"
+    },
+    {
+      "id": "unique.sunwoven-almanac-90-005",
+      "nameKey": "unique.exact-involucre",
+      "name": "Exact Involucre",
+      "frame": "plant",
+      "baseType": "item.plant-bract-b-009",
+      "rarity": "almanac",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.precision",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.keen-edge",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "It was built to count precisely, not to fight precisely \u2014 the involucre spends its whole allowance on getting the number right and keeps almost nothing back for a blow."
+      },
+      "iconKey": "icon.unique.exact-involucre",
+      "flavorKey": "flavor.unique.exact-involucre",
+      "flavor": "Every grain the field yields is weighed and logged the instant it is sensed, down to the exact measure the almanac has always insisted on \u2014 nothing here rounds up, and nothing rounds down either.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "deterministic"
+    },
+    {
+      "id": "unique.sunwoven-almanac-90-006",
+      "nameKey": "unique.hypocotyl-of-the-precept",
+      "name": "Hypocotyl of the Precept",
+      "frame": "plant",
+      "baseType": "item.plant-roots-a-006",
       "rarity": "sunwoven",
       "powerAxis": "offense",
       "fixedAtoms": [
         {
           "family": "atom.searing-strike",
-          "powerBand": "extreme",
-          "params": { "element": "light" }
+          "powerBand": "medium",
+          "params": {
+            "element": "light"
+          }
         },
         {
-          "family": "atom.might",
-          "powerBand": "high"
+          "family": "atom.swiftness",
+          "powerBand": "low"
         }
       ],
       "varianceSlot": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "variance": "narrow"
       },
       "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (might) against a sunwoven/almanac rarity's own 4-5 affix count band. Everything else the muzzle does is the on-hit rider, which is generous precisely because the stat sheet does not see it."
+        "kind": "conditional",
+        "condition": "below-half-health",
+        "note": "The precept only applies once the root is already failing \u2014 at full health it is exactly the quiet foothold it looks like, and nothing more."
       },
-      "tags": ["heavy", "organic", "offensive", "rooted", "signature"],
-      "iconKey": "icon.unique.sunlit-maw",
-      "flavorKey": "flavor.unique.sunlit-maw",
-      "flavor": "Every seed it fires follows the same taught arc the last one did — not because the aim is perfect, but because the lesson was.",
-      "notes": "element:light matches the theme's own affinity rather than an arbitrary pick. powerBand held to high/extreme on both fixed lines to sit inside rarity.ladder ordinal 90's tierWindow (4-5) — the exemplar's cultivated entry (tierWindow 1-3) used medium/low for the identical reason, scaled up."
-    },
-    {
-      "id": "unique.sunwoven-almanac-90-002",
-      "nameKey": "unique.trunk-of-the-lineage",
-      "name": "Trunk of the Lineage",
-      "frame": "plant",
-      "baseType": "item.plant-stem-b-007",
-      "rarity": "almanac",
-      "powerAxis": "survivability",
-      "fixedAtoms": [
-        {
-          "family": "atom.regeneration",
-          "powerBand": "extreme"
-        },
-        {
-          "family": "atom.fortitude",
-          "powerBand": "high"
-        }
+      "iconKey": "icon.unique.hypocotyl-of-the-precept",
+      "flavorKey": "flavor.unique.hypocotyl-of-the-precept",
+      "flavor": "The garden's oldest precept says a dying root strikes back before it lets go. Pale and still underground, this hypocotyl has never once needed to be told the rule a second time.",
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "offensive"
       ],
-      "varianceSlot": {
-        "family": "atom.mending",
-        "variance": "narrow"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (fortitude). The recurring heal is a resource.delta rider the affix pool cannot roll on this role at this size, which is the entire point of the fixed core."
-      },
-      "tags": ["heavy", "organic", "defensive", "rooted", "signature"],
-      "iconKey": "icon.unique.trunk-of-the-lineage",
-      "flavorKey": "flavor.unique.trunk-of-the-lineage",
-      "flavor": "Each ring records a season someone else survived first, and the trunk has not forgotten a single one of them.",
-      "notes": "Noun 'trunk' and concept 'lineage' both drawn from this partition's own theme pools (nounPools['core-guard.plant'], conceptPools['sunwoven-almanac']); neither word appears in the sets/charms files already authored against this theme."
-    },
-    {
-      "id": "unique.sunwoven-almanac-90-003",
-      "nameKey": "unique.copied-carapace",
-      "name": "Copied Carapace",
-      "frame": "plant",
-      "baseType": "item.plant-sheath-b-002",
-      "rarity": "sunwoven",
-      "powerAxis": "control",
-      "fixedAtoms": [
-        {
-          "family": "atom.sust-callus",
-          "powerBand": "extreme"
-        },
-        {
-          "family": "atom.resilience",
-          "powerBand": "high"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.warding",
-        "variance": "narrow"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (resilience). The on-damage-taken shield stack is the rider a ward-array's affix pool at this rung could not offer on top of a normal roll."
-      },
-      "tags": ["heavy", "organic", "defensive", "rooted", "signature"],
-      "iconKey": "icon.unique.copied-carapace",
-      "flavorKey": "flavor.unique.copied-carapace",
-      "flavor": "The original shell cracked centuries ago. This one was copied down to the seam, and the seam has never once needed testing.",
-      "notes": "Deliberately avoids atom.carapace and atom.plating despite the name: both write arm1Max/arm2Max, Unity fields that exist only on humanoid/hybrid frames (frames: [\"humanoid\",\"hybrid\"] on both, checked against g-armour.json) — the exact trap the unique exemplar's own notes call out. resilience/warding/sust-callus all carry frames [\"humanoid\",\"plant\"] and are the plant-legal equivalents."
-    },
-    {
-      "id": "unique.sunwoven-almanac-90-004",
-      "nameKey": "unique.thicket-of-the-litany",
-      "name": "Thicket of the Litany",
-      "frame": "plant",
-      "baseType": "item.plant-thorn-b-004",
-      "rarity": "almanac",
-      "powerAxis": "utility",
-      "fixedAtoms": [
-        {
-          "family": "atom.warded",
-          "powerBand": "extreme",
-          "params": { "element": "light" }
-        },
-        {
-          "family": "atom.quickening",
-          "powerBand": "high"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.sust-freshgraft",
-        "variance": "normal"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (quickening). The on-spawn shield is a rider, not a stat, and reads generous only because the sheet cannot price it."
-      },
-      "tags": ["heavy", "organic", "utility", "rooted", "signature"],
-      "iconKey": "icon.unique.thicket-of-the-litany",
-      "flavorKey": "flavor.unique.thicket-of-the-litany",
-      "flavor": "It recites the same warning to every hand that reaches in, and the warning has never once needed updating.",
-      "notes": "element:light again ties to the theme's own elementAffinity. 'litany' drawn from conceptPools['sunwoven-almanac'], not yet used by the sets or charms files already authored against this theme."
-    },
-    {
-      "id": "unique.sunwoven-almanac-90-005",
-      "nameKey": "unique.goldenmargin",
-      "name": "Goldenmargin",
-      "frame": "plant",
-      "baseType": "item.plant-pollen-b-007",
-      "rarity": "sunwoven",
-      "powerAxis": "economy",
-      "fixedAtoms": [
-        {
-          "family": "atom.midas",
-          "powerBand": "extreme"
-        },
-        {
-          "family": "atom.vitality",
-          "powerBand": "high"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.econ-bounty",
-        "variance": "wide"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (vitality). Both economy families (midas, econ-bounty) sit in bands.v1.json's familiesOutOfFourWaySplit note, not the primaryChannel raw-stat group, so this jewel still carries only a single stat-sheet line."
-      },
-      "tags": ["light", "arcane", "utility", "signature"],
-      "iconKey": "icon.unique.goldenmargin",
-      "flavorKey": "flavor.unique.goldenmargin",
-      "flavor": "A scribe once noted, in gold ink, that this bloom pays for itself — and every gardener since has believed the margin note over the flower.",
-      "notes": "Name is a whole word from uniqueSetSeedPools['sunwoven-almanac'] (pattern 'fusion', pre-composed, used as-is rather than re-decomposed per naming.v1.json's rule 2a). Not yet used by sets.sunwoven-almanac.json or the charm files already authored against this theme (they used firstedition and copyhand from the same pool)."
-    },
-    {
-      "id": "unique.sunwoven-almanac-90-006",
-      "nameKey": "unique.rehearsed-frond",
-      "name": "Rehearsed Frond",
-      "frame": "plant",
-      "baseType": "item.plant-leaves-b-001",
-      "rarity": "almanac",
-      "powerAxis": "offense",
-      "fixedAtoms": [
-        {
-          "family": "atom.lifesteal",
-          "powerBand": "extreme"
-        },
-        {
-          "family": "atom.savagery",
-          "powerBand": "high"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.tempo-haste",
-        "variance": "narrow"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (savagery). The on-hit leech is the resource.delta rider; the sheet only ever sees the attack line."
-      },
-      "tags": ["medium-light", "organic", "offensive", "rooted", "signature"],
-      "iconKey": "icon.unique.rehearsed-frond",
-      "flavorKey": "flavor.unique.rehearsed-frond",
-      "flavor": "It has practiced the same cut ten thousand times and improved on none of them, because none of them ever needed improving.",
-      "notes": "Adjective 'rehearsed' from themeAdjectivePools['sunwoven-almanac'], not used elsewhere in this theme's already-authored sets/charms files."
+      "acquisition": "deterministic"
     },
     {
       "id": "unique.sunwoven-almanac-90-007",
-      "nameKey": "unique.arbour-of-the-canon",
-      "name": "Arbour of the Canon",
+      "nameKey": "unique.illuminated-balsam",
+      "name": "Illuminated Balsam",
       "frame": "plant",
-      "baseType": "item.plant-canopy-b-002",
-      "rarity": "sunwoven",
+      "baseType": "item.plant-glands-b-008",
+      "rarity": "almanac",
       "powerAxis": "survivability",
       "fixedAtoms": [
         {
-          "family": "atom.regeneration",
-          "powerBand": "extreme"
+          "family": "atom.fortitude",
+          "powerBand": "high"
         },
         {
-          "family": "atom.bulwark",
-          "powerBand": "high"
+          "family": "atom.regeneration",
+          "powerBand": "medium"
         }
       ],
       "varianceSlot": {
-        "family": "atom.fortitude",
+        "family": "atom.cleansing",
         "variance": "normal"
       },
       "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (bulwark). The recurring heal is the rider; bulwark is the item's only line an ordinary stat sheet would ever show."
+        "kind": "conditional",
+        "condition": "above-half-health",
+        "note": "The balsam seals a wound before it becomes serious, not after \u2014 once the plant falls past half its own vigor, the light in it has nothing left over to lend."
       },
-      "tags": ["heavy", "organic", "defensive", "rooted", "signature"],
-      "iconKey": "icon.unique.arbour-of-the-canon",
-      "flavorKey": "flavor.unique.arbour-of-the-canon",
-      "flavor": "Grown to the letter of a design nobody living wrote, the arbour holds the shape it was told to hold and asks no questions about who told it.",
-      "notes": "Concept 'canon' from conceptPools['sunwoven-almanac'], unused elsewhere in this theme's committed sets/charms content. 'Arbour' names the physical shape of a mantle piece (nounPools['mantle.plant']) — a covering garment, not a claim that the whole theme is a place, which the theme's own avoid-list reserves for hollow-orchard."
+      "iconKey": "icon.unique.illuminated-balsam",
+      "flavorKey": "flavor.unique.illuminated-balsam",
+      "flavor": "Sealed light pools in this gland the way sap pools in a cut that never quite closes \u2014 bright enough to read by, and generous only while there is still enough of the plant left to spare it.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "acquisition": "deterministic"
     },
     {
       "id": "unique.sunwoven-almanac-90-008",
-      "nameKey": "unique.pagelight",
-      "name": "Pagelight",
+      "nameKey": "unique.sunverse",
+      "name": "Sunverse",
       "frame": "plant",
-      "baseType": "item.plant-crown-b-007",
-      "rarity": "almanac",
+      "baseType": "item.plant-runner-a-009",
+      "rarity": "sunwoven",
       "powerAxis": "control",
       "fixedAtoms": [
         {
-          "family": "atom.stalwart",
-          "powerBand": "extreme"
+          "family": "atom.summoner",
+          "powerBand": "medium"
         },
         {
-          "family": "atom.warding",
-          "powerBand": "high"
+          "family": "atom.volley",
+          "powerBand": "low"
         }
       ],
       "varianceSlot": {
-        "family": "atom.sust-grit",
-        "variance": "narrow"
+        "family": "atom.quickening",
+        "variance": "wide"
       },
       "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (warding). The status-resist rider is a status-channel family, not a primaryChannel stat, so it is generous for the same reason every other rider in this file is."
+        "kind": "conditional",
+        "condition": "actor-is-killer",
+        "note": "The verse only repeats itself for a gardener that has already proven it can finish something \u2014 until the first kill lands, this runner keeps its offspring to itself."
       },
-      "tags": ["medium", "arcane", "defensive", "signature"],
-      "iconKey": "icon.unique.pagelight",
-      "flavorKey": "flavor.unique.pagelight",
-      "flavor": "Read enough pages back to back and the crown starts glowing on its own — not with an idea, only with everything that was ever written down.",
-      "notes": "Name is a whole word from uniqueSetSeedPools['sunwoven-almanac'], unused elsewhere in this theme's authored content. Kept arcane/no-origin-tag rather than organic/rooted since the flavor treats it as a woven artifact of pages, not living tissue."
+      "iconKey": "icon.unique.sunverse",
+      "flavorKey": "flavor.unique.sunverse",
+      "flavor": "Every runner it sends out carries one verse of the same recorded sun, rooting fresh the instant the gardener that grew it draws its first blood. The almanac calls this multiplication; the garden just calls it Tuesday.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "acquisition": "deterministic"
     }
   ]
 }

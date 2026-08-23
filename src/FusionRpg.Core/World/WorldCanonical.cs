@@ -34,11 +34,12 @@ public static class WorldCanonical
             Row(sb, "sector", s.SectorId, s.TypeId, s.Climate, s.DangerBand, s.Phase, s.OwnerFactionId,
                 s.StabilityMilli, s.PressureMilli, s.DepletionMilli, s.DevelopmentLevel,
                 s.AuthoredIntel, s.LastSeenTurn, s.LayoutX, s.LayoutY,
-                s.LoamStock, s.FractureIntensityMilli);
+                s.LoamStock, s.FractureIntensityMilli, s.WardenBindingId, s.NeglectedTurns);
 
             foreach (var sl in s.Slots)
                 Row(sb, "slot", s.SectorId, sl.SlotIndex, sl.SlotTypeId, sl.Element, sl.State,
-                    sl.OwnerFactionId, sl.GuardWaveId, sl.GuardState);
+                    sl.OwnerFactionId, sl.GuardWaveId, sl.GuardState, sl.StructureId,
+                    sl.ConstructionTurnsRemaining);
         }
 
         foreach (var l in w.Lanes)
@@ -49,12 +50,12 @@ public static class WorldCanonical
         {
             Row(sb, "entity", e.EntityId, e.Kind, e.OwnerFactionId, e.AtSectorId, e.OnLaneId,
                 e.OnLaneTowardSectorId, e.LaneProgressMilli, e.Stance, e.MovementRemaining,
-                e.Routed ? 1 : 0);
+                e.Routed ? 1 : 0, e.CarriedLoam);
 
             for (var i = 0; i < e.Members.Count; i++)
             {
                 var m = e.Members[i];
-                Row(sb, "member", e.EntityId, i, m.InstanceId, m.SpeciesId, m.Level, m.Hp, m.Wounds);
+                Row(sb, "member", e.EntityId, i, m.InstanceId, m.SpeciesId, m.Level, m.Hp, m.Wounds, m.Role);
             }
         }
 
@@ -69,7 +70,8 @@ public static class WorldCanonical
 
             foreach (var slot in snapshot.Slots)
                 Row(sb, "intel-slot", faction.FactionId, snapshot.SectorId, slot.SlotIndex,
-                    slot.SlotTypeId, slot.Element, slot.GuardWaveId, slot.State, slot.GuardState);
+                    slot.SlotTypeId, slot.Element, slot.GuardWaveId, slot.State, slot.GuardState,
+                    slot.StructureId);
 
             foreach (var force in snapshot.Forces)
                 Row(sb, "intel-force", faction.FactionId, snapshot.SectorId, force.EntityId,

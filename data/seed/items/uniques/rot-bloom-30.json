@@ -23,10 +23,10 @@
   "entries": [
     {
       "id": "unique.rot-bloom-30-001",
-      "nameKey": "unique.rotwake",
-      "name": "Rotwake",
+      "nameKey": "unique.teeming-spitter",
+      "name": "Teeming Spitter",
       "frame": "plant",
-      "baseType": "item.plant-muzzle-b-002",
+      "baseType": "item.plant-muzzle-a-003",
       "rarity": "grafted",
       "powerAxis": "offense",
       "fixedAtoms": [
@@ -38,7 +38,7 @@
           }
         },
         {
-          "family": "atom.gardener",
+          "family": "atom.deathblast",
           "powerBand": "low"
         }
       ],
@@ -47,177 +47,151 @@
         "variance": "narrow"
       },
       "counterPressure": {
-        "kind": "narrow",
-        "note": "A grafted nozzle draws only one or two affixes at this rung. This one carries a single raw-stat line (ferocity, narrow) and nothing else that a stat sheet can price: the earth rider is elemental damage the pool would already grant on-hit, and the on-death plant spawn is board presence, not a number. It loses the stat race to an ordinary grafted rare and wins on the corpse-into-crop it leaves behind."
+        "kind": "conditional",
+        "condition": "target-afflicted",
+        "note": "The earth-burn on hit only rewards a target already carrying a status \u2014 the spitter finishes rot it did not start, so it does nothing extra against a clean target."
       },
+      "iconKey": "icon.unique.teeming-spitter",
+      "flavorKey": "flavor.unique.teeming-spitter",
+      "flavor": "What it spits was rot an hour ago. Give it a season and it will be soil, then bloom, then rot again.",
       "tags": [
         "medium",
         "organic",
-        "offensive",
         "rooted",
+        "offensive",
         "signature"
       ],
-      "notes": "REFERENCES RESOLVE: baseType item.plant-muzzle-b-002 (plant-armament-primary-b, class nozzle, band b) is frozen wave-1a content. rarity 'grafted' is ordinal 30 of core.v1.json, this partition's assigned floor rung. Both fixedAtoms are role-legal for armament-primary as authored in their own family files (g.on-hit, g.on-death) — no generator rule broken here. atom.searing-strike's element param is set to 'earth', the one element rot-bloom's theme entry (themes.v1.json) claims, read as the nozzle spraying compost-acid rather than fire. atom.gardener (spawn a plant on death) is the rot-bloom identity atom of the whole file: the nozzle that kills also seeds what grows over the kill. Name 'Rotwake' is uniqueSetSeedPools['rot-bloom'] used bare (fusion pattern, a pre-registered seed noun), per words.v1.json poolAccess.uniquePartition."
+      "acquisition": "drop"
     },
     {
       "id": "unique.rot-bloom-30-002",
-      "nameKey": "unique.composted-harness",
-      "name": "Composted Harness",
+      "nameKey": "unique.sodden-raincoat",
+      "name": "Sodden Raincoat",
       "frame": "humanoid",
       "baseType": "item.humanoid-torso-b-002",
       "rarity": "cultivated",
       "powerAxis": "survivability",
       "fixedAtoms": [
         {
-          "family": "atom.warded",
-          "powerBand": "medium",
-          "params": {
-            "element": "earth"
-          }
+          "family": "atom.fortitude",
+          "powerBand": "medium"
         },
         {
-          "family": "atom.vitality",
-          "powerBand": "medium"
+          "family": "atom.mending",
+          "powerBand": "low"
         }
       ],
       "varianceSlot": {
-        "family": "atom.regeneration",
-        "variance": "narrow"
+        "family": "atom.vitality",
+        "variance": "normal"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "A cultivated torso guard draws two to three affixes; this one has exactly one raw-stat line (vitality) plus a shield grant and a regen roll, both of which price separately from a flat maxHp number. Its whole identity is a corpse that keeps composting itself back into a working shell, not the biggest hp figure in the slot."
+        "note": "A cultivated rung draws two to three affixes; this coat offers one raw-stat line (fortitude) plus a low mending trickle, landing well under the 60% raw-stat ceiling against that baseline."
       },
+      "iconKey": "icon.unique.sodden-raincoat",
+      "flavorKey": "flavor.unique.sodden-raincoat",
+      "flavor": "It never dries. Nothing under it does either, and that is exactly the point.",
       "tags": [
         "medium-heavy",
-        "necrotic",
+        "organic",
+        "sturdy",
         "defensive",
-        "undead",
         "signature"
       ],
-      "notes": "REFERENCES RESOLVE: baseType item.humanoid-torso-b-002 (humanoid-core-guard-b, class scale, band b) is frozen wave-1a content. rarity 'cultivated' is ordinal 40, the upper rung of this partition's assigned 30/40 band. Both fixedAtoms are role-legal for core-guard (g.sustain, g.life both list it) — no generator rule broken. atom.warded's element is 'earth' for the same reason as -001, matching rot-bloom's single claimed element. Name is 'compound' (themeAdjectivePools['rot-bloom'] 'composted' + nounPools['core-guard.humanoid'] 'harness')."
+      "acquisition": "drop"
     },
     {
       "id": "unique.rot-bloom-30-003",
-      "nameKey": "unique.shroud-of-the-turning",
-      "name": "Shroud of the Turning",
+      "nameKey": "unique.shroud-of-decay",
+      "name": "Shroud of Decay",
       "frame": "plant",
-      "baseType": "item.plant-sheath-b-001",
+      "baseType": "item.plant-sheath-a-002",
       "rarity": "grafted",
       "powerAxis": "control",
       "fixedAtoms": [
         {
-          "family": "atom.mesmerizing",
-          "powerBand": "low"
-        },
-        {
-          "family": "atom.plating",
+          "family": "atom.warded",
           "powerBand": "medium"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.shield-regen",
-        "variance": "narrow"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "One raw-stat line (plating) against a grafted rung's one-to-two affix baseline, plus a shield-regen roll. The mesmerize rider is a capability a stat sheet cannot see and does not count toward the ceiling — this sheath is not competing with a plain armour rare on defense alone."
-      },
-      "tags": [
-        "heavy",
-        "organic",
-        "defensive",
-        "rooted",
-        "signature"
-      ],
-      "notes": "ROLE BREAK, SANCTIONED: atom.mesmerizing's authored `roles` (g.affliction) do not include ward-array — the affliction group's legal roles are the hit-adjacent ones (armament-primary/-secondary, manipulator, jewel-major, jewel-minor-a/-b, sense). A unique's fixed atoms are not drawn from the affix pool, so no `affix_pool_tag` filter ever applies to them (ssot-uniques.md §3.5's rule-breaking ladder, rung 2, the same device the unique exemplar demonstrates on a head-guard/on-hit pairing). No MACHINE rule is touched: status.apply's `hypno` payload is a working, unmutexed status (g-affliction.json's own notes on atom.mesmerizing), used here at its own family's lowest band precisely because turning a zombie against its allies is the strongest thing this status catalog can do. This is the control-axis row for ward-array and the whole reason the sheath is worth wearing over an ordinary grafted rare: pollen spores off a rotting sheath, not a stat. REFERENCES RESOLVE: baseType item.plant-sheath-b-001 (plant-ward-array-b, class bark, band b) is frozen wave-1a content; atom.plating and atom.shield-regen are both role-legal for ward-array in their own family files (g.armour, g.shield-stat). Name is 'of-construct': nounPools['ward-array.plant'] 'shroud' + conceptPools['rot-bloom'] 'turning' (the compost pile's own turning, not a magic-item connective invention)."
-    },
-    {
-      "id": "unique.rot-bloom-30-004",
-      "nameKey": "unique.fetid-lid",
-      "name": "Fetid Lid",
-      "frame": "humanoid",
-      "baseType": "item.humanoid-off-hand-a-001",
-      "rarity": "cultivated",
-      "powerAxis": "utility",
-      "fixedAtoms": [
-        {
-          "family": "atom.cleansing",
-          "powerBand": "low"
-        },
-        {
-          "family": "atom.sust-freshgraft",
-          "powerBand": "low"
         }
       ],
       "varianceSlot": {
         "family": "atom.mending",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "below-half-health",
+        "note": "The ward layer only forms once the wearer is already dying \u2014 a shroud that will not close over anything still standing."
+      },
+      "iconKey": "icon.unique.shroud-of-decay",
+      "flavorKey": "flavor.unique.shroud-of-decay",
+      "flavor": "Wrap the wound before the rot decides what grows there instead.",
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "acquisition": "drop"
+    },
+    {
+      "id": "unique.rot-bloom-30-004",
+      "nameKey": "unique.putrid-choker",
+      "name": "Putrid Choker",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-neck-a-004",
+      "rarity": "cultivated",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.lifesteal",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.fortitude",
         "variance": "narrow"
       },
       "counterPressure": {
-        "kind": "narrow",
-        "note": "Both fixed atoms are status.clear riders, not raw stats — a cultivated off-hand rare in this slot would rather carry a flat defensive number, which this focus deliberately does not. The single raw-stat line is the rolled mending slot, well under a cultivated rung's two-to-three affix baseline."
+        "kind": "drawback",
+        "severityBand": "slight",
+        "family": "atom.vitality",
+        "note": "Everything it pulls in it takes a small cut of first \u2014 the wearer's own baseline vitality is what feeds the exchange."
       },
+      "iconKey": "icon.unique.putrid-choker",
+      "flavorKey": "flavor.unique.putrid-choker",
+      "flavor": "Worn tight enough to smell everything it has already started to become.",
       "tags": [
         "light",
         "necrotic",
+        "fragile",
         "utility",
-        "undead",
         "signature"
       ],
-      "notes": "REFERENCES RESOLVE: baseType item.humanoid-off-hand-a-001 (humanoid-armament-secondary-a, class focus, band a) is frozen wave-1a content. All three atoms are role-legal for armament-secondary as authored (g.sustain lists it for cleansing and sust-freshgraft; g.life lists it for mending) — no generator rule broken. atom.sust-freshgraft ('a new graft carries none of the old plant's rot', g-sustain.json's own note) is the rot-bloom identity atom here: a lid that lets whatever is underneath start over clean. Name is 'compound': themeAdjectivePools['rot-bloom'] 'fetid' + nounPools['armament-secondary.humanoid'] 'lid'."
+      "acquisition": "drop"
     },
     {
       "id": "unique.rot-bloom-30-005",
-      "nameKey": "unique.wormtithe",
-      "name": "Wormtithe",
+      "nameKey": "unique.sepal-of-silage",
+      "name": "Sepal of Silage",
       "frame": "plant",
-      "baseType": "item.plant-pollen-a-001",
+      "baseType": "item.plant-bract-b-003",
       "rarity": "grafted",
       "powerAxis": "economy",
       "fixedAtoms": [
         {
-          "family": "atom.sunbloom",
+          "family": "atom.midas",
           "powerBand": "medium"
         },
         {
-          "family": "atom.econ-bounty",
-          "powerBand": "medium"
-        }
-      ],
-      "varianceSlot": {
-        "family": "atom.econ-graze",
-        "variance": "narrow"
-      },
-      "counterPressure": {
-        "kind": "narrow",
-        "note": "Every atom on this pollen sac is a resource.economy rider, and none of the three is a raw combat stat — a grafted jewel-major rare would rather carry a defensive or offensive line, which this one has none of. It pays out on kills and hits landed, and it pays nothing while the wearer is standing still."
-      },
-      "tags": [
-        "light",
-        "organic",
-        "utility",
-        "rooted",
-        "signature"
-      ],
-      "notes": "REFERENCES RESOLVE: baseType item.plant-pollen-a-001 (plant-pollen-a, class spore, band a) is frozen wave-1a content. All three atoms are role-legal for jewel-major (g.economy lists it) — no generator rule broken. atom.sunbloom and atom.econ-bounty ('Rot Bounty' — a decay/harvest-flavoured kill ledger per g-economy.json's own note) are both economy-axis by family design, matching this row's allocation directly. Name is 'fusion': uniqueSetSeedPools['rot-bloom'] 'wormtithe' used bare, per words.v1.json poolAccess.uniquePartition."
-    },
-    {
-      "id": "unique.rot-bloom-30-006",
-      "nameKey": "unique.claw-of-the-glut",
-      "name": "Claw of the Glut",
-      "frame": "humanoid",
-      "baseType": "item.humanoid-hands-b-002",
-      "rarity": "cultivated",
-      "powerAxis": "offense",
-      "fixedAtoms": [
-        {
-          "family": "atom.venomous",
-          "powerBand": "medium"
-        },
-        {
-          "family": "atom.savagery",
-          "powerBand": "high"
+          "family": "atom.ferocity",
+          "powerBand": "low"
         }
       ],
       "varianceSlot": {
@@ -226,89 +200,139 @@
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "atom.savagery is a `More`-op multiplier, ssot-affixes.md's own named example of a rare-tier-band-only family — its floor is powerBand 'high' with no lower rung, so this claw is fixed at that ceiling rather than rolled into it. Against that, the only rolled raw-stat line is the might variance slot; the poison rider is a status, not a stat, keeping the summed raw-stat count under a cultivated rung's own two-to-three affix baseline."
+        "note": "Its raw-stat contribution is a single low ferocity line; the economy payoff is a capability, not a stat, so the item stays well under the raw-stat ceiling for its rung."
       },
+      "notes": "atom.midas is not in sense's own implicit slate (classes.v1.json lists that slate as a stopgap of atom.might/atom.ferocity only, because sense's named families \u2014 accuracy, crit rate \u2014 are stat.derived and quarantined). A unique's fixed core sits outside the drawn pool, where the role's affix-pool-tag filter never runs, so the break costs the schema nothing: the sense role stays exactly as unrollable for midas as before, and this one item is a deliberate exception, not a hole.",
+      "iconKey": "icon.unique.sepal-of-silage",
+      "flavorKey": "flavor.unique.sepal-of-silage",
+      "flavor": "It does not flower for bees. It flowers for what the compost pays back.",
       "tags": [
         "medium",
-        "necrotic",
-        "offensive",
-        "undead",
+        "organic",
+        "rooted",
+        "utility",
         "signature"
       ],
-      "notes": "REFERENCES RESOLVE: baseType item.humanoid-hands-b-002 (humanoid-manipulator-b, class scale, band b) is frozen wave-1a content. All three atoms are role-legal for manipulator as authored (g.affliction and g.attack both list it) — no generator rule broken. Name is 'of-construct': nounPools['manipulator.humanoid'] 'claw' + conceptPools['rot-bloom'] 'glut' (an overabundance the decay cycle produces, not a magic-item connective)."
+      "acquisition": "drop"
+    },
+    {
+      "id": "unique.rot-bloom-30-006",
+      "nameKey": "unique.burgeoning-gumboot",
+      "name": "Burgeoning Gumboot",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-feet-b-003",
+      "rarity": "cultivated",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.might",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.regeneration",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "front-row",
+        "note": "The kick only lands from the front row \u2014 a boot with nothing to plant itself against does not swing any harder."
+      },
+      "notes": "atom.might is not in footing's own implicit slate (classes.v1.json's stopgap there is atom.regeneration/atom.vitality only, since the role's named humanoid identity \u2014 evasion, movement, initiative \u2014 has no bindable family today). Fixed on a unique's core rather than drawn from the role's pool, so footing's rolled pool stays exactly as offense-free as it was.",
+      "iconKey": "icon.unique.burgeoning-gumboot",
+      "flavorKey": "flavor.unique.burgeoning-gumboot",
+      "flavor": "Something took root in the sole. It has not slowed the kicking any.",
+      "tags": [
+        "medium",
+        "organic",
+        "sturdy",
+        "offensive",
+        "signature"
+      ],
+      "acquisition": "drop"
     },
     {
       "id": "unique.rot-bloom-30-007",
-      "nameKey": "unique.overgrown-canopy",
-      "name": "Overgrown Canopy",
+      "nameKey": "unique.mouldreign",
+      "name": "Mouldreign",
       "frame": "plant",
-      "baseType": "item.plant-canopy-b-001",
+      "baseType": "item.plant-glands-a-003",
       "rarity": "grafted",
       "powerAxis": "survivability",
       "fixedAtoms": [
         {
-          "family": "atom.bulwark",
-          "powerBand": "high"
+          "family": "atom.mending",
+          "powerBand": "medium"
         },
         {
-          "family": "atom.warded",
-          "powerBand": "medium",
-          "params": {
-            "element": "earth"
-          }
+          "family": "atom.rotting",
+          "powerBand": "low"
         }
       ],
       "varianceSlot": {
-        "family": "atom.regeneration",
-        "variance": "narrow"
+        "family": "atom.withering",
+        "variance": "wide"
       },
       "counterPressure": {
-        "kind": "narrow",
-        "note": "atom.bulwark is this group's own named rare-tier-band family (ssot-affixes.md §4.4, alongside savagery); its floor is 'high' with nothing beneath it, so it is fixed rather than rolled. One raw-stat line at that ceiling plus a shield grant and a rolled regen tick stay within a grafted rung's one-to-two affix baseline once the shield (not a stat channel) is set aside."
+        "kind": "drawback",
+        "severityBand": "moderate",
+        "family": "atom.vitality",
+        "note": "The wound knits shut the same way rot spreads \u2014 the mending is real, but it costs the gland's own baseline vitality to run."
       },
+      "notes": "atom.mending is a survivability family, not one of infusion's own legal families (classes.v1.json's infusion slate is the status.apply cluster \u2014 buttering, freezing, rotting, and the rest). Placed in the unique's fixed core rather than the drawn pool, so infusion's rolled affixes stay exactly the status-only set they were; atom.rotting is drawn from infusion's real slate and doubles as the theme's own name.",
+      "iconKey": "icon.unique.mouldreign",
+      "flavorKey": "flavor.unique.mouldreign",
+      "flavor": "The wound closes the way a fallen log closes over \u2014 slowly, and with something living in the seam.",
       "tags": [
-        "heavy",
-        "organic",
-        "defensive",
+        "medium-light",
+        "necrotic",
         "rooted",
+        "defensive",
         "signature"
       ],
-      "notes": "REFERENCES RESOLVE: baseType item.plant-canopy-b-001 (plant-mantle-b, class bark, band b) is frozen wave-1a content. Both fixedAtoms are role-legal for mantle as authored (g.life and g.sustain both list it) — no generator rule broken. atom.warded's element is 'earth', matching this partition's other uses. Name is 'compound': themeAdjectivePools['rot-bloom'] 'overgrown' + nounPools['mantle.plant'] 'canopy'."
+      "acquisition": "drop"
     },
     {
       "id": "unique.rot-bloom-30-008",
-      "nameKey": "unique.mouldreign",
-      "name": "Mouldreign",
+      "nameKey": "unique.rattle-of-the-windrow",
+      "name": "Rattle of the Windrow",
       "frame": "humanoid",
-      "baseType": "item.humanoid-head-b-002",
+      "baseType": "item.humanoid-horn-a-003",
       "rarity": "cultivated",
       "powerAxis": "control",
       "fixedAtoms": [
         {
-          "family": "atom.withering",
+          "family": "atom.gravemaking",
           "powerBand": "medium"
         },
         {
-          "family": "atom.stoicism",
-          "powerBand": "medium"
+          "family": "atom.gardener",
+          "powerBand": "low"
         }
       ],
       "varianceSlot": {
-        "family": "atom.ward-brace",
+        "family": "atom.gravedigging",
         "variance": "narrow"
       },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One raw-stat line (stoicism) plus a rolled ward-brace slot, both well under a cultivated rung's two-to-three affix baseline. The wither rider is a status-over-time effect a stat sheet cannot price, and it is the entire reason to wear a crown that otherwise loses the stat race to a plain cultivated helm."
+        "note": "Its only raw-stat presence is the low gardener spawn line; the grave-cell control it grants is a board capability, not a stat, so it lands comfortably under the rung's raw-stat ceiling."
       },
+      "iconKey": "icon.unique.rattle-of-the-windrow",
+      "flavorKey": "flavor.unique.rattle-of-the-windrow",
+      "flavor": "Shake it once at the turned earth. Whatever answers was already listening.",
       "tags": [
-        "medium",
-        "necrotic",
-        "utility",
+        "medium-light",
+        "metal",
         "undead",
+        "utility",
         "signature"
       ],
-      "notes": "ROLE BREAK, SANCTIONED: atom.withering's authored `roles` (g.affliction) do not include head-guard — the same hit-adjacent role list as atom.mesmerizing above. A unique's fixed atoms sit in the container's fixed core, never drawn from the affix pool, so no `affix_pool_tag` filter reaches them (ssot-uniques.md §3.5's rule-breaking ladder, the same device used on -003). No MACHINE rule is touched: g-affliction.json's own notes call status='wither' 'fully functional today with no missing payload half'. This is the control-axis row for head-guard: a crown that saps and slows rather than one that merely blocks. REFERENCES RESOLVE: baseType item.humanoid-head-b-002 (humanoid-head-guard-b, class leather, band b) is frozen wave-1a content; atom.stoicism and atom.ward-brace are both role-legal for head-guard in their own family file (g.ward). Name is 'fusion': uniqueSetSeedPools['rot-bloom'] 'mouldreign' used bare, per words.v1.json poolAccess.uniquePartition."
+      "acquisition": "drop"
     }
   ]
 }

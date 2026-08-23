@@ -41,6 +41,20 @@
         "organic",
         "rooted",
         "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -63,6 +77,20 @@
         "organic",
         "rooted",
         "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -85,6 +113,20 @@
         "organic",
         "rooted",
         "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -107,6 +149,20 @@
         "organic",
         "rooted",
         "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -129,6 +185,20 @@
         "organic",
         "rooted",
         "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -151,6 +221,20 @@
         "organic",
         "rooted",
         "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -173,6 +257,20 @@
         "organic",
         "rooted",
         "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -195,6 +293,20 @@
         "organic",
         "rooted",
         "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -217,6 +329,20 @@
         "mineral",
         "rooted",
         "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -239,6 +365,20 @@
         "mineral",
         "rooted",
         "heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -261,6 +401,20 @@
         "organic",
         "rooted",
         "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     },
     {
@@ -283,6 +437,20 @@
         "organic",
         "rooted",
         "medium-heavy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-fortify"
+        }
       ]
     }
   ]

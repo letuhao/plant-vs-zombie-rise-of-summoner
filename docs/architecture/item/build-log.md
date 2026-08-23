@@ -754,6 +754,58 @@ argument for mechanising taste — it is an argument for knowing which parts of 
 
 ---
 
+## The question neither validator was asking
+
+The owner asked whether anything checks that a set bonus can actually be *earned* — that the pieces
+naming a set have base items behind them. Nothing did, and the answer was worse than expected:
+**all 30 sets are uncompletable.**
+
+`ssot-sets.md` §3.1 states that "membership is declared, not inferred", and §4 keys
+`item_set_member` on `(set_id, container_id)` — a specific base type, plus its role and frame.
+Every authored member names a role and nothing else. So no item is a member of anything, no
+threshold ever counts, and all 128 member rows the schema wants were never written.
+
+The C# validator was reporting `PASS — 1,438 entries, 0 errors` throughout. It was right. Every
+reference in those sets resolves, because **there is no reference** — a reference checker has
+nothing to read when the row is simply absent. Referential integrity and reachability are
+independent properties, and the corpus has now demonstrated it in the expensive direction.
+
+### tools/seed_graph — the second question, asked separately
+
+A Python checker (stdlib only, 16 tests) that asks *can a player get this, and can they finish it?*
+It is a separate tool rather than more checks in the first one because the two ask structurally
+different questions, and folding them together would blur the boundary that made this gap
+invisible.
+
+Nine checks; on the current corpus, **35 gaps and 34 notes**:
+
+- 30 sets uncompletable · 144 uniques, 70 charms, 60 consumables with no acquisition path at all
+- 30 of 40 gems unobtainable · 7 of 32 role/frame slots with no drop path
+- the entire `+X` enhancement line unreachable — `item_enhance_track` was scoped onto the base-type
+  kind by entry-shapes.md §6 and never authored on any of 740
+
+The one trap it has to get right, pinned by tests in both directions: acquisition is **categorical**
+for equipment (`{role, frame}` yields any matching base type) and **specific** for inserts (granted
+by id). Check only for specific grants and all 740 base types report unobtainable; check only
+categorically and the 30 dead gems disappear.
+
+Not a gap, and worth recording because it was checked: affix families map 1:1 onto display
+templates with zero orphans in either direction, and every socket-word ingredient family is supplied
+by at least one gem.
+
+### The exemplar, a third time
+
+`set.exemplar.json` shows `members: [{ "role": "core-guard" }]`. Five agents followed it. That is
+the third shape defect propagated by an exemplar in this build, after `powerAxis` and the display
+templates, and it is now a standing rule rather than an anecdote: **an exemplar is the most-read
+file in the corpus while authoring, and a wrong one is indistinguishable from a wrong contract.**
+[enrichment-plan.md](enrichment-plan.md) fixes it before dispatching anything.
+
+CI runs the checker report-only, because gating a corpus with 35 known gaps just paints the build
+red. Its own tests gate, so the checks cannot rot meanwhile; wave R4 arms the corpus gate.
+
+---
+
 ## Next
 
 - **0b** — F1 word pools (Opus), V1 validator (Opus, code under `tools/ItemSeedValidator/`).

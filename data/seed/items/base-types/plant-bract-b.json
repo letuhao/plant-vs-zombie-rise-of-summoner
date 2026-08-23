@@ -42,6 +42,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -65,6 +79,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -88,6 +116,20 @@
         "mineral",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -111,6 +153,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -134,6 +190,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -157,6 +227,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -180,6 +264,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -203,6 +301,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -226,6 +338,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -249,6 +375,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -272,6 +412,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -295,6 +449,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     }
   ]

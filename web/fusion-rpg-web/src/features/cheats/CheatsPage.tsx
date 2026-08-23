@@ -581,6 +581,9 @@ export function CheatsPage() {
         {tab === "I" && (
           <>
             <Button onClick={() => void action.mutateAsync({ action: "recipes" })}>Dump recipes</Button>
+            <Button onClick={() => void action.mutateAsync({ action: "almanac-dump-all" })}>
+              Dump almanac (all)
+            </Button>
             <Button onClick={() => void action.mutateAsync({ action: "reinforce" })}>Reinforce</Button>
             <Button onClick={() => void action.mutateAsync({ action: "set-zombie-hp", hp: 27000 })}>
               Set zombie HP 27000

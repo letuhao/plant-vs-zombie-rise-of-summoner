@@ -1,22 +1,27 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Effects.Atoms.Power;
 using FusionRpg.Data;
 using FusionRpg.Tools.AtomImporter;
 
 // The seed importer (E14a). Reads data/seed/**.json, validates everything, and writes it in one
 // transaction — or writes nothing and says why.
 //
-// Usage: dotnet run --project tools/AtomImporter -- [seed root] [--db <dir>] [--check]
-//        seed root  default: data/seed, found by walking up from the working directory
-//        --db       default: $FUSIONRPG_DATA, else dist/FusionRpg.Server/data beside the repo root
-//        --check    validate against the real catalog and roll back — writes nothing
+// Usage: dotnet run --project tools/AtomImporter -- [seed root] [--db <dir>] [--check] [--validate]
+//        seed root   default: data/seed, found by walking up from the working directory
+//        --db        default: $FUSIONRPG_DATA, else dist/FusionRpg.Server/data beside the repo root
+//        --check     validate against the real catalog and roll back — writes nothing
+//        --validate  also run E14b's content checks (lint + power drift) over the imported batch
+//                     and fail on a blocking finding (E24, completeness-audit.md B4 — these checks
+//                     existed with zero callers outside their own tests)
 //
-// Exit codes: 0 imported (or checked clean), 1 refused, 2 could not start.
+// Exit codes: 0 imported/checked/validated clean, 1 refused, 2 could not start.
 //
 // This file holds arguments and a report. Every decision about content is in Core (the format) or
 // the data project (the transaction), where scripts/guard-dal.ps1 applies — it does not scan
 // tools/. Which files get swept is SeedScanner, next door, so a test can hold it to that.
 
 var check = args.Contains("--check", StringComparer.Ordinal);
+var validate = args.Contains("--validate", StringComparer.Ordinal);
 var positional = new List<string>();
 string? dbOverride = null;
 
@@ -78,9 +83,10 @@ if (!collected.IsOk)
 }
 
 ImportOutcome outcome;
+RpgStore store;
 try
 {
-    var store = new RpgStore(dataDir);
+    store = new RpgStore(dataDir);
     store.Init();
     outcome = store.ImportContent(collected.Content, dryRun: check);
 }
@@ -99,10 +105,23 @@ if (!outcome.IsOk)
     return 1;
 }
 
+if (validate)
+{
+    // Lint(atoms, containers) and Drift(atoms) are well-defined over the batch just imported; a
+    // power BUDGET is deliberately not run — see ValidationGate for why.
+    var lint = ContentValidation.Lint(collected.Content.Atoms, collected.Content.Containers);
+    var drift = ContentValidation.Drift(collected.Content.Atoms, store.GetPowerTables());
+    var decision = ValidationGate.Decide(lint, drift);
+
+    foreach (var line in decision.Lines) Console.WriteLine(line);
+
+    if (!decision.Ok) return 1;
+}
+
 Console.WriteLine(
     $"{files.Count} file(s): {outcome.Atoms} atom(s), {outcome.Containers} container(s), " +
     $"{outcome.Curves} curve(s), {outcome.Rarities} rarity band(s), " +
-    $"{outcome.Elements} element(s)");
+    $"{outcome.Elements} element(s), {outcome.ChannelPolicies} channel policy row(s)");
 if (check)
 {
     // The revision and the hash below are the CURRENT ones, read after the rollback — saying

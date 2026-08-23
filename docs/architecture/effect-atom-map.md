@@ -2,6 +2,13 @@
 
 **Status:** **Capability map (2026-08-22)** — module ids, dependency direction, build order, and cross-program hazards. **19 spec files covering 20 module ids are written; E1 is built and accepted.** Everything from E2 onward is specced and unbuilt. Source of truth for intent: [effect-atom-ideal.md](effect-atom-ideal.md), whose §13 closes with *"Every question raised in this document is now decided, defaulted, or explicitly scoped to a later spec. The capability map can start."*
 
+> ⚠ **Completeness audit, 2026-08-23:** [effect-atom/completeness-audit.md](effect-atom/completeness-audit.md).
+> All 21 rows are built and every suite is green, and **three links were never built** — a loader, an importer
+> run, and a producer of bindings — so most of this layer does not reach the running game. **Wave 6 (E20–E25,
+> §3 below, Checkpoint F) is the fix**, planned at [tasks/effect-atom-plan.md](../../tasks/effect-atom-plan.md)
+> and [tasks/effect-atom-todo.md](../../tasks/effect-atom-todo.md). Read the audit before planning anything
+> else on top of this program.
+
 Prefix: `effect-atom`. Module specs at `docs/architecture/effect-atom/spec-<module-id>.md`; plan and tasks at `tasks/effect-atom-plan.md` / `tasks/effect-atom-todo.md` (AGENTS.md parallel-programs convention).
 
 **Why this is being specced now:** the [action](action-map.md) program needs a real container contract, and the owner chose to spec atoms first rather than depend on a placeholder (decision D1, 2026-08-22). That makes this program the critical path for the action architecture, and through it for the battle-timeline gate.
@@ -92,6 +99,20 @@ Four owner decisions on [effect-atom/atom-family-library.md](effect-atom/atom-fa
 
 **Also folded into an existing module:** E6 gains two owner-key scopes, `sector:{id}` and `slot:{id}`, so world buildings and sector environments can bind. The trigger list stays at 7 — `OnWorldTick` / `OnSectorEnter` / `OnBuildComplete` belong to the world spec that needs them.
 
+### Wave 6 — the seams (added by the 2026-08-23 completeness audit)
+
+Not a new capability wave — every module here makes an **already-built** capability reach the running
+game. Full task detail: [tasks/effect-atom-todo.md](../../tasks/effect-atom-todo.md).
+
+| id | Name | Owns | Depends on |
+|---|---|---|---|
+| **E20** | `content-boot` | The loader: `RpgStore.LoadContentIntoRuntime()` calls `ElementTable.Use`/`PowerTables.Use` at host startup, and `deploy-play.ps1` runs the importer against the live data dir first. Closes the finding that editing a roster row, a matrix cell, or a coefficient moved the content hash and changed nothing. | — |
+| **E21** | `status-stat-applier` | The consumer `StatusStatPayload.ToModifiers` never got: a stat plugin or composer hook reading live status instances via `StatusRuntime.ForHost` and contributing their mods. Closes the finding that `rally`/`expose`/`command`/`shatter` still changed no stat after E17. | — |
+| **E22** | `channel-policy-reader` | `ChannelPolicyTable`, the same static shape as `ElementTable`/`PowerTables`, read by `DerivedStatRegistry` in place of the hardcoded `0.95`. Closes `effect_channel_policy` being hashed at registry v4 with zero readers and no author path. | E20 |
+| **E23** | `content-codegen` | `tools/ElementEnumGen`: generates `ElementTypeId` from the roster, deletes `EffectSeedCatalog` (E11's owed Step 4), generates the trait/roster C# literals. Closes the four values each still authored twice. | — |
+| **E24** | `validation-in-ci` | `AtomImporter --validate` runs `ContentValidation` and fails the process on a finding; `Server.Tests` and `E2E.Tests` join `ci.yml`. Closes both suites passing locally and never running anywhere else. | — |
+| **E25** | `compose-channel-cache` | Caches `AllCombatChannelIds`, invalidated by a version counter on `ElementTable`. Closes the uncached 84-string rebuild on every compose and every status-payload channel check. | — |
+
 ## 4. Dependency graph and build order
 
 Build position and dependencies, in one table. **This table is the derived view — each row's `Depends on` must equal that module's spec header.** An ASCII graph used to live here; it went stale twice without anyone noticing, so it is gone.
@@ -154,8 +175,9 @@ It also carries the model correction the specs got wrong: **items have no behavi
 - **✅ Checkpoint A — the spine compiles.** E1–E5: kinds, values, predicates, and the two schemas exist with tests, and **nothing in the game has changed**. Pure addition; if a golden moves here, stop.
 - **✅ Checkpoint B — the container contract is signed.** E5 reviewed. **This is the moment [action](action-map.md) A1 unblocks** — it needs the contract, not the implementation.
 - **✅ Checkpoint C — atoms execute.** E6+E13+E7+E8+E15+E19+E15+E19: a bound container compiles to a Foundation grant and the Funnel runs it. The content hash **exists** (E8) but is not yet **stamped into reports** — that is E12's, because adding a stamped field to a report *is* a golden diff.
-- **✅ Checkpoint D — the schema is proven.** E11: all 16 defs are rows, the **49** fixtures pass unchanged, `EffectSeedCatalog` is deleted. **The claim "a new effect costs one row" is either true here or the design failed.**
-- **⛔ Checkpoint E — goldens move.** E12 only. A re-bless with a written predicted delta and a win-rate sweep, needing owner sign-off — and it must not collide with the timeline gate (§6).
+- **✅ Checkpoint D — the schema is proven.** E11: all 16 defs are rows and the **49** fixtures pass unchanged. **The claim "a new effect costs one row" is either true here or the design failed.** ⚠️ `EffectSeedCatalog` is **not yet deleted** — E11 Step 4 was deferred and moves with E18's enum mirror to **E23** (wave 6).
+- **✅ Checkpoint E — goldens measured.** E12 only. The gate was asserted and never tested; run, **not one blessed hash moved**, no owner sign-off needed.
+- **⚠️ Checkpoint F — the layer is live, not just tested.** Added 2026-08-23 by the [completeness audit](effect-atom/completeness-audit.md): waves 1–5 proved every module correct in isolation, and almost none of it reaches the running game — no host loads a content table, nothing runs the importer, nothing creates a binding, E17's status payload has a parser with no applier. **Wave 6 (E20–E25)** closes it. Full acceptance in [tasks/effect-atom-todo.md](../../tasks/effect-atom-todo.md).
 
 ## 6. Cross-program hazards
 

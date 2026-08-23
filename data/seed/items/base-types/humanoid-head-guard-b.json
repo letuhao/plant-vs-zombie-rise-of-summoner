@@ -29,12 +29,32 @@
       "role": "head-guard",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.tiled-crest",
       "flavorKey": "flavor.base.tiled-crest",
       "flavor": "Overlapping shingles lap one over another, each catching and deflecting what would pierce.",
-      "tags": ["heavy", "defensive"]
+      "tags": [
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-002",
@@ -44,12 +64,32 @@
       "role": "head-guard",
       "class": "leather",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.cured-hardhat",
       "flavorKey": "flavor.base.cured-hardhat",
       "flavor": "Time and tanning have hardened it to near-wood. Sweat-stained from a thousand workdays, now repurposed.",
-      "tags": ["medium", "defensive"]
+      "tags": [
+        "medium",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-003",
@@ -59,12 +99,32 @@
       "role": "head-guard",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.corrugated-pot",
       "flavorKey": "flavor.base.corrugated-pot",
       "flavor": "The ridges that held its shape for boiling now hold their own against blows.",
-      "tags": ["heavy", "fragile"]
+      "tags": [
+        "heavy",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-004",
@@ -74,12 +134,32 @@
       "role": "head-guard",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.galvanised-colander",
       "flavorKey": "flavor.base.galvanised-colander",
       "flavor": "Zinc-bright and industrial. Its holes were meant to strain; now they are vents for a warrior's breath.",
-      "tags": ["heavy", "defensive"]
+      "tags": [
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-005",
@@ -89,12 +169,32 @@
       "role": "head-guard",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.jointed-bucket",
       "flavorKey": "flavor.base.jointed-bucket",
       "flavor": "Staves bound at the seams, moving freely until impact binds them into rigidity.",
-      "tags": ["medium-heavy", "defensive"]
+      "tags": [
+        "medium-heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-006",
@@ -104,12 +204,33 @@
       "role": "head-guard",
       "class": "leather",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.boiled-helmet",
       "flavorKey": "flavor.base.boiled-helmet",
       "flavor": "Scalded and shaped in its mold, the leather has forgotten how to bend. It remembers only how to endure.",
-      "tags": ["heavy", "sturdy", "defensive"]
+      "tags": [
+        "heavy",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-007",
@@ -119,12 +240,32 @@
       "role": "head-guard",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.splinted-pylon",
       "flavorKey": "flavor.base.splinted-pylon",
       "flavor": "Bound with cord at each joint, it flexes to absorb and redirect rather than stop cold.",
-      "tags": ["medium-heavy", "utility"]
+      "tags": [
+        "medium-heavy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-008",
@@ -134,12 +275,32 @@
       "role": "head-guard",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.immovable-kettle",
       "flavorKey": "flavor.base.immovable-kettle",
       "flavor": "Hammered into one solid form, there is nothing in it that will yield or sing under impact.",
-      "tags": ["heavy", "fragile"]
+      "tags": [
+        "heavy",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-009",
@@ -149,12 +310,32 @@
       "role": "head-guard",
       "class": "leather",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.oiled-washtub",
       "flavorKey": "flavor.base.oiled-washtub",
       "flavor": "Oil keeps the leather supple and repels the worst of the rain and blood alike.",
-      "tags": ["heavy", "defensive"]
+      "tags": [
+        "heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-010",
@@ -164,12 +345,32 @@
       "role": "head-guard",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.articulated-hopper",
       "flavorKey": "flavor.base.articulated-hopper",
       "flavor": "Each panel moves independently until the impact that locks them in place. Then it is one thing and unbreakable.",
-      "tags": ["medium-heavy", "sturdy"]
+      "tags": [
+        "medium-heavy",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-011",
@@ -179,12 +380,32 @@
       "role": "head-guard",
       "class": "leather",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.stained-crest",
       "flavorKey": "flavor.base.stained-crest",
-      "flavor": "Every mark tells a story — rust, rust-water, blood that never quite came clean. All proof of survival.",
-      "tags": ["heavy", "utility"]
+      "flavor": "Every mark tells a story \u2014 rust, rust-water, blood that never quite came clean. All proof of survival.",
+      "tags": [
+        "heavy",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.humanoid-head-b-012",
@@ -194,12 +415,32 @@
       "role": "head-guard",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.rigid-hardhat",
       "flavorKey": "flavor.base.rigid-hardhat",
       "flavor": "Stamped metal, tested on a factory floor before being tested in battle. It has passed both.",
-      "tags": ["medium-heavy", "defensive"]
+      "tags": [
+        "medium-heavy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

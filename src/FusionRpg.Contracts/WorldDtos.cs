@@ -31,6 +31,12 @@ public sealed record WorldSlotDto
     public string? OwnerFactionId { get; init; }
     public string? GuardWaveId { get; init; }
     public string GuardState { get; init; } = "";
+
+    /// <summary>
+    /// As visible as the slot itself (spec-structure-substrate.md) — no owner-gating, following the
+    /// slot's own existing fog treatment.
+    /// </summary>
+    public string? StructureId { get; init; }
 }
 
 /// <summary>

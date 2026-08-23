@@ -155,7 +155,9 @@ public class StatusStatPayloadTests
         Assert.Equal("status", mod.SourceKind);
         Assert.Equal("status:inst-1", mod.SourceId);
         Assert.Equal(ModifierOp.More, mod.Op);
-        Assert.Equal("Z1", mod.ApplyOwnerKey);
+        // E21: StatApplyScope's grammar requires the "entity:" prefix to match at all — a bare
+        // pointer silently composed nothing (found by a seam test running the real StatSystem).
+        Assert.Equal("entity:Z1", mod.ApplyOwnerKey);
     }
 
     [Fact]

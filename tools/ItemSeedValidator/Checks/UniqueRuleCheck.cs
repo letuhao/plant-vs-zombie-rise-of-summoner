@@ -21,19 +21,27 @@ public static class UniqueRuleCheck
     /// cannot know which eight roles the other seventeen chose, so — exactly like the id namespaces
     /// — the choice is made centrally once and handed down.
     ///
-    /// These are the eight highest `budgetWeightMilli` roles in `core.v1.json`, ties broken by
-    /// registry order. Both `jewel-minor` roles fall outside it anyway, at 15 milli each, which is
-    /// a useful cross-check on §3.7's separate ban rather than a coincidence.
+    /// The **four heaviest and four lightest** eligible roles in `core.v1.json`, by
+    /// `budgetWeightMilli`, with both `jewel-minor` roles excluded by §3.7's separate ban:
     ///
-    /// This particular eight is a **default, not a derivation** — "uniques go where the budget is"
-    /// is defensible and so is its opposite, given §3.5's "the rare wins the stat sheet, the unique
-    /// wins the build". It is one list in one place; changing it is an edit and a re-run.
-    /// </summary>
-    public static readonly string[] AllowedRoles =
+    ///     heavy   armament-primary 160 · core-guard 120 · ward-array 90 · jewel-major 80
+    ///     light   sense 50 · footing 50 · infusion 50 · retinue 40
+    ///
+    /// Owner decision, 2026-08-23, replacing an earlier default of "the eight heaviest". §3.5 makes
+    /// the argument: *the rare wins the stat sheet, the unique wins the build.* Identity does not
+    /// need budget, and putting every unique on the biggest slots concentrates power exactly where
+    /// it is already concentrated. Spreading to the ends means a boots or bandolier unique is a
+    /// real build decision rather than a rounding error.
+    ///
+    /// The seven roles left out — armament-secondary, manipulator, mantle, head-guard, girdle —
+    /// stay rare-and-set territory on purpose, which is the same reason §3.7 caps the count at 8.
+    static readonly string[] AllowedRolesRaw =
     {
-        "armament-primary", "core-guard", "ward-array", "armament-secondary",
-        "jewel-major", "manipulator", "mantle", "head-guard",
+        "armament-primary", "core-guard", "ward-array", "jewel-major",
+        "sense", "footing", "infusion", "retinue",
     };
+
+    public static readonly string[] AllowedRoles = AllowedRolesRaw;
 
     public static void Run(ValidationContext ctx)
     {

@@ -29,12 +29,34 @@
       "role": "ward-array",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.corrugated-fender",
       "flavorKey": "flavor.base.corrugated-fender",
       "flavor": "Ridged metal from a roadway. The waves catch and redirect what hits them.",
-      "tags": ["heavy", "metal", "mechanical", "defensive"]
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-002",
@@ -44,12 +66,35 @@
       "role": "ward-array",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.jointed-bumper",
       "flavorKey": "flavor.base.jointed-bumper",
       "flavor": "Once it absorbed impact by design. It absorbs it still, though now you wear it.",
-      "tags": ["heavy", "metal", "mechanical", "utility", "sturdy"]
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "utility",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-003",
@@ -59,12 +104,34 @@
       "role": "ward-array",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "trivial" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "trivial"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.splinted-batten",
       "flavorKey": "flavor.base.splinted-batten",
       "flavor": "A roof strut broken into shafts and bound tight. The binding is what holds.",
-      "tags": ["medium-heavy", "metal", "mechanical", "defensive"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "mechanical",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-004",
@@ -74,12 +141,35 @@
       "role": "ward-array",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.overlapping-shell",
       "flavorKey": "flavor.base.overlapping-shell",
-      "flavor": "Sheets of metal arranged like roof tiles—each one shed, and the next one stops the hit.",
-      "tags": ["heavy", "metal", "mechanical", "defensive", "sturdy"]
+      "flavor": "Sheets of metal arranged like roof tiles\u2014each one shed, and the next one stops the hit.",
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-005",
@@ -89,12 +179,34 @@
       "role": "ward-array",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.articulated-yoke",
       "flavorKey": "flavor.base.articulated-yoke",
       "flavor": "It pivots at the shoulders like it was made for them. It wasn't. That makes it better.",
-      "tags": ["medium-heavy", "metal", "mechanical", "utility"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "mechanical",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-006",
@@ -104,12 +216,34 @@
       "role": "ward-array",
       "class": "scale",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.netted-spoiler",
       "flavorKey": "flavor.base.netted-spoiler",
       "flavor": "A curved blade mounted on a chassis. Meant to slice air. Now it slices hits.",
-      "tags": ["heavy", "metal", "mechanical", "defensive"]
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-007",
@@ -119,12 +253,35 @@
       "role": "ward-array",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.soldered-girder",
       "flavorKey": "flavor.base.soldered-girder",
       "flavor": "Welded and sealed. The joints are as strong as the steel. Nothing comes apart.",
-      "tags": ["heavy", "metal", "mechanical", "defensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-008",
@@ -134,12 +291,34 @@
       "role": "ward-array",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.rigid-strut",
       "flavorKey": "flavor.base.rigid-strut",
       "flavor": "So stiff it barely moves. Wear it long enough, neither will you.",
-      "tags": ["heavy", "metal", "mechanical", "defensive"]
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-009",
@@ -149,12 +328,34 @@
       "role": "ward-array",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "trivial" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "trivial"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.industrial-rollbar",
       "flavorKey": "flavor.base.industrial-rollbar",
       "flavor": "Tube welded into a cage shape. It was built to catch a crash. You are the crash now.",
-      "tags": ["heavy", "metal", "mechanical", "defensive"]
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-010",
@@ -164,12 +365,35 @@
       "role": "ward-array",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.galvanised-shoulder",
       "flavorKey": "flavor.base.galvanised-shoulder",
       "flavor": "Zinc coating catches the light. Rust has never touched it. You wonder how long that lasts.",
-      "tags": ["medium-heavy", "metal", "mechanical", "utility", "sturdy"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "mechanical",
+        "utility",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-011",
@@ -179,12 +403,34 @@
       "role": "ward-array",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.warded", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.warded",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.monolithic-screen",
       "flavorKey": "flavor.base.monolithic-screen",
       "flavor": "A single unbroken pane of metal-mesh. You see through it. Nothing gets through it.",
-      "tags": ["heavy", "metal", "mechanical", "defensive"]
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     },
     {
       "id": "item.humanoid-shoulders-b-012",
@@ -194,12 +440,35 @@
       "role": "ward-array",
       "class": "plate",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.immovable-cowl",
       "flavorKey": "flavor.base.immovable-cowl",
       "flavor": "An engine hood bolted in place. It's done moving. Nothing will make it move again.",
-      "tags": ["heavy", "metal", "mechanical", "defensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-aegis"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-vigor"
+        }
+      ]
     }
   ]
 }

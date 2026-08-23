@@ -110,7 +110,8 @@ public static class IntelRecorder
                     Element = sl.Element,
                     GuardWaveId = sl.GuardWaveId,
                     State = sl.State,
-                    GuardState = sl.GuardState
+                    GuardState = sl.GuardState,
+                    StructureId = sl.StructureId
                 })
                 .ToList()
             : Array.Empty<RememberedSlot>(),

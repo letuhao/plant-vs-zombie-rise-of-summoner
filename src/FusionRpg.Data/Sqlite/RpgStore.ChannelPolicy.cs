@@ -74,41 +74,60 @@ public sealed partial class RpgStore
     /// </summary>
     public (bool Ok, string Reason) UpsertChannelPolicies(IReadOnlyList<ChannelPolicyRow> rows)
     {
-        foreach (var row in rows)
-        {
-            if (!Array.Exists(StatChannels.All, c => string.Equals(c, row.ChannelId, StringComparison.Ordinal)))
-                return (false,
-                    $"'{row.ChannelId}' is not a channel. This table holds a channel's VALUES; adding a "
-                    + "channel needs a composer case and a writer case, so it is code (E1's code-or-data rule)");
-
-            if (row.Direction is not (0 or 1))
-                return (false, $"{row.ChannelId}: direction {row.Direction} — 0 higher-is-better, 1 lower");
-        }
+        var reason = ValidateChannelPolicyRows(rows);
+        if (reason is not null) return (false, reason);
 
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
 
-            foreach (var row in rows)
-                ExecIn(db, tx, """
-                    INSERT INTO effect_channel_policy
-                      (channel_id, direction, default_value, cap_milli, compose_kind)
-                    VALUES ($id, $dir, $def, $cap, $kind)
-                    ON CONFLICT(channel_id) DO UPDATE SET
-                      direction = excluded.direction, default_value = excluded.default_value,
-                      cap_milli = excluded.cap_milli, compose_kind = excluded.compose_kind
-                    WHERE effect_channel_policy.direction IS NOT excluded.direction
-                       OR effect_channel_policy.default_value IS NOT excluded.default_value
-                       OR effect_channel_policy.cap_milli IS NOT excluded.cap_milli
-                       OR effect_channel_policy.compose_kind IS NOT excluded.compose_kind;
-                    """,
-                    ("$id", row.ChannelId), ("$dir", row.Direction), ("$def", row.DefaultValue),
-                    ("$cap", row.CapMilli), ("$kind", row.ComposeKind ?? "phased"));
+            foreach (var row in rows) UpsertChannelPolicyRowUnlocked(db, tx, row);
 
             tx.Commit();
             return (true, "");
         }
+    }
+
+    /// <summary>The check half, on a caller-owned row set — E14a (E22) validates before its own write.</summary>
+    static string? ValidateChannelPolicyRows(IReadOnlyList<ChannelPolicyRow> rows)
+    {
+        foreach (var row in rows)
+        {
+            if (!Array.Exists(StatChannels.All, c => string.Equals(c, row.ChannelId, StringComparison.Ordinal)))
+                return $"'{row.ChannelId}' is not a channel. This table holds a channel's VALUES; adding a "
+                       + "channel needs a composer case and a writer case, so it is code (E1's code-or-data rule)";
+
+            if (row.Direction is not (0 or 1))
+                return $"{row.ChannelId}: direction {row.Direction} — 0 higher-is-better, 1 lower";
+        }
+
+        return null;
+    }
+
+    /// <summary>The write half, on a caller-owned transaction. Returns rows actually changed.</summary>
+    static int UpsertChannelPolicyRowUnlocked(SqliteConnection db, SqliteTransaction tx, ChannelPolicyRow row)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            INSERT INTO effect_channel_policy
+              (channel_id, direction, default_value, cap_milli, compose_kind)
+            VALUES ($id, $dir, $def, $cap, $kind)
+            ON CONFLICT(channel_id) DO UPDATE SET
+              direction = excluded.direction, default_value = excluded.default_value,
+              cap_milli = excluded.cap_milli, compose_kind = excluded.compose_kind
+            WHERE effect_channel_policy.direction IS NOT excluded.direction
+               OR effect_channel_policy.default_value IS NOT excluded.default_value
+               OR effect_channel_policy.cap_milli IS NOT excluded.cap_milli
+               OR effect_channel_policy.compose_kind IS NOT excluded.compose_kind;
+            """;
+        cmd.Parameters.AddWithValue("$id", row.ChannelId);
+        cmd.Parameters.AddWithValue("$dir", row.Direction);
+        cmd.Parameters.AddWithValue("$def", row.DefaultValue);
+        cmd.Parameters.AddWithValue("$cap", row.CapMilli);
+        cmd.Parameters.AddWithValue("$kind", row.ComposeKind ?? "phased");
+        return cmd.ExecuteNonQuery();
     }
 
     /// <summary>What a channel does when nothing has been authored for it.</summary>

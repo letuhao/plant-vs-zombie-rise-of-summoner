@@ -25,27 +25,778 @@
       "id": "droptable.d1-001",
       "nameKey": "droptable.compost-cache",
       "name": "Compost Cache",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "compost-cache-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "girdle", "frame": "plant", "dropBand": "occasional" },
-            { "entryKind": "equipment", "role": "footing", "frame": "humanoid", "dropBand": "occasional" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "girdle",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "footing",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "compost-cache-mat",
           "entries": [
-            { "entryKind": "material", "ref": "essence.earth", "dropBand": "frequent", "qtyCurve": "curve.019" },
-            { "entryKind": "material", "ref": "substrate.plant.crude", "dropBand": "occasional", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "essence.earth",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.crude",
+              "dropBand": "occasional",
+              "qtyCurve": "curve.019"
+            }
           ]
         },
         {
           "groupKey": "compost-cache-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
+          ]
+        },
+        {
+          "groupKey": "r2-consumable",
+          "entries": [
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-001",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-002",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-003",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-004",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-005",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-006",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-007",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-008",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-009",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-010",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-011",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-012",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-013",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-014",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-015",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-016",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-017",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-018",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-019",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k1-020",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-001",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-002",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-003",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-004",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-005",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-006",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-007",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-008",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-009",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-010",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-011",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-012",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-013",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-014",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-015",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-016",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-017",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-018",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-019",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k2-020",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-001",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-002",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-003",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-004",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-005",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-006",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-007",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-008",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-009",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-010",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-011",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-012",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-013",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-014",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-015",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-016",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-017",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-018",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-019",
+              "dropBand": "frequent"
+            },
+            {
+              "entryKind": "consumable",
+              "ref": "consumable.k3-020",
+              "dropBand": "frequent"
+            }
+          ]
+        },
+        {
+          "groupKey": "r2-equipment",
+          "entries": [
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "footing",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "jewel-minor-b",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "mantle",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "retinue",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "standard",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "standard",
+              "frame": "plant",
+              "dropBand": "occasional"
+            }
+          ]
+        },
+        {
+          "groupKey": "r2-insert",
+          "entries": [
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-002",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-003",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-004",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-006",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-007",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-008",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-009",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-010",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-011",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-012",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-013",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-015",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-017",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-019",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-020",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-002",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-003",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-004",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-006",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-007",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-008",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-009",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-011",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-013",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-014",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-016",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-017",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-018",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-019",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-020",
+              "dropBand": "seldom"
+            }
+          ]
+        },
+        {
+          "groupKey": "r2-unique",
+          "entries": [
+            {
+              "entryKind": "unique",
+              "ref": "unique.ember-harvest-30-001",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.ember-harvest-30-002",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.ember-harvest-30-003",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.ember-harvest-30-004",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.ember-harvest-30-005",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.ember-harvest-30-006",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.ember-harvest-30-007",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.ember-harvest-30-008",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.frostbitten-vanguard-30-001",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.frostbitten-vanguard-30-002",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.frostbitten-vanguard-30-003",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.frostbitten-vanguard-30-004",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.frostbitten-vanguard-30-005",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.frostbitten-vanguard-30-006",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.frostbitten-vanguard-30-007",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.frostbitten-vanguard-30-008",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-30-001",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-30-002",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-30-003",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-30-004",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-30-005",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-30-006",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-30-007",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.hollow-orchard-30-008",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.rot-bloom-30-001",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.rot-bloom-30-002",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.rot-bloom-30-003",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.rot-bloom-30-004",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.rot-bloom-30-005",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.rot-bloom-30-006",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.rot-bloom-30-007",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.rot-bloom-30-008",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.thorned-chassis-30-001",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.thorned-chassis-30-002",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.thorned-chassis-30-003",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.thorned-chassis-30-004",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.thorned-chassis-30-005",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.thorned-chassis-30-006",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.thorned-chassis-30-007",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "unique",
+              "ref": "unique.thorned-chassis-30-008",
+              "dropBand": "occasional"
+            }
+          ]
+        },
+        {
+          "groupKey": "r3-material",
+          "entries": [
+            {
+              "entryKind": "material",
+              "ref": "essence.ice",
+              "dropBand": "occasional"
+            }
           ]
         }
       ],
@@ -55,27 +806,56 @@
       "id": "droptable.d1-002",
       "nameKey": "droptable.greenhouse-harvest",
       "name": "Greenhouse Harvest",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "greenhouse-harvest-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "manipulator", "frame": "plant", "dropBand": "occasional" },
-            { "entryKind": "equipment", "role": "sense", "frame": "plant", "dropBand": "occasional" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "manipulator",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "sense",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "greenhouse-harvest-mat",
           "entries": [
-            { "entryKind": "material", "ref": "essence.light", "dropBand": "frequent", "qtyCurve": "curve.019" },
-            { "entryKind": "material", "ref": "essence.fire", "dropBand": "occasional", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "essence.light",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "essence.fire",
+              "dropBand": "occasional",
+              "qtyCurve": "curve.019"
+            }
           ]
         },
         {
           "groupKey": "greenhouse-harvest-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
           ]
         }
       ],
@@ -85,27 +865,57 @@
       "id": "droptable.d1-003",
       "nameKey": "droptable.boneyard-scrap",
       "name": "Boneyard Scrap",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "boneyard-scrap-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "core-guard", "frame": "humanoid", "dropBand": "occasional", "rarityFloor": "grafted" },
-            { "entryKind": "equipment", "role": "armament-secondary", "frame": "humanoid", "dropBand": "occasional" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "core-guard",
+              "frame": "humanoid",
+              "dropBand": "occasional",
+              "rarityFloor": "grafted"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "armament-secondary",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "boneyard-scrap-mat",
           "entries": [
-            { "entryKind": "material", "ref": "shard.common", "dropBand": "frequent", "qtyCurve": "curve.019" },
-            { "entryKind": "material", "ref": "catalyst.forge", "dropBand": "seldom", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "shard.common",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.forge",
+              "dropBand": "seldom",
+              "qtyCurve": "curve.019"
+            }
           ]
         },
         {
           "groupKey": "boneyard-scrap-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
           ]
         }
       ],
@@ -115,26 +925,50 @@
       "id": "droptable.d1-004",
       "nameKey": "droptable.thicket-ambush",
       "name": "Thicket Ambush",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "thicket-ambush-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "armament-primary", "frame": "plant", "dropBand": "occasional" },
-            { "entryKind": "equipment", "role": "ward-array", "frame": "plant", "dropBand": "occasional" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "ward-array",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "thicket-ambush-mat",
           "entries": [
-            { "entryKind": "material", "ref": "essence.air", "dropBand": "frequent", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "essence.air",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            }
           ]
         },
         {
           "groupKey": "thicket-ambush-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
           ]
         }
       ],
@@ -144,27 +978,53 @@
       "id": "droptable.d1-005",
       "nameKey": "droptable.sunlit-windfall",
       "name": "Sunlit Windfall",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "sunlit-windfall-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "jewel-major", "frame": "plant", "dropBand": "seldom" },
-            { "entryKind": "equipment", "role": "jewel-major", "frame": "humanoid", "dropBand": "seldom" },
-            { "entryKind": "nothing", "dropBand": "frequent" }
+            {
+              "entryKind": "equipment",
+              "role": "jewel-major",
+              "frame": "plant",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "jewel-major",
+              "frame": "humanoid",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "frequent"
+            }
           ]
         },
         {
           "groupKey": "sunlit-windfall-ins",
           "entries": [
-            { "entryKind": "insert", "ref": "gem.g3-001", "dropBand": "seldom" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "insert",
+              "ref": "gem.g3-001",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "sunlit-windfall-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "frequent" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "frequent"
+            }
           ]
         }
       ],
@@ -174,27 +1034,57 @@
       "id": "droptable.d1-006",
       "nameKey": "droptable.blighted-bounty",
       "name": "Blighted Bounty",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "blighted-bounty-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "head-guard", "frame": "plant", "dropBand": "occasional", "rarityFloor": "fused" },
-            { "entryKind": "equipment", "role": "head-guard", "frame": "humanoid", "dropBand": "occasional" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "head-guard",
+              "frame": "plant",
+              "dropBand": "occasional",
+              "rarityFloor": "fused"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "head-guard",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "blighted-bounty-mat",
           "entries": [
-            { "entryKind": "material", "ref": "essence.dark", "dropBand": "frequent", "qtyCurve": "curve.019" },
-            { "entryKind": "material", "ref": "shard.rare", "dropBand": "seldom", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "essence.dark",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "shard.rare",
+              "dropBand": "seldom",
+              "qtyCurve": "curve.019"
+            }
           ]
         },
         {
           "groupKey": "blighted-bounty-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
           ]
         }
       ],
@@ -204,27 +1094,56 @@
       "id": "droptable.d1-007",
       "nameKey": "droptable.mulch-reserve",
       "name": "Mulch Reserve",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "mulch-reserve-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "infusion", "frame": "plant", "dropBand": "occasional" },
-            { "entryKind": "equipment", "role": "infusion", "frame": "humanoid", "dropBand": "occasional" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "infusion",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "infusion",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "mulch-reserve-mat",
           "entries": [
-            { "entryKind": "material", "ref": "substrate.plant.sound", "dropBand": "frequent", "qtyCurve": "curve.019" },
-            { "entryKind": "material", "ref": "essence.earth", "dropBand": "occasional", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "substrate.plant.sound",
+              "dropBand": "frequent",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "essence.earth",
+              "dropBand": "occasional",
+              "qtyCurve": "curve.019"
+            }
           ]
         },
         {
           "groupKey": "mulch-reserve-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
           ]
         }
       ],
@@ -234,27 +1153,57 @@
       "id": "droptable.d1-008",
       "nameKey": "droptable.graveyard-salvage",
       "name": "Graveyard Salvage",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "graveyard-salvage-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "retinue", "frame": "humanoid", "dropBand": "occasional" },
-            { "entryKind": "equipment", "role": "mantle", "frame": "humanoid", "dropBand": "occasional", "rarityFloor": "fused" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "retinue",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "mantle",
+              "frame": "humanoid",
+              "dropBand": "occasional",
+              "rarityFloor": "fused"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "graveyard-salvage-mat",
           "entries": [
-            { "entryKind": "material", "ref": "shard.epic", "dropBand": "seldom", "qtyCurve": "curve.019" },
-            { "entryKind": "material", "ref": "catalyst.temper", "dropBand": "occasional", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "shard.epic",
+              "dropBand": "seldom",
+              "qtyCurve": "curve.019"
+            },
+            {
+              "entryKind": "material",
+              "ref": "catalyst.temper",
+              "dropBand": "occasional",
+              "qtyCurve": "curve.019"
+            }
           ]
         },
         {
           "groupKey": "graveyard-salvage-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
           ]
         }
       ],
@@ -264,27 +1213,53 @@
       "id": "droptable.d1-009",
       "nameKey": "droptable.bramble-stash",
       "name": "Bramble Stash",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "bramble-stash-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "jewel-minor-a", "frame": "plant", "dropBand": "occasional" },
-            { "entryKind": "equipment", "role": "jewel-minor-a", "frame": "humanoid", "dropBand": "occasional" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "equipment",
+              "role": "jewel-minor-a",
+              "frame": "plant",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "jewel-minor-a",
+              "frame": "humanoid",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "bramble-stash-ins",
           "entries": [
-            { "entryKind": "insert", "ref": "gem.g1-001", "dropBand": "occasional" },
-            { "entryKind": "nothing", "dropBand": "staple" }
+            {
+              "entryKind": "insert",
+              "ref": "gem.g1-001",
+              "dropBand": "occasional"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "staple"
+            }
           ]
         },
         {
           "groupKey": "bramble-stash-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "staple"
+            }
           ]
         }
       ],
@@ -294,26 +1269,51 @@
       "id": "droptable.d1-010",
       "nameKey": "droptable.withered-trove",
       "name": "Withered Trove",
-      "sourceAllow": ["web"],
+      "sourceAllow": [
+        "web"
+      ],
       "groups": [
         {
           "groupKey": "withered-trove-gear",
           "entries": [
-            { "entryKind": "equipment", "role": "core-guard", "frame": "hybrid", "dropBand": "seldom", "rarityFloor": "heirloom" },
-            { "entryKind": "equipment", "role": "armament-primary", "frame": "hybrid", "dropBand": "seldom" },
-            { "entryKind": "nothing", "dropBand": "frequent" }
+            {
+              "entryKind": "equipment",
+              "role": "core-guard",
+              "frame": "hybrid",
+              "dropBand": "seldom",
+              "rarityFloor": "heirloom"
+            },
+            {
+              "entryKind": "equipment",
+              "role": "armament-primary",
+              "frame": "hybrid",
+              "dropBand": "seldom"
+            },
+            {
+              "entryKind": "nothing",
+              "dropBand": "frequent"
+            }
           ]
         },
         {
           "groupKey": "withered-trove-mat",
           "entries": [
-            { "entryKind": "material", "ref": "shard.legendary", "dropBand": "exceptional", "qtyCurve": "curve.019" }
+            {
+              "entryKind": "material",
+              "ref": "shard.legendary",
+              "dropBand": "exceptional",
+              "qtyCurve": "curve.019"
+            }
           ]
         },
         {
           "groupKey": "withered-trove-cur",
           "entries": [
-            { "entryKind": "currency", "ref": "souls", "dropBand": "seldom" }
+            {
+              "entryKind": "currency",
+              "ref": "souls",
+              "dropBand": "seldom"
+            }
           ]
         }
       ],

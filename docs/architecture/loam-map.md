@@ -3,6 +3,17 @@
 **Status:** **SEALED 2026-08-23 — owner-approved. Build authorized through the ⭐ gate.**
 All ten audit findings and all nine spec findings carry a verdict below. Post-gate modules stay
 unspecced and unplanned on purpose: the gate decides whether they happen.
+
+**Post-gate authorized 2026-08-23 (owner decision, gate verdict via automated test-suite coverage —
+see `tasks/loam-todo.md` Checkpoint 5).** All five post-gate modules are cleared to be specced and
+built in the build order below, and **all five are now sealed** (all design calls resolved, per the
+owner's follow-up authorization to "clear every missing" rather than leave open items for a second
+round): [spec-loam-legions.md](loam/spec-loam-legions.md) · [spec-loam-ai.md](loam/spec-loam-ai.md) ·
+[spec-structure-substrate.md](loam/spec-structure-substrate.md) ·
+[spec-loam-structures.md](loam/spec-loam-structures.md) ·
+[spec-loam-texture.md](loam/spec-loam-texture.md). **None are built yet** — this is Phase 1 (Specify)
+of spec-driven-development, complete for all five modules; Phase 2 (Plan/Tasks) and implementation
+have not started for any of them.
 **Design source:** [empire-economy-ideal.md](empire-economy-ideal.md) (the mechanism) ·
 [economy-principles.md](economy-principles.md) (the tests any of it must pass).
 **Slots into:** [world-map-program.md](world-map-program.md), ahead of `sector-development` — this
@@ -230,7 +241,28 @@ column is wasted work.
 | `loam-fe` | Light-in-the-dark overlay, the loam gauge, per-sector net flow on the wire, the abandonment surface. **Pre-gate — the owner cannot judge what they cannot see** | `loam-turn` | **2** |
 | `loam-texture` | Whatever survives A1's 500-hour test: granary, contagion, Unmade, wardens, prospecting, surges | `loam-structures` | 5 |
 
-Module specs — **the whole pre-gate slice is specced**: [spec-loam-model](loam/spec-loam-model.md) · [spec-loam-calc](loam/spec-loam-calc.md) · [spec-loam-turn](loam/spec-loam-turn.md) · [spec-loam-maps](loam/spec-loam-maps.md) · [spec-loam-ai-survival](loam/spec-loam-ai-survival.md) · [spec-loam-fe](loam/spec-loam-fe.md) — all **sealed** 2026-08-23. Post-gate modules are deliberately unspecced: the ⭐ gate decides whether they happen.
+Module specs — **the whole pre-gate slice is specced**: [spec-loam-model](loam/spec-loam-model.md) · [spec-loam-calc](loam/spec-loam-calc.md) · [spec-loam-turn](loam/spec-loam-turn.md) · [spec-loam-maps](loam/spec-loam-maps.md) · [spec-loam-ai-survival](loam/spec-loam-ai-survival.md) · [spec-loam-fe](loam/spec-loam-fe.md) — all **sealed** 2026-08-23.
+
+**Post-gate, sealed 2026-08-23** (owner authorized the post-gate program, then authorized resolving
+every open item rather than leaving them for a second pass): [spec-loam-legions](loam/spec-loam-legions.md)
+· [spec-loam-ai](loam/spec-loam-ai.md) · [spec-structure-substrate](loam/spec-structure-substrate.md) ·
+[spec-loam-structures](loam/spec-loam-structures.md) · [spec-loam-texture](loam/spec-loam-texture.md).
+
+**Adversarially audited 2026-08-23** (owner: "audit the spec, debate and strengthen") — three
+independent passes, one real problem confirmed with code quotes and fixed in the specs themselves:
+`FadePolicy.DecayFor`'s surge multiplier was originally worded to scale the function's *output*
+(post-clamp), which would have let a sector exceed `MaxDecayMilli`'s "no single turn can zero a sector
+outright" guarantee; corrected to scale the pre-clamp input instead. Also found and fixed: all five
+specs had independently reopened a golden-move budget `tasks/loam-plan.md` explicitly closed at two —
+now one batched move across the whole post-gate slice, not five; a habitability claim that assumed
+belief already carried structure data it does not; a `Sustain`-timing contradiction inside
+`spec-loam-legions.md` itself; a misdescription of `Lost`-handling as already clearing structure state
+when it does not; an unbuildable march-loam-gate algorithm, replaced with one the shipped topology code
+can actually run; and three accepted, explicitly-stated risks (severance reads near-zero without real
+scouting, by design; a homeworld-loss lockout on the range rule, by design; a warded sector still costs
+its component's pool and loses its binding on capture). **All five specs are sealed with these fixes
+folded in. None of the five post-gate modules are implemented yet** — Phase 2 (Plan/Tasks) has not
+started.
 
 Plan and tasks: [tasks/loam-plan.md](../../tasks/loam-plan.md) · [tasks/loam-todo.md](../../tasks/loam-todo.md) — 24 tasks, 5 phases, ending at the gate. The bare `plan.md`/`todo.md` pair belongs to Perf v3 and was not touched.
 

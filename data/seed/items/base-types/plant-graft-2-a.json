@@ -36,7 +36,21 @@
       "iconKey": "icon.base.dusted-wart",
       "flavorKey": "flavor.base.dusted-wart",
       "flavor": "A small growth catches the wind. Pollen drifts from something that was never meant to bloom.",
-      "tags": ["light", "organic", "rooted"]
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-002",
@@ -54,7 +68,21 @@
       "iconKey": "icon.base.floating-pin",
       "flavorKey": "flavor.base.floating-pin",
       "flavor": "A spike held aloft on nothing but itself. Something was grafted here once; it did not quite take.",
-      "tags": ["light", "organic", "rooted"]
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-003",
@@ -72,7 +100,22 @@
       "iconKey": "icon.base.ephemeral-tie",
       "flavorKey": "flavor.base.ephemeral-tie",
       "flavor": "A tendril wound tight around itself. The knot will not hold through winter.",
-      "tags": ["light", "organic", "rooted", "fragile"]
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-004",
@@ -90,7 +133,21 @@
       "iconKey": "icon.base.strewn-notch",
       "flavorKey": "flavor.base.strewn-notch",
       "flavor": "A rough cut, scattered across the stem. Two branches were joined here and then tore free.",
-      "tags": ["light", "organic", "rooted"]
+      "tags": [
+        "light",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-005",
@@ -108,7 +165,21 @@
       "iconKey": "icon.base.stored-scar",
       "flavorKey": "flavor.base.stored-scar",
       "flavor": "A sealed wound. What healed here was never meant to heal; now it holds something else.",
-      "tags": ["medium", "organic", "rooted"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-006",
@@ -126,7 +197,21 @@
       "iconKey": "icon.base.engorged-burl",
       "flavorKey": "flavor.base.engorged-burl",
       "flavor": "Swollen with sap and stubborn defiance. The graft took and then kept growing past where it should have stopped.",
-      "tags": ["medium", "organic", "rooted"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-007",
@@ -144,7 +229,21 @@
       "iconKey": "icon.base.nourished-gall",
       "flavorKey": "flavor.base.nourished-gall",
       "flavor": "A knot of wood fed from both sides. The host and the graft, learning to feed each other.",
-      "tags": ["medium", "organic", "rooted"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-008",
@@ -162,7 +261,21 @@
       "iconKey": "icon.base.dormant-nodule",
       "flavorKey": "flavor.base.dormant-nodule",
       "flavor": "A knot under the bark, waiting. No one knows what it was meant to be.",
-      "tags": ["medium", "organic", "rooted"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-009",
@@ -180,7 +293,21 @@
       "iconKey": "icon.base.ingrown-knob",
       "flavorKey": "flavor.base.ingrown-knob",
       "flavor": "Fused so deep it draws sap from the parent wood. To remove it now would kill the whole branch.",
-      "tags": ["heavy", "organic", "rooted"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-010",
@@ -198,7 +325,21 @@
       "iconKey": "icon.base.indivisible-outgrowth",
       "flavorKey": "flavor.base.indivisible-outgrowth",
       "flavor": "One flesh now, though it began as two. The scar tissue has become stronger than either parent.",
-      "tags": ["heavy", "organic", "rooted"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-011",
@@ -216,7 +357,21 @@
       "iconKey": "icon.base.permanent-peg",
       "flavorKey": "flavor.base.permanent-peg",
       "flavor": "Hammered in so long ago that the wood has healed over it. Pulling it free would splinter the whole limb.",
-      "tags": ["heavy", "organic", "rooted"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-graft-2-a-012",
@@ -234,7 +389,21 @@
       "iconKey": "icon.base.wedded-dowel",
       "flavorKey": "flavor.base.wedded-dowel",
       "flavor": "Two pieces of wood joined with a pin no wider than a needle. The union has held for seasons.",
-      "tags": ["heavy", "organic", "rooted"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        }
+      ]
     }
   ]
 }

@@ -147,6 +147,13 @@ table.t td { border-bottom: 1px solid var(--border); padding: var(--sp-2); verti
        box-shadow: var(--sh-inset); overflow: hidden; }
 .meter .fill { display: block; height: 100%; background: var(--lawn-hot); border-radius: var(--r-pill);
        transition: width var(--dur-layer) var(--ease-out); }
+/* NO MEMBER IN THE LOCKED SET — deliberately kept, deliberately unused.
+   All five resources (hp/stamina/hunger/spirit/qi) are `asset`: full is good, hunger
+   included (it is a fed/starving gauge, not a rising affliction). The class survives only
+   so a future resource could declare `burden`, which would be an ADR — adding one changes
+   what every generic operation on a resource means. Applying it to hunger was the bug this
+   comment exists to prevent; it was on four meters until 2026-08-23.
+   resource-hub-ssot.md §6. */
 .meter--burden .fill { background: var(--bad); }
 .meter--sm { --meter-h: 5px; }
 .meter.is-critical .fill { background: var(--bad); }
@@ -619,3 +626,182 @@ table.t td { border-bottom: 1px solid var(--border); padding: var(--sp-2); verti
       background: repeating-linear-gradient(45deg, var(--muted) 0 4px, transparent 4px 8px); opacity: .3; }
 .tier-lb { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
       color: var(--faint); text-align: center; }
+
+/* --- rarity chip (real 10-rung ladder) ------------------------------------
+   Three redundant channels: L* (lightness, strictly increasing — the actual
+   ordering channel), pip count (colour-blind legible), and text (always).
+   NEVER colour alone. spec-item-card.md §4, ssot-rarity.md §4.5. Distinct
+   from the legacy .frame[data-rarity="1".."5"] border system, which stays
+   in place for existing plate content. */
+.raritychip { display: inline-flex; align-items: center; gap: 5px; }
+.raritypips { display: inline-flex; gap: 1px; }
+.raritypips i { display: block; width: 4px; height: 9px; border-radius: 1px; background: var(--border); }
+.raritypips i.on { background: var(--rc); }
+/* The label is text-coloured, not colour-tinted — the SSOT's three channels are lightness (the
+   palette itself), pip count, and TEXT, not "text painted the rarity colour". Painting it in --rc
+   failed WCAG AA on the two darkest rungs (chaff 2.82, sprout 3.64) since low-L* rungs are dark on
+   a dark panel. Measured, not eyeballed: kit.css §rarity chip, spec-item-card.md §4. */
+.raritylabel { font-size: var(--text-xs); font-weight: 800; color: var(--text); }
+
+/* --- item card (D.7) -------------------------------------------------------
+   Eleven blocks, two zones — Identity (1-6) never collapses. Blocks 7/8/9/11
+   are placeholders owned by documents 3, 3, 6, 5. spec-item-card.md §1. */
+.itemcard { background: var(--panel); border: 1px solid var(--border-control); border-radius: var(--r-md);
+      max-width: 420px; overflow: hidden; }
+.itemcard .blk { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); }
+.itemcard .blk:last-child { border-bottom: 0; }
+.itemcard .blk.placeholder { opacity: .45; font-size: var(--text-xs); font-style: italic; }
+.itemcard .blk-lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--faint); margin-bottom: 4px; }
+.itemcard .hd { display: flex; align-items: flex-start; gap: var(--sp-3); }
+.itemcard .hd-txt { min-width: 0; }
+.itemcard .plus { font-family: var(--mono); font-weight: 800; color: var(--sun); font-size: var(--text-sm); }
+.itemcard .nm { font-family: var(--font-content); font-weight: 800; font-size: var(--text-lg); line-height: 1.15; }
+.itemcard .sub2 { font-size: var(--text-xs); color: var(--muted); margin-top: 2px; }
+.itemcard .req-line { display: flex; justify-content: space-between; font-size: var(--text-sm); }
+.itemcard .req-line.is-met { color: var(--muted); }
+.itemcard .req-line.is-unmet { color: var(--bad); font-weight: 700; }
+.itemcard .basestat { font-size: var(--text-sm); }
+.itemcard .implicit { font-size: var(--text-sm); font-style: italic; color: var(--muted); }
+.itemcard .affixline { display: flex; justify-content: space-between; align-items: baseline;
+      gap: var(--sp-2); font-size: var(--text-sm); padding: 2px 0; }
+.itemcard .affixline .grp-hd { font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .05em; color: var(--faint); margin-top: var(--sp-2); }
+.itemcard .enh-milestone { font-size: var(--text-xs); color: var(--muted); }
+.itemcard .enh-milestone .locked { opacity: .5; font-style: italic; }
+.itemcard .flavour { font-size: var(--text-xs); font-style: italic; color: var(--muted); }
+
+/* --- comparison: unit-class group headers + dominance verdict ------------
+   ssot-presentation.md §4.2. "Deltas group by unit class, and the unit is
+   in the group header, never in the column." spec-comparison.md §1-§2. */
+.diffgrp-hd { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+      color: var(--faint); margin: var(--sp-3) 0 3px; }
+.diffgrp-hd:first-child { margin-top: 0; }
+
+/* Word AND shape, never colour alone — the same redundancy rule rarity's ladder uses. */
+.verdict-badge { display: inline-flex; align-items: center; gap: 6px; font-weight: 800;
+      font-size: var(--text-sm); padding: 3px 10px; border-radius: var(--r-pill); border: 1px solid; }
+.verdict-badge[data-v="better"] { color: var(--ok);   border-color: rgb(111 191 115 / .5); background: rgb(111 191 115 / .08); }
+.verdict-badge[data-v="worse"]  { color: var(--bad);  border-color: rgb(217 123 123 / .5); background: rgb(217 123 123 / .08); }
+.verdict-badge[data-v="side"]   { color: var(--info); border-color: rgb(127 168 201 / .5); background: rgb(127 168 201 / .08); }
+.verdict-badge[data-v="none"]   { color: var(--muted); border-color: var(--border-control); }
+.trade { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-top: var(--sp-2); font-size: var(--text-xs); }
+.trade .gain b { color: var(--ok); }
+.trade .lose b { color: var(--bad); }
+
+/* The footnote is permanent — never a dismissible hint. */
+.footnote-permanent { font-size: var(--text-xs); color: var(--muted); font-style: italic;
+      border-top: 1px dashed var(--border); padding-top: var(--sp-2); margin-top: var(--sp-3); }
+
+/* Attribution chain: points sum, sigmoid applies exactly once at the final row. */
+.attrib .final { border-top: 2px solid var(--sun); margin-top: 3px; padding-top: 4px; }
+.attrib .final .amt { color: var(--sun); font-weight: 800; }
+.attrib .final .ref { position: static; margin-left: 6px; }
+
+/* --- socket block (item card §7) -------------------------------------------
+   spec-sockets-and-sets.md §1. Four states: active / one-away / known-inactive /
+   undiscovered (not rendered). ONE evaluator produces all four. */
+.sockcell { display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: var(--r-sm); border: 1px solid var(--border-control);
+      background: var(--panel-inset); font-size: var(--text-xs); font-weight: 800; }
+.sockcell.is-empty { border-style: dashed; color: var(--faint); }
+.combo { display: flex; align-items: baseline; gap: 6px; padding: 3px 0; font-size: var(--text-sm); }
+.combo .cb-nm { font-weight: 700; }
+.combo[data-state="active"] { color: var(--text); }
+.combo[data-state="one-away"], .combo[data-state="known-inactive"] { color: var(--muted); }
+.combo[data-state="one-away"] .cb-nm { color: var(--text); }
+.combo .cb-need { font-size: var(--text-xs); color: var(--sun); font-style: italic; }
+.combo .cb-atoms { font-size: var(--text-xs); color: var(--muted); }
+.combo[data-state="one-away"] .cb-atoms { opacity: .55; }
+.combo-detail { font-size: var(--text-xs); color: var(--muted); margin: -2px 0 4px; }
+
+/* --- set block (item card §8) ----------------------------------------------
+   spec-sockets-and-sets.md §2. The WHOLE ladder always renders — inactive
+   thresholds dimmed but their atoms stay visible, because they are the goal. */
+.setladder { display: grid; gap: 3px; }
+.setrung { display: grid; grid-template-columns: 70px 1fr; gap: var(--sp-2); align-items: baseline;
+      padding: 3px 0; font-size: var(--text-sm); }
+.setrung .req { font-weight: 800; font-size: var(--text-xs); color: var(--faint); }
+.setrung.is-active .req { color: var(--ok); }
+.setrung.is-active .grant { color: var(--text); }
+.setrung:not(.is-active) .grant { color: var(--muted); }
+.setrung .grant b { color: inherit; }
+.setrung .cap-badge { font-size: 9px; font-weight: 800; letter-spacing: .04em; color: var(--sun);
+      border: 1px solid var(--sun); border-radius: var(--r-pill); padding: 0 4px; margin-left: 4px; }
+
+/* --- paper-doll (D.8) ------------------------------------------------------
+   Rendered as a weight-sorted slot list, not illustrated body art — consistent
+   with README §5's exclusion of "art direction beyond framing and colour."
+   spec-equip-and-paperdoll.md §2-4. */
+.dollrow { display: grid; grid-template-columns: 22px 1fr 90px 60px; gap: var(--sp-2);
+      align-items: center; padding: 3px 0; font-size: var(--text-sm); }
+.dollrow .rank { font-family: var(--mono); font-size: var(--text-2xs); color: var(--faint); text-align: center; }
+.dollrow .rolenm { font-weight: 700; }
+.dollrow .rolenm .alt { font-weight: 400; color: var(--muted); font-size: var(--text-xs); }
+.dollrow .wbar { height: 6px; background: var(--panel-inset); border-radius: var(--r-pill); overflow: hidden; }
+.dollrow .wbar span { display: block; height: 100%; background: var(--sun); }
+.dollrow .wt { font-family: var(--mono); font-size: var(--text-xs); color: var(--muted); text-align: right; }
+.dollrow.is-locked { opacity: .5; }
+.dollrow.is-locked .rolenm { font-style: italic; }
+.dollrow.is-absent { opacity: .35; }
+.dollrow.is-absent .rolenm { text-decoration: line-through; font-style: italic; }
+.dollrow .lvltag { font-size: 9px; font-weight: 800; color: var(--warn); }
+.dollrow .abstag { font-size: 9px; font-weight: 800; color: var(--bad); }
+
+/* --- workshop: cost chips, reroll operations, salvage preview (F.3) -------
+   spec-inventory-and-workshop.md §2-3. Souls/substrate/shard/essence/catalyst
+   are never interchangeable — each gets a distinct glyph, never colour alone. */
+.costchip { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-xs);
+      font-weight: 700; padding: 2px 8px; border-radius: var(--r-pill); border: 1px solid var(--border-control);
+      background: var(--panel-inset); }
+.costchip .g { font-size: var(--text-sm); }
+.costchip[data-cls="souls"]     { border-color: rgb(224 180 75 / .5); }
+.costchip[data-cls="substrate"] { border-color: rgb(160 140 110 / .5); }
+.costchip[data-cls="shard"]     { border-color: rgb(127 168 201 / .5); }
+.costchip[data-cls="essence"]   { border-color: rgb(185 142 222 / .5); }
+.costchip[data-cls="catalyst"]  { border-color: rgb(217 123 123 / .5); }
+
+.opcard { border: 1px solid var(--border-control); border-radius: var(--r-md); padding: var(--sp-3);
+      background: var(--panel); }
+.opcard .op-nm { font-weight: 800; font-size: var(--text-md); }
+.opcard .op-feel { font-size: var(--text-xs); color: var(--muted); margin: 2px 0 8px; }
+.opcard .op-cost { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.guardlist { display: grid; gap: 4px; font-size: var(--text-sm); }
+.guardrow { display: grid; grid-template-columns: 60px 1fr; gap: var(--sp-2); align-items: baseline; }
+.guardrow .gid { font-family: var(--mono); font-size: var(--text-2xs); font-weight: 800; color: var(--sun); }
+.guardrow .gexcl { font-size: var(--text-xs); color: var(--muted); }
+
+/* --- action layer: usability, cost cluster, targeting (F.4) ---------------
+   spec-action-layer.md. The existing .actionslot (_kit/screens.css) only
+   ever shows two states (affordable / is-unaffordable) with a bare cost
+   number — no resource identity, no range/condition refusal. These extend
+   it additively; existing plates using .actionslot are untouched.
+   NOTE: this foundation plate loads only tokens.css + kit.css, not
+   screens.css, so .actionslot's own `position: relative` (needed for the
+   absolutely-positioned refuse-reason label below) is restated here —
+   without it the label computes against <body> instead of the button. */
+.actionslot { position: relative; }
+.actionslot.is-refused { opacity: 0.55; cursor: not-allowed; }
+.actionslot.is-refused .cost { display: none; }
+.actionslot .refuse-reason { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+      white-space: nowrap; font-size: 9px; font-weight: 800; color: var(--bad); }
+.actionslot[data-refuse="cooldown"] .refuse-reason { color: var(--warn); }
+
+.costcluster { display: flex; flex-direction: column; gap: 4px; }
+.costline { display: flex; align-items: center; gap: 6px; font-size: var(--text-sm); }
+.costline .pool { font-weight: 700; min-width: 64px; }
+.costline .bar { flex: 1; height: 6px; background: var(--panel-inset); border-radius: var(--r-pill); overflow: hidden; }
+.costline .bar span { display: block; height: 100%; background: var(--sun); }
+.costline.is-perTick .bar span { animation: drain 3s linear forwards; }
+@keyframes drain { from { width: 100%; } to { width: 0%; } }
+.costline .amt { font-family: var(--mono); font-size: var(--text-xs); color: var(--muted); min-width: 40px; text-align: right; }
+
+/* Chebyshev range diamond-square — never a circle, which would promise cells
+   the resolver's Square shape does not actually grant. */
+.rangegrid { display: inline-grid; grid-template-columns: repeat(7, 20px); gap: 2px; }
+.rangegrid .rc { width: 20px; height: 20px; border-radius: 2px; background: var(--panel-inset);
+      border: 1px solid var(--border); }
+.rangegrid .rc.in-range { background: rgb(127 168 201 / 0.25); border-color: rgb(127 168 201 / .6); }
+.rangegrid .rc.is-caster { background: var(--sun); border-color: var(--sun); }
+.rangegrid .rc.is-move { background: rgb(111 191 115 / 0.2); border-color: rgb(111 191 115 / .55); }

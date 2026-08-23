@@ -27,10 +27,46 @@
       "name": "Improvised Yoke",
       "themeKey": "theme.thorned-chassis",
       "members": [
-        { "role": "armament-primary" },
-        { "role": "core-guard" },
-        { "role": "manipulator" },
-        { "role": "footing" }
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-b-009"
+        },
+        {
+          "role": "armament-primary",
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-a-006"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-005"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-006"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-a-007"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-a-007"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-005"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-011"
+        }
       ],
       "thresholds": [
         {
@@ -43,14 +79,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "low" },
-            { "family": "atom.vitality", "powerBand": "low" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "low"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -63,10 +108,46 @@
       "name": "Husk of the Chassis",
       "themeKey": "theme.thorned-chassis",
       "members": [
-        { "role": "core-guard" },
-        { "role": "head-guard" },
-        { "role": "mantle" },
-        { "role": "girdle" }
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-006"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-007"
+        },
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-a-008"
+        },
+        {
+          "role": "head-guard",
+          "frame": "plant",
+          "baseType": "item.plant-crown-a-008"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-a-008"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-a-008"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-a-008"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-a-008"
+        }
       ],
       "thresholds": [
         {
@@ -79,14 +160,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.mending", "powerBand": "low" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.mending",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -99,10 +189,46 @@
       "name": "Junkbramble",
       "themeKey": "theme.thorned-chassis",
       "members": [
-        { "role": "armament-secondary" },
-        { "role": "jewel-major" },
-        { "role": "sense" },
-        { "role": "retinue" }
+        {
+          "role": "armament-secondary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-off-hand-a-009"
+        },
+        {
+          "role": "armament-secondary",
+          "frame": "plant",
+          "baseType": "item.plant-thorn-a-009"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-a-009"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-b-002"
+        },
+        {
+          "role": "sense",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-face-b-012"
+        },
+        {
+          "role": "sense",
+          "frame": "plant",
+          "baseType": "item.plant-bract-a-001"
+        },
+        {
+          "role": "retinue",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-horn-a-012"
+        },
+        {
+          "role": "retinue",
+          "frame": "plant",
+          "baseType": "item.plant-runner-b-009"
+        }
       ],
       "thresholds": [
         {
@@ -115,8 +241,14 @@
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "low" },
-            { "family": "atom.life-graft", "powerBand": "trivial" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "low"
+            },
+            {
+              "family": "atom.life-graft",
+              "powerBand": "trivial"
+            }
           ]
         }
       ],
@@ -129,10 +261,46 @@
       "name": "Retrofitted Cordon",
       "themeKey": "theme.thorned-chassis",
       "members": [
-        { "role": "girdle" },
-        { "role": "jewel-minor-a" },
-        { "role": "infusion" },
-        { "role": "retinue" }
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-a-010"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-a-010"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-ring-1-a-010"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "plant",
+          "baseType": "item.plant-graft-1-a-010"
+        },
+        {
+          "role": "infusion",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-bandolier-a-004"
+        },
+        {
+          "role": "infusion",
+          "frame": "plant",
+          "baseType": "item.plant-glands-b-010"
+        },
+        {
+          "role": "retinue",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-horn-b-001"
+        },
+        {
+          "role": "retinue",
+          "frame": "plant",
+          "baseType": "item.plant-runner-b-010"
+        }
       ],
       "thresholds": [
         {
@@ -145,14 +313,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "low" },
-            { "family": "atom.mending", "powerBand": "low" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "low"
+            },
+            {
+              "family": "atom.mending",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -165,10 +342,46 @@
       "name": "Warren of the Overhaul",
       "themeKey": "theme.thorned-chassis",
       "members": [
-        { "role": "footing" },
-        { "role": "manipulator" },
-        { "role": "sense" },
-        { "role": "jewel-minor-a" }
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-010"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-b-005"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-a-011"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-a-011"
+        },
+        {
+          "role": "sense",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-face-a-003"
+        },
+        {
+          "role": "sense",
+          "frame": "plant",
+          "baseType": "item.plant-bract-a-004"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-ring-1-a-011"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "plant",
+          "baseType": "item.plant-graft-1-a-011"
+        }
       ],
       "thresholds": [
         {
@@ -181,14 +394,23 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.might", "powerBand": "low" }
+            {
+              "family": "atom.might",
+              "powerBand": "low"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "low" },
-            { "family": "atom.vitality", "powerBand": "low" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "low"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "low"
+            }
           ]
         }
       ],
@@ -201,12 +423,66 @@
       "name": "Ironstem",
       "themeKey": "theme.thorned-chassis",
       "members": [
-        { "role": "armament-secondary" },
-        { "role": "core-guard" },
-        { "role": "head-guard" },
-        { "role": "mantle" },
-        { "role": "girdle" },
-        { "role": "footing" }
+        {
+          "role": "armament-secondary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-off-hand-a-012"
+        },
+        {
+          "role": "armament-secondary",
+          "frame": "plant",
+          "baseType": "item.plant-thorn-a-012"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-011"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-b-001"
+        },
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-a-012"
+        },
+        {
+          "role": "head-guard",
+          "frame": "plant",
+          "baseType": "item.plant-crown-a-012"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-a-012"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-a-012"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-a-012"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-a-012"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-011"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-b-006"
+        }
       ],
       "thresholds": [
         {
@@ -219,19 +495,33 @@
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" },
-            { "family": "atom.fortitude", "powerBand": "low" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.fortitude",
+              "powerBand": "low"
+            }
           ]
         },
         {
           "pieces": 6,
           "atoms": [
-            { "family": "atom.might", "powerBand": "medium" },
-            { "family": "atom.ferocity", "powerBand": "medium" }
+            {
+              "family": "atom.might",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
+      "tags": [
+        "signature"
+      ],
       "notes": "Whole-token fusion name 'Ironstem' from uniqueSetSeedPools['thorned-chassis'], used atomically. This partition's one grand (6-piece) set, per ssot-sets.md 3.4's 'exception, not the pattern' - it carries the mandatory thresholds at 2 and 4 plus a top threshold at 6, equal to its member count, so SetThresholdUnreachable does not apply. Capability atom.gardener (spawn.entity, OnDeath, plant) is powerBand medium rather than low, matching the grand-set convention already used on this fleet's frostbitten-vanguard sibling's own 6-piece entry - the six-slot commitment earns a stronger splash than a typical 4-piece set. Claims armament-secondary only, never armament-primary in the same entry. Six distinct member roles (armament-secondary, core-guard, head-guard, mantle, girdle, footing), all in the hybrid role core, none repeated within this entry. Tagged 'signature' (notability axis, tags.v1.json) as the partition's flagship - a curation flag, not a power claim. Higher tiers (vitality, fortitude, might, ferocity) are Flat/Increased stat.modify only, no More-op family."
     }
   ]

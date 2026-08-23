@@ -21,6 +21,13 @@ public sealed class ValidationContext
     /// <summary>id to the first entry that claimed it. Built by the identity check.</summary>
     public Dictionary<string, SeedEntry> ById { get; } = new(StringComparer.Ordinal);
 
+    /// <summary>
+    /// Runtime ids an entry MINTS rather than an allocation handing it out — a milestone's
+    /// `atom.enhance-*`, a socket word's `gem.word-*`. They are legitimate reference targets that
+    /// `ById` can never contain, so the resolver consults this too. Populated by ReferenceCheck.
+    /// </summary>
+    public HashSet<string> MintedRuntime { get; set; } = new(StringComparer.Ordinal);
+
     /// <summary>Ids retired by a disabled entry in this corpus, on top of the ledger.</summary>
     public HashSet<string> RetiredHere { get; } = new(StringComparer.Ordinal);
 

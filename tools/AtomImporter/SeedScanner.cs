@@ -12,7 +12,7 @@ public static class SeedScanner
 {
     /// <summary>The folders the atom importer owns. Nothing else under the seed root is its business.</summary>
     public static readonly string[] OwnedFolders =
-        { "atoms", "containers", "curves", "rarity", "elements" };
+        { "atoms", "containers", "curves", "rarity", "elements", "channel-policy" };
 
     /// <summary>
     /// The folders to sweep. A root the caller named explicitly is swept whole — that is the escape

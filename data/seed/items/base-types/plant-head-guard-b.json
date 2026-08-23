@@ -29,12 +29,34 @@
       "role": "head-guard",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.grooved-crown",
       "flavorKey": "flavor.base.grooved-crown",
       "flavor": "Its ridges catch the light. Running a finger along them tells the season's story.",
-      "tags": ["heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-002",
@@ -44,12 +66,34 @@
       "role": "head-guard",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.lichened-corona",
       "flavorKey": "flavor.base.lichened-corona",
       "flavor": "The growth is symbiotic: neither the bark nor the lichen would be itself without the other.",
-      "tags": ["medium", "organic", "rooted", "utility"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-003",
@@ -59,12 +103,35 @@
       "role": "head-guard",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.mossy-capitulum",
       "flavorKey": "flavor.base.mossy-capitulum",
       "flavor": "Soft to touch, deadly to underestimate. The moss is a living seal against harm.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-004",
@@ -74,13 +141,35 @@
       "role": "head-guard",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "trivial" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.gnarled-cupule",
       "flavorKey": "flavor.base.gnarled-cupule",
       "flavor": "Twisted by decades of wind and ice. It wears its deformation like armor.",
-      "tags": ["medium", "organic", "rooted", "defensive"],
-      "notes": "Lower implicit power band paired with standard socket count to provide variety in band-b weight — the gnarl itself carries the protection."
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "notes": "Lower implicit power band paired with standard socket count to provide variety in band-b weight \u2014 the gnarl itself carries the protection.",
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-005",
@@ -90,12 +179,35 @@
       "role": "head-guard",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.cracked-inflorescence",
       "flavorKey": "flavor.base.cracked-inflorescence",
-      "flavor": "Fractured by heat and hardship. The cracks let nothing pass — neither time nor harm.",
-      "tags": ["heavy", "organic", "rooted", "fragile", "defensive"]
+      "flavor": "Fractured by heat and hardship. The cracks let nothing pass \u2014 neither time nor harm.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "fragile",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-006",
@@ -105,12 +217,34 @@
       "role": "head-guard",
       "class": "bark",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.hoary-cone",
       "flavorKey": "flavor.base.hoary-cone",
       "flavor": "Winter's first frost gives it its white coat. What was brown grows pale and unforgiving.",
-      "tags": ["heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-007",
@@ -120,12 +254,35 @@
       "role": "head-guard",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.dense-thyrse",
       "flavorKey": "flavor.base.dense-thyrse",
       "flavor": "Compressed grain makes it heavier than water. Nothing passes through something this thick.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-008",
@@ -135,12 +292,34 @@
       "role": "head-guard",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.petrified-rosette",
       "flavorKey": "flavor.base.petrified-rosette",
-      "flavor": "Its layers have turned to stone over centuries. No bloom remains—only the memory of one.",
-      "tags": ["heavy", "organic", "rooted", "defensive"]
+      "flavor": "Its layers have turned to stone over centuries. No bloom remains\u2014only the memory of one.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-009",
@@ -150,12 +329,34 @@
       "role": "head-guard",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.ancient-cyme",
       "flavorKey": "flavor.base.ancient-cyme",
       "flavor": "Its form predates every creature that might wear it. It has seen epochs. It is past caring.",
-      "tags": ["heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-010",
@@ -165,12 +366,35 @@
       "role": "head-guard",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.unsplit-coronet",
       "flavorKey": "flavor.base.unsplit-coronet",
       "flavor": "Grain runs clean and unbroken. To break it would take more force than most things possess.",
-      "tags": ["medium", "organic", "rooted", "defensive", "sturdy"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-011",
@@ -180,12 +404,34 @@
       "role": "head-guard",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.vitality", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.vitality",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.marrowed-calyx",
       "flavorKey": "flavor.base.marrowed-calyx",
       "flavor": "Hollowed from within, yet somehow stronger. What is missing makes it work.",
-      "tags": ["medium", "organic", "rooted", "utility"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     },
     {
       "id": "item.plant-crown-b-012",
@@ -195,12 +441,35 @@
       "role": "head-guard",
       "class": "heartwood",
       "band": "b",
-      "implicit": { "family": "atom.mending", "powerBand": "trivial" },
+      "implicit": {
+        "family": "atom.mending",
+        "powerBand": "trivial"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.inert-bloom",
       "flavorKey": "flavor.base.inert-bloom",
       "flavor": "Once it bloomed and drew the sun. Now it is wood through and through, past growth and past feeling.",
-      "tags": ["heavy", "organic", "rooted", "fragile", "defensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "fragile",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-hardy"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
+      ]
     }
   ]
 }

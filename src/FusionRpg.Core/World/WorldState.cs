@@ -91,6 +91,19 @@ public sealed record WorldSlot
     public string? GuardWaveId { get; init; }
 
     public GuardState GuardState { get; init; } = GuardState.Cleared;
+
+    /// <summary>
+    /// What this slot carries, if anything (spec-structure-substrate.md). Null on every slot today —
+    /// the mechanism ships before any content uses it.
+    /// </summary>
+    public string? StructureId { get; init; }
+
+    /// <summary>
+    /// Null means either no structure or a finished one. A positive count means a structure was just
+    /// built and is not yet active (spec-loam-structures.md) — content for a later module, the field
+    /// lands now so it hashes and persists before that module needs it.
+    /// </summary>
+    public int? ConstructionTurnsRemaining { get; init; }
 }
 
 public sealed record WorldSector
@@ -142,6 +155,19 @@ public sealed record WorldSector
 
     /// <summary>Ordered by <see cref="WorldSlot.SlotIndex"/>, contiguous from zero.</summary>
     public IReadOnlyList<WorldSlot> Slots { get; init; } = Array.Empty<WorldSlot>();
+
+    /// <summary>
+    /// Set only by a warden bind (spec-loam-texture.md); a sector with a binding is exempt from
+    /// `FadePolicy` entirely while it holds — permanent, never released except by capture.
+    /// </summary>
+    public string? WardenBindingId { get; init; }
+
+    /// <summary>
+    /// How many consecutive turns this sector has sat <see cref="SectorPhase.Lost"/> and barren —
+    /// the Unmade's spawn clock (spec-loam-texture.md). Zero on any sector that is not currently in
+    /// that state; a later module resets it the moment the sector is reclaimed or grows a source.
+    /// </summary>
+    public int NeglectedTurns { get; init; }
 }
 
 public sealed record WorldLane
@@ -163,6 +189,16 @@ public sealed record WorldLane
     public LaneState State { get; init; } = LaneState.Open;
 }
 
+/// <summary>
+/// Whether a member fights or carries (spec-loam-legions.md). Fighter is the default so every
+/// member ever built before this field existed reads as one — the shape supply already assumed.
+/// </summary>
+public enum WorldEntityMemberRole
+{
+    Fighter,
+    Bearer
+}
+
 public sealed record WorldEntityMember
 {
     /// <summary>Roster specimen (`rpg_unique_actors`); null for non-player forces and guards.</summary>
@@ -171,6 +207,7 @@ public sealed record WorldEntityMember
     public int Level { get; init; } = 1;
     public int Hp { get; init; }
     public int Wounds { get; init; }
+    public WorldEntityMemberRole Role { get; init; } = WorldEntityMemberRole.Fighter;
 }
 
 public sealed record WorldEntity
@@ -207,6 +244,12 @@ public sealed record WorldEntity
     /// </summary>
     public bool Routed { get; init; }
     public IReadOnlyList<WorldEntityMember> Members { get; init; } = Array.Empty<WorldEntityMember>();
+
+    /// <summary>
+    /// Entity-level pool, not per-member (spec-loam-legions.md): members carry as a crew, not as
+    /// individual sacks. Zero for every entity built before this module.
+    /// </summary>
+    public long CarriedLoam { get; init; }
 }
 
 /// <summary>

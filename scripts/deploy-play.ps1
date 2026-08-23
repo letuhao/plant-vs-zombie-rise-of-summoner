@@ -125,6 +125,11 @@ if (-not $NoServer) {
         throw "Server exe missing after publish: $ServerExe"
     }
 
+    Write-Host "==> Importing data\seed into $DataDir (E20 — the server boots on this, not code literals)"
+    $ImporterProj = Join-Path $Root "tools\AtomImporter\AtomImporter.csproj"
+    dotnet run --project $ImporterProj -c Release -- --db $DataDir
+    if ($LASTEXITCODE -ne 0) { throw "AtomImporter refused the import — see output above" }
+
     if (Test-ServerUp) {
         Write-Host "==> Server already running at $Health (pass -RestartServer after server code changes)"
     } else {

@@ -12,6 +12,7 @@ public enum SeedEntryKind
     Rarity,
     Element,
     ElementMatrix,
+    ChannelPolicy,
 }
 
 /// <summary>
@@ -33,6 +34,14 @@ public sealed record SeedError(string SourcePath, string EntryId, AtomRejectionR
 public sealed record CurveSeed(string CurveId, CurveInput Input, IReadOnlyList<CurvePoint> Points);
 
 /// <summary>
+/// One authored channel policy row (E22). Core-side mirror of <c>FusionRpg.Data.ChannelPolicyRow</c> —
+/// Core cannot reference Data, and every other seeded table (elements, curves, rarity) already carries
+/// its own Core-side row type for the same reason.
+/// </summary>
+public sealed record ChannelPolicySeedRow(
+    string ChannelId, int Direction, int DefaultValue, int CapMilli, string ComposeKind);
+
+/// <summary>
 /// Everything one import wants to write, collected from every file and already checked for the
 /// duplicates that only exist across files.
 /// </summary>
@@ -49,12 +58,15 @@ public sealed class SeedContent
     /// <summary>Matchup cells, tagged by which matrix they belong to — the two never share rows.</summary>
     public List<(string Matrix, ElementMatrixRow Row)> ElementMatrix { get; } = new();
 
+    /// <summary>Channel policy rows (E22) — direction is the one column with a live consumer.</summary>
+    public List<ChannelPolicySeedRow> ChannelPolicies { get; } = new();
+
     /// <summary>Entry id to the file that authored it — the other half of a duplicate report.</summary>
     public Dictionary<string, string> SourceOf { get; } = new(StringComparer.Ordinal);
 
     public int Count =>
         Atoms.Count + Containers.Count + Curves.Count + Rarities.Count
-        + Elements.Count + ElementMatrix.Count;
+        + Elements.Count + ElementMatrix.Count + ChannelPolicies.Count;
 }
 
 /// <summary>What a collection pass produced, and everything wrong with it.</summary>
@@ -162,6 +174,7 @@ public static class AtomSeedFile
                     case SeedEntryKind.Curve: ReadCurve(path, entry, into, errors); break;
                     case SeedEntryKind.Element: ReadElement(path, entry, into, errors); break;
                     case SeedEntryKind.ElementMatrix: ReadMatrixCell(path, entry, into, errors); break;
+                    case SeedEntryKind.ChannelPolicy: ReadChannelPolicy(path, entry, into, errors); break;
                     default: ReadRarity(path, entry, into, errors); break;
                 }
             }
@@ -305,6 +318,29 @@ public static class AtomSeedFile
     }
 
     /// <summary>
+    /// One channel's values (E22). <c>channel</c> is required — the store refuses one that is not
+    /// already in <c>StatChannels.All</c>, so authoring a new channel here is a refusal, not a feature.
+    /// </summary>
+    static void ReadChannelPolicy(string path, JsonElement e, SeedContent into, List<SeedError> errors)
+    {
+        var channel = Str(e, "channel");
+        if (!Claim(path, channel, into, errors)) return;
+
+        if (IntOrNull(e, "direction") is not { } direction)
+        {
+            errors.Add(new SeedError(path, channel, AtomRejectionReason.MissingParam,
+                "a channel policy needs an explicit direction — 0 higher-is-better, 1 lower-is-better"));
+            return;
+        }
+
+        into.ChannelPolicies.Add(new ChannelPolicySeedRow(
+            channel, direction,
+            IntOrNull(e, "defaultValue") ?? 0,
+            IntOrNull(e, "capMilli") ?? -1,
+            string.IsNullOrWhiteSpace(Str(e, "composeKind")) ? "phased" : Str(e, "composeKind")));
+    }
+
+    /// <summary>
     /// One matchup cell. <c>matrix</c> chooses <c>combat</c> or <c>shield</c> — required, because a
     /// cell that guessed its matrix would silently rebalance the other one.
     /// </summary>
@@ -379,6 +415,7 @@ public static class AtomSeedFile
             case "rarity": kind = SeedEntryKind.Rarity; return true;
             case "element": kind = SeedEntryKind.Element; return true;
             case "element-matrix": kind = SeedEntryKind.ElementMatrix; return true;
+            case "channel-policy": kind = SeedEntryKind.ChannelPolicy; return true;
             default: kind = SeedEntryKind.Atom; return false;
         }
     }

@@ -42,6 +42,20 @@
         "mineral",
         "offensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -65,6 +79,20 @@
         "metal",
         "defensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -88,6 +116,20 @@
         "mineral",
         "defensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -111,6 +153,20 @@
         "metal",
         "utility",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -134,6 +190,20 @@
         "metal",
         "utility",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -156,6 +226,20 @@
         "medium-light",
         "organic",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -179,6 +263,20 @@
         "mineral",
         "offensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -202,6 +300,20 @@
         "metal",
         "defensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -225,6 +337,20 @@
         "mineral",
         "defensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -242,12 +368,26 @@
       "socketMax": 2,
       "iconKey": "icon.base.stapled-visor",
       "flavorKey": "flavor.base.stapled-visor",
-      "flavor": "Piecemeal construction — salvaged materials riveted together with military precision.",
+      "flavor": "Piecemeal construction \u2014 salvaged materials riveted together with military precision.",
       "tags": [
         "medium-heavy",
         "metal",
         "offensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -271,6 +411,20 @@
         "metal",
         "defensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     },
     {
@@ -294,6 +448,20 @@
         "metal",
         "offensive",
         "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-quicken"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-evasion"
+        }
       ]
     }
   ]

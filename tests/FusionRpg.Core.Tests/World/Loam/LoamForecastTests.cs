@@ -76,6 +76,31 @@ public class LoamForecastTests
     }
 
     [Fact]
+    public void Weakest_returns_null_when_the_pool_can_cover_its_own_upkeep()
+    {
+        // Direct coverage of Weakest's own early-return guard: neither of its two call sites
+        // (Pressure only calls it once a shortfall is already known; WillRelease's own downstream
+        // FadePolicy check happens to swallow a broken guard here too) actually exercises this
+        // branch, so mutation testing — not line coverage — is what found the gap.
+        var world = World(new[] { Sector("s", slots: new[] { Rootbed(0) }) });
+        var component = ComponentOf(world, "s");
+
+        Assert.Null(LoamForecast.Weakest(world, component, available: 100, upkeep: 50));
+    }
+
+    [Fact]
+    public void ProjectedStock_caps_new_accrual_at_capacity_per_sector()
+    {
+        // A rootbed sector sitting 10 short of its cap: the forecast must add only the room left
+        // (10), not the sector's full nominal yield (SeepPerTurn=50) — the same throttle
+        // LoamPhases.Production itself applies, replayed one turn ahead without mutating state.
+        var world = World(new[] { Sector("s", stock: LoamPolicy.LoamCapacity - 10, slots: new[] { Rootbed(0) }) });
+        var component = ComponentOf(world, "s");
+
+        Assert.Equal(LoamPolicy.LoamCapacity, LoamForecast.ProjectedStock(component, world));
+    }
+
+    [Fact]
     public void The_forecast_agrees_with_what_pressure_actually_does_this_turn()
     {
         var cases = new (WorldState World, bool ShouldRelease)[]

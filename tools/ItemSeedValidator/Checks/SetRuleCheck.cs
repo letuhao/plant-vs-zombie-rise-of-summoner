@@ -82,6 +82,7 @@ public static class SetRuleCheck
         foreach (var entry in ctx.Entries)
         {
             if (!string.Equals(entry.File.Kind, "set", StringComparison.Ordinal)) continue;
+            if (entry.File.IsExemplar) continue;   // a pattern, not corpus content
             var members = entry.Node["members"] as JsonArray ?? new JsonArray();
 
             foreach (var member in members.OfType<JsonObject>())

@@ -726,6 +726,16 @@ public static class CheatActions
         catch (Exception ex) { CheatState.Error(ex.Message); }
     }
 
+    public static void DumpAlmanacAll()
+    {
+        try
+        {
+            GameHooks.EnqueueFullAlmanacText();
+            CheatState.Note("almanac text sweep enqueued");
+        }
+        catch (Exception ex) { CheatState.Error(ex.Message); }
+    }
+
     public static void ReinforceSelected()
     {
         if (CheatState.SelectedPtr == IntPtr.Zero) { CheatState.Error("no selection"); return; }

@@ -122,7 +122,9 @@ public static class StatusStatPayload
     /// <summary>Primary channels plus the generated combat/status derived set.</summary>
     public static bool IsKnownChannel(string channel) =>
         Array.Exists(StatChannels.All, c => string.Equals(c, channel, StringComparison.Ordinal))
-        || DerivedStatChannels.AllCombatChannelIds.Contains(channel)
+        // E25: O(1) against the cached generation rather than a linear scan of a freshly
+        // allocated 84-element list on every channel parsed.
+        || DerivedStatChannels.IsCombatChannel(channel)
         || DerivedStatusChannels.Contains(channel);
 
     static readonly HashSet<string> DerivedStatusChannels = new(StringComparer.Ordinal)
@@ -164,7 +166,11 @@ public static class StatusStatPayload
                     _ => ModifierOp.Flat,
                 },
                 Value = mod.Value,
-                ApplyOwnerKey = instance.HostPtr,
+                // E21: StatApplyScope.Matches only recognises the "entity:" grammar — a bare pointer
+                // never matches (falls through to the final `return false`), so this contribution
+                // silently composed nothing until a seam test proved it end to end through the real
+                // StatSystem.Resolve, not just through ToModifiers in isolation.
+                ApplyOwnerKey = "entity:" + instance.HostPtr,
             });
 
         return result;

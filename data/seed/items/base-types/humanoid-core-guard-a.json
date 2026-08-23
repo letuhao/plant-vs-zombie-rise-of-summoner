@@ -36,8 +36,26 @@
       "socketMax": 0,
       "iconKey": "icon.base.quilted-vest",
       "flavorKey": "flavor.base.quilted-vest",
-      "flavor": "Stitched and padded for comfort. The quilting catches everything—wind, warmth, and worry.",
-      "tags": ["light", "organic", "defensive"]
+      "flavor": "Stitched and padded for comfort. The quilting catches everything\u2014wind, warmth, and worry.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-002",
@@ -55,7 +73,25 @@
       "iconKey": "icon.base.spun-shirt",
       "flavorKey": "flavor.base.spun-shirt",
       "flavor": "Woven on a wheel and worn by someone before you. The seams know their job.",
-      "tags": ["light", "organic", "defensive"]
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-003",
@@ -72,8 +108,26 @@
       "socketMax": 2,
       "iconKey": "icon.base.woven-jersey",
       "flavorKey": "flavor.base.woven-jersey",
-      "flavor": "Knitted tight, worn soft. The weave holds the body together—literally and metaphorically.",
-      "tags": ["light", "organic", "defensive"]
+      "flavor": "Knitted tight, worn soft. The weave holds the body together\u2014literally and metaphorically.",
+      "tags": [
+        "light",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-004",
@@ -91,7 +145,26 @@
       "iconKey": "icon.base.secondhand-apron",
       "flavorKey": "flavor.base.secondhand-apron",
       "flavor": "Someone else's work garment. The stains are old; the wear is familiar.",
-      "tags": ["light", "organic", "defensive", "fragile"]
+      "tags": [
+        "light",
+        "organic",
+        "defensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-005",
@@ -109,7 +182,26 @@
       "iconKey": "icon.base.insulated-smock",
       "flavorKey": "flavor.base.insulated-smock",
       "flavor": "Layered against cold and against harm. The insulation remembers every breath you have taken in it.",
-      "tags": ["light", "organic", "defensive", "sturdy"]
+      "tags": [
+        "light",
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-006",
@@ -127,7 +219,25 @@
       "iconKey": "icon.base.cured-windbreaker",
       "flavorKey": "flavor.base.cured-windbreaker",
       "flavor": "Treated leather blocks the gale and the worst of the storm. Your shoulders have memorized its shape.",
-      "tags": ["medium-light", "organic", "defensive"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-007",
@@ -145,7 +255,25 @@
       "iconKey": "icon.base.boiled-raincoat",
       "flavorKey": "flavor.base.boiled-raincoat",
       "flavor": "Leather treated to shed water and wounds alike. It heals its own cracks before they reach you.",
-      "tags": ["medium-light", "organic", "defensive"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-008",
@@ -163,7 +291,26 @@
       "iconKey": "icon.base.tanned-lifejacket",
       "flavorKey": "flavor.base.tanned-lifejacket",
       "flavor": "Originally built to keep you afloat. Now it keeps you standing.",
-      "tags": ["medium-light", "organic", "defensive", "sturdy"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-009",
@@ -181,7 +328,25 @@
       "iconKey": "icon.base.supple-jumpsuit",
       "flavorKey": "flavor.base.supple-jumpsuit",
       "flavor": "Leather soft enough to move in, stiff enough to stand against. One piece covers everything.",
-      "tags": ["medium-light", "organic", "defensive"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-010",
@@ -199,7 +364,26 @@
       "iconKey": "icon.base.threadbare-harness",
       "flavorKey": "flavor.base.threadbare-harness",
       "flavor": "Worn leather straps, repurposed and buckled. Thin enough to feel your breath, strong enough to catch your fall.",
-      "tags": ["medium", "organic", "defensive", "fragile"]
+      "tags": [
+        "medium",
+        "organic",
+        "defensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-011",
@@ -217,7 +401,26 @@
       "iconKey": "icon.base.frayed-crate",
       "flavorKey": "flavor.base.frayed-crate",
       "flavor": "Wood slats wrapped in fabric and tied to your middle. Ridiculous, but it holds together.",
-      "tags": ["medium", "mineral", "defensive", "fragile"]
+      "tags": [
+        "medium",
+        "mineral",
+        "defensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-a-012",
@@ -235,7 +438,26 @@
       "iconKey": "icon.base.hemmed-cage",
       "flavorKey": "flavor.base.hemmed-cage",
       "flavor": "A cage for the chest, padded at the seams. Built to trap harm before it reaches you.",
-      "tags": ["medium", "mineral", "defensive", "sturdy"]
+      "tags": [
+        "medium",
+        "mineral",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

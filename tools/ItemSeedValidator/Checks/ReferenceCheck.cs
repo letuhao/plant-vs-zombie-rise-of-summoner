@@ -45,6 +45,7 @@ public static class ReferenceCheck
 
         var edges = new List<(SeedEntry From, string To)>();
         var mintedFamilies = new Dictionary<string, SeedEntry>(StringComparer.Ordinal);
+        ctx.MintedRuntime = MintedRuntimeIds(ctx);
 
         foreach (var entry in ctx.Entries)
         {
@@ -278,9 +279,23 @@ public static class ReferenceCheck
             seen[family] = entry;
     }
 
+    /// <summary>
+    /// Runtime ids minted by an entry rather than allocated as one. A milestone mints
+    /// `atom.enhance-vigor`; a base type's `enhanceTrack` then points at it, and a socket word's
+    /// `runtimeId` is the same species. These are real targets in the runtime namespace and simply
+    /// are not entry ids, so `ById` will never hold them.
+    /// </summary>
+    static HashSet<string> MintedRuntimeIds(ValidationContext ctx) =>
+        ctx.Entries
+            .SelectMany(e => new[] { e.AsString("runtimeFamily"), e.AsString("runtimeId"),
+                                     e.AsString("containerId") })
+            .OfType<string>()
+            .ToHashSet(StringComparer.Ordinal);
+
     static void ResolveReference(ValidationContext ctx, SeedEntry entry, string path, string target)
     {
         if (ctx.Registries.ShippedFamilies.Contains(target)) return;
+        if (ctx.MintedRuntime.Contains(target)) return;
 
         if (!ctx.ById.TryGetValue(target, out var referenced))
         {

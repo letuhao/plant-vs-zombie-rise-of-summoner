@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel-policy",
+  "entries": [
+    { "channel": "attackInterval", "direction": 1 },
+    { "channel": "produceInterval", "direction": 1 }
+  ]
+}

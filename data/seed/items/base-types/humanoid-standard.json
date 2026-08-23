@@ -41,6 +41,20 @@
         "light",
         "organic",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -63,6 +77,20 @@
         "medium",
         "metal",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -85,6 +113,20 @@
         "light",
         "organic",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -102,11 +144,25 @@
       "socketMax": 0,
       "iconKey": "icon.base.fringed-scarecrow",
       "flavorKey": "flavor.base.fringed-scarecrow",
-      "flavor": "A straw-stuffed guardian, dressed in fringed silks — a scarecrow that terrifies with grace.",
+      "flavor": "A straw-stuffed guardian, dressed in fringed silks \u2014 a scarecrow that terrifies with grace.",
       "tags": [
         "medium-light",
         "organic",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -129,6 +185,20 @@
         "light",
         "organic",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -151,6 +221,20 @@
         "medium-heavy",
         "metal",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -172,6 +256,20 @@
       "tags": [
         "light",
         "organic"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -194,6 +292,20 @@
         "medium",
         "metal",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -216,6 +328,20 @@
         "light",
         "organic",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     },
     {
@@ -238,6 +364,20 @@
         "heavy",
         "mineral",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-aegis"
+        }
       ]
     }
   ]

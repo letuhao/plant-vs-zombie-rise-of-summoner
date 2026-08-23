@@ -18,7 +18,7 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "seed-contract.md §2-6, §9; words.v1.json v4 scavenged/domestic/industrial vocabulary; classes.v1.json implicit slates; band B emphasizes medium-heavy and heavy nouns with heavy mass-class tags"
+    "sourceRef": "seed-contract.md \u00a72-6, \u00a79; words.v1.json v4 scavenged/domestic/industrial vocabulary; classes.v1.json implicit slates; band B emphasizes medium-heavy and heavy nouns with heavy mass-class tags"
   },
   "entries": [
     {
@@ -29,12 +29,34 @@
       "role": "armament-primary",
       "class": "blade",
       "band": "b",
-      "implicit": { "family": "atom.ferocity", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.serrated-cleaver",
       "flavorKey": "flavor.base.serrated-cleaver",
       "flavor": "The edge is kitchen-sharp and butcher-heavy. It remembers what it was built for.",
-      "tags": ["heavy", "metal", "offensive", "mechanical"]
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-002",
@@ -44,12 +66,34 @@
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
-      "implicit": { "family": "atom.might", "powerBand": "medium" },
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.massive-pitchfork",
       "flavorKey": "flavor.base.massive-pitchfork",
       "flavor": "Forged for hay bales, never meant for living things. The weight says otherwise now.",
-      "tags": ["heavy", "organic", "offensive", "mechanical"]
+      "tags": [
+        "heavy",
+        "organic",
+        "offensive",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-003",
@@ -59,12 +103,36 @@
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
-      "implicit": { "family": "atom.might", "powerBand": "medium" },
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "medium"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.lumbering-sledge",
       "flavorKey": "flavor.base.lumbering-sledge",
       "flavor": "Slow enough that you see it coming. Heavy enough that it does not matter.",
-      "tags": ["heavy", "metal", "offensive", "sturdy", "mechanical", "vendor-stocked"]
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive",
+        "sturdy",
+        "mechanical",
+        "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-004",
@@ -74,12 +142,36 @@
       "role": "armament-primary",
       "class": "launcher",
       "band": "b",
-      "implicit": { "family": "atom.searing-strike", "powerBand": "medium" },
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "medium"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.primed-jackhammer",
       "flavorKey": "flavor.base.primed-jackhammer",
       "flavor": "The motor still works. The percussion is loud, terrible, and perfect.",
-      "tags": ["heavy", "metal", "offensive", "sturdy", "mechanical", "vendor-stocked"]
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive",
+        "sturdy",
+        "mechanical",
+        "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-005",
@@ -89,12 +181,34 @@
       "role": "armament-primary",
       "class": "blade",
       "band": "b",
-      "implicit": { "family": "atom.ferocity", "powerBand": "medium" },
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "medium"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.razored-chainsaw",
       "flavorKey": "flavor.base.razored-chainsaw",
       "flavor": "The chain is sharp. The noise is sharper. Everything it touches stops.",
-      "tags": ["heavy", "metal", "offensive", "mechanical"]
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-006",
@@ -104,12 +218,34 @@
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
-      "implicit": { "family": "atom.might", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.blunted-hoe",
       "flavorKey": "flavor.base.blunted-hoe",
       "flavor": "Worn through years of work. The wear has made it meaner, not duller.",
-      "tags": ["medium-heavy", "metal", "offensive", "mechanical"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-007",
@@ -119,12 +255,35 @@
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
-      "implicit": { "family": "atom.might", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.squat-spade",
       "flavorKey": "flavor.base.squat-spade",
       "flavor": "Short-hafted and broad. Made for digging graves, now it will dig others.",
-      "tags": ["medium-heavy", "metal", "offensive", "sturdy", "mechanical"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive",
+        "sturdy",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-008",
@@ -134,12 +293,35 @@
       "role": "armament-primary",
       "class": "blunt",
       "band": "b",
-      "implicit": { "family": "atom.ferocity", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.bruising-mallet",
       "flavorKey": "flavor.base.bruising-mallet",
       "flavor": "The head is solid oak. Each blow prints a flower of damage on whatever it hits.",
-      "tags": ["medium-heavy", "organic", "offensive", "sturdy", "vendor-stocked"]
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "offensive",
+        "sturdy",
+        "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-009",
@@ -149,12 +331,34 @@
       "role": "armament-primary",
       "class": "launcher",
       "band": "b",
-      "implicit": { "family": "atom.searing-strike", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.sighted-hose",
       "flavorKey": "flavor.base.sighted-hose",
       "flavor": "Nozzle end is precise. Whatever stream it throws lands where you aim it.",
-      "tags": ["medium-heavy", "metal", "offensive", "mechanical"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-010",
@@ -164,12 +368,35 @@
       "role": "armament-primary",
       "class": "launcher",
       "band": "b",
-      "implicit": { "family": "atom.searing-strike", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.recoiling-wrench",
       "flavorKey": "flavor.base.recoiling-wrench",
       "flavor": "Heavy enough to snap bones when thrown. The impact always surprises the user too.",
-      "tags": ["heavy", "metal", "offensive", "mechanical", "vendor-stocked"]
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive",
+        "mechanical",
+        "vendor-stocked"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-011",
@@ -179,12 +406,33 @@
       "role": "armament-primary",
       "class": "blade",
       "band": "b",
-      "implicit": { "family": "atom.deathblast", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.needling-machete",
       "flavorKey": "flavor.base.needling-machete",
       "flavor": "The blade comes to a point. Meant to slice. Now it pierces everything.",
-      "tags": ["medium-heavy", "metal", "offensive"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.humanoid-main-hand-b-012",
@@ -194,12 +442,34 @@
       "role": "armament-primary",
       "class": "launcher",
       "band": "b",
-      "implicit": { "family": "atom.deathblast", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.ranging-crowbar",
       "flavorKey": "flavor.base.ranging-crowbar",
       "flavor": "The fulcrum point is worn smooth. From opening doors to opening things that were never meant to open.",
-      "tags": ["heavy", "metal", "offensive", "mechanical"]
+      "tags": [
+        "heavy",
+        "metal",
+        "offensive",
+        "mechanical"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

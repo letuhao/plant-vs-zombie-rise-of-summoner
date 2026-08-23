@@ -2,9 +2,14 @@
   "schemaVersion": 1,
   "kind": "unique",
   "_meta": {
-    "batch": "uniques-1c",
     "partition": "uniques/earthen-bastion/70",
     "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "uniques-1c",
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7",
     "registryVersions": {
       "core": 1,
       "bands": 1,
@@ -13,197 +18,326 @@
       "classes": 2,
       "naming": 4,
       "words": 5
-    },
-    "exemplarVersion": 1,
-    "promptVersion": 1,
-    "model": "claude-sonnet-5",
-    "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "ssot-uniques.md#3.7"
+    }
   },
   "entries": [
     {
       "id": "unique.earthen-bastion-70-001",
-      "nameKey": "unique.patient-maw",
-      "name": "Patient Maw",
+      "nameKey": "unique.holding-thresher",
+      "name": "Holding Thresher",
       "frame": "plant",
-      "baseType": "item.plant-muzzle-b-005",
+      "baseType": "item.plant-muzzle-b-002",
       "rarity": "heirloom",
       "powerAxis": "control",
       "fixedAtoms": [
-        { "family": "atom.mesmerizing", "powerBand": "low" },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.buttering",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
       ],
-      "varianceSlot": { "family": "atom.ferocity", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One on-hit control rider held at the family's own low band, plus a single low maxHp Increased line and nothing else raw. A heirloom-rung main-hand rolls 3-4 affixes across tiers 3-5; this carries one modest stat line and a control verb the pool cannot draw for this role."
+        "note": "One ability rider (a hold, not a kill) plus one modest raw-stat line; the muzzle's own throughput is unremarkable next to a heirloom-rung rare, and everything it's actually good at is the thing the stat sheet can't show."
       },
-      "iconKey": "icon.unique.patient-maw",
-      "flavorKey": "flavor.unique.patient-maw",
-      "flavor": "It has not fired in a season. It has not needed to - nothing that reaches this line leaves thinking clearly.",
-      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
-      "notes": "Role armament-primary, axis control per the corpus-wide allocation table. baseType item.plant-muzzle-b-005 ('Venting Spitter', class nozzle, weapon.plant.nozzle ladder). atom.mesmerizing kept at its own shipped low band deliberately - its family notes flag hypno as the strongest single thing a status can do and ask that a chance-based rider never compound past low. Name: compound, adjective 'Patient' from themeAdjectivePools['earthen-bastion'], noun 'Maw' from nounPools['armament-primary.plant']."
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "iconKey": "icon.unique.holding-thresher",
+      "flavorKey": "flavor.unique.holding-thresher",
+      "flavor": "It does not spray to kill. It sprays to keep them exactly where they already made the mistake of standing.",
+      "notes": "armament-primary/control, row 1 of 8. baseType item.plant-muzzle-b-002 (role armament-primary, class nozzle, band b) resolved against data/seed/items/base-types/plant-armament-primary-b.json. atom.buttering is a shipped status.apply family (butter), used here as a control rider on a weapon role rather than the raw-damage rider a generator pool would normally weight toward that slot \u2014 a generator-level role/family preference, not a machine rule, and fixed atoms are not drawn from the pool.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.earthen-bastion-70-002",
-      "nameKey": "unique.bole-of-the-redoubt",
-      "name": "Bole of the Redoubt",
+      "nameKey": "unique.broad-bole",
+      "name": "Broad Bole",
       "frame": "plant",
-      "baseType": "item.plant-stem-b-007",
+      "baseType": "item.plant-stem-b-008",
       "rarity": "heirloom",
       "powerAxis": "utility",
       "fixedAtoms": [
-        { "family": "atom.cleansing", "powerBand": "medium" },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.cleansing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
       ],
-      "varianceSlot": { "family": "atom.vitality", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "normal"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One reactive status-clear rider and a single low maxHp Increased line - no offense line at all. A heirloom-rung torso rolls 3-4 affixes across tiers 3-5; this spends its whole fixed core on holding the line clean and upright."
+        "note": "The cleanse is what the slot is for; the raw-stat line under it is deliberately unremarkable so the utility rider is the whole reason to wear it, not a bonus on top of a stat stick."
       },
-      "iconKey": "icon.unique.bole-of-the-redoubt",
-      "flavorKey": "flavor.unique.bole-of-the-redoubt",
-      "flavor": "The wall that held longest was never the tallest one. It was the one nothing behind it ever had to explain.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "signature"],
-      "notes": "Role core-guard, axis utility. baseType item.plant-stem-b-007 ('Dense Trunk', class heartwood, armour.plant.heartwood ladder). atom.cleansing is status.clear/OnDamageTaken per g-sustain.json, cat U - strips a harmful status every time the wearer is struck, which is what makes this a utility-axis pick despite sitting on a core-guard body. Name: of-construct, noun 'Bole' from nounPools['core-guard.plant'], concept 'Redoubt' from conceptPools['earthen-bastion']."
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature",
+        "sturdy"
+      ],
+      "iconKey": "icon.unique.broad-bole",
+      "flavorKey": "flavor.unique.broad-bole",
+      "flavor": "Wide enough that two zombies could not get their hands around it together, if either still had the reach to try.",
+      "notes": "core-guard/utility, row 2 of 8. baseType item.plant-stem-b-008 (role core-guard, class heartwood, band b) resolved against data/seed/items/base-types/plant-stem-b.json.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.earthen-bastion-70-003",
-      "nameKey": "unique.stonebed",
-      "name": "Stonebed",
+      "nameKey": "unique.armature-of-the-redoubt",
+      "name": "Armature of the Redoubt",
       "frame": "plant",
-      "baseType": "item.plant-sheath-b-008",
-      "rarity": "firstseed",
+      "baseType": "item.plant-sheath-b-004",
+      "rarity": "heirloom",
       "powerAxis": "economy",
       "fixedAtoms": [
-        { "family": "atom.sunbloom", "powerBand": "medium" },
-        { "family": "atom.vitality", "powerBand": "low" }
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
       ],
-      "varianceSlot": { "family": "atom.mending", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One on-kill sun rider and a single low maxHp Flat line - no defense stat and no offense stat at all. A firstseed-rung shoulder-piece rolls 4-5 affixes across tiers 3-5; this spends its fixed core entirely on keeping the garden behind the line fed."
+        "note": "The armour's own protection is deliberately the low-band line here; the sun income is the point of the piece, and against a heirloom-rung rare's guard values this reads as a thin defensive stat line carrying an economy rider."
       },
-      "iconKey": "icon.unique.stonebed",
-      "flavorKey": "flavor.unique.stonebed",
-      "flavor": "Plant here once, and the ground remembers the shape of the root long after the root itself is gone.",
-      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
-      "notes": "Role ward-array, axis economy. baseType item.plant-sheath-b-008 ('Hoary Armature', class heartwood, armour.plant.heartwood ladder). atom.sunbloom (resource.economy, cat E) grants sun on kill - a rule break by the exemplar's own precedent, since g-economy.json's roles list is girdle/jewel-major/jewel-minor, never ward-array; a unique's fixed core is not drawn from the role pool, so the break costs the architecture nothing. Name: whole-token fusion from uniqueSetSeedPools['earthen-bastion'] (canonicalId 'stonebed'), used atomically per naming.v1.json's fusion pattern."
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature",
+        "sturdy"
+      ],
+      "iconKey": "icon.unique.armature-of-the-redoubt",
+      "flavorKey": "flavor.unique.armature-of-the-redoubt",
+      "flavor": "Every stalk it shelters keeps producing. A wall that also pays rent.",
+      "notes": "ward-array/economy, row 3 of 8. baseType item.plant-sheath-b-004 (role ward-array, class heartwood, band b) resolved against data/seed/items/base-types/plant-ward-array-b.json. atom.sunbloom is the shipped resource.economy family (on-kill sun, capPerMatch implemented in the runner per atom-family-library.md \u00a73.5) placed on a shoulder-armour role instead of the pool's usual economy carrier \u2014 a generator preference, not a machine rule.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.earthen-bastion-70-004",
-      "nameKey": "unique.buried-caltrop",
-      "name": "Buried Caltrop",
+      "nameKey": "unique.sporangium-of-siege",
+      "name": "Sporangium of Siege",
       "frame": "plant",
-      "baseType": "item.plant-thorn-b-004",
+      "baseType": "item.plant-pollen-b-009",
       "rarity": "firstseed",
       "powerAxis": "offense",
       "fixedAtoms": [
-        { "family": "atom.retribution", "powerBand": "high" },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.searing-strike",
+          "powerBand": "extreme",
+          "params": {
+            "element": "earth"
+          }
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "medium"
+        }
       ],
-      "varianceSlot": { "family": "atom.vitality", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "wide"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "Reflects damage back at whatever struck the wearer rather than dealing any of its own - no might or ferocity line at all, just one low maxHp Increased line beside it. A firstseed off-hand rolls 4-5 affixes across tiers 3-5; this never initiates."
+        "note": "One raw-stat line at medium band, everything else riding on the on-hit rider \u2014 against a firstseed-rung rare's tier-4/5 attack lines this is a deliberately thin stat sheet."
       },
-      "iconKey": "icon.unique.buried-caltrop",
-      "flavorKey": "flavor.unique.buried-caltrop",
-      "flavor": "It does not swing. It waits under the soil for the line to be crossed, and crossing it is the whole mistake.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "signature"],
-      "notes": "Role armament-secondary, axis offense. baseType item.plant-thorn-b-004 ('Hardened Goad', class thornguard, offhand.plant.thornguard ladder). atom.retribution (resource.delta/OnDamageTaken, cat O) is the offense-axis capability, framed as pure reprisal rather than an initiated strike - deliberately away from the 'offense-first framing' themes.v1.json asks earthen-bastion to avoid, while still sitting on the O power category the corpus allocation requires for this slot. Name: compound, adjective 'Buried' from themeAdjectivePools['earthen-bastion'], noun 'Caltrop' from nounPools['armament-secondary.plant']."
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive",
+        "signature"
+      ],
+      "iconKey": "icon.unique.sporangium-of-siege",
+      "flavorKey": "flavor.unique.sporangium-of-siege",
+      "flavor": "It does not scatter on the wind. It waits for a face to be close enough, then answers with the whole garden bed underneath it.",
+      "notes": "jewel-major/offense, row 4 of 8. baseType item.plant-pollen-b-009 (role jewel-major, class graft, band b) resolved against data/seed/items/base-types/plant-pollen-b.json. atom.searing-strike carries element:earth to match the theme's affinity. RUNTIME HONESTY: atom.searing-strike is a resource.delta family, lawn-live and battle-unsupported today per the effect-atom authoring spec's exemplar note \u2014 this item works on the lawn and rejects in battle until battle grows a grant path for that kind.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.earthen-bastion-70-005",
-      "nameKey": "unique.corymb-of-the-subsoil",
-      "name": "Corymb of the Subsoil",
+      "nameKey": "unique.involucre-of-the-berm",
+      "name": "Involucre of the Berm",
       "frame": "plant",
-      "baseType": "item.plant-pollen-b-007",
+      "baseType": "item.plant-bract-b-005",
       "rarity": "heirloom",
       "powerAxis": "survivability",
       "fixedAtoms": [
-        { "family": "atom.warded", "powerBand": "high", "params": { "element": "earth" } },
-        { "family": "atom.vitality", "powerBand": "low" }
+        {
+          "family": "atom.regeneration",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
       ],
-      "varianceSlot": { "family": "atom.regeneration", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "narrow"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One earth-shield-on-spawn rider and a single low maxHp Flat line, both survivability and nothing else - no offense, no control, no economy. A heirloom-rung neck-slot rolls 3-4 affixes across tiers 3-5; this is a wall around one stat and stops there."
+        "note": "One raw-stat line plus a periodic heal; no burst mitigation and no damage line at all, which against a heirloom-rung rare's spread reads as a survivability item that recovers slowly rather than one that refuses to take the hit."
       },
-      "iconKey": "icon.unique.corymb-of-the-subsoil",
-      "flavorKey": "flavor.unique.corymb-of-the-subsoil",
-      "flavor": "Pollen falls where it falls. This much of it took root in ground packed hard enough to hold.",
-      "tags": ["heavy", "organic", "rooted", "defensive", "signature"],
-      "notes": "Role jewel-major, axis survivability. baseType item.plant-pollen-b-007 ('Cohered Pistil', class graft, jewel.plant.graft ladder). atom.warded is element-variant (variants.generate = elements+omni per g-sustain.json), so params.element is authored here as 'earth' to match theme.earthen-bastion's elementAffinity, the same pattern the exemplar's atom.searing-strike entry uses for its own variant family. Name: of-construct, noun 'Corymb' from nounPools['jewel-major.plant'], concept 'Subsoil' from conceptPools['earthen-bastion']."
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "iconKey": "icon.unique.involucre-of-the-berm",
+      "flavorKey": "flavor.unique.involucre-of-the-berm",
+      "flavor": "Bracts folded tight as a berm's slope, closing back over whatever they lose the moment they lose it.",
+      "notes": "sense/survivability, row 5 of 8. baseType item.plant-bract-b-005 (role sense, class heartwood, band b) resolved against data/seed/items/base-types/plant-bract-b.json. RUNTIME HONESTY: atom.regeneration is a resource.delta family (OnTimer), lawn-live and battle-unsupported today per the effect-atom authoring spec's exemplar note \u2014 this item works on the lawn and rejects in battle until battle grows a grant path for that kind.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.earthen-bastion-70-006",
-      "nameKey": "unique.walled-whorl",
-      "name": "Walled Whorl",
+      "nameKey": "unique.tamped-holdfast",
+      "name": "Tamped Holdfast",
       "frame": "plant",
-      "baseType": "item.plant-leaves-b-006",
+      "baseType": "item.plant-roots-b-001",
       "rarity": "firstseed",
       "powerAxis": "control",
       "fixedAtoms": [
-        { "family": "atom.venomous", "powerBand": "medium" },
-        { "family": "atom.might", "powerBand": "low" }
+        {
+          "family": "atom.chilling",
+          "powerBand": "extreme"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
       ],
-      "varianceSlot": { "family": "atom.ferocity", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "wide"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One on-hit poison rider and a single low Flat-attack line - no survivability and no economy line at all. A firstseed-rung hand-slot rolls 4-5 affixes across tiers 3-5; this locks onto one control verb and one small number."
+        "note": "One raw-stat line at medium band under a firstseed rung's tier-4/5 window; the slow is the entire build-around and the boots offer nothing else."
       },
-      "iconKey": "icon.unique.walled-whorl",
-      "flavorKey": "flavor.unique.walled-whorl",
-      "flavor": "Close a hand around it, and the hand does not open again on its own terms.",
-      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
-      "notes": "Role manipulator, axis control. baseType item.plant-leaves-b-006 ('Stony Whorl', class heartwood, armour.plant.heartwood ladder). atom.venomous (status.apply/poison, per g-affliction.json) is legal on manipulator directly - one of the seven roles its own roles list already names, so no rule-break is needed here, only the axis allocation. Name: compound, adjective 'Walled' from themeAdjectivePools['earthen-bastion'], noun 'Whorl' from nounPools['manipulator.plant']."
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "iconKey": "icon.unique.tamped-holdfast",
+      "flavorKey": "flavor.unique.tamped-holdfast",
+      "flavor": "Packed so hard into the bed beneath it that the ground itself slows to match its pace, which is to say: none at all.",
+      "notes": "footing/control, row 6 of 8. baseType item.plant-roots-b-001 (role footing, class heartwood, band b) resolved against data/seed/items/base-types/footing/plant/b.json \u2014 chosen deliberately over item.plant-roots-b-002 (the base type's own 'Ancient Holdfast' entry) so the unique does not sit on the one base already carrying its head noun as a name.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.earthen-bastion-70-007",
-      "nameKey": "unique.longhold",
-      "name": "Longhold",
+      "nameKey": "unique.cistern-of-loam",
+      "name": "Cistern of Loam",
       "frame": "plant",
-      "baseType": "item.plant-canopy-b-004",
+      "baseType": "item.plant-glands-b-003",
       "rarity": "heirloom",
       "powerAxis": "utility",
       "fixedAtoms": [
-        { "family": "atom.gardener", "powerBand": "low" },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.gardener",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "medium"
+        }
       ],
-      "varianceSlot": { "family": "atom.vitality", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "normal"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "Both fixed lines sit at the family's own low band - a modest on-death spawn chance and one small maxHp Increased line, no offense stat of any kind. A heirloom-rung back-slot rolls 3-4 affixes across tiers 3-5; this keeps its whole fixed core deliberately small."
+        "note": "A one-shot HP top-up rather than a sustained stat line, plus an on-death spawn rider; a heirloom-rung rare's rolled affixes would beat this on raw numbers every time."
       },
-      "iconKey": "icon.unique.longhold",
-      "flavorKey": "flavor.unique.longhold",
-      "flavor": "When it finally falls, something is already growing where it stood.",
-      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
-      "notes": "Role mantle, axis utility. baseType item.plant-canopy-b-004 ('Ancient Bough', class heartwood, armour.plant.heartwood ladder). atom.gardener (spawn.entity/OnDeath, cat U per atom-family-library.md §3.5) is the rule-break here - g-on-death.json's roles list never includes mantle, and a unique's fixed core is not drawn from that pool, so the break costs nothing mechanically. Name: whole-token fusion from uniqueSetSeedPools['earthen-bastion'] (canonicalId 'longhold')."
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature",
+        "sturdy"
+      ],
+      "iconKey": "icon.unique.cistern-of-loam",
+      "flavorKey": "flavor.unique.cistern-of-loam",
+      "flavor": "Holds more than it needs, on the theory that a siege eventually asks for everything you saved.",
+      "notes": "infusion/utility, row 7 of 8. baseType item.plant-glands-b-003 (role infusion, class heartwood, band b) resolved against data/seed/items/base-types/infusion/plant/b.json.",
+      "acquisition": "source-locked"
     },
     {
       "id": "unique.earthen-bastion-70-008",
-      "nameKey": "unique.cone-of-the-embankment",
-      "name": "Cone of the Embankment",
+      "nameKey": "unique.colony-of-the-foundation",
+      "name": "Colony of the Foundation",
       "frame": "plant",
-      "baseType": "item.plant-crown-b-006",
+      "baseType": "item.plant-runner-b-006",
       "rarity": "firstseed",
       "powerAxis": "economy",
       "fixedAtoms": [
-        { "family": "atom.econ-muster", "powerBand": "medium" },
-        { "family": "atom.fortitude", "powerBand": "low" }
+        {
+          "family": "atom.midas",
+          "powerBand": "extreme"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "medium"
+        }
       ],
-      "varianceSlot": { "family": "atom.vitality", "variance": "narrow" },
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "wide"
+      },
       "counterPressure": {
         "kind": "narrow",
-        "note": "One on-deployment points rider and a single low maxHp Increased line - no offense and no control line at all. A firstseed-rung head-slot rolls 4-5 affixes across tiers 3-5; this never spends a slot on damage."
+        "note": "One medium-band raw-stat line under a firstseed rung's tier-4/5 window; the income rider is generous specifically because a currency drip is not a raw stat and cannot itself win a fight."
       },
-      "iconKey": "icon.unique.cone-of-the-embankment",
-      "flavorKey": "flavor.unique.cone-of-the-embankment",
-      "flavor": "It counts what the wall costs to hold, and it has never once come out ahead - until this season.",
-      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
-      "notes": "Role head-guard, axis economy. baseType item.plant-crown-b-006 ('Hoary Cone', class bark, armour.plant.bark ladder). atom.econ-muster (resource.economy/OnSpawn, per g-economy.json) is a rule break the same shape as Stonebed's above - its roles list is girdle/jewel-major/jewel-minor, never head-guard, and a unique's fixed core sidesteps the pool entirely. Name: of-construct, noun 'Cone' from nounPools['head-guard.plant'], concept 'Embankment' from conceptPools['earthen-bastion']."
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.colony-of-the-foundation",
+      "flavorKey": "flavor.unique.colony-of-the-foundation",
+      "flavor": "Every runner it sends out comes home carrying something. That is the whole of the arrangement, and it has held for longer than anyone digging here expected.",
+      "notes": "retinue/economy, row 8 of 8. baseType item.plant-runner-b-006 (role retinue, class graft, band b) resolved against data/seed/items/base-types/plant-runner-b.json \u2014 chosen deliberately over item.plant-runner-b-012 (the base type's own 'Inseparable Colony' entry) so the unique does not sit on the one base already carrying its head noun as a name.",
+      "acquisition": "source-locked"
     }
   ]
 }

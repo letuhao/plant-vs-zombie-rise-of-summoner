@@ -37,7 +37,25 @@
       "iconKey": "icon.base.soldered-keg",
       "flavorKey": "flavor.base.soldered-keg",
       "flavor": "What looks like solder drips shows where the cracks were stopped.",
-      "tags": ["heavy", "metal", "defensive"]
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-002",
@@ -55,7 +73,25 @@
       "iconKey": "icon.base.overlapping-harness",
       "flavorKey": "flavor.base.overlapping-harness",
       "flavor": "Layer over layer, stitched and strapped until nothing gets through.",
-      "tags": ["medium-heavy", "metal", "defensive"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-003",
@@ -73,7 +109,26 @@
       "iconKey": "icon.base.beaten-radiator",
       "flavorKey": "flavor.base.beaten-radiator",
       "flavor": "Its fins bent and broken, it has taken worse than it gives.",
-      "tags": ["heavy", "metal", "fragile", "defensive"]
+      "tags": [
+        "heavy",
+        "metal",
+        "fragile",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-004",
@@ -91,7 +146,25 @@
       "iconKey": "icon.base.industrial-gridiron",
       "flavorKey": "flavor.base.industrial-gridiron",
       "flavor": "A cooking grid becomes armor when strapped over vital places.",
-      "tags": ["medium-heavy", "mechanical", "defensive"]
+      "tags": [
+        "medium-heavy",
+        "mechanical",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-005",
@@ -109,7 +182,26 @@
       "iconKey": "icon.base.galvanised-furnace",
       "flavorKey": "flavor.base.galvanised-furnace",
       "flavor": "The white coating was meant to stop rust. Now it stops other things.",
-      "tags": ["heavy", "metal", "defensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-006",
@@ -127,7 +219,26 @@
       "iconKey": "icon.base.ponderous-cage",
       "flavorKey": "flavor.base.ponderous-cage",
       "flavor": "It weighs more than any person, but nothing can penetrate the bars.",
-      "tags": ["medium-heavy", "metal", "defensive", "sturdy"]
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "defensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-007",
@@ -145,7 +256,25 @@
       "iconKey": "icon.base.rigid-crate",
       "flavorKey": "flavor.base.rigid-crate",
       "flavor": "A shipping container made to hold something precious. Now it holds you.",
-      "tags": ["medium-heavy", "mechanical", "utility"]
+      "tags": [
+        "medium-heavy",
+        "mechanical",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-008",
@@ -163,7 +292,25 @@
       "iconKey": "icon.base.leaden-vest",
       "flavorKey": "flavor.base.leaden-vest",
       "flavor": "Weighted to stay in place. Weighted to stop what comes.",
-      "tags": ["light", "metal", "defensive"]
+      "tags": [
+        "light",
+        "metal",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-009",
@@ -181,7 +328,25 @@
       "iconKey": "icon.base.encasing-jumpsuit",
       "flavorKey": "flavor.base.encasing-jumpsuit",
       "flavor": "Originally meant to stay dry. Now it keeps other things from getting in.",
-      "tags": ["medium-light", "organic", "defensive"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-010",
@@ -199,7 +364,25 @@
       "iconKey": "icon.base.netted-windbreaker",
       "flavorKey": "flavor.base.netted-windbreaker",
       "flavor": "Wind passes through the mesh. Teeth, claws, and bullets do not.",
-      "tags": ["medium-light", "mechanical", "utility"]
+      "tags": [
+        "medium-light",
+        "mechanical",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-011",
@@ -217,7 +400,25 @@
       "iconKey": "icon.base.articulated-apron",
       "flavorKey": "flavor.base.articulated-apron",
       "flavor": "Leather strips hung and weighted so each piece moves independently, sealing gaps.",
-      "tags": ["light", "organic", "utility"]
+      "tags": [
+        "light",
+        "organic",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     },
     {
       "id": "item.humanoid-torso-b-012",
@@ -235,7 +436,26 @@
       "iconKey": "icon.base.clattering-lifejacket",
       "flavorKey": "flavor.base.clattering-lifejacket",
       "flavor": "Cork blocks and metal fittings. Floats in water, stands firm on land.",
-      "tags": ["medium-light", "organic", "sturdy", "defensive"]
+      "tags": [
+        "medium-light",
+        "organic",
+        "sturdy",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-vigor"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-hardy"
+        }
+      ]
     }
   ]
 }

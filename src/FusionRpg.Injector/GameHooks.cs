@@ -28,6 +28,7 @@ public static class GameHooks
     static float _lastPoints = float.MinValue;
     static string? _lastLevelName;
     static bool _recipesDumped;
+    static bool _almanacTextDumped;
     static bool _conveyDumped;
     static bool _catalogRetried;
     static int _catalogPending;
@@ -262,6 +263,39 @@ public static class GameHooks
         catch (Exception ex)
         {
             RpgHost.Log.Warning("catalog recipes: " + ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Sweep every PlantType/ZombieType and queue its almanac pedia text (name/info/cost/
+    /// introduce) straight from AlmanacDataLoader's already-loaded dictionaries — no need to
+    /// open the almanac UI or click each card. Window-only TMP fields (uiName/uiCost/...) are
+    /// skipped since no AlmanacPlantWindow/AlmanacZombieWindow is open during the sweep.
+    /// </summary>
+    public static void EnqueueFullAlmanacText()
+    {
+        if (_almanacTextDumped) return;
+        try
+        {
+            var n = 0;
+            foreach (var (id, name) in EnumerateEnum(typeof(PlantType)))
+            {
+                if (string.Equals(name, "Nothing", StringComparison.Ordinal)) continue;
+                AlmanacTextCapture.TryCapture("plant", id, (PlantType)id, null);
+                n++;
+            }
+            foreach (var (id, name) in EnumerateEnum(typeof(ZombieType)))
+            {
+                if (string.Equals(name, "Nothing", StringComparison.Ordinal)) continue;
+                AlmanacTextCapture.TryCapture("zombie", id, null, (ZombieType)id);
+                n++;
+            }
+            _almanacTextDumped = true;
+            RpgHost.Log.Info($"[almanac-text] full sweep queued {n} entries");
+        }
+        catch (Exception ex)
+        {
+            RpgHost.Log.Warning("almanac text sweep: " + ex.Message);
         }
     }
 

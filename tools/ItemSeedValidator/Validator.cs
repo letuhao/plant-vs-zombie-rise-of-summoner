@@ -69,6 +69,7 @@ public static class Validator
         ReferenceCheck.Run(ctx);
         UniqueRuleCheck.Run(ctx);
         SetRuleCheck.Run(ctx);
+        DropTableCheck.Run(ctx);
         LintCheck.Run(ctx);
 
         // Partitions are assigned by IdentityCheck, after some findings were already recorded.

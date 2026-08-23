@@ -37,7 +37,26 @@
       "iconKey": "icon.base.bristling-thorn",
       "flavorKey": "flavor.base.bristling-thorn",
       "flavor": "Bristles stand rigid in defense. It asks nothing except to be placed between harm and what it shields.",
-      "tags": ["heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-002",
@@ -55,7 +74,26 @@
       "iconKey": "icon.base.spraying-spine",
       "flavorKey": "flavor.base.spraying-spine",
       "flavor": "Evolved to scatter its payload across a wide arc. The spine does not discriminate where it lands.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-003",
@@ -73,7 +111,26 @@
       "iconKey": "icon.base.laden-bracken",
       "flavorKey": "flavor.base.laden-bracken",
       "flavor": "Heavy with seed-load, bending under its own abundance. Life taken feeds what is yet to grow.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-004",
@@ -91,7 +148,26 @@
       "iconKey": "icon.base.hardened-goad",
       "flavorKey": "flavor.base.hardened-goad",
       "flavor": "Pressed and petrified by seasons of impact, it has become nearly stone. A goad so hardened drives everything before it.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-005",
@@ -109,7 +185,26 @@
       "iconKey": "icon.base.hissing-hackle",
       "flavorKey": "flavor.base.hissing-hackle",
       "flavor": "The sound comes before the strike. A shrill promise that what you harm will return the favor.",
-      "tags": ["medium", "organic", "rooted", "defensive"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-006",
@@ -126,8 +221,27 @@
       "socketMax": 2,
       "iconKey": "icon.base.tangled-thistle",
       "flavorKey": "flavor.base.tangled-thistle",
-      "flavor": "Its tangle catches everything — cloth, blade, intention. Escape it quickly or become part of it.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "flavor": "Its tangle catches everything \u2014 cloth, blade, intention. Escape it quickly or become part of it.",
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-007",
@@ -145,7 +259,26 @@
       "iconKey": "icon.base.snarled-caltrop",
       "flavorKey": "flavor.base.snarled-caltrop",
       "flavor": "Knotted and vicious, it draws blood and strength from the same wound. No separation between defense and feeding.",
-      "tags": ["heavy", "organic", "rooted", "utility"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-008",
@@ -163,7 +296,26 @@
       "iconKey": "icon.base.bursting-briar",
       "flavorKey": "flavor.base.bursting-briar",
       "flavor": "Swollen with seed and ready to split. Whatever strikes it will carry its progeny outward in all directions.",
-      "tags": ["heavy", "organic", "rooted", "defensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-009",
@@ -180,8 +332,27 @@
       "socketMax": 1,
       "iconKey": "icon.base.venting-thicket",
       "flavorKey": "flavor.base.venting-thicket",
-      "flavor": "Compressed growth released in violent bursts. The thicket does not contain — it expels.",
-      "tags": ["medium", "organic", "rooted", "offensive"]
+      "flavor": "Compressed growth released in violent bursts. The thicket does not contain \u2014 it expels.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-010",
@@ -199,7 +370,26 @@
       "iconKey": "icon.base.acanthine-hedge",
       "flavorKey": "flavor.base.acanthine-hedge",
       "flavor": "Sharp as geometry, dense as a wall. What passes through pays a price in blood.",
-      "tags": ["medium", "organic", "rooted", "defensive"]
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-011",
@@ -217,7 +407,26 @@
       "iconKey": "icon.base.pressurized-nettle",
       "flavorKey": "flavor.base.pressurized-nettle",
       "flavor": "Grown under tension, released with force. Nettles are mild until pressure builds; then they sting across distance.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     },
     {
       "id": "item.plant-thorn-b-012",
@@ -234,8 +443,27 @@
       "socketMax": 0,
       "iconKey": "icon.base.seeded-palisade",
       "flavorKey": "flavor.base.seeded-palisade",
-      "flavor": "A wall holding a thousand futures. Impact it and scatter new growth across the field. The palisade does not just defend — it spreads.",
-      "tags": ["medium", "organic", "rooted", "offensive"]
+      "flavor": "A wall holding a thousand futures. Impact it and scatter new growth across the field. The palisade does not just defend \u2014 it spreads.",
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-keen"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-quicken"
+        }
+      ]
     }
   ]
 }

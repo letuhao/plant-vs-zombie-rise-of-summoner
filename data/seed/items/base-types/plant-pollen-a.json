@@ -42,6 +42,20 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -65,6 +79,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -88,6 +116,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -105,12 +147,26 @@
       "socketMax": 1,
       "iconKey": "icon.base.ephemeral-catkin",
       "flavorKey": "flavor.base.ephemeral-catkin",
-      "flavor": "A scent that fades even as you catch it — all seduction, no holding.",
+      "flavor": "A scent that fades even as you catch it \u2014 all seduction, no holding.",
       "tags": [
         "light",
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -134,6 +190,20 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -157,6 +227,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -180,6 +264,20 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -203,6 +301,20 @@
         "organic",
         "rooted",
         "utility"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -226,6 +338,20 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -243,12 +369,26 @@
       "socketMax": 2,
       "iconKey": "icon.base.ingrown-pistil",
       "flavorKey": "flavor.base.ingrown-pistil",
-      "flavor": "Grown so deep into the plant it cannot be separated — the plant cannot live without it.",
+      "flavor": "Grown so deep into the plant it cannot be separated \u2014 the plant cannot live without it.",
       "tags": [
         "heavy",
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -272,6 +412,20 @@
         "organic",
         "rooted",
         "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     },
     {
@@ -295,6 +449,20 @@
         "organic",
         "rooted",
         "defensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-fortify"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
       ]
     }
   ]

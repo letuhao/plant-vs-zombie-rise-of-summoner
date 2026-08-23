@@ -29,12 +29,34 @@
       "role": "armament-primary",
       "class": "nozzle",
       "band": "b",
-      "implicit": { "family": "atom.might", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.spraying-popper",
       "flavorKey": "flavor.base.spraying-popper",
       "flavor": "A bulbous chamber, sealed tight, that ruptures with force. Holds its payload in a steady mist.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-002",
@@ -44,12 +66,35 @@
       "role": "armament-primary",
       "class": "nozzle",
       "band": "b",
-      "implicit": { "family": "atom.ferocity", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.jetting-stinger",
       "flavorKey": "flavor.base.jetting-stinger",
       "flavor": "A piercing spine hardened to a fine point, engineered to push its discharge far and deep.",
-      "tags": ["heavy", "organic", "rooted", "offensive", "fragile"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-003",
@@ -59,12 +104,34 @@
       "role": "armament-primary",
       "class": "nozzle",
       "band": "b",
-      "implicit": { "family": "atom.searing-strike", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.hissing-gourd",
       "flavorKey": "flavor.base.hissing-gourd",
       "flavor": "Hollowed from a thick-walled fruit, its mouth carved into a hundred fine teeth that spit and curse.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-004",
@@ -74,12 +141,34 @@
       "role": "armament-primary",
       "class": "nozzle",
       "band": "b",
-      "implicit": { "family": "atom.deathblast", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.pressurized-bramble",
       "flavorKey": "flavor.base.pressurized-bramble",
       "flavor": "A thorned tangle bound so tightly it groans. Compressed almost to shattering, it waits to burst.",
-      "tags": ["medium-heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-005",
@@ -89,12 +178,35 @@
       "role": "armament-primary",
       "class": "nozzle",
       "band": "b",
-      "implicit": { "family": "atom.might", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.venting-spitter",
       "flavorKey": "flavor.base.venting-spitter",
       "flavor": "A creature part, still living, its glands raw and reflexive. Gasps and weeps its payload with each breath.",
-      "tags": ["heavy", "organic", "rooted", "offensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-006",
@@ -104,12 +216,34 @@
       "role": "armament-primary",
       "class": "nozzle",
       "band": "b",
-      "implicit": { "family": "atom.ferocity", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.drenching-cane",
       "flavorKey": "flavor.base.drenching-cane",
       "flavor": "Hollow where it should be solid, woven from the fibres that carry sap. It floods everything in its path.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-007",
@@ -119,12 +253,34 @@
       "role": "armament-primary",
       "class": "seedpod",
       "band": "b",
-      "implicit": { "family": "atom.might", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.swollen-husker",
       "flavorKey": "flavor.base.swollen-husker",
       "flavor": "Heavy enough to arc in a lazy throw, it breaks on impact and scatters its payload wide.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-008",
@@ -134,12 +290,35 @@
       "role": "armament-primary",
       "class": "seedpod",
       "band": "b",
-      "implicit": { "family": "atom.searing-strike", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.searing-strike",
+        "powerBand": "low"
+      },
       "socketMax": 0,
       "iconKey": "icon.base.swollen-cane",
       "flavorKey": "flavor.base.swollen-cane",
       "flavor": "Bulged to twice its natural diameter by pressurised growth. One hit and it splits catastrophically.",
-      "tags": ["heavy", "organic", "rooted", "offensive", "fragile"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive",
+        "fragile"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-009",
@@ -149,12 +328,35 @@
       "role": "armament-primary",
       "class": "seedpod",
       "band": "b",
-      "implicit": { "family": "atom.ferocity", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "low"
+      },
       "socketMax": 2,
       "iconKey": "icon.base.laden-bramble",
       "flavorKey": "flavor.base.laden-bramble",
       "flavor": "A mass of thorns knotted so densely it oozes from every seam. Packed and ready to scatter on release.",
-      "tags": ["heavy", "organic", "rooted", "offensive", "sturdy"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive",
+        "sturdy"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-010",
@@ -164,12 +366,34 @@
       "role": "armament-primary",
       "class": "seedpod",
       "band": "b",
-      "implicit": { "family": "atom.deathblast", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.deathblast",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.bursting-stinger",
       "flavorKey": "flavor.base.bursting-stinger",
-      "flavor": "A spine with a seed-pod core, pregnant with payload. Impact is explosive—the only way it empties.",
-      "tags": ["medium-heavy", "organic", "rooted", "offensive"]
+      "flavor": "A spine with a seed-pod core, pregnant with payload. Impact is explosive\u2014the only way it empties.",
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-011",
@@ -179,12 +403,34 @@
       "role": "armament-primary",
       "class": "seedpod",
       "band": "b",
-      "implicit": { "family": "atom.might", "powerBand": "low" },
+      "implicit": {
+        "family": "atom.might",
+        "powerBand": "low"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.seeded-popper",
       "flavorKey": "flavor.base.seeded-popper",
       "flavor": "A chamber that ripens and firms its contents. When tensioned, it releases them all at once like a sneeze.",
-      "tags": ["heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     },
     {
       "id": "item.plant-muzzle-b-012",
@@ -194,12 +440,34 @@
       "role": "armament-primary",
       "class": "seedpod",
       "band": "b",
-      "implicit": { "family": "atom.ferocity", "powerBand": "trivial" },
+      "implicit": {
+        "family": "atom.ferocity",
+        "powerBand": "trivial"
+      },
       "socketMax": 1,
       "iconKey": "icon.base.ripened-shaft",
       "flavorKey": "flavor.base.ripened-shaft",
       "flavor": "Hardened like wood but still living, it grew to carry a mature seed. The maturation itself is the weapon.",
-      "tags": ["medium-heavy", "organic", "rooted", "offensive"]
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-edge"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-keen"
+        }
+      ]
     }
   ]
 }

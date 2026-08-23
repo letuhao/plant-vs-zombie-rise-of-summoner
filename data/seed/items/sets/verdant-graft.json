@@ -27,10 +27,46 @@
       "name": "Halfgreen",
       "themeKey": "theme.verdant-graft",
       "members": [
-        { "role": "head-guard" },
-        { "role": "core-guard" },
-        { "role": "manipulator" },
-        { "role": "footing" }
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-b-007"
+        },
+        {
+          "role": "head-guard",
+          "frame": "plant",
+          "baseType": "item.plant-crown-b-007"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-b-010"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-b-010"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-b-007"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-b-007"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-b-009"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-003"
+        }
       ],
       "thresholds": [
         {
@@ -43,13 +79,21 @@
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" },
-            { "family": "atom.might", "powerBand": "low" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.might",
+              "powerBand": "low"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
-      "notes": "All 4 roles are in the hybrid role core. Capability atom.gardener (spawn.entity, on-death spawn a plant) sits alone at the 2-piece threshold, not stat.*. The 4-piece core is vitality (maxHp Flat) + might (atk Flat) — no More-op family, no defense channel. Name is the bare atomic seed 'halfgreen' from uniqueSetSeedPools['verdant-graft'], unused by either verdant-graft unique file (verdant-graft-50/-90)."
+      "tags": [
+        "signature"
+      ],
+      "notes": "All 4 roles are in the hybrid role core. Capability atom.gardener (spawn.entity, on-death spawn a plant) sits alone at the 2-piece threshold, not stat.*. The 4-piece core is vitality (maxHp Flat) + might (atk Flat) \u2014 no More-op family, no defense channel. Name is the bare atomic seed 'halfgreen' from uniqueSetSeedPools['verdant-graft'], unused by either verdant-graft unique file (verdant-graft-50/-90)."
     },
     {
       "id": "set.verdant-graft-002",
@@ -57,10 +101,46 @@
       "name": "Sapvein",
       "themeKey": "theme.verdant-graft",
       "members": [
-        { "role": "core-guard" },
-        { "role": "jewel-major" },
-        { "role": "girdle" },
-        { "role": "sense" }
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-b-012"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-b-012"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-b-012"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-a-008"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-b-008"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-b-008"
+        },
+        {
+          "role": "sense",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-face-b-002"
+        },
+        {
+          "role": "sense",
+          "frame": "plant",
+          "baseType": "item.plant-bract-b-007"
+        }
       ],
       "thresholds": [
         {
@@ -73,18 +153,26 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "low" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "low"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "medium" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
-      "notes": "All 4 roles are in the hybrid role core; no weapon role claimed. Capability atom.lifesteal (resource.delta, OnDamageDealt) is the lone non-stat atom, at the lowest threshold. Tiers 3/4 are fortitude (maxHp Increased) and ferocity (atk Increased) only — both self-diminishing Increased, no More, no defense. Name is the bare atomic seed 'sapvein' from uniqueSetSeedPools['verdant-graft'], unused elsewhere."
+      "tags": [
+        "signature"
+      ],
+      "notes": "All 4 roles are in the hybrid role core; no weapon role claimed. Capability atom.lifesteal (resource.delta, OnDamageDealt) is the lone non-stat atom, at the lowest threshold. Tiers 3/4 are fortitude (maxHp Increased) and ferocity (atk Increased) only \u2014 both self-diminishing Increased, no More, no defense. Name is the bare atomic seed 'sapvein' from uniqueSetSeedPools['verdant-graft'], unused elsewhere."
     },
     {
       "id": "set.verdant-graft-003",
@@ -92,10 +180,46 @@
       "name": "Surgical Cutting",
       "themeKey": "theme.verdant-graft",
       "members": [
-        { "role": "manipulator" },
-        { "role": "infusion" },
-        { "role": "mantle" },
-        { "role": "footing" }
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-b-009"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-b-009"
+        },
+        {
+          "role": "infusion",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-bandolier-b-007"
+        },
+        {
+          "role": "infusion",
+          "frame": "plant",
+          "baseType": "item.plant-glands-a-012"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-b-009"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-b-009"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-002"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-008"
+        }
       ],
       "thresholds": [
         {
@@ -108,13 +232,21 @@
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "low" },
-            { "family": "atom.fortitude", "powerBand": "medium" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "low"
+            },
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
-      "notes": "All 4 roles are in the hybrid role core; no weapon role claimed. Capability atom.bonding (status.apply, the literal graft-take) sits alone at 2 pieces. 4-piece core is vitality (Flat) + fortitude (Increased), no More, no defense. Name: adjective 'Surgical' (themeAdjectivePools['verdant-graft'], already paired with 'Locket' in verdant-graft-50) here paired with the invented, unregistered noun 'Cutting' (a propagation clipping — growth-stage flavor, distinct token set from any existing name)."
+      "tags": [
+        "signature"
+      ],
+      "notes": "All 4 roles are in the hybrid role core; no weapon role claimed. Capability atom.bonding (status.apply, the literal graft-take) sits alone at 2 pieces. 4-piece core is vitality (Flat) + fortitude (Increased), no More, no defense. Name: adjective 'Surgical' (themeAdjectivePools['verdant-graft'], already paired with 'Locket' in verdant-graft-50) here paired with the invented, unregistered noun 'Cutting' (a propagation clipping \u2014 growth-stage flavor, distinct token set from any existing name)."
     },
     {
       "id": "set.verdant-graft-004",
@@ -122,10 +254,46 @@
       "name": "Unresolved Ligature",
       "themeKey": "theme.verdant-graft",
       "members": [
-        { "role": "armament-secondary" },
-        { "role": "jewel-major" },
-        { "role": "retinue" },
-        { "role": "jewel-minor-a" }
+        {
+          "role": "armament-secondary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-off-hand-b-010"
+        },
+        {
+          "role": "armament-secondary",
+          "frame": "plant",
+          "baseType": "item.plant-thorn-b-010"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-neck-a-003"
+        },
+        {
+          "role": "jewel-major",
+          "frame": "plant",
+          "baseType": "item.plant-pollen-a-010"
+        },
+        {
+          "role": "retinue",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-horn-a-005"
+        },
+        {
+          "role": "retinue",
+          "frame": "plant",
+          "baseType": "item.plant-runner-b-005"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-ring-1-b-010"
+        },
+        {
+          "role": "jewel-minor-a",
+          "frame": "plant",
+          "baseType": "item.plant-graft-1-b-010"
+        }
       ],
       "thresholds": [
         {
@@ -138,18 +306,26 @@
         {
           "pieces": 3,
           "atoms": [
-            { "family": "atom.might", "powerBand": "low" }
+            {
+              "family": "atom.might",
+              "powerBand": "low"
+            }
           ]
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.ferocity", "powerBand": "low" }
+            {
+              "family": "atom.ferocity",
+              "powerBand": "low"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
-      "notes": "All 4 roles are in the hybrid role core; only one weapon role (armament-secondary) claimed, never both. Capability atom.martyrdom (resource.delta, OnDeath, heals allies) alone at 2 pieces. Tiers 3/4 are might (atk Flat) and ferocity (atk Increased), no More, no defense. Name: adjective 'Unresolved' (already paired with 'Cylinder' in verdant-graft-50) here paired with invented noun 'Ligature' — a surgical binding left open, echoing the theme's own instruction never to resolve which body is in control."
+      "tags": [
+        "signature"
+      ],
+      "notes": "All 4 roles are in the hybrid role core; only one weapon role (armament-secondary) claimed, never both. Capability atom.martyrdom (resource.delta, OnDeath, heals allies) alone at 2 pieces. Tiers 3/4 are might (atk Flat) and ferocity (atk Increased), no More, no defense. Name: adjective 'Unresolved' (already paired with 'Cylinder' in verdant-graft-50) here paired with invented noun 'Ligature' \u2014 a surgical binding left open, echoing the theme's own instruction never to resolve which body is in control."
     },
     {
       "id": "set.verdant-graft-005",
@@ -157,10 +333,46 @@
       "name": "Rootstock of the Conjunction",
       "themeKey": "theme.verdant-graft",
       "members": [
-        { "role": "core-guard" },
-        { "role": "head-guard" },
-        { "role": "girdle" },
-        { "role": "sense" }
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-003"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-004"
+        },
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-b-011"
+        },
+        {
+          "role": "head-guard",
+          "frame": "plant",
+          "baseType": "item.plant-crown-b-011"
+        },
+        {
+          "role": "girdle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-waist-b-011"
+        },
+        {
+          "role": "girdle",
+          "frame": "plant",
+          "baseType": "item.plant-soil-b-011"
+        },
+        {
+          "role": "sense",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-face-b-006"
+        },
+        {
+          "role": "sense",
+          "frame": "plant",
+          "baseType": "item.plant-bract-a-001"
+        }
       ],
       "thresholds": [
         {
@@ -173,13 +385,21 @@
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.vitality", "powerBand": "low" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.vitality",
+              "powerBand": "low"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
-      "notes": "All 4 roles are in the hybrid role core; no weapon role claimed. Capability atom.deathblast (resource.delta, OnDeath, burst on the corpse's cell) alone at 2 pieces — the graft keeps producing after the body stops. 4-piece core is fortitude (Increased) + vitality (Flat), no More, no defense. Name: Base 'Rootstock' (the horticultural term for the plant a graft is joined onto — invented, unregistered, resolves to itself) + concept 'conjunction' (conceptPools['verdant-graft'], unused by either verdant-graft unique file)."
+      "tags": [
+        "signature"
+      ],
+      "notes": "All 4 roles are in the hybrid role core; no weapon role claimed. Capability atom.deathblast (resource.delta, OnDeath, burst on the corpse's cell) alone at 2 pieces \u2014 the graft keeps producing after the body stops. 4-piece core is fortitude (Increased) + vitality (Flat), no More, no defense. Name: Base 'Rootstock' (the horticultural term for the plant a graft is joined onto \u2014 invented, unregistered, resolves to itself) + concept 'conjunction' (conceptPools['verdant-graft'], unused by either verdant-graft unique file)."
     },
     {
       "id": "set.verdant-graft-006",
@@ -187,12 +407,66 @@
       "name": "Scaffold of Engraftment",
       "themeKey": "theme.verdant-graft",
       "members": [
-        { "role": "armament-primary" },
-        { "role": "core-guard" },
-        { "role": "head-guard" },
-        { "role": "manipulator" },
-        { "role": "mantle" },
-        { "role": "footing" }
+        {
+          "role": "armament-primary",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-main-hand-b-007"
+        },
+        {
+          "role": "armament-primary",
+          "frame": "plant",
+          "baseType": "item.plant-muzzle-a-012"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-torso-a-005"
+        },
+        {
+          "role": "core-guard",
+          "frame": "plant",
+          "baseType": "item.plant-stem-a-006"
+        },
+        {
+          "role": "head-guard",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-head-b-012"
+        },
+        {
+          "role": "head-guard",
+          "frame": "plant",
+          "baseType": "item.plant-crown-b-012"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-hands-b-012"
+        },
+        {
+          "role": "manipulator",
+          "frame": "plant",
+          "baseType": "item.plant-leaves-b-012"
+        },
+        {
+          "role": "mantle",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-back-b-012"
+        },
+        {
+          "role": "mantle",
+          "frame": "plant",
+          "baseType": "item.plant-canopy-b-012"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid",
+          "baseType": "item.humanoid-feet-a-005"
+        },
+        {
+          "role": "footing",
+          "frame": "plant",
+          "baseType": "item.plant-roots-a-012"
+        }
       ],
       "thresholds": [
         {
@@ -200,26 +474,42 @@
           "capability": {
             "family": "atom.warded",
             "powerBand": "medium",
-            "params": { "element": "omni" }
+            "params": {
+              "element": "omni"
+            }
           }
         },
         {
           "pieces": 4,
           "atoms": [
-            { "family": "atom.vitality", "powerBand": "medium" },
-            { "family": "atom.might", "powerBand": "low" }
+            {
+              "family": "atom.vitality",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.might",
+              "powerBand": "low"
+            }
           ]
         },
         {
           "pieces": 6,
           "atoms": [
-            { "family": "atom.fortitude", "powerBand": "medium" },
-            { "family": "atom.ferocity", "powerBand": "medium" }
+            {
+              "family": "atom.fortitude",
+              "powerBand": "medium"
+            },
+            {
+              "family": "atom.ferocity",
+              "powerBand": "medium"
+            }
           ]
         }
       ],
-      "tags": ["signature"],
-      "notes": "Grand 6-piece set (rare, per ssot-sets.md#3.4) carrying thresholds at 2, 4 AND 6 as required. All 6 roles are in the hybrid role core; only one weapon role (armament-primary) claimed. Capability atom.warded (shield.grant, on hit or spawn) sits alone at 2 pieces; element is pinned to 'omni' rather than any concrete element, honoring the theme's own avoid-list ('any single dominant element'). 4- and 6-piece cores use vitality/might (Flat) and fortitude/ferocity (Increased) only, no More, no defense. Name: Base 'Scaffold' (invented, unregistered — a graft's physical support) + concept 'engraftment' (conceptPools['verdant-graft'], unused by either verdant-graft unique file)."
+      "tags": [
+        "signature"
+      ],
+      "notes": "Grand 6-piece set (rare, per ssot-sets.md#3.4) carrying thresholds at 2, 4 AND 6 as required. All 6 roles are in the hybrid role core; only one weapon role (armament-primary) claimed. Capability atom.warded (shield.grant, on hit or spawn) sits alone at 2 pieces; element is pinned to 'omni' rather than any concrete element, honoring the theme's own avoid-list ('any single dominant element'). 4- and 6-piece cores use vitality/might (Flat) and fortitude/ferocity (Increased) only, no More, no defense. Name: Base 'Scaffold' (invented, unregistered \u2014 a graft's physical support) + concept 'engraftment' (conceptPools['verdant-graft'], unused by either verdant-graft unique file)."
     }
   ]
 }

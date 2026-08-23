@@ -36,8 +36,25 @@
       "socketMax": 1,
       "iconKey": "icon.base.potent-offset",
       "flavorKey": "flavor.base.potent-offset",
-      "flavor": "A cutting swollen with potential—ready to break free and establish itself elsewhere.",
-      "tags": ["organic", "rooted"]
+      "flavor": "A cutting swollen with potential\u2014ready to break free and establish itself elsewhere.",
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-002",
@@ -55,7 +72,24 @@
       "iconKey": "icon.base.engorged-runner",
       "flavorKey": "flavor.base.engorged-runner",
       "flavor": "Thick lateral shoots, heavy with stored reserves, already pushing new rootlets into the soil.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-003",
@@ -73,7 +107,24 @@
       "iconKey": "icon.base.stored-propagule",
       "flavorKey": "flavor.base.stored-propagule",
       "flavor": "A dormant disseminule, carefully preserved against the season when it will disperse.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-004",
@@ -91,7 +142,24 @@
       "iconKey": "icon.base.husbanded-scion",
       "flavorKey": "flavor.base.husbanded-scion",
       "flavor": "A carefully tended cutting from proven stock, nurtured until it thrives on its own terms.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-005",
@@ -108,8 +176,25 @@
       "socketMax": 1,
       "iconKey": "icon.base.cohered-ratoon",
       "flavorKey": "flavor.base.cohered-ratoon",
-      "flavor": "Shoots sprung from a root crown long settled—the plant itself unified around them.",
-      "tags": ["organic", "rooted"]
+      "flavor": "Shoots sprung from a root crown long settled\u2014the plant itself unified around them.",
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-006",
@@ -127,7 +212,24 @@
       "iconKey": "icon.base.adopted-ramet",
       "flavorKey": "flavor.base.adopted-ramet",
       "flavor": "A clone fragment that has taken fully to new soil, indistinguishable now from the colony it joins.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-007",
@@ -145,7 +247,24 @@
       "iconKey": "icon.base.wedded-spawn",
       "flavorKey": "flavor.base.wedded-spawn",
       "flavor": "Offspring that has rooted beside the parent and grown into its embrace.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-008",
@@ -163,7 +282,24 @@
       "iconKey": "icon.base.seated-brood",
       "flavorKey": "flavor.base.seated-brood",
       "flavor": "A generation settled into the ground, their roots tangled beneath the parent's canopy.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-009",
@@ -181,7 +317,24 @@
       "iconKey": "icon.base.permanent-sobole",
       "flavorKey": "flavor.base.permanent-sobole",
       "flavor": "A basal shoot that became so vigorous it overshadowed what came before.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-010",
@@ -199,7 +352,24 @@
       "iconKey": "icon.base.charged-bourgeon",
       "flavorKey": "flavor.base.charged-bourgeon",
       "flavor": "A bud swollen with the force of growth, straining against its constraints.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-011",
@@ -217,7 +387,24 @@
       "iconKey": "icon.base.unremovable-clone",
       "flavorKey": "flavor.base.unremovable-clone",
       "flavor": "A perfect genetic duplicate, grafted in so long ago the line between copy and origin is invisible.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     },
     {
       "id": "item.plant-runner-b-012",
@@ -235,7 +422,24 @@
       "iconKey": "icon.base.inseparable-colony",
       "flavorKey": "flavor.base.inseparable-colony",
       "flavor": "A settlement of clones so thoroughly established that removing one would collapse them all.",
-      "tags": ["organic", "rooted"]
+      "tags": [
+        "organic",
+        "rooted"
+      ],
+      "enhanceTrack": [
+        {
+          "atLevel": 4,
+          "family": "atom.enhance-savagery"
+        },
+        {
+          "atLevel": 12,
+          "family": "atom.enhance-recovery"
+        },
+        {
+          "atLevel": 20,
+          "family": "atom.enhance-edge"
+        }
+      ]
     }
   ]
 }
