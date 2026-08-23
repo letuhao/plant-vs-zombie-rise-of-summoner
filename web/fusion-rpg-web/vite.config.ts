@@ -4,11 +4,16 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { lingui } from "@lingui/vite-plugin";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react({ babel: { plugins: ["macros"] } }),
+    lingui(),
+    tailwindcss()
+  ],
   base: "./",
   resolve: {
     alias: {
@@ -32,6 +37,8 @@ export default defineConfig({
       reportsDirectory: "./coverage",
       include: [
         "src/shell/**/*.{ts,tsx}",
+        "src/contract/**/*.{ts,tsx}",
+        "src/i18n/**/*.{ts,tsx}",
         "src/lib/bus/**/*.{ts,tsx}",
         "src/ui/**/*.{ts,tsx}",
         "src/layouts/**/*.{ts,tsx}",

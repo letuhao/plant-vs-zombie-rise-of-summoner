@@ -24,7 +24,10 @@ public static partial class WorldTemplateCatalog
         Factions = new WorldFaction[]
         {
             new() { FactionId = Dave, Kind = WorldFactionKind.Player, Name = "Dave" },
-            new() { FactionId = Zomboss, Kind = WorldFactionKind.Zomboss, Name = "Dr. Zomboss", PolicyId = Ai.FrontierRulesPolicy.Id }
+            new() { FactionId = Zomboss, Kind = WorldFactionKind.Zomboss, Name = "Dr. Zomboss", PolicyId = Ai.FrontierRulesPolicy.Id },
+            // L41 (spec-loam-texture.md): the same row `first-light` already has — no new AI, the
+            // Unmade need only that a `Wild` faction exists to spawn onto neglected barren ground.
+            new() { FactionId = Wild, Kind = WorldFactionKind.Wild, Name = "Wild", PolicyId = "stand-fast" }
         }.OrderBy(f => f.FactionId, StringComparer.Ordinal).ToList(),
 
         Sectors = new WorldSector[]

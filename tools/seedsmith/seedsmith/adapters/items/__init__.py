@@ -41,8 +41,15 @@ class ItemsAdapter:
                      applies_to=_applies_to("element")),
             Dimension(id="rarity", values=tuple(sorted(vocab["rarity"])), field="rarity",
                      applies_to=_applies_to("rarity")),
-            Dimension(id="class", values=tuple(sorted(vocab["class"])), field="class",
-                     applies_to=_applies_to("class")),
+            # "class" deliberately NOT exposed as a pairwise dimension yet: its 28 real values
+            # (registries.py's `class_values`) are frame- AND role-restricted per rung
+            # (classes.v1.json's classLadders[ladder][frame][i].roles), which legal_combinations
+            # does not encode. Exposing it today would report every (dimension, class) pair a
+            # rung's own roles/frame don't reach as a false hole — measured directly: doing so
+            # produced 100%-missing findings for band×class/frame×class/role×class, the exact
+            # "confidently wrong" trap spec-analytics §2.2 warns about. `registries().vocabularies
+            # ["class"]` still carries the correct vocabulary for whatever DOES need it (e.g. a
+            # future closed-vocabulary check on the field itself).
         ]
 
     def legal_combinations(self):

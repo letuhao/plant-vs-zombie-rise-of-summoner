@@ -1,11 +1,11 @@
 import { create } from "zustand";
 
 /**
- * The six stacking bands from game-gui-principles.md GG-5. Stage (band 0) is
- * not a stack entry — it is the persistent base every layer opens over — so
- * it has no place here.
+ * The six stacking bands from GG-5 / docs/design/_kit/tokens.css. Shell
+ * (band −1) is not one of them — it replaces the stage outright rather than
+ * stacking over it, so it never needs a place in this z-order.
  */
-export type Band = "shell" | "hud" | "panel" | "dialog" | "toast" | "system";
+export type Band = "stage" | "hud" | "panel" | "dialog" | "toast" | "system";
 
 export type LayerEntry = {
   id: string;

@@ -57,9 +57,13 @@ class JsonOutputTests(unittest.TestCase):
         self.assertEqual(code, EXIT_GAP)
 
         data = json.loads(out_path.read_text(encoding="utf-8"))
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]["metric"], "Coverage/EmptyPartition")
-        self.assertEqual(data[0]["subject"], "b")
+        # NOT_MEASURED findings from numerics-dependent metrics (no NumericsContext for the
+        # stub adapter run) are expected alongside the one real GAP — isolate the GAP explicitly
+        # rather than assert a total count that grows every time a new metric is registered.
+        gap_findings = [f for f in data if f["severity"] == "gap"]
+        self.assertEqual(len(gap_findings), 1)
+        self.assertEqual(gap_findings[0]["metric"], "Coverage/EmptyPartition")
+        self.assertEqual(gap_findings[0]["subject"], "b")
         self.assertEqual(data[0]["schemaVersion"], 1)
 
 

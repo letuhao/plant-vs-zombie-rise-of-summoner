@@ -330,6 +330,14 @@ export function AlmanacDumpPage() {
 - **No component builds its own modal, band, or z-index.** `PanelShell` / `DialogShell` / `Toast` /
   `SystemSheet` / `HudCluster` (§4) are the only band shells; a component setting `z-index` or
   rendering a fixed-position overlay directly is out of contract regardless of how it looks.
+- **Translated text in a component goes through `useLingui()`'s `_`, never the bare `t` macro.**
+  `const { _ } = useLingui(); _(msg\`...\`)` — not `t\`...\`` called directly. `t` compiles to a call
+  against the global `i18n` singleton with no React subscription attached; a component that only uses
+  it has nothing wiring it to `I18nProvider`'s context, so a locale switch elsewhere in the tree never
+  triggers that component to re-render (ordinary children-prop-reference semantics, not a Lingui bug).
+  `useLingui()` is a real context consumer and re-renders correctly. Found live in T6 (game-gui-todo.md)
+  by switching to the dev pseudolocale and watching a `t`-macro string sit untranslated — fixed in
+  `LawnStage.tsx`, and recorded here so it isn't rediscovered per-component.
 
 ---
 

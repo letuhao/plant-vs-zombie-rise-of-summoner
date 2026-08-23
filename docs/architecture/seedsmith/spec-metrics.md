@@ -99,9 +99,20 @@ ban, the 8-of-15 role quota, the one-per-(role, band, axis) rule, the 6-role set
 hybrid-core requirement each lived only in prose for the whole agentic build, and were violated 28,
 10 and 1 times respectively before anyone wrote a predicate.
 
-**All five now ship as C#** — `UniqueRuleCheck.cs`, `SetRuleCheck.cs`, wired at `Validator.cs:70-71`
-with tests. An earlier draft of this section listed them as *"never enforced"*, which was already
-false when written. So this family does **not** re-implement them.
+**Four of five ship as C#** — `UniqueRuleCheck.cs`, `SetRuleCheck.cs`, wired at
+`Validator.cs:70-71` with tests. An earlier draft of this section listed them as *"never
+enforced"*, which was already false when written. So this family does **not** re-implement them.
+
+**Correction (S7, 2026-08-23):** the fifth — the hybrid-core requirement — does **not** ship as
+C#. `grep -rn hybrid tools/ItemSeedValidator/Checks/*.cs` finds nothing; the eight real rule codes
+in `UniqueRuleCheck.cs`/`SetRuleCheck.cs` are `UniqueRoleForbidden`, `UniqueRoleQuota`,
+`UniqueAxisCollision`, `SetRoleCap`, `SetNoTwoPieceThreshold`, `SetGrandMissingStep`,
+`SetThresholdUnreachable`, `UniqueSetMembership` — no `SetRoleNotHybridCore` among them. That code
+exists only in `seedsmith.metrics.linkage.SetCompletability` (S3, ported from
+`seed_graph`'s `set_completability`). "All five now ship as C#" was wrong the moment it was
+written, in the very paragraph correcting an earlier wrong claim about this same family — found by
+building the Constraint manifest this section describes, against the actual C# source rather than
+this document's own prior say-so.
 
 What it owns is the *class*: **a rule stated in a lane document with no corresponding check in either
 tool.** That is a different and harder question than any individual predicate, because it requires

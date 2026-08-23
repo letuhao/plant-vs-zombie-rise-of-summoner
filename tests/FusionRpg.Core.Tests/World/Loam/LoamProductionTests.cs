@@ -49,6 +49,15 @@ public class LoamProductionTests
     }
 
     [Fact]
+    public void The_belief_overload_produces_nothing_for_an_unowned_sector_even_with_a_rootbed()
+    {
+        // The truth side's own G-B guard (`An_unowned_sector_produces_nothing_even_with_a_rootbed`)
+        // has no belief-side twin — a mutation pass (2026-08-23, loam-texture Checkpoint 10) found
+        // the belief overload's identical guard could be deleted outright with nothing noticing.
+        Assert.Equal(0, LoamProduction.For(null, new[] { SlotTypeCatalog.RootbedSlotTypeId }));
+    }
+
+    [Fact]
     public void The_belief_overload_agrees_with_the_truth_overload()
     {
         var sector = new WorldSector

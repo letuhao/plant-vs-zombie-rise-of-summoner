@@ -49,15 +49,18 @@
   --ease-default: 120ms;
 }
 
-/* Band stacking — GG-5. Every band-2..5 surface picks exactly one of these six
-   classes for its z-index; nothing else in the tree sets z-index or a z-*
-   Tailwind class. Band 0 (Stage) and band 1 (HUD) need no z-index token of
-   their own: Stage is the unstacked base (z:auto) and HUD sits directly above
-   it, so only the five surfaces players open and close, plus the shell that
-   replaces the stage outright, need an explicit tier. See game-gui-principles.md
-   GG-5 for the full seven-row table this six-token set is drawn from. */
+/* Band stacking — GG-5, values from docs/design/_kit/tokens.css (the canonical
+   source T7 generates this file from). Every band-0..5 surface picks exactly
+   one of these six classes for its z-index; nothing else in the tree sets
+   z-index or a z-* Tailwind class. Shell (boot/title/save-select/fatal-error,
+   GG-5's band −1) has no token here on purpose — it *replaces* the stage
+   rather than stacking over it (GG-5: "Blocks input below: n/a — replaces
+   stage"), so it never needs to coordinate z-order with anything else.
+   Corrected 2026-08-23: an earlier pass invented a `--band-shell` token and
+   omitted `--band-stage` before this file's own source of truth had been
+   read — the kit declares the reverse (stage is a real tier, shell isn't). */
 :root {
-  --band-shell: -1;
+  --band-stage: 0;
   --band-hud: 100;
   --band-panel: 200;
   --band-dialog: 300;
@@ -65,7 +68,7 @@
   --band-system: 500;
 }
 
-.band-shell { z-index: var(--band-shell); }
+.band-stage { z-index: var(--band-stage); }
 .band-hud { z-index: var(--band-hud); }
 .band-panel { z-index: var(--band-panel); }
 .band-dialog { z-index: var(--band-dialog); }

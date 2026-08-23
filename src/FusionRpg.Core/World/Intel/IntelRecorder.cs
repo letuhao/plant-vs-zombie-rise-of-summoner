@@ -1,3 +1,4 @@
+using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Turn;
 
 namespace FusionRpg.Core.World.Intel;
@@ -152,5 +153,76 @@ public static class IntelRecorder
         }
 
         return forces.OrderBy(f => f.EntityId, StringComparer.Ordinal);
+    }
+}
+
+/// <summary>
+/// Prospecting (spec-loam-texture.md): a dowser stance reveals which sectors hold a loam source — a
+/// rootbed, or an active well/waystation, exactly <see cref="Habitability"/>'s own rule for it — at a
+/// reach beyond ordinary scouting, without leaking anything else a plain scout would not already
+/// know (no owner, no danger band, no forces). Answers *where the prizes are*, an intel question, so
+/// it lives here as its own query rather than folded into <see cref="IntelRecorder.Observe"/>'s
+/// persisted snapshot: nothing here touches <c>FactionIntel</c> or <c>WorldCanonical</c>, the same
+/// loam-pure-and-unwired-from-belief boundary this program has held since wave 1.
+/// </summary>
+public static class Prospecting
+{
+    /// <summary>
+    /// Reach beyond <see cref="Visibility.ScoutSightLanes"/> — a dowser answers a much narrower
+    /// question (is there a source here) at a wider range than an ordinary scout answers a broader one.
+    /// </summary>
+    public const int DowserSightLanes = 4;
+
+    public const string DowserStance = "dowse";
+
+    /// <summary>Every sector a faction's dowsers have confirmed holds a loam source this turn.</summary>
+    public static IReadOnlySet<string> Reveal(WorldState world, string factionId)
+    {
+        var neighbours = Neighbours(world);
+        var reached = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var entity in world.Entities)
+        {
+            if (!string.Equals(entity.OwnerFactionId, factionId, StringComparison.Ordinal)) continue;
+            if (!string.Equals(entity.Stance, DowserStance, StringComparison.Ordinal)) continue;
+            if (entity.AtSectorId is not { } origin) continue;
+
+            reached.Add(origin);
+            var frontier = new List<string> { origin };
+            for (var step = 0; step < DowserSightLanes && frontier.Count > 0; step++)
+            {
+                var next = new List<string>();
+                foreach (var current in frontier)
+                {
+                    if (!neighbours.TryGetValue(current, out var adjacent)) continue;
+                    foreach (var neighbour in adjacent)
+                        if (reached.Add(neighbour)) next.Add(neighbour);
+                }
+
+                frontier = next;
+            }
+        }
+
+        return world.Sectors
+            .Where(s => reached.Contains(s.SectorId) && Habitability.For(s))
+            .Select(s => s.SectorId)
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    static Dictionary<string, List<string>> Neighbours(WorldState world)
+    {
+        var map = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (var sector in world.Sectors) map[sector.SectorId] = new List<string>();
+
+        foreach (var lane in world.Lanes)
+        {
+            if (lane.State != LaneState.Open) continue;
+            if (!map.ContainsKey(lane.FromSectorId) || !map.ContainsKey(lane.ToSectorId)) continue;
+
+            map[lane.FromSectorId].Add(lane.ToSectorId);
+            map[lane.ToSectorId].Add(lane.FromSectorId);
+        }
+
+        return map;
     }
 }

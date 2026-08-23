@@ -20,7 +20,7 @@ class EmptyPartitionMetric(Metric):
     loop = Loop.CLOSED
     gates = False
     needs = frozenset({"corpus", "adapter"})
-    covers: tuple[str, ...] = ()
+    covers: tuple[str, ...] = ("appendix-a:13",)
 
     def run(self, ctx: Ctx) -> list[Finding]:
         allocated = ctx.adapter.registries().vocabularies.get("partitions", frozenset())

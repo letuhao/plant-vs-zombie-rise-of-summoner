@@ -10,13 +10,22 @@ public static class LoamForecast
 {
     /// <summary>
     /// The weakest contributor in a component whose available stock cannot cover its upkeep — worst
-    /// per-sector balance, ordinal tiebreak. Null when the pool covers its own upkeep in full.
+    /// per-sector balance, ordinal tiebreak, excluding any warded sector from candidacy entirely
+    /// (spec-loam-texture.md's Wardens: warding stops the fade, not the cost, so a warded sector's
+    /// upkeep still counts above but it can never be the one selected to absorb the shortfall). Null
+    /// when the pool covers its own upkeep in full, or when every member is warded — the caller must
+    /// treat both the same way: no fade applied this turn.
     /// </summary>
     public static string? Weakest(WorldState world, IReadOnlyList<string> component, long available, long upkeep)
     {
         if (available >= upkeep) return null;
 
-        return component
+        var candidates = component
+            .Where(id => world.Sectors.First(s => s.SectorId == id).WardenBindingId is null)
+            .ToList();
+        if (candidates.Count == 0) return null;
+
+        return candidates
             .OrderBy(id => LoamBalance.PerSector(world, world.Sectors.First(s => s.SectorId == id)))
             .ThenBy(id => id, StringComparer.Ordinal)
             .First();

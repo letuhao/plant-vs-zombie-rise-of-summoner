@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "generatedBy": "seedsmith.numerics (tasks/seedsmith-todo.md, S5)",
+    "note": "The one genuinely tunable surface of item balance (docs/architecture/seedsmith/spec-numerics.md §2, §3.1). baseShare/channelWeight/opWeight are working values chosen to make the corpus resolvable, not a validated balance decision (spec-numerics.md §6.2) — telemetry refits channelWeight once gameplay data exists.",
+    "rebalance": "Never hand-edit this file. python -m seedsmith numerics rebalance --set channelWeight.<id>=<value> --publish writes tier-bands.v{n+1}.json; the old version stays for revert."
+  },
+  "baseSharePermille": 35,
+  "channelWeightPermille": {
+    "vitality": 1000,
+    "fortitude": 1000,
+    "bulwark": 1000,
+    "might": 1000,
+    "ferocity": 1000,
+    "savagery": 1000,
+    "warding": 1000,
+    "resilience": 1000,
+    "plating": 1000,
+    "carapace": 1000,
+    "mending": 1000,
+    "quickening": 1000,
+    "flourishing": 1000,
+    "swiftness": 1000
+  },
+  "opWeightPermille": {
+    "Flat": 1000,
+    "Increased": 1000,
+    "More": 550
+  }
+}

@@ -51,7 +51,7 @@
 
   { "file": "src/FusionRpg.Core/World/Loam/FadePolicy.cs",
     "name": "a shortfall recovers instead of decaying",
-    "find": "? Math.Max(0, currentStabilityMilli - DecayFor(-balance))",
+    "find": "? Math.Max(0, currentStabilityMilli - DecayFor(-balance, pressureMilli, surge))",
     "with": "? Math.Max(0, currentStabilityMilli + LoamPolicy.RecoveryMilli)" },
 
   { "file": "src/FusionRpg.Core/World/Loam/FadePolicy.cs",
@@ -66,13 +66,13 @@
 
   { "file": "src/FusionRpg.Core/World/Loam/FadePolicy.cs",
     "name": "decay ignores how deep the deficit runs",
-    "find": "deficitMagnitude / LoamPolicy.DecayScaleDivisor * LoamPolicy.DecayPerDeficitUnitMilli;",
-    "with": "0;" },
+    "find": "+ deficitMagnitude / LoamPolicy.DecayScaleDivisor * LoamPolicy.DecayPerDeficitUnitMilli",
+    "with": "+ 0" },
 
   { "file": "src/FusionRpg.Core/World/Loam/Habitability.cs",
     "name": "any slot at all makes ground habitable",
-    "find": "slotTypeIds.Any(id => SlotTypeCatalog.Get(id).Kind == SlotKind.Rootbed);",
-    "with": "slotTypeIds.Any();" },
+    "find": "if (SlotTypeCatalog.Get(slotTypeId).Kind == SlotKind.Rootbed) return true;",
+    "with": "return true;" },
 
   { "file": "src/FusionRpg.Core/World/Loam/LoamPolicy.cs",
     "name": "development and danger upkeep multiplies instead of adding",

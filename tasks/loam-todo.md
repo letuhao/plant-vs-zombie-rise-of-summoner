@@ -1107,7 +1107,15 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
 
 ## Phase 10 — `loam-texture`
 
-- [ ] **L38: The granary**
+- [x] **L38: The granary** ✅ 2026-08-23 — `StructureKind.Storage`, `StructureDef.CapacityBonus`,
+  "granary" catalog row; `LoamPhases.EffectiveCapacity(sector)` (public) replaces the raw
+  `LoamPolicy.LoamCapacity` cap in `Production` — additive, byte-identical for any sector with no
+  granary. **Real consistency gap found and fixed, not in L38's own stated file list**:
+  `LoamForecast.ProjectedStock` (the player-facing forecast) still capped at the raw constant, which
+  would have made the engine and its own forecast silently disagree the moment a granary existed —
+  fixed by pointing it at the same shared `EffectiveCapacity`, the exact discipline
+  `LoamForecast.cs`'s own doc comment already states as its reason to exist. Core 134 (Loam filter),
+  no regression.
   - Description: `StructureKind.Storage`, `StructureDef("granary", Storage, RequiredSlotKind: Wildland,
     CapacityBonus)`. `LoamPhases.Production`'s cap becomes `EffectiveCapacity(sector)` — base plus any
     active granary's bonus. Overflow above the raised cap is still lost and still reported.
@@ -1118,7 +1126,22 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     `LoamPhases.cs`, `tests/.../LoamTextureTests.cs` (new). Scope: S.
   - Dependencies: L37.
 
-- [ ] **L39/L40: Fade contagion and Fracture surges — built and proven together, on purpose**
+- [x] **L39/L40: Fade contagion and Fracture surges — built and proven together, on purpose**
+  ✅ 2026-08-23 — `FadePolicy.DecayFor(deficitMagnitude, pressureMilli=0, surge=false)`: pressure adds
+  to the pre-clamp sum, surge scales the WHOLE pre-clamp sum, one clamp at the end (unchanged shape)
+  — structurally cannot overshoot regardless of composition. `LoamPhases.Pressure` gained `turn`/
+  `seed` params (defaulted, so all 10 pre-existing call sites compile unchanged), reads
+  `TurnCalendar.Roll(turn, seed).Plague` for the surge flag, and a new `NextPressure` pass raises
+  lane-adjacent sectors' `PressureMilli` on every sector that actually faded this turn (capped),
+  decaying everyone else toward zero. Proven: the single most important test (huge deficit + max
+  contagion + surge together still clamps at exactly `MaxDecayMilli`); contagion raises a real
+  lane-neighbor's pressure and decays an unpressured one; a real (turn, seed) pair that rolls
+  Plague (found by search, not hardcoded) decays a fading sector further than the same turn without
+  one; recovery is untouched by either parameter. Core 2943, Data 463 (**golden hash empirically
+  unchanged** — this scenario's 20 turns never actually run a shortfall, so contagion/surge are
+  wired but unexercised by shipped content, the same "real mechanism, zero effect on existing
+  scenarios" shape L28's `Sustain` had — no `RulesetVersion` bump), E2E World 40 — all green; all 4
+  guard scripts green; `AbandonRuleTests`/`TwoHearthsCampaignTests` reconfirmed.
   - Description: both extend `FadePolicy.DecayFor`'s **pre-clamp** input, never its output — the exact
     bug the audit caught in this spec's first draft. Contagion: `PressureMilli` raised on lane-adjacent
     sectors of any actively-fading sector, decaying back to baseline otherwise, added into the pre-clamp
@@ -1135,7 +1158,18 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     `CalendarRoll`), `tests/.../LoamTextureTests.cs`. Scope: M.
   - Dependencies: L38.
 
-- [ ] **L41: The Unmade**
+- [x] **L41: The Unmade** ✅ 2026-08-23 — `LoamPhases`'s new neglect-and-spawn pass: any sector both
+  `Lost` and barren counts up `NeglectedTurns` (already-shipped field from L25); at
+  `UnmadeSpawnAfterTurns` it spawns a `Wild`-owned warband using the already-shipped
+  `StandFastPolicy` — no new AI — then resets the counter, and skips entirely if the ground is
+  already occupied or the map has no `WorldFactionKind.Wild` faction at all. `two-hearths` gained
+  the same `Wild` row `first-light` already has. Spawned entities are re-sorted into the entities
+  list by id (this is the first mechanic that ever adds a brand-new entity mid-game — stable
+  ordering had to be preserved deliberately, not assumed). Proven: spawns and reports on a Wild map;
+  provably does not spawn (but still counts) on a map with none, re-proven per the program's own
+  G-C-exemption discipline; never spawns onto occupied ground; the counter resets the instant ground
+  stops being barren-and-lost. Core 2947, Data 463, E2E World 40 — all green (golden hash unaffected
+  — `first-light` untouched); all 4 guard scripts green; the two long-run regressions reconfirmed.
   - Description: `Wild`-owned `WorldEntity` spawned onto neglected, `Lost`, barren ground, using the
     already-shipped `StandFastPolicy` — no new AI. `two-hearths` gains an explicit `Wild` faction row
     (map-authoring, part of this task, not a follow-up).
@@ -1146,7 +1180,29 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     `WorldTemplateCatalog.TwoHearths.cs` (`Wild` row), `tests/.../LoamTextureTests.cs`. Scope: M.
   - Dependencies: L40.
 
-- [ ] **L42: Wardens**
+- [x] **L42: Wardens** ✅ 2026-08-23 — `BindAsWarden` (`RpgStore.Contracts.cs`) mirrors `BindContract`'s
+  capacity check and upkeep fee exactly, adding one new `warden` column (`rpg_demon_contracts`,
+  `EnsureColumn`) flagged permanent; `ReleaseContract` now refuses any warden-flagged row
+  unconditionally (`contract.warden-permanent`), checked before every other release blocker.
+  `LoamForecast.Weakest` excludes warded sectors from fade candidacy entirely (not merely
+  deprioritizes them); `LoamPhases.Pressure` treats a `null` Weakest as "every member is warded" —
+  reports `loam.shortfall.unresolved:<amount>` and applies no fade to anyone, rather than the `!`
+  null-forgiving operator it used before this task (a real crash risk the old code never exercised
+  because no sector could be warded yet). The paid-in-full recovery branch also skips warded members
+  so their `StabilityMilli` truly never moves either way. `ClaimResolver.Run` clears
+  `WardenBindingId` the instant a claim changes a sector's owner — capture ends the binding
+  outright, no transfer, no refund, confirmed by a dedicated test (this file was not in the task's
+  original list; the acceptance criterion "capturing a warded sector ends the binding" cannot be
+  proven without it, so it was added and documented here rather than silently left unimplemented).
+  Proven: a fully-warded single-sector component with a guaranteed shortfall never fades and reports
+  the unresolved amount; a warded sector with the worse balance is passed over in favor of a
+  non-warded component-mate even though it would otherwise be selected; a warded sector is skipped
+  even when its component pays in full; `BindAsWarden` costs the same capacity slot and fee as an
+  ordinary bind and replays free same-day; `ReleaseContract` refuses a warden bind even though an
+  identical ordinary bind would release cleanly; an ordinary bind is never mistakenly flagged as a
+  warden. Core 2951/2951, Data 468/468 (golden hash unaffected — no new hashed field), E2E World
+  40/40 — all green; all 4 guard scripts green; `AbandonRuleTests`/`TwoHearthsCampaignTests`
+  reconfirmed 8/8.
   - Description: `BindAsWarden`, capacity-gated by `ContractPolicy.Capacity()` exactly as an ordinary
     bind; the resulting binding is unconditionally non-releasable. `WorldSector.WardenBindingId` exempts
     a sector from `FadePolicy` (never rises, never falls) — its upkeep still counts against its
@@ -1162,7 +1218,22 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     `tests/.../LoamTextureTests.cs`. Scope: M.
   - Dependencies: L41.
 
-- [ ] **L43: Prospecting**
+- [x] **L43: Prospecting** ✅ 2026-08-23 — `Prospecting.Reveal` (new type, same file: `Intel/IntelRecorder.cs`):
+  a `dowse` stance (a free string, the same loose convention `scout` already uses — no enum/catalog
+  anywhere enforces valid stance values) spreads out from wherever a faction's dowsers stand, over
+  open lanes, out to `DowserSightLanes` (4) hops, and returns exactly the sectors in that reach that
+  `Habitability.For` already calls a loam source — rootbed, or an active well/waystation, one shared
+  rule, not a second copy. Deliberately a pure query, not folded into `Observe`'s persisted pipeline:
+  it touches neither `FactionIntel`/`IntelSnapshot` nor `WorldCanonical`, so it adds no hashed field
+  and needs no golden-move re-bless — confirmed by a full Data-Tests run coming back byte-identical.
+  This keeps the intel-layer boundary the spec calls for (loam pure and unwired from belief) and
+  matches the task's own file list naming only `IntelRecorder.cs` — a second hashed-state file would
+  have contradicted that list, so a stateless design was the correct read of it, not a shortcut.
+  Proven: reveals a loam-source sector 4 hops out (past ordinary `ScoutSightLanes`, inside dowser
+  range); does not reach a source 5 hops out; reveals nothing for barren ground even within range;
+  an ordinary (non-`dowse`) stance reveals nothing at all. Core 2955/2955, Data 468/468 (hash
+  unchanged), E2E World 40/40 — all green; all 4 guard scripts green;
+  `AbandonRuleTests`/`TwoHearthsCampaignTests` reconfirmed 8/8.
   - Description: a dowser stance revealing rootbed/well/waystation-bearing slots at range, inside
     `IntelRecorder`/`IntelState` — an intel-layer feature, not a change under `World/Loam`.
   - Acceptance: reveals loam-source slots at range beyond ordinary scouting; reveals nothing else a
@@ -1171,17 +1242,104 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
   - Files: `Intel/IntelRecorder.cs`, `tests/.../IntelRecorderTests.cs`. Scope: S.
   - Dependencies: L42 (last, per the declared build order — no real technical dependency on wardens).
 
-### Checkpoint 10 — `loam-texture` built, ⭐ POST-GATE COMPLETE
-- [ ] All six mechanics (granary, contagion, surges, the Unmade, wardens, prospecting) pass their named
-  tests.
-- [ ] The decay-clamp stacking test (contagion + surge, already-severe deficit) proves the ceiling holds
-  — the audit's central finding, closed with evidence, not just a corrected sentence.
-- [ ] A fully-warded, unpayable component applies no fade and does not crash.
-- [ ] `two-hearths` has its `Wild` faction row.
-- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass —
-  the widest-reaching regression bar in this program, since this phase touches `FadePolicy` and
-  `LoamPhases` directly.
-- [ ] All four guard scripts green.
-- [ ] Mutation testing (`scripts/mutate.ps1`) extended to cover every new calculator this slice added,
-  on a verified-green baseline, same discipline as `loam-calc`'s own mutant set.
-- [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
+### Checkpoint 10 — `loam-texture` built, ⭐ POST-GATE COMPLETE ✅ PASSED 2026-08-23
+- [x] All six mechanics (granary, contagion, surges, the Unmade, wardens, prospecting) pass their named
+  tests. — `LoamTextureTests` (28 tests: granary L38, contagion/surge L39-40, the Unmade L41, wardens
+  L42) + `IntelRecorderTests`' 4 prospecting tests (L43). All pass.
+- [x] The decay-clamp stacking test (contagion + surge, already-severe deficit) proves the ceiling holds
+  — the audit's central finding, closed with evidence, not just a corrected sentence. —
+  `The_single_most_important_test_a_maxed_out_sector_under_contagion_and_surge_together_never_exceeds_the_ceiling`,
+  passing.
+- [x] A fully-warded, unpayable component applies no fade and does not crash. —
+  `A_warded_sector_never_fades_even_when_its_whole_component_cannot_pay` (single-sector fully-warded
+  component, guaranteed shortfall, `StabilityMilli` unchanged, no exception, reports
+  `loam.shortfall.unresolved:`), plus a dedicated mutant proving the `null`-weakest branch is
+  load-bearing (see mutation row below).
+- [x] `two-hearths` has its `Wild` faction row. — added at L41, confirmed still present.
+- [x] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still
+  pass — reconfirmed 8/8 after every task in this checkpoint's slice (L38 through L43 and the
+  mutation-driven fixes below), most recently just now.
+- [x] All four guard scripts green. — `guard-single-writer`, `guard-secondary-no-unity`,
+  `guard-funnel-delta`, `guard-dal` all OK, reconfirmed after every task and again just now.
+- [x] Mutation testing (`scripts/mutate.ps1`) extended to cover every new calculator this slice added,
+  on a verified-green baseline, same discipline as `loam-calc`'s own mutant set. — Three real findings,
+  same "survivor needs an explanation or a fix" discipline `loam-calc` itself was built under:
+  - `loam-calc` baseline was NOT actually green before this checkpoint: 3 mutants had gone stale
+    (`FadePolicy`'s surge/pressure params and `Habitability`'s structure-aware rewrite, both from
+    earlier in this program, had silently drifted the anchors out of sync with the code) and 1 was a
+    real, live survivor — `LoamProduction`'s belief-side overload could have its unowned-sector guard
+    deleted outright with nothing noticing (the truth side has that test; the belief side never did).
+    Fixed all 4 (3 anchors rewritten to match current code, 1 new test
+    `The_belief_overload_produces_nothing_for_an_unowned_sector_even_with_a_rootbed` added) —
+    re-run: 20/20 caught.
+  - New `scripts/mutants/loam-texture.json` (19 mutants) covers `LoamPhases.EffectiveCapacity`/
+    `NextPressure`/`Pressure`'s surge and warden branches/`UpdateNeglectAndSpawnTheUnmade`,
+    `LoamForecast.Weakest`'s warden exclusion, `FadePolicy`'s pressure/surge terms,
+    `Habitability.IsSource`'s structure-kind check, `Prospecting.Reveal`, and `ClaimResolver`'s
+    warden-release-on-capture. First run: 2 real survivors — the Unmade's neglect-threshold check
+    could be deleted with nothing noticing (every existing fixture happened to start at
+    threshold-1), and `Habitability` would treat *any* known structure as a loam source, not only a
+    `LoamSource`-kind one (no test built a Granary, `StructureKind.Storage`, on barren ground to prove
+    it does *not* count). Fixed both (new tests
+    `The_unmade_do_not_spawn_before_the_neglect_threshold_is_reached`,
+    `A_seat_with_an_active_waystation_is_habitable_even_with_no_rootbed_anywhere`,
+    `A_granary_never_makes_ground_habitable_on_its_own`) — re-run: 19/19 caught.
+  - New `scripts/mutants/warden-contracts.json` (6 mutants, run with
+    `-Project tests\FusionRpg.Data.Tests` since the target is `FusionRpg.Data`, not `Core`) covers
+    `BindAsWarden`'s warden-flagging end to end (the call site, the INSERT column, the read-back) and
+    `ReleaseContract`/`BindAsWarden`'s two warden-specific branches. One real gap found before writing
+    the set (no test covered `BindAsWarden` refusing an instance already ordinary-bound) — added
+    `Binding_a_warden_refuses_an_instance_already_bound_ordinarily` — 6/6 caught.
+  - Full regression after all of the above: Core 2959/2959, Data 469/469 (hash unaffected), E2E
+    World 40/40, all 4 guards green, `AbandonRuleTests`/`TwoHearthsCampaignTests` 8/8.
+- [x] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**). —
+  see the hand-off note at the end of this file.
+
+---
+
+## Hand-off — L41 through Checkpoint 10 (the Unmade, wardens, prospecting, mutation hardening)
+
+Suggested commit message:
+
+> Ship the Unmade, wardens, and prospecting; harden loam mutation coverage
+>
+> Closes out loam-texture (L38-L43) and Checkpoint 10, the program's post-gate slice. The Unmade
+> spawn onto neglected, barren, Lost ground once a map has a Wild faction (two-hearths now does).
+> Wardens let a bound demon permanently exempt one sector from FadePolicy, at the cost of a
+> non-releasable contract slot; LoamForecast/LoamPhases exclude warded sectors from fade candidacy
+> and a fully-warded, unpayable component now reports its shortfall instead of crashing. Prospecting
+> adds a dowser stance that reveals loam-source ground beyond ordinary scouting, as a pure intel
+> query with no new persisted or hashed state. A mutation pass over the whole loam module found and
+> fixed one live gap (LoamProduction's belief-side unowned-sector guard was deletable unnoticed) plus
+> three stale mutant anchors left behind by earlier waves, and added two new mutant sets
+> (loam-texture, warden-contracts) that found and closed two more real gaps before shipping.
+
+Paths touched this slice:
+
+- `src/FusionRpg.Core/World/Loam/LoamPhases.cs` — the Unmade spawn pass, wardens' fade exclusion
+- `src/FusionRpg.Core/World/Loam/LoamForecast.cs` — `Weakest` excludes warded sectors
+- `src/FusionRpg.Core/World/Movement/ClaimResolver.cs` — capture clears `WardenBindingId`
+- `src/FusionRpg.Core/World/Intel/IntelRecorder.cs` — `Prospecting.Reveal`
+- `src/FusionRpg.Core/World/WorldTemplateCatalog.TwoHearths.cs` — `Wild` faction row
+- `src/FusionRpg.Data/Sqlite/RpgStore.cs` — `warden` column
+- `src/FusionRpg.Data/Sqlite/RpgStore.Contracts.cs` — `BindAsWarden`, `ReleaseContract`'s warden refusal
+- `tests/FusionRpg.Core.Tests/World/Loam/LoamTextureTests.cs` — wardens, Unmade-threshold tests
+- `tests/FusionRpg.Core.Tests/World/Intel/IntelRecorderTests.cs` — prospecting tests
+- `tests/FusionRpg.Core.Tests/World/Loam/LoamProductionTests.cs` — belief-side unowned-sector test
+- `tests/FusionRpg.Core.Tests/World/Loam/HabitabilityTests.cs` — waystation/granary tests
+- `tests/FusionRpg.Data.Tests/WardenContractTests.cs` — new
+- `scripts/mutants/loam-calc.json` — 3 stale anchors fixed
+- `scripts/mutants/loam-texture.json` — new, 19 mutants
+- `scripts/mutants/warden-contracts.json` — new, 6 mutants
+- `tasks/loam-todo.md` — evidence for L41-L43 and Checkpoint 10
+
+Quick verify: `dotnet test tests\FusionRpg.Core.Tests`, `dotnet test tests\FusionRpg.Data.Tests`,
+the four `guard-*.ps1` scripts, `.\scripts\mutate.ps1 -Set loam-calc`,
+`.\scripts\mutate.ps1 -Set loam-texture`,
+`.\scripts\mutate.ps1 -Set warden-contracts -Project tests\FusionRpg.Data.Tests`.
+
+**Note for the owner**: `git status` shows a large number of already-*staged* files well outside this
+slice (`web/fusion-rpg-web/src/i18n/**`, `web/fusion-rpg-web/src/contract/**`,
+`tools/seedsmith/seedsmith/{numerics,metrics,budget}/**`, and others) that this session did not touch
+or stage. Flagging it since a mixed staging area this size is easy to commit unintentionally — worth
+reviewing `git status` before committing either this slice or that other work.

@@ -86,4 +86,370 @@ public class LoamTextureTests
         Assert.Equal(LoamPolicy.LoamCapacity, result.Sectors[0].LoamStock);
         Assert.Contains(report.Entries, e => e.Detail.StartsWith("loam.overflow"));
     }
+
+    // ---- L39/L40: fade contagion and Fracture surges, built and proven together -----------------
+
+    [Fact]
+    public void Contagion_adds_directly_to_the_pre_clamp_sum()
+    {
+        var withoutPressure = FadePolicy.DecayFor(deficitMagnitude: 0);
+        var withPressure = FadePolicy.DecayFor(deficitMagnitude: 0, pressureMilli: 50);
+
+        Assert.Equal(withoutPressure + 50, withPressure);
+    }
+
+    [Fact]
+    public void A_surge_scales_the_whole_pre_clamp_sum_not_the_clamped_output()
+    {
+        // A deficit small enough that neither the base decay nor the surge alone reaches the
+        // ceiling, so the multiplication is actually visible in the result.
+        var baseline = FadePolicy.DecayFor(deficitMagnitude: 100);
+        var surged = FadePolicy.DecayFor(deficitMagnitude: 100, surge: true);
+
+        Assert.True(surged > baseline);
+        Assert.Equal(baseline * LoamPolicy.SurgeDecayMultiplierMilli / 1000, surged);
+    }
+
+    [Fact]
+    public void The_single_most_important_test_a_maxed_out_sector_under_contagion_and_surge_together_never_exceeds_the_ceiling()
+    {
+        // A deficit already large enough to hit MaxDecayMilli on its own, contagion pressure piled
+        // on top, and a surge active the same turn — the exact combination the audit's first draft
+        // would have let overshoot (a contagion-inflated decay already clamped to 300, then scaled
+        // x1.5, becomes 450). The corrected shape scales the *input*, so it cannot.
+        var hugeDeficit = 100_000L;
+        var maxedOut = FadePolicy.DecayFor(hugeDeficit, pressureMilli: LoamPolicy.MaxPressureMilli, surge: true);
+
+        Assert.Equal(LoamPolicy.MaxDecayMilli, maxedOut);
+    }
+
+    [Fact]
+    public void A_recovering_sector_is_never_touched_by_pressure_or_surge()
+    {
+        // "A surge makes holding harder, it does not make giving up easier" — Apply's positive
+        // (recovering) branch must ignore both parameters entirely.
+        var withoutExtras = FadePolicy.Apply(500, balance: 1);
+        var withExtras = FadePolicy.Apply(500, balance: 1, pressureMilli: 999, surge: true);
+
+        Assert.Equal(withoutExtras, withExtras);
+    }
+
+    /// <summary>
+    /// A two-sector component joined by one lane — "poor" (no rootbed of its own, high development,
+    /// a real drag on the shared pool) and "rich" (holds the component's only rootbed). Together
+    /// they still run a shortfall, so `Weakest` (worse per-sector balance) always picks "poor" —
+    /// proving the pressure raise on "rich" is contagion from its neighbour fading, not "rich"
+    /// fading on its own account.
+    /// </summary>
+    static WorldState ContagionFixture(int poorPressure = 0, int richPressure = 0) => new()
+    {
+        WorldId = "w", TemplateId = "t", Seed = 1,
+        Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
+        Sectors = new[]
+        {
+            Sector(0, Rootbed()) with { SectorId = "rich", StabilityMilli = 1000, PressureMilli = richPressure },
+            new WorldSector
+            {
+                SectorId = "poor", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 1000,
+                DevelopmentLevel = 10, PressureMilli = poorPressure
+            }
+        },
+        Lanes = new[]
+        {
+            new WorldLane { LaneId = "l-rich-poor", FromSectorId = "rich", ToSectorId = "poor", TypeId = LaneTypeCatalog.RiftLaneTypeId }
+        }
+    };
+
+    [Fact]
+    public void A_sector_lane_adjacent_to_a_fading_neighbour_has_its_pressure_raised()
+    {
+        var world = ContagionFixture();
+        var report = new TurnReport();
+
+        var produced = LoamPhases.Production(world, report, "production");
+        var pressured = LoamPhases.Pressure(produced, report, "pressure");
+
+        // "poor" is disconnected from "rich" (each its own component — no shared pool), development
+        // 10 guarantees a real shortfall against zero production, so "poor" fades every turn.
+        Assert.Contains(report.Entries, e => e.Detail.StartsWith("loam.shortfall") && e.SectorId == "poor");
+        Assert.Equal(
+            Math.Min(LoamPolicy.MaxPressureMilli, LoamPolicy.ContagionPressurePerTurn),
+            pressured.Sectors.Single(s => s.SectorId == "rich").PressureMilli);
+    }
+
+    [Fact]
+    public void A_sector_with_no_fading_neighbour_decays_its_own_pressure_back_toward_zero()
+    {
+        var world = ContagionFixture(poorPressure: 0, richPressure: 200);
+        var report = new TurnReport();
+
+        // Give "poor" enough of its own stock that it pays its own way this turn — no shortfall, no
+        // contagion source, so "rich"'s own elevated pressure should simply decay.
+        var solvent = world with
+        {
+            Sectors = world.Sectors.Select(s => s.SectorId == "poor" ? s with { DevelopmentLevel = 0, LoamStock = 1000 } : s).ToList()
+        };
+
+        var produced = LoamPhases.Production(solvent, report, "production");
+        var pressured = LoamPhases.Pressure(produced, report, "pressure");
+
+        Assert.DoesNotContain(report.Entries, e => e.Detail.StartsWith("loam.shortfall"));
+        Assert.Equal(
+            Math.Max(0, 200 - LoamPolicy.PressureDecayPerTurn),
+            pressured.Sectors.Single(s => s.SectorId == "rich").PressureMilli);
+    }
+
+    static (int Turn, ulong Seed) FindAPlagueTurn()
+    {
+        for (var turn = 28; turn <= 28 * 20; turn += 28)
+            for (ulong seed = 0; seed < 500; seed++)
+                if (FusionRpg.Core.World.Turn.TurnCalendar.Roll(turn, seed).Plague)
+                    return (turn, seed);
+
+        throw new InvalidOperationException("no Plague roll found in the search range — widen it");
+    }
+
+    [Fact]
+    public void A_real_plague_turn_decays_a_fading_sector_further_than_the_same_turn_without_one()
+    {
+        var (plagueTurn, seed) = FindAPlagueTurn();
+        Assert.True(FusionRpg.Core.World.Turn.TurnCalendar.Roll(plagueTurn, seed).Plague);
+
+        var world = ContagionFixture();
+        var report = new TurnReport();
+        var produced = LoamPhases.Production(world, report, "production");
+
+        var withoutSurge = LoamPhases.Pressure(produced, new TurnReport(), "pressure", turn: 1, seed: seed);
+        var withSurge = LoamPhases.Pressure(produced, new TurnReport(), "pressure", turn: plagueTurn, seed: seed);
+
+        var stabilityWithoutSurge = withoutSurge.Sectors.Single(s => s.SectorId == "poor").StabilityMilli;
+        var stabilityWithSurge = withSurge.Sectors.Single(s => s.SectorId == "poor").StabilityMilli;
+
+        Assert.True(stabilityWithSurge < stabilityWithoutSurge,
+            $"a Plague turn should decay 'poor' further (without: {stabilityWithoutSurge}, with: {stabilityWithSurge})");
+    }
+
+    // ---- L41: the Unmade -----------------------------------------------------------------------
+
+    static WorldSector LostBarren(int neglectedTurns) => new()
+    {
+        SectorId = "ruins", TypeId = "stable", Phase = SectorPhase.Lost, OwnerFactionId = null,
+        NeglectedTurns = neglectedTurns,
+        Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.WildlandSlotTypeId } }
+    };
+
+    [Fact]
+    public void The_unmade_spawn_on_a_map_with_a_wild_faction()
+    {
+        var world = new WorldState
+        {
+            Factions = new[] { new WorldFaction { FactionId = "wild", Kind = WorldFactionKind.Wild, Name = "Wild" } },
+            Sectors = new[] { LostBarren(LoamPolicy.UnmadeSpawnAfterTurns - 1) }
+        };
+        var report = new TurnReport();
+
+        var result = LoamPhases.Pressure(world, report, "pressure");
+
+        Assert.Contains(result.Entities, e =>
+            string.Equals(e.OwnerFactionId, "wild", StringComparison.Ordinal) && e.AtSectorId == "ruins");
+        Assert.Contains(report.Entries, e => e.Detail == "unmade.spawned:ruins");
+        Assert.Equal(0, result.Sectors[0].NeglectedTurns); // the countdown resets — the ground is no longer empty
+    }
+
+    [Fact]
+    public void The_unmade_do_not_spawn_on_a_map_with_no_wild_faction()
+    {
+        // Re-proven explicitly, per this program's own G-C lesson: an exemption is checked at every
+        // place its logic could apply, not assumed to survive into a new mechanic untested.
+        var world = new WorldState
+        {
+            Factions = Array.Empty<WorldFaction>(),
+            Sectors = new[] { LostBarren(LoamPolicy.UnmadeSpawnAfterTurns - 1) }
+        };
+        var report = new TurnReport();
+
+        var result = LoamPhases.Pressure(world, report, "pressure");
+
+        Assert.Empty(result.Entities);
+        Assert.DoesNotContain(report.Entries, e => e.Detail.StartsWith("unmade"));
+        // The counter still climbs even with nobody to receive it — the exemption is on the spawn
+        // itself, not on tracking neglect.
+        Assert.Equal(LoamPolicy.UnmadeSpawnAfterTurns, result.Sectors[0].NeglectedTurns);
+    }
+
+    [Fact]
+    public void The_unmade_do_not_spawn_before_the_neglect_threshold_is_reached()
+    {
+        // A mutation pass (2026-08-23, loam-texture Checkpoint 10) found that dropping the
+        // `>= UnmadeSpawnAfterTurns` check entirely survived undetected — every other test happened
+        // to start at exactly threshold-1. Starting fresh (0) proves the threshold is actually load-bearing.
+        var world = new WorldState
+        {
+            Factions = new[] { new WorldFaction { FactionId = "wild", Kind = WorldFactionKind.Wild, Name = "Wild" } },
+            Sectors = new[] { LostBarren(0) }
+        };
+
+        var result = LoamPhases.Pressure(world, new TurnReport(), "pressure");
+
+        Assert.Empty(result.Entities);
+        Assert.Equal(1, result.Sectors[0].NeglectedTurns);
+    }
+
+    [Fact]
+    public void The_unmade_do_not_spawn_onto_ground_something_already_occupies()
+    {
+        var world = new WorldState
+        {
+            Factions = new[] { new WorldFaction { FactionId = "wild", Kind = WorldFactionKind.Wild, Name = "Wild" } },
+            Sectors = new[] { LostBarren(LoamPolicy.UnmadeSpawnAfterTurns - 1) },
+            Entities = new[]
+            {
+                new WorldEntity
+                {
+                    EntityId = "e-dave-1", Kind = WorldEntityKind.Legion, OwnerFactionId = "dave", AtSectorId = "ruins",
+                    Members = new[] { new WorldEntityMember { SpeciesId = "grunt" } }
+                }
+            }
+        };
+
+        var result = LoamPhases.Pressure(world, new TurnReport(), "pressure");
+
+        Assert.Single(result.Entities); // only the legion that was already there
+    }
+
+    [Fact]
+    public void The_neglect_counter_resets_once_the_ground_is_no_longer_barren_and_lost()
+    {
+        var world = new WorldState
+        {
+            Sectors = new[] { LostBarren(3) with { Phase = SectorPhase.Held, OwnerFactionId = "dave" } }
+        };
+
+        var result = LoamPhases.Pressure(world, new TurnReport(), "pressure");
+
+        Assert.Equal(0, result.Sectors[0].NeglectedTurns);
+    }
+
+    // ---- L42: wardens ---------------------------------------------------------------------------
+
+    static WorldFaction Dave() => new() { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" };
+
+    /// <summary>A rootbed elsewhere so `LoamUpkeep`'s G-C exemption ("a faction with no loam source
+    /// anywhere pays nothing") does not zero out the warded sector's own upkeep — unconnected, so it
+    /// is its own separate component and cannot subsidise the warded one.</summary>
+    static WorldSector HomeWithRootbed() => new()
+    {
+        SectorId = "home", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 1000,
+        LoamStock = 10_000, Slots = new[] { Rootbed() }
+    };
+
+    [Fact]
+    public void A_warded_sector_never_fades_even_when_its_whole_component_cannot_pay()
+    {
+        // No rootbed, high development, zero stock — a guaranteed, un-payable shortfall — and it is
+        // the only member of its own component, so LoamForecast.Weakest has nothing left to select
+        // once wardens are excluded from candidacy.
+        var warded = new WorldSector
+        {
+            SectorId = "warded", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 1000,
+            DevelopmentLevel = 10, WardenBindingId = "demon-1",
+            Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.WildlandSlotTypeId } }
+        };
+        var world = new WorldState { Factions = new[] { Dave() }, Sectors = new[] { HomeWithRootbed(), warded } };
+        var report = new TurnReport();
+
+        var result = LoamPhases.Pressure(world, report, "pressure");
+
+        Assert.Equal(1000, result.Sectors.Single(s => s.SectorId == "warded").StabilityMilli);
+        Assert.Contains(report.Entries, e => e.Detail.StartsWith("loam.shortfall.unresolved:"));
+        Assert.DoesNotContain(report.Entries, e => e.Detail.StartsWith("loam.shortfall:") && e.SectorId == "warded");
+    }
+
+    [Fact]
+    public void Weakest_excludes_a_warded_sector_even_when_it_has_the_worse_balance()
+    {
+        // Two sectors sharing one pool: "warded" carries the worse balance (higher development, no
+        // rootbed) but is warded; "frontier" has a milder shortfall of its own. Without the
+        // exclusion, Weakest would pick "warded" — proving the fade lands on "frontier" instead shows
+        // the exclusion is live, not merely that a warded sector happens not to be weakest.
+        var warded = new WorldSector
+        {
+            SectorId = "warded", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 1000,
+            DevelopmentLevel = 50, WardenBindingId = "demon-1",
+            Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.WildlandSlotTypeId } }
+        };
+        var frontier = new WorldSector
+        {
+            SectorId = "frontier", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 1000,
+            DevelopmentLevel = 1,
+            Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.WildlandSlotTypeId } }
+        };
+        var world = new WorldState
+        {
+            Factions = new[] { Dave() },
+            Sectors = new[] { HomeWithRootbed(), warded, frontier },
+            Lanes = new[]
+            {
+                new WorldLane { LaneId = "l", FromSectorId = "warded", ToSectorId = "frontier", TypeId = LaneTypeCatalog.RiftLaneTypeId }
+            }
+        };
+        var report = new TurnReport();
+
+        var result = LoamPhases.Pressure(world, report, "pressure");
+
+        Assert.Equal(1000, result.Sectors.Single(s => s.SectorId == "warded").StabilityMilli);
+        Assert.True(result.Sectors.Single(s => s.SectorId == "frontier").StabilityMilli < 1000);
+        Assert.Contains(report.Entries, e => e.Detail.StartsWith("loam.shortfall:") && e.SectorId == "frontier");
+    }
+
+    [Fact]
+    public void A_warded_sector_is_skipped_even_when_its_component_pays_in_full()
+    {
+        // A solvent component (rich stock, low upkeep) recovers every member — except the warded
+        // one, whose StabilityMilli must neither rise nor fall while the binding holds.
+        var warded = new WorldSector
+        {
+            SectorId = "warded", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 500,
+            LoamStock = 10_000, WardenBindingId = "demon-1",
+            Slots = new[] { Rootbed() }
+        };
+        var world = new WorldState { Factions = new[] { Dave() }, Sectors = new[] { warded } };
+        var report = new TurnReport();
+
+        var result = LoamPhases.Pressure(world, report, "pressure");
+
+        Assert.Equal(500, result.Sectors.Single(s => s.SectorId == "warded").StabilityMilli);
+    }
+
+    [Fact]
+    public void Capturing_a_warded_sector_ends_the_binding()
+    {
+        var warded = new WorldSector
+        {
+            SectorId = "warded", TypeId = "stable", OwnerFactionId = "zomboss", StabilityMilli = 1000,
+            WardenBindingId = "demon-1",
+            Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = "seat", GuardState = GuardState.Cleared } }
+        };
+        var raider = new WorldEntity
+        {
+            EntityId = "e-dave-1", Kind = WorldEntityKind.Legion, OwnerFactionId = "dave", AtSectorId = "warded",
+            Members = new[] { new WorldEntityMember { SpeciesId = "grunt" } }
+        };
+        var world = new WorldState
+        {
+            Factions = new[] { Dave(), new WorldFaction { FactionId = "zomboss", Kind = WorldFactionKind.Zomboss, Name = "Zomboss" } },
+            Sectors = new[] { warded },
+            Entities = new[] { raider }
+        };
+        var command = new WorldCommand
+        {
+            CommandId = "c1", Kind = WorldCommandKinds.Claim, CommanderId = "dave", EntityId = "e-dave-1", SectorId = "warded"
+        };
+
+        var result = FusionRpg.Core.World.Movement.ClaimResolver.Run(world, new[] { command }, new TurnReport(), "claim", turn: 1);
+
+        var captured = result.Sectors.Single(s => s.SectorId == "warded");
+        Assert.Equal("dave", captured.OwnerFactionId);
+        Assert.Null(captured.WardenBindingId);
+    }
 }

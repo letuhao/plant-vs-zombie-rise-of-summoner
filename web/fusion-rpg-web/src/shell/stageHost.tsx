@@ -27,14 +27,11 @@ export function resetStageMountCounts(): void {
 }
 
 /**
- * Band-0 wrapper (GG-5): the persistent base every layer opens over. Purely
- * structural — Stage carries no z-index token of its own (see
- * theme/tokens.css), it just needs a stable node for layers to be siblings
- * of / portal past.
+ * Band-0 wrapper (GG-5): the persistent base every layer opens over.
  */
 export function StageHost({ children }: { children: ReactNode }) {
   return (
-    <div data-testid="stage-host" className="relative h-full w-full">
+    <div data-testid="stage-host" className="band-stage relative h-full w-full">
       {children}
     </div>
   );

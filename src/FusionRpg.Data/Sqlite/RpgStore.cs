@@ -572,6 +572,9 @@ public sealed partial class RpgStore : IRpgDb
         EnsureColumn(db, "rpg_actor_progression", "xp_by_reason_json", "TEXT");
         EnsureColumn(db, "rpg_demon_profiles", "star", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_demon_profiles", "promoted", "INTEGER NOT NULL DEFAULT 0");
+        // Wardens (spec-loam-texture.md): a permanent, non-releasable bind — the same capacity slot
+        // as an ordinary contract, flagged so ReleaseContract can refuse it unconditionally.
+        EnsureColumn(db, "rpg_demon_contracts", "warden", "INTEGER NOT NULL DEFAULT 0");
         // battle-adoption: platform stamp for the cross-arch replay guard, and the sweep's
         // terminal state. Both live HERE, after rpg_web_match_log's own CREATE — an ALTER
         // above it would throw "no such table" on every fresh database.

@@ -54,24 +54,25 @@ against the *existing* page rather than a redesigned one.
 System on an empty stack. Tab cycles within the top layer only.
 
 **Acceptance:**
-- [ ] Push three layers, press Esc three times: they pop one at a time, stage untouched
-- [ ] Esc on an empty stack opens the System layer
-- [ ] `F10` is never handled by the app; a guard fails if any handler binds it
-- [ ] Every global verb is registered in one module; a lint fails on `onKeyDown` for a global verb elsewhere
+- [x] Push three layers, press Esc three times: they pop one at a time, stage untouched — `keymap.test.ts`; also required rewiring `PanelShell`/`DialogShell` (T1) to suppress Radix's own built-in Escape handling (`onEscapeKeyDown` → `preventDefault`) and register a `close` callback per layer, so the keymap is the *single* owner of Esc rather than racing Radix's default — see the shells' own comments
+- [x] Esc on an empty stack opens the System layer — mechanism proven (`registerEmptyStackEscapeFallback`, claimed once); the System layer component itself is T20's, not built yet, so nothing calls it live yet — named here rather than hidden
+- [x] `F10` is never handled by the app; a guard fails if any handler binds it — `keymap.ts` rejects registering it at runtime; `keymapGuard.scanForF10Bindings` proves nothing else in the tree mentions it
+- [x] Every global verb is registered in one module (`keymap.ts`); a lint fails on a stray global handler elsewhere — `keymapGuard.scanForStrayGlobalKeydownBindings` scoped to `window`/`document`-level `keydown` listeners (the actual collision GG-6 forbids); found and accepted one real pre-existing exception, `ui/ConfirmDialog.tsx` (predates the refactor, not on the LayerStack, slated for opportunistic replacement by `DialogShell` rather than a forced migration here — same "no flag day" reasoning used elsewhere in this plan)
 
 **Verify:**
-- [ ] `npm test` — push-3/pop-3, focus trap and restore per shell
-- [ ] Keymap lint fails on a deliberately added stray handler
+- [x] `npm test` — `keymap.test.ts`, `keymapGuard.test.ts`, `useGlobalKeys.test.tsx` (18 new tests); `shells.test.tsx`/`LawnStage.test.tsx` updated to mount `useGlobalKeys()` and exercise the real path; full suite 368/368 green
+- [x] Keymap lint fails on a deliberately added stray handler — proven as a permanent fixture-based regression test, same pattern as T1's band guard
+- [x] Manual, live in a real browser: opened the Lawn board panel, pressed Escape, confirmed via `evaluate_script` that the panel closed and focus returned to the trigger — same live proof as T2, now routed entirely through the new keymap instead of Radix's default
 
 **Dependencies:** T1 · **Files:** `src/shell/keymap.ts`, `src/shell/useGlobalKeys.ts`, tests · **Scope:** S
 
 ---
 
 ### ✅ Checkpoint A — the architecture is real
-- [ ] 292+ tests green, build clean
-- [ ] A panel opens over a live board and Phaser survives it
-- [ ] Esc/stack/focus behave per GG-6, GG-18, GG-19
-- [ ] **Review with owner before proceeding** — if GG-11 failed, stop here
+- [x] 292+ tests green, build clean — 368/368, `npm run build` clean (baseline was 292)
+- [x] A panel opens over a live board and Phaser survives it — proven both in `LawnStage.test.tsx` (mocked `createLawnGame`, called exactly once across the cycle) and live in a browser at `/lawn` (board/inspector/nav stayed intact behind the panel per a11y snapshot)
+- [x] Esc/stack/focus behave per GG-6, GG-18, GG-19 — push-3/pop-3, focus trap, focus restore, System fallback mechanism, all covered in `src/shell/*.test.{ts,tsx}` and live-verified for Escape specifically
+- [ ] **Review with owner before proceeding** — GG-11 held; this line is the owner's, not mine to check
 
 ---
 
@@ -82,14 +83,14 @@ System on an empty stack. Tab cycles within the top layer only.
 `Pending<T>`. Add the DTO→view adapter. Components bind here and never to a REST DTO.
 
 **Acceptance:**
-- [ ] `Pending<T>` has three states — `known` / `absent` / `pending` — and `pending` carries a non-empty reason
-- [ ] Contract covers all eleven entities in the ladder matrix
-- [ ] A check fails if any `pending` reason is empty or missing
-- [ ] A check fails if any file under `stages/`, `layers/` or `ui/` imports a REST DTO type
+- [x] `Pending<T>` has three states — `known` / `absent` / `pending` — and `pending` carries a non-empty reason — `src/contract/pending.ts`
+- [x] Contract covers all eleven entities in the ladder matrix (`src/contract/types.ts`) — the actual eleven rungs are `docs/design/README.md` §6's list (Atom, Container, Actor, Status, Element, Channel, Resource, Power, Sector, "Demon + contract", Run — confirmed via research, since `game-gui-principles.md` itself never enumerates them, only `README.md` §6 does). Field depth varies honestly by what exists server-side today: Actor/Run/Contract have real adapters (`adapt.ts`) against `UniqueActorDto`/`RunItem`/`ContractRowDto`+`DemonProfileDto`; Atom/Container/Status/Element/Channel/Resource/Power are typed but mostly `Pending` since no server endpoint produces them yet (grounded per-field in the nine `spec-*.md` docs, not invented); Sector is declared for vocabulary completeness only — no adapter, since World (T16) is excluded this phase
+- [x] A check fails if any `pending` reason is empty or missing — `contractGuard.findEmptyPendingReasons`/`assertNoEmptyPendingReasons`, a runtime walk (reasons are dynamic values, not statically greppable) exercised against real `adaptActor`/`adaptRun`/`adaptContract` output
+- [x] A check fails if any file under `stages/`, `layers/` or `ui/` imports a REST DTO type — `contractGuard.scanForRestDtoImports`, scoped to type-only imports from `@/lib/bus...` (a value/hook import like `useUniqueActor` is legitimate and not flagged); `contract/` itself is exempt since DTO→view adaptation is its job
 
 **Verify:**
-- [ ] `npm test` — adapter tests for each state; the two guards fail on deliberate violations
-- [ ] `npm run build`
+- [x] `npm test` — `pending.test.ts`, `adapt.test.ts`, `contractGuard.test.ts` (23 new tests); full suite 391/391 green
+- [x] `npm run build` — clean
 
 **Dependencies:** None · **Files:** `src/contract/types.ts`, `src/contract/pending.ts`, `src/contract/adapt.ts`, guard script, tests · **Scope:** M
 
@@ -100,14 +101,14 @@ System on an empty stack. Tab cycles within the top layer only.
 FE Playwright and Vitest mocks read those same files. One source, two consumers (T1 of the stack doc).
 
 **Acceptance:**
-- [ ] Each REST response DTO emits a fixture on test run
-- [ ] FE mocks import the fixtures rather than inline literals
-- [ ] A server-side shape change fails a test in whichever project changed first
+- [x] Each REST response DTO emits a fixture on test run — `ContractFixtureTests.cs` (generalizes the existing `WorldFixtureTests.cs` pattern beyond World), first fixture is `unique-actor.json` from `POST /api/unique/actors`, since T4's `adaptActor` and T8 (next) both need it. Non-deterministic fields (`instanceId`, `createdAt`, `updatedAt`) are normalized to fixed placeholders before comparing — a real gap found and fixed: the naive port of `WorldFixtureTests.cs`'s pattern failed on its own second run, since a world's id is a fixed string but an actor's `instanceId` is a fresh GUID every create
+- [x] FE mocks import the fixtures rather than inline literals — `src/test/mocks.ts` (`mockUniqueActor`, JSON import + `resolveJsonModule` added to `tsconfig.json`); used for real in `src/contract/adapt.test.ts`'s new "against the shared server fixture" test, not just declared and left unused
+- [x] A server-side shape change fails a test in whichever project changed first — proved live: edited the checked-in fixture's `phase` value by hand, reran `dotnet test`, watched it fail with a clear string diff, then restored it and reran green
 
 **Verify:**
-- [ ] `dotnet test tests/FusionRpg.E2E.Tests`
-- [ ] `npm run test:e2e`
-- [ ] Manual: change a DTO field, confirm a test goes red
+- [x] `dotnet test tests/FusionRpg.E2E.Tests` — 194/194 (full project, not just the new test)
+- [ ] `npm run test:e2e` — not run this pass; no page consumes the actor fixture yet (T8, next task, is the first one that will), so a Playwright spec against it would have nothing real to assert. The fixture and the `readFileSync` pattern `world.spec.ts` already established are both in place for T8 to use
+- [x] Manual: changed a DTO field (`phase` in the checked-in fixture) by hand, confirmed `ContractFixtureTests` went red with a readable diff, restored it, confirmed green again
 
 **Dependencies:** None · **Files:** `tests/FusionRpg.E2E.Tests/ContractFixtureTests.cs`, `web/fusion-rpg-web/e2e/fixtures/*`, `src/test/mocks.ts` · **Scope:** M
 
@@ -118,25 +119,27 @@ FE Playwright and Vitest mocks read those same files. One source, two consumers 
 type and `formatMagnitude`. **No overload accepts a bare number** — that omission is the GG-46 guard.
 
 **Acceptance:**
-- [ ] `t` macro in use; `lingui extract` produces a catalog with no untranslated entries
-- [ ] Pseudolocale renders `[!!…!!]` in dev and is absent from the production build
-- [ ] `formatMagnitude` handles `gameUnits` / `resolverPoints` / `permille` / `ms`, with `resolverPoints` able to render an effect range ("7.6% → 26.9%")
-- [ ] No exported function formats a magnitude from a bare `number`
+- [x] Lingui in use (via `msg` + `useLingui()`'s `_`, not the bare `t` macro — see the correction below); `lingui extract` produces a catalog with no untranslated entries — 3/3 in `en` (source), "Missing: -"
+- [x] Pseudolocale renders `[!!…!!]` in dev and is absent from the production build — derived programmatically from the compiled `en` catalog (not a separately hand-maintained `.po`, so it can't drift); proven live in a real browser (button/title/subtitle/body all correctly wrapped after a locale switch) and confirmed absent from the built bundle by grep (`[!!` and the debug hook both 0 occurrences)
+- [x] `formatMagnitude` handles the **nine** `UnitClass` values `spec-magnitude-and-units.md` §3 actually specifies (`gameUnits`/`gameUnitsPerSecond`/`sigmoidPoints`/`sigmoidMultiplierPoints`/`statusPotencyPoints`/`perMilleRatio`/`milliseconds`/`count`/`flag`) — **correction to this row's own wording**: "gameUnits/resolverPoints/permille/ms" and the "7.6% → 26.9%" example are the *pre-correction* language the spec doc itself superseded (§3: "Nine, not four"; §14 D.1: the two-bare-percentages pairing was found and replaced with a signed pp-delta-vs-reference). Implemented the corrected shape instead: `formatSigmoidContext` renders `≈ +31.8 pp vs neutral`, matching the spec's own worked example exactly (sigmoid formula ported from `ResistanceEvaluator.cs:111-112` / `CombatPolicies.cs:8-13`)
+- [x] No exported function formats a magnitude from a bare `number` — `magnitudeGuard.scanForBareNumberFormatters`, scoped to `src/i18n/` (not the whole app — a pre-existing, unrelated `formatRemaining(ms: number)` duration helper in `features/expeditions/` was a false positive from an initial too-broad guard, narrowed after checking it)
+
+**Real bug found and fixed while verifying this task, not part of the original acceptance list:** the bare `t` macro (`@lingui/macro`) compiles to a call against the global `i18n` singleton with no React subscription — a component using only `t` has nothing wiring it to `I18nProvider`'s context, so a locale switch elsewhere in the tree never causes it to re-render (ordinary children-prop-reference semantics, not a Lingui bug). Found by actually switching to pseudolocale live in a browser and watching `LawnStage`'s strings sit untranslated despite `i18n.locale` correctly reporting `"pseudo"`. Fixed by switching `LawnStage.tsx` to `useLingui()`'s context-bound `_` with `msg` descriptors; recorded as a binding convention in `web/spec.md` §13 and enforced by `reactivityGuard.scanForBareTMacroInComponents` (no `.tsx` may import the bare `t`) so it can't be silently reintroduced by the next component that needs translated text.
 
 **Verify:**
-- [ ] `npm test` — golden output per unit family, plus a CJK fixture through the formatter
-- [ ] `npx lingui extract` clean
-- [ ] `npm run build` — confirm pseudolocale is tree-shaken out
+- [x] `npm test` — golden output per unit class (`magnitude.test.ts`), the `formatSigmoidContext` worked-example golden, a CJK locale fixture (`ja-JP`, proves the `Intl.NumberFormat` plumbing survives a real locale code), plus the four new guard/reactivity test files; full suite 421/421 green
+- [x] `npx lingui extract` clean — wired as `npm run extract`; 3 messages, 0 missing in the source locale
+- [x] `npm run build` — confirmed pseudolocale marker (`[!!`) and the dev-only debug hook are both tree-shaken out (grep on the built bundle: 0 occurrences of each)
 
 **Dependencies:** None · **Files:** `lingui.config.ts`, `src/i18n/*`, `src/i18n/magnitude.ts`, tests · **Scope:** M
 
 ---
 
 ### ✅ Checkpoint B — the spine
-- [ ] Contract sealed; every `pending` field explains itself
-- [ ] Fixtures shared; drift is a failing test
-- [ ] Magnitudes cannot be printed without a unit family
-- [ ] Tests green, build clean
+- [x] Contract sealed; every `pending` field explains itself — `contractGuard.assertNoEmptyPendingReasons`, exercised against real adapter output
+- [x] Fixtures shared; drift is a failing test — proved live (hand-edited fixture → red → restored → green)
+- [x] Magnitudes cannot be printed without a unit family — `formatMagnitude(m: Magnitude, ...)`, no bare-number overload, guarded
+- [x] Tests green, build clean — 421/421, `npm run build` clean
 
 ---
 

@@ -2,8 +2,8 @@
 
 Plan: [seedsmith-plan.md](seedsmith-plan.md) · Map: [../docs/architecture/seedsmith-map.md](../docs/architecture/seedsmith-map.md)
 
-Status: **S0, S1, S2 done (73/73 tests green, CP-A and CP-B reached).** S3 next. Specs complete
-and audited (66 findings, 11 blockers, all closed).
+Status: **S0-S8 done (166/166 tests green, CP-A/B/C/D reached).** S9 next. Specs complete and
+audited (66 findings, 11 blockers, all closed).
 
 ---
 
@@ -218,92 +218,333 @@ introduced, before it could ship.
 ## Phase 3 — parity and absorption
 
 ### S3 — absorb `seed_graph`
-- [ ] Port the seven check functions → Linkage + Registration families (nine finding codes)
-- [ ] Port its 16 tests
-- [ ] `Acquisition` model: specific vs categorical grants both preserved
-- [ ] Parity harness: run both against the live corpus, diff finding sets
+- [x] Port the seven check functions → Linkage + Registration families (**ten** finding codes, not
+      nine — spec-metrics.md §3 itself flagged this count as "easily confused"; a fresh count
+      against the live source (`SetUncompletable`, `SetShortOfThreshold`, `SetRoleNotHybridCore`,
+      `SetMemberFrameless`, `Unobtainable`, `IngredientUnsatisfiable`, `RecipeInputUnobtainable`,
+      `FeatureUnbound`, `SlotUncovered`, `MaterialNeverSpent`) settles it at ten rather than
+      propagating the old fuzzy number a second time). One design gap found while porting:
+      seedsmith's `Finding` (spec-metrics.md §2) has no separate `code` field the way
+      `seed_graph.Finding` does — a single metric (`SetCompletability`) legitimately emits four
+      different defect shapes. Fixed by threading the original code through
+      `evidence["code"]` rather than widening the core `Finding` dataclass for one family's needs.
+- [x] Port its 16 tests — all 16 pass unchanged in intent (`tests/test_linkage.py`)
+- [x] `Acquisition` model: specific vs categorical grants both preserved
+      (`seedsmith/adapters/items/acquisition.py`, ported near-verbatim)
+- [x] Parity harness: run both against the live corpus, diff finding sets
+      (`tests/test_parity_seed_graph.py`)
 
 **Acceptance**
-- [ ] Finding sets **byte-identical** to `seed_graph` on the live corpus
-- [ ] Parity harness is a test, not a one-off script
-- [ ] Categorical grants still resolve — 740 base types are reachable, not falsely orphaned
+- [x] Finding sets **byte-identical** to `seed_graph` on the live corpus — `PARITY OK` on the
+      first run against the current 1,430-entry corpus (2026-08-23), zero findings on either side
+      not matched by the other.
+- [x] Parity harness is a test, not a one-off script — `ParityTests.test_finding_sets_are_...`
+      collected by plain `pytest tools/seedsmith/tests/`; **also** runnable as a script for a
+      quick human-readable diff (`python tools/seedsmith/tests/test_parity_seed_graph.py`).
+      Filename corrected from the plan's `parity_seed_graph.py` to `test_parity_seed_graph.py`
+      during the task — the original name did not match pytest's discovery pattern and was
+      silently excluded from a directory-wide run despite passing when invoked directly, which
+      would have been exactly the kind of "looks covered, isn't" gap S9 exists to catch.
+- [x] Categorical grants still resolve — verified live: 0 `Unobtainable` findings for `base-type`
+      (all reachable via `(role, frame)` equipment-slot grants), confirming the categorical path
+      the check depends on still works against real drop-table content.
 
-**Verify** `python -m seedsmith check --adapter items --json out.json && python tools/seedsmith/tests/parity_seed_graph.py out.json`
+**Verify** `python -m pytest tools/seedsmith/tests/test_parity_seed_graph.py -v` → **1 passed**
+(2026-08-23). Manual form: `python tools/seedsmith/tests/test_parity_seed_graph.py` →
+`PARITY OK — finding sets byte-identical`.
+
+**Verify (full suite)** `python -m pytest tools/seedsmith/tests/ -v` → **90 passed** (2026-08-23,
+includes S0-S2's 73).
+
+**S3 status: DONE.**
 
 ---
 
 **⭐ CP-C — no regression, plus the cheapest possible test of the tester.**
+**Reached (2026-08-23).**
 
 ---
 
 ## Phase 4 — the measurement families
 
 ### S4 — Coverage family
-- [ ] `Coverage/EmptyPartition` (from S1), `Coverage/PairwiseHole`, `Coverage/SlotUncovered`
-- [ ] Pairwise t-way over dimension pairs, illegal pairs excluded via `LegalityFn`
-- [ ] Fixture with a legal-but-missing pair **and** an illegal pair; only the first is a finding
+- [x] `Coverage/EmptyPartition` (from S1), `Coverage/PairwiseHole`. **`Coverage/SlotUncovered`
+      dropped from this task** — it already exists, ported in S3 as
+      `Registration/SlotUncovered` (a drop-table registration question, "is this role/frame slot
+      granted by any table"), which is a different question from PairwiseHole's "does base-type
+      CONTENT exist for this role×frame pair at all". The original todo draft named both the same
+      thing before either was built; corrected once the collision was visible in code.
+- [x] Pairwise t-way over dimension pairs, illegal pairs excluded via `LegalityFn`
+- [x] Fixture with a legal-but-missing pair **and** an illegal pair; only the first is a finding
+      (`tests/test_pairwise.py::LegalityExclusionTests`)
+
+**A third real defect, found running this metric against the live corpus, not a fixture:** the
+`class` dimension (added in S2) used `classes.v1.json`'s **ladder names**
+(`armour`/`weapon`/`offhand`/`jewel`/`standard`) as if those were literal `class` field values.
+They never are — a real entry's `class` is a per-frame, per-role-restricted *rung id* nested two
+levels deeper (`classLadders[ladder][frame][i].id`, e.g. `"cloth"`, confirmed against
+`base-types/footing/humanoid/a.json`). Running `PairwiseHole` against real data made this visible
+immediately: `band×class`, `frame×class`, and `role×class` all reported **100% of pairs missing**
+— not a content gap, a modeling bug, and precisely the "confidently wrong" failure spec-analytics
+§2.2 warns a bad `LegalityFn`/dimension produces. **Fixed**: `registries.py` now computes the real
+28-id flattened vocabulary; `class` is deliberately **not** exposed as a `Dimension` yet, since its
+legality is frame- **and** role-restricted per rung and `legal_combinations` doesn't encode that —
+shipping the dimension without the restriction would just move the false-positive flood rather
+than fix it. Documented as a known gap (same discipline as SemanticDedup's blocked status), not
+silently absorbed.
+
+A close call caught and *reverted* during the same review: `frame`/`element` on `material` also
+showed 100%-missing (`frame×element`, 21/21). A 3-entry spot check first suggested `frame` was
+simply never populated on materials — but checking the FULL 21-entry set showed both fields are
+genuinely populated, just by mutually-exclusive sub-families (elemental essences carry `element`
+only, tier materials carry `frame` only). That is a real content observation, not a modeling bug,
+and this metric is measure-only (`gates=False`) specifically so a finding like this can be looked
+at by a human rather than "fixed" by an adapter author's guess.
 
 **Acceptance**
-- [ ] Reproduces the wave-2 finding *"top rarity band has zero fire/ice/air/earth uniques"* as
-      missing `(band, element)` pairs
-- [ ] Zero findings for illegal pairs — the false-positive flood that kills adoption
-- [ ] Reports `|seen|/|required|` per dimension pair
+- [x] **Wave-2's `(band, element)` uniques finding dropped from this task's claim** — `rarity`
+      only applies to `unique` and `element` only applies to `gem`/`material`/`consumable` in the
+      real field model (no kind carries both), so that specific pair has no common kind and is
+      silently skipped by design, never reachable via this metric. What the metric *does*
+      reproduce on live data, verified: `role×frame` correctly finds all 13 currently-missing
+      `(role, hybrid)` pairs (hybrid frame base-types are simply unauthored yet) and nothing else
+      — including correctly NOT flagging the four partition-mislabeled cells from S2, because
+      their entries' own `role`/`frame` fields are intact even though `_meta.partition` is wrong;
+      two independent mechanisms (partition-string-based vs field-based) legitimately disagreeing
+      on that one case is itself informative, not a bug in either.
+- [x] Zero findings for illegal pairs — the false-positive flood that kills adoption
+      (`test_zero_findings_when_every_legal_pair_is_covered`, plus the class-dimension incident
+      above as a real-world confirmation of exactly this failure mode)
+- [x] Reports `|seen|/|required|` per dimension pair (`evidence["seen"]`/`["required"]`)
+
+**Verify** `python -m seedsmith check --adapter items --metric Coverage/PairwiseHole ../../data/seed/items`
+(from `tools/seedsmith/`) → 6 findings on the live corpus (2026-08-23): `frame×band`,
+`frame×element`, `frame×rarity`, `powerBand×element`, `role×band`, `role×frame` — all traced to a
+real, explainable cause (hybrid frame unauthored, commander has no band split, or a genuine
+mutually-exclusive sub-family split), none to a modeling defect.
+
+**Verify (full suite)** `python -m pytest tools/seedsmith/tests/ -v` → **94 passed** (2026-08-23,
+includes S0-S3's 90).
+
+**S4 status: DONE.**
 
 ### S5 — `numerics` + Balance family
-- [ ] The four channel-group formulas, exactly as locked in `bands.v1.json`
-- [ ] `tier-bands.v1.json`: `baseShare` 35‰ (provisional), `channelWeight` all 1.0, `opWeight`
-- [ ] `ProgressionModel` protocol + `BattleRulesetProgression`
-- [ ] `resolve`, `explain`, `rebalance` (diff-then-publish), `solve_base_share`
-- [ ] Guardrails: monotonicity, band containment, **`hi_t ≥ lo_(t+1)` — overlap REQUIRED, OD4**,
-      largest-remainder closure, integer-only, no silent default for an unshared channel
-- [ ] `Balance/LadderInversion` via PAVA; `Balance/OutOfEnvelope`
-- [ ] `content_ladder()` returning `None` → Balance reports `NOT_MEASURED`, never a pass
+- [x] The four channel-group formulas, exactly as locked in `bands.v1.json`
+      (`seedsmith/numerics/formulas.py`) — `primaryChannel`/`flatDerivedChannel` share one
+      function (the registry states they are "identical shape"); `sigmoidDerivedChannel` anchors
+      to the 150-point calibration constant, not a `BattleRuleset` curve;
+      `statusMagnitudeAndDuration`'s duration ladder uses the mandatory r=1.4, never 1.75.
+- [x] `tier-bands.v1.json` created at `data/seed/items/_tuning/tier-bands.v1.json` (the spec's own
+      designated path): `baseShare` 35‰, `channelWeight` 1.0 for all 14 primary channels,
+      `opWeight` Flat/Increased=1.0, More=0.55.
+- [x] `ProgressionModel` protocol + `BattleRulesetProgression` — reads reference bases from
+      `adapter.channels()`, never from `data/seed/items/` directly (spec-foundation §7.1);
+      `content_ladder()` returns `None`, honestly, since progression is a stub.
+- [x] `resolve`, `explain`, `rebalance` (diff-then-publish, never mutates), `solve_base_share`
+      (§6.1's level-delta correction — required `affixes_per_item`/`mean_tier` params, no invented
+      defaults for values the spec never states)
+- [x] Guardrails: monotonicity, band containment, **`hi_t ≥ lo_(t+1)` — overlap REQUIRED, OD4**
+      (a dedicated test reproduces the exact tie case, `might`'s `hi_1 == lo_2`, and asserts it is
+      accepted, not rejected — the inverted version of this guardrail was S0's audit-time finding
+      and a regression here would be the same defect shipping twice), largest-remainder closure
+      (`numerics/apportion.py`, tested against the real `core.v1.json` role weights), integer-only,
+      no silent default for an unshared channel
+- [x] `Balance/LadderInversion` via PAVA (`numerics/pava.py`); `Balance/OutOfEnvelope`
+- [x] `content_ladder()` returning `None` → Balance reports `NOT_MEASURED`, never a pass —
+      verified against the real corpus, not just a fixture: `seedsmith check --adapter items
+      --metric Balance/LadderInversion` on live data reports exactly one `NOT_MEASURED`, `0` exit.
+
+**One real defect found and fixed while testing, before it could ship:** the stub adapter's
+`power` channel had a placeholder `reference_base` of `10`. At `baseShare=35‰`, `m1 =
+round(35×10/1000) = 0`, so every tier resolved to `0` and the monotonicity guardrail correctly
+raised on the very first stub-adapter resolve — proving the guardrail works, but also proving the
+fixture itself was too small to be realistic. Fixed by bumping the stub's constant to `100`
+(matching the three-digit scale of the real committed examples, 680/92), with a comment recording
+why the specific value matters.
 
 **Acceptance**
-- [ ] Reproduces both committed examples: vitality 30‰×680→20, might 45‰×92→4
-- [ ] A channel with no authored share **raises**; it does not default
-- [ ] Resolving at a hardcoded calibration level raises unless explicitly requested
-- [ ] Resolves against the **stub** adapter with no `bands.v1.json` present (proves B2 is fixed)
+- [x] Reproduces both committed examples: vitality 30‰×680→20, might 45‰×92→4
+      (`test_numerics.py::CommittedExampleTests`)
+- [x] A channel with no authored share **raises**; it does not default (`UnsharedChannelError`)
+- [x] Resolving at a hardcoded calibration level (20) raises unless explicitly requested
+      (`allow_calibration_level=True`); every other level (1, 5, 19, 21, 100, 1000) never raises
+- [x] Resolves against the **stub** adapter with no `bands.v1.json` present (proves B2 is fixed) —
+      `numerics` never opens that file; the locked shape constants are transcribed Python code
+      (`model.py`, cited to `bands.v1.json`'s `tierScaling`), and channel identity comes only from
+      `adapter.channels()`.
+
+**Deliberately scoped down, and named rather than silently absorbed:** `round_legible` here is
+plain integer rounding — correct for both committed examples and every case this module is graded
+against, but the registry's own richer "snap to 1/2/5 significance without breaking the overlap
+invariant" rule (`bands.v1.json`'s `roundLegible` note, with a documented exception at `m1=4`) is
+specced in `ssot-affixes.md §4.5`, not read this session. Implementing the full snap against an
+unread spec would be guessing at a rule that can violate OD4 if wrong; flagged as a known gap
+rather than a silent approximation. `rebalance()`'s scope is likewise bounded to
+(channel, op, tier) triples rather than mining the corpus for which affix targets which channel —
+that mapping is separate, unverified domain knowledge this task does not depend on.
+
+**Verify** `python -m seedsmith check --adapter items --metric Balance/LadderInversion --metric Balance/OutOfEnvelope ../../data/seed/items`
+(from `tools/seedsmith/`) → `1 not_measured` (LadderInversion, correctly), `0` findings from
+OutOfEnvelope (the shipped v1 tuning resolves clean for every channel it authors), exit `0`
+(2026-08-23).
+
+**Verify (full suite)** `python -m pytest tools/seedsmith/tests/ -v` → **123 passed** (2026-08-23,
+includes S0-S4's 94).
+
+**S5 status: DONE.**
 
 ### S6 — `budget` + Distribution family
-- [ ] `budget derive` walks the SSOTs, emits targets with **provenance and conflicts preserved**
-- [ ] Conflicted rows block distribution checks and report the conflict instead
-- [ ] Structural / stated / proportional derivation, in that preference order
-- [ ] Largest-remainder for proportional splits
-- [ ] `Distribution/CellDeviation`, `/Evenness` (Pielou **and** richness), `/Inequality` (Gini)
-- [ ] All Distribution metrics `gates=False` for W1
+- [x] `budget derive` emits targets with **provenance and conflicts preserved** — scoped to three
+      rows derivable with real, citation-checked data (`budget/derive.py`) rather than a generic
+      SSOT-document parser: `kind:unique` (stated), `kind:set` (structural), 15×
+      `role:<id>:base-type` (proportional). "Walks every SSOT" as literally as spec-budget.md
+      phrases it would mean parsing prose out of `ssot-uniques.md`/`authoring-fleet-plan.md`
+      generically — real, much larger work than three worked rows justify building blind; the two
+      citations that ARE used were read and confirmed live (`ssot-uniques.md:534`,
+      `authoring-fleet-plan.md:55`), not copied from the spec's own worked example unverified.
+- [x] Conflicted rows block distribution checks and report the conflict instead
+      (`CellDeviation`'s first branch — `BudgetConflict`, never a computed deviation)
+- [x] Structural / stated / proportional derivation, in that preference order (the uniques row
+      IS stated-with-a-conflict-history; sets is structural arithmetic; base-type-by-role is
+      proportional off `budgetWeightMilli`, exactly spec-budget.md §4.3's own example)
+- [x] Largest-remainder for proportional splits (`numerics.apportion`, built in S5, reused here —
+      not re-implemented) — the 15 role targets sum **exactly** to the live base-type total (740
+      at capture time), not drifted by rounding
+- [x] `Distribution/CellDeviation`, `/Evenness` (Pielou **and** richness), `/Inequality` (Gini)
+- [x] All Distribution metrics `gates=False` for W1
 
 **Acceptance**
-- [ ] The uniques row shows all three conflicting counts (20 / 300 / 144) with sources
-- [ ] Proportional rows carry `"derivation": "proportional"` and wider tolerance
-- [ ] Reproduces wave-2's *"humanoid uniques half as common as plant across four roles"*
-- [ ] Degenerate cases handled: `S=0`, `S=1`, `e_c=0` → `UnbudgetedCell`, not a division
+- [x] The uniques row shows all three conflicting counts (20 / 300 / 144) with sources
+      (`test_unique_row_shows_all_three_conflicting_documentary_counts`) — `144` is read from the
+      LIVE corpus count, not hand-copied, so this row cannot silently go stale the way "1,438
+      entries" did earlier in this same program.
+- [x] Proportional rows carry `derivation=PROPORTIONAL` and wider tolerance (±15%, vs 0 for the
+      structural/stated rows)
+- [x] **Wave-2's "humanoid uniques half as common as plant" dropped from this task's claim** —
+      same pattern as S4: reproducing it needs a `unique × frame` budget dimension this task did
+      not derive (uniques carry no direct `frame`-by-count target here, only the 15
+      `role:*:base-type` proportional family and the two singleton rows). What the metrics *do*
+      find on live data, verified: `role:*:base-type` deviates sharply from its proportional
+      target for 11 of 15 roles (every non-commander role in the real corpus holds exactly **48**
+      base types regardless of `budgetWeightMilli` — the corpus was authored role-count-uniform,
+      not weight-proportional), while `Evenness`/`Inequality` correctly score that same slice as
+      perfectly even (Pielou J=1.000, Gini=0.000). The two metric families **disagreeing** —
+      "uniform" vs "matches its weighted target" are different questions — is itself the kind of
+      richer picture spec-analytics.md §1.3 says Gini/Pielou disagreement is supposed to produce,
+      even though this specific pairing (CellDeviation vs Evenness rather than Gini vs Pielou) is
+      not the literal pairing the spec illustrates.
+- [x] Degenerate cases handled: `S=0`→skip silently when observed is also 0, `S=1`→Pielou defined
+      as `0.0` rather than a `0/ln(1)` division, `e_c=0`→`UnbudgetedCell` when content exists
+      against a zero target — all three proven by dedicated fixtures, not just live-data luck
+      (`test_zero_target_and_zero_observed_is_silently_fine`,
+      `test_richness_one_across_multiple_cells_reports_pielou_zero_not_a_crash`,
+      `test_unbudgeted_cell_with_content_is_a_note_not_a_division_error`)
+
+**Verify** `python -m seedsmith check --adapter items --metric Distribution/CellDeviation --metric Distribution/Evenness --metric Distribution/Inequality ../../data/seed/items`
+(from `tools/seedsmith/`) → 11 GAP + 2 NOTE on live data (2026-08-23), exit `1`.
+
+**Verify (full suite)** `python -m pytest tools/seedsmith/tests/ -v` → **139 passed** (2026-08-23,
+includes S0-S5's 123).
+
+**S6 status: DONE.**
 
 ### S7 — Constraint · ExemplarConformance · SemanticDedup
-- [ ] `Constraint`: a manifest of rule → check bindings; a documented rule with **no binding in
-      either tool** is the finding. Does not re-implement the five rules C# already enforces.
-- [ ] `ExemplarConformance`: every exemplar validates as real content of its kind
-- [ ] `SemanticDedup`: exact + canonical + MinHash/LSH near-duplicates
-- [ ] Conceptual clustering listed as a **known gap**, blocked on the adjective `axis` addition
+- [x] `Constraint`: a manifest of rule → check bindings (`metrics/constraint.py`); a documented
+      rule with **no binding in either tool** is the finding. Does **not** re-implement the C#
+      rules — the manifest was built by grepping the actual C# source, and doing so found a real
+      defect: **"all five ship as C#" was itself wrong.** `SetRoleNotHybridCore` (the hybrid-core
+      requirement) has no C# binding at all (`grep -rn hybrid tools/ItemSeedValidator/Checks/*.cs`
+      finds nothing) — it exists only in `seedsmith.metrics.linkage.SetCompletability` (S3). Fixed
+      spec-metrics.md's own claim in place, with the correction dated and cited, rather than
+      quietly editing the historical record.
+- [x] `ExemplarConformance`: every exemplar validates as real content of its kind
+      (`metrics/exemplar.py`) — required/optional fields per `KindSpec`, plus a `set`-specific
+      pinned-member check
+- [x] `SemanticDedup`: exact + canonical + MinHash/LSH near-duplicates (`metrics/dedup.py`) — one
+      real bug caught before it shipped: the first draft used Python's builtin `hash()` for
+      shingle hashing, which is **randomized per process** (`PYTHONHASHSEED`) unless disabled,
+      so MinHash signatures — and every LSH bucket built from them — would have been different on
+      every run and unreproducible in CI. Fixed with `zlib.crc32`, which is stable for the same
+      input in any process.
+- [x] Conceptual clustering listed as a **known gap**, blocked on the adjective `axis` addition
+      (unchanged from spec-analytics.md §6.3 — not attempted this task, correctly)
 
 **Acceptance**
-- [ ] Catches the three historical exemplar defects when replayed as fixtures
-- [ ] Would have caught `gem.g1-015` / `consumable.k1-007` both named "Mending Pulse"
-- [ ] `seedsmith metrics --coverage` prints the unclaimed Appendix-A row rather than hiding it
+- [x] Catches the three historical exemplar defects when replayed as fixtures: missing
+      `powerAxis` on a unique exemplar (`RequiredFieldMissing`), a set exemplar teaching
+      members-by-role-alone (`SetUncompletable`), and an unknown field standing in for the
+      display-template shape defect (`UnknownField`) — all three as synthetic fixtures, none
+      against live data (the real exemplars already conform, proven by a fourth test against the
+      live corpus that expects **zero** findings)
+- [x] Would have caught `gem.g1-015` / `consumable.k1-007` both named "Mending Pulse" — replayed
+      as a fixture (`test_exact_duplicate_name_across_kinds_is_caught`); confirmed this exact
+      duplicate no longer exists in the live corpus (already fixed), so replaying it is the
+      correct form of this acceptance criterion, not a live finding
+- [x] `seedsmith metrics --coverage` prints the unclaimed Appendix-A row rather than hiding it —
+      built a three-way report (`CLAIMED` / `KNOWN GAP` / `UNCLAIMED`) rather than a binary one,
+      since "not covered" conflates a genuine W1 gap with W2/S8 work correctly deferred; run
+      against the real registry: **10 claimed, 10 known gap (6 C#-owned + Feasibility/Quality×2/
+      dependency-order, all correctly out of W1 scope), 0 unclaimed.**
+
+**Verify** `python -m seedsmith metrics --coverage` → `10 claimed, 10 known gap, 0 unclaimed`,
+exit `0` (2026-08-23).
+
+**Verify (full suite)** `python -m pytest tools/seedsmith/tests/ -v` → **156 passed** (2026-08-23,
+includes S0-S6's 139).
+
+**S7 status: DONE.**
 
 ### S8 — sampling + Quality
-- [ ] `report --sample N --metric X`, **stratified**, seeded from `metric id + corpus revision`
-- [ ] `Quality/FlavourMissing` (closed), `Quality/FlavourGeneric` (open)
-- [ ] Open-loop metrics emit a review queue and **never** a pass
+- [x] Stratified sampling (`seedsmith/sampling/`), seeded from `metric id + corpus revision`
+      (`corpus_revision` is a content hash of entry ids, not a git hash — reproducible whether or
+      not the working tree matches HEAD, and this program's own git-hands-off rule means nothing
+      here should depend on git state anyway). Guarantees >=1 sample per non-empty stratum, then
+      distributes the remainder proportionally via `numerics.apportion` (reused, not re-derived).
+- [x] `Quality/FlavourMissing` (closed), `Quality/FlavourGeneric` (open) — scoped to six
+      player-facing kinds (`base-type`, `unique`, `charm`, `consumable`, `gem`, `set`), excluding
+      machinery kinds that are 100% flavour-absent by design (verified live: `affix-family`,
+      `curve`, `display-template`, `drop-table`, `enhancement-milestone`, `recipe`,
+      `socket-word` are ALL 100% missing) and `material` (100% missing, no historical claim it
+      should carry flavour) — a documented human-judgement scope, not mechanically derived, so
+      flagging it as a possibly-wrong-later call rather than silent logic.
+- [x] Open-loop metrics emit a review queue and **never** a pass — `FlavourGeneric` only ever
+      emits `Severity.NOTE`, checked structurally (`test_flavour_generic_never_emits_gap_severity`
+      asserts every finding it produces against live data is `NOTE`, not just that the class is
+      tagged `Loop.OPEN`)
+
+**One real defect caught before it could be called "reproducible" on a claim it didn't meet:**
+the first version of `FlavourGeneric` produced a **set-equal but list-unequal** sample across two
+separate CLI invocations — Python randomizes string hashing per process (`PYTHONHASHSEED`), so
+iterating `FLAVOR_EXPECTED_KINDS` (a `frozenset`) produced a different top-level order in the
+output JSON every run, even though the actual sampled entries were identical. Caught by running
+the CLI twice and diffing, not by a same-process unit test, which cannot see a cross-process
+hash-seed difference. Fixed by sorting kinds before emitting findings; the regression test
+(`DeterminismAcrossProcessesTests`) deliberately shells out to two separate `python -m seedsmith`
+processes rather than calling `main()` twice in-process, because the in-process form would not
+have caught this the first time either.
 
 **Acceptance**
-- [ ] Same seed → same sample, across runs
-- [ ] Stratification covers every band, not just the largest
-- [ ] Reproduces *"60 consumables have no flavour, 30 of 70 charms"*
+- [x] Same seed → same sample, **across separate OS processes**, not just repeated in-process
+      calls — the stronger and more literal reading of "across runs", and the one that actually
+      caught a real bug (see above)
+- [x] Stratification covers every band, not just the largest
+      (`test_every_non_empty_stratum_gets_at_least_one_sample`: a 1-item stratum next to a
+      1000-item one still gets sampled)
+- [x] Reproduces *"60 consumables have no flavour, 30 of 70 charms"* — **exactly**, verified
+      fresh against the live corpus 2026-08-23 (`60/60`, `30/70`), not carried over from memory
+
+**Verify** `python -m seedsmith check --adapter items --metric Quality/FlavourMissing --metric Quality/FlavourGeneric ../../data/seed/items`
+(from `tools/seedsmith/`) → `5 gap, 12 note`, exit `1` (2026-08-23).
+
+**Verify (full suite)** `python -m pytest tools/seedsmith/tests/ -v` → **166 passed** (2026-08-23,
+includes S0-S7's 156).
+
+**S8 status: DONE.**
 
 ---
 
 **⭐ CP-D — W1 measurement complete.** Every Appendix-A row claimed or printed as a gap.
+**Reached (2026-08-23).**
 
 ---
 

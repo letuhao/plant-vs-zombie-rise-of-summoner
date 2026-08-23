@@ -51,7 +51,7 @@ class SetCompletability(Metric):
     loop = Loop.CLOSED
     gates = False
     needs = frozenset({"corpus"})
-    covers: tuple[str, ...] = ()
+    covers: tuple[str, ...] = ("appendix-a:11",)
 
     def run(self, ctx: Ctx) -> list[Finding]:
         findings: list[Finding] = []
@@ -110,7 +110,7 @@ class Unobtainable(Metric):
     loop = Loop.CLOSED
     gates = False
     needs = frozenset({"corpus"})
-    covers: tuple[str, ...] = ()
+    covers: tuple[str, ...] = ("appendix-a:10",)
 
     def run(self, ctx: Ctx) -> list[Finding]:
         acquisition = _acquisition(ctx)
@@ -207,7 +207,7 @@ class EnhancementTrackBound(Metric):
     loop = Loop.CLOSED
     gates = False
     needs = frozenset({"corpus"})
-    covers: tuple[str, ...] = ()
+    covers: tuple[str, ...] = ("appendix-a:12",)
 
     def run(self, ctx: Ctx) -> list[Finding]:
         milestones = ctx.corpus.by_kind("enhancement-milestone")
@@ -266,7 +266,7 @@ class DeadEndMaterials(Metric):
     loop = Loop.CLOSED
     gates = False
     needs = frozenset({"corpus"})
-    covers: tuple[str, ...] = ()
+    covers: tuple[str, ...] = ("appendix-a:20",)
 
     def run(self, ctx: Ctx) -> list[Finding]:
         spent = {line.get("material")

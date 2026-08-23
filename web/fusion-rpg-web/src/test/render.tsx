@@ -1,7 +1,9 @@
+import { I18nProvider } from "@lingui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, type RenderOptions } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import type { ReactElement, ReactNode } from "react";
+import { i18n } from "@/i18n";
 import { useGlobalKeys } from "@/shell/useGlobalKeys";
 
 export function createTestQueryClient() {
@@ -33,12 +35,14 @@ export function renderWithProviders(
 
   function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[route]}>
-          {withGlobalKeys ? <GlobalKeysMount /> : null}
-          {children}
-        </MemoryRouter>
-      </QueryClientProvider>
+      <I18nProvider i18n={i18n}>
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={[route]}>
+            {withGlobalKeys ? <GlobalKeysMount /> : null}
+            {children}
+          </MemoryRouter>
+        </QueryClientProvider>
+      </I18nProvider>
     );
   }
 

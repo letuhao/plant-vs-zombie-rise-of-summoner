@@ -78,7 +78,11 @@ public static class ClaimResolver
                         {
                             OwnerFactionId = command.CommanderId,
                             Phase = SectorPhase.Held,
-                            LastSeenTurn = turn
+                            LastSeenTurn = turn,
+                            // Warding vs. capture (spec-loam-texture.md): the ward exempts FadePolicy
+                            // only, never combat — capture ends the binding outright, no transfer to
+                            // the new owner and no refund to the old one.
+                            WardenBindingId = null
                         }
                         : s)
                     .ToList()

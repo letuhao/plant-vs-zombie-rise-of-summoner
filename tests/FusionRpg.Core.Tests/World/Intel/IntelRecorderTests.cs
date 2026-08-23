@@ -203,4 +203,65 @@ public class IntelRecorderTests
         Assert.Equal(IntelState.Rumored, IntelLadder.StateOf(snapshot, 16, seenThisTurn: false));
         Assert.Equal(6, IntelLadder.AgeOf(snapshot, 16));
     }
+
+    // ---- L43: prospecting -----------------------------------------------------------------------
+
+    static WorldSlot Rootbed() => new() { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.RootbedSlotTypeId };
+
+    /// <summary>A five-hop chain, "c0".."c5", with a rootbed placeable at any one hop — everything
+    /// else barren, so `Habitability.For` only ever fires where the fixture puts it.</summary>
+    static WorldState Chain(string? rootbedAt = null, string dowserStance = Prospecting.DowserStance) => new()
+    {
+        Factions = new[] { new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" } },
+        Sectors = Enumerable.Range(0, 6)
+            .Select(i => new WorldSector
+            {
+                SectorId = "c" + i, TypeId = "stable",
+                Slots = string.Equals("c" + i, rootbedAt, StringComparison.Ordinal)
+                    ? new[] { Rootbed() } : Array.Empty<WorldSlot>()
+            })
+            .ToArray(),
+        Lanes = Enumerable.Range(0, 5)
+            .Select(i => new WorldLane { LaneId = "l" + i, FromSectorId = "c" + i, ToSectorId = "c" + (i + 1) })
+            .ToArray(),
+        Entities = new[]
+        {
+            new WorldEntity
+            {
+                EntityId = "e-dowser", Kind = WorldEntityKind.Legion, OwnerFactionId = "dave", AtSectorId = "c0",
+                Stance = dowserStance, Members = new[] { new WorldEntityMember { SpeciesId = "grunt" } }
+            }
+        }
+    };
+
+    [Fact]
+    public void A_dowser_reveals_a_loam_source_sector_beyond_ordinary_scouting_range()
+    {
+        // c4 is four hops from the dowser at c0 — past Visibility.ScoutSightLanes (2), inside
+        // Prospecting.DowserSightLanes (4).
+        var revealed = Prospecting.Reveal(Chain(rootbedAt: "c4"), "dave");
+        Assert.Contains("c4", revealed);
+    }
+
+    [Fact]
+    public void A_dowser_does_not_reach_past_its_own_range()
+    {
+        // c5 is five hops out — one past DowserSightLanes.
+        var revealed = Prospecting.Reveal(Chain(rootbedAt: "c5"), "dave");
+        Assert.DoesNotContain("c5", revealed);
+    }
+
+    [Fact]
+    public void Prospecting_reveals_nothing_for_ground_with_no_loam_source()
+    {
+        var revealed = Prospecting.Reveal(Chain(rootbedAt: null), "dave");
+        Assert.Empty(revealed);
+    }
+
+    [Fact]
+    public void An_ordinary_stance_reveals_nothing_a_dowser_would()
+    {
+        var revealed = Prospecting.Reveal(Chain(rootbedAt: "c4", dowserStance: "march"), "dave");
+        Assert.Empty(revealed);
+    }
 }

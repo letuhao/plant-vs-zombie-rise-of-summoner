@@ -50,8 +50,10 @@ function scanLines(
  */
 const F10_PATTERN = /F10/;
 
+const F10_ALLOWED_FILES = new Set(["shell/keymap.ts", "shell/keymapGuard.ts"]);
+
 export function scanForF10Bindings(srcDir: string): GuardViolation[] {
-  return scanLines(srcDir, (relPath) => relPath === "shell/keymap.ts", [F10_PATTERN]);
+  return scanLines(srcDir, (relPath) => F10_ALLOWED_FILES.has(relPath), [F10_PATTERN]);
 }
 
 /**

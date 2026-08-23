@@ -16,7 +16,8 @@ public sealed record ContractRow(
     string? ReleasedUtc,
     string GainDay,
     int GainToday,
-    long Revision)
+    long Revision,
+    bool Warden = false)
 {
     public LoyaltyRank Rank => ContractPolicy.RankFor(Loyalty);
     public bool Deployable => Bound && ContractPolicy.IsDeployable(Loyalty);
@@ -272,6 +273,59 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// Binds a specimen as a permanent warden (spec-loam-texture.md): the same capacity check and
+    /// upkeep fee as <see cref="BindContract"/>, but the resulting bind is flagged non-releasable —
+    /// <see cref="ReleaseContract"/> refuses it unconditionally, for the life of the world. Refuses
+    /// an instance already bound as an ordinary (non-warden) contract, the same way binding an
+    /// already-bound demon does today.
+    /// </summary>
+    public (bool Ok, string Reason, ContractRow? Contract) BindAsWarden(
+        long playerId, string instanceId, DateTimeOffset? utcNow = null)
+    {
+        var id = (instanceId ?? "").Trim();
+        if (id.Length == 0) return (false, "specimen.missing", null);
+        var now = utcNow ?? DateTimeOffset.UtcNow;
+
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            if (GetPlayerUnlocked(db, playerId) is null) return (false, "player.unknown", null);
+            using var tx = db.BeginTransaction();
+            SettleContractsUnlocked(db, playerId, now);
+
+            var (specimenOk, rarity) = ReadContractableSpecimenUnlocked(db, playerId, id);
+            if (!specimenOk) return (false, "specimen.missing", null);
+
+            var existing = ReadContractUnlocked(db, id);
+            if (existing is { Bound: true, Warden: true })
+            {
+                tx.Commit();
+                return (true, "replay", existing);
+            }
+            if (existing is { Bound: true, Warden: false })
+                return (false, "contract.already-bound", null);
+
+            var state = ReadContractStateUnlocked(db, playerId);
+            if (CountBoundContractsUnlocked(db, playerId) >= ContractPolicy.Capacity(state?.PurchasedSlots ?? 0))
+                return (false, "capacity.full", null);
+
+            var stamp = now.UtcDateTime.ToString("o");
+            var day = now.UtcDateTime.ToString("yyyy-MM-dd");
+            var personality = existing?.Personality ?? ContractPolicy.PersonalityFor(id);
+            var fee = ContractPolicy.UpkeepPerDay(rarity, personality);
+            if (ReadSoulBalanceUnlocked(db, playerId).Balance < fee)
+                return (false, "souls.insufficient", null);
+            // A false return means this demon's day is already paid (a same-day re-sign). Not an error.
+            AppendSoulLedgerUnlocked(db, playerId, 0, -fee, SoulEarnPolicy.Reasons.Upkeep,
+                "contract", id, $"bind:{id}:{day}", stamp);
+
+            BindContractRowUnlocked(db, playerId, id, stamp, warden: true);
+            tx.Commit();
+            return (true, "", ReadContractUnlocked(db, id));
+        }
+    }
+
     /// <summary>Frees the slot. Free of charge, and the demon keeps every point of loyalty it earned —
     /// benched demons neither pay nor decay.</summary>
     public (bool Ok, string Reason, ContractRow? Contract) ReleaseContract(
@@ -294,6 +348,9 @@ public sealed partial class RpgStore
                 tx.Commit();
                 return (true, "replay", row);
             }
+            // Permanent, for the life of the world (spec-loam-texture.md) — unconditional, checked
+            // before every other release blocker below, none of which can override it.
+            if (row.Warden) return (false, "contract.warden-permanent", null);
 
             var actor = ReadUniqueActorUnlocked(db, id);
             if (actor != null && !string.Equals(actor.Phase, UniqueActorPhases.Roster, StringComparison.Ordinal)
@@ -557,7 +614,7 @@ public sealed partial class RpgStore
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             SELECT instance_id, player_id, bound, loyalty, personality, bound_utc, released_utc,
-                   gain_day, gain_today, revision
+                   gain_day, gain_today, revision, warden
             FROM rpg_demon_contracts WHERE instance_id=$i;
             """;
         cmd.Parameters.AddWithValue("$i", instanceId);
@@ -570,7 +627,7 @@ public sealed partial class RpgStore
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             SELECT instance_id, player_id, bound, loyalty, personality, bound_utc, released_utc,
-                   gain_day, gain_today, revision
+                   gain_day, gain_today, revision, warden
             FROM rpg_demon_contracts WHERE player_id=$p;
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
@@ -586,7 +643,7 @@ public sealed partial class RpgStore
         return new ContractRow(
             r.GetString(0), r.GetInt64(1), r.GetInt64(2) != 0, (int)r.GetInt64(3), personality,
             r.IsDBNull(5) ? null : r.GetString(5), r.IsDBNull(6) ? null : r.GetString(6),
-            r.GetString(7), (int)r.GetInt64(8), r.GetInt64(9));
+            r.GetString(7), (int)r.GetInt64(8), r.GetInt64(9), r.GetInt64(10) != 0);
     }
 
     internal int CountBoundContractsUnlocked(SqliteConnection db, long playerId)
@@ -633,20 +690,23 @@ public sealed partial class RpgStore
     }
 
     /// <summary>Binds (or re-binds) a specimen. Loyalty never drops on binding — a demon released
-    /// and re-signed keeps what it earned.</summary>
-    internal void BindContractRowUnlocked(SqliteConnection db, long playerId, string instanceId, string now)
+    /// and re-signed keeps what it earned. <paramref name="warden"/> flags a permanent bind
+    /// (spec-loam-texture.md); once set it is never cleared by an ordinary re-sign.</summary>
+    internal void BindContractRowUnlocked(
+        SqliteConnection db, long playerId, string instanceId, string now, bool warden = false)
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             INSERT INTO rpg_demon_contracts(
               instance_id, player_id, bound, loyalty, personality, bound_utc, released_utc,
-              gain_day, gain_today, revision)
-            VALUES($i, $p, 1, $loyalty, $pers, $now, NULL, '', 0, 1)
+              gain_day, gain_today, revision, warden)
+            VALUES($i, $p, 1, $loyalty, $pers, $now, NULL, '', 0, 1, $warden)
             ON CONFLICT(instance_id) DO UPDATE SET
               bound = 1,
               loyalty = MAX(rpg_demon_contracts.loyalty, $loyalty),
               bound_utc = $now,
               released_utc = NULL,
+              warden = warden OR $warden,
               revision = revision + 1;
             """;
         cmd.Parameters.AddWithValue("$i", instanceId);
@@ -654,6 +714,7 @@ public sealed partial class RpgStore
         cmd.Parameters.AddWithValue("$loyalty", ContractPolicy.BindLoyalty);
         cmd.Parameters.AddWithValue("$pers", ContractPolicy.PersonalityFor(instanceId).ToId());
         cmd.Parameters.AddWithValue("$now", now);
+        cmd.Parameters.AddWithValue("$warden", warden ? 1 : 0);
         cmd.ExecuteNonQuery();
     }
 
@@ -662,7 +723,7 @@ public sealed partial class RpgStore
     internal ContractRow ContractViewUnlocked(SqliteConnection db, long playerId, string instanceId) =>
         ReadContractUnlocked(db, instanceId)
         ?? new ContractRow(instanceId, playerId, false, ContractPolicy.BindLoyalty,
-            ContractPolicy.PersonalityFor(instanceId), null, null, "", 0, 0);
+            ContractPolicy.PersonalityFor(instanceId), null, null, "", 0, 0, false);
 
     sealed record MigrationCandidate(string InstanceId, DemonRarity Rarity, int Star, int Level, string CreatedUtc);
 

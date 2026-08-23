@@ -96,7 +96,7 @@ public static class TurnEngine
         next = Sieges(next, revealed, report, turn, battles, seed);
         next = Production(next, report);
         next = Growth(next, report);
-        next = Pressure(next, revealed, report);
+        next = Pressure(next, revealed, report, turn, seed);
         next = Events(next, report, turn, seed);
 
         // Snapshot before Intel (RulesetVersion 3): a claim settles in Snapshot, so recording belief
@@ -207,12 +207,13 @@ public static class TurnEngine
     /// turn's supply pass. `LegionSupply.Resolve` runs last: sector upkeep first, legion top-up
     /// and burn second, from whatever the same pool has left.
     /// </summary>
-    static WorldState Pressure(WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report)
+    static WorldState Pressure(
+        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report, int turn, ulong seed)
     {
         report.BeginPhase(Phases.Pressure);
         var afterSustain = SustainResolver.Run(world, commands, report, Phases.Pressure);
         var afterSupply = SupplyGraph.Run(afterSustain, report, Phases.Pressure);
-        var afterPressure = LoamPhases.Pressure(afterSupply, report, Phases.Pressure);
+        var afterPressure = LoamPhases.Pressure(afterSupply, report, Phases.Pressure, turn, seed);
         return LegionSupply.Resolve(afterPressure, report, Phases.Pressure);
     }
 

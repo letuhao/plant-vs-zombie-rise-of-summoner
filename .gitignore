@@ -109,3 +109,7 @@ src/FusionRpg.Server/wwwroot/
 src/FusionRpg.Server/wwwroot/index.html
 .playwright-mcp/
 node_modules/
+.cursor/
+.pytest_cache/
+.remember/
+artifacts/

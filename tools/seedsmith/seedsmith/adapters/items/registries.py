@@ -40,7 +40,18 @@ def load_vocabularies() -> dict[str, frozenset[str]]:
     elements = frozenset(e["id"] for e in core["elements"]["concrete"]) | {core["elements"]["omni"]["id"]}
     rarities = frozenset(r["id"] for r in core["rarity"]["ladder"])
     tag_ids = frozenset(t["id"] for t in tags["tags"])
-    class_ladders = frozenset(classes["classLadders"].keys())
+    # NOT `classLadders.keys()` (armour/weapon/offhand/jewel/standard) — those are LADDER names,
+    # never a literal `class` field value. A base-type's real `class` value is a per-frame rung
+    # id nested two levels down (classLadders[ladder][frame][i].id, e.g. "cloth", "leather") —
+    # found only by loading a real entry and checking (base-types/footing/humanoid/a.json has
+    # class="cloth"), after the ladder-name version produced a 100%-missing pairwise finding for
+    # every (dimension, class) pair — a confidently wrong metric, not a real gap.
+    class_values = frozenset(
+        rung["id"]
+        for ladder in classes["classLadders"].values()
+        for frame_key in ("humanoid", "plant")
+        for rung in ladder.get(frame_key, [])
+    )
 
     snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
     partitions = frozenset(snapshot["partitionKind"].keys())
@@ -54,7 +65,7 @@ def load_vocabularies() -> dict[str, frozenset[str]]:
         "element": elements,
         "rarity": rarities,
         "tags": tag_ids,
-        "class": class_ladders,
+        "class": class_values,
         "partitions": partitions,
     }
 

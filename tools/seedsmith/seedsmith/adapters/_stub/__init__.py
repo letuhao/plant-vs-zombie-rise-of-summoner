@@ -28,8 +28,11 @@ def _legal(dim_a: str, value_a: str, dim_b: str, value_b: str) -> bool:
     return True
 
 
-def _power_reference_base(_point: object) -> int:
-    return 10
+def _power_reference_base(_level: int) -> int:
+    # 100, not a token value like 1 or 10: numerics.resolve()'s m1 = round(share x base / 1000)
+    # needs a base large enough that a realistic share (tens of permille) doesn't round to 0,
+    # exactly the failure mode this constant was originally too small to avoid.
+    return 100
 
 
 POWER = Channel(id="power", unit=Unit.GAME_UNITS, reference_base=_power_reference_base,

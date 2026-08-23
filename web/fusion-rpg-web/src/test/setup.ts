@@ -2,6 +2,13 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
 import { clearLogEvents } from "@/lib/bus/log-store";
+// Activates the (module-global) Lingui i18n singleton once for every test
+// run, mirroring the real boot order (main.tsx -> providers.tsx -> "@/i18n").
+// The `t` macro compiles to a call against this same singleton regardless of
+// whether a test wraps its render in <I18nProvider> — without this import
+// somewhere in the module graph, any component using `t`/`Trans` throws
+// "Attempted to call a translation function without setting a locale."
+import "@/i18n";
 
 // Recharts ResponsiveContainer needs layout APIs in jsdom.
 class ResizeObserverStub {
