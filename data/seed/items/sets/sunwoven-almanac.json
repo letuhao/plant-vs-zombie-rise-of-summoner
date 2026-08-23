@@ -1,0 +1,249 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "sets-1c",
+    "partition": "sets/sunwoven-almanac",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-sets.md#4.3"
+  },
+  "entries": [
+    {
+      "id": "set.sunwoven-almanac-001",
+      "nameKey": "set.ancestral-bine",
+      "name": "Ancestral Bine",
+      "themeKey": "theme.sunwoven-almanac",
+      "members": [
+        { "role": "core-guard" },
+        { "role": "sense" },
+        { "role": "girdle" },
+        { "role": "jewel-major" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.cleansing",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" },
+            { "family": "atom.mending", "powerBand": "low" }
+          ]
+        }
+      ],
+      "iconKey": "icon.set.ancestral-bine",
+      "flavorKey": "flavor.set.ancestral-bine",
+      "flavor": "Trained around the same stake for a hundred seasons, the bine no longer needs the stake — it remembers the shape on its own and curls back into it every spring."
+    },
+    {
+      "id": "set.sunwoven-almanac-002",
+      "nameKey": "set.indexed-lamina",
+      "name": "Indexed Lamina",
+      "themeKey": "theme.sunwoven-almanac",
+      "members": [
+        { "role": "manipulator" },
+        { "role": "jewel-minor-a" },
+        { "role": "infusion" },
+        { "role": "sense" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.retribution",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "medium" },
+            { "family": "atom.warding", "powerBand": "low" }
+          ]
+        }
+      ],
+      "iconKey": "icon.set.indexed-lamina",
+      "flavorKey": "flavor.set.indexed-lamina",
+      "flavor": "Every vein on this leaf was traced and numbered before it ever unfurled, so a strike lands exactly where the diagram already said a strike would land."
+    },
+    {
+      "id": "set.sunwoven-almanac-003",
+      "nameKey": "set.lattice-of-the-page",
+      "name": "Lattice of the Page",
+      "themeKey": "theme.sunwoven-almanac",
+      "members": [
+        { "role": "mantle" },
+        { "role": "footing" },
+        { "role": "girdle" },
+        { "role": "retinue" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.warded",
+            "powerBand": "low",
+            "params": { "element": "light" }
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.resilience", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" },
+            { "family": "atom.vitality", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": ["signature"],
+      "iconKey": "icon.set.lattice-of-the-page",
+      "flavorKey": "flavor.set.lattice-of-the-page",
+      "flavor": "Grown to hold up pages too heavy to stand on their own, the lattice does not care what is written on them — only that the binding never sags."
+    },
+    {
+      "id": "set.sunwoven-almanac-004",
+      "nameKey": "set.root-of-the-solstice",
+      "name": "Root of the Solstice",
+      "themeKey": "theme.sunwoven-almanac",
+      "members": [
+        { "role": "footing" },
+        { "role": "core-guard" },
+        { "role": "jewel-major" },
+        { "role": "manipulator" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.regeneration",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.mending", "powerBand": "medium" },
+            { "family": "atom.fortitude", "powerBand": "low" }
+          ]
+        }
+      ],
+      "iconKey": "icon.set.root-of-the-solstice",
+      "flavorKey": "flavor.set.root-of-the-solstice",
+      "flavor": "It only pushes deeper on the one day the almanac names, and every other day it is content to hold exactly the ground it already has."
+    },
+    {
+      "id": "set.sunwoven-almanac-005",
+      "nameKey": "set.firstedition",
+      "name": "Firstedition",
+      "themeKey": "theme.sunwoven-almanac",
+      "members": [
+        { "role": "armament-secondary" },
+        { "role": "sense" },
+        { "role": "jewel-minor-a" },
+        { "role": "infusion" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.midas",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "medium" },
+            { "family": "atom.warding", "powerBand": "low" }
+          ]
+        }
+      ],
+      "iconKey": "icon.set.firstedition",
+      "flavorKey": "flavor.set.firstedition",
+      "flavor": "Every printing since has fixed a typo the first one never had, and every printing since has also lost the one thing the first one got right by accident."
+    },
+    {
+      "id": "set.sunwoven-almanac-006",
+      "nameKey": "set.copyhand",
+      "name": "Copyhand",
+      "themeKey": "theme.sunwoven-almanac",
+      "members": [
+        { "role": "mantle" },
+        { "role": "girdle" },
+        { "role": "retinue" },
+        { "role": "jewel-major" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.gardener",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.resilience", "powerBand": "medium" },
+            { "family": "atom.mending", "powerBand": "low" }
+          ]
+        }
+      ],
+      "iconKey": "icon.set.copyhand",
+      "flavorKey": "flavor.set.copyhand",
+      "flavor": "It has never once composed a line of its own, only reproduced the last hand's exactly — and a garden grown from a faithful copy still grows."
+    }
+  ]
+}

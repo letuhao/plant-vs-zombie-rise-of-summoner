@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "kind": "drop-table",
+  "_meta": {
+    "partition": "drop-tables/3",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "drop-tables-1c",
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/entry-shapes.md#9",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "droptable.d3-001",
+      "nameKey": "droptable.bramble-windfall",
+      "name": "Bramble Windfall",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-001-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "girdle", "frame": "plant", "dropBand": "frequent", "rarityFloor": "grafted" },
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-002",
+      "nameKey": "droptable.withered-tribute",
+      "name": "Withered Tribute",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-002-reward",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.dark", "dropBand": "staple", "qtyCurve": "curve.019" },
+            { "entryKind": "insert", "ref": "gem.g1-016", "dropBand": "seldom" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-003",
+      "nameKey": "droptable.grafted-endowment",
+      "name": "Grafted Endowment",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-003-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "core-guard", "frame": "plant", "dropBand": "occasional", "rarityFloor": "cultivated" },
+            { "entryKind": "material", "ref": "substrate.plant.sound", "dropBand": "frequent", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-004",
+      "nameKey": "droptable.fallow-allotment",
+      "name": "Fallow Allotment",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-004-reward",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" },
+            { "entryKind": "insert", "ref": "gem.g3-005", "dropBand": "occasional" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-005",
+      "nameKey": "droptable.budding-largesse",
+      "name": "Budding Largesse",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-005-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "head-guard", "frame": "plant", "dropBand": "occasional", "rarityFloor": "grafted" },
+            { "entryKind": "nothing", "dropBand": "seldom" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-006",
+      "nameKey": "droptable.compost-dividend",
+      "name": "Compost Dividend",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-006-reward",
+          "entries": [
+            { "entryKind": "material", "ref": "substrate.plant.crude", "dropBand": "staple", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "catalyst.flux", "dropBand": "seldom", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-007",
+      "nameKey": "droptable.thorned-grant",
+      "name": "Thorned Grant",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-007-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "manipulator", "frame": "hybrid", "dropBand": "occasional", "rarityFloor": "fused" },
+            { "entryKind": "currency", "ref": "souls", "dropBand": "frequent" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-008",
+      "nameKey": "droptable.mycelial-bounty",
+      "name": "Mycelial Bounty",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-008-reward",
+          "entries": [
+            { "entryKind": "insert", "ref": "gem.g1-014", "dropBand": "occasional" },
+            { "entryKind": "material", "ref": "catalyst.temper", "dropBand": "seldom", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-009",
+      "nameKey": "droptable.sunken-stipend",
+      "name": "Sunken Stipend",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-009-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "footing", "frame": "humanoid", "dropBand": "occasional", "rarityFloor": "grafted" },
+            { "entryKind": "material", "ref": "shard.common", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d3-010",
+      "nameKey": "droptable.rootbound-cache",
+      "name": "Rootbound Cache",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d3-010-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "jewel-major", "frame": "plant", "dropBand": "seldom", "rarityFloor": "fused" },
+            { "entryKind": "insert", "ref": "gem.g3-012", "dropBand": "exceptional" }
+          ]
+        }
+      ],
+      "tags": []
+    }
+  ]
+}

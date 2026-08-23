@@ -34,6 +34,13 @@ public sealed class RegistrySet
     public IReadOnlyList<string> RarityIds { get; private set; } = Array.Empty<string>();
     public IReadOnlyList<string> CategoryIds { get; private set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// The five power-vector categories. Distinct from `tags.v1.json`'s three-value
+    /// `combat-posture` axis, which overlaps it on the word "utility" and is a different thing —
+    /// a confusion that has cost this build several rejected files.
+    /// </summary>
+    public IReadOnlyList<string> PowerCategoryIds { get; private set; } = Array.Empty<string>();
+
     // --- bands.v1.json ------------------------------------------------------------------
     /// <summary>band-field name (powerBand / costBand / dropBand / variance) to its closed enum.</summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> BandEnums { get; private set; }
@@ -250,6 +257,8 @@ public sealed class RegistrySet
         RarityIds = ((Core["rarity"] as JsonObject)?["ladder"] as JsonArray ?? new JsonArray())
             .OfType<JsonObject>().Select(r => r["id"]?.GetValue<string>()).OfType<string>().ToList();
         CategoryIds = ((Core["categories"] as JsonObject)?["list"] as JsonArray ?? new JsonArray())
+            .OfType<JsonObject>().Select(r => r["id"]?.GetValue<string>()).OfType<string>().ToList();
+        PowerCategoryIds = ((Core["powerCategories"] as JsonObject)?["list"] as JsonArray ?? new JsonArray())
             .OfType<JsonObject>().Select(r => r["id"]?.GetValue<string>()).OfType<string>().ToList();
     }
 

@@ -1,3 +1,4 @@
+using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Turn;
 
 namespace FusionRpg.Core.World.Movement;
@@ -84,6 +85,13 @@ public static class ClaimResolver
             };
 
             report.Add(phase, TurnReportKinds.Event, command.CommandId, "claim.held:" + sector.SectorId, sector.SectorId);
+
+            // spec-loam-turn.md's settlement rule needs no enforcement — the fade *is* the
+            // enforcement (ideal §8.10: barren ground can be taken but never kept). Refusing this
+            // claim would delete a real play (seizing a corridor to sever an enemy's chain), so it
+            // is allowed and simply warned about, naming the ground as temporary.
+            if (!Habitability.For(sector))
+                report.Add(phase, TurnReportKinds.Event, command.CommandId, "claim.barren:" + sector.SectorId, sector.SectorId);
         }
 
         return next;

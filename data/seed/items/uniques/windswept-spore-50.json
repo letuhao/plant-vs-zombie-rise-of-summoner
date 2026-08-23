@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/windswept-spore/50",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7"
+  },
+  "entries": [
+    {
+      "id": "unique.windswept-spore-50-001",
+      "nameKey": "unique.windborne-bellows",
+      "name": "Windborne Bellows",
+      "frame": "plant",
+      "baseType": "item.plant-muzzle-a-009",
+      "rarity": "fused",
+      "theme": "windswept-spore",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.regeneration",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.mending",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "It heals its bearer instead of hitting harder. Against anything that dies before the second breath, that trade never pays back."
+      },
+      "tags": [
+        "medium",
+        "organic",
+        "sturdy",
+        "defensive",
+        "signature"
+      ],
+      "iconKey": "icon.unique.windborne-bellows",
+      "flavorKey": "flavor.unique.windborne-bellows",
+      "flavor": "It breathes out as gladly as it fires — the same held breath either way, let go.",
+      "notes": "Name: Windborne (themeAdjectivePools['windswept-spore']) + Bellows (nounPools['armament-primary.plant']). baseType is a nozzle-class muzzle base, wave 1a. Puts a sustain rider on the offense-slot role table assigns it (survivability), which is the class's whole point: fixedAtoms sit in the fixed core, not the drawn pool, so role legality never gates them (unique.exemplar.json's established precedent)."
+    },
+    {
+      "id": "unique.windswept-spore-50-002",
+      "nameKey": "unique.culm-of-dispersal",
+      "name": "Culm of Dispersal",
+      "frame": "plant",
+      "baseType": "item.plant-stem-a-004",
+      "rarity": "chimeric",
+      "theme": "windswept-spore",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.entangling",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sporing",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.stalwart",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "front-row",
+        "note": "The tangle only reaches what is already close. Anything held at range never feels this stem move at all."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.culm-of-dispersal",
+      "flavorKey": "flavor.unique.culm-of-dispersal",
+      "flavor": "Every joint of this stem already knows where it will break, and lets it happen first.",
+      "notes": "Name: Culm (nounPools['core-guard.plant']) of Dispersal (conceptPools['windswept-spore']). atom.entangling/atom.sporing belong to the afflict family group, whose roles list does not include core-guard — legal only because a unique's fixed core is not drawn from the role pool (same exemption the exemplar documents)."
+    },
+    {
+      "id": "unique.windswept-spore-50-003",
+      "nameKey": "unique.sheath-of-breeze",
+      "name": "Sheath of Breeze",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-a-006",
+      "rarity": "fused",
+      "theme": "windswept-spore",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.shield-capacity",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        },
+        {
+          "family": "atom.shield-regen",
+          "powerBand": "low",
+          "params": {
+            "element": "air"
+          }
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.stoicism",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "slight",
+        "family": "atom.warding",
+        "note": "It never carries a flat guard the way a cultivated ward-array piece would; everything it offers renews instead of blocking outright."
+      },
+      "tags": [
+        "medium",
+        "organic",
+        "sturdy",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.sheath-of-breeze",
+      "flavorKey": "flavor.unique.sheath-of-breeze",
+      "flavor": "A husk with more air in it than casing. What it keeps out never mattered as much as what it lets through.",
+      "notes": "Name: Sheath (nounPools['ward-array.plant']) of Breeze (conceptPools['windswept-spore']). Shield family group ('ward-array','armament-secondary','jewel-major') is role-legal for ward-array, so both fixed atoms sit inside the generator's own rules — the only rule bent here is the drawback's reference to a family (atom.warding) the item deliberately omits."
+    },
+    {
+      "id": "unique.windswept-spore-50-004",
+      "nameKey": "unique.driftgum",
+      "name": "Driftgum",
+      "frame": "plant",
+      "baseType": "item.plant-thorn-a-004",
+      "rarity": "chimeric",
+      "theme": "windswept-spore",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-graze",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.midas",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "It only pays out while it is landing hits or watching something die; left idle on the lawn it earns nothing at all."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.driftgum",
+      "flavorKey": "flavor.unique.driftgum",
+      "flavor": "Sap that never sets. It travels light because it never intended to stay for the harvest.",
+      "notes": "Name is the 'fusion' pattern: Drift (noun form of themeAdjectivePools['windswept-spore'] entry 'drifting') + Gum (nounPools['armament-secondary.plant']), one word, two known pool words. econ-graze/sunbloom/midas are all the resource.economy family group, role-legal for armament-secondary via the shared jewel/girdle economy list's fixed-core exemption."
+    },
+    {
+      "id": "unique.windswept-spore-50-005",
+      "nameKey": "unique.pollen-of-scattering",
+      "name": "Pollen of Scattering",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-a-001",
+      "rarity": "fused",
+      "theme": "windswept-spore",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.searing-strike",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.cruelty",
+        "variance": "wide"
+      },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "target-shares-element",
+        "note": "The rider only catches when the target is already carrying an air-aligned charge of its own; against anything else it is a plain, unremarkable hit."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "offensive",
+        "signature"
+      ],
+      "iconKey": "icon.unique.pollen-of-scattering",
+      "flavorKey": "flavor.unique.pollen-of-scattering",
+      "flavor": "One cloud, thrown at a wind already leaving — sooner or later everything downwind burns the same.",
+      "notes": "Name: Pollen (nounPools['jewel-major.plant']) of Scattering (conceptPools['windswept-spore']). searing-strike/might/cruelty are all jewel-major-legal on-hit/offense families, drawn straight from the generator's own matrix — no rule bent here beyond the fixed-core count."
+    },
+    {
+      "id": "unique.windswept-spore-50-006",
+      "nameKey": "unique.buoyant-frond",
+      "name": "Buoyant Frond",
+      "frame": "plant",
+      "baseType": "item.plant-leaves-b-005",
+      "rarity": "chimeric",
+      "theme": "windswept-spore",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.lifesteal",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.hit-mend",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Every drop of the sustain it grants comes from a hit already landed or already taken; it has nothing to offer a manipulator that never touches the fight."
+      },
+      "tags": [
+        "medium-light",
+        "organic",
+        "sturdy",
+        "defensive",
+        "signature"
+      ],
+      "iconKey": "icon.unique.buoyant-frond",
+      "flavorKey": "flavor.unique.buoyant-frond",
+      "flavor": "It survives the way spores do: not by holding on, but by never landing anywhere that could kill it.",
+      "notes": "Name: Buoyant (themeAdjectivePools['windswept-spore']) + Frond (nounPools['manipulator.plant']). lifesteal/hit-mend are the on-hit family group, role-legal for manipulator; atom.vitality's own roles list omits manipulator, so the variance slot alone leans on the fixed-core exemption."
+    },
+    {
+      "id": "unique.windswept-spore-50-007",
+      "nameKey": "unique.veering-canopy",
+      "name": "Veering Canopy",
+      "frame": "plant",
+      "baseType": "item.plant-canopy-b-009",
+      "rarity": "fused",
+      "theme": "windswept-spore",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.mesmerizing",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.withering",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.ward-brace",
+        "variance": "wide"
+      },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "moderate",
+        "family": "atom.bulwark",
+        "note": "It never fattens its bearer's own health pool the way a plain cultivated mantle would; every point of budget went to unsettling the other side instead."
+      },
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "sturdy",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.veering-canopy",
+      "flavorKey": "flavor.unique.veering-canopy",
+      "flavor": "It shades nothing for long. A canopy that will not commit to a patch of ground is a hard thing to plan a siege under.",
+      "notes": "Name: Veering (themeAdjectivePools['windswept-spore']) + Canopy (nounPools['mantle.plant']). mesmerizing/withering are the afflict family group, whose roles list does not include mantle — legal only through the unique fixed-core exemption, same as entry 002."
+    },
+    {
+      "id": "unique.windswept-spore-50-008",
+      "nameKey": "unique.untethered-thistledown",
+      "name": "Untethered Thistledown",
+      "frame": "plant",
+      "baseType": "item.plant-crown-b-006",
+      "rarity": "chimeric",
+      "theme": "windswept-spore",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.evasion",
+          "powerBand": "medium",
+          "params": {
+            "element": "air"
+          }
+        },
+        {
+          "family": "atom.cleansing",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.padding",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "It only ever helps its bearer avoid or shed a hit; it adds nothing at all to a hit already landed."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "fragile",
+        "utility",
+        "signature"
+      ],
+      "iconKey": "icon.unique.untethered-thistledown",
+      "flavorKey": "flavor.unique.untethered-thistledown",
+      "flavor": "No bud on this crown ever waited to be picked. It was already gone before the bloom finished opening.",
+      "notes": "Name: Untethered (themeAdjectivePools['windswept-spore']) + Thistledown, an atomic Base noun from uniqueSetSeedPools['windswept-spore'] (whole-token resolution, not a fusion decomposition). atom.evasion and atom.cleansing are both head-guard-legal, drawn straight from the generator's own matrix."
+    }
+  ]
+}

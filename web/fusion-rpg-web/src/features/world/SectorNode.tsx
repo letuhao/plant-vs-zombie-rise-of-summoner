@@ -40,22 +40,46 @@ const slotGlyph: Record<string, string> = {
 
 export type SectorNodeProps = NodeProps & { data: SectorNodeData; showLifelines?: boolean };
 
+/**
+ * Territory is light in the dark (spec-loam-fe.md). `fading`'s dimming is continuous, in
+ * proportion to `stabilityMilli` — `barren`'s is not: it is a flat, distinct look regardless of the
+ * number, because barren ground can never be kept no matter what that number says this turn, and a
+ * player who reads it as "just another shade of fading" will make the wrong call every time.
+ */
+function anchorOpacity(anchorState: SectorNodeData["anchorState"], stabilityMilli: number): number {
+  if (anchorState !== "fading") return 1;
+  return 0.35 + 0.65 * Math.max(0, Math.min(1000, stabilityMilli)) / 1000;
+}
+
+const anchorStatusText: Record<SectorNodeData["anchorState"], string | null> = {
+  anchored: null, // silence is the healthy state — nothing to say
+  fading: "fading",
+  barren: "cannot be kept",
+  "not-yours": null
+};
+
 function SectorNodeView({ data, selected, showLifelines }: SectorNodeProps) {
   const shrouded = data.unknown;
 
   // A remembered card is dimmed and stamped with its age. Hiding *when* you last looked would not
   // create tension, it would create note-taking — the interesting uncertainty is what changed.
   const stale = data.remembered && data.age > 0;
+  const anchorStatus = anchorStatusText[data.anchorState];
 
   return (
     <div
       data-testid={`sector-node-${data.sectorId}`}
       data-ownership={data.ownership}
+      data-anchor-state={data.anchorState}
+      style={{ opacity: shrouded ? undefined : anchorOpacity(data.anchorState, data.stabilityMilli) }}
       className={cn(
         "w-[168px] rounded-lg border-2 bg-soil-raised/95 px-3 py-2 text-left shadow-md transition-shadow",
         ownershipRing[data.ownership] ?? ownershipRing.neutral,
         shrouded && "opacity-45 border-dashed",
         stale && "opacity-75",
+        // Barren: a flat, desaturated look distinct from fading's continuous dim — never the same
+        // visual language as a problem the player could still solve.
+        data.anchorState === "barren" && "grayscale border-stone-600/70 bg-stone-900/60",
         showLifelines && data.lifeline && "!border-amber-400 shadow-[0_0_12px] shadow-amber-400/40",
         selected && "shadow-[0_0_0_3px] shadow-sky-400/60"
       )}
@@ -79,6 +103,18 @@ function SectorNodeView({ data, selected, showLifelines }: SectorNodeProps) {
         </span>
         <span title="danger band">{"◆".repeat(Math.max(0, Math.min(5, data.dangerBand))) || "—"}</span>
       </div>
+
+      {anchorStatus ? (
+        <div
+          data-testid="sector-anchor-status"
+          className={cn(
+            "mt-0.5 text-[10px] font-semibold uppercase tracking-wide",
+            data.anchorState === "barren" ? "text-stone-400" : "text-amber-300"
+          )}
+        >
+          {anchorStatus}
+        </div>
+      ) : null}
 
       {showLifelines && data.lifelineCost > 0 ? (
         <div

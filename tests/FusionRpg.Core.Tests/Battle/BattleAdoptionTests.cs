@@ -59,8 +59,10 @@ public class BattleRateTests
     [Fact]
     public void Critical_hunter_recost_lands_near_twenty_seven_percent()
     {
-        var def = TraitBattleCatalog.Get("critical-hunter");
-        var mod = def.ChannelMods.Single(m => m.ChannelId == DerivedStatChannels.CombatCritRateOmni);
+        // Reads the MIGRATED source since E12 — the magnitude is a row now, not a catalog field.
+        // The outcome this asserts is unchanged, which is the whole point of the migration.
+        var mod = TraitAtomSource.Shipped().ModsFor("critical-hunter")
+            .Single(m => m.ChannelId == DerivedStatChannels.CombatCritRateOmni);
         var p = CombatProbability.Sigmoid(
             BattleRuleset.BaseCritRate(5) + mod.Amount - BattleRuleset.BaseCritResist(5),
             CombatProbabilityPolicy.CritRateScale);

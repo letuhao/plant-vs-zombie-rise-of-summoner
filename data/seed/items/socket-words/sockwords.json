@@ -131,7 +131,7 @@
       "minSockets": 3,
       "ingredients": [
         {"position": 0, "family": "atom.precision", "minPowerBand": "medium"},
-        {"position": 1, "family": "atom.keen_edge", "minPowerBand": "medium"},
+        {"position": 1, "family": "atom.keen-edge", "minPowerBand": "medium"},
         {"position": 2, "family": "atom.cruelty", "minPowerBand": "high"}
       ],
       "fixedAtoms": [
@@ -195,12 +195,12 @@
       "hostRole": "ward-array",
       "minSockets": 3,
       "ingredients": [
-        {"position": 0, "family": "atom.shield_capacity", "minPowerBand": "high"},
-        {"position": 1, "family": "atom.shield_toughness", "minPowerBand": "medium"},
-        {"position": 2, "family": "atom.shield_capacity", "minPowerBand": "high"}
+        {"position": 0, "family": "atom.shield-capacity", "minPowerBand": "high"},
+        {"position": 1, "family": "atom.shield-toughness", "minPowerBand": "medium"},
+        {"position": 2, "family": "atom.shield-capacity", "minPowerBand": "high"}
       ],
       "fixedAtoms": [
-        {"family": "atom.shield_capacity", "powerBand": "high"},
+        {"family": "atom.shield-capacity", "powerBand": "high"},
         {"family": "atom.plating", "powerBand": "medium"}
       ]
     },
@@ -258,7 +258,7 @@
       "minSockets": 2,
       "ingredients": [
         {"position": 0, "family": "atom.carapace", "minPowerBand": "high"},
-        {"position": 1, "family": "atom.shield_toughness", "minPowerBand": "medium"}
+        {"position": 1, "family": "atom.shield-toughness", "minPowerBand": "medium"}
       ],
       "fixedAtoms": [
         {"family": "atom.carapace", "powerBand": "high"},
@@ -325,7 +325,7 @@
       ],
       "fixedAtoms": [
         {"family": "atom.cruelty", "powerBand": "high"},
-        {"family": "atom.keen_edge", "powerBand": "medium"}
+        {"family": "atom.keen-edge", "powerBand": "medium"}
       ]
     },
     {
@@ -335,12 +335,12 @@
       "runtimeId": "gem.word-regenerative-pulse",
       "minSockets": 3,
       "ingredients": [
-        {"position": 0, "family": "atom.shield_regen", "minPowerBand": "low"},
+        {"position": 0, "family": "atom.shield-regen", "minPowerBand": "low"},
         {"position": 1, "family": "atom.mending", "minPowerBand": "high"},
-        {"position": 2, "family": "atom.shield_regen", "minPowerBand": "low"}
+        {"position": 2, "family": "atom.shield-regen", "minPowerBand": "low"}
       ],
       "fixedAtoms": [
-        {"family": "atom.shield_regen", "powerBand": "medium"},
+        {"family": "atom.shield-regen", "powerBand": "medium"},
         {"family": "atom.mending", "powerBand": "high"}
       ]
     },
@@ -352,7 +352,7 @@
       "minSockets": 2,
       "ingredients": [
         {"position": 0, "family": "atom.searing-strike", "minPowerBand": "high"},
-        {"position": 1, "family": "atom.keen_edge", "minPowerBand": "medium"}
+        {"position": 1, "family": "atom.keen-edge", "minPowerBand": "medium"}
       ],
       "fixedAtoms": [
         {"family": "atom.searing-strike", "powerBand": "high", "params": {"element": "light"}},

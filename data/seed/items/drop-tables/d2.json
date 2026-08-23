@@ -1,0 +1,353 @@
+{
+  "schemaVersion": 1,
+  "kind": "drop-table",
+  "_meta": {
+    "partition": "drop-tables/2",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "drop-tables-1c",
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/entry-shapes.md#9",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "droptable.d2-001",
+      "nameKey": "droptable.boneyard-warband",
+      "name": "Boneyard Warband",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "boneyard-warband-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "armament-secondary", "frame": "humanoid", "dropBand": "occasional", "rarityFloor": "sprout" },
+            { "entryKind": "equipment", "role": "core-guard", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "boneyard-warband-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.common", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "substrate.humanoid.crude", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "boneyard-warband-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-002",
+      "nameKey": "droptable.cinder-greenhouse",
+      "name": "Cinder Greenhouse",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "cinder-greenhouse-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "sense", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "head-guard", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "cinder-greenhouse-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.fire", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "catalyst.flux", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "cinder-greenhouse-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-003",
+      "nameKey": "droptable.marrow-silo",
+      "name": "Marrow Silo",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "marrow-silo-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "footing", "frame": "hybrid", "dropBand": "seldom", "rarityFloor": "grafted" },
+            { "entryKind": "equipment", "role": "manipulator", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "marrow-silo-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.rare", "dropBand": "seldom", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "substrate.humanoid.sound", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "marrow-silo-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "occasional" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-004",
+      "nameKey": "droptable.bramble-sentinel",
+      "name": "Bramble Sentinel",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "bramble-sentinel-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "ward-array", "frame": "plant", "dropBand": "occasional", "rarityFloor": "cultivated" },
+            { "entryKind": "equipment", "role": "jewel-major", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "bramble-sentinel-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.earth", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "substrate.plant.fine", "dropBand": "seldom", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "bramble-sentinel-ins",
+          "entries": [
+            { "entryKind": "insert", "ref": "gem.g1-005", "dropBand": "seldom" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "bramble-sentinel-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-005",
+      "nameKey": "droptable.hollowed-aqueduct",
+      "name": "Hollowed Aqueduct",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "hollowed-aqueduct-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "girdle", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "infusion", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "hollowed-aqueduct-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.dark", "dropBand": "occasional", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "catalyst.temper", "dropBand": "seldom", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "hollowed-aqueduct-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-006",
+      "nameKey": "droptable.vault-of-the-fallow",
+      "name": "Vault of the Fallow",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "vault-of-the-fallow-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "mantle", "frame": "hybrid", "dropBand": "seldom", "rarityFloor": "fused" },
+            { "entryKind": "equipment", "role": "jewel-minor-b", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "frequent" }
+          ]
+        },
+        {
+          "groupKey": "vault-of-the-fallow-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.epic", "dropBand": "seldom", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "substrate.plant.prime", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "vault-of-the-fallow-ins",
+          "entries": [
+            { "entryKind": "insert", "ref": "gem.g3-010", "dropBand": "seldom" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "vault-of-the-fallow-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "occasional" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-007",
+      "nameKey": "droptable.warcamp-of-rot",
+      "name": "Warcamp of Rot",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "warcamp-of-rot-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "retinue", "frame": "humanoid", "dropBand": "occasional", "rarityFloor": "cultivated" },
+            { "entryKind": "equipment", "role": "armament-primary", "frame": "hybrid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "warcamp-of-rot-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.dark", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "shard.rare", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "warcamp-of-rot-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-008",
+      "nameKey": "droptable.scorched-aviary",
+      "name": "Scorched Aviary",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "scorched-aviary-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "jewel-minor-a", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "sense", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "scorched-aviary-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.air", "dropBand": "occasional", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "essence.fire", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "scorched-aviary-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-009",
+      "nameKey": "droptable.gullet-foundry",
+      "name": "Gullet Foundry",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "gullet-foundry-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "core-guard", "frame": "hybrid", "dropBand": "seldom", "rarityFloor": "heirloom" },
+            { "entryKind": "equipment", "role": "head-guard", "frame": "hybrid", "dropBand": "seldom" },
+            { "entryKind": "nothing", "dropBand": "frequent" }
+          ]
+        },
+        {
+          "groupKey": "gullet-foundry-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.legendary", "dropBand": "exceptional", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "catalyst.forge", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "gullet-foundry-ins",
+          "entries": [
+            { "entryKind": "insert", "ref": "gem.g3-015", "dropBand": "seldom" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "gullet-foundry-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "seldom" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d2-010",
+      "nameKey": "droptable.thistle-redoubt",
+      "name": "Thistle Redoubt",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "thistle-redoubt-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "armament-secondary", "frame": "plant", "dropBand": "seldom", "rarityFloor": "heirloom" },
+            { "entryKind": "equipment", "role": "ward-array", "frame": "humanoid", "dropBand": "seldom" },
+            { "entryKind": "nothing", "dropBand": "frequent" }
+          ]
+        },
+        {
+          "groupKey": "thistle-redoubt-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.legendary", "dropBand": "exceptional", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "substrate.humanoid.prime", "dropBand": "seldom", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "thistle-redoubt-ins",
+          "entries": [
+            { "entryKind": "insert", "ref": "gem.g1-018", "dropBand": "exceptional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "thistle-redoubt-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "seldom" }
+          ]
+        }
+      ],
+      "tags": []
+    }
+  ]
+}

@@ -259,14 +259,14 @@
   },
   {
     "file": "src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs",
-    "name": "Recover re-files hold every turn forever",
-    "find": "if (string.Equals(entity.Stance, MovementPolicy.Hold, StringComparison.Ordinal)) return null;",
-    "with": ""
+    "name": "Recover re-files hold instead of reporting it is still mending",
+    "find": "if (string.Equals(entity.Stance, MovementPolicy.Hold, StringComparison.Ordinal))\n            return wounded > 0\n                ? Order(view, entity, WorldCommandKinds.StandFast, \"holding position, still recovering\")\n                : null;",
+    "with": "if (false) return null;"
   },
   {
     "file": "src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs",
     "name": "Recover digs in over a scratch",
-    "find": "if (WoundedMilli(entity) < RecoverAtMilli) return null;",
+    "find": "if (wounded < RecoverAtMilli) return null;",
     "with": ""
   },
   {
@@ -298,5 +298,36 @@
     "name": "Defend ignores the garrison already standing there",
     "find": "if (incoming - garrison <= margin) continue;",
     "with": "if (incoming <= margin) continue;"
+  },
+
+  {
+    "file": "src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs",
+    "name": "Abandon fires for a faction with no loam source anywhere (G-C)",
+    "find": "if (!hasSourceAnywhere) return null;",
+    "with": "if (false) return null;"
+  },
+  {
+    "file": "src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs",
+    "name": "Abandon fires on a solvent component",
+    "find": "if (componentBalance >= 0) return null;   // solvent — nothing to release",
+    "with": "if (false) return null;"
+  },
+  {
+    "file": "src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs",
+    "name": "Abandon ignores how much runway is left",
+    "find": "if (turnsOfRunway >= LoamPolicy.AbandonmentHorizonTurns) return null;   // still enough runway",
+    "with": "if (false) return null;"
+  },
+  {
+    "file": "src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs",
+    "name": "Abandon evacuates any entity in the component, not just the weakest sector's occupant",
+    "find": "if (!string.Equals(weakest, here, StringComparison.Ordinal)) return null;   // not this entity's ground to give up",
+    "with": ""
+  },
+  {
+    "file": "src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs",
+    "name": "Abandon picks the first sector by id instead of the worst balance",
+    "find": "if (weakest is null || balance < weakestBalance\n                || (balance == weakestBalance && string.CompareOrdinal(id, weakest) < 0))",
+    "with": "if (weakest is null)"
   }
 ]

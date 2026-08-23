@@ -64,9 +64,11 @@ public static class TraitBattleCatalog
         new()
         {
             TraitId = "critical-hunter", Mechanism = TraitBattleMechanism.FunnelRouted,
-            // Re-costed at battle-adoption (owner decision 5): sigmoid points, not per-mille.
-            // +150 over the −250 parity baseline → σ(−1.0) ≈ 26.9% crit (vs 7.6% base).
-            ChannelMods = new[] { new BattleChannelMod(DerivedStatChannels.CombatCritRateOmni, 150) }
+            // MIGRATED 2026-08-23 (E12). Its magnitude is now a row — `atom.critical-hunter.t1`, a
+            // stat.derived on combat.crit.rate.omni — reached through `TraitAtomSource`. The entry
+            // stays so the trait id, mechanism and the other thirteen keep their shape; only the
+            // magnitude moved. Measured delta: zero, across every battle golden.
+            ChannelMods = Array.Empty<BattleChannelMod>()
         },
         new() { TraitId = "guardian", Mechanism = TraitBattleMechanism.FunnelRouted, GuardShareMilli = 250 },
         // swift/berserker sit in the Funnel-routed HALF of the plan's locked 7/7 split even

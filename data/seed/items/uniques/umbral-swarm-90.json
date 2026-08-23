@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/umbral-swarm/90",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7"
+  },
+  "entries": [
+    {
+      "id": "unique.umbral-swarm-90-001",
+      "nameKey": "unique.faceless-chainsaw",
+      "name": "Faceless Chainsaw",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-main-hand-b-005",
+      "rarity": "sunwoven",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.summoner",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One low might line and a narrow ferocity roll are the entire raw-stat case for this blade. Its whole reason to exist is what rises where it kills, not what it hits harder than a plain chainsaw."
+      },
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "utility",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.umbral-swarm-90-002",
+      "nameKey": "unique.furnace-of-hunger",
+      "name": "Furnace of Hunger",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-torso-b-005",
+      "rarity": "almanac",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-toll",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.regeneration",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One low vitality line and a narrow regeneration roll are all the plate offers as armour. Every point of ordinary durability the pool could have put here instead went to the toll it levies on the field."
+      },
+      "tags": [
+        "heavy",
+        "metal",
+        "sturdy",
+        "utility",
+        "undead",
+        "signature"
+      ],
+      "notes": "OFF-ROLE ON PURPOSE. atom.econ-toll's pool eligibility (g.economy) is girdle/jewel-major/jewel-minor only; core-guard is not in it. A unique's fixed core is never drawn from the pool, so the role tag never applies to it (ssot-uniques.md §3.5 rung 2) — a chestplate that tithes the field is exactly the verb the pool would never hand to a torso."
+    },
+    {
+      "id": "unique.umbral-swarm-90-003",
+      "nameKey": "unique.smothering-shell",
+      "name": "Smothering Shell",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-shoulders-b-004",
+      "rarity": "sunwoven",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.retribution",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.shield-toughness",
+          "powerBand": "low",
+          "params": {
+            "element": "dark"
+          }
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.shield-capacity",
+        "variance": "narrow",
+        "params": {
+          "element": "dark"
+        }
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One low shield-toughness line and a narrow shield-capacity roll leave it barely sturdier than a plain scale piece. What it does instead is answer every hit that lands on it."
+      },
+      "tags": [
+        "heavy",
+        "metal",
+        "mechanical",
+        "offensive",
+        "sturdy",
+        "signature"
+      ],
+      "notes": "OFF-ROLE ON PURPOSE. atom.retribution's pool eligibility (g.on-hit) does not include ward-array. A unique's fixed core bypasses the pool tag entirely (ssot-uniques.md §3.5 rung 2) — a shoulder-guard that answers every hit is the verb no rolled shoulder piece can ever offer."
+    },
+    {
+      "id": "unique.umbral-swarm-90-004",
+      "nameKey": "unique.manhole-of-the-multitude",
+      "name": "Manhole of the Multitude",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-off-hand-b-003",
+      "rarity": "almanac",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.warded",
+          "powerBand": "high",
+          "params": {
+            "element": "dark"
+          }
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.evasion",
+        "variance": "narrow",
+        "params": {
+          "element": "dark"
+        }
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One low vitality line and a narrow evasion roll are the whole stat sheet. The ward it raises on spawn is the entire reason to carry a manhole cover into a fight that never stops arriving."
+      },
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "defensive",
+        "sturdy",
+        "undead",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.umbral-swarm-90-005",
+      "nameKey": "unique.collar-of-the-swarm",
+      "name": "Collar of the Swarm",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-neck-b-005",
+      "rarity": "sunwoven",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.flash-freeze",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.evasion",
+          "powerBand": "low",
+          "params": {
+            "element": "dark"
+          }
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One low evasion line and a narrow vitality roll are all the collar carries as a stat stick. The freeze it answers a hit with is the build; a bigger necklace is not what this is for."
+      },
+      "tags": [
+        "medium",
+        "metal",
+        "utility",
+        "undead",
+        "signature"
+      ]
+    },
+    {
+      "id": "unique.umbral-swarm-90-006",
+      "nameKey": "unique.claw-of-the-hive",
+      "name": "Claw of the Hive",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-hands-b-005",
+      "rarity": "almanac",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.gravemaking",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.might",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.precision",
+        "variance": "narrow",
+        "params": {
+          "element": "dark"
+        }
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One low might line and a narrow precision roll are the whole raw-stat case. The claws are for digging graves in the swarm's wake, not for hitting harder than a plain glove."
+      },
+      "tags": [
+        "medium",
+        "organic",
+        "utility",
+        "undead",
+        "signature"
+      ],
+      "notes": "OFF-ROLE ON PURPOSE. atom.gravemaking's pool eligibility (g.board) is retinue/jewel-major/jewel-minor only; manipulator is not in it. A unique's fixed core is never drawn from the pool (ssot-uniques.md §3.5 rung 2) — hands that raise a grave where the swarm's own kills fall are a verb no rolled glove will ever carry."
+    },
+    {
+      "id": "unique.umbral-swarm-90-007",
+      "nameKey": "unique.massed-hamper",
+      "name": "Massed Hamper",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-back-b-003",
+      "rarity": "sunwoven",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.econ-graze",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.stoicism",
+          "powerBand": "low",
+          "params": {
+            "element": "dark"
+          }
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.regeneration",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One low stoicism line and a narrow regeneration roll are all the pack offers as protection. It pays for itself off the field it crosses, not off its own plating."
+      },
+      "tags": [
+        "heavy",
+        "necrotic",
+        "sturdy",
+        "utility",
+        "signature"
+      ],
+      "notes": "OFF-ROLE ON PURPOSE. atom.econ-graze's pool eligibility (g.economy) is girdle/jewel-major/jewel-minor only; mantle is not in it. A unique's fixed core bypasses the pool tag (ssot-uniques.md §3.5 rung 2) — a pack that grazes sun off every kill the wearer's swarm makes is exactly the verb the pool would never put on a back slot."
+    },
+    {
+      "id": "unique.umbral-swarm-90-008",
+      "nameKey": "unique.nameless-bucket",
+      "name": "Nameless Bucket",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-head-b-005",
+      "rarity": "almanac",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.cruelty",
+          "powerBand": "high",
+          "params": {
+            "element": "dark"
+          }
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.evasion",
+        "variance": "narrow",
+        "params": {
+          "element": "dark"
+        }
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One low vitality line and a narrow evasion roll are the whole stat sheet under the dent. Every head in the swarm wears the same anonymous bucket; the one under this bucket just hits harder."
+      },
+      "tags": [
+        "medium-heavy",
+        "metal",
+        "offensive",
+        "undead",
+        "signature"
+      ]
+    }
+  ]
+}

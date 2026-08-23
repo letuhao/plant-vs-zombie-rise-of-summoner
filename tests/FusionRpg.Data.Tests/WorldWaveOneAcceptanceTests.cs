@@ -65,10 +65,33 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //      (`Intel` also moved after `Snapshot` at RulesetVersion 3, which did *not* move this
     //      hash: belief converges within a turn, so only the intermediate ones changed.)
     //
-    // The plan expected one re-bless. Four were needed, each for a behaviour change rather than a
-    // drift, and each recorded here. Protecting the hash in any of them would have meant shipping
-    // something known to be wrong.
-    const string GoldenFinalHash = "ea71c853391ca189230d6b2a9d0cc0c7b002178a01a92e6d1985911217a5f1ac";
+    //   8. **loam-model (L2 + L4), 2026-08-23** — `WorldCanonical` gained three loam fields:
+    //      `LoamStock`/`FractureIntensityMilli` on the sector row, `UpkeepHandicapMilli` on the
+    //      faction row. This is the module's own budgeted golden move (its acceptance criteria call
+    //      for exactly one), not a drift: `RulesetVersion` is unchanged, and `first-light`'s G-D
+    //      minimum edit (a homeworld rootbed plus a starting stock) is what actually changes the
+    //      sector row's content — the other two fields sit at their pre-loam defaults everywhere in
+    //      this scenario. **Blessed once, after L4** (persistence), not at L2 alone: `Play(...)`
+    //      commits each turn through `RpgStore`, so between L2 and L4 the homeworld's authored
+    //      `LoamStock` was silently dropped on the first save (the new columns didn't exist yet),
+    //      and a hash captured in that window would have blessed a lossy round trip rather than the
+    //      real one. Caught by every store-vs-engine replay-parity test in this project going red
+    //      at once — the same shape, not nine separate coincidences.
+    //
+    //   9. **loam-turn (L12-L15), 2026-08-23** — `Production` and `Pressure` stop being
+    //      pass-throughs (`RulesetVersion` 4). Zomboss's warband still has nothing here to command
+    //      (this scenario predates the AI stream giving him forces), so nothing about *combat* or
+    //      *movement* changed; what moved is that `first-light`'s homeworld now seeps loam each turn,
+    //      pays its own upkeep, and every other sector does too. This is the module's own budgeted
+    //      golden move (its acceptance criteria call for exactly one) and the loam program's
+    //      **second and last** — the first was `loam-model`'s field addition, which left
+    //      `RulesetVersion` unchanged and needed no re-bless of its own reasoning here beyond entry
+    //      #8 above.
+    //
+    // The plan expected one re-bless. Four were needed for world-intel, each for a behaviour change
+    // rather than a drift, and each recorded here. Protecting the hash in any of them would have
+    // meant shipping something known to be wrong.
+    const string GoldenFinalHash = "0ac049f4522eeb8eaa98ab7f9271a2f63584c85c65d8ca99ff1dbb62142b0f68";
 
     readonly string _dir;
     readonly RpgStore _store;

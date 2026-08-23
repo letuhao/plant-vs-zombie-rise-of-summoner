@@ -50,6 +50,7 @@ public static class SectorTypeCatalog
 
     const string Wildland = SlotTypeCatalog.WildlandSlotTypeId;
     const string Seat = SlotTypeCatalog.SeatSlotTypeId;
+    const string Rootbed = SlotTypeCatalog.RootbedSlotTypeId;
 
     static readonly IReadOnlyList<SectorTypeDef> Seed = new SectorTypeDef[]
     {
@@ -57,17 +58,17 @@ public static class SectorTypeCatalog
         {
             TypeId = "homeworld", Name = "Homeworld", BaseDangerBand = 0, CanHostSeat = true,
             Flags = SectorTypeFlags.Home,
-            AllowedSlotTypes = new[] { Seat, Wildland, "market", "shrine" }
+            AllowedSlotTypes = new[] { Seat, Wildland, "market", "shrine", Rootbed }
         },
         new()
         {
             TypeId = "stable", Name = "Stable Ground", BaseDangerBand = 1, CanHostSeat = true,
-            AllowedSlotTypes = new[] { Seat, Wildland, "essence-deposit", "material-seam", "lair", "vault" }
+            AllowedSlotTypes = new[] { Seat, Wildland, "essence-deposit", "material-seam", "lair", "vault", Rootbed }
         },
         new()
         {
             TypeId = "rich", Name = "Rich Ground", BaseDangerBand = 3, CanHostSeat = true,
-            AllowedSlotTypes = new[] { Seat, Wildland, "essence-deposit", "shard-vein", "material-seam", "lair" }
+            AllowedSlotTypes = new[] { Seat, Wildland, "essence-deposit", "shard-vein", "material-seam", "lair", Rootbed }
         },
         new()
         {
@@ -84,19 +85,19 @@ public static class SectorTypeCatalog
         new()
         {
             TypeId = "warcamp", Name = "Warcamp", BaseDangerBand = 4, CanHostSeat = true,
-            AllowedSlotTypes = new[] { Seat, Wildland, "tear", "lair" }
+            AllowedSlotTypes = new[] { Seat, Wildland, "tear", "lair", Rootbed }
         },
         new()
         {
             TypeId = "nexus", Name = "Nexus", BaseDangerBand = 3, CanHostSeat = true,
             Flags = SectorTypeFlags.Nexus,
-            AllowedSlotTypes = new[] { Seat, Wildland, "spire", "market" }
+            AllowedSlotTypes = new[] { Seat, Wildland, "spire", "market", Rootbed }
         },
         new()
         {
             TypeId = "boss-lair", Name = "Boss Lair", BaseDangerBand = 6, CanHostSeat = true,
             Flags = SectorTypeFlags.Boss,
-            AllowedSlotTypes = new[] { Seat, Wildland, "lair", "vault", "shard-vein" }
+            AllowedSlotTypes = new[] { Seat, Wildland, "lair", "vault", "shard-vein", Rootbed }
         }
     };
 

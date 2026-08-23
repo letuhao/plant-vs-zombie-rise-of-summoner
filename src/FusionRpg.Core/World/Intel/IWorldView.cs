@@ -41,6 +41,15 @@ public interface IWorldView
 
     /// <summary>How many turns stale the belief is; zero when it was seen this turn.</summary>
     int AgeOf(string sectorId);
+
+    /// <summary>
+    /// What this sector's <c>LoamStock</c> actually is, if this faction owns it — self-knowledge of
+    /// your own resource, not fog (spec-loam-ai-survival.md). "Only the owner" (loam-model) still
+    /// holds: this answers zero for anyone else's ground, and it is a live read of your own current
+    /// holding rather than a remembered snapshot, because <see cref="IntelSnapshot"/> is deliberately
+    /// never where stock lives — not even for the owner.
+    /// </summary>
+    long OwnLoamStock(string sectorId);
 }
 
 /// <summary>
@@ -97,6 +106,14 @@ public sealed class BelievedWorldView : IWorldView
 
     public int AgeOf(string sectorId) =>
         Believed(sectorId) is { } snapshot ? IntelLadder.AgeOf(snapshot, _world.CurrentTurn) : 0;
+
+    public long OwnLoamStock(string sectorId)
+    {
+        var sector = _world.Sectors.FirstOrDefault(s => string.Equals(s.SectorId, sectorId, StringComparison.Ordinal));
+        return sector is not null && string.Equals(sector.OwnerFactionId, FactionId, StringComparison.Ordinal)
+            ? sector.LoamStock
+            : 0;
+    }
 
     bool SeesNow(string sectorId) =>
         _sight.TryGetValue(sectorId, out var level) && level != SectorSight.None;

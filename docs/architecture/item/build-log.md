@@ -19,10 +19,14 @@ approval.** Decisions taken under that authorization are marked ⚖ below.
 | **0c** — exemplars, entry shapes | ✅ complete |
 | Freeze gate | ✅ closed — 7 registries frozen |
 | Pilot (5, contract test) | ✅ **PASS** — 0 errors, 69 entries, 9 files. Took 3 rounds |
-| **Stage 1a** — 14 affix groups + materials + curves | ▶ 16 agents running |
-| Stage 1b — base types (62) + gems (3) | pending 1a freeze |
-| Stage 1c — uniques, sets, charms, and the rest (44) | pending 1b freeze |
-| Wave 2 (script + 8) | pending |
+| **Stage 1a** — 14 affix groups + materials + curves | ✅ complete |
+| **Stage 1b** — base types (62) + gems (3) | ✅ complete |
+| **Stage 1c** — uniques, sets, charms, and the rest | ✅ uniques (18), sets (5), charms (4), socket words, consumables, recipes, milestones, display templates. Drop tables (4) ▶ running |
+| **Wave 2** — script + 8 semantic reviewers | ✅ complete — no BLOCKERs, 41 findings, [review/](review/README.md) |
+
+**Corpus:** 1,398 entries across 121 files, **0 errors**, 863 warnings. 69 validator tests green.
+Verified beyond the validator: an independent script recomputes every unique's `(role, axis)` from
+the allocation and compares it to what shipped — **144 uniques, 0 deviations.**
 
 ---
 
@@ -503,12 +507,250 @@ negative case proving the rule was narrowed rather than removed — a base type 
 `frame: any`, an unknown tag is still an error, `<b>` in a display template still rejects. 67 tests
 green; corpus **PASS at 1,129 entries across 93 files**.
 
+### ⚖ Decision 25 — markup rules apply to displayed strings only
+
+`MarkupInString` fired 183 times on `notes`, and every one was an author doing what the brief asked:
+recording which pool each word came from, as `nounPools['armament-primary.humanoid']`. The rule's
+own stated reason is that "display formatting belongs to the presentation layer" — which only bites
+on a string that gets displayed. `notes` and `identity` are authoring provenance and never reach a
+player. Narrowed to `name` and `flavor`; warnings fell from 1,119 to 902 and what remains is
+legible.
+
+Also cleared here: five `PartitionMetaMismatch` warnings. Four were mine — I wrote `recipes/all` and
+`enhancement-milestones/all` during the reference repair when the allocation says plain `recipes`
+and `enhancement-milestones`. The fifth was real: a base-type file labelled `base-types/graft-2/…`
+whose ids allocate to `base-types/jewel-minor-b/…`. The same class of defect as the briefs, from the
+same cause, which is why decision 24 exists.
+
+The dominant remaining warning is `Unreferenced` (790) — nothing points at most base types yet
+because the drop tables are batch 3. It should collapse once they land; if it does not, that is a
+real coverage finding and not noise.
+
 ### ⚖ Decision 24 — the validator generates the briefs
 
 Four of the six BLOCKED reports this build, and every partition-id error, came from the same place:
 a brief transcribing an id template or partition key by hand. `--list-partitions` dumps the
 allocation table the validator itself derives, and stage 1c's 32 briefs are generated from it. No
 partition id, id prefix, or pool key passes through a human or a summary on its way to an agent.
+
+---
+
+## Stage 1c dispatch tracker
+
+32 partitions, briefs generated from `--list-partitions` (decision 24). Dispatched in three batches
+in dependency order, because the two cross-partition hazards this build has actually hit are shared
+word pools and unresolvable references.
+
+**Batch 1 — 20 agents.** 18 unique partitions (Sonnet; they invent named legendary items) plus
+socket-words and charm resonance (Haiku; they consume a fixed vocabulary).
+
+**Batch 2 — 8 agents, after batch 1 lands.** 5 set partitions and 3 charm partitions. Sets share
+their theme's three word pools with that theme's unique partitions, and charms free-range across
+every theme's pools; neither can grep what has not been written yet.
+
+**Batch 3 — 4 agents, last.** The drop tables. They reference base types, uniques, sets, gems and
+consumables, and a reference to a file that does not exist yet is the defect this build has spent
+the most time on.
+
+A concurrency note worth keeping: batch 1 was dispatched telling agents to verify with
+`dotnet run --project tools/ItemSeedValidator`, which has twenty agents rebuilding one project at
+once. Later briefs point at the prebuilt `bin/Release/net8.0/ItemSeedValidator.exe` instead.
+
+---
+
+## The second briefing defect — content rules, not identity
+
+Decision 24 fixed briefs by generating them from the validator's allocation table, which killed
+every partition-id and id-prefix error. It also hid the other half of the problem: the allocation
+knows **identity** — ids, prefixes, pools — and knows nothing about **content rules**, which live
+only in the lane documents. So the 18 unique briefs carried a correct id template and none of
+ssot-uniques.md §3.7.
+
+One agent read the lane document anyway, honoured the role ban, and reported that
+`UniqueRoleForbidden` "isn't mechanically enforced yet". It was right on both counts, and that one
+sentence is what surfaced this. Checking the corpus:
+
+- **28 uniques on `jewel-minor` roles**, which §3.7 bans outright in v1.
+- **15 of 15 roles used per frame**, against a quota of 8.
+- The **(role, rung band, power axis)** rule was not merely unmet, it was **arithmetically
+  impossible**: five themes share rung band 30, so 5 × 15 entries competed for 8 roles × 5 axes =
+  40 combinations. The brief asked for 75 uniques to fit in 40 slots.
+
+Seventeen of eighteen agents complied with the brief they were given. The brief was wrong.
+
+### ⚖ Decision 26 — allocate the role/axis grid, then check it
+
+The role quota and the axis rule are corpus-wide, and an agent that can see only its own partition
+cannot satisfy either. That is the same shape as the id namespaces, so it gets the same treatment:
+decide centrally, hand each partition a constraint it can meet alone.
+
+- **Roles.** The eight highest `budgetWeightMilli` roles in `core.v1.json`, ties broken by registry
+  order. Both `jewel-minor` roles fall outside it at 15 milli each — a cross-check on §3.7's
+  separate ban rather than a coincidence. This eight is a **default, not a derivation**: "uniques go
+  where the budget is" is defensible, and so is its opposite given §3.5's "the rare wins the stat
+  sheet, the unique wins the build". It is one list in one file and changing it is an edit plus a
+  re-run — flagged for the owner rather than presented as settled.
+- **Axes.** A Latin square: `axis = (roleIndex + themeIndex) mod 5`. For a fixed role, the themes
+  sharing a rung band each get a different axis, so no two partitions can collide. Within a
+  partition the roles cycle through all five axes, so no theme comes out monotone. Verified
+  mechanically before dispatch: **144 distinct (band, role, axis) triples, zero clashes.**
+
+Eight uniques per partition instead of fifteen, 144 total. Below §5.33's "roughly 200 rows", and
+that is the arithmetic being honest — the earlier number was only reachable by breaking the rule.
+
+### ⚖ Decision 27 — `powerAxis` becomes a required field on `unique`
+
+The allocation is collision-free if agents comply, and compliance was not checkable, because
+§3.7 keys its rule on an axis the entry shape never carried. That is the same failure as the one
+above wearing a different hat: a rule nothing can check is not a rule, it is a hope. `powerAxis`
+is now required on kind `unique`, validated against `core.v1.json powerCategories`, and
+`UniqueAxisCollision` enforces the triple. Required rather than optional — an optional field half
+the corpus omits gates nothing.
+
+Making it required invalidates all 268 first-pass uniques. They were being re-run regardless.
+
+### The set lane had the same gap, found before it landed
+
+ssot-uniques.md §3.7 notes that the 8-role unique quota and ssot-sets.md §3.4's **6-role set cap**
+must be read together, since 8 + 6 > 15 and both lanes draw on the same fifteen slots. The sets
+brief carried neither the cap nor the other §3.4 hard rules, and batch 2 was already running when
+this surfaced. Rather than interrupt agents mid-write, the checks went in first so the output is
+measured rather than assumed: `SetRoleCap`, `SetNoTwoPieceThreshold`, `SetThresholdUnreachable`,
+`SetGrandMissingStep`, and `UniqueSetMembership`.
+
+**The generalisation worth keeping.** A brief needs two things and this build learned them a week
+apart: the **identity** facts, which the allocation owns and must never be transcribed by hand; and
+the **content** rules, which only the lane document owns and which no amount of generated id
+plumbing will supply. Getting the first right made the second invisible, because the partitions
+stopped failing.
+
+---
+
+## The re-run, and the seventh correct BLOCKED
+
+The 18 unique partitions re-ran against the allocated role/axis table. Seventeen landed clean at
+8 entries each. One reported BLOCKED, and it was right:
+
+> The shared `_exemplars/unique.exemplar.json` entry already occupies rung-band-30's
+> `(head-guard, offense)` slot — the one cell my table's row 8 requires — and `UniqueRuleCheck`
+> (unlike `IdentityCheck`'s id-uniqueness check) does not exempt exemplar entries from its
+> axis-collision ledger, so no legal choice for row 8 exists without deviating from the table.
+
+Two defects of mine in one sentence. Decision 27 made `powerAxis` required, which broke the
+exemplar, so I gave it `offense` — a value picked to satisfy the validator rather than chosen. And
+the new cross-row checks never learned what `IdentityCheck` already knew: **an exemplar is a
+pattern, not corpus content, and must not hold a slot in any ledger.** `SeedFile.IsExemplar` existed
+the whole time and the new code simply did not call it.
+
+The agent's alternative was to shift one row off its assigned axis. That would have validated, and
+it would have silently broken the Latin square that makes the whole allocation collision-free.
+Blocking cost one re-dispatch; deviating would have cost the property the allocation exists for.
+
+A related near-miss the same hour: making `powerAxis` required also invalidated the exemplar
+**while eighteen agents were reading it as their pattern**. Caught only by chasing a single
+leftover error instead of dismissing it as noise. The rule that falls out is narrow and worth
+keeping: **when a required field is added to a kind, the exemplar for that kind is content too** —
+and if authoring is live, it is the most-read file in the corpus.
+
+One transient worth recording so it is not mistaken for a defect later: a partition reported a
+collision against a sibling that was mid-write. It re-ran the validator, saw the clash, and fixed
+itself. An independent conformance script — every unique's `(role, axis)` recomputed from the
+allocation and compared to what shipped — found **zero deviations across all landed files**. Agent
+writes, validator catches, agent corrects, and a script that trusts none of them confirms it.
+
+---
+
+## Stage 1c closed — and what the warning pile was hiding
+
+All 32 partitions landed. **1,438 entries across 125 files, 0 errors, 69 validator tests green.**
+
+| kind | rows | | kind | rows |
+|---|---|---|---|---|
+| base-type | 740 | | drop-table | 40 |
+| unique | 144 | | gem | 40 |
+| affix-family | 98 | | recipe | 30 |
+| display-template | 98 | | set | 30 |
+| charm | 70 | | socket-word | 25 |
+| consumable | 60 | | curve | 24 |
+| material | 21 | | enhancement-milestone | 10 |
+
+The last pass was on the 852 warnings, on the theory that a pile that large is not information. It
+was not: **711 of them were one lint asking the wrong question.**
+
+`Unreferenced` flagged every entry nothing points at, across five kinds. Three of those five are
+reachable without a reference and always were:
+
+- **`base-type`** — 637 of 740 unreferenced, every one correct. A base type is reached by rolling.
+- **`gem`** — 0 of 40 referenced, and this is the design: entry-shapes.md §2 has a socket word name
+  its ingredients by atom **family** and `minPowerBand`, never by gem id. A gem is found and
+  socketed, not pointed at.
+- **`curve`** — resolved by the generator through `bands.v1.json`, never named by a seed row.
+
+And **21 materials** were being reported as orphans while recipes were spending them — because a
+recipe spends `substrate.humanoid.crude`, the runtime id, while the lint matched `material.017`, the
+tracking id. That is the third appearance of the tracking-vs-runtime split from entry-shapes.md §0,
+after decision 21 and the milestone families. It is worth naming as a standing hazard: **any code
+that matches ids across kinds has to ask which of an entry's two ids it means.**
+
+Narrowed to the kinds that genuinely exist to be referenced, `Unreferenced` now reports **zero** —
+which is the useful statement it could never make before: no affix family goes ungranted, no
+material goes unspent. Warnings: **852 → 141**, and the remainder is benign (119 files authored
+against an earlier additive registry version, 19 off-axis tags, 3 tier gaps for a human to glance
+at).
+
+### A brief error the shape document caught
+
+My socket-word brief said to reference gems "by id, in order". entry-shapes.md §2 says ingredients
+are `family` + `minPowerBand`. The agent followed the shape document over my instruction — which is
+what its brief tells it to do when the two disagree — and the data is right while my sentence was
+wrong. No re-run needed, and it is the cheapest possible version of this failure: the escape hatch
+worked without anyone having to notice it firing.
+
+---
+
+## Wave 2 — what eight reviewers found that a validator could not
+
+The deterministic column of the fleet plan's verification table was already green, so all eight
+lanes took only the semantic column. **No BLOCKERs; 41 findings, 19 MAJOR.** Full triage in
+[review/README.md](review/README.md).
+
+Three were defects rather than judgements, and all three are fixed:
+
+**⚖ Decision 28 — the pool exemption never covered collision.** `words.v1.json` exempts five kinds
+from the word pools and states *per kind* what each still owes; `gem` owes "global name and nameKey
+collision checks, the naming patterns, and every tag/element/registry rule". One early return
+collapsed all five into "checked for nothing", and two entries shipped as the identical string
+"Mending Pulse". The reviewer quoted the registry back at the validator. The exemption is now per
+kind: what is exempt is **pool membership**, never collision.
+
+**⚖ Decision 29 — a reference regex that rejects is safer than one that hides.** Ten references to
+`atom.keen_edge` and three siblings sat in the corpus producing no error and no warning.
+`ReferenceCheck`'s `idLike` gate decides whether a string is *considered* an id at all, and it
+accepted hyphens but not underscores — so these were not resolved and passed, they were never
+looked at. It now accepts underscores deliberately, so the misspelling resolves against nothing and
+reports `ReferenceUnresolved`.
+
+The spelling came from `naming.v1.json` listing shipped families in snake_case while every authored
+id is kebab-case. Authors who **minted** an id converted it; authors who only **referenced** one
+copied it verbatim. Both readings are defensible, which is why two independent kinds did it. The
+last instance lives in a frozen registry (`classes.v1.json:992`) and is left for the owner.
+
+**The identical-render pair.** `atom.tempo-surge` (`Increased`) and `atom.tempo-stampede` (`More`)
+rendered the same card line, hiding the most important stacking distinction in the system. The
+corpus already had the vocabulary from its own earlier templates.
+
+### What the review says about the briefs, not the corpus
+
+The MAJOR findings cluster hard: consumables have no flavour, 30 of 70 charms have none, three
+themes are silent, four of five sets are silent. These are all **late kinds with tight briefs**. The
+briefs got progressively better at stating rules a validator enforces and no better at requiring
+prose it cannot. The corpus came out mechanically correct and tonally uneven, and that is a direct
+readout of what was checkable.
+
+The generalisation, third variation on the same theme this build: **content converges on whatever
+is mechanised.** Ids became perfect once generated from the allocation. Role/axis became perfect
+once allocated and checked. Flavour stayed uneven because nothing could measure it. That is not an
+argument for mechanising taste — it is an argument for knowing which parts of a brief are wishes.
 
 ---
 

@@ -26,10 +26,19 @@ public class MigrationParityTests
 
     // ---- the migrated catalog ------------------------------------------------------------------
 
+    /// <summary>
+    /// The migrated defs, and only those — the <c>fx-*.json</c> files.
+    ///
+    /// <para>This swept the whole <c>atoms/</c> folder until E12 put a trait atom in it and every
+    /// fixture went red at once. The gate is about <b>the def migration</b>: it asserts nothing was
+    /// rejected and nothing needed the runner, which is true of the 16 defs and is not a claim about
+    /// authored content in general. A later atom that is deliberately battle-only would otherwise
+    /// break a gate that has nothing to do with it.</para>
+    /// </summary>
     static IReadOnlyList<AtomRow> SeedRows()
     {
         var dir = Path.Combine(RepoRoot(), "data", "seed", "atoms");
-        var files = Directory.GetFiles(dir, "*.json", SearchOption.AllDirectories)
+        var files = Directory.GetFiles(dir, "fx-*.json", SearchOption.AllDirectories)
             .OrderBy(f => f, StringComparer.Ordinal)
             .Select(f => (f, File.ReadAllText(f)))
             .ToArray();

@@ -3,7 +3,7 @@
   "kind": "material",
   "_meta": {
     "batch": "materials-all",
-    "partition": "materials/all",
+    "partition": "materials",
     "contractVersion": 1,
     "registryVersions": {
       "core": 1,
@@ -29,7 +29,9 @@
       "materialClass": "essence",
       "element": "fire",
       "iconKey": "icon.material.essence-fire",
-      "tags": ["arcane"]
+      "tags": [
+        "arcane"
+      ]
     },
     {
       "id": "material.002",
@@ -39,7 +41,9 @@
       "materialClass": "essence",
       "element": "ice",
       "iconKey": "icon.material.essence-ice",
-      "tags": ["arcane"]
+      "tags": [
+        "arcane"
+      ]
     },
     {
       "id": "material.003",
@@ -49,7 +53,9 @@
       "materialClass": "essence",
       "element": "air",
       "iconKey": "icon.material.essence-air",
-      "tags": ["arcane"]
+      "tags": [
+        "arcane"
+      ]
     },
     {
       "id": "material.004",
@@ -59,7 +65,9 @@
       "materialClass": "essence",
       "element": "earth",
       "iconKey": "icon.material.essence-earth",
-      "tags": ["mineral"]
+      "tags": [
+        "mineral"
+      ]
     },
     {
       "id": "material.005",
@@ -69,7 +77,9 @@
       "materialClass": "essence",
       "element": "light",
       "iconKey": "icon.material.essence-light",
-      "tags": ["arcane"]
+      "tags": [
+        "arcane"
+      ]
     },
     {
       "id": "material.006",
@@ -79,7 +89,9 @@
       "materialClass": "essence",
       "element": "dark",
       "iconKey": "icon.material.essence-dark",
-      "tags": ["necrotic"]
+      "tags": [
+        "necrotic"
+      ]
     },
     {
       "id": "material.007",
@@ -88,7 +100,9 @@
       "runtimeId": "shard.common",
       "materialClass": "shard",
       "iconKey": "icon.material.shard-common",
-      "tags": ["mineral"]
+      "tags": [
+        "mineral"
+      ]
     },
     {
       "id": "material.008",
@@ -97,7 +111,9 @@
       "runtimeId": "shard.rare",
       "materialClass": "shard",
       "iconKey": "icon.material.shard-rare",
-      "tags": ["mineral"]
+      "tags": [
+        "mineral"
+      ]
     },
     {
       "id": "material.009",
@@ -106,7 +122,9 @@
       "runtimeId": "shard.epic",
       "materialClass": "shard",
       "iconKey": "icon.material.shard-epic",
-      "tags": ["mineral"]
+      "tags": [
+        "mineral"
+      ]
     },
     {
       "id": "material.010",
@@ -115,7 +133,9 @@
       "runtimeId": "shard.legendary",
       "materialClass": "shard",
       "iconKey": "icon.material.shard-legendary",
-      "tags": ["mineral"]
+      "tags": [
+        "mineral"
+      ]
     },
     {
       "id": "material.011",
@@ -126,7 +146,10 @@
       "frame": "humanoid",
       "grade": 1,
       "iconKey": "icon.material.substrate-humanoid-crude",
-      "tags": ["metal", "light"]
+      "tags": [
+        "metal",
+        "light"
+      ]
     },
     {
       "id": "material.012",
@@ -137,7 +160,10 @@
       "frame": "humanoid",
       "grade": 2,
       "iconKey": "icon.material.substrate-humanoid-sound",
-      "tags": ["metal", "medium"]
+      "tags": [
+        "metal",
+        "medium"
+      ]
     },
     {
       "id": "material.013",
@@ -148,7 +174,10 @@
       "frame": "humanoid",
       "grade": 3,
       "iconKey": "icon.material.substrate-humanoid-fine",
-      "tags": ["metal", "medium-heavy"]
+      "tags": [
+        "metal",
+        "medium-heavy"
+      ]
     },
     {
       "id": "material.014",
@@ -159,7 +188,11 @@
       "frame": "humanoid",
       "grade": 4,
       "iconKey": "icon.material.substrate-humanoid-prime",
-      "tags": ["metal", "heavy", "sturdy"]
+      "tags": [
+        "metal",
+        "heavy",
+        "sturdy"
+      ]
     },
     {
       "id": "material.015",
@@ -170,7 +203,11 @@
       "frame": "plant",
       "grade": 1,
       "iconKey": "icon.material.substrate-plant-crude",
-      "tags": ["organic", "light", "rooted"]
+      "tags": [
+        "organic",
+        "light",
+        "rooted"
+      ]
     },
     {
       "id": "material.016",
@@ -181,7 +218,11 @@
       "frame": "plant",
       "grade": 2,
       "iconKey": "icon.material.substrate-plant-sound",
-      "tags": ["organic", "medium", "rooted"]
+      "tags": [
+        "organic",
+        "medium",
+        "rooted"
+      ]
     },
     {
       "id": "material.017",
@@ -192,7 +233,11 @@
       "frame": "plant",
       "grade": 3,
       "iconKey": "icon.material.substrate-plant-fine",
-      "tags": ["organic", "medium-heavy", "rooted"]
+      "tags": [
+        "organic",
+        "medium-heavy",
+        "rooted"
+      ]
     },
     {
       "id": "material.018",
@@ -203,7 +248,12 @@
       "frame": "plant",
       "grade": 4,
       "iconKey": "icon.material.substrate-plant-prime",
-      "tags": ["organic", "heavy", "rooted", "sturdy"]
+      "tags": [
+        "organic",
+        "heavy",
+        "rooted",
+        "sturdy"
+      ]
     },
     {
       "id": "material.019",
@@ -212,7 +262,9 @@
       "runtimeId": "catalyst.forge",
       "materialClass": "catalyst",
       "iconKey": "icon.material.catalyst-forge",
-      "tags": ["arcane"]
+      "tags": [
+        "arcane"
+      ]
     },
     {
       "id": "material.020",
@@ -221,7 +273,9 @@
       "runtimeId": "catalyst.temper",
       "materialClass": "catalyst",
       "iconKey": "icon.material.catalyst-temper",
-      "tags": ["mineral"]
+      "tags": [
+        "mineral"
+      ]
     },
     {
       "id": "material.021",
@@ -230,7 +284,9 @@
       "runtimeId": "catalyst.flux",
       "materialClass": "catalyst",
       "iconKey": "icon.material.catalyst-flux",
-      "tags": ["arcane"]
+      "tags": [
+        "arcane"
+      ]
     }
   ]
 }

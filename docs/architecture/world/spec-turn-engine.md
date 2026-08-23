@@ -42,6 +42,12 @@ Sieges → Construction & Production → Growth → Pressure → Events/Calendar
 - **No command may read another commander's commands for the same turn.** Orders seal at Commit and reveal together — this is what makes simultaneity fair and the AI honest.
 - Phases after movement are single ordered passes over the graph.
 - **`Intel` is last, and that position is load-bearing** (moved there 2026-08-22, `RulesetVersion` 3). Claims settle in `Snapshot`; recording belief before it left a faction unable to see that its *own* claim had succeeded, so it re-filed the order every turn and the engine dropped it as `claim.already-yours`. Belief is what you know at the *end* of the turn, and the end of the turn is after the turn has finished happening. Found by playing twenty turns rather than by any test — every suite agreed the engine was correct, and it was; the AI was simply being told a stale story about itself.
+- **`Production` and `Pressure` stopped being pass-throughs on 2026-08-23** (`RulesetVersion` 4,
+  spec-loam-turn.md): `Production` now runs `LoamPhases.Production` (yield into `LoamStock`, capped,
+  overflow reported and lost); `Pressure` runs `SupplyGraph.Run` **then** `LoamPhases.Pressure`
+  (upkeep drawn per component, shortfall fades the weakest contributor, a sector at zero stability is
+  lost). The order in the diagram above is unchanged — this is the two phases finally doing what
+  their names always said, not a reordering.
 
 #### Movement resolution is discrete-event, not fixed sub-steps
 

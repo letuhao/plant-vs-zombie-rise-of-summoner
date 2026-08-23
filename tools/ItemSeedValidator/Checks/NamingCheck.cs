@@ -96,7 +96,24 @@ public static class NamingCheck
         // `words.v1.json poolAccess.kindsExemptFromPools` is the registry's own statement of this,
         // so the list lives there rather than here. Collision and nameKey uniqueness still apply to
         // every kind — those are about clashes, not about grammar.
-        if (ctx.Registries.IsPoolExemptKind(entry.File.Kind)) return;
+        // The exemption is per kind, and `words.v1.json` spells out what each one still owes:
+        //
+        //   gem               collision + nameKey + THE NAMING PATTERNS + every registry rule
+        //   material          runtimeId preservation and global uniqueness
+        //   display-template  nameKey uniqueness only — a template is a sentence, not a name
+        //   curve             id grammar only
+        //   recipe            id grammar and reference resolution
+        //
+        // A single early return collapsed all five into "checked for nothing", which let
+        // `gem.g1-015` and `consumable.k1-007` both ship as "Mending Pulse" — the identical string,
+        // reported by a reviewer quoting this registry text back. What is actually exempted is
+        // POOL MEMBERSHIP, never the corpus-wide collision check.
+        var kind = entry.File.Kind ?? "";
+        var exemptFromPools = ctx.Registries.IsPoolExemptKind(kind);
+        var namesAThing = kind is not ("display-template" or "curve" or "recipe");
+        var followsPatterns = !exemptFromPools || kind == "gem";
+
+        if (!namesAThing) return;
 
         if (name.Contains('\''))
             ctx.Error(entry, "PossessiveForbidden", "naming.v1.json pluralsPossessivesConnectives",
@@ -113,6 +130,8 @@ public static class NamingCheck
                 ctx.Error(entry, "InventedConnective", "naming.v1.json pluralsPossessivesConnectives",
                     $"name '{name}' contains the lowercase word '{m.Value}'; only 'of' and a "
                     + "following 'the' are legal");
+
+        if (!followsPatterns) { RecordCollision(ctx, entry, name, seen); return; }
 
         if (GeneratedOnly.IsMatch(name))
             ctx.Error(entry, "GeneratedOnlyNamePattern", "naming.v1.json generatedOnlyPattern",
@@ -144,6 +163,17 @@ public static class NamingCheck
             CheckPlurals(ctx, entry, name);
         }
 
+        RecordCollision(ctx, entry, name, seen);
+    }
+
+    /// <summary>
+    /// The corpus-wide collision check, split out because it applies to kinds that are exempt from
+    /// the pool grammar. Every kind that names a thing a player sees goes through here.
+    /// </summary>
+    static void RecordCollision(
+        ValidationContext ctx, SeedEntry entry, string name, Dictionary<string, SeedEntry> seen)
+    {
+        var normalized = ctx.Normalizer.Normalize(name);
         if (normalized.Key.Length == 0) return;
         if (seen.TryGetValue(normalized.Key, out var first))
             ctx.Error(entry, "NameCollision", "seed-contract.md §5 / naming.v1.json collisionNormalization",
@@ -210,25 +240,28 @@ public static class NamingCheck
         foreach (var (path, key, value) in ValidationContext.Walk(entry.Node))
         {
             if (value is not JsonValue jv || !jv.TryGetValue<string>(out var text)) continue;
+            // The rule's own reason is "display formatting belongs to the presentation layer", which
+            // only bites on a string that gets displayed. `notes` and `identity` are authoring
+            // provenance and never reach a player, and the briefs actively ask an author to record
+            // where each word came from — `nounPools['armament-primary.humanoid']` is a code
+            // reference doing exactly that, not a bracket tag. Flagging it 183 times buried the
+            // warnings that meant something.
             var localized = key is "name" or "flavor";
-            var freeText = localized || key is "notes" or "identity";
-            if (!freeText) continue;
+            if (!localized) continue;
 
             foreach (var (pattern, what) in Markup)
             {
                 if (!pattern.IsMatch(text)) continue;
                 var message = $"'{path}' contains {what}; display formatting belongs to the "
                               + "presentation layer";
-                if (localized) ctx.Error(entry, "MarkupInString", "seed-contract.md §6", message);
-                else ctx.Warn(entry, "MarkupInString", "seed-contract.md §6", message);
+                ctx.Error(entry, "MarkupInString", "seed-contract.md §6", message);
             }
 
             if (!IsTemplateCarrier(entry, key) && Placeholder.IsMatch(text))
             {
                 var message = $"'{path}' contains a {{placeholder}}; only "
                               + string.Join("/", TemplateFields) + " carry substitution braces";
-                if (localized) ctx.Error(entry, "MarkupInString", "seed-contract.md §6", message);
-                else ctx.Warn(entry, "MarkupInString", "seed-contract.md §6", message);
+                ctx.Error(entry, "MarkupInString", "seed-contract.md §6", message);
             }
         }
     }

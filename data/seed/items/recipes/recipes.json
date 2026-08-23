@@ -3,7 +3,7 @@
   "kind": "recipe",
   "_meta": {
     "batch": "recipes-all",
-    "partition": "recipes/all",
+    "partition": "recipes",
     "contractVersion": 1,
     "registryVersions": {
       "core": 1,

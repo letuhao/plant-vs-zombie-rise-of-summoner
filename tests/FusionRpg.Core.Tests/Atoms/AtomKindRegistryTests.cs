@@ -40,7 +40,11 @@ public class AtomKindRegistryTests
         // Kinds with no executor in ANY runtime. Listing them here is the point: a kind may sit in
         // the vocabulary ahead of its consumer, but it must be quarantined (all-None, so binds are
         // rejected) and named in this set, never advertising support it does not have.
-        var awaitingConsumer = new[] { "stat.derived" };
+        //
+        // EMPTY since 2026-08-23: `stat.derived` was the only occupant, and E12 shipped its first
+        // consumer. An empty set is the healthy state — a kind waiting for a consumer is a promise
+        // the vocabulary has not kept yet.
+        var awaitingConsumer = Array.Empty<string>();
 
         // Permanent modifiers are not event-driven, so they declare no trigger (definitions.md §14.2).
         var permanentModifiers = new[] { "stat.modify", "stat.derived" };
@@ -250,8 +254,13 @@ public class AtomKindRegistryTests
         // grant skips with "shield-runtime-missing"; and stat.derived has no executor anywhere at all.
         // Battle having a working FA10 sink is not the same as an atom being able to reach it.
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("resource.delta")!.SupportIn(RuntimeId.Battle));
-        Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Battle));
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("shield.grant")!.SupportIn(RuntimeId.Battle));
+
+        // stat.derived RE-OPENED for battle 2026-08-23: E12 shipped the consumer. `BattleStatComposer`
+        // reads bound stat.derived atoms at squad build, through `TraitAtomSource` — the same place it
+        // read `ChannelMods` before. The cell moved because the code did, which is the only reason a
+        // cell in this matrix is ever allowed to move.
+        Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Battle));
 
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("stat.modify")!.SupportIn(RuntimeId.Battle));
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("spawn.entity")!.SupportIn(RuntimeId.Battle));
@@ -263,17 +272,35 @@ public class AtomKindRegistryTests
         // Sim: shield.grant is one line of wiring away (SimEffectHost sets Bag.Status and Bag.UtcNow,
         // never Bag.ShieldGate), but until that line exists a bind would be a silent skip.
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("shield.grant")!.SupportIn(RuntimeId.Sim));
+
+        // And stat.derived stays closed where it still has no consumer. Opening lawn and sim on the
+        // strength of battle's consumer would re-create exactly what the quarantine was for.
+        Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Lawn));
+        Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Sim));
     }
 
     // The documented channel enum listed four keys effects cannot reach. Pin the real eight.
     [Fact]
-    public void Primary_channels_are_the_real_eight()
+    public void Primary_channels_are_the_real_eleven_since_E16()
     {
-        Assert.Equal(8, AtomKindRegistry.PrimaryChannels.Length);
+        // It was eight, and this test asserted the three intervals were ABSENT — correctly, because
+        // they were cheat-document keys written straight to the Unity field, bypassing the modifier
+        // bag. The documented enum listed them anyway, which is how the gap survived. E16 promoted
+        // them into real composed channels, so the absent-assertions became wrong.
+        Assert.Equal(11, AtomKindRegistry.PrimaryChannels.Length);
         Assert.Contains("defense", AtomKindRegistry.PrimaryChannels);
         Assert.Contains("arm1Max", AtomKindRegistry.PrimaryChannels);
-        Assert.DoesNotContain("attackInterval", AtomKindRegistry.PrimaryChannels);
-        Assert.DoesNotContain("zombieSpeed", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("attackInterval", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("produceInterval", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("zombieSpeed", AtomKindRegistry.PrimaryChannels);
+    }
+
+    [Fact]
+    public void The_registry_and_the_stat_layer_cannot_disagree_about_the_channel_list()
+    {
+        // Two hand-maintained copies of one list is how the documented nine came to differ from the
+        // real eight in the first place.
+        Assert.Equal(FusionRpg.Core.Stats.StatChannels.All, AtomKindRegistry.PrimaryChannels);
     }
 
     // G6: the registry declares PrimaryChannels and, until now, never read it — so `channel: "atkk"`

@@ -67,6 +67,8 @@ public static class Validator
         OwnershipCheck.Run(ctx);
         NamingCheck.Run(ctx);
         ReferenceCheck.Run(ctx);
+        UniqueRuleCheck.Run(ctx);
+        SetRuleCheck.Run(ctx);
         LintCheck.Run(ctx);
 
         // Partitions are assigned by IdentityCheck, after some findings were already recorded.

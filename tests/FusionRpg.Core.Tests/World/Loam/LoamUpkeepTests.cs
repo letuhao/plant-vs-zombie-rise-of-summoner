@@ -1,0 +1,156 @@
+using FusionRpg.Core.World;
+using FusionRpg.Core.World.Loam;
+using Xunit;
+
+namespace FusionRpg.Core.Tests.World.Loam;
+
+/// <summary>L7 acceptance (spec-loam-calc.md #3): the row overload is the one worked by hand.</summary>
+public class LoamUpkeepTests
+{
+    static long UnmultipliedSum(int garrisonMembers, int developmentLevel, int dangerBand) =>
+        LoamPolicy.BaseUpkeepPerSector
+        + (long)garrisonMembers * LoamPolicy.GarrisonUpkeepPerMember
+        + LoamPolicy.DevelopmentAndDangerUpkeep(developmentLevel, dangerBand);
+
+    [Fact]
+    public void Baseline_intensity_and_handicap_cost_exactly_the_unmultiplied_sum()
+    {
+        var sum = UnmultipliedSum(garrisonMembers: 4, developmentLevel: 2, dangerBand: 1);
+        Assert.Equal(sum, LoamUpkeep.For(4, 2, 1, intensityMilli: 1000, handicapMilli: 1000));
+    }
+
+    [Fact]
+    public void Half_intensity_costs_half_and_double_intensity_costs_double()
+    {
+        var sum = UnmultipliedSum(garrisonMembers: 4, developmentLevel: 2, dangerBand: 1);
+
+        Assert.Equal(sum / 2, LoamUpkeep.For(4, 2, 1, intensityMilli: 500, handicapMilli: 1000));
+        Assert.Equal(sum * 2, LoamUpkeep.For(4, 2, 1, intensityMilli: 2000, handicapMilli: 1000));
+    }
+
+    [Fact]
+    public void The_handicap_scales_the_same_way_intensity_does()
+    {
+        var sum = UnmultipliedSum(garrisonMembers: 0, developmentLevel: 0, dangerBand: 0);
+        Assert.Equal(sum / 2, LoamUpkeep.For(0, 0, 0, intensityMilli: 1000, handicapMilli: 500));
+    }
+
+    [Fact]
+    public void The_formula_divides_only_once_not_once_per_multiplier()
+    {
+        // Round inputs (500/1000/2000/3000, handicap 1000) cannot tell "multiply everything, divide
+        // once" apart from "divide by each multiplier's 1000 separately" — the intermediate
+        // truncation happens to land on the same floor either way. Deliberately ugly numbers make
+        // the two shapes diverge: 16×333×777 ÷ 1,000,000 = 4, but ÷1000 then ×777÷1000 = 3.
+        var sum = UnmultipliedSum(garrisonMembers: 3, developmentLevel: 0, dangerBand: 0);
+        var singleDivision = sum * 333 * 777 / 1_000_000;
+
+        Assert.Equal(singleDivision, LoamUpkeep.For(3, 0, 0, intensityMilli: 333, handicapMilli: 777));
+    }
+
+    [Fact]
+    public void No_overflow_at_the_largest_legal_intensity_and_handicap()
+    {
+        // A sum large enough that, as an `int` multiplied by the two ceilings before any division,
+        // would already have wrapped past int.MaxValue (~2.147e9) — the bug this module's `long`
+        // quantities exist to remove as a class rather than patch as an instance.
+        const int hugeSum = 1_000_000;
+        var upkeep = LoamUpkeep.For(
+            garrisonMembers: hugeSum, developmentLevel: 0, dangerBand: 0,
+            intensityMilli: WorldValidation.MaxIntensityMilli, handicapMilli: WorldValidation.MaxHandicapMilli);
+
+        var expectedSum = UnmultipliedSum(hugeSum, 0, 0);
+        var expected = expectedSum * WorldValidation.MaxIntensityMilli * WorldValidation.MaxHandicapMilli / 1_000_000;
+
+        Assert.True(upkeep > 0, "upkeep silently wrapped negative at the legal maximum");
+        Assert.Equal(expected, upkeep);
+    }
+
+    [Fact]
+    public void Development_and_danger_upkeep_scales_linearly_and_independently()
+    {
+        // The formula's *shape* — additive, independent terms, each contributing something — pinned
+        // without hardcoding the exact provisional rates (LoamPolicy.DevelopmentUpkeepPerLevel and
+        // DangerUpkeepPerBand are tuning values L9's harness owns, not this test).
+        var neither = LoamPolicy.DevelopmentAndDangerUpkeep(0, 0);
+        var developmentOnly = LoamPolicy.DevelopmentAndDangerUpkeep(1, 0);
+        var dangerOnly = LoamPolicy.DevelopmentAndDangerUpkeep(0, 1);
+        var both = LoamPolicy.DevelopmentAndDangerUpkeep(1, 1);
+
+        Assert.Equal(0, neither);
+        Assert.True(developmentOnly > neither, "one level of development must cost something");
+        Assert.True(dangerOnly > neither, "one band of danger must cost something");
+        Assert.Equal(developmentOnly + dangerOnly, both); // additive, not multiplied together
+    }
+
+    // ---- the truth overload: ownership and the faction-wide source exemption ----
+
+    static WorldSlot Rootbed(int index) => new() { SlotIndex = index, SlotTypeId = SlotTypeCatalog.RootbedSlotTypeId };
+
+    static WorldState WorldWith(WorldSector sector, WorldFaction faction, params WorldSector[] otherSectors) => new()
+    {
+        WorldId = "w", TemplateId = "test", Seed = 1,
+        Factions = new[] { faction },
+        Sectors = new[] { sector }.Concat(otherSectors).OrderBy(s => s.SectorId, StringComparer.Ordinal).ToList()
+    };
+
+    [Fact]
+    public void An_unowned_sector_costs_nothing()
+    {
+        var sector = new WorldSector { SectorId = "s", OwnerFactionId = null, DevelopmentLevel = 5, DangerBand = 5 };
+        var world = WorldWith(sector, new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" });
+
+        Assert.Equal(0, LoamUpkeep.For(world, sector));
+    }
+
+    [Fact]
+    public void A_faction_with_a_rootbed_somewhere_pays_upkeep_on_a_sector_that_has_none()
+    {
+        var barren = new WorldSector { SectorId = "s-barren", OwnerFactionId = "f1" };
+        var withSource = new WorldSector { SectorId = "s-source", OwnerFactionId = "f1", Slots = new[] { Rootbed(0) } };
+        var world = WorldWith(barren, new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" }, withSource);
+
+        Assert.True(LoamUpkeep.For(world, barren) > 0);
+    }
+
+    [Fact]
+    public void A_standing_garrison_raises_the_truth_overloads_upkeep()
+    {
+        // The row overload's garrison term is tested directly elsewhere; this is the truth
+        // overload's own path — reading `world.Entities` for whoever stands in the sector — which
+        // nothing else in this file exercises (every other truth-overload fixture has no entities
+        // at all, so that `.Where(...).Sum(...)` lambda otherwise never runs).
+        var withSource = new WorldSector { SectorId = "s-source", OwnerFactionId = "f1", Slots = new[] { Rootbed(0) } };
+        var garrisoned = new WorldSector { SectorId = "s-garrison", OwnerFactionId = "f1" };
+        var legion = new WorldEntity
+        {
+            EntityId = "e1", Kind = WorldEntityKind.Legion, OwnerFactionId = "f1", AtSectorId = "s-garrison",
+            Members = new[]
+            {
+                new WorldEntityMember { SpeciesId = "sp1" },
+                new WorldEntityMember { SpeciesId = "sp2" }
+            }
+        };
+        var world = new WorldState
+        {
+            WorldId = "w", TemplateId = "test", Seed = 1,
+            Factions = new[] { new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" } },
+            Sectors = new[] { garrisoned, withSource }.OrderBy(s => s.SectorId, StringComparer.Ordinal).ToList(),
+            Entities = new[] { legion }
+        };
+
+        var withGarrison = LoamUpkeep.For(world, garrisoned);
+        var withoutGarrison = LoamUpkeep.For(0, garrisoned.DevelopmentLevel, garrisoned.DangerBand, garrisoned.FractureIntensityMilli, 1000);
+
+        Assert.Equal(withoutGarrison + 2 * LoamPolicy.GarrisonUpkeepPerMember, withGarrison);
+    }
+
+    [Fact]
+    public void A_faction_with_no_loam_source_anywhere_is_exempt_entirely()
+    {
+        var only = new WorldSector { SectorId = "s", OwnerFactionId = "f1", DevelopmentLevel = 5, DangerBand = 5 };
+        var world = WorldWith(only, new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" });
+
+        Assert.Equal(0, LoamUpkeep.For(world, only));
+    }
+}

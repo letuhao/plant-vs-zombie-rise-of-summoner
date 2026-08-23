@@ -448,6 +448,39 @@ public static class CheatState
         return d;
     }
 
+    /// <summary>
+    /// The real-valued absolutes (E16): fire rate, sun rate, creep speed.
+    ///
+    /// <para>These three used to be written straight to the Unity field from the extras path,
+    /// bypassing the modifier bag — which is why no effect could ever reach them, and why "shoots
+    /// faster" was unauthorable. They are Overrides now, the same shape <c>P-HP</c> and <c>P-ATK</c>
+    /// have always had, so the operator surface is unchanged and there is one path to the field.</para>
+    ///
+    /// <para>Separate from <see cref="BuildPlantAbsolute"/> because these are fractions and that map
+    /// is <c>int</c>: an attack interval of 1.5 seconds would truncate to 1.</para>
+    /// </summary>
+    public static Dictionary<string, double> BuildPlantAbsoluteReal()
+    {
+        var d = new Dictionary<string, double>(StringComparer.Ordinal);
+        void Put(string channel, string id)
+        {
+            if (!IsUserSet(id)) return;
+            var v = FVal(id);
+            if (v > 0) d[channel] = v;
+        }
+        Put(StatChannels.AttackInterval, "P-ATK-INT");
+        Put(StatChannels.ProduceInterval, "P-PROD-INT");
+        return d;
+    }
+
+    public static Dictionary<string, double> BuildZombieAbsoluteReal()
+    {
+        var d = new Dictionary<string, double>(StringComparer.Ordinal);
+        if (IsUserSet("Z-SPD-U") && FVal("Z-SPD-U") > 0)
+            d[StatChannels.ZombieSpeed] = FVal("Z-SPD-U");
+        return d;
+    }
+
     public static Dictionary<string, int> BuildZombieAbsolute()
     {
         var d = new Dictionary<string, int>(StringComparer.Ordinal);

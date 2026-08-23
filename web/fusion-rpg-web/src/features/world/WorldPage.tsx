@@ -14,11 +14,13 @@ import { cn } from "@/lib/cn";
 import { Badge, Banner, Button, KeyValue, Panel } from "@/ui";
 import firstLight from "./fixtures/first-light.json";
 import { LaneEdge } from "./LaneEdge";
+import { LoamGauge } from "./LoamGauge";
 import { SectorNode, type SectorNodeProps } from "./SectorNode";
+import { SectorPanel } from "./SectorPanel";
 import { toCommanderIntents } from "./commanderIntent";
 import { stepPlayback, toKeyframes } from "./turnPlayback";
 import type { WorldStateDto } from "./worldTypes";
-import { toGraph } from "./worldViewModel";
+import { summarizeLoam, toGraph } from "./worldViewModel";
 import {
   initialWorldUi,
   orderId,
@@ -92,6 +94,7 @@ export function WorldPage() {
     () => world.entities.find((e) => e.entityId === ui.selectedEntityId) ?? null,
     [world, ui.selectedEntityId]
   );
+  const loam = useMemo(() => summarizeLoam(graph.nodes.map((n) => n.data)), [graph]);
 
   const onNodeClick: NodeMouseHandler = (_, node) => dispatch({ type: "select-sector", sectorId: node.id });
 
@@ -229,6 +232,10 @@ export function WorldPage() {
         </Panel>
 
         <div>
+          <Panel title="Loam" testId="world-loam-gauge">
+            <LoamGauge summary={loam} />
+          </Panel>
+
           <Panel title="Sector" testId="world-inspector">
             {selected == null ? (
               <p className="text-sm text-muted">Pick a sector on the map.</p>
@@ -238,6 +245,7 @@ export function WorldPage() {
                   <span className="font-display text-text">{selected.label}</span>
                   <Badge>{selected.ownership}</Badge>
                 </div>
+                <SectorPanel sector={selected} />
                 <KeyValue
                   items={[
                     { label: "Type", value: selected.typeId },

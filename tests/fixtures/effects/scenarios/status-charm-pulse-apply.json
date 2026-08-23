@@ -22,9 +22,10 @@
       "targetPtr": "Z1",
       "typeId": 0,
       "targetTypeId": 0,
+      "_comment": "E17: no ApplyStatus action. charm_pulse declared a UnityCc payload and NO vanilla method exists for it (no SetCharm* in Assembly-CSharp) — so the FA2 action this step used to expect reached the injector's status switch, matched no case, and did nothing. An inert plan item that read as a working effect. The status itself still applies, which is what the next step checks, and it still CC-locks in battle because that reads the cc CATEGORY.",
       "expect": {
         "trigger": "OnDamageDealt",
-        "actions": [{ "action": "ApplyStatus", "params": { "status": "charm_pulse", "targetPtr": "Z1" } }]
+        "actions": []
       }
     },
     { "op": "expectStatus", "hostPtr": "Z1", "statusId": "charm_pulse", "present": true }

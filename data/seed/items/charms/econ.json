@@ -1,0 +1,401 @@
+{
+  "schemaVersion": 1,
+  "kind": "charm",
+  "_meta": {
+    "partition": "charms/econ",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "charms-1c",
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/entry-shapes.md#7",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "charm.econ-001",
+      "nameKey": "charm.hoarded-kernel",
+      "name": "Hoarded Kernel",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.hoarded-kernel",
+      "flavorKey": "flavor.charm.hoarded-kernel",
+      "flavor": "Every dwindling ember spares one grain for later. This one remembers why.",
+      "notes": "themeId: ember-harvest"
+    },
+    {
+      "id": "charm.econ-002",
+      "nameKey": "charm.gilded-husk",
+      "name": "Gilded Husk",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility", "mechanical"],
+      "iconKey": "icon.charm.gilded-husk",
+      "flavorKey": "flavor.charm.gilded-husk",
+      "flavor": "Painted over what it used to be, and prouder for it.",
+      "notes": "themeId: gilded-porcelain"
+    },
+    {
+      "id": "charm.econ-003",
+      "nameKey": "charm.lacquerclip",
+      "name": "Lacquerclip",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility", "mechanical"],
+      "iconKey": "icon.charm.lacquerclip",
+      "flavorKey": "flavor.charm.lacquerclip",
+      "flavor": "A single clasp, lacquered past its worth and carried anyway.",
+      "notes": "themeId: gilded-porcelain"
+    },
+    {
+      "id": "charm.econ-004",
+      "nameKey": "charm.scavenged-purse",
+      "name": "Scavenged Purse",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"],
+      "iconKey": "icon.charm.scavenged-purse",
+      "flavorKey": "flavor.charm.scavenged-purse",
+      "flavor": "Whatever the quartermaster didn't want, the pouch took gladly.",
+      "notes": "themeId: rusted-legion"
+    },
+    {
+      "id": "charm.econ-005",
+      "nameKey": "charm.bead-of-ash",
+      "name": "Bead of Ash",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.bead-of-ash",
+      "flavorKey": "flavor.charm.bead-of-ash",
+      "flavor": "What the last fire couldn't finish burning, it left behind as currency.",
+      "notes": "themeId: ember-harvest"
+    },
+    {
+      "id": "charm.econ-006",
+      "nameKey": "charm.rustloop",
+      "name": "Rustloop",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"],
+      "iconKey": "icon.charm.rustloop",
+      "flavorKey": "flavor.charm.rustloop",
+      "flavor": "Rings rust; the habit of keeping one does not.",
+      "notes": "themeId: rusted-legion"
+    },
+    {
+      "id": "charm.econ-007",
+      "nameKey": "charm.burgeoning-silo",
+      "name": "Burgeoning Silo",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "low" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 1,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.burgeoning-silo",
+      "flavorKey": "flavor.charm.burgeoning-silo",
+      "flavor": "Full past its seams, and still someone keeps filling it.",
+      "notes": "themeId: rot-bloom"
+    },
+    {
+      "id": "charm.econ-008",
+      "nameKey": "charm.holding-coffer",
+      "name": "Holding Coffer",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "low" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 1,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.holding-coffer",
+      "flavorKey": "flavor.charm.holding-coffer",
+      "flavor": "The roots hold the wall. The coffer holds everything else.",
+      "notes": "themeId: earthen-bastion"
+    },
+    {
+      "id": "charm.econ-009",
+      "nameKey": "charm.token-of-the-ledger",
+      "name": "Token of the Ledger",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "low" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 1,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.token-of-the-ledger",
+      "flavorKey": "flavor.charm.token-of-the-ledger",
+      "flavor": "A single page, copied so many times no one remembers the first hand.",
+      "notes": "themeId: sunwoven-almanac"
+    },
+    {
+      "id": "charm.econ-010",
+      "nameKey": "charm.locket-of-appraisal",
+      "name": "Locket of Appraisal",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "low" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 1,
+      "tags": ["utility", "mechanical"],
+      "iconKey": "icon.charm.locket-of-appraisal",
+      "flavorKey": "flavor.charm.locket-of-appraisal",
+      "flavor": "Opened once by an expert, and never quite closed the same way since.",
+      "notes": "themeId: gilded-porcelain"
+    },
+    {
+      "id": "charm.econ-011",
+      "nameKey": "charm.earthpod",
+      "name": "Earthpod",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "low" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 1,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.earthpod",
+      "flavorKey": "flavor.charm.earthpod",
+      "flavor": "Buried on purpose, dug up on schedule.",
+      "notes": "themeId: earthen-bastion"
+    },
+    {
+      "id": "charm.econ-012",
+      "nameKey": "charm.pouch-of-requisition",
+      "name": "Pouch of Requisition",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "low" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 1,
+      "tags": ["utility"],
+      "iconKey": "icon.charm.pouch-of-requisition",
+      "flavorKey": "flavor.charm.pouch-of-requisition",
+      "flavor": "Signed, stamped, and somehow still empty when it arrives.",
+      "notes": "themeId: rusted-legion"
+    },
+    {
+      "id": "charm.econ-013",
+      "nameKey": "charm.wandering-trinket",
+      "name": "Wandering Trinket",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 2,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.wandering-trinket",
+      "flavorKey": "flavor.charm.wandering-trinket",
+      "flavor": "It rode one spore farther than the garden that grew it.",
+      "notes": "themeId: windswept-spore"
+    },
+    {
+      "id": "charm.econ-014",
+      "nameKey": "charm.tended-bloom",
+      "name": "Tended Bloom",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 2,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.tended-bloom",
+      "flavorKey": "flavor.charm.tended-bloom",
+      "flavor": "Someone waters it who has no further use for water.",
+      "notes": "themeId: hollow-orchard"
+    },
+    {
+      "id": "charm.econ-015",
+      "nameKey": "charm.root-of-the-foundation",
+      "name": "Root of the Foundation",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 2,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.root-of-the-foundation",
+      "flavorKey": "flavor.charm.root-of-the-foundation",
+      "flavor": "Every wall the garden ever built started as one stubborn root.",
+      "notes": "themeId: earthen-bastion"
+    },
+    {
+      "id": "charm.econ-016",
+      "nameKey": "charm.seed-of-the-glut",
+      "name": "Seed of the Glut",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 2,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.seed-of-the-glut",
+      "flavorKey": "flavor.charm.seed-of-the-glut",
+      "flavor": "Plant enough and eventually the ground stops asking for more.",
+      "notes": "themeId: rot-bloom"
+    },
+    {
+      "id": "charm.econ-017",
+      "nameKey": "charm.patched-satchel",
+      "name": "Patched Satchel",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 2,
+      "tags": ["utility"],
+      "iconKey": "icon.charm.patched-satchel",
+      "flavorKey": "flavor.charm.patched-satchel",
+      "flavor": "Held together by whoever needed it to hold one more thing.",
+      "notes": "themeId: thorned-chassis"
+    },
+    {
+      "id": "charm.econ-018",
+      "nameKey": "charm.twinbead",
+      "name": "Twinbead",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "economy",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.sunbloom", "atom.midas"],
+      "poolRolls": 2,
+      "tags": ["utility"],
+      "iconKey": "icon.charm.twinbead",
+      "flavorKey": "flavor.charm.twinbead",
+      "flavor": "Grown as one, carried as two, spent as either.",
+      "notes": "themeId: verdant-graft"
+    },
+    {
+      "id": "charm.econ-019",
+      "nameKey": "charm.signet-of-the-coalbed",
+      "name": "Signet of the Coalbed",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "economy",
+      "frameHint": "any",
+      "uniqueCarry": true,
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "high" },
+        { "family": "atom.vitality", "powerBand": "medium", "params": { "sign": "negative" } }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility", "rooted"],
+      "iconKey": "icon.charm.signet-of-the-coalbed",
+      "flavorKey": "flavor.charm.signet-of-the-coalbed",
+      "flavor": "Every coin it grants is a coal it stops banking for winter.",
+      "notes": "themeId: ember-harvest"
+    },
+    {
+      "id": "charm.econ-020",
+      "nameKey": "charm.signet-of-annexation",
+      "name": "Signet of Annexation",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "economy",
+      "frameHint": "any",
+      "uniqueCarry": true,
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "high" },
+        { "family": "atom.might", "powerBand": "medium", "params": { "sign": "negative" } }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"],
+      "iconKey": "icon.charm.signet-of-annexation",
+      "flavorKey": "flavor.charm.signet-of-annexation",
+      "flavor": "Claim the neighbor's yield, and the strength to defend your own thins to pay for it.",
+      "notes": "themeId: verdant-graft"
+    }
+  ]
+}

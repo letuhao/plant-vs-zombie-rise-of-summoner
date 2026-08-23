@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "sets-1c",
+    "partition": "sets/thorned-chassis",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-sets.md#3.2"
+  },
+  "entries": [
+    {
+      "id": "set.thorned-chassis-001",
+      "nameKey": "set.improvised-yoke",
+      "name": "Improvised Yoke",
+      "themeKey": "theme.thorned-chassis",
+      "members": [
+        { "role": "armament-primary" },
+        { "role": "core-guard" },
+        { "role": "manipulator" },
+        { "role": "footing" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.retribution",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "low" },
+            { "family": "atom.vitality", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Compound name: adjective 'Improvised' from themeAdjectivePools['thorned-chassis'], Base noun 'Yoke' invented (a harness bolted on in a hurry, not from a pool). Capability atom.retribution (resource.delta, OnDamageTaken) reads as the makeshift rig shoving a hit straight back rather than absorbing it cleanly. Claims armament-primary only, no armament-secondary in this entry. All four member roles (armament-primary, core-guard, manipulator, footing) are in the hybrid role core. Higher tiers use only Flat/Increased stat.modify families (might, ferocity, vitality) - neither of the More-op families (bulwark, savagery) and no defense-channel family (warding, resilience), so SetTierForbiddenAtom does not apply."
+    },
+    {
+      "id": "set.thorned-chassis-002",
+      "nameKey": "set.husk-of-the-chassis",
+      "name": "Husk of the Chassis",
+      "themeKey": "theme.thorned-chassis",
+      "members": [
+        { "role": "core-guard" },
+        { "role": "head-guard" },
+        { "role": "mantle" },
+        { "role": "girdle" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.cleansing",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" },
+            { "family": "atom.mending", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Of-construct name: Base 'Husk' (ordinary noun - a hollowed zombie or plant remnant) plus Concept 'chassis' from conceptPools['thorned-chassis']. Capability atom.cleansing (status.clear, OnDamageTaken) reads as the scrap shell scraping loose whatever is clinging to the body underneath. Claims no armament role. All four member roles (core-guard, head-guard, mantle, girdle) are in the hybrid role core. Higher tiers (vitality, fortitude, mending) are Flat/Increased stat.modify only, no More-op or defense-channel family."
+    },
+    {
+      "id": "set.thorned-chassis-003",
+      "nameKey": "set.junkbramble",
+      "name": "Junkbramble",
+      "themeKey": "theme.thorned-chassis",
+      "members": [
+        { "role": "armament-secondary" },
+        { "role": "jewel-major" },
+        { "role": "sense" },
+        { "role": "retinue" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.venomous",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "low" },
+            { "family": "atom.life-graft", "powerBand": "trivial" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Whole-token fusion name 'Junkbramble' from uniqueSetSeedPools['thorned-chassis'] (canonicalId 'junkbramble'), used atomically per naming.v1.json's whole-token-resolution rule (2a) - never decomposed into 'junk' + 'bramble'. Capability atom.venomous (status.apply, poison) reads as scrap-wrapped thorn wire leaching toxin into whatever it snags. Claims armament-secondary only, never armament-primary in the same entry. Two-tier set (2/4, both legal per ssot-sets.md 3.4 - every set needs a threshold at 2, not at every integer up to its member count). All four member roles (armament-secondary, jewel-major, sense, retinue) are in the hybrid role core. The single higher tier (ferocity, life-graft) is Flat/Increased-equivalent stat.modify only - life-graft is an Increased-op family on the hp channel, not a More-op family - so SetTierForbiddenAtom does not apply."
+    },
+    {
+      "id": "set.thorned-chassis-004",
+      "nameKey": "set.retrofitted-cordon",
+      "name": "Retrofitted Cordon",
+      "themeKey": "theme.thorned-chassis",
+      "members": [
+        { "role": "girdle" },
+        { "role": "jewel-minor-a" },
+        { "role": "infusion" },
+        { "role": "retinue" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.econ-bounty",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "low" },
+            { "family": "atom.mending", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Compound name: adjective 'Retrofitted' from themeAdjectivePools['thorned-chassis'], Base noun 'Cordon' invented (a perimeter line strung between salvage posts). Capability atom.econ-bounty (resource.economy, OnDeath, points) reads as a retrofitted collection line paying out on every kill it is strung across. Claims no armament role. jewel-minor-a is included, jewel-minor-b is not, per ssot-sets.md 3.7's SetRoleNotUniversal split (jewel-minor-b is not in the hybrid role core). Higher tiers (fortitude, vitality, mending) are Flat/Increased stat.modify only."
+    },
+    {
+      "id": "set.thorned-chassis-005",
+      "nameKey": "set.warren-of-the-overhaul",
+      "name": "Warren of the Overhaul",
+      "themeKey": "theme.thorned-chassis",
+      "members": [
+        { "role": "footing" },
+        { "role": "manipulator" },
+        { "role": "sense" },
+        { "role": "jewel-minor-a" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.regeneration",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "low" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "low" },
+            { "family": "atom.vitality", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Of-construct name: Base 'Warren' (ordinary noun - a rooted, tunnelling network) plus Concept 'overhaul' from conceptPools['thorned-chassis'] (a maintenance pass run over the roots underneath the scrap). Capability atom.regeneration (resource.delta, OnTimer) reads as the warren quietly mending itself between hits. Claims no armament role. jewel-minor-a is included, jewel-minor-b is not, per the same SetRoleNotUniversal split as set.thorned-chassis-004. Higher tiers (might, ferocity, vitality) are Flat/Increased stat.modify only."
+    },
+    {
+      "id": "set.thorned-chassis-006",
+      "nameKey": "set.ironstem",
+      "name": "Ironstem",
+      "themeKey": "theme.thorned-chassis",
+      "members": [
+        { "role": "armament-secondary" },
+        { "role": "core-guard" },
+        { "role": "head-guard" },
+        { "role": "mantle" },
+        { "role": "girdle" },
+        { "role": "footing" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.gardener",
+            "powerBand": "medium"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" },
+            { "family": "atom.fortitude", "powerBand": "low" }
+          ]
+        },
+        {
+          "pieces": 6,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" },
+            { "family": "atom.ferocity", "powerBand": "medium" }
+          ]
+        }
+      ],
+      "tags": ["signature"],
+      "notes": "Whole-token fusion name 'Ironstem' from uniqueSetSeedPools['thorned-chassis'], used atomically. This partition's one grand (6-piece) set, per ssot-sets.md 3.4's 'exception, not the pattern' - it carries the mandatory thresholds at 2 and 4 plus a top threshold at 6, equal to its member count, so SetThresholdUnreachable does not apply. Capability atom.gardener (spawn.entity, OnDeath, plant) is powerBand medium rather than low, matching the grand-set convention already used on this fleet's frostbitten-vanguard sibling's own 6-piece entry - the six-slot commitment earns a stronger splash than a typical 4-piece set. Claims armament-secondary only, never armament-primary in the same entry. Six distinct member roles (armament-secondary, core-guard, head-guard, mantle, girdle, footing), all in the hybrid role core, none repeated within this entry. Tagged 'signature' (notability axis, tags.v1.json) as the partition's flagship - a curation flag, not a power claim. Higher tiers (vitality, fortitude, might, ferocity) are Flat/Increased stat.modify only, no More-op family."
+    }
+  ]
+}

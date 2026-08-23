@@ -57,6 +57,25 @@ export type WorldSectorDto = {
   lifelineCost: number;
   /** True when losing it would cut your territory in two. */
   lifeline: boolean;
+  /** Whether this ground can be kept at all — terrain, visible once scouted, not only to the owner. */
+  habitable: boolean;
+  /** What this sector earns this turn. Owner-only; zero for anything you do not hold. */
+  loamProduction: number;
+  /** What this sector costs this turn. Owner-only. */
+  loamUpkeep: number;
+  /** The number an abandonment decision is actually about. Owner-only. */
+  loamNet: number;
+  /** The connected block of your territory this sector pools with. Owner-only; null otherwise. */
+  componentId: string | null;
+  componentProduction: number;
+  componentUpkeep: number;
+  componentNet: number;
+  /** Raw stock. Owner-only; zero for anything you do not hold. */
+  loamStock: number;
+  /** The pooled stock of this sector's whole component. Owner-only. */
+  componentStock: number;
+  /** True when, if nothing changes, the engine releases this ground outright next turn. Owner-only. */
+  willReleaseNextTurn: boolean;
 };
 
 export type WorldLaneDto = {

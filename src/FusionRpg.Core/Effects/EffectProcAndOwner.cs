@@ -155,6 +155,11 @@ public static class EffectOverlayMerge
             "channel", "amount", "mode", "mergedCount", "targetPtr",
             "target", "delivery", "burst", "procDepthLimit", "chainDepth",
             "chance", "icd_ms", "max_stacks", "filters",
+            // E17: `stat` was documented in status-ssot.md and used in a shipped example, and was
+            // in neither the allowlist nor any parser — the example failed validation with
+            // "unknown overlay key 'stat'". It lands here WITH its consumer (StatusStatPayload),
+            // never before it: an allowlisted key nothing reads is the defect, not the fix.
+            "stat",
             "statusId", "periodMs", "durationMs", "status_icd_ms", "statusIcdMs",
             "everyHits", "resetOnBurst", "counterScope", "tickBudget",
             "spread", "immunityTags", "elementPayload"

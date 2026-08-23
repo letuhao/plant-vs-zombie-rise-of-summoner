@@ -29,8 +29,19 @@ public static class ReferenceCheck
             .Select(a => a.Prefix.Split('.')[0])
             .Distinct(StringComparer.Ordinal)
             .ToHashSet(StringComparer.Ordinal);
+        // Underscores are accepted here ON PURPOSE, even though no legal id contains one. The regex
+        // decides whether a string is even *considered* a reference, so a stricter pattern does not
+        // reject a misspelled id — it makes it invisible. Ten references to `atom.keen_edge` and
+        // friends sat in the corpus producing no error and no warning, because they failed this
+        // gate and `ResolveReference` was never called on them.
+        //
+        // They came from `naming.v1.json`, which lists the shipped families in snake_case while
+        // every authored id is kebab-case. The affix-family authors converted; the gem and
+        // socket-word authors, only *referencing* the families, copied the registry verbatim.
+        // Letting the underscore form through means it resolves against nothing and reports
+        // ReferenceUnresolved, which is the whole point.
         var idLike = new Regex(@"^(" + string.Join('|', namespaceRoots.Select(Regex.Escape))
-                                     + @")\.[a-z0-9]+(-[a-z0-9]+)*$", RegexOptions.Compiled);
+                                     + @")\.[a-z0-9]+([-_][a-z0-9]+)*$", RegexOptions.Compiled);
 
         var edges = new List<(SeedEntry From, string To)>();
         var mintedFamilies = new Dictionary<string, SeedEntry>(StringComparer.Ordinal);

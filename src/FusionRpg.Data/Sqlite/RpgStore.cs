@@ -554,6 +554,8 @@ public sealed partial class RpgStore : IRpgDb
         EnsureElementSchemaUnlocked(db);
         // power_coefficient + power_trigger_frequency + the sweep's proposal table (E9).
         EnsurePowerSchemaUnlocked(db);
+        // effect_channel_policy — a channel's caps and defaults, never its identity (E16).
+        EnsureChannelPolicySchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)

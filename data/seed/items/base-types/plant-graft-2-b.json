@@ -3,7 +3,7 @@
   "kind": "base-type",
   "_meta": {
     "batch": "base-plant-graft-2-b",
-    "partition": "base-types/graft-2/plant/b",
+    "partition": "base-types/jewel-minor-b/plant/b",
     "contractVersion": 1,
     "registryVersions": {
       "core": 1,

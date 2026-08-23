@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "kind": "drop-table",
+  "_meta": {
+    "partition": "drop-tables/4",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "drop-tables-1c",
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/entry-shapes.md#9",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "droptable.d4-001",
+      "nameKey": "droptable.reclaimed-mulch",
+      "name": "Reclaimed Mulch",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-001-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "substrate.plant.crude", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-002",
+      "nameKey": "droptable.salvaged-scrap",
+      "name": "Salvaged Scrap",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-002-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "substrate.humanoid.crude", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-003",
+      "nameKey": "droptable.seasoned-bark",
+      "name": "Seasoned Bark",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-003-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "substrate.plant.sound", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-004",
+      "nameKey": "droptable.riveted-ingot",
+      "name": "Riveted Ingot",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-004-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "substrate.humanoid.sound", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-005",
+      "nameKey": "droptable.kindled-cask",
+      "name": "Kindled Cask",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-005-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.fire", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-006",
+      "nameKey": "droptable.shadow-extract",
+      "name": "Shadow Extract",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-006-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.dark", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-007",
+      "nameKey": "droptable.squall-vessel",
+      "name": "Squall Vessel",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-007-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.air", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-008",
+      "nameKey": "droptable.molten-anvil",
+      "name": "Molten Anvil",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-008-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "catalyst.forge", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-009",
+      "nameKey": "droptable.budding-geode",
+      "name": "Budding Geode",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-009-yield",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.rare", "dropBand": "staple", "qtyCurve": "curve.019" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d4-010",
+      "nameKey": "droptable.layered-cutting",
+      "name": "Layered Cutting",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "d4-010-yield",
+          "entries": [
+            { "entryKind": "insert", "ref": "gem.g1-001", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    }
+  ]
+}

@@ -161,6 +161,29 @@ public sealed record BattleReport
     /// so replay/sweep guards refuse cross-platform re-resolution like a version mismatch.
     /// </summary>
     public string EnvironmentStamp { get; init; } = BattleEnvironment.Stamp;
+
+    /// <summary>
+    /// Which content produced this report (E12, deferred here from E8).
+    ///
+    /// <para><b>Carried, and deliberately outside the determinism hash</b> — the same treatment the
+    /// platform stamp gets, for the same reason. It is provenance, not battle math. Fold it into the
+    /// hash input and every content edit anywhere — a new item, a seventh element, a re-priced
+    /// coefficient — moves every battle golden, and a real determinism break becomes indistinguishable
+    /// from someone adding a row. That is the machine-dependence problem in a different coat.</para>
+    ///
+    /// <para><b>Null</b> when the host has no catalog: battle does not require one, and inventing a
+    /// hash for content that was not consulted would be a claim rather than a record. Null and not
+    /// empty-string, because only null is a string's default — and the omission below keys on that.</para>
+    ///
+    /// <para><b>Omitted from the JSON when empty</b>, which is what let this land without re-blessing
+    /// a single golden. Blanking the value was not enough — the property NAME alone moved all four
+    /// hashes. Absent-when-empty means the determinism view (which blanks it) serializes to exactly
+    /// the bytes it did before E12 existed.</para>
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore(
+        Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    public string? ContentHash { get; init; }
+
     public ulong Seed { get; init; }
     public string WaveId { get; init; } = "";
     public BattleOutcome Outcome { get; init; }

@@ -66,6 +66,58 @@ public sealed record WorldSectorDto
     public int PressureMilli { get; init; }
     public int DepletionMilli { get; init; }
     public int DevelopmentLevel { get; init; }
+
+    /// <summary>
+    /// The Fracture's local strength — terrain, so it is sent to anyone who has scouted this sector
+    /// (spec-loam-model.md).
+    /// </summary>
+    public int FractureIntensityMilli { get; init; } = 1000;
+
+    /// <summary>
+    /// Whether this ground can be kept at all — a property of the terrain, like intensity, so it is
+    /// sent to anyone who has scouted the sector, not only the owner (spec-loam-fe.md).
+    /// </summary>
+    public bool Habitable { get; init; }
+
+    /// <summary>What this sector earns this turn — owner-only (spec-loam-fe.md).</summary>
+    public long LoamProduction { get; init; }
+
+    /// <summary>What this sector costs this turn, after intensity and handicap — owner-only.</summary>
+    public long LoamUpkeep { get; init; }
+
+    /// <summary>The number the abandonment decision is actually about — owner-only.</summary>
+    public long LoamNet { get; init; }
+
+    /// <summary>
+    /// Which connected block of the owner's territory pools with this sector — the lowest sector id
+    /// in that component, stable and meaningful on the wire rather than an opaque index. Null unless
+    /// the viewer owns this sector.
+    /// </summary>
+    public string? ComponentId { get; init; }
+
+    public long ComponentProduction { get; init; }
+    public long ComponentUpkeep { get; init; }
+    public long ComponentNet { get; init; }
+
+    /// <summary>
+    /// Raw stock, owner-only (spec-loam-fe.md's gauge). Belief/`IntelSnapshot` deliberately never
+    /// carries this even for the owner — that fog rule is unchanged — but this DTO already reads
+    /// `StabilityMilli` straight from truth, gated the same way, and the gauge needs stock alongside
+    /// income/upkeep/net the same way.
+    /// </summary>
+    public long LoamStock { get; init; }
+
+    /// <summary>The pooled stock of this sector's whole component — owner-only.</summary>
+    public long ComponentStock { get; init; }
+
+    /// <summary>
+    /// True when, if nothing changes, this sector is the one the engine will actually release next
+    /// turn (stability to zero, ground lost) — not merely fade further. Owner-only. Computed by
+    /// <c>LoamForecast.WillRelease</c>, the same selection <c>LoamPhases.Pressure</c> itself applies
+    /// the fade with, so the warning and the eventual turn cannot silently disagree.
+    /// </summary>
+    public bool WillReleaseNextTurn { get; init; }
+
     public string Intel { get; init; } = "";
     public int LastSeenTurn { get; init; }
     public int LayoutX { get; init; }

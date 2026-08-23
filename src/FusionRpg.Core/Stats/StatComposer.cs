@@ -61,6 +61,9 @@ public sealed class StatComposer
                     Arm2Max = Math.Max(0, baseline.Arm2Max),
                     DefensePercent = 1f,
                     DefenseFlat = 0,
+                    AttackInterval = baseline.AttackInterval,
+                    ProduceInterval = baseline.ProduceInterval,
+                    ZombieSpeed = baseline.ZombieSpeed,
                     Contributions = all
                 };
             }
@@ -73,6 +76,19 @@ public sealed class StatComposer
 
         int Chan(string channel, int y0, int min = 1) =>
             Math.Max(min, (int)Math.Round(_strategy.ComposeChannel(y0, all.Where(m => m.Channel == channel))));
+
+        double Real(string channel, double y0, double min)
+        {
+            // A zero baseline means the entity has no such stat — a zombie has no produce interval.
+            // Composing modifiers onto it would invent one out of nothing.
+            if (y0 <= 0) return 0;
+            return Math.Max(min, _strategy.ComposeChannel(y0, all.Where(m => m.Channel == channel)));
+        }
+
+        // Floored above zero, not at it. `More` −100% on an interval is ordinary content, and the
+        // result is a divide-by-zero or an infinite fire rate depending on which call site reads it.
+        double Interval(string channel, double y0) =>
+            Real(channel, y0, StatChannels.MinimumInterval);
 
         ComposeDefense(all, out var defPct, out var defFlat);
 
@@ -87,6 +103,9 @@ public sealed class StatComposer
             Arm2Max = Chan(StatChannels.Arm2Max, baseline.Arm2Max, min: 0),
             DefensePercent = defPct,
             DefenseFlat = defFlat,
+            AttackInterval = Interval(StatChannels.AttackInterval, baseline.AttackInterval),
+            ProduceInterval = Interval(StatChannels.ProduceInterval, baseline.ProduceInterval),
+            ZombieSpeed = Real(StatChannels.ZombieSpeed, baseline.ZombieSpeed, min: 0),
             Contributions = bag.All
         };
     }

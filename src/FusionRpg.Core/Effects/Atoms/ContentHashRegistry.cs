@@ -30,8 +30,8 @@ public sealed record ContentHashTable(string TableName, IReadOnlyList<ContentHas
 /// </summary>
 public static class ContentHashRegistry
 {
-    /// <summary>Bump when a table joins or leaves. E18 → 2 (done), E9 → 3 (done), E16 → 4.</summary>
-    public const int CurrentSchemaVersion = 3;
+    /// <summary>Bump when a table joins or leaves. E18 → 2, E9 → 3, E16 → 4 — all done.</summary>
+    public const int CurrentSchemaVersion = 4;
 
     /// <summary>
     /// Version 1: the tables E2, E4 and E5 actually created. Instances, bindings and
@@ -157,11 +157,32 @@ public static class ContentHashRegistry
         }),
     }).ToArray());
 
+    /// <summary>
+    /// Version 4 adds E16's <c>effect_channel_policy</c>.
+    ///
+    /// <para>The table and this bump ship together on purpose. The 0.95 resist cap was a code
+    /// constant, where editing it moved every battle golden with the stamp standing still —
+    /// acceptable only because a constant edit is visible in a diff, which stops being true the
+    /// moment it becomes a row.</para>
+    /// </summary>
+    static readonly ContentHashTable[] V4 = Sorted(V3.Concat(new[]
+    {
+        new ContentHashTable("effect_channel_policy", new[]
+        {
+            ContentHashColumn.Text("channel_id"),
+            ContentHashColumn.Text("direction"),
+            ContentHashColumn.Text("default_value"),
+            ContentHashColumn.Text("cap_milli"),
+            ContentHashColumn.Text("compose_kind"),
+        }),
+    }).ToArray());
+
     public static IReadOnlyList<ContentHashTable> For(int schemaVersion) => schemaVersion switch
     {
         1 => V1,
         2 => V2,
         3 => V3,
+        4 => V4,
         _ => throw new ArgumentOutOfRangeException(nameof(schemaVersion),
             $"contentHashSchemaVersion {schemaVersion} is not a known registry version " +
             $"(latest is {CurrentSchemaVersion})"),

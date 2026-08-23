@@ -72,8 +72,31 @@ public static class LintCheck
                     $"role group '{group}' has exactly one member; a pool with one row never chooses");
     }
 
-    /// <summary>Kinds that exist to be referenced, and nothing references them.</summary>
-    static readonly string[] ReferencedKinds = { "base-type", "affix-family", "curve", "material", "gem" };
+    /// <summary>
+    /// Kinds that exist to be referenced, and nothing references them.
+    ///
+    /// `base-type` is deliberately NOT here. A base type is reachable by rolling, not by being
+    /// pointed at: 637 of 740 are referenced by nothing and every one of them is correct content.
+    /// Warning on each buried the roughly twenty findings that meant something under noise that
+    /// could never be actioned.
+    /// </summary>
+    /// Nor is `gem`, for the same reason once you read entry-shapes.md §2: a socket word names its
+    /// ingredients by atom FAMILY and `minPowerBand`, never by gem id, so a gem is found and
+    /// socketed rather than pointed at. Nor `curve` — a curve is resolved by the generator through
+    /// `bands.v1.json`, not named by any seed row.
+    ///
+    /// What is left genuinely exists to be referenced: an affix family nothing grants, and a
+    /// material no recipe spends, are both real findings.
+    static readonly string[] ReferencedKinds = { "affix-family", "material" };
+
+    /// <summary>
+    /// Five kinds carry a runtime-facing id beside their allocated tracking id (entry-shapes.md §0),
+    /// and a consumer naturally references the runtime one — a recipe spends
+    /// `substrate.humanoid.crude`, not `material.017`. Matching only the tracking id reports a live,
+    /// referenced row as an orphan. This is the same tracking-vs-runtime confusion that made the
+    /// validator demand an enhancement milestone resolve its own minted family.
+    /// </summary>
+    static readonly string[] RuntimeIdFields = { "runtimeId", "runtimeFamily", "containerId" };
 
     static void UnreferencedEntries(ValidationContext ctx)
     {
@@ -92,6 +115,7 @@ public static class LintCheck
             if (entry.File.IsExemplar) continue;
             if (!ReferencedKinds.Contains(entry.File.Kind ?? "", StringComparer.Ordinal)) continue;
             if (referenced.Contains(id)) continue;
+            if (RuntimeIdFields.Select(entry.AsString).OfType<string>().Any(referenced.Contains)) continue;
             ctx.Warn(entry, "Unreferenced", "lint",
                 $"nothing in the corpus references '{id}'");
         }

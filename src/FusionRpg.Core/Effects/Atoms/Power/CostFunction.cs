@@ -1,3 +1,4 @@
+using FusionRpg.Core.Stats;
 using System.Text.Json;
 
 namespace FusionRpg.Core.Effects.Atoms.Power;
@@ -66,6 +67,12 @@ public static class CostFunction
 
         var basePoints = PowerMath.MulMilli(normalisedMilli, coeff.CoeffMilli);
         var points = PowerMath.MulMilli(basePoints, conditionalityMilli);
+
+        // E16: on a lower-is-better channel, going DOWN is the buff. `quickening` reduces an attack
+        // interval, and pricing the raw magnitude would file the game's most wanted affix as a
+        // penalty — negative power, failing no budget, sorting last in every UI.
+        if (StatChannels.IsLowerBetter(StringOf(pars, "channel")) && SignOf(atom, kind, pars) > 0)
+            points = -points;
 
         var vector = PowerVector.FromCategory(kind.Categories, points);
 
@@ -187,6 +194,13 @@ public static class CostFunction
         // overlay. One reference unit, so it prices as "one of whatever this kind does".
         return 1;
     }
+
+    /// <summary>
+    /// Which way the atom moves its channel, before the direction flip. Reads the authored sign,
+    /// which <see cref="Price"/> has already taken the absolute value of.
+    /// </summary>
+    static int SignOf(AtomRow atom, AtomKind kind, IReadOnlyDictionary<string, JsonElement> pars) =>
+        Math.Sign(MeanMagnitude(atom, kind, pars));
 
     // ---- json helpers -----------------------------------------------------------------------------
 

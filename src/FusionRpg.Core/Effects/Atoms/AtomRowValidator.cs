@@ -77,7 +77,12 @@ public static class AtomRowValidator
         if (!TryParseObject(row.ParamsJson, out var pars, out var parsErr))
             return Fail(AtomRejectionReason.BadParamValue, $"params_json: {parsErr}");
 
-        var paramCheck = kind.Params.Validate(pars);
+        // Through the REGISTRY, not straight to the schema. `ParamSchema.Validate` checks the shape —
+        // which keys, of what kind — and the registry adds the rules that are about values, chief
+        // among them G6: a `channel` outside the primary list. Calling the schema directly meant
+        // `channel: "fireRate"` validated at load and then wrote nothing, which is the silent no-op
+        // G6 was raised to close. The rule existed and had a test; the row path just never used it.
+        var paramCheck = AtomKindRegistry.Validate(row.KindId, pars);
         if (!paramCheck.IsOk) return paramCheck;
 
         var opCheck = ValidateOp(row, pars);

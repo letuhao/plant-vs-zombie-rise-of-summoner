@@ -65,11 +65,19 @@ public static class KindCatalog
                 "powerBand", "nameWords", "displayTemplate", "channel",
             }),
         Defined("unique", "uniques", "uniques", "1c",
-            required: new[] { "frame", "baseType", "rarity", "fixedAtoms", "counterPressure", "tags" },
+            required: new[]
+            {
+                "frame", "baseType", "rarity", "fixedAtoms", "counterPressure", "tags",
+                // ssot-uniques.md §3.7 keys its anti-convergence rule on (role, rung band, power
+                // axis) and the shape carried no axis, so the rule was unverifiable and eighteen
+                // partitions were trusted rather than checked. Required, not optional: an optional
+                // field that half the corpus omits cannot gate anything.
+                "powerAxis",
+            },
             extra: new[]
             {
                 "frame", "baseType", "rarity", "fixedAtoms", "varianceSlot",
-                "counterPressure", "theme", "themeKey", "acquisition",
+                "counterPressure", "theme", "themeKey", "acquisition", "powerAxis",
             }),
         Defined("set", "sets", "sets", "1c",
             required: new[] { "themeKey", "members", "thresholds" },

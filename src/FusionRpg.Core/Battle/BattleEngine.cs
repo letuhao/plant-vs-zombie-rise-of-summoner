@@ -483,7 +483,11 @@ public static class BattleEngine
     {
         foreach (var inst in status.ForHost(actorKey))
         {
-            if ((inst.Kind == StatusKind.CrowdControl || inst.Kind == StatusKind.UnityCc) && inst.ExpiresAt >= now)
+            // Asks what the status DOES, not how it is delivered (E17). This tested `Kind`, and
+            // `Kind` conflates semantic role with execution path — so every `UnityCc` status locked
+            // the actor out of its turn, including `poison`, which is damage over time. Of the nine
+            // statuses the old check caught, eight are categorised `cc` and exactly one is not.
+            if (inst.IsCrowdControl && inst.ExpiresAt >= now)
                 return true;
         }
 

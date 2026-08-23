@@ -21,7 +21,11 @@ public enum SlotKind
     /// <summary>Unusable ground — cleared by a project into wildland before anything is built.</summary>
     Hazard,
     /// <summary>The one slot in a sector that may host a stronghold.</summary>
-    Seat
+    Seat,
+    /// <summary>Ground where the old world still shows through — the loam source. Appended, never
+    /// inserted: <c>WorldCanonical</c> writes the slot type id string, not the enum ordinal, so
+    /// appending is the only safe way to grow this list.</summary>
+    Rootbed
 }
 
 /// <summary>One slot type. Core is net6 / C# 10 — no <c>required</c>; Validate() rejects bad rows.</summary>
@@ -42,6 +46,7 @@ public static class SlotTypeCatalog
 {
     public const string SeatSlotTypeId = "seat";
     public const string WildlandSlotTypeId = "wildland";
+    public const string RootbedSlotTypeId = "rootbed";
 
     static IReadOnlyList<SlotTypeDef>? _all;
     static Dictionary<string, SlotTypeDef>? _byId;
@@ -70,7 +75,8 @@ public static class SlotTypeCatalog
         new() { SlotTypeId = "spire", Name = "Spire", Kind = SlotKind.Spire, Buildable = true },
         new() { SlotTypeId = "anomaly", Name = "Anomaly", Kind = SlotKind.Anomaly },
         new() { SlotTypeId = "hazard", Name = "Hazard", Kind = SlotKind.Hazard },
-        new() { SlotTypeId = SeatSlotTypeId, Name = "Seat", Kind = SlotKind.Seat, Buildable = true }
+        new() { SlotTypeId = SeatSlotTypeId, Name = "Seat", Kind = SlotKind.Seat, Buildable = true },
+        new() { SlotTypeId = RootbedSlotTypeId, Name = "Rootbed", Kind = SlotKind.Rootbed, Buildable = true, Yields = true }
     };
 
     static Dictionary<string, SlotTypeDef> ByIdMap()

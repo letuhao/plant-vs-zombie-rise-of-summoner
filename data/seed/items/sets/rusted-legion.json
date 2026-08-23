@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "sets-1c",
+    "partition": "sets/rusted-legion",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-sets.md#3.2"
+  },
+  "entries": [
+    {
+      "id": "set.rusted-legion-001",
+      "nameKey": "set.ranked-garrison",
+      "name": "Ranked Garrison",
+      "themeKey": "theme.rusted-legion",
+      "members": [
+        { "role": "armament-primary" },
+        { "role": "head-guard" },
+        { "role": "core-guard" },
+        { "role": "footing" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.econ-muster",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "low" },
+            { "family": "atom.vitality", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Compound name: adjective 'Ranked' from themeAdjectivePools['rusted-legion'], Base noun 'Garrison' invented (a standing posting, not from a pool). Capability atom.econ-muster (resource.economy, OnSpawn, points) reads as the roll call paying out the moment the unit falls in. No elemental param anywhere in this entry, per the theme's avoid-elemental-magic rule. Claims armament-primary only, no armament-secondary in this entry. All four member roles (armament-primary, head-guard, core-guard, footing) are in the hybrid role core. Higher tiers (might, ferocity, vitality) are Flat/Increased stat.modify only - neither More-op family (bulwark, savagery) nor any defense-channel family (warding, resilience) appears, so SetTierForbiddenAtom does not apply."
+    },
+    {
+      "id": "set.rusted-legion-002",
+      "nameKey": "set.battered-outpost",
+      "name": "Battered Outpost",
+      "themeKey": "theme.rusted-legion",
+      "members": [
+        { "role": "armament-secondary" },
+        { "role": "mantle" },
+        { "role": "girdle" },
+        { "role": "jewel-major" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.sust-callus",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" },
+            { "family": "atom.mending", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Compound name: adjective 'Battered' from themeAdjectivePools['rusted-legion'], Base noun 'Outpost' invented (a forward post nobody has resupplied lately). Capability atom.sust-callus (shield.grant, OnDamageTaken) reads as the last line of scavenged plating hardening exactly when it is hit, not before. No element param used. Claims armament-secondary only, never armament-primary in this entry. All four member roles (armament-secondary, mantle, girdle, jewel-major) are in the hybrid role core. Higher tiers (vitality, fortitude, mending) are Flat/Increased stat.modify only, no More-op or defense-channel family."
+    },
+    {
+      "id": "set.rusted-legion-003",
+      "nameKey": "set.sentry-of-the-barracks",
+      "name": "Sentry of the Barracks",
+      "themeKey": "theme.rusted-legion",
+      "members": [
+        { "role": "core-guard" },
+        { "role": "manipulator" },
+        { "role": "sense" },
+        { "role": "jewel-minor-a" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.entangling",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" },
+            { "family": "atom.life-graft", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Of-construct name: Base 'Sentry' invented (posted watch, not from a pool) plus Concept 'barracks' from conceptPools['rusted-legion']. Capability atom.entangling (status.apply, a snare status) reads as tripwire and netting strung around the post by whoever last stood this watch - no element param involved. Claims no armament role. jewel-minor-a is included, jewel-minor-b is not, since jewel-minor-b sits outside the hybrid role core (ssot-sets.md 3.7's SetRoleNotUniversal split). All four member roles (core-guard, manipulator, sense, jewel-minor-a) are in the hybrid role core. Higher tiers (fortitude, might, life-graft) are Flat/Increased stat.modify only."
+    },
+    {
+      "id": "set.rusted-legion-004",
+      "nameKey": "set.detail-of-the-depot",
+      "name": "Detail of the Depot",
+      "themeKey": "theme.rusted-legion",
+      "members": [
+        { "role": "armament-primary" },
+        { "role": "mantle" },
+        { "role": "footing" },
+        { "role": "infusion" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.volley",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" },
+            { "family": "atom.might", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Of-construct name: Base 'Detail' invented (a working party pulled off the roster) plus Concept 'depot' from conceptPools['rusted-legion']. Capability atom.volley (spawn.entity, bullet, OnDamageDealt) reads as a coordinated firing drill loosed on command - kind is 'bullet', no element param. Claims armament-primary only, no armament-secondary in this entry. All four member roles (armament-primary, mantle, footing, infusion) are in the hybrid role core. Higher tiers (ferocity, vitality, might) are Flat/Increased stat.modify only, no More-op or defense-channel family."
+    },
+    {
+      "id": "set.rusted-legion-005",
+      "nameKey": "set.standing-of-the-cohort",
+      "name": "Standing of the Cohort",
+      "themeKey": "theme.rusted-legion",
+      "members": [
+        { "role": "head-guard" },
+        { "role": "girdle" },
+        { "role": "retinue" },
+        { "role": "jewel-major" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.gravemaking",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.mending", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" },
+            { "family": "atom.life-graft", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Of-construct name: Base 'Standing' invented (a unit's rank and record) plus Concept 'cohort' from conceptPools['rusted-legion']. Capability atom.gravemaking (grid.spawn, Grave, OnDeath) reads as the detail that never stops digging, whatever else the cohort is doing - a grid item, no element param. Claims no armament role. All four member roles (head-guard, girdle, retinue, jewel-major) are in the hybrid role core. Higher tiers (mending, fortitude, life-graft) are Flat/Increased stat.modify only, no More-op or defense-channel family."
+    },
+    {
+      "id": "set.rusted-legion-006",
+      "nameKey": "set.trained-flagpost",
+      "name": "Trained Flagpost",
+      "themeKey": "theme.rusted-legion",
+      "members": [
+        { "role": "armament-secondary" },
+        { "role": "core-guard" },
+        { "role": "head-guard" },
+        { "role": "mantle" },
+        { "role": "sense" },
+        { "role": "footing" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.retribution",
+            "powerBand": "medium"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" },
+            { "family": "atom.fortitude", "powerBand": "low" }
+          ]
+        },
+        {
+          "pieces": 6,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" },
+            { "family": "atom.ferocity", "powerBand": "medium" }
+          ]
+        }
+      ],
+      "tags": ["signature"],
+      "notes": "Compound name: adjective 'Trained' from themeAdjectivePools['rusted-legion'], Base noun 'Flagpost' - the whole-token atomic seed from uniqueSetSeedPools['rusted-legion'], used as the compound's Base exactly as the exemplar's own 'Riveted Ironstem' pairs an adjective with a seed-pool Base; never decomposed into 'flag' + 'post'. This partition's one grand (6-piece) set, per ssot-sets.md 3.4's 'exception, not the pattern' - it carries the mandatory thresholds at 2 and 4 plus a top threshold at 6, equal to its member count, so SetThresholdUnreachable does not apply. Capability atom.retribution (resource.delta, OnDamageTaken) is powerBand medium rather than low, matching the grand-set convention already used on this fleet's thorned-chassis sibling's own 6-piece entry - the six-slot commitment earns a stronger splash than a typical 4-piece set. Claims armament-secondary only, never armament-primary in this entry. Six distinct member roles (armament-secondary, core-guard, head-guard, mantle, sense, footing), all in the hybrid role core, none repeated within this entry. Tagged 'signature' (notability axis, tags.v1.json) as the partition's flagship - a curation flag, not a power claim. Higher tiers (vitality, fortitude, might, ferocity) are Flat/Increased stat.modify only, no More-op family."
+    }
+  ]
+}

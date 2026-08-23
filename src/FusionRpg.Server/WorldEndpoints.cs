@@ -1,6 +1,7 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Intel;
+using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Topology;
 using FusionRpg.Core.World.Turn;
 using FusionRpg.Data;
@@ -258,7 +259,8 @@ public static class WorldEndpoints
 
     static WorldSectorDto ProjectSector(
         WorldSector sector, IWorldView view,
-        (IReadOnlyDictionary<string, long> Cost, IReadOnlySet<string> Critical) lifelines)
+        (IReadOnlyDictionary<string, long> Cost, IReadOnlySet<string> Critical) lifelines,
+        LoamReading loam)
     {
         var state = view.StateOf(sector.SectorId);
         var believed = view.Believed(sector.SectorId);
@@ -274,6 +276,18 @@ public static class WorldEndpoints
                 LayoutY = sector.LayoutY
             };
 
+        // Owner-only: these dictionaries only ever contain the *viewer's own* holdings
+        // (ComputeLoamReading is built over `TerritoryComponents.For(world, view.FactionId)`), so a
+        // sector this faction does not own simply has no entry — gated structurally, not by a
+        // per-field ownership check that could be forgotten on the next field added here.
+        var production = loam.ProductionBySector.TryGetValue(sector.SectorId, out var p) ? p : 0;
+        var upkeep = loam.UpkeepBySector.TryGetValue(sector.SectorId, out var u) ? u : 0;
+        var stock = loam.StockBySector.TryGetValue(sector.SectorId, out var st) ? st : 0;
+        var componentId = loam.ComponentIdBySector.TryGetValue(sector.SectorId, out var cid) ? cid : null;
+        var componentTotals = componentId is not null && loam.ComponentTotals.TryGetValue(componentId, out var totals)
+            ? totals
+            : (Production: 0L, Upkeep: 0L, Stock: 0L);
+
         return new WorldSectorDto
         {
             SectorId = sector.SectorId,
@@ -281,12 +295,19 @@ public static class WorldEndpoints
             Climate = believed.Climate?.ToString(),
             DangerBand = believed.DangerBand,
             DevelopmentLevel = believed.DevelopmentLevel,
+            FractureIntensityMilli = believed.FractureIntensityMilli,
+            Habitable = Habitability.For(believed.Slots.Select(sl => sl.SlotTypeId)),
             Phase = believed.Phase.ToString(),
             OwnerFactionId = believed.OwnerFactionId,
 
-            // Stability, pressure and depletion stay zero: nobody glances at a sector and reads its
-            // depletion off, and until something models observing them there is nothing honest to
-            // send. Development is different — you can see how built-up ground is by standing on it.
+            // Pressure and depletion stay zero: nobody glances at a sector and reads its depletion
+            // off, and until something models observing them there is nothing honest to send.
+            // Stability is owner-only (spec-loam-fe.md) and read from truth directly, the same
+            // pattern `LifelineCost` already uses for an owner-only number computed over the
+            // viewer's own holdings.
+            StabilityMilli = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                ? sector.StabilityMilli
+                : 0,
             Intel = state.ToString(),
             IntelAge = view.AgeOf(sector.SectorId),
             LastSeenTurn = believed.LastSeenTurn,
@@ -305,6 +326,17 @@ public static class WorldEndpoints
 
             LifelineCost = lifelines.Cost.TryGetValue(sector.SectorId, out var cost) ? cost : 0,
             Lifeline = lifelines.Critical.Contains(sector.SectorId),
+
+            LoamProduction = production,
+            LoamUpkeep = upkeep,
+            LoamNet = production - upkeep,
+            ComponentId = componentId,
+            ComponentProduction = componentTotals.Production,
+            ComponentUpkeep = componentTotals.Upkeep,
+            ComponentNet = componentTotals.Production - componentTotals.Upkeep,
+            LoamStock = stock,
+            ComponentStock = componentTotals.Stock,
+            WillReleaseNextTurn = loam.ReleaseCandidates.Contains(sector.SectorId),
 
             Forces = believed.Forces.Select(f => new WorldForceDto
             {
@@ -361,20 +393,89 @@ public static class WorldEndpoints
             ArticulationPoints.Find(LaneGraph.Build(world, holdings)));
     }
 
+    /// <summary>
+    /// Derived loam numbers (spec-loam-fe.md), computed from `loam-calc` at projection time and
+    /// never stored. Built the same shape as <see cref="Lifelines"/>: computed once, over the
+    /// viewer's own holdings only, so the gating is structural — a sector this faction does not own
+    /// simply never appears in any of these maps, rather than being computed and then hidden.
+    /// </summary>
+    sealed record LoamReading(
+        IReadOnlyDictionary<string, string> ComponentIdBySector,
+        IReadOnlyDictionary<string, long> ProductionBySector,
+        IReadOnlyDictionary<string, long> UpkeepBySector,
+        IReadOnlyDictionary<string, long> StockBySector,
+        IReadOnlyDictionary<string, (long Production, long Upkeep, long Stock)> ComponentTotals,
+        IReadOnlySet<string> ReleaseCandidates);
+
+    static readonly LoamReading NoLoamReading = new(
+        new Dictionary<string, string>(StringComparer.Ordinal),
+        new Dictionary<string, long>(StringComparer.Ordinal),
+        new Dictionary<string, long>(StringComparer.Ordinal),
+        new Dictionary<string, long>(StringComparer.Ordinal),
+        new Dictionary<string, (long, long, long)>(StringComparer.Ordinal),
+        new HashSet<string>(StringComparer.Ordinal));
+
+    static LoamReading ComputeLoamReading(WorldState world, string factionId)
+    {
+        var componentIdBySector = new Dictionary<string, string>(StringComparer.Ordinal);
+        var productionBySector = new Dictionary<string, long>(StringComparer.Ordinal);
+        var upkeepBySector = new Dictionary<string, long>(StringComparer.Ordinal);
+        var stockBySector = new Dictionary<string, long>(StringComparer.Ordinal);
+        var componentTotals = new Dictionary<string, (long, long, long)>(StringComparer.Ordinal);
+        var releaseCandidates = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var component in TerritoryComponents.For(world, factionId))
+        {
+            var componentId = component[0];   // stable and meaningful on the wire — the spec's own choice
+            long totalProduction = 0, totalUpkeep = 0, totalStock = 0;
+
+            foreach (var sectorId in component)
+            {
+                var sector = world.Sectors.First(s => string.Equals(s.SectorId, sectorId, StringComparison.Ordinal));
+                var production = LoamProduction.For(sector);
+                var upkeep = LoamUpkeep.For(world, sector);
+
+                componentIdBySector[sectorId] = componentId;
+                productionBySector[sectorId] = production;
+                upkeepBySector[sectorId] = upkeep;
+                stockBySector[sectorId] = sector.LoamStock;
+                totalProduction += production;
+                totalUpkeep += upkeep;
+                totalStock += sector.LoamStock;
+            }
+
+            componentTotals[componentId] = (totalProduction, totalUpkeep, totalStock);
+
+            // A turn-early warning for spec-loam-fe.md's abandonment surface, computed by the same
+            // static the engine's own Pressure phase uses to pick who takes the fade — reusing it
+            // rather than re-deriving the selection is what keeps this from silently disagreeing
+            // with what actually happens next turn.
+            var willRelease = LoamForecast.WillRelease(world, component);
+            if (willRelease is not null)
+                releaseCandidates.Add(willRelease);
+        }
+
+        return new LoamReading(componentIdBySector, productionBySector, upkeepBySector, stockBySector, componentTotals, releaseCandidates);
+    }
+
     static WorldStateDto Project(
         WorldState w, IWorldView view,
-        (IReadOnlyDictionary<string, long> Cost, IReadOnlySet<string> Critical) lifelines) => new()
+        (IReadOnlyDictionary<string, long> Cost, IReadOnlySet<string> Critical) lifelines)
     {
-        WorldId = w.WorldId,
-        TemplateId = w.TemplateId,
-        CurrentTurn = w.CurrentTurn,
-        Factions = w.Factions.Select(f => new WorldFactionDto
+        var loam = ComputeLoamReading(w, view.FactionId);
+
+        return new WorldStateDto
         {
-            FactionId = f.FactionId,
-            Kind = f.Kind.ToString(),
-            Name = f.Name
-        }).ToList(),
-        Sectors = w.Sectors.Select(s => ProjectSector(s, view, lifelines)).ToList(),
+            WorldId = w.WorldId,
+            TemplateId = w.TemplateId,
+            CurrentTurn = w.CurrentTurn,
+            Factions = w.Factions.Select(f => new WorldFactionDto
+            {
+                FactionId = f.FactionId,
+                Kind = f.Kind.ToString(),
+                Name = f.Name
+            }).ToList(),
+            Sectors = w.Sectors.Select(s => ProjectSector(s, view, lifelines, loam)).ToList(),
         Lanes = view.Lanes.Select(l => new WorldLaneDto
         {
             LaneId = l.LaneId,
@@ -408,5 +509,6 @@ public static class WorldEndpoints
                 Wounds = m.Wounds
             }).ToList()
         }).ToList()
-    };
+        };
+    }
 }

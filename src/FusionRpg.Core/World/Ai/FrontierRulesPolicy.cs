@@ -1,4 +1,5 @@
 using FusionRpg.Core.World.Intel;
+using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Movement;
 using FusionRpg.Core.World.Turn;
 
@@ -46,6 +47,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
             var value = ValueMap.For(view, defensive, reach);
 
             var order = Defend(view, entity, defensive, reach)
+                        ?? Abandon(view, entity)
                         ?? Finish(view, entity)
                         ?? Take(view, entity)
                         ?? Recover(view, entity, supplied)
@@ -121,7 +123,91 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         return total;
     }
 
-    // ---- 2. Finish ---------------------------------------------------------------------------
+    // ---- 2. Abandon (spec-loam-ai-survival.md) ------------------------------------------------
+
+    /// <summary>
+    /// Do not keep what you cannot sustain. If the component this entity stands in cannot pay its
+    /// own upkeep and its pooled stock will not outlast <see cref="LoamPolicy.AbandonmentHorizonTurns"/>
+    /// at the current burn rate, the entity evacuates the component's single weakest sector — which
+    /// is where it must be standing for this to fire — rather than being left to defend or recover
+    /// in ground that is going to fade regardless. Evacuating also removes that sector's own
+    /// garrison upkeep from the burn rate, which is the one thing an AI order can actually do about
+    /// a doomed component: stop feeding it.
+    ///
+    /// One rule, deliberately: this does not touch ownership, ClaimResolver, or `LoamPhases` at all
+    /// — the fade already does that. All this does is stop wasting an order on ground already lost.
+    /// </summary>
+    static PolicyOrder? Abandon(IWorldView view, WorldEntity entity)
+    {
+        if (entity.AtSectorId is not { } here) return null;
+        if (view.Believed(here) is not { } hereBelief) return null;
+        if (!string.Equals(hereBelief.OwnerFactionId, view.FactionId, StringComparison.Ordinal)) return null;
+
+        var owned = view.SectorIds
+            .Where(id => view.Believed(id) is { } b && string.Equals(b.OwnerFactionId, view.FactionId, StringComparison.Ordinal))
+            .ToList();
+        var component = TerritoryComponents.For(owned, SupplyReach.LinksOf(view.Lanes))
+            .FirstOrDefault(c => c.Contains(here));
+        if (component is null) return null;
+
+        // G-C, mirrored from LoamUpkeep's truth side: a faction with no loam source anywhere is
+        // exempt from upkeep entirely, so it has nothing to abandon. Every pre-loam AI fixture has
+        // no rootbed at all, and without this check Abandon fired on every one of them.
+        var hasSourceAnywhere = owned.Any(id =>
+            view.Believed(id) is { } b && Habitability.For(b.Slots.Select(sl => sl.SlotTypeId)));
+        if (!hasSourceAnywhere) return null;
+
+        var handicap = view.Factions.First(f => string.Equals(f.FactionId, view.FactionId, StringComparison.Ordinal)).UpkeepHandicapMilli;
+
+        long totalProduction = 0, totalUpkeep = 0, totalStock = 0;
+        string? weakest = null;
+        long weakestBalance = long.MaxValue;
+
+        foreach (var id in component)
+        {
+            if (view.Believed(id) is not { } b) continue;
+
+            var production = LoamProduction.For(b.OwnerFactionId, b.Slots.Select(sl => sl.SlotTypeId));
+            var garrisonMembers = view.OwnForces
+                .Where(e => string.Equals(e.AtSectorId, id, StringComparison.Ordinal))
+                .Sum(e => e.Members.Count);
+            var upkeep = LoamUpkeep.For(garrisonMembers, b.DevelopmentLevel, b.DangerBand, b.FractureIntensityMilli, handicap);
+
+            totalProduction += production;
+            totalUpkeep += upkeep;
+            totalStock += view.OwnLoamStock(id);
+
+            var balance = LoamBalance.PerSector(production, upkeep);
+            if (weakest is null || balance < weakestBalance
+                || (balance == weakestBalance && string.CompareOrdinal(id, weakest) < 0))
+            {
+                weakestBalance = balance;
+                weakest = id;
+            }
+        }
+
+        var componentBalance = LoamBalance.PerSector(totalProduction, totalUpkeep);
+        if (componentBalance >= 0) return null;   // solvent — nothing to release
+
+        var shortfall = -componentBalance;
+        var turnsOfRunway = totalStock / shortfall;
+        if (turnsOfRunway >= LoamPolicy.AbandonmentHorizonTurns) return null;   // still enough runway
+
+        if (!string.Equals(weakest, here, StringComparison.Ordinal)) return null;   // not this entity's ground to give up
+
+        var safeTarget = owned.FirstOrDefault(id => !component.Contains(id))
+                          ?? owned.FirstOrDefault(id => !string.Equals(id, here, StringComparison.Ordinal));
+        if (safeTarget is null) return null;
+
+        var path = Route(view, entity, safeTarget);
+        return path is null
+            ? null
+            : Order(view, entity, WorldCommandKinds.Move,
+                $"abandon {here}, {turnsOfRunway} turns of runway under the {LoamPolicy.AbandonmentHorizonTurns}-turn horizon",
+                lanePath: path);
+    }
+
+    // ---- 3. Finish ---------------------------------------------------------------------------
 
     /// <summary>Standing where a guard still holds a slot, with nothing hostile in sight.</summary>
     static PolicyOrder? Finish(IWorldView view, WorldEntity entity)
@@ -143,7 +229,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
                 sectorId: here, slotIndex: guarded.SlotIndex);
     }
 
-    // ---- 3. Take -----------------------------------------------------------------------------
+    // ---- 4. Take -----------------------------------------------------------------------------
 
     /// <summary>
     /// Standing on ground that is believed clear and believed unowned.
@@ -163,7 +249,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         return Order(view, entity, WorldCommandKinds.Claim, $"claim {here}", sectorId: here);
     }
 
-    // ---- 4. Recover --------------------------------------------------------------------------
+    // ---- 5. Recover --------------------------------------------------------------------------
 
     /// <summary>Badly hurt, in supply, and not already dug in.</summary>
     static PolicyOrder? Recover(IWorldView view, WorldEntity entity, IReadOnlySet<string> supplied)
@@ -201,7 +287,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         return (int)(wounds * 1000 / Math.Max(1, hp));
     }
 
-    // ---- 5. Explore --------------------------------------------------------------------------
+    // ---- 6. Explore --------------------------------------------------------------------------
 
     /// <summary>
     /// Ground nobody has seen, close enough to be worth the trip.
@@ -228,7 +314,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         return path is null ? null : Order(view, entity, WorldCommandKinds.Move, $"explore {target}", lanePath: path);
     }
 
-    // ---- 6. Expand ---------------------------------------------------------------------------
+    // ---- 7. Expand ---------------------------------------------------------------------------
 
     /// <summary>The best-valued reachable ground I do not hold, if it is worth having at all.</summary>
     static PolicyOrder? Expand(
@@ -236,7 +322,11 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         IReadOnlyDictionary<string, SectorValue> value, IReadOnlyDictionary<string, int> reach)
     {
         string? best = null;
-        long bestScore = 0;                                   // strictly positive: zero is not worth a march
+        // Strictly positive: zero is not worth a march. Survivor found extending the mutant set for
+        // L20 (loam-ai-survival) — no existing fixture drives every reachable, unowned candidate to
+        // a non-positive score, so a mutant starting this at `long.MinValue` goes uncaught. Pre-dates
+        // this module and is `Expand`'s own rule, not `Abandon`'s; recorded rather than fixed here.
+        long bestScore = 0;
 
         foreach (var sectorId in view.SectorIds.OrderBy(id => id, StringComparer.Ordinal))
         {
@@ -261,7 +351,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
                 $"expand to {best}, {value[best].Explain()}", lanePath: path);
     }
 
-    // ---- 7. Hold -----------------------------------------------------------------------------
+    // ---- 8. Hold -----------------------------------------------------------------------------
 
     static PolicyOrder Hold(IWorldView view, WorldEntity entity) =>
         Order(view, entity, WorldCommandKinds.StandFast, "nothing worth doing");

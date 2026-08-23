@@ -1,4 +1,5 @@
 using FusionRpg.Core.World.Intel;
+using FusionRpg.Core.World.Loam;
 using FusionRpg.Core.World.Movement;
 
 namespace FusionRpg.Core.World.Turn;
@@ -18,6 +19,11 @@ public static class TurnEngine
 {
     public const int EngineVersion = 1;
     /// <summary>
+    /// Bumped to 4 on 2026-08-23 (spec-loam-turn.md): `Production` and `Pressure` stop being
+    /// pass-throughs. A sector now earns loam and pays upkeep every turn, and ground can be lost to
+    /// the Fracture for the first time. The program's second and last golden re-bless — the first
+    /// was `loam-model`'s field addition, both recorded here per the same discipline W20 established.
+    ///
     /// Bumped to 3 on 2026-08-22: `Intel` moved *after* `Snapshot`. Belief is what you know at the
     /// end of the turn, and the end of the turn is after the turn has finished happening — before
     /// this, a claim settled in Snapshot was invisible to the faction that made it, which re-filed
@@ -28,7 +34,7 @@ public static class TurnEngine
     /// version 1. Stored version-1 reports refuse to re-derive rather than fabricating, which is the
     /// behaviour this counter exists for.
     /// </summary>
-    public const int RulesetVersion = 3;
+    public const int RulesetVersion = 4;
 
     public static class Phases
     {
@@ -175,10 +181,11 @@ public static class TurnEngine
         return SiegePhase.Run(world, commands, report, Phases.Sieges, turn, resolver, seed);
     }
 
+    /// <summary>A sector earns before it pays — `LoamPhases.Production` (spec-loam-turn.md).</summary>
     static WorldState Production(WorldState world, TurnReport report)
     {
         report.BeginPhase(Phases.Production);
-        return world;
+        return LoamPhases.Production(world, report, Phases.Production);
     }
 
     static WorldState Growth(WorldState world, TurnReport report)
@@ -189,12 +196,14 @@ public static class TurnEngine
 
     /// <summary>
     /// Supply is recomputed here, from scratch, and whatever falls off the chain starves. Nothing
-    /// about it is carried between turns.
+    /// about it is carried between turns. Loam's upkeep and fade run *after*, so garrison upkeep
+    /// reads the garrison that survived this turn's attrition.
     /// </summary>
     static WorldState Pressure(WorldState world, TurnReport report)
     {
         report.BeginPhase(Phases.Pressure);
-        return SupplyGraph.Run(world, report, Phases.Pressure);
+        var afterSupply = SupplyGraph.Run(world, report, Phases.Pressure);
+        return LoamPhases.Pressure(afterSupply, report, Phases.Pressure);
     }
 
     /// <summary>Calendar boundaries are rolled and reported; their effects belong to later modules.</summary>

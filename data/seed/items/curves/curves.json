@@ -3,9 +3,14 @@
   "kind": "curve",
   "_meta": {
     "batch": "curves-all",
-    "partition": "curves/all",
+    "partition": "curves",
     "contractVersion": 1,
-    "registryVersions": { "core": 1, "bands": 1, "naming": 4, "tags": 3 },
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "naming": 4,
+      "tags": 3
+    },
     "exemplarVersion": 1,
     "promptVersion": 1,
     "model": "claude-sonnet-5-20260101",
@@ -36,16 +41,46 @@
       "name": "Band Linear",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 1000 },
-        { "atOrdinal": 20, "multiplierPerMille": 1333 },
-        { "atOrdinal": 30, "multiplierPerMille": 1667 },
-        { "atOrdinal": 40, "multiplierPerMille": 2000 },
-        { "atOrdinal": 50, "multiplierPerMille": 2333 },
-        { "atOrdinal": 60, "multiplierPerMille": 2667 },
-        { "atOrdinal": 70, "multiplierPerMille": 3000 },
-        { "atOrdinal": 80, "multiplierPerMille": 3333 },
-        { "atOrdinal": 90, "multiplierPerMille": 3667 },
-        { "atOrdinal": 100, "multiplierPerMille": 4000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 1333
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 1667
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 2333
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 2667
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 3333
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 3667
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 4000
+        }
       ],
       "tags": [],
       "notes": "RATIO curve. Re-authors ssot-materials-crafting.md §7.5's `curve.band-linear` ([[1,1000],[2,2000],[3,3000],[4,4000]]) at the real ten-rung ordinal domain per decision-d3-cost-rarity-rebase.md R7 ('re-authored as ten points at x = 10, 20, ... 100. No new curve input is minted'). R7 fixes the domain but not the y-values; this file supplies them, invented with the original endpoints preserved as anchors: value(10)=1000 and value(100)=4000 match the shipped example's floor and ceiling exactly, linearly interpolated across the eight intermediate rungs (step = 3000/9, rounded to the nearest integer per-mille) so that, per R7's own rationale, two rungs inside one material band price differently instead of both clamping to 4000. Used by `material_recipe_cost.qty_curve_id`."
@@ -56,16 +91,46 @@
       "name": "Rarity Banding",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 1000 },
-        { "atOrdinal": 20, "multiplierPerMille": 1000 },
-        { "atOrdinal": 30, "multiplierPerMille": 1000 },
-        { "atOrdinal": 40, "multiplierPerMille": 2000 },
-        { "atOrdinal": 50, "multiplierPerMille": 2000 },
-        { "atOrdinal": 60, "multiplierPerMille": 2000 },
-        { "atOrdinal": 70, "multiplierPerMille": 3000 },
-        { "atOrdinal": 80, "multiplierPerMille": 3000 },
-        { "atOrdinal": 90, "multiplierPerMille": 4000 },
-        { "atOrdinal": 100, "multiplierPerMille": 4000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 4000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue = multiplierPerMille/1000 IS the `material_band` integer (1 common, 2 rare, 3 epic, 4 legendary). Directly reproduces decision-d3-cost-rarity-rebase.md §Q1.3's band map (itself sourced from ssot-rarity.md:298-303, R3: 'material_band ... populated from I1's own DemonRarity -> ordinal band map'). This column does not exist in core.v1.json yet (a genuine registry gap, same one entry-shapes.md §3 flags for `materials.v1.json`) — this curve is the interim authoritative source until that column lands. Also reused directly by I7's reroll costs, which need `b` (material_band) as a linear multiplier on `catalyst.flux` qty for Reforge (b) and Imprint (2b) — no separate curve needed for those; a consumer reads this curve and multiplies."
@@ -76,16 +141,46 @@
       "name": "Rarity Ceiling",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 4000 },
-        { "atOrdinal": 20, "multiplierPerMille": 6000 },
-        { "atOrdinal": 30, "multiplierPerMille": 8000 },
-        { "atOrdinal": 40, "multiplierPerMille": 10000 },
-        { "atOrdinal": 50, "multiplierPerMille": 12000 },
-        { "atOrdinal": 60, "multiplierPerMille": 14000 },
-        { "atOrdinal": 70, "multiplierPerMille": 16000 },
-        { "atOrdinal": 80, "multiplierPerMille": 18000 },
-        { "atOrdinal": 90, "multiplierPerMille": 20000 },
-        { "atOrdinal": 100, "multiplierPerMille": 20000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 6000
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 8000
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 10000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 12000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 14000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 16000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 18000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 20000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 20000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue = multiplierPerMille/1000 is the enhancement-level cap for that rung (`rarity_budget.enhance_cap`). Exact table from decision-d3-cost-rarity-rebase.md §Q1.4(b), itself constrained by ssot-rarity.md's own rule that total enhancement gain at cap stay <= one rung step in expectation. The doc marks it 'illustrative, not balanced' and notes ordinals 90 and 100 deliberately share cap 20 so almanac (the count-band ceiling) does not also get a higher enhancement ceiling stacked on top."
@@ -96,16 +191,46 @@
       "name": "Salvage Substrate",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 2000 },
-        { "atOrdinal": 20, "multiplierPerMille": 2000 },
-        { "atOrdinal": 30, "multiplierPerMille": 2000 },
-        { "atOrdinal": 40, "multiplierPerMille": 4000 },
-        { "atOrdinal": 50, "multiplierPerMille": 4000 },
-        { "atOrdinal": 60, "multiplierPerMille": 4000 },
-        { "atOrdinal": 70, "multiplierPerMille": 6000 },
-        { "atOrdinal": 80, "multiplierPerMille": 6000 },
-        { "atOrdinal": 90, "multiplierPerMille": 9000 },
-        { "atOrdinal": 100, "multiplierPerMille": 9000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 6000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 6000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 9000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 9000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is `substrateBase[band]` from ssot-materials-crafting.md §5.1's `salvage_coefficient` table (band 1=2, 2=4, 3=6, 4=9), expanded from the 4-band table onto the 10-rung ordinal ladder via curve.002's rarity->band map. `SalvagePolicy.Yield` adds `+ affixes` (drawn-atom count, I8's number, not authored here) on top of this base."
@@ -116,16 +241,46 @@
       "name": "Salvage Essence",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 0 },
-        { "atOrdinal": 20, "multiplierPerMille": 0 },
-        { "atOrdinal": 30, "multiplierPerMille": 0 },
-        { "atOrdinal": 40, "multiplierPerMille": 2000 },
-        { "atOrdinal": 50, "multiplierPerMille": 2000 },
-        { "atOrdinal": 60, "multiplierPerMille": 2000 },
-        { "atOrdinal": 70, "multiplierPerMille": 3000 },
-        { "atOrdinal": 80, "multiplierPerMille": 3000 },
-        { "atOrdinal": 90, "multiplierPerMille": 3000 },
-        { "atOrdinal": 100, "multiplierPerMille": 3000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 3000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is `essenceCap[band]` from ssot-materials-crafting.md §5.1's `salvage_coefficient` table (band 1=0, 2=2, 3=3, 4=3). A common-band item's salvage returns zero essence regardless of elemental affix count; this is by design, not an omission."
@@ -136,16 +291,46 @@
       "name": "Salvage Shard",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 0 },
-        { "atOrdinal": 20, "multiplierPerMille": 0 },
-        { "atOrdinal": 30, "multiplierPerMille": 0 },
-        { "atOrdinal": 40, "multiplierPerMille": 1000 },
-        { "atOrdinal": 50, "multiplierPerMille": 1000 },
-        { "atOrdinal": 60, "multiplierPerMille": 1000 },
-        { "atOrdinal": 70, "multiplierPerMille": 2000 },
-        { "atOrdinal": 80, "multiplierPerMille": 2000 },
-        { "atOrdinal": 90, "multiplierPerMille": 3000 },
-        { "atOrdinal": 100, "multiplierPerMille": 3000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 3000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is `shardBack[band]` (of band-1) from ssot-materials-crafting.md §5.1's `salvage_coefficient` table (band 1=0, 2=1, 3=2, 4=3). R1 (§5.2): salvage always returns a shard of the band BELOW the item's own — a common item (band 1) yields no shard at all, matching the zeros here."
@@ -156,26 +341,86 @@
       "name": "Enhance Linear",
       "input": "level",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 1000 },
-        { "atOrdinal": 2, "multiplierPerMille": 2000 },
-        { "atOrdinal": 3, "multiplierPerMille": 3000 },
-        { "atOrdinal": 4, "multiplierPerMille": 4000 },
-        { "atOrdinal": 5, "multiplierPerMille": 5000 },
-        { "atOrdinal": 6, "multiplierPerMille": 6000 },
-        { "atOrdinal": 7, "multiplierPerMille": 7000 },
-        { "atOrdinal": 8, "multiplierPerMille": 8000 },
-        { "atOrdinal": 9, "multiplierPerMille": 9000 },
-        { "atOrdinal": 10, "multiplierPerMille": 10000 },
-        { "atOrdinal": 11, "multiplierPerMille": 11000 },
-        { "atOrdinal": 12, "multiplierPerMille": 12000 },
-        { "atOrdinal": 13, "multiplierPerMille": 13000 },
-        { "atOrdinal": 14, "multiplierPerMille": 14000 },
-        { "atOrdinal": 15, "multiplierPerMille": 15000 },
-        { "atOrdinal": 16, "multiplierPerMille": 16000 },
-        { "atOrdinal": 17, "multiplierPerMille": 17000 },
-        { "atOrdinal": 18, "multiplierPerMille": 18000 },
-        { "atOrdinal": 19, "multiplierPerMille": 19000 },
-        { "atOrdinal": 20, "multiplierPerMille": 20000 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 5000
+        },
+        {
+          "atOrdinal": 6,
+          "multiplierPerMille": 6000
+        },
+        {
+          "atOrdinal": 7,
+          "multiplierPerMille": 7000
+        },
+        {
+          "atOrdinal": 8,
+          "multiplierPerMille": 8000
+        },
+        {
+          "atOrdinal": 9,
+          "multiplierPerMille": 9000
+        },
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 10000
+        },
+        {
+          "atOrdinal": 11,
+          "multiplierPerMille": 11000
+        },
+        {
+          "atOrdinal": 12,
+          "multiplierPerMille": 12000
+        },
+        {
+          "atOrdinal": 13,
+          "multiplierPerMille": 13000
+        },
+        {
+          "atOrdinal": 14,
+          "multiplierPerMille": 14000
+        },
+        {
+          "atOrdinal": 15,
+          "multiplierPerMille": 15000
+        },
+        {
+          "atOrdinal": 16,
+          "multiplierPerMille": 16000
+        },
+        {
+          "atOrdinal": 17,
+          "multiplierPerMille": 17000
+        },
+        {
+          "atOrdinal": 18,
+          "multiplierPerMille": 18000
+        },
+        {
+          "atOrdinal": 19,
+          "multiplierPerMille": 19000
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 20000
+        }
       ],
       "tags": [],
       "notes": "RATIO curve (identity: value(L)/value(1) = L). Shared shape for two lines in decision-d3-cost-rarity-rebase.md §Q1.4(c)'s rebased enhancement cost, both linear in the target level L with no ceiling/floor nonlinearity: souls = 50*L (baseQty=50) and catalyst.temper = ceil(L/3) (baseQty=1/3, generator applies ceil after scaling — see ssot-materials-crafting.md §7.4's `ceil((n+1)/3)` temper rate, restated in I6's variable). Verified against decision-d3's worked table: souls at L=4/8/12/16/20 = 200/400/600/800/1000, matching `50*L` exactly."
@@ -186,26 +431,86 @@
       "name": "Shard Power",
       "input": "level",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 1000 },
-        { "atOrdinal": 2, "multiplierPerMille": 3031 },
-        { "atOrdinal": 3, "multiplierPerMille": 5800 },
-        { "atOrdinal": 4, "multiplierPerMille": 9190 },
-        { "atOrdinal": 5, "multiplierPerMille": 13133 },
-        { "atOrdinal": 6, "multiplierPerMille": 17581 },
-        { "atOrdinal": 7, "multiplierPerMille": 22499 },
-        { "atOrdinal": 8, "multiplierPerMille": 27858 },
-        { "atOrdinal": 9, "multiplierPerMille": 33635 },
-        { "atOrdinal": 10, "multiplierPerMille": 39811 },
-        { "atOrdinal": 11, "multiplierPerMille": 46369 },
-        { "atOrdinal": 12, "multiplierPerMille": 53295 },
-        { "atOrdinal": 13, "multiplierPerMille": 60577 },
-        { "atOrdinal": 14, "multiplierPerMille": 68203 },
-        { "atOrdinal": 15, "multiplierPerMille": 76163 },
-        { "atOrdinal": 16, "multiplierPerMille": 84449 },
-        { "atOrdinal": 17, "multiplierPerMille": 93050 },
-        { "atOrdinal": 18, "multiplierPerMille": 101961 },
-        { "atOrdinal": 19, "multiplierPerMille": 111175 },
-        { "atOrdinal": 20, "multiplierPerMille": 120684 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 3031
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 5800
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 9190
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 13133
+        },
+        {
+          "atOrdinal": 6,
+          "multiplierPerMille": 17581
+        },
+        {
+          "atOrdinal": 7,
+          "multiplierPerMille": 22499
+        },
+        {
+          "atOrdinal": 8,
+          "multiplierPerMille": 27858
+        },
+        {
+          "atOrdinal": 9,
+          "multiplierPerMille": 33635
+        },
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 39811
+        },
+        {
+          "atOrdinal": 11,
+          "multiplierPerMille": 46369
+        },
+        {
+          "atOrdinal": 12,
+          "multiplierPerMille": 53295
+        },
+        {
+          "atOrdinal": 13,
+          "multiplierPerMille": 60577
+        },
+        {
+          "atOrdinal": 14,
+          "multiplierPerMille": 68203
+        },
+        {
+          "atOrdinal": 15,
+          "multiplierPerMille": 76163
+        },
+        {
+          "atOrdinal": 16,
+          "multiplierPerMille": 84449
+        },
+        {
+          "atOrdinal": 17,
+          "multiplierPerMille": 93050
+        },
+        {
+          "atOrdinal": 18,
+          "multiplierPerMille": 101961
+        },
+        {
+          "atOrdinal": 19,
+          "multiplierPerMille": 111175
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 120684
+        }
       ],
       "tags": [],
       "notes": "RATIO curve: value(L) = L^1.6 (base=1 at L=1), backing decision-d3-cost-rarity-rebase.md §Q1.4(c)'s `shard.{band} = ceil(L^1.6 / 2)` line (I6's own authoring guideline, ssot-enhancement.md §7.5). Consumer computes `ceil((1 * multiplierPerMille/1000) / 2)`. Verified against the decision doc's worked checkpoints at ilvl 64: L=4 -> ceil(9.190/2)=5, L=8 -> ceil(27.858/2)=14, L=12 -> ceil(53.295/2)=27, L=16 -> ceil(84.449/2)=43, L=20 -> ceil(120.684/2)=61 — all five match ssot-enhancement.md §7.5's published table exactly."
@@ -216,26 +521,86 @@
       "name": "Enhance Multiplier",
       "input": "level",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 1020 },
-        { "atOrdinal": 2, "multiplierPerMille": 1040 },
-        { "atOrdinal": 3, "multiplierPerMille": 1060 },
-        { "atOrdinal": 4, "multiplierPerMille": 1080 },
-        { "atOrdinal": 5, "multiplierPerMille": 1100 },
-        { "atOrdinal": 6, "multiplierPerMille": 1120 },
-        { "atOrdinal": 7, "multiplierPerMille": 1140 },
-        { "atOrdinal": 8, "multiplierPerMille": 1160 },
-        { "atOrdinal": 9, "multiplierPerMille": 1180 },
-        { "atOrdinal": 10, "multiplierPerMille": 1200 },
-        { "atOrdinal": 11, "multiplierPerMille": 1220 },
-        { "atOrdinal": 12, "multiplierPerMille": 1240 },
-        { "atOrdinal": 13, "multiplierPerMille": 1260 },
-        { "atOrdinal": 14, "multiplierPerMille": 1280 },
-        { "atOrdinal": 15, "multiplierPerMille": 1300 },
-        { "atOrdinal": 16, "multiplierPerMille": 1320 },
-        { "atOrdinal": 17, "multiplierPerMille": 1340 },
-        { "atOrdinal": 18, "multiplierPerMille": 1360 },
-        { "atOrdinal": 19, "multiplierPerMille": 1380 },
-        { "atOrdinal": 20, "multiplierPerMille": 1400 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 1020
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 1040
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 1060
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 1080
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 1100
+        },
+        {
+          "atOrdinal": 6,
+          "multiplierPerMille": 1120
+        },
+        {
+          "atOrdinal": 7,
+          "multiplierPerMille": 1140
+        },
+        {
+          "atOrdinal": 8,
+          "multiplierPerMille": 1160
+        },
+        {
+          "atOrdinal": 9,
+          "multiplierPerMille": 1180
+        },
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 1200
+        },
+        {
+          "atOrdinal": 11,
+          "multiplierPerMille": 1220
+        },
+        {
+          "atOrdinal": 12,
+          "multiplierPerMille": 1240
+        },
+        {
+          "atOrdinal": 13,
+          "multiplierPerMille": 1260
+        },
+        {
+          "atOrdinal": 14,
+          "multiplierPerMille": 1280
+        },
+        {
+          "atOrdinal": 15,
+          "multiplierPerMille": 1300
+        },
+        {
+          "atOrdinal": 16,
+          "multiplierPerMille": 1320
+        },
+        {
+          "atOrdinal": 17,
+          "multiplierPerMille": 1340
+        },
+        {
+          "atOrdinal": 18,
+          "multiplierPerMille": 1360
+        },
+        {
+          "atOrdinal": 19,
+          "multiplierPerMille": 1380
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 1400
+        }
       ],
       "tags": [],
       "notes": "RATIO curve, already the final applied multiplier (not a base-relative ratio): ssot-enhancement.md's affix scalar rule states 'each level adds +20‰ increased magnitude to the item's rolled affixes ... at +20, 1.400x'. multiplierPerMille(L) = 1000 + 20*L reproduces both endpoints exactly (L=10 -> 1200 = 1.200x, matching the doc's own +10 worked example; L=20 -> 1400 = 1.400x). Applies only to rolled affixes — implicits and milestone atoms are never scaled by this curve."
@@ -246,26 +611,86 @@
       "name": "Enhance Fortune",
       "input": "level",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 1000 },
-        { "atOrdinal": 2, "multiplierPerMille": 1000 },
-        { "atOrdinal": 3, "multiplierPerMille": 1000 },
-        { "atOrdinal": 4, "multiplierPerMille": 1000 },
-        { "atOrdinal": 5, "multiplierPerMille": 1000 },
-        { "atOrdinal": 6, "multiplierPerMille": 1000 },
-        { "atOrdinal": 7, "multiplierPerMille": 1000 },
-        { "atOrdinal": 8, "multiplierPerMille": 1000 },
-        { "atOrdinal": 9, "multiplierPerMille": 950 },
-        { "atOrdinal": 10, "multiplierPerMille": 900 },
-        { "atOrdinal": 11, "multiplierPerMille": 850 },
-        { "atOrdinal": 12, "multiplierPerMille": 780 },
-        { "atOrdinal": 13, "multiplierPerMille": 700 },
-        { "atOrdinal": 14, "multiplierPerMille": 600 },
-        { "atOrdinal": 15, "multiplierPerMille": 500 },
-        { "atOrdinal": 16, "multiplierPerMille": 420 },
-        { "atOrdinal": 17, "multiplierPerMille": 350 },
-        { "atOrdinal": 18, "multiplierPerMille": 290 },
-        { "atOrdinal": 19, "multiplierPerMille": 240 },
-        { "atOrdinal": 20, "multiplierPerMille": 200 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 6,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 7,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 8,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 9,
+          "multiplierPerMille": 950
+        },
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 900
+        },
+        {
+          "atOrdinal": 11,
+          "multiplierPerMille": 850
+        },
+        {
+          "atOrdinal": 12,
+          "multiplierPerMille": 780
+        },
+        {
+          "atOrdinal": 13,
+          "multiplierPerMille": 700
+        },
+        {
+          "atOrdinal": 14,
+          "multiplierPerMille": 600
+        },
+        {
+          "atOrdinal": 15,
+          "multiplierPerMille": 500
+        },
+        {
+          "atOrdinal": 16,
+          "multiplierPerMille": 420
+        },
+        {
+          "atOrdinal": 17,
+          "multiplierPerMille": 350
+        },
+        {
+          "atOrdinal": 18,
+          "multiplierPerMille": 290
+        },
+        {
+          "atOrdinal": 19,
+          "multiplierPerMille": 240
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 200
+        }
       ],
       "tags": [],
       "notes": "RATIO curve, already the applied figure: this IS the chance in per-mille, not a ratio against a base. Reproduces ssot-enhancement.md §7.6's shipped `item_enhance_rules` table verbatim ('Success chance before pity'): +1..+8 flat at 1000‰ (the safe band never fails), then falling to 200‰ at +20. Pity (+80‰ per failure, persisted per-instance, reset on success) is a runtime accumulator, not part of this base curve."
@@ -276,11 +701,26 @@
       "name": "Tier Magnitude",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 1000 },
-        { "atOrdinal": 2, "multiplierPerMille": 1750 },
-        { "atOrdinal": 3, "multiplierPerMille": 3063 },
-        { "atOrdinal": 4, "multiplierPerMille": 5359 },
-        { "atOrdinal": 5, "multiplierPerMille": 9379 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 1750
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 3063
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 5359
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 9379
+        }
       ],
       "tags": [],
       "notes": "RATIO curve: the cumulative form of bands.v1.json's `powerBand.tierScaling.magnitudeRatioPerMille` (1750‰ per-step, r=1.75), i.e. multiplierPerMille(t) = round(1000 * 1.75^(t-1)). This is the default shape 'shared by every channel-family group' per bands.v1.json unless a family's own tier-bands input overrides it (out of this registry's scope, owned by I8's not-yet-built tier-bands artefact). A family with no worked example of its own (see curve.012-curve.016 for the five that have one) resolves its m_t as `m1 * multiplierPerMille(t)/1000`, where m1 itself comes from a `sharePermille` this file does not supply."
@@ -291,11 +731,26 @@
       "name": "Tier Duration",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 1000 },
-        { "atOrdinal": 2, "multiplierPerMille": 1400 },
-        { "atOrdinal": 3, "multiplierPerMille": 1960 },
-        { "atOrdinal": 4, "multiplierPerMille": 2744 },
-        { "atOrdinal": 5, "multiplierPerMille": 3842 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 1400
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 1960
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 2744
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 3842
+        }
       ],
       "tags": [],
       "notes": "RATIO curve: the cumulative form of bands.v1.json's `powerBand.tierScaling.durationRatioPerMille` (1400‰ per-step, r=1.4), i.e. multiplierPerMille(t) = round(1000 * 1.4^(t-1)). MANDATORY for a status.apply family's duration ladder (bands.v1.json: 'control families ladder duration at r=1.4, never at 1.75' — a 1.75 ladder would put tier-5 control near 7.5s and let three items chain a permanent lock). Never applies to a magnitude or trigger-chance ladder; use curve.011 for those."
@@ -306,11 +761,26 @@
       "name": "Vitality Curve",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 20000 },
-        { "atOrdinal": 2, "multiplierPerMille": 35000 },
-        { "atOrdinal": 3, "multiplierPerMille": 60000 },
-        { "atOrdinal": 4, "multiplierPerMille": 105000 },
-        { "atOrdinal": 5, "multiplierPerMille": 185000 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 20000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 35000
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 60000
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 105000
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 185000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue = multiplierPerMille/1000 is the tier midpoint in game units (maxHp, Flat op). Reproduces bands.v1.json's `powerBand.channelFamilyGroups.primaryChannel.workedExamples[vitality]` verbatim (sharePermille=30 against BattleRuleset.BaseHp(20)=680, per ssot-affixes.md §4.5). Marked there as 'illustrative, inherited, not balanced' — reproduced here for calibration, not re-derived. The +/-33% band width around each midpoint (lo/hi) is `variance: \"normal\"`'s job (bands.v1.json), not this curve's."
@@ -321,11 +791,26 @@
       "name": "Might Magnitude",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 4000 },
-        { "atOrdinal": 2, "multiplierPerMille": 7000 },
-        { "atOrdinal": 3, "multiplierPerMille": 12000 },
-        { "atOrdinal": 4, "multiplierPerMille": 21000 },
-        { "atOrdinal": 5, "multiplierPerMille": 37000 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 7000
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 12000
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 21000
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 37000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is the tier midpoint in game units (atk, Flat op). Reproduces bands.v1.json's `primaryChannel.workedExamples[might]` verbatim (sharePermille=45 against BattleRuleset.BaseAtk(20)=92). Tier-1 resolves to 4 game units, below the registry's own 5-unit legibility floor (bands.v1.json's `tierScaling.overlap.knownEdgeCase`) — the documented fix lives on `ferocity` (curve.015), never here; kept as-is deliberately."
@@ -336,11 +821,26 @@
       "name": "Ferocity Magnitude",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 15 },
-        { "atOrdinal": 2, "multiplierPerMille": 26 },
-        { "atOrdinal": 3, "multiplierPerMille": 46 },
-        { "atOrdinal": 4, "multiplierPerMille": 80 },
-        { "atOrdinal": 5, "multiplierPerMille": 140 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 15
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 26
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 46
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 80
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 140
+        }
       ],
       "tags": [],
       "notes": "RATIO curve, already the applied figure: ferocity is `Increased atk`, so its tier value IS a per-mille figure natively (no *1000 scaling — do not confuse these small numbers with the VALUE-curve convention used elsewhere in this file). Reproduces bands.v1.json's `primaryChannel.workedExamples[ferocity]` verbatim (sharePermille=16 legibilised to a tier-1 midpoint of 15‰, exactly as the source notes)."
@@ -351,11 +851,26 @@
       "name": "Sigmoid Magnitude",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 6000 },
-        { "atOrdinal": 2, "multiplierPerMille": 10000 },
-        { "atOrdinal": 3, "multiplierPerMille": 18000 },
-        { "atOrdinal": 4, "multiplierPerMille": 32000 },
-        { "atOrdinal": 5, "multiplierPerMille": 56000 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 6000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 10000
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 18000
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 32000
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 56000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is the tier midpoint in sigmoid resolver points (AccuracyScale=CritRateScale=CritDamageScale=100.0, so 100 points = one full sigmoid unit). Reproduces bands.v1.json's `sigmoidDerivedChannel.workedExamples[0]` verbatim — the exact numeric table ssot-affixes.md §4.5 authored under the (incorrect, per the units-correction ledger) name `elemental_power`, reassigned here to the placeholder sigmoid family it arithmetically belongs to. Anchored so tier 5 lands near ~50 points, a third of the 150-point critical-hunter calibration trait. No correctly-named sigmoid family (precision, keen_edge, ...) has authored its own table yet; this is the only one that exists."
@@ -366,11 +881,26 @@
       "name": "Freezing Chance",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 25 },
-        { "atOrdinal": 2, "multiplierPerMille": 45 },
-        { "atOrdinal": 3, "multiplierPerMille": 75 },
-        { "atOrdinal": 4, "multiplierPerMille": 135 },
-        { "atOrdinal": 5, "multiplierPerMille": 235 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 25
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 45
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 75
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 135
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 235
+        }
       ],
       "tags": [],
       "notes": "RATIO curve, already the applied chance in per-mille. Reproduces bands.v1.json's `statusMagnitudeAndDuration.workedExample[freezing]` chance column verbatim. Pair with curve.018 for this same family's duration ladder — the two-ladder rule (bands.v1.json) requires them to scale at different ratios (1.75 vs 1.4), which is why chance and duration are never combined into one curve."
@@ -381,11 +911,26 @@
       "name": "Freezing Duration",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 800000 },
-        { "atOrdinal": 2, "multiplierPerMille": 1100000 },
-        { "atOrdinal": 3, "multiplierPerMille": 1500000 },
-        { "atOrdinal": 4, "multiplierPerMille": 2100000 },
-        { "atOrdinal": 5, "multiplierPerMille": 2900000 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 800000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 1100000
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 1500000
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 2100000
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 2900000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue = multiplierPerMille/1000 is the tier's duration in milliseconds. Reproduces bands.v1.json's `statusMagnitudeAndDuration.workedExample[freezing]` duration column verbatim (800ms at t1 rising to 2900ms at t5, the mandatory r=1.4 duration ratio). Large multiplierPerMille values are an artifact of this file's uniform base=1/VALUE convention applied to a millisecond-scale magnitude, not an error."
@@ -396,11 +941,26 @@
       "name": "Material Yield",
       "input": "level",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 1000 },
-        { "atOrdinal": 5, "multiplierPerMille": 1200 },
-        { "atOrdinal": 10, "multiplierPerMille": 1500 },
-        { "atOrdinal": 15, "multiplierPerMille": 2000 },
-        { "atOrdinal": 20, "multiplierPerMille": 3000 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 1200
+        },
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 1500
+        },
+        {
+          "atOrdinal": 15,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 3000
+        }
       ],
       "tags": [],
       "notes": "INVENTED, no source. Mints the curve id entry-shapes.md §9's drop-table example cites (`qtyCurve: \"curve.qty-material-standard\"`) so that reference has something to resolve to; the reference itself is illustrative, not a numbers commitment from any lane document. RATIO curve, base=1 at level 1: a stacking material's drop quantity grows modestly (1.0x -> 3.0x) with the dropping content's level. `input: level` here means the content/actor level of the drop source, not enhancement level (curve.007-010) or item level (curve.024) — see this file's `_meta.idVsNameKeyNote`/`openFindings` for the level-axis ambiguity this schema does not resolve. Will need refitting against real drop-volume data before it should be treated as balanced."
@@ -411,16 +971,46 @@
       "name": "Pool Floor",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 0 },
-        { "atOrdinal": 20, "multiplierPerMille": 1000 },
-        { "atOrdinal": 30, "multiplierPerMille": 1000 },
-        { "atOrdinal": 40, "multiplierPerMille": 2000 },
-        { "atOrdinal": 50, "multiplierPerMille": 2000 },
-        { "atOrdinal": 60, "multiplierPerMille": 3000 },
-        { "atOrdinal": 70, "multiplierPerMille": 3000 },
-        { "atOrdinal": 80, "multiplierPerMille": 4000 },
-        { "atOrdinal": 90, "multiplierPerMille": 4000 },
-        { "atOrdinal": 100, "multiplierPerMille": 5000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 5000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is `rarity.ladder[].countBand.min`, read directly from the FROZEN core.v1.json registry (not a lane document) — chaff draws 0 affixes (base type plus implicit only), almanac's floor is 5. Pairs with curve.021 for the ceiling."
@@ -431,16 +1021,46 @@
       "name": "Pool Ceiling",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 0 },
-        { "atOrdinal": 20, "multiplierPerMille": 2000 },
-        { "atOrdinal": 30, "multiplierPerMille": 2000 },
-        { "atOrdinal": 40, "multiplierPerMille": 3000 },
-        { "atOrdinal": 50, "multiplierPerMille": 3000 },
-        { "atOrdinal": 60, "multiplierPerMille": 4000 },
-        { "atOrdinal": 70, "multiplierPerMille": 4000 },
-        { "atOrdinal": 80, "multiplierPerMille": 5000 },
-        { "atOrdinal": 90, "multiplierPerMille": 5000 },
-        { "atOrdinal": 100, "multiplierPerMille": 6000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 5000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 5000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 6000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is `rarity.ladder[].countBand.max`, read directly from the FROZEN core.v1.json registry. Almanac's ceiling is 6 affixes, one more than its floor of 5 — the one rung whose count band is not two-wide."
@@ -451,16 +1071,46 @@
       "name": "Window Floor",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 0 },
-        { "atOrdinal": 20, "multiplierPerMille": 1000 },
-        { "atOrdinal": 30, "multiplierPerMille": 1000 },
-        { "atOrdinal": 40, "multiplierPerMille": 1000 },
-        { "atOrdinal": 50, "multiplierPerMille": 2000 },
-        { "atOrdinal": 60, "multiplierPerMille": 2000 },
-        { "atOrdinal": 70, "multiplierPerMille": 3000 },
-        { "atOrdinal": 80, "multiplierPerMille": 3000 },
-        { "atOrdinal": 90, "multiplierPerMille": 4000 },
-        { "atOrdinal": 100, "multiplierPerMille": 4000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 2000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 4000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is `rarity.ladder[].tierWindow.min`, read directly from the FROZEN core.v1.json registry. Chaff's tierWindow is `null` (no pool at all) and is encoded here as 0, a sentinel outside the real 1-5 tier domain, consistent with chaff's 0-affix count band (curve.020) making the window moot."
@@ -471,16 +1121,46 @@
       "name": "Window Ceiling",
       "input": "rarity",
       "points": [
-        { "atOrdinal": 10, "multiplierPerMille": 0 },
-        { "atOrdinal": 20, "multiplierPerMille": 1000 },
-        { "atOrdinal": 30, "multiplierPerMille": 3000 },
-        { "atOrdinal": 40, "multiplierPerMille": 3000 },
-        { "atOrdinal": 50, "multiplierPerMille": 4000 },
-        { "atOrdinal": 60, "multiplierPerMille": 4000 },
-        { "atOrdinal": 70, "multiplierPerMille": 5000 },
-        { "atOrdinal": 80, "multiplierPerMille": 5000 },
-        { "atOrdinal": 90, "multiplierPerMille": 5000 },
-        { "atOrdinal": 100, "multiplierPerMille": 5000 }
+        {
+          "atOrdinal": 10,
+          "multiplierPerMille": 0
+        },
+        {
+          "atOrdinal": 20,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 30,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 40,
+          "multiplierPerMille": 3000
+        },
+        {
+          "atOrdinal": 50,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 60,
+          "multiplierPerMille": 4000
+        },
+        {
+          "atOrdinal": 70,
+          "multiplierPerMille": 5000
+        },
+        {
+          "atOrdinal": 80,
+          "multiplierPerMille": 5000
+        },
+        {
+          "atOrdinal": 90,
+          "multiplierPerMille": 5000
+        },
+        {
+          "atOrdinal": 100,
+          "multiplierPerMille": 5000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is `rarity.ladder[].tierWindow.max`, read directly from the FROZEN core.v1.json registry. Chaff encoded as 0 (see curve.022's note). Four of the top five rungs (70-100) share ceiling t5 — the ladder differentiates those rungs by count band (curve.020/021) and window floor (curve.022), not by how high the window reaches."
@@ -491,11 +1171,26 @@
       "name": "Tier Threshold",
       "input": "tier",
       "points": [
-        { "atOrdinal": 1, "multiplierPerMille": 1000 },
-        { "atOrdinal": 2, "multiplierPerMille": 1000 },
-        { "atOrdinal": 3, "multiplierPerMille": 8000 },
-        { "atOrdinal": 4, "multiplierPerMille": 18000 },
-        { "atOrdinal": 5, "multiplierPerMille": 32000 }
+        {
+          "atOrdinal": 1,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 2,
+          "multiplierPerMille": 1000
+        },
+        {
+          "atOrdinal": 3,
+          "multiplierPerMille": 8000
+        },
+        {
+          "atOrdinal": 4,
+          "multiplierPerMille": 18000
+        },
+        {
+          "atOrdinal": 5,
+          "multiplierPerMille": 32000
+        }
       ],
       "tags": [],
       "notes": "VALUE curve, base=1: resolvedValue is the minimum item level (ilvl) at which a given atom tier may appear, reproduced verbatim from ssot-generation.md's 'Tier | Minimum ilvl' table (t1=1, t2=1, t3=8, t4=18, t5=32). `input: tier` here is the unambiguous atom-tier axis (bands.v1.json's `powerBand.tierMap`), not the level-of-a-level ambiguity flagged on curve.019 — tier 1-5 has exactly one meaning across this whole corpus."

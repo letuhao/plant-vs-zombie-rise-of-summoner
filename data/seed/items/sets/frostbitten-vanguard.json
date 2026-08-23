@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "sets-1c",
+    "partition": "sets/frostbitten-vanguard",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-sets.md#3.2"
+  },
+  "entries": [
+    {
+      "id": "set.frostbitten-vanguard-001",
+      "nameKey": "set.stillmarch",
+      "name": "Stillmarch",
+      "themeKey": "theme.frostbitten-vanguard",
+      "members": [
+        { "role": "armament-primary" },
+        { "role": "core-guard" },
+        { "role": "jewel-major" },
+        { "role": "footing" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.chilling",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" },
+            { "family": "atom.might", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Whole-token fusion name 'Stillmarch' from uniqueSetSeedPools['frostbitten-vanguard'] (canonicalId 'stillmarch'), used atomically. Capability atom.chilling (status.apply, C-category, 'chilling' status per atom-family-library.md 3.4) reads as the ground itself slowing anything that nears a line that has stopped retreating - no drawback field needed on a set capability, that rule is unique-only. All four member roles (armament-primary, core-guard, jewel-major, footing) are in the hybrid role core. Higher tiers use only Flat/Increased stat.modify families (fortitude, vitality, might) - none of the two More-op families (bulwark, savagery), so SetTierForbiddenAtom does not apply."
+    },
+    {
+      "id": "set.frostbitten-vanguard-002",
+      "nameKey": "set.coldstride",
+      "name": "Coldstride",
+      "themeKey": "theme.frostbitten-vanguard",
+      "members": [
+        { "role": "armament-secondary" },
+        { "role": "mantle" },
+        { "role": "head-guard" },
+        { "role": "sense" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.warded",
+            "powerBand": "low",
+            "params": { "element": "ice" }
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" },
+            { "family": "atom.fortitude", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Whole-token fusion name 'Coldstride' from uniqueSetSeedPools['frostbitten-vanguard']. The name reads as a laboured, halting tread, not speed or agility - flavour intentionally undercuts the surface word per the theme's own avoid-list ('speed, agility, or quickness flavor'). Capability atom.warded (shield.grant) carries params.element 'ice', matching the theme's sole elementAffinity and the same pattern the frostbitten-vanguard uniques partition already used on atom.warded/atom.searing-strike. Member roles (armament-secondary, mantle, head-guard, sense) are all hybrid-eligible; only armament-secondary is claimed, never armament-primary too, so SetRoleForbidden does not apply. Higher-tier atoms (ferocity, might, fortitude) are Flat/Increased only."
+    },
+    {
+      "id": "set.frostbitten-vanguard-003",
+      "nameKey": "set.frostcolumn",
+      "name": "Frostcolumn",
+      "themeKey": "theme.frostbitten-vanguard",
+      "members": [
+        { "role": "manipulator" },
+        { "role": "girdle" },
+        { "role": "infusion" },
+        { "role": "retinue" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.searing-strike",
+            "powerBand": "low",
+            "params": { "element": "ice" }
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.might", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.ferocity", "powerBand": "medium" },
+            { "family": "atom.vitality", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Whole-token fusion name 'Frostcolumn' from uniqueSetSeedPools['frostbitten-vanguard']. Capability atom.searing-strike (resource.delta, OnDamageDealt) carries params.element 'ice' - a bonus-element rider on every hand and hand-adjacent role in the column, the same family/params pairing already shipped on unique.frozen-pitchfork. Claims neither armament role, so §3.5's weapon rule is trivially satisfied. Member roles (manipulator, girdle, infusion, retinue) are all in the hybrid role core. Higher tiers (might, ferocity, vitality) are Flat/Increased only, no More-op families."
+    },
+    {
+      "id": "set.frostbitten-vanguard-004",
+      "nameKey": "set.icebound",
+      "name": "Icebound",
+      "themeKey": "theme.frostbitten-vanguard",
+      "members": [
+        { "role": "jewel-minor-a" },
+        { "role": "core-guard" },
+        { "role": "head-guard" },
+        { "role": "footing" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.regeneration",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" },
+            { "family": "atom.mending", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Whole-token fusion name 'Icebound' from uniqueSetSeedPools['frostbitten-vanguard']. Capability atom.regeneration (resource.delta, OnTimer) reads as the cold slowing the bleeding along with everything else about the wearer - no offensive rider, matching the theme's own 'sluggish' and 'brittle' tone words rather than a burst effect. Member roles (jewel-minor-a, core-guard, head-guard, footing) are all hybrid-eligible - jewel-minor-a is included, jewel-minor-b is not, per §3.7's SetRoleNotUniversal split. Claims no armament role at all. Higher tiers (fortitude, vitality, mending) are Flat/Increased stat.modify only."
+    },
+    {
+      "id": "set.frostbitten-vanguard-005",
+      "nameKey": "set.winterhold",
+      "name": "Winterhold",
+      "themeKey": "theme.frostbitten-vanguard",
+      "members": [
+        { "role": "armament-primary" },
+        { "role": "mantle" },
+        { "role": "jewel-major" },
+        { "role": "sense" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.martyrdom",
+            "powerBand": "low"
+          }
+        },
+        {
+          "pieces": 3,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" },
+            { "family": "atom.ferocity", "powerBand": "low" }
+          ]
+        }
+      ],
+      "tags": [],
+      "notes": "Whole-token fusion name 'Winterhold' from uniqueSetSeedPools['frostbitten-vanguard']. Capability atom.martyrdom (resource.delta, OnDeath, heal allies) is the most direct read of the theme identity - 'an army that kept marching anyway' - a fallen piece's last act still holds the line for whoever is still standing in it. Claims armament-primary only, never armament-secondary in the same set, and armament-primary already sits on set.frostbitten-vanguard-001 (Stillmarch) - member roles are declared per set, so the same role legally recurs across sets without collision. Higher tiers (vitality, fortitude, ferocity) are Flat/Increased only."
+    },
+    {
+      "id": "set.frostbitten-vanguard-006",
+      "nameKey": "set.glacierward",
+      "name": "Glacierward",
+      "themeKey": "theme.frostbitten-vanguard",
+      "members": [
+        { "role": "armament-secondary" },
+        { "role": "girdle" },
+        { "role": "infusion" },
+        { "role": "retinue" },
+        { "role": "jewel-minor-a" },
+        { "role": "manipulator" }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.retribution",
+            "powerBand": "medium"
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            { "family": "atom.fortitude", "powerBand": "medium" },
+            { "family": "atom.might", "powerBand": "medium" }
+          ]
+        },
+        {
+          "pieces": 6,
+          "atoms": [
+            { "family": "atom.vitality", "powerBand": "high" },
+            { "family": "atom.ferocity", "powerBand": "medium" },
+            { "family": "atom.mending", "powerBand": "medium" }
+          ]
+        }
+      ],
+      "tags": ["signature"],
+      "notes": "Whole-token fusion name 'Glacierward' from uniqueSetSeedPools['frostbitten-vanguard']. This is the partition's one grand (6-piece) set, per ssot-sets.md §3.4's 'exception, not the pattern' - it carries the mandatory thresholds at 2 and 4 plus a top threshold at 6, equal to its member count (SetThresholdUnreachable does not apply). Capability atom.retribution (resource.delta, OnDamageTaken, reflect) sits at the lowest threshold, powerBand medium rather than low, because the grand commitment (6 of ~13-15 slots) earns a stronger splash than a typical 4-piece set. Claims armament-secondary only. Six distinct member roles (armament-secondary, girdle, infusion, retinue, jewel-minor-a, manipulator), all in the hybrid role core, none repeated within this entry. Tagged 'signature' (notability axis, tags.v1.json) as the partition's flagship - a curation flag, not a power claim. Higher tiers use only Flat/Increased families (fortitude, might, vitality, ferocity, mending), no More-op family."
+    }
+  ]
+}

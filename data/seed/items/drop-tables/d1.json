@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "kind": "drop-table",
+  "_meta": {
+    "partition": "drop-tables/1",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "drop-tables-1c",
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/entry-shapes.md#9",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "droptable.d1-001",
+      "nameKey": "droptable.compost-cache",
+      "name": "Compost Cache",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "compost-cache-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "girdle", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "footing", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "compost-cache-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.earth", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "substrate.plant.crude", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "compost-cache-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-002",
+      "nameKey": "droptable.greenhouse-harvest",
+      "name": "Greenhouse Harvest",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "greenhouse-harvest-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "manipulator", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "sense", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "greenhouse-harvest-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.light", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "essence.fire", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "greenhouse-harvest-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-003",
+      "nameKey": "droptable.boneyard-scrap",
+      "name": "Boneyard Scrap",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "boneyard-scrap-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "core-guard", "frame": "humanoid", "dropBand": "occasional", "rarityFloor": "grafted" },
+            { "entryKind": "equipment", "role": "armament-secondary", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "boneyard-scrap-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.common", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "catalyst.forge", "dropBand": "seldom", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "boneyard-scrap-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-004",
+      "nameKey": "droptable.thicket-ambush",
+      "name": "Thicket Ambush",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "thicket-ambush-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "armament-primary", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "ward-array", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "thicket-ambush-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.air", "dropBand": "frequent", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "thicket-ambush-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-005",
+      "nameKey": "droptable.sunlit-windfall",
+      "name": "Sunlit Windfall",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "sunlit-windfall-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "jewel-major", "frame": "plant", "dropBand": "seldom" },
+            { "entryKind": "equipment", "role": "jewel-major", "frame": "humanoid", "dropBand": "seldom" },
+            { "entryKind": "nothing", "dropBand": "frequent" }
+          ]
+        },
+        {
+          "groupKey": "sunlit-windfall-ins",
+          "entries": [
+            { "entryKind": "insert", "ref": "gem.g3-001", "dropBand": "seldom" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "sunlit-windfall-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "frequent" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-006",
+      "nameKey": "droptable.blighted-bounty",
+      "name": "Blighted Bounty",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "blighted-bounty-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "head-guard", "frame": "plant", "dropBand": "occasional", "rarityFloor": "fused" },
+            { "entryKind": "equipment", "role": "head-guard", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "blighted-bounty-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "essence.dark", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "shard.rare", "dropBand": "seldom", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "blighted-bounty-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-007",
+      "nameKey": "droptable.mulch-reserve",
+      "name": "Mulch Reserve",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "mulch-reserve-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "infusion", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "infusion", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "mulch-reserve-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "substrate.plant.sound", "dropBand": "frequent", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "essence.earth", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "mulch-reserve-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-008",
+      "nameKey": "droptable.graveyard-salvage",
+      "name": "Graveyard Salvage",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "graveyard-salvage-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "retinue", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "mantle", "frame": "humanoid", "dropBand": "occasional", "rarityFloor": "fused" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "graveyard-salvage-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.epic", "dropBand": "seldom", "qtyCurve": "curve.019" },
+            { "entryKind": "material", "ref": "catalyst.temper", "dropBand": "occasional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "graveyard-salvage-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-009",
+      "nameKey": "droptable.bramble-stash",
+      "name": "Bramble Stash",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "bramble-stash-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "jewel-minor-a", "frame": "plant", "dropBand": "occasional" },
+            { "entryKind": "equipment", "role": "jewel-minor-a", "frame": "humanoid", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "bramble-stash-ins",
+          "entries": [
+            { "entryKind": "insert", "ref": "gem.g1-001", "dropBand": "occasional" },
+            { "entryKind": "nothing", "dropBand": "staple" }
+          ]
+        },
+        {
+          "groupKey": "bramble-stash-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "staple" }
+          ]
+        }
+      ],
+      "tags": []
+    },
+    {
+      "id": "droptable.d1-010",
+      "nameKey": "droptable.withered-trove",
+      "name": "Withered Trove",
+      "sourceAllow": ["web"],
+      "groups": [
+        {
+          "groupKey": "withered-trove-gear",
+          "entries": [
+            { "entryKind": "equipment", "role": "core-guard", "frame": "hybrid", "dropBand": "seldom", "rarityFloor": "heirloom" },
+            { "entryKind": "equipment", "role": "armament-primary", "frame": "hybrid", "dropBand": "seldom" },
+            { "entryKind": "nothing", "dropBand": "frequent" }
+          ]
+        },
+        {
+          "groupKey": "withered-trove-mat",
+          "entries": [
+            { "entryKind": "material", "ref": "shard.legendary", "dropBand": "exceptional", "qtyCurve": "curve.019" }
+          ]
+        },
+        {
+          "groupKey": "withered-trove-cur",
+          "entries": [
+            { "entryKind": "currency", "ref": "souls", "dropBand": "seldom" }
+          ]
+        }
+      ],
+      "tags": []
+    }
+  ]
+}

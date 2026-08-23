@@ -234,7 +234,7 @@
     {
       "id": "disptpl.p1-022",
       "nameKey": "disptpl.affix.tempo-surge",
-      "name": "{value}% faster zombie advance",
+      "name": "{value}% increased zombie advance",
       "runtimeFamily": "atom.tempo-surge",
       "plantOverrideKey": null,
       "groupId": "g.tempo",
@@ -244,7 +244,7 @@
     {
       "id": "disptpl.p1-023",
       "nameKey": "disptpl.affix.tempo-stampede",
-      "name": "{value}% faster zombie advance",
+      "name": "{value}% more zombie advance",
       "runtimeFamily": "atom.tempo-stampede",
       "plantOverrideKey": null,
       "groupId": "g.tempo",

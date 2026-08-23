@@ -95,6 +95,7 @@ public static class IntelRecorder
         Phase = sector.Phase,
         Climate = sector.Climate,
         DangerBand = sector.DangerBand,
+        FractureIntensityMilli = sector.FractureIntensityMilli,
         DevelopmentLevel = level == SectorSight.Full ? sector.DevelopmentLevel : 0,
 
         // A glimpse from next door tells you who holds the ground, not what is buried in it. That is

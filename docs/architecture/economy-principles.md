@@ -283,11 +283,11 @@ The point of writing principles first is that most "open questions" turn out not
 | Should essences stay non-substitutable? | **P12** | **Yes**, and this is load-bearing, not a detail — it is what makes territory choice mean anything |
 | Should extraction deplete? | **P9** | **Yes**, and `DepletionMilli` is already there, hashed and replayed, waiting for a reader |
 | Should garrisons affect output? | **P11** | **Yes** — otherwise labour is decoration and the army is pure cost |
-| How long is a campaign? | **P8** | **Not a pacing question.** It is the denominator of every payback period, and it must be answered before any yield number is chosen |
+| How long is a campaign? | **P8** | **Answered 2026-08-22: there is no campaign.** Endless-grind RPG; the bound is *map size*, and payback is measured against how long a map is held |
 
 **Still genuinely open**, because principles constrain them without determining them:
 
-1. **Campaign length in turns** (P8) — needed first; every yield number is meaningless without it.
+1. ~~Campaign length in turns~~ — **closed 2026-08-22**: no campaign, endless RPG. Replaced by **map size**, settled as a five-tier ladder in `empire-economy-ideal.md` §12.2.
 2. **What shipping stock home costs** — free on the supply chain, a building, or an interceptable
    caravan. P6 favours *some* cost (it creates the second decision); it does not say which.
 3. **The soul faucet's shape** — converter versus capped faucet. P5 permits either; P2 requires the

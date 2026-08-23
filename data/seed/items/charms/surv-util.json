@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 1,
+  "kind": "charm",
+  "_meta": {
+    "partition": "charms/surv-util",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "batch": "charms-1c",
+    "model": "claude-haiku-4-5-20251001",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/entry-shapes.md#7",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "charm.surv-util-001",
+      "nameKey": "charm.composted-mulch",
+      "name": "Composted Mulch",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.vitality", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["defensive", "rooted"],
+      "notes": "themeId: rot-bloom"
+    },
+    {
+      "id": "charm.surv-util-002",
+      "nameKey": "charm.windborne-pollen",
+      "name": "Windborne Pollen",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.rallying", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility", "rooted"],
+      "notes": "themeId: windswept-spore"
+    },
+    {
+      "id": "charm.surv-util-003",
+      "nameKey": "charm.root-of-bedrock",
+      "name": "Root of Bedrock",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.warding", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["defensive", "rooted"],
+      "notes": "themeId: earthen-bastion"
+    },
+    {
+      "id": "charm.surv-util-004",
+      "nameKey": "charm.hushed-sap",
+      "name": "Hushed Sap",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.cleansing", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility", "rooted"],
+      "notes": "themeId: hollow-orchard"
+    },
+    {
+      "id": "charm.surv-util-005",
+      "nameKey": "charm.scavenged-bead",
+      "name": "Scavenged Bead",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.mending", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["defensive"],
+      "notes": "themeId: rusted-legion"
+    },
+    {
+      "id": "charm.surv-util-006",
+      "nameKey": "charm.tag-of-nightfall",
+      "name": "Tag of Nightfall",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.exposing", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"],
+      "notes": "themeId: umbral-swarm"
+    },
+    {
+      "id": "charm.surv-util-007",
+      "nameKey": "charm.sepulchral-thorn",
+      "name": "Sepulchral Thorn",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.lifesteal", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["defensive", "undead"],
+      "notes": "themeId: charnel-bloom"
+    },
+    {
+      "id": "charm.surv-util-008",
+      "nameKey": "charm.verdant-seedling",
+      "name": "Verdant Seedling",
+      "charmClass": "minor",
+      "apCost": 1,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.gardener", "powerBand": "low" }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility", "rooted"],
+      "notes": "themeId: verdant-graft"
+    },
+    {
+      "id": "charm.surv-util-009",
+      "nameKey": "charm.gilded-casing",
+      "name": "Gilded Casing",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.warding", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.mending"],
+      "poolRolls": 1,
+      "tags": ["defensive"],
+      "notes": "themeId: gilded-porcelain"
+    },
+    {
+      "id": "charm.surv-util-010",
+      "nameKey": "charm.badge-of-the-cohort",
+      "name": "Badge of the Cohort",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.commanding", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.rallying", "atom.regeneration"],
+      "poolRolls": 1,
+      "tags": ["utility"],
+      "notes": "themeId: rusted-legion"
+    },
+    {
+      "id": "charm.surv-util-011",
+      "nameKey": "charm.frostbitten-rhizome",
+      "name": "Frostbitten Rhizome",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.vitality", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.mending"],
+      "poolRolls": 1,
+      "tags": ["defensive", "rooted"],
+      "notes": "themeId: frostbitten-vanguard"
+    },
+    {
+      "id": "charm.surv-util-012",
+      "nameKey": "charm.inherited-trellis",
+      "name": "Inherited Trellis",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.terraforming", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.gravemaking", "atom.gravedigging"],
+      "poolRolls": 1,
+      "tags": ["utility", "rooted"],
+      "notes": "themeId: sunwoven-almanac"
+    },
+    {
+      "id": "charm.surv-util-013",
+      "nameKey": "charm.sap-of-renewal",
+      "name": "Sap of Renewal",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.regeneration", "powerBand": "high" }
+      ],
+      "roleGroups": ["atom.mending"],
+      "poolRolls": 2,
+      "tags": ["defensive", "rooted"],
+      "notes": "themeId: rot-bloom"
+    },
+    {
+      "id": "charm.surv-util-014",
+      "nameKey": "charm.nameless-mound",
+      "name": "Nameless Mound",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.gravemaking", "powerBand": "high" }
+      ],
+      "roleGroups": ["atom.gravedigging", "atom.gravemaking"],
+      "poolRolls": 1,
+      "tags": ["utility"],
+      "notes": "themeId: umbral-swarm"
+    },
+    {
+      "id": "charm.surv-util-015",
+      "nameKey": "charm.weary-colony",
+      "name": "Weary Colony",
+      "charmClass": "standard",
+      "apCost": 3,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.martyrdom", "powerBand": "high" }
+      ],
+      "roleGroups": ["atom.regeneration", "atom.rallying"],
+      "poolRolls": 1,
+      "tags": ["defensive", "rooted"],
+      "notes": "themeId: rusted-legion"
+    },
+    {
+      "id": "charm.surv-util-016",
+      "nameKey": "charm.rootlet-of-loam",
+      "name": "Rootlet of Loam",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "utility",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.gravedigging", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.terraforming", "atom.warding"],
+      "poolRolls": 1,
+      "tags": ["utility", "rooted"],
+      "notes": "themeId: earthen-bastion"
+    },
+    {
+      "id": "charm.surv-util-017",
+      "nameKey": "charm.doubled-sheath",
+      "name": "Doubled Sheath",
+      "charmClass": "standard",
+      "apCost": 2,
+      "axis": "survivability",
+      "frameHint": "any",
+      "fixedAtoms": [
+        { "family": "atom.warded", "powerBand": "medium" }
+      ],
+      "roleGroups": ["atom.warding", "atom.terraforming"],
+      "poolRolls": 1,
+      "tags": ["defensive", "rooted"],
+      "notes": "themeId: verdant-graft"
+    },
+    {
+      "id": "charm.surv-util-018",
+      "nameKey": "charm.signet-of-the-foundation",
+      "name": "Signet of the Foundation",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "survivability",
+      "frameHint": "any",
+      "uniqueCarry": true,
+      "fixedAtoms": [
+        { "family": "atom.vitality", "powerBand": "high" },
+        { "family": "atom.warding", "powerBand": "medium", "params": { "sign": "negative" } }
+      ],
+      "poolRolls": 0,
+      "tags": ["defensive"],
+      "notes": "themeId: earthen-bastion"
+    },
+    {
+      "id": "charm.surv-util-019",
+      "nameKey": "charm.signet-of-the-diaspora",
+      "name": "Signet of the Diaspora",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "uniqueCarry": true,
+      "fixedAtoms": [
+        { "family": "atom.terraforming", "powerBand": "high" },
+        { "family": "atom.gravemaking", "powerBand": "medium", "params": { "sign": "negative" } }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"],
+      "notes": "themeId: windswept-spore"
+    },
+    {
+      "id": "charm.surv-util-020",
+      "nameKey": "charm.signet-of-the-almanac",
+      "name": "Signet of the Almanac",
+      "charmClass": "signet",
+      "apCost": 5,
+      "axis": "utility",
+      "frameHint": "any",
+      "uniqueCarry": true,
+      "fixedAtoms": [
+        { "family": "atom.gardener", "powerBand": "high" },
+        { "family": "atom.terraforming", "powerBand": "medium", "params": { "sign": "negative" } }
+      ],
+      "poolRolls": 0,
+      "tags": ["utility"],
+      "notes": "themeId: sunwoven-almanac"
+    }
+  ]
+}

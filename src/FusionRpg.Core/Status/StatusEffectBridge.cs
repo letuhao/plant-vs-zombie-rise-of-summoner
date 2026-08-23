@@ -229,7 +229,22 @@ public static class StatusEffectBridge
             SpreadStatusId: spreadStatusId,
             SpreadMaxHops: spreadMaxHops,
             SpreadIcdMs: spreadIcdMs,
-            SpreadTarget: spreadTarget);
+            SpreadTarget: spreadTarget,
+            StatMods: ParseStatMods(overlay));
+    }
+
+    /// <summary>
+    /// The <c>stat</c> overlay (E17) — timed modifiers a status contributes while active.
+    ///
+    /// <para>A malformed block is <b>dropped with a reason</b>, not partially applied: half a stat
+    /// payload is a status that does some of what it says. The overlay itself already passed the
+    /// allowlist by the time it reaches here, so this is about shape, not permission.</para>
+    /// </summary>
+    static IReadOnlyList<StatusStatMod>? ParseStatMods(Dictionary<string, object?> overlay)
+    {
+        if (!overlay.TryGetValue("stat", out var raw) || raw is null) return null;
+
+        return StatusStatPayload.TryParse(raw, out var mods, out _) && mods.Count > 0 ? mods : null;
     }
 
     static IReadOnlyList<string>? ParseImmunityTags(Dictionary<string, object?> overlay)

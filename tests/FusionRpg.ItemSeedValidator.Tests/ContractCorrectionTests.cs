@@ -199,6 +199,110 @@ public class ContractCorrectionTests
         Assert.DoesNotContain("TagAxisNotApplicable", Errors(result));
     }
 
+    /// <summary>
+    /// `notes` is authoring provenance and never reaches a player, and the briefs ask an author to
+    /// record which pool each word came from. `nounPools['armament-primary.humanoid']` is a code
+    /// reference, not a bracket tag; flagging it 183 times buried the warnings that meant something.
+    /// </summary>
+    [Fact]
+    public void Notes_may_carry_code_references()
+    {
+        var result = Validate("base-type", "base-types", """
+            {
+              "id": "item.humanoid-torso-a-001", "nameKey": "base.test", "name": "Ashen Fang",
+              "frame": "humanoid", "role": "core-guard", "class": "plate", "band": "a",
+              "iconKey": "icon.test", "tags": [],
+              "notes": "Noun from nounPools['core-guard.humanoid']; see `naming.v1.json`."
+            }
+            """);
+        Assert.DoesNotContain("MarkupInString", Codes(result));
+    }
+
+    /// <summary>
+    /// An exemplar is a pattern, not corpus content, and it must not hold a slot in any cross-row
+    /// ledger. `IdentityCheck` already knew that for ids; the new content checks did not, so the
+    /// exemplar's own entry squatted on the (head-guard, offense) cell at rung band 30 and made one
+    /// partition's allocated table unsatisfiable. That partition reported BLOCKED rather than
+    /// deviating quietly, which is the only reason it was caught.
+    /// </summary>
+    [Fact]
+    public void Exemplar_entries_do_not_occupy_the_axis_ledger()
+    {
+        var entry = """
+            {
+              "id": "unique.ember-harvest-30-001", "nameKey": "unique.emberfall",
+              "name": "Emberfall", "frame": "plant", "baseType": "item.plant-crown-a-003",
+              "rarity": "grafted", "powerAxis": "offense",
+              "fixedAtoms": [ { "family": "atom.might", "powerBand": "medium" } ],
+              "counterPressure": { "kind": "narrow", "note": "One line, nothing else." },
+              "tags": []
+            }
+            """;
+        var json = $$"""
+        {
+          "schemaVersion": 1, "kind": "unique",
+          "_meta": {
+            "batch": "test", "partition": "uniques/ember-harvest/30", "contractVersion": 1,
+            "registryVersions": { "naming": 1 }, "exemplarVersion": 1, "promptVersion": 1,
+            "model": "test", "authoredUtc": "2026-08-22T00:00:00Z", "sourceRef": "test"
+          },
+          "entries": [ {{entry}} ]
+        }
+        """;
+        var asExemplar = Validator.Run(SeedFixture.Registries(),
+            new[] { SeedFile.Parse(json, "_exemplars/unique.exemplar.json", "_exemplars") });
+        Assert.DoesNotContain("UniqueRoleForbidden", Codes(asExemplar));
+        Assert.DoesNotContain("UniqueRoleQuota", Codes(asExemplar));
+    }
+
+    /// <summary>
+    /// `words.v1.json` exempts five kinds from the word pools, and states per kind what each still
+    /// owes. For `gem` that is "global name and nameKey collision checks, the naming patterns, and
+    /// every tag/element/registry rule". A single early return collapsed all five into "checked for
+    /// nothing", and `gem.g1-015` and `consumable.k1-007` both shipped as "Mending Pulse" — the
+    /// identical string. What is exempt is pool membership, never collision.
+    /// </summary>
+    [Fact]
+    public void A_pool_exempt_gem_still_collides_with_another_kinds_name()
+    {
+        var json = """
+        {
+          "schemaVersion": 1, "kind": "gem",
+          "_meta": {
+            "batch": "test", "partition": "gems/1", "contractVersion": 1,
+            "registryVersions": { "naming": 1 }, "exemplarVersion": 1, "promptVersion": 1,
+            "model": "test", "authoredUtc": "2026-08-22T00:00:00Z", "sourceRef": "test"
+          },
+          "entries": [
+            { "id": "gem.g1-001", "nameKey": "gem.mending-pulse", "name": "Mending Pulse",
+              "family": "atom.vitality", "powerBand": "low" },
+            { "id": "gem.g1-002", "nameKey": "gem.pulse-of-mending", "name": "Pulse of Mending",
+              "family": "atom.vitality", "powerBand": "low" }
+          ]
+        }
+        """;
+        var result = Validator.Run(SeedFixture.Registries(),
+            new[] { SeedFile.Parse(json, "gems/g1.json", "gems") });
+        Assert.Contains("NameCollision", Errors(result));
+    }
+
+    /// <summary>
+    /// The reference regex decides whether a string is even considered an id, so a stricter pattern
+    /// does not reject a misspelling — it hides it. Ten `atom.keen_edge`-style references produced
+    /// no error and no warning because they failed the gate and were never resolved at all.
+    /// </summary>
+    [Fact]
+    public void A_misspelled_underscore_reference_is_reported_not_skipped()
+    {
+        var result = Validate("gem", "gems", """
+            {
+              "id": "gem.g1-001", "nameKey": "gem.sharp-spore", "name": "Sharp Spore",
+              "family": "atom.keen_edge", "powerBand": "low"
+            }
+            """);
+        Assert.Contains("ReferenceUnresolved", Errors(result));
+    }
+
     /// <summary>An unknown tag is still closed-vocabulary violation, and still an error.</summary>
     [Fact]
     public void Unknown_tag_is_still_an_error()

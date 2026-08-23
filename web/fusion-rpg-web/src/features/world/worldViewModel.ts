@@ -37,6 +37,80 @@ export type ForceView = {
   bandName: string;
 };
 
+/**
+ * Territory is light in the dark (spec-loam-fe.md). Four states, mutually exclusive:
+ * - `not-yours` — the existing fog treatment owns this one entirely; loam has nothing to add.
+ * - `anchored` — yours, holding a source, stability at or near full.
+ * - `fading` — yours, holding a source, stability has started to slip. Dims *in proportion*.
+ * - `barren` — yours, but it holds no source at all and can never be kept, regardless of its
+ *   current stability number. Deliberately a flat, distinct look rather than a point on the same
+ *   dimming scale as `fading` — confusing the two is the one mistake this module exists to prevent.
+ */
+export type AnchorState = "anchored" | "fading" | "barren" | "not-yours";
+
+const AnchoredFloorMilli = 900;
+
+export function anchorStateOf(ownership: Ownership, habitable: boolean, stabilityMilli: number): AnchorState {
+  if (ownership !== "mine") return "not-yours";
+  if (!habitable) return "barren";
+  return stabilityMilli >= AnchoredFloorMilli ? "anchored" : "fading";
+}
+
+export type LoamComponentSummary = {
+  componentId: string;
+  production: number;
+  upkeep: number;
+  net: number;
+  stock: number;
+  sectorCount: number;
+  /** The sector this component is about to lose next turn if nothing changes, or none. */
+  releaseCandidateSectorId: string | null;
+};
+
+export type LoamEmpireSummary = {
+  production: number;
+  upkeep: number;
+  net: number;
+  stock: number;
+  components: LoamComponentSummary[];
+};
+
+/**
+ * Empire-scope totals for the gauge (spec-loam-fe.md). Every number here is read straight off a
+ * sector or component total `loam-calc` already finalized on the server — this groups the viewer's
+ * own sectors by component and adds already-settled figures once per distinct component, which is
+ * addition, not a second copy of any upkeep/decay formula.
+ */
+export function summarizeLoam(nodes: SectorNodeData[]): LoamEmpireSummary {
+  const byComponent = new Map<string, SectorNodeData[]>();
+  for (const node of nodes) {
+    if (node.ownership !== "mine" || node.componentId == null) continue;
+    const list = byComponent.get(node.componentId);
+    if (list) list.push(node);
+    else byComponent.set(node.componentId, [node]);
+  }
+
+  const components: LoamComponentSummary[] = Array.from(byComponent.entries())
+    .map(([componentId, members]) => ({
+      componentId,
+      production: members[0].componentProduction,
+      upkeep: members[0].componentUpkeep,
+      net: members[0].componentNet,
+      stock: members[0].componentStock,
+      sectorCount: members.length,
+      releaseCandidateSectorId: members.find((m) => m.willReleaseNextTurn)?.sectorId ?? null
+    }))
+    .sort((a, b) => a.componentId.localeCompare(b.componentId));
+
+  return {
+    production: components.reduce((sum, c) => sum + c.production, 0),
+    upkeep: components.reduce((sum, c) => sum + c.upkeep, 0),
+    net: components.reduce((sum, c) => sum + c.net, 0),
+    stock: components.reduce((sum, c) => sum + c.stock, 0),
+    components
+  };
+}
+
 export type SectorNodeData = {
   sectorId: string;
   label: string;
@@ -59,6 +133,22 @@ export type SectorNodeData = {
   lifeline: boolean;
   slots: SectorSlotView[];
   forces: ForceView[];
+  /** Whether this ground can hold a source at all — terrain, visible once scouted. */
+  habitable: boolean;
+  /** Owner-only; zero for ground you do not hold. */
+  stabilityMilli: number;
+  anchorState: AnchorState;
+  /** What this sector earns/costs/nets this turn, and the pool it belongs to — owner-only. */
+  loamProduction: number;
+  loamUpkeep: number;
+  loamNet: number;
+  componentId: string | null;
+  componentProduction: number;
+  componentUpkeep: number;
+  componentNet: number;
+  loamStock: number;
+  componentStock: number;
+  willReleaseNextTurn: boolean;
 };
 
 export type LaneEdgeData = {
@@ -197,6 +287,9 @@ export function toGraph(state: WorldStateDto, previous?: WorldStateDto | null): 
   const nodes: SectorNode[] = state.sectors.map((sector) => {
     const forces = (sector.forces ?? []).map((f) => believedForceView(f, mine));
     const slots = slotViews(sector);
+    const ownership = ownershipOf(sector.ownerFactionId, mine);
+    const habitable = sector.habitable ?? false;
+    const stabilityMilli = sector.stabilityMilli ?? 0;
 
     return {
       id: sector.sectorId,
@@ -211,7 +304,7 @@ export function toGraph(state: WorldStateDto, previous?: WorldStateDto | null): 
         intel: sector.intel,
         dangerBand: sector.dangerBand,
         ownerFactionId: sector.ownerFactionId,
-        ownership: ownershipOf(sector.ownerFactionId, mine),
+        ownership,
         unknown: sector.intel === "Unknown",
         remembered: sector.intel === "Scouted" || sector.intel === "Rumored",
         age: sector.intelAge ?? 0,
@@ -228,7 +321,20 @@ export function toGraph(state: WorldStateDto, previous?: WorldStateDto | null): 
           forces.every((f) => f.ownership !== "enemy") &&
           sector.ownerFactionId !== mine,
         slots,
-        forces
+        forces,
+        habitable,
+        stabilityMilli,
+        anchorState: anchorStateOf(ownership, habitable, stabilityMilli),
+        loamProduction: sector.loamProduction ?? 0,
+        loamUpkeep: sector.loamUpkeep ?? 0,
+        loamNet: sector.loamNet ?? 0,
+        componentId: sector.componentId ?? null,
+        componentProduction: sector.componentProduction ?? 0,
+        componentUpkeep: sector.componentUpkeep ?? 0,
+        componentNet: sector.componentNet ?? 0,
+        loamStock: sector.loamStock ?? 0,
+        componentStock: sector.componentStock ?? 0,
+        willReleaseNextTurn: sector.willReleaseNextTurn ?? false
       }
     };
   });

@@ -23,6 +23,11 @@ public static class SlotValueCatalog
         // an empire without one has no chain at all. Nothing else comes close.
         [SlotKind.Seat] = 1000,
 
+        // The loam source (empire-economy-ssot.md §3): "settle from anywhere, rare, the prizes."
+        // More foundational than the other producers below — without one nearby, no base survives
+        // long enough to matter — but still short of a Seat itself.
+        [SlotKind.Rootbed] = 750,
+
         // The producers. Even until `sector-development` gives them output, they are the reason to
         // take ground rather than merely pass through it.
         [SlotKind.EssenceDeposit] = 700,

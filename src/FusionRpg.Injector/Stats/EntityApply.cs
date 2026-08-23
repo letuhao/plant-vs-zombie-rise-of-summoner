@@ -38,7 +38,12 @@ public static class EntityApply
             {
                 Hp = p.thePlantHealth,
                 MaxHp = p.thePlantMaxHealth,
-                Atk = p.attackDamage
+                Atk = p.attackDamage,
+                // E16: the intervals become real composed channels, so their game values have to be
+                // captured as a baseline like every other channel. Captured ONCE, on first sight —
+                // capturing later would bake an already-modified value in as if it were the original.
+                AttackInterval = p.thePlantAttackInterval,
+                ProduceInterval = p.thePlantProduceInterval
             });
 
             if (!GameHooks.Applied.Add(ptr)) return;
@@ -65,6 +70,7 @@ public static class EntityApply
                 playerId: CheatState.PvzStatsPlayerId > 0 ? CheatState.PvzStatsPlayerId : null,
                 cheatScale: s, cheatAbsolute: abs,
                 applyStats: PvzStatsApplyGate.ShouldComposeScales(hasScaleMods, hasPvz, hasEffectMods),
+                cheatAbsoluteReal: includeAbsolute ? CheatState.BuildPlantAbsoluteReal() : null,
                 pvzStatsMods: CheatState.PvzStatsMods);
             var final = CheatState.ActorHub.Resolve(ctx).AppliedCombat;
 
@@ -142,7 +148,8 @@ public static class EntityApply
                 Arm1 = z.theFirstArmorHealth,
                 Arm1Max = z.theFirstArmorMaxHealth,
                 Arm2 = z.theSecondArmorHealth,
-                Arm2Max = z.theSecondArmorMaxHealth
+                Arm2Max = z.theSecondArmorMaxHealth,
+                ZombieSpeed = z.uniqueSpeed
             });
 
             if (!GameHooks.Applied.Add(ptr))
@@ -179,6 +186,7 @@ public static class EntityApply
                 playerId: CheatState.PvzStatsPlayerId > 0 ? CheatState.PvzStatsPlayerId : null,
                 cheatScale: s, cheatAbsolute: abs,
                 applyStats: PvzStatsApplyGate.ShouldComposeScales(hasScaleMods, hasPvz, hasEffectMods),
+                cheatAbsoluteReal: includeAbsolute ? CheatState.BuildZombieAbsoluteReal() : null,
                 pvzStatsMods: CheatState.PvzStatsMods);
             var final = CheatState.ActorHub.Resolve(ctx).AppliedCombat;
 

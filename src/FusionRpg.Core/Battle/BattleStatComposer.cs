@@ -34,7 +34,21 @@ public static class BattleStatComposer
     public const int PrimaryAffinityDivisor = 4;    // +25% on the primary element
     public const int SecondaryAffinityDivisor = 8;  // +12.5% on the secondary element
 
-    public static ActorDerivedSnapshot Compose(BattleActorSetup setup)
+    /// <summary>
+    /// Where trait channel mods are read from (E12). Defaults to the migrated set, which supplies
+    /// `critical-hunter` and falls through to `TraitBattleCatalog` for the other thirteen — so one
+    /// trait moves and the rest are untouched.
+    /// </summary>
+    public static TraitAtomSource Traits { get; private set; } = TraitAtomSource.Shipped();
+
+    public static void UseTraits(TraitAtomSource source) =>
+        Traits = source ?? throw new ArgumentNullException(nameof(source));
+
+    public static void ResetTraits() => Traits = TraitAtomSource.Shipped();
+
+    public static ActorDerivedSnapshot Compose(BattleActorSetup setup) => Compose(setup, Traits);
+
+    public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource traits)
     {
         // battle-adoption mapping table: Atk is the resolver's BaseOverlayDamage — it must
         // NOT also sit in power.omni (double count). Defense stays: the defense channel is
@@ -58,7 +72,12 @@ public static class BattleStatComposer
         foreach (var traitId in setup.TraitIds)
         {
             if (!seenTraits.Add(traitId)) continue;
-            foreach (var mod in TraitBattleCatalog.Get(traitId).ChannelMods)
+
+            // E12: a migrated trait's mods come from its bound stat.derived atoms; every other
+            // trait still reads the catalog. This is the ONE consumption path the module adds —
+            // an earlier draft had battle reading bindings in three places, which would have been a
+            // fourth path bypassing both the compiler and the runner and appearing in no spec.
+            foreach (var mod in traits.ModsFor(traitId))
                 snap.Set(mod.ChannelId, snap.Get(mod.ChannelId) + mod.Amount);
         }
 

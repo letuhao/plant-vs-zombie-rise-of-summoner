@@ -65,6 +65,12 @@ public sealed record WorldFaction
 
     /// <summary>AI policy id; null for the human commander.</summary>
     public string? PolicyId { get; init; }
+
+    /// <summary>
+    /// Loam upkeep multiplier, per-mille, 1000 = normal (spec-loam-model.md). A declared balance
+    /// lever, not a cheat — hashed, replayed, and named in the turn report whenever it is not 1000.
+    /// </summary>
+    public int UpkeepHandicapMilli { get; init; } = 1000;
 }
 
 public sealed record WorldSlot
@@ -104,6 +110,21 @@ public sealed record WorldSector
     public int PressureMilli { get; init; }
     public int DepletionMilli { get; init; }
     public int DevelopmentLevel { get; init; }
+
+    /// <summary>
+    /// What this sector is holding right now (spec-loam-model.md) — stored per sector, spent per
+    /// connected component (`loam-calc` owns the draw). A plain count, not a per-mille: per-mille
+    /// here means rate or fraction, and a stockpile is neither. **`long`, not `int`** — one `long`
+    /// operand promotes the whole upkeep expression, so there is no cast to remember and therefore
+    /// none to forget; the `int` version silently overflowed into negative upkeep at legal inputs.
+    /// </summary>
+    public long LoamStock { get; init; }
+
+    /// <summary>
+    /// The local strength of the Fracture, per-mille, 1000 = baseline (spec-loam-model.md). The
+    /// chaos gradient: the map is not uniformly dangerous, and this field is what says so.
+    /// </summary>
+    public int FractureIntensityMilli { get; init; } = 1000;
 
     /// <summary>
     /// What the **template author** decided the player already knows when the world is created —

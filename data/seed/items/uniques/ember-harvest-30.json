@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "partition": "uniques/ember-harvest/30",
+    "batch": "uniques-1c",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "docs/architecture/item/ssot-uniques.md#3.7",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "unique.ember-harvest-30-001",
+      "nameKey": "unique.hoarded-thresher",
+      "name": "Hoarded Thresher",
+      "frame": "plant",
+      "baseType": "item.plant-muzzle-b-005",
+      "rarity": "grafted",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.hit-mend",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.lifesteal",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (vitality, low) against a grafted rung's normal 1-2 pool draws in the t1-t3 window; the hit-mend and lifesteal riders are resource.delta capabilities, not raw stats, so neither counts toward the ceiling."
+      },
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "notes": "ROLE BREAK (generator rule, not a machine rule): atom.vitality's legal role list (g-life.json) is head-guard/sense/core-guard/mantle/footing/girdle/jewel-major/jewel-minor-a/b/armament-secondary — it excludes armament-primary. A rolled muzzle would never draw a raw maxHp stat; this one carries it fixed, because a spitter that shrugs off return fire is the entire point of the item. atom.hit-mend (roles include armament-primary) and the atom.lifesteal variance slot (same) are both pool-legal for this role, so only the raw-stat line is the deliberate break. RUNTIME HONESTY: both hit-mend and lifesteal are resource.delta kind, lawn-live and battle-unsupported today per the exemplar's own disclosure — this item works on the lawn and rejects in battle until battle grows a grant path for that kind. baseType resolves to the sibling base-type partition's plant-muzzle-b file (role armament-primary, band b). Name is pattern 'compound': 'hoarded' from themeAdjectivePools['ember-harvest'], 'thresher' from nounPools['armament-primary.plant']."
+    },
+    {
+      "id": "unique.ember-harvest-30-002",
+      "nameKey": "unique.stalk-of-the-reaping",
+      "name": "Stalk of the Reaping",
+      "frame": "plant",
+      "baseType": "item.plant-stem-b-006",
+      "rarity": "cultivated",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.entangling",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.stalwart",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (fortitude, low) against a cultivated rung's normal 2-3 pool draws in the t1-t3 window; the fixed core is three atoms (base type implicit + these two) inside the cap of 4, one variance slot means pool_rolls = 1."
+      },
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "notes": "ROLE BREAK: atom.entangling's legal roles (g-affliction.json) are armament-primary/armament-secondary/manipulator/jewel-major/jewel-minor-a/b/sense — core-guard is not among them, so no rolled stem could ever draw a snare. Fixed here because a stem that roots the thing that strikes it is the item's whole concept. atom.fortitude and the atom.stalwart variance slot are both pool-legal for core-guard, so the control rider is the only deliberate break. RUNTIME HONESTY: atom.entangling's own family notes flag status:\"kelp\" as DECLARED INERT today (StatusPayloadKind.UnityCc with no Unity branch wired) — this item imports and prices cleanly but the snare does not bind anything until that branch ships. Name is pattern 'of-construct': base 'Stalk' from nounPools['core-guard.plant'], concept 'Reaping' (with 'the') from conceptPools['ember-harvest']."
+    },
+    {
+      "id": "unique.ember-harvest-30-003",
+      "nameKey": "unique.banked-casing",
+      "name": "Banked Casing",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-b-009",
+      "rarity": "grafted",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.shield-capacity",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gravedigging",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.shield-toughness",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (shield-capacity, low) against a grafted rung's normal 1-2 pool draws in the t1-t3 window; gravedigging is a board-utility capability, not a raw stat, and does not count toward the ceiling."
+      },
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "notes": "ROLE BREAK: atom.gravedigging's legal roles (g-board.json) are retinue/jewel-major/jewel-minor-a/b only — ward-array is not among them, and none of the plant-legal ward-array families in this corpus (the shield-stat group) carry a board-utility capability at all. Fixed here anyway: a sheath that clears the grave that would otherwise clog the lane it stands in is the item's utility hook, tagged 'utility' on the family itself (g-board.json). atom.shield-capacity and the atom.shield-toughness variance slot are both pool-legal for ward-array (g-shield-stat.json). Name is pattern 'compound': 'banked' from themeAdjectivePools['ember-harvest'], 'casing' from nounPools['ward-array.plant']."
+    },
+    {
+      "id": "unique.ember-harvest-30-004",
+      "nameKey": "unique.warmthkeeper",
+      "name": "Warmthkeeper",
+      "frame": "plant",
+      "baseType": "item.plant-thorn-b-004",
+      "rarity": "cultivated",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.stalwart",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.econ-bounty",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (stalwart, low) against a cultivated rung's normal 2-3 pool draws in the t1-t3 window; econ-bounty is a resource.economy capability, not a raw stat, and does not count toward the ceiling."
+      },
+      "tags": [
+        "medium",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "notes": "ROLE BREAK: atom.econ-bounty's legal roles (g-economy.json) are girdle/jewel-major/jewel-minor-a/b only — armament-secondary is not among them. Fixed here so an off-hand thorn can pay for what it takes down, which is exactly the economy-axis concept this slot was assigned. atom.stalwart and the atom.vitality variance slot are both pool-legal for armament-secondary. RUNTIME HONESTY: per atom.econ-bounty's own family notes, its write path (board.thePoints) is real and tested but has no confirmed downstream consumer today — authored anyway because the write path itself works and a kill-tally is exactly the judgement seed-contract.md §8 says a formula can never recover later. Name is pattern 'fusion': whole-token atomic word 'Warmthkeeper' from uniqueSetSeedPools['ember-harvest'] (rule 2a resolves it as a single registered word, not decomposed)."
+    },
+    {
+      "id": "unique.ember-harvest-30-005",
+      "nameKey": "unique.scorched-stamen",
+      "name": "Scorched Stamen",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-b-006",
+      "rarity": "grafted",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.might",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.searing-strike",
+          "powerBand": "medium",
+          "params": {
+            "element": "fire"
+          }
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.savagery",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (might, low) against a grafted rung's normal 1-2 pool draws in the t1-t3 window; searing-strike is a resource.delta on-hit capability, not a raw stat, and does not count toward the ceiling."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "offensive",
+        "signature"
+      ],
+      "notes": "No role break: atom.might, atom.searing-strike (element fire, matching this theme's own elementAffinity) and the atom.savagery variance slot are all pool-legal for jewel-major (g-attack.json, g-on-hit.json). This entry demonstrates the offense axis cleanly, without needing the generator-rule break the theme's other slots require. RUNTIME HONESTY: searing-strike's own family notes carry no runtime caveat beyond the standard resource.delta lawn-live status already flagged on entry 001. Name is pattern 'compound': 'scorched' from themeAdjectivePools['ember-harvest'], 'stamen' from nounPools['jewel-major.plant']."
+    },
+    {
+      "id": "unique.ember-harvest-30-006",
+      "nameKey": "unique.frond-of-warmth",
+      "name": "Frond of Warmth",
+      "frame": "plant",
+      "baseType": "item.plant-leaves-b-005",
+      "rarity": "cultivated",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.lifesteal",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.retribution",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (vitality, low) against a cultivated rung's normal 2-3 pool draws in the t1-t3 window; lifesteal is a resource.delta on-hit capability, not a raw stat, and does not count toward the ceiling."
+      },
+      "tags": [
+        "light",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "notes": "ROLE BREAK: atom.vitality's legal roles (g-life.json) exclude manipulator entirely — no shipped raw-HP family targets this role at all, which is exactly why a manipulator-slot survivability unique has to fix one rather than roll it. atom.lifesteal and the atom.retribution variance slot are both pool-legal for manipulator (g-on-hit.json), so only the raw-stat line is the deliberate break. RUNTIME HONESTY: lifesteal and retribution are both resource.delta kind, lawn-live and battle-unsupported today per the same disclosure as entry 001. Name is pattern 'of-construct': base 'Frond' from nounPools['manipulator.plant'], concept 'Warmth' from conceptPools['ember-harvest']."
+    },
+    {
+      "id": "unique.ember-harvest-30-007",
+      "nameKey": "unique.coalwidow",
+      "name": "Coalwidow",
+      "frame": "plant",
+      "baseType": "item.plant-canopy-b-007",
+      "rarity": "grafted",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.stalwart",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.mesmerizing",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.regeneration",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (stalwart, low) against a grafted rung's normal 1-2 pool draws in the t1-t3 window; mesmerizing is a status.apply on-hit capability, not a raw stat, and does not count toward the ceiling."
+      },
+      "tags": [
+        "medium-heavy",
+        "organic",
+        "rooted",
+        "defensive",
+        "signature"
+      ],
+      "notes": "ROLE BREAK: atom.mesmerizing's legal roles (g-affliction.json) are armament-primary/armament-secondary/manipulator/jewel-major/jewel-minor-a/b/sense — mantle is not among them, and none of mantle's own legal families carry a control capability at all. Fixed here for the control axis this slot was assigned. atom.stalwart and the atom.regeneration variance slot are both pool-legal for mantle (g-ward.json, g-sustain.json). Name is pattern 'fusion': whole-token atomic word 'Coalwidow' from uniqueSetSeedPools['ember-harvest'] (rule 2a — registered as a single word, not decomposed into two)."
+    },
+    {
+      "id": "unique.ember-harvest-30-008",
+      "nameKey": "unique.gleaned-chaplet",
+      "name": "Gleaned Chaplet",
+      "frame": "plant",
+      "baseType": "item.plant-crown-b-006",
+      "rarity": "cultivated",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.stalwart",
+          "powerBand": "low"
+        },
+        {
+          "family": "atom.gardener",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (stalwart, low) against a cultivated rung's normal 2-3 pool draws in the t1-t3 window; gardener is an on-death spawn capability, not a raw stat, and does not count toward the ceiling."
+      },
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility",
+        "signature"
+      ],
+      "notes": "No role break: atom.stalwart, atom.gardener (tags utility) and the atom.vitality variance slot are all pool-legal for head-guard (g-ward.json, g-on-death.json, g-life.json). One last thing planted before the wearer falls is the utility hook this slot was assigned, and no generator rule needed bending to get it. Name is pattern 'compound': 'gleaned' from themeAdjectivePools['ember-harvest'], 'chaplet' from nounPools['head-guard.plant'] — distinct from the exemplar's 'coronet' noun and 'guttering' adjective on the same role, to keep this partition's own head-guard entry clear of the pattern doc's worked example."
+    }
+  ]
+}

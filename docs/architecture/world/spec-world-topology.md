@@ -49,7 +49,40 @@ Lanes are edges when `State == Open`, the type carries supply, and a gate is not
 
 ### Cost, honestly
 
-`O(V⁴)` for the full reconnection sweep is fine at six sectors and fine at sixty. It is not fine at six hundred, and `world-generator` may well produce that. Two escape hatches, neither built now: compute reconnection cost only for articulation points and chokepoint candidates (Tarjan first, then the delta for the handful that survive), or cap the sweep to sectors within N hops of the frontier. Both are optimisations of a correct, simple thing — worth writing down so nobody discovers the cliff by surprise.
+**Measured 2026-08-23** (task L11 / loam-map finding A5) — this section previously *asserted* these
+numbers without anyone having run them, and DESIGN-GATE evidence rule 4 does not exempt our own docs.
+Ring-with-chords topology, Debug build, `ReconnectionCostBench`, **three separate process runs** (a
+single-shot Stopwatch reading is noisy on a cold JIT, so one run is a sample, not a measurement):
+
+| Nodes | Lanes | Sweep (3 runs) |
+|---|---|---|
+| 8 | 9 | 0.1–0.2 ms |
+| 16 | 18 | 11.5–16.8 ms |
+| 32 | 36 | 6.4–10.9 ms |
+| 64 | 72 | 46.8–79.7 ms |
+| 128 | 144 | **606.5–700.0 ms** |
+
+16 nodes consistently timed *slower* than 32 across all three runs — repeatable, not a fluke, and
+plausibly a JIT tier-up or first-touch allocation cost landing on the smaller run rather than
+anything about the algorithm (both are far below the 64/128 numbers that actually matter for the
+size-table decision). Not chased further: it does not change either conclusion below.
+
+So **sixty is fine**: under 80 ms per turn is comfortable for a turn-based commit, and the `huge`
+world tier is confirmed shippable.
+
+**128 is now measured: ~0.6–0.7 s.** That lands inside the 0.4–0.8 s estimate this section carried
+before the run — arithmetic that happened to be right, not a substitute for having run it. It changes
+no decision: the `giant` tier (`empire-economy-ssot.md` §4's size table) was already gated on the
+Tarjan-first optimisation unconditionally, independent of what the raw sweep measured, so this
+confirms the gate was correctly placed rather than moving it.
+
+`O(V⁴)` for the full reconnection sweep is fine at six sectors and fine at sixty. It is not fine at
+six hundred, and `world-generator` may well produce that; it is already uncomfortable at 128 without
+the optimisation, which the size table anticipated. Two escape hatches, neither built now: compute
+reconnection cost only for articulation points and chokepoint candidates (Tarjan first, then the
+delta for the handful that survive), or cap the sweep to sectors within N hops of the frontier. Both
+are optimisations of a correct, simple thing — worth writing down so nobody discovers the cliff by
+surprise.
 
 Recomputed per turn like `SupplyGraph`, never cached: same reasoning, and the cliff above is the only thing that would change it.
 

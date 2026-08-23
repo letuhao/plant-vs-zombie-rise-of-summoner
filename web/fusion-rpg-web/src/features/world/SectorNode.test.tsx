@@ -119,6 +119,57 @@ describe("SectorNode", () => {
   });
 });
 
+describe("territory is light in the dark (spec-loam-fe.md)", () => {
+  const anchored = { ...dataFor("homeworld"), anchorState: "anchored" as const, habitable: true, stabilityMilli: 1000 };
+  const fading = { ...dataFor("homeworld"), anchorState: "fading" as const, habitable: true, stabilityMilli: 300 };
+  const barren = { ...dataFor("homeworld"), anchorState: "barren" as const, habitable: false, stabilityMilli: 1000 };
+  const notYours = dataFor("ash-waste"); // neutral in the fixture — already "not-yours"
+
+  it("marks every card with its anchor state as a data attribute, so the four are assertable", () => {
+    render(<SectorNode {...propsFor(anchored)} />);
+    expect(screen.getByTestId("sector-node-homeworld")).toHaveAttribute("data-anchor-state", "anchored");
+  });
+
+  it("says nothing extra when anchored — silence is the healthy state", () => {
+    render(<SectorNode {...propsFor(anchored)} />);
+    expect(screen.queryByTestId("sector-anchor-status")).not.toBeInTheDocument();
+  });
+
+  it("dims a fading sector in proportion to its stability, and says so in player words", () => {
+    render(<SectorNode {...propsFor(fading)} />);
+    expect(screen.getByTestId("sector-anchor-status")).toHaveTextContent("fading");
+
+    const card = screen.getByTestId("sector-node-homeworld");
+    const opacity = Number(card.style.opacity);
+    expect(opacity).toBeGreaterThan(0);
+    expect(opacity).toBeLessThan(1);
+  });
+
+  it("gives barren ground a flat, distinct look — never just a deeper shade of fading", () => {
+    render(<SectorNode {...propsFor(barren)} />);
+    const card = screen.getByTestId("sector-node-homeworld");
+
+    expect(screen.getByTestId("sector-anchor-status")).toHaveTextContent("cannot be kept");
+    expect(card.className).toContain("grayscale");
+    // Barren at full `stabilityMilli` must not read as the *same* dimming `anchorOpacity` would give
+    // a fading sector at that number — it is a flat look (full opacity, `grayscale` doing the work
+    // instead), not a point on the fading scale.
+    expect(card.style.opacity).toBe("1");
+  });
+
+  it("leaves ground that is not yours to the existing fog treatment, not a fourth loam style", () => {
+    render(<SectorNode {...propsFor(notYours)} />);
+    const card = screen.getByTestId("sector-node-ash-waste");
+    expect(card).toHaveAttribute("data-anchor-state", "not-yours");
+    expect(screen.queryByTestId("sector-anchor-status")).not.toBeInTheDocument();
+  });
+
+  it("the four states never collide — every pairing renders a different anchor-state attribute", () => {
+    const states = [anchored, fading, barren, notYours].map((d) => d.anchorState);
+    expect(new Set(states).size).toBe(4);
+  });
+});
+
 describe("lane stroke", () => {
   it("draws a narrow pass thinner than an open front", () => {
     expect(strokeWidthFor(1000)).toBeGreaterThan(strokeWidthFor(600));

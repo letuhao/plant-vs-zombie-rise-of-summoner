@@ -1,0 +1,281 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/gilded-porcelain/70",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7"
+  },
+  "entries": [
+    {
+      "id": "unique.gilded-porcelain-70-001",
+      "nameKey": "unique.clockwork-cleaver",
+      "name": "Clockwork Cleaver",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-main-hand-b-001",
+      "rarity": "heirloom",
+      "theme": "gilded-porcelain",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.hit-mend",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.stalwart",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Its edge is decorative next to a real armament-primary stat stick — the two riders that keep the wielder upright do all of the work, and neither one adds a scrap of raw attack."
+      },
+      "iconKey": "icon.unique.clockwork-cleaver",
+      "flavorKey": "flavor.unique.clockwork-cleaver",
+      "flavor": "The edge dulled decades ago, in a hand that has not aged since. What keeps its owner standing was never in the blade.",
+      "tags": ["medium-heavy", "metal", "defensive", "mechanical", "signature"]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-002",
+      "nameKey": "unique.filigreed-crate",
+      "name": "Filigreed Crate",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-torso-b-007",
+      "rarity": "heirloom",
+      "theme": "gilded-porcelain",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.entangling",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.stalwart",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Built to hold something still, not to hit back — the whole design is spent on the binding rider and the resist that keeps it from being shrugged off, and nothing is left over for output."
+      },
+      "iconKey": "icon.unique.filigreed-crate",
+      "flavorKey": "flavor.unique.filigreed-crate",
+      "flavor": "Whatever it was built to hold, it holds better than that now.",
+      "tags": ["medium-heavy", "metal", "utility", "mechanical", "signature"]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-003",
+      "nameKey": "unique.screen-of-appraisal",
+      "name": "Screen of Appraisal",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-shoulders-b-011",
+      "rarity": "firstseed",
+      "theme": "gilded-porcelain",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.cleansing",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.sust-freshgraft",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.stalwart",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Both fixed riders only clear or clean a status the wearer already caught — a fight that never lands an affliction on this wearer gets nothing at all out of either one."
+      },
+      "iconKey": "icon.unique.screen-of-appraisal",
+      "flavorKey": "flavor.unique.screen-of-appraisal",
+      "flavor": "It prices every wound before the wound decides to matter.",
+      "tags": ["heavy", "metal", "utility", "mechanical", "signature"]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-004",
+      "nameKey": "unique.lacquered-lid",
+      "name": "Lacquered Lid",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-off-hand-b-010",
+      "rarity": "heirloom",
+      "theme": "gilded-porcelain",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.econ-toll",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.might",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A blunt off-hand with no defensive rider at all — every fixed slot here pays out currency, not survivability or damage, so it is a purse first and a bludgeon a distant second."
+      },
+      "iconKey": "icon.unique.lacquered-lid",
+      "flavorKey": "flavor.unique.lacquered-lid",
+      "flavor": "It does not fight. It taxes.",
+      "tags": ["light", "metal", "utility", "mechanical", "signature"]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-005",
+      "nameKey": "unique.porcelain-locket",
+      "name": "Porcelain Locket",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-neck-b-005",
+      "rarity": "firstseed",
+      "theme": "gilded-porcelain",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.might",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.ferocity",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.savagery",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Every fixed slot and the roll slot alike push the same single stat — attack and nothing else — so it carries no resist, no heal and no utility rider of any kind to fall back on."
+      },
+      "iconKey": "icon.unique.porcelain-locket",
+      "flavorKey": "flavor.unique.porcelain-locket",
+      "flavor": "No portrait inside. Only a spring, wound tight, waiting to be asked.",
+      "tags": ["light", "mineral", "offensive", "mechanical", "fragile", "signature"]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-006",
+      "nameKey": "unique.crazed-hand",
+      "name": "Crazed Hand",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-hands-b-010",
+      "rarity": "firstseed",
+      "theme": "gilded-porcelain",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.mending",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.regeneration",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Cracked glaze under the finish means the piece itself is marked fragile — everything it grants is recovery and cushion, and it grants nothing that helps land a hit."
+      },
+      "iconKey": "icon.unique.crazed-hand",
+      "flavorKey": "flavor.unique.crazed-hand",
+      "flavor": "Hairline cracks map every old break. None of them ever finished the job.",
+      "tags": ["medium", "mineral", "defensive", "mechanical", "fragile", "signature"]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-007",
+      "nameKey": "unique.rig-of-poise",
+      "name": "Rig of Poise",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-back-b-011",
+      "rarity": "heirloom",
+      "theme": "gilded-porcelain",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.mesmerizing",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.stalwart",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "The whole design spends its fixed budget locking down one target's attention and the wearer's own resist to being locked down in turn — no offense rider rides along with it."
+      },
+      "iconKey": "icon.unique.rig-of-poise",
+      "flavorKey": "flavor.unique.rig-of-poise",
+      "flavor": "It sways on unseen strings, and everyone nearby forgets to look away.",
+      "tags": ["medium-heavy", "metal", "utility", "mechanical", "signature"]
+    },
+    {
+      "id": "unique.gilded-porcelain-70-008",
+      "nameKey": "unique.glazeface",
+      "name": "Glazeface",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-head-b-011",
+      "rarity": "firstseed",
+      "theme": "gilded-porcelain",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.flourishing",
+          "powerBand": "high"
+        },
+        {
+          "family": "atom.quickening",
+          "powerBand": "medium"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.swiftness",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Every fixed and rolled slot shortens an interval — production, attack pace, movement — and none of them adds a single point of attack, defense or maximum health."
+      },
+      "iconKey": "icon.unique.glazeface",
+      "flavorKey": "flavor.unique.glazeface",
+      "flavor": "A face is painted on. Nothing behind it should be looking back — but the hinges keep working anyway.",
+      "tags": ["medium-heavy", "mineral", "utility", "mechanical", "signature"]
+    }
+  ]
+}

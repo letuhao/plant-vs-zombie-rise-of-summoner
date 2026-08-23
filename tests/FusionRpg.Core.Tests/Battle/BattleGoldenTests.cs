@@ -101,10 +101,31 @@ public class BattleGoldenTests
     /// architecture/OS/runtime blessed it, so a CI runner or a `dotnet` upgrade would fire the
     /// "determinism break" alarm for a non-reason. Locked by Goldens_do_not_depend_on_the_platform.
     /// </summary>
+    /// <summary>
+    /// The determinism hash. <b>Two provenance fields are blanked</b>: the platform stamp, because
+    /// `Math.Exp` is not bit-identical across architectures, and the content hash (E12), because it
+    /// records which content was consulted rather than what the engine computed.
+    ///
+    /// <para>Folding either in makes the goldens move for a reason that is not a determinism break —
+    /// the platform stamp made them green only on the machine that blessed them, and the content
+    /// hash would make every added row look like one.</para>
+    /// </summary>
     static string Hash(BattleReport report)
     {
-        var json = JsonSerializer.Serialize(report with { EnvironmentStamp = "" });
+        var json = JsonSerializer.Serialize(report with { EnvironmentStamp = "", ContentHash = null });
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json)));
+    }
+
+    [Fact]
+    public void Goldens_do_not_depend_on_the_content_stamp()
+    {
+        // E12 stamps the report with the content that produced it. If that reached the hash input,
+        // adding one item row would move every battle golden and a real determinism break would be
+        // indistinguishable from an author doing their job.
+        var report = BattleEngine.Resolve(StompSetup(), 1001) with { ContentHash = "v4|abc|x=1" };
+
+        Assert.Equal(Hash(report), Hash(report with { ContentHash = "v4|totally-different|y=2" }));
+        Assert.Equal("v4|abc|x=1", report.ContentHash); // and it still reaches the report
     }
 
     [Fact]

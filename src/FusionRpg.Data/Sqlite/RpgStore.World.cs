@@ -137,6 +137,12 @@ public sealed partial class RpgStore
         EnsureColumn(db, "rpg_world_entities", "on_lane_toward_sector_id", "TEXT");
         EnsureColumn(db, "rpg_world_entities", "routed", "INTEGER NOT NULL DEFAULT 0");
 
+        // spec-loam-model.md: an existing saved world reads back as "no stock, baseline Fracture,
+        // no handicap" — exactly the pre-loam world, so this is the correct migration.
+        EnsureColumn(db, "rpg_world_sectors", "loam_stock", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_world_sectors", "fracture_intensity_milli", "INTEGER NOT NULL DEFAULT 1000");
+        EnsureColumn(db, "rpg_world_factions", "upkeep_handicap_milli", "INTEGER NOT NULL DEFAULT 1000");
+
         EnsureWorldTurnSchemaUnlocked(db);
     }
 
@@ -192,27 +198,29 @@ public sealed partial class RpgStore
         {
             foreach (var f in world.Factions)
                 Insert(db, tx, """
-                    INSERT INTO rpg_world_factions (world_id, faction_id, kind, name, policy_id)
-                    VALUES ($w, $f, $k, $n, $pol);
+                    INSERT INTO rpg_world_factions (world_id, faction_id, kind, name, policy_id, upkeep_handicap_milli)
+                    VALUES ($w, $f, $k, $n, $pol, $handicap);
                     """,
                     ("$w", world.WorldId), ("$f", f.FactionId), ("$k", f.Kind.ToString()),
-                    ("$n", f.Name), ("$pol", (object?)f.PolicyId));
+                    ("$n", f.Name), ("$pol", (object?)f.PolicyId), ("$handicap", f.UpkeepHandicapMilli));
 
             foreach (var s in world.Sectors)
             {
                 Insert(db, tx, """
                     INSERT INTO rpg_world_sectors (world_id, sector_id, type_id, climate, danger_band,
                         phase, owner_faction_id, stability_milli, pressure_milli, depletion_milli,
-                        development_level, intel, last_seen_turn, layout_x, layout_y, revision)
+                        development_level, intel, last_seen_turn, layout_x, layout_y,
+                        loam_stock, fracture_intensity_milli, revision)
                     VALUES ($w, $s, $type, $climate, $danger, $phase, $owner, $stab, $press, $depl,
-                            $dev, $intel, $seen, $x, $y, 0);
+                            $dev, $intel, $seen, $x, $y, $loam, $intensity, 0);
                     """,
                     ("$w", world.WorldId), ("$s", s.SectorId), ("$type", s.TypeId),
                     ("$climate", (object?)s.Climate?.ToString()), ("$danger", s.DangerBand),
                     ("$phase", s.Phase.ToString()), ("$owner", (object?)s.OwnerFactionId),
                     ("$stab", s.StabilityMilli), ("$press", s.PressureMilli), ("$depl", s.DepletionMilli),
                     ("$dev", s.DevelopmentLevel), ("$intel", s.AuthoredIntel.ToString()),
-                    ("$seen", s.LastSeenTurn), ("$x", s.LayoutX), ("$y", s.LayoutY));
+                    ("$seen", s.LastSeenTurn), ("$x", s.LayoutX), ("$y", s.LayoutY),
+                    ("$loam", s.LoamStock), ("$intensity", s.FractureIntensityMilli));
 
                 foreach (var sl in s.Slots)
                     Insert(db, tx, """
@@ -335,7 +343,7 @@ public sealed partial class RpgStore
             var factions = new List<WorldFaction>();
             using (var cmd = db.CreateCommand())
             {
-                cmd.CommandText = "SELECT faction_id, kind, name, policy_id FROM rpg_world_factions WHERE world_id = $w ORDER BY faction_id;";
+                cmd.CommandText = "SELECT faction_id, kind, name, policy_id, upkeep_handicap_milli FROM rpg_world_factions WHERE world_id = $w ORDER BY faction_id;";
                 cmd.Parameters.AddWithValue("$w", worldId);
                 using var r = cmd.ExecuteReader();
                 while (r.Read())
@@ -344,7 +352,8 @@ public sealed partial class RpgStore
                         FactionId = r.GetString(0),
                         Kind = Enum.Parse<WorldFactionKind>(r.GetString(1)),
                         Name = r.GetString(2),
-                        PolicyId = r.IsDBNull(3) ? null : r.GetString(3)
+                        PolicyId = r.IsDBNull(3) ? null : r.GetString(3),
+                        UpkeepHandicapMilli = r.GetInt32(4)
                     });
             }
 
@@ -382,7 +391,8 @@ public sealed partial class RpgStore
                 cmd.CommandText = """
                     SELECT sector_id, type_id, climate, danger_band, phase, owner_faction_id,
                            stability_milli, pressure_milli, depletion_milli, development_level,
-                           intel, last_seen_turn, layout_x, layout_y
+                           intel, last_seen_turn, layout_x, layout_y,
+                           loam_stock, fracture_intensity_milli
                     FROM rpg_world_sectors WHERE world_id = $w ORDER BY sector_id;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -406,6 +416,8 @@ public sealed partial class RpgStore
                         LastSeenTurn = r.GetInt32(11),
                         LayoutX = r.GetInt32(12),
                         LayoutY = r.GetInt32(13),
+                        LoamStock = r.GetInt64(14),
+                        FractureIntensityMilli = r.GetInt32(15),
                         Slots = slotsBySector.TryGetValue(sectorId, out var slots)
                             ? slots
                             : new List<WorldSlot>()

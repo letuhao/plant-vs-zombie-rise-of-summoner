@@ -69,6 +69,14 @@ public sealed record IntelSnapshot
     public int DangerBand { get; init; }
 
     /// <summary>
+    /// The Fracture's local strength (spec-loam-model.md) — terrain, like <see cref="Climate"/> and
+    /// <see cref="DangerBand"/>, so it is captured on any sighting and survives once scouted.
+    /// Deliberately alone here: <c>LoamStock</c> is live state and never belongs in belief at all —
+    /// there is no field for it to leak through.
+    /// </summary>
+    public int FractureIntensityMilli { get; init; } = 1000;
+
+    /// <summary>
     /// How built-up it was when you last stood on it. Zero for a glimpse — you read development off
     /// the ground, not from one sector away — and the wire says so rather than reporting a bare zero
     /// that looks identical to undeveloped.

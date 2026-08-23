@@ -29,6 +29,7 @@
       "frame": "plant",
       "baseType": "item.plant-crown-a-003",
       "rarity": "cultivated",
+      "powerAxis": "offense",
       "fixedAtoms": [
         {
           "family": "atom.searing-strike",

@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/charnel-bloom/90",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "unique.charnel-bloom-90-001",
+      "nameKey": "unique.popper-of-the-wake",
+      "name": "Popper of the Wake",
+      "frame": "plant",
+      "baseType": "item.plant-muzzle-b-002",
+      "rarity": "sunwoven",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.might", "powerBand": "low" },
+        { "family": "atom.econ-graze", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against a sunwoven rare's four-to-five affixes. The econ-graze rider skims sun off every landed hit rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium-light", "organic", "rooted", "utility", "signature"],
+      "iconKey": "icon.unique.popper-of-the-wake",
+      "flavorKey": "flavor.unique.popper-of-the-wake",
+      "flavor": "It only blooms at a wake, and it never leaves the ground empty-handed.",
+      "notes": "role armament-primary (muzzle), axis economy. baseType item.plant-muzzle-b-002 grepped from data/seed/items/base-types/plant-armament-primary-b.json (frame plant, band b, name Jetting Stinger)."
+    },
+    {
+      "id": "unique.charnel-bloom-90-002",
+      "nameKey": "unique.blightvest",
+      "name": "Blightvest",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-torso-b-002",
+      "rarity": "almanac",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        { "family": "atom.vitality", "powerBand": "low" },
+        { "family": "atom.deathblast", "powerBand": "medium", "params": { "element": "dark" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.vitality, low) against an almanac rare's five-to-six affixes. The deathblast rider only fires once the wearer falls, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium", "organic", "undead", "offensive", "signature"],
+      "iconKey": "icon.unique.blightvest",
+      "flavorKey": "flavor.unique.blightvest",
+      "flavor": "Stitched from whatever the last body left behind. It gives generously, once.",
+      "notes": "role core-guard (torso), axis offense. baseType item.humanoid-torso-b-002 grepped from data/seed/items/base-types/humanoid-core-guard-b.json (frame humanoid, band b, name Overlapping Harness)."
+    },
+    {
+      "id": "unique.charnel-bloom-90-003",
+      "nameKey": "unique.cuticle-of-the-barrow",
+      "name": "Cuticle of the Barrow",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-b-002",
+      "rarity": "sunwoven",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        { "family": "atom.fortitude", "powerBand": "low" },
+        { "family": "atom.warded", "powerBand": "medium", "params": { "element": "dark" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a sunwoven rare's four-to-five affixes. The warded rider grants a shield once on spawn rather than adding a stat line, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium-light", "organic", "rooted", "defensive", "signature"],
+      "iconKey": "icon.unique.cuticle-of-the-barrow",
+      "flavorKey": "flavor.unique.cuticle-of-the-barrow",
+      "flavor": "Grown over a barrow instead of a root ball. The dead make surprisingly good soil.",
+      "notes": "role ward-array (sheath), axis survivability. baseType item.plant-sheath-b-002 grepped from data/seed/items/base-types/plant-ward-array-b.json (frame plant, band b, name Corky Casing)."
+    },
+    {
+      "id": "unique.charnel-bloom-90-004",
+      "nameKey": "unique.cadaverous-mirror",
+      "name": "Cadaverous Mirror",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-off-hand-b-002",
+      "rarity": "almanac",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        { "family": "atom.might", "powerBand": "low" },
+        { "family": "atom.mesmerizing", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against an almanac rare's five-to-six affixes. The mesmerizing rider is a chance-based status proc, not a stat line, so it does not enter the raw-stat sum."
+      },
+      "tags": ["light", "metal", "undead", "utility", "signature"],
+      "iconKey": "icon.unique.cadaverous-mirror",
+      "flavorKey": "flavor.unique.cadaverous-mirror",
+      "flavor": "Hold it up to a face and the face forgets whose it was.",
+      "notes": "role armament-secondary (off-hand), axis control. baseType item.humanoid-off-hand-b-002 grepped from data/seed/items/base-types/humanoid-armament-secondary-b.json (frame humanoid, band b, name Barring Sandbag)."
+    },
+    {
+      "id": "unique.charnel-bloom-90-005",
+      "nameKey": "unique.anther-of-the-afterlife",
+      "name": "Anther of the Afterlife",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-b-001",
+      "rarity": "sunwoven",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        { "family": "atom.mending", "powerBand": "low" },
+        { "family": "atom.sust-freshgraft", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "wide"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.mending, low) against a sunwoven rare's four-to-five affixes. The sust-freshgraft rider cleanses on spawn rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["light", "organic", "rooted", "utility", "signature"],
+      "iconKey": "icon.unique.anther-of-the-afterlife",
+      "flavorKey": "flavor.unique.anther-of-the-afterlife",
+      "flavor": "Every grain of pollen remembers exactly what it grew out of.",
+      "notes": "role jewel-major (pollen), axis utility. baseType item.plant-pollen-b-001 grepped from data/seed/items/base-types/plant-pollen-b.json (frame plant, band b, name Stored Anther)."
+    },
+    {
+      "id": "unique.charnel-bloom-90-006",
+      "nameKey": "unique.funereal-wrap",
+      "name": "Funereal Wrap",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-hands-b-002",
+      "rarity": "sunwoven",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.might", "powerBand": "low" },
+        { "family": "atom.econ-toll", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against a sunwoven rare's four-to-five affixes. The econ-toll rider tolls money for every hit absorbed rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["light", "organic", "undead", "utility", "signature"],
+      "iconKey": "icon.unique.funereal-wrap",
+      "flavorKey": "flavor.unique.funereal-wrap",
+      "flavor": "Wound cloth from a funeral that never quite ended. It still collects.",
+      "notes": "role manipulator (hands), axis economy. baseType item.humanoid-hands-b-002 grepped from data/seed/items/base-types/humanoid-manipulator-b.json (frame humanoid, band b, name Studded Knuckle)."
+    },
+    {
+      "id": "unique.charnel-bloom-90-007",
+      "nameKey": "unique.mourning-deathpetal",
+      "name": "Mourning Deathpetal",
+      "frame": "plant",
+      "baseType": "item.plant-canopy-b-001",
+      "rarity": "almanac",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        { "family": "atom.might", "powerBand": "low" },
+        { "family": "atom.gardener", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against an almanac rare's five-to-six affixes. The gardener rider spawns a plant on death rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium", "organic", "rooted", "offensive", "signature"],
+      "iconKey": "icon.unique.mourning-deathpetal",
+      "flavorKey": "flavor.unique.mourning-deathpetal",
+      "flavor": "The petals fall in mourning and land like a detonation.",
+      "notes": "role mantle (canopy), axis offense. baseType item.plant-canopy-b-001 grepped from data/seed/items/base-types/plant-mantle-b.json (frame plant, band b, name Grooved Pergola)."
+    },
+    {
+      "id": "unique.charnel-bloom-90-008",
+      "nameKey": "unique.crest-of-the-necropolis",
+      "name": "Crest of the Necropolis",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-head-b-002",
+      "rarity": "sunwoven",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        { "family": "atom.fortitude", "powerBand": "low" },
+        { "family": "atom.regeneration", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a sunwoven rare's four-to-five affixes. The regeneration rider ticks on a timer rather than adding a stat line, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium", "mineral", "undead", "defensive", "signature"],
+      "iconKey": "icon.unique.crest-of-the-necropolis",
+      "flavorKey": "flavor.unique.crest-of-the-necropolis",
+      "flavor": "Worn like a crown by something that stopped needing a name.",
+      "notes": "role head-guard (head), axis survivability. baseType item.humanoid-head-b-002 grepped from data/seed/items/base-types/humanoid-head-guard-b.json (frame humanoid, band b, name Cured Hardhat)."
+    }
+  ]
+}

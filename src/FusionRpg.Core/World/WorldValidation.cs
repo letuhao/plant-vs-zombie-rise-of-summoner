@@ -6,6 +6,19 @@ namespace FusionRpg.Core.World;
 /// </summary>
 public static class WorldValidation
 {
+    /// <summary>
+    /// Three times baseline (spec-loam-model.md, decided 2026-08-23). Past this, intensity would
+    /// dominate every other term in the upkeep formula and the other inputs stop being able to
+    /// matter — a multiplier that can drown its own operands is not a gradient, it is a switch.
+    /// </summary>
+    public const int MaxIntensityMilli = 3000;
+
+    /// <summary>Zero would make a faction invulnerable to upkeep entirely (spec-loam-model.md rule 5).</summary>
+    public const int MinHandicapMilli = 1;
+
+    /// <summary>Same ceiling reasoning as <see cref="MaxIntensityMilli"/> — generous until `loam-calc`'s harness has an opinion.</summary>
+    public const int MaxHandicapMilli = 3000;
+
     public static WorldState Validate(WorldState world)
     {
         RequireStableOrder(world);
@@ -17,6 +30,11 @@ public static class WorldValidation
         Rule6SlotShape(world);
         Rule7EntityPlacement(world);
         Rule8BeliefReferences(world);
+        Rule9FractureIntensityBounded(world);
+        Rule10LoamStockNonNegative(world);
+        Rule11HomeworldHasARootbed(world);
+        Rule12HandicapBounded(world);
+        Rule13TemplateSizeMatchesItsDeclaredTier(world);
         return world;
     }
 
@@ -278,5 +296,58 @@ public static class WorldValidation
             if (e.LaneProgressMilli is < 0 or > 1000)
                 throw new InvalidOperationException($"Entity '{e.EntityId}' lane progress {e.LaneProgressMilli} is outside 0..1000.");
         }
+    }
+
+    /// <summary>A negative Fracture is nonsense and an unbounded one is an overflow waiting for a multiplication.</summary>
+    static void Rule9FractureIntensityBounded(WorldState w)
+    {
+        foreach (var s in w.Sectors)
+            if (s.FractureIntensityMilli < 0 || s.FractureIntensityMilli > MaxIntensityMilli)
+                throw new InvalidOperationException(
+                    $"Sector '{s.SectorId}' has Fracture intensity {s.FractureIntensityMilli}, outside 0..{MaxIntensityMilli}.");
+    }
+
+    /// <summary>There is no such thing as owing loam — a shortfall is a fade, resolved in loam-turn, never a negative balance.</summary>
+    static void Rule10LoamStockNonNegative(WorldState w)
+    {
+        foreach (var s in w.Sectors)
+            if (s.LoamStock < 0)
+                throw new InvalidOperationException($"Sector '{s.SectorId}' has negative loam stock {s.LoamStock}.");
+    }
+
+    /// <summary>
+    /// A starting position with no loam source is a world that cannot be played. This is the only
+    /// rule that mentions the homeworld, and it is about playability, not about loam mechanics —
+    /// after the component-pooling resolution, nothing in the loam rules themselves reads
+    /// <see cref="SectorTypeFlags.Home"/> at all.
+    /// </summary>
+    static void Rule11HomeworldHasARootbed(WorldState w)
+    {
+        var home = w.Sectors.Single(s => SectorTypeCatalog.Get(s.TypeId).Flags.HasFlag(SectorTypeFlags.Home));
+        if (home.Slots.All(sl => sl.SlotTypeId != SlotTypeCatalog.RootbedSlotTypeId))
+            throw new InvalidOperationException($"Homeworld '{home.SectorId}' must hold a rootbed slot.");
+    }
+
+    /// <summary>An unbounded multiplier is an overflow, and a zero one is an invulnerable faction.</summary>
+    static void Rule12HandicapBounded(WorldState w)
+    {
+        foreach (var f in w.Factions)
+            if (f.UpkeepHandicapMilli < MinHandicapMilli || f.UpkeepHandicapMilli > MaxHandicapMilli)
+                throw new InvalidOperationException(
+                    $"Faction '{f.FactionId}' has upkeep handicap {f.UpkeepHandicapMilli}, outside {MinHandicapMilli}..{MaxHandicapMilli}.");
+    }
+
+    /// <summary>
+    /// A template's node count matches the size tier it declares (spec-loam-maps.md) — so a
+    /// template cannot silently outgrow (or fall short of) the vocabulary it claims, a range rather
+    /// than a number because the authored map lands where its teaching properties want it.
+    /// </summary>
+    static void Rule13TemplateSizeMatchesItsDeclaredTier(WorldState w)
+    {
+        var sizeId = WorldTemplateCatalog.SizeIdOf(w.TemplateId);
+        var size = WorldSizeCatalog.Get(sizeId);
+        if (w.Sectors.Count < size.MinNodes || w.Sectors.Count > size.MaxNodes)
+            throw new InvalidOperationException(
+                $"Template '{w.TemplateId}' has {w.Sectors.Count} sectors, outside its declared '{sizeId}' range {size.MinNodes}..{size.MaxNodes}.");
     }
 }

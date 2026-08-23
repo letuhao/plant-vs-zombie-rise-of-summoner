@@ -25,6 +25,24 @@ public sealed class StatusInstance
     public double SpreadChance { get; init; }
     public string? SpreadStatusId { get; init; }
     public int SpreadMaxHops { get; init; }
+
+    /// <summary>
+    /// Timed stat contributions this instance makes while active (E17). Empty for every status that
+    /// does not declare a <c>stat</c> payload, which is most of them.
+    /// </summary>
+    public IReadOnlyList<StatusStatMod> StatMods { get; init; } = Array.Empty<StatusStatMod>();
+
+    /// <summary>
+    /// Whether this status actually prevents acting (E17).
+    ///
+    /// <para>Copied from the def's <b>category</b>, not inferred from <see cref="Kind"/>.
+    /// <c>StatusKind</c> conflates two axes — semantic role (Buff / Debuff / Meter / CrowdControl)
+    /// and execution path (<c>UnityCc</c>) — so "is this crowd control" cannot be read off it. Nine
+    /// statuses carry a CC-ish kind and exactly one, <c>poison</c>, is categorised <c>dot</c>: it is
+    /// damage over time that happens to execute through a Unity method, and it was locking actors
+    /// out of their turn in battle because of how it is delivered rather than what it does.</para>
+    /// </summary>
+    public bool IsCrowdControl { get; init; }
     public int SpreadIcdMs { get; init; }
     public TargetSpec? SpreadTarget { get; init; }
     public int HopDepth { get; init; }
@@ -55,7 +73,8 @@ public sealed record StatusApplyInput(
     int SpreadMaxHops = 0,
     int SpreadIcdMs = 0,
     TargetSpec? SpreadTarget = null,
-    int HopDepth = 0);
+    int HopDepth = 0,
+    IReadOnlyList<StatusStatMod>? StatMods = null);
 
 public sealed record StatusApplyOutcome(
     bool Applied,
@@ -192,6 +211,8 @@ public sealed class StatusRuntime
             SpreadIcdMs = input.SpreadIcdMs,
             SpreadTarget = input.SpreadTarget,
             HopDepth = input.HopDepth,
+            StatMods = input.StatMods ?? Array.Empty<StatusStatMod>(),
+            IsCrowdControl = def.Categories.Contains(StatusL2bCategory.Cc),
             NextPulse = input.PeriodMs > 0 ? now.AddMilliseconds(input.PeriodMs) : DateTimeOffset.MaxValue,
             LastApplied = now,
             LastSpread = DateTimeOffset.MinValue

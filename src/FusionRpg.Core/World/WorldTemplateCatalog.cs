@@ -10,19 +10,37 @@ namespace FusionRpg.Core.World;
 /// world, every time. When generation lands, the seed starts doing work and this contract does not
 /// change.
 /// </summary>
-public static class WorldTemplateCatalog
+public static partial class WorldTemplateCatalog
 {
     public const string FirstLightId = "first-light";
+    public const string TwoHeartsId = "two-hearths";
 
-    public static IReadOnlyList<string> All { get; } = new[] { FirstLightId };
+    public static IReadOnlyList<string> All { get; } = new[] { FirstLightId, TwoHeartsId };
+
+    /// <summary>
+    /// Which size tier each template declares (spec-loam-maps.md) — checked by
+    /// <see cref="WorldValidation"/> against the actual sector count, so a template cannot silently
+    /// drift outside the range its own vocabulary claims.
+    /// </summary>
+    public static string SizeIdOf(string templateId) => templateId switch
+    {
+        FirstLightId => WorldSizeCatalog.SmallId,
+        TwoHeartsId => WorldSizeCatalog.MediumId,
+        _ => throw new ArgumentException($"No declared size for template '{templateId}'.")
+    };
 
     public static bool IsKnown(string? templateId) =>
         templateId != null && All.Contains(templateId, StringComparer.Ordinal);
 
+    /// <summary>
+    /// `first-light` stays the default until the ⭐ gate (owner decision, spec-loam-maps.md): an
+    /// unreviewed map should not become the thing every new save gets.
+    /// </summary>
     public static WorldState Build(string templateId, ulong seed, string worldId = "world-1") =>
         templateId switch
         {
             FirstLightId => WorldValidation.Validate(WithSeededIntel(FirstLight(seed, worldId))),
+            TwoHeartsId => WorldValidation.Validate(WithSeededIntel(TwoHearths(seed, worldId))),
             _ => throw new ArgumentException($"Unknown world template id '{templateId}'.")
         };
 
@@ -117,11 +135,17 @@ public static class WorldTemplateCatalog
                 SectorId = "homeworld", TypeId = "homeworld", Climate = null, DangerBand = 0,
                 Phase = SectorPhase.Held, OwnerFactionId = Dave, AuthoredIntel = IntelState.Watched,
                 StabilityMilli = 1000, LayoutX = 0, LayoutY = 0,
+                // G-D: validation rule 4 (loam-model) requires the homeworld carry a rootbed, and a
+                // starting stock (G-A) keeps a new world from fading on turn one once loam-turn is
+                // wired. Both are placeholders — L9's harness, not this template, decides the real
+                // number.
+                LoamStock = 500,
                 Slots = new WorldSlot[]
                 {
                     new() { SlotIndex = 0, SlotTypeId = "seat", State = SlotState.Claimed, OwnerFactionId = Dave },
                     new() { SlotIndex = 1, SlotTypeId = "wildland", State = SlotState.Claimed, OwnerFactionId = Dave },
-                    new() { SlotIndex = 2, SlotTypeId = "market", State = SlotState.Claimed, OwnerFactionId = Dave }
+                    new() { SlotIndex = 2, SlotTypeId = "market", State = SlotState.Claimed, OwnerFactionId = Dave },
+                    new() { SlotIndex = 3, SlotTypeId = SlotTypeCatalog.RootbedSlotTypeId, State = SlotState.Claimed, OwnerFactionId = Dave }
                 }
             },
             new()

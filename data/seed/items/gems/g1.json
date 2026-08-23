@@ -30,7 +30,9 @@
       "powerBand": "medium",
       "affinityElement": "fire",
       "iconKey": "icon.gem.ember-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-002",
@@ -41,7 +43,9 @@
       "powerBand": "medium",
       "affinityElement": "ice",
       "iconKey": "icon.gem.frost-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-003",
@@ -52,7 +56,9 @@
       "powerBand": "medium",
       "affinityElement": "earth",
       "iconKey": "icon.gem.stone-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-004",
@@ -63,7 +69,9 @@
       "powerBand": "medium",
       "affinityElement": "air",
       "iconKey": "icon.gem.gale-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-005",
@@ -74,7 +82,9 @@
       "powerBand": "medium",
       "affinityElement": "light",
       "iconKey": "icon.gem.radiant-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-006",
@@ -85,7 +95,9 @@
       "powerBand": "medium",
       "affinityElement": "dark",
       "iconKey": "icon.gem.umbral-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-007",
@@ -96,7 +108,9 @@
       "powerBand": "low",
       "affinityElement": "omni",
       "iconKey": "icon.gem.primal-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-008",
@@ -105,7 +119,9 @@
       "family": "atom.vitality",
       "powerBand": "medium",
       "iconKey": "icon.gem.vigor-fragment",
-      "tags": ["defensive"]
+      "tags": [
+        "defensive"
+      ]
     },
     {
       "id": "gem.g1-009",
@@ -114,7 +130,9 @@
       "family": "atom.mending",
       "powerBand": "high",
       "iconKey": "icon.gem.renewal-fragment",
-      "tags": ["defensive"]
+      "tags": [
+        "defensive"
+      ]
     },
     {
       "id": "gem.g1-010",
@@ -123,7 +141,9 @@
       "family": "atom.warding",
       "powerBand": "medium",
       "iconKey": "icon.gem.aegis-gem",
-      "tags": ["defensive"]
+      "tags": [
+        "defensive"
+      ]
     },
     {
       "id": "gem.g1-011",
@@ -132,7 +152,9 @@
       "family": "atom.lifesteal",
       "powerBand": "medium",
       "iconKey": "icon.gem.lifesteal-gem",
-      "tags": ["defensive"]
+      "tags": [
+        "defensive"
+      ]
     },
     {
       "id": "gem.g1-012",
@@ -141,7 +163,9 @@
       "family": "atom.retribution",
       "powerBand": "high",
       "iconKey": "icon.gem.retribution-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-013",
@@ -150,7 +174,9 @@
       "family": "atom.volley",
       "powerBand": "medium",
       "iconKey": "icon.gem.volley-fragment",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-014",
@@ -161,16 +187,20 @@
       "powerBand": "high",
       "affinityElement": "fire",
       "iconKey": "icon.gem.searing-fragment",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-015",
-      "nameKey": "gem.mending-pulse",
-      "name": "Mending Pulse",
+      "nameKey": "gem.salving-pulse",
+      "name": "Salving Pulse",
       "family": "atom.hit-mend",
       "powerBand": "low",
-      "iconKey": "icon.gem.mending-pulse",
-      "tags": ["defensive"]
+      "iconKey": "icon.gem.salving-pulse",
+      "tags": [
+        "defensive"
+      ]
     },
     {
       "id": "gem.g1-016",
@@ -179,7 +209,9 @@
       "family": "atom.hit-retort",
       "powerBand": "medium",
       "iconKey": "icon.gem.retort-gem",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-017",
@@ -188,7 +220,9 @@
       "family": "atom.hit-followthrough",
       "powerBand": "medium",
       "iconKey": "icon.gem.followthrough-shard",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-018",
@@ -197,7 +231,9 @@
       "family": "atom.might",
       "powerBand": "high",
       "iconKey": "icon.gem.might-gem",
-      "tags": ["offensive"]
+      "tags": [
+        "offensive"
+      ]
     },
     {
       "id": "gem.g1-019",
@@ -206,7 +242,9 @@
       "family": "atom.fortitude",
       "powerBand": "medium",
       "iconKey": "icon.gem.fortitude-gem",
-      "tags": ["defensive"]
+      "tags": [
+        "defensive"
+      ]
     },
     {
       "id": "gem.g1-020",
@@ -215,7 +253,9 @@
       "family": "atom.resilience",
       "powerBand": "high",
       "iconKey": "icon.gem.resilience-gem",
-      "tags": ["defensive"]
+      "tags": [
+        "defensive"
+      ]
     }
   ]
 }

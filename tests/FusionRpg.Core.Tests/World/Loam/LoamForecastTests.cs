@@ -1,0 +1,97 @@
+using FusionRpg.Core.World;
+using FusionRpg.Core.World.Loam;
+using FusionRpg.Core.World.Turn;
+using Xunit;
+
+namespace FusionRpg.Core.Tests.World.Loam;
+
+/// <summary>
+/// L24 acceptance (spec-loam-fe.md's abandonment surface): the forecast the server projects a turn
+/// early to warn a player must agree with what <see cref="LoamPhases.Pressure"/> actually goes on to
+/// do that same turn — proven here by running both against the same fixture and comparing, not by
+/// trusting the arithmetic on its own.
+/// </summary>
+public class LoamForecastTests
+{
+    const string Phase = "Test";
+
+    static WorldSlot Rootbed(int index) => new() { SlotIndex = index, SlotTypeId = SlotTypeCatalog.RootbedSlotTypeId };
+
+    static WorldSector Sector(string id, long stock = 0, int stability = 1000, int development = 0, int danger = 0, IReadOnlyList<WorldSlot>? slots = null) =>
+        new()
+        {
+            SectorId = id, TypeId = "stable", OwnerFactionId = "f1", LoamStock = stock, StabilityMilli = stability,
+            DevelopmentLevel = development, DangerBand = danger, Slots = slots ?? Array.Empty<WorldSlot>()
+        };
+
+    static WorldState World(IReadOnlyList<WorldSector> sectors, IReadOnlyList<WorldLane>? lanes = null) => new()
+    {
+        WorldId = "w", TemplateId = "t", Seed = 1,
+        Factions = new[] { new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" } },
+        Sectors = sectors,
+        Lanes = lanes ?? Array.Empty<WorldLane>()
+    };
+
+    /// <summary>An unconnected rootbed sector so G-C's "no source anywhere" exemption never swallows
+    /// the upkeep of the component under test — the same pitfall <c>A_cut_sector_runs_down_and_is_lost</c>
+    /// in <c>LoamPhasesTests</c> exists to name.</summary>
+    static WorldSector Elsewhere() => Sector("elsewhere", slots: new[] { Rootbed(0) });
+
+    static IReadOnlyList<string> ComponentOf(WorldState world, string sectorId) =>
+        TerritoryComponents.For(world, "f1").Single(c => c.Contains(sectorId));
+
+    [Fact]
+    public void A_healthy_component_forecasts_no_release()
+    {
+        var world = World(new[] { Sector("s", slots: new[] { Rootbed(0) }) });
+        Assert.Null(LoamForecast.WillRelease(world, ComponentOf(world, "s")));
+    }
+
+    [Fact]
+    public void A_shortfall_that_would_not_zero_the_weakest_forecasts_no_release()
+    {
+        // Full stability plus LoamPolicy.MaxDecayMilli's single-turn cap mean one turn's shortfall
+        // can dim a sector but never zero it outright starting from full health.
+        var world = World(new[] { Sector("s", stock: 0, stability: 1000, development: 5, danger: 4), Elsewhere() });
+        Assert.Null(LoamForecast.WillRelease(world, ComponentOf(world, "s")));
+    }
+
+    [Fact]
+    public void A_shortfall_against_a_sector_already_this_fragile_forecasts_its_release()
+    {
+        var world = World(new[] { Sector("s", stock: 0, stability: 50, development: 10, danger: 4), Elsewhere() });
+        Assert.Equal("s", LoamForecast.WillRelease(world, ComponentOf(world, "s")));
+    }
+
+    [Fact]
+    public void Picks_the_weakest_contributor_not_the_first_by_id()
+    {
+        var mild = Sector("mild", stock: 0, stability: 50, development: 1, danger: 0);
+        var harsh = Sector("harsh", stock: 0, stability: 50, development: 5, danger: 4);
+        var world = World(
+            new[] { mild, harsh, Elsewhere() },
+            new[] { new WorldLane { LaneId = "l", FromSectorId = "mild", ToSectorId = "harsh", TypeId = LaneTypeCatalog.RiftLaneTypeId } });
+
+        Assert.Equal("harsh", LoamForecast.WillRelease(world, ComponentOf(world, "mild")));
+    }
+
+    [Fact]
+    public void The_forecast_agrees_with_what_pressure_actually_does_this_turn()
+    {
+        var cases = new (WorldState World, bool ShouldRelease)[]
+        {
+            (World(new[] { Sector("s", stock: 0, stability: 50, development: 10, danger: 4), Elsewhere() }), true),
+            (World(new[] { Sector("s", slots: new[] { Rootbed(0) }) }), false)
+        };
+
+        foreach (var (world, shouldRelease) in cases)
+        {
+            var predicted = LoamForecast.WillRelease(world, ComponentOf(world, "s"));
+            var actual = LoamPhases.Pressure(LoamPhases.Production(world, new TurnReport(), Phase), new TurnReport(), Phase);
+            var lostForReal = actual.Sectors.Single(x => x.SectorId == "s").Phase == SectorPhase.Lost;
+
+            Assert.Equal(shouldRelease, predicted is not null);
+            Assert.Equal(shouldRelease, lostForReal);
+        }
+    }
+}

@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/verdant-graft/90",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "unique.verdant-graft-90-001",
+      "nameKey": "unique.twinburr",
+      "name": "Twinburr",
+      "frame": "plant",
+      "baseType": "item.plant-muzzle-b-001",
+      "rarity": "almanac",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        { "family": "atom.might", "powerBand": "low" },
+        { "family": "atom.bonding", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against an almanac rare's five-to-six affixes. The bonding rider is the literal graft-take, a status application rather than a stat line, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium", "organic", "rooted", "utility", "signature"],
+      "iconKey": "icon.unique.twinburr",
+      "flavorKey": "flavor.unique.twinburr",
+      "flavor": "Two barbs grown from one wound, neither willing to let the graft heal shut.",
+      "notes": "role armament-primary (muzzle), axis control. baseType item.plant-muzzle-b-001 grepped from data/seed/items/base-types/plant-armament-primary-b.json (frame plant, band b, name Spraying Popper). Name 'Twinburr' is pattern fusion: 'Twin' (themeAdjectivePools['verdant-graft'], canonical 'twinned', noun surface form) + 'Burr' (nounPools['armament-primary.plant'])."
+    },
+    {
+      "id": "unique.verdant-graft-90-002",
+      "nameKey": "unique.hybridised-harness",
+      "name": "Hybridised Harness",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-torso-b-001",
+      "rarity": "sunwoven",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        { "family": "atom.fortitude", "powerBand": "low" },
+        { "family": "atom.cleansing", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a sunwoven rare's four-to-five affixes. The cleansing rider strips an affliction on a trigger rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium-heavy", "metal", "rooted", "utility", "signature"],
+      "iconKey": "icon.unique.hybridised-harness",
+      "flavorKey": "flavor.unique.hybridised-harness",
+      "flavor": "Its straps stopped being leather around the third season of new growth.",
+      "notes": "role core-guard (torso), axis utility. baseType item.humanoid-torso-b-001 grepped from data/seed/items/base-types/humanoid-core-guard-b.json (frame humanoid, band b, name Soldered Keg). Name 'Hybridised Harness' is pattern compound: 'Hybridised' (themeAdjectivePools['verdant-graft']) + 'Harness' (nounPools['core-guard.humanoid'])."
+    },
+    {
+      "id": "unique.verdant-graft-90-003",
+      "nameKey": "unique.rind-of-symbiosis",
+      "name": "Rind of Symbiosis",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-b-001",
+      "rarity": "sunwoven",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.vitality", "powerBand": "low" },
+        { "family": "atom.sunbloom", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.vitality, low) against a sunwoven rare's four-to-five affixes. The sunbloom rider generates income on a trigger rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["light", "organic", "rooted", "utility", "signature"],
+      "iconKey": "icon.unique.rind-of-symbiosis",
+      "flavorKey": "flavor.unique.rind-of-symbiosis",
+      "flavor": "It sheds sun the way a healthy plant sheds shade — freely, and to somebody's profit.",
+      "notes": "role ward-array (sheath), axis economy. baseType item.plant-sheath-b-001 grepped from data/seed/items/base-types/plant-ward-array-b.json (frame plant, band b, name Grooved Shuck). Name 'Rind of Symbiosis' is pattern of-construct: 'Rind' (nounPools['ward-array.plant']) + concept 'Symbiosis' (conceptPools['verdant-graft'])."
+    },
+    {
+      "id": "unique.verdant-graft-90-004",
+      "nameKey": "unique.crossbred-shutter",
+      "name": "Crossbred Shutter",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-off-hand-b-001",
+      "rarity": "almanac",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        { "family": "atom.might", "powerBand": "low" },
+        { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "omni" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against an almanac rare's five-to-six affixes. The searing-strike rider is an on-hit elemental proc rather than a stat line, so it does not enter the raw-stat sum. Element pinned to omni, honoring theme.verdant-graft's own avoid-list ('any single dominant element')."
+      },
+      "tags": ["medium", "metal", "rooted", "offensive", "signature"],
+      "iconKey": "icon.unique.crossbred-shutter",
+      "flavorKey": "flavor.unique.crossbred-shutter",
+      "flavor": "Scavenged plate, softened at the seams by whatever kept growing underneath it.",
+      "notes": "role armament-secondary (off-hand), axis offense. baseType item.humanoid-off-hand-b-001 grepped from data/seed/items/base-types/humanoid-armament-secondary-b.json (frame humanoid, band b, name Shielding Manhole). Name 'Crossbred Shutter' is pattern compound: 'Crossbred' (themeAdjectivePools['verdant-graft']) + 'Shutter' (nounPools['armament-secondary.humanoid'])."
+    },
+    {
+      "id": "unique.verdant-graft-90-005",
+      "nameKey": "unique.ovule-of-wholeness",
+      "name": "Ovule of Wholeness",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-b-003",
+      "rarity": "sunwoven",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        { "family": "atom.fortitude", "powerBand": "low" },
+        { "family": "atom.regeneration", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "wide"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a sunwoven rare's four-to-five affixes. The regeneration rider ticks on a timer rather than adding a stat line, so it does not enter the raw-stat sum."
+      },
+      "tags": ["light", "organic", "rooted", "defensive", "signature"],
+      "iconKey": "icon.unique.ovule-of-wholeness",
+      "flavorKey": "flavor.unique.ovule-of-wholeness",
+      "flavor": "It does not know which half of it is supposed to be dying.",
+      "notes": "role jewel-major (pollen), axis survivability. baseType item.plant-pollen-b-003 grepped from data/seed/items/base-types/plant-pollen-b.json (frame plant, band b, name Latent Ovule). Name 'Ovule of Wholeness' is pattern of-construct: 'Ovule' (nounPools['jewel-major.plant']) + concept 'Wholeness' (conceptPools['verdant-graft'])."
+    },
+    {
+      "id": "unique.verdant-graft-90-006",
+      "nameKey": "unique.implanted-claw",
+      "name": "Implanted Claw",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-hands-b-001",
+      "rarity": "sunwoven",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        { "family": "atom.might", "powerBand": "low" },
+        { "family": "atom.retribution", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against a sunwoven rare's four-to-five affixes. The retribution rider fires back on being hit rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium-light", "metal", "rooted", "utility", "signature"],
+      "iconKey": "icon.unique.implanted-claw",
+      "flavorKey": "flavor.unique.implanted-claw",
+      "flavor": "The fingers close on reflex the graft never bothered to ask permission for.",
+      "notes": "role manipulator (hands), axis control. baseType item.humanoid-hands-b-001 grepped from data/seed/items/base-types/humanoid-manipulator-b.json (frame humanoid, band b, name Woven Glove). Name 'Implanted Claw' is pattern compound: 'Implanted' (themeAdjectivePools['verdant-graft']) + 'Claw' (nounPools['manipulator.humanoid'])."
+    },
+    {
+      "id": "unique.verdant-graft-90-007",
+      "nameKey": "unique.bough-of-annexation",
+      "name": "Bough of Annexation",
+      "frame": "plant",
+      "baseType": "item.plant-canopy-b-003",
+      "rarity": "sunwoven",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        { "family": "atom.vitality", "powerBand": "low" },
+        { "family": "atom.gardener", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "normal"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.vitality, low) against a sunwoven rare's four-to-five affixes. The gardener rider spawns a plant on death rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium", "organic", "rooted", "utility", "signature"],
+      "iconKey": "icon.unique.bough-of-annexation",
+      "flavorKey": "flavor.unique.bough-of-annexation",
+      "flavor": "Every branch it drops takes root somewhere it was never planted.",
+      "notes": "role mantle (canopy), axis utility. baseType item.plant-canopy-b-003 grepped from data/seed/items/base-types/plant-mantle-b.json (frame plant, band b, name Rough Arbour). Name 'Bough of Annexation' is pattern of-construct: 'Bough' (nounPools['mantle.plant']) + concept 'Annexation' (conceptPools['verdant-graft'])."
+    },
+    {
+      "id": "unique.verdant-graft-90-008",
+      "nameKey": "unique.twincrest",
+      "name": "Twincrest",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-head-b-001",
+      "rarity": "sunwoven",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.fortitude", "powerBand": "low" },
+        { "family": "atom.midas", "powerBand": "medium" }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "wide"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a sunwoven rare's four-to-five affixes. The midas rider mints currency on a trigger rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["light", "metal", "rooted", "utility", "signature"],
+      "iconKey": "icon.unique.twincrest",
+      "flavorKey": "flavor.unique.twincrest",
+      "flavor": "One crown, grown by two different appetites that never agreed to share.",
+      "notes": "role head-guard (head), axis economy. baseType item.humanoid-head-b-001 grepped from data/seed/items/base-types/humanoid-head-guard-b.json (frame humanoid, band b, name Tiled Crest). Name 'Twincrest' is pattern fusion: 'Twin' (themeAdjectivePools['verdant-graft'], canonical 'twinned', noun surface form) + 'Crest' (nounPools['head-guard.humanoid'])."
+    }
+  ]
+}

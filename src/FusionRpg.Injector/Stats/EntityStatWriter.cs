@@ -48,6 +48,13 @@ public static class EntityStatWriter
             p.thePlantHealth = hp;
             if (!CheatState.On("D-PROBE-BULLET"))
                 p.attackDamage = y.Atk;
+
+            // E16: fire rate and sun rate, composed. A zero means the baseline had none, so there
+            // is nothing to write — never a zero interval, which is a divide-by-zero or an infinite
+            // fire rate depending on which call site reads it.
+            if (y.AttackInterval > 0) p.thePlantAttackInterval = (float)y.AttackInterval;
+            if (y.ProduceInterval > 0) p.thePlantProduceInterval = (float)y.ProduceInterval;
+
             try { p.UpdateText(); } catch { }
 
             Remember(p.Pointer, p.thePlantHealth, p.thePlantMaxHealth, p.attackDamage, source);
@@ -76,6 +83,7 @@ public static class EntityStatWriter
             if (y.Arm2Max > 0) z.theSecondArmorMaxHealth = y.Arm2Max;
             if (y.Arm2 > 0) z.theSecondArmorHealth = y.Arm2;
             z.theAttackDamage = Math.Max(1, y.Atk);
+            if (y.ZombieSpeed > 0) z.uniqueSpeed = (float)y.ZombieSpeed;
             try { z.UpdateHealthText(); } catch { }
 
             Remember(z.Pointer, ZombieCombatFields.GetHp(z), ZombieCombatFields.GetMaxHp(z), z.theAttackDamage, source);
@@ -93,14 +101,17 @@ public static class EntityStatWriter
         {
             if (CheatState.IsUserSet("P-SHIELD") && CheatState.IVal("P-SHIELD") >= 0)
                 p.theShieldHealth = CheatState.IVal("P-SHIELD");
-            if (CheatState.IsUserSet("P-ATK-INT") && CheatState.FVal("P-ATK-INT") > 0)
-                p.thePlantAttackInterval = CheatState.FVal("P-ATK-INT");
+            // The two interval keys moved to the composed path (E16) and are deliberately absent
+            // here. Writing them in both places would fight the composer, last-write-wins and
+            // spawn-order dependent, so the same board could settle differently twice. They arrive
+            // as Override modifiers now — see CheatState.BuildPlantAbsoluteReal.
+            //
+            // The guard that keeps them gone reads THIS FILE as text, so do not write the field
+            // assignment in a comment either; it cannot tell one from code.
             if (CheatState.IsUserSet("P-ATK-CD") && CheatState.FVal("P-ATK-CD") >= 0)
                 p.thePlantAttackCountDown = CheatState.FVal("P-ATK-CD");
             if (CheatState.IsUserSet("P-ATK-ADD"))
                 p.attackSpeedAdder = CheatState.FVal("P-ATK-ADD");
-            if (CheatState.IsUserSet("P-PROD-INT") && CheatState.FVal("P-PROD-INT") > 0)
-                p.thePlantProduceInterval = CheatState.FVal("P-PROD-INT");
             if (CheatState.IsUserSet("P-PROD-CD") && CheatState.FVal("P-PROD-CD") >= 0)
                 p.thePlantProduceCountDown = CheatState.FVal("P-PROD-CD");
             if (CheatState.IsUserSet("P-SPEED") && CheatState.FVal("P-SPEED") > 0)
@@ -129,8 +140,8 @@ public static class EntityStatWriter
                 z.theArmor = CheatState.FVal("Z-ARMOR-F");
             if (CheatState.IsUserSet("Z-TAKEMULT") && CheatState.FVal("Z-TAKEMULT") >= 0)
                 z.takeDmgMultiplier = CheatState.FVal("Z-TAKEMULT");
-            if (CheatState.IsUserSet("Z-SPD-U") && CheatState.FVal("Z-SPD-U") > 0)
-                z.uniqueSpeed = CheatState.FVal("Z-SPD-U");
+            // The unique-speed key moved to the composed path (E16) — see the note in
+            // WritePlantExtras, including why it is not quoted here.
             if (CheatState.IsUserSet("Z-SPD") && CheatState.FVal("Z-SPD") > 0)
                 z.theSpeed = CheatState.FVal("Z-SPD");
             if (CheatState.IsUserSet("Z-SPD-O") && CheatState.FVal("Z-SPD-O") > 0)

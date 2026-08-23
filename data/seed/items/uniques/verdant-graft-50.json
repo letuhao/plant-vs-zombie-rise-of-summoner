@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/verdant-graft/50",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "unique.verdant-graft-50-001",
+      "nameKey": "unique.transplanted-gullet",
+      "name": "Transplanted Gullet",
+      "frame": "plant",
+      "baseType": "item.plant-muzzle-a-005",
+      "rarity": "fused",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        { "family": "atom.gardener", "powerBand": "medium" },
+        { "family": "atom.might", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.vitality", "variance": "narrow" },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Built for the death-spawn, not the damage. Its own raw-stat line is a single low-band atom.might, deliberately thin against a fused-rung pool roll of two to three affixes — the muzzle exists to seed the field after the kill, not to win the fight before it."
+      },
+      "tags": ["medium-light", "organic", "rooted", "utility", "signature"],
+      "flavorKey": "flavor.unique.transplanted-gullet",
+      "flavor": "A zombie's own throat, grafted muzzle-first onto living cane. What it swallows on the way down takes root on the way out.",
+      "iconKey": "icon.unique.transplanted-gullet",
+      "themeKey": "theme.verdant-graft",
+      "notes": "Role armament-primary, axis utility, rung band 50 (fused/chimeric). Base item.plant-muzzle-a-005 'Lobbed Gourd' (seedpod class, band a). Capability atom.gardener (spawn.entity, OnDeath) is the item's whole reason to exist; the fixed core stays at two atoms (implicit + might) inside the four-atom cap, one variance slot. atom.gardener is shipped (naming.v1.json idNamespaces.affixFamilies g.on-death existingFamilies) and already ships in surv-util-008/020 as a utility-axis capability, so the axis assignment matches precedent. No element param — verdant-graft's own elementAffinity is empty and its avoid-list names 'any single dominant element', so this file carries no params.element anywhere."
+    },
+    {
+      "id": "unique.verdant-graft-50-002",
+      "nameKey": "unique.hybridised-cistern",
+      "name": "Hybridised Cistern",
+      "frame": "plant",
+      "baseType": "item.plant-stem-a-005",
+      "rarity": "fused",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "medium" },
+        { "family": "atom.fortitude", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.mending", "variance": "normal" },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "slight",
+        "family": "atom.might",
+        "note": "The stem spends its own growth on storage rather than aggression: a slight authored drawback against atom.might, the band-side an author may write per core.v1.json's counterPressure.kinds.drawback shape (severityBand plus a family reference, no magnitude typed)."
+      },
+      "tags": ["medium-light", "organic", "rooted", "utility", "signature"],
+      "flavorKey": "flavor.unique.hybridised-cistern",
+      "flavor": "Half stem, half stomach, sutured to hold whatever the wearer feeds it — sunlight, coin, or worse — until it is ready to give some back.",
+      "iconKey": "icon.unique.hybridised-cistern",
+      "themeKey": "theme.verdant-graft",
+      "notes": "Role core-guard, axis economy, rung band 50. Base item.plant-stem-a-005 'Feathered Phloem' (husk class, band a). atom.midas is shipped (naming.v1.json g.economy existingFamilies) and is the same family charm.econ-002/004/etc. use for the economy axis, so this unique's axis claim matches an already-established mapping rather than inventing one."
+    },
+    {
+      "id": "unique.verdant-graft-50-003",
+      "nameKey": "unique.uncanny-carapace",
+      "name": "Uncanny Carapace",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-a-011",
+      "rarity": "chimeric",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        { "family": "atom.retribution", "powerBand": "medium" },
+        { "family": "atom.warded", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.fortitude", "variance": "wide" },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A ward-array slot fixed for offense rather than mitigation, the same class of generator-rule break the unique.exemplar documents on a head-guard slot: role x family pool legality is enforced by filtering the drawn pool on affix_pool_tag, and a unique's fixed atoms sit outside that pool entirely, so this costs no schema or code change. It stays a worse pure shield than a chimeric-rung rare on that axis — its own atom.warded line is only low-band."
+      },
+      "tags": ["heavy", "organic", "rooted", "offensive", "signature"],
+      "flavorKey": "flavor.unique.uncanny-carapace",
+      "flavor": "Bark grown thick over a graft that never fully took. Strike it and the wound remembers you before the plant does.",
+      "iconKey": "icon.unique.uncanny-carapace",
+      "themeKey": "theme.verdant-graft",
+      "notes": "Role ward-array, axis offense, rung band 50. Base item.plant-sheath-a-011 'Petrified Rind' (heartwood class, band a). atom.retribution is shipped (naming.v1.json g.on-hit existingFamilies, alongside searing_strike/lifesteal/volley)."
+    },
+    {
+      "id": "unique.verdant-graft-50-004",
+      "nameKey": "unique.stitched-proboscis",
+      "name": "Stitched Proboscis",
+      "frame": "plant",
+      "baseType": "item.plant-thorn-a-003",
+      "rarity": "fused",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        { "family": "atom.lifesteal", "powerBand": "high" },
+        { "family": "atom.vitality", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.mending", "variance": "narrow" },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "below-half-health",
+        "note": "Condition from core.v1.json's closed counterPressure.conditions list (leaf hpBelowMilli, already a shipped predicate leaf). The graft feeds harder only once its host is starving — full strength only below half health, ordinary at full health."
+      },
+      "tags": ["light", "organic", "rooted", "defensive", "signature"],
+      "flavorKey": "flavor.unique.stitched-proboscis",
+      "flavor": "A censer sewn from a feeding tube that never learned to stop. It drinks harder the hungrier its host becomes.",
+      "iconKey": "icon.unique.stitched-proboscis",
+      "themeKey": "theme.verdant-graft",
+      "notes": "Role armament-secondary, axis survivability, rung band 50. Base item.plant-thorn-a-003 'Smoking Nettle' (censer class, band a), whose own implicit is already atom.lifesteal at low — the unique's fixed core raises the same family to high rather than introducing a second sustain mechanic."
+    },
+    {
+      "id": "unique.verdant-graft-50-005",
+      "nameKey": "unique.anther-of-twinflesh",
+      "name": "Anther of Twinflesh",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-a-009",
+      "rarity": "chimeric",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        { "family": "atom.sporing", "powerBand": "medium" },
+        { "family": "atom.ferocity", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.vitality", "variance": "normal" },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "front-row",
+        "note": "Condition from core.v1.json's closed list (leaf rowIs). The spore cloud only reaches whoever is standing at the front of the lawn, never the back ranks."
+      },
+      "tags": ["heavy", "organic", "rooted", "offensive", "signature"],
+      "flavorKey": "flavor.unique.anther-of-twinflesh",
+      "flavor": "Pollen bred from two bloodlines that should never have shared a stem. It does not know which garden it belongs to, so it claims both.",
+      "iconKey": "icon.unique.anther-of-twinflesh",
+      "themeKey": "theme.verdant-graft",
+      "notes": "Role jewel-major, axis control, rung band 50. Base item.plant-pollen-a-009 'Cohered Stigma' (class 'graft', band a) — the base type's own class literally names this theme. Concept 'Twinflesh' drawn from words.v1.json uniqueSetSeedPools['verdant-graft'] (unused by the verdant-graft set file, which spends halfgreen/sapvein/engraftment/conjunction only). atom.sporing is shipped (defined directly in affix-families/g-affliction.json) and off-ctrl-009 already tags the same family axis 'control', matching this claim. Tag 'offensive' for the control axis follows off-ctrl-001..010's own precedent, all of which tag axis:control as offensive."
+    },
+    {
+      "id": "unique.verdant-graft-50-006",
+      "nameKey": "unique.welted-cilium",
+      "name": "Welted Cilium",
+      "frame": "plant",
+      "baseType": "item.plant-leaves-a-002",
+      "rarity": "fused",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        { "family": "atom.commanding", "powerBand": "medium" },
+        { "family": "atom.might", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.fortitude", "variance": "narrow" },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "moderate",
+        "family": "atom.might",
+        "note": "A moderate authored drawback against its own atom.might: the hand spends its strength directing the graft's allies rather than striking with it."
+      },
+      "tags": ["light", "organic", "rooted", "utility", "signature"],
+      "flavorKey": "flavor.unique.welted-cilium",
+      "flavor": "A single hair-fine nerve, transplanted whole, that still answers to a voice its new body has never heard.",
+      "iconKey": "icon.unique.welted-cilium",
+      "themeKey": "theme.verdant-graft",
+      "notes": "Role manipulator, axis utility, rung band 50. Base item.plant-leaves-a-002 'Wispy Stipule' (fibre class, band a). atom.commanding is shipped (classes.v1.json implicitSlates excludedForRole family reference) and surv-util-010 already carries it as a utility-axis capability."
+    },
+    {
+      "id": "unique.verdant-graft-50-007",
+      "nameKey": "unique.crossbred-canopy",
+      "name": "Crossbred Canopy",
+      "frame": "plant",
+      "baseType": "item.plant-canopy-b-004",
+      "rarity": "chimeric",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "medium" },
+        { "family": "atom.vitality", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.cleansing", "variance": "wide" },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A pure economy niche piece: it channels captured sunlight into stored currency instead of raw growth, so its own vitality line stays low-band against a chimeric-rung pool roll of three to four affixes."
+      },
+      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
+      "flavorKey": "flavor.unique.crossbred-canopy",
+      "flavor": "Ancient heartwood split and re-closed around scavenged tissue. It still turns toward the sun; it has simply stopped asking why.",
+      "iconKey": "icon.unique.crossbred-canopy",
+      "themeKey": "theme.verdant-graft",
+      "notes": "Role mantle, axis economy, rung band 50. Base item.plant-canopy-b-004 'Ancient Bough' (heartwood class, band b), whose own implicit is already atom.cleansing — kept as the varianceSlot family rather than displaced. Noun 'Canopy' is mantle's own plant display word (core.v1.json roles.list), used per words.v1.json poolAccess.uniquePartition's 'any nounPools entry ... should sound like it'."
+    },
+    {
+      "id": "unique.verdant-graft-50-008",
+      "nameKey": "unique.implanted-coronet",
+      "name": "Implanted Coronet",
+      "frame": "plant",
+      "baseType": "item.plant-crown-b-004",
+      "rarity": "chimeric",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        { "family": "atom.deathblast", "powerBand": "medium" },
+        { "family": "atom.vitality", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.mending", "variance": "narrow" },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "actor-is-killer",
+        "note": "Condition from core.v1.json's closed list (leaf actorIsKiller). The pod only detonates when the wearer lands the kill, never on an ally's or a passive death."
+      },
+      "tags": ["medium", "organic", "rooted", "offensive", "signature"],
+      "flavorKey": "flavor.unique.implanted-coronet",
+      "flavor": "A seed pod grafted where a skull should end. It waits for the wearer's kill, then blooms outward through whatever is still standing.",
+      "iconKey": "icon.unique.implanted-coronet",
+      "themeKey": "theme.verdant-graft",
+      "notes": "Role head-guard, axis offense, rung band 50 — the same role-breaking pattern the unique exemplar documents (a guard slot fixed for offense, legal because fixed atoms bypass the drawn pool's role x family legality). Base item.plant-crown-b-004 'Gnarled Cupule' (bark class, band b). atom.deathblast is shipped (naming.v1.json g.on-death existingFamilies)."
+    }
+  ]
+}

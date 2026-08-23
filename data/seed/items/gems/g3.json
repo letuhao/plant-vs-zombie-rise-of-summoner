@@ -43,7 +43,7 @@
       "id": "gem.g3-003",
       "nameKey": "gem.sharp-spore",
       "name": "Sharp Spore",
-      "family": "atom.keen_edge",
+      "family": "atom.keen-edge",
       "powerBand": "medium",
       "iconKey": "icon.gem.sharp-spore",
       "tags": ["offensive"]
@@ -106,7 +106,7 @@
       "id": "gem.g3-010",
       "nameKey": "gem.durable-rind",
       "name": "Durable Rind",
-      "family": "atom.shield_toughness",
+      "family": "atom.shield-toughness",
       "powerBand": "medium",
       "iconKey": "icon.gem.durable-rind",
       "tags": ["defensive"]
@@ -115,7 +115,7 @@
       "id": "gem.g3-011",
       "nameKey": "gem.regenerant-husk",
       "name": "Regenerant Husk",
-      "family": "atom.shield_regen",
+      "family": "atom.shield-regen",
       "powerBand": "low",
       "iconKey": "icon.gem.regenerant-husk",
       "tags": ["defensive"]
@@ -196,7 +196,7 @@
       "id": "gem.g3-020",
       "nameKey": "gem.shield-capacity-core",
       "name": "Capacity Core",
-      "family": "atom.shield_capacity",
+      "family": "atom.shield-capacity",
       "powerBand": "high",
       "iconKey": "icon.gem.shield-capacity-core",
       "tags": ["defensive"]

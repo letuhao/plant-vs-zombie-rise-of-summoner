@@ -27,13 +27,14 @@ public static class WorldCanonical
         Row(sb, "world", w.TemplateId, w.Seed, w.CurrentTurn);
 
         foreach (var f in w.Factions)
-            Row(sb, "faction", f.FactionId, f.Kind, f.Name, f.PolicyId);
+            Row(sb, "faction", f.FactionId, f.Kind, f.Name, f.PolicyId, f.UpkeepHandicapMilli);
 
         foreach (var s in w.Sectors)
         {
             Row(sb, "sector", s.SectorId, s.TypeId, s.Climate, s.DangerBand, s.Phase, s.OwnerFactionId,
                 s.StabilityMilli, s.PressureMilli, s.DepletionMilli, s.DevelopmentLevel,
-                s.AuthoredIntel, s.LastSeenTurn, s.LayoutX, s.LayoutY);
+                s.AuthoredIntel, s.LastSeenTurn, s.LayoutX, s.LayoutY,
+                s.LoamStock, s.FractureIntensityMilli);
 
             foreach (var sl in s.Slots)
                 Row(sb, "slot", s.SectorId, sl.SlotIndex, sl.SlotTypeId, sl.Element, sl.State,

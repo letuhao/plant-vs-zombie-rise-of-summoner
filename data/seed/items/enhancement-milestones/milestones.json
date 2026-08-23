@@ -3,7 +3,7 @@
   "kind": "enhancement-milestone",
   "_meta": {
     "batch": "enh-milestones-wave1",
-    "partition": "enhancement-milestones/all",
+    "partition": "enhancement-milestones",
     "contractVersion": 1,
     "registryVersions": {
       "core": 1,

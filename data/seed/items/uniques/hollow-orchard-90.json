@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/hollow-orchard/90",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7"
+  },
+  "entries": [
+    {
+      "id": "unique.hollow-orchard-90-001",
+      "nameKey": "unique.votive-thresher",
+      "name": "Votive Thresher",
+      "frame": "plant",
+      "baseType": "item.plant-muzzle-b-001",
+      "rarity": "sunwoven",
+      "fixedAtoms": [
+        { "family": "atom.lifesteal", "powerBand": "high" },
+        { "family": "atom.hit-mend", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.savagery", "variance": "normal" },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Everything it does routes through the strike itself. Nothing here helps the wielder who is not swinging it."
+      },
+      "powerAxis": "survivability",
+      "tags": ["heavy", "organic", "rooted", "defensive", "signature"],
+      "flavorKey": "flavor.unique.votive-thresher",
+      "flavor": "It parts what it strikes the way a vigil parts the dark - gently, and without hurry.",
+      "iconKey": "icon.unique.votive-thresher"
+    },
+    {
+      "id": "unique.hollow-orchard-90-002",
+      "nameKey": "unique.trunk-of-the-vigil",
+      "name": "Trunk of the Vigil",
+      "frame": "plant",
+      "baseType": "item.plant-stem-b-007",
+      "rarity": "almanac",
+      "fixedAtoms": [
+        { "family": "atom.entangling", "powerBand": "medium" },
+        { "family": "atom.stalwart", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.fortitude", "variance": "narrow" },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "front-row",
+        "note": "The roots only reach as far as the ground the wearer is actually standing on."
+      },
+      "powerAxis": "control",
+      "tags": ["heavy", "organic", "rooted", "defensive", "signature"],
+      "flavorKey": "flavor.unique.trunk-of-the-vigil",
+      "flavor": "Roots that have held their ground since before the fence line went up do not let go for a little noise.",
+      "iconKey": "icon.unique.trunk-of-the-vigil",
+      "notes": "BREAKS A GENERATOR RULE ON PURPOSE, same class of break as the shipped exemplar (unique.ember-harvest-30-001). atom.entangling (status.apply, the control family group) lists roles armament-primary/armament-secondary/manipulator/jewel-major/jewel-minor-a/jewel-minor-b/sense in g-on-hit.json - core-guard is not among them, and no legal core-guard family is a crowd-control verb at all (its legal pool is vitality/fortitude/mending/cleansing/warded/evasion/elemental-defense - all raw stats or shields, never a status.apply). A unique's fixedAtoms sit in the container's fixed core, never drawn from the role-filtered pool, so the role x family legality matrix (a DERIVED check over pool_rolls) never sees this atom. This is the one row on the assigned table (core-guard / control) where the axis cannot be expressed by any legal family at all, which is exactly the situation a unique class exists to cover. atom.stalwart and atom.fortitude are both legal for core-guard and carry no such note."
+    },
+    {
+      "id": "unique.hollow-orchard-90-003",
+      "nameKey": "unique.wardenbough",
+      "name": "Wardenbough",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-b-004",
+      "rarity": "sunwoven",
+      "fixedAtoms": [
+        { "family": "atom.cleansing", "powerBand": "medium" },
+        { "family": "atom.shield-toughness", "powerBand": "low", "params": { "element": "light" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.shield-capacity",
+        "variance": "narrow",
+        "params": { "element": "light" }
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "It clears what is already on the wearer. It does nothing for a status the wearer has not yet caught."
+      },
+      "powerAxis": "utility",
+      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
+      "flavorKey": "flavor.unique.wardenbough",
+      "flavor": "Nothing crosses the fence line unlooked-at while this branch still holds its leaves.",
+      "iconKey": "icon.unique.wardenbough",
+      "notes": "BREAKS A GENERATOR RULE ON PURPOSE. ward-array's entire legal pool, corpus-wide, is the five shield-stat families (shield-capacity/toughness/regen, shld-surge/cycle) - no other family in affix-families/ lists ward-array as a legal role, which means the role's pool can only ever roll raw shield numbers and can never express a utility verb (a cleanse) no matter how it is rolled. atom.cleansing (status.clear) is legal for head-guard/core-guard/mantle/footing/girdle/jewel-major/jewel-minor/armament-secondary but not ward-array. Fixed atoms are outside the drawn pool, so the break costs the architecture nothing. atom.shield-toughness and the shield-capacity varianceSlot are both native to ward-array's own family group and carry no such note."
+    },
+    {
+      "id": "unique.hollow-orchard-90-004",
+      "nameKey": "unique.lampfruit",
+      "name": "Lampfruit",
+      "frame": "plant",
+      "baseType": "item.plant-thorn-b-001",
+      "rarity": "almanac",
+      "fixedAtoms": [
+        { "family": "atom.sunbloom", "powerBand": "high" },
+        { "family": "atom.might", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.shield-toughness",
+        "variance": "normal",
+        "params": { "element": "light" }
+      },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "moderate",
+        "family": "atom.econ-toll",
+        "note": "The orchard does not give without also taking; carrying this thorn costs the wearer the way econ-toll's own toll does, quietly and every round."
+      },
+      "powerAxis": "economy",
+      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
+      "flavorKey": "flavor.unique.lampfruit",
+      "flavor": "It ripens without a season, and gives without being picked.",
+      "iconKey": "icon.unique.lampfruit",
+      "notes": "BREAKS A GENERATOR RULE ON PURPOSE. atom.sunbloom (resource.economy) lists roles girdle/jewel-major/jewel-minor-a/jewel-minor-b in g-economy.json - armament-secondary is not among them, and no legal armament-secondary family touches the economy channel at all (its legal pool is status.apply/atk-stat/elemental-power/shield-stat/tempo, none of them resource.economy). This is the assigned table's other axis with no legal-pool path: armament-secondary / economy. atom.might and the shield-toughness varianceSlot are both legal for armament-secondary and carry no such note."
+    },
+    {
+      "id": "unique.hollow-orchard-90-005",
+      "nameKey": "unique.haloed-corolla",
+      "name": "Haloed Corolla",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-b-007",
+      "rarity": "sunwoven",
+      "fixedAtoms": [
+        { "family": "atom.savagery", "powerBand": "high" },
+        { "family": "atom.cruelty", "powerBand": "medium", "params": { "element": "light" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.keen-edge",
+        "variance": "narrow",
+        "params": { "element": "light" }
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A pure damage stack with no rider - the whole build is the swing, not the surprise."
+      },
+      "powerAxis": "offense",
+      "tags": ["heavy", "organic", "rooted", "offensive", "signature"],
+      "flavorKey": "flavor.unique.haloed-corolla",
+      "flavor": "Even closed, it does not go dark.",
+      "iconKey": "icon.unique.haloed-corolla"
+    },
+    {
+      "id": "unique.hollow-orchard-90-006",
+      "nameKey": "unique.frond-of-the-threshold",
+      "name": "Frond of the Threshold",
+      "frame": "plant",
+      "baseType": "item.plant-leaves-b-001",
+      "rarity": "almanac",
+      "fixedAtoms": [
+        { "family": "atom.hit-mend", "powerBand": "high" },
+        { "family": "atom.hit-followthrough", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.ferocity", "variance": "normal" },
+      "counterPressure": {
+        "kind": "conditional",
+        "condition": "below-half-health",
+        "note": "The leaves close only over a wound that is actually open."
+      },
+      "powerAxis": "survivability",
+      "tags": ["heavy", "organic", "rooted", "defensive", "signature"],
+      "flavorKey": "flavor.unique.frond-of-the-threshold",
+      "flavor": "It closes only over what still needs closing.",
+      "iconKey": "icon.unique.frond-of-the-threshold"
+    },
+    {
+      "id": "unique.hollow-orchard-90-007",
+      "nameKey": "unique.cloistered-bough",
+      "name": "Cloistered Bough",
+      "frame": "plant",
+      "baseType": "item.plant-canopy-b-002",
+      "rarity": "sunwoven",
+      "fixedAtoms": [
+        { "family": "atom.withering", "powerBand": "medium" },
+        { "family": "atom.evasion", "powerBand": "low", "params": { "element": "light" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.stoicism",
+        "variance": "narrow",
+        "params": { "element": "light" }
+      },
+      "counterPressure": {
+        "kind": "drawback",
+        "severityBand": "slight",
+        "family": "atom.quickening",
+        "note": "A canopy this heavy costs the wearer the tempo atom.quickening would otherwise give back."
+      },
+      "powerAxis": "control",
+      "tags": ["heavy", "organic", "rooted", "defensive", "signature"],
+      "flavorKey": "flavor.unique.cloistered-bough",
+      "flavor": "Whatever it shelters, it also keeps.",
+      "iconKey": "icon.unique.cloistered-bough",
+      "notes": "BREAKS A GENERATOR RULE ON PURPOSE. atom.withering (status.apply) lists roles armament-primary/armament-secondary/manipulator/jewel-major/jewel-minor-a/jewel-minor-b/sense in g-on-hit.json - mantle is not among them, and mantle's own legal pool (vitality/fortitude/mending/cleansing/warded/evasion/elemental-defense/stoicism) has no status.apply family at all, the same gap core-guard has for the same reason: neither slot's pool carries a control verb. atom.evasion and the stoicism varianceSlot are both legal for mantle and carry no such note."
+    },
+    {
+      "id": "unique.hollow-orchard-90-008",
+      "nameKey": "unique.candlebranch",
+      "name": "Candlebranch",
+      "frame": "plant",
+      "baseType": "item.plant-crown-b-007",
+      "rarity": "almanac",
+      "fixedAtoms": [
+        { "family": "atom.cleansing", "powerBand": "medium" },
+        { "family": "atom.gardener", "powerBand": "low" }
+      ],
+      "varianceSlot": { "family": "atom.vitality", "variance": "normal" },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "Both riders are upkeep, not damage; a build that wants pure offense from its crown slot gets nothing here."
+      },
+      "powerAxis": "utility",
+      "tags": ["heavy", "organic", "rooted", "utility", "signature"],
+      "flavorKey": "flavor.unique.candlebranch",
+      "flavor": "A crown that keeps its own small light lit, so nothing tended beneath it has to grow in the dark.",
+      "iconKey": "icon.unique.candlebranch"
+    }
+  ]
+}

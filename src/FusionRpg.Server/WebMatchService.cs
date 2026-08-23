@@ -189,7 +189,15 @@ public sealed class WebMatchService
     (BattleReport Report, EventInsertNotify Notify) ResolveAndIngest(
         long playerId, string matchKey, BattleSetup setup, ulong seed)
     {
-        var report = BattleEngine.Resolve(setup, seed);
+        // E12: the report carries WHICH CONTENT produced it. Stamped here, where the store is, and
+        // never recomputed later — a power or a trait magnitude read back under a different
+        // contentHash is a different number, so a recomputed stamp would describe a battle that did
+        // not happen. Provenance only: it is excluded from the determinism hash, exactly as the
+        // platform stamp is, or every added row would look like a determinism break.
+        var report = BattleEngine.Resolve(setup, seed) with
+        {
+            ContentHash = _store.ComputeContentHash().ToCompact(),
+        };
         var events = BattleReportEmitter.Emit(report, matchKey).ToList();
 
         // The engine is clockless — stamp strictly monotonic t here, at ingest.

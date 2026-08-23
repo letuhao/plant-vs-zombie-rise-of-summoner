@@ -655,6 +655,81 @@
     </div>
   </div>
 
+  <!-- ------------------------------------------------- C.9 element system -->
+  <div class="sub">
+    <h3>C.9 Element &mdash; typing, payload, and <em>two</em> matrices</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      &sect;C.1 shows the roster and three sample matchups. This is the real component set, and it
+      exists because the element system has three shapes the kit had none of: a <b>6&times;6 matchup
+      matrix that comes in two independently editable copies</b>, an <b>actor typing</b> of nought,
+      one or two slots, and a <b>weighted payload</b> that always sums to 1.
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">Matchup matrix &mdash; three modes, one component</p>
+      <div class="spec-grid wide">
+        <div>
+          <p class="spec-label">Combat &mdash; <code>ElementRingMatrix</code>: four values, <code>SAME</code> is its own</p>
+          <table class="elmatrix"><tr><th class="rowhd">atk \ def</th><th>fire</th><th>ice</th><th>air</th><th>earth</th><th>light</th><th>dark</th></tr><tr><th class="rowhd">fire</th><td data-r="same">SAME</td><td data-r="str">STR</td><td data-r="wek">WEK</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td></tr><tr><th class="rowhd">ice</th><td data-r="wek">WEK</td><td data-r="same">SAME</td><td data-r="neu">NEU</td><td data-r="str">STR</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td></tr><tr><th class="rowhd">air</th><td data-r="str">STR</td><td data-r="neu">NEU</td><td data-r="same">SAME</td><td data-r="wek">WEK</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td></tr><tr><th class="rowhd">earth</th><td data-r="neu">NEU</td><td data-r="wek">WEK</td><td data-r="str">STR</td><td data-r="same">SAME</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td></tr><tr><th class="rowhd">light</th><td data-r="neu">NEU</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td><td data-r="same">SAME</td><td data-r="str">STR</td></tr><tr><th class="rowhd">dark</th><td data-r="neu">NEU</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td><td data-r="neu">NEU</td><td data-r="str">STR</td><td data-r="same">SAME</td></tr></table>
+        </div>
+        <div>
+          <p class="spec-label">Shield &mdash; <code>ShieldElementMatrix</code>: unit only, <code>SAME</code> folds into <code>0</code></p>
+          <table class="elmatrix"><tr><th class="rowhd">atk \ shield</th><th>fire</th><th>ice</th><th>air</th><th>earth</th><th>light</th><th>dark</th></tr><tr><th class="rowhd">fire</th><td data-r="same">0</td><td data-r="str">+1</td><td data-r="wek">-1</td><td data-r="neu">0</td><td data-r="neu">0</td><td data-r="neu">0</td></tr><tr><th class="rowhd">ice</th><td data-r="wek">-1</td><td data-r="same">0</td><td data-r="neu">0</td><td data-r="str">+1</td><td data-r="neu">0</td><td data-r="neu">0</td></tr><tr><th class="rowhd">air</th><td data-r="str">+1</td><td data-r="neu">0</td><td data-r="same">0</td><td data-r="wek">-1</td><td data-r="neu">0</td><td data-r="neu">0</td></tr><tr><th class="rowhd">earth</th><td data-r="neu">0</td><td data-r="wek">-1</td><td data-r="str">+1</td><td data-r="same">0</td><td data-r="neu">0</td><td data-r="neu">0</td></tr><tr><th class="rowhd">light</th><td data-r="neu">0</td><td data-r="neu">0</td><td data-r="neu">0</td><td data-r="neu">0</td><td data-r="same">0</td><td data-r="str">+1</td></tr><tr><th class="rowhd">dark</th><td data-r="neu">0</td><td data-r="neu">0</td><td data-r="neu">0</td><td data-r="neu">0</td><td data-r="str">+1</td><td data-r="same">0</td></tr></table>
+        </div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Diff mode &mdash; and an empty diff is a <em>statement</em>, not a blank panel</p>
+      <div class="row-flex">
+        <span class="tag">The shield chart matches the combat chart in all 36 pairs</span>
+        <span class="statenote">&mdash; verified at <code>ElementTable.Shipped()</code>, which copies the
+        ring array into the shield slot. They stay separate because they are independently editable.</span>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Actor typing &mdash; 0, 1 or 2 slots; <code>omni</code> is never one</p>
+      <div class="row-flex" style="gap:var(--sp-4)">
+        <span class="chip"><span class="el" data-el="fire"><i class="dot"></i>Fire</span></span>
+        <span class="chip"><span class="el" data-el="fire"><i class="dot"></i>Fire</span>
+          <span class="el" data-el="air"><i class="dot"></i>Air</span></span>
+        <span class="chip"><span class="statenote">untyped</span></span>
+        <span class="statenote">
+          <code>primary == secondary</code> is invalid, so the second picker excludes the first pick;
+          <b><code>omni</code> is an additive baseline and must not be offered at all.</b>
+        </span>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Weighted payload &mdash; positive weights summing to 1.0</p>
+      <div class="payload">
+        <span style="width:70%;background:var(--el-fire)">FIRE 70%</span>
+        <span style="width:30%;background:var(--el-air)">AIR 30%</span>
+      </div>
+
+      <div class="note">
+        <strong>Two matrices, and the difference is the <em>contract</em>, not the content.</strong>
+        The combat table returns a relation where <code>SAME</code> is distinct from <code>NEUTRAL</code>
+        and bakes K into <code>RelationShare</code> (&plusmn;0.25); the shield table returns a bare unit
+        <code>&minus;1 / 0 / +1</code>, folds <code>SAME</code> into <code>0</code>, and K is applied
+        <em>once</em> downstream in <code>ShieldMath</code> from its own decoupled constant. One
+        component cannot silently serve both &mdash; and it must be able to render the diff, because
+        divergence is an Ask-first balance decision that has simply not happened yet.
+        <br><br>
+        <strong>Dual typing multiplies.</strong>
+        <code>combinedMult = m_primary &times; m_secondary</code>, then
+        <code>bonus = (combinedMult &minus; 1) &times; base</code>. Fire into <b>ice + earth</b> is
+        <code>1.25 &times; 1.0 &minus; 1 = +0.25&times;</code>; into <b>air + earth</b> it is
+        <code>0.75 &times; 1.0 &minus; 1 = &minus;0.25&times;</code>. A two-type defender is not
+        &ldquo;twice as resistant&rdquo; &mdash; it lands anywhere in
+        <b>0.5625&times; to 1.5625&times;</b>.
+        <br><br>
+        <strong>Rows and columns are ordered by <code>Ordinal</code>, never alphabetically.</strong>
+        The ordinal drives the generated channel set &mdash; <code>combat.power.fire</code> exists
+        because fire is in the roster &mdash; so a re-sorted matrix would stop matching the stat sheet
+        it sits beside.
+        <span class="ref">spec-shield-and-elements.md &sect;0, &sect;3.3&ndash;&sect;3.5 &middot;
+        ElementTable.cs &middot; ElementRingMatrix.cs &middot; ShieldElementMatrix.cs &middot;
+        ElementHub.cs:16&ndash;24 &middot; ElementPayload.cs:24&ndash;38</span>
+      </div>
+    </div>
+  </div>
 </section>
 
 
@@ -1226,6 +1301,240 @@
       </div>
     </div>
   </div>
+  <!-- ---------------------------------------------------- D.5 stat sheet -->
+  <div class="sub">
+    <h3>D.5 Channel &mdash; the derived-stat sheet <span class="tag">Panel rung</span></h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      <b>99 pre-registered channels, five open-ended families, no knowable ceiling.</b> The coverage
+      matrix marked <code>Channel &middot; Panel</code> as <code>n/a</code>; that was a wrong refusal.
+      A channel does have a panel &mdash; it is what a player opens to find out why their creature hits
+      harder than it did an hour ago. The block below is <b>generated, never hand-listed</b>:
+      12 families &times; (omni + 6 elements) = <b>84</b>, exactly as
+      <code>BuildAllCombatChannelIds()</code> builds it, so adding an element or a family changes the
+      grid by construction rather than by an edit.
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">The sheet &mdash; band 2, opened from an actor</p>
+      <div class="panel-shell" style="max-width:none">
+        <div class="hd">
+          <span class="ttl">Derived stats &middot; Emberling</span>
+          <span class="spacer"></span>
+          <label class="toggle is-on"><span class="track"><span class="knob"></span></span> Show unchanged
+            <span class="statenote">&nbsp;&mdash; on; 77 of 84 combat cells sit at default</span></label>
+        </div>
+        <div class="bd" style="overflow-x:auto">
+          <table class="statsheet">
+            <thead>
+              <tr>
+                <th class="fam">Combat</th><th class="unitcol">unit</th>
+                <th class="omni">omni</th><th>fire</th><th>ice</th><th>air</th>
+                <th>earth</th><th>light</th><th>dark</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="fam">Power</td><td class="unitcol">game units</td><td class="omni"><span class="sv" data-st="active">12</span></td><td><span class="sv" data-st="active">150</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Defense</td><td class="unitcol">game units</td><td class="omni"><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="active">40</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Crit rate</td><td class="unitcol">sigmoid pts</td><td class="omni"><span class="sv" data-st="active">150</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Crit resist</td><td class="unitcol">sigmoid pts</td><td class="omni"><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Crit damage</td><td class="unitcol">sigmoid mult</td><td class="omni"><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="active">40</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Crit resist damage</td><td class="unitcol">sigmoid mult</td><td class="omni"><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Accuracy</td><td class="unitcol">sigmoid pts</td><td class="omni"><span class="sv" data-st="active">9</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Dodge</td><td class="unitcol">sigmoid pts</td><td class="omni"><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Shield capacity</td><td class="unitcol">game units</td><td class="omni"><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="active">80</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Shield toughness</td><td class="unitcol">game units</td><td class="omni"><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Shield pen</td><td class="unitcol">game units</td><td class="omni"><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+              <tr><td class="fam">Shield regen</td><td class="unitcol">units/s</td><td class="omni"><span class="sv" data-st="active">3</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td><td><span class="sv" data-st="default">·</span></td></tr>
+
+              <tr class="grp"><td colspan="9">Status &mdash; resist</td></tr>
+              <tr>
+                <td class="fam">Damage over time</td><td class="unitcol">potency</td>
+                <td class="omni"><span class="sv" data-st="active">0.40</span></td>
+                <td colspan="6" style="text-align:left">
+                  <span class="sv" data-st="capped">0.95</span><span class="capmark">CAP</span>
+                  <span class="statenote">&nbsp;more resist does nothing &mdash; the category cap is 0.95</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="fam">Crowd control</td><td class="unitcol">potency</td>
+                <td class="omni"><span class="sv" data-st="active">0.40</span></td>
+                <td colspan="6" style="text-align:left">
+                  <span class="sv" data-st="active">0.12</span>
+                  <span class="statenote">&nbsp;omni is <b>uncapped</b>; the category slice caps at 0.95</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="fam">Immune to Freeze</td><td class="unitcol">flag</td>
+                <td class="omni">&nbsp;</td>
+                <td colspan="6" style="text-align:left"><span class="tag">Immune to Freeze</span></td>
+              </tr>
+
+              <tr class="grp"><td colspan="9">Progression</td></tr>
+              <tr>
+                <td class="fam">Power</td><td class="unitcol">tier</td>
+                <td class="omni"><span class="sv" data-st="stub">1.0</span></td>
+                <td colspan="6" style="text-align:left">
+                  <span class="statenote">placeholder &mdash; the real curve is not built.
+                  Every actor in the game reads 1.0</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="fam">Armour bonus I</td><td class="unitcol">game units</td>
+                <td class="omni"><span class="sv" data-st="no-producer">&mdash;</span></td>
+                <td colspan="6" style="text-align:left">
+                  <span class="statenote">nothing grants this yet</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Six states, because a zero is four different things</p>
+      <div class="row-flex" style="gap:var(--sp-4)">
+        <span><span class="sv" data-st="active">150</span> <span class="statenote">active</span></span>
+        <span><span class="sv" data-st="default">·</span> <span class="statenote">default &mdash; real and gearable</span></span>
+        <span><span class="sv" data-st="capped">0.95</span><span class="capmark">CAP</span> <span class="statenote">capped</span></span>
+        <span><span class="sv" data-st="stub">1.0</span> <span class="statenote">stub</span></span>
+        <span><span class="sv" data-st="no-producer">&mdash;</span> <span class="statenote">no producer</span></span>
+        <span><span class="sv" data-st="unregistered">turn.haste</span> <span class="statenote">unregistered &mdash; dev only</span></span>
+      </div>
+
+      <div class="note">
+        <strong>The state model is the <code>Pending</code> contract, applied to a stat.</strong>
+        &ldquo;My fire resist is 0&rdquo; and &ldquo;fire resist does not do anything yet&rdquo; are
+        different sentences, and a sheet rendering both as <code>0</code> has lied to the player about
+        what to go and buy. Four of these states exist in shipped code right now:
+        <code>progression.power</code> and <code>progression.realm</code> are hardcoded <b>1.0</b>
+        stubs, so <code>TierPower</code> is 1.0 for every actor alive;
+        <code>progression.bonus.arm1</code>/<code>.arm2</code> and <code>status.expose.*</code> are
+        registered and readable with <b>no producer</b>; and <code>turn.speed</code>,
+        <code>turn.haste</code> and <code>turn.moveSpeed</code> are declared in
+        <code>DerivedTurnChannels.cs</code> but <b>not registered</b> &mdash;
+        <code>ValidateChannel</code> throws on all three.
+        <br><br>
+        <strong>Capped is a correctness case, not a nicety.</strong> The category resists cap at
+        <b>0.95</b> and the flag families at <b>1</b>, while <code>status.resist.omni</code> is
+        <b>uncapped</b> &mdash; two cells in the same row obeying different rules. A player at the cap
+        who stacks more resist gets literally nothing, and a bare <code>0.95</code> tells them to keep
+        going.
+        <br><br>
+        <strong>The unit label lives on the group row, never in the cell.</strong> That is the magnitude
+        document&rsquo;s rule expressed as a layout constraint &mdash; it is what stops
+        <code>+150 crit rate</code> and <code>+12 fire power</code> being read as comparable.
+        <span class="ref">spec-derived-stat-sheet.md &sect;2&ndash;&sect;4 &middot;
+        DerivedStatChannels.cs:110&ndash;146 &middot; DerivedStatRegistry.cs:30&ndash;110 &middot;
+        DerivedComposer.cs:38&ndash;70 &middot; DerivedTurnChannels.cs</span>
+      </div>
+    </div>
+  </div>
+  <!-- ------------------------------------------------------ D.6 shield -->
+  <div class="sub">
+    <h3>D.6 Shield &mdash; the layered pool and its cascade</h3>
+    <p class="lede" style="margin-bottom:var(--sp-3)">
+      A shield is not a number. It is a <b>bounded, ordered stack of typed pools</b> &mdash; at most
+      three per actor, draining highest-priority first: aura&nbsp;30 &rarr; skill&nbsp;20 &rarr;
+      innate&nbsp;10. The kit had no component for any of it, and the shield system is shipped code.
+    </p>
+
+    <div class="spec">
+      <p class="spec-label">The stack &mdash; one bar, segmented, drawn in drain order</p>
+      <div class="shieldstack">
+        <div class="shieldseg" data-el="ice" style="flex:40">
+          <span class="fill" style="width:100%"></span><span class="lb">ICE 40/40</span></div>
+        <div class="shieldseg" data-el="fire" style="flex:60">
+          <span class="fill" style="width:100%"></span><span class="lb">FIRE 60/60</span></div>
+        <div class="shieldseg" data-el="untyped" style="flex:100">
+          <span class="fill" style="width:100%"></span><span class="lb">UNTYPED 100/100 &middot; +3/s</span></div>
+      </div>
+      <div class="shieldstack" style="margin-top:2px">
+        <div class="tier-lb" style="flex:40">aura &middot; 30</div>
+        <div class="tier-lb" style="flex:60">skill &middot; 20</div>
+        <div class="tier-lb" style="flex:100">innate &middot; 10</div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">After a 100-damage pure-fire hit &mdash; two layers broken, nothing reached HP</p>
+      <div class="shieldstack">
+        <div class="shieldseg is-broken" data-el="ice" style="flex:40">
+          <span class="lb">ICE broken</span></div>
+        <div class="shieldseg is-broken" data-el="fire" style="flex:60">
+          <span class="lb">FIRE broken</span></div>
+        <div class="shieldseg" data-el="untyped" style="flex:100">
+          <span class="fill" style="width:92%"></span><span class="lb">UNTYPED 92/100</span></div>
+      </div>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">Absorb readout &mdash; band 4, expanded</p>
+      <div style="border:1px solid var(--border);border-radius:var(--r-md);overflow-x:auto">
+        <table class="statsheet">
+          <thead><tr>
+            <th class="fam">Layer</th><th class="unitcol">element</th>
+            <th>hp</th><th>elemMod</th><th>raw</th><th>clamp</th>
+            <th>to shield</th><th>spent</th><th>passes on</th>
+          </tr></thead>
+          <tbody>
+            <tr><td class="fam">aura</td><td class="unitcol">ice</td>
+              <td><span class="sv" data-st="active">40</span></td>
+              <td><span class="sv" data-st="capped">+25</span></td>
+              <td><span class="sv" data-st="active">125</span></td>
+              <td><span class="sv" data-st="default">10&ndash;300</span></td>
+              <td><span class="sv" data-st="active">125</span></td>
+              <td><span class="sv" data-st="active">40</span></td>
+              <td><span class="sv" data-st="active">68</span></td></tr>
+            <tr><td class="fam">skill</td><td class="unitcol">fire</td>
+              <td><span class="sv" data-st="active">60</span></td>
+              <td><span class="sv" data-st="default">0</span></td>
+              <td><span class="sv" data-st="active">68</span></td>
+              <td><span class="sv" data-st="default">7&ndash;204</span></td>
+              <td><span class="sv" data-st="active">68</span></td>
+              <td><span class="sv" data-st="active">60</span></td>
+              <td><span class="sv" data-st="active">8</span></td></tr>
+            <tr><td class="fam">innate</td><td class="unitcol">untyped</td>
+              <td><span class="sv" data-st="active">100</span></td>
+              <td><span class="sv" data-st="default">0</span></td>
+              <td><span class="sv" data-st="active">8</span></td>
+              <td><span class="sv" data-st="default">1&ndash;24</span></td>
+              <td><span class="sv" data-st="active">8</span></td>
+              <td><span class="sv" data-st="active">8</span></td>
+              <td><span class="sv" data-st="active">0</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="statenote" style="margin-top:var(--sp-2)">
+        &ldquo;Shield absorbed 100 &mdash; nothing reached you.&rdquo;
+        Fire is strong into the ice layer: <b>+25</b>.
+      </p>
+
+      <p class="spec-label" style="margin-top:var(--sp-4)">The two promises, stated in the UI rather than discovered</p>
+      <div class="row-flex" style="gap:var(--sp-4)">
+        <span class="tag">A hit always spends at least 10% of its damage on the shield</span>
+        <span class="tag">Penetration at best triples shield burn</span>
+      </div>
+
+      <div class="note">
+        <strong>100 damage reached 0 HP and cost 108 shield HP.</strong> That is not a rounding
+        artefact. Fire is strong into the ice layer, so <code>elemMod</code> <em>amplifies what the
+        shield pays</em> &mdash; and the same hit against a defender carrying <b>+30 toughness</b> per
+        layer costs only <b>68</b> and never touches the innate shield at all. A single bar cannot say
+        any of that, which is why the stack gets a per-layer readout.
+        <br><br>
+        <strong>The UI must never recompute <code>remainder</code>.</strong> It is
+        <em>proportional</em> &mdash;
+        <code>(input &times; (toShield &minus; spent) + toShield/2) / toShield</code> &mdash; not
+        <code>input &minus; spent</code>. Re-deriving it as a subtraction gives a different number from
+        the engine on almost every partial break. The server sends the cascade; the renderer renders it.
+        <br><br>
+        <strong>Four of the five apply outcomes are not &ldquo;it worked&rdquo;.</strong>
+        <code>Applied</code> &middot; <code>Merged</code> &middot; <code>DroppedWeaker</code> (at the
+        cap of three, and not stronger than the weakest) &middot; <code>Rejected</code>
+        (<code>maxHp &le; 0</code> after capacity) &middot; <code>MergedRemoved</code>. A UI that only
+        renders success cannot explain why a granted shield never appeared &mdash; GG-55 arriving from
+        the runtime instead of from a button.
+        <span class="ref">spec-shield-and-elements.md &sect;1&ndash;&sect;3 &middot;
+        ShieldMath.cs:22&ndash;46 &middot; ShieldPolicy.cs &middot; ShieldRuntime.cs:288&ndash;345 &middot;
+        ShieldInstance.cs:36&ndash;48</span>
+      </div>
+    </div>
+  </div>
 </section>
 
 
@@ -1443,7 +1752,7 @@
       <tr><td><b>Actor</b></td><td>D.2</td><td>D.2</td><td>D.2</td><td>D.2</td><td>D.2</td><td><a href="07-flows.html">p07 F</a></td></tr>
       <tr><td><b>Status</b></td><td>C.4</td><td>C.4</td><td><a href="05-chronicle-almanac.html">p05 B</a></td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
       <tr><td><b>Element</b></td><td>C.1</td><td>C.1</td><td><a href="05-chronicle-almanac.html">p05 B</a></td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
-      <tr><td><b>Channel</b></td><td>C.5</td><td>C.5 &middot; <b>C.8</b></td><td><a href="05-chronicle-almanac.html">p05 D</a></td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
+      <tr><td><b>Channel</b></td><td>C.5</td><td>C.5 &middot; <b>C.8</b></td><td><a href="05-chronicle-almanac.html">p05 D</a></td><td>n/a</td><td><b>D.5</b></td><td>dev only</td></tr>
       <tr><td><b>Resource</b></td><td>C.5</td><td>C.5</td><td>n/a</td><td>n/a</td><td>n/a</td><td>n/a</td></tr>
       <tr><td><b>Power</b></td><td>C.6</td><td>C.6</td><td>n/a</td><td>C.6</td><td>n/a</td><td>n/a</td></tr>
       <tr><td><b>Sector</b></td><td>D.4</td><td><a href="07-flows.html">p07 F</a></td><td>n/a</td><td>D.4</td><td><a href="03-world.html">p03 B</a></td><td>n/a</td></tr>

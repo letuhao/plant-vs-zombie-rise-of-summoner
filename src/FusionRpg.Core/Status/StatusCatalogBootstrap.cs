@@ -30,7 +30,22 @@ public static class StatusCatalogBootstrap
         Register(catalog, "expose", StatusKind.Debuff, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.ModifyStat);
         Register(catalog, "command", StatusKind.Meter, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.ModifyStat);
         Register(catalog, "shatter", StatusKind.Debuff, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.ModifyStat);
-        Register(catalog, "charm_pulse", StatusKind.CrowdControl, "overlay", StatusL2bCategory.Cc, StatusStacking.Replace, StatusPayloadKind.UnityCc);
+        // E17: corrected from UnityCc. NO vanilla method exists for it — an assembly-metadata sweep
+        // of Assembly-CSharp found SetEmbered / SetJalaed / SetKelped but no SetCharm*, only
+        // SetZombieWithMindControl / SetZombieMindControlledNode. Declaring UnityCc named an
+        // execution path the game does not have, which is a DEF ERROR and not missing wiring.
+        //
+        // What that cost, concretely: FA2 is emitted only for UnityCc statuses
+        // (StatusEffectBridge.cs:315), so every application queued an ApplyStatus action that
+        // reached the injector's status switch, matched no case, and did nothing. An inert plan item
+        // that looked like a working effect in every trace.
+        //
+        // ModifyStat is what an overlay-authored status can actually do now that the payload has a
+        // consumer. Deliberately NOT faked with a float write — that is the applyFloatSlow path,
+        // documented as weak and VFX-less, and it would make the status look implemented while doing
+        // something else. It still CC-locks in battle: that reads the `cc` CATEGORY, which is
+        // unchanged and is what the status means rather than how it is delivered.
+        Register(catalog, "charm_pulse", StatusKind.CrowdControl, "overlay", StatusL2bCategory.Cc, StatusStacking.Replace, StatusPayloadKind.ModifyStat);
 
         // 9.4 Contagion
         Register(catalog, "blight", StatusKind.Contagion, "overlay", StatusL2bCategory.Contagion, StatusStacking.Refresh, StatusPayloadKind.Spread, StatusPayloadKind.PulseHp);

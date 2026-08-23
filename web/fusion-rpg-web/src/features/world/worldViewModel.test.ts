@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
 import fixture from "./fixtures/first-light.json";
 import type { WorldStateDto } from "./worldTypes";
-import { GRID_X, GRID_Y, ownershipOf, sectorLabel, toGraph } from "./worldViewModel";
+import {
+  anchorStateOf,
+  GRID_X,
+  GRID_Y,
+  ownershipOf,
+  sectorLabel,
+  summarizeLoam,
+  toGraph,
+  type SectorNodeData
+} from "./worldViewModel";
 
 const world = fixture as WorldStateDto;
 
@@ -225,5 +234,132 @@ describe("helpers", () => {
     expect(ownershipOf("dave", "dave")).toBe("mine");
     expect(ownershipOf("wild", "dave")).toBe("enemy");
     expect(ownershipOf("dave", null)).toBe("enemy");
+  });
+});
+
+describe("anchorStateOf (spec-loam-fe.md: territory is light in the dark)", () => {
+  it("is not-yours before anything else — loam has nothing to add to the fog treatment", () => {
+    expect(anchorStateOf("enemy", true, 1000)).toBe("not-yours");
+    expect(anchorStateOf("neutral", false, 0)).toBe("not-yours");
+  });
+
+  it("is barren for your own ground that holds no source, regardless of its stability number", () => {
+    expect(anchorStateOf("mine", false, 1000)).toBe("barren");
+    expect(anchorStateOf("mine", false, 0)).toBe("barren");
+  });
+
+  it("is anchored when yours, holding a source, and near full stability", () => {
+    expect(anchorStateOf("mine", true, 1000)).toBe("anchored");
+    expect(anchorStateOf("mine", true, 900)).toBe("anchored");
+  });
+
+  it("is fading when yours, holding a source, but stability has started to slip", () => {
+    expect(anchorStateOf("mine", true, 899)).toBe("fading");
+    expect(anchorStateOf("mine", true, 0)).toBe("fading");
+  });
+
+  it("wires stabilityMilli and habitable from the DTO through to the node's data", () => {
+    const home = toGraph(world).nodes.find((n) => n.id === "homeworld")!.data;
+    expect(home.habitable).toBe(true);
+    expect(home.stabilityMilli).toBe(1000);
+    expect(home.anchorState).toBe("anchored");
+  });
+
+  it("wires the loam economy fields from the DTO through to the node's data", () => {
+    const home = toGraph(world).nodes.find((n) => n.id === "homeworld")!.data;
+    expect(home.componentId).toBe("homeworld");
+    expect(home.componentProduction).toBeGreaterThan(0);
+    expect(home.componentStock).toBeGreaterThan(0);
+    expect(home.willReleaseNextTurn).toBe(false);
+  });
+});
+
+describe("summarizeLoam (spec-loam-fe.md: the gauge)", () => {
+  const base: SectorNodeData = {
+    sectorId: "s",
+    label: "S",
+    typeId: "stable",
+    climate: null,
+    phase: "Held",
+    intel: "Watched",
+    dangerBand: 0,
+    ownerFactionId: "dave",
+    ownership: "mine",
+    unknown: false,
+    remembered: false,
+    age: 0,
+    claimable: false,
+    lifelineCost: 0,
+    lifeline: false,
+    slots: [],
+    forces: [],
+    habitable: true,
+    stabilityMilli: 1000,
+    anchorState: "anchored",
+    loamProduction: 0,
+    loamUpkeep: 0,
+    loamNet: 0,
+    componentId: null,
+    componentProduction: 0,
+    componentUpkeep: 0,
+    componentNet: 0,
+    loamStock: 0,
+    componentStock: 0,
+    willReleaseNextTurn: false
+  };
+
+  it("sums one component's totals once, not once per member sector", () => {
+    const nodes = [
+      { ...base, sectorId: "a", componentId: "a", componentProduction: 60, componentUpkeep: 20, componentNet: 40, componentStock: 200 },
+      { ...base, sectorId: "b", componentId: "a", componentProduction: 60, componentUpkeep: 20, componentNet: 40, componentStock: 200 }
+    ];
+
+    const summary = summarizeLoam(nodes);
+    expect(summary.production).toBe(60);
+    expect(summary.upkeep).toBe(20);
+    expect(summary.net).toBe(40);
+    expect(summary.stock).toBe(200);
+    expect(summary.components).toHaveLength(1);
+    expect(summary.components[0].sectorCount).toBe(2);
+  });
+
+  it("keeps a split territory as separate components and totals them for the empire figure", () => {
+    const nodes = [
+      { ...base, sectorId: "a", componentId: "a", componentProduction: 60, componentUpkeep: 20, componentNet: 40, componentStock: 200 },
+      { ...base, sectorId: "b", componentId: "b", componentProduction: 5, componentUpkeep: 30, componentNet: -25, componentStock: 10 }
+    ];
+
+    const summary = summarizeLoam(nodes);
+    expect(summary.components).toHaveLength(2);
+    expect(summary.net).toBe(15); // 40 + (-25)
+
+    const starving = summary.components.find((c) => c.net < 0)!;
+    expect(starving.componentId).toBe("b");
+  });
+
+  it("never counts ground you do not own, or ground with no component at all", () => {
+    const nodes = [
+      { ...base, sectorId: "enemy", ownership: "enemy" as const, componentId: "e", componentProduction: 999 },
+      { ...base, sectorId: "unscouted", componentId: null, componentProduction: 999 }
+    ];
+
+    const summary = summarizeLoam(nodes);
+    expect(summary.components).toHaveLength(0);
+    expect(summary.production).toBe(0);
+  });
+
+  it("names which sector a starving component is about to release", () => {
+    const nodes = [
+      { ...base, sectorId: "weak", componentId: "a", componentNet: -25, willReleaseNextTurn: true },
+      { ...base, sectorId: "strong", componentId: "a", componentNet: -25, willReleaseNextTurn: false }
+    ];
+
+    const summary = summarizeLoam(nodes);
+    expect(summary.components[0].releaseCandidateSectorId).toBe("weak");
+  });
+
+  it("names nothing when no component is about to release anything", () => {
+    const summary = summarizeLoam([{ ...base, componentId: "a" }]);
+    expect(summary.components[0].releaseCandidateSectorId).toBeNull();
   });
 });

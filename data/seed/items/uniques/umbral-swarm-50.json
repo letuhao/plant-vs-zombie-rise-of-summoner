@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/umbral-swarm/50",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "unique.umbral-swarm-50-001",
+      "nameKey": "unique.roiling-chainsaw",
+      "name": "Roiling Chainsaw",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-main-hand-b-005",
+      "rarity": "chimeric",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "dark" } },
+        { "family": "atom.ferocity", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.retribution",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.ferocity, low) against a chimeric rare's three-to-four affixes. The searing-strike rider is an on-hit resource.delta tick, not a stat line, so it never enters the raw-stat sum the ceiling checks."
+      },
+      "tags": ["heavy", "metal", "offensive", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.roiling-chainsaw",
+      "flavor": "It does not swing so much as arrive - tooth after tooth after tooth, the whole snarling crowd condensed into one length of steel.",
+      "notes": "role armament-primary (main-hand), axis offense. baseType item.humanoid-main-hand-b-005 grepped from data/seed/items/base-types/humanoid-armament-primary-b.json (blade class, frame humanoid, band b). Name from themeAdjectivePools['umbral-swarm'] (roiling) + nounPools['armament-primary.humanoid'] (chainsaw)."
+    },
+    {
+      "id": "unique.umbral-swarm-50-002",
+      "nameKey": "unique.smothering-cage",
+      "name": "Smothering Cage",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-torso-b-006",
+      "rarity": "fused",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        { "family": "atom.warded", "powerBand": "medium", "params": { "element": "dark" } },
+        { "family": "atom.mending", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.regeneration",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.mending, low) against a fused rare's two-to-three affixes. The warded rider grants a shield on spawn rather than adding a stat, so it stays outside the raw-stat sum."
+      },
+      "tags": ["medium-heavy", "metal", "sturdy", "defensive", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.smothering-cage",
+      "flavor": "Wear it and the crowd presses close instead of tearing through. Enough bodies leaning the same direction becomes a wall.",
+      "notes": "role core-guard (torso), axis survivability. baseType item.humanoid-torso-b-006 grepped from data/seed/items/base-types/humanoid-core-guard-b.json (scale class, frame humanoid, band b). Name from themeAdjectivePools['umbral-swarm'] (smothering) + nounPools['core-guard.humanoid'] (cage)."
+    },
+    {
+      "id": "unique.umbral-swarm-50-003",
+      "nameKey": "unique.yoke-of-the-multitude",
+      "name": "Yoke of the Multitude",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-shoulders-b-005",
+      "rarity": "chimeric",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        { "family": "atom.entangling", "powerBand": "medium" },
+        { "family": "atom.ward-brace", "powerBand": "low", "params": { "element": "dark" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.sust-callus",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.ward-brace, low) against a chimeric rare's three-to-four affixes. The entangling rider holds a target in place rather than adding damage or defense, so it does not enter the raw-stat sum."
+      },
+      "tags": ["medium-heavy", "metal", "defensive", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.yoke-of-the-multitude",
+      "flavor": "One neck under it moves how the crowd moves. A hundred necks under it move as one thing, and that thing does not scatter.",
+      "notes": "role ward-array (shoulders), axis control. baseType item.humanoid-shoulders-b-005 grepped from data/seed/items/base-types/humanoid-ward-array-b.json (scale class, frame humanoid, band b). Name from nounPools['ward-array.humanoid'] (yoke) + conceptPools['umbral-swarm'] (multitude), of-construct pattern."
+    },
+    {
+      "id": "unique.umbral-swarm-50-004",
+      "nameKey": "unique.radio-of-the-hive",
+      "name": "Radio of the Hive",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-off-hand-a-007",
+      "rarity": "fused",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        { "family": "atom.cleansing", "powerBand": "medium" },
+        { "family": "atom.fortitude", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.hit-mend",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a fused rare's two-to-three affixes. The cleansing rider strips a harmful status rather than adding a stat, so it sits outside the raw-stat sum."
+      },
+      "tags": ["light", "metal", "utility", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.radio-of-the-hive",
+      "flavor": "It never sends. It only listens, tuned to a frequency with no station behind it - just the low, patient hum of everyone else moving at once.",
+      "notes": "role armament-secondary (off-hand), axis utility. baseType item.humanoid-off-hand-a-007 grepped from data/seed/items/base-types/humanoid-armament-secondary-a.json (focus class, frame humanoid, band a). Name from nounPools['armament-secondary.humanoid'] (radio) + conceptPools['umbral-swarm'] (hive), of-construct pattern."
+    },
+    {
+      "id": "unique.umbral-swarm-50-005",
+      "nameKey": "unique.collar-of-the-hunger",
+      "name": "Collar of the Hunger",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-neck-b-004",
+      "rarity": "chimeric",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.midas", "powerBand": "medium" },
+        { "family": "atom.fortitude", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.econ-graze",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a chimeric rare's three-to-four affixes. The midas rider banks currency on a kill rather than adding a combat stat, so it does not count toward the raw-stat total."
+      },
+      "tags": ["medium", "metal", "utility", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.collar-of-the-hunger",
+      "flavor": "Every throat it has ever closed left something behind. The collar stopped counting; it only knows the tally is never zero.",
+      "notes": "role jewel-major (neck), axis economy. baseType item.humanoid-neck-b-004 grepped from data/seed/items/base-types/humanoid-jewel-major-b.json (torc class, frame humanoid, band b). Name from nounPools['jewel-major.humanoid'] (collar) + conceptPools['umbral-swarm'] (hunger), of-construct pattern."
+    },
+    {
+      "id": "unique.umbral-swarm-50-006",
+      "nameKey": "unique.engulfing-fist",
+      "name": "Engulfing Fist",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-hands-b-008",
+      "rarity": "fused",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        { "family": "atom.lifesteal", "powerBand": "medium" },
+        { "family": "atom.prec-fixation", "powerBand": "low", "params": { "element": "dark" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.hit-followthrough",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.prec-fixation, low) against a fused rare's two-to-three affixes. The lifesteal rider heals off damage already dealt rather than adding a second independent stat, so it stays outside the raw-stat sum."
+      },
+      "tags": ["heavy", "metal", "offensive", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.engulfing-fist",
+      "flavor": "One hand closes. A thousand hands remember closing. The grip that lands is never just the one you can see.",
+      "notes": "role manipulator (hands), axis offense. baseType item.humanoid-hands-b-008 grepped from data/seed/items/base-types/humanoid-manipulator-b.json (plate class, frame humanoid, band b). Name from themeAdjectivePools['umbral-swarm'] (engulfing) + nounPools['manipulator.humanoid'] (fist)."
+    },
+    {
+      "id": "unique.umbral-swarm-50-007",
+      "nameKey": "unique.cylinder-of-the-undertow",
+      "name": "Cylinder of the Undertow",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-back-b-009",
+      "rarity": "chimeric",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        { "family": "atom.sust-callus", "powerBand": "medium" },
+        { "family": "atom.fortitude", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.cleansing",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a chimeric rare's three-to-four affixes. The sust-callus rider grants a shield only in response to being struck rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["heavy", "metal", "sturdy", "defensive", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.cylinder-of-the-undertow",
+      "flavor": "Strapped to a back that keeps walking after the tide should have taken it. Whatever pulled it under let go before it was finished.",
+      "notes": "role mantle (back), axis survivability. baseType item.humanoid-back-b-009 grepped from data/seed/items/base-types/humanoid-back-b.json (plate class, frame humanoid, band b, role mantle). Name from nounPools['mantle.humanoid'] (cylinder) + conceptPools['umbral-swarm'] (undertow), of-construct pattern."
+    },
+    {
+      "id": "unique.umbral-swarm-50-008",
+      "nameKey": "unique.pylon-of-the-penumbra",
+      "name": "Pylon of the Penumbra",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-head-b-007",
+      "rarity": "fused",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        { "family": "atom.withering", "powerBand": "medium" },
+        { "family": "atom.prec-verdict", "powerBand": "low", "params": { "element": "dark" } }
+      ],
+      "varianceSlot": {
+        "family": "atom.sust-freshgraft",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.prec-verdict, low) against a fused rare's two-to-three affixes. The withering rider applies a status on hit rather than adding a stat, so it does not count toward the raw-stat total."
+      },
+      "tags": ["medium-heavy", "necrotic", "utility", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.pylon-of-the-penumbra",
+      "flavor": "Not day, not night - the sliver between, where the shapes stop having edges. It sees best from exactly there.",
+      "notes": "role head-guard (head), axis control. baseType item.humanoid-head-b-007 grepped from data/seed/items/base-types/humanoid-head-guard-b.json (scale class, frame humanoid, band b). Name from nounPools['head-guard.humanoid'] (pylon) + conceptPools['umbral-swarm'] (penumbra), of-construct pattern."
+    }
+  ]
+}

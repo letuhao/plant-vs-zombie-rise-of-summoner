@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/thorned-chassis/30",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7"
+  },
+  "entries": [
+    {
+      "id": "unique.thorned-chassis-30-001",
+      "nameKey": "unique.wired-cane",
+      "name": "Wired Cane",
+      "frame": "plant",
+      "baseType": "item.plant-muzzle-a-011",
+      "rarity": "grafted",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.hit-mend",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.flourishing",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.hit-followthrough",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A grafted muzzle draws one or two affixes at this rung. This one carries exactly one raw-stat line (flourishing, low) — the other two atoms are resource.delta riders (hit-mend, hit-followthrough), which price separately and do not sum into the stat sheet. It loses the attack-stat race to an ordinary grafted rare and wins on never running dry between shots."
+      },
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted",
+        "utility"
+      ],
+      "notes": "REFERENCES RESOLVE: baseType item.plant-muzzle-a-011 (plant-armament-primary-a, class nozzle, band a) is frozen wave-1a content. rarity 'grafted' is ordinal 30, this partition's floor rung. All three atoms are role-legal for armament-primary as authored in their own family files (g.on-hit for hit-mend/hit-followthrough, g.tempo for flourishing) — no generator rule broken. flourishing (produceInterval Flat) is the utility identity here, not an attack stat: a valve wired to breathe in time with the plant's own growth clock rather than its firing rate. Name is compound: adjective 'wired' from themeAdjectivePools['thorned-chassis'], base noun 'cane' from nounPools['armament-primary.plant'] — matching the base type's own head noun."
+    },
+    {
+      "id": "unique.thorned-chassis-30-002",
+      "nameKey": "unique.gridiron-of-salvage",
+      "name": "Gridiron of Salvage",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-torso-b-004",
+      "rarity": "cultivated",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.midas",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.cleansing",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A cultivated torso guard draws two to three affixes. This one has exactly one raw-stat line (fortitude, low) plus a resource.economy rider (midas) and a status.clear roll (cleansing), neither of which counts toward the raw-stat sum. It loses the hp race to an ordinary cultivated rare and wins on what it pays out per kill."
+      },
+      "tags": [
+        "medium-heavy",
+        "mechanical",
+        "defensive"
+      ],
+      "notes": "REFERENCES RESOLVE: baseType item.humanoid-torso-b-004 (humanoid-core-guard-b, class scale, band b) is frozen wave-1a content. rarity 'cultivated' is ordinal 40, this partition's upper rung. THIS ENTRY BREAKS A GENERATOR RULE ON PURPOSE: atom.midas belongs to g.economy, whose role list is girdle/jewel-major/jewel-minor only — core-guard is not on it, so no rolled affix pool will ever hand a torso a scrap-bounty windfall. A unique's fixed atoms are not drawn from the pool, so the break costs the architecture nothing (the same mechanism the exemplar's crown/searing-strike entry documents). fortitude and cleansing are both role-legal for core-guard (g.life, g.sustain), so only the identity atom is a deliberate break. Name is of-construct: base noun 'gridiron' from nounPools['core-guard.humanoid'] (also the base type's own head noun) plus concept 'salvage' from conceptPools['thorned-chassis']."
+    },
+    {
+      "id": "unique.thorned-chassis-30-003",
+      "nameKey": "unique.scrapthorn",
+      "name": "Scrapthorn",
+      "frame": "plant",
+      "baseType": "item.plant-sheath-b-003",
+      "rarity": "grafted",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.retribution",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.cleansing",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A grafted sheath draws one or two affixes. This one has exactly one raw-stat line (vitality, low); retribution (resource.delta) and cleansing (status.clear) both price outside the stat sheet. It loses the toughness race to an ordinary grafted rare and wins by making the hit that lands on it a mistake."
+      },
+      "tags": [
+        "heavy",
+        "organic",
+        "rooted",
+        "offensive"
+      ],
+      "notes": "REFERENCES RESOLVE: baseType item.plant-sheath-b-003 (plant-ward-array-b, class husk, band b) is frozen wave-1a content. rarity 'grafted' is ordinal 30, this partition's floor rung. THIS ENTRY BREAKS A GENERATOR RULE ON PURPOSE, on all three atoms: ward-array has no legal capability family anywhere in the role x family matrix (g.on-hit, g.on-death, g.sustain, g.economy, g.tempo, g.affliction and g.board all omit it), and its only legal raw-stat family is g.armour's plating/carapace pair, which writes the arm1/arm2 Unity fields that exist only on zombies — dead weight on a plant frame, not a daring choice. So this unique deliberately uses vitality (maxHp Flat, universal and safe on any frame) instead, and both capability atoms (retribution, cleansing) the same way: fixed atoms are not drawn from a pool, so a role with no legal pool entry at all costs the architecture nothing when its unique ignores that matrix entirely. Name is a whole-token fusion, 'scrapthorn' from uniqueSetSeedPools['thorned-chassis'], used atomically per naming.v1.json's resolution rule."
+    },
+    {
+      "id": "unique.thorned-chassis-30-004",
+      "nameKey": "unique.girded-umbrella",
+      "name": "Girded Umbrella",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-off-hand-a-008",
+      "rarity": "cultivated",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        {
+          "family": "atom.sust-husk",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.hit-mend",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A cultivated off-hand draws two to three affixes. This one has exactly one raw-stat line (fortitude, low); sust-husk (shield.grant) and hit-mend (resource.delta) both price outside the stat sheet. It loses the hp race to an ordinary cultivated rare and wins by refusing to break in the first place."
+      },
+      "tags": [
+        "medium-light",
+        "organic",
+        "defensive"
+      ],
+      "notes": "REFERENCES RESOLVE: baseType item.humanoid-off-hand-a-008 (humanoid-armament-secondary-a, class panel, band a) is frozen wave-1a content. rarity 'cultivated' is ordinal 40, this partition's upper rung. All three atoms are role-legal for armament-secondary as authored in their own family files (g.sustain for sust-husk, g.life for fortitude, g.on-hit for hit-mend) — no generator rule broken. Name is compound: adjective 'girded' from themeAdjectivePools['thorned-chassis'], base noun 'umbrella' from the base type's own head noun (an ordinary noun, not a theme-pool word, since a base head-noun is always available to a unique occupying that role)."
+    },
+    {
+      "id": "unique.thorned-chassis-30-005",
+      "nameKey": "unique.corymb-of-the-scaffold",
+      "name": "Corymb of the Scaffold",
+      "frame": "plant",
+      "baseType": "item.plant-pollen-a-008",
+      "rarity": "grafted",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        {
+          "family": "atom.entangling",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.flash-freeze",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A grafted pollen head draws one or two affixes. This one has exactly one raw-stat line (vitality, low); entangling (status.apply) and flash-freeze (board.action) both price outside the stat sheet. It loses the hp race to an ordinary grafted rare and wins by deciding what the enemy lane is allowed to do."
+      },
+      "tags": [
+        "medium",
+        "organic",
+        "rooted"
+      ],
+      "notes": "REFERENCES RESOLVE: baseType item.plant-pollen-a-008 (plant-pollen-a, class stamen, band a) is frozen wave-1a content. rarity 'grafted' is ordinal 30, this partition's floor rung. All three atoms are role-legal for jewel-major as authored in their own family files (g.affliction for entangling, g.life for vitality, g.board for flash-freeze) — no generator rule broken. Name is of-construct: base noun 'corymb' from nounPools['jewel-major.plant'] (also the base type's own head noun) plus concept 'scaffold' from conceptPools['thorned-chassis'], read as a grafted flowerhead bolted to a scrap gantry that locks a lane down when it releases."
+    },
+    {
+      "id": "unique.thorned-chassis-30-006",
+      "nameKey": "unique.cobbled-palm",
+      "name": "Cobbled Palm",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-hands-a-009",
+      "rarity": "cultivated",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        {
+          "family": "atom.hit-mend",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.tempo-yield",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.hit-followthrough",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A cultivated glove draws two to three affixes. This one has exactly one raw-stat line (tempo-yield, low); hit-mend and hit-followthrough are both resource.delta riders that price outside the stat sheet. It loses the stat race to an ordinary cultivated rare and wins on the plants behind it producing faster than they should."
+      },
+      "tags": [
+        "medium-light",
+        "organic",
+        "utility"
+      ],
+      "notes": "REFERENCES RESOLVE: baseType item.humanoid-hands-a-009 (humanoid-manipulator-a, class wrap, band a) is frozen wave-1a content. rarity 'cultivated' is ordinal 40, this partition's upper rung. All three atoms are role-legal for manipulator as authored in their own family files (g.on-hit for hit-mend/hit-followthrough, g.tempo for tempo-yield) — no generator rule broken. tempo-yield (produceInterval Increased) is the utility identity: a bolted-together glove that keeps the lawn's own production line running rather than adding raw damage. Name is compound: adjective 'cobbled' from themeAdjectivePools['thorned-chassis'], base noun 'palm' from nounPools['manipulator.humanoid']."
+    },
+    {
+      "id": "unique.thorned-chassis-30-007",
+      "nameKey": "unique.canopy-of-the-scrapyard",
+      "name": "Canopy of the Scrapyard",
+      "frame": "plant",
+      "baseType": "item.plant-canopy-a-009",
+      "rarity": "grafted",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        {
+          "family": "atom.sunbloom",
+          "powerBand": "medium"
+        },
+        {
+          "family": "atom.fortitude",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.sust-freshgraft",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A grafted canopy draws one or two affixes. This one has exactly one raw-stat line (fortitude, low); sunbloom (resource.economy) and sust-freshgraft (status.clear) both price outside the stat sheet. It loses the hp race to an ordinary grafted rare and wins on what it earns just standing there."
+      },
+      "tags": [
+        "medium-light",
+        "organic",
+        "rooted"
+      ],
+      "notes": "REFERENCES RESOLVE: baseType item.plant-canopy-a-009 (plant-mantle-a, class frond, band a) is frozen wave-1a content. rarity 'grafted' is ordinal 30, this partition's floor rung. THIS ENTRY BREAKS A GENERATOR RULE ON PURPOSE: atom.sunbloom belongs to g.economy, whose role list is girdle/jewel-major/jewel-minor only — mantle is not on it, so no rolled affix pool will ever hand a canopy a sun-income grant. A unique's fixed atoms are not drawn from the pool, so the break costs nothing (the same device row -002 and the exemplar's own crown entry use). fortitude and sust-freshgraft are both role-legal for mantle (g.life, g.sustain), so only the identity atom is a deliberate break. Name is of-construct: base noun 'canopy' from nounPools['mantle.plant'] (also the base type's own head noun) plus concept 'scrapyard' from conceptPools['thorned-chassis']."
+    },
+    {
+      "id": "unique.thorned-chassis-30-008",
+      "nameKey": "unique.spiked-hardhat",
+      "name": "Spiked Hardhat",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-head-b-002",
+      "rarity": "cultivated",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        {
+          "family": "atom.deathblast",
+          "powerBand": "medium",
+          "params": {
+            "element": "omni"
+          }
+        },
+        {
+          "family": "atom.vitality",
+          "powerBand": "low"
+        }
+      ],
+      "varianceSlot": {
+        "family": "atom.gardener",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "A cultivated helmet draws two to three affixes. This one has exactly one raw-stat line (vitality, low); deathblast (resource.delta) and gardener (spawn.entity) both price outside the stat sheet. It loses the hp race to an ordinary cultivated rare and wins on what happens the moment it fails."
+      },
+      "tags": [
+        "medium",
+        "metal",
+        "offensive"
+      ],
+      "notes": "REFERENCES RESOLVE: baseType item.humanoid-head-b-002 (humanoid-head-guard-b, class shell, band b) is frozen wave-1a content. rarity 'cultivated' is ordinal 40, this partition's upper rung. All three atoms are role-legal for head-guard as authored in their own family files (g.on-death for deathblast and gardener, g.life for vitality) — no generator rule broken. deathblast's element is set to 'omni' rather than any single element, matching themes.v1.json's explicit avoid-list entry for thorned-chassis ('any single dominant element') and its own empty elementAffinity. Name is compound: adjective 'spiked' from themeAdjectivePools['thorned-chassis'], base noun 'hardhat' from nounPools['head-guard.humanoid']."
+    }
+  ]
+}

@@ -137,13 +137,18 @@ public class BindGateTests
     }
 
     [Fact]
-    public void A_quarantined_kind_binds_nowhere()
+    public void A_kind_binds_only_where_a_consumer_exists()
     {
-        // stat.derived is None/None/None until its first consumer ships (D6).
-        foreach (var runtime in new[] { RuntimeId.Lawn, RuntimeId.Battle, RuntimeId.Sim })
+        // stat.derived was None/None/None under D6's quarantine. E12 shipped the battle consumer
+        // (`BattleStatComposer` reading bound atoms at squad build), so battle now accepts it —
+        // and lawn and sim still do not, because nothing there reads it.
+        var atom = Atom("stat.derived", "{\"channel\":\"combat.power.fire\",\"op\":\"flat\",\"amount\":5}");
+
+        Assert.True(Bind(atom, OwnerScope.Match, new BindContext(RuntimeId.Battle, IsPlanner: true)).IsOk);
+
+        foreach (var runtime in new[] { RuntimeId.Lawn, RuntimeId.Sim })
             Assert.Equal(AtomRejectionReason.RuntimeUnsupported,
-                Bind(Atom("stat.derived", "{\"channel\":\"combat.power.fire\",\"op\":\"flat\",\"amount\":5}"),
-                    OwnerScope.Match, new BindContext(runtime, IsPlanner: true)).Reason);
+                Bind(atom, OwnerScope.Match, new BindContext(runtime, IsPlanner: true)).Reason);
     }
 
     // ---- world scopes, level, staleness ---------------------------------------------------------------

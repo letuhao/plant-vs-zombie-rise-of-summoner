@@ -14,6 +14,7 @@ public sealed class StatContextFactory
         StatsConfig? cheatScale = null,
         IReadOnlyDictionary<string, int>? cheatAbsolute = null,
         bool applyStats = true,
+        IReadOnlyDictionary<string, double>? cheatAbsoluteReal = null,
         IReadOnlyList<StatModifier>? pvzStatsMods = null,
         ActorElementTypes? elementTypes = null) =>
         new()
@@ -26,6 +27,7 @@ public sealed class StatContextFactory
             PlayerId = playerId,
             CheatScale = cheatScale,
             CheatAbsolute = cheatAbsolute,
+            CheatAbsoluteReal = cheatAbsoluteReal,
             ApplyStats = applyStats,
             PvzStatsMods = pvzStatsMods,
             ElementTypes = elementTypes ?? ActorElementTypes.Neutral
@@ -40,6 +42,7 @@ public sealed class StatContextFactory
         StatsConfig? cheatScale = null,
         IReadOnlyDictionary<string, int>? cheatAbsolute = null,
         bool applyStats = true,
+        IReadOnlyDictionary<string, double>? cheatAbsoluteReal = null,
         IReadOnlyList<StatModifier>? pvzStatsMods = null,
         ActorElementTypes? elementTypes = null) =>
         new()
@@ -52,6 +55,7 @@ public sealed class StatContextFactory
             PlayerId = playerId,
             CheatScale = cheatScale,
             CheatAbsolute = cheatAbsolute,
+            CheatAbsoluteReal = cheatAbsoluteReal,
             ApplyStats = applyStats,
             PvzStatsMods = pvzStatsMods,
             ElementTypes = elementTypes ?? ActorElementTypes.Neutral

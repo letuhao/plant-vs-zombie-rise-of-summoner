@@ -882,6 +882,34 @@ public static class DebugActions
             case "hypno":
                 z.SetMindControl(1);
                 break;
+
+            // E17: ember / jala / kelp declared UnityCc and had NO branch here. The methods were in
+            // the game the whole time — status-ssot.md was right and our code never caught up — so
+            // three of the eight "declared and does nothing" statuses were three cases away from
+            // working. Verified against Assembly-CSharp metadata before writing: the signatures are
+            // NOT uniform (SetJalaed takes nothing, SetKelped takes two), so the obvious
+            // copy-paste of SetFreeze's shape would not have compiled.
+            //
+            // ⚠️ These three are FLAGS, not timed CC, and the compiler is what said so: SetEmbered
+            // takes a bool, SetJalaed takes nothing, and only SetKelped carries a duration at all.
+            // Copying SetFreeze(duration, level) — the obvious shape — does not compile.
+            //
+            // The consequence is real and is NOT papered over: for ember and jala the Unity side has
+            // no notion of expiry, so the status instance expiring on our clock does not clear the
+            // game flag. Clearing them needs a Withdraw path that FA3 does not have for these ids,
+            // and inventing one here would be the applier layer wearing a debug action's clothes.
+            case "ember":
+                try { z.SetEmbered(true); }
+                catch { CheatState.Error("SetEmbered unavailable"); }
+                break;
+            case "jala":
+                try { z.SetJalaed(); }
+                catch { CheatState.Error("SetJalaed unavailable"); }
+                break;
+            case "kelp":
+                try { z.SetKelped(duration, true); }
+                catch { CheatState.Error("SetKelped unavailable"); }
+                break;
         }
     }
 

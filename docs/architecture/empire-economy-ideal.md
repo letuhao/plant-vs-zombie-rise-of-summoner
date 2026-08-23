@@ -5,6 +5,12 @@ order, no acceptance criteria, nothing committed. Written *before* buildings and
 purpose (owner): a building is a thing that makes a resource, so the resource has to mean something
 first, or every building is a guess.
 
+> ⛔ **SUPERSEDED 2026-08-23 by [empire-economy-ssot.md](empire-economy-ssot.md).** This file is kept
+> as the **reasoning trail only** — it accumulated four layers of retraction across a day of design
+> (§4 by §7.9 · §7.3 by §8.1 then §12.7 · §8.7 by §12.3 · G6 by §12.5), so a reader starting at §1
+> absorbs superseded claims before reaching the corrections. **Read the SSOT for what holds.** Consult
+> this one only when you want to know *why* something was decided, or what was tried and dropped.
+
 > ⚠️ **Read [economy-principles.md](economy-principles.md) first.** It was written after this
 > document, at the owner's direction, and it is the layer underneath: the tests a currency must pass
 > before it may exist. Where this file *picks* (§4's four-stock set, §6's option menus), the
@@ -467,7 +473,12 @@ carries loam out. One mechanism, two directions, and a supply line that is genui
   kind of elemental affinity discount.
 - **Depletion applies to wells** (P9) — `DepletionMilli` exists, hashed, unread.
 
-### 8.7 Zomboss does not need loam — and that is the best version
+### 8.7 ~~Zomboss does not need loam~~ — **RETRACTED, see §12.3**
+
+> ⛔ **Owner, 2026-08-22: "Zomboss and the player have the same mechanism. His base/capital is like
+> ours, nothing different — we don't need a double mechanism."** The asymmetry below is withdrawn.
+> What survives it is the `Sever` rule and the `ReconnectionCost` reuse, which are now available to
+> **both** sides. Kept as the reasoning trail; §12.3 is what holds.
 
 He is *of* the fracture. He is already real there. **You** are the invader carrying your world out in
 sacks; he is home.
@@ -929,9 +940,15 @@ chain barren sectors outward indefinitely, and the settlement rule would have no
 
 #### G6 · Can a sector hold several rootworks?
 
-**One per sector.** They are the anchor, not a stackable industry. Allowing several turns one
+> ⛔ **RETRACTED by the owner, 2026-08-22 — see §12.5.** *"Some sectors have redundant loam
+> generators, and they become hot sectors that conflict frequently."* Several per sector is wanted,
+> and it is what gives the map its conflict zones. My turtling worry had the answer backwards: a
+> super-sector is not an unassailable engine, it is a **magnet**. The counter to turtling is the
+> enemy, not a rule.
+
+~~**One per sector.** They are the anchor, not a stackable industry. Allowing several turns one
 super-sector into an unassailable engine and rewards turtling, which is the opposite of what the
-mechanic is for.
+mechanic is for.~~
 
 #### G7 · Is fade graded, or does everything happen at zero?
 
@@ -994,6 +1011,11 @@ gone). Those look similar and only one of them is rational.
 
 | # | Gap | Why I cannot settle it |
 |---|---|---|
+> ✅ **All four answered by the owner, 2026-08-22 — see §12.** O1 dissolved (there is no campaign
+> length; this is an endless RPG and the bound is *map size*). O2 answered: symmetric. O3 dissolved
+> with the symmetric homeworld. O4 answered by the **chaos gradient** rather than by superlinear
+> upkeep.
+
 | **O1** | **Campaign length in turns** | Pure taste, and it is the denominator of every payback period (**P8**). Blocking Hearth rate, sector upkeep, distance multiplier, heartland radius, legion leash and well yield — six numbers, all downstream of one |
 | **O2** | **Conquered enemy ground: inherit or re-anchor?** | Zomboss does not need loam (§8.7), so his sectors have no rootworks to capture. Taking his ground may therefore give you nothing you can *keep*. That is either the best difficulty curve in the design or a wall at the endgame, and it is a pacing judgement, not a derivation |
 | **O3** | **Do wells survive the homeworld falling?** | §8.10's sub-decision, still unanswered. Strict = total collapse, cleanest rule. Lenient = a rump survives on natural wells and retaking home becomes the objective |
@@ -1001,7 +1023,160 @@ gone). Those look similar and only one of them is rational.
 
 ---
 
-## 12. What this is not
+## 12. Owner review — four corrections that change the frame
+
+All four §11.2 gaps answered 2026-08-22. Two of them overturn things written above rather than
+filling holes, so they are recorded as corrections, not as answers.
+
+### 12.1 There is no campaign length — this is an endless RPG
+
+> **Owner:** *"There is no limit. This is not a strategy game, this is an RPG game with endless
+> grind. The one thing we need to limit is the number of nodes in the map — so after you complete a
+> map, you advance to a new map."*
+
+This retires O1 and **changes what principle P8 is measured against.** I had campaign length as the
+denominator of every payback period; there is no campaign. The denominator is **map lifetime** —
+how long you will hold a given map before moving on.
+
+> **The tuning rule this creates, and it is sharper than the old one:** *maps are disposable, so a
+> long-payback building is a trap.* Every investment must repay inside the time you will spend on
+> **this** map, not inside some campaign that never ends. That makes map size the number everything
+> else is derived from, which is a far better anchor than a taste call about campaign length —
+> because map size is also a *content* knob we control directly.
+
+Map completion → next map is **a separate mechanism** (progression / meta-loop) and is not designed
+here. It does need designing: what carries over, what is lost, and what makes a map "complete".
+
+### 12.2 Map sizes
+
+`ReconnectionCost` is `O(V⁴)` and `spec-world-topology.md:52` is explicit about the cliff —
+*"fine at six sectors and fine at sixty, not fine at six hundred"* — with two escape hatches written
+down and unbuilt (Tarjan-first filtering, or a frontier-capped sweep). All-pairs cost is Floyd–Warshall
+`O(V³)`, *"fine to a few hundred"*. That bounds the ladder honestly rather than by taste.
+
+**Ids are plain; display names are content.** Same discipline as `resource-hub-ssot.md` §3 — a label
+is never a key. This also dodges a real collision: `reach` appears in 31 source files
+(`ReachMap`, `SupplyReach`) and `hollow` is already a sector id in `first-light`.
+
+| Id | Display | Nodes | Notes |
+|---|---|---|---|
+| `small` | **Pocket** | ~8 | A first map, or a sitting. Everything is within a few hops; loam pressure is gentle |
+| `medium` | **Fragment** | ~16 | A short map. Two or three clusters, one real chokepoint |
+| `large` | **Expanse** | ~32 | The standard. Enough room for the chaos gradient (§12.6) to have a shallow and a deep end |
+| `huge` | **Abyss** | ~64 | The ceiling of what is *built* — at the documented edge of the `O(V⁴)` sweep |
+| `giant` | **Maelstrom** | ~128 | **Needs the Tarjan-first optimisation first.** Do not ship this size before that lands |
+
+Doubling per tier keeps the progression legible and makes each step feel like a different game rather
+than the same game with more tiles. `world-graph-ideal.md` §14 thread 6 guessed *"three clusters,
+~20 sectors"* — that sits between Fragment and Expanse, which is a decent sanity check on the ladder.
+
+### 12.3 Zomboss is symmetric — §8.7 retracted
+
+> **Owner:** *"Zomboss and the player have the same mechanism. His base/capital is like ours, nothing
+> different. We don't need a double mechanism."*
+
+Correct, and the cost I was quoting for asymmetry — two economies to balance — was the honest reason
+not to do it. **What we gain is more than the flavour we lose:**
+
+- **You can starve him.** His chain, his rootworks and his capital are all attackable exactly the way
+  yours are. Supply war becomes two-sided instead of one-sided denial.
+- **Taking his capital collapses his economy** rather than merely killing a boss. That is a second
+  win route with a completely different shape, and it comes free.
+- One `ValueMap`, one weight set, one `INeedVector`. Every AI number tuned once.
+- **`Sever` and the `ReconnectionCost` reuse survive intact** — they are simply available to both
+  sides now, which is what makes them interesting.
+
+Reavers (§9.2) still make sense; they are just a role either side can field.
+
+### 12.4 Most sectors lose money — and that is the whole economy
+
+> **Owner:** *"Not all sectors can generate loam faster than they consume, so upkeep is an unavoidable
+> tax that every empire must pay. The homeworld makes the tax very cheap; losing it means the empire
+> must pay much."*
+
+This is the single most important economic statement in the design, and it inverts the usual 4X
+assumption that a province pays for itself.
+
+> **Baseline is a deficit. Profit comes from concentration, not from breadth.**
+
+Consequences, all good:
+
+- **Expansion is a loss-making act**, justified by what it *reaches* — a rootbed, a chokepoint, a
+  route — never by what it *holds*. That is a far more interesting reason to take ground than "it
+  pays for itself".
+- **Principle P3 is satisfied permanently.** Loam binds at every empire size, because the baseline is
+  negative. There is no size at which you are comfortable.
+- **O4 dissolves.** There is no late-game surplus to engineer against if the floor is a deficit, so
+  superlinear upkeep is not needed — see §12.6 for what does the work instead.
+- **Every held sector is a standing argument.** "Why do we still hold this?" becomes a real question
+  with a real answer, every turn, for every sector.
+
+### 12.5 Hot sectors — G6 retracted
+
+> **Owner:** *"Some sectors have redundant loam generators, and they become hot sectors that conflict
+> frequently."*
+
+G6 said one rootworks per sector, to stop a super-sector becoming an unassailable engine. That had
+the answer backwards: **a super-sector is not an engine, it is a magnet.** The counter to turtling is
+the enemy, not a rule — and with §12.3's symmetry, both sides want the same handful of dense sectors,
+which is precisely how a map grows a front line without anyone authoring one.
+
+So: **several rootworks per sector, and the dense ones are the map's conflict zones.** The homeworld
+is simply the extreme of this — the densest cluster of generators plus natural storage — rather than
+a magic exception.
+
+### 12.6 The chaos gradient — upkeep is local, and that is the real answer to O4
+
+> **Owner:** *"Doesn't upkeep depend on building, unit, sector stats and chaos source? Chaos decay is
+> high or low depending on the place on the map, not equal everywhere."*
+
+Yes, and this is better than the flat distance-scaling in §8.3. Upkeep composes:
+
+```
+upkeep(sector) = ( base
+                 + Σ upkeep of its structures
+                 + Σ upkeep of its garrison
+                 + f(sector stats: development, danger band) )
+                 × fractureIntensity(sector)
+```
+
+**`fractureIntensity` is a per-sector field, authored or generated — the map is not uniformly
+dangerous.** This does a remarkable amount of work at once:
+
+- **The map gains a direction.** There is a shallow end and a deep end, so "further out" is a
+  *quality* of ground rather than only a distance.
+- **It replaces superlinear upkeep as the answer to O4.** Expansion gets harder because you are
+  expanding into worse ground — diegetic, visible on the map, and explicable — rather than because a
+  formula quietly punished your tenth sector.
+- **`DangerBand` already exists** on `WorldSector` and already correlates danger with reward. Chaos
+  intensity is the economic half of the same idea, and the two should be authored together.
+- **A rich sector deep in the chaos may cost more than it yields.** That is a genuine judgement call
+  rather than an arithmetic one, and it means the best-looking ground on the map is not automatically
+  worth taking.
+- It composes with §9.1's fade contagion: high-intensity regions fade faster *and* cost more, so the
+  deep map is hostile in two reinforcing ways.
+
+### 12.7 The homeworld, restated
+
+Not "the one place the Fracture never touched" as a mechanical exception — that comment in
+`SectorTypeCatalog.cs:8` is fiction the mechanics no longer need. It is **the densest concentration of
+loam generators plus natural storage**, and its loss is economic rather than instant:
+
+1. The cheap-tax regime ends. Upkeep that was comfortable becomes crushing.
+2. The empire cannot pay everywhere, so the frontier starts fading (§7.7's abandonment decision, now
+   forced rather than chosen).
+3. Fading ground raises intensity for its neighbours (§9.1 contagion) — **the snowball**.
+4. Both sides therefore race to hold or retake it, because it is the cheapest ground either of them
+   will ever own.
+
+This replaces §7.3's instant countdown with a **recoverable catastrophe that has a race in it**, which
+is better: a loss you can fight your way out of, and a clock that tells you how long you have. It also
+dissolves O3 — with a symmetric homeworld and a deficit baseline, an isolated colony is not a special
+case, it is just an expensive one.
+
+---
+
+## 13. What this is not
 
 - Not a change to [resource-hub-ssot.md](resource-hub-ssot.md). The five actor pools are untouched;
   this document never uses the word for them.

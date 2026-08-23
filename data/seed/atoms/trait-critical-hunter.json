@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.critical-hunter",
+      "tier": 1,
+      "kind": "stat.derived",
+      "name": "Critical Hunter",
+      "icdKey": "trait.critical-hunter.crit",
+      "params": {
+        "channel": "combat.crit.rate.omni",
+        "op": "flat",
+        "amount": 150
+      },
+      "tags": {
+        "category": "offense",
+        "source": "trait"
+      }
+    }
+  ]
+}

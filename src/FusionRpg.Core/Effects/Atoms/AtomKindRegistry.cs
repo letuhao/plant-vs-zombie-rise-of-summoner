@@ -20,11 +20,16 @@ public static class AtomKindRegistry
         { AtomTriggers.OnSpawn, AtomTriggers.OnDamageDealt, AtomTriggers.OnDamageTaken,
           AtomTriggers.OnDeath, AtomTriggers.OnTimer };
 
-    /// <summary>Primary stat channels — the real eight. The documented nine were partly fiction:
-    /// attackInterval/produceInterval/zombieSpeed are cheat-document keys that bypass the modifier
-    /// bag entirely and cannot be reached by an effect until E16 promotes them.</summary>
-    public static readonly string[] PrimaryChannels =
-        { "hp", "maxHp", "atk", "defense", "arm1", "arm1Max", "arm2", "arm2Max" };
+    /// <summary>
+    /// The primary stat channels — <b>eleven</b> since E16.
+    ///
+    /// <para>It was eight, and the documented nine were partly fiction: attackInterval,
+    /// produceInterval and zombieSpeed were cheat-document keys written straight to the Unity field,
+    /// bypassing the modifier bag, so no effect could reach them. E16 promoted all three, which is
+    /// what makes "shoots faster" authorable at all. Read from <see cref="StatChannels.All"/> rather
+    /// than copied, so the two lists cannot drift.</para>
+    /// </summary>
+    public static readonly string[] PrimaryChannels = Stats.StatChannels.All;
 
     static readonly Dictionary<string, AtomKind> Kinds = Build();
 
@@ -96,14 +101,16 @@ public static class AtomKindRegistry
                     new ParamDef("channel", ParamKind.String, Required: true),
                     new ParamDef("op", ParamKind.String, Required: true),
                     new ParamDef("amount", ParamKind.Value, Required: true)),
-                // D6, 2026-08-22 re-verification: this shipped as Full/Full/Full and has NO executor
-                // in any runtime. No opcode, no EffectBag branch, no sink arm (the injector sink
-                // dispatches ten actions and throws on unknown), and battle reads derived mods only
-                // from TraitBattleCatalog — never from a grant. A bind would be accepted and then do
-                // nothing, forever, which is status.expose.* again: the exact failure this module
-                // exists to prevent, and a violation of its own "never add a kind without an executor".
-                // Goes back to Full per runtime as each consumer ships (E12's BattleStatComposer seam first).
-                new RuntimeSupportMatrix(RuntimeState.None, RuntimeState.None, RuntimeState.None),
+                // D6, 2026-08-22: quarantined to None/None/None because the kind had NO executor in
+                // any runtime — no opcode, no EffectBag branch, no sink arm, and battle read derived
+                // mods only from TraitBattleCatalog. A bind would have been accepted and then done
+                // nothing forever, which is the exact failure this module exists to prevent.
+                //
+                // BATTLE re-opened 2026-08-23 by E12, which ships the first consumer:
+                // `BattleStatComposer` reads bound stat.derived atoms at squad build, through
+                // `TraitAtomSource`. Lawn and sim stay None — they still have no consumer, and
+                // flipping them on the strength of battle's would re-create the quarantine's cause.
+                new RuntimeSupportMatrix(RuntimeState.None, RuntimeState.Full, RuntimeState.None),
                 AtomTriggers.None,
                 PowerCategory.Offense | PowerCategory.Survivability | PowerCategory.Control,
                 "No opcode — direct derived-channel mods. Derived ops are Flat|Increased|Replace|Flag; " +

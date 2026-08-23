@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "kind": "unique",
+  "_meta": {
+    "batch": "uniques-1c",
+    "partition": "uniques/rusted-legion/50",
+    "contractVersion": 1,
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-08-22T00:00:00Z",
+    "sourceRef": "ssot-uniques.md#3.7",
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 4,
+      "classes": 2,
+      "naming": 4,
+      "words": 5
+    }
+  },
+  "entries": [
+    {
+      "id": "unique.rusted-legion-50-001",
+      "nameKey": "unique.oxidewatch",
+      "name": "Oxidewatch",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-main-hand-b-009",
+      "rarity": "fused",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        { "family": "atom.mesmerizing", "powerBand": "low" },
+        { "family": "atom.might", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against a fused rare's two-to-three affixes. The mesmerizing rider is a status.apply proc, not a stat line, so it never enters the raw-stat sum the ceiling checks."
+      },
+      "tags": ["medium-heavy", "metal", "offensive", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.oxidewatch",
+      "flavor": "Rigged from a hose nozzle and a rusted sight, it was never built to aim true. It was built to make the target forget which way true was.",
+      "notes": "role armament-primary (main-hand), axis control. baseType item.humanoid-main-hand-b-009 grepped from data/seed/items/base-types/humanoid-armament-primary-b.json (launcher class, frame humanoid, band b). atom.mesmerizing and atom.might are both role-legal for armament-primary in their own family files (g.affliction, g.attack) - no rule broken. Name from uniqueSetSeedPools['rusted-legion'] (oxidewatch)."
+    },
+    {
+      "id": "unique.rusted-legion-50-002",
+      "nameKey": "unique.surplusward",
+      "name": "Surplusward",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-torso-b-007",
+      "rarity": "chimeric",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        { "family": "atom.cleansing", "powerBand": "low" },
+        { "family": "atom.fortitude", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.vitality",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.fortitude, low) against a chimeric rare's three-to-four affixes. The cleansing rider strips a harmful status on being struck rather than adding a stat, so it stays outside the raw-stat sum."
+      },
+      "tags": ["medium-heavy", "metal", "mechanical", "utility", "signature"],
+      "flavorKey": "flavor.unique.surplusward",
+      "flavor": "Crates come stamped PROPERTY OF SOMEONE ELSE. Wear one long enough and the stamp stops mattering.",
+      "notes": "role core-guard (torso), axis utility. baseType item.humanoid-torso-b-007 grepped from data/seed/items/base-types/humanoid-core-guard-b.json (plate class, frame humanoid, band b). atom.cleansing and atom.fortitude are both role-legal for core-guard in their own family files (g.sustain, g.life) - no rule broken. Name from uniqueSetSeedPools['rusted-legion'] (surplusward)."
+    },
+    {
+      "id": "unique.rusted-legion-50-003",
+      "nameKey": "unique.commandeered-yoke",
+      "name": "Commandeered Yoke",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-shoulders-b-002",
+      "rarity": "fused",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.econ-toll", "powerBand": "medium" },
+        { "family": "atom.plating", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.carapace",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.plating, low) against a fused rare's two-to-three affixes. The econ-toll rider banks currency on being struck rather than adding a stat, so it does not enter the raw-stat sum."
+      },
+      "tags": ["heavy", "metal", "mechanical", "utility", "sturdy", "signature"],
+      "flavorKey": "flavor.unique.commandeered-yoke",
+      "flavor": "Requisitioned twice, returned once, requisitioned again. The paperwork is lost. The plating never was.",
+      "notes": "ROLE BREAK, SANCTIONED: atom.econ-toll's authored `roles` (g.economy) are girdle/jewel-major/jewel-minor-a/jewel-minor-b - ward-array is not among them. A unique's fixed atoms are not drawn from the affix pool, so no affix_pool_tag filter ever applies to them (ssot-uniques.md §3.5's rule-breaking ladder, rung 2, the same device the unique exemplar demonstrates). No MACHINE rule is touched: resource.economy's OnDamageTaken trigger is one of its four legal events. atom.plating and atom.carapace are both role-legal for ward-array AND frame-legal for humanoid (frames: [humanoid, hybrid] in g-armour.json - this is not a plant unique, so the arm1Max/arm2Max fields are real, per the exemplar's own frame-filter carve-out). baseType item.humanoid-shoulders-b-002 grepped from data/seed/items/base-types/humanoid-ward-array-b.json (scale class, frame humanoid, band b). Name: adjective 'Commandeered' from themeAdjectivePools['rusted-legion'] + noun 'Yoke' from nounPools['ward-array.humanoid'], compound pattern."
+    },
+    {
+      "id": "unique.rusted-legion-50-004",
+      "nameKey": "unique.dentedrank",
+      "name": "Dentedrank",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-off-hand-b-009",
+      "rarity": "chimeric",
+      "powerAxis": "offense",
+      "fixedAtoms": [
+        { "family": "atom.hit-followthrough", "powerBand": "medium" },
+        { "family": "atom.ferocity", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.might",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.ferocity, low) against a chimeric rare's three-to-four affixes. The hit-followthrough rider is a plain on-hit bonus-damage tick, not a second independent stat line, so it does not count toward the raw-stat total."
+      },
+      "tags": ["medium-light", "metal", "offensive", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.dentedrank",
+      "flavor": "A rank insignia, flattened, sharpened at one edge. Whoever wore it first is not who swings it now.",
+      "notes": "role armament-secondary (off-hand), axis offense. baseType item.humanoid-off-hand-b-009 grepped from data/seed/items/base-types/humanoid-armament-secondary-b.json (blunt class, frame humanoid, band b). atom.hit-followthrough and atom.ferocity are both role-legal for armament-secondary in their own family files (g.on-hit, g.attack) - no rule broken. Name from uniqueSetSeedPools['rusted-legion'] (dentedrank)."
+    },
+    {
+      "id": "unique.rusted-legion-50-005",
+      "nameKey": "unique.dogtag-of-duty",
+      "name": "Dogtag of Duty",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-neck-b-002",
+      "rarity": "fused",
+      "powerAxis": "survivability",
+      "fixedAtoms": [
+        { "family": "atom.sust-husk", "powerBand": "low" },
+        { "family": "atom.vitality", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.fortitude",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.vitality, low) against a fused rare's two-to-three affixes. The sust-husk rider grants a shield on a timer rather than adding a stat, so it stays outside the raw-stat sum."
+      },
+      "tags": ["heavy", "metal", "defensive", "signature"],
+      "flavorKey": "flavor.unique.dogtag-of-duty",
+      "flavor": "Stamped with a name the roster still carries. The body changed hands; the debt did not.",
+      "notes": "role jewel-major (neck), axis survivability. baseType item.humanoid-neck-b-002 grepped from data/seed/items/base-types/humanoid-jewel-major-b.json (seal class, frame humanoid, band b). atom.sust-husk and atom.vitality are both role-legal for jewel-major in their own family files (g.sustain, g.life) - no rule broken. Deliberately avoids atom.warded: it is variant-generated (elements+omni) and rusted-legion's theme entry (themes.v1.json) lists elementAffinity: [] and explicitly avoids elemental magic. Name: noun 'Dogtag' from nounPools['jewel-major.humanoid'] + concept 'Duty' from conceptPools['rusted-legion'], of-construct pattern."
+    },
+    {
+      "id": "unique.rusted-legion-50-006",
+      "nameKey": "unique.conscripted-fist",
+      "name": "Conscripted Fist",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-hands-b-008",
+      "rarity": "chimeric",
+      "powerAxis": "control",
+      "fixedAtoms": [
+        { "family": "atom.freezing", "powerBand": "low" },
+        { "family": "atom.might", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.ferocity",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.might, low) against a chimeric rare's three-to-four affixes. The freezing rider is a status.apply proc, not a stat line, so it never enters the raw-stat sum."
+      },
+      "tags": ["heavy", "metal", "offensive", "mechanical", "signature"],
+      "flavorKey": "flavor.unique.conscripted-fist",
+      "flavor": "The knuckles were riveted for someone who never got a choice about wearing them. Neither does whatever they close around.",
+      "notes": "role manipulator (hands), axis control. baseType item.humanoid-hands-b-008 grepped from data/seed/items/base-types/humanoid-manipulator-b.json (plate class, frame humanoid, band b). atom.freezing and atom.might are both role-legal for manipulator in their own family files (g.affliction, g.attack) - no rule broken. Name from themeAdjectivePools['rusted-legion'] (conscripted) + nounPools['manipulator.humanoid'] (fist)."
+    },
+    {
+      "id": "unique.rusted-legion-50-007",
+      "nameKey": "unique.coldration",
+      "name": "Coldration",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-back-b-005",
+      "rarity": "fused",
+      "powerAxis": "utility",
+      "fixedAtoms": [
+        { "family": "atom.sust-freshgraft", "powerBand": "low" },
+        { "family": "atom.vitality", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.mending",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.vitality, low) against a fused rare's two-to-three affixes. The sust-freshgraft rider cleanses on spawn rather than adding a stat, so it does not count toward the raw-stat total."
+      },
+      "tags": ["medium-heavy", "organic", "sturdy", "utility", "signature"],
+      "flavorKey": "flavor.unique.coldration",
+      "flavor": "Tins that outlasted the mess hall, the company, and the war they were packed for. Still sealed. Still cold.",
+      "notes": "role mantle (back), axis utility. baseType item.humanoid-back-b-005 grepped from data/seed/items/base-types/humanoid-back-b.json (scale class, frame humanoid, band b, role mantle). atom.sust-freshgraft and atom.vitality are both role-legal for mantle in their own family files (g.sustain, g.life) - no rule broken. Name from uniqueSetSeedPools['rusted-legion'] (coldration)."
+    },
+    {
+      "id": "unique.rusted-legion-50-008",
+      "nameKey": "unique.hardhat-of-the-quartermaster",
+      "name": "Hardhat of the Quartermaster",
+      "frame": "humanoid",
+      "baseType": "item.humanoid-head-b-002",
+      "rarity": "chimeric",
+      "powerAxis": "economy",
+      "fixedAtoms": [
+        { "family": "atom.econ-bounty", "powerBand": "medium" },
+        { "family": "atom.plating", "powerBand": "low" }
+      ],
+      "varianceSlot": {
+        "family": "atom.carapace",
+        "variance": "narrow"
+      },
+      "counterPressure": {
+        "kind": "narrow",
+        "note": "One raw-stat line (atom.plating, low) against a chimeric rare's three-to-four affixes. The econ-bounty rider banks points on a kill rather than adding a stat, so it stays outside the raw-stat sum."
+      },
+      "tags": ["medium", "organic", "utility", "signature"],
+      "flavorKey": "flavor.unique.hardhat-of-the-quartermaster",
+      "flavor": "Every dent is a requisition the quartermaster approved and never delivered on time. The hat kept the promise the paperwork didn't.",
+      "notes": "ROLE BREAK, SANCTIONED: atom.econ-bounty's authored `roles` (g.economy) are girdle/jewel-major/jewel-minor-a/jewel-minor-b - head-guard is not among them. A unique's fixed atoms are not drawn from the affix pool, so no affix_pool_tag filter ever applies to them (ssot-uniques.md §3.5's rule-breaking ladder, rung 2). No MACHINE rule is touched: resource.economy's OnDeath trigger is one of its four legal events. atom.plating and atom.carapace are both role-legal for head-guard AND frame-legal for humanoid (frames: [humanoid, hybrid] in g-armour.json). baseType item.humanoid-head-b-002 grepped from data/seed/items/base-types/humanoid-head-guard-b.json (leather class, frame humanoid, band b). Name: noun 'Hardhat' from nounPools['head-guard.humanoid'] + concept 'Quartermaster' from conceptPools['rusted-legion'], of-construct pattern."
+    }
+  ]
+}
