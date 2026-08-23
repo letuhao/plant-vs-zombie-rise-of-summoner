@@ -46,12 +46,31 @@
   --shadow-panel: 0 2px 8px rgb(0 0 0 / 0.35);
   --shadow-inset: inset 0 1px 3px rgb(0 0 0 / 0.45);
 
-  --z-index-nav-active: 1;
-  --z-index-hud: 20;
-  --z-index-banner: 30;
-
   --ease-default: 120ms;
 }
+
+/* Band stacking — GG-5. Every band-2..5 surface picks exactly one of these six
+   classes for its z-index; nothing else in the tree sets z-index or a z-*
+   Tailwind class. Band 0 (Stage) and band 1 (HUD) need no z-index token of
+   their own: Stage is the unstacked base (z:auto) and HUD sits directly above
+   it, so only the five surfaces players open and close, plus the shell that
+   replaces the stage outright, need an explicit tier. See game-gui-principles.md
+   GG-5 for the full seven-row table this six-token set is drawn from. */
+:root {
+  --band-shell: -1;
+  --band-hud: 100;
+  --band-panel: 200;
+  --band-dialog: 300;
+  --band-toast: 400;
+  --band-system: 500;
+}
+
+.band-shell { z-index: var(--band-shell); }
+.band-hud { z-index: var(--band-hud); }
+.band-panel { z-index: var(--band-panel); }
+.band-dialog { z-index: var(--band-dialog); }
+.band-toast { z-index: var(--band-toast); }
+.band-system { z-index: var(--band-system); }
 
 :root {
   color: var(--color-text);

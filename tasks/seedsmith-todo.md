@@ -2,8 +2,8 @@
 
 Plan: [seedsmith-plan.md](seedsmith-plan.md) · Map: [../docs/architecture/seedsmith-map.md](../docs/architecture/seedsmith-map.md)
 
-Status: **S0 done (17/17 tests green).** S1 next. Specs complete and audited (66 findings, 11
-blockers, all closed).
+Status: **S0, S1 done (56/56 tests green, CP-A reached).** S2 next. Specs complete and audited
+(66 findings, 11 blockers, all closed).
 
 ---
 
@@ -88,18 +88,39 @@ finding, exit with the right code.
 - `__main__.py`: `seedsmith check`
 
 **Acceptance**
-- [ ] `seedsmith check --adapter stub` → clean fixture: `0`; broken fixture: `1`
-- [ ] Unreadable corpus → `2`, distinct from `1`, with a message naming the file
-- [ ] `Loop.OPEN` + `gates=True` raises at registration
-- [ ] A metric whose `needs` are unmet emits `NOT_MEASURED`, never a pass
-- [ ] `Finding` carries `schemaVersion`
-- [ ] Package is `seedsmith/__main__.py` — no `seedsmith.py` shadowing the package
+- [x] `seedsmith check --adapter stub` → clean fixture: `0`; broken fixture: `1`
+- [x] Unreadable corpus → `2`, distinct from `1`, with a message naming the file
+- [x] `Loop.OPEN` + `gates=True` raises at registration
+- [x] A metric whose `needs` are unmet emits `NOT_MEASURED`, never a pass
+- [x] `Finding` carries `schemaVersion`
+- [x] Package is `seedsmith/__main__.py` — no `seedsmith.py` shadowing the package
 
-**Verify** `python -m seedsmith check --adapter stub tests/fixtures/clean && echo OK`
+**Verify** `python -m seedsmith check --adapter stub tests/fixtures/clean && echo OK` → prints
+`no findings`, exit `0` (2026-08-23, run from `tools/seedsmith/`)
+
+**Built:** `seedsmith/corpus/{model,__init__}.py` (`Entry`, `Edge`, `Corpus.load`, `by_id`/
+`by_kind`/`by_partition`, `discover_edges`, `register_minted_ids`/`resolves`, `is_exemplar`,
+`CorpusLoadError`) · `seedsmith/adapters/{base,_stub,registry}.py` (`SeedAdapter` protocol,
+`KindSpec`/`Dimension`/`Channel`/`LegalityFn`/`RegistrySet`, `StubAdapter` with a real `False`
+legality case, name→adapter registry) · `seedsmith/metrics/{model,registry,coverage}.py`
+(`Metric`/`Finding`/`Loop`/`Severity`/`Ctx`, `MetricRegistry.register` rejecting OPEN+gates=True,
+`run_all` emitting `NOT_MEASURED` on unmet `needs`, `Coverage/EmptyPartition`) ·
+`seedsmith/report/cli.py` + `seedsmith/__main__.py` (`seedsmith check`, exit codes 0/1/2, `--json`,
+`--gate`, `--metric`) · fixtures `tests/fixtures/{clean,broken,unreadable}` ·
+`tests/{test_corpus,test_stub_adapter,test_metrics,test_cli}.py`.
+
+**Verify (full suite)** `python -m pytest tools/seedsmith/tests/ -v` → **56 passed** (2026-08-23,
+includes S0's 17). One real defect caught and fixed during review: `discover_edges` was matching
+an entry's own `id` field against the id-pattern and reporting a self-loop edge — fixed by
+excluding the top-level `id` field unconditionally, with a regression test
+(`test_non_matching_strings_are_not_edges`) pinning the fix.
+
+**S1 status: DONE.**
 
 ---
 
 **⭐ CP-A — the seam is real.** Stub is the only adapter. Nothing item-shaped exists yet.
+**Reached (2026-08-23).**
 
 ---
 

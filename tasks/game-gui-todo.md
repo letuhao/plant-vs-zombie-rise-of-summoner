@@ -16,14 +16,14 @@ one owner of visibility), the six band tokens, and `PanelShell` + `DialogShell` 
 Also rewrites the coverage include list around the new structure (gap G6) so later tasks inherit it.
 
 **Acceptance:**
-- [ ] `LayerStack` supports push, pop, popAll, and reports the top layer; no component reads it directly except the shells
-- [ ] Six band values exist as CSS custom properties; a lint fails on any `z-index` or `z-*` outside them
-- [ ] `PanelShell` and `DialogShell` render, trap focus, and restore focus to their opener
+- [x] `LayerStack` supports push, pop, popAll, and reports the top layer; no component reads it directly except the shells — guarded by `bandGuard.scanForLayerStackImports`, proven clean against the real tree
+- [x] Six band values exist as CSS custom properties; a lint fails on any `z-index` or `z-*` outside them — `--band-shell/-hud/-panel/-dialog/-toast/-system` in `theme/tokens.css`; `bandGuard.scanForStrayZIndex` migrated the three pre-existing offenders (`LawnPage.tsx`, `LawnStatsModal.tsx`, `ConfirmDialog.tsx`) to the new `.band-*` classes rather than allowlisting them
+- [x] `PanelShell` and `DialogShell` render, trap focus, and restore focus to their opener — note: Radix's own `onCloseAutoFocus` targets its internal `Dialog.Trigger`, which these fully-controlled shells never render, so restore is done explicitly (capture `document.activeElement` on the render that flips `open` true, refocus it in `onCloseAutoFocus`) — see the shells' own comments
 
 **Verify:**
-- [ ] `npm test` — new unit tests for push/pop/popAll and focus restore
-- [ ] `npm run build`
-- [ ] Band lint fails on a deliberately added `z-index: 5`
+- [x] `npm test` — 25 new tests (`layerStack.test.ts`, `bandGuard.test.ts`, `shells.test.tsx`); full suite 348/348 green, no regressions (baseline 292)
+- [x] `npm run build` — `tsc --noEmit` clean, `vite build` clean
+- [x] Band lint fails on a deliberately added `z-index: 5` — proven as a permanent fixture-based regression test (`bandGuard.test.ts` "fixtures" suite), not a one-off manual check
 
 **Dependencies:** None · **Files:** `src/shell/layerStack.ts`, `src/shell/PanelShell.tsx`, `src/shell/DialogShell.tsx`, `src/theme/tokens.css`, `vite.config.ts` (coverage) · **Scope:** M
 

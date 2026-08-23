@@ -8,9 +8,35 @@ namespace FusionRpg.Core.World.Loam;
 /// </summary>
 public static class LoamProduction
 {
-    /// <summary>The truth side.</summary>
-    public static long For(WorldSector sector) =>
-        For(sector.OwnerFactionId, sector.Slots.Select(sl => sl.SlotTypeId));
+    /// <summary>
+    /// The truth side. Extends additively over the belief-side sum: each Rootbed slot's own base
+    /// yield, multiplied by its own active structure's <c>YieldMultiplierMilli</c> if one is present
+    /// (spec-loam-structures.md — a Well multiplies, it does not replace) — 1000 (unchanged) for a
+    /// slot with no structure or one still under construction, so a rootbed with no well behaves
+    /// exactly as it does today.
+    /// </summary>
+    public static long For(WorldSector sector)
+    {
+        if (sector.OwnerFactionId is null) return 0; // G-B
+
+        long total = 0;
+        foreach (var slot in sector.Slots)
+        {
+            if (SlotTypeCatalog.Get(slot.SlotTypeId).Kind != SlotKind.Rootbed) continue;
+
+            var multiplierMilli = 1000;
+            if (slot.StructureId is { } structureId
+                && slot.ConstructionTurnsRemaining is null or <= 0
+                && StructureCatalog.IsKnown(structureId))
+            {
+                multiplierMilli = StructureCatalog.Get(structureId).YieldMultiplierMilli;
+            }
+
+            total += LoamPolicy.SeepPerTurn * multiplierMilli / 1000;
+        }
+
+        return total;
+    }
 
     /// <summary>
     /// The belief side: all a caller needs is whether the sector is owned (never fogged — you

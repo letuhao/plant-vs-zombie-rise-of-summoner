@@ -873,7 +873,7 @@ export function LawnPage() {
           {canvas}
           {inspectorOpen ? (
             <div
-              className="fixed inset-0 z-40 bg-black/40"
+              className="band-panel fixed inset-0 bg-black/40"
               data-testid="lawn-inspector-drawer-backdrop"
               onClick={() => setInspectorOpen(false)}
             >

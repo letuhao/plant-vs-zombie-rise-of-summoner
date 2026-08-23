@@ -296,7 +296,8 @@ public static class WorldEndpoints
             DangerBand = believed.DangerBand,
             DevelopmentLevel = believed.DevelopmentLevel,
             FractureIntensityMilli = believed.FractureIntensityMilli,
-            Habitable = Habitability.For(believed.Slots.Select(sl => sl.SlotTypeId)),
+            Habitable = Habitability.For(believed.Slots.Select(sl =>
+                (sl.SlotTypeId, sl.StructureId, sl.ConstructionTurnsRemaining))),
             Phase = believed.Phase.ToString(),
             OwnerFactionId = believed.OwnerFactionId,
 

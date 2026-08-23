@@ -63,6 +63,17 @@ public static class WorldCommandAdmission
             if (command.Amount is not { } amount || amount <= 0) return (false, "amount.invalid");
         }
 
+        if (command.Kind == WorldCommandKinds.Build)
+        {
+            if (command.EntityId is null) return (false, "entity.missing");
+            if (namedSector is null) return (false, "sector.missing");
+            if (command.SlotIndex is not { } buildSlotIndex
+                || namedSector.Slots.All(sl => sl.SlotIndex != buildSlotIndex))
+                return (false, "slot.unknown");
+            if (command.StructureId is not { } structureId || !StructureCatalog.IsKnown(structureId))
+                return (false, "structure.unknown");
+        }
+
         if (command.Kind == WorldCommandKinds.Clear)
         {
             // `clear` names its target outright — entity, sector, slot. Whether the legion is

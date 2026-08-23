@@ -44,6 +44,8 @@ public class HabitabilityTests
             SectorId = "s", TypeId = "stable",
             Slots = new[] { new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.RootbedSlotTypeId } }
         };
-        Assert.Equal(Habitability.For(sector), Habitability.For(sector.Slots.Select(sl => sl.SlotTypeId)));
+        Assert.Equal(
+            Habitability.For(sector),
+            Habitability.For(sector.Slots.Select(sl => (sl.SlotTypeId, sl.StructureId, sl.ConstructionTurnsRemaining))));
     }
 }

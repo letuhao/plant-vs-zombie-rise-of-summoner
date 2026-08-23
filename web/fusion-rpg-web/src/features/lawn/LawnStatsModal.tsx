@@ -51,7 +51,7 @@ export function LawnStatsModal({
       role="dialog"
       aria-label="Lawn statistics"
       data-testid="lawn-stats-modal"
-      className="fixed z-50 w-[min(22rem,calc(100vw-2rem))] rounded-md border border-border bg-panel p-3 shadow-panel"
+      className="band-hud fixed w-[min(22rem,calc(100vw-2rem))] rounded-md border border-border bg-panel p-3 shadow-panel"
       style={{ left: pos.x, top: pos.y }}
     >
       <div

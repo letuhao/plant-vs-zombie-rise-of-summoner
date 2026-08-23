@@ -6,7 +6,7 @@ import { FusionPage } from "@/features/fusion/FusionPage";
 import { CheatsPage } from "@/features/cheats/CheatsPage";
 import { AlmanacDumpPage } from "@/features/almanac-dump/AlmanacDumpPage";
 import { IconDumpPage } from "@/features/icon-dump/IconDumpPage";
-import { LawnPage } from "@/features/lawn/LawnPage";
+import { LawnStage } from "@/stages/lawn/LawnStage";
 import { RosterPage } from "@/features/roster/RosterPage";
 import { LogPage } from "@/features/log/LogPage";
 import { MetricsPage } from "@/features/metrics/MetricsPage";
@@ -40,7 +40,7 @@ export function AppRoutes() {
         <Route path="runs" element={<MetricsPage />} />
         <Route path="metrics" element={<Navigate to="/runs" replace />} />
         <Route path="storage" element={<StoragePage />} />
-        <Route path="lawn" element={<LawnPage />} />
+        <Route path="lawn" element={<LawnStage />} />
         <Route path="world" element={<WorldPage />} />
         <Route path="roster" element={<RosterPage />} />
         <Route path="demons" element={<DemonsPage />} />

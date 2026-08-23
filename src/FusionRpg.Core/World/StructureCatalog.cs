@@ -27,6 +27,12 @@ public sealed record StructureDef
     /// multiplies its Seat's zero — one field expresses both (spec-structure-substrate.md).
     /// </summary>
     public int YieldMultiplierMilli { get; init; } = 1000;
+
+    /// <summary>
+    /// How many `Production` passes construction takes, decrementing to zero, before the structure
+    /// is active (spec-loam-structures.md). Zero means never under construction — instant.
+    /// </summary>
+    public int BuildTurns { get; init; }
 }
 
 /// <summary>

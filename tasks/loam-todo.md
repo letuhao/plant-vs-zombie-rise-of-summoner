@@ -976,7 +976,18 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
 
 ## Phase 9 — `loam-structures`
 
-- [ ] **L33: The well — multiply, don't replace**
+- [x] **L33: The well — multiply, don't replace** ✅ 2026-08-23 — `StructureCatalog` gains a `well`
+  row (+ `waystation`, staged now since both share the new `BuildTurns` field, not wired until L34/
+  L35) and `StructureDef.BuildTurns`; `LoamPolicy` gains `WellYieldMultiplierMilli`/`WellCostMilli`/
+  `WaystationCostMilli`/`*BuildTurns`/`WaystationRangeHops` (provisional placeholders — the spec
+  names no numeric target for any of these, unlike the legion leash's explicit 4-8 turn range, so no
+  harness was fabricated for them). `LoamProduction.For`'s truth overload extended per-slot: each
+  Rootbed multiplied by its own active structure's multiplier, 1000 (unchanged) with none — proven
+  byte-identical for an un-welled rootbed, multi-rootbed sectors proven independent, construction
+  gating proven (inert while `ConstructionTurnsRemaining>0`, active at exactly 0). Belief-side
+  overload deliberately untouched (out of this task's stated scope; L34 is what widens belief).
+  Core 2914 (one pre-existing allocation-count test flaked under full-suite load, confirmed passing
+  standalone and on retry — not a regression, not touched by this change).
   - Description: `StructureDef("well", LoamSource, RequiredSlotKind: Rootbed, YieldMultiplierMilli)`.
     `LoamProduction.For` extends additively: base yield × the active structure's multiplier if present,
     else unchanged.
@@ -987,7 +998,19 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     harness-tuned), `LoamProduction.cs`, `tests/.../LoamStructuresTests.cs` (new). Scope: S.
   - Dependencies: L32.
 
-- [ ] **L34: The waystation, and widening belief to support it**
+- [x] **L34: The waystation, and widening belief to support it** ✅ 2026-08-23 — `StructureCatalog`'s
+  `waystation` row (Seat-required, multiplier irrelevant at 1000 since Seat yield is already 0);
+  `Habitability.For` widened to "Rootbed, or an active LoamSource structure" on both overloads.
+  `RememberedSlot.ConstructionTurnsRemaining` added (mirroring the truth field the same way
+  `StructureId` already does) and wired through `IntelRecorder`/`WorldCanonical`; all three real
+  belief-overload callers updated in the same change (`FrontierRulesPolicy.cs`, `ValueMap.cs`,
+  `WorldEndpoints.cs`), plus the test call site. Proven: an active waystation is habitable and
+  yields exactly 0; one still under construction is not yet habitable; a bare Seat with no
+  structure is not; belief and truth overloads agree. **Real gap found and fixed**: the L25 batch
+  did not anticipate this belief-widening need — a genuine fifth golden move, field-only,
+  `RulesetVersion` unchanged, recorded honestly in `decisions.md` rather than folded quietly into an
+  already-closed budget. Core 2918, Data 463, E2E World 40, Guard 73 — all green; all 4 guard
+  scripts green.
   - Description: `StructureDef("waystation", LoamSource, RequiredSlotKind: Seat)`. Two changes in one
     task, per the audit finding that they cannot ship separately: (1) widen `Habitability.For`'s belief
     overload signature to carry structure id + active/under-construction status, updating **every**
@@ -1001,7 +1024,18 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     (`WorldEndpoints.cs`, `FrontierRulesPolicy.cs`, at minimum). Scope: M.
   - Dependencies: L33.
 
-- [ ] **L35: Construction — `Build`, and the exact activation turn**
+- [x] **L35: Construction — `Build`, and the exact activation turn** ✅ 2026-08-23 —
+  `WorldCommandKinds.Build` (+ `WorldCommand.StructureId`), admitted (entity/sector/slot/structure
+  all required and validated), resolved via `BuildResolver.Run` in `Snapshot` right after
+  `ClaimResolver` (same re-validation discipline: ownership re-checked at resolution, not trusted
+  from Reveal). `LoamPhases.Production` now decrements `ConstructionTurnsRemaining` *before* reading
+  the yield/habitability check that same pass — proven exactly turn-by-turn (inert through all
+  `BuildTurns` passes, active starting the exact pass the counter reaches zero, not the turn after).
+  Cost spent from the founder's own `CarriedLoam`. Proven end-to-end: a sector that fades to `Lost`
+  during this same turn's `Pressure` (which runs before `Snapshot`) refuses its own `Build` order at
+  resolution — not silently applied — because `BuildResolver`'s ownership re-check simply sees the
+  ownership `Pressure` already cleared. Core 2926, Data 463 — all green; all 4 guard scripts green.
+  No new `WorldCanonical` field this task (Build only writes to fields that already exist).
   - Description: `WorldCommandKinds.Build`, cost spent from the issuing legion's own `CarriedLoam`
     (G1's bootstrap spend). `ConstructionTurnsRemaining` decrements first, then that same `Production`
     pass reads the post-decrement value — active starting the `BuildTurns`-th decrementing pass, same
@@ -1016,7 +1050,19 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
     `World/Movement/BuildResolver.cs` (new), `TurnEngine.cs`, `tests/.../LoamStructuresTests.cs`. Scope: M.
   - Dependencies: L34, L28 (`Sustain`, for the "keeps a construction site alive" scenario).
 
-- [ ] **L36: `Lost` actually clears structure state — new code, not a description**
+- [x] **L36: `Lost` actually clears structure state — new code, not a description** ✅ 2026-08-23 —
+  `LoamPhases.Pressure`'s `Lost` branch now maps over slots, clearing `StructureId`/
+  `ConstructionTurnsRemaining` in the same `with` expression that already clears ownership. Proven:
+  a sector lost mid-construction has both fields cleared the same turn (no partial refund); a
+  Sustain-ing legion keeps an otherwise-doomed construction site alive through all `BuildTurns`
+  (habitable, active, by completion), the identical fixture without Sustain loses the half-built
+  structure part way through. **Real fixture gap found while writing these tests**: a single-sector
+  world with no rootbed anywhere trips `LoamUpkeep`'s existing G-C exemption ("no source anywhere →
+  exempt from upkeep entirely"), so the isolated construction site never faded at all until a
+  separate, disconnected, real-rootbed sector was added to the fixture — the same exemption
+  `SupplyGraph.cs` already mirrors for the wild, just newly relevant here. Core 2928, Data 463 — all
+  green (golden hash unaffected — no shipped scenario ever carries a non-null `StructureId` into
+  `Lost` yet); all 4 guard scripts green.
   - Description: the audit found `LoamPhases.Pressure`'s `Lost` branch never touches `s.Slots` today.
     This task adds that: the branch maps over slots, clearing `StructureId`/`ConstructionTurnsRemaining`
     on every one, in the same `with` expression that already clears ownership.

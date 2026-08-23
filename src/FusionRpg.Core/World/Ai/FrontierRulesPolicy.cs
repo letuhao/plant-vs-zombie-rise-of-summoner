@@ -165,7 +165,8 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         // exempt from upkeep entirely, so it has nothing to abandon. Every pre-loam AI fixture has
         // no rootbed at all, and without this check Abandon fired on every one of them.
         var hasSourceAnywhere = owned.Any(id =>
-            view.Believed(id) is { } b && Habitability.For(b.Slots.Select(sl => sl.SlotTypeId)));
+            view.Believed(id) is { } b
+            && Habitability.For(b.Slots.Select(sl => (sl.SlotTypeId, sl.StructureId, sl.ConstructionTurnsRemaining))));
         if (!hasSourceAnywhere) return null;
 
         var handicap = view.Factions.First(f => string.Equals(f.FactionId, view.FactionId, StringComparison.Ordinal)).UpkeepHandicapMilli;

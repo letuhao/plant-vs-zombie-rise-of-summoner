@@ -51,6 +51,12 @@ public sealed record RememberedSlot
     /// captured on any survey the same way <see cref="SlotTypeId"/> already is.
     /// </summary>
     public string? StructureId { get; init; }
+
+    /// <summary>
+    /// A structure's construction state, visible on the same terms as the structure itself
+    /// (spec-loam-structures.md) — not owner-gated either.
+    /// </summary>
+    public int? ConstructionTurnsRemaining { get; init; }
 }
 
 /// <summary>

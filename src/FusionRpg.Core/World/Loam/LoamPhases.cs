@@ -20,26 +20,47 @@ public static class LoamPhases
 
         foreach (var sector in world.Sectors)
         {
-            var yield = LoamProduction.For(sector);
+            // Decrements first; the yield check right after reads the post-decrement value, so a
+            // structure with BuildTurns = N is inert for its first N passes and active starting the
+            // (N+1)th — the same pass the counter reaches zero, not the turn after
+            // (spec-loam-structures.md's audit-resolved ordering).
+            var decremented = DecrementConstruction(sector);
+
+            var yield = LoamProduction.For(decremented);
             if (yield == 0)
             {
-                sectors.Add(sector);
+                sectors.Add(decremented);
                 continue;
             }
 
             // The cap throttles new accrual only — it never claws back stock already held, the same
             // fix the economy harness (L9) needed for its own local ledger.
-            var room = Math.Max(0, LoamPolicy.LoamCapacity - sector.LoamStock);
+            var room = Math.Max(0, LoamPolicy.LoamCapacity - decremented.LoamStock);
             var added = Math.Min(room, yield);
             var overflow = yield - added;
 
             if (overflow > 0)
                 report.Add(phase, TurnReportKinds.Event, sector.SectorId, "loam.overflow:" + overflow, sector.SectorId);
 
-            sectors.Add(sector with { LoamStock = sector.LoamStock + added });
+            sectors.Add(decremented with { LoamStock = decremented.LoamStock + added });
         }
 
         return world with { Sectors = sectors };
+    }
+
+    /// <summary>Every slot still under construction counts down by one, this pass, before anything reads it.</summary>
+    static WorldSector DecrementConstruction(WorldSector sector)
+    {
+        if (sector.Slots.All(sl => sl.ConstructionTurnsRemaining is not > 0)) return sector;
+
+        return sector with
+        {
+            Slots = sector.Slots
+                .Select(sl => sl.ConstructionTurnsRemaining is > 0
+                    ? sl with { ConstructionTurnsRemaining = sl.ConstructionTurnsRemaining - 1 }
+                    : sl)
+                .ToList()
+        };
     }
 
     /// <summary>
@@ -105,7 +126,17 @@ public static class LoamPhases
             if (lost.Contains(s.SectorId))
             {
                 report.Add(phase, TurnReportKinds.Event, s.OwnerFactionId ?? "", "loam.lost:" + s.SectorId, s.SectorId);
-                return s with { LoamStock = stockById[s.SectorId], StabilityMilli = 0, Phase = SectorPhase.Lost, OwnerFactionId = null };
+                return s with
+                {
+                    LoamStock = stockById[s.SectorId], StabilityMilli = 0, Phase = SectorPhase.Lost,
+                    OwnerFactionId = null,
+                    // A half-built structure is not a refund, it is exactly the loss G1 warns the
+                    // player about (spec-loam-structures.md) — new code, not a description of
+                    // behaviour that already existed: this branch never touched `s.Slots` before.
+                    Slots = s.Slots
+                        .Select(sl => sl with { StructureId = null, ConstructionTurnsRemaining = null })
+                        .ToList()
+                };
             }
 
             return s with { LoamStock = stockById[s.SectorId], StabilityMilli = stabilityById[s.SectorId] };

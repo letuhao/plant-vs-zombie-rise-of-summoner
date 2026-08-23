@@ -86,13 +86,10 @@ class Metric(ABC):
 
     def __init_subclass__(cls, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
-        # Caught here too (not only at registry.register) so a metric that is merely
-        # IMPORTED — never registered — still cannot exist in this contradictory state.
-        if cls.loop is Loop.OPEN and cls.gates:
-            raise ValueError(
-                f"{cls.__name__}: an OPEN-loop metric may never gate (P3) — it cannot verify "
-                f"its own fix, so it must report a review queue, never a pass/fail"
-            )
+        # The OPEN+gates=True contradiction is deliberately NOT checked here: catching it at
+        # class-definition time would make it impossible to even construct an instance to hand
+        # to a test verifying MetricRegistry.register()'s own guard (tasks/seedsmith-todo.md, S1
+        # names registration specifically). One enforcement point for that rule, not two.
         unknown = cls.needs - VALID_NEEDS
         if unknown:
             raise ValueError(f"{cls.__name__}: unknown needs {sorted(unknown)}")

@@ -274,6 +274,10 @@ public static class TurnEngine
         // alive, which guards are left — is only decided once the rest of the turn has run.
         world = ClaimResolver.Run(world, commands, report, Phases.Snapshot, turn);
 
+        // Build resolves right after — the same reason, and so it sees this same turn's claim if
+        // one just landed on the same sector (spec-loam-structures.md).
+        world = BuildResolver.Run(world, commands, report, Phases.Snapshot);
+
         // Posture changes land here, then the refill reads them — so a legion keeps the budget it
         // started the turn with and only pays for its new posture from the next turn. Digging in
         // *after* marching your full distance must not be free.

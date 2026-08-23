@@ -71,7 +71,7 @@ public static class WorldCanonical
             foreach (var slot in snapshot.Slots)
                 Row(sb, "intel-slot", faction.FactionId, snapshot.SectorId, slot.SlotIndex,
                     slot.SlotTypeId, slot.Element, slot.GuardWaveId, slot.State, slot.GuardState,
-                    slot.StructureId);
+                    slot.StructureId, slot.ConstructionTurnsRemaining);
 
             foreach (var force in snapshot.Forces)
                 Row(sb, "intel-force", faction.FactionId, snapshot.SectorId, force.EntityId,

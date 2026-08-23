@@ -27,7 +27,14 @@ public static class WorldCommandKinds
     /// </summary>
     public const string Sustain = "sustain";
 
-    public static readonly IReadOnlyList<string> All = new[] { StandFast, Move, Clear, Claim, Stance, Sustain };
+    /// <summary>
+    /// Found a structure on a compatible, empty slot in the sector a legion stands on
+    /// (spec-loam-structures.md), spending the issuing legion's own `CarriedLoam`.
+    /// </summary>
+    public const string Build = "build";
+
+    public static readonly IReadOnlyList<string> All =
+        new[] { StandFast, Move, Clear, Claim, Stance, Sustain, Build };
 
     public static bool IsKnown(string? kind) =>
         kind != null && All.Contains(kind, StringComparer.Ordinal);
@@ -67,4 +74,7 @@ public sealed record WorldCommand
 
     /// <summary>How much carried loam a `sustain` order spends (spec-loam-legions.md).</summary>
     public long? Amount { get; init; }
+
+    /// <summary>Which structure a `build` order names (spec-loam-structures.md).</summary>
+    public string? StructureId { get; init; }
 }

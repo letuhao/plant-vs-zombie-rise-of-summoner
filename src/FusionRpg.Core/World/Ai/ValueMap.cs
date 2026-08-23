@@ -119,7 +119,8 @@ public static class ValueMap
             // or merely-glimpsed ground stays governed by the curiosity axis, exactly as it already
             // is for `yield` — penalizing what you have not looked at would kill exploration outright.
             var habitabilityPenalty = believed is { Slots.Count: > 0 } surveyed
-                                       && !Habitability.For(surveyed.Slots.Select(sl => sl.SlotTypeId))
+                                       && !Habitability.For(surveyed.Slots.Select(sl =>
+                                           (sl.SlotTypeId, sl.StructureId, sl.ConstructionTurnsRemaining)))
                 ? total * HabitabilityPenaltyMilli / 1000
                 : 0;
 

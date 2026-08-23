@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 440" width="1280" height="440" role="img" aria-label="Rise of Summoner — command demons, hold the lawn, take back the multiverse">
+  <defs>
+    <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1712"/>
+      <stop offset="0.55" stop-color="#16120e"/>
+      <stop offset="1" stop-color="#0e0b09"/>
+    </linearGradient>
+    <radialGradient id="riftGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#5a8f62" stop-opacity="0.34"/>
+      <stop offset="0.55" stop-color="#3d6b45" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#3d6b45" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="haze" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#e0b44b" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#e0b44b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="leftFade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#100d0a" stop-opacity="0.97"/>
+      <stop offset="0.62" stop-color="#100d0a" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#100d0a" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="laneFade" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#16120e" stop-opacity="0.85"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="440" fill="url(#soil)"/>
+  <circle cx="988" cy="175" r="215" fill="url(#riftGlow)"/>
+
+  <g stroke="#4a4034" stroke-width="1.5" fill="none" opacity="0.85">
+    <path d="M988 180 L836 112"/>
+    <path d="M988 180 L1136 128"/>
+    <path d="M988 180 L896 236"/>
+    <path d="M988 180 L1080 242"/>
+    <path d="M836 112 L756 212"/>
+    <path d="M1136 128 L1198 208"/>
+    <path d="M836 112 L1042 88"/>
+    <path d="M1042 88 L1136 128"/>
+    <path d="M896 236 L756 212"/>
+    <path d="M1080 242 L1198 208"/>
+  </g>
+  <g stroke="#5a8f62" stroke-width="2" fill="none" opacity="0.55">
+    <path d="M988 180 L836 112"/>
+    <path d="M988 180 L1136 128"/>
+  </g>
+
+  <g stroke="#16120e" stroke-width="2.5">
+    <circle cx="836"  cy="112" r="8"  fill="#e0703c"/>
+    <circle cx="1136" cy="128" r="8"  fill="#6fc4d9"/>
+    <circle cx="756"  cy="212" r="7"  fill="#b08a4f"/>
+    <circle cx="1198" cy="208" r="7"  fill="#8b7bab"/>
+    <circle cx="896"  cy="236" r="6"  fill="#b7c9d6"/>
+    <circle cx="1080" cy="242" r="6"  fill="#efdca0"/>
+    <circle cx="1042" cy="88"  r="7"  fill="#c96a52"/>
+  </g>
+  <circle cx="988" cy="180" r="23" fill="none" stroke="#e0b44b" stroke-width="1.5" opacity="0.45"/>
+  <circle cx="988" cy="180" r="15" fill="#e0b44b" stroke="#16120e" stroke-width="3"/>
+
+  <ellipse cx="990" cy="280" rx="430" ry="64" fill="url(#haze)"/>
+
+  <g stroke="#16120e" stroke-width="1.5" stroke-opacity="0.6">
+    <polygon points="620,440 752,440 874.8,280 811.0,280"   fill="#33583c"/>
+    <polygon points="752,440 884,440 938.7,280 874.8,280"   fill="#26432f"/>
+    <polygon points="884,440 1016,440 1002.6,280 938.7,280" fill="#33583c"/>
+    <polygon points="1016,440 1148,440 1066.5,280 1002.6,280" fill="#26432f"/>
+    <polygon points="1148,440 1280,440 1130.3,280 1066.5,280" fill="#33583c"/>
+  </g>
+  <g stroke="#16120e" stroke-width="1.2" stroke-opacity="0.7">
+    <circle cx="710.6" cy="415" r="7"   fill="#6fbf73"/>
+    <circle cx="953.2" cy="415" r="7"   fill="#6fbf73"/>
+    <circle cx="1195.9" cy="415" r="7"  fill="#6fbf73"/>
+    <circle cx="857.9" cy="368" r="5"   fill="#5a8f62"/>
+    <circle cx="1060.7" cy="368" r="5"  fill="#5a8f62"/>
+    <circle cx="815.5" cy="308" r="3.4" fill="#9b7fb0"/>
+    <circle cx="967.0" cy="308" r="3.4" fill="#9b7fb0"/>
+    <circle cx="1042.8" cy="308" r="3.4" fill="#9b7fb0"/>
+  </g>
+  <rect x="600" y="280" width="680" height="160" fill="url(#laneFade)"/>
+  <rect x="0" y="0" width="820" height="440" fill="url(#leftFade)"/>
+
+  <g font-family="Trebuchet MS, Segoe UI, Verdana, Geneva, sans-serif">
+    <text x="64" y="120" font-size="16" letter-spacing="4.2" fill="#a89880">AN RPG EXPANSION FOR PLANTS VS. ZOMBIES FUSION</text>
+    <text x="62" y="206" font-size="78" font-weight="bold" fill="#f2ead8" textLength="322" lengthAdjust="spacingAndGlyphs">RISE OF</text>
+    <text x="62" y="284" font-size="78" font-weight="bold" fill="#e0b44b" textLength="524" lengthAdjust="spacingAndGlyphs">SUMMONER</text>
+    <text x="64" y="352" font-size="22" fill="#c9bca6">Command demons. Hold the lawn. Take back the multiverse.</text>
+    <text x="216" y="398" font-size="13" letter-spacing="2.4" fill="#7d7060">SIX ELEMENTS &#183; A LIVING ROSTER &#183; A WAR MAP</text>
+  </g>
+
+  <line x1="64" y1="312" x2="600" y2="312" stroke="#4a4034" stroke-width="2"/>
+  <line x1="64" y1="312" x2="168" y2="312" stroke="#c96a52" stroke-width="3"/>
+
+  <g stroke="#16120e" stroke-width="1.5">
+    <circle cx="70"  cy="393" r="6" fill="#e0703c"/>
+    <circle cx="94"  cy="393" r="6" fill="#6fc4d9"/>
+    <circle cx="118" cy="393" r="6" fill="#b7c9d6"/>
+    <circle cx="142" cy="393" r="6" fill="#b08a4f"/>
+    <circle cx="166" cy="393" r="6" fill="#efdca0"/>
+    <circle cx="190" cy="393" r="6" fill="#8b7bab"/>
+  </g>
+</svg>

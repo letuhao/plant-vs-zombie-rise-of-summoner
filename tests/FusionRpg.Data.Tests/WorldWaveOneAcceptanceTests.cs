@@ -109,10 +109,18 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       bootstrap the same shape as G-D's homeworld stock) as the template-side minimum edit a
     //       zero-reserve legion would otherwise need to survive stepping off owned ground at all.
     //
+    //   12. **L34, 2026-08-23** — `RememberedSlot.ConstructionTurnsRemaining` (belief side, mirroring
+    //       the truth field the same way `StructureId` already does) was a genuine gap the L25
+    //       batch did not anticipate: widening `Habitability.For`'s belief overload to recognize an
+    //       active waystation needed construction status visible in belief, and nothing carried it
+    //       yet. Field-only, `RulesetVersion` unchanged (same precedent as `loam-model`'s and L25's
+    //       own) — no pre-existing scenario places a structure at all, so nothing about the *play*
+    //       changed, only the row shape the hash is taken over.
+    //
     // The plan expected one re-bless. Four were needed for world-intel, each for a behaviour change
     // rather than a drift, and each recorded here. Protecting the hash in any of them would have
     // meant shipping something known to be wrong.
-    const string GoldenFinalHash = "b548a9ee0495880ac7327aca04b9b52868aa7923c5146d4bdcd2f845b25b8f22";
+    const string GoldenFinalHash = "a7abb774047dc1aa53215892b1152fe36c803330692a4cfddfcc16f33031a553";
 
     readonly string _dir;
     readonly RpgStore _store;
