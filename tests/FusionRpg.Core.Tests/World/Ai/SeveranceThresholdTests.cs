@@ -108,4 +108,14 @@ public class SeveranceThresholdTests
         // Every member has a way round (spec-world-topology.md's own framing) — nothing here should
         // ever look like a worthwhile cut.
         var world = Fixture(GraphShapes.Ring());
-        var everySector = world.Sectors.Select(s => s.SectorId)
+        var everySector = world.Sectors.Select(s => s.SectorId).ToList();
+        var view = FullyScoutedEnemy(world, everySector);
+
+        foreach (var sectorId in everySector)
+        {
+            var score = SeveranceScore.For(view, Zomboss, sectorId);
+            Assert.False(score > FrontierRulesPolicy.SeveranceThresholdCost,
+                $"'{sectorId}' scored {score}, above the threshold on a ring with no articulation point");
+        }
+    }
+}

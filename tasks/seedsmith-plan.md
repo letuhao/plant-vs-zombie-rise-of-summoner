@@ -11,11 +11,19 @@ Audit: [seedsmith/review/](../docs/architecture/seedsmith/review/) — 66 findin
 
 ## Scope
 
-**W1 only: measurement.** `corpus`, `adapter`, `numerics`, `budget`, `metrics`, `report`.
+**W1: measurement.** `corpus`, `adapter`, `numerics`, `budget`, `metrics`, `report`.
 
 On completion, seedsmith finds every known defect in the item corpus with **zero model calls** —
 including the nine empty partitions that survived three authoring waves unnoticed. W2 (`planner`,
-`briefkit`) and W3 (`pipeline`) are out of scope and gate on this being green.
+`briefkit`) and the rest of W3 (`pipeline`'s generation logic) are out of scope and gate on this
+being green.
+
+**Plus one independent slice: `llm_caller` (S0).** Not part of the measurement chain — it has no
+edge to or from `corpus`/`adapter`/`metrics` — so it isn't "held" pending W3's gate, it's simply not
+on that path. Porting a proven, already-solved LM Studio caller (reasoning disabled, self-heal
+verify loop) is buildable and fully testable today against a mock server, with nothing above it
+required to exist first. W3 still gates on `metrics`/`planner` before *using* it to generate
+content — S0 only proves the transport mechanism, in isolation.
 
 **Not in W1, deliberately:** the `SemanticDedup` conceptual-clustering metric, blocked on a 516-word
 adjective `axis` registry addition (analytics §6.3). It ships as a declared gap, not as a check
@@ -28,10 +36,16 @@ implemented against the wrong grouping.
 ```
 corpus ── adapter ─┬─ numerics ─┐
                    ├─ budget ───┼─ metrics ── report
+
+llm_caller (S0, independent) ── (feeds W3's pipeline; gates on nothing above)
 ```
 
 Strictly downward. `numerics` and `budget` depend on `adapter`, not on the item registries directly
 — corrected after audit finding B2, and enforced by the stub adapter rather than by discipline.
+
+`llm_caller` is a second, disconnected component of this graph, not a follow-on to it. It imports
+nothing from `corpus`/`adapter`/`metrics` and they import nothing from it, so it has no position in
+the topological order above — it runs whenever, including now.
 
 ---
 
@@ -47,6 +61,22 @@ either working or visibly not.
 ---
 
 ## Phases and checkpoints
+
+### Phase 0 — `llm_caller` (S0), independent
+
+Ports `D:\Works\source\lore-weave\scripts\i18n_translate.py`'s LM Studio caller: reasoning disabled
+at the request (`reasoning_effort: "none"` + `chat_template_kwargs.enable_thinking: false` —
+different servers/templates read different keys, so both are always sent), robust JSON extraction,
+and a self-heal retry loop generalized so any future pipeline supplies its own verify rule instead
+of a translation-specific one. Full spec: [spec-pipeline.md §5.1](../docs/architecture/seedsmith/spec-pipeline.md#51-dont-build-a-model-calling-client---reuse-one-that-already-works).
+
+Proven in production on the source project's translate pipeline — this is a port and a
+generalization of the self-heal signature, not new design. Tested entirely against a stdlib mock
+HTTP server; no live model, no seedsmith dependency, no ordering relative to S1–S10.
+
+**⭐ CP-0 — the transport is proven before anything is built on top of it.** The reasoning-disable
+payload and the self-heal retry loop are verified against a fixture server, independent of whether
+`metrics` or `planner` exist yet.
 
 ### Phase 1 — walking skeleton (S1)
 
@@ -95,6 +125,7 @@ replacement.
 
 | # | Task | Delivers | Gates on |
 |---|---|---|---|
+| S0 | `llm_caller` | ported LM Studio transport + self-heal loop, mock-server tested | — (independent) |
 | S1 | Walking skeleton | corpus + stub adapter + 1 metric + report + CLI | — |
 | S2 | `adapter-items` | the same path on 1,438 real entries | S1 |
 | S3 | Absorb `seed_graph` | Linkage + Registration families, parity-proven | S2 |
@@ -138,6 +169,11 @@ Every task, without exception:
 
 ## Out of scope
 
-`planner`, `briefkit`, `pipeline` (W2/W3) · closing the eight accidental empty partitions — they are
-W2's known-answer test and must stay open · the adjective `axis` registry addition · any change to
-`tools/ItemSeedValidator`, which stays the referential gate.
+`planner`, `briefkit`, and `pipeline`'s *generation* logic — schemas, briefs, the actual act of
+writing content into the corpus — all still gate on `metrics`/`planner` existing (W2/W3). `llm_caller`
+(S0) is explicitly **not** in that bucket: it is the transport underneath `pipeline`, has no edge to
+`metrics` or `planner`, and is in scope now as its own slice.
+
+Also out of scope: closing the eight accidental empty partitions — they are W2's known-answer test
+and must stay open · the adjective `axis` registry addition · any change to `tools/ItemSeedValidator`,
+which stays the referential gate.

@@ -2,7 +2,70 @@
 
 Plan: [seedsmith-plan.md](seedsmith-plan.md) · Map: [../docs/architecture/seedsmith-map.md](../docs/architecture/seedsmith-map.md)
 
-Status: **not started.** Specs complete and audited (66 findings, 11 blockers, all closed).
+Status: **S0 done (17/17 tests green).** S1 next. Specs complete and audited (66 findings, 11
+blockers, all closed).
+
+---
+
+## Phase 0 — `llm_caller` (independent — no dependency on Phase 1+)
+
+### S0 — port the LM Studio caller
+`tools/seedsmith/seedsmith/pipeline/llm_caller.py`
+
+Port of `D:\Works\source\lore-weave\scripts\i18n_translate.py`, proven in production on that
+project's translate pipeline. Per spec-pipeline.md §5.1: transport and JSON extraction are copied
+as-is; the self-heal loop is generalized so `verify_fn` is supplied per caller instead of hardcoded
+to translation checks. No import from `corpus`, `adapters`, or `metrics` in either direction — this
+is why it needs no dependency and can build now rather than waiting on W3's gate.
+
+- `call_model(system, user, *, temperature)`: configurable endpoint/model (defaults: LM Studio
+  `http://localhost:1234/v1/chat/completions`, `google/gemma-4-26b-a4b-qat`); every call sends
+  `reasoning_effort: "none"` **and** `chat_template_kwargs: {enable_thinking: False, thinking:
+  False}` — both, unconditionally, because different servers/templates read different keys; 2-attempt
+  retry on `URLError`/`TimeoutError` only (no retry-storm against a wedged queue)
+- `extract_json(text)`: strip ` ```json ` fences/prose, parse the first `{...}`; regex fallback for
+  an unescaped `"` inside a value when strict `json.loads` fails
+- `call_with_self_heal(items, system, build_user, verify_fn, max_heal)`: generalized from
+  `translate_chunk()` — `verify_fn(items, out) -> (hard, soft)` is a parameter now, so a future
+  pipeline (flavour text, set headers, …) supplies its own hard/soft rule instead of the ported
+  translation-specific one; on exhausted heal rounds, falls back to a caller-supplied default per
+  key and reports which keys failed, never blank
+- Config adjustable via `seedsmith.toml` (endpoint, model, `max_heal`, timeout), ported script's
+  values as defaults
+
+**Acceptance**
+- [x] A stdlib `http.server` fixture captures the outgoing request body; test asserts both
+      reasoning-disable keys are present on every call, not just the first
+- [x] `extract_json` fixtures: clean JSON, fenced JSON, prose-wrapped JSON, and one
+      unescaped-quote case each parse correctly
+- [x] `call_with_self_heal` fixture: a `verify_fn` that fails once then passes proves the retry
+      re-prompts with the *named* defect (mirrors the ported script's "name the exact defects" design)
+- [x] `call_with_self_heal` fixture: a `verify_fn` that never clears within `max_heal` falls back to
+      the caller-supplied default and reports exactly which keys failed
+- [x] A test greps the module for `from seedsmith.(corpus|adapters|metrics)` and fails if found —
+      the zero-dependency claim is enforced, not asserted in prose
+- [x] Suite runs fully offline — the mock server is the only "model" ever called
+- [x] (beyond the original list, added on review) `load_config()` reads `[pipeline.llm_caller]`
+      from `seedsmith.toml` per spec-foundation §7.3; missing file/table falls back to
+      `DEFAULT_CONFIG`, malformed TOML raises rather than silently defaulting
+- [x] (beyond the original list, added on review) `call_model` retries `attempts` times against a
+      genuinely unreachable endpoint and then raises `RuntimeError`, proven without a mock
+
+**Verify** `python -m pytest tools/seedsmith/tests/test_llm_caller.py -v` → **17 passed** (2026-08-23)
+
+**Built:** `tools/seedsmith/seedsmith/pipeline/llm_caller.py` (`LlmCallerConfig`, `load_config`,
+`call_model`, `extract_json`, `call_with_self_heal`) · `tools/seedsmith/seedsmith/__init__.py` ·
+`tools/seedsmith/seedsmith/pipeline/__init__.py` · `tools/seedsmith/tests/test_llm_caller.py` (17
+tests across `ReasoningDisabledTests`, `RetryExhaustionTests`, `ExtractJsonTests`, `SelfHealTests`,
+`LoadConfigTests`, `DependencyIsolationTests`).
+
+**S0 status: DONE.**
+
+---
+
+**Note:** S0 does not unlock `pipeline`'s generation logic — that still gates on `metrics` and
+`planner` existing, so a pipeline's success can be graded against a real finding (spec-pipeline.md
+§2). S0 only proves the transport-and-self-heal mechanism, in isolation, before anything depends on it.
 
 ---
 

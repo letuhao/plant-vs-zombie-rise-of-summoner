@@ -60,10 +60,10 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
                         ?? Abandon(view, entity)
                         ?? Finish(view, entity)
                         ?? Take(view, entity)
-                        ?? Sever(view, entity, reach)
+                        ?? Sever(view, entity, reach, supplied)
                         ?? Recover(view, entity, supplied)
                         ?? Explore(view, entity, reach)
-                        ?? Expand(view, entity, value, reach)
+                        ?? Expand(view, entity, value, reach, supplied)
                         ?? Hold(view, entity);
 
             orders.Add(order);
@@ -269,7 +269,8 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
     /// wins when both are available — and above <see cref="Recover"/> and routine expansion: a cut
     /// this good is worth pre-empting mere self-maintenance for.
     /// </summary>
-    static PolicyOrder? Sever(IWorldView view, WorldEntity entity, IReadOnlyDictionary<string, int> reach)
+    static PolicyOrder? Sever(
+        IWorldView view, WorldEntity entity, IReadOnlyDictionary<string, int> reach, IReadOnlySet<string> supplied)
     {
         string? best = null;
         long bestScore = SeveranceThresholdCost;
@@ -290,9 +291,9 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         if (best is null) return null;
 
         var path = Route(view, entity, best);
-        return path is null
-            ? null
-            : Order(view, entity, WorldCommandKinds.Move, $"sever {best}, severance {bestScore}", lanePath: path);
+        if (path is null || !SurvivesTheRoute(view, entity, path, supplied)) return null;
+
+        return Order(view, entity, WorldCommandKinds.Move, $"sever {best}, severance {bestScore}", lanePath: path);
     }
 
     // ---- 6. Recover --------------------------------------------------------------------------
@@ -365,7 +366,8 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
     /// <summary>The best-valued reachable ground I do not hold, if it is worth having at all.</summary>
     static PolicyOrder? Expand(
         IWorldView view, WorldEntity entity,
-        IReadOnlyDictionary<string, SectorValue> value, IReadOnlyDictionary<string, int> reach)
+        IReadOnlyDictionary<string, SectorValue> value, IReadOnlyDictionary<string, int> reach,
+        IReadOnlySet<string> supplied)
     {
         string? best = null;
         // Strictly positive: zero is not worth a march. Survivor found extending the mutant set for
@@ -391,16 +393,72 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         if (best is null) return null;
 
         var path = Route(view, entity, best);
-        return path is null
-            ? null
-            : Order(view, entity, WorldCommandKinds.Move,
-                $"expand to {best}, {value[best].Explain()}", lanePath: path);
+        if (path is null || !SurvivesTheRoute(view, entity, path, supplied)) return null;
+
+        return Order(view, entity, WorldCommandKinds.Move,
+            $"expand to {best}, {value[best].Explain()}", lanePath: path);
     }
 
     // ---- 9. Hold -----------------------------------------------------------------------------
 
     static PolicyOrder Hold(IWorldView view, WorldEntity entity) =>
         Order(view, entity, WorldCommandKinds.StandFast, "nothing worth doing");
+
+    // ---- the march-loam gate (spec-loam-ai.md) ------------------------------------------------
+
+    /// <summary>
+    /// Would this legion's leash survive its own route? One pass over an already-known lane path,
+    /// partitioned into contiguous out-of-supply runs, requiring `Capacity ≥ Burn × (length of the
+    /// longest such run)` — the leash only has to survive the worst single stretch beyond supply,
+    /// since any in-supply sector along the way tops the legion back toward full before the next
+    /// stretch begins. Not a turn-by-turn simulator: this reads `supplied` once, computed for the
+    /// route's starting `WorldState`, the same pre-march-filter shape `Route` itself already uses.
+    ///
+    /// A legion with no burn at all (an empty roster) has nothing to run out on, so it always
+    /// survives — there is nothing here for the gate to refuse.
+    /// </summary>
+    internal static bool SurvivesTheRoute(
+        IWorldView view, WorldEntity entity, IReadOnlyList<string> lanePath, IReadOnlySet<string> supplied)
+    {
+        var burn = LegionSupply.Burn(entity);
+        if (burn <= 0) return true;
+
+        if (entity.AtSectorId is not { } origin) return true;   // Route() itself never produces a path without one
+
+        var capacity = LegionSupply.Capacity(entity);
+        var longestRun = 0;
+        var currentRun = 0;
+
+        foreach (var sectorId in SectorsAlong(view, origin, lanePath))
+        {
+            if (supplied.Contains(sectorId))
+            {
+                currentRun = 0;
+                continue;
+            }
+
+            currentRun++;
+            if (currentRun > longestRun) longestRun = currentRun;
+        }
+
+        return capacity >= burn * longestRun;
+    }
+
+    /// <summary>The ordered sectors a lane path actually visits, origin included — believed lanes, walked once.</summary>
+    static IReadOnlyList<string> SectorsAlong(IWorldView view, string origin, IReadOnlyList<string> lanePath)
+    {
+        var sectors = new List<string>(lanePath.Count + 1) { origin };
+        var at = origin;
+
+        foreach (var laneId in lanePath)
+        {
+            var lane = view.Lanes.First(l => string.Equals(l.LaneId, laneId, StringComparison.Ordinal));
+            at = string.Equals(lane.FromSectorId, at, StringComparison.Ordinal) ? lane.ToSectorId : lane.FromSectorId;
+            sectors.Add(at);
+        }
+
+        return sectors;
+    }
 
     // ---- plumbing ------------------------------------------------------------------------------
 

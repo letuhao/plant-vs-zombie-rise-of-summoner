@@ -174,9 +174,21 @@ the game running. `RpgStore.RebuildAlmanacSeed()`:
 1. **Wrapped in one transaction per connection** (hot write; media is read-only for this step —
    never shared with the hot write, per the existing convention `// Media write first — never share
    a txn with hot.` [RpgStore.Almanac.cs:54](../../../src/FusionRpg.Data/Sqlite/RpgStore.Almanac.cs)).
+   Combat baselines are loaded **once, in exactly two queries** (one per side) before the row loop —
+   **not** one query per type. **Corrected 2026-08-23, live evidence:** the original design (a
+   per-type `SELECT ... WHERE side=... AND type=... ORDER BY captured_utc LIMIT 1` called once per
+   row) is an N+1 pattern — confirmed live against a real 40,459-row `spawn_stats` table (523MB
+   `rpg-hot.sqlite`, 70+ runs) to take 30s+ and never complete under a 30s client timeout, invisible
+   to every automated test because test databases only ever seed a handful of rows. Replaced with
+   `LoadCombatBaselinesUnlocked`: one query per side using
+   `ROW_NUMBER() OVER (PARTITION BY type ORDER BY captured_utc ASC)` to get the earliest sample per
+   type in a single pass, loaded into an in-memory dictionary the row loop reads from (no further
+   SQL per row). Proven independent of indexing, not just index-assisted: timed directly against a
+   copy of the real database with `ix_spawn_stats_side_type_source` dropped entirely — 0.111s;
+   0.069s with the index present. The index stays as a minor assist, not a load-bearing requirement.
    For each row in `type_almanac_dump` (media DB): parse `fields_json`, strip `<color=...>` /
-   `</color>` markup from `info`/`introduce`, run the cost regexes, look up the baseline
-   `spawn_stats` sample, upsert one `almanac_seed` row. A failure partway through rolls back the
+   `</color>` markup from `info`/`introduce`, run the cost regexes, look up the baseline from the
+   preloaded dictionary, upsert one `almanac_seed` row. A failure partway through rolls back the
    whole rebuild rather than leaving a table with mixed `contract_version`/`rebuilt_utc` stamps.
 2. **Stale-row handling:** after upserting, delete any `almanac_seed` row whose `(side, type_id)` no
    longer has a matching `type_almanac_dump` row — a rebuild reflects the current capture state, not
@@ -255,7 +267,11 @@ CREATE TABLE IF NOT EXISTS almanac_seed_enrichment (
   unlock_condition  TEXT,
   type_class        TEXT,   -- e.g. "Basic Plant"; plants only
   weaknesses_text   TEXT,   -- raw prose; zombies only
-  damage_vs_text    TEXT,   -- raw prose, damage-vs-tag breakdown; zombies only
+  damage_vs_text    TEXT,   -- raw prose, damage-vs-tag breakdown; zombies only (unpopulated for now
+                             -- — see note below, the source tool folds this into weaknesses_text)
+  description_text  TEXT,   -- raw prose behavior text, e.g. "Ignores handheld armor"; plants only
+                             -- (added 2026-08-23 — found on Plant-id-info alongside Type/Unlock,
+                             -- covers 574/617 plants, not in the original design)
   source            TEXT NOT NULL,   -- e.g. 'pvz-fusion-almanac-3.6.1'
   matched_by        TEXT NOT NULL,   -- 'name' — never 'type_id', see above
   imported_utc      TEXT NOT NULL,
@@ -271,9 +287,16 @@ not a live hook. One-time (repeatable) import:
    `data/seed/external-reference/almanac-enrichment/pvz-fusion-almanac-3.6.1.json` (kept under
    `data/seed/` to match the repo's one existing checked-in-data convention, in an `external-reference/`
    subfolder since it isn't authored game content like the rest of `data/seed/`) — an array of `{name, side,
-   qualities?, unlock?, typeClass?, weaknesses?, damageVs?}`, produced once by querying the fan
-   tool's Scratch VM state (as done manually this session) and hand-reviewed before committing —
-   not regenerated automatically, since the source is a static download, not a live feed.
+   qualities?, unlock?, typeClass?, weaknesses?, damageVs?, description?}`, produced once by querying
+   the fan tool's Scratch VM state (as done manually this session) and hand-reviewed before
+   committing — not regenerated automatically, since the source is a static download, not a live
+   feed. **Owner-reviewed and approved 2026-08-23** (781 rows: 617 plants, 164 zombies) via a
+   generated review page, before being treated as commit-ready. Two extraction bugs were found and
+   fixed during this session before that approval: `qualities` initially came back empty for every
+   row due to a Scratch-VM object wrapper the unwrap logic didn't yet handle (fixed — 375/617 plants
+   now carry real tags); `description` wasn't extracted at all in the first pass (added — 574/617
+   plants). `Zombie-id-modifiers` (a separate buff/upgrade-gacha catalog in the source tool, 15
+   entries) was deliberately left uncollected — a different data domain from descriptive type text.
 2. `RpgStore.ImportAlmanacEnrichment(IEnumerable<...> rows)` matches each row to an
    `almanac_seed` row by normalized `display_name`/`type_name`, upserts the enrichment table, and
    **reports unmatched rows** (name-matching a 3.6.1 export against 3.8.1 content will always miss
@@ -291,6 +314,7 @@ public sealed class AlmanacSeedEnrichmentDto
     public string? TypeClass { get; set; }
     public string? WeaknessesText { get; set; }
     public string? DamageVsText { get; set; }
+    public string? Description { get; set; }   // added 2026-08-23, see schema note above
     public string Source { get; set; } = "";
 }
 // on AlmanacSeedDto:

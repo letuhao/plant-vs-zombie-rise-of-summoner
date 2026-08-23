@@ -80,11 +80,16 @@ hard blocker — see the map's "Why this shape" section for the hard-vs-soft dis
    (fan-tool data, hand-review is explicitly the spec's own boundary, not something an agent can
    self-certify) — file is at
    `data/seed/external-reference/almanac-enrichment/pvz-fusion-almanac-3.6.1.json`.
-4. **DONE 2026-08-23** (production-server spot-check deferred, see #2): `dotnet test
+4. **DONE 2026-08-23, including the live production-server check.** `dotnet test
    tests\FusionRpg.Core.Tests tests\FusionRpg.Data.Tests tests\FusionRpg.Guard.Tests` — 2882/2882 +
-   459/459 + 70/70 green; `.\scripts\guard-dal.ps1`,
-   `.\scripts\guard-single-writer.ps1`,`.\scripts\guard-secondary-no-unity.ps1`,
-   `.\scripts\guard-funnel-delta.ps1` — all green; injector deployed live via `deploy-play.ps1
-   -NoServer` for T1-T3; browsing `GET /api/almanac/seed/{side}/{typeId}` against the raw in-game
-   almanac card on the live production server is the one remaining deferred step (owner's terminal
-   only, per CLAUDE.md's server-lifetime rule, and to avoid dropping the owner's active session).
+   463/463 + 70/70 green; `.\scripts\guard-dal.ps1`, `.\scripts\guard-single-writer.ps1`,
+   `.\scripts\guard-secondary-no-unity.ps1`, `.\scripts\guard-funnel-delta.ps1` — all green; injector
+   deployed live via `deploy-play.ps1 -NoServer` for T1-T3. The production-server spot-check
+   (deferred earlier while the owner's game was actively connected) completed once the server was
+   confirmed idle: `dotnet publish` + direct `Start-Process` (per CLAUDE.md's server-lifetime rule),
+   rebuild + enrich triggered against the real 520MB `rpg-hot.sqlite`, `GET
+   /api/almanac/seed/plant/0` verified against the spec's recorded Peashooter sample. **Found a real
+   defect doing this that no automated test could have caught**: the baseline `spawn_stats` lookup
+   had no index for its `side/type/source` filter, so against a real-sized database (not a test
+   fixture) a rebuild never completed within 30s. Fixed with `ix_spawn_stats_side_type_source`;
+   confirmed rebuild now takes 0.33s. Full suite re-run green after the fix.

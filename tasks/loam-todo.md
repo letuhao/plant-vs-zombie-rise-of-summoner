@@ -889,7 +889,15 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
   - Dependencies: L25 (no legions dependency — this task could run any time after state lands, but
     follows the declared build order).
 
-- [ ] **L30: `SeveranceScore` and the `Sever` rule**
+- [x] **L30: `SeveranceScore` and the `Sever` rule** ✅ 2026-08-23 — `SeveranceScore.For` (a sibling
+  to `ValueMap`, pointing `ReconnectionCost.For` at a target faction's believed holdings); `Sever`
+  wired into `FrontierRulesPolicy`'s chain at position 5 (`Defend → Abandon → Finish → Take → Sever →
+  Recover → Explore → Expand → Hold`); `SeveranceThresholdCost=10_000` harness-tuned and proven
+  against Barbell/Star/Ring shapes (fires exactly on bridge-end articulation points, never on a ring
+  with none). Proven: fires against a genuine cut and marches there; declines on non-load-bearing
+  enemy ground; declines when `Take` already claimed the turn; the fog-degenerate near-zero reading
+  is a **passing** test, not a bug. Core 2907, Data 463, Guard 73 — all green; all 4 guard scripts
+  green (including the `World/Ai` belief-only guard).
   - Description: `SeveranceScore.For(view, targetFactionId, sectorId)`, `ReconnectionCost.For` pointed
     at an enemy's believed holdings. New `Sever` rule in `FrontierRulesPolicy`'s chain, position 5
     (after `Take`, before `Recover`). `SeveranceThresholdTests` harness-tunes the fire threshold.
@@ -905,7 +913,21 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
   - Dependencies: L29 (both touch `World/Ai`'s scoring surface; sequencing avoids the two changes
     colliding in review).
 
-- [ ] **L31: The AI-side march-loam gate**
+- [x] **L31: The AI-side march-loam gate** ✅ 2026-08-23 — `FrontierRulesPolicy.SurvivesTheRoute`
+  (`internal`, one pass over the lane path's sector sequence via a new `SectorsAlong` helper),
+  wired into both `Expand` and `Sever` right after `Route(...)` succeeds. Proven at the mechanism
+  level: the *same 5-lane route* is refused when only its endpoint is supplied (one 5-long stretch,
+  200 capacity < 80×5) and survives when a midpoint is also supplied (two 2-long stretches, 200 ≥
+  80×2) — total length held constant on purpose, isolating "worst run" as the only variable. Proven
+  behaviorally too: a thin-leashed band is refused the identical march a well-provisioned one takes
+  (reusing the existing best-ground fixture). **Real collateral found and fixed**: `Band()`'s
+  single default member had no bearer, so every pre-existing rule test that marched through any
+  unsupplied ground would have started failing the moment the gate landed — fixed by giving the
+  shared `Band()` helper a bearer by default (gate-specific tests build their own weaker `ThinBand`).
+  Core 2909, Guard 73 — all green; all 4 guard scripts green. `FusionRpg.Data` was mid-build-break
+  from an unrelated concurrent stream's in-progress edit (`RpgStore.AlmanacSeed.cs`, Almanac perf
+  work) at the time L31 finished; that stream resolved its own edit shortly after — confirmed by
+  re-running Data.Tests (463, all green) once it built clean again.
   - Description: a filter inside `FrontierRulesPolicy`'s own route selection (`Expand`, `Sever`) — one
     pass over an already-known lane path, partitioned into contiguous out-of-supply runs, requiring
     `Capacity ≥ BurnPerMember × MemberCount ×` the longest run. Not a turn-by-turn simulator — the
@@ -918,16 +940,25 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
   - Dependencies: L27 (needs `LegionSupply`'s capacity/burn already wired), L30 (touches the same
     file's route-selection code `Sever` just added).
 
-### Checkpoint 7 — `loam-ai` built
-- [ ] Habitability collapses `Total` for barren ground without suppressing `SeveranceScore`.
-- [ ] `Sever` fires/declines correctly, including the accepted fog-degenerate case as a passing test.
-- [ ] No AI-chosen route ever exhausts a legion's leash before arrival.
-- [ ] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
-- [ ] All four guard scripts green, including the `World/Ai`-reads-belief-only guard.
+### Checkpoint 7 — `loam-ai` built ✅ PASSED 2026-08-23
+- [x] Habitability collapses `Total` for barren ground without suppressing `SeveranceScore`.
+  (`SeveranceScoreTests`/`SeveranceThresholdTests` prove `SeveranceScore` responds normally on the
+  exact fixtures where habitability would have zeroed a `ValueMap` candidate)
+- [x] `Sever` fires/declines correctly, including the accepted fog-degenerate case as a passing test.
+- [x] No AI-chosen route ever exhausts a legion's leash before arrival. (`SurvivesTheRoute` gates
+  both `Expand` and `Sever`)
+- [x] `AbandonRuleTests`'s 100-turn and `TwoHearthsCampaignTests`'s 60-turn properties both still pass.
+- [x] All four guard scripts green, including the `World/Ai`-reads-belief-only guard.
 
 ## Phase 8 — `structure-substrate`
 
-- [ ] **L32: Validate the plumbing end to end**
+- [x] **L32: Validate the plumbing end to end** ✅ 2026-08-23 — already proven as a side effect of
+  L25's own thorough test coverage; this task re-ran the exact verify command fresh rather than
+  trusting memory. `dotnet test --filter FullyQualifiedName~Structure`: 11/11 green (6
+  `StructureCatalogTests` + 3 `Rule14_*` in `WorldInvariantTests.cs`, the established home for Rule
+  tests in this codebase — used instead of a separate `WorldValidationTests.cs`). DTO round-trip
+  reconfirmed via `WorldFixtureTests` (E2E). All 5 of `spec-structure-substrate.md`'s own success
+  criteria hold; no new `WorldCanonical` field this task. All 4 guard scripts green.
   - Description: `structure-substrate` is deliberately content-light — its state and catalog already
     landed in L25. This task proves the mechanism works on its own terms: a placeholder structure
     validates, `Rule14` fires/declines, the DTO round-trips owner-agnostically.
@@ -937,11 +968,11 @@ Plan: [loam-plan.md](loam-plan.md)'s post-gate section · Specs:
   - Files: `tests/.../StructureCatalogTests.cs` (new), `tests/.../WorldValidationTests.cs`. Scope: S.
   - Dependencies: L25.
 
-### Checkpoint 8 — `structure-substrate` built
-- [ ] Catalog validates at static init; `Rule14` fires and declines correctly.
-- [ ] `WorldSlotDto.StructureId` round-trips.
-- [ ] No behavior yet — confirmed by design, not an oversight.
-- [ ] All four guard scripts green.
+### Checkpoint 8 — `structure-substrate` built ✅ PASSED 2026-08-23
+- [x] Catalog validates at static init; `Rule14` fires and declines correctly.
+- [x] `WorldSlotDto.StructureId` round-trips.
+- [x] No behavior yet — confirmed by design, not an oversight.
+- [x] All four guard scripts green.
 
 ## Phase 9 — `loam-structures`
 

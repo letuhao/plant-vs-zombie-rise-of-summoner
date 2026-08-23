@@ -70,10 +70,15 @@ public sealed partial class RpgStore
 
             try
             {
+                // One set-based query per side (not one query per type — was an N+1 loop over
+                // ~900 types, each a full spawn_stats scan; confirmed live against a real 520MB
+                // hot.sqlite this took 30s+ and never completed under a 30s client timeout).
+                var baselines = LoadCombatBaselinesUnlocked(hot, tx);
+
                 foreach (var d in dumps)
                 {
                     seen.Add((d.Side, d.TypeId));
-                    UpsertOneAlmanacSeedRowUnlocked(hot, tx, d.Side, d.TypeId, d.FieldsJson, d.CapturedUtc, nowUtc, summary);
+                    UpsertOneAlmanacSeedRowUnlocked(hot, tx, d.Side, d.TypeId, d.FieldsJson, d.CapturedUtc, nowUtc, baselines, summary);
                 }
 
                 summary.StaleRemoved = DeleteStaleAlmanacSeedRowsUnlocked(hot, tx, seen);
@@ -94,6 +99,7 @@ public sealed partial class RpgStore
     void UpsertOneAlmanacSeedRowUnlocked(
         SqliteConnection hot, SqliteTransaction tx,
         string side, int typeId, string fieldsJson, string almanacCapturedUtc, string nowUtc,
+        Dictionary<(string Side, int TypeId), (string StatsJson, string CapturedUtc)> baselines,
         AlmanacSeedRebuildSummary summary)
     {
         var rawFields = JsonSerializer.Deserialize<Dictionary<string, string?>>(fieldsJson, AlmanacJson)
@@ -140,7 +146,7 @@ public sealed partial class RpgStore
             }
         }
 
-        var (hp, attack, armor, armorMax, statsObserved, statsSampleUtc) = ReadCombatBaselineUnlocked(hot, side, typeId);
+        var (hp, attack, armor, armorMax, statsObserved, statsSampleUtc) = ResolveCombatBaseline(side, typeId, baselines);
         if (statsObserved) summary.StatsObserved++; else summary.StatsUnobserved++;
         if (side == "plant") summary.PlantsBuilt++; else if (side == "zombie") summary.ZombiesBuilt++;
 
@@ -185,28 +191,64 @@ public sealed partial class RpgStore
         cmd.ExecuteNonQuery();
     }
 
-    (int? Hp, int? Attack, int? Armor, int? ArmorMax, bool Observed, string? SampleUtc) ReadCombatBaselineUnlocked(
-        SqliteConnection hot, string side, int typeId)
+    /// <summary>
+    /// Loads the earliest baseline spawn_stats sample per (side, type) in exactly two queries —
+    /// not one query per type. Each query uses ROW_NUMBER() OVER (PARTITION BY type ORDER BY
+    /// captured_utc) so SQLite does one indexed pass per side instead of one lookup per type
+    /// (the previous per-type loop was an N+1 pattern: ~900 separate queries, each a full table
+    /// scan without a matching index — confirmed live to take 30s+ against a real ~38k-row
+    /// spawn_stats table before this rewrite and the ix_spawn_stats_side_type_source index).
+    /// </summary>
+    static Dictionary<(string Side, int TypeId), (string StatsJson, string CapturedUtc)> LoadCombatBaselinesUnlocked(
+        SqliteConnection hot, SqliteTransaction tx)
     {
-        using var cmd = hot.CreateCommand();
-        cmd.CommandText = side == "plant"
-            ? "SELECT stats_json, captured_utc FROM spawn_stats WHERE side='plant' AND type=$t AND source='start' ORDER BY captured_utc ASC LIMIT 1;"
-            : "SELECT stats_json, captured_utc FROM spawn_stats WHERE side='zombie' AND type=$t AND source IN ('start','initHealth') ORDER BY captured_utc ASC LIMIT 1;";
-        cmd.Parameters.AddWithValue("$t", typeId);
-        using var r = cmd.ExecuteReader();
-        if (!r.Read()) return (null, null, null, null, false, null);
+        var result = new Dictionary<(string, int), (string, string)>();
 
-        var statsJson = r.GetString(0);
-        var sampleUtc = r.GetString(1);
-        var hp = TryInt(statsJson, "hpBase");
-        var attack = TryInt(statsJson, "attackBase");
+        void LoadSide(string side, string sourceFilterSql, Action<SqliteCommand> bindSources)
+        {
+            using var cmd = hot.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = $"""
+                SELECT type, stats_json, captured_utc FROM (
+                  SELECT type, stats_json, captured_utc,
+                         ROW_NUMBER() OVER (PARTITION BY type ORDER BY captured_utc ASC) AS rn
+                  FROM spawn_stats
+                  WHERE side=$side AND {sourceFilterSql}
+                )
+                WHERE rn = 1;
+                """;
+            cmd.Parameters.AddWithValue("$side", side);
+            bindSources(cmd);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                result[(side, r.GetInt32(0))] = (r.GetString(1), r.GetString(2));
+        }
+
+        LoadSide("plant", "source=$s1", cmd => cmd.Parameters.AddWithValue("$s1", "start"));
+        LoadSide("zombie", "source IN ($s1,$s2)", cmd =>
+        {
+            cmd.Parameters.AddWithValue("$s1", "start");
+            cmd.Parameters.AddWithValue("$s2", "initHealth");
+        });
+
+        return result;
+    }
+
+    static (int? Hp, int? Attack, int? Armor, int? ArmorMax, bool Observed, string? SampleUtc) ResolveCombatBaseline(
+        string side, int typeId, Dictionary<(string Side, int TypeId), (string StatsJson, string CapturedUtc)> baselines)
+    {
+        if (!baselines.TryGetValue((side, typeId), out var baseline))
+            return (null, null, null, null, false, null);
+
+        var hp = TryInt(baseline.StatsJson, "hpBase");
+        var attack = TryInt(baseline.StatsJson, "attackBase");
         int? armor = null, armorMax = null;
         if (side == "zombie")
         {
-            armor = TryInt(statsJson, "armorBase");
-            armorMax = TryInt(statsJson, "armorMaxBase");
+            armor = TryInt(baseline.StatsJson, "armorBase");
+            armorMax = TryInt(baseline.StatsJson, "armorMaxBase");
         }
-        return (hp, attack, armor, armorMax, true, sampleUtc);
+        return (hp, attack, armor, armorMax, true, baseline.CapturedUtc);
     }
 
     static int DeleteStaleAlmanacSeedRowsUnlocked(SqliteConnection hot, SqliteTransaction tx, HashSet<(string Side, int TypeId)> keep)

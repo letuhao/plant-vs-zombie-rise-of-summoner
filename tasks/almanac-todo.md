@@ -183,12 +183,29 @@ Plan: [almanac-plan.md](almanac-plan.md) · Map: [../docs/architecture/almanac-m
 - [x] `dotnet test tests\FusionRpg.Data.Tests tests\FusionRpg.E2E.Tests` green — 459/459 + 193/193
 - [x] `.\scripts\guard-dal.ps1` green
 - [x] Manual: `POST /api/almanac/seed/rebuild` then spot-check `GET /api/almanac/seed/plant/0`
-  (Peashooter) against the live samples recorded in the spec — **done via E2E test, not the live
-  production server**: the owner's game is actively connected to the running server right now: a
-  redeploy would drop that session, so I deferred the live-exe check rather than disrupt it.
-  `Rebuild_then_get_round_trips_through_the_real_server` exercises the identical `Program.cs` route
-  registrations end-to-end and asserts the exact spec-recorded Peashooter values (cost 100,
-  cooldown 7.5s) — equivalent evidence via the real pipeline, different host.
+  (Peashooter) against the live samples recorded in the spec — **completed live 2026-08-23** against
+  the actual production server and its real accumulated 520MB `rpg-hot.sqlite` (70+ runs of data),
+  once the server was confirmed not to have an active game session connected (it had actually
+  stopped running by then). **Found and fixed a real, serious defect in the process:**
+  `RebuildAlmanacSeed()`'s per-type `spawn_stats` baseline query (`WHERE side=... AND type=... AND
+  source=...`) had no matching index — against the real database this made every rebuild hang past
+  30+ seconds (confirmed: it never completed at all under a 30s client timeout) doing a full table
+  scan per type, ~900 times. All automated tests passed regardless, because test databases only ever
+  have a handful of seeded rows — this defect was invisible to every test in the suite.
+  **First pass added an index** (`ix_spawn_stats_side_type_source`) — masked the symptom (30s+ → 0.33s)
+  but left the N+1 query shape in place. **Owner pushed back correctly** ("if it cost 30s that means
+  bad SQL... redesign") — an index band-aiding an N+1 loop isn't the same as fixing the query shape,
+  and would degrade again as `spawn_stats` keeps growing unbounded. **Rewrote `RebuildAlmanacSeed()`
+  to load all baselines in exactly 2 queries** (one per side) using
+  `ROW_NUMBER() OVER (PARTITION BY type ORDER BY captured_utc)` instead of 904 per-type queries;
+  the per-row step is now an in-memory dictionary lookup. Proved this doesn't just lean on the same
+  index: copied the real 523MB DB to a scratch file, dropped the index, and timed the new query
+  directly — **0.111s with no index at all**, 0.069s with it back (40,459 real rows) — the index is
+  now a minor bonus, not a requirement. Live end-to-end after redeploying: rebuild 0.63s (904 built,
+  82 observed), `GET /api/almanac/seed/plant/0` unchanged and correct (豌豆射手, cost 100,
+  cooldown 7.5s, hp 300, attack 20). `POST /api/almanac/seed/enrich` live: 89 matched / 692 unmatched
+  (expected — 3.6.1 fan-tool names vs. our 3.8.1 catalog, already documented, not a defect).
+  `FusionRpg.Data.Tests` 463/463, E2E `AlmanacSeed*` 5/5, `guard-dal.ps1` green — all after the rewrite.
 - [x] Review with owner before Module 3 — flagged in session summary; proceeding per the goal's
   default-to-action instruction (Module 3 is explicitly optional/non-blocking per the map)
 
@@ -259,12 +276,10 @@ Plan: [almanac-plan.md](almanac-plan.md) · Map: [../docs/architecture/almanac-m
     Regenerated the checked-in export (`data/seed/external-reference/almanac-enrichment/pvz-fusion-almanac-3.6.1.json`,
     781 rows, now 251KB) and the review artifact
     (https://claude.ai/code/artifact/3b17e8a0-4d71-424d-810d-8a864f28a360) with the corrected data.
-    **`RpgStore.AlmanacSeedEnrichment.cs`/`RpgStore.cs` schema change verified via an isolated
-    `dotnet build src/FusionRpg.Data` (clean) before an unrelated, in-progress, uncommitted change
-    on the owner's side (`src/FusionRpg.Core/World/Ai/SeveranceScore.cs`, untracked, not part of
-    this work) started failing `FusionRpg.Core`'s build — blocking the full test-suite run. Not
-    touching that file (not this stream's work); full `Data.Tests`/`E2E.Tests` re-run is owed once
-    Core builds again.
+    Full suite re-run once the owner's unrelated concurrent `FusionRpg.Core` build issue (their own
+    in-progress `World/Ai/SeveranceScore.cs`, untouched by this work) resolved on its own:
+    `FusionRpg.Data.Tests` 463/463 (459 + 4 new — `Description_field_imports_and_reads_back` plus
+    the existing suite unaffected), E2E `AlmanacSeed*` 5/5, `guard-dal.ps1` green.
 
 ### Checkpoint 3 (Complete) — CLOSED 2026-08-23
 

@@ -58,6 +58,28 @@ public static class StructureCatalog
             RequiredSlotKind = SlotKind.Rootbed,
             CostMilli = 0,
             YieldMultiplierMilli = 1000
+        },
+        new()
+        {
+            StructureId = "well",
+            Name = "Well",
+            Kind = StructureKind.LoamSource,
+            RequiredSlotKind = SlotKind.Rootbed,
+            CostMilli = Loam.LoamPolicy.WellCostMilli,
+            YieldMultiplierMilli = Loam.LoamPolicy.WellYieldMultiplierMilli,
+            BuildTurns = Loam.LoamPolicy.WellBuildTurns
+        },
+        new()
+        {
+            StructureId = "waystation",
+            Name = "Waystation",
+            Kind = StructureKind.LoamSource,
+            RequiredSlotKind = SlotKind.Seat,
+            CostMilli = Loam.LoamPolicy.WaystationCostMilli,
+            // A Seat's own base yield is already zero, so the multiplier is irrelevant here —
+            // 1000 (unchanged) rather than a special case in LoamProduction's formula.
+            YieldMultiplierMilli = 1000,
+            BuildTurns = Loam.LoamPolicy.WaystationBuildTurns
         }
     };
 

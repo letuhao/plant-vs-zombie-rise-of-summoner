@@ -42,7 +42,18 @@ public class FrontierRulesTests
         AtSectorId = at,
         Stance = stance,
         MovementRemaining = MovementPolicy.BudgetFor(stance),
-        Members = new[] { new WorldEntityMember { SpeciesId = "normalzombie", Level = 1, Hp = hp, Wounds = wounds } }
+        // A bearer by default (L31, spec-loam-ai.md): every existing rule test in this file predates
+        // the march-loam gate and has nothing to do with it, so the default band carries enough
+        // capacity to survive any route this small map can produce. Tests that mean to exercise the
+        // gate itself build their own, deliberately weaker or stronger, entity.
+        Members = new[]
+        {
+            new WorldEntityMember
+            {
+                SpeciesId = "normalzombie", Level = 1, Hp = hp, Wounds = wounds,
+                Role = WorldEntityMemberRole.Bearer
+            }
+        }
     };
 
     /// <summary>A world dressed to order, observed, and seen through Zomboss's eyes.</summary>
@@ -234,7 +245,120 @@ public class FrontierRulesTests
         Assert.DoesNotContain(Decide(view), o => o.Reason.Contains("defend", StringComparison.Ordinal));
     }
 
-    // ---- rule 4: Recover ---------------------------------------------------------------------
+    // ---- rule 5: Sever (spec-loam-ai.md) ------------------------------------------------------
+
+    /// <summary>
+    /// A dedicated shape for `Sever` alone: a-b-c-d. Zomboss holds his own Seat at "a"; Dave holds
+    /// b, c, d as a chain. "c" is Dave's own articulation point — cutting it splits "d" off from
+    /// "b" entirely; neither "b" nor "d" is.
+    ///
+    /// Zomboss's belief of Dave's three sectors is built directly (fully scouted), not through
+    /// natural visibility the way `Seen()` computes it: `Sever` is scouting-gated by construction
+    /// (spec-loam-ai.md), and a fixture that skipped this would only exercise the zero-fog
+    /// degenerate case, not the rule itself.
+    /// </summary>
+    static IWorldView Severable(params WorldEntity[] entities)
+    {
+        var world = GraphShapes.From(600, "a-b", "b-c", "c-d") with { Factions = Map().Factions };
+        var dressed = world with
+        {
+            Sectors = world.Sectors
+                .Select(s => s.SectorId switch
+                {
+                    "a" => s with { OwnerFactionId = "zomboss", Slots = new[] { Slot(0, "seat") } },
+                    "b" or "c" or "d" => s with { OwnerFactionId = "dave" },
+                    _ => s
+                })
+                .ToList(),
+            Entities = entities.OrderBy(e => e.EntityId, StringComparer.Ordinal).ToList()
+        };
+
+        IntelSnapshot Scout(string sectorId)
+        {
+            var sector = dressed.Sectors.Single(s => s.SectorId == sectorId);
+            return new IntelSnapshot
+            {
+                SectorId = sectorId, LastSeenTurn = 0, Detail = SectorSight.Full,
+                OwnerFactionId = sector.OwnerFactionId, Phase = sector.Phase, Climate = sector.Climate,
+                DangerBand = sector.DangerBand
+            };
+        }
+
+        var snapshots = new[] { "a", "b", "c", "d" }.Select(Scout)
+            .OrderBy(s => s.SectorId, StringComparer.Ordinal)
+            .ToList();
+
+        return new BelievedWorldView(
+            dressed with { Intel = new[] { new FactionIntel { FactionId = "zomboss", Sectors = snapshots } } },
+            "zomboss");
+    }
+
+    [Fact]
+    public void An_enemy_articulation_point_is_worth_marching_at()
+    {
+        var view = Severable(Band("a"));
+
+        var order = Only(view);
+        Assert.Equal(WorldCommandKinds.Move, order.Command.Kind);
+        Assert.Contains("sever c", order.Reason, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void It_does_not_march_at_an_enemy_sector_that_is_not_load_bearing()
+    {
+        // Same shape, but only "b" and "d" — Dave's non-critical ends — are within reach the rule
+        // would even consider naming as the *best* target once "c" is removed from the picture.
+        // Proven directly: neither end's own severance score clears the threshold.
+        var view = Severable(Band("a"));
+        Assert.False(SeveranceScore.For(view, "dave", "b") > FrontierRulesPolicy.SeveranceThresholdCost);
+        Assert.False(SeveranceScore.For(view, "dave", "d") > FrontierRulesPolicy.SeveranceThresholdCost);
+    }
+
+    [Fact]
+    public void A_higher_rule_already_claiming_the_turn_pre_empts_sever()
+    {
+        // Zomboss's own band stands on clear, unowned ground (Take's own precondition) in the same
+        // world that also has a genuine cut available elsewhere — Take must still win, since it is
+        // strictly lower-risk than attacking an enemy-held junction.
+        var world = GraphShapes.From(600, "a-b", "b-c", "c-d") with { Factions = Map().Factions };
+        var dressed = world with
+        {
+            Sectors = world.Sectors
+                .Select(s => s.SectorId switch
+                {
+                    "a" => s with { Slots = new[] { Slot(0, "wildland") } },
+                    "b" or "c" or "d" => s with { OwnerFactionId = "dave" },
+                    _ => s
+                })
+                .ToList(),
+            Entities = new[] { Band("a") }
+        };
+
+        IntelSnapshot Scout(string sectorId)
+        {
+            var sector = dressed.Sectors.Single(s => s.SectorId == sectorId);
+            return new IntelSnapshot
+            {
+                SectorId = sectorId, LastSeenTurn = 0, Detail = SectorSight.Full,
+                OwnerFactionId = sector.OwnerFactionId, Phase = sector.Phase, Climate = sector.Climate,
+                DangerBand = sector.DangerBand
+            };
+        }
+
+        var snapshots = new[] { "a", "b", "c", "d" }.Select(Scout)
+            .OrderBy(s => s.SectorId, StringComparer.Ordinal)
+            .ToList();
+
+        var view = new BelievedWorldView(
+            dressed with { Intel = new[] { new FactionIntel { FactionId = "zomboss", Sectors = snapshots } } },
+            "zomboss");
+
+        var order = Only(view);
+        Assert.Equal(WorldCommandKinds.Claim, order.Command.Kind);
+        Assert.Equal("a", order.Command.SectorId);
+    }
+
+    // ---- rule 6: Recover ---------------------------------------------------------------------
 
     [Fact]
     public void Badly_hurt_and_in_supply_it_digs_in()
@@ -496,5 +620,92 @@ public class FrontierRulesTests
         Assert.Equal(
             Decide(forward).Select(o => o.Command.CommandId),
             Decide(backward).Select(o => o.Command.CommandId));
+    }
+
+    // ---- L31: the march-loam gate (spec-loam-ai.md) -------------------------------------------
+
+    static WorldEntity ThinBand(string at) => new()
+    {
+        EntityId = "e-zomboss-1", Kind = WorldEntityKind.Warband, OwnerFactionId = "zomboss",
+        AtSectorId = at, Stance = "march", MovementRemaining = MovementPolicy.BudgetFor("march"),
+        // 8 members, one bearer: Capacity 200, Burn 80 — a short leash the gate can actually
+        // discriminate on, unlike the well-provisioned default `Band()`.
+        Members = Enumerable.Range(0, 7)
+            .Select(_ => new WorldEntityMember { SpeciesId = "normalzombie", Level = 1, Hp = 200 })
+            .Append(new WorldEntityMember { SpeciesId = "normalzombie", Level = 1, Hp = 200, Role = WorldEntityMemberRole.Bearer })
+            .ToList()
+    };
+
+    [Fact]
+    public void The_gate_measures_the_worst_out_of_supply_run_not_the_routes_total_length()
+    {
+        // Same total length (5 lanes, a through f) both times, and that is deliberate: it isolates
+        // the one thing that must decide the outcome. Continuous: only "a" is supplied, so the
+        // whole rest of the route is one five-long stretch — 200 capacity cannot cover 80 x 5 = 400.
+        // Broken: "d" is also supplied, splitting the same five lanes into two two-long stretches —
+        // 200 easily covers 80 x 2 = 160. A check that only summed total distance would treat both
+        // identically; this one does not.
+        var lanePath = new[] { "l-a-b", "l-b-c", "l-c-d", "l-d-e", "l-e-f" };
+        var world = GraphShapes.From(600, "a-b", "b-c", "c-d", "d-e", "e-f");
+        var entity = ThinBand("a");
+
+        var continuous = new HashSet<string>(StringComparer.Ordinal) { "a" };
+        Assert.False(FrontierRulesPolicy.SurvivesTheRoute(
+            new BelievedWorldView(world with { Intel = IntelRecorder.Observe(world, world, 0) }, "zomboss"),
+            entity, lanePath, continuous));
+
+        var broken = new HashSet<string>(StringComparer.Ordinal) { "a", "d" };
+        Assert.True(FrontierRulesPolicy.SurvivesTheRoute(
+            new BelievedWorldView(world with { Intel = IntelRecorder.Observe(world, world, 0) }, "zomboss"),
+            entity, lanePath, broken));
+    }
+
+    [Fact]
+    public void A_thin_roster_is_refused_a_march_a_well_provisioned_one_would_take()
+    {
+        // Zomboss holds only "a"; "b" and "c" are unowned ground he must cross to reach "d", so the
+        // whole three-lane route beyond his own Seat is one unsupplied stretch. Belief is built
+        // directly (fully scouted) rather than through natural visibility, matching this gate's own
+        // scouting-adjacent precondition and sidestepping Explore's own glimpse/unknown handling,
+        // which is not what this test is about.
+        var world = Map();
+        var dressed = world with
+        {
+            Sectors = world.Sectors
+                .Select(s => s.SectorId switch
+                {
+                    "a" => s with { OwnerFactionId = "zomboss", Slots = new[] { Slot(0, "seat") } },
+                    "d" => s with { Slots = new[] { Slot(0, "essence-deposit") } },
+                    _ => s
+                })
+                .ToList(),
+            Entities = new[] { ThinBand("a") }
+        };
+
+        IntelSnapshot Scout(string sectorId)
+        {
+            var sector = dressed.Sectors.Single(s => s.SectorId == sectorId);
+            return new IntelSnapshot
+            {
+                SectorId = sectorId, LastSeenTurn = 0, Detail = SectorSight.Full,
+                OwnerFactionId = sector.OwnerFactionId, Phase = sector.Phase, Climate = sector.Climate,
+                DangerBand = sector.DangerBand,
+                Slots = sector.Slots.Select(sl => new RememberedSlot
+                {
+                    SlotIndex = sl.SlotIndex, SlotTypeId = sl.SlotTypeId, Element = sl.Element,
+                    GuardWaveId = sl.GuardWaveId, State = sl.State, GuardState = sl.GuardState
+                }).ToList()
+            };
+        }
+
+        var snapshots = new[] { "a", "b", "c", "d" }.Select(Scout)
+            .OrderBy(s => s.SectorId, StringComparer.Ordinal)
+            .ToList();
+
+        var view = new BelievedWorldView(
+            dressed with { Intel = new[] { new FactionIntel { FactionId = "zomboss", Sectors = snapshots } } },
+            "zomboss");
+
+        Assert.DoesNotContain(Decide(view), o => o.Reason.Contains("expand", StringComparison.Ordinal));
     }
 }

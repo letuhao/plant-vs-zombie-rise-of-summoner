@@ -260,6 +260,11 @@ public sealed partial class RpgStore : IRpgDb
             CREATE INDEX IF NOT EXISTS ix_archive_catalog_kind ON archive_catalog(kind);
             """);
         try { Exec(db, "CREATE INDEX IF NOT EXISTS ix_spawn_stats_run_ptr ON spawn_stats(run_id, ptr);"); } catch { /* old db */ }
+        // almanac_seed's baseline lookup filters side+type+source per rebuilt row (RpgStore.AlmanacSeed.cs)
+        // — without this, a rebuild against a real-sized DB (hundreds of thousands of spawn_stats rows
+        // across many runs) does a full table scan per type, ~900 times. Confirmed live 2026-08-23: a
+        // rebuild against a 520MB hot.sqlite never returned within 30s before this index existed.
+        try { Exec(db, "CREATE INDEX IF NOT EXISTS ix_spawn_stats_side_type_source ON spawn_stats(side, type, source, captured_utc);"); } catch { /* old db */ }
         try { Exec(db, "CREATE INDEX IF NOT EXISTS ix_events_run ON events(run_id);"); } catch { /* old db */ }
         try { Exec(db, "CREATE INDEX IF NOT EXISTS ix_events_player ON events(player_id);"); } catch { /* old db */ }
         try { Exec(db, "CREATE UNIQUE INDEX IF NOT EXISTS ix_runs_match_key ON runs(match_key) WHERE match_key IS NOT NULL;"); } catch { /* old db */ }

@@ -80,4 +80,31 @@ public static class LoamPolicy
 
     /// <summary>What one member, fighter or bearer, burns per turn beyond supply. Harness-tuned alongside <see cref="CarryPerBearer"/>.</summary>
     public const long BurnPerMember = 10;
+
+    // ---- loam-structures (spec-loam-structures.md) ----
+
+    /// <summary>
+    /// Per-mille, 1000 = unchanged. A well multiplies its own rootbed's seep — a provisional
+    /// placeholder like every other constant here, not yet harness-measured against a stated target
+    /// (the spec names none for this one, unlike the legion leash's explicit 4-8 turn range).
+    /// </summary>
+    public const int WellYieldMultiplierMilli = 2000;
+
+    /// <summary>What a well costs to build, spent from the founding legion's own `CarriedLoam`.</summary>
+    public const long WellCostMilli = 200;
+
+    /// <summary>What a waystation costs to build. Same spend path as a well's.</summary>
+    public const long WaystationCostMilli = 300;
+
+    /// <summary>How many `Production` passes a well takes to finish, decrementing to zero.</summary>
+    public const int WellBuildTurns = 2;
+
+    /// <summary>How many `Production` passes a waystation takes to finish — riskier ground, longer build.</summary>
+    public const int WaystationBuildTurns = 4;
+
+    /// <summary>
+    /// A waystation may only be founded within this many unweighted hops (G5) of a sector the
+    /// founder already holds that is itself currently habitable.
+    /// </summary>
+    public const int WaystationRangeHops = 3;
 }
