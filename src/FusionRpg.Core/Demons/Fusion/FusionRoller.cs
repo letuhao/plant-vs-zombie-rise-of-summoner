@@ -13,7 +13,7 @@ public sealed record FusionRollResult(string Variant, IReadOnlyList<string> Trai
 public static class FusionRoller
 {
     // The summon altar's constant, referenced — the two shiny odds can never drift apart.
-    const int ShinyDie = SummonRoller.ShinyOneIn;
+    static int ShinyDie => SummonRoller.ShinyOneIn;
 
     public static FusionRollResult Roll(
         DemonSpeciesDef resultSpecies, DemonRarity resultRarity,

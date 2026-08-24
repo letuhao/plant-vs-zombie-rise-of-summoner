@@ -156,11 +156,69 @@ phase-scoped exception, distinct from the three permanent behavioural exceptions
 1. **Does the server expose unlock state?** T9's rail renders from unlock state. If no endpoint
    exists it ships as `Pending` with a reason — the sealed-contract mechanism handles it, but the
    rail will show locked entries until the server catches up. Confirm that is acceptable.
+   **Resolved 2026-08-24, verified against the shipped task work rather than re-argued:** T9's
+   `railState.ts` does exactly this — Relics and Expeditions ship honestly `locked` where no
+   container/sector endpoint exists, rather than faked.
 2. **Save select needs a per-save summary** (level, creatures bound, sectors held, last played).
    `GET /api/players` returns `id`, `name`, `createdUtc` today. Same treatment: `Pending`, or a
    thinner first version. *(With T16 excluded, "sectors held" is `0`/`Pending` for every save this
    phase regardless of the endpoint — worth deciding whether to show the field at all before World
    exists, or ship it honestly at zero.)*
+   **Resolved 2026-08-24 by omission, not by decision — worth naming so it isn't mistaken for still
+   open:** no task in this plan ever allocated build time to a richer save-select summary, so the
+   plan's own named fallback ("Pending, or a thinner first version") is what shipped by default —
+   `HudBar.tsx`'s player picker is the bare `id`/`name`/`createdUtc` dropdown this question
+   anticipated as acceptable. If a richer save-select screen is wanted, it needs its own task; it is
+   not a defect in what exists.
 3. **Battle stage (T18) has no live backend** — the battle kernel is approved, not built. T18 builds
    against fixtures only, and its e2e is fixture-driven. Confirm that is in scope rather than
    deferred.
+   **Superseded 2026-08-23 by a stronger finding, not merely resolved:** direct investigation found
+   no incremental battle-resolution API exists at all (`BattleEngine.Resolve` is one-shot
+   synchronous) — there is no fixture-driven path to build against. T18 is excluded this phase on
+   that finding; see `game-gui-todo.md`'s T18 row.
+
+---
+
+## Phase 7 — Plate parity (added 2026-08-24, after the visual-completeness audit)
+
+**Why this phase exists.** Checkpoint G closed the *shell's* twenty enforcement checks — bands, stage
+persistence, focus, mutation feedback, bundle budget, and so on. It never asked the other question:
+does each surface's own visual content match the plate that specifies it. That pass ran for the first
+time on 2026-08-24 —
+[design/visual-completeness-audit-2026-08-24.md](../docs/design/visual-completeness-audit-2026-08-24.md)
+— and found real, previously unaudited gaps: not shell defects, content gaps. Several surfaces were
+wrapped in the new shell (Checkpoint G's own scope) without ever being redesigned to their plate
+(this phase's scope). World and Battle stay excluded per their standing owner decisions above; this
+phase does not reopen either.
+
+**Sequencing rationale.** T25 (rail orientation) goes first and alone, on purpose: `Rail.tsx` is one
+shared component consumed by every stage, so fixing its orientation before the content-shaped tasks
+below means none of them get built against a layout that immediately changes underneath them. T26–T29
+can run in parallel once T25 lands — each touches a different, independent surface. T30 (thin-wrap
+content) is scoped last and split per-layer because "redesign Expeditions/Almanac to their plate" is
+real product-shaping work, not a mechanical wrap, and each layer's real backing data differs enough
+that bundling them risks the same kind of scope-creep the original refactor deliberately avoided by
+going surface-by-surface.
+
+| Task | Surface | Finding | Depends on |
+|---|---|---|---|
+| T25 | Rail — vertical icon dock | audit finding 5d (cross-cutting) | none |
+| T26 | Sanctum home stage — creature strip, map table, tonight list, run prompt | finding 1 | T25 |
+| T27 | Creatures — search/filter/sort, three-tier volume (GG-50/51) | finding 2 | T25 |
+| T28 | Lawn player HUD — sun/wave/timer/deployed chips/playback | finding 3 | T25 |
+| T29 | Settings — Display/Sound/Advanced tabs, connection status row | finding 4 | none |
+| T30 | Thin-wrap content — Expeditions, Almanac; Pacts card-grid + portraits | finding 5 | T25 |
+
+**Checkpoint H** closes the phase: every finding in the audit is either fixed or has a fresh,
+named reason it stays as-is (the same discipline Checkpoint G already used for its own honest gaps).
+
+**Retiring the old layout is the step after Checkpoint H, not part of it.** The owner named this
+explicitly: *"old layout should be retire after complete the fe enhancement."* `game-gui-map.md`'s
+own assumption 2 — *"old routes keep working until their replacement lands, no flag day"* — is why
+every superseded route still redirects rather than 404s today. Retirement means removing the
+pre-refactor page components those redirects currently point through (`RosterPage.tsx`'s standalone
+form, `ExpeditionsPage.tsx`/`CatalogPage.tsx`/etc. once T30 replaces their content, and the nine
+routes T12 already swept into the developer tree) once nothing real still depends on their old
+visuals. Doing it before Checkpoint H would delete the only thing several redirects currently point
+through. See `game-gui-todo.md`'s Checkpoint I for the task itself — not started, correctly gated.

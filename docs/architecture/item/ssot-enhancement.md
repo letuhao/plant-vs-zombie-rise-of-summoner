@@ -424,15 +424,24 @@ low-rarity item more** — a designed catch-up property, and the reason rarity c
 I8's roll distribution is the *other* overlap source. This lane assumes it carries part, not all
 (§9.1).
 
-### 7.3 Caps
+### 7.3 Caps — soft, not hard (AGENTS.md "no hard progression ceilings"; reconciled 2026-08-24)
+
+**Pre-build correction.** An earlier draft clamped `ilvl_cap` to a hard `[4, 20]` and stopped the
+`rarity_cap` table at Legendary +20 "because that felt like enough." Neither is a real constraint —
+the Peril band's falling success rate and from-+17 level-drop risk (§3.1) is *already* the soft cap
+this lane needs: pushing further gets steadily less worth it, without a numeric wall forcing the
+stop. A hard ceiling on top of that risk curve is a second, redundant, unexplained cap of exactly the
+kind PS-8 exists to catch.
 
 ```text
 cap(item) = min( rarity_cap[rarity], ilvl_cap(item_level), progression_cap(player) )
-ilvl_cap(ilvl) = clamp(4 + ilvl / 4, 4, 20)          -- integer division
+ilvl_cap(ilvl) = max(4, 4 + ilvl / 4)          -- integer division; floor only, no ceiling
 ```
 
 Proposed `rarity_cap`, offered to **I1** as an append-only column on the existing `rarity` table
-alongside `ordinal`. Rung names are I1's; this is the shape, not the vocabulary.
+alongside `ordinal`. Rung names are I1's; this is the shape, not the vocabulary. The table is
+**open-ended**: a future rarity rung above Legendary/Unique adds a higher row, the same way the
+power ladder's own rung list grows — it is not a hard stop at +20.
 
 | Rung (illustrative) | cap |
 |---|---|
@@ -440,11 +449,13 @@ alongside `ordinal`. Rung names are I1's; this is the shape, not the vocabulary.
 | Magic | +8 |
 | Rare | +12 |
 | Epic | +16 |
-| Legendary / Unique | +20 |
+| Legendary / Unique | +20, and whatever a future rung above it adds |
 
-`ilvl_cap` stops a level-8 base being enhanced into endgame gear: ilvl 20 → +9, ilvl 40 → +14, ilvl 64 →
-**+20**. `progression_cap` is a campaign band; this lane defaults it to 20 (no gate) because progression
-is not its to decide (§10.3).
+`ilvl_cap` scales with item level and does not top out: ilvl 20 → +9, ilvl 40 → +14, ilvl 64 → +20,
+ilvl 128 → +36, without an artificial floor on how far the formula can go. `progression_cap` is a
+campaign band; this lane defaults it to a high, effectively-non-binding value because progression is
+not its to decide (§10.3) — a real progression gate, if one is ever wanted, is a configurable soft
+cap owned by the progression system, not a number this lane hardcodes.
 
 **A cap lowered by a later rebalance grandfathers.** An item already above the new cap keeps its level
 and cannot go higher. Retroactively stripping levels is the same defect as retroactively un-succeeding an
@@ -766,7 +777,8 @@ stalls. Transfer (§7.4) is the release valve; the 70% ratio is the price of the
    deletes §7.6, three reason codes, and the whole odds-disclosure gate. That is a real simplification,
    and it costs the only moment in the ladder that has any tension.
 3. **Is there a campaign progression gate on the ladder, and who owns it?** I defaulted
-   `progression_cap` to 20 (no gate) because progression is not this lane's.
+   `progression_cap` to a high, effectively-non-binding value (§7.3, reconciled 2026-08-24 — no hard
+   progression ceilings, AGENTS.md) because progression is not this lane's.
 4. **The transfer ratio (70%) and the ±8 item-level window** are pure feel numbers with no reasoning
    behind them beyond "lossy but not punitive".
 5. **Does enhancement apply to charms (I10) and socket inserts (I4), or only to equipment?** I scoped it

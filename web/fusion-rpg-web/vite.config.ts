@@ -41,7 +41,7 @@ export default defineConfig({
         "src/i18n/**/*.{ts,tsx}",
         "src/theme/**/*.{ts,tsx}",
         "src/ui/actor/**/*.{ts,tsx}",
-        "src/stages/sanctum/**/*.{ts,tsx}",
+        "src/stages/**/*.{ts,tsx}",
         "src/layers/**/*.{ts,tsx}",
         "src/lib/bus/**/*.{ts,tsx}",
         "src/ui/**/*.{ts,tsx}",

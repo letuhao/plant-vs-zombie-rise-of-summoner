@@ -9,6 +9,7 @@ namespace FusionRpg.Server;
 
 public sealed class EventIngest : BackgroundService
 {
+    // Structural (tunables-ssot.md T2) — SQLite write-batch size, not balance.
     public const int WriterBatch = 800;
 
     private readonly Channel<EventEnvelope> _channel = Channel.CreateUnbounded<EventEnvelope>(new UnboundedChannelOptions

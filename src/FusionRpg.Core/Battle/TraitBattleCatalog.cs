@@ -53,48 +53,82 @@ public static class TraitBattleMath
     }
 }
 
+/// <summary>Config-backed (tunables-ssot.md T1) — data/tuning/battle.v1.json's traits map. Trait
+/// ids/mechanisms/ChannelMods stay here (schema); every Milli/Charges magnitude is loaded.</summary>
 public static class TraitBattleCatalog
 {
-    public static readonly IReadOnlyList<TraitBattleDef> All = new TraitBattleDef[]
+    static BattleTuning? _tuning;
+
+    public static void Configure(BattleTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static BattleTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "TraitBattleCatalog.Configure(...) has not run. Every trait's magnitudes read " +
+        "data/tuning/battle.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    static IReadOnlyList<TraitBattleDef>? _all;
+
+    public static IReadOnlyList<TraitBattleDef> All => _all ??= Build();
+
+    static IReadOnlyList<TraitBattleDef> Build()
     {
-        // Funnel-routed — stat mods + HP mutations through the battle-local EffectFunnel.
-        new() { TraitId = "berserker", Mechanism = TraitBattleMechanism.FunnelRouted, BerserkRampHalfMilli = 250, BerserkRampQuarterMilli = 500 },
-        new() { TraitId = "regenerator", Mechanism = TraitBattleMechanism.FunnelRouted, RegenPerRoundMilli = 20 },
-        new() { TraitId = "soul-eater", Mechanism = TraitBattleMechanism.FunnelRouted, OnKillHealMilli = 100 },
-        new()
+        TraitBattleDef Of(string id, TraitBattleMechanism mechanism, bool targetsLowestHp = false, bool guardsAdjacentAlly = false) =>
+            Merge(id, mechanism, targetsLowestHp, guardsAdjacentAlly);
+
+        return new TraitBattleDef[]
         {
-            TraitId = "critical-hunter", Mechanism = TraitBattleMechanism.FunnelRouted,
-            // MIGRATED 2026-08-23 (E12). Its magnitude is now a row — `atom.critical-hunter.t1`, a
-            // stat.derived on combat.crit.rate.omni — reached through `TraitAtomSource`. The entry
-            // stays so the trait id, mechanism and the other thirteen keep their shape; only the
-            // magnitude moved. Measured delta: zero, across every battle golden.
-            ChannelMods = Array.Empty<BattleChannelMod>()
-        },
-        new() { TraitId = "guardian", Mechanism = TraitBattleMechanism.FunnelRouted, GuardShareMilli = 250 },
-        // swift/berserker sit in the Funnel-routed HALF of the plan's locked 7/7 split even
-        // though their mechanics run engine-side (initiative math, damage multiplier) — the
-        // split classifies which traits the contracts module later layers obedience onto,
-        // not the literal code path of every parameter.
-        new() { TraitId = "swift", Mechanism = TraitBattleMechanism.FunnelRouted, InitiativeBonusMilli = 1000 },
-        new() { TraitId = "immortal", Mechanism = TraitBattleMechanism.FunnelRouted, DeathRefusalCharges = 1 },
+            // Funnel-routed — stat mods + HP mutations through the battle-local EffectFunnel.
+            Of("berserker", TraitBattleMechanism.FunnelRouted),
+            Of("regenerator", TraitBattleMechanism.FunnelRouted),
+            Of("soul-eater", TraitBattleMechanism.FunnelRouted),
+            new()
+            {
+                TraitId = "critical-hunter", Mechanism = TraitBattleMechanism.FunnelRouted,
+                // MIGRATED 2026-08-23 (E12). Its magnitude is now a row — `atom.critical-hunter.t1`, a
+                // stat.derived on combat.crit.rate.omni — reached through `TraitAtomSource`. The entry
+                // stays so the trait id, mechanism and the other thirteen keep their shape; only the
+                // magnitude moved. Measured delta: zero, across every battle golden.
+                ChannelMods = Array.Empty<BattleChannelMod>()
+            },
+            Of("guardian", TraitBattleMechanism.FunnelRouted),
+            // swift/berserker sit in the Funnel-routed HALF of the plan's locked 7/7 split even
+            // though their mechanics run engine-side (initiative math, damage multiplier) — the
+            // split classifies which traits the contracts module later layers obedience onto,
+            // not the literal code path of every parameter.
+            Of("swift", TraitBattleMechanism.FunnelRouted),
+            Of("immortal", TraitBattleMechanism.FunnelRouted),
 
-        // Engine-native behaviors — outside the FA vocabulary by design.
-        new() { TraitId = "coward", Mechanism = TraitBattleMechanism.EngineBehavior, RetreatBelowMilli = 250 },
-        new() { TraitId = "bloodthirsty", Mechanism = TraitBattleMechanism.EngineBehavior, TargetsLowestHp = true },
-        new() { TraitId = "loyal", Mechanism = TraitBattleMechanism.EngineBehavior, GuardsAdjacentAlly = true },
-        new() { TraitId = "greedy", Mechanism = TraitBattleMechanism.EngineBehavior, SoulLootBonusMilli = 250 },
-        new() { TraitId = "genius", Mechanism = TraitBattleMechanism.EngineBehavior, SpecimenXpBonusMilli = 250 },
-        new() { TraitId = "void-touched", Mechanism = TraitBattleMechanism.EngineBehavior, EssenceProcMilli = 100, EssenceRiderMilli = 150 },
-        new() { TraitId = "chaos-marked", Mechanism = TraitBattleMechanism.EngineBehavior, EssenceProcMilli = 100, EssenceRiderMilli = 150 }
-    };
+            // Engine-native behaviors — outside the FA vocabulary by design.
+            Of("coward", TraitBattleMechanism.EngineBehavior),
+            Of("bloodthirsty", TraitBattleMechanism.EngineBehavior, targetsLowestHp: true),
+            Of("loyal", TraitBattleMechanism.EngineBehavior, guardsAdjacentAlly: true),
+            Of("greedy", TraitBattleMechanism.EngineBehavior),
+            Of("genius", TraitBattleMechanism.EngineBehavior),
+            Of("void-touched", TraitBattleMechanism.EngineBehavior),
+            Of("chaos-marked", TraitBattleMechanism.EngineBehavior)
+        };
+    }
 
-    static readonly Dictionary<string, TraitBattleDef> ById =
-        All.ToDictionary(t => t.TraitId, StringComparer.Ordinal);
+    static TraitBattleDef Merge(string id, TraitBattleMechanism mechanism, bool targetsLowestHp, bool guardsAdjacentAlly)
+    {
+        var m = Tuning.TraitOf(id);
+        return new TraitBattleDef
+        {
+            TraitId = id, Mechanism = mechanism,
+            BerserkRampHalfMilli = m.BerserkRampHalfMilli, BerserkRampQuarterMilli = m.BerserkRampQuarterMilli,
+            RegenPerRoundMilli = m.RegenPerRoundMilli, OnKillHealMilli = m.OnKillHealMilli,
+            GuardShareMilli = m.GuardShareMilli, InitiativeBonusMilli = m.InitiativeBonusMilli,
+            DeathRefusalCharges = m.DeathRefusalCharges, RetreatBelowMilli = m.RetreatBelowMilli,
+            TargetsLowestHp = targetsLowestHp, GuardsAdjacentAlly = guardsAdjacentAlly,
+            SoulLootBonusMilli = m.SoulLootBonusMilli, SpecimenXpBonusMilli = m.SpecimenXpBonusMilli,
+            EssenceProcMilli = m.EssenceProcMilli, EssenceRiderMilli = m.EssenceRiderMilli
+        };
+    }
 
-    public static bool IsKnown(string? traitId) => traitId != null && ById.ContainsKey(traitId);
+    public static bool IsKnown(string? traitId) =>
+        traitId != null && All.Any(t => string.Equals(t.TraitId, traitId, StringComparison.Ordinal));
 
     public static TraitBattleDef Get(string traitId) =>
-        ById.TryGetValue(traitId, out var def)
-            ? def
-            : throw new ArgumentException($"Unknown battle trait id '{traitId}'.");
+        All.FirstOrDefault(t => string.Equals(t.TraitId, traitId, StringComparison.Ordinal))
+            ?? throw new ArgumentException($"Unknown battle trait id '{traitId}'.");
 }

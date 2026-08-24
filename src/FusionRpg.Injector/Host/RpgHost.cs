@@ -91,6 +91,23 @@ public static class RpgHost
         FusionRpg.Core.Expeditions.ExpeditionTuningHub.Configure(
             FusionRpg.Core.Expeditions.ExpeditionTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "expeditions.v1.json"))));
+        FusionRpg.Core.Match.MatchTuningPolicy.Configure(
+            FusionRpg.Core.Match.MatchTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "match.v1.json"))));
+        FusionRpg.Core.Effects.EffectsTuningHub.Configure(
+            FusionRpg.Core.Effects.EffectsTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "effects.v1.json"))));
+        FusionRpg.Core.Net.NetPolicy.Configure(
+            FusionRpg.Core.Net.NetTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "net.v1.json"))));
+        FusionRpg.Core.Vfx.VfxTuningHub.Configure(
+            FusionRpg.Core.Vfx.VfxTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "vfx.v1.json"))));
+        FusionRpg.Core.Power.PowerTuningHub.Configure(
+            FusionRpg.Core.Power.PowerTuningLoader.Parse(
+                // T4.2 (power-dial, 2026-08-24): v1 (bMilli=0) -> v2 (bMilli=400). v1 stays on disk --
+                // reverting is pointing this back at power-scale.v1.json and un-bumping RulesetVersion.
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "power-scale.v2.json"))));
 
         IsInitialized = true;
     }

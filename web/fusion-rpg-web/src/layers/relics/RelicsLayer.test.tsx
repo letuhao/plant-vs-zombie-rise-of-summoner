@@ -65,6 +65,30 @@ function setup(opts?: { equipped?: { slot: string; itemId: string }[] }) {
 }
 
 describe("RelicsLayer (T14)", () => {
+  it("shows a loading state while queries are in flight, distinct from empty (GG-17)", () => {
+    mockUseUniqueActors.mockReturnValue({ isLoading: true, data: undefined });
+    mockUseRelics.mockReturnValue({ data: { items: relics } });
+    mockUseUniqueEquipment.mockReturnValue({ data: { items: [] } });
+    renderWithProviders(<RelicsLayer open onOpenChange={() => {}} playerId={1} />);
+    expect(screen.getByTestId("relics-loading")).toBeInTheDocument();
+    expect(screen.queryByText("No creatures bound yet")).not.toBeInTheDocument();
+  });
+
+  it("shows an error state with a retry, distinct from empty (GG-17)", async () => {
+    const refetchActors = vi.fn();
+    const refetchRelics = vi.fn();
+    mockUseUniqueActors.mockReturnValue({ isError: true, data: undefined, refetch: refetchActors });
+    mockUseRelics.mockReturnValue({ data: { items: relics }, refetch: refetchRelics });
+    mockUseUniqueEquipment.mockReturnValue({ data: { items: [] } });
+    const user = userEvent.setup();
+    renderWithProviders(<RelicsLayer open onOpenChange={() => {}} playerId={1} />);
+    expect(screen.getByTestId("relics-error")).toBeInTheDocument();
+
+    await user.click(screen.getByText("Retry"));
+    expect(refetchActors).toHaveBeenCalled();
+    expect(refetchRelics).toHaveBeenCalled();
+  });
+
   it("shows an empty state with no bound creatures — nothing to equip a relic to yet", () => {
     mockUseUniqueActors.mockReturnValue({ data: { playerId: 1, items: [] } });
     mockUseRelics.mockReturnValue({ data: { items: relics } });

@@ -65,6 +65,7 @@ export function StatsPage() {
         <Button
           data-testid="stats-save"
           disabled={save.isPending}
+          title={save.isPending ? "Saving…" : undefined}
           onClick={() => void save.mutateAsync(stats)}
         >
           Save and push to injector

@@ -1,12 +1,23 @@
 namespace FusionRpg.Core;
 
+/// <summary>Config-backed magnitudes (tunables-ssot.md T1) — data/tuning/sim.v1.json. Name strings
+/// stay structural (not magnitudes).</summary>
 public static class SimDefaults
 {
-    public const long PlantHp = 300;
-    public const long PlantAttack = 20;
-    public const long ZombieHp = 270;
-    public const long ZombieAttack = 50;
-    public const long HitDamage = 50;
+    static SimTuning? _tuning;
+
+    public static void Configure(SimTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static SimTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "SimDefaults.Configure(...) has not run. SimEngine's fallback stats read " +
+        "data/tuning/sim.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    public static long PlantHp => Tuning.PlantHp;
+    public static long PlantAttack => Tuning.PlantAttack;
+    public static long ZombieHp => Tuning.ZombieHp;
+    public static long ZombieAttack => Tuning.ZombieAttack;
+    public static long HitDamage => Tuning.HitDamage;
     public const string LevelName = "Sim";
     public const string PlantTypeName = "Peashooter";
     public const string ZombieTypeName = "Zombie";

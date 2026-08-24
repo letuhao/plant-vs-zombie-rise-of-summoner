@@ -1,4 +1,5 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Power;
 using FusionRpg.Data;
 using Xunit;
 
@@ -50,13 +51,19 @@ public class AtomInstanceStoreTests : IDisposable
             }).IsOk);
     }
 
+    // T3.4 (content-scale): 20 is the pin -- contentScale(20) == 1.000 exactly, so this store test's
+    // frozen values stay exactly what they were before content-scale existed.
+    static readonly PowerTuning Tuning = PowerTuning.Build(
+        1, 1, 80_000, 0, 20, 680, // fixed anchor (Fixed* consts are `internal` to Core+Core.Tests only)
+        1000, 25000, 250, 1000, 5000, 5000, 25000);
+
     string SaveInstance(string containerId = "trait.stalwart", long seed = 42)
     {
         var container = _store.GetContainer(containerId)!;
         var atoms = _store.ListAtoms().ToDictionary(a => a.AtomId, StringComparer.Ordinal);
 
         var r = Instantiator.TryInstantiate(container,
-            id => atoms.TryGetValue(id, out var a) ? a : null, seed, out var inst);
+            id => atoms.TryGetValue(id, out var a) ? a : null, seed, 20, Tuning, out var inst);
         Assert.True(r.IsOk, r.ToString());
 
         return _store.SaveInstance(inst!);

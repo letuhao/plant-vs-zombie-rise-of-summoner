@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "@/test/render";
+import { getStageMountCount, resetStageMountCounts } from "@/shell/stageHost";
 import { SanctumStage } from "./SanctumStage";
 
 const mockUsePlayers = vi.fn();
@@ -11,17 +12,28 @@ const mockUseSoulBalance = vi.fn();
 const mockUseRelics = vi.fn();
 const mockUseDemonRoster = vi.fn();
 
-vi.mock("@/lib/bus", () => ({
-  usePlayers: () => mockUsePlayers(),
-  useUniqueActors: () => mockUseUniqueActors(),
-  useRuns: () => mockUseRuns(),
-  useSoulBalance: () => mockUseSoulBalance(),
-  useRelics: () => mockUseRelics(),
-  useDemonRoster: () => mockUseDemonRoster(),
-  useSpeciesIndex: () => new Map(),
-  useUniqueEquipment: () => ({ data: { items: [] } }),
-  usePutUniqueEquipment: () => ({ mutate: vi.fn(), isPending: false })
-}));
+// Almanac/Chronicle mount CatalogPage/RecipesPage/MetricsPage/RpgProgressionPage/PvzStatsPage
+// once opened (T13: layers defer mounting until first open, not on every Sanctum render — see
+// `mountedLayers` in SanctumStage.tsx). Their own `@/lib/bus` hooks (useTypes, useRecipes,
+// useMetrics, useRunSpawns, useRpgProgression*, usePvzStats*, …) are left as the real
+// implementations via `importOriginal`, matching T12's DeveloperTree.test.tsx precedent: with no
+// live server they degrade into loading/error states harmlessly in jsdom instead of needing an
+// ever-growing explicit mock list for pages this file isn't testing.
+vi.mock("@/lib/bus", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/bus")>();
+  return {
+    ...actual,
+    usePlayers: () => mockUsePlayers(),
+    useUniqueActors: () => mockUseUniqueActors(),
+    useRuns: () => mockUseRuns(),
+    useSoulBalance: () => mockUseSoulBalance(),
+    useRelics: () => mockUseRelics(),
+    useDemonRoster: () => mockUseDemonRoster(),
+    useSpeciesIndex: () => new Map(),
+    useUniqueEquipment: () => ({ data: { items: [] } }),
+    usePutUniqueEquipment: () => ({ mutate: vi.fn(), isPending: false })
+  };
+});
 
 vi.mock("@/lib/bus/contracts", () => ({
   useContracts: () => ({
@@ -55,6 +67,7 @@ beforeEach(() => {
   });
   mockUseRelics.mockReturnValue({ data: { items: [] } });
   mockUseDemonRoster.mockReturnValue({ data: { items: [] } });
+  resetStageMountCounts();
 });
 
 describe("SanctumStage", () => {
@@ -97,17 +110,16 @@ describe("SanctumStage", () => {
     await waitFor(() => expect(screen.queryByTestId("creatures-layer")).not.toBeInTheDocument());
   });
 
-  it("clicking an unlocked non-Creatures rail entry opens its placeholder layer, and Esc closes it", async () => {
+  it("clicking an unlocked non-Creatures rail entry opens its real layer, and Esc closes it", async () => {
     mockUseRuns.mockReturnValue({ data: [{ id: 1, startedUtc: "2026-01-01T00:00:00Z" }] });
     const user = userEvent.setup();
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
 
     await user.click(screen.getByTestId("rail-almanac"));
-    await waitFor(() => expect(screen.getByTestId("sanctum-layer-placeholder")).toBeInTheDocument());
-    expect(screen.getByRole("heading", { name: "Almanac" })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId("almanac-layer")).toBeInTheDocument());
 
     await user.keyboard("{Escape}");
-    await waitFor(() => expect(screen.queryByTestId("sanctum-layer-placeholder")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByTestId("almanac-layer")).not.toBeInTheDocument());
   });
 
   it("the focus card's CTA opens the same Creatures layer", async () => {
@@ -115,6 +127,43 @@ describe("SanctumStage", () => {
     renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
     await user.click(screen.getByTestId("focus-card-cta"));
     await waitFor(() => expect(screen.getByTestId("creatures-layer")).toBeInTheDocument());
+  });
+
+  it("a layer stays mounted across a close, not just its chunk cached (T13: deferred mount, not remount-per-open)", async () => {
+    mockUseRuns.mockReturnValue({ data: [{ id: 1, startedUtc: "2026-01-01T00:00:00Z" }] });
+    const user = userEvent.setup();
+    renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
+
+    await user.click(screen.getByTestId("rail-almanac"));
+    await waitFor(() => expect(screen.getByTestId("almanac-layer")).toBeInTheDocument());
+    await user.click(screen.getByTestId("almanac-tab-recipes"));
+    expect(screen.getByTestId("almanac-tab-recipes")).toHaveAttribute("aria-current", "true");
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByTestId("almanac-layer")).not.toBeInTheDocument());
+
+    await user.click(screen.getByTestId("rail-almanac"));
+    await waitFor(() => expect(screen.getByTestId("almanac-layer")).toBeInTheDocument());
+    // If the layer had been fully unmounted rather than staying mounted-but-hidden, its own
+    // `useState` would have reset to the "creatures" default on this reopen.
+    expect(screen.getByTestId("almanac-tab-recipes")).toHaveAttribute("aria-current", "true");
+  });
+
+  it("the stage's mount count stays 1 across every layer opening and closing, not just one (GG-1/GG-11)", async () => {
+    mockUseRuns.mockReturnValue({ data: [{ id: 1, startedUtc: "2026-01-01T00:00:00Z" }] });
+    const user = userEvent.setup();
+    renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
+    expect(getStageMountCount("sanctum")).toBe(1);
+
+    for (const rail of ["rail-creatures", "rail-almanac", "rail-chronicle"]) {
+      await user.click(screen.getByTestId(rail));
+      await waitFor(() => expect(screen.getByTestId("sanctum-hud")).toBeInTheDocument());
+      expect(getStageMountCount("sanctum")).toBe(1);
+
+      await user.keyboard("{Escape}");
+      await waitFor(() => expect(screen.getByTestId("sanctum-hud")).toBeInTheDocument());
+      expect(getStageMountCount("sanctum")).toBe(1);
+    }
   });
 
   it("Almanac and Chronicle are locked until a run has completed", () => {

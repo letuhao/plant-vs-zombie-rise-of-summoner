@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/software-architecture.md",
+    "note": "Extracted byte-identical from RpgProgression.cs (tunables-ssot.md M.11, 2026-08-24). POC-tuned XP curve/awards (RpgXpAwardMap, persisted via RpgStore.Progression) — kept live rather than migrated as dead code; RpgProgressionBalanceTests exercises it directly.",
+    "rebalance": "Never hand-edit this file. python tools/tuning/publish.py progression <dotted.key>=<value> [...] writes progression.v{n+1}.json; the old version stays on disk for revert."
+  },
+  "xpCurve": {
+    "plant":  { "first": 80.0,  "step": 32.0 },
+    "zombie": { "first": 70.0,  "step": 28.0 },
+    "player": { "first": 100.0, "step": 45.0 }
+  },
+  "awards": {
+    "kill": 12,
+    "defeat": -100,
+    "mower": -30,
+    "plantPlace": 8,
+    "zombieSpawn": 9
+  }
+}

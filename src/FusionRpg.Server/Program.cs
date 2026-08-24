@@ -62,6 +62,30 @@ FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
 FusionRpg.Core.Expeditions.ExpeditionTuningHub.Configure(
     FusionRpg.Core.Expeditions.ExpeditionTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "expeditions.v1.json"))));
+FusionRpg.Core.SimDefaults.Configure(
+    FusionRpg.Core.SimTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "sim.v1.json"))));
+FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
+    FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "progression.v1.json"))));
+FusionRpg.Core.Battle.BattleTuningHub.Configure(
+    FusionRpg.Core.Battle.BattleTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "battle.v1.json"))));
+FusionRpg.Core.Demons.SummoningTuningHub.Configure(
+    FusionRpg.Core.Demons.SummoningTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "summoning.v1.json"))));
+FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
+    FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "ai.v1.json"))));
+FusionRpg.Data.Policies.SealedCompactionPolicy.Configure(
+    FusionRpg.Data.Policies.DataTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "data.v1.json"))));
+FusionRpg.Core.Power.PowerTuningHub.Configure(
+    FusionRpg.Core.Power.PowerTuningLoader.Parse(
+        // T4.2 (power-dial, 2026-08-24): v1 (bMilli=0) -> v2 (bMilli=400). v1 stays on disk --
+        // reverting is pointing this back at power-scale.v1.json and un-bumping RulesetVersion, no
+        // other code change (PS-7).
+        File.ReadAllText(Path.Combine(tuningDir, "power-scale.v2.json"))));
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
@@ -71,6 +95,8 @@ Directory.CreateDirectory(dataDir);
 Console.WriteLine($"[data] {dataDir} (hot=rpg-hot.sqlite media=rpg-media.sqlite)");
 builder.Services.AddSingleton(new RpgStore(dataDir));
 builder.Services.AddSingleton(sp => new TypeIconStore(sp.GetRequiredService<RpgStore>()));
+builder.Services.AddSingleton<FusionRpg.Core.Power.IPowerIndexProvider>(sp =>
+    new FusionRpg.Server.Power.ServerPowerIndexProvider(sp.GetRequiredService<RpgStore>(), FusionRpg.Core.Power.PowerTuningHub.Tuning));
 builder.Services.AddSingleton<IColdArchiveWriter>(sp => new ColdArchiveWriter(sp.GetRequiredService<RpgStore>()));
 builder.Services.AddSingleton<IColdArchiveCatalog>(sp => new ColdArchiveCatalog(sp.GetRequiredService<RpgStore>()));
 builder.Services.AddSingleton<IHotCompactor>(sp => new HotCompactor(sp.GetRequiredService<RpgStore>()));

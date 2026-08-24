@@ -73,8 +73,10 @@ public class BattleEffectHostTests
     [Fact]
     public void Amount_cap_refuses_oversized_mutations()
     {
+        // T3.5 (spec-caps-reconcile.md §2.1): AmountCap is now derived (long.MaxValue/2), not the old
+        // 1e9 literal -- "one past the cap" has to be computed from the live value, not hardcoded.
         var (host, actors) = NewHost(("squad:0", 50, 100));
-        Assert.False(host.QueueHpDelta("squad:0", long.MaxValue / 2));
+        Assert.False(host.QueueHpDelta("squad:0", ResourceDeltaMath.AmountCap + 1));
         host.Flush();
         Assert.Equal(50, actors["squad:0"].Hp);
         Assert.Empty(host.LastApplied);

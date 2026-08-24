@@ -23,14 +23,23 @@ public sealed record SummonRollResult(
 /// </summary>
 public static class SummonRoller
 {
-    public const int EpicHardPity = 25;
-    public const int LegendarySoftStart = 41;   // pull number where the ramp begins
-    public const int LegendaryHardPity = 55;
-    public const int LegendaryBasePerMille = 10;
-    public const int LegendaryRampPerMille = 60;
-    public const int EpicPerMille = 50;
-    public const int RarePerMille = 200;
-    public const int ShinyOneIn = 64;
+    static SummoningTuning? _tuning;
+
+    public static void Configure(SummoningTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static RollerTuning Tuning => (_tuning ?? throw new InvalidOperationException(
+        "SummonRoller.Configure(...) has not run. Pity/rarity math reads " +
+        "data/tuning/summoning.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.")).Roller;
+
+    public static int EpicHardPity => Tuning.EpicHardPity;
+    public static int LegendarySoftStart => Tuning.LegendarySoftStart;   // pull number where the ramp begins
+    public static int LegendaryHardPity => Tuning.LegendaryHardPity;
+    public static int LegendaryBasePerMille => Tuning.LegendaryBasePerMille;
+    public static int LegendaryRampPerMille => Tuning.LegendaryRampPerMille;
+    public static int EpicPerMille => Tuning.EpicPerMille;
+    public static int RarePerMille => Tuning.RarePerMille;
+    public static int ShinyOneIn => Tuning.ShinyOneIn;
 
     public static (IReadOnlyList<SummonRollResult> Results, PityState Pity) Roll(
         SummonBannerDef banner, ElementTypeId? focusElement, int count, PityState pity, SeededRng rng)

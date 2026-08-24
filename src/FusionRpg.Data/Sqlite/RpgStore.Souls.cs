@@ -15,12 +15,27 @@ public sealed partial class RpgStore
     readonly Dictionary<(long PlayerId, long RunId), int> _killEarnMemo = new();
 
     /// <summary>
+    /// T3.6 (spec-caps-reconcile.md §2.3, SSOT §11.7a): every soul-earn amount now scales by
+    /// <c>contentScale(Θ)</c> instead of the flat caps this task deleted. The live vanilla-PvZ
+    /// capture pipeline (<c>zombie.die</c> / <c>match.result</c> → <see cref="PvzActivityKinds"/>)
+    /// carries no per-kill or per-run depth signal today — a <c>ZombieKilled</c> fact records only
+    /// that a kill happened (<c>PvzActivityRollupBuilder</c> reads nothing else off it), and a
+    /// <c>MatchEnded</c> fact carries only a result string. Wiring a real signal through vanilla PvZ
+    /// capture is a separate, unbuilt task — none of <c>PvzActivityKinds.cs</c>, the injector capture
+    /// hooks, or the fact-shaping code are in this task's file list. Reading at the pin keeps every
+    /// vanilla-PvZ soul award byte-identical to pre-T3.6 behavior (contentScale(20) = 1.000 exactly)
+    /// — an explicit, documented placeholder, never a silent unscaled default.
+    /// </summary>
+    const int VanillaPvzKillAndRunTheta = 20;
+
+    /// <summary>
     /// Soul earns from a freshly inserted Activity fact — called inside the fact's own transaction
     /// (spec-soul-economy.md). Dedupe key = fact id, so re-ingest can never double-earn.
     /// </summary>
     void ApplySoulEarnFromActivityUnlocked(
         SqliteConnection db, long playerId, long runId, string t, string factKind, string payload, long factId)
     {
+        var tuning = Core.Power.PowerTuningHub.Tuning;
         long delta;
         string reason;
         switch (factKind)
@@ -35,12 +50,12 @@ public sealed partial class RpgStore
                     _killEarnMemo[key] = counted;
                 }
 
-                // Patron bonus (spec-patron-demon.md): +1 on every 10th earning kill, same 50-soul
-                // cap. Gated so the audited unpatroned shape stays byte-identical; the patron
-                // check is a PK point lookup, not a scan (review-C1 discipline).
+                // Patron bonus (spec-patron-demon.md): +1 on every 10th earning kill, uncapped since
+                // T3.6. Gated so the audited unpatroned shape stays byte-identical; the patron check
+                // is a PK point lookup, not a scan (review-C1 discipline).
                 delta = HasPatronUnlocked(db, playerId)
-                    ? Core.Demons.Patron.PatronPolicy.KillEarnWithPatron(counted)
-                    : SoulEarnPolicy.KillEarn(counted);
+                    ? Core.Demons.Patron.PatronPolicy.KillEarnWithPatron(counted, VanillaPvzKillAndRunTheta, tuning)
+                    : SoulEarnPolicy.KillEarn(VanillaPvzKillAndRunTheta, tuning);
                 if (delta > 0)
                     _killEarnMemo[key] = counted + 1;
                 reason = SoulEarnPolicy.Reasons.Kill;
@@ -48,20 +63,12 @@ public sealed partial class RpgStore
             }
             case PvzActivityKinds.MatchEnded:
             {
-                // Same normalization as the runs projection ("win" → "victory", etc.).
+                // Same normalization as the runs projection ("win" → "victory", etc.). No more
+                // daily-victory decay (T3.6 deleted VictoryFullPerDay, audit F11) -- both outcomes
+                // read the same way now.
                 var victory = string.Equals(NormalizeResult(TryString(payload, "result")), "victory", StringComparison.Ordinal);
-                if (victory)
-                {
-                    var priorToday = CountVictoriesOnDayUnlocked(db, playerId, t);
-                    delta = SoulEarnPolicy.MatchEndEarn(true, (int)priorToday);
-                    reason = SoulEarnPolicy.Reasons.Victory;
-                }
-                else
-                {
-                    delta = SoulEarnPolicy.MatchEndEarn(false, 0);
-                    reason = SoulEarnPolicy.Reasons.Defeat;
-                }
-
+                delta = SoulEarnPolicy.MatchEndEarn(victory, VanillaPvzKillAndRunTheta, tuning);
+                reason = victory ? SoulEarnPolicy.Reasons.Victory : SoulEarnPolicy.Reasons.Defeat;
                 break;
             }
             default:
@@ -80,19 +87,6 @@ public sealed partial class RpgStore
         cmd.Parameters.AddWithValue("$p", playerId);
         cmd.Parameters.AddWithValue("$r", reason);
         cmd.Parameters.AddWithValue("$run", runId);
-        return (long)(cmd.ExecuteScalar() ?? 0L);
-    }
-
-    long CountVictoriesOnDayUnlocked(SqliteConnection db, long playerId, string t)
-    {
-        using var cmd = db.CreateCommand();
-        cmd.CommandText = """
-            SELECT COUNT(*) FROM rpg_soul_ledger
-            WHERE player_id=$p AND reason=$r AND substr(t,1,10) = substr($t,1,10);
-            """;
-        cmd.Parameters.AddWithValue("$p", playerId);
-        cmd.Parameters.AddWithValue("$r", SoulEarnPolicy.Reasons.Victory);
-        cmd.Parameters.AddWithValue("$t", t);
         return (long)(cmd.ExecuteScalar() ?? 0L);
     }
 
@@ -151,19 +145,36 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
-    /// Balance ceiling — keeps SQLite integer addition far from 64-bit overflow (which silently
-    /// degrades to REAL and permanently corrupts the snapshot). Last line of defense; endpoints clamp too.
+    /// Dynamic per-award ceiling — headroom to <c>long.MaxValue</c> from a given balance
+    /// (spec-caps-reconcile.md §2.1, F12), not a fixed constant. What actually overflows is
+    /// <c>balance + award</c> after many awards, not any single award's own size, so the bound has to
+    /// track the balance it protects rather than sit at some round decimal near <c>int64</c>. Pure and
+    /// public — no DB needed to test "an award legal at balance 0 is refused near int64Max" directly.
     /// </summary>
-    public const long MaxSoulAward = 1_000_000_000;
+    public static long MaxSoulAwardFrom(long balance) => checked(long.MaxValue - Math.Max(0L, balance));
+
+    /// <summary>
+    /// One policy for the soul-award ceiling, shared by every path that can credit a balance
+    /// (<see cref="AwardSouls"/> here and <c>ApplyExpeditionRewards</c> in RpgStore.Expeditions.cs) —
+    /// before this task the expedition path silently clamped instead (§11.2a). Throws, never clamps.
+    /// </summary>
+    static void GuardSoulAwardOrThrow(long balance, long delta)
+    {
+        var headroom = MaxSoulAwardFrom(balance);
+        if (delta > headroom)
+            throw new ArgumentOutOfRangeException(nameof(delta), delta,
+                $"soul award exceeds headroom {headroom} at balance {balance} (int64 balance ceiling)");
+    }
 
     /// <summary>Positive award outside the activity path (codex discovery, milestones). Idempotent on dedupe.</summary>
     public (bool Inserted, SoulBalanceDto Balance) AwardSouls(long playerId, long delta, string reason, string dedupeKey)
     {
-        if (delta <= 0 || delta > MaxSoulAward) throw new ArgumentOutOfRangeException(nameof(delta));
+        if (delta <= 0) throw new ArgumentOutOfRangeException(nameof(delta));
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
+            GuardSoulAwardOrThrow(ReadSoulBalanceUnlocked(db, playerId).Balance, delta);
             var inserted = AppendSoulLedgerUnlocked(db, playerId, 0, delta, reason, null, null, dedupeKey,
                 DateTime.UtcNow.ToString("o"));
             tx.Commit();

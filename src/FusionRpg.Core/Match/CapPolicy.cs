@@ -6,12 +6,31 @@ namespace FusionRpg.Core.Match;
 /// </summary>
 public sealed class CapPolicyConfig
 {
-    public int MaxLivingPlants { get; set; } = 50;
-    public int MaxLivingZombies { get; set; } = 80;
+    // Config-backed (tunables-ssot.md T1) — data/tuning/match.v1.json. Property initializers (not
+    // default parameters) can read a method, so a one-off override via the object initializer (as
+    // tests do) still gets the real configured value for any field it leaves unset.
+    public int MaxLivingPlants { get; set; } = MatchTuningPolicy.MaxLivingPlants;
+    public int MaxLivingZombies { get; set; } = MatchTuningPolicy.MaxLivingZombies;
     /// <summary><c>-1</c> = unlimited.</summary>
     public int MaxLivingBullets { get; set; } = -1;
 
     public static CapPolicyConfig Defaults() => new();
+}
+
+/// <summary>Host-configured match tuning (tunables-ssot.md T1/T5) — data/tuning/match.v1.json.</summary>
+public static class MatchTuningPolicy
+{
+    static MatchTuning? _tuning;
+
+    public static void Configure(MatchTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static MatchTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "MatchTuningPolicy.Configure(...) has not run. CapPolicyConfig.Defaults() reads " +
+        "data/tuning/match.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    public static int MaxLivingPlants => Tuning.MaxLivingPlants;
+    public static int MaxLivingZombies => Tuning.MaxLivingZombies;
 }
 
 public readonly struct LivingCounts

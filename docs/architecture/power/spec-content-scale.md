@@ -5,7 +5,7 @@ Module **`content-scale`**, wave 3 in the [power map](../power-map.md). Depends 
 > **Reads [ssot-power-scale.md](ssot-power-scale.md)** — the parent SSOT. Where this spec and the
 > SSOT disagree, **the SSOT wins**.
 
-**Status:** Draft — pending owner review. No build authorized.
+**Status:** Owner approved 2026-08-24 — build authorized.
 
 ---
 
@@ -66,6 +66,19 @@ byte-for-byte (§5, "Identity at the pin").
 Reassigned here from `power-guard`, whose C# source scan cannot see a Python tool
 ([spec-power-guard.md](spec-power-guard.md) §8).
 
+> **Correction (T3.4, 2026-08-24), read before build, not after:** "the corpus" here and "the corpus"
+> `Instantiator` resolves are **two disconnected corpora**, not one — `data/seed/README.md` states it
+> plainly ("Two unrelated corpora share this folder. Each has its own format and its own tool") and no
+> code contradicts it: `tools/seedsmith`/`tools/ItemSeedValidator` author and check `data/seed/items/`
+> only; `Instantiator`/`AtomSeedFile.Collect` read `data/seed/atoms/` + `data/seed/containers/` only
+> (validated by `tools/AtomImporter`), and grepped confirmation found **zero** call from either items
+> tool into `UpsertAtom`/`UpsertContainer`/`AtomImporter` — no bridge between them exists yet. So this
+> module's "identity at Θc=20" proof (§5, `ContentScaleTests.ShippedCorpus_...`) is run against the
+> atoms/containers corpus, the only one `Instantiator` can even see today; the seedsmith-authored items
+> corpus stays scale-free by construction (nothing reads it into a magnitude path at all yet), not
+> because this check reaches it. If an items→atoms compiler ships later, THAT module inherits this
+> seam's obligation — it does not retroactively become true of `content-scale` today.
+
 ### 2.4 Θ_content at drop time
 
 The dropping context supplies it: a wave drop uses the wave's `ContentIndex`; an expedition inherits
@@ -79,17 +92,28 @@ the bug this module exists to prevent.
 dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Instantiat|FullyQualifiedName~ContentScale"
 dotnet test tests\FusionRpg.Core.Tests
 dotnet test tests\FusionRpg.Data.Tests
-python -m seedsmith validate        # corpus must still resolve
+dotnet run --project tools\AtomImporter -- --check   # atoms/containers corpus resolves clean, writes nothing
 ```
+
+**Correction (T3.4, 2026-08-24):** `python -m seedsmith validate` was never a real command — the actual
+CLI (`tools/seedsmith/seedsmith/report/cli.py`) has no `validate` subcommand at all, only `check
+<corpus_root> --adapter <name> [--gate]` (`--gate` is a bare flag, not a value; e.g.
+`python -m seedsmith check data/seed/items --adapter items --gate`) and `metrics`. **And** it names the
+wrong tool for what this line is actually verifying — see the §2.3a correction above. The atoms/containers
+corpus `Instantiator` resolves is checked by `tools/AtomImporter -- --check`, not by seedsmith at all.
 
 ## 4. Structure
 
 ```
 src/FusionRpg.Core/Power/ContentScale.cs                (new — the ratio, pure)
 src/FusionRpg.Core/Effects/Atoms/Instantiator.cs        (edit — the single multiplication)
-src/FusionRpg.Data/Sqlite/RpgStore.Atoms.cs             (edit — persist content_scale_milli, theta_content)
+src/FusionRpg.Data/Sqlite/RpgStore.AtomInstances.cs     (edit — persist content_scale_milli, theta_content)
 tests/FusionRpg.Core.Tests/Power/ContentScaleTests.cs
 ```
+
+**Correction (T3.4, 2026-08-24):** the file above was originally named `RpgStore.Atoms.cs` (the
+*catalog* table) — the instance table this module actually persists to lives in
+`RpgStore.AtomInstances.cs`, caught by reading the DAL split before editing, not after.
 
 ## 5. Testing strategy
 

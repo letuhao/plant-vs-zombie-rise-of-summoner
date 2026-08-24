@@ -184,10 +184,30 @@ public class ShieldMathTests
     }
 
     [Fact]
-    public void Max_input_clamp_prevents_overflow()
+    public void Input_one_under_MaxInput_throws_nothing()
     {
-        var r = ShieldMath.AbsorbLayer(long.MaxValue / 4, 1000, 1000, 1000, 9);
-        Assert.InRange(r.Remainder, 0, ShieldMath.MaxInput);
-        Assert.True(r.DamageToShield <= 3 * ShieldMath.MaxInput);
+        var r = ShieldMath.AbsorbLayer(ShieldMath.MaxInput - 1, 1000, 1000, 1000, 1);
+        Assert.True(r.DamageToShield >= 0);
+    }
+
+    [Fact]
+    public void Input_over_MaxInput_throws_naming_the_site_and_the_value()
+    {
+        // T3.5 (spec-caps-reconcile.md §2.1): the old clamp is gone -- an oversized input is refused
+        // loudly, not silently pinned and allowed to compute a wrong (but plausible-looking) result.
+        var over = ShieldMath.MaxInput + 1;
+        var ex = Assert.Throws<ShieldInputOverflow>(() => ShieldMath.AbsorbLayer(over, 1000, 1000, 1000, 9));
+        Assert.Equal(over, ex.Input);
+        Assert.Equal(ShieldMath.MaxInput, ex.MaxInput);
+    }
+
+    [Fact]
+    public void MaxInput_is_derived_from_the_loaded_ShieldPolicy_not_a_literal()
+    {
+        // F13: MaxInput reads MatchupShareKPm/ChipFloorKPm/PenCapKPm -- at the shipped values
+        // (250/100/3000) the elemMod term (1000 * 250 = 250,000) is the tightest of the three, so
+        // MaxInput == long.MaxValue / 250,000 exactly. Independently recomputed here, not read off
+        // the implementation under test.
+        Assert.Equal(long.MaxValue / 250_000, ShieldMath.MaxInput);
     }
 }

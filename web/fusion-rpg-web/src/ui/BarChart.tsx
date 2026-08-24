@@ -1,15 +1,10 @@
-import {
-  Bar,
-  BarChart as RechartsBarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis
-} from "recharts";
 import { cn } from "@/lib/cn";
 
+/**
+ * T13/T19: the horizontal-bar shape, rebuilt from theme tokens instead of `recharts` (T13's
+ * dependency-removal goal). Same external shape as before this rebuild, so every existing caller
+ * (`RpgProgressionPage.tsx`) is unchanged.
+ */
 export type BarChartItem = {
   label: string;
   value: number;
@@ -43,47 +38,30 @@ export function BarChart({
     );
   }
 
-  const data = items.map((i) => ({
-    name: i.label,
-    value: i.value,
-    fill: toneFill[i.tone ?? (i.value < 0 ? "bad" : "sun")]
-  }));
+  const max = Math.max(1, ...items.map((i) => Math.abs(i.value)));
 
   return (
-    <div data-testid={testId} className={cn("h-48 w-full min-w-0", className)}>
-      <ResponsiveContainer width="100%" height="100%">
-        <RechartsBarChart data={data} layout="vertical" margin={{ top: 4, right: 12, left: 4, bottom: 4 }}>
-          <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" horizontal={false} />
-          <XAxis
-            type="number"
-            stroke="var(--color-muted)"
-            tick={{ fill: "var(--color-muted)", fontSize: 11 }}
-          />
-          <YAxis
-            type="category"
-            dataKey="name"
-            width={72}
-            stroke="var(--color-muted)"
-            tick={{ fill: "var(--color-muted)", fontSize: 11 }}
-          />
-          <Tooltip
-            contentStyle={{
-              background: "var(--color-panel)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)"
-            }}
-            formatter={(value) => {
-              const n = typeof value === "number" ? value : Number(value);
-              return Number.isFinite(n) ? (n >= 0 ? `+${n.toFixed(0)}` : n.toFixed(0)) : String(value);
-            }}
-          />
-          <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-            {data.map((entry) => (
-              <Cell key={entry.name} fill={entry.fill} />
-            ))}
-          </Bar>
-        </RechartsBarChart>
-      </ResponsiveContainer>
+    <div data-testid={testId} className={cn("flex w-full min-w-0 flex-col gap-2", className)}>
+      {items.map((item) => {
+        const fill = toneFill[item.tone ?? (item.value < 0 ? "bad" : "sun")];
+        const pct = (Math.abs(item.value) / max) * 100;
+        return (
+          <div key={item.label} className="flex items-center gap-2 text-xs" data-testid={`${testId}-row`}>
+            <span className="w-20 shrink-0 truncate text-muted" title={item.label}>
+              {item.label}
+            </span>
+            <span className="h-3 min-w-0 flex-1 overflow-hidden rounded-sm bg-panel-inset">
+              <span
+                className="block h-full rounded-sm transition-[width]"
+                style={{ width: `${pct}%`, background: fill }}
+              />
+            </span>
+            <span className="w-14 shrink-0 text-right tabular-nums text-text">
+              {item.value >= 0 ? `+${item.value.toFixed(0)}` : item.value.toFixed(0)}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

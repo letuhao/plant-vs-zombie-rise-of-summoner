@@ -28,7 +28,9 @@ export function DataTable<T>({
   if (!rows.length && empty) return <>{empty}</>;
 
   return (
-    <div className={cn("mt-2 overflow-auto", className)}>
+    // tabIndex so a keyboard user can actually reach and scroll this when it overflows
+    // (axe: scrollable-region-focusable) — overflow-auto alone leaves it mouse/trackpad-only.
+    <div className={cn("mt-2 overflow-auto", className)} tabIndex={0}>
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>

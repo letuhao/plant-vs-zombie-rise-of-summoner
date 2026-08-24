@@ -37,8 +37,10 @@ export function TabList({
             onClick={() => onChange(t.id)}
             className={cn(
               "rounded-sm px-3 py-1.5 font-ui text-sm transition-colors",
+              // text-almanac on bg-lawn measures 4.27:1 — just under WCAG AA's 4.5:1 floor;
+              // text-text (the standard high-contrast body color) clears it comfortably.
               active
-                ? "bg-lawn text-almanac shadow-panel"
+                ? "bg-lawn text-text shadow-panel"
                 : "bg-panel-inset text-muted hover:bg-soil-raised hover:text-text"
             )}
           >

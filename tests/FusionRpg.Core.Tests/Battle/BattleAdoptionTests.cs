@@ -20,11 +20,17 @@ public class BattleRateTests
         BattleRuleset.BaseCritRate(level) - BattleRuleset.BaseCritResist(level),
         CombatProbabilityPolicy.CritRateScale);
 
+    // battle-rates (T2.2): extended past the original 1/5/10/20 to prove parity invariance holds at
+    // Theta = 10,000 too — spec-battle-rates.md §5, "not just 1/5/10/20". Same test, wider range;
+    // per the spec's own boundary, extend rather than duplicate this into a separate file.
     [Theory]
     [InlineData(1)]
     [InlineData(5)]
     [InlineData(10)]
     [InlineData(20)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(10000)]
     public void Parity_hit_rate_is_ninety_percent(int level) =>
         Assert.InRange(HitAtParity(level), 0.88, 0.92);
 
@@ -33,6 +39,9 @@ public class BattleRateTests
     [InlineData(5)]
     [InlineData(10)]
     [InlineData(20)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(10000)]
     public void Parity_crit_rate_is_five_to_ten_percent(int level) =>
         Assert.InRange(CritAtParity(level), 0.05, 0.10);
 
@@ -159,6 +168,7 @@ public class BattleResolverParityTests
     {
         // The self-arming ban test (CombatSsotContractTests) now runs its armed branch —
         // this is the local assertion that arming actually happened.
-        Assert.Equal(2, BattleRuleset.RulesetVersion);
+        // T4.2 (power-dial, 2026-08-24): RulesetVersion 2 -> 3.
+        Assert.Equal(3, BattleRuleset.RulesetVersion);
     }
 }

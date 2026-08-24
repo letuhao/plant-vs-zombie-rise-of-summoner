@@ -5,7 +5,7 @@ Module **`content-authoring`**, wave 2 in the [power map](../power-map.md). Depe
 > **Reads [ssot-power-scale.md](ssot-power-scale.md)** — the parent SSOT. Where this spec and the
 > SSOT disagree, **the SSOT wins**.
 
-**Status:** Draft — pending owner review. No build authorized.
+**Status:** Owner approved 2026-08-24 — build authorized.
 
 ---
 

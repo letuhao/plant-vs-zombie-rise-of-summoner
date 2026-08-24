@@ -93,9 +93,8 @@ public class RpgProgressionBalanceTests
         Assert.True(zombie.Level >= plant.Level);
     }
 
-    [Fact]
-    public void Power_scale_stub_is_one()
-    {
-        Assert.Equal(1.0, RpgXpPowerScale.ForKill(3, """{"type":3}"""));
-    }
+    // T3.3 (power-plan.md, done 2026-08-24): Power_scale_stub_is_one deleted -- RpgXpPowerScale
+    // (the class it tested) is gone. Its coverage ("kill power scale is 1.0") is already asserted
+    // through the real production path in RpgXpAwardMapTests.cs (Assert.Equal(1.0, a.PowerScale)),
+    // which is the stronger test since it exercises FromActivity, not a stub class in isolation.
 }

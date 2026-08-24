@@ -11,12 +11,14 @@ export function SanctumHud({
   playerName,
   soulsBalance,
   summonerLevel,
-  unreadResultCount
+  unreadResultCount,
+  onOpenSystem
 }: {
   playerName: string;
   soulsBalance: number;
   summonerLevel: Pending<{ level: number; xp: number }>;
   unreadResultCount: number;
+  onOpenSystem: () => void;
 }) {
   return (
     <div className="band-hud flex items-center gap-5 border-b border-border bg-soil-raised px-5 py-3" data-testid="sanctum-hud">
@@ -34,7 +36,7 @@ export function SanctumHud({
           Lv {summonerLevel.value.level} · {summonerLevel.value.xp} xp
         </span>
       ) : (
-        <span className="text-xs italic text-faint" data-testid="sanctum-hud-level-pending">
+        <span className="text-xs italic text-muted" data-testid="sanctum-hud-level-pending">
           {summonerLevel.state === "pending" ? summonerLevel.reason : "No summoner level yet"}
         </span>
       )}
@@ -53,9 +55,9 @@ export function SanctumHud({
       <button
         type="button"
         data-testid="sanctum-hud-menu"
-        disabled
-        title="System settings arrive in a later pass (T20)"
-        className="rounded-sm border border-border-control px-2.5 py-1.5 text-sm text-faint opacity-60"
+        onClick={onOpenSystem}
+        title="Settings"
+        className="rounded-sm border border-border-control px-2.5 py-1.5 text-sm text-muted hover:bg-panel-raised hover:text-text"
       >
         Menu
       </button>

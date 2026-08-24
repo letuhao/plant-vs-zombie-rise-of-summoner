@@ -2,9 +2,9 @@ using System.Text.Json;
 
 namespace FusionRpg.Core.Demons;
 
-public sealed record SoulKillTuning(int KillDelta, int KillCapPerMatch);
+public sealed record SoulKillTuning(int KillDelta);
 
-public sealed record SoulMatchEndTuning(int VictoryDelta, int VictoryFullPerDay, int DefeatDelta);
+public sealed record SoulMatchEndTuning(int VictoryDelta, int DefeatDelta);
 
 public sealed record SoulCodexTuning(int HalfMilestone, int FullMilestone);
 
@@ -40,13 +40,11 @@ public static class SoulEarnTuningLoader
 
             var k = Obj(root, "kill", "$");
             var kill = new SoulKillTuning(
-                KillDelta: Int(k, "killDelta", "kill"),
-                KillCapPerMatch: Int(k, "killCapPerMatch", "kill"));
+                KillDelta: Int(k, "killDelta", "kill"));
 
             var m = Obj(root, "matchEnd", "$");
             var matchEnd = new SoulMatchEndTuning(
                 VictoryDelta: Int(m, "victoryDelta", "matchEnd"),
-                VictoryFullPerDay: Int(m, "victoryFullPerDay", "matchEnd"),
                 DefeatDelta: Int(m, "defeatDelta", "matchEnd"));
 
             var dEl = Obj(root, "discoveryDelta", "$");

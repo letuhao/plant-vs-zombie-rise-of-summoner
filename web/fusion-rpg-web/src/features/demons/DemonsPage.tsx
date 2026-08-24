@@ -267,6 +267,7 @@ export function DemonsPage() {
               <div className="flex gap-2">
                 <Button
                   disabled={summon.isPending || balance < b.costPerPull}
+                  title={summon.isPending ? "Summoning…" : balance < b.costPerPull ? "Not enough Souls" : undefined}
                   onClick={() => void pull(b.bannerId, 1, b.costPerPull)}
                   data-testid={`pull-1-${b.bannerId}`}
                 >
@@ -274,6 +275,7 @@ export function DemonsPage() {
                 </Button>
                 <Button
                   disabled={summon.isPending || balance < b.costPerTen}
+                  title={summon.isPending ? "Summoning…" : balance < b.costPerTen ? "Not enough Souls" : undefined}
                   onClick={() => void pull(b.bannerId, 10, b.costPerTen)}
                   data-testid={`pull-10-${b.bannerId}`}
                 >

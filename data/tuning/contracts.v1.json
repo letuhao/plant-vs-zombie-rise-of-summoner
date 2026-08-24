@@ -3,7 +3,7 @@
   "version": 1,
   "_meta": {
     "owner": "docs/architecture/demons/spec-demon-contracts.md",
-    "note": "Extracted byte-identical from ContractPolicy.cs (tunables-ssot.md M.1, 2026-08-23). Working values carried over as-is — not yet a validated balance decision.",
+    "note": "Extracted byte-identical from ContractPolicy.cs (tunables-ssot.md M.1, 2026-08-23). Working values carried over as-is — not yet a validated balance decision. slots.maxSlots was removed by T3.6 (spec-caps-reconcile.md §2.3, SSOT §11.1/§11.1a, 2026-08-24) — the escalating price (slotPriceStep x n) was always the real scarcity control, so the hard 48-slot ceiling was redundant and is gone.",
     "rebalance": "Never hand-edit this file. python tools/tuning/publish.py contracts <dotted.key>=<value> [...] writes contracts.v{n+1}.json; the old version stays on disk for revert."
   },
   "loyalty": {
@@ -24,7 +24,6 @@
   },
   "slots": {
     "baseSlots": 12,
-    "maxSlots": 48,
     "slotPriceStep": 300
   },
   "settlement": {

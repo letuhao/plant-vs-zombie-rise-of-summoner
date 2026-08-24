@@ -1,3 +1,4 @@
+using FusionRpg.Core.Overlay;
 using UnityEngine;
 
 namespace FusionRpg.Injector.Hud;
@@ -7,8 +8,9 @@ namespace FusionRpg.Injector.Hud;
 /// </summary>
 public static class OverlaySettingsGui
 {
-    const float PanelW = 280f;
-    const float PanelH = 196f;
+    // Config-backed (tunables-ssot.md T1) — data/tuning/overlay.v1.json's settingsGui.
+    static float PanelW => OverlayTuningHub.Tuning.SettingsGui.PanelW;
+    static float PanelH => OverlayTuningHub.Tuning.SettingsGui.PanelH;
 
     public static void Draw()
     {

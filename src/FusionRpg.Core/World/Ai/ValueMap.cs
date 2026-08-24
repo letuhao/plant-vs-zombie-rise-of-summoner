@@ -7,14 +7,15 @@ namespace FusionRpg.Core.World.Ai;
 /// <summary>How much of each axis a policy cares about. Per-mille; only the ratios matter.</summary>
 public sealed record ValueWeights
 {
-    public int Yield { get; init; } = 1000;
-    public int Strategic { get; init; } = 800;
-    public int Defensibility { get; init; } = 500;
-    public int Cost { get; init; } = 700;
-    public int Risk { get; init; } = 900;
-    public int Curiosity { get; init; } = 600;
+    public int Yield { get; init; }
+    public int Strategic { get; init; }
+    public int Defensibility { get; init; }
+    public int Cost { get; init; }
+    public int Risk { get; init; }
+    public int Curiosity { get; init; }
 
-    public static readonly ValueWeights Default = new();
+    /// <summary>Config-backed (tunables-ssot.md T1) — data/tuning/ai.v1.json's valueMap.defaultWeights.</summary>
+    public static ValueWeights Default => WorldAiPolicy.DefaultWeights;
 }
 
 /// <summary>What one sector is worth, and why.</summary>
@@ -44,17 +45,17 @@ public readonly record struct SectorValue(
 public static class ValueMap
 {
     /// <summary>How attractive unknown ground is, against the average of what you do know.</summary>
-    public const int OptimismMilli = 700;
+    public static int OptimismMilli => WorldAiPolicy.Tuning.ValueMap.OptimismMilli;
 
     /// <summary>What holding ground outside your own supply costs you, per-mille of the whole.</summary>
-    public const int OverextensionPenaltyMilli = 1400;
+    public static int OverextensionPenaltyMilli => WorldAiPolicy.Tuning.ValueMap.OverextensionPenaltyMilli;
 
     /// <summary>
     /// What barren ground costs an `Expand`/`Take` decision, per-mille of the whole (spec-loam-ai.md).
     /// Same starting placeholder as <see cref="OverextensionPenaltyMilli"/> — the shape is mirrored
     /// deliberately, the value is its own independently-tunable lever, not borrowed from it.
     /// </summary>
-    public const int HabitabilityPenaltyMilli = 1400;
+    public static int HabitabilityPenaltyMilli => WorldAiPolicy.Tuning.ValueMap.HabitabilityPenaltyMilli;
 
     public static IReadOnlyDictionary<string, SectorValue> For(
         IWorldView view,

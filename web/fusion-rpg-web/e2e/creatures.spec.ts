@@ -91,3 +91,38 @@ test.describe("Creatures layer (T10)", () => {
     await expect(page.getByTestId("creatures-layer")).toBeVisible();
   });
 });
+
+// T27 (plate 02 §A/§D): search/filter/sort, and GG-51's close/reopen persistence, in a real browser.
+test.describe("Creatures layer — plate parity (T27)", () => {
+  test("the side filter and search box narrow the real list live", async ({ page }) => {
+    await mockSanctum(page);
+    await page.goto("/#/sanctum?panel=creatures");
+    await expect(page.getByTestId("creatures-row-a1")).toBeVisible();
+    await expect(page.getByTestId("creatures-row-a2")).toBeVisible();
+
+    await page.getByTestId("creatures-filter-zombie").click();
+    await expect(page.getByTestId("creatures-row-a1")).not.toBeVisible();
+    await expect(page.getByTestId("creatures-row-a2")).toBeVisible();
+
+    await page.getByTestId("creatures-filter-all").click();
+    await page.getByTestId("creatures-search").fill("lvl 5");
+    await expect(page.getByTestId("creatures-row-a1")).toBeVisible();
+    await expect(page.getByTestId("creatures-row-a2")).not.toBeVisible();
+  });
+
+  test("search/filter/sort state survives the layer closing and reopening, within the session (GG-51)", async ({ page }) => {
+    await mockSanctum(page);
+    await page.goto("/#/sanctum?panel=creatures");
+    await page.getByTestId("creatures-filter-zombie").click();
+    await page.getByTestId("creatures-sort").selectOption("level-asc");
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("creatures-layer")).not.toBeVisible();
+
+    await page.keyboard.press("c");
+    await expect(page.getByTestId("creatures-layer")).toBeVisible();
+    await expect(page.getByTestId("creatures-filter-zombie")).toHaveAttribute("aria-current", "true");
+    await expect(page.getByTestId("creatures-sort")).toHaveValue("level-asc");
+    await expect(page.getByTestId("creatures-row-a1")).not.toBeVisible();
+  });
+});

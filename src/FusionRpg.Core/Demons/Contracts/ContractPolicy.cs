@@ -89,7 +89,6 @@ public static class ContractPolicy
     public static int RitualGain => Tuning.Loyalty.RitualGain;
 
     public static int BaseSlots => Tuning.Slots.BaseSlots;
-    public static int MaxSlots => Tuning.Slots.MaxSlots;
     public static int SlotPriceStep => Tuning.Slots.SlotPriceStep;
 
     /// <summary>A six-month absence settles thirty days: bounded work, bounded bill.</summary>
@@ -164,13 +163,18 @@ public static class ContractPolicy
         return v;
     }
 
-    public static int Capacity(int purchasedSlots) =>
-        Math.Min(MaxSlots, BaseSlots + Math.Max(0, purchasedSlots));
+    /// <summary>T3.6 (spec-caps-reconcile.md §2.3, SSOT §11.1a): no ceiling — the escalating price
+    /// (see <see cref="NextSlotPrice"/>) was always the real scarcity control, not this `Math.Min`.
+    /// A roster of 2,012 costs 600,300,000 cumulative souls; that is the limit, not a hard-coded 48.</summary>
+    public static int Capacity(int purchasedSlots) => BaseSlots + Math.Max(0, purchasedSlots);
 
     public static long NextSlotPrice(int purchasedSlots) =>
         (long)SlotPriceStep * (Math.Max(0, purchasedSlots) + 1);
 
-    public static bool CanBuySlot(int purchasedSlots) => Capacity(purchasedSlots) < MaxSlots;
+    /// <summary>Always true post-T3.6 — kept as a named check (rather than removed outright) because
+    /// the store's buy-slot gate and the contracts API both call it, and "can this purchase ever
+    /// succeed" remains a meaningful question even though nothing refuses it today.</summary>
+    public static bool CanBuySlot(int purchasedSlots) => true;
 
     /// <summary>Whole UTC days between two stamps, clamped to <see cref="MaxSettleDays"/>. Day-quantised,
     /// not 24-hour windows: a minute past midnight UTC is a new tribute day. A stamp in the future

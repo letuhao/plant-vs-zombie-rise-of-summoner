@@ -1,4 +1,5 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Power;
 using FusionRpg.Data;
 using Xunit;
 
@@ -61,13 +62,18 @@ public class BindResolutionTests : IDisposable
             }).IsOk, id);
     }
 
+    // T3.4 (content-scale): 20 is the pin -- contentScale(20) == 1.000 exactly.
+    static readonly PowerTuning Tuning = PowerTuning.Build(
+        1, 1, 80_000, 0, 20, 680, // fixed anchor (Fixed* consts are `internal` to Core+Core.Tests only)
+        1000, 25000, 250, 1000, 5000, 5000, 25000);
+
     string BindOf(string containerId, OwnerKind kind, string key, string source = "test")
     {
         var container = _store.GetContainer(containerId)!;
         var atoms = _store.ListAtoms().ToDictionary(a => a.AtomId, StringComparer.Ordinal);
 
         Assert.True(Instantiator.TryInstantiate(container,
-            id => atoms.TryGetValue(id, out var a) ? a : null, 1, out var inst).IsOk);
+            id => atoms.TryGetValue(id, out var a) ? a : null, 1, 20, Tuning, out var inst).IsOk);
 
         var instanceId = _store.SaveInstance(inst!);
         var bindingId = Guid.NewGuid().ToString("N");

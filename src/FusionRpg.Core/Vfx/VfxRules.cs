@@ -8,29 +8,38 @@ namespace FusionRpg.Core.Vfx;
 /// </summary>
 public static class VfxRules
 {
-    public const int FloaterCap = DamageFxFloaterRules.Cap;                       // 64
-    public const int BurstCap = 24;
-    public const float FloaterLifeSeconds = DamageFxFloaterRules.LifeSeconds;     // 0.9
-    public const float BurstLifeSeconds = 0.55f;
-    public const float RisePixels = DamageFxFloaterRules.RisePixels;              // 56
+    static VfxTuning? _tuning;
 
-    public const float FloaterRateLimitSeconds = 0.05f;   // per (cueId, TargetPtr)
-    public const float BurstRateLimitSeconds = 0.15f;     // per (cueId, cell)
-    public const int GlobalCuePerTickCap = 32;
-    public const int CueQueueCap = 256;
+    public static void Configure(VfxTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static VfxRulesTuning Tuning => (_tuning ?? throw new InvalidOperationException(
+        "VfxRules.Configure(...) has not run. Vfx rules read data/tuning/vfx.v{n}.json " +
+        "(tunables-ssot.md T5) — there is no built-in default to fall back to.")).Rules;
+
+    public static int FloaterCap => DamageFxFloaterRules.Cap;                       // 64
+    public static int BurstCap => Tuning.BurstCap;
+    public static float FloaterLifeSeconds => DamageFxFloaterRules.LifeSeconds;     // 0.9
+    public static float BurstLifeSeconds => (float)Tuning.BurstLifeSeconds;
+    public static float RisePixels => DamageFxFloaterRules.RisePixels;              // 56
+
+    public static float FloaterRateLimitSeconds => (float)Tuning.FloaterRateLimitSeconds;   // per (cueId, TargetPtr)
+    public static float BurstRateLimitSeconds => (float)Tuning.BurstRateLimitSeconds;       // per (cueId, cell)
+    public static int GlobalCuePerTickCap => Tuning.GlobalCuePerTickCap;
+    public static int CueQueueCap => Tuning.CueQueueCap;
 
     /// <summary>Crit keeps distinctness via size, not color — vfx-ssot.md §16.4.</summary>
-    public const float CritFontScale = 1.25f;
+    public static float CritFontScale => (float)Tuning.CritFontScale;
 
     /// <summary>Crit pop: start big, settle to CritFontScale by this normalized life t.</summary>
-    public const float CritPopStartScale = 1.5f;
-    public const float CritPopSettleT = 0.3f;
+    public static float CritPopStartScale => (float)Tuning.CritPopStartScale;
+    public static float CritPopSettleT => (float)Tuning.CritPopSettleT;
 
     /// <summary>Amount tiers (|amount|): small hits shrink, big hits grow — numeric labels only.</summary>
-    public const long AmountTierSmallBelow = 50;
-    public const long AmountTierBigFrom = 200;
-    public const float AmountTierSmallScale = 0.9f;
-    public const float AmountTierBigScale = 1.15f;
+    public static long AmountTierSmallBelow => Tuning.AmountTierSmallBelow;
+    public static long AmountTierBigFrom => Tuning.AmountTierBigFrom;
+    public static float AmountTierSmallScale => (float)Tuning.AmountTierSmallScale;
+    public static float AmountTierBigScale => (float)Tuning.AmountTierBigScale;
 
     public static float PopScale(float t)
     {
@@ -66,14 +75,23 @@ public static class VfxSkipReasons
 /// <summary>Sustained-visual policy — SPEC vfx-v3 §3 (tight budget locked by owner).</summary>
 public static class VfxSustainedRules
 {
-    public const int GlobalCap = 24;
-    public const int PerHostCap = 2;
+    static VfxTuning? _tuning;
+
+    public static void Configure(VfxTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static VfxSustainedTuning Tuning => (_tuning ?? throw new InvalidOperationException(
+        "VfxSustainedRules.Configure(...) has not run. Sustained-visual rules read " +
+        "data/tuning/vfx.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.")).Sustained;
+
+    public static int GlobalCap => Tuning.GlobalCap;
+    public static int PerHostCap => Tuning.PerHostCap;
     /// <summary>TTL = status duration + this grace; the expire cue normally ends the visual first.</summary>
-    public const double TtlGraceSeconds = 2.0;
+    public static double TtlGraceSeconds => Tuning.TtlGraceSeconds;
     /// <summary>Statuses with no known duration re-confirm via re-apply within this window.</summary>
-    public const double InfiniteTtlSeconds = 60.0;
-    public const float AuraPulseSeconds = 0.3f;
-    public const int AuraMaxParticles = 6;
+    public static double InfiniteTtlSeconds => Tuning.InfiniteTtlSeconds;
+    public static float AuraPulseSeconds => (float)Tuning.AuraPulseSeconds;
+    public static int AuraMaxParticles => Tuning.AuraMaxParticles;
 }
 
 /// <summary>Enumerated sustained end reasons — debug.fx.state.ended payload contract.</summary>

@@ -5,7 +5,8 @@ namespace FusionRpg.Injector.Host;
 /// <summary>Ships PerfProbe windows every ~5s — perf-probe-plan.md §1.4. Best-effort, never throws.</summary>
 public static class PerfReporter
 {
-    public const float IntervalSeconds = 5f;
+    // Config-backed (tunables-ssot.md T1) — data/tuning/net.v1.json's perfReporter.
+    public static float IntervalSeconds => (float)FusionRpg.Core.Net.NetPolicy.Tuning.PerfReporter.IntervalSeconds;
 
     public static void Flush(RpgClient? client)
     {

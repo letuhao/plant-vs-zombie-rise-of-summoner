@@ -1,16 +1,26 @@
 using System.Text.Json;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Power;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Atoms;
 
 /// <summary>
 /// E6 roll moment 2. The claim under test: the same
-/// <c>(container, catalog_revision, roll_seed)</c> reproduces an instance byte-identically — over the
-/// atom set and frozen values, <b>excluding</b> the generated `instance_id` and `created_utc`.
+/// <c>(container, catalog_revision, roll_seed, theta_content)</c> reproduces an instance
+/// byte-identically — over the atom set and frozen values, <b>excluding</b> the generated
+/// `instance_id` and `created_utc`.
 /// </summary>
 public class InstantiatorTests
 {
+    // T3.4 (content-scale): PinTheta (20) is the pin — contentScale(20) == 1.000 exactly — so every
+    // pre-T3.4 test in this file keeps asserting its original, pre-scaling values unchanged by
+    // routing through Make()'s default. Tests that care about scaling pass a different theta directly.
+    const int PinTheta = 20;
+    static readonly PowerTuning Tuning = PowerTuning.Build(
+        1, 1, PowerTuning.FixedCMilli, 0, PowerTuning.FixedPinIndex, PowerTuning.FixedPinValue,
+        1000, 25000, 250, 1000, 5000, 5000, 25000);
+
     static readonly Dictionary<string, AtomRow> Catalog = new(StringComparer.Ordinal);
 
     static InstantiatorTests()
@@ -39,9 +49,9 @@ public class InstantiatorTests
 
     static AtomRow? Lookup(string id) => Catalog.TryGetValue(id, out var a) ? a : null;
 
-    static InstanceRow Make(ContainerRow c, long seed)
+    static InstanceRow Make(ContainerRow c, long seed, int thetaContent = PinTheta)
     {
-        var r = Instantiator.TryInstantiate(c, Lookup, seed, out var inst);
+        var r = Instantiator.TryInstantiate(c, Lookup, seed, thetaContent, Tuning, out var inst);
         Assert.True(r.IsOk, r.ToString());
         return inst!;
     }
@@ -238,7 +248,7 @@ public class InstantiatorTests
     {
         var c = Container(atoms: new[] { new ContainerAtomRow(1, "atom.nope.t1") });
 
-        var r = Instantiator.TryInstantiate(c, Lookup, 1, out var inst);
+        var r = Instantiator.TryInstantiate(c, Lookup, 1, PinTheta, Tuning, out var inst);
 
         Assert.Equal(AtomRejectionReason.UnknownAtom, r.Reason);
         Assert.Null(inst);

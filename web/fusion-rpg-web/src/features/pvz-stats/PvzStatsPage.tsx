@@ -70,6 +70,7 @@ export function PvzStatsPage() {
             data-testid="pvz-stats-seed"
             onClick={() => void seed.mutateAsync(playerId)}
             disabled={seed.isPending}
+            title={seed.isPending ? "Seeding…" : undefined}
           >
             Seed demo (+10/−5)
           </Button>
@@ -77,6 +78,7 @@ export function PvzStatsPage() {
             data-testid="pvz-stats-reset"
             onClick={() => void reset.mutateAsync(playerId)}
             disabled={reset.isPending}
+            title={reset.isPending ? "Resetting…" : undefined}
           >
             Reset
           </Button>

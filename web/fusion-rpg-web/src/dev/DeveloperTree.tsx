@@ -1,14 +1,24 @@
-import { useEffect, useState } from "react";
-import { AlmanacDumpPage } from "@/features/almanac-dump/AlmanacDumpPage";
-import { CheatsPage } from "@/features/cheats/CheatsPage";
-import { IconDumpPage } from "@/features/icon-dump/IconDumpPage";
-import { LogPage } from "@/features/log/LogPage";
-import { MetricsPage } from "@/features/metrics/MetricsPage";
-import { PvzActivityPage } from "@/features/pvz-activity/PvzActivityPage";
-import { SimPage } from "@/features/sim/SimPage";
-import { StatsPage } from "@/features/stats/StatsPage";
-import { StatusPage } from "@/features/status/StatusPage";
+import { lazy, Suspense, useEffect, useState } from "react";
+import { ChunkFallback } from "@/shell/ChunkFallback";
 import { PanelShell } from "@/shell/PanelShell";
+
+// GG-38's "dev" chunk (tech-stack.md §6, unbudgeted but still not entry weight): the nine pages
+// load only once the tree is actually opened, not on every app boot.
+const StatusPage = lazy(() => import("@/features/status/StatusPage").then((m) => ({ default: m.StatusPage })));
+const StatsPage = lazy(() => import("@/features/stats/StatsPage").then((m) => ({ default: m.StatsPage })));
+const PvzActivityPage = lazy(() =>
+  import("@/features/pvz-activity/PvzActivityPage").then((m) => ({ default: m.PvzActivityPage }))
+);
+const IconDumpPage = lazy(() =>
+  import("@/features/icon-dump/IconDumpPage").then((m) => ({ default: m.IconDumpPage }))
+);
+const AlmanacDumpPage = lazy(() =>
+  import("@/features/almanac-dump/AlmanacDumpPage").then((m) => ({ default: m.AlmanacDumpPage }))
+);
+const CheatsPage = lazy(() => import("@/features/cheats/CheatsPage").then((m) => ({ default: m.CheatsPage })));
+const SimPage = lazy(() => import("@/features/sim/SimPage").then((m) => ({ default: m.SimPage })));
+const LogPage = lazy(() => import("@/features/log/LogPage").then((m) => ({ default: m.LogPage })));
+const MetricsPage = lazy(() => import("@/features/metrics/MetricsPage").then((m) => ({ default: m.MetricsPage })));
 
 export const DEV_SURFACES = [
   { id: "status", label: "Status", Component: StatusPage },
@@ -80,7 +90,9 @@ export function DeveloperTree({
       }
     >
       <div data-testid={`dev-tree-surface-${active!.id}`}>
-        <active.Component />
+        <Suspense fallback={<ChunkFallback testId={`dev-tree-surface-${active!.id}-loading`} />}>
+          <active.Component />
+        </Suspense>
       </div>
     </PanelShell>
   );

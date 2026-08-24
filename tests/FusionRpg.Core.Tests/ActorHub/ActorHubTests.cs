@@ -18,10 +18,13 @@ public class ActorHubResolveTests
         var ctx = stats.Contexts.ForPlant("P1", new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 });
         var result = hub.Resolve(ctx);
 
+        // T3.2: progression.power reads Theta via IPowerIndexProvider now, defaulting to
+        // StubPowerIndexProvider (Theta=0) -- the retired curve's "level<=0 -> 1.0" is gone, so the
+        // un-hydrated default genuinely is 0, not 1. TierPower = power * realm = 0 * 1.0 = 0.
         Assert.Equal(100, result.RuntimePrimary.Hp);
         Assert.Equal(100, result.AppliedCombat.Hp);
-        Assert.Equal(1.0, result.Derived.TierPower);
-        Assert.Equal(1.0, result.Derived.Get(DerivedStatChannels.ProgressionPower));
+        Assert.Equal(0.0, result.Derived.TierPower);
+        Assert.Equal(0.0, result.Derived.Get(DerivedStatChannels.ProgressionPower));
     }
 
     [Fact]
@@ -52,7 +55,7 @@ public class ActorHubResolveTests
     {
         var stats = StatSystemBootstrap.CreateDefault();
         var hub = new FusionRpg.Core.Stats.Derived.ActorHub(stats);
-        hub.Register(new RpgProgressionSubsystem(new FixedLevelProgressionProvider(5)));
+        hub.Register(new RpgProgressionSubsystem(_ => 5));
 
         var ctx = stats.Contexts.ForPlant("P1", new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 });
         var result = hub.Resolve(ctx);
@@ -183,12 +186,4 @@ public class ActorHubResolveTests
         Assert.Equal(neutral.RuntimePrimary.Hp, typed.RuntimePrimary.Hp);
     }
 
-    sealed class FixedLevelProgressionProvider : IProgressionPowerProvider
-    {
-        readonly int _level;
-        public FixedLevelProgressionProvider(int level) => _level = level;
-        public int GetLevel(StatContext ctx) => _level;
-        public double GetPower(StatContext ctx) => ProgressionPowerCurve.PowerFromLevel(_level);
-        public double GetRealm(StatContext ctx) => 1.0;
-    }
 }

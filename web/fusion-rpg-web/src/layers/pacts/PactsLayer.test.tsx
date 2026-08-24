@@ -104,6 +104,34 @@ function setup(opts?: { contracts?: unknown[]; patronInstanceId?: string | null 
 }
 
 describe("PactsLayer (T17)", () => {
+  it("shows a loading state while queries are in flight, distinct from empty (GG-17)", () => {
+    mockUsePlayers.mockReturnValue({ data: { currentPlayerId: 1 } });
+    mockUseSpeciesIndex.mockReturnValue(speciesIndex);
+    mockUseDemonRoster.mockReturnValue({ isLoading: true, data: undefined });
+    mockUseContracts.mockReturnValue({ isLoading: true, data: undefined });
+    mockUsePatron.mockReturnValue({ data: { patron: null, switchCostSouls: 100 } });
+    renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
+    expect(screen.getByTestId("pacts-loading")).toBeInTheDocument();
+    expect(screen.queryByText("No pacts yet")).not.toBeInTheDocument();
+  });
+
+  it("shows an error state with a retry, distinct from empty (GG-17)", async () => {
+    const refetchContracts = vi.fn();
+    const refetchRoster = vi.fn();
+    mockUsePlayers.mockReturnValue({ data: { currentPlayerId: 1 } });
+    mockUseSpeciesIndex.mockReturnValue(speciesIndex);
+    mockUseDemonRoster.mockReturnValue({ data: roster, refetch: refetchRoster });
+    mockUseContracts.mockReturnValue({ isError: true, data: undefined, refetch: refetchContracts });
+    mockUsePatron.mockReturnValue({ data: { patron: null, switchCostSouls: 100 } });
+    const user = userEvent.setup();
+    renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
+    expect(screen.getByTestId("pacts-error")).toBeInTheDocument();
+
+    await user.click(screen.getByText("Retry"));
+    expect(refetchContracts).toHaveBeenCalled();
+    expect(refetchRoster).toHaveBeenCalled();
+  });
+
   it("shows an empty state with no bound pacts", () => {
     setup({ contracts: [] });
     renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
@@ -146,5 +174,20 @@ describe("PactsLayer (T17)", () => {
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByTestId("pacts-layer")).not.toBeInTheDocument());
     expect(screen.getByTestId("stage-behind")).toBeInTheDocument();
+  });
+
+  // T30 (plate 03 §D): side-by-side cards with a colour-tinted portrait, not the earlier vertical
+  // stack with no portrait at all.
+  it("renders pacts side by side, not stacked, each with a rarity-tinted portrait", () => {
+    setup();
+    renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
+    expect(screen.getByTestId("pacts-grid")).toHaveClass("grid-cols-2");
+
+    const portraits = screen.getAllByTestId("pact-portrait");
+    expect(portraits).toHaveLength(2);
+    // d1 is epic (Imp), d2 is rare (Wraith) — real profile.rarity, not a fabricated palette.
+    expect(portraits[0]).toHaveClass("border-rarity-4");
+    expect(portraits[1]).toHaveClass("border-rarity-3");
+    expect(portraits[0]).toHaveTextContent("I"); // first letter of the real display name
   });
 });

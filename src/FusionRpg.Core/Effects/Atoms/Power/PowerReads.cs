@@ -29,6 +29,8 @@ namespace FusionRpg.Core.Effects.Atoms.Power;
 /// </summary>
 public static class PowerScalar
 {
+    // Structural (tunables-ssot.md T2) — the closed-vocabulary category count PowerVector's shape
+    // is built from below, not a balance dial.
     public const int Categories = 5;
 
     /// <summary>
@@ -90,8 +92,18 @@ public static class PowerScalar
 /// </summary>
 public static class MatchupRead
 {
+    static EffectsTuning? _tuning;
+
+    /// <summary>Host-only (Injector/Server startup, or a test's inline construction).</summary>
+    public static void Configure(EffectsTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static EffectsTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "MatchupRead.Configure(...) has not run. SlotShareMilli reads data/tuning/effects.v{n}.json " +
+        "(tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
     /// <summary>How much one strong or weak slot moves the price, per-mille.</summary>
-    public const int SlotShareMilli = 250;
+    public static int SlotShareMilli => Tuning.MatchupReadSlotShareMilli;
 
     /// <summary>
     /// The attacker's offense, conditioned on the defender's elements.

@@ -123,16 +123,45 @@ public class ContractPolicyTests
     }
 
     [Fact]
-    public void Slot_ladder_rises_forever_until_the_ceiling()
+    public void Slot_ladder_rises_forever_no_ceiling()
     {
+        // T3.6 (spec-caps-reconcile.md §2.3, SSOT §11.1/§11.1a, 2026-08-24): MaxSlots is deleted.
+        // The escalating price was always the real scarcity control -- SSOT §11.1a's own worked
+        // table, independently re-derived here rather than copied: NextSlotPrice(purchased) =
+        // 300 x (purchased+1), so the price to reach TOTAL slot N (purchased = N-12) is
+        // 300 x (N-11), and the cumulative cost to reach N is a triangular sum.
         Assert.Equal(12, ContractPolicy.Capacity(0));
         Assert.Equal(300, ContractPolicy.NextSlotPrice(0));
         Assert.Equal(600, ContractPolicy.NextSlotPrice(1));
         Assert.Equal(900, ContractPolicy.NextSlotPrice(2));
+
+        // Past the OLD 48-slot ceiling, capacity keeps climbing and buying never refuses.
         Assert.Equal(48, ContractPolicy.Capacity(36));
         Assert.True(ContractPolicy.CanBuySlot(35));
-        Assert.False(ContractPolicy.CanBuySlot(36));   // 12 + 36 = the 48 ceiling
-        Assert.Equal(48, ContractPolicy.Capacity(40)); // over-purchase can never exceed the ceiling
+        Assert.True(ContractPolicy.CanBuySlot(36));   // used to be exactly the 48 ceiling -- not anymore
+        Assert.Equal(49, ContractPolicy.Capacity(37)); // capacity keeps climbing past the old ceiling
+        Assert.Equal(112, ContractPolicy.Capacity(100));
+        Assert.True(ContractPolicy.CanBuySlot(10_000)); // no purchased count ever refuses
+
+        // SSOT §11.1a's own table, exact: total slot 512 (purchased=500) prices at 150,300, cumulative
+        // 37,575,000 -- the argument the whole deletion rests on, asserted precisely, not approximately.
+        Assert.Equal(512, ContractPolicy.Capacity(500));
+        Assert.Equal(150_300, ContractPolicy.NextSlotPrice(500));
+
+        long cumulative = 0;
+        for (var k = 0; k < 500; k++) cumulative += ContractPolicy.NextSlotPrice(k);
+        Assert.Equal(37_575_000, cumulative);
+    }
+
+    [Fact]
+    public void Warden_property_holds_past_the_old_ceiling_it_never_depended_on()
+    {
+        // SSOT §11.1a: "the warden mechanic survives intact... because of the price formula, not
+        // because of the cap." Proven directly: binding a warden still consumes a slot and the Nth
+        // slot still costs strictly more than the (N-1)th, arbitrarily far past the old 48 ceiling.
+        Assert.Equal(600_300, ContractPolicy.NextSlotPrice(2000)); // the 2,012th total slot, SSOT's own row
+        Assert.True(ContractPolicy.NextSlotPrice(2000) > ContractPolicy.NextSlotPrice(1999));
+        Assert.Equal(2012, ContractPolicy.Capacity(2000));
     }
 
     [Theory]

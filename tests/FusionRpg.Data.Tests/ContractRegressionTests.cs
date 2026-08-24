@@ -10,7 +10,8 @@ namespace FusionRpg.Data.Tests;
 /// <summary>
 /// Post-Wave-G locks: behaviours that currently hold only by construction. Each of these is
 /// something a plausible refactor could silently break — mixed solvency across days, the churn
-/// guard's day boundary, cross-player isolation, and the slot ceiling.
+/// guard's day boundary, cross-player isolation, and (T3.6, 2026-08-24) the slot ladder's price,
+/// now that the old hard ceiling behind it is gone.
 /// </summary>
 public class ContractRegressionTests : IDisposable
 {
@@ -200,23 +201,28 @@ public class ContractRegressionTests : IDisposable
     }
 
     [Fact]
-    public void The_slot_ladder_climbs_to_the_ceiling_and_then_refuses()
+    public void The_slot_ladder_climbs_past_the_old_ceiling_and_never_refuses_on_capacity()
     {
+        // T3.6 (spec-caps-reconcile.md §2.3, SSOT §11.1/§11.1a, 2026-08-24): MaxSlots is deleted.
+        // Buy 40 -- past the OLD 48-total-slot (36-purchased) ceiling -- through the REAL live-DB
+        // purchase path, not just the pure ContractPolicy math (already covered by
+        // ContractPolicyTests.Slot_ladder_rises_forever_no_ceiling). Every purchase must succeed; none
+        // may refuse with "capacity.max", because that reason no longer exists.
+        const int purchases = 40; // 12 + 40 = 52, past the old 48 ceiling
         long spent = 0;
-        for (var k = 0; k < ContractPolicy.MaxSlots - ContractPolicy.BaseSlots; k++)
+        for (var k = 0; k < purchases; k++)
         {
             var buy = _store.BuyContractSlot(1, $"ladder-{k}", Day0);
             Assert.True(buy.Ok, $"slot {k} refused: {buy.Reason}");
             spent += ContractPolicy.SlotPriceStep * (k + 1);
         }
 
-        Assert.Equal(ContractPolicy.MaxSlots, _store.GetContractState(1)!.Capacity);
+        Assert.Equal(52, _store.GetContractState(1)!.Capacity);
         Assert.Equal(300_000 - spent, _store.GetSoulBalance(1).Balance);
 
-        var over = _store.BuyContractSlot(1, "ladder-over", Day0);
-        Assert.False(over.Ok);
-        Assert.Equal("capacity.max", over.Reason);
-        Assert.Equal(300_000 - spent, _store.GetSoulBalance(1).Balance);   // a refusal writes nothing
+        // The warden property (SSOT §11.1a): the Nth slot costs strictly more than the (N-1)th,
+        // arbitrarily far past the old ceiling -- because of the price, never because of a cap.
+        Assert.True(ContractPolicy.NextSlotPrice(purchases) > ContractPolicy.NextSlotPrice(purchases - 1));
     }
 
     [Fact]

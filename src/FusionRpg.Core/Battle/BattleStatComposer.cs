@@ -30,9 +30,18 @@ public static class BattleStatComposer
         return set;
     }
 
+    static BattleTuning? _tuning;
+
+    public static void Configure(BattleTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static BattleTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "BattleStatComposer.Configure(...) has not run. The affinity divisors read " +
+        "data/tuning/battle.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
     /// <summary>Affinity share of Atk/Defense granted on the actor's own element channels.</summary>
-    public const int PrimaryAffinityDivisor = 4;    // +25% on the primary element
-    public const int SecondaryAffinityDivisor = 8;  // +12.5% on the secondary element
+    public static int PrimaryAffinityDivisor => Tuning.PrimaryAffinityDivisor;     // +25% on the primary element
+    public static int SecondaryAffinityDivisor => Tuning.SecondaryAffinityDivisor; // +12.5% on the secondary element
 
     /// <summary>
     /// Where trait channel mods are read from (E12). Defaults to the migrated set, which supplies
@@ -50,16 +59,22 @@ public static class BattleStatComposer
 
     public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource traits)
     {
+        // battle-rates (T2.2) / content-authoring (T2.3): setup.Index is Theta — an alias for Level,
+        // not a new source (no real power-index composition is wired through BattleActorSetup yet;
+        // that is a later wave's job). Named here so the read is honest about what it means now, per
+        // spec-battle-rates.md §2.3's "pass Theta" framing.
+        int theta = setup.Index;
+
         // battle-adoption mapping table: Atk is the resolver's BaseOverlayDamage — it must
         // NOT also sit in power.omni (double count). Defense stays: the defense channel is
         // its only consumer. Affinity shares remain genuine adjustments on both sides.
         var snap = ActorDerivedSnapshot.FromValues(new[]
         {
             new KeyValuePair<string, double>(DerivedStatChannels.CombatDefenseOmni, setup.Defense),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatAccuracyOmni, BattleRuleset.BaseAccuracy(setup.Level)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatDodgeOmni, BattleRuleset.BaseDodge(setup.Level)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritRateOmni, BattleRuleset.BaseCritRate(setup.Level)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritResistOmni, BattleRuleset.BaseCritResist(setup.Level))
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatAccuracyOmni, BattleRuleset.BaseAccuracy(theta)),
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatDodgeOmni, BattleRuleset.BaseDodge(theta)),
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritRateOmni, BattleRuleset.BaseCritRate(theta)),
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritResistOmni, BattleRuleset.BaseCritResist(theta))
         });
 
         if (setup.ElementPrimary is { } primary)

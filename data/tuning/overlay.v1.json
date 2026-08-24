@@ -3,7 +3,7 @@
   "version": 1,
   "_meta": {
     "owner": "docs/architecture/overlay-switch-program.md",
-    "note": "Extracted byte-identical from OverlayPausePolicy.cs, OverlaySwitchLayout.cs, OverlaySwitchState.cs (tunables-ssot.md M.4, 2026-08-23).",
+    "note": "Extracted byte-identical from OverlayPausePolicy.cs, OverlaySwitchLayout.cs, OverlaySwitchState.cs (tunables-ssot.md M.4, 2026-08-23) plus OverlaySettingsGui.cs's panel size (M.14, 2026-08-24) — same UI/feel-tuning class as switchLayout.",
     "rebalance": "Never hand-edit this file. python tools/tuning/publish.py overlay <dotted.key>=<value> [...] writes overlay.v{n+1}.json; the old version stays on disk for revert."
   },
   "pause": {
@@ -22,5 +22,9 @@
     "debounceMs": 300,
     "probeIntervalMs": 30000,
     "sendTimeoutMs": 3000
+  },
+  "settingsGui": {
+    "panelW": 280.0,
+    "panelH": 196.0
   }
 }

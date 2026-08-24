@@ -258,6 +258,12 @@ the audit flagged. `SectorValue`'s other five per-mille axes (`Strategic`, `Defe
 This is existing, correct design: the six axis components are bounded by construction, and only their
 weighted combination needed widening, which it already got.
 
+**2026-08-24 addendum (tunables-ssot.md M.10):** `World/Ai/WorldAiTuning.cs`'s `ValueWeightsTuning`
+record mirrors `ValueWeights`'s six `int` fields one-for-one, as the JSON-parsed shape
+`WorldAiPolicy.Tuning.ValueMap.DefaultWeights` is built from (`data/tuning/ai.v1.json`). Same proven
+cap: a per-mille policy weight, not a resource magnitude — the mirror inherits the verdict, not a new
+one.
+
 ### 3.6 A retention tail, not a magnitude
 
 `Data/Policies/SealedCompactionPolicy.cs:8` (`SoulRetainTailPerPlayer = 5_000`). **Proven cap:** the
@@ -268,6 +274,14 @@ table (*"per-frame/runtime caps, retention tails"*) and in SSOT §11's exempt ca
 `ActivityRetainTail = 10_000` and `XpRetainTailPerActor = 5_000` in the same class, both the same
 shape and neither flagged (their names don't contain a magnitude word) — recorded here so a future
 sweep doesn't waste time re-deriving the same verdict for its two siblings.
+
+**2026-08-24 addendum (tunables-ssot.md M.16):** `SoulRetainTailPerPlayer` is now config-backed —
+`SealedCompactionPolicy.SoulRetainTailPerPlayer` reads `data/tuning/data.v1.json`'s
+`retain.soulTailPerPlayer` via `Data/Policies/DataTuning.cs`'s `RetainTuning` record, which mirrors
+all four retain fields (including the two already-exempt siblings) as `int` for the same reason: none
+of the four is a resource magnitude, all four are compaction retention depths. `KeepLastNFullCaptureRuns`
+sits in the identical record and is the fourth sibling this doc's "not a new verdict" note already
+covers.
 
 ---
 
@@ -285,3 +299,8 @@ for in exactly one of §1 (regex fix, 17), §2 (LADDER, 56), or §3 (BOUNDED, 19
 §2.5), touches nothing in §3, and additionally fixes SSOT §11.2a's three narrowing casts
 (`EffectBag.cs:707`, `EventDrain.cs:458,475` — out of this triage's scope, already named directly in
 power-todo.md).
+
+**2026-08-24 update:** post-P0.4, `--targets A3 | wc -l` reads **21**, not 19 — §3's BOUNDED set
+after LADDER's widening, plus the two addenda above (§3.5, §3.6) that Phase M's config migration
+added by mirroring already-BOUNDED types into new tuning records. 21 = 19 (original BOUNDED) + 2
+(mirrors, same verdicts, not new findings). Still 0 critical; `guard-overflow.ps1` still passes.

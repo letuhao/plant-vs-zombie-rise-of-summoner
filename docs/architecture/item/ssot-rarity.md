@@ -213,9 +213,17 @@ legality:
 6. **A promoted item is marked** (`promoted_from_ordinal`). Measured reason: a Cultivated promoted to
    Fused averages **59 % of a natural Fused** (§7.2). The mark explains the gap instead of hiding it,
    and it preserves *found beats crafted* without a hidden penalty.
-7. **Promotion tops out at ordinal 80 (Firstseed).** Sunwoven and Almanac are drop-only, so the top of
-   the ladder stays a reason to play content rather than a reason to grind currency. Owner-flaggable
-   (§10.4).
+7. **Promotion tops out where `promote_from = 0` first appears on the rung table** — today that is
+   ordinal 80 (Firstseed), leaving Sunwoven and Almanac drop-only so the top of the ladder stays a
+   reason to play content rather than a reason to grind currency. **This is a data row, not a
+   constant**: `promote_from` is a per-rung registry entry (§4.4), not a hardcoded ordinal in code, so
+   raising or removing the ceiling — including the "90, or no ceiling with a steep cost curve"
+   alternative §10 open question 4 raises — is a table edit when the owner answers it, never a code
+   change. Reconciled 2026-08-24 against AGENTS.md's no-hard-progression-ceilings rule: the
+   *mechanism* is already the required configurable soft cap; only *where the owner sets it* is still
+   open (§10 item 4, unchanged by this pass). Promotion's **cost**, separately, is I6's to own (§3.7
+   preamble) — the same rule applies there once I6 specs it: a per-rarity table value, not a formula
+   constant.
 
 **Where the rung lives, and how SC5 survives.** Rarity moves off the container and onto the **item row**
 (`item.rarity_id`, initialised from the container at drop). One rule with no special case: the

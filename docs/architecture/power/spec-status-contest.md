@@ -5,7 +5,8 @@ Module **`status-contest`**, wave 3 in the [power map](../power-map.md). Depends
 > **Reads [ssot-power-scale.md](ssot-power-scale.md)** — the parent SSOT. Where this spec and the
 > SSOT disagree, **the SSOT wins**.
 
-**Status:** Draft — pending owner review. No build authorized.
+**Status:** Owner approved 2026-08-24 — build authorized. **Built the same day** (power-todo.md
+T3.1/T3.2/T3.3, all three done) — full test suite green throughout, no golden re-blessed.
 
 ---
 
@@ -65,9 +66,9 @@ curve *activates*, in the opposite direction from the one it fixes. It is change
 **Both halves of the evaluator then read power the same way**, which is the property the SSOT's
 theorem needs and which no amount of curve-choosing can supply on its own.
 
-### 2.5 ADR P1 amendment (draft)
+### 2.5 ADR P1 amendment — landed in `decisions.md` 2026-08-24 (T3.1/T3.2)
 
-> **P1 UpdatePower — amended 2026-08-DD.** The POC curve `ProgressionPowerCurve (2^min(level,12))` is
+> **P1 UpdatePower — amended 2026-08-24.** The POC curve `ProgressionPowerCurve (2^min(level,12))` is
 > **retired**. `progression.power` reads `Θ` from `IPowerIndexProvider`
 > ([ssot-power-scale.md](ssot-power-scale.md) §4), linear per the difference-contest
 > theorem (§2). `StatusPolicy.ResistFromPowerRatio` moves `0 -> 1.0` so a matched pair contests at
@@ -107,7 +108,7 @@ tests/FusionRpg.Core.Tests/Status/ResistanceEvaluatorTests.cs  (edit — the red
 | Symmetry | `delta(a,b) == -delta(b,a)` for all pairs — the property `ResistFromPowerRatio = 0` broke |
 | Existing stub test updated | `Neutral_stub_tier_power_contributes_to_delta` asserted `delta == 1.0` for two identical actors. It must now assert **0.0** — it encoded the bug |
 | `RpgXpPowerScale` gone | no reference in `src/`; kill XP unchanged (the stub returned 1.0, so removing the multiply is arithmetically inert) |
-| Attacker-less path | unchanged — `tierPower = 1.0` stub, `status.power.* = 0` |
+| Attacker-less path | **Genuinely unchanged (delta stays 0) — but not automatically, and this row's silence on *why* hid a real defect. Found building T3.1 (2026-08-24):** naively, `AttackerLess()` zeroing only the *attacker's* channels means a normal defender's own tier power still counts as resist, giving `delta = -1`, not 0. Run through the full battle suite, that `-1` sends every scripted DoT/CC/rider status (`BattleEngine.cs`'s "land attacker-less at t0") to `netFactor`'s `MinNetFactor` floor — **completely inert** (`BattleStatusTests.Dot_kills_through_rounds` went `Victory → Stalemate`). Fixed properly, not patched around: `ComputeDelta` gained an `attackerLess` parameter that excludes `defender.TierPower × ResistFromPowerRatio` from the contest when there is no real attacker side to contest it with (immunity/category/omni resist still apply). Net effect matches this row's original claim — delta is 0 — but by an explicit, intentional exclusion rather than an accident of the bug being fixed |
 | **Golden movement is expected here** | status goldens move. Each moved hash is attributable to #1 or #2 and re-blessed knowingly, one commit, with the before/after in the message |
 
 ## 6. Boundaries
@@ -132,6 +133,13 @@ it · leave `IProgressionPowerProvider` alive beside `IPowerIndexProvider`.
 
 **None.** The propagation debt below is scoped work — evidence rule 6 makes it obligatory, not a
 decision.
+
+**Resolved during T3.1's build (2026-08-24):** §5's "Attacker-less path" row said "unchanged" without
+explaining why that's true — and naively it *isn't*: excluding the tier-power-resist term for
+attacker-less requests needed an explicit code change (`ComputeDelta`'s new `attackerLess`
+parameter), not just "the formula happens to still give 0". Without it, every scripted DoT/CC in
+battle went completely inert (`BattleStatusTests` — a real, caught-by-the-full-suite defect, not
+golden drift). See the note in place in §5 for the full trace.
 
 ### The debt
 

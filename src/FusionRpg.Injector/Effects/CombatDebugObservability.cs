@@ -5,6 +5,7 @@ namespace FusionRpg.Injector.Effects;
 /// <summary>In-memory ring of recent overlay/probe dumps for debug.combat.snapshot.</summary>
 public static class CombatDebugObservability
 {
+    // Structural (tunables-ssot.md T2) — debug ring-buffer size, not balance.
     const int Cap = 8;
     static readonly object Gate = new();
     static readonly Queue<Dictionary<string, object>> OverlayRing = new();

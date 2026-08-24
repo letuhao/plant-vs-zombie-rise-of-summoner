@@ -104,10 +104,8 @@ test.describe("Developer tree (T12)", () => {
       await expect(page.getByTestId("dev-tree")).toBeVisible();
       await expect(page.getByTestId(`dev-tree-surface-${id}`)).toBeVisible();
     }
-
-    await page.goto("/#/metrics");
-    await expect(page).toHaveURL(/#\/sanctum\?dev=runs/);
-    await expect(page.getByTestId("dev-tree-surface-runs")).toBeVisible();
+    // `/metrics` used to alias here too; as of T19 it redirects to the real Chronicle "Runs" tab
+    // instead (almanac-chronicle.spec.ts) — `runs` above already covers the dev tree's own surface.
   });
 
   test("switching tabs inside the tree updates the surface without leaving the tree", async ({ page }) => {

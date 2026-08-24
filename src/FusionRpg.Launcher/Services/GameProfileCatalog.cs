@@ -134,6 +134,8 @@ public sealed class GameProfileCatalog
                 [
                     new FingerprintDef
                     {
+                        // Structural (tunables-ssot.md T2) — exact byte length of this game
+                        // version's binary, used to auto-detect which profile is installed. Not balance.
                         GameAssemblyLength = 47964672,
                         AssemblyCSharpPaths =
                         [
@@ -160,6 +162,7 @@ public sealed class GameProfileCatalog
                 [
                     new FingerprintDef
                     {
+                        // Structural (tunables-ssot.md T2) — see the 3.8.1 profile's fingerprint above.
                         GameAssemblyLength = 57717248,
                         AssemblyCSharpPaths = ["MelonLoader/Il2CppAssemblies/Assembly-CSharp.dll"],
                         AssemblyCSharpLengths = [8405504]

@@ -131,8 +131,9 @@ public sealed class ResistanceEvaluator
             }
         }
 
+        var attackerLess = request.AttackerLess || attacker == null;
         var attackerSnap = ResolveAttackerSnapshot(request, attacker);
-        var delta = ComputeDelta(request.StatusId, category, attackerSnap, defender);
+        var delta = ComputeDelta(request.StatusId, category, attackerSnap, defender, attackerLess);
         var netFactor = ComputeNetFactor(delta);
 
         foreach (var tag in tags)
@@ -147,10 +148,14 @@ public sealed class ResistanceEvaluator
             return Resisted(request, delta, netFactor, 0, 0, 0, StatusResistReason.PotencyFloor);
         }
 
-        var matchPower = (attackerSnap.TierPower + defender.TierPower) / 2.0;
+        // T3.2 (audit F3): no longer scaled by matchPower. Under linear Theta, a power-scaled divisor
+        // makes a FIXED gap DECAY as both sides climb (measured: gap-5 p_apply 0.5010 at Theta=10,
+        // 0.5000 at Theta=10,000) -- every apply converges to a coin flip regardless of how far ahead
+        // the attacker is. A constant divisor is the one regime where both halves of the evaluator
+        // (delta's contest, and the roll built from it) read power the same way.
         var effectiveApplyScale = Math.Max(
             StatusPolicy.ApplyScaleFloor,
-            StatusPolicy.ApplyScaleKForCategory(category) * matchPower);
+            StatusPolicy.ApplyScaleKForCategory(category));
         var steepness = StatusPolicy.ApplySteepnessForCategory(category);
         var pApply = Sigmoid(delta / effectiveApplyScale, steepness);
         var pFinal = request.GrantChance * pApply;
@@ -191,7 +196,8 @@ public sealed class ResistanceEvaluator
         string statusId,
         string category,
         ActorDerivedSnapshot attacker,
-        ActorDerivedSnapshot defender)
+        ActorDerivedSnapshot defender,
+        bool attackerLess = false)
     {
         var totalPower = (StatusPolicy.IncludeTierPowerInDelta ? attacker.TierPower : 0)
                          + attacker.Get(DerivedStatChannels.StatusPowerOmni)
@@ -201,7 +207,15 @@ public sealed class ResistanceEvaluator
         var categoryResist = Math.Min(defender.Get($"status.resist.{category}"), StatusPolicy.CategoryResistCap);
         var perIdResist = Math.Min(defender.Get(DerivedStatChannels.StatusResist(statusId)), StatusPolicy.CategoryResistCap);
 
-        var totalResist = defender.TierPower * StatusPolicy.ResistFromPowerRatio
+        // T3.1 fix (power-plan.md, found via BattleStatusTests going Victory -> Stalemate, not
+        // assumed safe): the tier-power term is a CONTEST between two sides, so it is symmetric —
+        // either both sides' tier power enter it, or neither does. An attacker-less application
+        // (scripted setup statuses, trait/attack riders — BattleEngine.cs's "land attacker-less at
+        // t0") has no real attacker side to contest with; without this guard, ResistFromPowerRatio=1.0
+        // makes attacker.TierPower=0 net negative against ANY normal-power defender, netFactor clamps
+        // to MinNetFactor (0.0), and the scripted effect becomes permanently, completely inert.
+        // Category/per-id/omni resist (actual immunities and resistances) still apply normally.
+        var totalResist = (attackerLess ? 0 : defender.TierPower * StatusPolicy.ResistFromPowerRatio)
                           + defender.Get(DerivedStatChannels.StatusResistOmni)
                           + categoryResist
                           + perIdResist;
@@ -209,12 +223,14 @@ public sealed class ResistanceEvaluator
         return totalPower - totalResist;
     }
 
-    public static double ComputeNetFactor(double delta)
-    {
-        if (Math.Abs(delta) < 1e-9)
-            return 1.0;
-        return Math.Clamp(delta, StatusPolicy.MinNetFactor, StatusPolicy.MaxNetFactor);
-    }
+    // T3.2 (audit F4): a raw delta used directly as a multiplier made parity and +1 both give 1.0x
+    // but +2 give 2.0x -- a cliff, and one retired world (Wa=25) gave 25x. Normalizing by
+    // NetFactorScale removes the cliff and retires the delta==0 special case: the linear formula
+    // already gives exactly 1.0 there with no branch (1 + 0/scale == 1), which is also why the
+    // clamp's floor (MinNetFactor) is what makes a heavily negative delta fully-resisted, not a
+    // hardcoded zero.
+    public static double ComputeNetFactor(double delta) =>
+        Math.Clamp(1.0 + delta / StatusPolicy.NetFactorScale, StatusPolicy.MinNetFactor, StatusPolicy.MaxNetFactor);
 
     static bool IsUseless(double magnitude, double duration) =>
         Math.Abs(magnitude) < 1e-9 && duration <= 0;

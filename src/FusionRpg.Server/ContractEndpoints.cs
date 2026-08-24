@@ -153,7 +153,13 @@ public static class ContractEndpoints
                 purchasedSlots = purchased,
                 nextSlotPrice = ContractPolicy.NextSlotPrice(purchased),
                 canBuy = ContractPolicy.CanBuySlot(purchased),
-                maxSlots = ContractPolicy.MaxSlots
+                // T3.6 (spec-caps-reconcile.md §2.3): ContractPolicy.MaxSlots is deleted -- price is
+                // now the only real ceiling (SSOT §11.1a). int.MaxValue keeps this wire field's shape
+                // for existing consumers ("no number is ever reached") rather than dropping it, which
+                // would ripple into the web frontend's own maxSlots fixtures/types outside this
+                // backend spec's file list -- flagged in power-todo.md T3.6 as a follow-up, not fixed
+                // here silently.
+                maxSlots = int.MaxValue
             },
             dailyTribute = rows.Where(c => c.bound).Sum(c => (long)c.upkeepPerDay),
             deployFloor = ContractPolicy.DeployFloor,

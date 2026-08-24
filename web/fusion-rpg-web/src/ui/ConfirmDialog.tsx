@@ -74,6 +74,7 @@ export function ConfirmDialog({
             size="sm"
             variant="ghost"
             disabled={busy}
+            title={busy ? "Working — can't cancel mid-request" : undefined}
             onClick={onCancel}
           >
             {cancelLabel}
@@ -84,6 +85,7 @@ export function ConfirmDialog({
             size="sm"
             variant={tone === "danger" ? "danger" : "primary"}
             disabled={busy}
+            title={busy ? "Working…" : undefined}
             onClick={onConfirm}
           >
             {busy ? "Working…" : confirmLabel}

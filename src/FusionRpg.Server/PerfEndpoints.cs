@@ -5,6 +5,7 @@ namespace FusionRpg.Server;
 /// <summary>In-memory ring of injector PerfProbe windows (~5s each) — perf-probe-plan.md §1.4.</summary>
 public sealed class PerfWindowBuffer
 {
+    // Structural (tunables-ssot.md T2) — ring-buffer size, not balance.
     public const int Cap = 240; // ~20 minutes of 5s windows
 
     readonly object _gate = new();

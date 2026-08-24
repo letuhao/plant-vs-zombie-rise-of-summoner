@@ -12,7 +12,8 @@ namespace FusionRpg.Injector.Fx;
 /// </summary>
 static class TintCompositor
 {
-    public const float ReassertSeconds = 0.25f;
+    // Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.tintReassertSeconds.
+    public static float ReassertSeconds => (float)VfxTuningHub.Tuning.Render.TintReassertSeconds;
 
     sealed class Entry
     {

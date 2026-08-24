@@ -11,7 +11,7 @@ public sealed record ContractLoyaltyTuning(
     int WinGain, int LossPenalty, int DailyGainCap, int DecayPerDay, int RitualGain,
     int RankBonusSwornMilli, int RankBonusTrustedMilli, int RankBonusDevotedMilli);
 
-public sealed record ContractSlotsTuning(int BaseSlots, int MaxSlots, int SlotPriceStep);
+public sealed record ContractSlotsTuning(int BaseSlots, int SlotPriceStep);
 
 public sealed record ContractSettlementTuning(int MaxSettleDays);
 
@@ -80,7 +80,6 @@ public static class ContractTuningLoader
             var slotsEl = Obj(root, "slots", "$");
             var slots = new ContractSlotsTuning(
                 BaseSlots: Int(slotsEl, "baseSlots", "slots"),
-                MaxSlots: Int(slotsEl, "maxSlots", "slots"),
                 SlotPriceStep: Int(slotsEl, "slotPriceStep", "slots"));
 
             var settlementEl = Obj(root, "settlement", "$");

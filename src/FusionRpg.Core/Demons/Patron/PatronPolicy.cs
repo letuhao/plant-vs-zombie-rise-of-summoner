@@ -1,3 +1,5 @@
+using FusionRpg.Core.Power;
+
 namespace FusionRpg.Core.Demons.Patron;
 
 /// <summary>Computed patron aura — per-mille combat bonuses on the patron's element channels.
@@ -29,10 +31,6 @@ public static class PatronPolicy
     public static int AuraClampMilli => Tuning.AuraClampMilli;
     public static int PerStarMilli => Tuning.PerStarMilli;
 
-    /// <summary>The per-match kill-soul ceiling — mirrors the audited earn-v2 cap. Named for
-    /// deletion by caps-reconcile (power-plan.md T3.6, not yet authorized).</summary>
-    public static int KillSoulCap => Tuning.KillSoulCap;
-
     public static int RarityBaseMilli(DemonRarity rarity) =>
         Tuning.RarityBaseMilli.TryGetValue(rarity, out var v) ? v : Tuning.RarityBaseMilli[DemonRarity.Legendary];
 
@@ -54,14 +52,20 @@ public static class PatronPolicy
     }
 
     /// <summary>
-    /// Kill-earn delta for the (counted+1)-th earning kill with a patron set: +1 base, +1 on
-    /// every 10th, expressed as a running-total difference so the 50-soul cap is exact at the
-    /// boundary instead of overshooting on a bonus kill.
+    /// Kill-earn delta for the (counted+1)-th earning kill with a patron set: +1 base, +1 on every
+    /// 10th, expressed as a running-total difference (T3.6 kept this shape even after the 50-soul
+    /// cap it used to be exact against was deleted — the technique still isolates one kill's marginal
+    /// share cleanly, it just no longer has a ceiling to be exact at). Uncapped, and scaled by
+    /// <see cref="ContentScale"/> like the unpatroned path (<see cref="SoulEarnPolicy.KillEarn"/>) —
+    /// deliberately, not named in SSOT §11.7a's own formula list, because leaving the patron bonus
+    /// flat while the base path scales would make owning a patron a strictly WORSE choice at any
+    /// depth past the pin, the opposite of what a bonus is for.
     /// </summary>
-    public static long KillEarnWithPatron(int countedKills)
+    public static long KillEarnWithPatron(int countedKills, int thetaEnemy, PowerTuning tuning)
     {
-        static long SoulsAfter(int earningKills) =>
-            Math.Min(KillSoulCap, earningKills + earningKills / 10);
+        var scaleMilli = ContentScale.Milli(thetaEnemy, tuning);
+        long SoulsAfter(int earningKills) =>
+            ContentScale.Apply(earningKills + earningKills / 10, scaleMilli);
         return SoulsAfter(countedKills + 1) - SoulsAfter(countedKills);
     }
 }

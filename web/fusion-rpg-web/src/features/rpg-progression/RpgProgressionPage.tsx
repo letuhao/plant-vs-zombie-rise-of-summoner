@@ -20,6 +20,7 @@ import {
   BarChart,
   Button,
   DataTable,
+  DivergingBar,
   EmptyState,
   HelpText,
   KeyValue,
@@ -34,6 +35,10 @@ import {
   TypeIcon,
   type DataTableColumn
 } from "@/ui";
+
+/** Ledger deltas per event are bounded in practice (a single kill/spawn/run award); values past
+ * this just clamp at the bar's edge rather than needing a per-render dynamic scale. */
+const LEDGER_DELTA_SCALE = 500;
 
 type TabId = "overview" | "plants" | "zombies" | "ledger";
 type SelectedActor = { kind: string; typeId: number };
@@ -76,7 +81,16 @@ const ledgerColumns: DataTableColumn<RpgXpLedgerEntry>[] = [
   { key: "t", header: "Time", cell: (r) => r.t },
   { key: "actor", header: "Actor", cell: (r) => `${r.kind}/${r.typeName ?? r.typeId}` },
   { key: "reason", header: "Reason", cell: (r) => r.reason },
-  { key: "delta", header: "Δ", cell: (r) => (r.delta >= 0 ? `+${r.delta}` : String(r.delta)) },
+  {
+    key: "delta",
+    header: "Δ",
+    cell: (r) => (
+      <div className="flex min-w-24 items-center gap-2">
+        <span className="tabular-nums">{r.delta >= 0 ? `+${r.delta}` : String(r.delta)}</span>
+        <DivergingBar testId={`ledger-delta-${r.id}`} value={r.delta} scaleMax={LEDGER_DELTA_SCALE} className="w-16" />
+      </div>
+    )
+  },
   { key: "level", header: "Level", cell: (r) => `${r.levelBefore}→${r.levelAfter}` },
   { key: "xp", header: "XP", cell: (r) => `${r.xpBefore.toFixed(0)}→${r.xpAfter.toFixed(0)}` },
   { key: "run", header: "Run", cell: (r) => String(r.runId) },
@@ -229,6 +243,7 @@ function ActorDossier({
         data-testid="progression-actor-clear-demotion"
         size="sm"
         disabled={clearDemotion.isPending || row.demotionCount === 0}
+        title={clearDemotion.isPending ? "Clearing…" : row.demotionCount === 0 ? "No demotions to clear" : undefined}
         onClick={() =>
           void clearDemotion.mutateAsync({
             playerId,
@@ -289,7 +304,7 @@ function KindBrowser({
               <option value="level">level</option>
               <option value="xp">xp</option>
               <option value="updated">updated</option>
-              <option value="typeId">typeId</option>
+              <option value="typeId">Type</option>
             </Select>
             <HelpText>Page</HelpText>
             <Select
@@ -416,6 +431,7 @@ export function RpgProgressionPage() {
             data-testid="rpg-progression-seed"
             onClick={() => void seed.mutateAsync(playerId)}
             disabled={seed.isPending}
+            title={seed.isPending ? "Seeding…" : undefined}
           >
             Seed demo
           </Button>
@@ -468,6 +484,13 @@ export function RpgProgressionPage() {
                   data-testid="progression-clear-demotion"
                   size="sm"
                   disabled={clearDemotion.isPending || playerActor.demotionCount === 0}
+                  title={
+                    clearDemotion.isPending
+                      ? "Clearing…"
+                      : playerActor.demotionCount === 0
+                        ? "No demotions to clear"
+                        : undefined
+                  }
                   onClick={() =>
                     void clearDemotion.mutateAsync({ playerId, kind: "player", typeId: 0 })
                   }
@@ -579,7 +602,7 @@ export function RpgProgressionPage() {
                 <input
                   data-testid="ledger-filter-typeid"
                   className="rounded-sm border border-border bg-soil px-2 py-1.5 text-sm"
-                  placeholder="typeId"
+                  placeholder="Type"
                   value={ledgerTypeId}
                   onChange={(e) => {
                     setLedgerTypeId(e.target.value);

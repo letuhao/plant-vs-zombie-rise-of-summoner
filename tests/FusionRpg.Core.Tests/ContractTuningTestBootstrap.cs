@@ -1,15 +1,23 @@
 using System.Runtime.CompilerServices;
+using FusionRpg.Core;
+using FusionRpg.Core.Battle;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Shield;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Demons.Contracts;
 using FusionRpg.Core.Demons.Fusion;
 using FusionRpg.Core.Demons.Patron;
+using FusionRpg.Core.Effects;
 using FusionRpg.Core.Expeditions;
+using FusionRpg.Core.Match;
 using FusionRpg.Core.Overlay;
+using FusionRpg.Core.Power;
+using FusionRpg.Core.Progression;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Vfx;
 using FusionRpg.Core.World;
+using FusionRpg.Core.World.Ai;
 using FusionRpg.Core.World.Loam;
 
 namespace FusionRpg.Core.Tests;
@@ -42,6 +50,15 @@ internal static class ContractTuningTestBootstrap
         OverlayTuningHub.Configure(DefaultOverlay);
         StatsTuningHub.Configure(DefaultStats);
         ExpeditionTuningHub.Configure(DefaultExpeditions);
+        MatchTuningPolicy.Configure(DefaultMatch);
+        EffectsTuningHub.Configure(DefaultEffects);
+        SimDefaults.Configure(DefaultSim);
+        ProgressionTuningHub.Configure(DefaultProgression);
+        BattleTuningHub.Configure(DefaultBattle);
+        SummoningTuningHub.Configure(DefaultSummoning);
+        WorldAiPolicy.Configure(DefaultAi);
+        VfxTuningHub.Configure(DefaultVfx);
+        PowerTuningHub.Configure(DefaultPower);
     }
 
     public static readonly ContractTuning DefaultContracts = new(
@@ -52,7 +69,7 @@ internal static class ContractTuningTestBootstrap
             SwornThreshold: 400, TrustedThreshold: 600, DevotedThreshold: 800,
             WinGain: 15, LossPenalty: 10, DailyGainCap: 60, DecayPerDay: 25, RitualGain: 100,
             RankBonusSwornMilli: 15, RankBonusTrustedMilli: 35, RankBonusDevotedMilli: 60),
-        Slots: new ContractSlotsTuning(BaseSlots: 12, MaxSlots: 48, SlotPriceStep: 300),
+        Slots: new ContractSlotsTuning(BaseSlots: 12, SlotPriceStep: 300),
         Settlement: new ContractSettlementTuning(MaxSettleDays: 30),
         PersonalityRates: new Dictionary<DemonPersonality, PersonalityRateTuning>
         {
@@ -127,8 +144,8 @@ internal static class ContractTuningTestBootstrap
     public static readonly SoulEarnTuning DefaultSouls = new(
         SchemaVersion: 1,
         Version: 1,
-        Kill: new SoulKillTuning(KillDelta: 1, KillCapPerMatch: 50),
-        MatchEnd: new SoulMatchEndTuning(VictoryDelta: 100, VictoryFullPerDay: 3, DefeatDelta: 25),
+        Kill: new SoulKillTuning(KillDelta: 1),
+        MatchEnd: new SoulMatchEndTuning(VictoryDelta: 100, DefeatDelta: 25),
         DiscoveryDelta: new Dictionary<DemonRarity, int>
         {
             [DemonRarity.Common] = 25,
@@ -144,7 +161,6 @@ internal static class ContractTuningTestBootstrap
         SwitchCostSouls: 100,
         AuraClampMilli: 150,
         PerStarMilli: 10,
-        KillSoulCap: 50,
         RarityBaseMilli: new Dictionary<DemonRarity, int>
         {
             [DemonRarity.Common] = 20,
@@ -200,9 +216,10 @@ internal static class ContractTuningTestBootstrap
         CategoryResistCap: 0.95,
         ApplyScaleK: 100.0,
         ApplyScaleFloor: 1.0,
-        ResistFromPowerRatio: 0.0,
+        ResistFromPowerRatio: 1.0, // T3.1 (power-plan.md, done 2026-08-24): 0 -> 1.0, matched pair contests at delta=0
         MinNetFactor: 0.0,
         MaxNetFactor: 10_000.0,
+        NetFactorScale: 10.0, // T3.2 (power-plan.md, done 2026-08-24): netFactor = 1 + delta/NetFactorScale (audit F4)
         ProgressionPowerStubDefault: 1.0,
         ProcDepthLimitDefault: 6,
         ApplySteepnessDefault: 1.0);
@@ -214,7 +231,8 @@ internal static class ContractTuningTestBootstrap
         SwitchLayout: new OverlaySwitchLayoutTuning(
             BaseButtonW: 72f, BaseButtonH: 28f, BaseMargin: 16f, ReferenceHeight: 1080f,
             MinScale: 1f, MaxScale: 3f),
-        SwitchState: new OverlaySwitchStateTuning(DebounceMs: 300, ProbeIntervalMs: 30_000, SendTimeoutMs: 3_000));
+        SwitchState: new OverlaySwitchStateTuning(DebounceMs: 300, ProbeIntervalMs: 30_000, SendTimeoutMs: 3_000),
+        SettingsGui: new OverlaySettingsGuiTuning(PanelW: 280f, PanelH: 196f));
 
     public static readonly StatsTuning DefaultStats = new(
         SchemaVersion: 1,
@@ -239,4 +257,95 @@ internal static class ContractTuningTestBootstrap
         EventRoll: new ExpeditionEventRollTuning(
             QuietCeilMilli: 400, FoundSoulsCeilMilli: 750, WildCeilMilli: 900, WildJoinMilli: 250,
             ShinyDie: 64, InjuryPowerDivisor: 4));
+
+    public static readonly MatchTuning DefaultMatch = new(
+        SchemaVersion: 1, Version: 1, MaxLivingPlants: 50, MaxLivingZombies: 80);
+
+    public static readonly EffectsTuning DefaultEffects = new(
+        SchemaVersion: 1, Version: 1,
+        MatchupReadSlotShareMilli: 250,
+        DamageFxFloater: new DamageFxFloaterTuning(Cap: 64, LifeSeconds: 0.9, RisePixels: 56));
+
+    public static readonly SimTuning DefaultSim = new(
+        SchemaVersion: 1, Version: 1,
+        PlantHp: 300, PlantAttack: 20, ZombieHp: 270, ZombieAttack: 50, HitDamage: 50);
+
+    public static readonly ProgressionTuning DefaultProgression = new(
+        SchemaVersion: 1, Version: 1,
+        PlantCurve: new XpCurveParams(80.0, 32.0),
+        ZombieCurve: new XpCurveParams(70.0, 28.0),
+        PlayerCurve: new XpCurveParams(100.0, 45.0),
+        Awards: new XpAwardsTuning(Kill: 12, Defeat: -100, Mower: -30, PlantPlace: 8, ZombieSpawn: 9));
+
+    public static readonly BattleTuning DefaultBattle = new(
+        SchemaVersion: 1, Version: 1,
+        RoundDurationMs: 1000, MaxRounds: 50,
+        PrimaryAffinityDivisor: 4, SecondaryAffinityDivisor: 8,
+        Traits: new Dictionary<string, TraitMagnitudes>(StringComparer.Ordinal)
+        {
+            ["berserker"] = new(BerserkRampHalfMilli: 250, BerserkRampQuarterMilli: 500),
+            ["regenerator"] = new(RegenPerRoundMilli: 20),
+            ["soul-eater"] = new(OnKillHealMilli: 100),
+            ["guardian"] = new(GuardShareMilli: 250),
+            ["swift"] = new(InitiativeBonusMilli: 1000),
+            ["immortal"] = new(DeathRefusalCharges: 1),
+            ["coward"] = new(RetreatBelowMilli: 250),
+            ["greedy"] = new(SoulLootBonusMilli: 250),
+            ["genius"] = new(SpecimenXpBonusMilli: 250),
+            ["void-touched"] = new(EssenceProcMilli: 100, EssenceRiderMilli: 150),
+            ["chaos-marked"] = new(EssenceProcMilli: 100, EssenceRiderMilli: 150),
+        });
+
+    public static readonly SummoningTuning DefaultSummoning = new(
+        SchemaVersion: 1, Version: 1,
+        Banners: new Dictionary<string, BannerTuning>(StringComparer.Ordinal)
+        {
+            ["standard-rift"] = new(CostPerPull: 100, CostPerTen: 900, FocusWeightMultiplier: 1.0),
+            ["element-focus"] = new(CostPerPull: 120, CostPerTen: 1080, FocusWeightMultiplier: 3.0),
+        },
+        Roller: new RollerTuning(
+            EpicHardPity: 25, LegendarySoftStart: 41, LegendaryHardPity: 55,
+            LegendaryBasePerMille: 10, LegendaryRampPerMille: 60, EpicPerMille: 50,
+            RarePerMille: 200, ShinyOneIn: 64));
+
+    public static readonly WorldAiTuning DefaultAi = new(
+        SchemaVersion: 1, Version: 1,
+        FrontierRules: new FrontierRulesTuning(RecoverAtMilli: 400, ExploreTurns: 3, SeveranceThresholdCost: 10_000),
+        ThreatMap: new ThreatMapTuning(StaleDecayPerTurn: 150, MaxSpreadHops: 4, ProximityFalloffPerHop: 400),
+        ValueMap: new ValueMapTuning(
+            OptimismMilli: 700, OverextensionPenaltyMilli: 1400, HabitabilityPenaltyMilli: 1400,
+            DefaultWeights: new ValueWeightsTuning(
+                Yield: 1000, Strategic: 800, Defensibility: 500, Cost: 700, Risk: 900, Curiosity: 600)));
+
+    public static readonly VfxTuning DefaultVfx = new(
+        SchemaVersion: 1, Version: 1,
+        TintMaxStrength: 0.35,
+        BurstConeHalfAngle: 0.6, BurstRisingSideFactor: 0.4, BurstDirectionalSideFactor: 0.5,
+        Rules: new VfxRulesTuning(
+            BurstCap: 24, BurstLifeSeconds: 0.55, FloaterRateLimitSeconds: 0.05, BurstRateLimitSeconds: 0.15,
+            GlobalCuePerTickCap: 32, CueQueueCap: 256, CritFontScale: 1.25, CritPopStartScale: 1.5,
+            CritPopSettleT: 0.3, AmountTierSmallBelow: 50, AmountTierBigFrom: 200,
+            AmountTierSmallScale: 0.9, AmountTierBigScale: 1.15),
+        Sustained: new VfxSustainedTuning(
+            GlobalCap: 24, PerHostCap: 2, TtlGraceSeconds: 2.0, InfiniteTtlSeconds: 60.0,
+            AuraPulseSeconds: 0.3, AuraMaxParticles: 6),
+        Render: new VfxRenderTuning(
+            BurstParticles: 28, ParticleSortingOrder: 80, ParticleTextureSize: 64, MarkerEdgeSoftness: 0.1,
+            ShieldBar: new VfxShieldBarTuning(
+                BarWorldWidth: 0.95, BarWorldHeight: 0.12, WorldYOffset: -0.35,
+                MaxSegments: 3, Cap: 32, MaxPips: 3),
+            TintReassertSeconds: 0.25));
+
+    // bMilli=0 matches the shipped power-scale.v1.json exactly (plan.md "B=0 first, dial second") —
+    // BattleRuleset.BaseHp/Atk/Defense must stay byte-identical to their pre-T2.1 literal formulas
+    // for every test in this assembly, the same zero-golden-movement guarantee production gets.
+    public static readonly PowerTuning DefaultPower = PowerTuning.Build(
+        schemaVersion: 1, version: 1,
+        cMilli: PowerTuning.FixedCMilli, bMilli: 400, pinIndex: PowerTuning.FixedPinIndex, pinValue: PowerTuning.FixedPinValue, // T4.2 (power-dial, 2026-08-24): 0 -> 400, matches shipped power-scale.v2.json
+        wdMilli: 1000, waMilli: 25000, wrMilli: 250, wzMilli: 1000, wmMilli: 5000, wwMilli: 5000, wfMilli: 25000,
+        channels: new Dictionary<string, PowerChannelTuning>
+        {
+            ["atk"] = new PowerChannelTuning(CMilli: 12_000, PinValue: 92),
+            ["defense"] = new PowerChannelTuning(CMilli: 2_000, PinValue: 22),
+        });
 }

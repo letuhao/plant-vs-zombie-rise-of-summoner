@@ -16,6 +16,8 @@ public sealed class FlatPredicate : ICompiledPredicate
 {
     /// <summary>Jump targets below zero are answers, not indices.</summary>
     internal const int True = -1;
+    // Structural (tunables-ssot.md T2) — a jump-target sentinel (an answer, not an index), same
+    // class as True above.
     internal const int False = -2;
 
     /// <summary>One test plus where to go next. Strings are interned to ints at compile time.</summary>

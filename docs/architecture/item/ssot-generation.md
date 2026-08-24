@@ -329,15 +329,30 @@ nowhere.
 contentLevel:
   web battle        WaveDef.RecommendedLevel        — 1 / 3 / 6 / 10 today
                                                      (src/FusionRpg.Core/Battle/WaveCatalog.cs:32-35)
-  expedition tick   tier base level                 — scout 2 · forage 5 · hunt 9 · warpath 14
-  expedition boss   tier base level + 3             — the 20 h boss tick
+  expedition tick   the resolved wave's own WaveDef.RecommendedLevel — not a second formula.
+                    ExpeditionResolver picks WHICH wave (its wave chain: scout → rift-skirmish;
+                    forage → +rift-warband; hunt → +rift-onslaught; warpath → +rift-onslaught,
+                    rift-tyrant), then that wave's RecommendedLevel is item level exactly like a
+                    web battle (src/FusionRpg.Core/Expeditions/ExpeditionResolver.cs, WaveChain)
+  expedition boss   same as above, at the fixed boss wave (BossWaveId = "rift-tyrant") — still
+                    WaveDef.RecommendedLevel, not "tier base level + 3"
   world sector      sectorLevel(danger_band)        — mapping owed by the world program (§10.10)
-  PvZ run           min(mappedRunLevel, playerLevel) and capped — §4.6
+  PvZ run           not yet designed — no `mappedRunLevel` concept exists in shipped code. PvZ-
+                    sourced drops need a real contentLevel source before this lane can resolve one;
+                    tracked as an open question (§11), not a formula to treat as built
 
 jitter j:  on stream item.ilvl, NextPerMille() → [0,150) = −1 · [150,750) = 0 · [750,1000) = +1
 itemLevel = max(1, contentLevel + j)
 level_req = max(1, itemLevel − 2)
 ```
+
+**Corrected 2026-08-24.** The original text listed five independent `contentLevel` formulas; three
+did not exist in shipped code. Expeditions were never a second formula — `ExpeditionResolver`
+dispatches every battle (tick or boss) through the same `BattleSetup{WaveId, Wave}` a web battle
+uses, so the wave it picks carries its own `RecommendedLevel` the same way §4.1's first row already
+describes. Only the *wave selection* varies by expedition tier (the wave chain); the level mechanism
+does not fork. `mappedRunLevel` (PvZ run) was never implemented anywhere — `grep` finds it nowhere
+outside this one line — so it is recorded here as undesigned rather than restated as if it shipped.
 
 Why content and not player: *"where do I farm this?"* must always have an answer. The moment item
 level tracks player level, every piece of content yields the same gear and the map flattens.
@@ -482,8 +497,18 @@ fires at bind, with `LevelTooLow` / `ScopeUnsupported` / whatever I11 adds. Conf
 | 1 | The injector never rolls a drop. PvZ posts a **loot event**; the server resolves it on the same pipeline. | There is no injector drop path, so there is nothing to be better. Matches charter §3: *"All web-mode outcomes resolve server-side with seeded, recorded RNG"* |
 | 2 | Every drop table declares `source_allow`. A table not reachable from `web` is rejected at import. | `StandaloneRuleViolation` |
 | 3 | Every `drop_table_entry` reachable from a PvZ source must also be reachable from a web source — a set-containment check over the resolved entry graph. | `StandaloneRuleViolation`. This is the strongest readable form of *"never the best source of anything web mode also provides"*, and it is cheap: two reachability sets and a subset test |
-| 4 | Rate parity: equipment from `source = injector` is capped per player at **2 per run** and **12 per day**, as a column (`pvz_loot_budget`), not a constant. | Applied at step 5; excess equipment entries resolve as `nothing` and the log records `pvz_cap` |
-| 5 | The charter adopts *"boosted earn"* as a legal extension role. **It applies to currency and materials, never to equipment drop rate or rarity weights.** | Equipment weight shifts on a PvZ-reachable entry are rejected at import; currency and material shifts are allowed |
+| 4 | The charter adopts *"boosted earn"* as a legal extension role. **It applies to currency and materials, never to equipment drop rate or rarity weights.** | Equipment weight shifts on a PvZ-reachable entry are rejected at import; currency and material shifts are allowed |
+
+**Removed (pre-build reconciliation, 2026-08-24): a per-player rate-parity cap on injector-sourced
+equipment (2/run, 12/day, `pvz_loot_budget`).** A daily/per-run cap is a stamina gate, and
+[standalone-rpg-map.md](../standalone-rpg-map.md) already ruled *"no stamina system — with no
+monetization a stamina gate has no honest job."* Rules 1/2/3 already do the real work rate parity
+was standing in for: source `web` reachability, `StandaloneRuleViolation` containment, and rule 4
+above (unweighted equipment) together mean PvZ can never be the *best* place to farm equipment —
+matching drop tables, matching odds, no separate weight bonus. A count cap on top of identical odds
+adds nothing rate parity doesn't already guarantee; it only throttles play. If a PvZ-specific
+volume concern shows up in practice, it is a `data/tuning/<domain>.v{n}.json` soft cap (tunables-ssot.md
+T1), never a hardcoded 2/12.
 
 Rule 5 is the sharp one. A soul bonus is linear and spends down. An equipment rate or rarity bonus
 compounds into permanent build power, which makes the game the best way to play the RPG — the exact
@@ -555,7 +580,7 @@ CREATE TABLE item_drop_log (
   item_level          INTEGER NOT NULL,
   context_json        TEXT NOT NULL,        -- smart-loot mode, squad frame mix, pity in, caps
   result_json         TEXT NOT NULL,        -- full manifest incl. every minted instance_id
-  notes               TEXT NOT NULL DEFAULT '',  -- envelope_narrowed | pvz_cap | pity_forced
+  notes               TEXT NOT NULL DEFAULT '',  -- envelope_narrowed | pity_forced (pvz_cap retired — §4.6, 2026-08-24)
   t                   TEXT NOT NULL,
   UNIQUE(player_id, correlation_id));
 
@@ -929,8 +954,9 @@ before anything here is built.
    identical. Reversible in one column of `item_loot_pity`.
 3. **Is smart loot on by default?** I said yes, with a visible toggle. Off-by-default is a defensible
    different game.
-4. **The PvZ equipment cap — 2 per run, 12 per day.** Balance, not architecture, but it is the number
-   that decides whether PvZ play feels like a real second faucet or a token one.
+4. ~~**The PvZ equipment cap — 2 per run, 12 per day.**~~ Retired 2026-08-24 (§4.6) — a daily/per-run
+   cap is a stamina gate `standalone-rpg-map.md` already ruled out; rate parity (§4.6 rules 1–4) does
+   the real work without it. No longer an open question.
 5. **Is 45% of normal battles dropping no gear too harsh?** It is the single number §8 is most
    sensitive to. Raising equipment weight from 550 to 700 takes the session yield from ~10 to ~12.
 6. **`item_drop_log` retention horizon.** I proposed a day-one tail-trim of the replay payload. How
@@ -938,6 +964,13 @@ before anything here is built.
 7. **Trading.** I found none in the tree and designed as if none exists, which is what makes smart loot
    cheap here (§3.3). If trading is ever intended, smart loot's cost rises sharply and this decision
    should be revisited before it ships, not after.
+8. **PvZ run `contentLevel` (§4.1)** — added 2026-08-24, found while correcting §4.1's three
+   never-built formulas. A PvZ-sourced drop needs *some* item-level source once standalone-first
+   ships item generation; nothing in the tree computes one today. Candidates: the player's own level
+   (mirrors "web battle" reading `WaveDef.RecommendedLevel`, i.e. the *content* the player is
+   currently running sets it — but PvZ has no wave-def-equivalent to read from), or a flat
+   session/run level the PvZ side reports. Neither is designed; this lane cannot resolve PvZ-sourced
+   generation until one is.
 
 ---
 

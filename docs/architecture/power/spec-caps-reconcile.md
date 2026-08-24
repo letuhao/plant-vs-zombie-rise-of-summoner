@@ -5,7 +5,7 @@ Module **`caps-reconcile`**, wave 3 in the [power map](../power-map.md). Depends
 > **Reads [ssot-power-scale.md](ssot-power-scale.md) §11** — the caps register. Where this spec and
 > the SSOT disagree, **the SSOT wins**.
 
-**Status:** Draft — pending owner review. No build authorized.
+**Status:** Owner approved 2026-08-24 — build authorized.
 
 ---
 

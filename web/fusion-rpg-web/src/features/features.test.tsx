@@ -522,7 +522,7 @@ describe("feature pages", () => {
 
     await waitFor(() => {
 
-      expect(screen.getByTestId("progression-chart-reason").querySelector(".recharts-responsive-container")).toBeTruthy();
+      expect(screen.getByTestId("progression-chart-reason").querySelector('[data-testid="bar-chart"]')).toBeTruthy();
 
     });
 

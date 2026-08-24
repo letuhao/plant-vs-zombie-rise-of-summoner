@@ -5,7 +5,7 @@ Module **`power-index`**, wave 1 in the [power map](../power-map.md). Depends on
 > **Reads [ssot-power-scale.md](ssot-power-scale.md)** — the parent SSOT. Where this spec and the
 > SSOT disagree, **the SSOT wins**. This module implements §5; it decides nothing.
 
-**Status:** Draft — pending owner review. No build authorized.
+**Status:** Owner approved 2026-08-24 — build authorized. Built: T1.3/T1.4 (power-todo.md), done and verified the same day.
 
 ---
 
@@ -70,8 +70,18 @@ public interface IPowerIndexProvider
 
 `StatContext` already carries `PlayerId`, `Side`, `TypeId` — the key
 `InjectorProgressionPowerProvider` uses today. **`ContentContext` is new**: `(dangerBand, worldTier,
-zombossLevel)`, a plain record, because content has no `StatContext` and forcing one would put a
-fake actor on every wave definition.
+zombossLevel, realmsAdvanced)`, a plain record, because content has no `StatContext` and forcing one
+would put a fake actor on every wave definition.
+
+> **Correction, found building T1.3 (2026-08-24):** this section originally listed `ContentContext`
+> as three fields — `(dangerBand, worldTier, zombossLevel)`, omitting `realmsAdvanced`. But §2.1's
+> own formula is `Θ_content = Wz·zombossLevel + Wm·dangerBand + Ww·worldTier + Wf·realmsAdvanced`, and
+> SSOT §5.1 is explicit that `realmsAdvanced` must land on **both** sides at `Wf = Wa` to keep the
+> actor/content gap constant — without a fourth field, `ContentContext` could never even be
+> constructed for the F2/F8 divergence tripwire's "500 simulated worlds" test (§5). Per this file's
+> own header — "where this spec and the SSOT disagree, the SSOT wins" — the field is added. Everything
+> else on this page (the interface, the implementation table, the testing table) already assumed a
+> `realmsAdvanced`-bearing `ContentContext`; only this one prose line was stale.
 
 | Implementation | Lives in | Source |
 |---|---|---|
@@ -131,7 +141,7 @@ dotnet test tests\FusionRpg.Guard.Tests        # DAL boundary — the server imp
 
 ```
 src/FusionRpg.Core/Power/IPowerIndexProvider.cs      (new — interface + Stub + Hydrated)
-src/FusionRpg.Core/Power/ContentContext.cs           (new — dangerBand, worldTier, zombossLevel)
+src/FusionRpg.Core/Power/ContentContext.cs           (new — dangerBand, worldTier, zombossLevel, realmsAdvanced — §2.2 correction)
 src/FusionRpg.Core/Power/PowerAxisReport.cs          (new — §2.4)
 src/FusionRpg.Core/Power/PowerIndexComposer.cs       (new — the weighted sum, pure)
 src/FusionRpg.Injector/Stats/InjectorPowerIndexProvider.cs   (new — replaces InjectorProgressionPowerProvider)
@@ -204,3 +214,7 @@ tests/FusionRpg.Core.Tests/Power/PowerAxisReportTests.cs
 **None.** All six weights have starting values (SSOT §5.3), the no-cap decision is recorded, and
 `Wm = 5` is derived from the shipped `SectorTypeCatalog` bands (SSOT §5.3), and its absence has a
 defined behaviour regardless. The world program may move the weight; it owes nothing.
+
+**Resolved during T1.3's build (2026-08-24):** §2.2's `ContentContext` prose was missing
+`realmsAdvanced` — corrected in place, see the note there. No design decision changed; the formula
+and testing table were already correct, only one field list was stale.

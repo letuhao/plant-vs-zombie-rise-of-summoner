@@ -10,16 +10,36 @@ public sealed record SummonBannerDef(
     bool HasElementFocus,
     double FocusWeightMultiplier);
 
+/// <summary>Config-backed (tunables-ssot.md T1) — data/tuning/summoning.v1.json's banners map.
+/// Banner ids/HasElementFocus stay here (schema); cost/focus-weight magnitudes are loaded.</summary>
 public static class SummonBannerCatalog
 {
     public const string StandardRift = "standard-rift";
     public const string ElementFocus = "element-focus";
 
-    public static readonly IReadOnlyList<SummonBannerDef> All = new[]
+    static SummoningTuning? _tuning;
+
+    public static void Configure(SummoningTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static SummoningTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "SummonBannerCatalog.Configure(...) has not run. Every banner reads " +
+        "data/tuning/summoning.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    static IReadOnlyList<SummonBannerDef>? _all;
+
+    public static IReadOnlyList<SummonBannerDef> All => _all ??= new[]
     {
-        new SummonBannerDef(StandardRift, 100, 900, HasElementFocus: false, FocusWeightMultiplier: 1.0),
-        new SummonBannerDef(ElementFocus, 120, 1_080, HasElementFocus: true, FocusWeightMultiplier: 3.0)
+        Of(StandardRift, hasElementFocus: false),
+        Of(ElementFocus, hasElementFocus: true)
     };
+
+    static SummonBannerDef Of(string bannerId, bool hasElementFocus)
+    {
+        var b = Tuning.Banners.TryGetValue(bannerId, out var v) ? v
+            : throw new InvalidOperationException($"summoning tuning: missing banner '{bannerId}'.");
+        return new SummonBannerDef(bannerId, b.CostPerPull, b.CostPerTen, hasElementFocus, b.FocusWeightMultiplier);
+    }
 
     public static SummonBannerDef? TryGet(string? bannerId) =>
         All.FirstOrDefault(b => string.Equals(b.BannerId, bannerId, StringComparison.Ordinal));

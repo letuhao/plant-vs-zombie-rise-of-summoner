@@ -228,8 +228,8 @@ test.describe("audit shell e2e", () => {
   test("loads status and navigates audit pages", async ({ page }) => {
     // Status/Stats/Cheats/Log/Runs are dev-tree surfaces as of T12 (see dev-tree.spec.ts for
     // the tree's own contract) — this test still exercises them as regression coverage that
-    // the pages themselves render inside their new home. Types/Recipes stay real AuditNav
-    // links (players reach them directly, unlike the developer-only pages).
+    // the pages themselves render inside their new home. Types/Recipes are Almanac tabs as of
+    // T19 (see almanac-chronicle.spec.ts for that layer's own contract).
     // The dev tree is a modal panel: Radix correctly aria-hides the rest of the page (including
     // HudBar's "Rise of Summoner" heading) while it's open, so that heading isn't asserted here.
     await page.goto("./#/status");
@@ -249,15 +249,19 @@ test.describe("audit shell e2e", () => {
     await page.getByTestId("cheat-tab-B").click();
     await expect(page.getByText("P-GOD — Plant godmode")).toBeVisible();
 
-    // The dev tree is a modal panel — close it before touching AuditNav underneath.
+    // The dev tree is a modal panel — close it before touching the rail underneath.
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("dev-tree")).not.toBeVisible();
 
-    await page.getByRole("link", { name: "Types" }).click();
+    await page.getByTestId("rail-almanac").click();
+    await expect(page.getByTestId("almanac-layer")).toBeVisible();
     await expect(page.getByText("Peashooter")).toBeVisible();
 
-    await page.getByRole("link", { name: "Recipes" }).click();
+    await page.getByTestId("almanac-tab-recipes").click();
     await expect(page.getByText(/SunPea \(3\)/)).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("almanac-layer")).not.toBeVisible();
 
     await page.goto("./#/log");
     await expect(page.getByRole("heading", { name: "Live log" })).toBeVisible();
@@ -323,6 +327,8 @@ test.describe("audit shell e2e", () => {
       });
     });
     await page.goto("./#/pvz-stats");
+    await expect(page).toHaveURL(/#\/sanctum\?panel=chronicle/);
+    await page.getByTestId("chronicle-tab-pvz-stats").click();
     await expect(page.getByTestId("page-pvz-stats")).toBeVisible();
     await page.getByTestId("pvz-stats-seed").click();
     await expect.poll(() => seeded).toBe(true);
@@ -597,6 +603,8 @@ test.describe("audit shell e2e", () => {
       });
     });
     await page.goto("./#/rpg-progression");
+    await expect(page).toHaveURL(/#\/sanctum\?panel=chronicle/);
+    await page.getByTestId("chronicle-tab-growth").click();
     await expect(page.getByTestId("page-rpg-progression")).toBeVisible();
     await page.getByTestId("rpg-progression-seed").click();
     await expect.poll(() => seeded).toBe(true);

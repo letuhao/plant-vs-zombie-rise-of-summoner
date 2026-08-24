@@ -6,7 +6,9 @@ namespace FusionRpg.Launcher.Services;
 public class PortPicker
 {
     public const int PreferredPort = 5088;
+    // Structural (tunables-ssot.md T2) — network port range for the local server, not balance.
     public const int ScanStart = 5089;
+    // Structural (tunables-ssot.md T2) — see ScanStart above.
     public const int ScanEnd = 5188;
     public const int SkipVitePort = 5173;
 

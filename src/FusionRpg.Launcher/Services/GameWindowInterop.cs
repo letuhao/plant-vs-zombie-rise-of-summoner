@@ -10,12 +10,16 @@ namespace FusionRpg.Launcher.Services;
 /// </summary>
 public static class GameWindowInterop
 {
+    // Structural (tunables-ssot.md T2) — a fixed Win32 message id, not balance.
     public const int WmHotKey = 0x0312;
+    // Structural (tunables-ssot.md T2) — our registered hotkey id, not balance.
     public const int OverlayHotKeyId = 0x5250; // 'RP'
     public const Key DefaultOverlayKey = Key.F10;
 
     const uint ModNoRepeat = 0x4000;
+    // Structural (tunables-ssot.md T2), both below — fixed Win32 ShowWindow() command codes, not balance.
     const int SwRestore = 9;
+    // Structural (tunables-ssot.md T2) — see SwRestore above.
     const int SwMinimize = 6;
     static readonly IntPtr HwndTopmost = new(-1);
     const uint SwpShowWindow = 0x0040;

@@ -100,35 +100,42 @@ Owning docs for the designed rows: [battle-timeline-map.md](battle-timeline-map.
 
 | Channel id | Compose | Default v1 | Consumer |
 |---|---|---|---|
-| `progression.power` | flat replace | **1.0** (hardcoded stub) | Status delta + dynamic ApplyScale |
-| `progression.realm` | flat replace | **1.0** (stub) | Future breakthrough multiplier |
+| `progression.power` | flat replace | **Θ** from `IPowerIndexProvider.ActorIndex` — **0** when un-hydrated (`StubPowerIndexProvider`, the default) | Status delta + dynamic ApplyScale |
+| `progression.realm` | flat replace | **1.0** (stub, permanent — SSOT: additive in `Θ`, never a contest multiplier) | Future breakthrough multiplier |
 
 **Grain:** `(player_id, kind, type_id)` from [rpg-progression.md](rpg-progression.md) — plant/zombie type level today; player actor optional summoner-wide omni later.
 
-**v1 stub contract:**
+**Contract (power-plan.md T3.2, shipped 2026-08-24):**
 
 ```text
-// RpgProgressionSubsystem — until power system ADR
-progression.power(actor) = ProgressionPowerStub.Default   // 1.0
-
-// Future replace hook (document interface; no impl in Actor Hub v1 code plan):
-IProgressionPowerProvider.UpdatePower(ActorKey, level, realm?) → progression.power
+// RpgProgressionSubsystem
+progression.power(actor) = powerIndexProvider.ActorIndex(ctx)   // Θ; 0 if no provider hydrated it
+progression.realm(actor) = StatusPolicy.ProgressionPowerStubDefault   // 1.0, permanent
 ```
 
-Hardcoded stub keeps StatusRuntime / Actor Hub testable before level→power curves exist. **`RpgXpPowerScale`** remains XP-only — do not conflate with combat `progression.power`.
+`IPowerIndexProvider` ([power/spec-power-index.md](power/spec-power-index.md)) replaced
+`IProgressionPowerProvider` (deleted, T1.4) as the hydration seam. The kill-XP power scale
+(`RpgXpAwardMap.Award.PowerScale`; its old carrier class `RpgXpPowerScale` is deleted, T3.3) stays
+XP-only — do not conflate with combat `progression.power`.
 
-**Tier power (locked):** use **`progression.tierPower = progression.power × progression.realm`** everywhere `progression.power` appears in delta and ApplyScale formulas. v1 stub: both **1.0** → `tierPower = 1.0`.
+**Tier power (locked):** use **`progression.tierPower = progression.power × progression.realm`**
+everywhere `progression.power` appears in delta and ApplyScale formulas. Un-hydrated default:
+`0 × 1.0 = 0` — a real behaviour change from the retired POC curve's `level≤0 → 1.0` special case,
+not a stub value chosen independently of it.
 
-> **⚠ ADR P1 amended 2026-08-23 — this section describes what ships today, which is about to change.**
-> The POC curve `2^min(level,12)` is **retired**: it is geometric on a difference-based contest, and
-> two identical level-12 actors measured `netFactor = 4096` (a base-20 status dealing 81,920).
-> `progression.power` becomes **`Θ`** from `IPowerIndexProvider` (linear); `ResistFromPowerRatio`
-> moves 0 → 1.0; `effectiveApplyScale` drops its `× matchPower`; `netFactor` becomes
-> `1 + delta/NetFactorScale`. **`progression.realm` stays 1.0 permanently** — realm advancement is
-> additive in `Θ`, never a contest multiplier.
+> **✅ ADR P1 amended 2026-08-23, built 2026-08-24 (power-todo.md T3.1/T3.2) — this section describes
+> what ships now, not a pending change.**
+> The POC curve `2^min(level,12)` is **retired and deleted**
+> (`ProgressionPowerCurve.cs` is gone): it was geometric on a difference-based contest, and two
+> identical level-12 actors measured `netFactor = 4096` (a base-20 status dealing 81,920) before the
+> fix. `progression.power` is now **`Θ`** from `IPowerIndexProvider` (linear); `ResistFromPowerRatio`
+> moved 0 → 1.0 (T3.1); `effectiveApplyScale` dropped its `× matchPower` (T3.2, audit F3); `netFactor`
+> is now `1 + delta/NetFactorScale` (T3.2, audit F4). **`progression.realm` stays 1.0 permanently** —
+> realm advancement is additive in `Θ`, never a contest multiplier.
 > SSOT: [power/ssot-power-scale.md](power/ssot-power-scale.md) §6 · spec:
-> [power/spec-status-contest.md](power/spec-status-contest.md). **Specced, not built** — the stub
-> descriptions below remain accurate until wave 3 lands.
+> [power/spec-status-contest.md](power/spec-status-contest.md). Full test suite green throughout;
+> the one real defect the change surfaced (attacker-less scripted statuses going inert) was found
+> and fixed in the same task, not shipped then discovered — see power-todo.md T3.1's evidence.
 
 ### C. Status attacker power (attacker ActorPtr at Apply)
 
@@ -447,7 +454,7 @@ ActorHub may resolve primary stats for Writer on a different cadence than derive
 - Do not use fixed-only ApplyScale as Fusion product lock (Chaos fixed scale is reference only)
 - No runtime YAML derived loader v1
 - **StatusRuntime code must not ship** before Actor Hub derived resolve + `progression.power` stub channel exist
-- Do not conflate `RpgXpPowerScale` (kill XP audit) with combat `progression.power`
+- Do not conflate the kill-XP power scale (`RpgXpAwardMap.Award.PowerScale`; formerly `RpgXpPowerScale`, deleted T3.3) with combat `progression.power`
 
 ---
 

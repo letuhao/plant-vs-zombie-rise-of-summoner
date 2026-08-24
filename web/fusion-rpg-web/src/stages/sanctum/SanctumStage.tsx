@@ -1,45 +1,49 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDemonRoster, usePlayers, useRelics, useRuns, useSoulBalance, useUniqueActors } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
 import { adaptActor } from "@/contract/adapt";
 import { pendingWithReason } from "@/contract/pending";
 import { registerGlobalVerb } from "@/shell/keymap";
-import { PanelShell } from "@/shell/PanelShell";
+import { ChunkFallback } from "@/shell/ChunkFallback";
 import { StageHost, useStageMountGuard } from "@/shell/stageHost";
 import { Rail } from "@/shell/Rail";
 import { deriveRailEntries, type RailEntry, type RailUnlockInputs } from "@/shell/railState";
-import { CreaturesLayer } from "@/layers/creatures/CreaturesLayer";
-import { RelicsLayer } from "@/layers/relics/RelicsLayer";
-import { FusionLayer } from "@/layers/fusion/FusionLayer";
-import { ExpeditionsLayer } from "@/layers/expeditions/ExpeditionsLayer";
 import { useExpeditionReturnWatcher } from "@/layers/expeditions/expeditionReturnWatcher";
-import { PactsLayer } from "@/layers/pacts/PactsLayer";
+import { currentBindings, KEYBINDINGS_CHANGED_EVENT, type BindableActionId } from "@/layers/system/keybindings";
 import type { ActorRungState } from "@/ui/actor";
 import { FocusCard } from "./FocusCard";
 import { SanctumHud } from "./SanctumHud";
 
-const PLACED_LAYER_IDS = ["sanctum", "creatures", "relics", "fusion", "pacts", "expeditions"] as const;
-type PlacedLayerId = (typeof PLACED_LAYER_IDS)[number];
+// GG-38's `layer-collection` / `layer-world` / `layer-reference` chunks (tech-stack.md §6): each
+// layer's real weight (a wrapped page, in most cases) loads once it's opened for the first time,
+// not on every Sanctum visit — see `mountedLayers` below for the "opened once, stays mounted"
+// gating that gives lazy() something to defer in the first place.
+const CreaturesLayer = lazy(() =>
+  import("@/layers/creatures/CreaturesLayer").then((m) => ({ default: m.CreaturesLayer }))
+);
+const RelicsLayer = lazy(() => import("@/layers/relics/RelicsLayer").then((m) => ({ default: m.RelicsLayer })));
+const FusionLayer = lazy(() => import("@/layers/fusion/FusionLayer").then((m) => ({ default: m.FusionLayer })));
+const ExpeditionsLayer = lazy(() =>
+  import("@/layers/expeditions/ExpeditionsLayer").then((m) => ({ default: m.ExpeditionsLayer }))
+);
+const PactsLayer = lazy(() => import("@/layers/pacts/PactsLayer").then((m) => ({ default: m.PactsLayer })));
+const AlmanacLayer = lazy(() => import("@/layers/almanac/AlmanacLayer").then((m) => ({ default: m.AlmanacLayer })));
+const ChronicleLayer = lazy(() =>
+  import("@/layers/chronicle/ChronicleLayer").then((m) => ({ default: m.ChronicleLayer }))
+);
 
-const LAYER_TITLES: Record<Exclude<RailEntry["id"], PlacedLayerId>, string> = {
-  almanac: "Almanac",
-  chronicle: "Chronicle"
-};
-
-function isPlaced(id: Exclude<RailEntry["id"], "sanctum">): boolean {
-  return (PLACED_LAYER_IDS as readonly string[]).includes(id);
+/** T20 (GG-20): every rail entry is a rebindable action, so this reads the live table instead of
+ * a hardcoded key literal — `useKeybindingsVersion` below forces a re-read after any rebind. */
+function useKeybindingsVersion(): number {
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const onChange = () => setVersion((v) => v + 1);
+    window.addEventListener(KEYBINDINGS_CHANGED_EVENT, onChange);
+    return () => window.removeEventListener(KEYBINDINGS_CHANGED_EVENT, onChange);
+  }, []);
+  return version;
 }
-
-const LAYER_KEYS: Record<Exclude<RailEntry["id"], "sanctum">, string> = {
-  creatures: "c",
-  relics: "r",
-  fusion: "f",
-  pacts: "p",
-  expeditions: "e",
-  almanac: "a",
-  chronicle: "h"
-};
 
 /**
  * The home stage (band 0) — information-architecture.md §2.1. Everything a
@@ -61,10 +65,32 @@ export function SanctumStage() {
   const openLayer = searchParams.get("panel") as Exclude<RailEntry["id"], "sanctum"> | null;
   const selectedId = searchParams.get("sel");
 
+  // A layer mounts (and its chunk fetches) the first time it's opened — via a click or a cold
+  // deep-link — and then stays mounted across a later close, matching every layer's existing
+  // "open toggles visibility, not existence" contract (PanelShell's own push/pop only fires while
+  // `open` is true). Without this, `React.lazy` alone would still fetch all seven chunks on the
+  // very first Sanctum render, since every layer below is unconditionally rendered with `open`
+  // simply false — the mount itself, not just the code-splitting, has to be deferred.
+  const [mountedLayers, setMountedLayers] = useState<Set<string>>(() => (openLayer ? new Set([openLayer]) : new Set()));
+  useEffect(() => {
+    if (openLayer && !mountedLayers.has(openLayer)) {
+      setMountedLayers((prev) => new Set(prev).add(openLayer));
+    }
+  }, [openLayer, mountedLayers]);
+
   function openLayerById(id: Exclude<RailEntry["id"], "sanctum">) {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       next.set("panel", id);
+      return next;
+    });
+  }
+  // Same `?system=1` flag `SystemHost.tsx` (T20) already reads globally — no new plumbing needed,
+  // just the HUD's own long-disabled Menu button finally pointing at the layer that now exists.
+  function openSystem() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("system", "1");
       return next;
     });
   }
@@ -84,6 +110,9 @@ export function SanctumStage() {
       return next;
     });
   }
+
+  const keybindingsVersion = useKeybindingsVersion();
+  const layerKeys = currentBindings();
 
   const actors = actorsQuery.data?.items ?? [];
   const relicsQuery = useRelics();
@@ -107,14 +136,14 @@ export function SanctumStage() {
     const unregisters = railEntries
       .filter((e): e is RailEntry & { id: Exclude<RailEntry["id"], "sanctum"> } => e.id !== "sanctum" && e.state !== "locked")
       .map((entry) =>
-        registerGlobalVerb(LAYER_KEYS[entry.id], `sanctum-rail-${entry.id}`, () => {
+        registerGlobalVerb(layerKeys[entry.id as BindableActionId], `sanctum-rail-${entry.id}`, () => {
           if (openLayer === entry.id) closeLayer();
           else openLayerById(entry.id);
         })
       );
     return () => unregisters.forEach((fn) => fn());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [railEntries.map((e) => e.state).join(","), openLayer]);
+  }, [railEntries.map((e) => e.state).join(","), openLayer, keybindingsVersion]);
 
   const firstActorState: ActorRungState | null =
     actors.length > 0 ? { kind: "ready", data: adaptActor(actors[0]!) } : null;
@@ -128,50 +157,67 @@ export function SanctumStage() {
           "The summoner-led progression loop is the product direction, not what ships today (AGENTS.md)"
         )}
         unreadResultCount={railInputs.unreadResultCount}
+        onOpenSystem={openSystem}
       />
-      <Rail entries={railEntries} onSelect={(id) => id !== "sanctum" && openLayerById(id)} />
+      <div className="flex items-start" data-testid="sanctum-frame">
+        <Rail entries={railEntries} onSelect={(id) => id !== "sanctum" && openLayerById(id)} />
 
-      <div className="p-5" data-testid="sanctum-body">
-        <FocusCard
-          actorCount={actors.length}
-          firstActor={firstActorState}
-          onOpenCreatures={() => openLayerById("creatures")}
-        />
+        <div className="min-w-0 flex-1 p-5" data-testid="sanctum-body">
+          <FocusCard
+            actorCount={actors.length}
+            firstActor={firstActorState}
+            onOpenCreatures={() => openLayerById("creatures")}
+          />
+        </div>
       </div>
 
-      <CreaturesLayer
-        open={openLayer === "creatures"}
-        onOpenChange={(open) => !open && closeLayer()}
-        playerId={playerId}
-        selectedId={selectedId}
-        onSelect={selectCreature}
-      />
+      {mountedLayers.has("creatures") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-creatures" />}>
+          <CreaturesLayer
+            open={openLayer === "creatures"}
+            onOpenChange={(open) => !open && closeLayer()}
+            playerId={playerId}
+            selectedId={selectedId}
+            onSelect={selectCreature}
+          />
+        </Suspense>
+      ) : null}
 
-      <RelicsLayer
-        open={openLayer === "relics"}
-        onOpenChange={(open) => !open && closeLayer()}
-        playerId={playerId}
-      />
+      {mountedLayers.has("relics") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-relics" />}>
+          <RelicsLayer open={openLayer === "relics"} onOpenChange={(open) => !open && closeLayer()} playerId={playerId} />
+        </Suspense>
+      ) : null}
 
-      <FusionLayer open={openLayer === "fusion"} onOpenChange={(open) => !open && closeLayer()} />
+      {mountedLayers.has("fusion") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-fusion" />}>
+          <FusionLayer open={openLayer === "fusion"} onOpenChange={(open) => !open && closeLayer()} />
+        </Suspense>
+      ) : null}
 
-      <ExpeditionsLayer open={openLayer === "expeditions"} onOpenChange={(open) => !open && closeLayer()} />
+      {mountedLayers.has("expeditions") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-expeditions" />}>
+          <ExpeditionsLayer open={openLayer === "expeditions"} onOpenChange={(open) => !open && closeLayer()} />
+        </Suspense>
+      ) : null}
 
-      <PactsLayer open={openLayer === "pacts"} onOpenChange={(open) => !open && closeLayer()} />
+      {mountedLayers.has("pacts") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-pacts" />}>
+          <PactsLayer open={openLayer === "pacts"} onOpenChange={(open) => !open && closeLayer()} />
+        </Suspense>
+      ) : null}
 
-      <PanelShell
-        open={openLayer !== null && !isPlaced(openLayer)}
-        onOpenChange={(open) => !open && closeLayer()}
-        title={openLayer && !isPlaced(openLayer) ? LAYER_TITLES[openLayer as keyof typeof LAYER_TITLES] : ""}
-        subtitle="Arrives in a later pass of this refactor"
-        testId="sanctum-layer-placeholder"
-      >
-        <p className="text-sm text-muted">
-          {openLayer && !isPlaced(openLayer) ? LAYER_TITLES[openLayer as keyof typeof LAYER_TITLES] : ""} is
-          unlocked and reachable from the rail — its own designed layer lands in a later task. This
-          placeholder exists so the rail's reachability is real today rather than a dead button.
-        </p>
-      </PanelShell>
+      {mountedLayers.has("almanac") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-almanac" />}>
+          <AlmanacLayer open={openLayer === "almanac"} onOpenChange={(open) => !open && closeLayer()} />
+        </Suspense>
+      ) : null}
+
+      {mountedLayers.has("chronicle") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-chronicle" />}>
+          <ChronicleLayer open={openLayer === "chronicle"} onOpenChange={(open) => !open && closeLayer()} />
+        </Suspense>
+      ) : null}
     </StageHost>
   );
 }

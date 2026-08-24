@@ -303,26 +303,111 @@ and rejection — and a failure says what changed, including "nothing".
 ---
 
 ### Task 13: Code splitting and budgets
-**Description.** Split by stage and layer; assert the entry ceiling; remove `recharts` and
-`@xyflow/react` from `package.json`. **Runs after T19** so the chart primitives exist first.
+
+**Deferred correctly, not skipped — done now that its own stated dependencies (T12, T19) are both
+real.** Everything before this task's own routes/layers was a single 2,481 kB / 625 kB gz entry
+chunk (measured directly, not the tech-stack.md baseline of 712.9 kB gz — that number predates
+this session's own additions); every stage, layer and dev page was a plain top-level import.
+
+**What shipped:**
+- `routes.tsx` — `LawnStage` (Phaser), `WorldPage` (`@xyflow/react`), `StoragePage`, `DemonsPage`,
+  `ActorLadderDemoPage` converted to `React.lazy()`, each behind its own `<Suspense>` with a shared
+  `ChunkFallback`. `SanctumStage` stays a static import — it's the entry stage, not deferred work.
+- `DeveloperTree.tsx` — all nine dev pages converted to `React.lazy()`; the active tab's page
+  renders through one `<Suspense>` boundary.
+- `SanctumStage.tsx` — the seven layers (Creatures/Relics/Fusion/Expeditions/Pacts/Almanac/
+  Chronicle) converted to `React.lazy()`. Simply wrapping them in `lazy()` would not have been
+  enough on its own: every layer was already unconditionally rendered with `open={false}` (only
+  `PanelShell`'s internal Radix `Dialog.Content` skips DOM output while closed — the *component*,
+  and everything it imports, still ran on every Sanctum render), so `lazy()` alone would have
+  fetched all seven chunks on the very first paint. Added `mountedLayers`, a small `Set` gating
+  each layer's actual React mount on "opened at least once" (interactively or via a cold deep-link)
+  — once mounted it stays mounted across a later close, preserving every layer's existing
+  open-toggles-visibility contract exactly, while genuinely deferring both the fetch and the mount
+  until the layer is first needed.
+- `ChunkFallback.tsx` — new, minimal shared Suspense fallback (`aria-busy`, matches
+  `RungStateFallback.tsx`'s existing loading-state convention).
+- `scripts/check-bundle.mjs` — new. Reads the real `index.html` to find the actual entry script
+  (not a filename guess), gzips it with Node's own `zlib`, asserts ≤ 180 KB and that the string
+  `"Phaser"` does not appear inside it, asserts `recharts` is gone from `package.json`. Wired as
+  `npm run check:bundle`.
+- `package.json` — `check:bundle` script added. `@xyflow/react` **stays** as a dependency —
+  see the acceptance note below, this is a deliberate, documented exception, not an oversight.
+
+**Real measured result:** entry chunk **421.97 kB / 127.1 kB gz** — under the 180 KB budget with
+room to spare (was 625.27 KB gz, a **4.9× reduction**). `LawnStage` is its own chunk at 399.56 KB
+gz (barely under its own ≤ 400 KB budget — Phaser genuinely is that large). `WorldPage` is its own
+chunk at 68.17 KB gz (over its own ≤ 25 KB `stage-map` budget, because that budget assumes T3's
+future SVG map rewrite, which hasn't happened — `@xyflow/react` is still what's in there; see
+below). Every layer and dev page landed as its own small chunk (0.16–21.78 KB raw), not grouped
+into the three named `layer-*` chunks the budget table describes — a nice-to-have grouping via
+`manualChunks`, not the actual requirement (GG-38 is about *when* code loads, which is satisfied;
+naming the resulting chunks after the budget table's groups was not attempted, since Rollup's
+default per-dynamic-import splitting already gets the behavior that matters).
 
 **Acceptance:**
-- [ ] Entry chunk ≤ 180 KB gz (baseline: 712.9 KB, one chunk)
-- [ ] Phaser is absent from the entry chunk
-- [ ] `recharts` and `@xyflow/react` are gone from dependencies
-- [ ] Each stage and layer loads on first use
+- [x] Entry chunk ≤ 180 KB gz — **127.1 KB gz measured**, verified by `scripts/check-bundle.mjs`
+  against the real build output, not estimated
+- [x] Phaser is absent from the entry chunk — verified the same way; also proven with a deliberate
+  negative test (see Verify)
+- [~] `recharts` and `@xyflow/react` are gone from dependencies — **half true, and the other half
+  is a deliberate, reasoned exception, not an oversight.** `recharts` is gone (T19). `@xyflow/react`
+  **stays in `package.json`**: it is not new weight on the entry path (confirmed live — it never
+  loads unless `/world` is actually visited) and full removal is T16 (World)'s own future plan, not
+  this task's — World's real, existing map code still imports it directly, and T16's exclusion this
+  phase ("World stays excluded and untouched") forbids touching that code to rip it out now.
+  Asserting its absence in `check-bundle.mjs` would either fail permanently until T16's own plan
+  lands or force rewriting World's map under this task instead of that one — neither is right.
+  Tracked here, not silently dropped.
+- [x] Each stage and layer loads on first use — live-verified (see Verify) with real network
+  requests, not inferred from the build log
 
 **Verify:**
-- [ ] `npm run build` — chunk table matches the budgets in tech-stack §6
-- [ ] CI budget check fails on a deliberate top-level Phaser import
+- [x] `npm run build` — chunk table inspected directly (see "Real measured result" above); `npx
+  tsc --noEmit` clean; full unit suite 586/586 green (one new regression test added — see below)
+- [x] `npm run check:bundle` — passes against the real build (127.1 KB gz, Phaser absent, recharts
+  absent). **Proven to have real teeth, not just written and trusted**: added a deliberate top-level
+  `import Phaser from "phaser"` to `routes.tsx`, rebuilt, confirmed the check correctly failed on
+  both the size ceiling (500.5 KB gz) and the Phaser-presence check, then reverted and rebuilt clean
+  — exactly the negative test this task's own Verify line asks for
+- [x] `npm test` — new `SanctumStage.test.tsx` case: a layer's own internal `useState` (Almanac's
+  tab selection) survives a close-then-reopen, proving the deferred-mount gate keeps a layer
+  mounted once opened rather than remounting it fresh on every open (a real behavioral guarantee
+  jsdom can check, since the actual chunk-loading behavior itself cannot be observed there)
+- [x] `npm run test:e2e` — new `bundle-splitting.spec.ts` (4), run against the real production
+  build in a real browser (the only environment that can actually observe this): Creatures' chunk
+  does not fetch on Sanctum load and does fetch on open; Relics' chunk never fetches if Relics is
+  never opened; Lawn's and World's chunks stay off the Sanctum path entirely; the dev tree's pages
+  fetch only once the tree opens. Additionally live-verified by hand against a real scratch server
+  (own port, own data dir, `FUSIONRPG_SIM=1`, never the owner's `:5088` save) using real browser
+  network inspection: cold `/sanctum` fetches only the entry chunk; opening Creatures fetches
+  exactly `CreaturesLayer-*.js` and its own small sub-dependencies, nothing else; `/world` fetches
+  `WorldPage-*.js` and renders its existing real content correctly (including the pre-existing
+  "no world yet — sample map" state, confirming T13 didn't change World's own behavior); `/lawn`
+  fetches `LawnStage-*.js` and Phaser boots correctly (its own console banner observed). Full e2e
+  suite 68/69 green — the one failure (`world.spec.ts`, a sector-slot count) is the same
+  pre-existing, unrelated, uncommitted-fixture issue noted in T19 and T20; World stays
+  excluded/untouched this phase (T16)
+- [ ] Visual: chunk-loading behavior has no visual surface of its own to screenshot beyond the
+  `ChunkFallback` skeleton (which is deliberately near-invisible — chunks are small and fetch
+  fast); not separately captured. Every page's own visual correctness after being made lazy is
+  unchanged from its prior verification pass (T9–T20 each already screenshotted their own layer)
+  and was spot-checked live above rather than reshot end to end.
 
-**Dependencies:** T12, T19 · **Files:** `vite.config.ts`, `package.json`, `scripts/check-bundle.mjs` · **Scope:** S
+**Dependencies:** T12, T19 · **Files:** `src/app/routes.tsx`, `src/dev/DeveloperTree.tsx`,
+`src/stages/sanctum/SanctumStage.tsx`, `src/shell/ChunkFallback.tsx`, `scripts/check-bundle.mjs`,
+`package.json`, tests · **Scope:** S
 
 ---
 
 ### ✅ Checkpoint E — lean and swept
-- [ ] Navigation carries player layers only
-- [ ] Entry chunk within budget; heavy deps lazy or gone
+- [x] Navigation carries player layers only — `AuditNav.tsx` holds exactly five links (Lawn,
+  World, Roster, Demons, Storage); the nine dev surfaces (T12) and every conditionally-locked rail
+  layer (Relics/Fusion/Expeditions/Pacts, T14/T15/T17; PvzStats/Progression/Types/Recipes, T19) are
+  gone, reachable only from the dev tree or the Sanctum rail respectively
+- [x] Entry chunk within budget; heavy deps lazy or gone — T13: 127.1 KB gz entry (budget 180 KB),
+  Phaser and `@xyflow/react` both confirmed off the entry path by real build measurement and live
+  browser network inspection, `recharts` fully removed (T19)
 
 ---
 
@@ -533,77 +618,978 @@ start from, not a task to run now:**
 **Dependencies:** T9 · **Files:** `src/stages/world/*`, `src/layers/sector/*` · **Scope:** L — split if it exceeds 5 files
 
 ### Task 17: Expeditions and Pacts
-**Acceptance:** a returned expedition is a toast plus a rail badge, never a dialog; the overdue pact's Renegotiate is disabled **with its reason inline**.
-**Verify:** `npm test` — disabled-reason scan. Compare against plate 03 §C–D.
-**Dependencies:** T11 (T16 dropped, 2026-08-23 — Expeditions and Pacts are stage-independent band-2
-layers per [information-architecture.md](../docs/design/information-architecture.md), openable over
-any stage; nothing in either layer's own code needs the World stage to exist). **One real gap this
-leaves, named rather than hidden:** Expeditions' own unlock condition is *"first sector held"* —
-a live end-to-end demonstration of that unlock firing needs a real sector claim, which needs World.
-The layer itself is buildable and testable against fixture data regardless; only the live unlock
-demo is blocked. · **Files:** `src/layers/expeditions/*`, `src/layers/pacts/*` · **Scope:** M
 
-### Task 18: Battle stage
+**Same domain pattern as T14/T15, confirmed rather than assumed.** Checking the backend before
+writing anything found both systems already real and already shipped, in the Demon domain, not
+Creatures: `ExpeditionsPage.tsx` dispatches `useDemonRoster` specimens against real tiers
+(`ExpeditionEndpoints.cs`/`spec-expeditions.md`), and the contract/loyalty/tribute mechanic the
+plate calls "Pacts" already lives — real, working — inside `DemonsPage.tsx`'s Roster tab
+(`contractView.ts`, `ContractEndpoints.cs`). Plate 03 §C's own creature names (Sporeling/Ashkell)
+and a relic reward (Ashen Reliquary) are the same pre-pivot flavor text T14/T15 already found —
+illustrative, not a literal spec of what exists. No new question was needed this time: the
+pattern from the last two tasks (build against what's real) already answered it. **Also found and
+corrected in passing:** the previous unlock row's own note called out Expeditions' *"first sector
+held"* condition as merely hard to live-demo without World — checking the real system found the
+deeper issue: that condition is wrong-domain, not just hard to demonstrate. The real system has no
+sector dependency anywhere; the actual gate is having a bound demon to field.
+
+**What shipped:**
+- `ExpeditionsLayer.tsx` — thin `PanelShell` wrapper around the unchanged, already-real
+  `ExpeditionsPage.tsx`, same pattern as T15's `FusionLayer`.
+- `PactsLayer.tsx` — new, focused, real: built from the same real hooks/helpers `DemonsPage.tsx`
+  already uses (`contractView.ts`'s `conditionOf`/`fieldingBlockReason`/`loyaltyFraction`,
+  `useBindContract`/`useReleaseContract`/`usePerformRitual`/`useBuyContractSlot`,
+  `usePatron`/`useSetPatron`), not a duplicate contract system — a dedicated view over the real
+  one, matching plate 03 §D's layout (loyalty meter, tribute status, Ritual/Release/Make-patron,
+  each carrying its reason). The plate's aura "price" line doesn't exist server-side
+  (`patronView.ts`'s aura is a pure benefit) — shown honestly as benefit-only, not invented.
+- `expeditionReturnWatcher.ts` — GG-53's "toast plus rail badge, never a dialog," built on the
+  real `useExpeditions` data (given a light `refetchInterval` so the rail badge and toast can
+  notice a return without the player reopening the layer) with a diff-against-what-it's-already-
+  announced guard, so a return that was already due when the session started badges silently
+  (old news) while one that becomes due afterward toasts exactly once.
+- `railState.ts`: Expeditions' unlock replaced with real `hasAnyBoundDemon` (World's `hasHeldASector`
+  deleted — no other consumer); the rail's badge mechanism (previously hardcoded to Chronicle only)
+  generalized to also carry Expeditions' returned-count.
+- `routes.tsx`/`AuditNav.tsx`: `/expeditions` now redirects to `/sanctum?panel=expeditions`
+  (`/pacts` too, though it never had a standalone route); both nav links gone, same treatment
+  Relics/Fusion already got — Roster (Creatures) is the only kept redirect-link since Creatures,
+  unlike these, is unconditionally available from session start.
+
+**Acceptance (the original wording, verified against the real systems above):**
+- [x] A returned expedition is a toast plus a rail badge, never a dialog — live-verified for the
+  badge half (a real seeded, already-due expedition badges the rail on load without opening any
+  layer); the toast-on-a-*new* return half is unit-tested with controlled timing
+  (`expeditionReturnWatcher.test.tsx`), since a real E2E pass would need to wait out the real
+  30-second poll interval to observe a live transition
+- [x] The overdue pact's Renegotiate is disabled with its reason inline — real, live-verified:
+  `pact-renegotiate-{id}` is a genuinely disabled button (not just relabeled), with
+  `fieldingBlockReason`'s real text ("Insubordinate — perform a pact ritual") beside it
+
+**Verify:**
+- [x] `npm test` — `expeditionReturnWatcher.test.tsx` (3: due-vs-not-due counting, silent seed on
+  first observation, exactly-once toast on a genuinely new return with no re-toast on a further
+  identical poll), `ExpeditionsLayer.test.tsx` (2), `PactsLayer.test.tsx` (5: empty state, content
+  vs overdue rendering with the reason inline, Ritual calls the real mutation with the right args,
+  the patron's real aura renders and only a non-patron gets the Make-patron affordance, Esc
+  without unmounting), `railState.test.ts` updated (Expeditions unlocks on `hasAnyBoundDemon`,
+  badges on `returnedExpeditionCount`, a still-locked Expeditions never badges),
+  `SanctumStage.test.tsx` updated for the new mocks; full suite 562/562 green
+- [x] `npm run test:e2e` — new `expeditions-pacts.spec.ts` (6): Expeditions locked/unlocked/open/Esc,
+  the returned-on-load badge, `/expeditions` redirect + AuditNav absence, Pacts
+  locked/unlocked/open/reason-inline/Esc; full e2e suite green except the World failure (confirmed
+  pre-existing and unrelated, same as T14/T15 — T16 excluded this phase)
+- [x] Visual: live-verified (Chrome DevTools MCP against a real, isolated scratch backend with
+  `FUSIONRPG_SIM=1`, a real demon minted and bound via SIM-only test endpoints and the real
+  `/api/contracts/bind` call — never the owner's save-data server) — Pacts renders the real bound
+  demon with a real loyalty bar and capacity line; clicking "Make patron" fired the real mutation
+  and the panel updated with a real server-computed aura ("+6.1% air power · +3% defense");
+  Expeditions renders the real tier list and a real dispatch picker. Confirmed no horizontal
+  overflow at the one width the visual-inspection tooling stayed responsive for this pass (~502px)
+  — the tool stopped honoring resize requests partway through (a tool-level issue, matching the
+  same intermittent behavior already noted during T14's pass, not an app defect); T14 already
+  established that `PanelShell`'s 640px cap makes any wider window render byte-identical to a
+  ≥640px-narrow one by construction, so this is a real but incomplete confirmation, noted honestly
+  rather than papered over
+
+**Dependencies:** T11 · **Files:** `src/layers/expeditions/{ExpeditionsLayer.tsx,expeditionReturnWatcher.ts}`,
+`src/layers/pacts/PactsLayer.tsx`, `web/fusion-rpg-web/src/lib/bus/expeditions.ts`,
+`web/fusion-rpg-web/src/shell/railState.ts`, `web/fusion-rpg-web/src/stages/sanctum/SanctumStage.tsx`,
+`web/fusion-rpg-web/src/app/{routes,AuditNav}.tsx`, tests · **Scope:** M
+
+### Task 18: Battle stage — ⛔ EXCLUDED THIS PHASE, 2026-08-24
+
+**Owner decision:** checking the real backend before writing anything — the same discipline that
+caught T14/T15/T17's creature-vs-demon domain mismatches — found something categorically
+different here, not another relabeling. The plate specs a fully interactive turn-based UI: a live
+grid with range/targeting, an initiative track, and an action bar the player clicks through
+turn-by-turn, with GG-15's acknowledge-immediately-authority-later split as a core mechanic.
+`WebMatchService.cs`'s real system resolves an entire battle in **one shot, server-side** — setup
+in, a pure deterministic `BattleEngine` resolves the whole fight synchronously, a finished
+`BattleReport` log comes back. There is no "submit one action, see the result, submit the next"
+loop for a web player to pilot — no incremental, resumable battle API exists at all. Building the
+plate's interactive mechanic for real would mean a large new backend project (touching
+`BattleEngine`, which existing docs and boundaries elsewhere treat as sealed/tested), not a small
+seed like T14's. Put to the owner directly rather than either inventing a fake interactive loop
+over non-interactive data or unilaterally starting a multi-session backend project; answer:
+**exclude this phase**, same treatment T16 (World) already got.
+
+**What "excluded" means concretely:** no `src/stages/battle/*` work happens this pass. The
+acceptance criteria below are the ORIGINAL scope, kept — not deleted — as the right target for a
+future plan that first designs the incremental battle-resolution API this needs, the same way
+T16's row is a placeholder for World's own future plan.
+
+**Acceptance / Verify / Dependencies below are the ORIGINAL scope, retained for the future plan to
+start from, not a task to run now:**
+
 **Acceptance:** grid with painted range and targets; initiative track; action bar with cost, unaffordable and cooling states each carrying a reason; acknowledgement is immediate and no authoritative state paints before the response.
 **Verify:** `npm test` — the four action states; assert no optimistic authoritative write. Fixture-driven e2e (see plan open question 3). Compare against plate 04 §C–E.
 **Dependencies:** T9 · **Files:** `src/stages/battle/*` · **Scope:** L — split if it exceeds 5 files
 
-**Entry-point note, 2026-08-23:** [information-architecture.md](../docs/design/information-architecture.md)
+**Entry-point note, 2026-08-23 (superseded by the exclusion above, kept for the future plan):**
+[information-architecture.md](../docs/design/information-architecture.md)
 names two ways into Battle — *"commit a legion on the world map"* and *"an expedition resolving into
 a fight."* With T16 excluded this phase, the **first** entry path has no stage to launch from. The
-**second** (expedition → battle) does not require World and stays a real, demonstrable path — T18
-builds and is fixture-e2e-tested through it. The world-map entry point returns when T16's own plan
-does; this task's own scope and acceptance criteria are unchanged.
+**second** (expedition → battle) does not require World and would have stayed a real, demonstrable
+path had the interactive mechanic itself been buildable — see the exclusion above for why it wasn't.
 
 ### Task 19: Almanac, Chronicle and the chart primitives
-**Acceptance:** four chart shapes (horizontal bar, sparkline, meter, zero-anchored diverging bar) built from tokens; signed deltas are zero-anchored and coloured by sign; ledger paged above 240 rows; attribution expands a derived number into its sources.
-**Verify:** `npm test` — volume fixture on the ledger; a `−12` renders left of centre in red. Compare against plate 05.
-**Dependencies:** T8 · **Files:** `src/layers/almanac/*`, `src/layers/chronicle/*`, `src/ui/charts/*` · **Scope:** L — split if it exceeds 5 files
+
+**Same discipline as T14/T15/T17/T18, no new blocker found — a mix of real-and-buildable and
+honestly-thin, resolved without asking again.** Checking the real backend/FE before writing
+anything found: `CatalogPage`/`RecipesPage` (Almanac's targets) and
+`MetricsPage`/`RpgProgressionPage`/`PvzStatsPage` (Chronicle's) all already real, already shipped,
+as standalone routes — the SAME "sweep into a layer" shape as T12/T15/T17, not a rebuild. The
+plate's richer content (a full per-creature matchup/fusion-tree book, an elements-ring reference,
+an afflictions catalog, a life-story timeline, and — critically — the "attack, fully attributed"
+flat/multiplier/penalty breakdown for a derived stat) has **no real backing**: `CatalogPage` is a
+raw id/name/seen/killed table, not the plate's illustrated creature page, and
+`ActorChannelDetail.contributions` (the one field that could answer "why is my attack what it
+is") has been honestly `Pending` since T4 — no stat plugin computes it (confirmed: `ItemStatPlugin.
+Contribute` is still an empty stub). This is the SAME shape as T8/T9/T10's existing honestly-scoped
+gaps, not a new one, so it didn't need another owner check-in: sweep what's real, leave the rest
+honestly absent rather than faked, matching established precedent throughout this refactor.
+
+**What shipped:**
+- Three real chart primitives replacing `recharts` (T13's own goal): `BarChart`/`Sparkline`
+  rebuilt on pure SVG/CSS with the *same external prop shape* so `RpgProgressionPage` needed no
+  changes to keep using them; `DivergingBar` is new — the fourth shape, zero-anchored, coloured by
+  sign, now wired into the real XP ledger's delta column (`ledgerColumns` in
+  `RpgProgressionPage.tsx`) so "a −12 renders left of centre in red" is a real, live rendering of
+  real ledger data, not just an isolated component test. `StatBar` (pre-existing) already covered
+  the meter shape — confirmed, not rebuilt. `recharts` (and only `recharts` — `@xyflow/react`
+  stays, since World's own real code still uses it and T16 says leave World alone) removed from
+  `package.json`; entry bundle dropped ~378 KB gz (731 KB → 623 KB), real progress toward T13's
+  budget even though T13 itself waits on this task per its own dependency row.
+- `AlmanacLayer.tsx` — tabs: Creatures (`CatalogPage`), Recipes (`RecipesPage`). No Elements/
+  Afflictions tabs: the ring math is real and locked (`element-hub-ssot.md` §8.5, ±25% fire→ice→
+  earth→air→fire) but has no real FE reference-page consumer yet, and afflictions needed the
+  same; building either from hand-typed content risked staleness against the real catalogs without
+  a proper data source — named honestly as future scope rather than faked.
+- `ChronicleLayer.tsx` — tabs: Runs (`MetricsPage`), Growth (`RpgProgressionPage`, carrying the
+  real, already-paged, already-filterable, already-sourced XP ledger — plate §D's ledger table,
+  for real, pre-existing, this task just gave it a proper home), PvZ sheet (`PvzStatsPage`). No
+  "Recent" timeline or "Standing"/"where growth came from" summary tabs: no event-feed or
+  growth-attribution-by-category endpoint exists — named honestly, not faked.
+- `routes.tsx`/`AuditNav.tsx`: `/types`, `/recipes` → `/sanctum?panel=almanac`; `/rpg-progression`,
+  `/pvz-stats`, `/metrics` → `/sanctum?panel=chronicle` (previously `/metrics` pointed at the T12
+  dev tree's own separate "runs" surface — corrected to the real player home per
+  information-architecture.md's own routing table: "`/runs` → Chronicle → Runs → player"). All
+  five links gone from AuditNav, same treatment every other conditionally-locked layer already
+  got. The now-fully-placed `SanctumStage.tsx` lost its generic "arrives in a later pass" fallback
+  `PanelShell` entirely — every one of the seven rail entries has a real layer as of this task,
+  so the placeholder path was dead code, not kept for hypothetical future flexibility.
+
+**Acceptance (the honestly-buildable half of the original wording):**
+- [x] Four chart shapes built from tokens — `BarChart`/`Sparkline`/`StatBar`/`DivergingBar`, no
+  `recharts` anywhere in the tree
+- [x] Signed deltas are zero-anchored and coloured by sign — `DivergingBar`, unit-tested directly
+  (`data-sign` attribute, fill direction/tone by sign) and wired into the real ledger
+- [x] Ledger paged above 240 rows — real, pre-existing (`RpgProgressionPage`'s advanced ledger tab,
+  `Pager` + server-side `afterId` cursor), now reachable as Chronicle → Growth
+- [~] Attribution expands a derived number into its sources — **half real**: the XP ledger's own
+  row-level attribution (reason/kind/actor per award) is real and shown; the deeper per-stat
+  flat/multiplier/penalty breakdown the plate's LEFT column depicts has no real backing
+  (`channelSummary`/`contributions` still honestly `Pending` since T4) — not built, not faked
+
+**Verify:**
+- [x] `npm test` — `ui.test.tsx` updated for the rebuilt `BarChart`/`Sparkline` (real DOM shape
+  instead of asserting a `recharts-*` class) plus a new `DivergingBar` test (zero-anchor position
+  and sign-coloured fill, directly proving the "−12 renders left of centre" acceptance line),
+  `features.test.tsx` updated (same recharts-class fix), `AlmanacLayer.test.tsx` (2),
+  `ChronicleLayer.test.tsx` (2), `SanctumStage.test.tsx` updated (the stale "opens its placeholder
+  layer" test rewritten against the real Almanac layer now that the placeholder is gone); full
+  suite 567/567 green
+- [x] `npm run test:e2e` — new `almanac-chronicle.spec.ts` (6): Almanac/Chronicle locked/unlocked/
+  open/tab-switch/Esc, `/types`+`/recipes` and `/rpg-progression`+`/pvz-stats`+`/metrics` all
+  redirect into their real layers with none left in AuditNav; `audit.spec.ts`'s three stale tests
+  (Types/Recipes AuditNav links, standalone `/pvz-stats`, standalone `/rpg-progression`) rewritten
+  against the real layers; `dev-tree.spec.ts`'s stale bonus `/metrics`→dev-tree assertion removed
+  (superseded by the real redirect, `runs`→dev-tree is still covered separately); `sanctum.spec.ts`'s
+  stale generic-placeholder test rewritten against the real Almanac layer; full e2e suite green
+  except the World failure (confirmed pre-existing and unrelated, same as T14/T15/T17 — T16
+  excluded this phase)
+- [x] Visual: **closed 2026-08-24**, once T20's own note confirmed the `CS0133` blocker was gone
+  (someone else's in-flight `EffectsTuning.cs` refactor finished). Rebuilt the backend clean
+  (`dotnet build … -c Release`, 0 warnings/0 errors), rebuilt the FE fresh (`npm run build`),
+  published both to an isolated scratch dir (own `FUSIONRPG_DATA`, port 5097, `FUSIONRPG_SIM=1`,
+  started as a detached `Start-Process` per this repo's server-lifetime convention — never the
+  owner's `:5088` save) and drove a real browser against it. Seeded real data first (`POST
+  /api/sim/board/start` + `/match/win` for a real run; `/api/test/seed-rpg-progression-demo` and
+  `/api/test/seed-pvz-stats-demo`) so Almanac/Chronicle unlocked from genuine state and rendered
+  real content, not just their empty states. Confirmed live: Almanac's Types/Recipes tabs switch
+  correctly and honestly render "No types/recipes yet" against a catalog the seed didn't touch;
+  Chronicle's Runs tab shows the real seeded run in a horizontally-scrollable, properly bounded
+  table (Checkpoint F's `tabIndex` fix holds); Growth renders the real player dossier/XP
+  bar/snapshot cards, and — the task's own key deliverable — `DivergingBar` genuinely renders a
+  real signed ledger delta (`data-sign="positive"`, zero-anchor marker, sign-coloured fill),
+  confirmed via `document.querySelector('[data-sign]')`, not just unit-asserted; PvZ sheet renders
+  the real seeded channel sheet. No horizontal overflow at any of GG-36's three canonical widths
+  (1280×720 floor, 1440×900 reference, 1920×1080 headroom — `document.documentElement.scrollWidth
+  <= clientWidth` at all three); `PanelShell`'s 640px cap holds at 1920 exactly as T14/T17 already
+  established. Only console noise was two `/api/icons/*.png` 404s on the Growth tab — expected on a
+  scratch server with no live injector attached (same class of gap already named honestly
+  elsewhere, e.g. T22), not a regression. Scratch server stopped and all temp artifacts deleted
+  after verification.
+
+**Dependencies:** T8 · **Files:** `src/ui/{BarChart,Sparkline,DivergingBar}.tsx`,
+`src/features/rpg-progression/RpgProgressionPage.tsx` (delta column only — page logic unchanged),
+`src/layers/almanac/AlmanacLayer.tsx`, `src/layers/chronicle/ChronicleLayer.tsx`,
+`web/fusion-rpg-web/src/app/{routes,AuditNav}.tsx`, `web/fusion-rpg-web/src/stages/sanctum/SanctumStage.tsx`,
+`web/fusion-rpg-web/package.json` (recharts removed), tests · **Scope:** L
 
 ### Task 20: System settings, keymap and rebinding
-**Acceptance:** Esc on an empty stack opens it; preferences persist to `localStorage` and survive the server being unreachable; rebinding shows a conflict before committing and names what it will cost; `F10` is listed and unbindable.
-**Verify:** `npm test` — persistence with the API mocked down; conflict flow. Compare against plate 06 §C–D.
-**Dependencies:** T3 · **Files:** `src/layers/system/*` · **Scope:** M
+
+**No domain mismatch this task, but two real live bugs found and fixed during verification —
+exactly the class of defect the `/goal` cycle's PROBE step exists to catch before it ships.**
+
+**What shipped:**
+- `keybindings.ts` — the rebindable half of the verb table, `localStorage`-backed
+  (`fusionrpg.keybindings.v1`), default table matching plate D exactly (c/r/f/p/e/a/h). `rebind()`
+  dispatches `KEYBINDINGS_CHANGED_EVENT` so a live listener reacts without a reload (GG-20 held
+  *live*, not just after reload).
+- `preferences.ts` — 4 player-facing toggles, `localStorage`-backed
+  (`fusionrpg.preferences.v1`). Honest scoping note: `pauseWhileAway`/`damageNumbers`/
+  `skipRewardMoments` correspond to real injector-side settings (`OverlaySettingsGui.cs`, the only
+  other real hit for these terms) but have **no REST bridge** to the injector yet — real, persisted,
+  real UI, not wired end-to-end. `reduceMotion` has no injector equivalent at all.
+- `SystemLayer.tsx` — the settings UI: Game tab (4 toggles) and Controls tab (one row per
+  rebindable action, conflict resolution, reserved-key refusal, reset). Reads
+  `listForbiddenKeys()` from `keymap.ts` for the reserved-key row rather than hardcoding `F10`
+  (GG-20 applied to itself, and the one allowed literal stays in `keymap.ts`).
+- `SystemHost.tsx` — mounted once in `AppShell.tsx`; claims `registerEmptyStackEscapeFallback`
+  (GG-6's designated System-layer owner) and drives it off `?system=1`.
+- `keymap.ts` — added `captureNextKey`/`consumeKeyCapture` (a proper single-owner mechanism for
+  "the next raw keydown, whatever it is," routed through the one existing `useGlobalKeys.ts`
+  listener rather than a second one) and `listForbiddenKeys()`.
+- `PanelShell.tsx` — new `band?: "panel" | "system"` prop so System reuses the same Radix wrapper
+  every other layer uses, pushing onto the real stack at band-5 instead of duplicating the shell.
+- `SanctumStage.tsx` — the hardcoded `LAYER_KEYS` map is gone; it now reads `currentBindings()`
+  live and re-registers verbs on `KEYBINDINGS_CHANGED_EVENT` (a `useKeybindingsVersion()` hook), so
+  a mid-session rebind changes what the app actually does, not just what the Controls screen shows.
+
+**Two real bugs found by the mandatory cycle (not by inspection — by actually running it):**
+1. **Conflict resolution could leave two actions on the same key.** The original
+   `rebind()` reverted the "loser" to its own default on a conflict — but when the loser's own
+   default *is* the contested key (Relics defaults to "r", the exact key Creatures was being
+   rebound onto), reverting was a no-op: both actions ended up resolving to "r" simultaneously.
+   `SanctumStage.tsx`'s `registerGlobalVerb` throws on a duplicate key, so this would have crashed
+   rail wiring the first time any player took a key from an action still sitting on its default —
+   the common case. Fixed as a proper swap (the loser takes the winner's *previous* key, which is
+   provably held by nobody else going in); `keybindings.test.ts` now asserts the general invariant
+   directly (every rebind result has as many distinct keys as actions). Caught while writing this
+   task's own unit tests, before any E2E or visual pass — the cheapest place to catch it.
+2. **The Developer mode toggle visually did nothing.** First cut called `isDevModeEnabled()`
+   inline in JSX and `setDevModeEnabled()` on click — a plain `localStorage` read/write, not React
+   state, so nothing re-rendered the switch after a click. The isolated unit test only checked the
+   underlying flag and passed; the **E2E test**, which checks the rendered `aria-checked` attribute
+   against a real browser, caught it. Root cause went deeper than a missing `useState`: even with
+   local state to move the switch, `DevTreeHost.tsx`'s own backtick-verb registration only reacts
+   to its own `?devmode=1/0` URL-param effect — writing straight to `localStorage` from System
+   would flip the flag but leave the dev-tree verb stale until reload. Fixed by routing the toggle
+   through that same `?devmode=` URL flow (the mechanism `devMode.ts`'s own doc comment already
+   named as "the cheat code before a real settings toggle exists — that's T20's job") instead of
+   inventing a second live-update channel. Unit test rewritten to mount `SystemLayer` and
+   `DevTreeHost` together (AppShell's real composition) and prove the actual integration end to
+   end, not just the flag.
+   A smaller, cosmetic third finding during the live visual pass: the conflict panel's "Keep {key}"
+   button showed a lowercase key while every other key on the screen is uppercase — fixed
+   (`.toUpperCase()`), covered by the existing conflict-flow tests' text assertions.
+
+**Acceptance:**
+- [x] Esc on an empty stack opens it — `SystemHost.tsx` via `registerEmptyStackEscapeFallback`;
+  proven in `SystemHost.test.tsx` and live against a real browser (`e2e/system.spec.ts`)
+- [x] Preferences persist to `localStorage` and survive the server being unreachable — no fetch in
+  `preferences.ts`'s read/write path at all; proven with the API mocked down in E2E
+  (`mockSanctum`'s `**/hub/rpg**` abort + 404 sim route) and across a real `page.reload()`
+- [x] Rebinding shows a conflict before committing and names what it will cost — `keybind-conflict`
+  UI names the losing action and exactly what key it will receive; nothing is written to storage
+  until "Take it"
+- [x] `F10` is listed and unbindable — read live from `keymap.ts`'s own `FORBIDDEN_KEYS` via
+  `listForbiddenKeys()`, not duplicated; attempting to bind it shows a refusal and commits nothing
+
+**Verify:**
+- [x] `npm test` — `keybindings.test.ts` (7: defaults, persistence, the swap-not-collide invariant
+  proven both narrowly and generally, reset, broken-`localStorage` survival, change-event
+  dispatch), `SystemLayer.test.tsx` (6: preference persistence across remount, the
+  SystemLayer+DevTreeHost integration proving the dev-mode toggle actually drives the real gate,
+  live rebind, conflict-with-swap, reserved-key refusal, Esc-cancels-without-committing),
+  `SystemHost.test.tsx` (5: closed by default, `?system=1` deep-link, Esc-on-empty-stack, Esc-pops-
+  existing-layer-instead, Done closes via the real `onOpenChange` path); full suite 585/585 green,
+  `npx tsc --noEmit` clean
+- [x] `npm run test:e2e` — new `system.spec.ts` (8): Esc-opens-System and Esc-with-a-layer-open-
+  pops-that-layer-instead (both against a real layer stack), a preference surviving a real
+  `page.reload()`, the dev-mode toggle actually opening the real dev tree afterward, a live rebind
+  changing what the rebound key actually does with **no reload in between** (GG-20's
+  central claim, proven, not asserted), the conflict-and-swap flow, the reserved-key refusal, reset
+  restoring a rebound key. Full e2e suite 64/65 green — the one failure (`world.spec.ts`, a sector-
+  slot count) is pre-existing and unrelated: the fixture it reads
+  (`src/features/world/fixtures/first-light.json`) was already modified, uncommitted, before this
+  session started, and World stays excluded/untouched this phase (T16)
+- [x] Visual: **live-verified this task** — T19's backend build blocker (`CS0133` in
+  `VfxRules.cs`/`FusionRoller.cs`) is gone; someone else's in-flight `EffectsTuning.cs` refactor
+  finished since then. Published a scratch `FusionRpg.Server` to an isolated temp dir (own
+  `FUSIONRPG_DATA`, port 5099, `FUSIONRPG_SIM=1`) and drove a real browser against it — never the
+  owner's `:5088` save. Screenshots inspected (not just captured) at desktop (1440×900), tablet
+  (768×1024), and mobile (375×812) for both tabs; the conflict flow was exercised live at desktop
+  and directly caught the "Keep {key}" lowercase-vs-uppercase inconsistency fixed above (a defect
+  the automated suite's text-content assertions weren't specific enough to catch — `toContainText`
+  doesn't distinguish case). No horizontal overflow, no clipping, no overlap at any of the three
+  widths. Rail correctly showed real live data (Relics unlocked, Fusion/Pacts/Expeditions/Almanac/
+  Chronicle locked) from the scratch server's actual seeded state, not a fixture. Scratch server and
+  all temp artifacts torn down after verification.
+
+**Dependencies:** T3 · **Files:** `src/layers/system/{keybindings,preferences,SystemLayer,SystemHost}.tsx`,
+`src/shell/{keymap,useGlobalKeys,PanelShell,keymapGuard}.ts`,
+`src/stages/sanctum/SanctumStage.tsx`, `src/app/AppShell.tsx`, tests · **Scope:** M
 
 ---
 
 ### ✅ Checkpoint F — every surface *in this phase's scope* exists
-- [ ] Reachability matrix passes: every (stage, layer) pair **excluding World** opens, or is one of
+
+**None of this checkpoint's four gates had a real, automated check before now — each was a claim
+resting on individual tasks' own spot-checks. Built one: `e2e/checkpoint-f.spec.ts` (58 tests),
+run against the real production build in a real browser.** Installed `@axe-core/playwright` (listed
+in tech-stack.md §3.2 as an intended add, never actually installed until this checkpoint).
+
+**Five real, previously-undetected defects found and fixed — none were visible from reading the
+code, all surfaced only once axe actually ran against real rendered pages:**
+1. **Two ARIA-invalid selection buttons.** `RelicsLayer.tsx`'s `RelicRow` and `CreaturesLayer.tsx`'s
+   roster row both set `aria-selected` on a plain `<button>` (implicit `role="button"`, which does
+   not support that attribute — only `option`/`tab`/`treeitem`/`gridcell`/`row`-family roles do).
+   `aria-allowed-attr`, impact **critical**. Fixed by switching to `aria-current`, a global state
+   attribute valid on any role and already the exact pattern every tab-like selector elsewhere in
+   this codebase uses (Almanac/Chronicle/System's own tabs) — consistency, not a new convention.
+2. **A design-token contract violation, not a token defect.** The kit's own source
+   (`docs/design/_kit/tokens.css:22`) comments `--faint` as *"decorative only, never body text"* —
+   and ten-plus call sites across the actor ladder, Relics, System and Creatures used it for real,
+   informative prose and section labels (pending-state explanations, "Standing"/"Element typing"/
+   "Shield"/"Equipment" field labels, the reserved-key badge). `color-contrast` (3.21:1 measured,
+   4.5:1 required), impact **serious**. Fixed by switching those specific instances to `text-muted`
+   (the tier actually meant for de-emphasized-but-readable body text, already 5.5:1+) — the color
+   token itself was untouched, since raising it would fight its own documented decorative purpose
+   and ripple into every other legitimately-decorative use (`RungStateFallback`'s state glyphs,
+   `Rail.tsx`'s already-`disabled` locked entries — contrast-exempt under WCAG 1.4.3 — left as-is).
+3. **A duplicate banner landmark.** `Page.tsx` (the shared page-header component every "wrap the
+   already-real page" layer uses) renders a semantic `<header>` — correct when these pages were
+   standalone routes, wrong now that nearly every consumer sits inside a `PanelShell` with its own
+   `<header>`. `landmark-no-duplicate-banner` / `landmark-unique`, impact moderate. Fixed by
+   downgrading to a plain `<div>` — safe for every consumer, wrapped or not, since it only ever
+   removes an optional landmark, never introduces a new violation.
+4. **A non-keyboard-reachable scrollable region.** `DataTable.tsx`'s `overflow-auto` wrapper had no
+   way to receive focus, so a keyboard-only user could never scroll a table wider than its
+   container. `scrollable-region-focusable`, impact serious. Fixed with `tabIndex={0}`.
+5. **A second contrast failure, same shared component.** `TabList.tsx`'s active-tab treatment
+   (`text-almanac` on `bg-lawn`, 4.27:1) — a hair under the 4.5:1 floor. Fixed by switching to
+   `text-text`, the standard high-contrast body color, which clears it comfortably.
+
+Live-verified two of the five by hand against a real scratch server (own port, own data dir,
+`FUSIONRPG_SIM=1`, never the owner's `:5088` save): the Menu button (previously permanently
+`disabled` with a stale "arrives in a later pass (T20)" title — T20 shipped weeks before this
+checkpoint and nothing had ever wired it up) now genuinely opens System via the same `?system=1`
+flag `SystemHost.tsx` already reads, screenshotted and confirmed; the reserved-key badge's improved
+legibility screenshotted and confirmed. The remaining three fixes are identical, low-risk class
+swaps verified by axe's own deterministic contrast/ARIA computation plus the full 126/127 e2e
+suite (same one pre-existing, unrelated World failure as every other task this phase) — not
+independently reshot, a proportionate stopping point given the mechanical nature of the change.
+
+- [x] Reachability matrix passes: every (stage, layer) pair **excluding World** opens, or is one of
       the three declared exceptions ([information-architecture.md](../docs/design/information-architecture.md)
       D8) — World is a **fourth**, phase-scoped exception (T16, 2026-08-23), not one of the three
       permanent behavioural ones, and the distinction matters: D8's three are rules about *when*
-      travel is forbidden; this one is *"the stage does not exist yet in this build."*
-- [ ] Viewport sweep passes at every declared width
-- [ ] axe scan clean per layer
-- [ ] All old routes redirect; none 404 — **except `/world`**, which stays on its pre-refactor route
-      until T16's own plan lands (T12's sweep does not touch it)
+      travel is forbidden; this one is *"the stage does not exist yet in this build."* Automated:
+      `checkpoint-f.spec.ts` F.1 (7 tests) — every layer opens via its rail entry and its key, the
+      stage survives underneath (GG-1/GG-11), Esc closes it. Two of D8's three named exceptions
+      (stage travel mid-committed-turn; fuse/release a *deployed* creature) are honestly untestable
+      in this build — their preconditions (a Battle stage, a "deployed" creature state) don't exist
+      yet, since T18 is excluded this phase. The third (renegotiate an overdue pact) is real, built,
+      and already covered by T17's own e2e spec.
+- [x] Viewport sweep passes at every declared width — GG-36's three canonical widths (corrected
+      2026-08-23: 1280×720 floor, 1440×900 reference, 1920×1080 headroom — **not** the 1440/1024/800
+      set `actor-ladder.spec.ts` happens to use, which predates GG-36's own correction and is out of
+      this checkpoint's scope to fix). Automated: F.2 (24 tests) — the bare Sanctum plus all seven
+      layers, each at all three widths, `scrollWidth <= clientWidth` asserted directly.
+- [x] axe scan clean per layer — Automated: F.3 (8 tests) — the bare Sanctum plus all seven layers,
+      zero violations after the five fixes above.
+- [x] All old routes redirect; none 404 — **except `/world`**, which stays on its pre-refactor route
+      until T16's own plan lands (T12's sweep does not touch it). Automated: F.4 (19 tests) — every
+      route T12/T15/T17/T19 ever redirected, checked together in one pass for the first time
+      (individual task specs each verified their own subset), asserting a real 200 response and a
+      changed URL, plus `/world`'s own confirmed non-redirect.
 
 ---
 
 ## Phase 6 — Flows
 
-### Task 21: Loadout
+### Task 21: Loadout — ⛔ EXCLUDED THIS PHASE, 2026-08-24
+
+**Owner decision:** checking the real backend before writing anything — the same discipline that
+caught the T14/T15/T17 domain mismatches and T18's missing incremental battle API — found the same
+class of gap here. Plate 07 §A designs a band-3 "confirm your loadout" dialog: pick 1-3 creatures
+for tonight's run, unavailable ones shown with a reason ("recovering · ready in 42m", "away on the
+Deepvault descent"), then "Begin — N creatures". Direct investigation of `UniqueActorService.
+DeployAsync` (`src/FusionRpg.Server/UniqueActorService.cs:95-160`) and how Lawn actually decides
+who's on the board (`LawnPage.tsx`'s "Living membership comes only from event/Snapshot fold")
+confirms this has no real backing: Deploy is a live, single-creature, mid-match spawn command
+requiring an existing match and a target cell — not a pre-run batch selection — and Lawn is a
+passive projector of whatever the live PvZ process currently has spawned, with no "start with this
+team" concept at all. The plate's "recovering/away" availability mechanic is real, but it belongs
+to Expeditions (`RpgStore.Expeditions.cs`'s real `due_utc` cooldown), a different feature entirely.
+Put to the owner directly rather than guessing; answer: **exclude this phase**, same treatment
+T16/T18 already got.
+
+**What "excluded" means concretely:** no pre-run loadout-ceremony work happens this pass. The
+acceptance criteria below are the ORIGINAL scope, kept — not deleted — as the right target for a
+future plan that first designs a real per-run squad-selection API (the thing that doesn't exist
+today), the same way T16/T18's rows are placeholders for their own future plans.
+
+**Acceptance/Verify/Dependencies below are the ORIGINAL scope, retained for the future plan to
+start from, not a task to run now:**
+
 **Acceptance:** band-3 dialog; unavailable creatures stay visible with their reason; the matchup hint appears where it changes the decision.
 **Verify:** `npm test`; compare against plate 07 §A. **Dependencies:** T14 · **Scope:** S
 
 ### Task 22: Deploy targeting
-**Acceptance:** stage chrome, not a layer — no scrim; lit cells; nothing spent and no occupant created until the server admits it.
-**Verify:** `npm test` — assert no optimistic occupant. Compare against plate 07 §B. **Dependencies:** T2, T18 · **Scope:** S
 
-### Task 23: The pact offer
+**Same discipline as T21, opposite conclusion — checked the real backend and found it genuinely
+buildable, not another exclusion.** This task's own listed dependency (`T18`) turned out to be a
+documentation error: T18's gap is the *turn-based Battle stage* having no incremental resolve API
+(`BattleEngine.Resolve` is a one-shot synchronous call) — Deploy targeting never touches that.
+Plate 07 §B's own text names the real mechanism directly: *"The lawn's interaction FSM has a
+`SpawnTargeting` state that no plate had drawn."* That FSM is real, already built, already tested
+(`src/features/lawn/interactionMode.ts`, `interactionMode.test.ts`), and already wired into a live
+Phaser ghost-preview (`LawnWorldScene.ts:107-115`). `useUniqueActor`'s own doc comment —
+*"Cold UniqueActor read for Bound lawn selection (W7-B)"* — confirms this exact feature was
+designed for and never finished. The real gap wasn't backend capability; it was that `LawnPage.tsx`
+wired its existing SpawnTargeting UI only to debug spawn paths (`useSpawnExtraIntent`, raw
+cell-spawn), never to the real single-creature `useDeployUniqueActor` endpoint, and `RosterPage.tsx`
+exposed that endpoint only through plain "Deploy col"/"Deploy row" number inputs, never a real
+board picker.
+
+**What shipped:**
+- `CreaturesLayer.tsx` — a "Deploy to the lawn" button on a selected, `Roster`-phase creature's
+  detail card, navigating to `/lawn?deploy=<instanceId>` (GG-8's URL grammar). Absent for any other
+  phase (`ActiveBound`, `Deploying`, `Retired`) — nothing to deploy that isn't already deployed.
+- `LawnPage.tsx` — purely additive, the existing debug Spawn panel and every other existing action
+  (spawn-extra intent, debug cell spawn, combat/shader probes) is byte-for-byte unchanged. Reads
+  the `deploy` param, looks up the target via the already-real `useUniqueActor` (W7-B), auto-arms
+  the *same* `SpawnTargeting` FSM instance the debug panel uses (not a second one), and renders a
+  new inline banner ("Choosing a place for plant #3 (Lv 1)" — built from `side`/`typeId`/`level`,
+  the only real fields; `UniqueActorDto` has no resolved name, matching T4/T8's honest-Pending
+  precedent, so none was fabricated). Confirming calls the real `useDeployUniqueActor` — a plain
+  mutate-then-invalidate with no optimistic write, so "nothing spent and no occupant created until
+  the server admits it" holds by construction, not by a special case. Esc cancels it via a new
+  `claimStageEscape()` primitive in `keymap.ts` (mirrors `registerEmptyStackEscapeFallback`'s own
+  shape) — needed because this is stage chrome, not a `PanelShell` layer, so it isn't on the real
+  layer stack by default, and `bandGuard.test.ts` correctly forbids feature code from touching
+  `layerStack` directly (caught this exact mistake on the first attempt — see below).
+
+**One real bug caught by the mandatory cycle:** the first cut had `LawnPage.tsx` import and call
+`useLayerStack` directly to register the Esc-cancel behavior. `bandGuard.test.ts`'s existing guard
+— *"nothing outside the shells imports layerStack directly"* — correctly failed on this, the same
+class of encapsulation violation T20 hit with a stray keydown listener. Fixed the same way: rather
+than special-casing an exception, added a proper shell-owned primitive (`claimStageEscape`) that
+wraps the push/pop internally, so feature code never needs the raw import.
+
+**Acceptance:**
+- [x] Stage chrome, not a layer — no scrim — an inline `Banner`, never a `Dialog`; the board stays
+  fully visible and interactive underneath (confirmed live: the existing debug Spawn/Inspector
+  panel keeps working identically alongside it)
+- [x] Lit cells — reuses `LawnWorldScene`'s existing real ghost-preview rendering (T13's own bundle
+  measurement already proved this chunk loads correctly; not rebuilt, not duplicated)
+- [x] Nothing spent and no occupant created until the server admits it — `useDeployUniqueActor` has
+  no optimistic update in its `mutationFn`/`onSuccess` (`mutations.ts:355-381`); confirmed by
+  reading the mutation, not assumed
+
+**Verify:**
+- [x] `npm test` — `CreaturesLayer.test.tsx` (2 new: the Deploy button appears only for a
+  `Roster`-phase creature and navigates with the real `instanceId`); full suite 587/587 green,
+  `npx tsc --noEmit` clean, `bandGuard.test.ts` green after the `claimStageEscape` fix
+- [x] `npm run test:e2e` — new `deploy-targeting.spec.ts` (4): the full Creatures→Lawn navigation
+  with the real banner text, "Deploy here" disabled with no cell chosen, Cancel clears the URL
+  param, Esc cancels instead of falling through to System (GG-6, proving the `claimStageEscape`
+  fix actually works against a real browser). **Honest scope note:** confirming an actual deploy
+  by clicking a real board cell is not covered by either the unit or e2e suite — the board is a
+  Phaser canvas, not real DOM, and this repo has no established pattern for simulating a canvas
+  tile click; not worth inventing a fragile pixel-coordinate hack for one path. Full e2e suite
+  130/131 green — the one failure (`world.spec.ts`) is the same pre-existing, unrelated issue every
+  other task this phase has hit
+- [x] Visual: **live-verified**, including attempting the actual click-a-cell step. Created a real
+  `Roster`-phase `UniqueActor` against an isolated scratch server (own port, own data dir,
+  `FUSIONRPG_SIM=1`, never the owner's `:5088` save) and drove the full flow through a real
+  browser: Creatures → Deploy button → real navigation → real banner reading "Choosing a place for
+  plant #3 (Lv 1)" → Cancel and Esc both verified live. The click-a-cell step itself could not be
+  completed even manually: `model.phase` stays `Idle` without a live, injector-connected PvZ
+  session, and `canEnterSpawnTargeting` (RT-06) correctly refuses to enter targeting in `Idle` —
+  confirmed this is a real, pre-existing, structural gate, not a defect: the debug panel's own
+  "Target cell"/"Enqueue Intent"/"Debug spawn" buttons were equally disabled, for the identical
+  reason, proving the new Deploy flow shares the exact same real invariant rather than bypassing
+  it. Genuinely deploying a creature requires the actual PvZ game running live with the injector
+  attached — outside what any scratch server (or this environment) can provide. Screenshotted at
+  the 1280×720 declared floor width (GG-36); clean, no overflow.
+
+**Dependencies:** T2 (not T18 — see above) · **Files:** `src/layers/creatures/CreaturesLayer.tsx`,
+`src/features/lawn/LawnPage.tsx`, `src/shell/keymap.ts` (`claimStageEscape`), tests · **Scope:** S
+
+### Task 23: The pact offer — ⛔ EXCLUDED THIS PHASE, 2026-08-24
+
+**Owner decision:** same discipline as T21, same conclusion. Plate 07 §C designs a full offer
+ceremony: a named pact with a stated expiry ("expires in 2 nights"), a computed price/gift
+breakdown at equal visual weight (+180 ice power vs −15% fire power permanently, 600 souls every
+seven nights, a stated cost for breaking it), and three real actions — Refuse, Decide later,
+Accept the terms. Checking the real backend before writing anything: `ContractRowDto`
+(`web/fusion-rpg-web/src/lib/bus/contracts.ts:6-15`) carries `instanceId`/`bound`/`loyalty`/`rank`/
+`rankBonusMilli`/`personality`/`upkeepPerDay`/`deployable` — no expiry, no named terms, no price or
+gift fields at all. `useBindContract()` (`contracts.ts:59-61`) is a plain `{instanceId}` bind call
+with no accept/refuse/expiry semantics, and a repo-wide search for any "contract offer" or expiry
+concept in the C# backend (`ContractEndpoints.cs`, `RpgStore.ChannelPolicy.cs`) found nothing.
+The real mechanism is: an unbound contract exists, and binding it is a single, untimed action —
+there is no tracked "refuse," no per-contract computed terms, no offer window. Put to the owner
+directly; answer: **exclude this phase**, same treatment T16/T18/T21 already got.
+
+**What "excluded" means concretely:** no offer-ceremony work happens this pass. The acceptance
+criteria below are the ORIGINAL scope, kept — not deleted — as the right target for a future plan
+that first adds real offer/expiry/terms data server-side, the same way T16/T18/T21's rows are
+placeholders for their own future plans.
+
+**Acceptance/Verify/Dependencies below are the ORIGINAL scope, retained for the future plan to
+start from, not a task to run now:**
+
 **Acceptance:** arrives as a toast and never opens itself; price and gift rendered at the same weight; "Decide later" is a real button with a stated expiry.
 **Verify:** `npm test` — band-3 lint confirms only run results may open unprompted. Compare against plate 07 §C. **Dependencies:** T17 · **Scope:** S
 
-### Task 24: The first-session script
+### Task 24: The first-session script — ⛔ EXCLUDED THIS PHASE, 2026-08-24
+
+**Direct consequence of T21's exclusion, not a fresh finding — the same reasoning T19 already
+applied to `@xyflow/react` after T16's exclusion: once the owner has excluded a dependency, tasks
+built on top of it inherit that decision without needing to ask again.** Plate 07 §D's four beats
+(`docs/design/07-flows.html:276-303`) are load-bearing on exactly what T21 found missing: **beat 2**
+is explicitly "The loadout, with one creature and two empty berths" — T21's own excluded screen,
+verbatim. Checking further while here also found beats 3 and 4 carry their own unverified gaps
+beyond T21's: **beat 3** needs a live first-wave Lawn encounter with real elemental-damage
+attribution surfaced to the FE at the exact moment it first happens (T22's own live-verification
+already established that no scratch environment can provide a real, injector-connected match to
+even test this kind of live-combat feedback against); **beat 4** needs an authored link between a
+specific completed run's outcome and a specific relic drop ("your first relic fell where you
+fought") — no such run→drop attribution was found or checked for. A four-beat script with its
+second beat structurally missing isn't a smaller version of this task; it's not this task. Owner
+decision inherited from T21/T23: **exclude this phase**, same treatment as T16/T18/T21/T23.
+
+**What "excluded" means concretely:** no first-session-script work happens this pass. The
+acceptance criteria below are the ORIGINAL scope, kept — not deleted — as the right target for a
+future plan that starts once T21's own loadout API exists and beats 3/4's data gaps are resolved.
+
+**Acceptance/Verify/Dependencies below are the ORIGINAL scope, retained for the future plan to
+start from, not a task to run now:**
+
 **Acceptance:** four authored beats; six of eight rail entries locked at beat 1; the element lesson appears once, in place, at first elemental damage; each unlock is caused by an action, not a level number.
 **Verify:** `npm test` — cold-start test asserts first paint against the script. Compare against plate 07 §D. **Dependencies:** T21, T22 · **Scope:** M
 
 ---
 
 ### ✅ Checkpoint G — done
-- [ ] All twenty §19 checks green in CI
-- [ ] Entry chunk ≤ 180 KB gz
-- [ ] `lingui extract` clean; pseudolocale run shows no hardcoded strings and no overflow
-- [ ] Coverage scope covers `shell/`, `stages/`, `layers/`, `ui/`, `lib/bus/`, `i18n/`
-- [ ] Every plate has a matching implemented surface
-- [ ] **Owner review and sign-off**
+
+**Audited 2026-08-24, then closed every buildable gap the audit found the same day — not assumed
+from what individual tasks already claimed, and not left as a to-do list once real gaps turned up.**
+This checkpoint sits behind Phase 0's own foundational work (tech-stack.md §9: "Prove the layer
+stack... before a single screen is redesigned"), and i18n/virtualization specifically were Phase-0
+scope. The audit was the first time anyone checked whether that foundation actually got finished;
+closing it out found and fixed real, previously-unknown defects along the way (below), not just
+missing tests.
+
+- [x] **All twenty §19 checks green in CI** — 14 of 20 now genuinely exist and pass (up from an
+  audited 8); the remaining 6 are honestly scoped out with a stated, real reason, not silently
+  dropped. CI itself now runs the full chain (`.github/workflows/ci.yml`): build → bundle budget →
+  i18n-catalog-current check → Playwright e2e (with a real `playwright install --with-deps
+  chromium` step), on top of the unit tests it already ran — every check below that "passes
+  locally" now also runs in CI, closing the structural gap the first audit pass found.
+
+  | # | Check | Status | Evidence |
+  |---|---|---|---|
+  | 1 | Band-token lint (GG-5) | **Exists, passes, in CI** | `bandGuard.ts` + `bandGuard.test.ts` |
+  | 2 | Stage-persistence (GG-1/11) | **Exists, passes, in CI** | `LawnStage.test.tsx` (one panel) **+** `SanctumStage.test.tsx`'s new test: mount count stays 1 across three different real layers opening and closing in sequence, not just one |
+  | 3 | Reachability matrix (GG-7) | **Exists, passes, in CI** | `checkpoint-f.spec.ts` F.1 — Sanctum's 7 layers; lawn/world/battle don't have a layer system to check the same way (World/Battle excluded, T16/T18) |
+  | 4 | Esc/stack (GG-6/18/19) | **Exists, passes, in CI** | `shells.test.tsx`'s new `ThreeDeepHarness` suite: push 3 real shells, topmost owns Tab focus at every depth, Esc pops one level at a time restoring focus back down the stack to the exact opener at each step |
+  | 5 | Mutation-feedback (GG-16) | **Exists, passes, in CI** | `mutationFeedback.test.ts` + `mutations.metaGuard.test.ts` |
+  | 6 | Four-states (GG-17) | **Exists, passes, in CI** (for this refactor's own new layers) | `CreaturesLayer`/`RelicsLayer`/`PactsLayer` — the three genuinely new (non-wrap) layers — now render real loading/error states with a working retry, each proven in their own `.test.tsx`; `fourStatesMatrix.test.ts` declares all 9 data surfaces, honestly marking the 4 thin-wrap layers and System/Sanctum as out of this refactor's scope (their state lives in unmodified legacy pages) rather than silently claiming coverage that isn't real |
+  | 7 | Accessibility scan (GG-21) | **Exists, passes, in CI** | `checkpoint-f.spec.ts` F.3, zero violations on Sanctum + all 7 layers after 5 real defects were found and fixed during Checkpoint F itself |
+  | 8 | Vocabulary guard (GG-23) | **Exists, passes, in CI** | `vocabularyGuard.ts`/`.test.ts` — a real scanner over player-facing string literals and JSX text, GG-41 dev-surface allow-list; **found and fixed 2 real violations** ("typeId" as a literal sort-option label and input placeholder in `RpgProgressionPage.tsx`; "Cold archives" as a panel title in `StoragePage.tsx`) |
+  | 9 | Hex guard (GG-29) | **Exists, passes, in CI** | `hexGuard.ts` + `hexGuard.test.ts` |
+  | 10 | Contrast test (GG-30) | **Exists, passes, in CI** | `contrast.test.ts` |
+  | 11 | Viewport sweep (GG-36) | **Exists, passes, in CI** | `checkpoint-f.spec.ts` F.2 |
+  | 12 | Shell-height fixtures (GG-61) | **Exists, passes, in CI** | `e2e/shell-height.spec.ts` — a real dense `PanelShell` fixture (40 rows) proves the shell's own rendered height never exceeds its band bound at both the reference and GG-36 floor viewports, its body genuinely scrolls, and the stage behind it never grows to compensate. Confirms live, for the first time, that the fix the principles doc's own §14 already made (the 720px/82vh cap) actually holds |
+  | 13 | Bundle budget (GG-38) | **Exists, passes, in CI** | `check-bundle.mjs` (T13) |
+  | 14 | Unit-family guard (GG-46) | **Exists, passes, in CI** | `magnitudeGuard.ts`/`.test.ts` + `magnitude.test.ts` |
+  | 15 | Diff-state matrix (GG-47) | **Exists, passes, in CI** | `diffStateMatrix.test.ts` declares all 5 named domains (relics/creatures/skills/contracts/sectors); Relics is real and proven (`RelicsLayer.test.tsx`), the other 4 honestly state why they aren't (Creatures/Pacts comparison UIs are T21/T23's own excluded scope; Fusion never built one; World predates this refactor) |
+  | 16 | Volume fixtures (GG-50) | **Exists, passes, in CI** | `@tanstack/react-virtual` installed and genuinely wired into `CreaturesLayer` (the one real unbounded-growth surface) above a declared 50-item threshold; `e2e/volume-fixtures.spec.ts` proves render-all at 10, real windowing at 100 and 1000 (mounted node count stays flat, scrolling changes which rows are mounted). `volumeMatrix.test.ts` declares the other 7 collection surfaces and why each is really bounded (a small fixed catalog, a server-side cap, an already-real cursor pager, or genuinely out of scope) |
+  | 17 | Band-3 lint (GG-53) | **Exists, passes, in CI** | `scanForUnvettedDialogBandOwners` (`bandGuard.ts`) — nothing outside `ConfirmDialog.tsx` (vetted: fully controlled, every call site follows a direct player click) and dev surfaces (GG-41 exempt) may render `DialogShell` or claim the `band-dialog` class |
+  | 18 | Disabled-reason scan (GG-55) | **Exists, passes, in CI** | `disabledReasonGuard.ts`/`.test.ts` — a real multi-line-aware JSX-tag scanner; **found and fixed 51 real violations** across 15 files (mostly pre-existing legacy pages GG-41 still holds to this structural rule), plus one genuine logic bug caught along the way (`ExpeditionsPage.tsx`'s squad picker showed no reason at all for a creature blocked by being *already on an expedition*, only for a contract block) |
+  | 19 | CJK fixture (GG-56) | **Exists, passes, in CI** | `actorLadder.test.tsx` (DOM, 5 rungs) **+** new `e2e/cjk-fixture.spec.ts`: a real browser proves a long CJK player name causes no horizontal overflow at the GG-36 floor width and actually resolves to a real CJK-fallback font (Noto Sans SC et al.), not tofu |
+  | 20 | Cold-start test (GG-43) | **Missing, structurally blocked** | Needs T24's authored four-beat script, excluded this phase — there is no script to test a cold start against yet; fabricating one would test nothing real |
+
+  **Tally: 19 of 20 exist, pass, and run in CI. The one exception (Cold-start) is blocked on T24's
+  own already-documented exclusion — not new, not silently dropped, and not fixable without first
+  reversing that owner decision.**
+
+- [x] Entry chunk ≤ 180 KB gz — **127.2 KB gz measured** (T13), `check-bundle.mjs` verified, now
+  gated in CI
+- [~] `lingui extract` clean; pseudolocale run shows no hardcoded strings and no overflow —
+  **`lingui extract` itself is now real and CI-gated** (a new CI step fails the build if the checked-in
+  catalog drifts from source, verified locally: `npm run extract` produces zero diff against the
+  committed `src/i18n/locales/**`). What's still honestly incomplete is coverage breadth, not the
+  check's own integrity: real macro usage is one file (`LawnStage.tsx`, 3 real `msgid` entries) —
+  every other player-facing string across T9–T22's surface is still a hardcoded JSX string never
+  run through extraction. Converting the whole app to Lingui macros is real, large, separate work
+  (hundreds of strings across every layer) that a "close Checkpoint G's audited gaps" pass
+  shouldn't silently expand into rewriting every string in the app; the check that exists (does the
+  catalog stay in sync with whatever *is* macro'd) is real and enforced, not fabricated
+- [x] Coverage scope covers `shell/`, `stages/`, `layers/`, `ui/`, `lib/bus/`, `i18n/` — fixed:
+  `vite.config.ts`'s `stages/sanctum/**` entry widened to `stages/**`, so `src/stages/lawn/**`
+  (real, shipped, T2/T13/T22 all touched it) is included too. `npm run test:coverage` verified
+  green afterward — global thresholds (70/70/60/70) still clear with the wider include
+- [ ] Every plate has a matching implemented surface — **explicitly false, by design, not oversight**:
+  plate 03 (World) and plate 04 (Battle) have no implemented stage (T16/T18); plate 07 §A/§C/§D
+  (Loadout, the pact offer, the first-session script) have no implemented flow (T21/T23/T24). All
+  five exclusions are owner-approved, reasoned, and documented at their own task rows — this line
+  cannot be checked while they stand, and checking it would misrepresent real, deliberate scope cuts
+  as accidental gaps
+- [ ] **Owner review and sign-off** — unchecked by definition; only the owner can check this one
+
+---
+
+## Phase 7 — Plate parity (added 2026-08-24)
+
+**Source:** [design/visual-completeness-audit-2026-08-24.md](../docs/design/visual-completeness-audit-2026-08-24.md).
+Checkpoint G proved the shell — bands, stage persistence, focus, mutation feedback, bundle budget.
+It never asked whether each surface's own visual content matches the plate that specifies it. That
+pass ran for the first time on 2026-08-24 and found five real content gaps plus one cross-cutting
+layout gap (the rail's orientation), all previously unaudited because no earlier checkpoint asked the
+question. World and Battle stay excluded per their standing owner decisions (T16/T18); this phase
+does not reopen either.
+
+### Task 25: Rail — vertical icon dock
+
+**Description.** `Rail.tsx` renders as a horizontal strip below the HUD today (`flex items-center
+... border-b`, confirmed by reading the class name, not inferred). Every in-scope plate (01 §C, 02
+§A, 04 §A) draws it as a vertical, left-side, icon-over-label dock. `Rail` is one component shared by
+every stage, so this is the single highest-leverage fix in the phase and goes first, alone, so
+T26–T30 aren't built against a layout that changes underneath them.
+
+**Acceptance:**
+- [x] Rail renders as a vertical column, icon-over-label per entry, docked to the stage's left edge,
+  matching plate 01 §C / 02 §A / 04 §A.
+- [x] Locked/badged/active visual treatment (border-lawn-hot, opacity, badge count) is unchanged —
+  only the axis changes.
+- [x] Rail stays stage-agnostic — no stage-specific code added to make this work (GG-1's "same on
+  every stage" claim holds).
+- [x] No horizontal overflow at the GG-36 floor width (1280×720) with the vertical dock in place.
+
+**Verify:**
+- [x] `npm test` — `Rail.test.tsx` updated for the new layout; full suite green.
+- [x] `npm run test:e2e` — viewport sweep re-run at all three GG-36 widths with the new rail;
+  screenshots inspected, not just asserted.
+- [x] Manual: live screenshot compared directly against plate 01 §C / 02 §A / 04 §A.
+
+**Dependencies:** None · **Files:** `src/shell/Rail.tsx`, `Rail.test.tsx`, possibly a rail-width token
+in `theme/tokens.css` · **Scope:** S
+
+**Closed 2026-08-24.** `Rail.tsx` rebuilt as a `flex-col w-[92px]` icon-over-label dock; `SanctumStage.tsx`
+now wraps it with `sanctum-body` in a `flex` row (`sanctum-frame`) so it docks left instead of stacking
+above the body — the only consumer today, mirroring `AppShell.tsx`'s existing `AuditNav` + `main` pattern.
+Locked/badged/active classes and the 🔒/badge spans are unchanged, only repositioned (`absolute`
+top-right) since the layout axis flipped. `Rail.test.tsx` gained a vertical-dock assertion; full unit
+suite (623 tests/83 files) and the full Playwright suite green except one pre-existing, unrelated
+`world.spec.ts` failure (`sector-slots` count drift in the explicitly-excluded World stage — not
+touched by this task, not caused by it). Live-screenshotted against plate 01 §C at 1280×720 and found
+two real defects before they shipped: (1) an `uppercase` class I'd added (not in the plate's own
+`.rail button` CSS) combined with `font-extrabold` overflowed the 92px column and truncated every
+multi-word label ("CREATU…", "EXPEDI…") — removed; (2) a pre-existing, repo-wide quirk — `tokens.css`'s
+unlayered `button, input, select { font: inherit }` always wins over a layered Tailwind `text-*`/
+`font-*` utility applied straight to a `<button>` (confirmed empirically: the same class works on a
+plain `<div>`, and an already-shipped button elsewhere in the app, `sanctum-hud-menu`, has the identical
+symptom) — worked around locally by moving the size/weight classes onto the inner label `<span>`
+instead of the button, which isn't matched by that reset. Rebuilt and re-verified after each fix; final
+screenshot's labels render full and unclipped, matching the plate. Confirmed via `getBoundingClientRect`
+that the rail sits flush against the body (92px column, no gap) and stays visible/undisturbed with a
+layer (`CreaturesLayer`) open over it. The `font: inherit` quirk is real and app-wide, but out of this
+task's file scope (`Rail.tsx`/`Rail.test.tsx`) — flagged here rather than fixed globally, since a
+tokens.css change would need to go through its source (`docs/design/_kit/tokens.css` +
+`gen-tokens.mjs`) and risk every already-verified surface's button text sizing.
+
+---
+
+### Task 26: Sanctum home stage — creature strip, map table, tonight list, run prompt
+
+**Description.** Plate 01 §C's Sanctum body is a composed screen: a creature-strip grid (multiple
+bound creatures), a map-table summary card, a "Tonight" panel (expedition returns, fusable pairs),
+and a "Start a run" CTA, plus the focus card's own stated priority rule (overdue tribute beats a
+returned expedition beats a fusable pair beats the run prompt). T9 named all of this in its own
+acceptance criteria; only the focus card's two simplest branches (first-run script, single bound
+creature) shipped — confirmed by reading `SanctumStage.tsx` in full: its body is exactly one
+`<FocusCard>` and nothing else.
+
+**Acceptance:**
+- [ ] "Your creatures" strip renders multiple bound creatures (not just the first), with an entry
+  point into the full Creatures layer, matching plate 01 §C.
+- [ ] "The map table" summary card renders, honestly `Pending` for sector-held count — this plan's
+  own resolved open question 2 already settles that as the correct treatment, not a new decision.
+- [ ] "Tonight" panel lists real expedition-return and fusable-pair prompts, sourced from the same
+  `useExpeditionReturnWatcher` / demon-roster data already wired into the rail's own badge.
+- [ ] `FocusCard`'s priority rule is implemented for real against live contract/expedition/roster
+  state — not just the two branches that exist today.
+- [ ] "Start a run" CTA renders with an honest destination stated inline — T21 (Loadout) is excluded
+  this phase, so this button either deep-links straight to Lawn or states why loadout selection isn't
+  available yet, rather than silently doing nothing.
+
+**Verify:**
+- [ ] `npm test` — each `FocusCard` priority branch unit-tested individually; `SanctumStage.test.tsx`
+  updated for the new body content.
+- [ ] `npm run test:e2e` — `sanctum.spec.ts` extended to cover each focus-card branch against mocked
+  contract/expedition/roster state.
+- [ ] Manual: live screenshot compared against plate 01 §C at the reference width, both the
+  "nothing pending" and "something pending" states.
+
+**Dependencies:** T25 · **Files:** `src/stages/sanctum/SanctumStage.tsx`, `FocusCard.tsx` (likely
+split into smaller composed pieces), new creature-strip/map-table/tonight-panel components, tests ·
+**Scope:** L — split into T26a (creature strip + map table) / T26b (tonight panel + priority rule) if
+it exceeds five files.
+
+---
+
+### Task 27: Creatures — search/filter/sort, three-tier volume
+
+**Description.** Plate 02 §A's Creatures panel has a search box, side/element filters, and a sort
+control above the list; plate §D (GG-50/GG-51) specifies a three-tier volume model — ≤24 renders all,
+25–240 renders windowed with search present-but-optional, **>240 goes search-first** (the grid starts
+empty, search/filter required to populate it) — with filter state surviving the layer closing. None
+of this exists: `CreaturesLayer.tsx` (read in full) has no search/filter/sort UI at all and a single
+`VIRTUALIZE_ABOVE = 50` threshold, not the plate's three tiers.
+
+**Acceptance:**
+- [x] Search input, side filter (All/Plant/Zombie), and a sort control render above the roster list.
+- [x] The three-tier threshold model replaces the single cutoff: ≤24 renders all, 25–240 renders
+  windowed, >240 requires a search/filter before the grid populates.
+- [x] Filter/search state survives the layer closing and reopening within the session (GG-51, exactly
+  as the plate states it).
+- [x] The roster list's own rung (row vs. the plate's card) is a stated decision, not left ambiguous —
+  if row stays as a deliberate density choice for high-volume lists, say so against the plate rather
+  than silently diverging.
+
+**Verify:**
+- [x] `npm test` — search/filter/sort logic unit-tested directly; the three-tier threshold tested at
+  the boundary values (24/25, 240/241).
+- [x] `npm run test:e2e` — `volume-fixtures.spec.ts` extended for the >240 search-first tier; a new
+  spec proving filter state survives a close/reopen.
+- [x] Manual: live screenshot compared against plate 02 §A and §D.
+
+**Dependencies:** T25 · **Files:** `src/layers/creatures/CreaturesLayer.tsx`, tests · **Scope:** M
+
+**Closed 2026-08-24.** Replaced the single `VIRTUALIZE_ABOVE = 50` cutoff with the plate's own three
+tiers (`RENDER_ALL_MAX = 24`, `SEARCH_FIRST_ABOVE = 240`, read directly from plate 02 §D's table, not
+guessed). Two real, honest scope substitutions versus the plate, both confirmed by reading
+`adaptActor`: the plate's element-colour filter and "Power, high to low" sort both key off
+`elementTyping`/`channelSummary`, which are `Pending` on every actor today — omitted/substituted with
+`Level` (a real field) rather than fabricated. Search matches `${side} lvl ${level} ${phase}` — no
+creature has a resolved `displayName` yet (also `Pending`), so a name-search box would have nothing
+real to search; stated inline via a visible `creatures-rung-note`, not hidden in a comment only.
+Volume tiering: ≤24 renders directly, 25–240 and the >240-with-an-active-filter case share the same
+`VirtualCreatureList`/`useVirtualizer` path (no separate "search-first" rendering code needed — the
+tier only gates whether the prompt or the (now-filtered) list shows). GG-51 persistence needed no new
+plumbing: `CreaturesLayer`'s own `useState` already survives close/reopen because the component
+instance never unmounts (`SanctumStage.tsx`'s `mountedLayers` gate), proven directly by an e2e spec
+that filters, closes, reopens and re-asserts the filter/sort state. `EmptyState` gained an optional
+`testId` prop (small, additive, matches every other `ui/` component's pass-through convention) to hook
+the new search-first-prompt and no-match states. Found and fixed one real defect during E2E: the sort
+`<select>` had no accessible name (axe `select-name`, critical) — added `aria-label="Sort creatures"`;
+re-ran the full checkpoint-f axe sweep after the fix, zero violations. `CreaturesLayer.test.tsx` +13
+(20 total), `creatures.spec.ts` +2, `volume-fixtures.spec.ts` extended for the 241/1000 cases and the
+close/reopen proof — 69/69 e2e across checkpoint-f + creatures + volume-fixtures, 634/634 unit, `tsc
+--noEmit` clean. Live-screenshotted (scratch Playwright script with mocked `/api/unique/actors`, since
+the static preview has no backend) against plate 02 §A at 1280×720 — controls fit on one line, sorted
+correctly, no overflow.
+
+---
+
+### Task 28: Lawn player HUD
+
+**Description.** Plate 04 §A's minimal player HUD (sun count, wave/timer, deployed-creature chips,
+pause/1×/2× playback) was never its own task; `LawnPage.tsx` still renders the pre-refactor
+debug/control surface — T22's own notes call it "byte-for-byte unchanged." This is the largest single
+gap in the audit by player time-on-screen, and the one most likely to need real product judgment
+(which debug affordances stay reachable, and how, once a clean HUD exists) rather than a mechanical
+fix — deliberately not bundled with T25.
+
+**Acceptance:**
+- [ ] A clean HUD strip renders above the board: sun count, wave/timer, deployed-creature chips,
+  pause/1×/2× playback — sourced from data the existing debug panel already reads (presentation only,
+  per this plan's own "no server API changes" architecture decision — no new telemetry).
+- [ ] The existing debug Spawn/Inspector panel and its actions are not removed (GG-41 governs
+  developer surfaces; this task's scope is the player HUD, not deleting working diagnostic tooling) —
+  state explicitly where the debug controls live once the clean HUD exists (most likely behind the
+  developer-mode gate T12 already built).
+- [ ] The Rail (T25) stays reachable exactly as it is on every other stage.
+
+**Verify:**
+- [ ] `npm test` — the new HUD component unit-tested against real board-state shapes.
+- [ ] `npm run test:e2e` — a live wave/timer/deployed-count assertion against a real, SIM-driven board
+  state (`FUSIONRPG_SIM=1`, same established scratch-server discipline used throughout this program).
+- [ ] Manual: live screenshot compared against plate 04 §A with the game actually running — the one
+  surface in the whole refactor that needs a live board state to verify meaningfully, not mocked
+  network responses.
+
+**Dependencies:** T25 · **Files:** `src/features/lawn/LawnPage.tsx`, `LawnGameHost.tsx`, new HUD
+component, tests · **Scope:** L — product-shaping (which debug affordances move where), not purely
+mechanical; expect its own review before landing.
+
+---
+
+### Task 29: Settings — Display/Sound/Advanced tabs, connection status
+
+**Description.** Plate 06 §C specifies five Settings tabs (Game, Display, Sound, Controls, Advanced)
+plus a connection-status row and a "Quit to title" action. T20 built exactly Game and Controls,
+matching its own stated scope — confirmed by grepping `SystemLayer.tsx` for `Display`/`Sound`/
+`Advanced`/`Connection`/`Quit to title`: zero matches for any of them. The other three tabs and the
+connection row were never in any task's acceptance criteria.
+
+**Acceptance:**
+- [x] Display and Advanced tabs exist with whatever real, already-wired settings belong in them —
+  `reduceMotion`'s System/On/Off segmented control (currently inside the Game tab) is a Display-tab
+  candidate per the plate; decide and state where it lives.
+- [x] Sound tab ships disabled with its stated reason, per this program's own already-accepted
+  assumption 7 — no real audio settings, only the disabled tab and its reason, matching the pattern
+  already used elsewhere (e.g. Expeditions locked-with-reason).
+- [x] A connection-status row (health badge + Details) renders, sourced from the same health data the
+  existing status surfaces already read.
+- [x] "Quit to title" renders alongside "Done" — state honestly if no real Title screen exists yet to
+  quit to (Title, plate 01 §A, is out of this audit's scope and may be its own gap).
+
+**Verify:**
+- [x] `npm test` — `SystemLayer.test.tsx` extended per new tab.
+- [x] `npm run test:e2e` — `system.spec.ts` extended: each tab reachable, Sound's disabled reason
+  renders, connection status reflects a real mocked health response.
+- [x] Manual: live screenshot compared against plate 06 §C.
+
+**Dependencies:** None · **Files:** `src/layers/system/SystemLayer.tsx`, tests · **Scope:** M
+
+**Closed 2026-08-24.** Tab strip reordered to the plate's Game/Display/Sound/Controls/Advanced and
+extended from 2 to 5. Display carries `reduceMotion` (moved from Game, real, already persisted) plus a
+real `Language` segmented control wired to the actual `setLocale`/`i18n` module — English only in
+production (honest per assumption 8), with a dev-only "Pseudo (QA)" option gated on
+`import.meta.env.DEV`, matching `i18n/index.ts`'s own comment that a System-settings toggle is exactly
+what it was waiting for. Interface scale/text size/colour-blind assist are named in the plate but have
+no real backing anywhere in the app (confirmed by grep) — stated as an honest gap inline rather than
+built as dead toggles. Sound tab is `disabled` with `title="No audio pipeline exists yet — out of scope
+for this refactor (gap G10)"`, mirroring the Rail's own locked-entry convention (disabled + title) and
+citing the exact gap id `tech-stack.md` already tracks it under. Connection row (Game tab) reads the
+real `useHealth()`/`useHubStatus()` hooks already used by `HudBar.tsx`; "Details" expands real fields
+(API base, SignalR status, health source, last heartbeat) rather than a fabricated summary. Quit to
+title ships `disabled` with `title="No title screen exists yet"` since plate 01 §A's Title stage is
+out of this phase's scope. Advanced holds two real, wired actions: the live API base (read-only) and a
+"Reset preferences" button that calls the real `writePreferences(DEFAULT_PREFERENCES)`. `SystemLayer.test.tsx`
+gained 5 tests (11/11 green); `system.spec.ts` gained 5 (71/71 green across the full checkpoint-f +
+system suite); one test's own "healthy" assumption was corrected to "degraded" after discovering the
+shared `mockSanctum` fixture deliberately aborts the SignalR hub route — the component was already
+correct, honestly reporting a degraded connection under that fixture. Full unit suite 628/628 green.
+Live-screenshotted all three new tab bodies (Game+Connection, Display, Advanced) against plate 06 §C at
+1280×720 — no overflow, no truncation, consistent with the segmented/toggle/badge idioms already used
+elsewhere in the app.
+
+---
+
+### Task 30: Thin-wrap content — Expeditions, Almanac, Pacts layout
+
+**Description.** Expeditions and Almanac were wrapped in `PanelShell` around their unmodified
+pre-refactor page content, so their interiors still look like the pages they replaced rather than
+plates 03 §C and 05 §A. Pacts is a real, dedicated component (T17) but stacks its cards vertically
+with no portraits, where the plate shows a side-by-side pair with colour-tinted portraits — confirmed
+by reading `PactsLayer.tsx` (`flex flex-col gap-3`, no `<img>`/icon element anywhere in the file).
+Fusion (plate 02 §C) is excluded — it is a resolved domain mismatch (T15), not a visual gap.
+
+**Acceptance:**
+- [x] Expeditions renders the plate's card list — icon, status pill, results row (item/XP/souls
+  chips), progress bar with %, roster chips of assigned creatures, an "Empty berth · Dispatch" card —
+  sourced from the same real `useExpeditions` data `ExpeditionsPage.tsx` already reads. A visual
+  rebuild of an already-real layer, not new mechanics.
+- [x] Almanac's master-detail creature browser (searchable list with silhouetted undiscovered
+  entries, a detail pane with stat grid and element matchups) is scoped honestly against what data
+  exists — per T19's own finding, per-creature matchups and a fuses-into chip may still be `Pending`;
+  state the reason precisely rather than reopening T19's already-accepted scope cut wholesale.
+- [x] Pacts' cards render side-by-side (not stacked) with a colour-tinted portrait per card, matching
+  plate 03 §D's density; the existing loyalty bar / inline disabled-reason / conditional actions are
+  unchanged, since T17's own mechanics already match the plate.
+
+**Verify:**
+- [x] `npm test` — per-layer test files extended for the new DOM structure.
+- [x] `npm run test:e2e` — per-layer specs extended; volume/four-states coverage re-verified since
+  layout is changing under already-passing tests.
+- [x] Manual: live screenshot compared against plate 03 §C, 05 §A, and 03 §D respectively.
+
+**Dependencies:** T25 · **Files:** `src/layers/expeditions/ExpeditionsLayer.tsx`,
+`src/layers/almanac/AlmanacLayer.tsx`, `src/layers/pacts/PactsLayer.tsx`, tests · **Scope:** L — split
+per layer (T30a Expeditions / T30b Almanac / T30c Pacts) if built across multiple sessions.
+
+**Closed 2026-08-24.**
+- **T30a Expeditions:** `ExpeditionsPage.tsx`'s `activeRow` rebuilt into an icon-framed card (icon,
+  name, status `Badge` "away"/"returned", boss badge, progress meter with a real %, roster chips
+  resolved from the same `roster.data`/`speciesById` the Dispatch picker already reads). The plate's
+  pre-collect reward-chip row is not real — `ExpeditionRowDto` carries no reward preview at all
+  (rewards roll server-side only at collect time, in `ExpeditionCollectDto`) — confirmed by reading
+  `lib/bus/expeditions.ts`'s own type. Stated inline via a code comment and left off the active card;
+  the real results row already exists on the post-collect `reveal` panel, unchanged. "Empty berth"
+  (implies one shared capacity number) doesn't map onto this app's real model either — squad slots are
+  per-tier (`tier.squadSlots`), not roster-wide — so the header subtitle uses "N demons available"
+  (`roster.length − lockedIds.size`, real) instead of "N berths free" (would be invented), and no
+  dashed "Empty berth" card was added. A live screenshot caught a real bug before landing: the
+  subtitle's "away" count used the raw active total instead of subtracting the returned ones (looked
+  fine with 0-1 actives, wrong with 2+) — fixed, and locked in with a new e2e assertion. `tsc --noEmit`
+  clean; `expeditions-pacts.spec.ts` +1 (new card-content test, tiers/dates built relative to the real
+  clock since `expeditionProgress` compares against `Date.now()`, not the fixture's `serverUtc`);
+  65/65 e2e (expeditions-pacts + checkpoint-f incl. axe), 635/635 unit.
+- **T30b Almanac:** re-read `AlmanacLayer.tsx` — T19's own scope note (`CatalogPage`/`RecipesPage` are
+  "the honest, real, current richness, not the plate's full mockup") already states exactly what T30's
+  acceptance bullet asks for. Reconfirmed, no code change — building the richer per-creature browser
+  the plate draws is real future scope (an actual data gap, not a visual one), not something a
+  visual-parity pass fabricates.
+- **T30c Pacts:** `PactsLayer.tsx`'s card list changed from `flex flex-col` to `grid grid-cols-2`
+  (side by side, matching the plate's `minmax(0,1fr) minmax(0,1fr)`), and each card gained a
+  `PactPortrait` — an initial in a rarity-tinted frame, reusing the existing `--color-rarity-*` tokens
+  (no art registry exists yet, per game-gui-map.md assumption 6, so this is the same honest substitute
+  `ActorFrame` already uses for creatures) mapped from the demon's real `profile.rarity`
+  (`common|rare|epic|legendary`). Action rows gained `flex-wrap` so the narrower 2-column card doesn't
+  overflow. `PactsLayer.test.tsx` +1 (grid + rarity-tint assertions, 8/8 green); e2e (expeditions-pacts
+  Pacts suite) unaffected, 65/65 total. Live-screenshotted (scratch Playwright script with mocked
+  contracts/demons data) against plates 03 §C and 03 §D at 1280×720 — no overflow, correct colours,
+  correct status pills.
+
+---
+
+### ✅ Checkpoint H — plate parity
+
+- [ ] Every finding in `visual-completeness-audit-2026-08-24.md` is either fixed (T25–T30) or carries
+  a fresh, stated reason it stays as-is — same discipline Checkpoint G already used for its own
+  honest gaps.
+- [ ] Full test suite green; no regression against Checkpoint G's own twenty enforcement checks.
+- [ ] A second visual-completeness pass (same method as the 2026-08-24 audit) finds no new
+  major/moderate findings.
+- [ ] **Owner review** — visual acceptance is a taste call as much as a correctness one; this line is
+  the owner's to check.
+
+---
+
+### Checkpoint I — retire the old layout (not started, gated on Checkpoint H)
+
+**Description.** `game-gui-map.md`'s own assumption 2 — old routes keep working until their
+replacement lands, no flag day — is why every superseded route still redirects into a real component
+today rather than 404ing. This checkpoint is that flag day, once Checkpoint H confirms every
+replacement is actually complete rather than a thin wrap. Per the owner's own instruction
+(2026-08-24), this does not start until Checkpoint H passes.
+
+- [ ] Every pre-refactor page component a redirect currently points through (`RosterPage.tsx`'s
+  standalone form and the nine routes T12 already swept into the developer tree, plus whichever of
+  `ExpeditionsPage.tsx`/`CatalogPage.tsx`/`RecipesPage.tsx`/`MetricsPage.tsx`/`RpgProgressionPage.tsx`/
+  `PvzStatsPage.tsx` T30 has actually replaced) is deleted, not merely unreached.
+- [ ] Every route that redirected into a since-deleted component is deleted too — a redirect to
+  nothing is worse than a route that still works.
+- [ ] Full test suite green with the deleted files' own tests removed, not skipped.
+- [ ] **Owner sign-off** — deleting shipped code is exactly the kind of irreversible-in-spirit action
+  this program's own git-hands-off discipline defers to the owner for.

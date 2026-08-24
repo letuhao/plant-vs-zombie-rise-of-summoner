@@ -612,8 +612,9 @@ nobody "unifies" them into `Θ` by mistake.
 | 13 | `PowerScalar.Of` — geomean over 5 categories | geometric mean | `PowerReads.cs:38` | **Display only, and it has no production caller.** Never a balance input |
 | 15 | `double` in stat composition (14 sites) | IEEE-754 | `CombatDerivedReader`, `ElementHub`, `StatModifier`, `CombatPolicies` | **Decided 2026-08-23: it stands** — §10.7 |
 | 14 | `maxTierAt(itemLevel)` — t3@8, t4@18, t5@32 | step function | `ssot-generation.md` §4.1 | Gates tier *access* by content level. A gate, not a magnitude |
+| 16 | `PatronPolicy.AuraMilli(rarity, star, level)` | `rarityBase + perStar·star + level`, clamped | `PatronPolicy.cs:37` | **A different axis, found and added by `power-guard`'s own G2 sweep (T4.1, 2026-08-24).** `level` here is the *patron demon's own* level, not the actor's `Θ` — a small, hard-clamped (`AuraClampMilli`) aura bonus, spec-locked 2026-08-21, unrelated to the power ladder. Never reads `PowerTuning`, never should |
 
-> **Rule PS-4. Rows 7–14 are relative or bounded, and must never be multiplied by `contentScale`.**
+> **Rule PS-4. Rows 7–14, 16 are relative or bounded, and must never be multiplied by `contentScale`.**
 > Row 12 is the one people will get wrong: `PowerVector` prices magnitudes that are *already* scaled.
 
 ### 10.3 Resolved — questions the sweep closed

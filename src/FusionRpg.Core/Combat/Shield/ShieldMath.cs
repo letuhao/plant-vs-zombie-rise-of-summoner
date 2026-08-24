@@ -5,6 +5,21 @@ namespace FusionRpg.Core.Combat.Shield;
 
 public readonly record struct ShieldLayerResult(long Spent, long Remainder, long DamageToShield);
 
+/// <summary>Thrown by <see cref="ShieldMath.AbsorbLayer"/> when <c>input</c> exceeds
+/// <see cref="ShieldMath.MaxInput"/> — refuses to silently clamp (spec-caps-reconcile.md §2.1).</summary>
+public sealed class ShieldInputOverflow : Exception
+{
+    public long Input { get; }
+    public long MaxInput { get; }
+
+    public ShieldInputOverflow(long input, long maxInput)
+        : base($"shield math: input={input} exceeds MaxInput={maxInput} for the loaded ShieldPolicy — refuses to clamp")
+    {
+        Input = input;
+        MaxInput = maxInput;
+    }
+}
+
 /// <summary>
 /// Pure single-layer absorb math — shield-system-spec.md §2.4. All arithmetic is 64-bit
 /// integer at permille scale; rounding is half away from zero via (num + d/2) / d on
@@ -12,8 +27,40 @@ public readonly record struct ShieldLayerResult(long Spent, long Remainder, long
 /// </summary>
 public static class ShieldMath
 {
-    /// <summary>Gate-entry clamp so input × damageToShield can never overflow long.</summary>
-    public const long MaxInput = 1_000_000_000;
+    /// <summary>
+    /// Gate-entry bound so every product <see cref="AbsorbLayer"/> forms against <c>input</c> stays
+    /// inside <c>long</c> — DERIVED from <see cref="ShieldPolicy"/>'s own loaded coefficients (F13:
+    /// reads <c>MatchupShareKPm</c>, <c>ChipFloorKPm</c>, <c>PenCapKPm</c>), never a literal
+    /// (spec-caps-reconcile.md §2.1). Recomputed on every read, not cached — it must track whatever
+    /// <see cref="ShieldPolicy"/> is currently configured with, same as every other Policy read.
+    ///
+    /// <para>Three products in <see cref="AbsorbLayer"/> scale with <c>input</c>:
+    /// <c>weightedRelationUnitPm × MatchupShareKPm × input</c> (elemMod's numerator),
+    /// <c>ChipFloorKPm × input</c> (floor's numerator), <c>PenCapKPm × input</c> (cap's numerator).
+    /// <c>MaxInput</c> is <c>long.MaxValue</c> divided by the LARGEST of the three coefficients — the
+    /// tightest of the three safe ceilings, i.e. the one that binds first.</para>
+    ///
+    /// <para><c>weightedRelationUnitPm</c>'s documented [-1000,1000] range on <see cref="AbsorbLayer"/>
+    /// is not assumed here, it is provable: <see cref="ShieldElementMatrix.RelationUnit"/> only ever
+    /// returns {-1,0,1}, and <c>ElementPayload</c> requires its component weights to be positive and
+    /// sum to 1.0 (± <c>WeightSumEpsilon</c>) before <see cref="WeightedRelationUnitPm"/> converts them
+    /// to per-mille — so Σ weightPm_i ≈ 1000, and the worst case (every component agreeing in sign)
+    /// sums to at most 1000 in magnitude.</para>
+    /// </summary>
+    public static long MaxInput
+    {
+        get
+        {
+            checked
+            {
+                var elemCoefficient = 1000L * Math.Max(1L, Math.Abs(ShieldPolicy.MatchupShareKPm));
+                var floorCoefficient = Math.Max(1L, Math.Abs(ShieldPolicy.ChipFloorKPm));
+                var capCoefficient = Math.Max(1L, Math.Abs(ShieldPolicy.PenCapKPm));
+                var widest = Math.Max(elemCoefficient, Math.Max(floorCoefficient, capCoefficient));
+                return long.MaxValue / widest;
+            }
+        }
+    }
 
     /// <param name="input">Damage reaching this layer, HP units (≥ 0).</param>
     /// <param name="shieldHp">This shield's current pool, HP units (≥ 0).</param>
@@ -26,7 +73,7 @@ public static class ShieldMath
     {
         if (input <= 0 || shieldHp <= 0)
             return new ShieldLayerResult(0, input < 0 ? 0 : input, 0);
-        if (input > MaxInput) input = MaxInput;
+        if (input > MaxInput) throw new ShieldInputOverflow(input, MaxInput);
         if (hitCount < 1) hitCount = 1;
 
         // elemMod = relUnitPm × KPm × input / 1e6 (permille × permille), half away from zero.

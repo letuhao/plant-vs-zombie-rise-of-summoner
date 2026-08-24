@@ -19,14 +19,25 @@ public static class RpgXpReasons
     public const string ZombieSpawn = "zombie_spawn";
 }
 
-/// <summary>Arithmetic XP curve per actor kind (POC-tuned; faster early levels).</summary>
+/// <summary>Arithmetic XP curve per actor kind (POC-tuned; faster early levels). Config-backed
+/// (tunables-ssot.md T1) — data/tuning/progression.v1.json's xpCurve.</summary>
 public static class RpgXpCurve
 {
+    static ProgressionTuning? _tuning;
+
+    public static void Configure(ProgressionTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static ProgressionTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "RpgXpCurve.Configure(...) has not run. Every XP curve reads " +
+        "data/tuning/progression.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
     public static (double First, double Step) ParamsFor(string kind) => kind switch
     {
-        RpgActorKinds.Plant => (80.0, 32.0),
-        RpgActorKinds.Zombie => (70.0, 28.0),
-        _ => (100.0, 45.0) // player — first match clears L1; mid-game paces ~L12–18 / 20 wins
+        RpgActorKinds.Plant => (Tuning.PlantCurve.First, Tuning.PlantCurve.Step),
+        RpgActorKinds.Zombie => (Tuning.ZombieCurve.First, Tuning.ZombieCurve.Step),
+        // player — first match clears L1; mid-game paces ~L12–18 / 20 wins
+        _ => (Tuning.PlayerCurve.First, Tuning.PlayerCurve.Step)
     };
 
     public static double XpToNext(string kind, long level)
@@ -49,14 +60,27 @@ public static class RpgXpCurve
     }
 }
 
-/// <summary>Base award deltas (POC-tuned). Kill is multiplied by <see cref="RpgXpPowerScale"/>.</summary>
+/// <summary>Base award deltas (POC-tuned). Kill is multiplied by a power scale (T3.3: the stub class
+/// that used to carry this is deleted — see RpgXpAwardMap.NoKillPowerScaleYet).
+/// Config-backed (tunables-ssot.md T1) — data/tuning/progression.v1.json's awards. Not a `const`:
+/// RpgXpAwardMapTests' [InlineData] rows hardcode the current values instead (attributes require
+/// compile-time constants), asserted separately against the live value.</summary>
 public static class RpgXpAwards
 {
-    public const double Kill = 12;
-    public const double Defeat = -100;
-    public const double Mower = -30;
-    public const double PlantPlace = 8;
-    public const double ZombieSpawn = 9;
+    static ProgressionTuning? _tuning;
+
+    public static void Configure(ProgressionTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static XpAwardsTuning Tuning => (_tuning ?? throw new InvalidOperationException(
+        "RpgXpAwards.Configure(...) has not run. Every award reads data/tuning/progression.v{n}.json " +
+        "(tunables-ssot.md T5) — there is no built-in default to fall back to.")).Awards;
+
+    public static double Kill => Tuning.Kill;
+    public static double Defeat => Tuning.Defeat;
+    public static double Mower => Tuning.Mower;
+    public static double PlantPlace => Tuning.PlantPlace;
+    public static double ZombieSpawn => Tuning.ZombieSpawn;
 }
 
 public sealed class RpgActorState

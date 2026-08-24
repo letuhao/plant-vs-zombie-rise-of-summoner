@@ -59,11 +59,13 @@ export function LevelTag({ level }: { level: number }) {
   );
 }
 
-/** The sealed-contract UX for a not-yet-servable field (game-gui-map.md's contract section): the reason is rendered, not hidden. */
+/** The sealed-contract UX for a not-yet-servable field (game-gui-map.md's contract section): the
+ * reason is rendered, not hidden — real, readable content, so `text-muted` (the kit's own
+ * `--faint` token is decorative-only, never body text, and fails WCAG AA contrast on prose). */
 export function PendingNote({ pending, testId }: { pending: Pending<unknown>; testId?: string }) {
   if (pending.state !== "pending") return null;
   return (
-    <p className="text-xs italic text-faint" data-testid={testId}>
+    <p className="text-xs italic text-muted" data-testid={testId}>
       {pending.reason}
     </p>
   );

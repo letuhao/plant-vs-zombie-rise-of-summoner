@@ -128,6 +128,7 @@ public static class GameHooks
 
     static int EnqueueEnumSide(string side, Type enumType)
     {
+        // Structural (tunables-ssot.md T2) — network payload batch size, not balance.
         const int chunk = 400;
         var entries = new List<Dictionary<string, object>>(chunk);
         var n = 0;
@@ -234,6 +235,7 @@ public static class GameHooks
             }
             if (RpgHost.Client == null)
                 RpgHost.Log.Warning("catalog recipes: RpgHost.Client is null — entries will be computed but never sent");
+            // Structural (tunables-ssot.md T2) — network payload batch size, not balance.
             const int chunk = 200;
             var entries = new List<Dictionary<string, object>>(chunk);
             var pairCount = 0;

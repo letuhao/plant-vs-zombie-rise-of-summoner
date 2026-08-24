@@ -10,10 +10,20 @@ public readonly record struct BurstParticle(
 /// </summary>
 public static class VfxBurstMath
 {
-    /// <summary>Half-angle (radians) of the Rising / Directional cones.</summary>
-    public const float ConeHalfAngle = 0.6f;
-    const float RisingSideFactor = 0.4f;
-    const float DirectionalSideFactor = 0.5f;
+    static VfxTuning? _tuning;
+
+    public static void Configure(VfxTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static VfxTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "VfxBurstMath.Configure(...) has not run. Cone/side factors read data/tuning/vfx.v{n}.json " +
+        "(tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    /// <summary>Half-angle (radians) of the Rising / Directional cones. Config-backed
+    /// (tunables-ssot.md T1) — data/tuning/vfx.v1.json's burst.</summary>
+    public static float ConeHalfAngle => (float)Tuning.BurstConeHalfAngle;
+    static float RisingSideFactor => (float)Tuning.BurstRisingSideFactor;
+    static float DirectionalSideFactor => (float)Tuning.BurstDirectionalSideFactor;
 
     public static BurstParticle Particle(VfxBurstShape shape, int index, int count, float span, float life)
     {

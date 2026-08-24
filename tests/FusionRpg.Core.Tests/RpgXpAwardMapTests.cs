@@ -6,11 +6,15 @@ namespace FusionRpg.Core.Tests;
 
 public class RpgXpAwardMapTests
 {
+    // [InlineData] requires compile-time constants, so RpgXpAwards' config-backed properties
+    // (data/tuning/progression.v1.json) can't sit here directly — literals mirror its current
+    // awards.kill/mower/plantPlace/zombieSpawn; Kill_award_uses_power_scale_one below asserts the
+    // live value instead.
     [Theory]
-    [InlineData(PvzActivityKinds.ZombieKilled, null, null, RpgActorKinds.Player, 0, RpgXpAwards.Kill, RpgXpReasons.Kill)]
-    [InlineData(PvzActivityKinds.MowerUsed, null, null, RpgActorKinds.Player, 0, RpgXpAwards.Mower, RpgXpReasons.Mower)]
-    [InlineData(PvzActivityKinds.PlantPlaced, null, 7, RpgActorKinds.Plant, 7, RpgXpAwards.PlantPlace, RpgXpReasons.PlantPlace)]
-    [InlineData(PvzActivityKinds.ZombieSpawned, null, 3, RpgActorKinds.Zombie, 3, RpgXpAwards.ZombieSpawn, RpgXpReasons.ZombieSpawn)]
+    [InlineData(PvzActivityKinds.ZombieKilled, null, null, RpgActorKinds.Player, 0, 12.0, RpgXpReasons.Kill)]
+    [InlineData(PvzActivityKinds.MowerUsed, null, null, RpgActorKinds.Player, 0, -30.0, RpgXpReasons.Mower)]
+    [InlineData(PvzActivityKinds.PlantPlaced, null, 7, RpgActorKinds.Plant, 7, 8.0, RpgXpReasons.PlantPlace)]
+    [InlineData(PvzActivityKinds.ZombieSpawned, null, 3, RpgActorKinds.Zombie, 3, 9.0, RpgXpReasons.ZombieSpawn)]
     public void Maps_activity_to_single_award(
         string kind, string? result, int? typeId,
         string expectKind, int expectTypeId, double expectDelta, string expectReason)

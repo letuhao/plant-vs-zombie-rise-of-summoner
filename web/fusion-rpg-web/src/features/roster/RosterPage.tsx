@@ -120,6 +120,7 @@ export function RosterPage() {
           <Button
             size="sm"
             disabled={busy || !canDeploy(r.phase)}
+            title={busy ? "Working…" : !canDeploy(r.phase) ? `Not deployable in phase ${r.phase}` : undefined}
             data-testid={`roster-deploy-${r.instanceId}`}
             onClick={() =>
               void run("Deploy enqueued", () =>
@@ -137,6 +138,7 @@ export function RosterPage() {
             size="sm"
             variant="danger"
             disabled={busy || !canRetire(r.phase)}
+            title={busy ? "Working…" : !canRetire(r.phase) ? `Not retireable in phase ${r.phase}` : undefined}
             data-testid={`roster-retire-${r.instanceId}`}
             onClick={() => setRetireTarget(r)}
           >
@@ -195,6 +197,7 @@ export function RosterPage() {
             className="mt-3"
             data-testid="roster-create"
             disabled={busy || playerId <= 0}
+            title={busy ? "Working…" : playerId <= 0 ? "No player selected" : undefined}
             onClick={() =>
               void run("Specimen created", () =>
                 create.mutateAsync({ side, typeId, playerId })
@@ -279,6 +282,7 @@ export function RosterPage() {
                     value={slotDrafts[slot] ?? ""}
                     data-testid={`roster-equip-${slot}`}
                     disabled={!equipEnabled || busy}
+                    title={busy ? "Working…" : !equipEnabled ? `Equip disabled in phase ${selected.phase}` : undefined}
                     placeholder={STUB_HINT}
                     onChange={(e) =>
                       setSlotDrafts((prev) => ({ ...prev, [slot]: e.target.value }))
@@ -289,6 +293,7 @@ export function RosterPage() {
                   <Button
                     size="sm"
                     disabled={!equipEnabled || busy}
+                    title={busy ? "Working…" : !equipEnabled ? `Equip disabled in phase ${selected.phase}` : undefined}
                     data-testid={`roster-equip-save-${slot}`}
                     onClick={() =>
                       void run(`Equipped ${slot}`, () =>
@@ -307,6 +312,7 @@ export function RosterPage() {
                     size="sm"
                     variant="danger"
                     disabled={!equipEnabled || busy}
+                    title={busy ? "Working…" : !equipEnabled ? `Equip disabled in phase ${selected.phase}` : undefined}
                     data-testid={`roster-equip-clear-${slot}`}
                     onClick={() =>
                       void run(`Cleared ${slot}`, () =>
@@ -340,12 +346,24 @@ export function RosterPage() {
                 value={xpDelta}
                 data-testid="roster-xp-delta"
                 disabled={!canAwardXp(selected.phase) || busy}
+                title={
+                  busy ? "Working…" : !canAwardXp(selected.phase) ? `Can't award XP in phase ${selected.phase}` : undefined
+                }
                 onChange={(v) => setXpDelta(Number.isFinite(v) ? v : 0)}
               />
             </Field>
             <Button
               data-testid="roster-xp-award"
               disabled={!canAwardXp(selected.phase) || busy || xpDelta <= 0}
+              title={
+                busy
+                  ? "Working…"
+                  : !canAwardXp(selected.phase)
+                    ? `Can't award XP in phase ${selected.phase}`
+                    : xpDelta <= 0
+                      ? "Enter a positive amount"
+                      : undefined
+              }
               onClick={() =>
                 void run("XP awarded", () =>
                   awardXp.mutateAsync({

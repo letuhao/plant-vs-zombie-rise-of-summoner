@@ -48,12 +48,23 @@ public static class DamageFxPalette
     };
 }
 
-/// <summary>IMGUI floater timing. Overlay Tick/Draw must use these so tests can lock the values.</summary>
+/// <summary>IMGUI floater timing. Overlay Tick/Draw must use these so tests can lock the values.
+/// Config-backed (tunables-ssot.md T1) — data/tuning/effects.v1.json's damageFxFloater; the ONE
+/// source VfxRules.FloaterCap/FloaterLifeSeconds/RisePixels alias.</summary>
 public static class DamageFxFloaterRules
 {
-    public const int Cap = 64;
-    public const float LifeSeconds = 0.9f;
-    public const float RisePixels = 56f;
+    static EffectsTuning? _tuning;
+
+    public static void Configure(EffectsTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static EffectsTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "DamageFxFloaterRules.Configure(...) has not run. Every floater rule reads " +
+        "data/tuning/effects.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    public static int Cap => Tuning.DamageFxFloater.Cap;
+    public static float LifeSeconds => (float)Tuning.DamageFxFloater.LifeSeconds;
+    public static float RisePixels => (float)Tuning.DamageFxFloater.RisePixels;
 
     public static bool AtCap(int count) => count >= Cap;
     public static bool Expired(float age) => age >= LifeSeconds;

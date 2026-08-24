@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   getLastHitEvent,
   getLawnMembershipRing,
   subscribeLastHit,
   subscribeLog,
+  useDeployUniqueActor,
   useLawnDebugPost,
   useSpawnExtraIntent,
   useUniqueActor
 } from "@/lib/bus";
 import type { LawnSelectPayload } from "@/game/EventBus";
 import { cn } from "@/lib/cn";
+import { claimStageEscape } from "@/shell/keymap";
 import { Page } from "@/layouts/Page";
 import { Split } from "@/layouts/Split";
 import {
@@ -230,6 +233,71 @@ export function LawnPage() {
     setInteraction((prev) =>
       reduceInteraction(prev, { type: "enterSpawnTargeting" }, model.phase)
     );
+  };
+
+  // T22 — deploying a real, player-owned creature (Creatures layer's "Deploy to the lawn"),
+  // distinct from the debug Spawn panel below: reuses the same SpawnTargeting FSM and the same
+  // ghost-preview board (interactionMode.ts, LawnWorldScene) rather than inventing a second one,
+  // but confirms through the real `useDeployUniqueActor` endpoint instead of the debug intent
+  // paths — nothing is spent and no occupant exists until the server actually admits it (the
+  // mutation only invalidates on success; there is no optimistic write to react to before that).
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deployInstanceId = searchParams.get("deploy");
+  const deployActorQ = useUniqueActor(deployInstanceId);
+  // UniqueActorDto has no resolved display name (T4/T8's honest-Pending precedent — names
+  // resolve from the almanac catalog, not wired to any reader yet); build the label from what's
+  // actually real (side, typeId, level) rather than fabricating one.
+  const deployActor = deployActorQ.data;
+  const deployActorName = deployActor
+    ? `${deployActor.side === "zombie" ? "zombie" : "plant"} #${deployActor.typeId} (Lv ${deployActor.level})`
+    : "your creature";
+  const deployMutation = useDeployUniqueActor();
+
+  const clearDeploy = useCallback(() => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("deploy");
+      return next;
+    });
+  }, [setSearchParams]);
+
+  useEffect(() => {
+    if (!deployInstanceId) return;
+    setInteraction((prev) =>
+      reduceInteraction(prev, { type: "enterSpawnTargeting" }, model.phase)
+    );
+    // Only re-arm when the target itself changes — model.phase changes on every board tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deployInstanceId]);
+
+  // GG-6: Esc must cancel deploy-targeting rather than falling through to the empty-stack
+  // System fallback. This isn't a PanelShell layer (it's stage chrome, per the plate), so it
+  // registers directly on the real stack — the same single mechanism `handleEscape()` already
+  // walks, not a second Escape-handling path.
+  useEffect(() => {
+    if (!deployInstanceId) return undefined;
+    return claimStageEscape("lawn-deploy-targeting", cancelDeploy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deployInstanceId]);
+
+  const confirmDeploy = () => {
+    if (!deployInstanceId || !hasCell) return;
+    void runAction(`Deployed ${deployActorName}`, async () => {
+      await deployMutation.mutateAsync({
+        instanceId: deployInstanceId,
+        col: targetCol,
+        row: targetRow,
+        matchKey: model.matchKey ?? undefined
+      });
+      clearDeploy();
+      setInteraction(idleInteraction());
+    });
+  };
+
+  const cancelDeploy = () => {
+    clearMsgs();
+    clearDeploy();
+    setInteraction(idleInteraction());
   };
 
   const enqueueIntentSpawn = () => {
@@ -466,6 +534,7 @@ export function LawnPage() {
             size="sm"
             variant="ghost"
             disabled={!canSpawn || busy}
+            title={busy ? "Working…" : !canSpawn ? `Spawn targeting disabled in ${model.phase}` : undefined}
             onClick={enterTargeting}
             data-testid="lawn-target-cell"
           >
@@ -474,6 +543,15 @@ export function LawnPage() {
           <Button
             size="sm"
             disabled={!canSpawn || busy || !hasCell}
+            title={
+              busy
+                ? "Working…"
+                : !canSpawn
+                  ? `Spawn targeting disabled in ${model.phase}`
+                  : !hasCell
+                    ? "Target a cell first"
+                    : undefined
+            }
             onClick={enqueueIntentSpawn}
             data-testid="lawn-intent-spawn"
           >
@@ -483,6 +561,15 @@ export function LawnPage() {
             size="sm"
             variant="ghost"
             disabled={!canSpawn || busy || !hasCell}
+            title={
+              busy
+                ? "Working…"
+                : !canSpawn
+                  ? `Spawn targeting disabled in ${model.phase}`
+                  : !hasCell
+                    ? "Target a cell first"
+                    : undefined
+            }
             onClick={debugCellSpawn}
             data-testid="lawn-debug-spawn"
           >
@@ -501,6 +588,7 @@ export function LawnPage() {
             size="sm"
             variant="ghost"
             disabled={busy}
+            title={busy ? "Working…" : undefined}
             onClick={probeShaders}
             data-testid="lawn-probe-shaders"
           >
@@ -510,6 +598,7 @@ export function LawnPage() {
             size="sm"
             variant="ghost"
             disabled={busy || !hasCell}
+            title={busy ? "Working…" : !hasCell ? "Target a cell first" : undefined}
             onClick={cellFlash}
             data-testid="lawn-cell-flash"
           >
@@ -644,6 +733,7 @@ export function LawnPage() {
               size="sm"
               variant="danger"
               disabled={busy}
+              title={busy ? "Working…" : undefined}
               onClick={killSelected}
               data-testid="lawn-kill"
             >
@@ -653,6 +743,7 @@ export function LawnPage() {
               size="sm"
               variant="ghost"
               disabled={busy}
+              title={busy ? "Working…" : undefined}
               onClick={combatHitSelected}
               data-testid="lawn-combat-hit"
             >
@@ -662,6 +753,7 @@ export function LawnPage() {
               size="sm"
               variant="ghost"
               disabled={busy}
+              title={busy ? "Working…" : undefined}
               onClick={combatDeltaSelected}
               data-testid="lawn-combat-delta"
             >
@@ -681,6 +773,7 @@ export function LawnPage() {
                     size="sm"
                     variant="ghost"
                     disabled={busy}
+                    title={busy ? "Working…" : undefined}
                     onClick={applyStatus}
                     data-testid="lawn-apply-status"
                   >
@@ -690,6 +783,7 @@ export function LawnPage() {
                     size="sm"
                     variant="ghost"
                     disabled={busy}
+                    title={busy ? "Working…" : undefined}
                     onClick={clearStatus}
                     data-testid="lawn-clear-status"
                   >
@@ -777,6 +871,7 @@ export function LawnPage() {
             size="sm"
             variant="ghost"
             disabled={!canSpawn || busy}
+            title={busy ? "Working…" : !canSpawn ? `Spawn targeting disabled in ${model.phase}` : undefined}
             onClick={enterTargeting}
           >
             Target cell
@@ -784,6 +879,15 @@ export function LawnPage() {
           <Button
             size="sm"
             disabled={!canSpawn || busy || !hasCell}
+            title={
+              busy
+                ? "Working…"
+                : !canSpawn
+                  ? `Spawn targeting disabled in ${model.phase}`
+                  : !hasCell
+                    ? "Target a cell first"
+                    : undefined
+            }
             onClick={enqueueIntentSpawn}
           >
             Enqueue Intent
@@ -860,6 +964,30 @@ export function LawnPage() {
       {actionOk ? (
         <Banner tone="info" className="mb-3" data-testid="lawn-action-ok">
           {actionOk}
+        </Banner>
+      ) : null}
+      {deployInstanceId ? (
+        // Stage chrome (plate 07 §B): no scrim, the board stays fully visible and interactive
+        // underneath — this is an inline banner, never a Dialog/layer.
+        <Banner tone="info" className="mb-3 flex flex-wrap items-center justify-between gap-2" data-testid="lawn-deploy-banner">
+          <span>
+            Choosing a place for {deployActorName}
+            {hasCell ? ` — cell (${targetRow}, ${targetCol})` : ""}
+          </span>
+          <span className="flex gap-2">
+            <Button size="sm" variant="ghost" onClick={cancelDeploy} data-testid="lawn-deploy-cancel">
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={!hasCell || deployMutation.isPending}
+              title={deployMutation.isPending ? "Deploying…" : !hasCell ? "Click a cell on the board first" : undefined}
+              onClick={confirmDeploy}
+              data-testid="lawn-deploy-confirm"
+            >
+              Deploy here
+            </Button>
+          </span>
         </Banner>
       ) : null}
       {viewMode === "split" ? (

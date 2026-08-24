@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/software-architecture.md",
+    "note": "Extracted byte-identical from CapPolicy.cs (tunables-ssot.md M.7, 2026-08-24). RAM cap config for Intent/FA4/debug Create spawns (not vanilla waves). MaxLivingBullets stays a C# default (-1 = unlimited, a sentinel, not a magnitude).",
+    "rebalance": "Never hand-edit this file. python tools/tuning/publish.py match <dotted.key>=<value> [...] writes match.v{n+1}.json; the old version stays on disk for revert."
+  },
+  "maxLivingPlants": 50,
+  "maxLivingZombies": 80
+}

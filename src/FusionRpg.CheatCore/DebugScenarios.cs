@@ -9,9 +9,14 @@ public sealed class DebugScenarioStep
 /// <summary>Named debug effect-test scenarios (server expands → injector <c>debug.run-steps</c>).</summary>
 public static class DebugScenarios
 {
-    public const int PeaTypeId = 0; // Peashooter — confirm via /api/types live
+    // Structural (tunables-ssot.md T2), all four below — vanilla PVZ Fusion's own type ids
+    // (confirm via /api/types live), not balance numbers this repo owns.
+    public const int PeaTypeId = 0; // Peashooter
+    // Structural (tunables-ssot.md T2) — see PeaTypeId above.
     public const int SunflowerTypeId = 1;
+    // Structural (tunables-ssot.md T2) — see PeaTypeId above.
     public const int WallNutTypeId = 3;
+    // Structural (tunables-ssot.md T2) — see PeaTypeId above.
     public const int BasicZombieTypeId = 0;
 
     /// <summary>Step names allowed in Expand output (unit-tested).</summary>
@@ -74,8 +79,12 @@ public static class DebugScenarios
         "pvz.spawn.extra"
     };
 
+    // Structural (tunables-ssot.md T2), all three below — vanilla PVZ Fusion's own type ids, same
+    // class as PeaTypeId etc. above.
     public const int GraveGridTypeId = 7;
+    // Structural (tunables-ssot.md T2) — see GraveGridTypeId above.
     public const int IceBlockGridTypeId = 8;
+    // Structural (tunables-ssot.md T2) — see GraveGridTypeId above.
     public const int DriverZombieTypeId = 16;
 
     public static IReadOnlyList<DebugScenarioStep> Expand(string id, string scenarioId)

@@ -38,6 +38,7 @@ public enum PerfSection
 /// </summary>
 public static class PerfProbe
 {
+    // Structural (tunables-ssot.md T2) — must match PerfSection's member count above, not balance.
     const int SectionCount = 21;
 
     static readonly string[] SectionNames =

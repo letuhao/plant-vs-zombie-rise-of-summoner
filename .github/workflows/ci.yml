@@ -34,6 +34,12 @@ jobs:
           python scripts/audit-overflow.py
           if ($LASTEXITCODE -ne 0) { throw "overflow audit found a critical finding — see output above" }
 
+      - name: Magic-number guard (power-todo.md M.6)
+        shell: pwsh
+        run: |
+          python scripts/audit-magic-numbers.py
+          if ($LASTEXITCODE -ne 0) { throw "magic-number audit found an M1/M2 finding — see output above" }
+
       - name: Restore / test (.NET)
         shell: pwsh
         run: |
@@ -89,3 +95,38 @@ jobs:
             if ($pkg.scripts.test) { npm test; if ($LASTEXITCODE -ne 0) { throw "npm test failed" } }
             else { Write-Host "No npm test script; skipping web tests." }
           }
+
+      - name: Web build
+        working-directory: web/fusion-rpg-web
+        shell: pwsh
+        run: |
+          npm run build
+          if ($LASTEXITCODE -ne 0) { throw "npm run build failed" }
+
+      - name: Web bundle budget (GG-38 — Checkpoint G §19 check 13)
+        working-directory: web/fusion-rpg-web
+        shell: pwsh
+        run: |
+          npm run check:bundle
+          if ($LASTEXITCODE -ne 0) { throw "entry chunk is over budget, or Phaser/recharts leaked into it — see output above" }
+
+      - name: Web i18n catalog is current (Checkpoint G — lingui extract clean)
+        working-directory: web/fusion-rpg-web
+        shell: pwsh
+        run: |
+          npm run extract
+          if ($LASTEXITCODE -ne 0) { throw "lingui extract failed" }
+          $diff = git status --porcelain -- src/i18n/locales
+          if ($diff) {
+            Write-Host $diff
+            throw "extracted i18n catalog is out of date — run 'npm run extract' in web/fusion-rpg-web and commit the result"
+          }
+
+      - name: Web e2e tests (Checkpoint G §19 checks 3/7/11 — reachability, axe, viewport)
+        working-directory: web/fusion-rpg-web
+        shell: pwsh
+        run: |
+          npx playwright install --with-deps chromium
+          if ($LASTEXITCODE -ne 0) { throw "playwright browser install failed" }
+          npm run test:e2e
+          if ($LASTEXITCODE -ne 0) { throw "playwright e2e tests failed" }

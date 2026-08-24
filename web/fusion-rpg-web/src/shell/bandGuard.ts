@@ -77,3 +77,46 @@ export function scanForLayerStackImports(srcDir: string): GuardViolation[] {
     [LAYER_STACK_IMPORT_PATTERN]
   );
 }
+
+/**
+ * GG-53 / D6: only run-ending results may open a blocking (band-3) surface unprompted — level-ups,
+ * drops and contract offers report at band 4 and queue for the sanctum instead. No run-result
+ * screen exists yet (it's part of T24, excluded this phase), so today's real invariant is
+ * narrower and fully checkable: nothing outside `src/shell/` and `ui/ConfirmDialog.tsx` may render
+ * `DialogShell` or claim the `band-dialog` class. `ConfirmDialog` is exempt by construction, not by
+ * assumption — it is a fully controlled component (the caller's own `open` state decides visibility)
+ * and every existing call site sets that state from a direct button click, never a background
+ * event; GG-41 also exempts developer surfaces from GG-53 entirely, so the same
+ * allow-list `vocabularyGuard.ts` uses for those applies here.
+ */
+const DIALOG_BAND_PATTERNS = [/<DialogShell\b/, /\bband-dialog\b/, /band:\s*["']dialog["']/];
+
+const DIALOG_BAND_ALLOWED_PATHS = new Set(["ui/ConfirmDialog.tsx"]);
+
+const DEV_SURFACE_PREFIXES = [
+  "dev/",
+  "features/status/",
+  "features/stats/",
+  "features/pvz-activity/",
+  "features/icon-dump/",
+  "features/almanac-dump/",
+  "features/cheats/",
+  "features/sim/",
+  "features/log/",
+  "features/metrics/",
+  "features/lawn/",
+  "features/roster/",
+  "stages/lawn/"
+];
+
+export function scanForUnvettedDialogBandOwners(srcDir: string): GuardViolation[] {
+  return scanLines(
+    srcDir,
+    (relPath) =>
+      relPath.startsWith("shell/") ||
+      relPath === "theme/tokens.css" ||
+      DIALOG_BAND_ALLOWED_PATHS.has(relPath) ||
+      DEV_SURFACE_PREFIXES.some((p) => relPath.startsWith(p)),
+    DIALOG_BAND_PATTERNS
+  );
+}

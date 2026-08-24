@@ -5,7 +5,7 @@ Module **`battle-magnitude`**, wave 2 in the [power map](../power-map.md). Depen
 > **Reads [ssot-power-scale.md](ssot-power-scale.md)** — the parent SSOT. Where this spec and the
 > SSOT disagree, **the SSOT wins**.
 
-**Status:** Draft — pending owner review. No build authorized.
+**Status:** Owner approved 2026-08-24 — build authorized.
 
 ---
 
@@ -106,7 +106,7 @@ tests/FusionRpg.Core.Tests/Power/BattleMagnitudeParityTests.cs
 | **Parity, defense** | `BaseDefense(L) == 2 + L` for `L in [0, 5000]` at `B=0` — exact |
 | Pins | `680 / 92 / 22` at Θ=20 |
 | **The disproof, asserted** | a single-ratio model is shown wrong: `Value(0) × 92/680 != 12`. Keeps §2.1's reasoning from being re-litigated |
-| **F1 regression** | every channel's derived `A` is **> 0** for `B ∈ {0, 200, 400, 1000, 9998}`. An absolute-`B` model gives defense `A = −2.8`; this test fails if anyone reintroduces it |
+| **F1 regression** | every channel's derived `A` is **> 0** for `B ∈ {0, 200, 400, 1000}`. An absolute-`B` model gives defense `A = −2.8`; this test fails if anyone reintroduces it. **Correction, found building T2.1 (2026-08-24): `9998` removed from this row.** `A_ch` crosses zero at `bMilli ≈ 3113` for atk (pin 92) and `≈ 3254` for defense (pin 22) — both *below* hp's own ≈3158 threshold (spec-power-ladder.md, T1.2's `PowerLadderTests.Monotonic_ValueStrictlyIncreases`, which excludes 9998 for the identical reason). Verified by direct computation, not assumed: at `bMilli=9998`, atk's `A` numerator is `-120,365,040,000`. This is the same "9998 is a legal-input pin-holds stress value, not a claim that every property holds there" pattern T1.2 already established — the disproof/regression intent (never let defense's `A` go negative *at the decided or documented dial range*) is unaffected; the literal `{...,9998}` set in the original draft was carried over from the pin-holds test without re-deriving whether F1 also holds there |
 | Proportional growth | at `B=400`, `P_ch(100) / linear_ch(100)` is within ±0.02 across hp, atk and defense |
 | `B > 0` moves all three | at `B=400` every channel's growth rate rises; none drifts alone |
 | **No golden moved** | Core + Server suites green, `git status tests/` clean |
@@ -134,3 +134,8 @@ is the entire point of wave 2.
 **None.** The single-ratio question was raised and closed inside §2.1 by arithmetic: it cannot be
 exact, so per-channel `C`/`A` is the design. That resolution is asserted by a test rather than left
 as a note.
+
+**Resolved during T2.1's build (2026-08-24):** §5's F1 regression row included `9998` in its `B`
+set; corrected in place (see the note there) — `9998` breaks positivity for atk/defense at a *lower*
+threshold than it already does for hp (T1.2), so it was never a meaningful "F1 never regresses"
+witness at that value. No design decision changed; the per-channel model and the disproof both stand.

@@ -12,6 +12,7 @@ import {
 } from "@/lib/bus/expeditions";
 import { Page } from "@/layouts/Page";
 import { Badge, Banner, Button, EmptyState, Panel, TypeIcon } from "@/ui";
+import { cn } from "@/lib/cn";
 import { expeditionProgress, formatRemaining } from "./expeditionTime";
 import { useContracts } from "@/lib/bus/contracts";
 import { conditionOf, contractIndex, fieldingBlockReason } from "../demons/contractView";
@@ -52,6 +53,20 @@ export function ExpeditionsPage() {
     return () => clearInterval(t);
   }, [active.length]);
 
+  const rosterById = useMemo(
+    () => new Map((roster.data?.items ?? []).map((s) => [s.profile.instanceId, s])),
+    [roster.data]
+  );
+
+  const returnedCount = useMemo(
+    () =>
+      active.filter((e) => {
+        const t = tiers.find((x) => x.tierId === e.tierId);
+        return t ? expeditionProgress(e.dispatchedUtc, e.dueUtc, t.tickMinutes, t.tickCount, nowMs).due : false;
+      }).length,
+    [active, tiers, nowMs]
+  );
+
   const lockedIds = useMemo(() => {
     const set = new Set<string>();
     for (const e of expeditions.data?.items ?? [])
@@ -90,37 +105,89 @@ export function ExpeditionsPage() {
     }
   }
 
+  // T30 (plate 03 §C): an icon-framed card per expedition — status pill, a real progress meter with
+  // its %, and roster chips for the real squad (`squadInstanceIds` is real; `roster.data` resolves
+  // each into a species/nickname the same way the Dispatch picker already does below). The plate's
+  // card also shows a reward chip row (items/XP/souls) on the *returned* card, before it's
+  // collected — `ExpeditionRowDto` carries no reward preview at all (rewards roll server-side at
+  // collect time, in `ExpeditionCollectDto`), so that row would be fabricated here. It's real on the
+  // `reveal` panel below, right after a real collect — this card stays honest and omits it.
   function activeRow(e: ExpeditionRowDto) {
     const t = tiers.find((x) => x.tierId === e.tierId);
     const p = t
       ? expeditionProgress(e.dispatchedUtc, e.dueUtc, t.tickMinutes, t.tickCount, nowMs)
       : null;
+    const isReady = p?.due ?? false;
     return (
-      <div key={e.id} className="rounded-sm border border-border bg-soil-raised/40 p-3" data-testid={`expedition-${e.id}`}>
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold">
-              {t?.name ?? e.tierId}
-              <Badge className="ml-2">{e.squadInstanceIds.length} demons</Badge>
-              {t?.hasBossWave ? <Badge className="ml-1">boss</Badge> : null}
-            </p>
-            <p className="text-xs text-muted">
-              {p?.due
-                ? "Ready to collect"
-                : `${formatRemaining(p?.remainingMs ?? 0)} remaining · tick ${p?.elapsedTicks ?? 0}/${t?.tickCount ?? 0}`}
-            </p>
+      <div
+        key={e.id}
+        className={cn("rounded-md border p-3", isReady ? "border-ok" : "border-border")}
+        data-testid={`expedition-${e.id}`}
+      >
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="flex h-11 w-11 flex-none items-center justify-center rounded-md border-2 border-border-control bg-panel-inset text-lg"
+          >
+            ⛵
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-text">{t?.name ?? e.tierId}</p>
+            <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+              <Badge tone={isReady ? "ok" : "neutral"}>{isReady ? "returned" : "away"}</Badge>
+              {t?.hasBossWave ? <Badge tone="neutral">boss</Badge> : null}
+              <span className="text-xs text-muted">
+                {isReady ? "Ready to collect" : `${formatRemaining(p?.remainingMs ?? 0)} remaining`}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => void sendCollect(e, false)} disabled={!p?.due || collect.isPending}>
+          <div className="flex flex-none items-center gap-2">
+            <Button
+              size="sm"
+              onClick={() => void sendCollect(e, false)}
+              disabled={!isReady || collect.isPending}
+              title={collect.isPending ? "Collecting…" : !isReady ? "Not back yet" : undefined}
+            >
               Collect
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => void sendCollect(e, true)} disabled={collect.isPending}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => void sendCollect(e, true)}
+              disabled={collect.isPending}
+              title={collect.isPending ? "Recalling…" : undefined}
+            >
               Recall
             </Button>
           </div>
         </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded bg-soil-sunken">
-          <div className="h-full bg-leaf" style={{ width: `${Math.round((p?.progress ?? 0) * 100)}%` }} />
+
+        {!isReady ? (
+          <div className="mt-2" data-testid={`expedition-progress-${e.id}`}>
+            <div className="flex items-center justify-between text-xs text-muted">
+              <span>Progress</span>
+              <span>{Math.round((p?.progress ?? 0) * 100)}%</span>
+            </div>
+            <div className="mt-1 h-1.5 overflow-hidden rounded bg-soil-sunken">
+              <div className="h-full bg-leaf" style={{ width: `${Math.round((p?.progress ?? 0) * 100)}%` }} />
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mt-2 flex flex-wrap gap-1.5" data-testid={`expedition-roster-${e.id}`}>
+          {e.squadInstanceIds.map((id) => {
+            const specimen = rosterById.get(id);
+            const species = specimen ? speciesById.get(specimen.profile.speciesId) : undefined;
+            return (
+              <span
+                key={id}
+                className="inline-flex items-center gap-1 rounded-pill border border-border bg-panel-inset px-2 py-0.5 text-xs text-text"
+              >
+                {species ? <TypeIcon side={species.side} typeId={species.gameTypeId} size={16} /> : null}
+                {specimen?.profile.nickname ?? species?.name ?? id}
+              </span>
+            );
+          })}
         </div>
       </div>
     );
@@ -177,11 +244,23 @@ export function ExpeditionsPage() {
         </Panel>
       ) : null}
 
-      <Panel title="Active expeditions">
+      <Panel
+        title="Active expeditions"
+        // T30: the plate's subtitle reads "N returned · N away · N berths free" — "berths" implies a
+        // single shared capacity number, but squad slots are per-tier (`tier.squadSlots`), not a
+        // roster-wide pool, so that exact number isn't real here. "demons available" (roster minus
+        // whoever's already out) is the honest equivalent: it answers the same question — can I
+        // dispatch another one right now — with a real count instead of an invented one.
+        description={
+          active.length > 0 || (roster.data?.items.length ?? 0) > 0
+            ? `${returnedCount} returned · ${active.length - returnedCount} away · ${(roster.data?.items.length ?? 0) - lockedIds.size} demons available`
+            : undefined
+        }
+      >
         {active.length === 0 ? (
           <EmptyState title="No expeditions out" hint="Pick a tier and a squad below to dispatch one." />
         ) : (
-          <div className="space-y-2">{active.map(activeRow)}</div>
+          <div className="flex flex-col gap-3">{active.map(activeRow)}</div>
         )}
       </Panel>
 
@@ -215,7 +294,7 @@ export function ExpeditionsPage() {
                 key={id}
                 type="button"
                 disabled={blocked}
-                title={contractBlock ?? undefined}
+                title={onExpedition ? "Already on an expedition" : (contractBlock ?? undefined)}
                 onClick={() => toggle(id)}
                 className={`flex items-center gap-2 rounded-sm border p-2 text-left text-sm ${
                   picked ? "border-leaf" : "border-border"
@@ -244,6 +323,13 @@ export function ExpeditionsPage() {
           <Button
             onClick={() => void sendDispatch()}
             disabled={!tier || squad.length === 0 || dispatch.isPending}
+            title={
+              dispatch.isPending
+                ? "Dispatching…"
+                : squad.length === 0
+                  ? "Pick at least one demon"
+                  : undefined
+            }
           >
             Dispatch {squad.length}/{tier?.squadSlots ?? 0}
           </Button>

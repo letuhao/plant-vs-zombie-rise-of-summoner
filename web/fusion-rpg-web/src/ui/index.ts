@@ -27,4 +27,5 @@ export { Pager } from "./Pager";
 export { BarChart } from "./BarChart";
 export type { BarChartItem } from "./BarChart";
 export { Sparkline } from "./Sparkline";
+export { DivergingBar } from "./DivergingBar";
 export { TypeIcon, typeIconUrl } from "./TypeIcon";

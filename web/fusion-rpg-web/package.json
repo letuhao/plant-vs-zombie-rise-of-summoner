@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173",
     "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "check:bundle": "node scripts/check-bundle.mjs",
     "preview": "vite preview --host 127.0.0.1 --port 5173",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -25,6 +26,7 @@
     "@microsoft/signalr": "^8.0.7",
     "@radix-ui/react-dialog": "^1.1.23",
     "@tanstack/react-query": "^5.101.4",
+    "@tanstack/react-virtual": "^3.14.10",
     "@xyflow/react": "^12.11.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -32,11 +34,11 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.2",
-    "recharts": "^3.10.1",
     "tailwind-merge": "^3.6.0",
     "zustand": "^4.5.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@lingui/cli": "^5.9.5",
     "@lingui/vite-plugin": "^5.9.5",
     "@playwright/test": "^1.62.1",

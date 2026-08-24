@@ -37,7 +37,7 @@ export function ActorCard({
         </div>
       </div>
       <div>
-        <p className="text-2xs font-bold uppercase tracking-wide text-faint">Standing</p>
+        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Standing</p>
         <PendingNote pending={data.channelSummary} testId="actor-standing-pending" />
       </div>
       <div className="mt-auto flex items-center gap-2 border-t border-border pt-2">

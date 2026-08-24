@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useId, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { cn } from "@/lib/cn";
-import { useLayerStack } from "./layerStack";
+import { useLayerStack, type Band } from "./layerStack";
 
 export type PanelShellProps = {
   open: boolean;
@@ -11,6 +11,9 @@ export type PanelShellProps = {
   footer?: ReactNode;
   children: ReactNode;
   testId?: string;
+  /** GG-5's band this shell occupies in the stack — "panel" (band-2) for every ordinary layer;
+   * "system" (band-5, T20) for the one settings shell reachable from an empty stack. */
+  band?: Extract<Band, "panel" | "system">;
 };
 
 /**
@@ -27,7 +30,8 @@ export function PanelShell({
   subtitle,
   footer,
   children,
-  testId = "panel-shell"
+  testId = "panel-shell",
+  band = "panel"
 }: PanelShellProps) {
   const id = useId();
   const push = useLayerStack((state) => state.push);
@@ -35,9 +39,9 @@ export function PanelShell({
 
   useEffect(() => {
     if (!open) return;
-    push({ id, band: "panel", close: () => onOpenChange(false) });
+    push({ id, band, close: () => onOpenChange(false) });
     return () => pop(id);
-  }, [open, id, push, pop, onOpenChange]);
+  }, [open, id, band, push, pop, onOpenChange]);
 
   // Radix restores focus to its own Trigger by default; PanelShell is fully
   // controlled and has no Dialog.Trigger, so that default is a no-op. Capture
@@ -53,7 +57,10 @@ export function PanelShell({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="band-panel fixed inset-0 bg-black/50" data-testid={`${testId}-overlay`} />
+        <Dialog.Overlay
+          className={cn(band === "system" ? "band-system" : "band-panel", "fixed inset-0 bg-black/50")}
+          data-testid={`${testId}-overlay`}
+        />
         <Dialog.Content
           data-testid={testId}
           onCloseAutoFocus={(event) => {
@@ -68,7 +75,8 @@ export function PanelShell({
             event.preventDefault();
           }}
           className={cn(
-            "band-panel fixed left-1/2 top-1/2 flex w-[min(640px,92vw)] -translate-x-1/2 -translate-y-1/2",
+            band === "system" ? "band-system" : "band-panel",
+            "fixed left-1/2 top-1/2 flex w-[min(640px,92vw)] -translate-x-1/2 -translate-y-1/2",
             "flex-col overflow-hidden rounded-md border border-border bg-panel shadow-panel",
             "max-h-[min(720px,82vh)]"
           )}

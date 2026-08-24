@@ -3,16 +3,14 @@
   "version": 1,
   "_meta": {
     "owner": "docs/architecture/demons/spec-soul-economy.md",
-    "note": "Extracted byte-identical from SoulEarnPolicy.cs (tunables-ssot.md M.3, 2026-08-23). killCapPerMatch and victoryFullPerDay are named for deletion by caps-reconcile (power-plan.md T3.6, not yet authorized) — this migration makes them config-driven now so T3.6 only has to delete a row, not fight a hardcoded const.",
+    "note": "Extracted byte-identical from SoulEarnPolicy.cs (tunables-ssot.md M.3, 2026-08-23). killCapPerMatch and victoryFullPerDay were removed by T3.6 (spec-caps-reconcile.md §2.3, SSOT §11.7, 2026-08-24) — the flat caps are gone; killDelta/victoryDelta/defeatDelta are unchanged and now scale by contentScale(Theta) instead (SSOT §11.7a).",
     "rebalance": "Never hand-edit this file. python tools/tuning/publish.py souls <dotted.key>=<value> [...] writes souls.v{n+1}.json; the old version stays on disk for revert."
   },
   "kill": {
-    "killDelta": 1,
-    "killCapPerMatch": 50
+    "killDelta": 1
   },
   "matchEnd": {
     "victoryDelta": 100,
-    "victoryFullPerDay": 3,
     "defeatDelta": 25
   },
   "discoveryDelta": {

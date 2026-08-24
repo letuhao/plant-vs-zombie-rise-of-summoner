@@ -205,10 +205,13 @@ public class EffectFunnelTests
     [Fact]
     public void Merged_sum_over_cap_skips_whole_packet()
     {
+        // T3.5 (spec-caps-reconcile.md §2.1): AmountCap is now derived (long.MaxValue/2), not the old
+        // 1e9 literal -- each half individually legal, their MERGED sum one past the live cap.
+        var half = ResourceDeltaMath.AmountCap / 2 + 1;
         var h = new FoundationHarness();
         h.Sink.Items.Clear();
-        Assert.True(h.Funnel.EnqueueMutation("entity:sum", 600_000_000L));
-        Assert.True(h.Funnel.EnqueueMutation("entity:sum", 600_000_000L));
+        Assert.True(h.Funnel.EnqueueMutation("entity:sum", half));
+        Assert.True(h.Funnel.EnqueueMutation("entity:sum", half));
         h.Funnel.Flush();
         Assert.DoesNotContain(h.Sink.Items, a => a.Action == EffectActions.ApplyResourceDelta);
         Assert.Contains(h.Funnel.LastSkipped, s => s.Contains("amount-cap", StringComparison.Ordinal));

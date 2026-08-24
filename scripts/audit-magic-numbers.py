@@ -70,7 +70,8 @@ SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$|Tests?\.cs$", re.I)
 # Forcing its numbers into a flat tuning file would fragment one coherent scenario across two files for
 # no benefit a JSON sibling wouldn't also need. Named explicitly, not folded into the generic Catalog
 # pattern, so this stays a deliberate, reviewable exception rather than a silent broadening.
-CONTENT_FILE = re.compile(r"WorldTemplateCatalog(\.\w+)?\.cs$")
+CONTENT_FILE = re.compile(
+    r"WorldTemplateCatalog(\.\w+)?\.cs$|VfxCatalog\.cs$|VfxAuraMath\.cs$|GameProfileCatalog\.cs$")
 
 # Contexts where a literal is structure, not balance.
 SKIP_LINE = re.compile(

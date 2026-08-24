@@ -94,12 +94,23 @@ export function FusionPage() {
     const isPatron = patron.data?.patron?.instanceId === id;
     const disabled =
       role === "sacrifice" && (s.profile.locked || id === baseId || isPatron);
+    const disabledReason =
+      role !== "sacrifice"
+        ? undefined
+        : s.profile.locked
+          ? "Locked — unlock it first"
+          : id === baseId
+            ? "Already chosen as the base"
+            : isPatron
+              ? "Your patron can't be sacrificed"
+              : undefined;
     const cap = STAR_CAPS[s.profile.rarity] ?? 5;
     return (
       <button
         key={id}
         type="button"
         disabled={disabled}
+        title={disabledReason}
         onClick={() => {
           if (role === "base") {
             setBaseId(selected ? null : id);
@@ -234,6 +245,17 @@ export function FusionPage() {
             !preview.data?.ok ||
             !(affordability?.affordable ?? false) ||
             (mode === "recipe" && (!pickedTrait || sacrifices.length !== 2))
+          }
+          title={
+            execute.isPending
+              ? "Fusing…"
+              : !preview.data?.ok
+                ? "Pick a base and ingredients to price the fusion first"
+                : !(affordability?.affordable ?? false)
+                  ? "Not enough Souls or ingredients"
+                  : mode === "recipe" && (!pickedTrait || sacrifices.length !== 2)
+                    ? "Recipe fusion needs a trait and exactly two sacrifices"
+                    : undefined
           }
         >
           Fuse

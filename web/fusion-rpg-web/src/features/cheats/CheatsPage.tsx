@@ -125,6 +125,7 @@ function CheatFloat({
           type="button"
           variant="ghost"
           disabled={!isSet && draft.trim() === ""}
+          title={!isSet && draft.trim() === "" ? "Nothing set to clear" : undefined}
           onClick={() => {
             setDraft("");
             markCheatFloatDirty(id);
@@ -249,6 +250,7 @@ export function CheatsPage() {
         <Button
           data-testid="cheats-push"
           disabled={save.isPending || !remote.data}
+          title={save.isPending ? "Pushing…" : !remote.data ? "Nothing loaded yet" : undefined}
           onClick={() => remote.data && void save.mutateAsync(remote.data)}
         >
           Push snapshot to injector
@@ -275,6 +277,7 @@ export function CheatsPage() {
             data-testid="probe-end"
             variant="ghost"
             disabled={endProbe.isPending || !probeId}
+            title={endProbe.isPending ? "Ending…" : !probeId ? "No probe running" : undefined}
             onClick={() => {
               void endProbe.mutateAsync({ probeId: probeId || undefined, reason: "web" });
               setActiveProbe(null);

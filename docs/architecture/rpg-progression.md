@@ -31,7 +31,7 @@ Identity: `(player_id, kind, type_id)`.
 
 | Activity | Actor | Reason | Delta (POC-locked) |
 |---|---|---|---|
-| `ZombieKilled` | player | `kill` | +12 × `RpgXpPowerScale.ForKill` (stub **1.0** until zombie power SSOT) |
+| `ZombieKilled` | player | `kill` | +12 × kill power scale (stub **1.0** — `RpgXpAwardMap.NoKillPowerScaleYet`, awaiting `content-scale`) |
 | `MatchEnded` defeat | player | `defeat` | −100 |
 | `MowerUsed` | player | `mower` | −30 |
 | `PlantPlaced` | plant/`type` | `plant_place` | +8 |
@@ -39,31 +39,44 @@ Identity: `(player_id, kind, type_id)`.
 
 Every place/spawn awards (not once-per-type-per-run). Kill ledger `payload_json` includes `powerScale` for future audit.
 
-**Power-scaled kill XP is reserved:** scaler stub returns 1.0 until zombie power SSOT exists. Do not treat flat awards as final combat-coupled design.
+**Power-scaled kill XP is still reserved, not wired:** the multiplier stub still returns 1.0 — only
+its *source class* changed (T3.3 deleted `RpgXpPowerScale`, replacing it with a structural constant
+in `RpgXpAwardMap` — same value, zero behaviour change). A real value needs `content-scale` (T3.4+),
+not yet built. Do not treat flat awards as final combat-coupled design.
 
-> **⚠ ADR P1 amended 2026-08-23.** The zombie power SSOT now exists: it is `Θ_content`
-> ([power/ssot-power-scale.md](power/ssot-power-scale.md) §5). `RpgXpPowerScale` is **retired** — its
-> documented future job is exactly what `Θ_content` does, and a stub whose replacement exists is dead
-> code. The POC curve `2^min(level,12)` is retired with it; `progression.power` becomes linear `Θ`.
-> Spec: [power/spec-status-contest.md](power/spec-status-contest.md). **Specced, not built** — the
-> stub descriptions above remain accurate until wave 3.
+> **✅ ADR P1 amended 2026-08-23, built 2026-08-24 (power-todo.md T3.1/T3.2/T3.3 — all three done).**
+> The zombie power SSOT now exists: it is `Θ_content` ([power/ssot-power-scale.md](power/ssot-power-scale.md) §5).
+> `progression.power` is now linear **`Θ`** from `IPowerIndexProvider`, and the POC curve
+> `2^min(level,12)` is retired and **deleted** (`ProgressionPowerCurve.cs` is gone).
+> `RpgXpPowerScale` is **deleted** too (T3.3) — its documented future job was exactly what
+> `Θ_content` does, and a stub whose replacement now exists was dead code. `RpgXpAwardMap.FromActivity`
+> keeps the same 1.0 multiplier as a structural constant (`NoKillPowerScaleYet`) so kill XP itself is
+> unaffected until `content-scale` gives it a real value.
+> Spec: [power/spec-status-contest.md](power/spec-status-contest.md).
 
-## Combat power (design — not shipped)
+## Combat power (T3.1/T3.2 shipped 2026-08-24; bonus flats still design-only)
 
-RpgProgression **levels** are the future input for combat **`progression.power`** on the Actor Hub derived catalog — separate from XP awards and separate from **`progression.bonus.*`** combat flats.
+RpgProgression **levels** are the future input for combat **`progression.bonus.*`** flats on the
+Actor Hub derived catalog — separate from XP awards and now also separate from
+**`progression.power`**, which no longer reads level at all (see above).
 
 | Concept | Role today | Future |
 |---|---|---|
-| **`RpgXpPowerScale.ForKill`** | Kill XP audit multiplier (stub **1.0**) | May read zombie tier for XP only — **not** status ApplyScale |
-| **`progression.power`** | Not in code | Derived channel from type level × realm; v1 Actor Hub stub **1.0** hardcoded |
-| **`progression.bonus.*`** | Not in code | Flat HP/ATK/defense at AppliedCombat merge — separate power ADR |
-| **`IProgressionPowerProvider.UpdatePower`** | **In code** since ADR P1 — `IProgressionPowerProvider.cs:15`. This row said *"Not in code"* and was wrong | **Superseded** by `IPowerIndexProvider` (ADR P1 amendment, 2026-08-23) |
+| **Kill power scale** | Kill XP audit multiplier (stub **1.0**, `RpgXpAwardMap.NoKillPowerScaleYet`) — `RpgXpPowerScale` class **deleted** (T3.3) | May read `Θ_content` for XP only (`content-scale`, T3.4+) — **not** status ApplyScale |
+| **`progression.power`** | **In code, shipped** — `RpgProgressionSubsystem` reads `IPowerIndexProvider.ActorIndex(ctx)`, defaulting to Θ=0 (`StubPowerIndexProvider`) when un-hydrated | Real hydration (`InjectorPowerIndexProvider`/`ServerPowerIndexProvider`, both built T1.4) needs a live caller — not this program's scope |
+| **`progression.bonus.*`** | Not in code — gated on a bare `Func<StatContext,int>?` delegate `RpgProgressionSubsystem` accepts but nothing production passes (T1.4) | Flat HP/ATK/defense at AppliedCombat merge — separate power ADR, unrelated to `progression.power`'s own T3.2 rewiring |
+| **`IProgressionPowerProvider`** | **Deleted** (T1.4) | **Superseded** by `IPowerIndexProvider` — done, not a future |
 
 **Grain for power:** same as progression PK — `(player_id, kind, type_id)`. Plant on lawn uses plant type level; zombie defender uses zombie type level. Player actor level may add summoner-wide omni later.
 
-**Precedence (v1 stub):** all Hot entities use hardcoded **`tierPower = 1.0`** until `IProgressionPowerProvider.UpdatePower` ships. Future: lawn entity reads type level from SQLite; bound unique specimen precedence — see [unique-actor-runtime.md](unique-actor-runtime.md).
+**Precedence (current):** all Hot entities read `tierPower = progression.power × progression.realm`
+through `IPowerIndexProvider` — **0 × 1.0 = 0** until a host actually hydrates a real Θ snapshot
+(`HydratedPowerIndexProvider.Hydrate`/`InjectorPowerIndexProvider.Hydrate`), which nothing in
+production calls yet (same "built, not wired to a live caller" state as `IPowerIndexProvider` itself
+since T1.4). Future: lawn entity reads type level from SQLite; bound unique specimen precedence — see
+[unique-actor-runtime.md](unique-actor-runtime.md).
 
-Do **not** conflate `RpgXpPowerScale` (ledger `powerScale` in kill payload) with combat `progression.power`. See [actor-hub-ssot.md](actor-hub-ssot.md) and [../research/actor-core-chaos-mapping.md](../research/actor-core-chaos-mapping.md) for Chaos level/realm curve reference.
+Do **not** conflate the kill power scale (`RpgXpAwardMap.Award.PowerScale`, ledger `powerScale` in kill payload) with combat `progression.power`. See [actor-hub-ssot.md](actor-hub-ssot.md) and [../research/actor-core-chaos-mapping.md](../research/actor-core-chaos-mapping.md) for Chaos level/realm curve reference.
 
 ## Curve
 

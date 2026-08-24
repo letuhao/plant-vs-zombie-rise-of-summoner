@@ -262,13 +262,14 @@ export function StoragePage() {
       </Panel>
 
       <Panel
-        title="Cold archives"
+        title="Compacted archives"
         testId="panel-storage-archives"
         actions={
           <Button
             data-testid="storage-delete-archives"
             size="sm"
             disabled={busy || selectedUris.size === 0}
+            title={busy ? "Working…" : selectedUris.size === 0 ? "Select an archive first" : undefined}
             onClick={() =>
               setPendingConfirm({ kind: "delete-archives", count: selectedUris.size })
             }
@@ -281,7 +282,7 @@ export function StoragePage() {
           columns={archiveColumns}
           rows={archives.data ?? []}
           rowKey={(row) => row.uri}
-          empty={<EmptyState title="No cold archives" hint="Closed runs archive after compact." />}
+          empty={<EmptyState title="No compacted archives" hint="Closed runs archive after compact." />}
         />
       </Panel>
 
@@ -294,6 +295,7 @@ export function StoragePage() {
               data-testid="storage-purge-capture"
               size="sm"
               disabled={busy || selectedRunIds.size === 0}
+              title={busy ? "Working…" : selectedRunIds.size === 0 ? "Select a run first" : undefined}
               onClick={() =>
                 setPendingConfirm({ kind: "purge-capture", count: selectedRunIds.size })
               }
@@ -305,6 +307,7 @@ export function StoragePage() {
               size="sm"
               variant="danger"
               disabled={busy || selectedRunIds.size === 0}
+              title={busy ? "Working…" : selectedRunIds.size === 0 ? "Select a run first" : undefined}
               onClick={() =>
                 setPendingConfirm({ kind: "delete-runs", count: selectedRunIds.size })
               }
@@ -331,6 +334,7 @@ export function StoragePage() {
         <Button
           data-testid="storage-trim-tails"
           disabled={busy}
+          title={busy ? "Working…" : undefined}
           onClick={() => setPendingConfirm({ kind: "trim-tails" })}
         >
           Trim activity/XP to sealed limits now

@@ -41,13 +41,25 @@ public sealed record InstanceRow
     public IReadOnlyList<InstanceAtomRow> Atoms { get; init; } = Array.Empty<InstanceAtomRow>();
 
     /// <summary>
+    /// content-scale (T3.4): the Θ_content this instance rolled at, and the exact per-mille ratio
+    /// applied to every <c>OnInstantiate</c>/<c>Fixed</c> magnitude in <see cref="Atoms"/> — recorded
+    /// so any value can be divided back to its relative roll and audited (spec-content-scale.md
+    /// §2.2). 1000 = ×1.000, the pin (Θ_content = 20).
+    /// </summary>
+    public int ThetaContent { get; init; }
+    public long ContentScaleMilli { get; init; }
+
+    /// <summary>
     /// The comparison used for reproducibility, deliberately <b>excluding</b> `instance_id` and
     /// `created_utc`, which are generated. Without that exclusion the test could never pass.
+    /// <see cref="ThetaContent"/> is included on purpose — a different drop depth is a different
+    /// instance for reproducibility purposes, even if the relative roll happens to match.
     /// </summary>
     public string ContentFingerprint()
     {
         var sb = new StringBuilder();
         sb.Append(ContainerId).Append('\n');
+        sb.Append(ThetaContent).Append('|').Append(ContentScaleMilli).Append('\n');
         foreach (var a in Atoms)
             sb.Append(a.Seq).Append('|').Append(a.AtomId).Append('|')
               .Append(a.ValuesJson).Append('|').Append(a.PowerJson ?? "").Append('\n');
@@ -64,13 +76,25 @@ public sealed record InstanceRow
 public static class Instantiator
 {
     /// <summary>
-    /// Instantiate. Re-running with the same <c>(container, catalogRevision, rollSeed)</c> reproduces
-    /// the instance byte-identically over <see cref="InstanceRow.ContentFingerprint"/>.
+    /// Instantiate. Re-running with the same <c>(container, catalogRevision, rollSeed, thetaContent)</c>
+    /// reproduces the instance byte-identically over <see cref="InstanceRow.ContentFingerprint"/>.
+    ///
+    /// <para><paramref name="thetaContent"/> and <paramref name="tuning"/> are required, not
+    /// defaulted (spec-content-scale.md §2.4: "Absence is a rejection, not a default of 1.0" — a
+    /// silent 1.0 is a drop that quietly ignores depth). Making them non-optional parameters is that
+    /// rejection: there is no call this compiles without a real Θ_content and a loaded tuning, so
+    /// there is no runtime "missing" state left to reject, and no need to grow
+    /// <see cref="AtomRejectionReason"/>'s closed, guard-tested 33-member list for a case that C#'s
+    /// own type system already forecloses. Every caller that has no depth to supply cannot reach this
+    /// method at all — that decision belongs one layer up, at whoever resolves Θ_content from a wave,
+    /// expedition or world context.</para>
     /// </summary>
     public static AtomRejection TryInstantiate(
         ContainerRow container,
         Func<string, AtomRow?> lookupAtom,
         long rollSeed,
+        int thetaContent,
+        FusionRpg.Core.Power.PowerTuning tuning,
         out InstanceRow? instance,
         InstanceOrigin origin = InstanceOrigin.Drop,
         long catalogRevision = 0)
@@ -80,6 +104,10 @@ public static class Instantiator
         var check = ContainerValidator.Validate(container, lookupAtom);
         if (!check.IsOk) return check;
 
+        // Computed once (spec §2.2: "One call site") — never re-derived per atom, so every value in
+        // this instance scales by the exact same ratio.
+        var contentScaleMilli = FusionRpg.Core.Power.ContentScale.Milli(thetaContent, tuning);
+
         var rows = new List<InstanceAtomRow>();
 
         // The fixed core keeps its authored seq. Determinism comes first, literally: a trait always
@@ -87,7 +115,7 @@ public static class Instantiator
         foreach (var entry in container.Atoms.OrderBy(a => a.Seq))
         {
             var atom = lookupAtom(entry.AtomId)!;
-            var freeze = Freeze(atom, entry.OverridesJson, rollSeed, entry.Seq, out var valuesJson);
+            var freeze = Freeze(atom, entry.OverridesJson, rollSeed, entry.Seq, contentScaleMilli, out var valuesJson);
             if (!freeze.IsOk) return freeze;
 
             rows.Add(new InstanceAtomRow(entry.Seq, entry.AtomId, valuesJson));
@@ -99,7 +127,7 @@ public static class Instantiator
         foreach (var atomId in drawn)
         {
             var atom = lookupAtom(atomId)!;
-            var freeze = Freeze(atom, null, rollSeed, nextSeq, out var valuesJson);
+            var freeze = Freeze(atom, null, rollSeed, nextSeq, contentScaleMilli, out var valuesJson);
             if (!freeze.IsOk) return freeze;
 
             rows.Add(new InstanceAtomRow(nextSeq, atomId, valuesJson));
@@ -114,6 +142,8 @@ public static class Instantiator
             CatalogRevision = catalogRevision,
             Origin = origin,
             Atoms = rows,
+            ThetaContent = thetaContent,
+            ContentScaleMilli = contentScaleMilli,
         };
         return AtomRejection.Ok;
     }
@@ -166,9 +196,14 @@ public static class Instantiator
     /// <summary>
     /// Resolve every <c>OnInstantiate</c> value spec; copy <c>Fixed</c> ones; leave <c>OnApply</c>
     /// alone. Non-value params pass through untouched.
+    ///
+    /// <para>content-scale (T3.4) multiplies both <c>OnInstantiate</c> and <c>Fixed</c> results —
+    /// both are magnitudes that end up on the item, so both are worth more when the item drops
+    /// deeper. <c>OnApply</c> is exempt for an unrelated, pre-existing reason (it belongs to the hit,
+    /// not the item) and stays exempt here too — content-scale never touches it.</para>
     /// </summary>
     static AtomRejection Freeze(
-        AtomRow atom, string? overridesJson, long rollSeed, int seq, out string valuesJson)
+        AtomRow atom, string? overridesJson, long rollSeed, int seq, long contentScaleMilli, out string valuesJson)
     {
         valuesJson = "{}";
 
@@ -200,9 +235,10 @@ public static class Instantiator
 
             frozen[key] = spec.Roll switch
             {
-                RollPolicy.OnInstantiate => spec.Resolve(rng),
-                RollPolicy.Fixed => spec.Min,
-                // Left as authored: an OnApply range belongs to the hit, not the item.
+                RollPolicy.OnInstantiate => FusionRpg.Core.Power.ContentScale.Apply(spec.Resolve(rng), contentScaleMilli),
+                RollPolicy.Fixed => FusionRpg.Core.Power.ContentScale.Apply(spec.Min, contentScaleMilli),
+                // Left as authored: an OnApply range belongs to the hit, not the item — content-scale
+                // never touches it, same reasoning that already exempted it from freezing at all.
                 _ => raw,
             };
         }

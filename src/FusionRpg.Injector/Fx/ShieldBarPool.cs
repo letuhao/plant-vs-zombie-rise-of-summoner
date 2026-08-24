@@ -18,12 +18,14 @@ namespace FusionRpg.Injector.Fx;
 /// </summary>
 static class ShieldBarPool
 {
-    const float BarWorldWidth = 0.95f;
-    const float BarWorldHeight = 0.12f;
-    const float WorldYOffset = -0.35f;
-    const int MaxSegments = 3;
-    const int Cap = 32;
-    const int MaxPips = 3;
+    // Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.shieldBar.
+    static VfxShieldBarTuning Tuning => VfxTuningHub.Tuning.Render.ShieldBar;
+    static float BarWorldWidth => (float)Tuning.BarWorldWidth;
+    static float BarWorldHeight => (float)Tuning.BarWorldHeight;
+    static float WorldYOffset => (float)Tuning.WorldYOffset;
+    static int MaxSegments => Tuning.MaxSegments;
+    static int Cap => Tuning.Cap;
+    static int MaxPips => Tuning.MaxPips;
 
     static readonly List<(string? ElementId, long Hp)> ScratchStacks = new(3);
     static readonly List<ShieldBarColor.Stop> ScratchStops = new(3);

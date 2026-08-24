@@ -26,10 +26,22 @@ public class BattleGoldenTests
     // read a portability failure as a determinism break. Battle MATH did not move: the only
     // failures in the re-bless run were these two hash tests, while every shape, rate, shield,
     // and expedition test stayed green with no seed re-selection.
-    const string StompHash = "CDCE257B7257186D3E56845ABA0DC38873A218816095D52217728ADE64D74B1D";
-    const string CloseHash = "C1ACC76319EA0A4CE9FA653936DB57324117410E7E0E5DD712A469740266E5E0";
-    const string WipeHash = "54860127B4D05F4F5310E271AD1855ACDE97F66716FBA1DA3E7D32BD59F26B14";
-    const string SeedSweepHash = "CF42E75B71E3845593133E2DE99DCC39C3869554621179D47A6C115A4268198D";
+    // RulesetVersion 2 hashes (bMilli=0) remain decodable by their stamp for history.
+    //
+    // Re-blessed 2026-08-24 at RulesetVersion 3 (T4.2, power-dial: power-scale.v2.json's
+    // bMilli 0 -> 400 — the ONE golden-moving change the whole power program was built around).
+    // Every actor here sits away from the Theta=20 pin (levels 1/2/5/6/10), so every magnitude
+    // legitimately moved; nothing here is a rate, so PS-3 does not apply to these hashes at all.
+    // Triaged BEFORE this re-bless, not after: the full CORE suite's only failures were these
+    // hash goldens, the two literal RulesetVersion==2 assertions, and the three B=0-specific
+    // BattleMagnitudeParityTests (reframed separately, not re-blessed) — every rate-specific
+    // test (RateParityTests.cs, BattleAdoptionTests.cs's BattleRateTests) stayed green with zero
+    // changes, confirming zero rate goldens moved. Golden_outcomes_hold_their_shapes (Victory/
+    // Defeat/retreat) also stayed green, unchanged — the shapes held, only the numbers moved.
+    const string StompHash = "A9B076C2B8C4D1AEA629C2FE20C8E3A706AA8BB05BA775925902FD78B93E76C9";
+    const string CloseHash = "DEE290C1E84D57B150D2650043B538949220CFDC267DB42763BB7BD572902F5A";
+    const string WipeHash = "8BD6365E32BEC3E73733147916611FE5A21AB4926D53F490EDB6592ED361C530";
+    const string SeedSweepHash = "9D8F88A2B1D98E4E71F927AF9A43A2E77CF843BF98337ED4223511721B673890";
 
     static BattleActorSetup Actor(string key, string side, int level,
         ElementTypeId? elem = null, params string[] traits) => new()

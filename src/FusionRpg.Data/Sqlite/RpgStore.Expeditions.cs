@@ -297,8 +297,12 @@ public sealed partial class RpgStore
 
             if (rewards.EventSouls > 0)
             {
+                // One policy with AwardSouls (spec-caps-reconcile.md §2.1, §11.2a) — this path used to
+                // silently clamp via Math.Min while AwardSouls threw; now both throw on the same
+                // dynamic headroom rather than the reward being quietly shorted.
+                GuardSoulAwardOrThrow(ReadSoulBalanceUnlocked(db, playerId).Balance, rewards.EventSouls);
                 AppendSoulLedgerUnlocked(db, playerId, 0,
-                    Math.Min(rewards.EventSouls, MaxSoulAward),
+                    rewards.EventSouls,
                     Core.Demons.SoulEarnPolicy.Reasons.Expedition, null, null,
                     "exp:" + expeditionId, now.UtcDateTime.ToString("o"));
             }

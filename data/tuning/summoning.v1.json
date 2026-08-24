@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/demons/spec-demon-summoning.md",
+    "note": "Extracted byte-identical from SummonBannerCatalog.cs and SummonRoller.cs (tunables-ssot.md M.8, 2026-08-24). Banner ids/HasElementFocus stay in C# (schema); costs and pity/rarity math moved.",
+    "rebalance": "Never hand-edit this file. python tools/tuning/publish.py summoning <dotted.key>=<value> [...] writes summoning.v{n+1}.json; the old version stays on disk for revert."
+  },
+  "banners": {
+    "standard-rift":   { "costPerPull": 100, "costPerTen": 900,  "focusWeightMultiplier": 1.0 },
+    "element-focus":    { "costPerPull": 120, "costPerTen": 1080, "focusWeightMultiplier": 3.0 }
+  },
+  "roller": {
+    "epicHardPity": 25,
+    "legendarySoftStart": 41,
+    "legendaryHardPity": 55,
+    "legendaryBasePerMille": 10,
+    "legendaryRampPerMille": 60,
+    "epicPerMille": 50,
+    "rarePerMille": 200,
+    "shinyOneIn": 64
+  }
+}

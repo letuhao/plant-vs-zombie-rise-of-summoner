@@ -8,6 +8,7 @@ import {
   Button,
   Checkbox,
   ConfirmDialog,
+  DivergingBar,
   EmptyState,
   Field,
   HelpText,
@@ -164,11 +165,9 @@ describe("ui primitives", () => {
     await user.click(screen.getByTestId("pager-next"));
     expect(onNext).toHaveBeenCalled();
     expect(screen.getByTestId("bar-chart")).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByTestId("bar-chart").querySelector(".recharts-responsive-container")).toBeTruthy();
-    });
+    expect(screen.getByTestId("bar-chart-row")).toHaveTextContent("+12");
     expect(screen.getByTestId("sparkline")).toBeInTheDocument();
-    expect(screen.getByTestId("sparkline").querySelector(".recharts-responsive-container")).toBeTruthy();
+    expect(screen.getByTestId("sparkline").querySelector("svg polyline")).toBeTruthy();
   });
 
   it("BarChart and Sparkline empty states", () => {
@@ -180,6 +179,27 @@ describe("ui primitives", () => {
     );
     expect(screen.getByTestId("bar-chart")).toHaveTextContent("No bars");
     expect(screen.getByTestId("sparkline")).toHaveTextContent("No recent XP");
+  });
+
+  it("DivergingBar (T19's fourth chart shape) is zero-anchored and coloured by sign", () => {
+    render(
+      <>
+        <DivergingBar testId="delta-neg" value={-12} scaleMax={20} />
+        <DivergingBar testId="delta-pos" value={12} scaleMax={20} />
+      </>
+    );
+    const neg = screen.getByTestId("delta-neg");
+    expect(neg).toHaveAttribute("data-sign", "negative");
+    expect(neg.querySelector("[class*='bad']")).toBeTruthy();
+    // Negative fills left of the zero line — its style targets the right edge, not the left.
+    const negFill = neg.querySelector("[class*='bad']") as HTMLElement;
+    expect(negFill.style.right).toBe("50%");
+
+    const pos = screen.getByTestId("delta-pos");
+    expect(pos).toHaveAttribute("data-sign", "positive");
+    const posFill = pos.querySelector("[class*='bg-ok']") as HTMLElement;
+    expect(posFill).toBeTruthy();
+    expect(posFill.style.left).toBe("50%");
   });
 
   it("TypeIcon falls back when image fails", async () => {

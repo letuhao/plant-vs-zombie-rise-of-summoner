@@ -186,10 +186,21 @@ export function WorldPage() {
       actions={
         isLive ? (
           <>
-            <Button onClick={sendOrders} disabled={ui.pending.length === 0 || submit.isPending}>
+            <Button
+              onClick={sendOrders}
+              disabled={ui.pending.length === 0 || submit.isPending}
+              title={
+                submit.isPending ? "Filing…" : ui.pending.length === 0 ? "Queue an order first" : undefined
+              }
+            >
               File {ui.pending.length} order{ui.pending.length === 1 ? "" : "s"}
             </Button>
-            <Button onClick={endTurn} disabled={commit.isPending} data-testid="end-turn">
+            <Button
+              onClick={endTurn}
+              disabled={commit.isPending}
+              title={commit.isPending ? "Ending turn…" : undefined}
+              data-testid="end-turn"
+            >
               End turn
             </Button>
             <Button onClick={() => setLifelines((v) => !v)} data-testid="toggle-lifelines">
@@ -337,7 +348,17 @@ export function WorldPage() {
                       >
                         March here
                       </Button>
-                      <Button onClick={queueClaim} disabled={!legion || !selected.claimable}>
+                      <Button
+                        onClick={queueClaim}
+                        disabled={!legion || !selected.claimable}
+                        title={
+                          !legion
+                            ? "Pick a force first — click the sector it is standing in"
+                            : !selected.claimable
+                              ? "This sector can't be claimed right now"
+                              : undefined
+                        }
+                      >
                         Claim
                       </Button>
                     </div>

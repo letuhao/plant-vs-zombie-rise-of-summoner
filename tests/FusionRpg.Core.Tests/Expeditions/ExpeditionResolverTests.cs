@@ -144,10 +144,16 @@ public class ExpeditionResolverTests
     // serialization-shape churn — BattleActorSetup gained InnateShield, so every embedded
     // plan changed bytes even though expedition MATH did not (per-tick streams unchanged;
     // Same_inputs/Recall tests prove the resolver itself byte-stable across the re-bless).
-    const string ScoutHash = "8F8623FAA38826F082BC39DB8BC6B26F18A1B76EACD05E202E4A72861AE6624D";
-    const string ForageHash = "50888892407AE206A2505FB8EB96DE428BD30F3C9083B69DC92593AA04D298E2";
-    const string HuntHash = "A4445896ADE17DD6EDE328C82F073D5599D7CC1D89C0B839CD38A6DF699626AA";
-    const string WarpathHash = "1261227BA73392697F5C66BD286BA81BC4EDC31B3C985CA5585DB55ACFB816FA";
+    //
+    // Re-blessed 2026-08-24 at RulesetVersion 3 (T4.2, power-dial): Squad()'s actors sit at
+    // level 5, away from the Theta=20 pin, so BaseHp/BaseAtk/BaseDefense legitimately moved with
+    // bMilli 0->400 — expected magnitude movement, the same triage as BattleGoldenTests.cs.
+    // Same_inputs_resolve_identically and the recall pro-rating tests stayed green unchanged,
+    // confirming the resolver's OWN per-tick RNG logic did not move, only the embedded magnitudes.
+    const string ScoutHash = "4AD27E8E940CCE8C85CA94DD2D7B3748FADA236F7A863A35371B6CE8114E25C6";
+    const string ForageHash = "EAE8E34360557638A93DF7D400AE416BA5C9003914D5A4292E7F9DF1B2DC6DBE";
+    const string HuntHash = "272223CB0085C7B19D1D6E0FE2710A97204F806B10D49BF187FD94E777A5FB31";
+    const string WarpathHash = "A1C7283BB8022A3720145C263331B89665DD2849E552E3FC5110510692E19078";
 
     [Fact]
     public void Tier_goldens_are_locked()

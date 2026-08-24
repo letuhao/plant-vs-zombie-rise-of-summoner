@@ -12,7 +12,8 @@ namespace FusionRpg.Injector.Fx;
 /// </summary>
 static class BurstPool
 {
-    const int BurstParticles = 28;
+    // Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.burstParticles.
+    static int BurstParticles => VfxTuningHub.Tuning.Render.BurstParticles;
 
     sealed class Slot
     {

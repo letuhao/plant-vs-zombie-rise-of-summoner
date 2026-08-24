@@ -65,7 +65,9 @@ public sealed partial class RpgStore
               roll_seed INTEGER NOT NULL,
               catalog_revision INTEGER NOT NULL DEFAULT 0,
               created_utc TEXT NOT NULL,
-              origin TEXT NOT NULL DEFAULT 'drop'
+              origin TEXT NOT NULL DEFAULT 'drop',
+              theta_content INTEGER NOT NULL DEFAULT 0,
+              content_scale_milli INTEGER NOT NULL DEFAULT 1000
             );
             CREATE INDEX IF NOT EXISTS ix_effect_instance_container ON effect_instance(container_id);
 
@@ -94,6 +96,14 @@ public sealed partial class RpgStore
             CREATE INDEX IF NOT EXISTS ix_effect_binding_instance ON effect_binding(instance_id);
             CREATE INDEX IF NOT EXISTS ix_effect_binding_source ON effect_binding(source);
             """);
+
+        // T3.4 (content-scale): a database created before this migration has effect_instance without
+        // these two columns — CREATE TABLE IF NOT EXISTS is a no-op against it, so the addition has
+        // to be explicit. Defaults (Theta=0, scale=1000=x1.000) only ever apply to pre-migration rows
+        // read back after this point; every row written through SaveInstance from here on always
+        // supplies real values (TryInstantiate requires them, spec-content-scale.md §2.4).
+        EnsureColumn(db, "effect_instance", "theta_content", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "effect_instance", "content_scale_milli", "INTEGER NOT NULL DEFAULT 1000");
     }
 
     /// <summary>
@@ -112,15 +122,18 @@ public sealed partial class RpgStore
 
             ExecIn(db, tx, """
                 INSERT INTO effect_instance
-                  (instance_id, container_id, roll_seed, catalog_revision, created_utc, origin)
-                VALUES ($id, $c, $seed, $rev, $utc, $origin)
+                  (instance_id, container_id, roll_seed, catalog_revision, created_utc, origin,
+                   theta_content, content_scale_milli)
+                VALUES ($id, $c, $seed, $rev, $utc, $origin, $theta, $scale)
                 ON CONFLICT(instance_id) DO UPDATE SET
                   container_id = excluded.container_id, roll_seed = excluded.roll_seed,
-                  catalog_revision = excluded.catalog_revision, origin = excluded.origin;
+                  catalog_revision = excluded.catalog_revision, origin = excluded.origin,
+                  theta_content = excluded.theta_content, content_scale_milli = excluded.content_scale_milli;
                 """,
                 ("$id", id), ("$c", instance.ContainerId), ("$seed", instance.RollSeed),
                 ("$rev", instance.CatalogRevision), ("$utc", utc),
-                ("$origin", instance.Origin.ToString().ToLowerInvariant()));
+                ("$origin", instance.Origin.ToString().ToLowerInvariant()),
+                ("$theta", instance.ThetaContent), ("$scale", instance.ContentScaleMilli));
 
             ExecIn(db, tx, "DELETE FROM effect_instance_atom WHERE instance_id = $id;", ("$id", id));
 
@@ -147,7 +160,8 @@ public sealed partial class RpgStore
             using (var cmd = db.CreateCommand())
             {
                 cmd.CommandText =
-                    "SELECT instance_id, container_id, roll_seed, created_utc, origin, catalog_revision " +
+                    "SELECT instance_id, container_id, roll_seed, created_utc, origin, catalog_revision, " +
+                    "theta_content, content_scale_milli " +
                     "FROM effect_instance WHERE instance_id = $id;";
                 cmd.Parameters.AddWithValue("$id", instanceId);
                 using var r = cmd.ExecuteReader();
@@ -162,6 +176,8 @@ public sealed partial class RpgStore
                     Origin = Enum.TryParse<InstanceOrigin>(r.GetString(4), true, out var o)
                         ? o : InstanceOrigin.Drop,
                     CatalogRevision = r.GetInt64(5),
+                    ThetaContent = r.GetInt32(6),
+                    ContentScaleMilli = r.GetInt64(7),
                 };
             }
 
@@ -342,7 +358,8 @@ public sealed partial class RpgStore
             using (var cmd = db.CreateCommand())
             {
                 cmd.CommandText =
-                    "SELECT instance_id, container_id, roll_seed, created_utc, origin, catalog_revision " +
+                    "SELECT instance_id, container_id, roll_seed, created_utc, origin, catalog_revision, " +
+                    "theta_content, content_scale_milli " +
                     "FROM effect_instance;";
                 using var r = cmd.ExecuteReader();
                 while (r.Read())
@@ -358,6 +375,8 @@ public sealed partial class RpgStore
                         Origin = Enum.TryParse<InstanceOrigin>(r.GetString(4), true, out var o)
                             ? o : InstanceOrigin.Drop,
                         CatalogRevision = r.GetInt64(5),
+                        ThetaContent = r.GetInt32(6),
+                        ContentScaleMilli = r.GetInt64(7),
                     };
                 }
             }

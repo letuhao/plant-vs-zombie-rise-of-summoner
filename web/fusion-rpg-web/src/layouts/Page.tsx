@@ -18,7 +18,12 @@ export function Page({
 }) {
   return (
     <div className={cn("max-w-[1100px]", className)} data-testid={testId ?? "page"}>
-      <header className="mb-4 flex flex-wrap items-start justify-between gap-3" data-testid="page-header">
+      {/* A plain div, not a semantic <header>: every real consumer of this component is wrapped
+          inside a PanelShell now (T12/T15/T17/T19's "wrap the already-real page" pattern), which
+          already renders its own <header> banner — a second one here is a duplicate landmark
+          (axe: landmark-no-duplicate-banner / landmark-unique), and a page body never needs its
+          own banner landmark regardless. */}
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3" data-testid="page-header">
         <div>
           <h1 className="font-display text-display text-text" data-testid="page-title">
             {title}
@@ -34,7 +39,7 @@ export function Page({
             {actions}
           </div>
         ) : null}
-      </header>
+      </div>
       <div data-testid="page-body">{children}</div>
     </div>
   );

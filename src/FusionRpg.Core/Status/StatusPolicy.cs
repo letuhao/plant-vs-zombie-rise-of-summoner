@@ -19,6 +19,8 @@ public static class StatusPolicy
     public static double ResistFromPowerRatio => Tuning.ResistFromPowerRatio;
     public static double MinNetFactor => Tuning.MinNetFactor;
     public static double MaxNetFactor => Tuning.MaxNetFactor;
+    /// <summary>T3.2 (audit F4): netFactor = 1 + delta/NetFactorScale — linear, no cliff.</summary>
+    public static double NetFactorScale => Tuning.NetFactorScale;
     public static double ProgressionPowerStubDefault => Tuning.ProgressionPowerStubDefault;
     public static int ProcDepthLimitDefault => Tuning.ProcDepthLimitDefault;
 

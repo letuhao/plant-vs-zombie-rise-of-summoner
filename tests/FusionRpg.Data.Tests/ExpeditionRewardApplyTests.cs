@@ -74,6 +74,35 @@ public class ExpeditionRewardApplyTests : IDisposable
     }
 
     [Fact]
+    public void Expedition_souls_past_headroom_throw_instead_of_silently_clamping()
+    {
+        // T3.5 (spec-caps-reconcile.md §2.1, §11.2a): before this task, AwardSouls threw on excess but
+        // this path silently clamped via Math.Min(rewards.EventSouls, MaxSoulAward) -- "two policies
+        // for one ceiling, and the silent one is on the reward path." Now both throw on the SAME
+        // dynamic headroom, proven here by pushing balance to within 100 of long.MaxValue via the
+        // audited AwardSouls path, then asking the expedition path for more than that headroom.
+        var (specimen, _) = _store.MintDemon(1, Spec());
+        var (_, _, row) = _store.DispatchExpedition(1, "reward-headroom", "scout-30m", new[] { specimen.Actor.InstanceId }, 1);
+
+        _store.AwardSouls(1, long.MaxValue - 100, "seed", "near-ceiling");
+        var balanceBefore = _store.GetSoulBalance(1).Balance;
+
+        var rewards = new RpgStore.ExpeditionRewardApply(
+            EventSouls: 1000, // headroom is only 100 -- this must be refused, not shorted to 100
+            Materials: Array.Empty<(string, long)>(),
+            SpecimenXp: Array.Empty<(string, double)>(),
+            WildMints: Array.Empty<DemonMintSpec>());
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            _store.ApplyExpeditionRewards(row!.Id, 1, ExpeditionStates.Collected, rewards));
+
+        // Refused, not shorted: the transaction rolled back entirely -- balance untouched and the
+        // expedition still open (a future retry with a legal amount can still succeed).
+        Assert.Equal(balanceBefore, _store.GetSoulBalance(1).Balance);
+        Assert.Equal(ExpeditionStates.Dispatched, _store.TryGetExpedition(row!.Id)!.State);
+    }
+
+    [Fact]
     public void Bad_material_in_rewards_applies_nothing()
     {
         var (specimen, _) = _store.MintDemon(1, Spec());

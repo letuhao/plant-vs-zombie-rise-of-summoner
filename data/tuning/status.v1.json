@@ -3,15 +3,16 @@
   "version": 1,
   "_meta": {
     "owner": "docs/architecture/actor-hub-ssot.md",
-    "note": "Extracted byte-identical from StatusPolicy.cs (tunables-ssot.md M.4, 2026-08-23). resistFromPowerRatio is the exact value power-plan.md T3.1 (not yet authorized) will change 0->1.0 — this migration is what turns that into a one-value publish instead of a code edit.",
+    "note": "Extracted byte-identical from StatusPolicy.cs (tunables-ssot.md M.4, 2026-08-23). power-plan.md T3.1 (done 2026-08-24): resistFromPowerRatio 0->1.0. T3.2 (done 2026-08-24): added netFactorScale (audit F4 -- netFactor = 1 + delta/netFactorScale, replacing a raw-delta cliff where +2 gave 2.0x and one retired world gave 25x); applyScaleK is no longer scaled by matchPower (audit F3, code-side change in ResistanceEvaluator.cs, not a tuning value). progressionPowerStubDefault now backs only progression.realm (progression.power reads Theta via IPowerIndexProvider) -- SSOT: progression.realm stays 1.0 permanently.",
     "rebalance": "Never hand-edit this file. python tools/tuning/publish.py status <dotted.key>=<value> [...] writes status.v{n+1}.json; the old version stays on disk for revert."
   },
   "categoryResistCap": 0.95,
   "applyScaleK": 100.0,
   "applyScaleFloor": 1.0,
-  "resistFromPowerRatio": 0.0,
+  "resistFromPowerRatio": 1.0,
   "minNetFactor": 0.0,
   "maxNetFactor": 10000.0,
+  "netFactorScale": 10.0,
   "progressionPowerStubDefault": 1.0,
   "procDepthLimitDefault": 6,
   "applySteepnessDefault": 1.0

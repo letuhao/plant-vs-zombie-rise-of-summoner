@@ -9,9 +9,11 @@ namespace FusionRpg.Injector.Hud;
 /// </summary>
 static class Win32
 {
+    // Structural (tunables-ssot.md T2) — a fixed Win32 API constant, not balance.
     public const uint PM_REMOVE = 0x0001;
 
     /// <summary>Sent to our pumped thread when the registered overlay hotkey fires.</summary>
+    // Structural (tunables-ssot.md T2) — a fixed Win32 message id, not balance.
     public const uint WM_HOTKEY = 0x0312;
 
     /// <summary>Our hotkey id. Scoped to this thread, so it cannot clash with the launcher's.</summary>
@@ -20,7 +22,9 @@ static class Win32
     const int WS_POPUP = unchecked((int)0x80000000);
     const int WS_EX_TOOLWINDOW = 0x00000080; // keep it out of the alt-tab list
     const int SW_HIDE = 0;
+    // Structural (tunables-ssot.md T2), both below — fixed Win32 ShowWindow() command codes, not balance.
     const int SW_SHOWNOACTIVATE = 4;
+    // Structural (tunables-ssot.md T2) — see SW_SHOWNOACTIVATE above.
     const int SW_SHOW = 5;
     const uint MOD_NOREPEAT = 0x4000;
     const uint SWP_NOACTIVATE = 0x0010;

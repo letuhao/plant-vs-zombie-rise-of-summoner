@@ -50,7 +50,13 @@ function scanLines(
  */
 const F10_PATTERN = /F10/;
 
-const F10_ALLOWED_FILES = new Set(["shell/keymap.ts", "shell/keymapGuard.ts"]);
+const F10_ALLOWED_FILES = new Set([
+  "shell/keymap.ts",
+  "shell/keymapGuard.ts",
+  // T20's Controls screen renders keymap.ts's own forbidden-keys list (`listForbiddenKeys()`) as
+  // a read-only reserved row — it reads the literal, never assigns it.
+  "layers/system/SystemLayer.tsx"
+]);
 
 export function scanForF10Bindings(srcDir: string): GuardViolation[] {
   return scanLines(srcDir, (relPath) => F10_ALLOWED_FILES.has(relPath), [F10_PATTERN]);

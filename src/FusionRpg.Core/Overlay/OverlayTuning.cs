@@ -10,11 +10,14 @@ public sealed record OverlaySwitchLayoutTuning(
 
 public sealed record OverlaySwitchStateTuning(int DebounceMs, int ProbeIntervalMs, int SendTimeoutMs);
 
+public sealed record OverlaySettingsGuiTuning(float PanelW, float PanelH);
+
 /// <summary>Overlay balance/UI surface (tunables-ssot.md T1) — loaded, not hard-coded. See
 /// <see cref="OverlayTuningHub.Configure"/> and <see cref="OverlayTuningLoader"/>.</summary>
 public sealed record OverlayTuning(
     int SchemaVersion, int Version,
-    OverlayPauseTuning Pause, OverlaySwitchLayoutTuning SwitchLayout, OverlaySwitchStateTuning SwitchState);
+    OverlayPauseTuning Pause, OverlaySwitchLayoutTuning SwitchLayout, OverlaySwitchStateTuning SwitchState,
+    OverlaySettingsGuiTuning SettingsGui);
 
 public sealed class OverlayTuningRejection : Exception
 {
@@ -56,8 +59,13 @@ public static class OverlayTuningLoader
                 ProbeIntervalMs: Int(s, "probeIntervalMs", "switchState"),
                 SendTimeoutMs: Int(s, "sendTimeoutMs", "switchState"));
 
+            var g = Obj(root, "settingsGui");
+            var settingsGui = new OverlaySettingsGuiTuning(
+                PanelW: Flt(g, "panelW", "settingsGui"),
+                PanelH: Flt(g, "panelH", "settingsGui"));
+
             return new OverlayTuning(Int(root, "schemaVersion", "$"), Int(root, "version", "$"),
-                pause, layout, state);
+                pause, layout, state, settingsGui);
         }
     }
 

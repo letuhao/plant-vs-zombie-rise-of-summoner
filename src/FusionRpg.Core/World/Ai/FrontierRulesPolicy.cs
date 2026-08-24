@@ -23,10 +23,10 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
     public static readonly FrontierRulesPolicy Instance = new();
 
     /// <summary>Wounds above this, in per-mille of a member's health, are worth standing still for.</summary>
-    public const int RecoverAtMilli = 400;
+    public static int RecoverAtMilli => WorldAiPolicy.Tuning.FrontierRules.RecoverAtMilli;
 
     /// <summary>How far a legion will travel to look at ground nobody has seen.</summary>
-    public const int ExploreTurns = 3;
+    public static int ExploreTurns => WorldAiPolicy.Tuning.FrontierRules.ExploreTurns;
 
     /// <summary>
     /// The reconnection-cost floor a `Sever` target must clear to be worth attacking
@@ -36,7 +36,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
     /// moment cutting it splits the enemy's holdings) and comfortably above a redundant sector's
     /// near-zero one.
     /// </summary>
-    public const long SeveranceThresholdCost = 10_000;
+    public static long SeveranceThresholdCost => WorldAiPolicy.Tuning.FrontierRules.SeveranceThresholdCost;
 
     public string PolicyId => Id;
 

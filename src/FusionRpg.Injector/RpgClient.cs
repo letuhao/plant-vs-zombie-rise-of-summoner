@@ -12,9 +12,10 @@ namespace FusionRpg.Injector;
 
 public sealed class RpgClient
 {
-    public const int QueueCap = 50_000;
-    public const int DrainSize = 256;
-    public const int FlushMs = 16;
+    // Config-backed (tunables-ssot.md T1) — data/tuning/net.v1.json's client.
+    public static int QueueCap => FusionRpg.Core.Net.NetPolicy.Tuning.Client.QueueCap;
+    public static int DrainSize => FusionRpg.Core.Net.NetPolicy.Tuning.Client.DrainSize;
+    public static int FlushMs => FusionRpg.Core.Net.NetPolicy.Tuning.Client.FlushMs;
 
     private readonly string _base;
     private HttpClient? _http;

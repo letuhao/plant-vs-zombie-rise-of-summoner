@@ -4,7 +4,9 @@
 every consumer onto it, the caps standard, the numeric-overflow standard, the magic-number standard,
 and the doc reconciliations for features not yet built.
 
-**Status:** Phase 0, M and D **authorized and unblocked**. Phases 1–4 pending owner review of the map and specs — a review gate, not a dependency. **No open questions.**
+**Status:** Phase 0, M and D **authorized and unblocked, done**. Owner approved the map and all ten
+module specs 2026-08-24 — **Phases 1–4 authorized.** Phase 1 (T1.1–T1.4, Checkpoint 1) done the same
+day. **No open questions.**
 **Task list:** [power-todo.md](power-todo.md) · **Map:** [../docs/architecture/power-map.md](../docs/architecture/power-map.md)
 **SSOT:** [power/ssot-power-scale.md](../docs/architecture/power/ssot-power-scale.md) ·
 [tunables-ssot.md](../docs/architecture/tunables-ssot.md) ·
@@ -182,11 +184,14 @@ Four unbuilt-feature specs to correct before they ship.
 | Soul earn formula | §11.7a — `KillDelta × contentScale`, constants unchanged |
 | `Wm` | `5` (§5.3), derived from the shipped `SectorTypeCatalog` bands 0–6 |
 | SSOT §10.4 economy | **Decided** — loam stays `Θ`-invariant, souls scale on `P(Θ)` |
-| ADR P1 amendment | **Written** into `decisions.md`, marked pending build |
+| ADR P1 amendment | **Written** into `decisions.md`, **built 2026-08-24** (T3.1/T3.2) |
 
-**One review gate remains, and it is not a blocker:** owner approval of the map and the ten specs,
-before Phases 1–4 build. Phases 0, M and D are authorized and need nothing.
+**Owner approved the map and the ten specs 2026-08-24 — the review gate is cleared.** Phases 0
+through 4, plus M and D, are all **built and verified 2026-08-24** — see `tasks/power-todo.md` for
+the per-task evidence (T1.1 through T4.2, Checkpoints 0–4/M/D all passed). Nothing in this program
+remains open.
 
-Two inputs are still *welcome* rather than *owed*: the world program can confirm or move `Wm` (a
-weight in a tuning file either way), and the demon/economy stream can retune the soul constants it
-already owns (they are unchanged, so silence is a valid answer).
+Two inputs stayed *welcome* rather than *owed* throughout, and remain so: the world program may still
+confirm or move `Wm` (a weight in a tuning file either way), and the demon/economy stream may still
+retune the soul constants it already owns (they shipped unchanged, so silence was and is a valid
+answer).

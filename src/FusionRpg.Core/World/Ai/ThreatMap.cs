@@ -30,19 +30,19 @@ public enum ThreatReading
 public static class ThreatMap
 {
     /// <summary>How much confidence a turn of staleness costs. Seven turns is total amnesia.</summary>
-    public const int StaleDecayPerTurn = 150;
+    public static int StaleDecayPerTurn => WorldAiPolicy.Tuning.ThreatMap.StaleDecayPerTurn;
 
     /// <summary>
     /// How far a sighting is allowed to smear. Beyond four hops the fear is so diffuse it says
     /// nothing, and freshness has nearly run out by then anyway.
     /// </summary>
-    public const int MaxSpreadHops = 4;
+    public static int MaxSpreadHops => WorldAiPolicy.Tuning.ThreatMap.MaxSpreadHops;
 
     /// <summary>What each hop past the spread costs. Zero at three, which bounds the walk.</summary>
-    public const int ProximityFalloffPerHop = 400;
+    public static int ProximityFalloffPerHop => WorldAiPolicy.Tuning.ThreatMap.ProximityFalloffPerHop;
 
     /// <summary>Where the falloff reaches zero — the radius worth visiting at all.</summary>
-    public const int FalloffReach = 1000 / ProximityFalloffPerHop;   // 2
+    public static int FalloffReach => 1000 / ProximityFalloffPerHop;   // 2
 
     public static IReadOnlyDictionary<string, long> For(IWorldView view, ThreatReading reading)
     {

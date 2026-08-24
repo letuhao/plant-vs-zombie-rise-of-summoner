@@ -1,6 +1,10 @@
-import { Area, AreaChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
 import { cn } from "@/lib/cn";
 
+/**
+ * T13/T19: the sparkline shape, rebuilt from theme tokens instead of `recharts` (T13's
+ * dependency-removal goal). A plain inline SVG polyline — same external shape as before this
+ * rebuild, so every existing caller (`RpgProgressionPage.tsx`) is unchanged.
+ */
 export function Sparkline({
   values,
   className,
@@ -21,36 +25,26 @@ export function Sparkline({
     );
   }
 
-  const data = values.map((v, i) => ({ i, v }));
+  const width = 100;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const stepX = values.length > 1 ? width / (values.length - 1) : 0;
+  const points = values
+    .map((v, i) => {
+      const x = i * stepX;
+      const y = height - ((v - min) / range) * height;
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    })
+    .join(" ");
+  const areaPoints = `0,${height} ${points} ${width},${height}`;
 
   return (
     <div data-testid={testId} className={cn("w-full max-w-md", className)} style={{ height }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 4, right: 4, left: 4, bottom: 4 }}>
-          <YAxis hide domain={["auto", "auto"]} />
-          <Tooltip
-            contentStyle={{
-              background: "var(--color-panel)",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)"
-            }}
-            labelFormatter={() => "Δ XP"}
-            formatter={(value) => {
-              const n = typeof value === "number" ? value : Number(value);
-              return Number.isFinite(n) ? n.toFixed(0) : String(value);
-            }}
-          />
-          <Area
-            type="monotone"
-            dataKey="v"
-            stroke="var(--color-sun)"
-            fill="var(--color-sun)"
-            fillOpacity={0.2}
-            strokeWidth={2}
-            isAnimationActive={false}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+      <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" width="100%" height="100%">
+        <polygon points={areaPoints} fill="var(--color-sun)" fillOpacity={0.2} />
+        <polyline points={points} fill="none" stroke="var(--color-sun)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+      </svg>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # Capability map: power program
 
-**Status:** **Map drafted 2026-08-23; every open question closed the same day — pending owner review. No build authorized.**
+**Status:** **Map drafted 2026-08-23, every open question closed the same day. Owner approved the map and all ten module specs 2026-08-24 — build authorized.**
 **Inventory:** the SSOT's §10 sweep found **14** power-shaped scales; 6 collapse into `Θ`, 8 are bounded or relative and stay. That table is now closed — a scale not in it has no permission to exist.
 **Parent SSOT:** [power/ssot-power-scale.md](power/ssot-power-scale.md) (reconciled 2026-08-23).
 **Adversarial audit:** [power/audit-2026-08-23.md](power/audit-2026-08-23.md) — 8 findings, 5 critical, all adjudicated and applied.
@@ -49,7 +49,7 @@ unwritten item scale. This program replaces all three with a single index `Θ` a
 | `power-guard` | Four checks (SSOT §9.2): no literal curve in code · no private `f(level)` outside `Core/Power` · §10 inventory closed · the pin holds for every tuning version. The thing that stops §0's drift returning | waves 1–3 | **4** |
 | `power-dial` | Turn `B` from `0` to its shipped value. `RulesetVersion` bump + knowing golden re-bless. **The only golden-moving change in the program** | everything | **4** |
 
-**Module specs** — all ten drafted 2026-08-23, pending review:
+**Module specs** — all ten drafted 2026-08-23, approved and **built 2026-08-24** (power-todo.md T1.1–T4.2, Checkpoints 1–4 all passed):
 [power-ladder](power/spec-power-ladder.md) · [power-index](power/spec-power-index.md) ·
 [battle-magnitude](power/spec-battle-magnitude.md) · [battle-rates](power/spec-battle-rates.md) ·
 [content-authoring](power/spec-content-authoring.md) · [status-contest](power/spec-status-contest.md) ·
@@ -84,6 +84,8 @@ flowchart TB
 | **Atom layer (E9)** | Nothing — `PowerVector` stays scale-free | It prices *relative* content; the magnitudes it prices are already scaled. Scaling it double-counts (`ssot-power-scale` §1) |
 
 ## Checkpoints
+
+All five passed 2026-08-24 (power-todo.md Checkpoints 1–4; wave 3's own gate is Checkpoint 3's 3b).
 
 | After | Gate |
 |---|---|
@@ -131,7 +133,7 @@ costs a config version, not a refactor.
 
 **Still needed from outside this program** — none of it blocking waves 1–2:
 
-1. ~~ADR P1 amendment~~ — **written into `decisions.md`** 2026-08-23, marked pending build.
+1. ~~ADR P1 amendment~~ — **written into `decisions.md`** 2026-08-23, **built 2026-08-24** (T3.1/T3.2).
 2. ~~Economy owner ratifies §10.4~~ — **decided**: loam `Θ`-invariant, souls scale on `P(Θ)`.
 3. ~~`Wm` from the world program~~ — **decided**: `Wm = 5`, derived from the shipped catalog.
 

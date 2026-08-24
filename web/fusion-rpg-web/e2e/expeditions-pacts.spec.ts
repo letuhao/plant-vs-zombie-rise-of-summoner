@@ -127,6 +127,65 @@ test.describe("Expeditions layer (T17)", () => {
     const nav = page.getByTestId("audit-nav");
     await expect(nav.getByText("Expeditions", { exact: true })).toHaveCount(0);
   });
+
+  // T30 (plate 03 §C): the active-expedition card — status pill, real progress %, real roster chips.
+  test("an active card shows a real status pill, progress percentage and roster chip; a returned one offers Collect with no fabricated rewards", async ({ page }) => {
+    // `expeditionProgress` (expeditionTime.ts) compares against the browser's real `Date.now()`, not
+    // the fixture's `serverUtc` — so "away" vs "returned" has to be built relative to the real clock
+    // at test-run time, not a fixed historical date (mockSanctum's own dueUtc-before-serverUtc fixture
+    // only works for the rail-badge test, which reads a *different*, server-time-relative watcher).
+    const now = Date.now();
+    const iso = (ms: number) => new Date(ms).toISOString();
+    await mockSanctum(page, { contracts: [boundDemon] });
+    // mockSanctum's own `/api/expeditions/*` route hardcodes `tiers: []` — override it so
+    // "scout-30m" resolves to a real tier, otherwise every card's `due`/progress math silently
+    // falls back to its zero-default (this is what broke on the first run of this test).
+    await page.route("**/api/expeditions/*", (route) =>
+      fulfillJson(route, {
+        serverUtc: iso(now),
+        tiers: [
+          { tierId: "scout-30m", name: "Scout", durationMinutes: 60, tickCount: 2, battleCount: 2, squadSlots: 2, hasBossWave: false, tickMinutes: 30 }
+        ],
+        items: [
+          {
+            id: 1,
+            state: "Dispatched",
+            tierId: "scout-30m",
+            squadInstanceIds: ["d1"],
+            dispatchedUtc: iso(now - 30 * 60_000),
+            dueUtc: iso(now + 30 * 60_000) // still away, ~50% through
+          },
+          {
+            id: 2,
+            state: "Dispatched",
+            tierId: "scout-30m",
+            squadInstanceIds: ["d1"],
+            dispatchedUtc: iso(now - 120 * 60_000),
+            dueUtc: iso(now - 60 * 60_000) // due an hour ago — returned
+          }
+        ]
+      })
+    );
+    await page.goto("/#/sanctum?panel=expeditions");
+
+    // Regression: the subtitle's "away" count is the active total *minus* the returned ones, not
+    // the raw active total — caught visually (a live screenshot showed "2 away" with only one
+    // actually away) before this assertion existed.
+    await expect(page.getByTestId("expeditions-layer")).toContainText("1 returned · 1 away");
+
+    const away = page.getByTestId("expedition-1");
+    await expect(away).toContainText("away");
+    await expect(away.getByTestId("expedition-progress-1")).toBeVisible();
+    await expect(away.getByTestId("expedition-roster-1")).toContainText("d1"); // no species catalog mocked — real fallback to instanceId
+    await expect(away.getByRole("button", { name: "Collect" })).toBeDisabled();
+
+    const returned = page.getByTestId("expedition-2");
+    await expect(returned).toContainText("returned");
+    await expect(returned.getByTestId("expedition-progress-2")).not.toBeVisible();
+    await expect(returned.getByRole("button", { name: "Collect" })).toBeEnabled();
+    // Honest scope: no reward chips on the pre-collect card — ExpeditionRowDto carries no preview.
+    await expect(returned).not.toContainText("souls");
+  });
 });
 
 test.describe("Pacts layer (T17)", () => {

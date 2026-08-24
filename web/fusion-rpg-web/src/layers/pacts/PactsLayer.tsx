@@ -13,7 +13,31 @@ import { displayName } from "@/features/demons/rosterSplit";
 import { auraLabel, auraPreviewMilli } from "@/features/demons/patronView";
 import { PanelShell } from "@/shell/PanelShell";
 import { EmptyState } from "@/ui/EmptyState";
-import { Badge, Button } from "@/ui";
+import { Badge, Banner, Button } from "@/ui";
+
+// T30 (plate 03 §D): a colour-tinted portrait per card. No demon art registry exists (game-gui-map.md
+// assumption 6 — art is out, the registry is in), so this is the same honest substitute
+// `ui/actor/shared.tsx`'s `ActorFrame` already uses for creatures — an initial inside a coloured
+// frame — reusing the existing `--color-rarity-*` tokens rather than inventing a demon-specific
+// palette. Demon rarity is a 4-tier `common|rare|epic|legendary` string (`lib/bus/demons.ts`), not
+// the 5-tier numeric scale those tokens were named for, so this maps onto a rising subset of them.
+const RARITY_TINT: Record<string, string> = {
+  common: "border-rarity-1",
+  rare: "border-rarity-3",
+  epic: "border-rarity-4",
+  legendary: "border-rarity-5"
+};
+
+function PactPortrait({ rarity, initial }: { rarity: string; initial: string }) {
+  return (
+    <span
+      data-testid="pact-portrait"
+      className={`flex h-11 w-11 flex-none items-center justify-center rounded-md border-2 bg-panel-inset font-display text-lg uppercase text-text ${RARITY_TINT[rarity] ?? "border-border"}`}
+    >
+      {initial}
+    </span>
+  );
+}
 
 /**
  * T17 — the demon contracts layer (plate 03 §D, spec-demon-contracts.md): loyalty, tribute,
@@ -64,25 +88,46 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
         ) : undefined
       }
     >
-      {rows.length === 0 ? (
+      {contracts.isLoading || roster.isLoading ? (
+        <p className="text-sm text-muted" data-testid="pacts-loading" aria-busy="true">
+          Loading pacts…
+        </p>
+      ) : contracts.isError || roster.isError ? (
+        <Banner tone="error" data-testid="pacts-error">
+          Couldn't load pacts.
+          <Button
+            size="sm"
+            variant="ghost"
+            className="ml-2"
+            onClick={() => {
+              void contracts.refetch();
+              void roster.refetch();
+            }}
+          >
+            Retry
+          </Button>
+        </Banner>
+      ) : rows.length === 0 ? (
         <EmptyState title="No pacts yet" hint="Bind a demon's contract from the Demons roster to see it here." />
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 gap-3" data-testid="pacts-grid">
           {rows.map((c) => {
             const specimen = bySpecimenId.get(c.instanceId);
             const species = specimen ? speciesById.get(specimen.profile.speciesId) : undefined;
             const condition = conditionOf(c);
             const isPatron = patron.data?.patron?.instanceId === c.instanceId;
+            const name = specimen ? displayName(specimen, species?.name) : c.instanceId;
             return (
               <div
                 key={c.instanceId}
-                className={`rounded-md border p-3 ${condition === "insubordinate" ? "border-bad" : "border-border"}`}
+                className={`min-w-0 rounded-md border p-3 ${condition === "insubordinate" ? "border-bad" : "border-border"}`}
                 data-testid={`pact-${c.instanceId}`}
               >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-text">
-                    {specimen ? displayName(specimen, species?.name) : c.instanceId}
-                  </span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <PactPortrait rarity={specimen?.profile.rarity ?? "common"} initial={name.slice(0, 1)} />
+                    <span className="truncate font-semibold text-text">{name}</span>
+                  </div>
                   <Badge className={condition === "insubordinate" ? "" : undefined}>
                     {condition === "insubordinate" ? "tribute overdue" : "content"}
                   </Badge>
@@ -111,7 +156,7 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
                   </p>
                 ) : null}
 
-                <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                   {condition === "insubordinate" ? (
                     <>
                       <Button size="sm" disabled title="Renegotiate" data-testid={`pact-renegotiate-${c.instanceId}`}>

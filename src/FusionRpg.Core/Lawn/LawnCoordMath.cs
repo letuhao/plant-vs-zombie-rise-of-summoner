@@ -7,7 +7,10 @@ namespace FusionRpg.Core.Lawn;
 /// </summary>
 public static class LawnCoordMath
 {
+    // Structural (tunables-ssot.md T2) — the PvZ lawn's fixed 10x5 grid shape (0-indexed last col/
+    // row), not a balance dial. Changing it is a different board, not a tuning pass.
     public const int DefaultLastCol = 9;
+    // Structural (tunables-ssot.md T2) — see DefaultLastCol above.
     public const int DefaultLastRow = 4;
 
     public static int ClampIndex(int value, int lastInclusive)

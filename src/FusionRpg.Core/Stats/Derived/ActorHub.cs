@@ -88,11 +88,16 @@ public sealed class ActorHub
 
 public static class ActorHubBootstrap
 {
-    public static ActorHub CreateDefault(StatSystem? stats = null, IProgressionPowerProvider? power = null)
+    /// <summary><paramref name="level"/> feeds only <see cref="Subsystems.RpgProgressionSubsystem"/>'s
+    /// bonus-mod gating (T1.4 deleted <c>IProgressionPowerProvider</c>); <paramref name="powerIndex"/>
+    /// feeds <c>progression.power</c> (T3.2, defaults to Θ=0) — see that class's doc comment for why
+    /// the two stay separate parameters.</summary>
+    public static ActorHub CreateDefault(StatSystem? stats = null, Func<StatContext, int>? level = null,
+        FusionRpg.Core.Power.IPowerIndexProvider? powerIndex = null)
     {
         var sys = stats ?? StatSystemBootstrap.CreateDefault();
         var hub = new ActorHub(sys);
-        hub.Register(new Subsystems.RpgProgressionSubsystem(power));
+        hub.Register(new Subsystems.RpgProgressionSubsystem(level, powerIndex));
         return hub;
     }
 }

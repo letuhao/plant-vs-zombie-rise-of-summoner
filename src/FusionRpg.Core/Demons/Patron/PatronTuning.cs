@@ -6,7 +6,7 @@ namespace FusionRpg.Core.Demons.Patron;
 /// <see cref="PatronPolicy.Configure"/> and <see cref="PatronTuningLoader"/>.</summary>
 public sealed record PatronTuning(
     int SchemaVersion, int Version,
-    long SwitchCostSouls, int AuraClampMilli, int PerStarMilli, int KillSoulCap,
+    long SwitchCostSouls, int AuraClampMilli, int PerStarMilli,
     IReadOnlyDictionary<DemonRarity, int> RarityBaseMilli);
 
 public sealed class PatronTuningRejection : Exception
@@ -34,7 +34,6 @@ public static class PatronTuningLoader
             var switchCostSouls = Long(root, "switchCostSouls", "$");
             var auraClampMilli = Int(root, "auraClampMilli", "$");
             var perStarMilli = Int(root, "perStarMilli", "$");
-            var killSoulCap = Int(root, "killSoulCap", "$");
 
             var rEl = Obj(root, "rarityBaseMilli", "$");
             var rarityBase = new Dictionary<DemonRarity, int>();
@@ -42,7 +41,7 @@ public static class PatronTuningLoader
                 rarityBase[rarity] = Int(rEl, rarity.ToString().ToLowerInvariant(), "rarityBaseMilli");
 
             return new PatronTuning(schemaVersion, version, switchCostSouls, auraClampMilli,
-                perStarMilli, killSoulCap, rarityBase);
+                perStarMilli, rarityBase);
         }
     }
 

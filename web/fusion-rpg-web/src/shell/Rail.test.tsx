@@ -50,4 +50,15 @@ describe("Rail", () => {
     await user.click(screen.getByTestId("rail-relics"));
     expect(onSelect).not.toHaveBeenCalled();
   });
+
+  // T25 (plate 01 §C / 02 §A / 04 §A): a vertical, left-docked icon-over-label column, not the
+  // earlier horizontal strip.
+  it("renders as a vertical icon-over-label dock, not a horizontal strip", () => {
+    render(<Rail entries={deriveRailEntries(baseInputs)} onSelect={() => {}} />);
+    expect(screen.getByTestId("rail")).toHaveClass("flex-col");
+    const creatures = screen.getByTestId("rail-creatures");
+    // icon-over-label: an aria-hidden glyph span plus the visible label text, both inside the button.
+    expect(creatures.querySelector("span[aria-hidden='true']")).toBeInTheDocument();
+    expect(creatures).toHaveTextContent("Creatures");
+  });
 });

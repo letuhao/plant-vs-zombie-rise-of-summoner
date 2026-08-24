@@ -11,6 +11,7 @@ namespace FusionRpg.Server;
 /// </summary>
 public sealed class InjectorCommandInbox
 {
+    // Structural (tunables-ssot.md T2) — bounded queue memory, not balance.
     const int Cap = 2_000;
     readonly ConcurrentQueue<CommandDto> _q = new();
     int _count;

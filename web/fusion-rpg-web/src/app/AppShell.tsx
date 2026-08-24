@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { useHealth, useHubStatus, usePlayers } from "@/lib/bus";
 import { DevTreeHost } from "@/dev/DevTreeHost";
+import { SystemHost } from "@/layers/system/SystemHost";
 import { useGlobalKeys } from "@/shell/useGlobalKeys";
 import { Toasts } from "@/shell/Toasts";
 import { Banner } from "@/ui";
@@ -37,6 +38,7 @@ export function AppShell() {
       </div>
       <Toasts />
       <DevTreeHost />
+      <SystemHost />
     </div>
   );
 }

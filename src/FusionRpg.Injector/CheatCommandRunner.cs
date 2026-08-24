@@ -21,6 +21,7 @@ public static class CheatCommandRunner
 {
     static readonly ConcurrentQueue<CommandDto> Pending = new();
     static readonly ConcurrentDictionary<string, byte> SeenIds = new();
+    // Structural (tunables-ssot.md T2) — dedupe-cache memory bound, not balance.
     const int SeenCap = 512;
 
     public static void Enqueue(CommandDto cmd)

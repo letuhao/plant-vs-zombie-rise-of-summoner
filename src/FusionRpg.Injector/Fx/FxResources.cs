@@ -1,3 +1,4 @@
+using FusionRpg.Core.Vfx;
 using UnityEngine;
 
 namespace FusionRpg.Injector.Fx;
@@ -9,8 +10,9 @@ namespace FusionRpg.Injector.Fx;
 /// </summary>
 public static class FxResources
 {
-    /// <summary>Render ordering for overlay particles — one named home for the old magic 80.</summary>
-    public const int ParticleSortingOrder = 80;
+    /// <summary>Render ordering for overlay particles — one named home for the old magic 80.
+    /// Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.particleSortingOrder.</summary>
+    public static int ParticleSortingOrder => VfxTuningHub.Tuning.Render.ParticleSortingOrder;
 
     static Material? _particleMat;
     static Texture2D? _softDisc;
@@ -87,7 +89,8 @@ public static class FxResources
     static Texture2D MarkerTexture(Core.Vfx.VfxMarkerShape shape)
     {
         if (MarkerTextures.TryGetValue(shape, out var cached) && cached != null) return cached;
-        const int size = 64;
+        // Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.particleTextureSize.
+        var size = VfxTuningHub.Tuning.Render.ParticleTextureSize;
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
         {
             hideFlags = HideFlags.HideAndDontSave,
@@ -113,7 +116,8 @@ public static class FxResources
 
     static float ShapeAlpha(Core.Vfx.VfxMarkerShape shape, float nx, float ny)
     {
-        const float edge = 0.1f;
+        // Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.markerEdgeSoftness.
+        var edge = (float)VfxTuningHub.Tuning.Render.MarkerEdgeSoftness;
         switch (shape)
         {
             case Core.Vfx.VfxMarkerShape.Diamond:
@@ -145,7 +149,8 @@ public static class FxResources
     static Texture2D SoftDisc()
     {
         if (_softDisc != null) return _softDisc;
-        const int size = 64;
+        // Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.particleTextureSize.
+        var size = VfxTuningHub.Tuning.Render.ParticleTextureSize;
         var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
         {
             hideFlags = HideFlags.HideAndDontSave,

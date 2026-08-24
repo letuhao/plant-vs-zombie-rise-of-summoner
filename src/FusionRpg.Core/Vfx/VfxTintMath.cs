@@ -6,7 +6,17 @@ namespace FusionRpg.Core.Vfx;
 /// </summary>
 public static class VfxTintMath
 {
-    public const float MaxStrength = 0.35f;
+    static VfxTuning? _tuning;
+
+    public static void Configure(VfxTuning tuning) =>
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static VfxTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "VfxTintMath.Configure(...) has not run. MaxStrength reads data/tuning/vfx.v{n}.json " +
+        "(tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    /// <summary>Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's tint.maxStrength.</summary>
+    public static float MaxStrength => (float)Tuning.TintMaxStrength;
 
     public static (byte R, byte G, byte B) Composite(
         (byte R, byte G, byte B) baseRgb,
@@ -24,5 +34,6 @@ public static class VfxTintMath
         return (Clamp(r), Clamp(g), Clamp(b));
     }
 
-    static byte Clamp(float v) => v <= 0f ? (byte)0 : v >= 255f ? (byte)255 : (byte)Math.Round(v);
+    static byte Clamp(float v) =>
+        v <= byte.MinValue ? byte.MinValue : v >= byte.MaxValue ? byte.MaxValue : (byte)Math.Round(v);
 }

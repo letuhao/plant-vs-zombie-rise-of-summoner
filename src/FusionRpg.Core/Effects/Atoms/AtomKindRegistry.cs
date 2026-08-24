@@ -11,8 +11,12 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// </summary>
 public static class AtomKindRegistry
 {
+    // Structural (tunables-ssot.md T2), all three: closed-vocabulary cardinalities, not balance —
+    // each must match what this registry actually builds below, not a dial a balance pass turns.
     public const int AttachPointCount = 5;
+    // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     public const int KindCount = 12;
+    // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     public const int TriggerCount = 7;
 
     /// <summary>Event triggers plus OnTimer — for kinds that can also fire on a tick.</summary>

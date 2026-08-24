@@ -5,7 +5,7 @@ import { adaptRelic } from "@/contract/adapt";
 type RelicDto = Parameters<typeof adaptRelic>[0];
 import { PanelShell } from "@/shell/PanelShell";
 import { EmptyState } from "@/ui/EmptyState";
-import { Button, Select } from "@/ui";
+import { Banner, Button, Select } from "@/ui";
 
 type Tab = "held" | "equipped" | "storage";
 
@@ -26,9 +26,9 @@ function RelicRow({
       type="button"
       data-testid={`relics-row-${relic.id}`}
       data-selected={selected}
-      aria-selected={selected}
+      aria-current={selected}
       onClick={onSelect}
-      className="flex w-full items-center gap-3 border-b border-border px-3 py-2 text-left last:border-b-0 focus-visible:bg-panel-raised aria-selected:bg-panel-raised"
+      className="flex w-full items-center gap-3 border-b border-border px-3 py-2 text-left last:border-b-0 focus-visible:bg-panel-raised aria-current:bg-panel-raised"
     >
       <span
         className="inline-block h-3 w-3 shrink-0 rounded-full"
@@ -125,7 +125,26 @@ export function RelicsLayer({
         </div>
       }
     >
-      {actors.length === 0 ? (
+      {actorsQuery.isLoading || relicsQuery.isLoading ? (
+        <p className="text-sm text-muted" data-testid="relics-loading" aria-busy="true">
+          Loading relics…
+        </p>
+      ) : actorsQuery.isError || relicsQuery.isError ? (
+        <Banner tone="error" data-testid="relics-error">
+          Couldn't load relics.
+          <Button
+            size="sm"
+            variant="ghost"
+            className="ml-2"
+            onClick={() => {
+              void actorsQuery.refetch();
+              void relicsQuery.refetch();
+            }}
+          >
+            Retry
+          </Button>
+        </Banner>
+      ) : actors.length === 0 ? (
         <EmptyState title="No creatures bound yet" hint="Bind a creature to equip relics to it." />
       ) : (
         <div className="flex flex-col gap-4">
@@ -153,7 +172,7 @@ export function RelicsLayer({
             // that cap left the comparison too narrow to read comfortably at any width.
             <div className="flex flex-col gap-4">
               <div>
-                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-faint">
+                <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted">
                   Held — pick one to see what it changes
                 </p>
                 <div className="rounded-md border border-border" data-testid="relics-list">
@@ -172,7 +191,7 @@ export function RelicsLayer({
               <div>
                 {candidate ? (
                   <div data-testid="relics-compare">
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-faint">
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted">
                       {currentInCandidateSlot?.id === candidate.id
                         ? `${candidate.name} is already equipped`
                         : currentInCandidateSlot
@@ -193,6 +212,7 @@ export function RelicsLayer({
                         <Button
                           data-testid="relics-equip-btn"
                           disabled={equipMutation.isPending}
+                          title={equipMutation.isPending ? "Equipping…" : undefined}
                           onClick={() =>
                             equipMutation.mutate({ instanceId: actorId, slot: candidate.slot, itemId: candidate.id })
                           }

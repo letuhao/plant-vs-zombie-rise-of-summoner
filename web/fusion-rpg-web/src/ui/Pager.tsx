@@ -21,11 +21,25 @@ export function Pager({
 }) {
   return (
     <div data-testid={testId} className={cn("mt-3 flex flex-wrap items-center gap-2", className)}>
-      <Button data-testid={`${testId}-prev`} size="sm" variant="ghost" disabled={!canPrev} onClick={onPrev}>
+      <Button
+        data-testid={`${testId}-prev`}
+        size="sm"
+        variant="ghost"
+        disabled={!canPrev}
+        title={canPrev ? undefined : "Already at the first page"}
+        onClick={onPrev}
+      >
         Prev
       </Button>
       <HelpText>{label}</HelpText>
-      <Button data-testid={`${testId}-next`} size="sm" variant="ghost" disabled={!canNext} onClick={onNext}>
+      <Button
+        data-testid={`${testId}-next`}
+        size="sm"
+        variant="ghost"
+        disabled={!canNext}
+        title={canNext ? undefined : "No more pages"}
+        onClick={onNext}
+      >
         Next
       </Button>
     </div>

@@ -68,17 +68,18 @@ test.describe("Sanctum stage (T9)", () => {
 
   test("opening a layer from the rail keeps the stage mounted underneath, and Esc returns to it", async ({ page }) => {
     await mockSanctum(page);
-    // Unlock Almanac so this test can exercise the *generic placeholder* path — Creatures has
-    // its own real layer as of T10 (creatures.spec.ts covers its stage-persistence in depth).
+    // Unlock Almanac to exercise a non-Creatures layer here — Creatures has its own dedicated
+    // stage-persistence coverage (creatures.spec.ts); every rail entry has a real layer as of T19
+    // (almanac-chronicle.spec.ts covers Almanac's own contract).
     await page.route("**/api/runs", (route) => fulfillJson(route, { items: [{ id: 1, startedUtc: "2026-01-01T00:00:00Z" }] }));
     await page.goto("/#/sanctum");
 
     await page.getByTestId("rail-almanac").click();
-    await expect(page.getByTestId("sanctum-layer-placeholder")).toBeVisible();
+    await expect(page.getByTestId("almanac-layer")).toBeVisible();
     await expect(page.getByTestId("sanctum-hud")).toBeVisible(); // stage still mounted behind it
 
     await page.keyboard.press("Escape");
-    await expect(page.getByTestId("sanctum-layer-placeholder")).not.toBeVisible();
+    await expect(page.getByTestId("almanac-layer")).not.toBeVisible();
     await expect(page.getByTestId("rail")).toBeVisible();
   });
 

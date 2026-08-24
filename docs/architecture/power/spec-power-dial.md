@@ -5,7 +5,7 @@ Module **`power-dial`**, wave 4 in the [power map](../power-map.md). Depends on 
 > **Reads [ssot-power-scale.md](ssot-power-scale.md)** — the parent SSOT. Where this spec and the
 > SSOT disagree, **the SSOT wins**.
 
-**Status:** Draft — pending owner review. No build authorized.
+**Status:** Owner approved 2026-08-24 — build authorized.
 
 ---
 

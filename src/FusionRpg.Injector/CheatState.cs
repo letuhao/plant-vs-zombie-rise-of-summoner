@@ -27,9 +27,14 @@ public static class CheatState
     public static StatsConfig LocalStats { get; } = new();
     /// <summary>Shared StatSystem — plugins compose Y0 + Xi → Y. Cheats feed cheat.scale / cheat.absolute only.</summary>
     public static StatSystem Stats { get; } = StatSystemBootstrap.CreateDefault();
-    public static InjectorProgressionPowerProvider ProgressionPower { get; } = new();
-    /// <summary>Derived snapshot compose — wraps Stats; Writer uses AppliedCombat.</summary>
-    public static ActorHub ActorHub { get; } = ActorHubBootstrap.CreateDefault(Stats, ProgressionPower);
+    /// <summary>Derived snapshot compose — wraps Stats; Writer uses AppliedCombat. Not yet fed by
+    /// <see cref="PowerIndex"/> — see RpgProgressionSubsystem's doc comment (power-plan.md T3.2).</summary>
+    public static ActorHub ActorHub { get; } = ActorHubBootstrap.CreateDefault(Stats);
+    static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;
+    /// <summary>Θ ladder index, ready for a consumer (power-plan.md waves 2-3) — inert until then.
+    /// Lazy: PowerTuningHub.Configure runs in RpgHost.Initialize, which this must not race.</summary>
+    public static FusionRpg.Core.Power.IPowerIndexProvider PowerIndex =>
+        _powerIndex ??= new InjectorPowerIndexProvider(FusionRpg.Core.Power.PowerTuningHub.Tuning);
     public static IntPtr SelectedPtr;
     public static string SelectedSide = "";
     static int _spawnCol = 3;

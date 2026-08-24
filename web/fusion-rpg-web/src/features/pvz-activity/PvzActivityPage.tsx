@@ -44,6 +44,7 @@ export function PvzActivityPage() {
             data-testid="pvz-activity-seed"
             onClick={() => void seed.mutateAsync(playerId)}
             disabled={seed.isPending}
+            title={seed.isPending ? "Seeding…" : undefined}
           >
             Seed demo
           </Button>
@@ -51,6 +52,7 @@ export function PvzActivityPage() {
             data-testid="pvz-activity-spawn-extra"
             onClick={() => void spawnExtra.mutateAsync({ typeId: 0, reason: "luck-demo", playerId })}
             disabled={spawnExtra.isPending}
+            title={spawnExtra.isPending ? "Enqueuing…" : undefined}
           >
             Intent: extra spawn
           </Button>

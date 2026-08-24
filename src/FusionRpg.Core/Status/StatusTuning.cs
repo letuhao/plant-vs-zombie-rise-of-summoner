@@ -7,7 +7,7 @@ namespace FusionRpg.Core.Status;
 public sealed record StatusTuning(
     int SchemaVersion, int Version,
     double CategoryResistCap, double ApplyScaleK, double ApplyScaleFloor,
-    double ResistFromPowerRatio, double MinNetFactor, double MaxNetFactor,
+    double ResistFromPowerRatio, double MinNetFactor, double MaxNetFactor, double NetFactorScale,
     double ProgressionPowerStubDefault, int ProcDepthLimitDefault, double ApplySteepnessDefault);
 
 public sealed class StatusTuningRejection : Exception
@@ -39,6 +39,7 @@ public static class StatusTuningLoader
                 ResistFromPowerRatio: Dbl(root, "resistFromPowerRatio"),
                 MinNetFactor: Dbl(root, "minNetFactor"),
                 MaxNetFactor: Dbl(root, "maxNetFactor"),
+                NetFactorScale: Dbl(root, "netFactorScale"),
                 ProgressionPowerStubDefault: Dbl(root, "progressionPowerStubDefault"),
                 ProcDepthLimitDefault: Int(root, "procDepthLimitDefault"),
                 ApplySteepnessDefault: Dbl(root, "applySteepnessDefault"));

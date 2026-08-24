@@ -56,22 +56,22 @@ export function ActorPanel({
       </div>
 
       <div className="mt-4">
-        <p className="text-2xs font-bold uppercase tracking-wide text-faint">Standing</p>
+        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Standing</p>
         <PendingNote pending={data.channelSummary} testId="actor-standing-pending" />
       </div>
 
       <div className="mt-4">
-        <p className="text-2xs font-bold uppercase tracking-wide text-faint">Element typing</p>
+        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Element typing</p>
         <PendingNote pending={data.elementTyping} testId="actor-element-pending" />
       </div>
 
       <div className="mt-4">
-        <p className="text-2xs font-bold uppercase tracking-wide text-faint">Shield</p>
+        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Shield</p>
         <PendingNote pending={data.shieldStack} testId="actor-shield-pending" />
       </div>
 
       <div className="mt-4">
-        <p className="text-2xs font-bold uppercase tracking-wide text-faint">Equipment</p>
+        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Equipment</p>
         <PendingNote pending={data.equipSlots} testId="actor-equip-pending" />
       </div>
     </PanelShell>

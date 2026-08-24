@@ -5,7 +5,7 @@ Module **`power-ladder`**, wave 1 in the [power map](../power-map.md). Depends o
 > **Reads [ssot-power-scale.md](ssot-power-scale.md)** — the parent SSOT. Where this spec and the
 > SSOT disagree, **the SSOT wins**. This module implements §4 and §9; it decides nothing.
 
-**Status:** Draft — pending owner review. No build authorized.
+**Status:** Owner approved 2026-08-24 — build authorized. Built: T1.1/T1.2 (power-todo.md), done and verified the same day.
 
 ---
 
