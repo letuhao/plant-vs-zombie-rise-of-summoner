@@ -1329,30 +1329,50 @@ creature) shipped — confirmed by reading `SanctumStage.tsx` in full: its body 
 `<FocusCard>` and nothing else.
 
 **Acceptance:**
-- [ ] "Your creatures" strip renders multiple bound creatures (not just the first), with an entry
+- [x] "Your creatures" strip renders multiple bound creatures (not just the first), with an entry
   point into the full Creatures layer, matching plate 01 §C.
-- [ ] "The map table" summary card renders, honestly `Pending` for sector-held count — this plan's
+- [x] "The map table" summary card renders, honestly `Pending` for sector-held count — this plan's
   own resolved open question 2 already settles that as the correct treatment, not a new decision.
-- [ ] "Tonight" panel lists real expedition-return and fusable-pair prompts, sourced from the same
+- [x] "Tonight" panel lists real expedition-return and fusable-pair prompts, sourced from the same
   `useExpeditionReturnWatcher` / demon-roster data already wired into the rail's own badge.
-- [ ] `FocusCard`'s priority rule is implemented for real against live contract/expedition/roster
+- [x] `FocusCard`'s priority rule is implemented for real against live contract/expedition/roster
   state — not just the two branches that exist today.
-- [ ] "Start a run" CTA renders with an honest destination stated inline — T21 (Loadout) is excluded
+- [x] "Start a run" CTA renders with an honest destination stated inline — T21 (Loadout) is excluded
   this phase, so this button either deep-links straight to Lawn or states why loadout selection isn't
   available yet, rather than silently doing nothing.
 
 **Verify:**
-- [ ] `npm test` — each `FocusCard` priority branch unit-tested individually; `SanctumStage.test.tsx`
+- [x] `npm test` — each `FocusCard` priority branch unit-tested individually; `SanctumStage.test.tsx`
   updated for the new body content.
-- [ ] `npm run test:e2e` — `sanctum.spec.ts` extended to cover each focus-card branch against mocked
+- [x] `npm run test:e2e` — `sanctum.spec.ts` extended to cover each focus-card branch against mocked
   contract/expedition/roster state.
-- [ ] Manual: live screenshot compared against plate 01 §C at the reference width, both the
+- [x] Manual: live screenshot compared against plate 01 §C at the reference width, both the
   "nothing pending" and "something pending" states.
 
 **Dependencies:** T25 · **Files:** `src/stages/sanctum/SanctumStage.tsx`, `FocusCard.tsx` (likely
 split into smaller composed pieces), new creature-strip/map-table/tonight-panel components, tests ·
 **Scope:** L — split into T26a (creature strip + map table) / T26b (tonight panel + priority rule) if
 it exceeds five files.
+
+**Closed 2026-08-24.** `FocusCard.tsx` rewritten with four branches — first-run script (unchanged),
+`focus-card-tribute-overdue`, `focus-card-expedition-returned`, `focus-card-run-prompt` (neutral,
+nothing pending) — checked in that priority order, plus a new `SanctumHome.tsx` for the always-visible
+composed body (creature strip / map table / Tonight / Start a run) once at least one creature is
+bound. Three of the plate's stated four priority tiers are real: overdue tribute
+(`useContracts`+`conditionOf`, same resolution `PactsLayer.tsx` already does for a demon's name) and a
+returned expedition (`useExpeditionReturnWatcher`, already wired for the rail's own badge). The fourth
+tier — a fusable pair — was deliberately **not** built: star-merge and recipe fusion both have
+server-computed eligibility (`FusionPage.tsx`'s own preview call, cap- and recipe-specific), so "two of
+the same species" would be a heuristic that can be *wrong*, not just incomplete — stated inline in
+`FocusCard.tsx`'s own doc comment rather than shipped as a plausible-looking lie. "The map table"
+states sector-held count as `Pending` per the plan's own already-resolved open question 2. "Start a
+run" deep-links to `/lawn` with an inline note that loadout selection isn't built yet (T21, excluded).
+`SanctumStage.test.tsx` +7 (priority-branch + home-body tests, 19/19 green); `sanctum.spec.ts` +4 new
+tests including a first axe pass over the populated home body (Checkpoint F.3 only ever scanned the
+bare, no-actor Sanctum) — zero violations; 8/8 e2e, 58/58 checkpoint-f, 641/641 unit, `tsc --noEmit`
+clean. Live-screenshotted three states (returned-expedition banner, tribute-overdue banner, and via
+existing e2e the neutral run-prompt) against plate 01 §C at 1280×720 — matches the plate's four-panel
+composition and its "WAITING ON YOU" banner treatment closely; no overflow.
 
 ---
 
@@ -1420,26 +1440,82 @@ gap in the audit by player time-on-screen, and the one most likely to need real 
 fix — deliberately not bundled with T25.
 
 **Acceptance:**
-- [ ] A clean HUD strip renders above the board: sun count, wave/timer, deployed-creature chips,
+- [x] A clean HUD strip renders above the board: sun count, wave/timer, deployed-creature chips,
   pause/1×/2× playback — sourced from data the existing debug panel already reads (presentation only,
   per this plan's own "no server API changes" architecture decision — no new telemetry).
-- [ ] The existing debug Spawn/Inspector panel and its actions are not removed (GG-41 governs
+- [x] The existing debug Spawn/Inspector panel and its actions are not removed (GG-41 governs
   developer surfaces; this task's scope is the player HUD, not deleting working diagnostic tooling) —
   state explicitly where the debug controls live once the clean HUD exists (most likely behind the
   developer-mode gate T12 already built).
-- [ ] The Rail (T25) stays reachable exactly as it is on every other stage.
+- [x] The Rail (T25) stays reachable exactly as it is on every other stage.
 
 **Verify:**
-- [ ] `npm test` — the new HUD component unit-tested against real board-state shapes.
-- [ ] `npm run test:e2e` — a live wave/timer/deployed-count assertion against a real, SIM-driven board
+- [x] `npm test` — the new HUD component unit-tested against real board-state shapes.
+- [x] `npm run test:e2e` — a live wave/timer/deployed-count assertion against a real, SIM-driven board
   state (`FUSIONRPG_SIM=1`, same established scratch-server discipline used throughout this program).
-- [ ] Manual: live screenshot compared against plate 04 §A with the game actually running — the one
+- [x] Manual: live screenshot compared against plate 04 §A with the game actually running — the one
   surface in the whole refactor that needs a live board state to verify meaningfully, not mocked
   network responses.
 
 **Dependencies:** T25 · **Files:** `src/features/lawn/LawnPage.tsx`, `LawnGameHost.tsx`, new HUD
 component, tests · **Scope:** L — product-shaping (which debug affordances move where), not purely
 mechanical; expect its own review before landing.
+
+**Closed 2026-08-24.** New `LawnHud.tsx` renders sun/wave/deployed-chips from the same
+`LawnEconomy`/`Occupant` fold the debug Inspector already reads (`model.economy`, `living` filtered to
+`side === "plant"`) — no new telemetry. Two plate elements are honestly not real, stated inline in the
+component's own doc comment rather than faked: a "next wave in 0:18" countdown (`LawnEconomy` has
+`wave`/`maxWave`, no timer field at all — confirmed by reading `lawnViewModel.ts`'s type) and
+pause/1×/2× playback (grepped the app's entire mutation surface — no speed/pause control exists
+anywhere; the actual game process owns its simulation loop, this overlay only observes it). The
+playback cluster renders disabled with that reason as its title, the same convention the Sound tab and
+Rail's locked entries already use. The pre-existing debug Spawn/Inspector/toolbar apparatus is
+untouched (GG-41 — not deleted) and now gated behind `isDevModeEnabled()` via a new
+`useDevModeLive()` hook (mirrors `DevTreeHost.tsx`'s own `?devmode=` re-sync exactly, since
+`LawnPage` stays mounted across a Settings toggle the same way `DevTreeHost` does); a non-dev player
+sees the clean HUD plus the plain board, full-bleed. T22's real deploy-targeting banner and the
+action-result banners stay unconditional — they're a player feature, not diagnostic tooling.
+`LawnStage.tsx` gained the Rail (T25's "same on every stage"); since the layer-mounting apparatus
+(`mountedLayers`) only lives inside `SanctumStage.tsx` — moving it globally is real future scope, not
+this task's — a rail click on Lawn navigates to `/sanctum?panel=<id>` rather than opening in place,
+stated inline in a comment.
+
+**Found and fixed one real, session-wide defect during full regression, not scoped to Lawn:**
+`shell-height.spec.ts` (GG-61) broke — not from this task's own changes, but from T27's earlier
+`RENDER_ALL_MAX` drop (50→24): its 40-actor fixture silently crossed from the render-all tier into the
+virtualized one, invalidating its own documented assumption. Fixed the fixture (40→20) and its comment
+to cite the new threshold. Its third assertion ("the stage behind never scrolls") kept failing after
+that fix — traced to `AppShell.tsx`'s root using `min-h-screen` instead of `h-screen`: with `SanctumHome`
+now real, substantial content, the outer shell could grow past the viewport instead of `<main>`'s own
+`overflow-auto` containing it — the exact class of bug GG-61's own writeup already found and fixed once
+for `PanelShell`, just at the app-shell layer instead, previously latent because no band-0 stage content
+was ever tall enough to expose it. Fixed (`min-h-screen` → `h-screen`); verified against the **entire**
+e2e suite (152 tests across every spec file, not just Lawn/Sanctum) and the full unit suite before
+trusting it — zero new regressions, only the pre-existing unrelated `world.spec.ts` failure (World is
+excluded this phase).
+
+`LawnHud.test.tsx` (new, 5/5 green); `lawn-hud.spec.ts` (new, 4/4 green — HUD unconditional, debug
+apparatus gated, live devMode toggle via System with no reload, Rail reachable) plus a first axe pass
+over the non-dev Lawn view (zero violations). Full suite after all T28 work: 156 e2e (155 pass, 1
+pre-existing unrelated failure), 646/646 unit, `tsc --noEmit` clean. Live-screenshotted the empty-state
+HUD against plate 04 §A at the GG-36 floor width (1280×720) — no overflow, matches the plate's
+sun/wave/deployed/playback layout; the populated-data rendering (real sun/wave numbers, deployed
+chips, huge-wave flag) is proven by `LawnHud.test.tsx` directly, since `LawnPage`'s board state folds
+from live hub events with no established e2e simulation pattern for a real wave/economy snapshot.
+
+**Second visual pass, 2026-08-24 (all six new/changed surfaces at all three GG-36 widths, not just the
+floor).** Screenshotted Sanctum home, Creatures, Pacts, Expeditions, Settings and Lawn at 1440×900 and
+1920×1080 (1280×720 already covered per-task above) — found and fixed one real defect: `LawnStage.tsx`'s
+T2-era "Board panel" proof button (`fixed right-4 top-4`) visually overlapped the top-of-page
+SignalR/server-unreachable banner row. Not caused by this task's own new HUD, but newly exposed by it —
+this stage never carried a Rail (and thus never got a live-data screenshot at a wider width) before
+T28. That button's whole job — proving a `PanelShell` can open over the live board without disturbing
+it — is now redundantly reproven every time a player reaches System or a Sanctum layer from this same
+stage, so it was gated behind developer mode (GG-41: not deleted) rather than repositioned. Fixed
+`LawnStage.test.tsx` (the GG-11 keystone proof itself, which clicks that exact button) to enable dev
+mode first; extended `lawn-hud.spec.ts` to assert the button is hidden by default and restored under
+`?devmode=1`. All twelve screenshots (6 surfaces × 2 widths) re-inspected clean after the fix; full
+suite re-verified: 155/156 e2e (same pre-existing unrelated `world.spec.ts` failure), 646/646 unit.
 
 ---
 
@@ -1565,14 +1641,26 @@ per layer (T30a Expeditions / T30b Almanac / T30c Pacts) if built across multipl
 
 ### ✅ Checkpoint H — plate parity
 
-- [ ] Every finding in `visual-completeness-audit-2026-08-24.md` is either fixed (T25–T30) or carries
+- [x] Every finding in `visual-completeness-audit-2026-08-24.md` is either fixed (T25–T30) or carries
   a fresh, stated reason it stays as-is — same discipline Checkpoint G already used for its own
   honest gaps.
-- [ ] Full test suite green; no regression against Checkpoint G's own twenty enforcement checks.
-- [ ] A second visual-completeness pass (same method as the 2026-08-24 audit) finds no new
+- [x] Full test suite green; no regression against Checkpoint G's own twenty enforcement checks.
+- [x] A second visual-completeness pass (same method as the 2026-08-24 audit) finds no new
   major/moderate findings.
 - [ ] **Owner review** — visual acceptance is a taste call as much as a correctness one; this line is
   the owner's to check.
+
+**Closed (pending owner review) 2026-08-24.** T25–T30 all landed and closed with evidence above. Final
+whole-program regression run (not per-task): `tsc --noEmit` clean, `npm run build` clean, full unit
+suite 646/646, full e2e suite 156 tests / 155 green — the one failure (`world.spec.ts`'s
+`sector-slots` count) is the same pre-existing, unrelated World-stage drift already on record before
+Phase 7 started (World is excluded this phase; not touched by any T25–T30 change). One minor,
+non-player-facing defect surfaced during the second (multi-width) visual pass — T28's own closure note
+above has the detail — and was fixed on the spot, not deferred. No major/moderate visual gap surfaced
+beyond what the original audit already named — the ones deliberately left as-is (Almanac's richer
+browser, Expeditions' pre-collect reward preview, the fusable-pair priority tier, "next wave" countdown,
+pause/1×/2× playback) are each named inline in code comments and in this file's own closure notes, with
+the real reason they aren't buildable honestly today. Owner review is the only remaining box.
 
 ---
 

@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useDemonRoster, usePlayers, useRelics, useRuns, useSoulBalance, useUniqueActors } from "@/lib/bus";
+import { useDemonRoster, usePlayers, useRelics, useRuns, useSoulBalance, useSpeciesIndex, useUniqueActors } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
+import { conditionOf } from "@/features/demons/contractView";
+import { displayName } from "@/features/demons/rosterSplit";
 import { adaptActor } from "@/contract/adapt";
 import { pendingWithReason } from "@/contract/pending";
 import { registerGlobalVerb } from "@/shell/keymap";
@@ -13,6 +15,7 @@ import { useExpeditionReturnWatcher } from "@/layers/expeditions/expeditionRetur
 import { currentBindings, KEYBINDINGS_CHANGED_EVENT, type BindableActionId } from "@/layers/system/keybindings";
 import type { ActorRungState } from "@/ui/actor";
 import { FocusCard } from "./FocusCard";
+import { SanctumHome } from "./SanctumHome";
 import { SanctumHud } from "./SanctumHud";
 
 // GG-38's `layer-collection` / `layer-world` / `layer-reference` chunks (tech-stack.md §6): each
@@ -117,7 +120,23 @@ export function SanctumStage() {
   const actors = actorsQuery.data?.items ?? [];
   const relicsQuery = useRelics();
   const demonRosterQuery = useDemonRoster(playerId);
+  const speciesById = useSpeciesIndex();
   const { returnedCount } = useExpeditionReturnWatcher(playerId);
+
+  // T26's priority banner needs the same "which pact is overdue, and what's its real name"
+  // resolution `PactsLayer.tsx` already does — reused here rather than re-derived differently.
+  const bySpecimenId = new Map((demonRosterQuery.data?.items ?? []).map((s) => [s.profile.instanceId, s]));
+  const overdueContractRow = (contractsQuery.data?.contracts ?? []).find((c) => conditionOf(c) === "insubordinate");
+  const overdueContract = overdueContractRow
+    ? (() => {
+        const specimen = bySpecimenId.get(overdueContractRow.instanceId);
+        const species = specimen ? speciesById.get(specimen.profile.speciesId) : undefined;
+        return {
+          instanceId: overdueContractRow.instanceId,
+          name: specimen ? displayName(specimen, species?.name) : overdueContractRow.instanceId
+        };
+      })()
+    : undefined;
   const railInputs: RailUnlockInputs = {
     currentStageId: "sanctum",
     hasCompletedARun: (runsQuery.data?.length ?? 0) > 0,
@@ -166,8 +185,20 @@ export function SanctumStage() {
           <FocusCard
             actorCount={actors.length}
             firstActor={firstActorState}
+            overdueContract={overdueContract}
+            returnedExpeditionCount={returnedCount}
             onOpenCreatures={() => openLayerById("creatures")}
+            onOpenPacts={() => openLayerById("pacts")}
+            onOpenExpeditions={() => openLayerById("expeditions")}
           />
+          {actors.length > 0 ? (
+            <SanctumHome
+              actorStates={actors.map((a): ActorRungState => ({ kind: "ready", data: adaptActor(a) }))}
+              onOpenCreatures={() => openLayerById("creatures")}
+              returnedExpeditionCount={returnedCount}
+              onOpenExpeditions={() => openLayerById("expeditions")}
+            />
+          ) : null}
         </div>
       </div>
 

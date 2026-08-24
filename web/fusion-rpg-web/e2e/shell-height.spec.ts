@@ -24,9 +24,10 @@ async function fulfillJson(route: Route, body: unknown, status = 200) {
  * about one dense entity, not many entities (that's GG-50) — but a `PanelShell` doesn't know or
  * care which one it's holding, so a large, uniform list through the same real component proves the
  * same shell-height guarantee GG-61 asks for without inventing a bespoke fixture shape. Kept below
- * CreaturesLayer's own `VIRTUALIZE_ABOVE` threshold (GG-50, 50) on purpose: above it the list
- * becomes its own fixed-height scroll region, which would test the virtualizer's box instead of
- * `PanelShell`'s — a different guarantee, already covered by e2e/volume-fixtures.spec.ts. */
+ * CreaturesLayer's own `RENDER_ALL_MAX` threshold (GG-50/T27, 24 — was 50 before T27's three-tier
+ * volume model) on purpose: above it the list becomes its own fixed-height virtualized scroll region,
+ * which would test the virtualizer's box instead of `PanelShell`'s — a different guarantee, already
+ * covered by e2e/volume-fixtures.spec.ts. */
 function manyActors(count: number) {
   return {
     playerId: 1,
@@ -49,7 +50,7 @@ async function mockSanctum(page: Page) {
   await page.route("**/api/players", (route) => fulfillJson(route, players));
   await page.route("**/api/players/current", (route) => fulfillJson(route, { ok: true }));
   await page.route("**/api/sim", (route) => fulfillJson(route, null, 404));
-  await page.route("**/api/unique/actors**", (route) => fulfillJson(route, manyActors(40)));
+  await page.route("**/api/unique/actors**", (route) => fulfillJson(route, manyActors(20)));
   await page.route("**/api/relics", (route) => fulfillJson(route, { items: [] }));
   await page.route("**/api/runs", (route) => fulfillJson(route, { items: [] }));
   await page.route("**/api/souls/**", (route) =>
@@ -82,9 +83,9 @@ test.describe("Shell height (GG-61 — a dense entity scrolls inside its own she
 
     const shell = page.getByTestId("creatures-layer");
     await expect(shell).toBeVisible();
-    // 80 rows renders — proves the dense fixture actually landed, not an empty/error state.
+    // 20 rows renders — proves the dense fixture actually landed, not an empty/error state.
     await expect(page.getByTestId("creatures-row-a0")).toBeVisible();
-    await expect(page.getByTestId("creatures-row-a39")).toHaveCount(1);
+    await expect(page.getByTestId("creatures-row-a19")).toHaveCount(1);
 
     const shellBox = await shell.boundingBox();
     expect(shellBox).not.toBeNull();

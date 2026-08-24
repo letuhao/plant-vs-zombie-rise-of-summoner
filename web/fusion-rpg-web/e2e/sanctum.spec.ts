@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { test, expect, type Page, type Route } from "@playwright/test";
 
 const health = {
@@ -88,5 +89,99 @@ test.describe("Sanctum stage (T9)", () => {
     await page.goto("/#/status");
     await expect(page).toHaveURL(/#\/sanctum\?dev=status/);
     await expect(page.getByRole("heading", { name: "Status" })).toBeVisible();
+  });
+});
+
+// T26 (plate 01 §C): the composed home body and the focus card's real priority rule, in a real
+// browser against a bound roster.
+test.describe("Sanctum home (T26)", () => {
+  async function mockBoundRoster(page: Page, opts?: { contracts?: unknown[] }) {
+    await mockSanctum(page);
+    await page.route("**/api/unique/actors**", (route) =>
+      fulfillJson(route, {
+        playerId: 1,
+        items: [
+          { instanceId: "a1", playerId: 1, side: "plant", typeId: 3, phase: "Roster", level: 5, xp: 10, revision: 1 },
+          { instanceId: "a2", playerId: 1, side: "zombie", typeId: 7, phase: "Roster", level: 9, xp: 10, revision: 1 }
+        ]
+      })
+    );
+    await page.route("**/api/contracts/**", (route) =>
+      fulfillJson(route, {
+        contracts: opts?.contracts ?? [],
+        capacity: { used: 1, total: 4, purchasedSlots: 0, nextSlotPrice: 500, canBuy: true, maxSlots: 8 },
+        dailyTribute: 1,
+        deployFloor: 0,
+        loyaltyMax: 1000
+      })
+    );
+    await page.route("**/api/demons/catalog", (route) => fulfillJson(route, { species: [] }));
+    await page.route("**/api/demons/*/codex", (route) => fulfillJson(route, { entries: [] }));
+    await page.route("**/api/demons/*/summon-state", (route) => fulfillJson(route, { pity: 0 }));
+    await page.route("**/api/demons/*", (route) =>
+      fulfillJson(route, {
+        playerId: 1,
+        items: [{ profile: { instanceId: "d1", speciesId: "sp-imp", rarity: "epic", star: 1, elementPrimary: "fire", nickname: null }, actor: { level: 5 } }]
+      })
+    );
+    await page.route("**/api/patron/**", (route) => fulfillJson(route, { patron: null, switchCostSouls: 100 }));
+    await page.route("**/api/expeditions/*", (route) => fulfillJson(route, { serverUtc: new Date().toISOString(), tiers: [], items: [] }));
+  }
+
+  test("with nothing pending, the banner is the neutral run-prompt and the composed body renders real data", async ({ page }) => {
+    await mockBoundRoster(page);
+    await page.goto("/#/sanctum");
+
+    await expect(page.getByTestId("focus-card-run-prompt")).toBeVisible();
+    await expect(page.getByTestId("sanctum-home")).toBeVisible();
+    await expect(page.getByTestId("sanctum-home-creature-strip").getByTestId("actor-chip")).toHaveCount(2);
+    await expect(page.getByTestId("sanctum-home-sectors-held")).toContainText("Pending");
+    await expect(page.getByTestId("sanctum-home-tonight-empty")).toBeVisible();
+    await expect(page.getByTestId("sanctum-home-defend")).toBeVisible();
+
+    // Checkpoint F.3 only scans the bare (no-actor) Sanctum — this is the first axe pass over the
+    // populated home body (creature strip, map table, tonight, run prompt) T26 added.
+    const results = await new AxeBuilder({ page }).include('[data-testid="sanctum-home"]').analyze();
+    expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+  });
+
+  test("an overdue pact takes the banner, and its CTA opens the real Pacts layer", async ({ page }) => {
+    await mockBoundRoster(page, {
+      contracts: [{ instanceId: "d1", bound: true, deployable: false, loyalty: 10, rank: "insubordinate", personality: "cruel", upkeepPerDay: 1 }]
+    });
+    await page.goto("/#/sanctum");
+
+    await expect(page.getByTestId("focus-card-tribute-overdue")).toBeVisible();
+    await expect(page.getByTestId("focus-card-run-prompt")).not.toBeVisible();
+
+    await page.getByTestId("focus-card-pay-tribute").click();
+    await expect(page.getByTestId("pacts-layer")).toBeVisible();
+  });
+
+  test("a returned expedition takes the banner (below an overdue pact) and Tonight offers Collect", async ({ page }) => {
+    await mockBoundRoster(page);
+    await page.route("**/api/expeditions/*", (route) =>
+      fulfillJson(route, {
+        serverUtc: new Date().toISOString(),
+        tiers: [{ tierId: "scout-30m", name: "Scout", durationMinutes: 60, tickCount: 2, battleCount: 2, squadSlots: 2, hasBossWave: false, tickMinutes: 30 }],
+        items: [
+          {
+            id: 1,
+            state: "Dispatched",
+            tierId: "scout-30m",
+            squadInstanceIds: ["d1"],
+            dispatchedUtc: new Date(Date.now() - 120 * 60_000).toISOString(),
+            dueUtc: new Date(Date.now() - 60 * 60_000).toISOString()
+          }
+        ]
+      })
+    );
+    await page.goto("/#/sanctum");
+
+    await expect(page.getByTestId("focus-card-expedition-returned")).toBeVisible();
+    await expect(page.getByTestId("sanctum-home-tonight-expedition")).toContainText("1 expedition returned");
+
+    await page.getByTestId("sanctum-home-tonight-collect").click();
+    await expect(page.getByTestId("expeditions-layer")).toBeVisible();
   });
 });

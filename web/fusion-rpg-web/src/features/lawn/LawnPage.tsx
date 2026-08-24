@@ -13,6 +13,7 @@ import {
 import type { LawnSelectPayload } from "@/game/EventBus";
 import { cn } from "@/lib/cn";
 import { claimStageEscape } from "@/shell/keymap";
+import { useDevModeLive } from "@/dev/useDevModeLive";
 import { Page } from "@/layouts/Page";
 import { Split } from "@/layouts/Split";
 import {
@@ -29,6 +30,7 @@ import {
   TypeIcon
 } from "@/ui";
 import { LawnGameHost } from "./LawnGameHost";
+import { LawnHud } from "./LawnHud";
 import { LawnOccupantList } from "./LawnOccupantList";
 import { LawnStatsModal } from "./LawnStatsModal";
 import {
@@ -181,8 +183,20 @@ export function LawnPage() {
     [model.phase]
   );
 
+  // T28 — the debug Spawn/Inspector/toolbar apparatus below stays exactly as it is (GG-41: a
+  // developer surface doesn't get deleted for a player-facing pass), gated behind the same
+  // developer-mode flag T12 already built rather than shown to every player by default. The new
+  // `LawnHud` and the deploy-targeting banner (T22, a real player feature) are unconditional.
+  const devMode = useDevModeLive();
   const living = listOccupants(model);
   const livingCount = living.length;
+  const deployedChips = useMemo(
+    () =>
+      living
+        .filter((o) => o.side === "plant")
+        .map((o) => ({ ptr: o.ptr, side: o.side, typeId: o.typeId, typeName: o.typeName })),
+    [living]
+  );
   const picked = pickPhaserOccupants(
     living,
     PHASER_OCCUPANT_BUDGET,
@@ -897,23 +911,8 @@ export function LawnPage() {
     </Panel>
   );
 
-  return (
-    <Page
-      testId="page-lawn"
-      title="Lawn"
-      description="Observe projector + Intent/debug enqueue — never FE Admit or optimistic living."
-      className={large ? "max-w-none" : "max-w-[1600px]"}
-      actions={
-        <>
-          <Badge tone={model.phase === "InMatch" ? "ok" : "neutral"}>
-            {model.phase}
-          </Badge>
-          <Badge tone="neutral">
-            canvas {canvasCount} / living {livingCount}
-          </Badge>
-        </>
-      }
-    >
+  const devToolbarAndInspector = (
+    <>
       <div className="mb-3 flex flex-wrap gap-2" data-testid="lawn-view-toolbar">
         {VIEW_MODES.map((mode) => (
           <Button
@@ -956,40 +955,6 @@ export function LawnPage() {
         Living set is folded from hub events / debug snapshots — not from Activity
         rollups. Mutations enqueue only; Server/Injector Admit gates apply.
       </Banner>
-      {actionError ? (
-        <Banner tone="error" className="mb-3" data-testid="lawn-action-error">
-          {actionError}
-        </Banner>
-      ) : null}
-      {actionOk ? (
-        <Banner tone="info" className="mb-3" data-testid="lawn-action-ok">
-          {actionOk}
-        </Banner>
-      ) : null}
-      {deployInstanceId ? (
-        // Stage chrome (plate 07 §B): no scrim, the board stays fully visible and interactive
-        // underneath — this is an inline banner, never a Dialog/layer.
-        <Banner tone="info" className="mb-3 flex flex-wrap items-center justify-between gap-2" data-testid="lawn-deploy-banner">
-          <span>
-            Choosing a place for {deployActorName}
-            {hasCell ? ` — cell (${targetRow}, ${targetCol})` : ""}
-          </span>
-          <span className="flex gap-2">
-            <Button size="sm" variant="ghost" onClick={cancelDeploy} data-testid="lawn-deploy-cancel">
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              disabled={!hasCell || deployMutation.isPending}
-              title={deployMutation.isPending ? "Deploying…" : !hasCell ? "Click a cell on the board first" : undefined}
-              onClick={confirmDeploy}
-              data-testid="lawn-deploy-confirm"
-            >
-              Deploy here
-            </Button>
-          </span>
-        </Banner>
-      ) : null}
       {viewMode === "split" ? (
         <Split
           className="lg:grid-cols-[minmax(0,1.75fr)_minmax(18rem,24rem)]"
@@ -1027,6 +992,75 @@ export function LawnPage() {
           setStatsOpen(false);
         }}
       />
+    </>
+  );
+
+  return (
+    <Page
+      testId="page-lawn"
+      title="Lawn"
+      description={devMode ? "Observe projector + Intent/debug enqueue — never FE Admit or optimistic living." : undefined}
+      className={devMode && large ? "max-w-none" : "max-w-[1600px]"}
+      actions={
+        devMode ? (
+          <>
+            <Badge tone={model.phase === "InMatch" ? "ok" : "neutral"}>{model.phase}</Badge>
+            <Badge tone="neutral">canvas {canvasCount} / living {livingCount}</Badge>
+          </>
+        ) : undefined
+      }
+    >
+      <LawnHud
+        sun={model.economy?.sun}
+        wave={model.economy?.wave}
+        maxWave={model.economy?.maxWave}
+        hugeWave={model.economy?.hugeWave}
+        deployed={deployedChips}
+      />
+
+      {actionError ? (
+        <Banner tone="error" className="mb-3" data-testid="lawn-action-error">
+          {actionError}
+        </Banner>
+      ) : null}
+      {actionOk ? (
+        <Banner tone="info" className="mb-3" data-testid="lawn-action-ok">
+          {actionOk}
+        </Banner>
+      ) : null}
+      {deployInstanceId ? (
+        // Stage chrome (plate 07 §B): no scrim, the board stays fully visible and interactive
+        // underneath — this is an inline banner, never a Dialog/layer. Unconditional — deploying a
+        // real, owned creature (T22) is a player feature, not diagnostic tooling.
+        <Banner tone="info" className="mb-3 flex flex-wrap items-center justify-between gap-2" data-testid="lawn-deploy-banner">
+          <span>
+            Choosing a place for {deployActorName}
+            {hasCell ? ` — cell (${targetRow}, ${targetCol})` : ""}
+          </span>
+          <span className="flex gap-2">
+            <Button size="sm" variant="ghost" onClick={cancelDeploy} data-testid="lawn-deploy-cancel">
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={!hasCell || deployMutation.isPending}
+              title={deployMutation.isPending ? "Deploying…" : !hasCell ? "Click a cell on the board first" : undefined}
+              onClick={confirmDeploy}
+              data-testid="lawn-deploy-confirm"
+            >
+              Deploy here
+            </Button>
+          </span>
+        </Banner>
+      ) : null}
+
+      {devMode ? (
+        devToolbarAndInspector
+      ) : (
+        <div data-testid="lawn-canvas-plain">
+          <LawnGameHost model={model} interaction={interaction} viewMode="large" onSelect={onSelect} />
+        </div>
+      )}
     </Page>
   );
 }

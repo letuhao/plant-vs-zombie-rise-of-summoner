@@ -182,6 +182,18 @@ phase-scoped exception, distinct from the three permanent behavioural exceptions
 
 ## Phase 7 — Plate parity (added 2026-08-24, after the visual-completeness audit)
 
+**Status: built, 2026-08-24 — T25 through T30 all closed with evidence in
+[game-gui-todo.md](game-gui-todo.md); Checkpoint H passed except the owner-review line.** Full
+regression at the end of the phase (not per-task): `tsc --noEmit` clean, `npm run build` clean, full
+unit suite 646/646, full e2e suite 155/156 (the one failure is the pre-existing, unrelated
+`world.spec.ts` drift already on record, World being excluded this phase). One real, session-wide
+defect was found and fixed along the way, not scoped to any single task: `AppShell.tsx`'s root used
+`min-h-screen` instead of `h-screen`, so once T26 gave the Sanctum stage real, substantial content
+(`SanctumHome`), the outer shell could grow past the viewport instead of `<main>`'s own `overflow-auto`
+containing it — the same class of bug GG-61's own writeup already found once for `PanelShell`, just at
+the app-shell layer, previously latent because no band-0 stage content had ever been tall enough to
+expose it. Fixed and verified against the entire e2e suite before trusting it.
+
 **Why this phase exists.** Checkpoint G closed the *shell's* twenty enforcement checks — bands, stage
 persistence, focus, mutation feedback, bundle budget, and so on. It never asked the other question:
 does each surface's own visual content match the plate that specifies it. That pass ran for the first

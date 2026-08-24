@@ -1,8 +1,15 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { msg } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
+import { useDemonRoster, usePlayers, useRelics, useRuns } from "@/lib/bus";
+import { useContracts } from "@/lib/bus/contracts";
+import { useDevModeLive } from "@/dev/useDevModeLive";
 import { LawnPage } from "@/features/lawn/LawnPage";
+import { useExpeditionReturnWatcher } from "@/layers/expeditions/expeditionReturnWatcher";
 import { PanelShell } from "@/shell/PanelShell";
+import { Rail } from "@/shell/Rail";
+import { deriveRailEntries, type RailEntry, type RailUnlockInputs } from "@/shell/railState";
 import { StageHost, useStageMountGuard } from "@/shell/stageHost";
 
 /**
@@ -25,30 +32,75 @@ import { StageHost, useStageMountGuard } from "@/shell/stageHost";
 export function LawnStage() {
   useStageMountGuard("lawn");
   const { _ } = useLingui();
+  const navigate = useNavigate();
   const [panelOpen, setPanelOpen] = useState(false);
+  // T28: this GG-11 keystone proof (a panel can open over the live board without disturbing it) is
+  // now redundantly re-proven by real usage every time a player reaches System or a Sanctum layer
+  // from here — visually found overlapping the top banner row at a wider viewport during a second
+  // multi-width pass, not caused by T28's own new HUD but newly exposed by it (this stage never had
+  // a Rail before). Gated behind developer mode rather than deleted (GG-41).
+  const devMode = useDevModeLive();
+
+  // T28/GG-1: "the rail is identical on every stage." Every layer it opens still only exists inside
+  // `SanctumStage.tsx` (its `mountedLayers` gate isn't shared globally — moving the whole layer
+  // stack up to AppShell is real future scope, not this task's), so a rail click here navigates to
+  // where the layer actually lives rather than trying to open it in place over the live board. The
+  // unlock queries below duplicate `SanctumStage.tsx`'s own — cheap and safe, since react-query
+  // dedupes by query key rather than refetching.
+  const players = usePlayers();
+  const playerId = players.data?.currentPlayerId ?? 1;
+  const runsQuery = useRuns();
+  const contractsQuery = useContracts(playerId);
+  const relicsQuery = useRelics();
+  const demonRosterQuery = useDemonRoster(playerId);
+  const { returnedCount } = useExpeditionReturnWatcher(playerId);
+  const railInputs: RailUnlockInputs = {
+    currentStageId: "lawn",
+    hasCompletedARun: (runsQuery.data?.length ?? 0) > 0,
+    hasAnyDemon: (demonRosterQuery.data?.items.length ?? 0) > 0,
+    hasAnyContract: (contractsQuery.data?.contracts.length ?? 0) > 0,
+    hasAnyRelic: (relicsQuery.data?.items.length ?? 0) > 0,
+    hasAnyBoundDemon: contractsQuery.data?.contracts.some((c) => c.bound) ?? false,
+    returnedExpeditionCount: returnedCount,
+    unreadResultCount: 0
+  };
+  const railEntries = deriveRailEntries(railInputs);
+
+  function openLayerOnSanctum(id: Exclude<RailEntry["id"], "sanctum">) {
+    navigate(`/sanctum?panel=${id}`);
+  }
 
   return (
     <StageHost>
-      <LawnPage />
-      <button
-        type="button"
-        data-testid="lawn-stage-open-panel"
-        className="band-hud fixed right-4 top-4 rounded-sm border border-border bg-panel px-3 py-1 text-sm text-text shadow-panel"
-        onClick={() => setPanelOpen(true)}
-      >
-        {_(msg`Board panel`)}
-      </button>
-      <PanelShell
-        open={panelOpen}
-        onOpenChange={setPanelOpen}
-        title={_(msg`Board panel`)}
-        subtitle={_(msg`Proves a panel can open here without disturbing the board`)}
-        testId="lawn-stage-panel"
-      >
-        <p className="text-sm text-muted">
-          {_(msg`Board layers arrive with a later pass — this one exists to prove they can open over the live game without resetting it.`)}
-        </p>
-      </PanelShell>
+      <div className="flex items-start" data-testid="lawn-frame">
+        <Rail entries={railEntries} onSelect={(id) => (id === "sanctum" ? navigate("/sanctum") : openLayerOnSanctum(id))} />
+        <div className="min-w-0 flex-1">
+          <LawnPage />
+        </div>
+      </div>
+      {devMode ? (
+        <>
+          <button
+            type="button"
+            data-testid="lawn-stage-open-panel"
+            className="band-hud fixed right-4 top-4 rounded-sm border border-border bg-panel px-3 py-1 text-sm text-text shadow-panel"
+            onClick={() => setPanelOpen(true)}
+          >
+            {_(msg`Board panel`)}
+          </button>
+          <PanelShell
+            open={panelOpen}
+            onOpenChange={setPanelOpen}
+            title={_(msg`Board panel`)}
+            subtitle={_(msg`Proves a panel can open here without disturbing the board`)}
+            testId="lawn-stage-panel"
+          >
+            <p className="text-sm text-muted">
+              {_(msg`Board layers arrive with a later pass — this one exists to prove they can open over the live game without resetting it.`)}
+            </p>
+          </PanelShell>
+        </>
+      ) : null}
     </StageHost>
   );
 }

@@ -18,7 +18,7 @@ export function AppShell() {
   const hubWarn = hub === "err" ? "SignalR disconnected — falling back to poll" : null;
 
   return (
-    <div className="flex min-h-screen flex-col" data-testid="app-shell">
+    <div className="flex h-screen flex-col" data-testid="app-shell">
       {apiErr ? (
         <Banner tone="error" data-testid="banner-api-error">
           Server unreachable: {apiErr}

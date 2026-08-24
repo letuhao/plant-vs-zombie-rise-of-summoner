@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "@/test/render";
 import { getStageMountCount, resetStageMountCounts } from "@/shell/stageHost";
 import { resetKeymapForTests } from "@/shell/keymap";
+import { setDevModeEnabled } from "@/dev/devMode";
 import { LawnStage } from "./LawnStage";
 
 const mutateAsync = vi.fn();
@@ -34,6 +35,30 @@ describe("LawnStage — GG-11 keystone proof", () => {
     destroyLawnGame.mockClear();
     resetStageMountCounts();
     resetKeymapForTests();
+    // This environment's default window.localStorage is incomplete (same pattern
+    // SystemLayer.test.tsx already uses) — stub a real in-memory Storage before each test.
+    const mem: Record<string, string> = {};
+    const ls = {
+      getItem: (k: string) => mem[k] ?? null,
+      setItem: (k: string, v: string) => {
+        mem[k] = v;
+      },
+      removeItem: (k: string) => {
+        delete mem[k];
+      },
+      clear: () => {
+        for (const key of Object.keys(mem)) delete mem[key];
+      },
+      key: (i: number) => Object.keys(mem)[i] ?? null,
+      get length() {
+        return Object.keys(mem).length;
+      }
+    };
+    Object.defineProperty(window, "localStorage", { configurable: true, value: ls });
+    // T28: `lawn-stage-open-panel` (the GG-11 proof button) is gated behind developer mode now
+    // that a real Rail on this stage makes it redundant scaffolding for a live player — this test
+    // is specifically about the developer-facing proof, so it turns the gate on directly.
+    setDevModeEnabled(true);
   });
 
   it("opening and closing a panel leaves the Phaser Game instance identical and never unmounts the stage", async () => {
