@@ -310,7 +310,7 @@ public sealed partial class RpgStore
     static List<ChannelPolicyRow> ValidateChannelPolicyContent(SeedContent content, List<SeedError> errors)
     {
         var rows = content.ChannelPolicies
-            .Select(r => new ChannelPolicyRow(r.ChannelId, r.Direction, r.DefaultValue, r.CapMilli, r.ComposeKind))
+            .Select(r => new ChannelPolicyRow(r.ChannelId, r.Direction))
             .ToList();
 
         var reason = ValidateChannelPolicyRows(rows);

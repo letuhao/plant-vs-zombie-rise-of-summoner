@@ -59,6 +59,16 @@ public sealed record ActionEnvelope
     /// </summary>
     public string SpeedChannel { get; init; } = DerivedTurnChannels.Speed;
 
+    /// <summary>
+    /// Which <c>skill.cooldown.{category}</c> channel this action's cooldown reads for its reduction
+    /// (spec-skill-modifiers.md §1.1 — closes action-map.md:177's gap; D3 repointed here rather than
+    /// inventing a second cooldown-reduction mechanism on the envelope). A <b>reference</b>, mirroring
+    /// <see cref="SpeedChannel"/> — no new channel is declared here, and unlike <c>SpeedChannel</c>
+    /// there is no single universal default: which of the five categories applies is the action's own
+    /// choice, so an action that declares none reads no reduction (<c>null</c>, not a guessed category).
+    /// </summary>
+    public string? CooldownChannel { get; init; }
+
     public long WindupTicks { get; init; }
 
     /// <summary>Single hit at wind-up end. Genuinely immutable, and shared rather than re-allocated.</summary>
@@ -120,6 +130,7 @@ public sealed record ActionEnvelope
         ActionId == other.ActionId &&
         TimeCostTicks == other.TimeCostTicks &&
         SpeedChannel == other.SpeedChannel &&
+        CooldownChannel == other.CooldownChannel &&
         WindupTicks == other.WindupTicks &&
         RecoveryTicks == other.RecoveryTicks &&
         Class == other.Class &&
@@ -159,6 +170,7 @@ public sealed record ActionEnvelope
         hash.Add(ActionId);
         hash.Add(TimeCostTicks);
         hash.Add(SpeedChannel);
+        hash.Add(CooldownChannel);
         hash.Add(WindupTicks);
         hash.Add(RecoveryTicks);
         hash.Add((int)Class);

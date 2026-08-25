@@ -62,7 +62,7 @@ puts `+9 hp` and `+5 accuracy` in the same numeric column.
 
 ---
 
-## 3. The unit ledger — nine classes, each verified
+## 3. The unit ledger — ten classes, each verified
 
 Every derived and primary magnitude belongs to exactly one class. The right-hand column is the consumer
 I read this session; a channel whose consumer I could not name does not get a class, it gets a
@@ -79,12 +79,20 @@ rejection (§8).
 | `Milliseconds` | `4.0 s` · `250 ms` under one second | none | durations, `icd_ms` | authored ms ([definitions.md §2](../architecture/effect-atom/definitions.md)) |
 | `Count` | `2 bullets` | none | `count`, `maxTargets` | atom param schemas |
 | `Flag` | present / absent, **never a number** | none | `status.immune.{tag}` `status.immuneReduction.{tag}` | [DerivedStatRegistry.cs:92-104](../../src/FusionRpg.Core/Stats/Derived/DerivedStatRegistry.cs) — `MaxPriorityFlag`, cap `1` |
+| `LadderIndex` | `Θ 20` | `→ 680 power` — **exact, not an estimate** (§3.2) | `progression.power` `progression.realm` | [ResistanceEvaluator.cs:190-217](../../src/FusionRpg.Core/Status/ResistanceEvaluator.cs) reads it **linearly** as a contest delta; `PowerLadder.Value(Θ)` reads it as `P(Θ)` for magnitudes |
 
-**Nine, not four.** [tech-stack.md:201-208](tech-stack.md) and [web/spec.md:177](../web/spec.md) declare
+**Ten, not four** (nine when this document was written; `LadderIndex` added 2026-08-24). [tech-stack.md:201-208](tech-stack.md) and [web/spec.md:177](../web/spec.md) declare
 `gameUnits · resolverPoints · permille · ms`. `resolverPoints` must be **split into the three real
 behaviours** (`SigmoidPoints`, `SigmoidMultiplierPoints`, `StatusPotencyPoints`), the six flat families
-moved to `GameUnits`, and `GameUnitsPerSecond`, `Count` and `Flag` added. Both files are corrected by
-this document.
+moved to `GameUnits`, and `GameUnitsPerSecond`, `Count`, `Flag` and `LadderIndex` added. Both files are
+corrected by this document.
+
+> **Tenth class added 2026-08-24.** The ledger shipped with nine and had no class for `Θ`, which is the
+> most load-bearing derived channel in the game — the `derived-stats` program found the hole while
+> classifying 157 new channels and could not assign `progression.power` a class at all. `Magnitude.unit`
+> is a **required** field, so `Θ` was not expressible in the render contract. Owner authorised the
+> addition the same day. **Contract change owed:** the `UnitClass` union in
+> [contract/types.ts](../../web/fusion-rpg-web/src/contract/types.ts) gains `"ladderIndex"`.
 
 ### 3.1 One rule that falls out and will otherwise be broken
 
@@ -93,6 +101,27 @@ component*, weighted by that component's share of the payload
 ([OverlayCombatCalculator.cs:87](../../src/FusionRpg.Core/Combat/OverlayCombatCalculator.cs)). A bare
 `+12 damage` over-promises on a mixed-element hit. The element is part of the unit, not decoration.
 
+
+### 3.2 `LadderIndex` — the one class whose context part is a fact
+
+Every other context part is an **estimate against a named reference** (§4.2) and must be rendered with
+that hedging. `LadderIndex` is the exception, for two reasons that are worth stating rather than
+rediscovering:
+
+**Θ is read two different ways, and the player needs both.** Contests read it **linearly** — what
+matters is `Θ_you − Θ_them`. Magnitudes read **`P(Θ) = C + A·Θ + B·Θ(Θ−1)/2`**, which is quadratic
+([power/ssot-power-scale.md](../architecture/power/ssot-power-scale.md) §4). Showing only the index
+hides how fast it compounds; showing only `P(Θ)` hides that contests do not compound at all. **Both
+parts, always.**
+
+**The context part is exact.** `P(20) = 680` is the shipped pin, not a sample against a reference
+specimen. So `LadderIndex` renders `→ 680 power` with **no `≈` and no `vs <ref>`** — the only class in
+this table that does. Rendering it with the hedging the other classes require would tell the player a
+true number is a guess.
+
+**`progression.realm` is pinned at `1.0` permanently** (ADR P1 — realm advancement is additive in `Θ`,
+never a contest multiplier). It carries this class for contract completeness and renders as `stub`
+per [spec-derived-stat-sheet.md](spec-derived-stat-sheet.md) §3, not as a live index.
 ---
 
 ## 4. The two-part line

@@ -18,13 +18,20 @@
 
 ---
 
-## 2. The generation rule — do not hand-author 84 channel families
+## 2. The generation rule — do not hand-author 196 channel families
 
-The derived catalog is 12 combat families × 7 element slots = 84 channels. Authoring 84 families would be the exact mistake this program exists to prevent.
+The derived catalog is 28 combat families × 7 element slots = 196 channels (F6, reconcile pass,
+2026-08-25 — was 12 × 7 = 84 when this doc was first drafted; the combat chain's T5.1–T5.4 modules
+added 16 more families: `combat.{penetration,absorption,amplification,reduction}`,
+`combat.reflect.{rate,resist.rate,damage,resist.damage}`,
+`combat.parry.{break,rate,shred,strength}`, `combat.block.{break,rate,shred,strength}` — see
+`src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs`'s `CombatChannelFamilies`, the canonical
+count). Authoring 196 families would be the exact mistake this program exists to prevent.
 
 **Instead: one family per *combat family*, with the element slot as the `variant` column.** *(The `variant`, not merely a param: `atom_id` derives as `{family_id}[.{variant}].t{tier}` and the unique key is `(family_id, tier, variant)`, so seven t1 element rows would collide if the element lived only inside `params_json`. It may appear in the channel param as well.)* `elemental_power` is one family; its atoms carry `element: fire|ice|air|earth|light|dark|omni`. Seven slots × 5 tiers = 35 rows **generated** from one family definition.
 
-That turns the entire derived layer into **12 authored families** producing ~420 generated rows, and it means adding a seventh element later regenerates rather than re-authors.
+That turns the entire derived layer into **28 authored families** producing ~980 generated rows (28 ×
+7 × 5), and it means adding a seventh element later regenerates rather than re-authors.
 
 ---
 
@@ -95,17 +102,14 @@ Power category shown as **O**ffense · **S**urvivability · **C**ontrol · **U**
 | `flourishing` | `produceInterval` | E | plant | **new channel** — faster sun |
 | `swiftness` | `zombieSpeed` | O | zombie | **new channel** — the pressure lever |
 
-### 3.2 `stat.derived` — 12 generated families (~420 rows)
+### 3.2 `stat.derived` — 28 generated families (~980 rows)
 
 > ⚠️ **`stat.derived` is quarantined `None/None/None` (D6)** — it has no executor in any runtime today.
 > Every family below is **`pending` in all three runtimes**, not just battle. The first consumer ships
 > in **E12** (`BattleStatComposer` at squad build), which re-opens the battle cell. Authoring these rows
-> before then produces content nothing can bind.
-
-> ⚠️ **`stat.derived` is quarantined `None/None/None` (D6)** — it has no executor in any runtime today.
-> Every family below is **`pending` in all three runtimes**, not just battle. The first consumer ships
-> in **E12** (`BattleStatComposer` at squad build), which re-opens the battle cell. Authoring these rows
-> before then produces content nothing can bind.
+> before then produces content nothing can bind. This applies equally to the 16 combat-chain families
+> added below (F6) — they are code-readable today (T5.1–T5.4 shipped their readers), not
+> content-bindable until E12, same as the original 12.
 
 | Family | Channel family | Cat | Flavour names by element |
 |---|---|---|---|
@@ -121,6 +125,33 @@ Power category shown as **O**ffense · **S**urvivability · **C**ontrol · **U**
 | `shield_toughness` | `combat.shield.toughness.*` | S | |
 | `shield_pen` | `combat.shield.pen.*` | O | |
 | `shield_regen` | `combat.shield.regen.*` | S | |
+| *(owed to seedsmith)* | `combat.penetration.*` | O | — |
+| *(owed to seedsmith)* | `combat.absorption.*` | S | — |
+| *(owed to seedsmith)* | `combat.amplification.*` | O | — |
+| *(owed to seedsmith)* | `combat.reduction.*` | S | — |
+| *(owed to seedsmith)* | `combat.reflect.resist.rate.*` | O | — |
+| *(owed to seedsmith)* | `combat.reflect.rate.*` | S | — |
+| *(owed to seedsmith)* | `combat.reflect.resist.damage.*` | O | — |
+| *(owed to seedsmith)* | `combat.reflect.damage.*` | S | — |
+| *(owed to seedsmith)* | `combat.parry.break.*` | O | — |
+| *(owed to seedsmith)* | `combat.parry.rate.*` | S | — |
+| *(owed to seedsmith)* | `combat.parry.shred.*` | O | — |
+| *(owed to seedsmith)* | `combat.parry.strength.*` | S | — |
+| *(owed to seedsmith)* | `combat.block.break.*` | O | — |
+| *(owed to seedsmith)* | `combat.block.rate.*` | S | — |
+| *(owed to seedsmith)* | `combat.block.shred.*` | O | — |
+| *(owed to seedsmith)* | `combat.block.strength.*` | S | — |
+
+**F6 handoff (reconcile pass, 2026-08-25):** the 16 rows above are structural only — channel family and
+`Cat` (O/S) are pulled directly from each channel's `role` field in
+`data/seed/derived-stats/catalog.json` (`attacker`→O, `defender`→S, same convention the 12 original rows
+already use), not invented here. The `Family` id and any flavour names are **explicitly handed to the
+item corpus — [seedsmith](../seedsmith-map.md)** ([tasks/seedsmith-todo.md](../../../tasks/seedsmith-todo.md)) —
+this reconcile module authors no atom rows (§3's own ban) and does not choose names for content it will
+never bind (E12 gates that, see the quarantine note above). Cat is O for every attacker-owned half of a
+role-inverted pair (`penetration`, `amplification`, the `.resist.` reflect channels, `break`, `shred`)
+and S for every defender-owned half (`absorption`, `reduction`, the plain reflect channels, `rate`,
+`strength`) — mechanically derived, not a creative choice, so it is filled in here rather than deferred.
 
 Plus **4 status-channel families** (not element-expanded): `affliction` (`status.power.*` by category), `stalwart` (`status.resist.*`), `immunity` (`status.immune.{tag}`), `susceptibility` (`status.expose.*` — **declared with zero readers today**, so **not authored at all** until it has a consumer; `tier` validates as ≥ 1, so there is no tier-0 parking spot).
 
@@ -262,9 +293,9 @@ So G8 resolves as:
 | Attach points | 5 |
 | Kinds | 12 |
 | **Authored families** | **71** (§3.1–3.5 tables, counted) |
-| Generated element rows (12 families × 7 slots) | ~84 templates |
+| Generated element rows (28 `stat.derived` families × 7 slots, F6 2026-08-25 — was 12×7) | ~196 templates |
 | Tiers per family | 5 |
-| **Total atoms at 5 tiers** | **~355 authored + ~420 generated** |
+| **Total atoms at 5 tiers** | **~355 authored + ~980 generated** |
 | Held back pending payloads | 8 status families |
 
 Diablo 2 shipped 490 affix rows on roughly 50 families. We reach comparable content depth from **12 kinds and ~71 authored families**, because the element expansion is generated and the tiers are pure data.

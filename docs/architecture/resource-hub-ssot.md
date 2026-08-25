@@ -152,15 +152,22 @@ does not.
 
 ## 8. Channels and current values
 
-**Magnitudes are Actor-Hub derived channels:**
+**Magnitudes are registered Actor-Hub derived channels (F8, reconcile pass, 2026-08-25 — shipped by
+[spec-actor-channels.md](derived-stats/spec-actor-channels.md), no longer hypothetical):**
 
 ```text
 resource.max.{id}      resource.regen.{id}
 ```
 
-They form **their own family list and must not join `AllCombatChannelIds`**, which a test asserts is
-exactly **84**. Registration rules are the Actor Hub's ([actor-hub-ssot.md](actor-hub-ssot.md) §3.G):
-unknown channel → reject.
+`resource.efficiency.*` is a third, registered alongside them (`SumIncreased`, capped at 1.0 —
+`DerivedStatPolicy.ResourceEfficiencyCap`). All three form **their own family list and do not join
+`CombatChannelFamilies`/`AllCombatChannelIds`**, which is exactly **28 families / 196 channels** today
+(reconcile pass, F6/F9, 2026-08-25 — was 12/84 when this doc was first drafted; see
+`src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs`'s `CombatChannelFamilies` for the canonical
+count, not a hand-copied number). Registration rules are the Actor Hub's
+([actor-hub-ssot.md](actor-hub-ssot.md) §3.G): unknown channel → reject. Proven live end-to-end by
+`tests/FusionRpg.Core.Tests/Stats/ActorChannelsTests.cs` (`ResourceChannelsNotInCombatRoster`,
+`LazyValueMatchesTicked`, `EfficiencyCannotExceedOne`, `MaxAndRegenUncapped`).
 
 **Current values are not channels.** They are per-actor runtime state resolved **lazily**:
 

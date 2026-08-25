@@ -47,6 +47,7 @@ internal static class ContractTuningTestBootstrap
         CombatPolicy.Configure(DefaultCombat);
         StarPolicy.Configure(DefaultFusion);
         StatusPolicy.Configure(DefaultStatus);
+        DerivedStatPolicy.Configure(DefaultDerivedStats);
         OverlayTuningHub.Configure(DefaultOverlay);
         StatsTuningHub.Configure(DefaultStats);
         ExpeditionTuningHub.Configure(DefaultExpeditions);
@@ -187,7 +188,14 @@ internal static class ContractTuningTestBootstrap
         AreaDefaultRectangleWidth: 3,
         AreaDefaultRectangleHeight: 3,
         DotDefaultPeriodMs: 1000,
-        DotDefaultDurationMs: 5000);
+        DotDefaultDurationMs: 5000,
+        PierceScale: 10.0,
+        AmpScale: 10.0,
+        BlockCapPermille: 950,
+        ParryCapPermille: 950,
+        AvoidanceBandCapPermille: 950,
+        ReflectRateScale: 10.0,
+        ReflectShareScale: 10.0);
 
     public static readonly FusionTuning DefaultFusion = new(
         SchemaVersion: 1,
@@ -210,10 +218,12 @@ internal static class ContractTuningTestBootstrap
             [DemonRarity.Legendary] = new(Souls: 1000, ShardRarity: DemonRarity.Epic, ShardCount: 4, EssenceCount: 8),
         });
 
+    public static readonly DerivedStatTuning DefaultDerivedStats = new(
+        SchemaVersion: 1, Version: 1, CategoryResistCap: 0.95);
+
     public static readonly StatusTuning DefaultStatus = new(
         SchemaVersion: 1,
         Version: 1,
-        CategoryResistCap: 0.95,
         ApplyScaleK: 100.0,
         ApplyScaleFloor: 1.0,
         ResistFromPowerRatio: 1.0, // T3.1 (power-plan.md, done 2026-08-24): 0 -> 1.0, matched pair contests at delta=0

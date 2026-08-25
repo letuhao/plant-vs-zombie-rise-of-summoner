@@ -1,6 +1,7 @@
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Xunit;
 
 namespace FusionRpg.Data.Tests;
@@ -38,7 +39,6 @@ public class ChannelPolicyStoreTests : IDisposable
         var policies = _store.GetChannelPolicies();
 
         Assert.Equal(StatChannels.All.Length, policies.Count);
-        Assert.All(policies, p => Assert.Equal(-1, p.CapMilli)); // uncapped until authored
     }
 
     [Fact]
@@ -53,17 +53,18 @@ public class ChannelPolicyStoreTests : IDisposable
     }
 
     [Fact]
-    public void A_cap_can_be_authored_and_reads_back()
+    public void A_direction_can_be_authored_and_reads_back()
     {
+        // Defense ships HigherIsBetter (0) — flipping to 1 is a genuine, verifiable change, not a no-op.
         var edited = new[]
         {
-            RpgStore.ShippedPolicy(StatChannels.Defense) with { CapMilli = 950 },
+            RpgStore.ShippedPolicy(StatChannels.Defense) with { Direction = 1 },
         };
 
         Assert.True(_store.UpsertChannelPolicies(edited).Ok);
 
         var stored = _store.GetChannelPolicies().Single(p => p.ChannelId == StatChannels.Defense);
-        Assert.Equal(950, stored.CapMilli);
+        Assert.Equal(1, stored.Direction);
     }
 
     [Fact]
@@ -94,24 +95,28 @@ public class ChannelPolicyStoreTests : IDisposable
     // ---- the hash --------------------------------------------------------------------------------
 
     [Fact]
-    public void The_registry_is_at_version_four_and_covers_the_policy_table()
+    public void The_registry_is_at_version_five_and_covers_the_policy_table()
     {
-        Assert.Equal(4, ContentHashRegistry.CurrentSchemaVersion);
+        // Bumped 4 -> 5 by cap-consolidation (T1, 2026-08-24): default_value/cap_milli/compose_kind
+        // retired as dead columns — a table-SHAPE change, asserted separately from golden stability
+        // (spec-cap-consolidation.md §3.1) so "hash changed" is never mistaken for "gameplay changed".
+        Assert.Equal(5, ContentHashRegistry.CurrentSchemaVersion);
         Assert.Contains("effect_channel_policy",
             ContentHashRegistry.Current.Select(t => t.TableName));
     }
 
     [Fact]
-    public void Editing_a_cap_moves_the_content_hash()
+    public void Editing_a_direction_moves_the_content_hash()
     {
-        // The reason the table and the registry bump ship together. The 0.95 resist cap was a code
-        // constant: editing it moved every battle golden while the stamp stood still — acceptable
-        // only because a constant is visible in a diff, which stops being true once it is a row.
+        // The reason the table and the registry bump ship together (originally: the 0.95 resist cap
+        // was a code constant, editing it moved every battle golden while the stamp stood still —
+        // acceptable only while a constant edit is visible in a diff). Direction is the one column
+        // left with a live consumer, so it is what now carries this claim.
         var before = _store.ComputeContentHash().Hash;
 
         _store.UpsertChannelPolicies(new[]
         {
-            RpgStore.ShippedPolicy(StatChannels.Defense) with { CapMilli = 950 },
+            RpgStore.ShippedPolicy(StatChannels.Defense) with { Direction = 1 },
         });
 
         Assert.NotEqual(before, _store.ComputeContentHash().Hash);
@@ -120,7 +125,7 @@ public class ChannelPolicyStoreTests : IDisposable
     [Fact]
     public void Writing_the_same_policy_twice_does_not_move_the_hash()
     {
-        var policy = new[] { RpgStore.ShippedPolicy(StatChannels.Defense) with { CapMilli = 950 } };
+        var policy = new[] { RpgStore.ShippedPolicy(StatChannels.Defense) with { Direction = 1 } };
         _store.UpsertChannelPolicies(policy);
         var hash = _store.ComputeContentHash().Hash;
 
@@ -140,7 +145,7 @@ public class ChannelPolicyStoreTests : IDisposable
 
         Assert.True(_store.UpsertChannelPolicies(new[]
         {
-            RpgStore.ShippedPolicy(StatChannels.Defense) with { CapMilli = 950 },
+            RpgStore.ShippedPolicy(StatChannels.Defense) with { Direction = 1 },
         }).Ok);
 
         Assert.True(_store.GetCatalogRevision() > before);
@@ -149,12 +154,53 @@ public class ChannelPolicyStoreTests : IDisposable
     [Fact]
     public void Writing_the_same_policy_twice_does_not_bump_the_revision_the_second_time()
     {
-        var policy = new[] { RpgStore.ShippedPolicy(StatChannels.Defense) with { CapMilli = 950 } };
+        var policy = new[] { RpgStore.ShippedPolicy(StatChannels.Defense) with { Direction = 1 } };
         _store.UpsertChannelPolicies(policy);
         var revision = _store.GetCatalogRevision();
 
         _store.UpsertChannelPolicies(policy);
 
         Assert.Equal(revision, _store.GetCatalogRevision());
+    }
+
+    // ---- the three dead columns (cap-consolidation, T1) ---------------------------------------------
+
+    [Fact]
+    public void NoDeadColumns()
+    {
+        // effect_channel_policy carries channel_id and direction only -- default_value, cap_milli and
+        // compose_kind retired as columns nothing ever read (spec-cap-consolidation.md §1.2, §3).
+        using var db = SqliteConnectionFactory.Open(_store.HotPath, readOnly: true);
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "PRAGMA table_info(effect_channel_policy);";
+        using var r = cmd.ExecuteReader();
+
+        var columns = new List<string>();
+        while (r.Read())
+            columns.Add(r.GetString(1)); // column 1 of table_info is the column name
+
+        Assert.Equal(
+            new[] { "channel_id", "direction" }.OrderBy(x => x, StringComparer.Ordinal),
+            columns.OrderBy(x => x, StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public void ContentHashChangedGoldensDidNot()
+    {
+        // The registry bump (V4 -> V5) and gameplay-golden stability are two SEPARATE claims —
+        // spec-cap-consolidation.md §3.1 requires asserting them separately so neither is read as
+        // evidence about the other. This proves the SHAPE half: V4 and V5 disagree on
+        // effect_channel_policy's column list (structurally, at the registry level, independent of any
+        // live database). The golden-stability half is proven by the full FusionRpg.Core.Tests run
+        // (battle/status suites) staying green through this same change — a claim this test cannot
+        // make on its own, which is exactly the point: neither test alone is sufficient.
+        var v4Table = ContentHashRegistry.For(4).Single(t => t.TableName == "effect_channel_policy");
+        var v5Table = ContentHashRegistry.For(5).Single(t => t.TableName == "effect_channel_policy");
+
+        Assert.Equal(5, v4Table.Columns.Count);
+        Assert.Equal(2, v5Table.Columns.Count);
+        Assert.NotEqual(
+            v4Table.Columns.Select(c => c.Name),
+            v5Table.Columns.Select(c => c.Name));
     }
 }

@@ -37,7 +37,7 @@ public sealed class OverlayCombatMath : ICombatMath
     public long Finalize(long signedAmount, string ptr, DamagePacket packet, BoardEntitySnap? entity)
     {
         if (signedAmount > 0)
-            return signedAmount;
+            return FinalizeHeal(signedAmount, packet);
 
         if (packet.ElementPayload == null || packet.ElementPayload.Count == 0)
             return signedAmount;
@@ -62,5 +62,28 @@ public sealed class OverlayCombatMath : ICombatMath
         var (delta, breakdown) = _calculator.Compute(request, _rng);
         _emitBreakdown?.Invoke(breakdown, packet, ptr);
         return delta;
+    }
+
+    /// <summary>
+    /// spec-healing-pair.md §2.1: <c>effectiveHeal = baseOverlayHeal + heal.power(healer)</c>. No
+    /// matchup, no roll, no opposed term — strictly less than combat-damage-ssot.md §4.3's "Funnel
+    /// transport only, no matchup/hit/crit" ban, so the boundary stays untouched. <c>heal.power</c> is
+    /// <c>Pool</c> class (the healer's own output capacity, like <c>combat.shield.capacity</c>), so
+    /// there is no defender-side term to read at all — only the healer (<c>packet.ActorPtr</c>) is
+    /// resolved. An attacker-less heal (no <see cref="DamagePacket.ActorPtr"/>) resolves the same stub
+    /// snapshot the damage path uses, which composes <c>heal.power</c> to its default 0 — contributing
+    /// nothing, not a guessed value.
+    /// </summary>
+    long FinalizeHeal(long signedAmount, DamagePacket packet)
+    {
+        var attackerLess = string.IsNullOrWhiteSpace(packet.ActorPtr);
+        var healer = _resolve(packet.ActorPtr, attackerLess);
+        var healPower = healer.Derived.Get(Stats.Derived.DerivedStatChannels.CombatHealPower);
+
+        // HealNeverNegative: an overlay heal can never become damage. heal.power is registered
+        // uncapped (a magnitude, PS-8) but nothing forbids an authored negative modifier reaching it
+        // upstream — the floor at 0 is what actually enforces "never negative" at this boundary.
+        var effectiveHeal = Math.Max(0.0, signedAmount + healPower);
+        return (long)Math.Round(effectiveHeal, MidpointRounding.AwayFromZero);
     }
 }

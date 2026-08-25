@@ -53,6 +53,9 @@ FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
 FusionRpg.Core.Status.StatusPolicy.Configure(
     FusionRpg.Core.Status.StatusTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "status.v1.json"))));
+FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
+    FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
 FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
     FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "overlay.v1.json"))));

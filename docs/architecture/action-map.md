@@ -174,7 +174,7 @@ Grounding: `chaos-backend-service/docs/action-core` and `docs/combat-core`.
 **Taken:**
 
 - **Actions declare resource requirements**, validated before execution and rolled back on failure — with consumption typed (`Fixed`, `Percentage`, `Scaling(stat)`, `Conditional`) rather than a bare number.
-- **Timing scales off derived stats** — an execution-speed channel and a cooldown-reduction channel, with `min` / `base` / `max` bounds so a stat cannot drive a duration to zero. Our envelope has `SpeedChannel` but **no bounds and no cooldown-reduction channel** — a real gap this program should close.
+- **Timing scales off derived stats** — an execution-speed channel and a cooldown-reduction channel, with `min` / `base` / `max` bounds so a stat cannot drive a duration to zero. **Closed 2026-08-24 (spec-skill-modifiers.md, T4.3):** the envelope's `SpeedChannel` already existed; it now has a sibling, `CooldownChannel`, referencing one of the five `skill.cooldown.{category}` channels the derived-stats program registered — not a second, envelope-local mechanism. The one-tick floor lives in `Battle/Timeline/CooldownMath.cs` as a structural `const` (PS-8 exempt, spec-stat-taxonomy.md §2.4's divisor rule), not a tunable — a zero-tick cooldown is a crash, not a balance outcome.
 - **`interrupt_affects_cooldown`** as an explicit knob. B5 currently hard-codes that an interrupt starts no resolve-scoped cooldown; Chaos makes it declarable, which is the better call.
 - **Targeting taxonomy** — single, multiple, area, projectile — as a starting vocabulary.
 - **Defence as a first-class action kind**, not a passive stat.
@@ -197,7 +197,7 @@ Grounding: `chaos-backend-service/docs/action-core` and `docs/combat-core`.
 
 **D2 — resources: four pools — `hp`, `sun`, `soul`, `stamina`.** Mana is refused explicitly: *it does not fit PvZ lore*. That constraint is binding on every later naming decision here — a resource name has to be something a PvZ player already recognises, or something this game has already taught them. See §9.
 
-**D3 — envelope rework: fold into A5, before the T5 gate.** Duration `min`/`base`/`max` bounds, a cooldown-reduction channel, and `interrupt_affects_cooldown` are added where the basic attack first drives the envelope for real — while goldens have not moved and the change is still free.
+**D3 — envelope rework: fold into A5, before the T5 gate.** `interrupt_affects_cooldown` still lands here, where the basic attack first drives the envelope for real, while goldens have not moved and the change is still free. **The cooldown-reduction channel and its one-tick floor are repointed at the derived-stats program (T4.3), not built a second time here** — `ActionEnvelope.CooldownChannel` references `skill.cooldown.{category}` (spec-skill-modifiers.md §1.1), so A5 wires the reference, it does not invent the channel or the floor.
 
 ## 9. Resources — locked set and open naming
 

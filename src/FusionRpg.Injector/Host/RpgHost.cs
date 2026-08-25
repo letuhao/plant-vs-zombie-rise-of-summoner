@@ -82,6 +82,9 @@ public static class RpgHost
         FusionRpg.Core.Status.StatusPolicy.Configure(
             FusionRpg.Core.Status.StatusTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "status.v1.json"))));
+        FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
+            FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stats.v1.json"))));
         FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
             FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "overlay.v1.json"))));

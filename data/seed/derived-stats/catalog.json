@@ -1,0 +1,729 @@
+{
+  "schemaVersion": 1,
+  "kind": "derived-stat",
+  "_meta": {
+    "owner": "docs/architecture/actor-hub-ssot.md",
+    "note": "Machine-readable mirror of the DerivedStatCatalog for tooling that cannot reference FusionRpg.Core (seedsmith, the web app, importers). Registration itself stays code-first in Stats/Derived/DerivedStatRegistry.cs - this file describes it, it does not drive it.",
+    "families-not-channels": "Entries are FAMILIES plus the axis they expand over, never the expanded channel list. The 196 combat channels are generated from CombatChannelFamilies x (omni + roster) precisely so adding an element or a family changes the count by construction; hand-listing the expansion here would create a second source of truth with a delay fuse. Expand axis='element' over data/seed/elements/roster.json the same way Core does.",
+    "shipped-only": "Registered channels only, still true. catalog-extension (T2, derived-stats program, 2026-08-24) registered the 157-channel combat-balance extension (H.1-H.7 in actor-hub-ssot.md SS3H) in DerivedStatRegistry -- it is no longer PROPOSED, it is SHIPPED, with every new channel defaulting to 0 and zero readers wired (registration only; the reader modules land in later phases). move.range moved here from notRegistered accordingly.",
+    "counts": "9 progression (7 + 2 new) + 24 status constants (8 + 16 new) + 196 combat (84 + 112 new) + 1 healing + 15 resource + 1 move.range + 10 action-category = 256 named, plus 9 open prefix families (5 original + 4 new status-duration/intensity). Verified against DerivedStatRegistry.CreateDefault() 2026-08-24; DerivedStatRegistryTests asserts the combat total (196) and SeedCatalogMatchesCode asserts this mirror against the live registry.",
+    "composeKinds": "FlatSum | FlatReplace | SumIncreased | MaxPriorityFlag - see DerivedComposeKind.",
+    "classification": "TWO orthogonal axes, both required, neither inferred from the other. statClass (Contest|Race|Pool|Feeder) answers 'does it need a counterpart' - spec-stat-taxonomy.md; null statClass means the counterbalance rule does not apply (the two Theta channels only). unitClass answers 'what arithmetic is it and how does it render' - the TEN-class ledger in docs/design/spec-magnitude-and-units.md SS3 (nine plus LadderIndex, added 2026-08-24), each class verified against its consumer in src/. null unitClass means that ledger has not assigned one; per its SS8 a channel whose consumer cannot be named gets a REJECTION, never an invented placeholder -- true of every one of catalog-extension's 157 new channels at registration time. Do not add a third scheme."
+  },
+  "axes": {
+    "none": {
+      "note": "One channel, id used verbatim."
+    },
+    "element": {
+      "note": "Expand as `{family}.{slot}` over omni first, then each enabled roster element in ordinal order.",
+      "omni": "omni",
+      "rosterSource": "data/seed/elements/roster.json",
+      "slotsToday": [
+        "omni",
+        "fire",
+        "ice",
+        "air",
+        "earth",
+        "light",
+        "dark"
+      ]
+    },
+    "status-category": {
+      "note": "Fixed categories, plus a sparse per-status override matched by prefix.",
+      "categories": [
+        "omni",
+        "dot",
+        "cc",
+        "contagion"
+      ],
+      "sparse": "status.power.{statusId} / status.resist.{statusId} / status.duration.{statusId} / status.durationReduction.{statusId} / status.intensity.{statusId} / status.intensityReduction.{statusId}"
+    },
+    "action-category": {
+      "note": "New axis, actor-hub-ssot.md SS3H.3 (H.3, 2026-08-24). Not element-typed, not status-category-typed. Must not join CombatChannelFamilies/AllCombatChannelIds (SS3G rule 1).",
+      "categories": [
+        "attack",
+        "defense",
+        "support",
+        "movement",
+        "status"
+      ]
+    },
+    "resource-id": {
+      "note": "actor-hub-ssot.md SS3H.5 (H.5, 2026-08-24). data/seed/resources/roster.json is the authored mirror of the five ids; expand in that file's ordinal order.",
+      "rosterSource": "data/seed/resources/roster.json",
+      "ids": [
+        "hp",
+        "stamina",
+        "hunger",
+        "spirit",
+        "qi"
+      ]
+    }
+  },
+  "entries": [
+    {
+      "family": "progression.bonus.maxHp",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Pool",
+      "consumer": "AppliedCombat",
+      "unitClassNote": "Inferred, not in the ledger's own table: these add into hp/maxHp/atk/defense/arm* at the AppliedCombat merge, and those primaries ARE GameUnits. Consumer is nameable (ActorHub.MergeAppliedCombat -> EntityStatWriter), so SS8's rejection rule is satisfied. Flagged for the ledger owner to confirm rather than silently adopted."
+    },
+    {
+      "family": "progression.bonus.atk",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Pool",
+      "consumer": "AppliedCombat",
+      "unitClassNote": "Inferred, not in the ledger's own table: these add into hp/maxHp/atk/defense/arm* at the AppliedCombat merge, and those primaries ARE GameUnits. Consumer is nameable (ActorHub.MergeAppliedCombat -> EntityStatWriter), so SS8's rejection rule is satisfied. Flagged for the ledger owner to confirm rather than silently adopted."
+    },
+    {
+      "family": "progression.bonus.defense",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Pool",
+      "consumer": "AppliedCombat",
+      "unitClassNote": "Inferred, not in the ledger's own table: these add into hp/maxHp/atk/defense/arm* at the AppliedCombat merge, and those primaries ARE GameUnits. Consumer is nameable (ActorHub.MergeAppliedCombat -> EntityStatWriter), so SS8's rejection rule is satisfied. Flagged for the ledger owner to confirm rather than silently adopted."
+    },
+    {
+      "family": "progression.bonus.arm1",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Pool",
+      "consumer": "armor split",
+      "unitClassNote": "Inferred, not in the ledger's own table: these add into hp/maxHp/atk/defense/arm* at the AppliedCombat merge, and those primaries ARE GameUnits. Consumer is nameable (ActorHub.MergeAppliedCombat -> EntityStatWriter), so SS8's rejection rule is satisfied. Flagged for the ledger owner to confirm rather than silently adopted."
+    },
+    {
+      "family": "progression.bonus.arm2",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Pool",
+      "consumer": "armor split",
+      "unitClassNote": "Inferred, not in the ledger's own table: these add into hp/maxHp/atk/defense/arm* at the AppliedCombat merge, and those primaries ARE GameUnits. Consumer is nameable (ActorHub.MergeAppliedCombat -> EntityStatWriter), so SS8's rejection rule is satisfied. Flagged for the ledger owner to confirm rather than silently adopted."
+    },
+    {
+      "family": "progression.power",
+      "axis": "none",
+      "compose": "FlatReplace",
+      "default": 1.0,
+      "cap": null,
+      "unitClass": "LadderIndex",
+      "statClass": null,
+      "consumer": "status delta + ApplyScale",
+      "note": "Registry default is 1.0; the live value is Theta from IPowerIndexProvider, 0 when un-hydrated. See actor-hub-ssot.md SS3B.",
+      "unitClassNote": "LadderIndex - the tenth class, added to docs/design/spec-magnitude-and-units.md SS3.2 on 2026-08-24 because Theta is an INDEX, not a magnitude, and none of the original nine fit. Renders authoritative 'Theta 20' + exact context '-> 680 power'; the only class whose context part is a fact rather than an estimate, since P(20)=680 is the shipped pin."
+    },
+    {
+      "family": "progression.realm",
+      "axis": "none",
+      "compose": "FlatReplace",
+      "default": 1.0,
+      "cap": null,
+      "unitClass": "LadderIndex",
+      "statClass": null,
+      "note": "Pinned 1.0 permanently by ADR P1 - realm advancement is additive in Theta, never a contest multiplier.",
+      "unitClassNote": "LadderIndex - the tenth class, added to docs/design/spec-magnitude-and-units.md SS3.2 on 2026-08-24 because Theta is an INDEX, not a magnitude, and none of the original nine fit. Renders authoritative 'Theta 20' + exact context '-> 680 power'; the only class whose context part is a fact rather than an estimate, since P(20)=680 is the shipped pin."
+    },
+    {
+      "family": "status.power",
+      "axis": "status-category",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": "MaxNetFactor",
+      "unitClass": "StatusPotencyPoints",
+      "statClass": "Contest",
+      "counterpart": "status.resist",
+      "role": "attacker"
+    },
+    {
+      "family": "status.resist",
+      "axis": "status-category",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": 0.95,
+      "unitClass": "StatusPotencyPoints",
+      "statClass": "Contest",
+      "counterpart": "status.power",
+      "capNote": "omni half is UNCAPPED (balance knob); dot/cc/contagion and sparse ids cap at 0.95.",
+      "role": "defender"
+    },
+    {
+      "family": "combat.power",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Contest",
+      "counterpart": "combat.defense",
+      "role": "attacker"
+    },
+    {
+      "family": "combat.defense",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Contest",
+      "counterpart": "combat.power",
+      "role": "defender"
+    },
+    {
+      "family": "combat.crit.rate",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "SigmoidPoints",
+      "statClass": "Contest",
+      "counterpart": "combat.crit.resist",
+      "role": "attacker"
+    },
+    {
+      "family": "combat.crit.resist",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "SigmoidPoints",
+      "statClass": "Contest",
+      "counterpart": "combat.crit.rate",
+      "role": "defender"
+    },
+    {
+      "family": "combat.crit.damage",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "SigmoidMultiplierPoints",
+      "statClass": "Contest",
+      "counterpart": "combat.crit.resist.damage",
+      "role": "attacker"
+    },
+    {
+      "family": "combat.crit.resist.damage",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "SigmoidMultiplierPoints",
+      "statClass": "Contest",
+      "counterpart": "combat.crit.damage",
+      "role": "defender"
+    },
+    {
+      "family": "combat.accuracy",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "SigmoidPoints",
+      "statClass": "Contest",
+      "counterpart": "combat.dodge",
+      "role": "attacker"
+    },
+    {
+      "family": "combat.dodge",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "SigmoidPoints",
+      "statClass": "Contest",
+      "counterpart": "combat.accuracy",
+      "role": "defender"
+    },
+    {
+      "family": "combat.shield.capacity",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Pool",
+      "role": "owner"
+    },
+    {
+      "family": "combat.shield.toughness",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Contest",
+      "counterpart": "combat.shield.pen",
+      "role": "owner",
+      "note": "Chip floor 0.10x - toughness saturates at 10x shield efficiency; immunity impossible by construction."
+    },
+    {
+      "family": "combat.shield.pen",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": "Contest",
+      "counterpart": "combat.shield.toughness",
+      "role": "attacker",
+      "note": "Pen cap 3x input, per layer."
+    },
+    {
+      "family": "combat.shield.regen",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "GameUnitsPerSecond",
+      "statClass": "Pool",
+      "role": "owner"
+    },
+    {
+      "family": "status.duration",
+      "axis": "status-category",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "status.durationReduction",
+      "role": "attacker",
+      "note": "H.2, 2026-08-24 -- registration only, no reader wired. status-potency (T4.1) owns splitting the shared netFactor into independent duration/intensity terms; ships at default 0 so nothing computes differently yet."
+    },
+    {
+      "family": "status.durationReduction",
+      "axis": "status-category",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "status.duration",
+      "role": "defender",
+      "note": "H.2, 2026-08-24 -- registration only. No cap assigned yet: a balance value ahead of the reader that decides it belongs to status-potency (T4.1), not this registration."
+    },
+    {
+      "family": "status.intensity",
+      "axis": "status-category",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "status.intensityReduction",
+      "role": "attacker",
+      "note": "H.2, 2026-08-24 -- registration only, no reader wired."
+    },
+    {
+      "family": "status.intensityReduction",
+      "axis": "status-category",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "status.intensity",
+      "role": "defender",
+      "note": "H.2, 2026-08-24 -- registration only. No cap assigned yet, same reasoning as status.durationReduction."
+    },
+    {
+      "family": "combat.penetration",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.absorption",
+      "role": "attacker",
+      "note": "H.1, 2026-08-24 -- standard role (not inverted). Scales defense-surviving damage; reader lands in mitigation-chain."
+    },
+    {
+      "family": "combat.absorption",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.penetration",
+      "role": "defender",
+      "note": "H.1, 2026-08-24 -- standard role."
+    },
+    {
+      "family": "combat.amplification",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.reduction",
+      "role": "attacker",
+      "note": "H.1, 2026-08-24 -- standard role. Final damage multiplier; reader lands in mitigation-chain."
+    },
+    {
+      "family": "combat.reduction",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.amplification",
+      "role": "defender",
+      "note": "H.1, 2026-08-24 -- standard role."
+    },
+    {
+      "family": "combat.reflect.resist.rate",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.reflect.rate",
+      "role": "attacker",
+      "note": "H.1, 2026-08-24 -- ROLE-INVERTED: for reflection the defender owns the half that raises an outcome (reflect.rate), the attacker owns the suppressing half (reflect.resist.rate). Reader lands in reflection module; joins the shared ProcDepthLimit."
+    },
+    {
+      "family": "combat.reflect.rate",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.reflect.resist.rate",
+      "role": "defender",
+      "note": "H.1, 2026-08-24 -- role-inverted, see combat.reflect.resist.rate."
+    },
+    {
+      "family": "combat.reflect.resist.damage",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.reflect.damage",
+      "role": "attacker",
+      "note": "H.1, 2026-08-24 -- role-inverted, same shape as the rate pair but sizes the bounce, not its chance."
+    },
+    {
+      "family": "combat.reflect.damage",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.reflect.resist.damage",
+      "role": "defender",
+      "note": "H.1, 2026-08-24 -- role-inverted, see combat.reflect.resist.damage."
+    },
+    {
+      "family": "combat.parry.break",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.parry.rate",
+      "role": "attacker",
+      "note": "H.1, 2026-08-24 -- ROLE-INVERTED: defender owns parry.rate (raises the parry outcome), attacker owns parry.break (suppresses it). Q6b: no chip floor (a proc, not a pool); ceiling follows the status-cap precedent, 950 permille, own tuning key."
+    },
+    {
+      "family": "combat.parry.rate",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.parry.break",
+      "role": "defender",
+      "note": "H.1, 2026-08-24 -- role-inverted, see combat.parry.break."
+    },
+    {
+      "family": "combat.parry.shred",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.parry.strength",
+      "role": "attacker",
+      "note": "H.1, 2026-08-24 -- role-inverted. H.9 Q6: shares shield.toughness<->shield.pen's saturation curve shape (chip floor 0.10x, pen cap 3x) rather than a second curve -- one shared contest helper, two channel sets."
+    },
+    {
+      "family": "combat.parry.strength",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.parry.shred",
+      "role": "defender",
+      "note": "H.1, 2026-08-24 -- role-inverted, see combat.parry.shred."
+    },
+    {
+      "family": "combat.block.break",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.block.rate",
+      "role": "attacker",
+      "note": "H.1, 2026-08-24 -- role-inverted, same shape as combat.parry.break/rate."
+    },
+    {
+      "family": "combat.block.rate",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.block.break",
+      "role": "defender",
+      "note": "H.1, 2026-08-24 -- role-inverted, see combat.block.break. Composes with the guard action category (A8) -- guarding raises block.rate, they do not compete."
+    },
+    {
+      "family": "combat.block.shred",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.block.strength",
+      "role": "attacker",
+      "note": "H.1, 2026-08-24 -- role-inverted. H.9 Q6: shares shield.toughness<->shield.pen's saturation curve shape, same reasoning as combat.parry.shred."
+    },
+    {
+      "family": "combat.block.strength",
+      "axis": "element",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "combat.block.shred",
+      "role": "defender",
+      "note": "H.1, 2026-08-24 -- role-inverted, see combat.block.shred."
+    },
+    {
+      "family": "skill.cooldown",
+      "axis": "action-category",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Race",
+      "note": "H.3, 2026-08-24. Race class (H.9 Q3): unpaired by nature -- the opponent's own cooldown is already the counter. Pairing it would be a status ('make the enemy slower'), not a stat."
+    },
+    {
+      "family": "skill.effectiveness",
+      "axis": "action-category",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Feeder",
+      "note": "H.3, 2026-08-24. Feeder class (H.9 Q3): applied to baseOverlayDamage BEFORE the power/defense delta (combat-damage-ssot.md SS6.7), so it inherits its pair from combat.defense. Moving it after mitigation would oblige a .reduction half -- a breaking change, not a refactor."
+    },
+    {
+      "family": "combat.heal.power",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Pool",
+      "role": "owner",
+      "note": "H.4, owner decision 2026-08-24: unpaired. The healer's own output capacity, like combat.shield.capacity -- not a Contest with a missing half. No defender-side term, so no delta on the heal path and combat-damage-ssot.md SS4.3 stays untouched. Anti-heal is a status (H.9 Q4's precedent), not a channel."
+    },
+    {
+      "family": "resource.max",
+      "axis": "resource-id",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Pool",
+      "note": "H.5, 2026-08-24. Pool throughout (H.9 Q4): the counters are statuses (root, qi-burn), never a paired channel."
+    },
+    {
+      "family": "resource.regen",
+      "axis": "resource-id",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Pool",
+      "note": "H.5, 2026-08-24. Pool, same reasoning as resource.max."
+    },
+    {
+      "family": "resource.efficiency",
+      "axis": "resource-id",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": 1.0,
+      "unitClass": null,
+      "statClass": "Pool",
+      "note": "H.5, 2026-08-24; compose/cap corrected T4.4, 2026-08-25. Pool, bounded-ratio (cost reduction cannot exceed 100%, spec-actor-channels.md SS2.2) -- SumIncreased, not FlatSum: DerivedComposer's FlatSum case never applies a Cap at all. Cap: DerivedStatPolicy.ResourceEfficiencyCap (1.0), PS-8 exempt (structural, not a tuned value)."
+    },
+    {
+      "family": "move.range",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Pool",
+      "note": "H.6, 2026-08-24. Pool (H.9 Q4, same reasoning as resource). Moved here from notRegistered -- action-map.md's own promise ('registers in actor-hub-ssot.md SS3 with resource.*') is now kept."
+    },
+    {
+      "family": "progression.xpRate",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": null,
+      "note": "H.7, 2026-08-24. Class: null, non-combat (same 'Non-combat' row as progression.power/realm). A per-actor multiplier layered ON RpgXpAwardMap.Award.PowerScale, never a replacement -- SS3B's XP-only boundary stays."
+    },
+    {
+      "family": "progression.breakthroughSuccess",
+      "axis": "none",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": 1.0,
+      "unitClass": null,
+      "statClass": "Pool",
+      "note": "H.7, 2026-08-24; compose/cap/statClass corrected T4.4, 2026-08-25. A roll chance; what a success grants is Theta, never a multiplier on progression.realm (ADR P1 stays pinned at 1.0). Class Pool (not null like power/realm's LadderIndex shape) -- the actor's own roll probability, no pair; EveryCapIsClassified requires a StatClass on any capped channel. Cap: DerivedStatPolicy.BreakthroughSuccessCap (1.0), PS-8 exempt bounded ratio."
+    }
+  ],
+  "prefixFamilies": [
+    {
+      "prefix": "status.power.",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": "StatusPotencyPoints",
+      "statClass": "Contest",
+      "counterpart": "status.resist."
+    },
+    {
+      "prefix": "status.resist.",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": 0.95,
+      "unitClass": "StatusPotencyPoints",
+      "statClass": "Contest",
+      "counterpart": "status.power."
+    },
+    {
+      "prefix": "status.immune.",
+      "compose": "MaxPriorityFlag",
+      "default": 0,
+      "cap": 1,
+      "note": "Complete block before net. Does not match status.immuneReduction.",
+      "unitClass": "Flag",
+      "statClass": "Pool"
+    },
+    {
+      "prefix": "status.immuneReduction.",
+      "compose": "MaxPriorityFlag",
+      "default": 0,
+      "cap": 1,
+      "note": "Partial block - scales netFactor.",
+      "unitClass": "Flag",
+      "statClass": "Pool"
+    },
+    {
+      "prefix": "status.expose.",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "note": "Registered vocabulary with ZERO readers today - ssot-affixes.md flags authoring it as RuntimeUnsupported.",
+      "unitClass": null,
+      "statClass": null
+    },
+    {
+      "prefix": "status.duration.",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "status.durationReduction."
+    },
+    {
+      "prefix": "status.durationReduction.",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "status.duration."
+    },
+    {
+      "prefix": "status.intensity.",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "status.intensityReduction."
+    },
+    {
+      "prefix": "status.intensityReduction.",
+      "compose": "SumIncreased",
+      "default": 0,
+      "cap": null,
+      "unitClass": null,
+      "statClass": "Contest",
+      "counterpart": "status.intensity."
+    }
+  ],
+  "notRegistered": [
+    {
+      "channel": "turn.speed",
+      "declaredIn": "src/FusionRpg.Core/Battle/Timeline/DerivedTurnChannels.cs",
+      "reason": "Battle stream vocabulary. No registry entry, no reader - the only reference is ActionEnvelope.SpeedChannel's default string. Race class per actor-hub-ssot.md SS3H.0 -- would classify unpaired if registered, but stays out until the battle stream gives it a reader."
+    },
+    {
+      "channel": "turn.haste",
+      "declaredIn": "src/FusionRpg.Core/Battle/Timeline/DerivedTurnChannels.cs",
+      "reason": "Same."
+    },
+    {
+      "channel": "turn.moveSpeed",
+      "declaredIn": "src/FusionRpg.Core/Battle/Timeline/DerivedTurnChannels.cs",
+      "reason": "Same."
+    }
+  ]
+}

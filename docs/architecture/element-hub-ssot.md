@@ -132,72 +132,71 @@ Why:
 
 ---
 
-## 6. Derived channel catalog (locked v1)
+## 6. Derived channel catalog
 
-Element Hub extends Actor Hub with these named derived channels:
+**Corrected 2026-08-24 (element-families, T3.1).** This section was a hand-written table ending
+*"Catalog size (v1): 40 combat derived channels."* Shipped reality had already reached **84** —
+missing `light`/`dark` (added 2026-08-21) and all four `combat.shield.*` families (approved
+2026-08-21) — and the derived-stats program's H.1 then took it to **196**. A hand-listed table is the
+wrong shape for something that changes by construction whenever a family or an element is added;
+restating it as a longer literal table would reproduce the exact defect at a larger size. This section
+now states the **generation rule** instead, matching the precedent [actor-hub-ssot.md](actor-hub-ssot.md)
+§3E already set.
 
-### 6.1 Offense
+### 6.1 The rule
 
-| Channel id | Compose | Default | Consumer |
-|---|---|---|---|
-| `combat.power.omni` | flat sum | 0 | Overlay damage delta |
-| `combat.power.fire` | flat sum | 0 | Overlay damage delta |
-| `combat.power.ice` | flat sum | 0 | Overlay damage delta |
-| `combat.power.air` | flat sum | 0 | Overlay damage delta |
-| `combat.power.earth` | flat sum | 0 | Overlay damage delta |
-| `combat.crit.rate.omni` | flat sum | 0 | Crit roll |
-| `combat.crit.rate.fire` | flat sum | 0 | Crit roll |
-| `combat.crit.rate.ice` | flat sum | 0 | Crit roll |
-| `combat.crit.rate.air` | flat sum | 0 | Crit roll |
-| `combat.crit.rate.earth` | flat sum | 0 | Crit roll |
-| `combat.crit.damage.omni` | flat sum | 0 | Crit magnitude |
-| `combat.crit.damage.fire` | flat sum | 0 | Crit magnitude |
-| `combat.crit.damage.ice` | flat sum | 0 | Crit magnitude |
-| `combat.crit.damage.air` | flat sum | 0 | Crit magnitude |
-| `combat.crit.damage.earth` | flat sum | 0 | Crit magnitude |
-| `combat.accuracy.omni` | flat sum | 0 | Hit roll |
-| `combat.accuracy.fire` | flat sum | 0 | Hit roll |
-| `combat.accuracy.ice` | flat sum | 0 | Hit roll |
-| `combat.accuracy.air` | flat sum | 0 | Hit roll |
-| `combat.accuracy.earth` | flat sum | 0 | Hit roll |
+```text
+channels = families × (omni + roster)
+```
 
-### 6.2 Defense
+`families` is `DerivedStatChannels.CombatChannelFamilies` (Core) — **28 families today**, never
+hand-listed here. `roster` is the enabled element set from `data/seed/elements/roster.json`
+(`ElementRoster.Concrete` in code) — **6 today** (`fire · ice · air · earth · light · dark`), plus the
+fixed `omni` slot. **28 × 7 = 196.** Adding an element or a family changes this count by construction;
+[`Section6MatchesGeneration`](../../tests/FusionRpg.Core.Tests/ActorHub/ElementHubDocDriftTests.cs)
+fails on a planted drift between this table and `CombatChannelFamilies`, so the two cannot separate
+again silently the way the old 40-row table did for three months.
 
-| Channel id | Compose | Default | Consumer |
-|---|---|---|---|
-| `combat.defense.omni` | flat sum | 0 | Overlay damage delta |
-| `combat.defense.fire` | flat sum | 0 | Overlay damage delta |
-| `combat.defense.ice` | flat sum | 0 | Overlay damage delta |
-| `combat.defense.air` | flat sum | 0 | Overlay damage delta |
-| `combat.defense.earth` | flat sum | 0 | Overlay damage delta |
-| `combat.crit.resist.omni` | flat sum | 0 | Crit roll |
-| `combat.crit.resist.fire` | flat sum | 0 | Crit roll |
-| `combat.crit.resist.ice` | flat sum | 0 | Crit roll |
-| `combat.crit.resist.air` | flat sum | 0 | Crit roll |
-| `combat.crit.resist.earth` | flat sum | 0 | Crit roll |
-| `combat.crit.resist.damage.omni` | flat sum | 0 | Crit magnitude |
-| `combat.crit.resist.damage.fire` | flat sum | 0 | Crit magnitude |
-| `combat.crit.resist.damage.ice` | flat sum | 0 | Crit magnitude |
-| `combat.crit.resist.damage.air` | flat sum | 0 | Crit magnitude |
-| `combat.crit.resist.damage.earth` | flat sum | 0 | Crit magnitude |
-| `combat.dodge.omni` | flat sum | 0 | Hit roll |
-| `combat.dodge.fire` | flat sum | 0 | Hit roll |
-| `combat.dodge.ice` | flat sum | 0 | Hit roll |
-| `combat.dodge.air` | flat sum | 0 | Hit roll |
-| `combat.dodge.earth` | flat sum | 0 | Hit roll |
+### 6.2 The 28 families
 
-**Catalog size (v1):** 40 combat derived channels + 2 actor type metadata fields.
+| Family group | Families | Compose | Default | Consumer |
+|---|---|---|---|---|
+| Offense (original) | `combat.power` · `combat.crit.rate` · `combat.crit.damage` · `combat.accuracy` | flat sum | 0 | Overlay damage delta · crit roll · crit magnitude · hit roll |
+| Defense (original) | `combat.defense` · `combat.crit.resist` · `combat.crit.resist.damage` · `combat.dodge` | flat sum | 0 | same, defender side |
+| Shield (E16/E20) | `combat.shield.capacity` · `combat.shield.toughness` · `combat.shield.pen` · `combat.shield.regen` | flat sum | 0 | [shield-system-spec.md](shield-system-spec.md) §2.3 |
+| Mitigation (H.1, registered T2, semantics T3, reader T5) | `combat.penetration` · `combat.absorption` · `combat.amplification` · `combat.reduction` | flat sum | 0 | mitigation-chain — not yet wired |
+| Reflection (H.1, registered T2, semantics T3, reader T5) | `combat.reflect.resist.rate` · `combat.reflect.rate` · `combat.reflect.resist.damage` · `combat.reflect.damage` | flat sum | 0 | reflection — not yet wired |
+| Parry (H.1, registered T2, semantics T3, reader T5) | `combat.parry.break` · `combat.parry.rate` · `combat.parry.shred` · `combat.parry.strength` | flat sum | 0 | evasion-chain — not yet wired |
+| Block (H.1, registered T2, semantics T3, reader T5) | `combat.block.break` · `combat.block.rate` · `combat.block.shred` · `combat.block.strength` | flat sum | 0 | evasion-chain — not yet wired |
 
-### Deferred from Chaos
+Every H.1 pair is `Contest` class, both halves uncapped, resolved as a difference
+([spec-stat-taxonomy.md](derived-stats/spec-stat-taxonomy.md) §2.2). Six of the eight pairs are
+**role-inverted** — the defender owns the half that raises an outcome, the attacker owns the
+suppressing half (parry, block, reflection). The seed catalog's `role` field
+(`data/seed/derived-stats/catalog.json`) carries this per H.9 Q2; do not infer it from the name.
 
-Do not define these in v1:
+### Deferred from Chaos — v1 shipped in full (2026-08-25)
 
-- `StatusProbability`, `StatusDuration`, `StatusIntensity`
-- `ElementPenetration`
-- `ElementAbsorption`
-- `ElementReflection`
-- `Parry*`
-- `Block*`
+**Retitled 2026-08-24 (element-families, T3.2); readers landed 2026-08-25 (combat chain, T5.1–T5.4).**
+Five of the eight items below shipped as registered channels first (T2, 2026-08-24), then gained their
+mechanism (mitigation-chain / evasion-chain / reflection, T5.1–T5.4 — see
+[combat-damage-ssot.md](combat-damage-ssot.md) §6.7/§6.4a/§6.7a). Nothing below is deferred any longer
+— kept as a record of what v1 *deferred*, which is what lets a reader's history be attributed to the
+module that actually wired it rather than read as an unexplained addition.
+
+**Shipped, mechanism and all:**
+
+- `Penetration`, `Absorption` → `combat.penetration.*` / `combat.absorption.*`
+- `Parry*` → `combat.parry.break/rate/shred/strength.*`
+- `Block*` → `combat.block.break/rate/shred/strength.*`
+- `Reflection` → `combat.reflect.{resist.}rate.*` / `combat.reflect.{resist.}damage.*`
+
+**Still not in v1:**
+
+- `StatusProbability`, `StatusDuration`, `StatusIntensity` — bundled together in this list since Chaos;
+  `status.duration.*`/`status.intensity.*` shipped separately via H.2 (status potency, T2), but
+  `StatusProbability` has no channel equivalent (status apply chance is the sigmoid roll, not a
+  channel) and this bundle is not unpacked here — out of element-families' scope
 - mastery / social / mobility stats
 
 Status already owns timed-state apply math; those extra combat families would widen the surface too early.
@@ -206,18 +205,25 @@ Status already owns timed-state apply math; those extra combat families would wi
 
 ## 7. Omni rule (locked)
 
-Omni is additive-only.
+Omni is additive-only — for **every** combat family, original and H.1 alike (element-families, T3.1,
+2026-08-24; spec-element-families.md §2.1).
 
 ```text
-totalOffense = offense.omni + offense.{element}
-totalDefense = defense.omni + defense.{element}
+totalX = X.omni + X.{element}
 ```
 
-Bans:
+for `X` in any of the 28 families — the eight originals (`power`, `defense`, `crit.rate`,
+`crit.resist`, `crit.damage`, `crit.resist.damage`, `accuracy`, `dodge`), the four shield families, and
+the sixteen H.1 families (`penetration`, `absorption`, `amplification`, `reduction`,
+`reflect.{resist.}rate`, `reflect.{resist.}damage`, `parry.{break,rate,shred,strength}`,
+`block.{break,rate,shred,strength}`).
+
+Bans — extends unchanged to the new families:
 
 - `omni × element`
 - `omni × crit`
 - `omni × dodge`
+- `omni × penetration`, `omni × parry`, `omni × block`, `omni × reflect`
 - any multiplicative omni snowball rule
 
 This matches the status design in [actor-hub-ssot.md](actor-hub-ssot.md): omni is the baseline, element is the typed slice.

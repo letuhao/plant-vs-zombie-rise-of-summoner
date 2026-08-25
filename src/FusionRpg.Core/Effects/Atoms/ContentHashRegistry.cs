@@ -30,8 +30,9 @@ public sealed record ContentHashTable(string TableName, IReadOnlyList<ContentHas
 /// </summary>
 public static class ContentHashRegistry
 {
-    /// <summary>Bump when a table joins or leaves. E18 → 2, E9 → 3, E16 → 4 — all done.</summary>
-    public const int CurrentSchemaVersion = 4;
+    /// <summary>Bump when a table joins or leaves, or a covered table's column list changes.
+    /// E18 → 2, E9 → 3, E16 → 4, cap-consolidation (T1) → 5 — all done.</summary>
+    public const int CurrentSchemaVersion = 5;
 
     /// <summary>
     /// Version 1: the tables E2, E4 and E5 actually created. Instances, bindings and
@@ -177,12 +178,35 @@ public static class ContentHashRegistry
         }),
     }).ToArray());
 
+    /// <summary>
+    /// Version 5 narrows <c>effect_channel_policy</c> to <c>channel_id</c>/<c>direction</c>
+    /// (cap-consolidation, T1, 2026-08-24) — <c>default_value</c>, <c>cap_milli</c> and
+    /// <c>compose_kind</c> retired as dead columns nothing ever read; a derived cap's one home is now
+    /// <c>data/tuning/derived-stats.v1.json</c>.
+    ///
+    /// <para><b>This is a table-shape change, not a gameplay change.</b> No composed number moves —
+    /// the cap value itself is unchanged (0.95), only where it is enforced. The stamp moves because the
+    /// hashed <i>shape</i> changed, exactly the same distinction V4's own doc comment draws for the
+    /// opposite direction (a column joining). Asserted separately from golden stability in
+    /// <c>ChannelPolicyStoreTests</c> and <c>DerivedStatRegistryTests</c> so a session seeing "hash
+    /// changed, goldens clean" does not assume one of them is wrong.</para>
+    /// </summary>
+    static readonly ContentHashTable[] V5 = Sorted(
+        V4.Where(t => t.TableName != "effect_channel_policy")
+          .Append(new ContentHashTable("effect_channel_policy", new[]
+          {
+              ContentHashColumn.Text("channel_id"),
+              ContentHashColumn.Text("direction"),
+          }))
+          .ToArray());
+
     public static IReadOnlyList<ContentHashTable> For(int schemaVersion) => schemaVersion switch
     {
         1 => V1,
         2 => V2,
         3 => V3,
         4 => V4,
+        5 => V5,
         _ => throw new ArgumentOutOfRangeException(nameof(schemaVersion),
             $"contentHashSchemaVersion {schemaVersion} is not a known registry version " +
             $"(latest is {CurrentSchemaVersion})"),

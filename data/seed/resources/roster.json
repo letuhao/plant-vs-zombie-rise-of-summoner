@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "resource",
+  "_meta": {
+    "owner": "docs/architecture/resource-hub-ssot.md",
+    "note": "The five actor resources. One shared set - both factions carry all five, with the same ids, polarity and mechanics. Faction difference is a display label only, never a branch and never an id (resource-hub-ssot.md SS1-SS3, decisions.md 'Resource model (2026-08-22)'). Labels are repeated here so a reader does not need a second file; they remain content, not keys.",
+    "warning": "The plant label 'Sun' on `hunger` is the ACTOR pool, not the lawn sun bank. The lawn bank is pvz.* and match-scoped, owned by SimEngine. See resource-hub-ssot.md SS4 before writing any UI.",
+    "status": "Vocabulary locked 2026-08-22, runtime not yet built. resource.max/regen/efficiency channels are PROPOSED - actor-hub-ssot.md SS3H.5."
+  },
+  "entries": [
+    {
+      "id": "hp",
+      "class": "body",
+      "ordinal": 0,
+      "exhaustion": false,
+      "exhaustionNote": "Depletion is death, owned by the turn FSM Downed state - never an exhaustion debuff.",
+      "actionCost": false,
+      "labels": { "plant": "HP", "zombie": "HP" }
+    },
+    {
+      "id": "stamina",
+      "class": "body",
+      "ordinal": 1,
+      "exhaustion": true,
+      "actionCost": true,
+      "pays": "physical",
+      "paysNote": "Move, basic attack, guard, reposition.",
+      "labels": { "plant": "Stamina", "zombie": "Stamina" }
+    },
+    {
+      "id": "hunger",
+      "class": "energy",
+      "ordinal": 2,
+      "exhaustion": true,
+      "actionCost": false,
+      "pays": "none",
+      "paysNote": "Sustain - gates regeneration and condition rather than being spent per action.",
+      "labels": { "plant": "Sun", "zombie": "Hunger" }
+    },
+    {
+      "id": "spirit",
+      "class": "essence",
+      "ordinal": 3,
+      "exhaustion": true,
+      "actionCost": false,
+      "pays": "none",
+      "paysNote": "Never an action cost. What the actor IS, and what the summoner harvests as soul when it is extinguished.",
+      "labels": { "plant": "Spirit", "zombie": "Spirit" }
+    },
+    {
+      "id": "qi",
+      "class": "essence",
+      "ordinal": 4,
+      "exhaustion": true,
+      "actionCost": true,
+      "pays": "skill",
+      "paysNote": "Skills and abilities - anything with a trigger, an element, or a container of atoms behind it.",
+      "labels": { "plant": "Yang", "zombie": "Yin" }
+    }
+  ]
+}

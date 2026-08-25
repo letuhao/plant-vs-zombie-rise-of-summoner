@@ -598,7 +598,9 @@ public sealed partial class RpgStore : IRpgDb
         EnsureElementSchemaUnlocked(db);
         // power_coefficient + power_trigger_frequency + the sweep's proposal table (E9).
         EnsurePowerSchemaUnlocked(db);
-        // effect_channel_policy — a channel's caps and defaults, never its identity (E16).
+        // effect_channel_policy — a channel's direction, never its identity (E16). Caps/defaults
+        // columns retired T1.4 (cap-consolidation, 2026-08-25): they were dead, direction is the only
+        // live column.
         EnsureChannelPolicySchemaUnlocked(db);
     }
 

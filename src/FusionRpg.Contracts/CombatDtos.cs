@@ -81,6 +81,8 @@ public sealed class OverlayCombatBreakdown
 {
     [JsonPropertyName("hit")] public bool Hit { get; init; }
     [JsonPropertyName("crit")] public bool Crit { get; init; }
+    [JsonPropertyName("parried")] public bool Parried { get; init; }
+    [JsonPropertyName("blocked")] public bool Blocked { get; init; }
     [JsonPropertyName("matchupBonus")] public double MatchupBonus { get; init; }
     [JsonPropertyName("weightedDelta")] public double WeightedDelta { get; init; }
     [JsonPropertyName("powerAdjustedDamage")] public double PowerAdjustedDamage { get; init; }

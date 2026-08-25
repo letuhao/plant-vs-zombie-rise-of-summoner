@@ -13,7 +13,9 @@ public static class StatusPolicy
         "StatusPolicy.Configure(...) has not run. Every status rule reads data/tuning/" +
         "status.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
 
-    public static double CategoryResistCap => Tuning.CategoryResistCap;
+    // CategoryResistCap moved to Stats.Derived.DerivedStatPolicy (cap-consolidation, T1, 2026-08-24) —
+    // it was clamped a second time here after DerivedComposer already applied it, making a raised
+    // tunable a silent no-op. One key now: data/tuning/derived-stats.v1.json.
     public static double ApplyScaleK => Tuning.ApplyScaleK;
     public static double ApplyScaleFloor => Tuning.ApplyScaleFloor;
     public static double ResistFromPowerRatio => Tuning.ResistFromPowerRatio;
@@ -49,6 +51,14 @@ public enum StatusResistReason
     StatusIcd
 }
 
+/// <summary>
+/// <c>Delta</c>/<c>NetFactor</c> stay Phase 1's apply-chance delta and its net factor — untouched by
+/// spec-status-potency.md's split (§2.1: "Phase 1 is untouched"). <c>DurationNetFactor</c> and
+/// <c>IntensityNetFactor</c> are the NEW, independent Phase 2 values that actually drive
+/// <c>EffectiveDuration</c>/<c>EffectiveMagnitude</c> now — the potency floor
+/// (<see cref="StatusResistReason.PotencyFloor"/>) checks <c>IntensityNetFactor</c> only (§2.2: a
+/// zero-duration status is instantaneous, a legitimate effect, not a resist).
+/// </summary>
 public sealed record StatusApplyResult(
     bool Applied,
     StatusResistReason? ResistReason,
@@ -58,7 +68,9 @@ public sealed record StatusApplyResult(
     double PFinal,
     double EffectiveApplyScale,
     double EffectiveMagnitude,
-    double EffectiveDuration);
+    double EffectiveDuration,
+    double DurationNetFactor = 0,
+    double IntensityNetFactor = 0);
 
 public sealed record StatusApplyRequest(
     string StatusId,

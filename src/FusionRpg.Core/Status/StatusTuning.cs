@@ -6,7 +6,7 @@ namespace FusionRpg.Core.Status;
 /// <see cref="StatusPolicy.Configure"/> and <see cref="StatusTuningLoader"/>.</summary>
 public sealed record StatusTuning(
     int SchemaVersion, int Version,
-    double CategoryResistCap, double ApplyScaleK, double ApplyScaleFloor,
+    double ApplyScaleK, double ApplyScaleFloor,
     double ResistFromPowerRatio, double MinNetFactor, double MaxNetFactor, double NetFactorScale,
     double ProgressionPowerStubDefault, int ProcDepthLimitDefault, double ApplySteepnessDefault);
 
@@ -33,7 +33,6 @@ public static class StatusTuningLoader
             return new StatusTuning(
                 SchemaVersion: Int(root, "schemaVersion"),
                 Version: Int(root, "version"),
-                CategoryResistCap: Dbl(root, "categoryResistCap"),
                 ApplyScaleK: Dbl(root, "applyScaleK"),
                 ApplyScaleFloor: Dbl(root, "applyScaleFloor"),
                 ResistFromPowerRatio: Dbl(root, "resistFromPowerRatio"),

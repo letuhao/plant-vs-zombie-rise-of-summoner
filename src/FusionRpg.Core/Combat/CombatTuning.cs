@@ -9,7 +9,10 @@ public sealed record CombatTuning(
     int SchemaVersion, int Version,
     int ProcDepthLimit, int DefaultMaxTargets,
     int AreaDefaultSquareSize, int AreaDefaultRectangleWidth, int AreaDefaultRectangleHeight,
-    int DotDefaultPeriodMs, int DotDefaultDurationMs);
+    int DotDefaultPeriodMs, int DotDefaultDurationMs,
+    double PierceScale, double AmpScale,
+    long BlockCapPermille, long ParryCapPermille, long AvoidanceBandCapPermille,
+    double ReflectRateScale, double ReflectShareScale);
 
 public sealed class CombatTuningRejection : Exception
 {
@@ -40,7 +43,14 @@ public static class CombatTuningLoader
                 AreaDefaultRectangleWidth: Int(root, "areaDefaultRectangleWidth", "$"),
                 AreaDefaultRectangleHeight: Int(root, "areaDefaultRectangleHeight", "$"),
                 DotDefaultPeriodMs: Int(root, "dotDefaultPeriodMs", "$"),
-                DotDefaultDurationMs: Int(root, "dotDefaultDurationMs", "$"));
+                DotDefaultDurationMs: Int(root, "dotDefaultDurationMs", "$"),
+                PierceScale: Dbl(root, "pierceScale", "$"),
+                AmpScale: Dbl(root, "ampScale", "$"),
+                BlockCapPermille: Long(root, "blockCapPermille", "$"),
+                ParryCapPermille: Long(root, "parryCapPermille", "$"),
+                AvoidanceBandCapPermille: Long(root, "avoidanceBandCapPermille", "$"),
+                ReflectRateScale: Dbl(root, "reflectRateScale", "$"),
+                ReflectShareScale: Dbl(root, "reflectShareScale", "$"));
         }
     }
 
@@ -49,5 +59,19 @@ public static class CombatTuningLoader
         if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetInt32(out var v))
             throw new CombatTuningRejection($"combat tuning: missing or non-integer '{path}.{key}'");
         return v;
+    }
+
+    static long Long(JsonElement parent, string key, string path)
+    {
+        if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetInt64(out var v))
+            throw new CombatTuningRejection($"combat tuning: missing or non-integer '{path}.{key}'");
+        return v;
+    }
+
+    static double Dbl(JsonElement parent, string key, string path)
+    {
+        if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number)
+            throw new CombatTuningRejection($"combat tuning: missing or non-numeric '{path}.{key}'");
+        return el.GetDouble();
     }
 }
