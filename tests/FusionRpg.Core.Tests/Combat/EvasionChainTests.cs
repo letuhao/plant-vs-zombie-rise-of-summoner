@@ -150,9 +150,17 @@ public class EvasionChainTests
         Assert.True(breakdown.Parried);
         Assert.False(breakdown.Blocked);
         Assert.False(breakdown.Crit); // no crit roll on a parried hit
-        // removed = ClampedContest with delta = strength(40) - shred(0) = 40 -> raw = 100+40 = 140,
-        // capped at 950‰*100 = 95 -> remaining = 100-95 = 5.
-        Assert.Equal(-5, delta);
+        // removed = ClampedContest with deltaBase = parryNeutralShareKPm(500‰) x 100 = 50 and
+        // delta = strength(40) - shred(0) = 40 -> raw = 50+40 = 90, inside [0, 950‰x100 = 95]
+        // -> remaining = 100-90 = 10.
+        //
+        // This assertion used to be -5, and that is the point: at the old 1000‰ neutral share the
+        // raw value was 140, clamped to 95, so strength(40) changed NOTHING -- the test named a
+        // strength value it never actually exercised. At 500‰ the neutral point sits inside the
+        // clamp range, so the same 40 points now move removal from 50 to 90. Measured before the
+        // change: sweeping parry.strength 0 -> 2000 left mean damage flat at 789.3 across 4,000
+        // fights (tools/CombatSim, `sweep --channel combat.parry.strength.omni`).
+        Assert.Equal(-10, delta);
     }
 
     [Fact]
@@ -179,7 +187,7 @@ public class EvasionChainTests
         Assert.True(breakdown.Blocked);
         Assert.False(breakdown.Parried);
         Assert.False(breakdown.Crit);
-        Assert.Equal(-5, delta); // same arithmetic as ParryShortCircuits, block's own stat pair
+        Assert.Equal(-10, delta); // same arithmetic as ParryShortCircuits, block's own stat pair
     }
 
     [Fact]

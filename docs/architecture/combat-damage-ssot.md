@@ -231,6 +231,49 @@ absorption) floors at exactly `1.0` rather than granting defense a bonus past it
 absorption cancels penetration, it does not amplify defense. `PierceScale` lives in
 `data/tuning/combat.v1.json`, shape only (both factors are identity at delta 0 for any positive scale).
 
+#### 6.3a How defense combines — `defenseShape` (changed 2026-08-25, `RulesetVersion` 3 → 4)
+
+**`combat.defense` divides; it does not subtract.** `defenseShape: divisive` is the shipped default.
+
+```text
+offense     = effectiveBaseDamage + Σ(w × (attackerPower(E) + componentBonus(E)))
+defenseSum  = Σ(w × effectiveDefense(E))
+ladderScale = BaseOverlayDamage + Σ(w × attackerPower(E))     // NOT offense — see below
+K           = DefenseDivisorK × ladderScale                    // 0.45 shipped
+
+powerAdjusted = defenseSum >= 0 ?  offense × K / (K + defenseSum)
+                                :  offense × (2 − K / (K + |defenseSum|))
+```
+
+**Why not subtractive.** `base + (power − defense)` floors at zero the moment defense outruns offense,
+which is **total immunity** — the same defect §6.7's `ampFactor` had, and just as unacceptable. Measured
+over 50,000 simulated fights before the change: **17.1% of *landed* hits dealt nothing**. After it, the
+zero-damage count equals the miss count exactly — no landed hit deals zero. Damage approaches zero
+asymptotically and never arrives, so no clamp is needed and none is present.
+
+**`K` reads ladder quantities only, and that is load-bearing.** `ladderScale` is the authored hit plus
+power — both `P(Θ)`-scale magnitudes. It deliberately excludes `skill.effectiveness` and the matchup
+bonus, which also ride in `offense`. Letting a per-action multiplier into the divisor makes it scale the
+numerator *and* shrink the divisor's bite, i.e. **superlinear** — which would break `skill.effectiveness`'s
+locked `Feeder` classification. Measured when an earlier draft used `offense`: a 1000× effectiveness
+leaked **826** damage through a 5000× defense wall; reading ladder scale only, it leaks **1**.
+`SkillModifiersTests.EffectivenessIsPreMitigation` pins the invariant (the mitigated fraction is flat in
+effectiveness) rather than any literal.
+
+**Scale invariance.** Tying `K` to the incoming hit rather than to a constant is what keeps the mitigated
+*fraction* unchanged when attacker and defender climb the ladder together — the power-scaled-divisor
+regime [power/ssot-power-scale.md](power/ssot-power-scale.md) §2 measures. WoW scales its armour constant
+with attacker level and Path of Exile with the incoming hit for the same reason; a fixed divisor works
+only in a level-capped game.
+
+**Negative defense still amplifies**, via the mirrored branch above — the construction League of Legends
+uses for negative resistances, continuous at zero (both branches give exactly `1.0`). `CombatGlass`
+ships `defense.omni = -50`; clamping defense at zero would have silently deleted the glass-cannon
+mechanic, which is what `Combat_glass_vs_neutral_increases_damage` exists to catch.
+
+`defenseShape: subtractive` restores v1 exactly, and `DefenseDivisorK` is calibrated so adopting the
+shape did not also move the balance (mean damage within 0.8% of the subtractive baseline).
+
 ### 6.4 Hit roll
 
 For each component `E`:
@@ -292,10 +335,21 @@ defaults by construction, no guard clause, matching `p_parry_raw`/`p_block_raw`'
 **Resolution on parry or block ("no block, no mitigation," ParryShortCircuits):**
 
 ```text
-removed = ClampedContest(deltaBase: effectiveBaseDamage, delta: strength - shred, hitCount: 1,
+neutralBase = effectiveBaseDamage × ParryNeutralShareKPm/1000        // 500‰ shipped
+removed = ClampedContest(deltaBase: neutralBase, delta: strength - shred, hitCount: 1,
                          boundsBase: effectiveBaseDamage, floorKPm: 0, capKPm: 950)   // §2's helper
 finalDamage = max(0, effectiveBaseDamage - removed)
 ```
+
+**Why the neutral point is not the whole hit (changed 2026-08-25, `parryNeutralShareKPm` 1000 → 500).**
+v1 passed `effectiveBaseDamage` as `deltaBase`, which seats the neutral removal *on* the 950‰ cap —
+`base > 0.95 × base` — so `removed` was pinned at the cap and **`strength` did nothing at all** until
+`shred` already exceeded it by more than 5% of the hit. Measured before the change: sweeping
+`parry.strength` from 0 to 2000 left mean damage flat at 789.3 across 4,000 fights. At 500‰ the
+neutral point sits *inside* `[0, cap]`, so both halves of the pair move it — the shape `ShieldMath`
+has always had, where the neutral value sits at a third of its own cap rather than on it. The bounds
+still scale against the **full** hit: what is capped is the share of *this* hit a single proc may
+remove. Tunable, PS-8-exempt bounded ratio; `1000` restores v1 exactly.
 
 Neither parry nor block runs the mitigation chain (penetration/defense/crit/amplification, §6.1–6.7)
 — resolution ends here. `strength`/`shred` follow the SAME role inversion as the rate pair: the
@@ -371,9 +425,25 @@ if crit succeeds:
 
 // T5.1 (spec-mitigation-chain.md §2, 2026-08-25) — amplification/reduction, ONCE, after crit:
 ampDelta = (combat.amplification.omni + Σ(w × combat.amplification.E)) - (combat.reduction.omni + Σ(w × combat.reduction.E))
-ampFactor = max(0, 1 + ampDelta / AmpScale)   // identity (1.0) at ampDelta = 0; unclamped upward (PS-8)
+
+// ampShape: reciprocal (shipped 2026-08-25) -- identity at 0, unclamped upward (PS-8),
+// asymptotic downward so mitigation can never reach total.
+ampFactor = ampDelta >= 0 ?  1 + ampDelta / AmpScale
+                          :  1 / (1 - ampDelta / AmpScale)
 finalDamage = finalDamage × ampFactor
 ```
+
+**The reducing half is asymptotic because the linear one reached zero.** v1 used
+`max(0, 1 + ampDelta/AmpScale)` for both halves. That floor is **reachable**: at
+`ampDelta ≤ −AmpScale` the multiplier is exactly `0`, so **`combat.reduction` at 30 points made an
+actor immune to every attack at any power** — 49,147 of 50,000 landed hits dealt literally nothing in
+simulation. `reciprocal` keeps `1 + d/s` for every `ampDelta ≥ 0`, so nothing on the amplifying side
+changes at all, and mirrors `PierceFactor`'s own shape below zero. **Raising `AmpScale` is not a fix**
+— it moves the immunity threshold rather than removing it, and under-mitigates everywhere else.
+
+This is the mitigation chain's half of the guarantee §6.4a already gives the evasion chain: a block
+removes at most 950‰, *never* all of it — "immunity impossible by construction". That was true of
+block and parry and false of `reduction` until this change. `ampShape: linearClamped` restores v1.
 
 `weightedDelta` already includes per-component matchup bonuses from §6.2–6.3.
 
@@ -414,10 +484,21 @@ the answer for most modifiers, but is not the definition, and `penetration`/`abs
 
 ### 6.7a Reflection (T5.4, spec-reflection.md, 2026-08-25)
 
-**Fires on `finalDamage` from §6.7 — post-mitigation, post-crit, post-amp, pre-shield.** Reflection
-reads the same `finalDamage` §7 is about to hand to the shield gate, not a value the gate has already
-reduced: a shield protects its owner, it does not shrink what the owner bounces back (spec §3, §9 —
-decided reading, the opposite is defensible but this is what ships). Two `Contest` pairs, both
+**Fires on what actually reached HP — post-mitigation, post-crit, post-amp, and (since 2026-08-25)
+POST-shield.** `reflectReadsPostShield: true` is the shipped default.
+
+> **This reverses the original v1 reading, on measured evidence.** v1 read the pre-shield
+> `finalDamage`, on the argument that "a shield protects its owner, it does not shrink what the owner
+> bounces back" (spec-reflection.md §3/§9 — explicitly flagged there as a decided reading whose
+> opposite was defensible). Simulated, that reading let shield and reflect compound into a trade no
+> attacker can win: a shielded reflector **took zero damage and killed its attacker in 28 swings**,
+> returning **542.8%** of the damage it received. Reading the post-shield amount instead — the value
+> `DamageApplyPipeline` already returns, so it costs nothing to use — brings self-damage to **9.0%**
+> and turns the same fight into an even trade at 84 swings. A fully absorbed hit now reflects nothing.
+> `reflectReadsPostShield: false` restores the v1 reading, and `ReflectsPreShield_whenConfigured`
+> keeps it under test.
+
+Two `Contest` pairs, both
 **role-inverted** like §6.4a's parry/block — the defender (the one who just took `finalDamage`) raises
 `reflect.rate`/`reflect.damage`, the attacker suppresses via `reflect.resist.rate`/`reflect.resist.damage`:
 
@@ -442,8 +523,19 @@ if success:
 
 **Linear, not sigmoid, same reasoning as §6.4a:** `sigmoid(0) = 0.5` would hand every actor a default
 50% reflect chance before any content authors `reflect.rate`, contradicting "nothing moves at zero"
-(`NoGoldensMoveAtZero`). `ReflectRateScale`/`ReflectShareScale` live in `data/tuning/combat.v1.json`,
-shape only (10.0 each), reusing `StatusPolicy.NetFactorScale`'s own value rather than a fresh number.
+(`NoGoldensMoveAtZero`). `ReflectRateScale`/`ReflectShareScale` live in `data/tuning/combat.v1.json`.
+`ReflectShareScale` moved 10.0 → **100.0** on 2026-08-25: at 10 the entire authoring range of
+`reflect.damage` was 0–10 before `reflectShare` saturated at 1.0, two orders of magnitude tighter than
+`parry.rate`'s permille range for a conceptually identical stat.
+
+> **`reflectShare` is clamped to `[0,1]`, and that has a consequence worth stating.** Reflected damage
+> can never exceed damage taken, so against an attacker with equal effective HP a pure thorns build
+> can only ever **tie** — both actors die on the same swing. Simulated across `reflect.damage` 0 → 120
+> there is no value at which the attacker dies and the reflector survives; the outcome jumps straight
+> from "defender dies" to "both die" once share reaches 1.0. **Thorns wins on HP asymmetry alone**, not
+> on the reflect stats themselves. Recorded as a property of the design, not a defect — but it means a
+> thorns archetype whose ceiling is a mutual kill needs something else (durability, or a share that
+> may exceed 1.0) if it is meant to be a winning build rather than a deterrent.
 
 **No ElementPayload on the bounce packet.** §6.7's `finalDamage` is already fully mitigated —
 re-running §6.1–6.7 on the bounce would mitigate it a second time. `OverlayCombatMath.Finalize` passes

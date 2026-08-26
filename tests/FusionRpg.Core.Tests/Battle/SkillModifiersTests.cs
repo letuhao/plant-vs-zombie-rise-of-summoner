@@ -42,13 +42,30 @@ public class SkillModifiersTests
         var calculator = new OverlayCombatCalculator();
         var rng = new FixedCombatRng(0.0);
 
-        var (baseline, _) = calculator.Compute(BaseRequest(1.0), rng);
-        var (doubled, _) = calculator.Compute(BaseRequest(2.0), rng);
+        // Asserted as an INVARIANT — the mitigated fraction (damage / pre-mitigation offense) is flat
+        // in effectiveness — rather than as the old literal `baseline - 100 == doubled`.
+        //
+        // That literal was only true while mitigation SUBTRACTED. It quietly encoded one DefenseShape
+        // into a test whose subject is skill.effectiveness, so adopting divisive mitigation would have
+        // demanded a re-bless of a contract that had not actually changed. The invariant below is the
+        // thing §2 really promises: effectiveness scales the pre-mitigation term, and defense answers
+        // it — proportionally under divisive, absolutely under subtractive, but never bypassed.
+        //
+        // It is also the regression guard for a real defect. `K` must read LADDER quantities only
+        // (authored base + power). An earlier draft used `offense`, which also carries effectiveness —
+        // that let effectiveness scale the numerator AND shrink the divisor's bite, making a
+        // Feeder-class modifier superlinear. Measured when it did: 1000x effectiveness against a
+        // 5000x defense wall leaked 826 damage; reading ladder scale only, it leaks 1.
+        double MitigatedFraction(double effectiveness)
+        {
+            var (delta, _) = calculator.Compute(BaseRequest(effectiveness), rng);
+            var offense = 100.0 * effectiveness + 20.0; // base x effectiveness + power(20)
+            return -delta / offense;
+        }
 
-        // BaseOverlayDamage=100 doubled to 200 adds +100 to the pre-delta base, which flows straight
-        // into powerAdjusted (weightedDelta unchanged: power 20 - defense 10 = 10 either way) --
-        // exactly the "+100 to the pre-mitigation term" a Feeder application produces.
-        Assert.Equal(baseline - 100, doubled); // signed deltas: both negative, doubled is 100 more damage
+        var atTen = MitigatedFraction(10.0);
+        Assert.Equal(atTen, MitigatedFraction(100.0), 3);
+        Assert.Equal(atTen, MitigatedFraction(1000.0), 3);
     }
 
     [Fact]
@@ -85,8 +102,22 @@ public class SkillModifiersTests
         };
 
         var (signedDelta, breakdown) = calculator.Compute(request, rng);
-        Assert.Equal(0, signedDelta);
-        Assert.Equal(0, breakdown.FinalSignedDelta);
+
+        // Overwhelming defense reduces a 1000x-scaled hit to essentially nothing — but NOT to
+        // exactly nothing, and that distinction is the point of DefenseShape.Divisive.
+        //
+        // This assertion was `Assert.Equal(0, signedDelta)` while mitigation subtracted. Reaching
+        // exactly zero IS total immunity, and it is the same defect this session removed from
+        // ampFactor: a defender past a threshold takes literally nothing from any attacker at any
+        // power. Divisive mitigation approaches zero asymptotically instead, so defense can be
+        // arbitrarily strong and still never make an actor invulnerable. Keeping the old assertion
+        // would have preserved immunity in `combat.defense` while banning it in `combat.reduction` —
+        // the same rule enforced in one place and not the other.
+        //
+        // 10 base x 1000 effectiveness = 10,000 offense against 50,000 defense leaks 1.
+        Assert.True(signedDelta < 0, "defense must never zero a hit outright — that is immunity");
+        Assert.True(-signedDelta <= 10, $"defense must still absorb ~all of it, leaked {-signedDelta}");
+        Assert.Equal(signedDelta, breakdown.FinalSignedDelta);
     }
 
     [Fact]

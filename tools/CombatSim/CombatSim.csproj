@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FusionRpg.Tools.CombatSim</RootNamespace>
+    <AssemblyName>CombatSim</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Core only. This tool drives the REAL combat pipeline (OverlayCombatCalculator,
+         CombatDamageDispatcher, ShieldMath) through FoundationHarness — the offline harness Core
+         already ships for exactly this. It opens no database, issues no SQL, and never touches the
+         game. A reimplementation of the math here would drift from src/ and make every balance
+         reading a lie, so there is deliberately none. -->
+    <ProjectReference Include="..\..\src\FusionRpg.Core\FusionRpg.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="scenarios\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="variants\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

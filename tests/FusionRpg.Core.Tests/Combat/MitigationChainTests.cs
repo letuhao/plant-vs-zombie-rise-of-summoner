@@ -205,11 +205,17 @@ public class MitigationChainTests
         // conversion, 4 total. Verified empirically too: audit-overflow.py before and after T5.1+T5.3
         // reports the identical A3=21/A7=15/0-critical baseline -- no new finding either module.
         // Proven here structurally: no cast-after-multiply (the A4 violation class) anywhere in the
-        // file, and every `long` appearance is one of these four known, accounted-for boundaries.
+        // file, and every `long` appearance is one of these known, accounted-for boundaries.
+        //
+        // 4 → 5 when ParryNeutralShareKPm landed: the neutral removal is a FIFTH crossing into
+        // ClampedContest's long domain (`effectiveBaseDamage × share/1000`). It divides by 1000
+        // last and rounds once, like the four before it, and is a cast-of-a-product — never the
+        // banned `(long)(a*b)` cast-AFTER-multiply, since the multiply is double-domain by
+        // construction and the cast applies to the already-rounded result.
         var text = ReadCoreFile("Combat", "OverlayCombatCalculator.cs");
         Assert.DoesNotContain("(long)(", text, StringComparison.Ordinal);
         var longCasts = System.Text.RegularExpressions.Regex.Matches(text, @"\(long\)").Count;
-        Assert.Equal(4, longCasts);
+        Assert.Equal(5, longCasts);
     }
 
     static string ReadCoreFile(params string[] relativeUnderCore)

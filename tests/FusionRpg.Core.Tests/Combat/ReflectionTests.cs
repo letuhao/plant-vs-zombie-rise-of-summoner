@@ -235,11 +235,15 @@ public class ReflectionTests
     }
 
     [Fact]
-    public void ReflectsPreShield()
+    public void FullyAbsorbedHitDoesNotReflect()
     {
-        // spec SS3 (decided reading, SS9): reflection reads finalDamage BEFORE the shield gate
-        // -- a shield protects its owner, it does not shrink what the owner bounces back.
-        // Proven by fully absorbing the original hit and confirming the reflector STILL rolls.
+        // Shipped default since 2026-08-25 (combat.v1.json reflectReadsPostShield: true):
+        // reflection reads what actually reached HP, so a hit the shield ate entirely bounces
+        // nothing. The measured reason for the change, over 50,000 simulated fights
+        // (tools/CombatSim, variants/reflect.json, scenario shield-reflect): under the pre-shield
+        // reading a shielded reflector took a mean 197 damage while returning 542.8% of the damage
+        // the attacker dealt -- a trade no attacker can win, from two defensive stats that were
+        // never designed to compound.
         var h = new FoundationHarness().WithShieldGate();
         h.PinDerived("a", NeutralCombat);
         h.PinDerived("b", NeutralCombat.Overlay(MaxReflect));
@@ -250,6 +254,37 @@ public class ReflectionTests
         CombatDamageDispatcher.DispatchInstant(
             Hit("a", "b", -100), BoardSnapshot.Empty, Ev(), h.Funnel,
             CombatPolicy.Default, rng, PassThroughCombatMath.Instance, skipped, h.Bag.ShieldGate, h.Resolve);
+
+        Assert.Contains(skipped, s => s.EndsWith(":absorbed", StringComparison.Ordinal));
+        Assert.Equal(0, rng.Draws); // nothing reached HP, so there was nothing to reflect
+    }
+
+    [Fact]
+    public void ReflectsPreShield_whenConfigured()
+    {
+        // The other half of the switch still ships and stays reachable: at
+        // ReflectReadsPostShield=false the reflector rolls even on a fully absorbed hit -- spec
+        // -reflection.md SS3/SS9's original decided reading, "a shield protects its owner, it does
+        // not shrink what the owner bounces back". Kept as an executable description of the
+        // alternative rather than deleted, so flipping the tuning key back is a one-line change
+        // with a test already standing behind it.
+        //
+        // Uses a LOCAL policy instance rather than mutating CombatPolicy.Default: ~3,500 tests
+        // share that singleton and xunit runs collections concurrently, so a global write here
+        // would race them (the same hazard DerivedStatPolicy.UseScoped exists to solve).
+        var h = new FoundationHarness().WithShieldGate();
+        h.PinDerived("a", NeutralCombat);
+        h.PinDerived("b", NeutralCombat.Overlay(MaxReflect));
+        h.GrantShield("b", baseHp: 1000);
+
+        var policy = CombatPolicy.FromDefault();
+        policy.ReflectReadsPostShield = false;
+
+        var rng = new FixedSuccessRng();
+        var skipped = new List<string>();
+        CombatDamageDispatcher.DispatchInstant(
+            Hit("a", "b", -100), BoardSnapshot.Empty, Ev(), h.Funnel,
+            policy, rng, PassThroughCombatMath.Instance, skipped, h.Bag.ShieldGate, h.Resolve);
 
         Assert.Contains(skipped, s => s.EndsWith(":absorbed", StringComparison.Ordinal));
         Assert.Equal(1, rng.Draws); // reflection still rolled despite the full absorption

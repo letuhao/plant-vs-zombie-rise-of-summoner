@@ -69,6 +69,14 @@ public sealed class OverlayCombatCalculator
                 effectiveBaseDamage);
 
         var weightedDelta = 0.0;
+        // Offense and mitigation accumulated separately, for DefenseShape.Divisive only. The
+        // Subtractive path still uses weightedDelta computed exactly the way it always was.
+        var weightedOffense = 0.0;
+        var weightedDefense = 0.0;
+        // Power WITHOUT the matchup bonus and WITHOUT effectiveness — see DivisiveMitigation's
+        // ladderScale. Both excluded terms are effectiveness-scaled, and effectiveness must not
+        // reach the divisor.
+        var weightedPowerOnly = 0.0;
         var ampDelta = 0.0;
         var pHitFinal = 0.0;
         var pCritFinal = 0.0;
@@ -87,6 +95,9 @@ public sealed class OverlayCombatCalculator
             var effectiveDefenseOmni = def.Get(DerivedStatChannels.CombatDefenseOmni) * PierceFactor(penDeltaOmni, pierceScale);
 
             weightedDelta = atk.Get(DerivedStatChannels.CombatPowerOmni) - effectiveDefenseOmni;
+            weightedOffense = atk.Get(DerivedStatChannels.CombatPowerOmni);
+            weightedPowerOnly = weightedOffense; // omni fallback has no matchup term at all
+            weightedDefense = effectiveDefenseOmni;
             ampDelta += atk.Get(DerivedStatChannels.CombatAmplificationOmni) - def.Get(DerivedStatChannels.CombatReductionOmni);
             pHitFinal = CombatProbability.Sigmoid(
                 atk.Get(DerivedStatChannels.CombatAccuracyOmni) - def.Get(DerivedStatChannels.CombatDodgeOmni),
@@ -118,6 +129,14 @@ public sealed class OverlayCombatCalculator
 
             var effectiveDelta = (power - defense) + componentBonus;
             weightedDelta += c.Weight * effectiveDelta;
+
+            // Divisive's own accumulators, kept SEPARATE rather than deriving weightedDelta from
+            // them: floating-point addition is not associative, so `w·((p−d)+b)` and
+            // `w·(p+b) − w·d` are not guaranteed bit-identical. Recomputing weightedDelta from a
+            // split would risk moving a golden on the Subtractive path for no reason at all.
+            weightedOffense += c.Weight * (power + componentBonus);
+            weightedPowerOnly += c.Weight * power;
+            weightedDefense += c.Weight * defense;
 
             // spec-mitigation-chain.md §2.3: amplification/reduction apply ONCE to the already-summed
             // final damage, not per component -- accumulating omni+element here, weighted, produces
@@ -187,7 +206,15 @@ public sealed class OverlayCombatCalculator
         var cleanHit = !miss && !parried && !blocked;
         var crit = cleanHit && (request.ForceCrit ?? CombatProbability.RollSuccess(rng, pCritFinal));
 
-        var powerAdjusted = effectiveBaseDamage + weightedDelta;
+        var powerAdjusted = CombatPolicy.Default.DefenseShape == DefenseShape.Divisive
+            ? DivisiveMitigation(
+                offense: effectiveBaseDamage + weightedOffense,
+                defense: weightedDefense,
+                k: CombatPolicy.Default.DefenseDivisorK,
+                // The divisor reads the LADDER-scaled hit — authored base plus power — never
+                // effectiveness or matchup. See DivisiveMitigation.
+                ladderScale: request.BaseOverlayDamage + weightedPowerOnly)
+            : effectiveBaseDamage + weightedDelta;
         double finalDamage;
         if (miss)
             finalDamage = 0;
@@ -202,14 +229,21 @@ public sealed class OverlayCombatCalculator
             // zero (floor 0 — no immunity-by-non-spend concern, block/parry has no pool to protect),
             // a maximal one removes at most 950‰, never all of it.
             var baseLong = (long)Math.Round(effectiveBaseDamage, MidpointRounding.AwayFromZero);
+            // The neutral removal, before strength/shred moves it. At the shipped 1000‰ this is
+            // exactly baseLong (x * 1.0 is exact in IEEE, so byte-identical); below 1000‰ it seats
+            // the neutral point INSIDE the [0, cap] range so strength and shred both do something.
+            // Bounds still scale against the full hit — what is capped is the share of THIS hit.
+            var neutralBase = (long)Math.Round(
+                effectiveBaseDamage * (CombatPolicy.Default.ParryNeutralShareKPm / 1000.0),
+                MidpointRounding.AwayFromZero);
             var removed = parried
                 ? ClampedContest.Apply(
-                    deltaBase: baseLong,
+                    deltaBase: neutralBase,
                     delta: (long)Math.Round(CombatDerivedReader.ParryStrength(defSnap) - CombatDerivedReader.ParryShred(atkSnap), MidpointRounding.AwayFromZero),
                     hitCount: 1, boundsBase: baseLong,
                     floorKPm: 0, capKPm: CombatPolicy.Default.ParryCapPermille)
                 : ClampedContest.Apply(
-                    deltaBase: baseLong,
+                    deltaBase: neutralBase,
                     delta: (long)Math.Round(CombatDerivedReader.BlockStrength(defSnap) - CombatDerivedReader.BlockShred(atkSnap), MidpointRounding.AwayFromZero),
                     hitCount: 1, boundsBase: baseLong,
                     floorKPm: 0, capKPm: CombatPolicy.Default.BlockCapPermille);
@@ -229,7 +263,9 @@ public sealed class OverlayCombatCalculator
             // from flipping a positive finalDamage negative (which downstream would just read as "no
             // damage" via the signedDelta conversion below, but silently, not provably), not "capping
             // amplification" — amplification's own contribution to ampDelta is still fully unbounded.
-            finalDamage *= AmpFactor(ampDelta, ampScale);
+            finalDamage *= CombatPolicy.Default.AmpShape == AmpShape.Reciprocal
+                ? AmpFactorReciprocal(ampDelta, ampScale)
+                : AmpFactor(ampDelta, ampScale);
 
             // Min-chip floor (owner decision 6): profile-scoped — a landed hit deals at
             // least ceil(share × base), min 1. Overlay profile is 0 → this branch is dead
@@ -339,4 +375,54 @@ public sealed class OverlayCombatCalculator
     /// </summary>
     public static double AmpFactor(double ampDelta, double ampScale) =>
         Math.Max(0.0, 1.0 + ampDelta / ampScale);
+
+    /// <summary>
+    /// <see cref="AmpShape.Reciprocal"/> — <see cref="AmpFactor"/>'s reducing half made asymptotic,
+    /// mirroring <see cref="PierceFactor"/>'s own shape. Identical to <see cref="AmpFactor"/> for
+    /// every <paramref name="ampDelta"/> ≥ 0 (both are <c>1 + d/s</c>, still unbounded upward, PS-8),
+    /// so nothing on the amplifying side changes. Below zero it returns <c>1/(1 + |d|/s)</c>, which
+    /// approaches zero without reaching it — so <c>reduction</c> always helps and can never confer
+    /// the total immunity <see cref="AmpFactor"/> hands out at <c>ampDelta ≤ −ampScale</c>.
+    /// </summary>
+    public static double AmpFactorReciprocal(double ampDelta, double ampScale)
+    {
+        if (ampDelta >= 0) return 1.0 + ampDelta / ampScale;
+        return 1.0 / (1.0 - ampDelta / ampScale);
+    }
+
+    /// <summary>
+    /// <see cref="DefenseShape.Divisive"/>: <c>offense × K/(K + defense)</c> with
+    /// <c>K = k × offense</c>. Identity at <c>defense = 0</c>, asymptotic to zero as defense grows
+    /// — so there is no subtractive cliff where a defender simply becomes immune, and no clamp is
+    /// needed to prevent negative damage (the curve never crosses zero). Scale-invariant: doubling
+    /// offense and defense together leaves the mitigated FRACTION unchanged, which is the property
+    /// a quadratic power ladder needs and a constant divisor cannot give (ssot-power-scale.md §2).
+    /// </summary>
+    /// <param name="ladderScale">What <c>K</c> is measured against — the authored hit plus power,
+    /// both `P(Θ)`-scale magnitudes. Deliberately NOT <paramref name="offense"/>: offense also
+    /// carries <c>skill.effectiveness</c> and the matchup bonus, and letting a per-action multiplier
+    /// into the divisor would make effectiveness superlinear (it would scale the numerator AND
+    /// shrink the mitigated fraction), breaking its locked `Feeder` classification. Measured before
+    /// this split: a 1000x effectiveness took damage from ~0 to 826 against a defense wall. Reading
+    /// only ladder quantities keeps the mitigated fraction constant with respect to effectiveness —
+    /// so effectiveness stays exactly linear and `combat.defense` still answers it, proportionally
+    /// rather than absolutely. Scale invariance is unaffected: base and power both climb with the
+    /// ladder, so the fraction is unchanged when attacker and defender advance together.</param>
+    public static double DivisiveMitigation(double offense, double defense, double k, double ladderScale)
+    {
+        if (offense <= 0) return offense;
+        var denom = k * ladderScale;
+        // k <= 0, or a degenerate ladder scale, disables mitigation rather than dividing by zero.
+        if (denom <= 0) return offense;
+
+        // NEGATIVE defense amplifies, mirrored around 1.0 — `2 - K/(K + |defense|)`. Clamping it to
+        // zero instead would silently delete the glass-cannon mechanic the subtractive shape has
+        // always had (`ActorDerivedProfiles.CombatGlass` ships defense.omni = -50, and a defense
+        // debuff can push any actor below zero). Caught by Combat_glass_vs_neutral_increases_damage
+        // rather than reasoned about in advance. Same construction League of Legends uses for
+        // negative resistances, and it is continuous at 0: both branches give exactly 1.0 there.
+        if (defense < 0)
+            return offense * (2.0 - denom / (denom - defense));
+        return offense * denom / (denom + defense);
+    }
 }

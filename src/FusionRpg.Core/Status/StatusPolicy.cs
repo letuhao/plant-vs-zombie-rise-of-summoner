@@ -29,9 +29,42 @@ public static class StatusPolicy
     /// <summary>P1: tierPower feeds ApplyScale and delta totals.</summary>
     public const bool IncludeTierPowerInDelta = true;
 
+    /// <summary>Which curve turns <c>delta</c> into an apply chance (2026-08-25).</summary>
+    public static StatusApplyShape ApplyShape => Tuning.ApplyShape;
+
+    /// <summary>Where the apply contest's neutral point sits, in delta units. <c>0</c> reproduces the
+    /// shipped behaviour exactly. Positive values mean an attacker needs a real power advantage before
+    /// a status becomes likely — which is what stops an unequipped attacker landing everything on a
+    /// coin flip.</summary>
+    public static double ApplyOffsetK => Tuning.ApplyOffsetK;
+
     public static double ApplyScaleKForCategory(string category) => ApplyScaleK;
 
     public static double ApplySteepnessForCategory(string category) => Tuning.ApplySteepnessDefault;
+}
+
+/// <summary>
+/// How <c>delta</c> becomes an apply probability (ResistanceEvaluator Phase 1).
+/// </summary>
+public enum StatusApplyShape
+{
+    /// <summary>Shipped v1: <c>sigmoid((delta − offset)/scale, steepness)</c>. Smooth and
+    /// soft-counterable — it never reaches 0 or 1, so no amount of resistance confers immunity.
+    /// <b>But a sigmoid's neutral point is 0.5 for every scale and every steepness</b>, so at
+    /// <c>offset = 0</c> a status lands on a coin flip against a target that has bought no resistance
+    /// at all. For a <c>cc</c> with duration ≥ 2 rounds that is not a 50% chance, it is a permanent
+    /// lock (measured 2026-08-25). Raising <c>ApplyOffsetK</c> moves the neutral point without
+    /// changing the shape, which keeps soft-counterability AND fixes the default.</summary>
+    Sigmoid,
+
+    /// <summary>Linear from zero: <c>clamp((delta − offset)/scale, 0, 1)</c>. The shape the evasion
+    /// chain already chose for exactly this problem — <c>OverlayCombatCalculator</c>'s rate contests
+    /// are linear per-mille precisely because <i>"a sigmoid would give 0.5 at delta=0 … which is not
+    /// 'empty bands are a no-op', it is a new default nobody chose"</i>. Hard-counterable: enough
+    /// resistance zeroes the apply chance outright, the same way <c>parry.break</c> can zero a parry.
+    /// That is a real trade — see PS-8 and the RPS measurement's rule 5 on hard vs soft defences —
+    /// which is why both shapes stay reachable rather than one replacing the other.</summary>
+    LinearFromZero
 }
 
 public static class StatusL2bCategory

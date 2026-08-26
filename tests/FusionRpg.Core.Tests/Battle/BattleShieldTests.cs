@@ -153,7 +153,7 @@ public class BattleShieldTests
     {
         var report = Run(Actor("squad:0", "squad"), Actor("wave:0", "wave"));
         // T4.2 (power-dial, 2026-08-24): RulesetVersion 2 -> 3.
-        Assert.Equal(3, report.RulesetVersion);
+        Assert.Equal(4, report.RulesetVersion);
         Assert.Equal(BattleEnvironment.Stamp, report.EnvironmentStamp);
         Assert.False(string.IsNullOrWhiteSpace(report.EnvironmentStamp));
     }

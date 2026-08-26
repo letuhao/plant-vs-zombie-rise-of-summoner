@@ -23,9 +23,17 @@ public class OverlayCombatProfileTests
             ForceCrit = false
         };
         var (_, breakdown) = calc.Compute(request, new SeededCombatRng(1));
-        // glass: defense.omni = -50 → powerAdjusted = 100 - (-50) = 150
-        Assert.Equal(150, breakdown.PowerAdjustedDamage, 3);
-        Assert.Equal(-150, breakdown.FinalSignedDelta);
+        // glass: defense.omni = -50, so NEGATIVE defense must still AMPLIFY (the property this test
+        // is named for). DefenseShape.Divisive mirrors below zero — 2 − K/(K + |defense|) with
+        // K = 0.45 × 100 = 45 → 2 − 45/95 = 1.5263 → 152.63. Was 150 under the subtractive shape
+        // (100 − (−50)); the mechanic is preserved, the number is not.
+        //
+        // This test is why the mirrored branch exists at all. A first pass clamped defense at zero
+        // (`Math.Max(0, defense)`), which silently deleted the glass-cannon mechanic — this
+        // assertion caught it, and it would have shipped as "glass profiles quietly stopped being
+        // glass" otherwise.
+        Assert.Equal(152.632, breakdown.PowerAdjustedDamage, 3);
+        Assert.Equal(-153, breakdown.FinalSignedDelta);
     }
 
     [Fact]
@@ -52,7 +60,11 @@ public class OverlayCombatProfileTests
         var fire = calc.Compute(Req(ElementTypeId.Fire), new SeededCombatRng(1));
 
         // ice def 30 + fire STR vs ice (+25 matchup) → fire powerAdjusted = 100+25 = 125
-        Assert.Equal(70, ice.Breakdown.PowerAdjustedDamage, 3);
+        // DefenseShape.Divisive (2026-08-25): offense 100, ladderScale 100, K = 0.45 x 100 = 45,
+        // ice defense 30 -> 100 x 45/(45+30) = 60. Was 70 under the subtractive shape (100 - 30).
+        // The fire case is unchanged at 125: matchup is excluded from ladderScale, and the ice
+        // tank has no fire defense, so its divisor bites nothing.
+        Assert.Equal(60, ice.Breakdown.PowerAdjustedDamage, 3);
         Assert.Equal(125, fire.Breakdown.PowerAdjustedDamage, 3);
         Assert.Equal(25, fire.Breakdown.MatchupBonus, 3);
         Assert.Equal(0, ice.Breakdown.MatchupBonus, 3);

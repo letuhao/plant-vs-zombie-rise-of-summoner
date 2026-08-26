@@ -52,8 +52,13 @@ public class OmniFallbackTests
         var calc = new OverlayCombatCalculator();
         var (delta, breakdown) = calc.Compute(Request(attacker, defender, forceHit: true, forceCrit: false),
             new SeededCombatRng(1));
-        Assert.Equal(20.0, breakdown.WeightedDelta, 9);   // omni power − omni defense
-        Assert.Equal(-120, delta);
+        Assert.Equal(20.0, breakdown.WeightedDelta, 9);   // omni power − omni defense, unchanged
+        // DefenseShape.Divisive (2026-08-25): offense 130 (base 100 + omni power 30),
+        // ladderScale 130, K = 0.45 × 130 = 58.5, defense 10
+        //   → 130 × 58.5/(58.5+10) = 111.02 → 111.
+        // Was -120 under the subtractive shape (100 + 30 − 10). WeightedDelta above is deliberately
+        // still the subtractive difference: it is a reported breakdown field, not the formula.
+        Assert.Equal(-111, delta);
     }
 
     [Fact]

@@ -19,5 +19,10 @@
   "parryCapPermille": 950,
   "avoidanceBandCapPermille": 950,
   "reflectRateScale": 10.0,
-  "reflectShareScale": 10.0
+  "reflectShareScale": 100.0,
+  "parryNeutralShareKPm": 500,
+  "defenseShape": "divisive",
+  "defenseDivisorK": 0.45,
+  "reflectReadsPostShield": true,
+  "ampShape": "reciprocal"
 }

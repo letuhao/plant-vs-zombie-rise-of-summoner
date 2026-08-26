@@ -197,7 +197,12 @@ internal static class ContractTuningTestBootstrap
         ParryCapPermille: 950,
         AvoidanceBandCapPermille: 950,
         ReflectRateScale: 10.0,
-        ReflectShareScale: 10.0);
+        ReflectShareScale: 100.0,
+        ParryNeutralShareKPm: 500,
+        DefenseShape: DefenseShape.Divisive,
+        DefenseDivisorK: 0.45,
+        ReflectReadsPostShield: true,
+        AmpShape: AmpShape.Reciprocal);
 
     public static readonly FusionTuning DefaultFusion = new(
         SchemaVersion: 1,
@@ -234,7 +239,9 @@ internal static class ContractTuningTestBootstrap
         NetFactorScale: 10.0, // T3.2 (power-plan.md, done 2026-08-24): netFactor = 1 + delta/NetFactorScale (audit F4)
         ProgressionPowerStubDefault: 1.0,
         ProcDepthLimitDefault: 6,
-        ApplySteepnessDefault: 1.0);
+        ApplySteepnessDefault: 1.0,
+        ApplyShape: StatusApplyShape.Sigmoid,
+        ApplyOffsetK: 0.0);
 
     public static readonly OverlayTuning DefaultOverlay = new(
         SchemaVersion: 1,

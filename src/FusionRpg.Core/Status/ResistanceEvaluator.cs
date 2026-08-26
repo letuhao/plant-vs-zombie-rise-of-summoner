@@ -124,6 +124,28 @@ public sealed class ResistanceEvaluator
         1.0 / (1.0 + Math.Exp(-x * steepness));
 
     /// <summary>
+    /// delta → apply chance. Two shapes, both reachable from tuning, defaulting to the shipped one
+    /// (<see cref="StatusApplyShape.Sigmoid"/> at <c>ApplyOffsetK = 0</c>, which is byte-identical to
+    /// the previous <c>Sigmoid(delta / scale, steepness)</c> — <c>delta - 0.0</c> is exact in IEEE).
+    ///
+    /// <para><b>Why this became a shape rather than a number.</b> A sigmoid is 0.5 at its own zero for
+    /// EVERY scale and EVERY steepness, so no value of any existing tunable could move the neutral
+    /// point — an unequipped attacker landed every status on a coin flip, and a <c>cc</c> at parity
+    /// was a permanent lock. That is the same defect the evasion chain refused for parry
+    /// (<c>OverlayCombatCalculator</c>: <i>"a sigmoid would give 0.5 at delta=0 … a new default nobody
+    /// chose"</i>), and this is the same fix, made selectable rather than imposed.</para>
+    /// </summary>
+    public static double ApplyChance(double delta, double scale, double steepness)
+    {
+        var shifted = delta - StatusPolicy.ApplyOffsetK;
+        return StatusPolicy.ApplyShape switch
+        {
+            StatusApplyShape.LinearFromZero => scale <= 0 ? 0 : Math.Clamp(shifted / scale, 0.0, 1.0),
+            _ => Sigmoid(shifted / scale, steepness)
+        };
+    }
+
+    /// <summary>
     /// spec-status-potency.md §2.1 — Phase 1 (this method's apply-chance roll) is untouched; only
     /// Phase 2 (potency) splits into independent duration and intensity deltas.
     /// <paramref name="statusElement"/> is Q1's term (§2.3): the status DEF's own element tag, never
@@ -202,7 +224,7 @@ public sealed class ResistanceEvaluator
             StatusPolicy.ApplyScaleFloor,
             StatusPolicy.ApplyScaleKForCategory(category));
         var steepness = StatusPolicy.ApplySteepnessForCategory(category);
-        var pApply = Sigmoid(delta / effectiveApplyScale, steepness);
+        var pApply = ApplyChance(delta, effectiveApplyScale, steepness);
         var pFinal = request.GrantChance * pApply;
 
         if (rng.NextUnit() >= pFinal)

@@ -61,8 +61,14 @@ public static class CombatDamageDispatcher
             // second counter). A terminal bounce is left to the SAME top-of-function check on
             // the recursive call inside TryReflect, so it is dropped, never applied at a
             // clamped zero (SS2.1 rule 2).
-            if (actorResolve != null && rng != null && amount < 0 && !string.IsNullOrWhiteSpace(packet.ActorPtr))
-                TryReflect(packet, ptr, amount, ev, funnel, policy, rng, math, skipped, shieldGate, actorResolve, snapshot);
+            //
+            // CombatPolicy.ReflectReadsPostShield flips that one reading: `applied.AppliedAmount`
+            // is what actually reached HP, so a fully absorbed hit reflects nothing. Default false
+            // keeps the shipped behaviour exactly -- the value is already on hand either way, so
+            // this costs no extra work, only a choice.
+            var reflectSource = policy.ReflectReadsPostShield ? applied.AppliedAmount : amount;
+            if (actorResolve != null && rng != null && reflectSource < 0 && !string.IsNullOrWhiteSpace(packet.ActorPtr))
+                TryReflect(packet, ptr, reflectSource, ev, funnel, policy, rng, math, skipped, shieldGate, actorResolve, snapshot);
         }
 
         return n;

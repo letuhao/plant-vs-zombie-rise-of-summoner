@@ -67,8 +67,14 @@ public static class BattleRuleset
     /// <summary>v2 (combat-unification battle-adoption): the SSOT resolver replaced the
     /// per-mille curves; baselines re-expressed in resolver-scale points (owner decision 5).
     /// v3 (T4.2, power-dial, 2026-08-24): power-scale.v2.json's bMilli 0 -> 400 — every magnitude
-    /// away from the Theta=20 pin moves; the pin itself and every rate golden must not (PS-3).</summary>
-    public const int RulesetVersion = 3;
+    /// away from the Theta=20 pin moves; the pin itself and every rate golden must not (PS-3).
+    /// v4 (defense-shape, 2026-08-25): combat.defense stops SUBTRACTING and starts DIVIDING
+    /// (combat-damage-ssot.md SS6.3, DefenseShape.Divisive). Every mitigated magnitude moves; no
+    /// rate does, and PS-3 still does not apply to these hashes. Adopted because the subtractive
+    /// shape floors damage at zero once defense outruns offense -- total immunity, the same defect
+    /// removed from ampFactor in the same session, measured at 17.1% of LANDED hits dealing
+    /// nothing. Divisive approaches zero asymptotically and never reaches it.</summary>
+    public const int RulesetVersion = 4;
 
     static BattleTuning? _tuning;
 

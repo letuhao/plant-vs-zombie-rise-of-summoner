@@ -169,6 +169,6 @@ public class BattleResolverParityTests
         // The self-arming ban test (CombatSsotContractTests) now runs its armed branch —
         // this is the local assertion that arming actually happened.
         // T4.2 (power-dial, 2026-08-24): RulesetVersion 2 -> 3.
-        Assert.Equal(3, BattleRuleset.RulesetVersion);
+        Assert.Equal(4, BattleRuleset.RulesetVersion);
     }
 }
