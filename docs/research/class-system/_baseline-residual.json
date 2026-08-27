@@ -1,0 +1,110 @@
+﻿{
+    "model":  "D:\\Works\\source\\plant-vs-zombie-rise-of-summoner\\data\\tuning\\aptitudes.v2.json",
+    "modelDescription":  "aptitudes.v2 — 486 edges, contest span 100, gamma contest 1 / magnitude 1, recovery x0.37, mitigation x0.3",
+    "thetas":  [
+                   100
+               ],
+    "archetypes":  [
+                       "FORCE",
+                       "FINESSE",
+                       "BASTION"
+                   ],
+    "verified":  true,
+    "trials":  3000,
+    "arrows":  [
+                   {
+                       "theta":  100,
+                       "attacker":  "FORCE",
+                       "defender":  "FINESSE",
+                       "predictedWinShareA":  0.9999519943020443,
+                       "simulatedWinShareA":  0.9966666666666667,
+                       "residual":  0.0032853276353775884,
+                       "roundsA":  48.89101303283377,
+                       "roundsB":  14.513763712744172,
+                       "netAttritionA":  3553.4854801364067,
+                       "netAttritionB":  7416.40846098962,
+                       "simMedianRounds":  18,
+                       "neverEnds":  false
+                   },
+                   {
+                       "theta":  100,
+                       "attacker":  "FORCE",
+                       "defender":  "BASTION",
+                       "predictedWinShareA":  0.9987120047680369,
+                       "simulatedWinShareA":  0.999,
+                       "residual":  -0.00028799523196310073,
+                       "roundsA":  24.917006931143636,
+                       "roundsB":  11.722528086196998,
+                       "netAttritionA":  7360.231617334492,
+                       "netAttritionB":  12039.05908637851,
+                       "simMedianRounds":  13,
+                       "neverEnds":  false
+                   },
+                   {
+                       "theta":  100,
+                       "attacker":  "FINESSE",
+                       "defender":  "FORCE",
+                       "predictedWinShareA":  4.8005697955710858E-05,
+                       "simulatedWinShareA":  0.0033333333333333335,
+                       "residual":  -0.0032853276353776227,
+                       "roundsA":  14.513763712744172,
+                       "roundsB":  48.89101303283377,
+                       "netAttritionA":  7416.40846098962,
+                       "netAttritionB":  3553.4854801364067,
+                       "simMedianRounds":  18,
+                       "neverEnds":  false
+                   },
+                   {
+                       "theta":  100,
+                       "attacker":  "FINESSE",
+                       "defender":  "BASTION",
+                       "predictedWinShareA":  0.01912253564331362,
+                       "simulatedWinShareA":  0.0003333333333333333,
+                       "residual":  0.018789202309980286,
+                       "roundsA":  19.242068953313535,
+                       "roundsB":  34.05476239567645,
+                       "netAttritionA":  5593.993050392022,
+                       "netAttritionB":  4031.7737284256127,
+                       "simMedianRounds":  17,
+                       "neverEnds":  false
+                   },
+                   {
+                       "theta":  100,
+                       "attacker":  "BASTION",
+                       "defender":  "FORCE",
+                       "predictedWinShareA":  0.0012879952319631571,
+                       "simulatedWinShareA":  0.001,
+                       "residual":  0.0002879952319631571,
+                       "roundsA":  11.722528086196998,
+                       "roundsB":  24.917006931143636,
+                       "netAttritionA":  12039.05908637851,
+                       "netAttritionB":  7360.231617334492,
+                       "simMedianRounds":  13,
+                       "neverEnds":  false
+                   },
+                   {
+                       "theta":  100,
+                       "attacker":  "BASTION",
+                       "defender":  "FINESSE",
+                       "predictedWinShareA":  0.9808774643566864,
+                       "simulatedWinShareA":  0.9996666666666667,
+                       "residual":  -0.01878920230998027,
+                       "roundsA":  34.05476239567645,
+                       "roundsB":  19.242068953313535,
+                       "netAttritionA":  4031.7737284256127,
+                       "netAttritionB":  5593.993050392022,
+                       "simMedianRounds":  17,
+                       "neverEnds":  false
+                   }
+               ],
+    "residual":  {
+                     "mean":  0.007454175059107004,
+                     "max":  0.018789202309980286,
+                     "count":  6
+                 },
+    "unendingCount":  0,
+    "_meta":  {
+                  "measuredAt":  "2026-08-27T10:52:04.2593089Z",
+                  "conditions":  "data/tuning/aptitudes.v2.json (live shipped config -- P8.2 stamina bind + P8.3 mitigation dial, and this tool\u0027s own resolver was ported 2026-08-27 to apply that dial the same way Core\u0027s AptitudeResolver.EffectiveKMilli does). FORCE=fire/FINESSE=air/BASTION=earth (scratch copies of tools/CombatSim/builds/*.json with only element changed, never overwriting the tracked fire/fire/fire files). Theta=100, seed 8888, 3000 trials/arrow. Elements genuinely live: closed-form and simulated win shares both move with the matchup (P8.1\u0027s own headline finding, e.g. FORCE v FINESSE closed-form ~98% vs simulated ~68%), not the ~100%/~0% same-element result the tracked builds alone would have produced."
+              }
+}

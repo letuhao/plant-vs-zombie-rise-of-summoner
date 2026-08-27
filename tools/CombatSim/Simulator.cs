@@ -278,6 +278,7 @@ public static class Simulator
         var skipped = new List<string>();
 
         int aWins = 0, bWins = 0, mutual = 0, stale = 0;
+        double lostA = 0, lostB = 0; var rateSamples = 0;
         var roundCounts = new List<long>(trials);
 
         for (var t = 0; t < trials; t++)
@@ -297,6 +298,14 @@ public static class Simulator
             {
                 ["a"] = (long)Math.Round(a.Hp.Sample(sampler)),
                 ["b"] = (long)Math.Round(b.Hp.Sample(sampler))
+            };
+            var hp0 = new Dictionary<string, long>(hp, StringComparer.Ordinal);
+            // Regeneration, ticked. Without it a pool that refills reads as one that does not, and
+            // the termination invariant (class-system-ideal.md §5d) cannot be tested at all.
+            var regen = new Dictionary<string, double>(StringComparer.Ordinal)
+            {
+                ["a"] = Stat(a, "resource.regen.hp"),
+                ["b"] = Stat(b, "resource.regen.hp")
             };
 
             var pools = actions is null ? null : new Dictionary<string, ActorPools>(StringComparer.Ordinal)
@@ -390,9 +399,22 @@ public static class Simulator
                 // Lazy accrual, once per round (spec-action-costs.md §2). Both actors regenerate
                 // whether or not they acted — regen is per tick of simulated time, not per action.
                 if (pools is not null) { pools["a"].Tick(); pools["b"].Tick(); }
+
+                foreach (var key in new[] { "a", "b" })
+                {
+                    if (hp[key] <= 0) continue;                       // no regenerating out of death
+                    var cap = hp0[key];
+                    hp[key] = Math.Min(cap, hp[key] + (long)Math.Round(regen[key]));
+                }
             }
 
             roundCounts.Add(round);
+            if (round > 0)
+            {
+                lostA += (hp0["a"] - hp["a"]) / (double)round;
+                lostB += (hp0["b"] - hp["b"]) / (double)round;
+                rateSamples++;
+            }
             var aDead = hp["a"] <= 0;
             var bDead = hp["b"] <= 0;
             if (aDead && bDead) mutual++;
@@ -408,9 +430,14 @@ public static class Simulator
             BWins = bWins / (double)trials,
             MutualKills = mutual / (double)trials,
             Stalemates = stale / (double)trials,
-            MedianRounds = Percentiles.Of(roundCounts).Median
+            MedianRounds = Percentiles.Of(roundCounts).Median,
+            RateAgainstA = rateSamples == 0 ? 0 : lostA / rateSamples,
+            RateAgainstB = rateSamples == 0 ? 0 : lostB / rateSamples
         };
     }
+
+    static double Stat(Archetype a, string channel) =>
+        a.Stats.TryGetValue(channel, out var r) ? (r.Min + r.Max) / 2.0 : 0.0;
 
     static ActorElementTypes Types(string? element) =>
         element is { } e && ElementRoster.TryParse(e, out var p) ? ActorElementTypes.Create(p) : ActorElementTypes.Neutral;

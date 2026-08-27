@@ -199,8 +199,8 @@ Named so they are not smuggled in.
 
 | Out | Why | Where it goes |
 |---|---|---|
-| **Primary stats** (STR/VIT/DEX/INT/SPI or the Tinh five) | Owner deferred 2026-08-24 | Its own program, after this |
-| **`element_mastery`** — per-element progression | Feeds §3H's element families but is a progression design, not a catalog one | With primary stats |
+| **Primary stats** (STR/VIT/DEX/INT/SPI or the Tinh five) | Owner deferred 2026-08-24 | **Answered 2026-08-26** — the `class-system` program, module 1: [class-system/spec-primary-stats.md](class-system/spec-primary-stats.md). Twelve aptitudes, not five; a **source**, not a registered channel, so nothing here needs to change |
+| **`element_mastery`** — per-element progression | Feeds §3H's element families but is a progression design, not a catalog one | **Answered 2026-08-26** — [spec-primary-stats.md](class-system/spec-primary-stats.md) §3.3: it is **not** a primary stat. Per-element is *flavour*, and aptitudes stop at `omni`, so it belongs to the `aspect` tier. Handed forward with two conditions: it owes a [power/ssot-power-scale.md](power/ssot-power-scale.md) §10 row or a proof it is not power-shaped, and PS-3 applies to it |
 | Commander / economy / crafting / social stats | Owner: *"commander stats, we design them in map feature"* | World map program |
 | `turn.speed` · `turn.haste` · `turn.moveSpeed` registration | Battle stream owns them; they register when it gives them a reader | Battle program |
 | Element roster changes (adding a 7th element) | Generation makes it free; deciding it is Element Hub's | — |

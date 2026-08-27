@@ -1,160 +1,239 @@
 # Spec: action-costs (A3)
 
-Module **A3** in the [action map](../action-map.md). Depends on **A1**. Sequenced **after `A5`** deliberately — a basic attack is free, so making the cost system a prerequisite would have delayed the only module that can tell us whether the action model is right.
+**Status: REVISED 2026-08-27** against the sealed [action-ideal.md](../action-ideal.md). Module **A3** in
+the [action map](../action-map.md). Depends on **A1** and **A12**.
 
-Resource semantics come from [resource-hub-ideal.md](../resource-hub-ideal.md) and the **Resource model** row in [decisions.md](../decisions.md). This module does not redesign them; it spends them.
+Sequenced **after `A5`** deliberately — putting a behaviour change inside the one module whose entire job
+is proving nothing changed would defeat the byte-identity gate. `A4` ships its affordability gate as a seam
+until this lands.
+
+**What changed in this revision:**
+
+| | Change | Source |
+|---|---|---|
+| 1 | **Six resources**, not five — `poise` shipped 2026-08-26 | `decisions.md`, `DerivedStatChannels.cs:510` |
+| 2 | The **"exactly 84 channels"** claim is **wrong** — it is 259+ | `derived-stats` shipped 256; `poise` added three |
+| 3 | The pools are **already built** — this module no longer creates them | `DerivedStatRegistry.cs:165-171`, `roster.json` |
+| 4 | **Cost and cooldown ride the rung** | ideal §6, decisions 11, 12 |
+| 5 | **`poise` has a three-part cost** | ideal §2.2, `spec-guard-economy.md` |
+| 6 | **"Stamina is free" is a tuning defect, not ours** | ideal §2.1, decision 22 |
+| 7 | **An item is not a resource** — open, from another lane | [item/ssot-consumables.md](../item/ssot-consumables.md) §5(b) |
 
 ## Objective
 
 Make an action cost something, and make running out matter.
 
-Two halves:
+## Design
 
-1. **Paying** — validate, consume, and roll back an action's cost list.
-2. **The pools themselves** — the five resources, their channels, their lazy regeneration, and the exhaustion status that fires when one empties.
+### 1. The six resources — already registered, not created here
 
-## Design (locked on approval)
+One shared set. The faction difference is a **display label owned by content** — never a channel id, never
+a branch.
 
-### 1. The five resources
+| id | class | plant label | zombie label | pays for | exhaustion |
+|---|---|---|---|---|---|
+| `hp` | body | HP | HP | nothing — spent by **being hit** | **none** — depletion is death, owned by the FSM's `Downed` |
+| `stamina` | body | Stamina | Stamina | physical: move, basic attack, reposition | ✅ |
+| `hunger` | energy | **Sun** | Hunger | nothing — spent by **recovery** | ✅ |
+| `spirit` | essence | Spirit | Spirit | nothing — spent by **affliction** | ✅ |
+| `qi` | essence | **Yang** | **Yin** | skills and abilities | ✅ |
+| **`poise`** | body | Poise | Poise | **guarding** — §4 | ✅ |
 
-One shared set. The faction difference is a **display label owned by content** — never a channel id, never a branch.
+`soul` is **not** here — it is the summoner's player-scoped currency, and `A11`'s discard tax spends it.
 
-| id | class | plant label | zombie label | exhaustion |
-|---|---|---|---|---|
-| `hp` | body | HP | HP | **none** — depletion is death, owned by the turn FSM's `Downed` |
-| `stamina` | body | Stamina | Stamina | ✅ |
-| `hunger` | energy | **Sun** | Hunger | ✅ |
-| `spirit` | essence | Spirit | Spirit | ✅ |
-| `qi` | essence | **Yang** | **Yin** | ✅ |
+> ⚠️ **The plant label "Sun" on `hunger` is the ACTOR pool, not the lawn sun bank.** The lawn bank is
+> `pvz.*` and match-scoped, owned by `SimEngine`. Read [resource-hub-ssot.md](../resource-hub-ssot.md) §4
+> before writing any UI.
 
-`soul` is **not** here. It is the summoner mechanism's player-scoped currency and stays in `rpg_soul_balances`.
+**`resource.max.{id}` / `resource.regen.{id}` / `resource.efficiency.{id}` are registered and have no
+reader.** `DerivedStatRegistry.cs:165-171` registers all three in a loop over `ResourceIds`. **This module
+is that reader.** It does not add channels.
 
-### 2. Channels, and what is *not* a channel
+> ⛔ **The old text asserted `AllCombatChannelIds` is "exactly 84". It is 259+.** That was an *acceptance
+> criterion*, so left in place it becomes a red test on day one rather than a confusing sentence.
+> Resource channels are their own family and correctly do **not** element-expand.
 
-Two derived families in the Actor Hub: **`resource.max.{id}`** and **`resource.regen.{id}`**.
+### 2. Current values are runtime state, and they regenerate lazily
 
-> They form **their own family list and must not join `AllCombatChannelIds`**, which a test asserts is exactly **84**. Resources are not element-typed, so element expansion would be wrong for them as well as arithmetically fatal.
-
-**Current values are not channels.** They are per-actor runtime state, and they regenerate **lazily**:
-
-```
-value(now) = clamp(stored + rate × (now − lastTick), 0, max)
-```
-
-Not scheduled. Four regenerating pools across 200 actors would be **800 recurring events** against a 0.15 ms kernel slice, and the server already runs a compute-on-read law for exactly this reason.
-
-The consequence that is easy to miss: **a lazily-resolved pool can cross a threshold with nothing observing it**, so exhaustion must be re-evaluated **on read**, not only on write.
-
-### 3. Paying
-
-```
-validate every cost  →  consume every cost  →  roll back all of them if any fails
+```text
+value(now) = clamp(stored + rate * (now - lastTick), 0, max)
 ```
 
-Atomic, and per pool. An action that consumed `stamina` and then found no `spirit` must leave the actor exactly as it found them — asserted pool by pool, not in aggregate, because an aggregate assertion passes when two errors cancel.
+**No scheduled event per pool per actor.** With six pools across 200 actors that is 1,200 timers that do
+nothing but arithmetic. Lazy compute-on-read gives an identical answer.
 
-`when` decides the moment:
+**At battle end a pool resolves to a concrete value and `lastTick` is dropped** — a persisted `lastTick`
+would make a saved actor's pool depend on wall-clock between sessions.
 
-| `when` | Behaviour |
-|---|---|
-| `onCommit` (default) | The whole cost at commit |
-| `perTick` | One payment per resolve offset. **Failing to pay ends the action** — cancel remaining resolves, release the slot, charge `interrupt_cooldown_milli`. Diablo's channel shape: pay per second, drop the channel when you run dry |
+### 3. Paying — validate all, consume all, roll back on any failure
 
-**Committing is what costs, not landing.** Interrupted, fizzled, and missed actions have all paid. One rule with no exceptions, and it is what keeps slot accounting identical on every exit path.
+An action costs a **list**. `when` is `onCommit` (default) or `perTick`.
 
-### 4. Exhaustion is a status, not a new mechanism
+**Committing is what costs, not landing.** An interrupted channel has paid; a fizzled action has paid; a
+missed attack has paid. One rule, and it is what keeps slot accounting identical on every exit path.
 
-Every resource except `hp` debuffs derived stats when it empties. `StatusRuntime` already owns instances, stacking, family mutex, resistance, VFX cues, and — the one that matters here — **`icd_ms`**, which exists precisely to stop an apply/clear cycle churning.
+**Rollback is asserted per pool, never in aggregate** — an aggregate assertion passes when two errors
+cancel.
 
-Reusing it buys three things that would otherwise need inventing: exhaustion becomes **visible**, **resistable** (a trait can grant resistance to stamina exhaustion), and **dispellable**.
+A `perTick` cost that cannot be paid **ends the action through the interrupt path**: cancel remaining
+resolves, release the slot, charge `interrupt_cooldown_milli`.
 
-**What the debuff *is* is content, not code.** The registry stores a **container id**; the container is atoms. Hardcoding a channel list here would make this the fifth content system the atom program exists to stop.
+### 4. `poise` — three parts, and each obeys a different rule
 
-Two rules the implementation must hold:
+Guard is a **stance** (`A8`), and its cost is not one number:
 
-- **Hysteresis.** `exhaustEnter‰` / `exhaustLeave‰` per resource, validated as `leave > enter` at load, defaulting to enter 0‰ / leave 100‰. A pool sitting at zero while regen trickles would otherwise apply and clear the debuff on alternate ticks.
-- **No self-regen cycle.** An exhaustion debuff must **never** touch a channel that feeds its own resource's regeneration. That is the only true death spiral, and because the registry knows which channels feed which regen, it is **rejectable by validation** rather than left to judgement.
-
-*(The broader spiral — exhaustion slowing the turn channels — is mostly not real: regen is per tick of simulated time, so a slowed actor waits longer and therefore regenerates more before acting. A proportional floor on the turn channels is still required, but for kernel-stall reasons and it belongs to the readiness model.)*
-
-### 5. Lifetime — persist across a run, refill at rest
-
-> **A rest is a place, not a timer.** A *run* is a sortie away from the summoner's base; a *rest* is the return.
-
-| Structure | Run | Rest |
+| Part | When | Rule it obeys |
 |---|---|---|
-| Expedition | The expedition, across all encounters | Return to base |
-| World map | Travel between safe sectors | Arriving at a home or friendly sector |
-| One-off skirmish | A run of exactly one encounter | Immediately after — always starts full, persists nothing |
+| **flat commit** | raising the guard | *committing costs, always* |
+| **absorb drain** ∝ what the guard stopped | on each absorb | *output is priced* |
+| **per-tick hold** | while held | **termination** — §4.1 |
 
-Refill is **full**. Three consequences:
+> The first two are [spec-guard-economy.md](../class-system/spec-guard-economy.md)'s decision C: *"two
+> different rules governing two different things, which is what each was written for."*
 
-1. **Pool state needs somewhere to live between encounters** — a per-member row on the run. Nothing stores this today, **and "a run" is not a thing the schema has** (audit I4). Three structures, one of them missing:
+#### 4.1 The per-tick hold is not optional
 
-   | Context | Run identity | State |
-   |---|---|---|
-   | Expedition | `rpg_expeditions.id` | Exists |
-   | World map | A journey between safe sectors | Needs deriving — the world program owns turns and sectors, not runs |
-   | One-off skirmish | **None** | A run of exactly one encounter, so it needs no row: pools start full and persist nothing |
+Two actors both guarding forever deal and take nothing — `netAttrition ≤ 0` on both sides, which is the
+**termination invariant**, and `decisions.md` makes it **blocking**: *"no later layer can repair a pool
+that refills faster than it drains."*
 
-   The skirmish case is the one that resolves the problem rather than complicating it — **absence of a run row means a run of one**, which is both the correct behaviour and the easiest case to test. Only the world-map case needs a decision, and it belongs to that program.
-2. **`ExpeditionResolver` must thread pools through its encounters**, or expeditions silently ignore the entire resource system.
-3. **`hp` follows the same rule.** A demon ending at 10 HP starts the next fight at 10. That is the intended attrition, and it changes expedition outcomes and every balance number derived from them.
+`when = perTick` already exists and *"failing to pay ends the action through the interrupt path"* is
+shipped semantics, so **a mutual guard resolves arithmetically, with no special case.**
 
-### 6. What `now` means across a boundary
+**`poise` at zero is a broken guard, not death** — an exhaustion status, like every pool except `hp`.
 
-> **Lazy within a battle; concrete between battles.**
+### 5. Cost and cooldown ride the rung
 
-Inside a battle, `now` is the simulation tick, persisted with the state so save and load resume from the same tick. **At battle end every lazy pool is resolved to a concrete value and `lastTick` is dropped** — what crosses the boundary is a number, not a number plus a timestamp from a clock about to reset to zero.
+```text
+cost(rung, Theta)  = anchorCost(Theta) * costMulti(rung)     # ValueSpec, so it scales
+cooldown(rung)     = baseCd * cdMulti(rung)                  # ticks. NEVER Theta.
+```
 
-**Cooldowns do not survive a battle boundary.** They are ticks in a clock that no longer exists; a cooldown meant to span encounters is a run-scoped effect and belongs to the run. Carrying one across would make it expire instantly, and the bug would look like content being wrong rather than time being wrong.
+Both multipliers come from **`A12`**, never from a literal here.
 
-### 7. Shields are excluded, on purpose
+**Cooldown rides the rung alone.** It is time, not a magnitude — PS-3 does not cover it, and a level-1000
+actor waiting 1000× longer is nonsense.
 
-They have capacity, regen, and depletion, which is why they keep looking like resources. But **nothing ever pays a shield to act.** They are consumed by the damage pipeline, element-typed across seven pools, and carry `toughness` and `pen` — semantics no action cost has or wants. They are also shipped and test-locked.
+**Cost span exceeds power span** (`A12` §3), so a top-rung action is burst you pay for. `resource.efficiency`
+is the bounded 0..1 ratio that reduces it, capped at 1.0 and **`Θ`-free**.
 
-The registry owns the **action economy**; shields belong to the **damage layer**. Recorded so it is not re-argued.
+### 6. ⛔ The authoring rule this module owns
+
+> **An action cost is authored against the pool's REGEN, never against its MAX.**
+> Sized against the pool a cost looks meaningful and is not.
+
+The measurement that produced it ([class-system-ideal.md](../class-system-ideal.md) §8.1b):
+
+```text
+strike   cost 1,544 stamina/round   vs   regen 3,784/round   ->  NEVER runs dry
+```
+
+**That defect is NOT this module's to fix.** It is `recovery.scaleMilli = 374` in
+[`data/tuning/aptitudes.v1.json`](../../../data/tuning/aptitudes.v1.json) (the POC copy under
+`tools/CombatSim/tuning/` is **value-identical** — verified 2026-08-27, only two `_meta` strings differ) — one dial multiplying every regen family, solved against
+**peer damage** (correct for `hp`) and inherited by `resource.regen.stamina`, which peer damage does not
+oppose. It is already scheduled as `residual-fit`'s second fixed step.
+
+**What we owe is the rule, not the number** — and the rule survives whatever that coefficient becomes,
+which is exactly why it belongs here and the coefficient does not.
+
+### 7. Exhaustion is a status, never a hardcoded channel list
+
+Reuses `StatusRuntime` — instances, stacking, resistance, VFX, `icd_ms`. The debuff is a **container of
+atoms**.
+
+Two properties that are easy to get wrong and are asserted directly:
+
+- **One status apply, not one per tick**, for a pool held at the threshold with regen trickling. The final
+  state is identical either way, which is what hides the bug — so it is **counted**.
+- **Exhaustion re-evaluates on read**, proven by crossing the leave threshold **with no write at all**.
+
+**A self-regen cycle is rejected at load** — an exhaustion debuff that reduces the regen of the pool whose
+emptiness applied it. The `poise` exhaustion **must not touch poise's own regen channel**.
+
+### 8. ⛔ Open — an item is not a resource
+
+[item/ssot-consumables.md](../item/ssot-consumables.md) §5(b), unanswered and owed by this module:
+
+> *"`rpg_action_cost` is `(action_id, resource_id, amount_spec, when)`, priced against the locked actor
+> resources. **A consumable's cost is an item, which is not a resource.** `A3` must either widen
+> `resource_id` to admit an item stock row, or state that consuming the item is a **precondition** (`A4`)
+> rather than a **cost** (`A3`). Either is fine; leaving it unstated means the first consumable action has
+> nowhere to declare what it spends."*
+
+**Recommendation: a precondition, not a cost.** Three reasons, and the third is decisive:
+
+1. `resource_id` is a **closed set of six** and widening it to a polymorphic id is the `effect_binding`
+   mistake in a different table (`A1` §5).
+2. Rollback semantics differ — a resource rolls back arithmetically; an item stock row is a transaction.
+3. **Costs scale with `Θ` and rungs; an item does not.** *One potion* is one potion at every level, so it
+   fails the pure-number property the whole cost economy rests on.
+
+That makes the inventory read `A4`'s leaf, which that spec now owes.
+
+### 9. Run lifetime
+
+Pools persist across an encounter and **refill at rest** — a rest is *returning to base*, a run is *a
+sortie away from it*. `hp` included.
+
+**No run row means a run of one** — the skirmish case, which is both correct and the easiest to test.
+**Cooldowns do not cross a battle boundary**; pools do.
 
 ## Commands
 
 ```powershell
-dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Resource"
 dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ActionCost"
-dotnet test tests\FusionRpg.Data.Tests
+dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Resource"
+dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~RunPool"
 ```
 
 ## Structure
 
 ```
-src/FusionRpg.Core/Resources/ResourceCatalog.cs     (the five, code-first like StatusCatalog)
-src/FusionRpg.Core/Resources/ResourcePool.cs        (value, lastTick, lazy resolve, clamp)
-src/FusionRpg.Core/Resources/ExhaustionEvaluator.cs (hysteresis, status apply/clear)
-src/FusionRpg.Core/Actions/CostValidator.cs         (validate-all / consume-all / roll-back)
-src/FusionRpg.Data/Sqlite/RpgStore.RunPools.cs      (per-run pool state)
-tests/FusionRpg.Core.Tests/Resources/
+src/FusionRpg.Core/Actions/Cost/CostLedger.cs        (validate all -> consume all -> roll back)
+src/FusionRpg.Core/Actions/Cost/ResourcePool.cs      (lazy regen; struct, zero alloc on read)
+src/FusionRpg.Core/Actions/Cost/ExhaustionPolicy.cs  (threshold + hysteresis, via StatusRuntime)
+src/FusionRpg.Data/Sqlite/RpgStore.RunPools.cs
+tests/FusionRpg.Core.Tests/Actions/ActionCostTests.cs
 ```
 
 ## Testing strategy
 
-- **Rollback is atomic, asserted per pool.** An action whose second cost fails leaves every pool exactly as found. An aggregate assertion passes when two errors cancel, so this is checked pool by pool.
-- **Lazy regen equals scheduled regen.** Resolve a pool once after 1000 ticks and compare against a thousand one-tick steps. Identical, or the lazy model is a different game.
-- **Exhaustion does not flicker.** A pool held at the enter threshold with regen trickling must produce **one** status apply, not one per tick. Count applies, not final state — the final state is identical either way, which is what makes this bug invisible without a counter.
-- **A self-regen cycle is rejected at load**, proven against a planted cycle rather than trusted.
-- **`resource.*` channels are absent from `AllCombatChannelIds`** — the 84-count assertion still passes, tested directly rather than as a side effect.
-- **Exhaustion re-evaluates on read.** Let a pool cross the leave threshold with no write at all, then read it: the status must clear. This is the failure mode lazy resolution introduces, and nothing else catches it.
-- **Pools survive an encounter boundary and refill at rest**, with `hp` following the same rule.
-- **A `perTick` cost that cannot be paid ends the action** through the interrupt path, releasing the slot and charging `interrupt_cooldown_milli`.
+| Case | Expect |
+|---|---|
+| **Six ids**, asserted directly | a five-resource regression is red |
+| **Lazy regen == scheduled regen** | one resolve after 1000 ticks equals a thousand one-tick steps |
+| **Zero scheduled events** for five regenerating pools across 200 actors | counted, not asserted in prose |
+| Rollback | asserted **per pool** — an aggregate assertion passes when two errors cancel |
+| A `perTick` cost that cannot be paid | ends via the interrupt path, releases the slot, charges `interrupt_cooldown_milli` |
+| Missed / fizzled / interrupted | **all paid**, all cool down |
+| Two mutual guards | **terminate** — the per-tick hold drains both; a planted zero-hold version **hangs**, which is what makes the test worth having |
+| `poise` at zero | exhaustion status, **not** death |
+| `poise` exhaustion touching `resource.regen.poise` | **rejected at load** — the self-regen cycle |
+| Exhaustion apply count | **one**, for a pool held at the threshold with regen trickling |
+| Exhaustion leave | re-evaluated **on read**, with no write |
+| Cost at `Θ`=20 vs `Θ`=5,000 | scales; **cooldown identical** |
+| `resource.efficiency` | bounded 0..1, capped at 1.0, `Θ`-free — asserted at both ends |
+| Pools across an encounter boundary | survive; refill at rest, `hp` included |
+| Cooldowns across a battle boundary | do **not** survive |
+| At battle end | pools resolve to a concrete value and **`lastTick` is dropped** |
 
 ## Boundaries
 
-- **Always:** validate-all before consume-all; keep `resource.*` out of `AllCombatChannelIds`; express exhaustion as a status whose debuff is a container of atoms; resolve pools lazily.
-- **Ask first:** adding a sixth resource; changing a display label mapping (that is content); giving shields a registry row.
-- **Never:** a scheduled per-tick regen event; an exhaustion debuff touching its own regen channel; `soul` as an actor pool; a hardcoded channel list for an exhaustion debuff; a resource reading a PvZ value — the two games share no state.
+**Always:** validate all before consuming any; roll back per pool; author costs against regen; take
+multipliers from `A12`; keep `resource.efficiency` `Θ`-free.
+
+**Ask first:** widening `resource_id`; a seventh resource; changing exhaustion's threshold shape.
+
+**Never:** a scheduled regen event per pool; a persisted `lastTick`; a hardcoded channel list in an
+exhaustion debuff; an exhaustion that reduces its own pool's regen; `soul` as an action cost; a cost
+multiplier written as a literal in this module.
 
 ## Success criteria
 
-1. An action can cost several resources, atomically, with a per-pool-proven rollback.
-2. Four regenerating pools across 200 actors add **zero** scheduled events.
-3. Exhaustion is visible, resistable, dispellable, and does not flicker.
-4. Pools persist across a run and refill at rest, including through `ExpeditionResolver`.
-5. Adding a resource costs a catalog row and two channels — not a system.
+1. Six resources, asserted — not five.
+2. Lazy regen is provably identical to scheduled regen, with zero timers.
+3. Two mutual guards terminate, and a planted zero-hold version hangs.
+4. Rollback holds per pool.
+5. The item-as-cost question is **answered in writing**, so the first consumable action has somewhere to
+   declare what it spends.

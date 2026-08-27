@@ -10,10 +10,12 @@ namespace FusionRpg.Core.Tests.ActorHub;
 public class SeedCatalogTests
 {
     [Fact]
-    public void CatalogResolves256()
+    public void CatalogResolves259()
     {
         // Derived, not literal: the two independent sources (the family-count formula and the
         // registered-def count) must agree, and whatever they agree ON is the assertion.
+        // 256 -> 259 (class-system `poise-resource`, 2026-08-26): a sixth resource id adds three
+        // channels (resource.max/regen/efficiency.poise) through the existing resource-id axis loop.
         var combatExpected = DerivedStatChannels.CombatChannelFamilies.Count * (ElementRoster.Concrete.Count + 1);
         var registry = DerivedStatRegistry.CreateDefault();
 
@@ -21,7 +23,7 @@ public class SeedCatalogTests
             Assert.True(registry.IsKnown(channelId), $"missing combat channel: {channelId}");
 
         Assert.Equal(combatExpected, DerivedStatChannels.AllCombatChannelIds.Count);
-        Assert.Equal(256, registry.AllRegistered.Count);
+        Assert.Equal(259, registry.AllRegistered.Count);
     }
 
     [Fact]
@@ -162,7 +164,10 @@ public class SeedCatalogTests
         var elementSlots = new[] { ElementRoster.OmniId }.Concat(ElementRoster.Concrete.Select(e => e.ToElementId())).ToList();
         string[] statusCategories = { "omni", "dot", "cc", "contagion" };
         string[] actionCategories = { "attack", "defense", "support", "movement", "status" };
-        string[] resourceIds = { "hp", "stamina", "hunger", "spirit", "qi" };
+        // Reads the live list rather than a hand-duplicated literal (was a 5-element copy that went
+        // stale the moment `poise` was appended, 2026-08-26 -- the exact drift this test exists to
+        // catch, just one level removed). A future resource id needs no edit here either.
+        var resourceIds = DerivedStatChannels.ResourceIds.ToArray();
 
         var result = new Dictionary<string, CatalogChannelMeta>(StringComparer.Ordinal);
         foreach (var entry in root.GetProperty("entries").EnumerateArray())

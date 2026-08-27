@@ -303,6 +303,39 @@ public static class DerivedStatChannels
             [CombatShieldToughnessPrefix] = UnitClass.GameUnits,
             [CombatShieldPenPrefix] = UnitClass.GameUnits,
             [CombatShieldRegenPrefix] = UnitClass.GameUnitsPerSecond,
+
+            // class-system P1.5 reader census (2026-08-26) — 16 of H.1's families verified against a
+            // live production consumer, not a doc comment. ReciprocalPoints (class-system/spec-unit-
+            // class-close.md §3.3/§3.5, authorised 2026-08-26 — NOT GameUnits, corrected after an
+            // initial pass wrongly grouped these with combat.defense by tuning-file section rather
+            // than by formula shape): an uncapped point delta feeding PierceFactor/AmpFactorReciprocal,
+            // both asymptotic — verified at OverlayCombatCalculator.cs's mitigation chain.
+            // PerMilleRatio: a linear-from-zero share clamped to [0,1] feeding a chance or a bounded
+            // damage share — verified at OverlayCombatCalculator.cs:162-169 ("Rate contests are linear
+            // and permille, not sigmoid") and CombatDamageDispatcher.cs:96-104 (reflect, same shape).
+            [CombatPenetrationPrefix] = UnitClass.ReciprocalPoints,
+            [CombatAbsorptionPrefix] = UnitClass.ReciprocalPoints,
+            [CombatAmplificationPrefix] = UnitClass.ReciprocalPoints,
+            [CombatReductionPrefix] = UnitClass.ReciprocalPoints,
+            [CombatReflectRatePrefix] = UnitClass.PerMilleRatio,
+            [CombatReflectResistRatePrefix] = UnitClass.PerMilleRatio,
+            [CombatReflectDamagePrefix] = UnitClass.PerMilleRatio,
+            [CombatReflectResistDamagePrefix] = UnitClass.PerMilleRatio,
+            [CombatParryRatePrefix] = UnitClass.PerMilleRatio,
+            [CombatParryBreakPrefix] = UnitClass.PerMilleRatio,
+            // strength/shred: class-system/spec-unit-class-close.md §3.4 flags these "needs care" and
+            // stops short of a definitive class rather than stretching one to fit (§2 step 4) — neither
+            // SigmoidMultiplierPoints (not a sigmoid) nor ReciprocalPoints (not asymptotic) matches
+            // ClampedContest.Apply's shape (a raw delta clamped LINEARLY to a permille share).
+            // GameUnits is kept as the least-wrong fit: an uncapped ladder-scaled point delta at the
+            // CHANNEL level, same as combat.power/defense, with the bounding happening downstream in
+            // the clamp rather than in the channel's own arithmetic.
+            [CombatParryStrengthPrefix] = UnitClass.GameUnits,
+            [CombatParryShredPrefix] = UnitClass.GameUnits,
+            [CombatBlockRatePrefix] = UnitClass.PerMilleRatio,
+            [CombatBlockBreakPrefix] = UnitClass.PerMilleRatio,
+            [CombatBlockStrengthPrefix] = UnitClass.GameUnits,
+            [CombatBlockShredPrefix] = UnitClass.GameUnits,
         };
 
     /// <summary>One generated combat channel id together with the family and slot it came from — the
@@ -469,10 +502,12 @@ public static class DerivedStatChannels
     public static string ResourceRegen(string resourceId) => $"{ResourceRegenPrefix}.{resourceId}";
     public static string ResourceEfficiency(string resourceId) => $"{ResourceEfficiencyPrefix}.{resourceId}";
 
-    /// <summary>The five actor resource ids — data/seed/resources/roster.json is the authored mirror;
+    /// <summary>The six actor resource ids — data/seed/resources/roster.json is the authored mirror;
     /// this is the code-side list registration walks. Kept in ordinal order to match that file's
-    /// <c>ordinal</c> field.</summary>
-    public static readonly IReadOnlyList<string> ResourceIds = new[] { "hp", "stamina", "hunger", "spirit", "qi" };
+    /// <c>ordinal</c> field. <c>poise</c> appended 2026-08-26 (class-system, module `poise-resource`,
+    /// decisions.md "Resource model") — append-only, never reorder: the ordinal coupling is a comment,
+    /// not a compiler-checked invariant, so reordering silently desyncs the two files.</summary>
+    public static readonly IReadOnlyList<string> ResourceIds = new[] { "hp", "stamina", "hunger", "spirit", "qi", "poise" };
 
     // H.6 -- movement, 1 channel. Pool class (Q4, same reasoning as resource). Lands with §H.5 per
     // action-map.md's own promise ("registers in actor-hub-ssot.md §3 with resource.*").

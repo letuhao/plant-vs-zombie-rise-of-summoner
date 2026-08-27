@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
 Minimal tuning publish path (tunables-ssot.md T4 + §7.1) — "the first domain builds the tool it
-actually needs," not a general CLI up front. `contracts` is that first domain.
+actually needs," not a general CLI up front. `contracts` is that first domain; §7.1 itself: "the
+second domain generalises it if the shape holds" — `aptitudes` is that second domain, and its own
+`edges` array (a list of `{channel, source, kMilli}` objects, not a nested dict) is a genuinely new
+shape dict-only dotted paths cannot address, so this adds exactly one thing: a bracket selector on a
+list segment.
 
 T4: config is versioned and never hand-edited. This writes v{n+1}; v{n} stays on disk untouched, so
 reverting a balance pass is restoring a file, not reading a diff.
@@ -10,10 +14,16 @@ Usage (repo root):
     python tools/tuning/publish.py contracts loyalty.winGain=20
     python tools/tuning/publish.py contracts personalityRates.loyal.gainPct=130 slots.maxSlots=64
     python tools/tuning/publish.py contracts --label "spring balance pass" loyalty.winGain=20
+    python tools/tuning/publish.py aptitudes "edges[channel=resource.regen.hp,source=Vigor].kMilli=83"
 
 Each `key=value` is a dotted path into the JSON document (matching its own nesting — see
 data/tuning/contracts.v1.json). The value is parsed as int, then float, then bool, then left as a
 string, in that order — the first that round-trips exactly is used.
+
+A path segment may carry a bracket selector, `name[k1=v1,k2=v2]`, to reach one object inside a JSON
+array named `name` — the object whose fields match every k=v pair exactly (string equality; ints in
+the selector compare against int values). Refuses (does not guess) if zero or more than one array
+element matches, same as a missing dict key refuses rather than defaulting.
 
 Exit codes: 0 = published, 1 = no changes / bad input, 2 = usage error.
 """
@@ -46,16 +56,94 @@ def latest_version(domain):
     return max(versions)
 
 
-def set_path(doc, dotted_key, value):
-    parts = dotted_key.split(".")
-    node = doc
-    for p in parts[:-1]:
-        if not isinstance(node, dict) or p not in node:
+SELECTOR_RE = re.compile(r"^([^\[\]]+)\[([^\[\]]+)\]$")
+
+
+def split_kv(arg):
+    # A bracket selector's own clauses ("channel=resource.regen.hp") contain "=" too, so the naive
+    # first-"=" split used for the selector's OWN clauses (there, correct: one "=" per clause, no
+    # brackets to worry about) is wrong at the top level, where that "=" is INSIDE a [...] and not
+    # the key/value separator. Split on the first "=" that is outside any bracket depth instead.
+    depth = 0
+    for i, ch in enumerate(arg):
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+        elif ch == "=" and depth == 0:
+            return arg[:i], arg[i + 1:]
+    return None
+
+
+def split_path(dotted_key):
+    # Plain str.split(".") would also split the dots INSIDE a bracket selector's own value (e.g.
+    # "edges[channel=resource.regen.hp,source=Vigor].kMilli" -- "resource.regen.hp" is itself
+    # dotted). Only split on a "." that is outside any [...].
+    parts, depth, current = [], 0, ""
+    for ch in dotted_key:
+        if ch == "[":
+            depth += 1
+            current += ch
+        elif ch == "]":
+            depth -= 1
+            current += ch
+        elif ch == "." and depth == 0:
+            parts.append(current)
+            current = ""
+        else:
+            current += ch
+    parts.append(current)
+    return parts
+
+
+def _parse_selector(raw):
+    # "k1=v1,k2=v2" -> {"k1": v1, "k2": v2}, values parsed the same way CLI values are (int first).
+    pairs = {}
+    for kv in raw.split(","):
+        if "=" not in kv:
+            raise KeyError("selector clause '%s' is not key=value" % kv)
+        k, v = kv.split("=", 1)
+        pairs[k] = parse_value(v)
+    return pairs
+
+
+def _step(node, dotted_key, seg):
+    """Advance one dotted-path segment (plain key, or name[k=v,...] into a list) and return
+    (child, description) — description names what was matched, for error messages."""
+    m = SELECTOR_RE.match(seg)
+    if m is None:
+        if not isinstance(node, dict) or seg not in node:
             raise KeyError("'%s' has no '%s' — refusing to invent a new key (T5 spirit: "
                             "publish edits existing tunables, it does not add undocumented ones)"
-                            % (dotted_key, p))
-        node = node[p]
+                            % (dotted_key, seg))
+        return node[seg], seg
+
+    list_key, selector_raw = m.group(1), m.group(2)
+    if not isinstance(node, dict) or list_key not in node:
+        raise KeyError("'%s' has no '%s' — refusing to invent a new key" % (dotted_key, list_key))
+    lst = node[list_key]
+    if not isinstance(lst, list):
+        raise KeyError("'%s' is not an array — a [selector] only applies to one" % list_key)
+    selector = _parse_selector(selector_raw)
+    matches = [el for el in lst if isinstance(el, dict) and all(el.get(k) == v for k, v in selector.items())]
+    if len(matches) == 0:
+        raise KeyError("'%s[%s]' matches no element of '%s' — refusing to guess"
+                        % (list_key, selector_raw, dotted_key))
+    if len(matches) > 1:
+        raise KeyError("'%s[%s]' matches %d elements of '%s' — selector must be unique"
+                        % (list_key, selector_raw, len(matches), dotted_key))
+    return matches[0], "%s[%s]" % (list_key, selector_raw)
+
+
+def set_path(doc, dotted_key, value):
+    parts = split_path(dotted_key)
+    node = doc
+    for p in parts[:-1]:
+        node, _ = _step(node, dotted_key, p)
     last = parts[-1]
+    m = SELECTOR_RE.match(last)
+    if m is not None:
+        raise KeyError("'%s' ends in a [selector] with no field after it — nothing to set" % dotted_key)
     if not isinstance(node, dict) or last not in node:
         raise KeyError("'%s' does not exist in the current document" % dotted_key)
     old = node[last]
@@ -83,10 +171,11 @@ def main():
 
     changes = []
     for kv in a.sets:
-        if "=" not in kv:
+        split = split_kv(kv)
+        if split is None:
             print("not a key=value pair: %r" % kv, file=sys.stderr)
             return 2
-        key, raw = kv.split("=", 1)
+        key, raw = split
         value = parse_value(raw)
         try:
             old = set_path(doc, key, value)

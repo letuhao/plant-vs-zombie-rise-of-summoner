@@ -34,7 +34,14 @@ export type UnitClass =
   | "perMilleRatio"
   | "milliseconds"
   | "count"
-  | "flag";
+  | "flag"
+  // Ten classes above (spec-magnitude-and-units.md §3); the two below are class-system additions,
+  // both authorised 2026-08-26 (spec-primary-stats.md §3.2, spec-unit-class-close.md §3.3/§3.5) —
+  // "ladderIndex" itself was already shipped in C# 2026-08-24 but owed here until now (§3's own
+  // "Contract change owed" note).
+  | "ladderIndex"
+  | "aptitudePoints"
+  | "reciprocalPoints";
 
 export type ChannelId = string;
 

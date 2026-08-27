@@ -75,7 +75,10 @@ public class StatTaxonomyTests
         var expectedUnits = new[]
         {
             "GameUnits", "GameUnitsPerSecond", "SigmoidPoints", "SigmoidMultiplierPoints",
-            "StatusPotencyPoints", "PerMilleRatio", "Milliseconds", "Count", "Flag", "LadderIndex"
+            "StatusPotencyPoints", "PerMilleRatio", "Milliseconds", "Count", "Flag", "LadderIndex",
+            // class-system additions, both authorised 2026-08-26 (spec-primary-stats.md §3.2,
+            // spec-unit-class-close.md §3.3/§3.5) — ten classes become twelve.
+            "AptitudePoints", "ReciprocalPoints"
         };
         Assert.Equal(expectedUnits.OrderBy(x => x), Enum.GetNames(unitClassTypes[0]).OrderBy(x => x));
 
@@ -132,20 +135,42 @@ public class StatTaxonomyTests
             Assert.NotNull(def.Unit);
         }
 
-        // Every one of catalog-extension's 157 new channels carries Unit: null — §2.7 forbids inventing
-        // a placeholder for a channel with no nameable consumer at registration time. Counted, not
-        // spot-checked, so a channel that slipped in with a guessed Unit is caught even if no single
-        // test names it.
+        // Every one of catalog-extension's 157 new channels carried Unit: null at first — §2.7 forbids
+        // inventing a placeholder for a channel with no nameable consumer at registration time.
+        // 157 -> 160 (class-system `poise-resource`, 2026-08-26: poise's three resource channels) ->
+        // 31 (class-system P1.5 reader census, 2026-08-26): 129 channels gained a real Unit once their
+        // production reader was found and verified (16 combat H.1 families x 7 slots = 112, plus 16
+        // status duration/intensity fixed-category channels, plus combat.heal.power = 129). The
+        // remaining 31 are exactly the 8 reader-less families' channel counts (skill.cooldown 5 +
+        // skill.effectiveness 5 + resource.max 6 + resource.regen 6 + resource.efficiency 6 +
+        // move.range 1 + progression.xpRate 1 + progression.breakthroughSuccess 1 = 31) — every one of
+        // which now carries a UnitClassNote instead (asserted separately, NoNullUnitClassWithoutANote
+        // below), so a null Unit is never unexplained.
         var newNullUnitCount = AllRegistered.Count(d => !original.Contains(d.ChannelId) && d.Unit is null);
-        Assert.Equal(157, newNullUnitCount);
+        Assert.Equal(31, newNullUnitCount);
+    }
+
+    [Fact]
+    public void NoNullUnitClassWithoutANote()
+    {
+        // class-system-todo.md P1.6 — a null Unit is either an original-99 impossibility (asserted
+        // above) or carries a UnitClassNote naming the missing reader. "Not classified yet" (an
+        // oversight) and "classified as unread" (a documented, re-checked fact) must never be the
+        // same shape in the data — the note IS the difference.
+        var unnoted = AllRegistered
+            .Where(d => d.Unit is null && string.IsNullOrWhiteSpace(d.UnitClassNote))
+            .Select(d => d.ChannelId)
+            .ToList();
+        Assert.True(unnoted.Count == 0, "null Unit with no UnitClassNote: " + string.Join(", ", unnoted));
     }
 
     [Fact]
     public void ShippedFamiliesClassify()
     {
         // 9 progression (7 + H.7's 2) + 24 status constants (8 + H.2's 16) + 196 combat (84 + H.1's 112)
-        // + 1 healing + 15 resource + 1 move.range + 10 action-category = 256 (99 -> 256, T2).
-        Assert.Equal(256, AllRegistered.Count);
+        // + 1 healing + 18 resource (15 + `poise`'s 3, 2026-08-26) + 1 move.range + 10 action-category
+        // = 259 (99 -> 256 T2 -> 259 class-system `poise-resource`).
+        Assert.Equal(259, AllRegistered.Count);
 
         // Every def classifies except three non-combat Theta/progression channels the counterbalance
         // rule does not apply to (actor-hub-ssot.md §H.0's "Non-combat" row). breakthroughSuccess

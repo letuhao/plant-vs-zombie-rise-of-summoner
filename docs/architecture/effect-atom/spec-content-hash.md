@@ -64,6 +64,14 @@ Not covered: instances · bindings · runtime state · `power_coefficient_propos
 
 **[built] Version 1 registers the six tables that exist today** — `effect_atom`, `effect_container`, `effect_container_atom`, `effect_container_pool`, `effect_curve`, `rarity`. `effect_element` and both matrices arrive with **E18** (version 2) and `power_coefficient` / `power_trigger_frequency` with **E9** (version 3). Registering a table before its DDL exists would make `ComputeContentHash` throw on every call.
 
+**`power_predicate_frequency` registers as a later version — approved 2026-08-27.** E9 gained a
+`predicateFrequency` factor so a conditional atom prices below the same atom unconditional (*"deal x2 damage
+on rotted zombie"* versus *"deal x2 damage"*). Its table is authored content by the same definition as
+`power_trigger_frequency` beside it — **a balance tweak to a predicate frequency re-prices every conditional
+atom in the corpus**, and left out of the hash that re-pricing would be invisible. It registers **after its
+DDL exists**, as its own version bump, the same rule already applied to `effect_element` and
+`power_coefficient`. See [spec-power-vector.md](spec-power-vector.md) §*Predicates ARE priced*.
+
 **Action tables register as a later version — approved 2026-08-22.** The action program's `rpg_action`, `rpg_action_cost`, and `rpg_action_effect_scope` are content by the same definition as everything above: authored rows whose values change battle outcomes. Left out, **a balance tweak to an action would silently invalidate every golden and every recorded battle**, and the report would claim a reproducibility it no longer has — the exact drift this module exists to prevent.
 
 They register **after** `A1` ships its DDL, as their own version bump, because registering a table before its DDL exists makes `ComputeContentHash` throw on every call. Same rule already applied to `effect_element` and `power_coefficient`. Instances stay excluded, as everywhere else. See [action/spec-action-catalog.md](../action/spec-action-catalog.md) (A6) §3.

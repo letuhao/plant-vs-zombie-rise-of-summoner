@@ -39,8 +39,138 @@ power[category] = coeff(kind, channel, category)
 | `triggerFrequency` | expected fires per battle-minute for that trigger — a **`power_trigger_frequency` table**, data, sweep-fittable, hashed |
 | `icdFactor` | `min(1, triggerFrequency⁻¹ / (icd_ms/60000))`; `1` when `icd_ms = 0` **or `triggerFrequency = 0`** (else it divides by zero) **or `triggerFrequency = 0`** (else it divides by zero) |
 | `targetCountFactor` | `min(maxTargets, expectedTargets)` from the target spec; `1` for single-target |
+| `predicateFrequency` | **‰ of evaluations where the E3 tree is true** — a **`power_predicate_frequency` table**, data, sweep-fittable, hashed. `1000‰` when the atom declares no predicate. **Approved 2026-08-27 — see below** |
 
 `triggerFrequency` is a table rather than a constant deliberately: it is a balance number, the sweep must be able to propose against it, and as a code constant it would move every golden with **no content-hash change** — the one outcome E8 exists to prevent.
+
+### Predicates ARE priced — owner decision, 2026-08-27
+
+This spec previously said *"predicates are deliberately not priced"*, and the action program's re-design
+showed what that costs. **Owner:** *"should calculate price by apply chance, should set it as tunable value
+— like `deal x2 damage on rotted zombie` versus `deal x2 damage`; the second statement is higher price."*
+
+Correct, and it needs no new mechanism: **a predicate is priced exactly the way a trigger already is.**
+
+```text
+conditionality = (chance/1000) x triggerFrequency x icdFactor x targetCountFactor x predicateFrequency
+```
+
+**The table is `power_predicate_frequency`, keyed on leaf id (and args where they matter** — `hasStatus`
+differs per status, `hpBelowMilli` per threshold**).** The tree composes its leaves in per-mille integers:
+
+| Node | Frequency |
+|---|---|
+| `Leaf(id, args)` | table lookup, ‰ |
+| `And(a, b)` | `p(a) * p(b) / 1000` |
+| `Or(a, b)` | `1000 - (1000 - p(a)) * (1000 - p(b)) / 1000` |
+| `Not(a)` | `1000 - p(a)` |
+
+**It is a table for the same three reasons `triggerFrequency` is** — it is a balance number, the sweep must
+be able to propose against it, and as a code constant it would move every golden with no content-hash
+change. It registers into **E8's covered set as its own version bump**, after its DDL exists, exactly as
+`power_coefficient` and the element tables did.
+
+**Independence is an approximation, and it is declared rather than hidden.** `And(hasStatus(cold),
+hasStatus(freeze))` are correlated, so the product understates. This is the same class of known error the
+module already documents for multiplicative pairs, and it is covered by the same instrument: the ±25%
+override tolerance, with `power_note` recording why.
+
+#### The number is a CHAIN, not a probability — owner, 2026-08-27
+
+A first draft of this section said *"price it at the frequency a competent user achieves."* That is the
+right instinct and the wrong shape, because **a competent user cannot reach most of the chain.** The owner's
+worked example, on `hasStatus(rot)`:
+
+> *"rot is one of 21 statuses, it needs 3 conditions to apply so it should be cheaper 3 or 4 times. A
+> defence demon **can be** rotted (low rot resistance). An attack demon **carries** a rot status action or
+> passive. And that attack demon **can attack** the target defence demon. So to apply x2 damage on a rotted
+> demon is not easy."*
+
+Three independent gates, and each one multiplies:
+
+```text
+predicateFrequency = reachability x susceptibility x coincidence x uptime
+```
+
+| Factor | Question | Who controls it | Priced at |
+|---|---|---|---|
+| **reachability** | do I carry an applier at all? | **the player** — buildable | the **dedicated build's achievable value**, near `1000‰`. This is the one a five-slot loadout can guarantee, so pricing it low is the underpricing hole |
+| **susceptibility** | will this target accept it? | **content** — `status.resist.{category}` | measured across the shipped roster |
+| **coincidence** | does the applier reach the same target as the payoff? | **the encounter** | `1000‰` while there is no board — *with no board every range check passes* — and a real number once `A10` lands |
+| **uptime** | is it still up when I act? | **the clock** | status duration against the payoff's cooldown |
+
+**Only `reachability` is buildable.** Splitting it out is what lets a dedicated build be priced honestly on
+the part it controls while still receiving a real discount on the three it does not — which is the owner's
+*"3 or 4 times cheaper"*, arrived at by multiplication rather than by a flat fudge.
+
+**A leaf with no applier requirement has `reachability = 1000‰`** and the chain collapses to one or two
+factors. `hpBelowMilli(400, subject:target)` needs no setup, so it prices near its raw incidence.
+
+#### ⛔ The chain is FLOORED — `predicateDiscountFloorMilli`, default `400‰`
+
+**Owner, 2026-08-27:** *"3 or 4 cheaper is too high. Maybe 2 or 2.5 cheaper as default, else we can ship
+some imbalanced build if the player focuses combo play — that can be unfair for Zomboss."*
+
+Correct, and the reason is structural rather than a matter of taste:
+
+> **The chain measures the AVERAGE case. The price has to hold against the BEST case.**
+
+A combo player does not experience the average. If the chain multiplies out to `250‰` (4× cheaper) but a
+dedicated build lands the condition 80% of the time, that build pays 25% and receives 80% — **3.2× value,
+handed to exactly the player who least needs help.**
+
+```text
+predicateFrequency = max(predicateDiscountFloorMilli, reachability x susceptibility x coincidence x uptime)
+
+// BOUNDED RATIO (PS-8 exempt): a floor on a discount, in (0, 1000]. Not a cap on power -
+// it bounds how far a price may fall below face value, never how large the effect may be.
+predicateDiscountFloorMilli = 400   // 2.5x max discount. Band 400-500; 500 is the conservative choice.
+```
+
+At a `400‰` floor the same build pays 40% and receives 80% — **1.6× value.** Still a real payoff for
+building around a condition, no longer a dominant one.
+
+**Why a floor rather than a better model of the best case.** Modelling *"how often does a dedicated build
+actually land this"* is a per-build simulation, and it would have to be re-run whenever any content moves.
+A floor bounds the same failure with one tunable and no model, which is the instrument this repo already
+uses for the identical shape — `StatusPolicy.CategoryResistCap = 0.95`, *"resistance can never reach
+100%"*.
+
+#### The Zomboss asymmetry, which is the real argument
+
+Both sides can carry combos. **Only one side chooses its combo after seeing the opponent.**
+
+| | Player | Zomboss |
+|---|---|---|
+| Loadout | **free build**, five slots assembled per fight | an **authored pattern**, fixed at design time |
+| Combo | picked to beat what is in front of them | whatever the pattern was written with |
+
+So any mechanic that rewards **adaptive** assembly favours the player structurally, and an underpriced
+conditional atom is precisely that mechanic. Worse, the class system's dominance matrix would not catch it:
+that matrix compares **allocations**, not loadouts, so a combo-driven dominant build is invisible to the
+guard that exists to find dominant builds.
+
+**And it would invert the layer's own job.** `class-system-ideal.md` §8.8b makes the dominant corner the
+**action/passive/skill layer's to fix**. A discount generous enough to create a new dominant build would
+have this layer manufacturing the defect it was brought in to remove.
+
+> **The rule this is an instance of**, for the fifth time in this repo: *a number is only meaningful
+> relative to the thing that opposes it.* A predicate's opposition is not one thing, so neither is its
+> price.
+
+#### ⛔ Pricing alone cannot fix it — the pool must correlate enabler and payoff
+
+**`rot` is 1 of 21 statuses.** If a demon type's pool weights statuses independently, a rot-conditional
+payoff and a rot applier almost never land in the same ten-action pool, let alone the same five-slot
+loadout. The discount would then be **paid for a combination the generator never assembles** — a real
+discount on an unreal capability, which is worse than not discounting at all.
+
+> **A generated pool that offers a conditional payoff must also offer its enabler.** That is a generation
+> constraint on the demon-type weight vector, not a pricing one, and no `predicateFrequency` value can
+> substitute for it.
+
+See [action-ideal.md](../action-ideal.md) §7.2 — the type weight vector gains **enabler/payoff pairing**
+alongside its category weights.
 
 For an `OnApply` range the priced magnitude is the **mean**; variance itself has value, and the formula ignores that by design.
 

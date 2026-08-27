@@ -1,0 +1,535 @@
+﻿{
+    "model":  "D:\\Works\\source\\plant-vs-zombie-rise-of-summoner\\data\\tuning\\aptitudes.v2.json",
+    "theta":  100,
+    "chains":  [
+                   {
+                       "startedFrom":  "force",
+                       "steps":  [
+                                     {
+                                         "index":  0,
+                                         "winAgainstPrev":  0,
+                                         "distToPrev":  0,
+                                         "points":  {
+                                                        "Might":  39.627599007881706,
+                                                        "Vigor":  15,
+                                                        "Onslaught":  15.333468485232851,
+                                                        "Retribution":  30.03893354638362
+                                                    }
+                                     },
+                                     {
+                                         "index":  1,
+                                         "winAgainstPrev":  0.9363186725705737,
+                                         "distToPrev":  24.97002266879675,
+                                         "points":  {
+                                                        "Might":  15,
+                                                        "Vigor":  15,
+                                                        "Onslaught":  15,
+                                                        "Retribution":  55.01791139086257
+                                                    }
+                                     },
+                                     {
+                                         "index":  2,
+                                         "winAgainstPrev":  0.9999999999998964,
+                                         "distToPrev":  40.02015468774334,
+                                         "points":  {
+                                                        "Might":  15,
+                                                        "Vigor":  55.02239798462411,
+                                                        "Onslaught":  15,
+                                                        "Retribution":  15
+                                                    }
+                                     },
+                                     {
+                                         "index":  3,
+                                         "winAgainstPrev":  0.5180363393964411,
+                                         "distToPrev":  2.268808090129813,
+                                         "points":  {
+                                                        "Might":  17.257811498683274,
+                                                        "Vigor":  52.742593303047755,
+                                                        "Onslaught":  15,
+                                                        "Retribution":  15
+                                                    }
+                                     }
+                                 ],
+                       "cycleStart":  2,
+                       "cycleLength":  1,
+                       "isCycle":  false,
+                       "isFixedPoint":  true
+                   },
+                   {
+                       "startedFrom":  "finesse",
+                       "steps":  [
+                                     {
+                                         "index":  0,
+                                         "winAgainstPrev":  0,
+                                         "distToPrev":  0,
+                                         "points":  {
+                                                        "Agility":  42.916909513479034,
+                                                        "Composure":  39.08309407010993,
+                                                        "Pierce":  15,
+                                                        "Focus":  3
+                                                    }
+                                     },
+                                     {
+                                         "index":  1,
+                                         "winAgainstPrev":  0.956768601883055,
+                                         "distToPrev":  52.00144383822784,
+                                         "points":  {
+                                                        "Agility":  15,
+                                                        "Composure":  15,
+                                                        "Pierce":  67.00288409286672,
+                                                        "Focus":  3
+                                                    }
+                                     },
+                                     {
+                                         "index":  2,
+                                         "winAgainstPrev":  0.5000024295580419,
+                                         "distToPrev":  0.0004141886797981442,
+                                         "points":  {
+                                                        "Agility":  15,
+                                                        "Composure":  15,
+                                                        "Pierce":  67.00371247022632,
+                                                        "Focus":  3
+                                                    }
+                                     }
+                                 ],
+                       "cycleStart":  1,
+                       "cycleLength":  1,
+                       "isCycle":  false,
+                       "isFixedPoint":  true
+                   },
+                   {
+                       "startedFrom":  "bastion",
+                       "steps":  [
+                                     {
+                                         "index":  0,
+                                         "winAgainstPrev":  0,
+                                         "distToPrev":  0,
+                                         "points":  {
+                                                        "Bulwark":  17.969565204115067,
+                                                        "Fortitude":  16.955542304906217,
+                                                        "Precision":  24.774440540019718,
+                                                        "Ferocity":  40.30045195095898
+                                                    }
+                                     },
+                                     {
+                                         "index":  1,
+                                         "winAgainstPrev":  0.6113275742762043,
+                                         "distToPrev":  22.47012348993817,
+                                         "points":  {
+                                                        "Bulwark":  40.43981268492586,
+                                                        "Fortitude":  15,
+                                                        "Precision":  15,
+                                                        "Ferocity":  29.560435296819364
+                                                    }
+                                     },
+                                     {
+                                         "index":  2,
+                                         "winAgainstPrev":  0.5000036474973365,
+                                         "distToPrev":  0.1422458690271462,
+                                         "points":  {
+                                                        "Bulwark":  40.58214034934596,
+                                                        "Fortitude":  15,
+                                                        "Precision":  15,
+                                                        "Ferocity":  29.418271223185172
+                                                    }
+                                     }
+                                 ],
+                       "cycleStart":  1,
+                       "cycleLength":  1,
+                       "isCycle":  false,
+                       "isFixedPoint":  true
+                   }
+               ],
+    "dominanceMatrix":  {
+                            "names":  [
+                                          "Might",
+                                          "Fortitude",
+                                          "Vigor",
+                                          "Onslaught",
+                                          "Agility",
+                                          "Composure",
+                                          "Pierce",
+                                          "Focus",
+                                          "Bulwark",
+                                          "Retribution",
+                                          "Precision",
+                                          "Ferocity"
+                                      ],
+                            "wins":  [
+                                         [
+                                             0.5,
+                                             0.9999999309721842,
+                                             0.9999999566505335,
+                                             0.9978097799471182,
+                                             0.999999960855491,
+                                             0.9999999493089329,
+                                             0.9807030417856085,
+                                             0.9999999663880692,
+                                             0.9999998581997421,
+                                             0.12659841617638656,
+                                             1,
+                                             0.9742103391086032
+                                         ],
+                                         [
+                                             6.9027815796651737E-08,
+                                             0.5,
+                                             1,
+                                             2.6158019179156611E-05,
+                                             1,
+                                             1,
+                                             2.1653392582365871E-05,
+                                             1,
+                                             1,
+                                             0,
+                                             1,
+                                             2.77818211084635E-05
+                                         ],
+                                         [
+                                             4.3349466460895769E-08,
+                                             0,
+                                             0.5,
+                                             1.2636382327069207E-05,
+                                             0.7007109255615899,
+                                             1.4772730420054003E-06,
+                                             9.809413755945684E-06,
+                                             0.9989458729818235,
+                                             6.106226635438361E-16,
+                                             0,
+                                             0.34206809975705443,
+                                             1.1054119914255534E-05
+                                         ],
+                                         [
+                                             0.0021902200528818305,
+                                             0.9999738419808208,
+                                             0.9999873636176729,
+                                             0.5,
+                                             0.9999896015470724,
+                                             0.9999866699374329,
+                                             0.2481132292866849,
+                                             0.999991811303576,
+                                             0.9998910055338851,
+                                             9.8876480963960844E-07,
+                                             1,
+                                             0.39247726460355586
+                                         ],
+                                         [
+                                             3.9144509023092411E-08,
+                                             0,
+                                             0.29928907443841013,
+                                             1.0398452927606883E-05,
+                                             0.5,
+                                             6.1248165561522683E-07,
+                                             8.5602558503872217E-06,
+                                             0.9846491711107179,
+                                             2.7755575615628914E-16,
+                                             0,
+                                             0.025414808712309556,
+                                             1.0361363757371844E-05
+                                         ],
+                                         [
+                                             5.0691067121633182E-08,
+                                             0,
+                                             0.999998522726958,
+                                             1.3330062567040724E-05,
+                                             0.9999993875183444,
+                                             0.5,
+                                             1.2658642774721063E-05,
+                                             0.9999999989931633,
+                                             6.1382466720605322E-08,
+                                             0,
+                                             0.9999998257132253,
+                                             1.5267887746639452E-05
+                                         ],
+                                         [
+                                             0.01929695821439148,
+                                             0.9999783466074177,
+                                             0.999990190586244,
+                                             0.7518867707133151,
+                                             0.9999914397441496,
+                                             0.9999873413572253,
+                                             0.5,
+                                             0.9999930186572714,
+                                             0.999949420526153,
+                                             0.9999791951740383,
+                                             1,
+                                             0.6156674387019437
+                                         ],
+                                         [
+                                             3.3611930794208433E-08,
+                                             0,
+                                             0.0010541270181765872,
+                                             8.1886964239941129E-06,
+                                             0.01535082888928202,
+                                             1.0068367251037103E-09,
+                                             6.9813427286402607E-06,
+                                             0.5,
+                                             0,
+                                             0,
+                                             0.001426914786285871,
+                                             7.6675229774836318E-06
+                                         ],
+                                         [
+                                             1.4180025786902917E-07,
+                                             0,
+                                             0.9999999999999993,
+                                             0.00010899446611489783,
+                                             0.9999999999999998,
+                                             0.9999999386175333,
+                                             5.0579473846956713E-05,
+                                             1,
+                                             0.5,
+                                             0,
+                                             1,
+                                             8.67320000658145E-05
+                                         ],
+                                         [
+                                             0.8734015838236134,
+                                             1,
+                                             1,
+                                             0.9999990112351904,
+                                             1,
+                                             1,
+                                             2.0804825961673323E-05,
+                                             1,
+                                             1,
+                                             0.5,
+                                             1,
+                                             0.9997034896036145
+                                         ],
+                                         [
+                                             0,
+                                             0,
+                                             0.6579319002429456,
+                                             0,
+                                             0.9745851912876904,
+                                             1.742867746790111E-07,
+                                             0,
+                                             0.9985730852137141,
+                                             0,
+                                             0,
+                                             0.5,
+                                             0
+                                         ],
+                                         [
+                                             0.025789660891396782,
+                                             0.9999722181788915,
+                                             0.9999889458800857,
+                                             0.6075227353964441,
+                                             0.9999896386362426,
+                                             0.9999847321122534,
+                                             0.38433256129805626,
+                                             0.9999923324770226,
+                                             0.9999132679999342,
+                                             0.0002965103963855076,
+                                             1,
+                                             0.5
+                                         ]
+                                     ],
+                            "unending":  [
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ],
+                                             [
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false,
+                                                 false
+                                             ]
+                                         ]
+                        },
+    "dominantCorners":  [
+
+                        ],
+    "coverage":  {
+                     "elementAxis":  "neutral",
+                     "actionsActive":  false,
+                     "reservedFamilies":  [
+                                              "move.range",
+                                              "resource.efficiency.hunger",
+                                              "resource.efficiency.qi",
+                                              "resource.efficiency.stamina",
+                                              "resource.max.hunger",
+                                              "resource.max.qi",
+                                              "resource.max.spirit",
+                                              "resource.max.stamina",
+                                              "resource.regen.hunger",
+                                              "resource.regen.qi",
+                                              "resource.regen.spirit",
+                                              "resource.regen.stamina",
+                                              "skill.cooldown.attack",
+                                              "skill.cooldown.defense",
+                                              "skill.cooldown.movement",
+                                              "skill.cooldown.status",
+                                              "skill.cooldown.support",
+                                              "skill.effectiveness.attack",
+                                              "skill.effectiveness.defense",
+                                              "skill.effectiveness.movement",
+                                              "skill.effectiveness.status",
+                                              "skill.effectiveness.support"
+                                          ],
+                     "tuningSync":  "dominanceMatrix/dominantCorners updated 2026-08-27 (Checkpoint 8) -- measured via tools/DominanceBaseline (FusionRpg.Core.DominanceGuard/TerminationGuard, the SAME production resolver TerminationGuard.Assert uses), which reads the LIVE data/tuning/aptitudes.v2.json config automatically, no internal copy. Independently corroborated by DominanceGuardTests.cs\u0027s own Measure_theRealTwelveCornerShape_matchesTheCheckedInBaselinesEmptyDominantCorners and docs/research/class-residual-2026-08-27.md\u0027s P8.5 section (same headline finding: no absolute dominant corner, Retribution near-dominant at 10 of 11, loses only to Pierce). chains above is ALSO fresh as of 2026-08-27, closing the one remaining gap: trinity now runs with --models pointed at this same live v2 file (never tools/CombatSim\u0027s own internal v1 POC copy), and that tool\u0027s own resolver (AptitudeTuning.ToModel) was ported the same day to apply the AptitudeMitigation dial the way Core\u0027s AptitudeResolver.EffectiveKMilli does (ResolverMatchesSimulatorTests.cs, P3.4) -- so this is a best-response CHASE (BestResponse.Chase, a search DominanceGuard has no equivalent for and so cannot reproduce the way dominanceMatrix/ dominantCorners are overlaid above) against the real shipped config, not a stale internal copy. coverage.elementAxis stays \"neutral\" deliberately, not as a residual gap: dominanceMatrix/dominantCorners/chains all spike individual APTITUDES, and aptitudes feed combat.power.omni only by design (class-system-ideal.md 4.1 rule 2 -- \"an aptitude reaches a MECHANISM, never a FLAVOUR\"; elements are a flavour axis, so any aptitude-to-element mapping would be arbitrary, which is exactly the rule this file\u0027s OWN elements-live measurement lives in _baseline-residual.json instead, at the ARCHETYPE/posture level, where FORCE/FINESSE/BASTION do carry a real element)."
+                 },
+    "_meta":  {
+                  "measuredAt":  "2026-08-27T10:52:08.8033902Z",
+                  "conditions":  "dominanceMatrix/dominantCorners: data/tuning/aptitudes.v2.json (live, via FusionRpg.Core.DominanceGuard -- P8.2/P8.3\u0027s stamina bind + mitigation dial). chains: ALSO data/tuning/aptitudes.v2.json now (live, via tools/CombatSim trinity --models, that tool\u0027s own resolver ported 2026-08-27 to apply the mitigation dial too). All twelve spiked corners, Theta=100, seed 20260826 — elementAxis neutral BY DESIGN (aptitudes are element-blind, class-system-ideal.md 4.1 rule 2 -- not a gap; see coverage.tuningSync), action economy off."
+              }
+}

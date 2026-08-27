@@ -19,12 +19,23 @@ export function formatMagnitude(m: Magnitude, locale = "en"): string {
     case "sigmoidPoints":
     case "sigmoidMultiplierPoints":
     case "statusPotencyPoints":
+    // reciprocalPoints (class-system, spec-unit-class-close.md §3.5): same raw-delta shape as
+    // gameUnits — a debuff can push penetration/absorption/amplification/reduction negative, so the
+    // signed-int format applies, not the unsigned one ladderIndex/aptitudePoints use below.
+    case "reciprocalPoints":
       return signedInt(m.value, locale);
     case "perMilleRatio":
       return formatPerMille(m.value, m.op);
     case "milliseconds":
       return formatMilliseconds(m.value);
     case "count":
+      return new Intl.NumberFormat(locale).format(m.value);
+    // ladderIndex (Theta, spec-magnitude-and-units.md §3.2) and aptitudePoints (an allocation's own
+    // point count, spec-primary-stats.md §3.2) are both non-negative by construction — Theta never
+    // goes below 0 and AptitudeAllocation rejects negative points (P1.2) — so neither needs the
+    // signed +/− prefix gameUnits-shaped classes carry.
+    case "ladderIndex":
+    case "aptitudePoints":
       return new Intl.NumberFormat(locale).format(m.value);
     case "flag":
       // Never a number — present/absent per spec-magnitude-and-units.md's unit ledger.

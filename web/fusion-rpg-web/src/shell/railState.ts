@@ -5,7 +5,15 @@
  * place unlock derivation happens; the component just renders what this
  * returns.
  */
-export type RailLayerId = "creatures" | "relics" | "fusion" | "pacts" | "expeditions" | "almanac" | "chronicle";
+export type RailLayerId =
+  | "creatures"
+  | "relics"
+  | "fusion"
+  | "pacts"
+  | "expeditions"
+  | "almanac"
+  | "chronicle"
+  | "aptitudes";
 
 export type RailEntryState = "active" | "available" | "badged" | "locked";
 
@@ -48,13 +56,16 @@ const UNLOCK_LADDER: Record<RailLayerId, { label: string; key: string; reason: s
   pacts: { label: "Pacts", key: "P", reason: "Unlocks when a contract is first offered" },
   expeditions: { label: "Expeditions", key: "E", reason: "Unlocks once you have a bound demon to field" },
   almanac: { label: "Almanac", key: "A", reason: "Unlocks after your first run" },
-  chronicle: { label: "Chronicle", key: "H", reason: "Unlocks after your first run" }
+  chronicle: { label: "Chronicle", key: "H", reason: "Unlocks after your first run" },
+  aptitudes: { label: "Primary Stats", key: "S", reason: "Unlocks at session start" }
 };
 
 function isUnlocked(id: RailLayerId, inputs: RailUnlockInputs): boolean {
   switch (id) {
     case "creatures":
       return true; // GG-44: unlocks at session start, same as Sanctum
+    case "aptitudes":
+      return true; // same reasoning as creatures -- a foundational system, not an earned one
     case "relics":
       return inputs.hasAnyRelic;
     case "fusion":

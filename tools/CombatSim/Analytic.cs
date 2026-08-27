@@ -47,13 +47,24 @@ public static class Analytic
         double Mean, double Variance,
         double PHit, double PParry, double PBlock, double PClean, double PCrit,
         double DClean, double DCrit, double DParry, double DBlock,
-        IReadOnlyList<Atom> Atoms);
+        IReadOnlyList<Atom> Atoms,
+        /// <summary>The base damage this swing was actually thrown at. Equals the authored base for a
+        /// single action, and the usage-weighted mean across actions when an action set is in play —
+        /// a skill-strike at x1.8 applies a x1.8 status, because the runtime scales the status off the
+        /// packet it rode in on. Missing this put the model 15.4% off with actions AND status live,
+        /// while each alone was under 4%.</summary>
+        double EffectiveBase);
 
     public sealed record SideStats(double DealtMean, double DealtVar, double TakenMean, double TakenVar);
 
     public sealed record DuelPrediction(
         string A, string B,
         double WinShareA,
+        /// <summary>Net attrition per round on each side: damage taken MINUS recovery. The
+        /// TERMINATION INVARIANT reads these — if both are ≤ 0 the fight cannot end, and that is an
+        /// economy defect rather than a build choice (class-system-ideal.md §5d).</summary>
+        double NetAttritionA, double NetAttritionB,
+        double RecoveryA, double RecoveryB,
         double RateAgainstB, double RateAgainstA,
         double VarAgainstB, double VarAgainstA,
         double RoundsA, double RoundsB,
@@ -178,7 +189,7 @@ public static class Analytic
         var mean = atoms.Sum(a => a.P * a.Damage);
         var second = atoms.Sum(a => a.P * a.Damage * a.Damage);
         return new StrikeStats(mean, Math.Max(0.0, second - mean * mean),
-            pHit, pParry, pBlock, pClean, pCrit, dClean, dCrit, dParry, dBlock, atoms);
+            pHit, pParry, pBlock, pClean, pCrit, dClean, dCrit, dParry, dBlock, atoms, baseDamage);
     }
 
     /// <summary>
@@ -208,7 +219,9 @@ public static class Analytic
     /// </summary>
     static double ShieldEffectiveHp(Archetype owner, Archetype attacker, double incomingPerSwing)
     {
-        var shield = (owner.ShieldHp.Min + owner.ShieldHp.Max) / 2.0;
+        // Mirror ShieldRuntime: maxHp = grant.BaseHp + capacity. The archetype carries the granted
+        // baseline; the capacity the build bought is a channel the runtime adds on top.
+        var shield = (owner.ShieldHp.Min + owner.ShieldHp.Max) / 2.0 + V(owner, ShieldCapacity);
         if (shield <= 0 || incomingPerSwing <= 0) return 0;
 
         var input = (long)Math.Round(incomingPerSwing, MidpointRounding.AwayFromZero);
@@ -224,6 +237,7 @@ public static class Analytic
         return damageToShield <= 0 ? 0 : shield * (double)input / damageToShield;
     }
 
+    const string ShieldCapacity = "combat.shield.capacity.omni";
     const string ShieldPen = "combat.shield.pen.omni";
     const string ShieldToughness = "combat.shield.toughness.omni";
 
@@ -278,7 +292,7 @@ public static class Analytic
         // own packet from the status, not from the attacker's swing.
         // Per ROUND, from refresh uptime — not per swing. See ExpectedDotPerRound.
         var dotPerSwing = Status is null ? 0.0
-            : StatusMath.ExpectedDotPerRound(atk, def, Status, baseDamage, s.PHit);
+            : StatusMath.ExpectedDotPerRound(atk, def, Status, s.EffectiveBase, s.PHit);
 
         // CC removes rounds from the side it lands ON. Here `atk` is the one swinging, so a CC that
         // `def` lands on `atk` is what would reduce this swing — but that belongs to the OTHER swing's
@@ -302,6 +316,23 @@ public static class Analytic
     /// The whole prediction: two stat blocks in, a win share out. No trials.
     /// </summary>
     public static DuelPrediction Predict(Archetype a, Archetype b) => Predict(a, b, null);
+
+    /// <summary>
+    /// A fight not decided within this many rounds is a loss for BOTH sides. <c>null</c> = no clock,
+    /// which is what every measurement before 2026-08-26 assumed.
+    ///
+    /// <para><b>⛔ NOT A BALANCE METRIC — owner correction 2026-08-26.</b> A clock penalises fights for
+    /// being LONG, and a survival or cc build makes fights legitimately long without that being a
+    /// defect. A survivalist that wins in 60 rounds has won; a clock calls it a draw. Using this to
+    /// judge balance manufactures a result that pure win rate does not show — measured: at 25 rounds
+    /// the dominant corner "cleared", and under win rate alone it never left.</para>
+    ///
+    /// <para>The defect a clock was reached for is <b>unresolvable</b> fights, not long ones, and the
+    /// termination invariant (§5d) targets exactly that and nothing else. <b>Win rate is the metric.</b>
+    /// This stays only as an ENCOUNTER DESIGN parameter — a real encounter may have a timer — and it
+    /// must be left off for any balance judgement.</para>
+    /// </summary>
+    public static double? RoundLimit { get; set; }
 
     /// <summary>Status profile in play, or null for none. Set by the caller before Predict — a field
     /// rather than a parameter because it threads through Swing/Strike unchanged otherwise, and the
@@ -348,8 +379,10 @@ public static class Analytic
         // CC: a disabled actor does not swing. A lands cc on B at p×duration of B's rounds, so B's
         // output is scaled down by exactly that share, and vice versa. Applied ONCE, here, rather than
         // inside Swing — the effect belongs to the victim's rate, not to the attacker's swing.
-        var ccOnB = Status is null ? 0.0 : StatusMath.CcDisabledShare(a, b, Status, baseA) * swingA.Strike.PHit;
-        var ccOnA = Status is null ? 0.0 : StatusMath.CcDisabledShare(b, a, Status, baseB) * swingB.Strike.PHit;
+        var ccOnB = Status is null ? 0.0
+            : StatusMath.CcDisabledShare(a, b, Status, swingA.Strike.EffectiveBase) * swingA.Strike.PHit;
+        var ccOnA = Status is null ? 0.0
+            : StatusMath.CcDisabledShare(b, a, Status, swingB.Strike.EffectiveBase) * swingB.Strike.PHit;
         var actB = 1.0 - ccOnB;
         var actA = 1.0 - ccOnA;
 
@@ -369,8 +402,15 @@ public static class Analytic
             return (hp / rate, hp * variance / (rate * rate * rate));
         }
 
-        var (tKillB, vKillB) = FirstPassage(hpB, rateB, varB);
-        var (tKillA, vKillA) = FirstPassage(hpA, rateA, varA);
+        // RECOVERY. A pool that refills is a pool that must be out-damaged, so the quantity that
+        // actually decides whether anything dies is damage MINUS recovery — never damage alone.
+        // Regeneration sized against the POOL looks comfortable and says nothing; sized against
+        // INCOMING DAMAGE it decides whether the fight can end at all (§5d).
+        var recovA = RecoveryPerRound(a, b, swingB.DealtMean);
+        var recovB = RecoveryPerRound(b, a, swingA.DealtMean);
+
+        var (tKillB, vKillB) = FirstPassage(hpB, rateB - recovB, varB);
+        var (tKillA, vKillA) = FirstPassage(hpA, rateA - recovA, varA);
 
         double win;
         if (double.IsInfinity(tKillB) && double.IsInfinity(tKillA)) win = 0.5;
@@ -397,9 +437,33 @@ public static class Analytic
             var sd = Math.Sqrt(Math.Max(0.0, varDiff));
             win = sd <= 0 ? (tKillB < tKillA ? 1.0 : tKillB > tKillA ? 0.0 : 0.5)
                           : Phi((tKillA - tKillB) / sd);
+
+            // The clock. A won race that finishes after the limit is not a win — it is a timeout, and
+            // a timeout is a loss for both. So the win share is the probability of killing IN TIME,
+            // which is what stops "cannot lose" from being the same thing as "optimal".
+            if (RoundLimit is { } limit && limit > 0)
+            {
+                // A wins only if it kills B before the bell AND before B kills A. Those two are
+                // separate conditions, so each side's win probability is its race share times its own
+                // chance of finishing in time, and the reported share is over DECISIVE outcomes:
+                //
+                //   pA = P(A wins the race) × P(T_B < limit)
+                //   pB = P(B wins the race) × P(T_A < limit)
+                //   share = pA / (pA + pB)          — a double timeout is a draw, excluded like a stalemate
+                //
+                // Independence between "who is faster" and "is it fast enough" is an approximation,
+                // and it is the same order as the normal race itself.
+                var aInTime = Phi((limit - tKillB) / Math.Sqrt(Math.Max(1e-9, vKillB)));
+                var bInTime = Phi((limit - tKillA) / Math.Sqrt(Math.Max(1e-9, vKillA)));
+                var pA = win * aInTime;
+                var pB = (1.0 - win) * bInTime;
+                win = pA + pB <= 1e-12 ? 0.5 : pA / (pA + pB);
+            }
         }
 
-        return new DuelPrediction(a.Name, b.Name, win, rateB, rateA, varB, varA, tKillA, tKillB,
+        return new DuelPrediction(a.Name, b.Name, win,
+            rateA - recovA, rateB - recovB, recovA, recovB,
+            rateB, rateA, varB, varA, tKillA, tKillB,
             Strike(a, b, baseA), Strike(b, a, baseB), swingA.BackMean, swingB.BackMean);
     }
 
@@ -443,7 +507,20 @@ public static class Analytic
         var rounds = Walk(perAction, atk, baseDamage, target, 400).Rounds;
         var w = Walk(perAction, atk, baseDamage, target, (int)Math.Clamp(Math.Ceiling(rounds) + 2, 1, 4000));
 
-        return fallback with { Mean = w.Mean, Variance = w.Variance, Atoms = w.Atoms };
+        // PHit must be the EFFECTIVE per-ROUND landing rate, not the per-swing one — a round spent
+        // passing cannot land a status. Status uptime and cc share both read this, so leaving it
+        // unweighted over-applied status exactly in proportion to how often the actor ran dry.
+        // Measured: actions alone 0.9% residual, status alone 4.0%, both together 15.4% — the gap was
+        // entirely this interaction.
+        var effPHit = w.Weight.Sum(kv => perAction[kv.Key].Stats is { } st ? st.PHit * kv.Value / w.Used : 0.0);
+        var effBase = w.Weight.Sum(kv => perAction[kv.Key].Stats is not null
+            ? baseDamage * perAction[kv.Key].Def.DamageMultiplier * kv.Value / w.Used : 0.0);
+
+        return fallback with
+        {
+            Mean = w.Mean, Variance = w.Variance, Atoms = w.Atoms,
+            PHit = effPHit, EffectiveBase = effBase
+        };
     }
 
     /// <summary>
@@ -462,7 +539,8 @@ public static class Analytic
     /// respect the phase rather than smooth it away. Here there can be several phases (one per action
     /// running dry), so the schedule is walked rather than solved in two segments.</para>
     /// </summary>
-    static (double Mean, double Variance, double Rounds, List<Atom> Atoms) Walk(
+    static (double Mean, double Variance, double Rounds, List<Atom> Atoms,
+            Dictionary<int, double> Weight, double Used) Walk(
         List<(ActionSet.ActionDef Def, StrikeStats? Stats, double Cost)> perAction,
         Archetype atk, double baseDamage, double targetHp, int maxRounds)
     {
@@ -499,7 +577,7 @@ public static class Analytic
             if (cumDamage >= targetHp) break;            // the fight is over; later rounds never happen
         }
 
-        if (used == 0) return (0, 0, maxRounds, new List<Atom>());
+        if (used == 0) return (0, 0, maxRounds, new List<Atom>(), weight, 1);
 
         // The mixture over the rounds that actually happened — so a build that bursts for three rounds
         // and then passes reads as the average of THOSE rounds, not of an imagined steady state.
@@ -510,13 +588,37 @@ public static class Analytic
             if (st is null) { atoms.Add(new Atom(count / used, 0.0)); continue; }
             foreach (var at in st.Atoms) atoms.Add(new Atom(at.P * count / used, at.Damage));
         }
-        return (cumMean / used, cumVar / used, used, atoms);
+        return (cumMean / used, cumVar / used, used, atoms, weight, used);
     }
 
     /// <summary>Rounds-to-kill needs a target size; the shield term needs a rate, which needs rounds.
     /// Breaking that knot with raw hp only is deliberate — the shield correction is applied later at
     /// full precision, and using it here would nest one fixed point inside another for a second-order
     /// effect on the ACTION MIX, not on the result.</summary>
+    /// <summary>
+    /// HP-equivalent recovered per round: direct hp regen, plus shield regen converted through the
+    /// same <c>input/damageToShield</c> ratio a shield point is worth (<see cref="ShieldEffectiveHp"/>).
+    /// Shield regen only counts while a shield can exist to receive it.
+    /// </summary>
+    static double RecoveryPerRound(Archetype owner, Archetype attacker, double incomingPerSwing)
+    {
+        var hpRegen = V(owner, ResourceRegenHp);
+        var shieldRegen = V(owner, ShieldRegen);
+        if (shieldRegen <= 0 || incomingPerSwing <= 0) return hpRegen;
+
+        var input = (long)Math.Round(incomingPerSwing, MidpointRounding.AwayFromZero);
+        if (input <= 0) return hpRegen;
+        var breakerDelta = (long)Math.Round(
+            V(attacker, ShieldPen) - V(owner, ShieldToughness), MidpointRounding.AwayFromZero);
+        var dts = ClampedContest.Apply(input, breakerDelta, 1, input,
+            FusionRpg.Core.Combat.Shield.ShieldPolicy.ChipFloorKPm,
+            FusionRpg.Core.Combat.Shield.ShieldPolicy.PenCapKPm);
+        return hpRegen + (dts <= 0 ? 0 : shieldRegen * input / dts);
+    }
+
+    const string ResourceRegenHp = "resource.regen.hp";
+    const string ShieldRegen = "combat.shield.regen.omni";
+
     static double EffectiveHpOf(Archetype a) => (a.Hp.Min + a.Hp.Max) / 2.0;
 
     /// <summary>Standard normal CDF. Abramowitz &amp; Stegun 7.1.26 on erf — max error 1.5e-7,

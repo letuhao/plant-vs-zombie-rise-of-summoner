@@ -1,5 +1,11 @@
 # Spec: usability-conditions (A4)
 
+**Status: REVISED 2026-08-27** against the sealed [action-ideal.md](../action-ideal.md).
+
+**What changed:** a **sixth gate** for the guard stance (§1a) · an **inventory leaf** owed to the
+consumables lane (§3a) · affordability now spans **six** resources, and `A3` answers the
+item-is-not-a-resource question in this module's favour (§3a).
+
 Module **A4** in the [action map](../action-map.md). Depends on **A1**, and contributes to the effect-atom program's **`E3`** rather than forking it.
 
 ## Objective
@@ -24,6 +30,26 @@ Evaluated in this order, **cheapest first**, stopping at the first refusal:
 | 4 | **Range** — Chebyshev, or pass with no board | O(1) | A2 |
 | 5 | **Condition** — the compiled predicate | ≤16 nodes | E3 |
 
+### 1a ⛔ Gate 0 — the stance refusal, and it comes FIRST
+
+Guard is a **stance** (`A8`): while it holds, **every other action is refused, movement included.**
+
+| # | Gate | Cost |
+|---|---|---|
+| **0** | **Stance** — is this actor mid-stance, and is this action the release? | per-actor |
+
+It sits **before** `bound` for one reason, and it is not cost — no measurement was taken and a status probe
+is not obviously cheaper than a dictionary hit. It is **per-actor**, so `A7` hoists it out of the target
+loop **and** out of the action loop. An actor holding a stance refuses every candidate at
+zero per-target cost.
+
+**Its refusal is typed like the rest** — `StanceHeld` — because the FE must say *"you are guarding"*
+rather than greying a button with no reason, and `A7` must know that re-checking next tick **can** change
+the answer.
+
+*Guard-while-moving is a separate action*, so it passes gate 0 by being the release rather than by
+exemption. **There is no exemption list**, which is what stops this gate acquiring one.
+
 The order is deliberate and load-bearing for `A7`: gate 1 is per-actor and hoistable out of the target loop, gates 2 and 3 are per-action, and only gates 4 and 5 are per-target. An implementation that evaluates all five per `(action, target)` pair does the same work an order of magnitude more often.
 
 **Gate 3 is a seam, and a no-op until `A3` lands** (audit R2-1). The build order is `A1 → A2 → A4 → A5 → A3`, so this module ships **before** the cost table exists. `IAffordabilityCheck` returns affordable while there is no cost system; `A3` supplies the real implementation behind the same interface.
@@ -35,9 +61,49 @@ Reordering `A3` earlier would be worse: it would put the cost system inside `A5`
 ```
 UsabilityResult = Usable | NotBound | OnCooldown | CannotAfford(resourceId)
                 | OutOfRange | TooClose | ConditionFailed | NoValidTarget
+                | StanceHeld | MissingStock(stockId)
 ```
 
 A boolean is useless to both consumers. The FE needs *"not enough spirit"* on a greyed button; `A7` needs to know whether re-checking next tick could change the answer — `OnCooldown` and `CannotAfford` become true with time, `NotBound` never does. A bare `false` forces both to re-derive what the gate already knew.
+
+### 3a ⛔ The inventory leaf — owed to another lane, and now answered
+
+[item/ssot-consumables.md](../item/ssot-consumables.md) §5(c): *"`A4`'s usability condition needs a leaf
+that reads **do I hold ≥ 1 of this stock row**. The leaf list is closed and none of them reads
+inventory."*
+
+**Answered here, and the answer is that it belongs here rather than in `A3`.**
+
+`A3` §8 declines to widen `resource_id` to admit an item, for three reasons — the closed six-id set, the
+different rollback semantics, and the decisive one:
+
+> **Costs scale with `Θ` and rungs; an item does not.** *One potion* is one potion at every level, so it
+> fails the pure-number property the cost economy rests on.
+
+So consuming the item is a **precondition**, and this module reads it:
+
+| Leaf | Param | Reads |
+|---|---|---|
+| `holdsStock` | `(stockId, minQty)` | inventory |
+
+**It is a leaf, not a gate**, because it is per-actor-per-action and predicate-shaped — unlike affordability,
+which is a lookup over a cost list. Adding it is a **reviewed change to `E3`'s closed list**, and it needs a
+reader: `FactReader` gains a narrow, readonly stock probe, following `HpMilli`'s existing shape.
+
+#### Mode matrix — where the stock is read from
+
+The leaf's guard rail answers **when** the count is read, not **where from**, and the two runtimes differ:
+
+| Mode | Stock source | Wave 1 |
+|---|---|---|
+| **battle** | server-authoritative, resolved at action-set assembly (`A15`) | ✅ supported |
+| **PvZ lawn** | the overlay is a **stateless observer** and never reads current game state | ⛔ **unsupported** — a consumable action is **not bindable** in lawn mode |
+
+**An unsupported mode named is fine; an unstated one is the `resource.delta` defect again.**
+
+⚠️ **The leaf must not perform I/O.** `E3`'s boundary is explicit — *"never a leaf that performs I/O,
+reads a clock, or draws RNG."* The stock count is read into the fact struct at evaluation setup, exactly as
+resource values are.
 
 ### 3. Conditions reuse `E3`, and this module contributes leaves to it
 

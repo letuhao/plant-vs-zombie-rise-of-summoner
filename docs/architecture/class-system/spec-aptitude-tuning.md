@@ -1,9 +1,14 @@
 # Spec: `aptitude-tuning` — the class system's balance surface, as data
 
 **Module id:** `aptitude-tuning` · **Program:** [class-system-map.md](../class-system-map.md) ·
-**Status: proposed 2026-08-25, awaiting owner review. Not authorized to build.**
+**Status: AUTHORIZED 2026-08-26 -- owner's /goal directive commands execution of the class-system plan to completion; supersedes this "awaiting owner review" header, which was never flipped after that directive landed.**
 
-**Depends on:** `unit-class-close` · **Blocks:** `aptitude-resolve`, `deterministic-core`
+**Depends on:** `primary-stats` · `unit-class-close` · **Blocks:** `aptitude-resolve`, `deterministic-core`
+
+> **Dependency added 2026-08-26.** `primary-stats` declares the twelve, the `AptitudeAllocation` type
+> and the `share` denominator this file's `edges` and read functions are written against. Before it,
+> this spec configured coefficients for stats with no home — see
+> [spec-primary-stats.md](spec-primary-stats.md) §1.
 
 ---
 
@@ -62,7 +67,18 @@ unrepresentable in the engine and silently wrong in the config.
 matrix nobody can author; the inverted form is sparse and makes *"what feeds this?"* one row
 (class-system-ideal.md §7a.1).
 
-### 2.1 The two read functions
+### 2.1 The two read functions — **and this module owns their implementation**
+
+> **Decided 2026-08-26.** `AptitudeReadFunctions` lives here, not in `aptitude-resolve`. Both
+> [aptitude-resolve](spec-aptitude-resolve.md) and [deterministic-core](spec-deterministic-core.md)
+> need `k · share^γ · P(Θ)`, and the map calls them parallel *"sharing only the config"* — they share
+> the **arithmetic** too. Two implementations of it is §1 rule 2's failure one layer down: a divergence
+> would surface as *model error* in `residual-fit` and be fitted away.
+>
+> **This module is the right home because it owns two of the four inputs** (`k` and `γ`); `share` comes
+> from `primary-stats`' allocation type and `P(Θ)` from the power ladder. It is pure math over
+> `(allocation, tuning, Θ)` — no seam, no channel, no I/O — so owning it costs this module nothing and
+> keeps the other two genuinely parallel instead of nominally so.
 
 ```text
 contest   value  =  kMilli/1000 · share^gamma_c · spanPoints
@@ -115,11 +131,17 @@ not have the same shape:
 > `penetration` at `kMilli: 1000` delivers **×0.09**. Those are not three options; they are one option
 > and two decorations.
 
-Measured 2026-08-25 ([class-system-ideal.md](../class-system-ideal.md) §7b.4): the shipped coefficients
-make `Fortitude` the best point against every opponent for every build, with 5–7 of 12 aptitudes dead.
-Resizing the three reciprocal-consumed channels to a ×1.9-comparable total takes the best marginal from
-**+3.56% to +1.67%** and revives several — most of the gap, not all of it (§8.7 there keeps the residue
-open).
+Measured 2026-08-25 ([class-system-ideal.md](../class-system-ideal.md) §7b.4): resizing the three
+reciprocal-consumed channels to a ×1.9-comparable total took the best marginal from **+3.56% to
++1.67%** and revived several aptitudes — most of the gap, not all of it. **The sizing rule is what
+survives from that pass, and it is what this section is for.**
+
+> **⚠️ The numbers that pass measured, not the verdict that accompanied them.** That pass also reported
+> *"`Fortitude` is the best point against every opponent, 5–7 of 12 aptitudes dead"*. It is
+> **superseded** — measured before resources, actions and status existed and with two model bugs live
+> ([class-system-ideal.md](../class-system-ideal.md) §0.0.5). On the current model the best marginal is
+> **under 1% everywhere** and the best point differs per build. Do not size a coefficient against the
+> retracted table; §9.3 has the current standing.
 
 **This is not an argument for capping the reciprocal shapes.** They exist because
 `max(0, 1 + d/s)` reaches exactly zero and confers total immunity (decisions.md, *Combat mitigation
@@ -155,6 +177,7 @@ data/tuning/aptitudes.v1.json                          the config (shipped home)
 src/FusionRpg.Core/Stats/Aptitudes/AptitudeTuning.cs   the record — no I/O, no defaults
 src/FusionRpg.Core/Stats/Aptitudes/AptitudeTuningLoader.cs   pure parser over a string
 src/FusionRpg.Core/Stats/Aptitudes/AptitudeTuningHub.cs      Configure(...) / Current
+src/FusionRpg.Core/Stats/Aptitudes/AptitudeReadFunctions.cs  the two PS-3 reads, pure (§2.1)
 tests/FusionRpg.Core.Tests/Stats/Aptitudes/AptitudeTuningTests.cs
 tools/CombatSim/tuning/aptitudes.v1.json               the POC copy, until this module ships
 ```
@@ -252,6 +275,15 @@ either fails the invariance is gone whether or not any matchup looks wrong.
 4. Moving a coefficient in the file and restarting changes the predicted matrix — **no rebuild**.
 5. `deterministic-core` and `aptitude-resolve` are both wired to `AptitudeTuningHub.Current`, and a
    test asserts they resolve the same channel values for the same allocation.
+6. **The two balance criteria are wired to `balance-guard` with their ranking intact** — the
+   termination invariant as **HARD** (a failure fails the build) and the dominance matrix as **SOFT**
+   (a failure reports, with its coverage, and does not fail the build). See §9.3 for why they are not
+   equals, and [class-system-ideal.md](../class-system-ideal.md) §0.2.1 for the full argument.
+
+> **Note for whoever builds this.** Criterion 6 is the one that is easy to get wrong in a way nothing
+> catches: wire both halves as blocking and the module never lands, because the soft half is red by
+> design today; wire both as advisory and the one defect no later layer could repair becomes a warning
+> nobody reads.
 
 ---
 
@@ -269,11 +301,25 @@ aptitude's posture. There is no price, so this file needs no posture mapping at 
 as **vocabulary for humans and a shape for Zomboss patterns**, not as a lookup this module performs.
 
 **9.3 Whether the shipped coefficients may go in as-is.** They may not, and this is the one open item
-that blocks a *balance* claim rather than a *build* one. §2.2 measured that the shipped `kMilli` values
-make `Fortitude` mandatory and leave 5–7 of 12 aptitudes dead under free build. The module can be built
-on them — the schema and loader are indifferent to the numbers — but **`balance-guard` will be red on
-day one**, and that is the correct outcome rather than a reason to delay. Do not silently retune while
-extracting; T7 forbids landing a refactor and a rebalance together.
+that blocks a *balance* claim rather than a *build* one. The module can be built on them — the schema
+and loader are indifferent to the numbers — and `balance-guard` will be **partly red on day one**,
+which is the correct outcome rather than a reason to delay. Do not silently retune while extracting;
+T7 forbids landing a refactor and a rebalance together.
+
+**Which half, and how red — corrected 2026-08-26.** §2.2's reading (*"`Fortitude` mandatory, 5–7 of 12
+aptitudes dead"*) is **superseded**. It was measured before resources, actions and status existed, and
+with two model bugs live ([class-system-ideal.md](../class-system-ideal.md) §0.0.5). On the current
+model the guard has two halves and they do **not** carry equal weight:
+
+| Guard half | Standing | Day-one result |
+|---|---|---|
+| **Termination invariant** (ideal §5d) | **HARD** — measured on live quantities only; no later layer can fix it | ✅ **green** — net attrition +3,937 to +14,107 |
+| **Dominance matrix** (ideal §8.8b) | **SOFT** — the action / passive / skill layer is what fills it | ⛔ red — `Bulwark` beats all 11 corners, but as an **upper bound on severity, not a verdict on the design** (ideal §8.8a): elements were neutralised in every run, and 15–47% of each aptitude is unmeasurable |
+
+**So "red on day one" is the soft half only, measured on a partial model.** A build gate that treats
+that red as a blocker is reading it wrong; a balance claim that ignores it is reading it wrong the
+other way. `residual-fit` has two fixed first steps before the number means anything sharper — make
+elements live, and make `stamina` bind (ideal §8.1b, §8.1d).
 
 ---
 

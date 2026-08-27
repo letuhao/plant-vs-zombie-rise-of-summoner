@@ -65,7 +65,8 @@ public class ElementHubDocDriftTests
         Assert.Equal(196, combatExpected); // sanity: this IS today's generated value, not a guess
         Assert.Contains($"**{combatExpected}**", text);
         Assert.Contains($"**{registry.AllRegistered.Count}**", text);
-        Assert.Equal(256, registry.AllRegistered.Count);
+        // 256 -> 259 (class-system `poise-resource`, 2026-08-26): a sixth resource id.
+        Assert.Equal(259, registry.AllRegistered.Count);
     }
 
     [Fact]

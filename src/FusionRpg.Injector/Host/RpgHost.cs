@@ -111,6 +111,10 @@ public static class RpgHost
                 // T4.2 (power-dial, 2026-08-24): v1 (bMilli=0) -> v2 (bMilli=400). v1 stays on disk --
                 // reverting is pointing this back at power-scale.v1.json and un-bumping RulesetVersion.
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "power-scale.v2.json"))));
+        FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
+            FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
+                // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. v1 stays on disk -- reverting is pointing this back at aptitudes.v1.json.
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v2.json"))));
 
         IsInitialized = true;
     }

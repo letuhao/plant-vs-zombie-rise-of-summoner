@@ -200,6 +200,24 @@ public sealed class WebMatchService
         };
         var events = BattleReportEmitter.Emit(report, matchKey).ToList();
 
+        // class-system-todo.md P9.2's own prerequisite, found while building it: without this, no
+        // later query can attribute a battle to the allocation that produced it — rpg_aptitude_
+        // allocation is an upsert with no history, so a later re-allocation silently erases every
+        // earlier battle's own provenance. Captured here, once, reading the SAME store/scope/key
+        // AptitudeChannelMods already read to build this same squad (BuildSquad, above) — not
+        // re-derived from a different assumption, and never affects combat math or goldens (a pure
+        // additional event, not a resolver input).
+        var aptitudeShares = _store.LoadAllocation(
+            FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId)).Shares();
+        events.Add(new EventEnvelope
+        {
+            T = "",
+            Game = RpgConstants.GameIdWebRpg,
+            Kind = "aptitude.snapshot",
+            MatchKey = matchKey,
+            Payload = new Dictionary<string, object?> { ["scope"] = "commander", ["shares"] = aptitudeShares }
+        });
+
         // The engine is clockless — stamp strictly monotonic t here, at ingest.
         var t0 = DateTime.UtcNow;
         for (var i = 0; i < events.Count; i++)
@@ -281,6 +299,7 @@ public sealed class WebMatchService
                 ChannelMods = StarChannelMods(s.Profile.Star, level)
                     .Concat(LoyaltyChannelMods(
                         contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
+                    .Concat(AptitudeChannelMods(level, playerId, _store))
                     .ToList()
             });
         }
@@ -327,6 +346,25 @@ public sealed class WebMatchService
             new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, power),
             new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatDefenseOmni, defense)
         };
+    }
+
+    /// <summary>
+    /// class-system-todo.md P2.5/P9.1 — aptitudes reach battle the same way stars/loyalty do: ordinary
+    /// ChannelMods in the setup, adapted at this one seam, never an engine or composer change
+    /// (spec-aptitude-resolve.md §2a — "this module emits one thing and it is adapted at two seams").
+    /// **Reads the real commander-scope allocation now** (spec-aptitude-allocation-surface.md, 2026-08-27)
+    /// — `point-economy`'s `AllocationStore` is the real per-actor source; a player who has never
+    /// allocated still resolves against `AptitudeAllocation.Empty` (`LoadAllocation`'s own contract on
+    /// an unset key), so this stays exactly as inert as before for every squad it already served.
+    /// </summary>
+    public static IReadOnlyList<BattleChannelMod> AptitudeChannelMods(int level, long playerId, RpgStore store)
+    {
+        var allocation = store.LoadAllocation(
+            FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
+        var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
+        return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
+            allocation, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
+            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
     }
 
     static BattleActorSetup Synthetic(int i) => new()

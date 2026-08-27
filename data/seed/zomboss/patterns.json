@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "zomboss-pattern",
+  "_meta": {
+    "owner": "docs/architecture/class-system/spec-zomboss-patterns.md",
+    "note": "The nine named Zomboss builds (class-system module 10). Checked-in mirror of src/FusionRpg.Core/Battle/Ai/ZombossPatterns.cs for tooling that cannot reference FusionRpg.Core, matching data/seed/aptitudes/roster.json's own precedent. Code is the load source; this file describes it, it does not drive it (tunables-ssot.md SS7.2).",
+    "status": "class-system P7.5, landed 2026-08-27. sharePermille sums to <= 1000 per pattern by construction (spec SS2 point 4, the anti-cheat: a pattern never spends more than the budget it is given).",
+    "warning": "Shares, never point counts (spec SS6) -- the budget at a given Theta comes from point-economy's PointBudget, not from anything in this file. No element on a pattern (spec SS3.1); element is chosen per-Zomboss at generation time."
+  },
+  "entries": [
+    { "id": "force-pure", "ordinal": 0, "mix": "pure", "sharePermille": { "Might": 396, "Vigor": 150, "Onslaught": 153, "Retribution": 300 } },
+    { "id": "finesse-pure", "ordinal": 1, "mix": "pure", "sharePermille": { "Agility": 429, "Composure": 391, "Pierce": 150, "Focus": 30 } },
+    { "id": "bastion-pure", "ordinal": 2, "mix": "pure", "sharePermille": { "Bulwark": 180, "Fortitude": 170, "Precision": 248, "Ferocity": 402 } },
+    { "id": "force-defence-bastion-breaks-guard", "ordinal": 3, "mix": "mixed", "reads_as": "armoured counter-puncher (guard-leaning)", "sharePermille": { "Fortitude": 300, "Vigor": 300, "Precision": 200, "Ferocity": 200 } },
+    { "id": "force-defence-bastion-breaks-aggro", "ordinal": 4, "mix": "mixed", "reads_as": "armoured counter-puncher (aggro-leaning)", "sharePermille": { "Fortitude": 200, "Vigor": 200, "Precision": 300, "Ferocity": 300 } },
+    { "id": "finesse-defence-force-breaks-guard", "ordinal": 5, "mix": "mixed", "reads_as": "evasive guard-breaker (guard-leaning)", "sharePermille": { "Agility": 300, "Composure": 300, "Onslaught": 400 } },
+    { "id": "finesse-defence-force-breaks-aggro", "ordinal": 6, "mix": "mixed", "reads_as": "evasive guard-breaker (aggro-leaning)", "sharePermille": { "Agility": 200, "Composure": 200, "Onslaught": 600 } },
+    { "id": "bastion-defence-finesse-breaks-guard", "ordinal": 7, "mix": "mixed", "reads_as": "parrying armour-piercer (guard-leaning)", "sharePermille": { "Bulwark": 300, "Retribution": 300, "Pierce": 400 } },
+    { "id": "bastion-defence-finesse-breaks-aggro", "ordinal": 8, "mix": "mixed", "reads_as": "parrying armour-piercer (aggro-leaning)", "sharePermille": { "Bulwark": 200, "Retribution": 200, "Pierce": 600 } }
+  ]
+}

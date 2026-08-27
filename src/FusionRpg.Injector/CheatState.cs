@@ -27,12 +27,25 @@ public static class CheatState
     public static StatsConfig LocalStats { get; } = new();
     /// <summary>Shared StatSystem — plugins compose Y0 + Xi → Y. Cheats feed cheat.scale / cheat.absolute only.</summary>
     public static StatSystem Stats { get; } = StatSystemBootstrap.CreateDefault();
-    /// <summary>Derived snapshot compose — wraps Stats; Writer uses AppliedCombat. Not yet fed by
-    /// <see cref="PowerIndex"/> — see RpgProgressionSubsystem's doc comment (power-plan.md T3.2).</summary>
-    public static ActorHub ActorHub { get; } = ActorHubBootstrap.CreateDefault(Stats);
+    static ActorHub? _actorHub;
+    /// <summary>Derived snapshot compose — wraps Stats; Writer uses AppliedCombat. class-system-todo.md
+    /// P1.10 (2026-08-26): now fed by <see cref="PowerIndex"/> — was constructed via a field
+    /// initializer, which forced <c>PowerTuningHub.Tuning</c> (throws before
+    /// <c>RpgHost.Initialize</c>'s <c>Configure</c> call) the moment ANY static member of
+    /// <see cref="CheatState"/> was first touched. Lazy, same pattern as <see cref="PowerIndex"/>
+    /// itself, so first evaluation happens on first actual stat resolve rather than at class-load.</summary>
+    /// <summary>class-system-todo.md P2.4 (2026-08-27): now also passes AptitudeTuningHub.Tuning, so
+    /// the overlay's aptitude resolve is actually live — inert (allocation defaults to Empty, P6's
+    /// AllocationStore doesn't exist yet) but exercised through the real ActorHub.Register seam,
+    /// exactly as spec-aptitude-resolve.md §2 requires ("via ActorHub.Register", not merely capable
+    /// of it). Both hosts already call AptitudeTuningHub.Configure at startup (P2.3), so this read is
+    /// safe by the time anything touches ActorHub.</summary>
+    public static ActorHub ActorHub => _actorHub ??= ActorHubBootstrap.CreateDefault(
+        Stats, powerIndex: PowerIndex, aptitudeTuning: FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
     static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;
-    /// <summary>Θ ladder index, ready for a consumer (power-plan.md waves 2-3) — inert until then.
-    /// Lazy: PowerTuningHub.Configure runs in RpgHost.Initialize, which this must not race.</summary>
+    /// <summary>Θ ladder index. Lazy: PowerTuningHub.Configure runs in RpgHost.Initialize, which this
+    /// must not race — <c>PowerTuningHub.Tuning</c> throws (not a stale default) before Configure runs,
+    /// so evaluating this eagerly at class-load would crash startup, not just read Theta=0.</summary>
     public static FusionRpg.Core.Power.IPowerIndexProvider PowerIndex =>
         _powerIndex ??= new InjectorPowerIndexProvider(FusionRpg.Core.Power.PowerTuningHub.Tuning);
     public static IntPtr SelectedPtr;

@@ -5,7 +5,7 @@ using FusionRpg.Core.Stats;
 namespace FusionRpg.Core.Stats.Derived.Subsystems;
 
 /// <summary>
-/// Progression tier power + combat bonus flats — P1/P2 ADR, amended by power-plan.md T3.2.
+/// Progression tier power — P1/P2 ADR, amended by power-plan.md T3.2.
 ///
 /// <para><c>progression.power</c> reads Θ from <see cref="IPowerIndexProvider.ActorIndex"/> — the
 /// POC curve (<c>2^min(level,12)</c>) is retired (deleted, <c>ProgressionPowerCurve.cs</c> is gone).
@@ -17,20 +17,21 @@ namespace FusionRpg.Core.Stats.Derived.Subsystems;
 /// <para><c>progression.realm</c> stays the stub constant permanently (SSOT: "realm advancement is
 /// additive in Θ, never a contest multiplier" — not this subsystem's concern to change).</para>
 ///
-/// <para><see cref="_level"/> keeps only the one thing that was ever meaningfully exercised: the
-/// level-gated bonus-mod path (<c>ActorHubTests.Applied_combat_includes_progression_bonus_flats</c>).
-/// A bare per-context delegate, not a re-creation of the deleted <c>IProgressionPowerProvider</c> —
-/// and deliberately separate from <see cref="_powerIndex"/>: bonus-mod "level" and Θ are different
-/// wiring questions that happen to share a number today, not one concept with two names.</para>
+/// <para>class-system-todo.md P3.3 (2026-08-27) retired the level-gated
+/// <c>progression.bonus.{maxHp,atk,defense}</c> flat curve this subsystem used to own (was already
+/// latent — no host ever passed the delegate that drove it) — those five bridge channels
+/// (<c>ProgressionBonus{MaxHp,Atk,Defense,Arm1,Arm2}</c>) are allocation-sourced now, fed by
+/// <see cref="Subsystems"/>' sibling <see cref="AptitudeSubsystem"/> through the same
+/// <c>ActorHub.Register</c> seam, for whichever aptitudes have an edge into them (`Vigor`→maxHp/arm2,
+/// `Might`/`Ferocity`→atk, `Fortitude`/`Bulwark`→defense/arm1). Retired in ssot-power-scale.md §10.1's
+/// same change (the inventory row this stub earned there is cleared, not left stale).</para>
 /// </summary>
 public sealed class RpgProgressionSubsystem : IActorStatSubsystem
 {
-    readonly Func<StatContext, int>? _level;
     readonly IPowerIndexProvider _powerIndex;
 
-    public RpgProgressionSubsystem(Func<StatContext, int>? level = null, IPowerIndexProvider? powerIndex = null)
+    public RpgProgressionSubsystem(IPowerIndexProvider? powerIndex = null)
     {
-        _level = level;
         _powerIndex = powerIndex ?? new StubPowerIndexProvider();
     }
 
@@ -48,25 +49,6 @@ public sealed class RpgProgressionSubsystem : IActorStatSubsystem
             DerivedStatChannels.ProgressionRealm,
             DerivedModifierOp.Replace,
             StatusPolicy.ProgressionPowerStubDefault,
-            SourceId: SubsystemId));
-
-        var level = _level?.Invoke(ctx) ?? 0;
-        if (level <= 0) return;
-
-        mods.Add(new DerivedModifier(
-            DerivedStatChannels.ProgressionBonusMaxHp,
-            DerivedModifierOp.Flat,
-            level * 10,
-            SourceId: SubsystemId));
-        mods.Add(new DerivedModifier(
-            DerivedStatChannels.ProgressionBonusAtk,
-            DerivedModifierOp.Flat,
-            level,
-            SourceId: SubsystemId));
-        mods.Add(new DerivedModifier(
-            DerivedStatChannels.ProgressionBonusDefense,
-            DerivedModifierOp.Flat,
-            level * 0.5,
             SourceId: SubsystemId));
     }
 }

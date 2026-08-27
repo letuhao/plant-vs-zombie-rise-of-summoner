@@ -596,6 +596,13 @@ Swept 2026-08-23 across `src/` and `docs/architecture/`.
 | 5 | `LoamPolicy.DevelopmentUpkeepPerLevel = 5` | linear | `LoamPolicy.cs:30` | **Economy magnitude — scales on `P(Θ)` only if its matching faucet does** (§10.4) |
 | 6 | `XpToNext = first + (L−1)·step` | arithmetic | `rpg-progression.md` | **Kept, unchanged.** It is the *cost* ladder, not a power ladder — see §10.5 |
 
+Row 17 (`RpgProgressionSubsystem`'s `level`-gated bonus flats, found latent by class-system P1.13,
+2026-08-26) is **retired, not merely re-verdicted** — class-system P3.3 (2026-08-27) deleted the stub
+from `RpgProgressionSubsystem.cs` entirely; `progression.bonus.{maxHp,atk,defense,arm1,arm2}` are
+allocation-sourced now, through `AptitudeSubsystem`/`AptitudeResolver` (already governed by `aptitude-
+tuning`'s PS-3 read functions, not a private `f(level)`), so there is nothing left for this table to
+hold. The row number is retired with it, not reassigned.
+
 ### 10.2 Non-level scales — these are legitimate and stay
 
 Each is bounded, or operates in relative space, so none can drift with level. They are listed so

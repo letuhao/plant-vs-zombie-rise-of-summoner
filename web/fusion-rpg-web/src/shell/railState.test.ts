@@ -13,7 +13,7 @@ const allLocked: RailUnlockInputs = {
 };
 
 describe("deriveRailEntries — GG-44, renders from state", () => {
-  it("returns Sanctum first, then the seven layers, in the fixed order", () => {
+  it("returns Sanctum first, then the eight layers, in the fixed order", () => {
     const entries = deriveRailEntries(allLocked);
     expect(entries.map((e) => e.id)).toEqual([
       "sanctum",
@@ -23,7 +23,8 @@ describe("deriveRailEntries — GG-44, renders from state", () => {
       "pacts",
       "expeditions",
       "almanac",
-      "chronicle"
+      "chronicle",
+      "aptitudes"
     ]);
   });
 
@@ -36,6 +37,10 @@ describe("deriveRailEntries — GG-44, renders from state", () => {
 
   it("Creatures is unlocked from session start regardless of any other state", () => {
     expect(deriveRailEntries(allLocked).find((e) => e.id === "creatures")!.state).toBe("available");
+  });
+
+  it("Aptitudes is unlocked from session start regardless of any other state", () => {
+    expect(deriveRailEntries(allLocked).find((e) => e.id === "aptitudes")!.state).toBe("available");
   });
 
   it("every locked entry carries a non-empty reason (GG-17)", () => {

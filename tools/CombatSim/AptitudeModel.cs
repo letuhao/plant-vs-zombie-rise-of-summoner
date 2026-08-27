@@ -201,7 +201,12 @@ public sealed class Build
             return v;
         }
         var hp = HpPerLadder * p + Take(ResourceMaxHp);
-        var shield = ShieldPerLadder * p + channels.GetValueOrDefault(ShieldCapacityOmni);
+        // DOUBLE-COUNT FIXED 2026-08-26. This used to add `combat.shield.capacity.omni` into the
+        // granted pool — but ShieldRuntime computes `maxHp = grant.BaseHp + capacity` and reads the
+        // channel ITSELF, so the capacity landed twice and every shielded actor had 2x the shield it
+        // was buying. The comment below already said ShieldRuntime reads the channel; the code added
+        // it anyway. Grant the BASELINE only and let the runtime apply what the build bought.
+        var shield = ShieldPerLadder * p;
 
         return new Archetype
         {

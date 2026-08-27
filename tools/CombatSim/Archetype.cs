@@ -80,6 +80,11 @@ public sealed class DuelSummary
     public double Stalemates { get; init; }
     public double MedianRounds { get; init; }
 
+    /// <summary>Measured HP lost per round, per side — the diagnostic that separates "the model has
+    /// the wrong rate" from "the model has the wrong variance". A win-share residual alone cannot.</summary>
+    public double RateAgainstA { get; init; }
+    public double RateAgainstB { get; init; }
+
     /// <summary>A's share of decisive results — the number the matrix prints. 0.5 is a coin flip.</summary>
     public double AWinShare => AWins + BWins <= 0 ? 0.5 : AWins / (AWins + BWins);
 }

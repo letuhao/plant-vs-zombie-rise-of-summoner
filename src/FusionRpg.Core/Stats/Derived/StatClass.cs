@@ -58,5 +58,23 @@ public enum UnitClass
 
     /// <summary>An index on the Θ / P(Θ) power ladder, not a magnitude. The tenth class, added
     /// 2026-08-24 — spec-magnitude-and-units.md §3.2. Context part is exact, not an estimate.</summary>
-    LadderIndex
+    LadderIndex,
+
+    /// <summary>An aptitude's own point investment (e.g. "Might 55") — class-system/spec-primary-
+    /// stats.md §3.2, authorised 2026-08-26. The `LadderIndex` precedent applies exactly: PS-3 reads
+    /// an aptitude two ways (contest linearly, magnitude through `P(Θ)`), so both the point count and
+    /// its effect matter. Unlike `LadderIndex`, the context part is an ESTIMATE, not exact — `share`
+    /// divides by the actor's whole allocation, so "Might 55" alone buys nothing determinate. Shown
+    /// only on a surface with a real allocation (actor sheet); suppressed elsewhere, same rule as
+    /// `StatusPotencyPoints` (§4.3) — a number computed against an allocation the player has not made
+    /// is not a hedge, it is a fiction.</summary>
+    AptitudePoints,
+
+    /// <summary>An uncapped point delta that feeds a RECIPROCAL-shaped bounded factor — the reciprocal
+    /// analog of `SigmoidPoints`' sigmoid-shaped one. class-system/spec-unit-class-close.md §3.3/§3.5,
+    /// authorised 2026-08-26: verified reader is `CombatDerivedReader` + `OverlayCombatCalculator`'s
+    /// mitigation chain — `PierceFactor(d,s) = 1/(1+max(0,d)/s)` and its amplification-side mirror
+    /// `AmpFactorReciprocal`, both asymptotic rather than linear or sigmoid. Covers `combat.penetration`
+    /// `/absorption/amplification/reduction`.</summary>
+    ReciprocalPoints
 }

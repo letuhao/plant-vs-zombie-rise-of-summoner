@@ -1,0 +1,36 @@
+{
+    "_meta": {
+        "owner": "class-system-todo.md P6.4",
+        "purpose": "Machine-checked counterpart to BattleGoldenTests.cs's own comment-block re-bless history. Every RulesetVersion bump that moves a golden hash needs an entry HERE naming the program and task that moved it -- scripts/verify-golden-attribution.py fails the build on a hash move with no matching entry, or on two entries claiming the same rulesetVersion from different programs (a two-stream collision). Entries below for rulesetVersion 2-4 are a backfill, transcribed from BattleGoldenTests.cs's own existing prose comments (lines 17-56, as of 2026-08-27) -- not re-derived, not guessed.",
+        "schema": "One entry per rulesetVersion. 'hashes' names every golden that moved (by the same names BattleGoldenTests.cs / _baseline-goldens.json use: stompHash/closeHash/wipeHash/seedSweepHash), 'unchanged' names any golden the bump did NOT move (still worth recording -- a re-bless that silently moved a hash nobody expected to move is exactly the kind of thing this file exists to catch on the NEXT diff)."
+    },
+    "entries": [
+        {
+            "rulesetVersion": 2,
+            "program": "combat-unification",
+            "task": "battle-adoption",
+            "date": "2026-08-21",
+            "hashes": ["stompHash", "closeHash", "wipeHash", "seedSweepHash"],
+            "unchanged": [],
+            "reason": "SSOT resolver adopted + re-tuned baselines + shields + report shape changed every byte, once, by design. Predicted-delta review done before the bless: outcomes/shapes held (stomp Victory, wipe Defeat with the coward retreating), mirror-match symmetry 48-56%. Re-blessed again the SAME DAY for a second, unrelated reason: the hash input stopped including the platform stamp -- battle math itself did not move that second time, only the hash INPUT shape did."
+        },
+        {
+            "rulesetVersion": 3,
+            "program": "power",
+            "task": "T4.2 power-dial",
+            "date": "2026-08-24",
+            "hashes": ["stompHash", "closeHash", "wipeHash", "seedSweepHash"],
+            "unchanged": [],
+            "reason": "power-scale.v2.json's bMilli 0 -> 400 -- the one golden-moving change the whole power program was built around. Every golden actor sits away from the Theta=20 pin (levels 1/2/5/6/10), so every magnitude legitimately moved; PS-3 does not apply (nothing here is a rate). Triaged before the re-bless: the only Core suite failures were these hash goldens, two literal RulesetVersion==2 assertions, and three B=0-specific tests (reframed separately, not re-blessed) -- every rate-specific test stayed green with zero changes, confirming zero rate goldens moved."
+        },
+        {
+            "rulesetVersion": 4,
+            "program": "combat-damage-ssot",
+            "task": "defense-shape",
+            "date": "2026-08-25",
+            "hashes": ["stompHash", "closeHash", "wipeHash", "seedSweepHash"],
+            "unchanged": [],
+            "reason": "combat.defense stops SUBTRACTING and starts DIVIDING (combat-damage-ssot.md 6.3, DefenseShape.Divisive) -- subtractive mitigation floored damage at zero once defense outran offense (measured: 17.1% of landed hits dealing nothing over 50,000 simulated fights), so every mitigated magnitude moves. Triaged before the re-bless: whole battle suite was 314/319 with the only five failures being these hash goldens and three trace fixtures; every rate test stayed green untouched, so no rate golden moved and PS-3 does not apply."
+        }
+    ]
+}

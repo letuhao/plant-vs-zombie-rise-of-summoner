@@ -602,6 +602,9 @@ public sealed partial class RpgStore : IRpgDb
         // columns retired T1.4 (cap-consolidation, 2026-08-25): they were dead, direction is the only
         // live column.
         EnsureChannelPolicySchemaUnlocked(db);
+        // rpg_aptitude_allocation — class-system P6.2, spec-point-economy.md. Inputs only, one row
+        // per (scope, scopeKey, aptitude) with a nonzero spend.
+        EnsureAptitudeAllocationSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)
@@ -670,6 +673,7 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_fusion_discovery;", "DELETE FROM rpg_patron;",
                              "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
+                             "DELETE FROM rpg_aptitude_allocation;",
                              "DELETE FROM archive_catalog;",
                              "DELETE FROM players;"
                          })

@@ -28,6 +28,29 @@
       "shareExponentMilli": 1000
     }
   },
+  "recovery": {
+    "_note": "The TERMINATION INVARIANT dial (class-system-ideal.md 5d). Multiplies every edge whose channel starts with one of `families` below. Recovery is sized against PEER DAMAGE, never against the pool it refills: with r = recovery/peerDamage, a fight stretches by 1/(1-r) and r >= 1 means it never ends. Measured before this dial existed: r = 1.33 on a max-Vigor mirror, i.e. an unkillable pair.",
+    "scaleMilli": 374,
+    "_scaleWhy": "374 = 0.374x, SOLVED not inverted. Measured r without the dial was 1.33 (an unkillable pair). Target r = 0.670 -> a max-sustain build stretches a fight exactly 3x. r is NOT linear in the dial, because nerfing recovery also shortens the fight and so moves DAMAGE: 500 -> r 0.79, 424 -> 0.76, 374 -> 0.670. Three passes, each measured. Re-solve after any coefficient change that touches damage - the coupling means the dial does not hold still on its own.",
+    "targetRecoveryShareMilli": 670,
+    "_targetWhy": "The ACCEPTANCE CRITERION, not the dial - what balance-guard checks. 670 means a max-sustain build may stretch a fight 3x and no further. It is a share of peer damage, so it is Theta-free like every other ratio here.",
+    "families": [
+      "resource.regen",
+      "combat.shield.regen"
+    ]
+  },
+  "mitigation": {
+    "_note": "Recovery's own sibling dial (class-system-todo.md P8.3) for non-recovery survivability -- combat.defense/dodge/parry/block/absorption/heal, channels recovery.families never reaches. Ported into this tool 2026-08-27, matching the live data/tuning/aptitudes.v2.json calibration exactly (docs/research/class-residual-2026-08-27.md) -- this tool's own resolver was blind to the dial until now, which is what left P3.4/P8.1/Checkpoint 8's baselines silently understating mitigation.",
+    "scaleMilli": 300,
+    "families": [
+      "combat.defense",
+      "combat.dodge",
+      "combat.parry",
+      "combat.block",
+      "combat.absorption",
+      "combat.heal"
+    ]
+  },
   "familyRead": {
     "_note": "THE unitClass DECISION, as one reviewable block rather than a flag on every edge - because the read mode is a property of the CHANNEL (what the formula compares it against), never of the edge that feeds it. Rule (measured, class-rps-balance-2026-08-25.md 3.1): a family compared against a LADDER quantity is a magnitude; a family feeding a bounded ratio through a small scale is a contest.",
     "combat.power": "magnitude",
@@ -105,21 +128,6 @@
       "kMilli": 800
     },
     {
-      "channel": "combat.defense.omni",
-      "source": "Fortitude",
-      "kMilli": 3000
-    },
-    {
-      "channel": "combat.defense.omni",
-      "source": "Composure",
-      "kMilli": 1600
-    },
-    {
-      "channel": "combat.defense.omni",
-      "source": "Bulwark",
-      "kMilli": 1600
-    },
-    {
       "channel": "combat.accuracy.omni",
       "source": "Precision",
       "kMilli": 3000
@@ -175,74 +183,14 @@
       "kMilli": 1400
     },
     {
-      "channel": "combat.crit.resist.omni",
-      "source": "Composure",
-      "kMilli": 3000
-    },
-    {
-      "channel": "combat.crit.resist.omni",
-      "source": "Fortitude",
-      "kMilli": 1400
-    },
-    {
-      "channel": "combat.crit.resist.omni",
-      "source": "Vigor",
-      "kMilli": 1400
-    },
-    {
-      "channel": "combat.crit.resist.damage.omni",
-      "source": "Composure",
-      "kMilli": 3000
-    },
-    {
-      "channel": "combat.crit.resist.damage.omni",
-      "source": "Fortitude",
-      "kMilli": 1400
-    },
-    {
-      "channel": "combat.crit.resist.damage.omni",
-      "source": "Vigor",
-      "kMilli": 1400
-    },
-    {
       "channel": "combat.penetration.omni",
       "source": "Onslaught",
       "kMilli": 300
     },
     {
-      "channel": "combat.absorption.omni",
-      "source": "Fortitude",
-      "kMilli": 1000
-    },
-    {
-      "channel": "combat.absorption.omni",
-      "source": "Composure",
-      "kMilli": 500
-    },
-    {
-      "channel": "combat.absorption.omni",
-      "source": "Vigor",
-      "kMilli": 500
-    },
-    {
       "channel": "combat.amplification.omni",
       "source": "Onslaught",
       "kMilli": 90
-    },
-    {
-      "channel": "combat.reduction.omni",
-      "source": "Fortitude",
-      "kMilli": 90
-    },
-    {
-      "channel": "combat.reduction.omni",
-      "source": "Composure",
-      "kMilli": 150
-    },
-    {
-      "channel": "combat.reduction.omni",
-      "source": "Vigor",
-      "kMilli": 150
     },
     {
       "channel": "combat.parry.rate.omni",
@@ -303,21 +251,6 @@
       "channel": "combat.reflect.resist.damage.omni",
       "source": "Pierce",
       "kMilli": 1800
-    },
-    {
-      "channel": "combat.shield.capacity.omni",
-      "source": "Vigor",
-      "kMilli": 55000
-    },
-    {
-      "channel": "combat.shield.regen.omni",
-      "source": "Vigor",
-      "kMilli": 900
-    },
-    {
-      "channel": "combat.shield.toughness.omni",
-      "source": "Vigor",
-      "kMilli": 2000
     },
     {
       "channel": "combat.shield.pen.omni",
@@ -480,7 +413,7 @@
     {
       "channel": "resource.max.hp",
       "source": "Vigor",
-      "kMilli": 30000
+      "kMilli": 12000
     },
     {
       "channel": "resource.max.hp",
@@ -2509,6 +2442,109 @@
       "channel": "status.intensityReduction.contagion",
       "source": "Ferocity",
       "kMilli": 400
+    },
+    {
+      "_group": "=== MITIGATION CHAIN: one PRIMARY stage per aptitude. The chain is a product of four stages, so an aptitude holding several is superlinear in its own share - moving one stage moved dominance from Vigor to Fortitude in one edit (8.8) ==="
+    },
+    {
+      "channel": "combat.defense.omni",
+      "source": "Fortitude",
+      "kMilli": 3000
+    },
+    {
+      "channel": "combat.defense.omni",
+      "source": "Bulwark",
+      "kMilli": 900
+    },
+    {
+      "channel": "combat.defense.omni",
+      "source": "Composure",
+      "kMilli": 700
+    },
+    {
+      "channel": "combat.absorption.omni",
+      "source": "Bulwark",
+      "kMilli": 1000
+    },
+    {
+      "channel": "combat.absorption.omni",
+      "source": "Vigor",
+      "kMilli": 300
+    },
+    {
+      "channel": "combat.absorption.omni",
+      "source": "Fortitude",
+      "kMilli": 250
+    },
+    {
+      "channel": "combat.reduction.omni",
+      "source": "Retribution",
+      "kMilli": 90
+    },
+    {
+      "channel": "combat.reduction.omni",
+      "source": "Composure",
+      "kMilli": 30
+    },
+    {
+      "channel": "combat.reduction.omni",
+      "source": "Fortitude",
+      "kMilli": 25
+    },
+    {
+      "channel": "combat.crit.resist.omni",
+      "source": "Composure",
+      "kMilli": 3000
+    },
+    {
+      "channel": "combat.crit.resist.omni",
+      "source": "Agility",
+      "kMilli": 900
+    },
+    {
+      "channel": "combat.crit.resist.omni",
+      "source": "Vigor",
+      "kMilli": 700
+    },
+    {
+      "channel": "combat.crit.resist.damage.omni",
+      "source": "Composure",
+      "kMilli": 3000
+    },
+    {
+      "channel": "combat.crit.resist.damage.omni",
+      "source": "Agility",
+      "kMilli": 900
+    },
+    {
+      "channel": "combat.crit.resist.damage.omni",
+      "source": "Vigor",
+      "kMilli": 700
+    },
+    {
+      "channel": "combat.shield.toughness.omni",
+      "source": "Vigor",
+      "kMilli": 2000
+    },
+    {
+      "channel": "combat.shield.toughness.omni",
+      "source": "Bulwark",
+      "kMilli": 600
+    },
+    {
+      "channel": "combat.shield.capacity.omni",
+      "source": "Vigor",
+      "kMilli": 55000
+    },
+    {
+      "channel": "combat.shield.capacity.omni",
+      "source": "Bulwark",
+      "kMilli": 9000
+    },
+    {
+      "channel": "combat.shield.regen.omni",
+      "source": "Vigor",
+      "kMilli": 900
     }
   ]
 }

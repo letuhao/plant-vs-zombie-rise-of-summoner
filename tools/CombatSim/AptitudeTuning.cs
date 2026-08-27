@@ -28,6 +28,8 @@ public sealed class AptitudeTuning
     public int Version { get; set; }
     public GrantBlock? Grant { get; set; }
     public ReadBlock? Read { get; set; }
+    public RecoveryBlock? Recovery { get; set; }
+    public MitigationBlock? Mitigation { get; set; }
     public Dictionary<string, string>? FamilyRead { get; set; }
     public List<TunedEdge>? Edges { get; set; }
 
@@ -35,6 +37,27 @@ public sealed class AptitudeTuning
     {
         public double? AptitudePointsPerTheta { get; set; }
         public double? SkillPointsPerTheta { get; set; }
+    }
+
+    /// <summary>The termination-invariant dial (class-system-ideal.md §5d). One multiplier over every
+    /// recovery family, because <c>r = recovery/peerDamage</c> is a GLOBAL ratio — nerfing one regen
+    /// edge at a time cannot target it.</summary>
+    public sealed class RecoveryBlock
+    {
+        public long? ScaleMilli { get; set; }
+        public long? TargetRecoveryShareMilli { get; set; }
+        public List<string>? Families { get; set; }
+    }
+
+    /// <summary>Recovery's own sibling dial (class-system-todo.md P8.3, AptitudeMitigation in
+    /// src/FusionRpg.Core/Stats/Aptitudes/AptitudeTuning.cs) for non-recovery survivability —
+    /// combat.defense/dodge/parry/block/absorption/heal. Ported 2026-08-27: this tool's own resolver
+    /// was blind to this dial even after aptitudes.v2.json shipped it (P3.4/P8.1/Checkpoint 8's shared
+    /// finding) — ScaleFor below now mirrors Core's AptitudeResolver.EffectiveKMilli exactly.</summary>
+    public sealed class MitigationBlock
+    {
+        public long? ScaleMilli { get; set; }
+        public List<string>? Families { get; set; }
     }
 
     public sealed class ReadBlock
@@ -98,6 +121,11 @@ public sealed class AptitudeTuning
         Need(Read?.Contest?.SpanPoints is > 0, "read.contest.spanPoints");
         Need(Read?.Contest?.ShareExponentMilli is > 0, "read.contest.shareExponentMilli");
         Need(Read?.Magnitude?.ShareExponentMilli is > 0, "read.magnitude.shareExponentMilli");
+        Need(Recovery?.ScaleMilli is >= 0, "recovery.scaleMilli");
+        Need(Recovery?.TargetRecoveryShareMilli is > 0, "recovery.targetRecoveryShareMilli");
+        Need(Recovery?.Families is { Count: > 0 }, "recovery.families");
+        Need(Mitigation?.ScaleMilli is >= 0, "mitigation.scaleMilli");
+        Need(Mitigation?.Families is { Count: > 0 }, "mitigation.families");
         Need(FamilyRead is { Count: > 0 }, "familyRead");
         Need(Edges is { Count: > 0 }, "edges");
 
@@ -144,8 +172,21 @@ public sealed class AptitudeTuning
     /// </summary>
     public AptitudeModel ToModel(string name)
     {
+        var recoveryScale = Recovery!.ScaleMilli!.Value / 1000.0;
+        var mitigationScale = Mitigation!.ScaleMilli!.Value / 1000.0;
+        bool IsRecovery(string channel) =>
+            Recovery.Families!.Any(f => channel.StartsWith(f, StringComparison.Ordinal));
+        bool IsMitigation(string channel) =>
+            Mitigation.Families!.Any(f => channel.StartsWith(f, StringComparison.Ordinal));
+        // Mirrors Core's AptitudeResolver.EffectiveKMilli exactly: recovery is checked first and, if it
+        // matches, mitigation is never even considered for that edge -- the two dials are mutually
+        // exclusive per channel, not stacked.
+        double ScaleFor(string channel) =>
+            IsRecovery(channel) ? recoveryScale : IsMitigation(channel) ? mitigationScale : 1.0;
+
         var edges = RealEdges.Select(e => new AptitudeEdge(
-            e.Channel!, e.Source!, e.KMilli / 1000.0,
+            e.Channel!, e.Source!,
+            e.KMilli / 1000.0 * ScaleFor(e.Channel!),
             FamilyRead![FamilyOf(e.Channel!)!].Equals("magnitude", StringComparison.OrdinalIgnoreCase)
                 ? ReadMode.Magnitude
                 : ReadMode.Contest)).ToList();
@@ -156,7 +197,9 @@ public sealed class AptitudeTuning
             Description = $"aptitudes.v{Version} — {edges.Count} edges, "
                           + $"contest span {Read!.Contest!.SpanPoints}, "
                           + $"gamma contest {Read.Contest.ShareExponentMilli / 1000.0:0.###} / "
-                          + $"magnitude {Read.Magnitude!.ShareExponentMilli / 1000.0:0.###}",
+                          + $"magnitude {Read.Magnitude!.ShareExponentMilli / 1000.0:0.###}, "
+                          + $"recovery x{Recovery.ScaleMilli!.Value / 1000.0:0.##}, "
+                          + $"mitigation x{Mitigation.ScaleMilli!.Value / 1000.0:0.##}",
             Edges = edges,
             ContestSpan = Read.Contest.SpanPoints!.Value,
             ContestShareExponent = Read.Contest.ShareExponentMilli!.Value / 1000.0,

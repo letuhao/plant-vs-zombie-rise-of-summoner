@@ -6,7 +6,7 @@
     "note": "Machine-readable mirror of the DerivedStatCatalog for tooling that cannot reference FusionRpg.Core (seedsmith, the web app, importers). Registration itself stays code-first in Stats/Derived/DerivedStatRegistry.cs - this file describes it, it does not drive it.",
     "families-not-channels": "Entries are FAMILIES plus the axis they expand over, never the expanded channel list. The 196 combat channels are generated from CombatChannelFamilies x (omni + roster) precisely so adding an element or a family changes the count by construction; hand-listing the expansion here would create a second source of truth with a delay fuse. Expand axis='element' over data/seed/elements/roster.json the same way Core does.",
     "shipped-only": "Registered channels only, still true. catalog-extension (T2, derived-stats program, 2026-08-24) registered the 157-channel combat-balance extension (H.1-H.7 in actor-hub-ssot.md SS3H) in DerivedStatRegistry -- it is no longer PROPOSED, it is SHIPPED, with every new channel defaulting to 0 and zero readers wired (registration only; the reader modules land in later phases). move.range moved here from notRegistered accordingly.",
-    "counts": "9 progression (7 + 2 new) + 24 status constants (8 + 16 new) + 196 combat (84 + 112 new) + 1 healing + 15 resource + 1 move.range + 10 action-category = 256 named, plus 9 open prefix families (5 original + 4 new status-duration/intensity). Verified against DerivedStatRegistry.CreateDefault() 2026-08-24; DerivedStatRegistryTests asserts the combat total (196) and SeedCatalogMatchesCode asserts this mirror against the live registry.",
+    "counts": "9 progression (7 + 2 new) + 24 status constants (8 + 16 new) + 196 combat (84 + 112 new) + 1 healing + 18 resource (15 + 3 poise, 2026-08-26) + 1 move.range + 10 action-category = 259 named, plus 9 open prefix families (5 original + 4 new status-duration/intensity). Verified against DerivedStatRegistry.CreateDefault() 2026-08-24, resource-id axis re-verified 2026-08-26 (class-system, poise-resource); DerivedStatRegistryTests asserts the combat total (196) and SeedCatalogMatchesCode asserts this mirror against the live registry -- the resource-id axis expands over DerivedStatChannels.ResourceIds directly, so a seventh resource would not need this note updated by hand.",
     "composeKinds": "FlatSum | FlatReplace | SumIncreased | MaxPriorityFlag - see DerivedComposeKind.",
     "classification": "TWO orthogonal axes, both required, neither inferred from the other. statClass (Contest|Race|Pool|Feeder) answers 'does it need a counterpart' - spec-stat-taxonomy.md; null statClass means the counterbalance rule does not apply (the two Theta channels only). unitClass answers 'what arithmetic is it and how does it render' - the TEN-class ledger in docs/design/spec-magnitude-and-units.md SS3 (nine plus LadderIndex, added 2026-08-24), each class verified against its consumer in src/. null unitClass means that ledger has not assigned one; per its SS8 a channel whose consumer cannot be named gets a REJECTION, never an invented placeholder -- true of every one of catalog-extension's 157 new channels at registration time. Do not add a third scheme."
   },
@@ -300,11 +300,11 @@
       "compose": "SumIncreased",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "StatusPotencyPoints",
       "statClass": "Contest",
       "counterpart": "status.durationReduction",
       "role": "attacker",
-      "note": "H.2, 2026-08-24 -- registration only, no reader wired. status-potency (T4.1) owns splitting the shared netFactor into independent duration/intensity terms; ships at default 0 so nothing computes differently yet."
+      "note": "H.2, 2026-08-24 -- registered. Reader VERIFIED 2026-08-26 (class-system P1.5): ResistanceEvaluator.cs:331-336's ComputePotencyDelta reads it dynamically (\"status.{family}.{omni|category|statusId}\"), same formula shape as status.power/status.resist -- gates and scales effectiveDuration."
     },
     {
       "family": "status.durationReduction",
@@ -312,11 +312,11 @@
       "compose": "SumIncreased",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "StatusPotencyPoints",
       "statClass": "Contest",
       "counterpart": "status.duration",
       "role": "defender",
-      "note": "H.2, 2026-08-24 -- registration only. No cap assigned yet: a balance value ahead of the reader that decides it belongs to status-potency (T4.1), not this registration."
+      "note": "H.2, 2026-08-24 -- registered. Reader VERIFIED 2026-08-26 (class-system P1.5): same ComputePotencyDelta call, defender side (ResistanceEvaluator.cs:334-336)."
     },
     {
       "family": "status.intensity",
@@ -324,11 +324,11 @@
       "compose": "SumIncreased",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "StatusPotencyPoints",
       "statClass": "Contest",
       "counterpart": "status.intensityReduction",
       "role": "attacker",
-      "note": "H.2, 2026-08-24 -- registration only, no reader wired."
+      "note": "H.2, 2026-08-24 -- registered. Reader VERIFIED 2026-08-26 (class-system P1.5): ResistanceEvaluator.cs:331-336, gates the potency floor (line 211) and scales effectiveMagnitude."
     },
     {
       "family": "status.intensityReduction",
@@ -336,11 +336,11 @@
       "compose": "SumIncreased",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "StatusPotencyPoints",
       "statClass": "Contest",
       "counterpart": "status.intensity",
       "role": "defender",
-      "note": "H.2, 2026-08-24 -- registration only. No cap assigned yet, same reasoning as status.durationReduction."
+      "note": "H.2, 2026-08-24 -- registered. Reader VERIFIED 2026-08-26 (class-system P1.5): same mechanism, defender side."
     },
     {
       "family": "combat.penetration",
@@ -348,11 +348,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "ReciprocalPoints",
       "statClass": "Contest",
       "counterpart": "combat.absorption",
       "role": "attacker",
-      "note": "H.1, 2026-08-24 -- standard role (not inverted). Scales defense-surviving damage; reader lands in mitigation-chain."
+      "note": "H.1, 2026-08-24 -- standard role. Reader VERIFIED 2026-08-26 (class-system P1.5): OverlayCombatCalculator.cs feeds PierceFactor mitigation as a raw ladder-scaled point delta, same shape as combat.defense. UNIT CORRECTED 2026-08-26: initial pass wrongly assigned GameUnits by tuning-file section proximity to combat.defense; spec-unit-class-close.md SS3.3/SS3.5 (authorised 2026-08-26) assigns ReciprocalPoints -- an uncapped point delta feeding PierceFactor/AmpFactorReciprocal, both asymptotic, not a flat unbounded magnitude."
     },
     {
       "family": "combat.absorption",
@@ -360,11 +360,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "ReciprocalPoints",
       "statClass": "Contest",
       "counterpart": "combat.penetration",
       "role": "defender",
-      "note": "H.1, 2026-08-24 -- standard role."
+      "note": "H.1, 2026-08-24 -- standard role. Reader VERIFIED 2026-08-26 (class-system P1.5): same PierceFactor chain, defender side. UNIT CORRECTED 2026-08-26: initial pass wrongly assigned GameUnits by tuning-file section proximity to combat.defense; spec-unit-class-close.md SS3.3/SS3.5 (authorised 2026-08-26) assigns ReciprocalPoints -- an uncapped point delta feeding PierceFactor/AmpFactorReciprocal, both asymptotic, not a flat unbounded magnitude."
     },
     {
       "family": "combat.amplification",
@@ -372,11 +372,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "ReciprocalPoints",
       "statClass": "Contest",
       "counterpart": "combat.reduction",
       "role": "attacker",
-      "note": "H.1, 2026-08-24 -- standard role. Final damage multiplier; reader lands in mitigation-chain."
+      "note": "H.1, 2026-08-24 -- standard role. Reader VERIFIED 2026-08-26 (class-system P1.5): OverlayCombatCalculator.cs feeds AmpFactor/AmpFactorReciprocal as a raw ladder-scaled point delta, same shape as combat.defense. UNIT CORRECTED 2026-08-26: initial pass wrongly assigned GameUnits by tuning-file section proximity to combat.defense; spec-unit-class-close.md SS3.3/SS3.5 (authorised 2026-08-26) assigns ReciprocalPoints -- an uncapped point delta feeding PierceFactor/AmpFactorReciprocal, both asymptotic, not a flat unbounded magnitude."
     },
     {
       "family": "combat.reduction",
@@ -384,11 +384,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "ReciprocalPoints",
       "statClass": "Contest",
       "counterpart": "combat.amplification",
       "role": "defender",
-      "note": "H.1, 2026-08-24 -- standard role."
+      "note": "H.1, 2026-08-24 -- standard role. Reader VERIFIED 2026-08-26 (class-system P1.5): same AmpFactor chain, defender side. UNIT CORRECTED 2026-08-26: initial pass wrongly assigned GameUnits by tuning-file section proximity to combat.defense; spec-unit-class-close.md SS3.3/SS3.5 (authorised 2026-08-26) assigns ReciprocalPoints -- an uncapped point delta feeding PierceFactor/AmpFactorReciprocal, both asymptotic, not a flat unbounded magnitude."
     },
     {
       "family": "combat.reflect.resist.rate",
@@ -396,11 +396,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "PerMilleRatio",
       "statClass": "Contest",
       "counterpart": "combat.reflect.rate",
       "role": "attacker",
-      "note": "H.1, 2026-08-24 -- ROLE-INVERTED: for reflection the defender owns the half that raises an outcome (reflect.rate), the attacker owns the suppressing half (reflect.resist.rate). Reader lands in reflection module; joins the shared ProcDepthLimit."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): CombatDamageDispatcher.cs TryReflect -- linear-from-zero, clamped [0,1], feeds pReflect (\"Linear from zero, not sigmoid\")."
     },
     {
       "family": "combat.reflect.rate",
@@ -408,11 +408,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "PerMilleRatio",
       "statClass": "Contest",
       "counterpart": "combat.reflect.resist.rate",
       "role": "defender",
-      "note": "H.1, 2026-08-24 -- role-inverted, see combat.reflect.resist.rate."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): same pReflect chain, attacker side."
     },
     {
       "family": "combat.reflect.resist.damage",
@@ -420,11 +420,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "PerMilleRatio",
       "statClass": "Contest",
       "counterpart": "combat.reflect.damage",
       "role": "attacker",
-      "note": "H.1, 2026-08-24 -- role-inverted, same shape as the rate pair but sizes the bounce, not its chance."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): CombatDamageDispatcher.cs TryReflect -- linear-from-zero, clamped [0,1], feeds reflectShare (the bounced-damage share)."
     },
     {
       "family": "combat.reflect.damage",
@@ -432,11 +432,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "PerMilleRatio",
       "statClass": "Contest",
       "counterpart": "combat.reflect.resist.damage",
       "role": "defender",
-      "note": "H.1, 2026-08-24 -- role-inverted, see combat.reflect.resist.damage."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): same reflectShare chain, attacker side."
     },
     {
       "family": "combat.parry.break",
@@ -444,11 +444,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "PerMilleRatio",
       "statClass": "Contest",
       "counterpart": "combat.parry.rate",
       "role": "attacker",
-      "note": "H.1, 2026-08-24 -- ROLE-INVERTED: defender owns parry.rate (raises the parry outcome), attacker owns parry.break (suppresses it). Q6b: no chip floor (a proc, not a pool); ceiling follows the status-cap precedent, 950 permille, own tuning key."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): OverlayCombatCalculator.cs:168 -- \"Rate contests are linear and permille, not sigmoid\"; feeds pParryRaw, the outcome-band gate."
     },
     {
       "family": "combat.parry.rate",
@@ -456,11 +456,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "PerMilleRatio",
       "statClass": "Contest",
       "counterpart": "combat.parry.break",
       "role": "defender",
-      "note": "H.1, 2026-08-24 -- role-inverted, see combat.parry.break."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): same pParryRaw gate, defender side."
     },
     {
       "family": "combat.parry.shred",
@@ -468,11 +468,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "GameUnits",
       "statClass": "Contest",
       "counterpart": "combat.parry.strength",
       "role": "attacker",
-      "note": "H.1, 2026-08-24 -- role-inverted. H.9 Q6: shares shield.toughness<->shield.pen's saturation curve shape (chip floor 0.10x, pen cap 3x) rather than a second curve -- one shared contest helper, two channel sets."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): OverlayCombatCalculator.cs:242 -- ladder-scaled point delta feeding ClampedContest.Apply's removed-damage share."
     },
     {
       "family": "combat.parry.strength",
@@ -480,11 +480,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "GameUnits",
       "statClass": "Contest",
       "counterpart": "combat.parry.shred",
       "role": "defender",
-      "note": "H.1, 2026-08-24 -- role-inverted, see combat.parry.shred."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): same ClampedContest.Apply chain, defender side."
     },
     {
       "family": "combat.block.break",
@@ -492,11 +492,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "PerMilleRatio",
       "statClass": "Contest",
       "counterpart": "combat.block.rate",
       "role": "attacker",
-      "note": "H.1, 2026-08-24 -- role-inverted, same shape as combat.parry.break/rate."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): OverlayCombatCalculator.cs:169, same rate-contest shape as parry.break."
     },
     {
       "family": "combat.block.rate",
@@ -504,11 +504,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "PerMilleRatio",
       "statClass": "Contest",
       "counterpart": "combat.block.break",
       "role": "defender",
-      "note": "H.1, 2026-08-24 -- role-inverted, see combat.block.break. Composes with the guard action category (A8) -- guarding raises block.rate, they do not compete."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): same block outcome-band gate, defender side."
     },
     {
       "family": "combat.block.shred",
@@ -516,11 +516,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "GameUnits",
       "statClass": "Contest",
       "counterpart": "combat.block.strength",
       "role": "attacker",
-      "note": "H.1, 2026-08-24 -- role-inverted. H.9 Q6: shares shield.toughness<->shield.pen's saturation curve shape, same reasoning as combat.parry.shred."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): OverlayCombatCalculator.cs:247 -- ladder-scaled point delta feeding ClampedContest.Apply, same shape as parry.shred."
     },
     {
       "family": "combat.block.strength",
@@ -528,11 +528,11 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "GameUnits",
       "statClass": "Contest",
       "counterpart": "combat.block.shred",
       "role": "defender",
-      "note": "H.1, 2026-08-24 -- role-inverted, see combat.block.shred."
+      "note": "H.1, 2026-08-24. Reader VERIFIED 2026-08-26 (class-system P1.5): same ClampedContest.Apply chain, defender side."
     },
     {
       "family": "skill.cooldown",
@@ -542,7 +542,8 @@
       "cap": null,
       "unitClass": null,
       "statClass": "Race",
-      "note": "H.3, 2026-08-24. Race class (H.9 Q3): unpaired by nature -- the opponent's own cooldown is already the counter. Pairing it would be a status ('make the enemy slower'), not a stat."
+      "note": "H.3, 2026-08-24. Race class (H.9 Q3): unpaired by nature -- the opponent's own cooldown is already the counter. Pairing it would be a status ('make the enemy slower'), not a stat.",
+      "unitClassNote": "No reader: CooldownMath.ApplyReduction and ActionEnvelope.CooldownChannel both exist with zero callers -- the action/timeline layer that would wire them is unbuilt (action-map.md)."
     },
     {
       "family": "skill.effectiveness",
@@ -552,7 +553,8 @@
       "cap": null,
       "unitClass": null,
       "statClass": "Feeder",
-      "note": "H.3, 2026-08-24. Feeder class (H.9 Q3): applied to baseOverlayDamage BEFORE the power/defense delta (combat-damage-ssot.md SS6.7), so it inherits its pair from combat.defense. Moving it after mitigation would oblige a .reduction half -- a breaking change, not a refactor."
+      "note": "H.3, 2026-08-24. Feeder class (H.9 Q3): applied to baseOverlayDamage BEFORE the power/defense delta (combat-damage-ssot.md SS6.7), so it inherits its pair from combat.defense. Moving it after mitigation would oblige a .reduction half -- a breaking change, not a refactor.",
+      "unitClassNote": "No reader: OverlayCombatRequest.EffectivenessMultiplier participates in the formula but every construction site leaves it at its default 1.0 no-op -- nothing sets it from this channel."
     },
     {
       "family": "combat.heal.power",
@@ -560,10 +562,10 @@
       "compose": "FlatSum",
       "default": 0,
       "cap": null,
-      "unitClass": null,
+      "unitClass": "GameUnits",
       "statClass": "Pool",
       "role": "owner",
-      "note": "H.4, owner decision 2026-08-24: unpaired. The healer's own output capacity, like combat.shield.capacity -- not a Contest with a missing half. No defender-side term, so no delta on the heal path and combat-damage-ssot.md SS4.3 stays untouched. Anti-heal is a status (H.9 Q4's precedent), not a channel."
+      "note": "H.4, 2026-08-24 -- Pool, unpaired. Reader VERIFIED 2026-08-26 (class-system P1.5): OverlayCombatMath.cs:81,86 -- effectiveHeal = max(0, signedAmount + healPower), a flat additive magnitude."
     },
     {
       "family": "resource.max",
@@ -573,7 +575,8 @@
       "cap": null,
       "unitClass": null,
       "statClass": "Pool",
-      "note": "H.5, 2026-08-24. Pool throughout (H.9 Q4): the counters are statuses (root, qi-burn), never a paired channel."
+      "note": "H.5, 2026-08-24. Pool throughout (H.9 Q4): the counters are statuses (root, qi-burn), never a paired channel.",
+      "unitClassNote": "No shipped reader for any resource id. tools/CombatSim's own POC reads resource.max.hp only (AptitudeModel.cs) -- not a shipped consumer. Action/resource economy unbuilt (action-map.md)."
     },
     {
       "family": "resource.regen",
@@ -583,7 +586,8 @@
       "cap": null,
       "unitClass": null,
       "statClass": "Pool",
-      "note": "H.5, 2026-08-24. Pool, same reasoning as resource.max."
+      "note": "H.5, 2026-08-24. Pool, same reasoning as resource.max.",
+      "unitClassNote": "No shipped reader for any resource id. tools/CombatSim's own POC reads resource.regen.hp only (Analytic.cs) -- not a shipped consumer. Action/resource economy unbuilt (action-map.md)."
     },
     {
       "family": "resource.efficiency",
@@ -593,7 +597,8 @@
       "cap": 1.0,
       "unitClass": null,
       "statClass": "Pool",
-      "note": "H.5, 2026-08-24; compose/cap corrected T4.4, 2026-08-25. Pool, bounded-ratio (cost reduction cannot exceed 100%, spec-actor-channels.md SS2.2) -- SumIncreased, not FlatSum: DerivedComposer's FlatSum case never applies a Cap at all. Cap: DerivedStatPolicy.ResourceEfficiencyCap (1.0), PS-8 exempt (structural, not a tuned value)."
+      "note": "H.5, 2026-08-24; compose/cap corrected T4.4, 2026-08-25. Pool, bounded-ratio (cost reduction cannot exceed 100%, spec-actor-channels.md SS2.2) -- SumIncreased, not FlatSum: DerivedComposer's FlatSum case never applies a Cap at all. Cap: DerivedStatPolicy.ResourceEfficiencyCap (1.0), PS-8 exempt (structural, not a tuned value).",
+      "unitClassNote": "No reader: action cost reduction has no consumer until the action layer exists (action-map.md). CombatSim's own tuning explicitly marks this family reserved."
     },
     {
       "family": "move.range",
@@ -603,7 +608,8 @@
       "cap": null,
       "unitClass": null,
       "statClass": "Pool",
-      "note": "H.6, 2026-08-24. Pool (H.9 Q4, same reasoning as resource). Moved here from notRegistered -- action-map.md's own promise ('registers in actor-hub-ssot.md SS3 with resource.*') is now kept."
+      "note": "H.6, 2026-08-24. Pool (H.9 Q4, same reasoning as resource). Moved here from notRegistered -- action-map.md's own promise ('registers in actor-hub-ssot.md SS3 with resource.*') is now kept.",
+      "unitClassNote": "No reader: the battle grid is deferred (action-map.md: \"with no board, every range check passes\"), so no range check exists to consume this channel yet."
     },
     {
       "family": "progression.xpRate",
@@ -613,7 +619,8 @@
       "cap": null,
       "unitClass": null,
       "statClass": null,
-      "note": "H.7, 2026-08-24. Class: null, non-combat (same 'Non-combat' row as progression.power/realm). A per-actor multiplier layered ON RpgXpAwardMap.Award.PowerScale, never a replacement -- SS3B's XP-only boundary stays."
+      "note": "H.7, 2026-08-24. Class: null, non-combat (same 'Non-combat' row as progression.power/realm). A per-actor multiplier layered ON RpgXpAwardMap.Award.PowerScale, never a replacement -- SS3B's XP-only boundary stays.",
+      "unitClassNote": "No reader: RpgXpAwardMap's NoKillPowerScaleYet is a hardcoded 1.0 placeholder, not sourced from this channel."
     },
     {
       "family": "progression.breakthroughSuccess",
@@ -623,7 +630,8 @@
       "cap": 1.0,
       "unitClass": null,
       "statClass": "Pool",
-      "note": "H.7, 2026-08-24; compose/cap/statClass corrected T4.4, 2026-08-25. A roll chance; what a success grants is Theta, never a multiplier on progression.realm (ADR P1 stays pinned at 1.0). Class Pool (not null like power/realm's LadderIndex shape) -- the actor's own roll probability, no pair; EveryCapIsClassified requires a StatClass on any capped channel. Cap: DerivedStatPolicy.BreakthroughSuccessCap (1.0), PS-8 exempt bounded ratio."
+      "note": "H.7, 2026-08-24; compose/cap/statClass corrected T4.4, 2026-08-25. A roll chance; what a success grants is Theta, never a multiplier on progression.realm (ADR P1 stays pinned at 1.0). Class Pool (not null like power/realm's LadderIndex shape) -- the actor's own roll probability, no pair; EveryCapIsClassified requires a StatClass on any capped channel. Cap: DerivedStatPolicy.BreakthroughSuccessCap (1.0), PS-8 exempt bounded ratio.",
+      "unitClassNote": "No reader: the breakthrough roll/grant mechanism this probability would drive is unbuilt."
     }
   ],
   "prefixFamilies": [

@@ -78,6 +78,14 @@ public static class PerfProbe
     static readonly long[] FrameBuckets = new long[4];
     static long _frameMaxUs;
 
+    // class-system-todo.md V5 — named point-in-time gauges (progression.power at resolve,
+    // poiseRegenPerRound/peerDamagePerRound, per-round resource cost-vs-regen), distinct from the
+    // fixed-enum Sections/Emits/Frames above: a gauge has no natural upper bound on its name set, so
+    // it is a dictionary rather than a fixed array. Latest write per name wins — a gauge reads "the
+    // current value", never an accumulated total — and every name is cleared on the next snapshot,
+    // same lifecycle as every other counter in this class.
+    static readonly System.Collections.Concurrent.ConcurrentDictionary<string, double> Values = new();
+
     static long _windowStart = Stopwatch.GetTimestamp();
     static int _lastGen0 = GC.CollectionCount(0);
     static int _lastGen1 = GC.CollectionCount(1);
@@ -120,6 +128,15 @@ public static class PerfProbe
         var idx = dtSeconds < 0.0084f ? 0 : dtSeconds < 0.0167f ? 1 : dtSeconds < 0.0334f ? 2 : 3;
         Interlocked.Increment(ref FrameBuckets[idx]);
         InterlockedMax(ref _frameMaxUs, (long)(dtSeconds * 1_000_000f));
+    }
+
+    /// <summary>Record a named point-in-time gauge — class-system-todo.md V5's runtime-metrics seam.
+    /// The latest call for a given <paramref name="name"/> before the next snapshot wins. Any caller
+    /// may introduce a new name without touching this file again; there is no fixed enum to extend.</summary>
+    public static void RecordValue(string name, double value)
+    {
+        if (!Enabled || string.IsNullOrEmpty(name)) return;
+        Values[name] = value;
     }
 
     static void InterlockedMax(ref long target, long value)
@@ -204,6 +221,10 @@ public static class PerfProbe
         _lastGen2 = gen2;
         _lastAlloc = alloc;
 
+        var values = new Dictionary<string, object>(Values.Count);
+        foreach (var name in Values.Keys.ToArray())
+            if (Values.TryRemove(name, out var v)) values[name] = v;
+
         return new Dictionary<string, object>
         {
             ["t"] = DateTime.UtcNow.ToString("o"),
@@ -211,7 +232,8 @@ public static class PerfProbe
             ["frames"] = frames,
             ["sections"] = sections,
             ["emits"] = emits,
-            ["gc"] = gc
+            ["gc"] = gc,
+            ["values"] = values
         };
     }
 

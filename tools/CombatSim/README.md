@@ -69,6 +69,47 @@ fixed, the other not.
 **Not modelled:** refresh/stacking (StatusRuntime owns family mutex - a re-apply over-counts) and CC
 (it costs the target its turn, which needs the readiness model).
 
+## `trinity` — the structural test
+
+Does the posture trinity survive free build, or is it vocabulary? Spike each of the 12 aptitudes to the
+max a legal allocation permits and play every spike against every other. **A row that beats all 11 is a
+dominant build: free build has one correct answer.**
+
+```powershell
+dotnet run --no-build -- trinity --actions basic --status -a force --theta 100 --rounds 25
+```
+
+144 closed-form evaluations, instant - cheap enough to be a guard. Use this rather than best-response
+chasing: the hill-climb reported "nothing beats Bulwark 55" while a direct check showed Vigor 55
+beating it 100%. A search that misses a 100% counter is not evidence of absence.
+
+**`--rounds N` is the clock - and it is NOT a balance metric.** A clock penalises fights for being
+LONG, which is what survival and cc builds legitimately make them; measured on win rate with no clock,
+the dominant corner never leaves. Keep it OFF for balance judgements; it is an encounter-design
+parameter. The termination invariant is the instrument for unresolvable fights. (Old note, withdrawn:: a fight not decided in N rounds is a loss for BOTH. Without it,
+"cannot lose" is optimal even when it also cannot win - and that alone flipped the result
+no clock: Bulwark dominates; 25 rounds: no dominant corner; 15 rounds: dominant again - that apparent
+band was the clock changing the win condition, not the design balancing.) Write-up: [`class-system-ideal.md`](../../docs/architecture/class-system-ideal.md) 8.7a/8.8a.
+
+## The termination invariant
+
+Owner principle: **two actors at the same power scale, neither a pure-survival build with no damage,
+must not fight forever.** That case excepted, an unending fight is a RESOURCE ECONOMY DEFECT - usually
+regeneration outpacing consumption.
+
+```text
+netAttrition(X) = damage taken per round - recovery per round
+netAttrition <= 0 on BOTH sides  =>  neither can ever die
+```
+
+`predict` flags it as `NEVER ENDS`; `trinity` marks the pairing `INF` in the matrix. Both engines now
+TICK REGENERATION - before 2026-08-26 neither did, so a pool that refills read as one that does not and
+this whole class of defect was outside what the harness could express.
+
+Measured on a max-Vigor mirror: damage 7,535/round, recovery 9,992/round, **net -2,457 - the fight
+cannot end.** Sizing rule that follows: **regen is sized against PEER DAMAGE, never against the pool.**
+With r = recovery/damage, fights stretch by 1/(1-r) and r >= 1 is never.
+
 ## Two engines, one config — and why that matters
 
 There are now **two** ways to get a number out of this tool, and they read the same

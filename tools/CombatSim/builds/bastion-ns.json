@@ -10,5 +10,5 @@
   },
   "hpPerLadder": 15,
   "damagePerLadder": 1.5,
-  "shieldPerLadder": 0
+  "shieldPerLadder": 2
 }

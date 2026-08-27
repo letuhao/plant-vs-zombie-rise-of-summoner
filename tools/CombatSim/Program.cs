@@ -26,6 +26,8 @@ try
         "predict" => Predict(opts),
         "status" => StatusSweep(opts),
         "marginal" => MarginalCmd(opts),
+        "trinity" => Trinity(opts),
+        "resolve" => ResolveCmd(opts),
         "list" => List(),
         _ => Fail($"unknown command '{command}'")
     };
@@ -138,7 +140,14 @@ int Explain(Options o)
     var ladder = new FusionRpg.Core.Power.PowerLadder(
         FusionRpg.Core.Power.PowerTuningLoader.Parse(
             File.ReadAllText(Path.Combine(TuningBootstrap.RepoRoot, "data", "tuning", "power-scale.v2.json"))));
-    var model = AptitudeModel.Load(o.Models ?? "h-split");
+    var explainName = o.Models ?? "h-split";
+    // Path.GetFileName, not explainName itself: an absolute --models path (e.g. straight at
+    // data/tuning/aptitudes.v2.json) does not START WITH "aptitudes", it starts with a drive letter --
+    // this tool's own P8.1 methodology depends on absolute-path loading a live tuning file, so this
+    // check has to look at the filename, not the whole path.
+    var model = Path.GetFileName(explainName).StartsWith("aptitudes", StringComparison.OrdinalIgnoreCase)
+        ? AptitudeTuning.Load(explainName).ToModel(explainName)
+        : AptitudeModel.Load(explainName);
     var names = (o.Archetypes ?? "finesse,bastion").Split(',', StringSplitOptions.TrimEntries);
     var theta = o.Thetas is { } th ? int.Parse(th.Split(',')[0]) : 100;
     var a = Build.Load(names[0]).At(theta, model, ladder);
@@ -167,6 +176,40 @@ int Explain(Options o)
     return 0;
 }
 
+// class-system-todo.md P3.4 — the raw channel dictionary AptitudeModel.Resolve produces for one build,
+// as JSON on stdout. No duel, no Analytic/Simulator involved: this is purely "given these points at
+// this Θ, what does this tool's resolver say every channel is worth", the exact same question
+// FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.Resolve answers in the shipped game. A test in
+// tests/FusionRpg.Core.Tests runs both resolvers over the same seeded allocation and diffs the output
+// — the closed-form predict/trinity commands above never exercise this path at all, since Build.At()
+// immediately folds hp/shield out of the channel dictionary and discards the rest into an Archetype.
+int ResolveCmd(Options o)
+{
+    TuningBootstrap.Load(o.Sets);
+    var ladder = new FusionRpg.Core.Power.PowerLadder(
+        FusionRpg.Core.Power.PowerTuningLoader.Parse(
+            File.ReadAllText(Path.Combine(TuningBootstrap.RepoRoot, "data", "tuning", "power-scale.v2.json"))));
+
+    var modelName = o.Models ?? "aptitudes.v1";
+    var tuning = AptitudeTuning.Load(modelName);
+    var model = tuning.ToModel(modelName);
+    var buildName = (o.Archetypes ?? "force")
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)[0];
+    var build = Build.Load(buildName);
+    var theta = o.Thetas is { } th ? int.Parse(th.Split(',')[0]) : 100;
+
+    // build.Points directly, NOT Build.At()'s budget-rescaled copy: every edge in this tuning reads a
+    // SHARE (points / total), and rescaling every point by the same factor leaves every share (and so
+    // every resolved value) unchanged. At() also folds hp/shield channels out of the dictionary and
+    // discards everything else into an Archetype -- exactly the transform this command exists to skip.
+    var channels = model.Resolve(build.Points, theta, ladder);
+
+    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(
+        new { name = build.Name, theta, channels },
+        new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+    return 0;
+}
+
 int SearchCmd(Options o)
 {
     TuningBootstrap.Load(o.Sets);
@@ -175,7 +218,8 @@ int SearchCmd(Options o)
             File.ReadAllText(Path.Combine(TuningBootstrap.RepoRoot, "data", "tuning", "power-scale.v2.json"))));
     // A tuning config and a hypothesis model resolve the same way; the search does not care which.
     var modelName = o.Models ?? "h-split";
-    var model = modelName.StartsWith("aptitudes", StringComparison.OrdinalIgnoreCase)
+    // Path.GetFileName, not modelName itself -- see Explain()'s identical comment above.
+    var model = Path.GetFileName(modelName).StartsWith("aptitudes", StringComparison.OrdinalIgnoreCase)
         ? AptitudeTuning.Load(modelName).ToModel(modelName)
         : AptitudeModel.Load(modelName);
     var names = (o.Archetypes ?? "force,finesse,bastion")
@@ -295,12 +339,14 @@ int Predict(Options o)
         : $"  ACTIONS  {actions.Name} — {string.Join(", ", actions.Actions.Select(x => x.Cost is null ? x.Id + " (free)" : $"{x.Id} ({x.Cost.ResourceId})"))}");
     Console.WriteLine();
 
-    var head = $"  {"Θ",-6}{"matchup",-22}{"predicted",12}{"rounds A",11}{"rounds B",11}";
+    var head = $"  {"Θ",-6}{"matchup",-22}{"predicted",12}{"rounds A",11}{"rounds B",11}{"netAttr B",12}";
     if (verify) head += $"{"simulated",12}{"residual",11}{"simRnds",9}";
     Console.WriteLine(head);
     Console.WriteLine("  " + new string('-', head.Length));
 
     var residuals = new List<double>();
+    var unending = 0;
+    var jsonArrows = new List<JsonEmit.PredictArrow>();
     foreach (var theta in thetas)
     {
         for (var i = 0; i < builds.Count; i++)
@@ -311,19 +357,28 @@ int Predict(Options o)
             var b = builds[j].At(theta, model, ladder);
             var p = Analytic.Predict(a, b, actions);
             var row = $"  {theta,-6}{a.Name + " v " + b.Name,-22}{p.WinShareA,12:P1}"
-                      + $"{p.RoundsA,11:0.0}{p.RoundsB,11:0.0}";
+                      + $"{p.RoundsA,11:0.0}{p.RoundsB,11:0.0}{p.NetAttritionB,12:N0}";
+            var neverEnds = p.NetAttritionA <= 0 && p.NetAttritionB <= 0;
+            if (neverEnds) { row += "  ⛔ NEVER ENDS"; unending++; }
+            double? sim = null, residual = null, simMedianRounds = null;
             if (verify)
             {
                 var duel = Simulator.Duel(a, b, trials, o.Seed ?? 8888, o.Rounds ?? 3000, actions, status);
-                var sim = duel.AWinShare;
-                var residual = p.WinShareA - sim;
-                residuals.Add(Math.Abs(residual));
+                sim = duel.AWinShare;
+                residual = p.WinShareA - sim;
+                residuals.Add(Math.Abs(residual.Value));
+                simMedianRounds = duel.MedianRounds;
                 // Median simulated rounds against the predicted shorter kill-time: if these agree the
                 // RATE is right and the gap is variance; if they disagree the rate itself is wrong.
                 // Diagnostic first, guessing second - the lesson from class-rps-balance 5.2.
                 row += $"{sim,12:P1}{residual,11:+0.0%;-0.0%;0.0%}{duel.MedianRounds,9:0.0}";
+                if (o.Trace)
+                    row += $"   rateA pred {p.RateAgainstA,10:N0} sim {duel.RateAgainstA,10:N0}"
+                         + $" | rateB pred {p.RateAgainstB,10:N0} sim {duel.RateAgainstB,10:N0}";
             }
             Console.WriteLine(row);
+            jsonArrows.Add(new JsonEmit.PredictArrow(theta, a.Name, b.Name, p.WinShareA, sim, residual,
+                p.RoundsA, p.RoundsB, p.NetAttritionA, p.NetAttritionB, simMedianRounds, neverEnds));
         }
     }
 
@@ -337,6 +392,25 @@ int Predict(Options o)
         Console.WriteLine(residuals.Max() <= 0.05
             ? "    simulator's job becomes falsifying it, not producing the number."
             : "    the math omits — depleting pools, ordering, combination — lives in this gap.");
+    }
+
+    if (unending > 0)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"  ⛔ TERMINATION INVARIANT VIOLATED on {unending} pairing(s): recovery ≥ damage on BOTH");
+        Console.WriteLine("     sides, so neither can ever die. Unless both builds bought no offence at all, that is");
+        Console.WriteLine("     a RESOURCE ECONOMY DEFECT — regeneration is outpacing consumption (§5d).");
+    }
+
+    if (o.Json && o.Out is { } predictJsonPath)
+    {
+        var doc = new JsonEmit.PredictDocument(
+            model.Name, model.Description ?? "", thetas, builds.Select(x => x.Name).ToList(),
+            verify, verify ? trials : null, jsonArrows,
+            residuals.Count > 0 ? new JsonEmit.ResidualSummary(residuals.Average(), residuals.Max(), residuals.Count) : null,
+            unending);
+        JsonEmit.Write(predictJsonPath, doc);
+        Console.WriteLine($"  wrote {predictJsonPath}");
     }
 
     // One matchup in full, so the mixture is visible rather than asserted.
@@ -356,6 +430,9 @@ int Predict(Options o)
         Console.WriteLine($"    reflected back per round: to {a0.Name} {d.ReflectMeanToA,10:N0}   "
                           + $"to {b0.Name} {d.ReflectMeanToB,10:N0}");
         Console.WriteLine($"    HP depletion per round: {b0.Name} {d.RateAgainstB,12:N0}   {a0.Name} {d.RateAgainstA,12:N0}");
+        Console.WriteLine($"    RECOVERY per round:     {b0.Name} {d.RecoveryB,12:N0}   {a0.Name} {d.RecoveryA,12:N0}");
+        Console.WriteLine($"    NET ATTRITION:          {b0.Name} {d.NetAttritionB,12:N0}   {a0.Name} {d.NetAttritionA,12:N0}"
+                          + (d.NetAttritionA <= 0 || d.NetAttritionB <= 0 ? "   <- a side that cannot be worn down" : ""));
     }
     return 0;
 }
@@ -373,7 +450,8 @@ int MarginalCmd(Options o)
             File.ReadAllText(Path.Combine(TuningBootstrap.RepoRoot, "data", "tuning", "power-scale.v2.json"))));
 
     var modelName = o.Models ?? "aptitudes.v1";
-    var model = modelName.StartsWith("aptitudes", StringComparison.OrdinalIgnoreCase)
+    // Path.GetFileName, not modelName itself -- see Explain()'s identical comment above.
+    var model = Path.GetFileName(modelName).StartsWith("aptitudes", StringComparison.OrdinalIgnoreCase)
         ? AptitudeTuning.Load(modelName).ToModel(modelName)
         : AptitudeModel.Load(modelName);
     var builds = (o.Archetypes ?? "force-ns,finesse-ns,bastion-ns")
@@ -387,6 +465,7 @@ int MarginalCmd(Options o)
     Console.WriteLine("  Change in win rate. Renormalisation means every other share falls, so this is");
     Console.WriteLine("  the point's value NET of what it costs elsewhere — the only question free build asks.");
 
+    var jsonSubjects = new List<JsonEmit.MarginalSubject>();
     foreach (var subject in builds)
     {
         var opponents = builds.Where(b => b.Name != subject.Name).ToList();
@@ -402,6 +481,7 @@ int MarginalCmd(Options o)
         Console.WriteLine("  " + new string('-', hdr.Length - 2));
 
         var best = rows.OrderByDescending(r => r.Best).First();
+        var jsonRows = new List<JsonEmit.MarginalRow>();
         foreach (var r in rows.OrderByDescending(r => r.Best))
         {
             var line = $"  {r.Aptitude,-14}{r.CurrentPoints,7:0.#}";
@@ -414,13 +494,22 @@ int MarginalCmd(Options o)
             if (mandatory) line += "  MANDATORY";
             else if (dead) line += "  DEAD";
             Console.WriteLine(line);
+            jsonRows.Add(new JsonEmit.MarginalRow(r.Aptitude, r.CurrentPoints, r.DeltaWinPerOpponent,
+                r.Best, r.Worst, r.Spread, mandatory, dead));
         }
         Console.WriteLine($"    best single point: {best.Aptitude} ({best.Best:+0.000%;-0.000%})");
+        jsonSubjects.Add(new JsonEmit.MarginalSubject(subject.Name, opponents.Select(x => x.Name).ToList(), jsonRows));
     }
 
     Console.WriteLine();
     Console.WriteLine("  A healthy free-build distribution has NO row marked MANDATORY and NO row marked DEAD:");
     Console.WriteLine("  every aptitude is the best point somewhere, and none is the best point everywhere.");
+
+    if (o.Json && o.Out is { } marginalJsonPath)
+    {
+        JsonEmit.Write(marginalJsonPath, new JsonEmit.MarginalDocument(model.Name, theta, jsonSubjects));
+        Console.WriteLine($"  wrote {marginalJsonPath}");
+    }
     return 0;
 }
 
@@ -435,7 +524,8 @@ int StatusSweep(Options o)
         FusionRpg.Core.Power.PowerTuningLoader.Parse(
             File.ReadAllText(Path.Combine(TuningBootstrap.RepoRoot, "data", "tuning", "power-scale.v2.json"))));
     var modelName = o.Models ?? "aptitudes.v1";
-    var model = modelName.StartsWith("aptitudes", StringComparison.OrdinalIgnoreCase)
+    // Path.GetFileName, not modelName itself -- see Explain()'s identical comment above.
+    var model = Path.GetFileName(modelName).StartsWith("aptitudes", StringComparison.OrdinalIgnoreCase)
         ? AptitudeTuning.Load(modelName).ToModel(modelName)
         : AptitudeModel.Load(modelName);
     var builds = (o.Archetypes ?? "force,finesse,bastion")
@@ -451,7 +541,7 @@ int StatusSweep(Options o)
     Console.WriteLine("  Every number below is what the shipped ResistanceEvaluator returns for that pairing.");
     Console.WriteLine();
 
-    var hdr = $"  {"status",-13}{"cat",-11}{"attacker",-10}{"defender",-10}{"p(apply)",10}{"netF",8}{"mag x",9}{"dur",8}{"kill rnds",11}{"vs none",10}";
+    var hdr = $"  {"status",-13}{"cat",-11}{"attacker",-10}{"defender",-10}{"p(apply)",10}{"netF",8}{"mag x",9}{"dur",8}{"win rate",11}{"swing",10}";
     Console.WriteLine(hdr);
     Console.WriteLine("  " + new string('-', hdr.Length - 2));
 
@@ -466,8 +556,11 @@ int StatusSweep(Options o)
             var atk = builds[i].At(theta, model, ladder);
             var def = builds[j].At(theta, model, ladder);
 
+            // WIN RATE, not kill time (owner correction 2026-08-26). A cc lengthens a fight by design,
+            // so a kill-time metric scores it as a failure for doing its job. What a status is worth is
+            // what it does to who WINS.
             Analytic.Status = null;
-            var noneRounds = Analytic.Predict(atk, def, actions).RoundsB;
+            var noneWin = Analytic.Predict(atk, def, actions).WinShareA;
             Analytic.Status = profile;
             var pred = Analytic.Predict(atk, def, actions);
             Analytic.Status = null;
@@ -476,27 +569,172 @@ int StatusSweep(Options o)
             var netF = dur <= 0 ? 0 : dur / profile.BaseDurationRounds;
             var magX = profile.MagnitudeShareOfBase <= 0 ? 0
                 : mag / ((atk.BaseDamage.Min + atk.BaseDamage.Max) / 2.0 * profile.MagnitudeShareOfBase);
-            var ratio = noneRounds <= 0 ? 1 : pred.RoundsB / noneRounds;
-            worst.Add((id, profile.Category, ratio, $"{atk.Name}->{def.Name}"));
+            var swing = pred.WinShareA - noneWin;      // how much the status moved the WINNER
+            worst.Add((id, profile.Category, swing, $"{atk.Name}->{def.Name}"));
 
             // One row per status, on its strongest pairing only — 21 x 6 rows is a wall, not a report.
             if (i == 0 && j == 1)
-                Console.WriteLine($"  {id,-13}{profile.Category,-11}{atk.Name,-10}{def.Name,-10}{p,10:P1}{netF,8:0.0}x{magX,8:0.0}x{dur,8:0.0}{pred.RoundsB,11:0.0}{ratio,9:P0}");
+                Console.WriteLine($"  {id,-13}{profile.Category,-11}{atk.Name,-10}{def.Name,-10}{p,10:P1}{netF,8:0.0}x{magX,8:0.0}x{dur,8:0.0}{pred.WinShareA,11:P1}{swing,9:+0.0%;-0.0%;0.0%}");
         }
     }
 
     Console.WriteLine();
-    Console.WriteLine("  MOST LETHAL PAIRINGS — kill time as a share of the same fight with no status at all");
-    foreach (var w in worst.OrderBy(x => x.Ratio).Take(8))
-        Console.WriteLine($"    {w.Id,-13}{w.Cat,-11}{w.Pair,-24}{w.Ratio,8:P0}  of baseline");
+    Console.WriteLine("  BIGGEST WIN-RATE SWINGS — how much the status moved who wins, vs no status at all");
+    foreach (var w in worst.OrderByDescending(x => Math.Abs(x.Ratio)).Take(8))
+        Console.WriteLine($"    {w.Id,-13}{w.Cat,-11}{w.Pair,-24}{w.Ratio,8:+0.0%;-0.0%;0.0%}  win rate");
     Console.WriteLine();
-    var byCat = worst.GroupBy(x => x.Cat).OrderBy(g => g.Average(x => x.Ratio));
-    Console.WriteLine("  BY CATEGORY (mean across all 6 orderings)");
+    var byCat = worst.GroupBy(x => x.Cat).OrderByDescending(g => g.Average(x => Math.Abs(x.Ratio)));
+    Console.WriteLine("  BY CATEGORY — mean |win-rate swing| across all 6 orderings. A cc that lengthens a");
+    Console.WriteLine("  fight without changing the winner is worth nothing, and this is what says so.");
     foreach (var g in byCat)
-        Console.WriteLine($"    {g.Key,-11}{g.Average(x => x.Ratio),8:P0} of baseline   ·  best {g.Min(x => x.Ratio):P0}  worst {g.Max(x => x.Ratio):P0}");
+        Console.WriteLine($"    {g.Key,-11}{g.Average(x => Math.Abs(x.Ratio)),8:P1} mean swing   ·  largest {g.Max(x => Math.Abs(x.Ratio)):P1}");
     Console.WriteLine();
     Console.WriteLine("  contagion is a DOT here with its spread removed — a 1v1 has no second host, so its");
     Console.WriteLine("  real mechanic is structurally unmeasurable in this harness.");
+    return 0;
+}
+
+// class-system-ideal.md 8.8 — the structural test. Best-response iteration: does the allocation space
+// CYCLE (the trinity is real) or CONVERGE (there is one correct build and the trinity is a story about
+// three samples)? Only affordable because it runs on the closed form.
+int Trinity(Options o)
+{
+    TuningBootstrap.Load(o.Sets);
+    Analytic.AssertChannelsRegistered();
+    var ladder = new FusionRpg.Core.Power.PowerLadder(
+        FusionRpg.Core.Power.PowerTuningLoader.Parse(
+            File.ReadAllText(Path.Combine(TuningBootstrap.RepoRoot, "data", "tuning", "power-scale.v2.json"))));
+    var modelName = o.Models ?? "aptitudes.v1";
+    // Path.GetFileName, not modelName itself -- see Explain()'s identical comment above.
+    var model = Path.GetFileName(modelName).StartsWith("aptitudes", StringComparison.OrdinalIgnoreCase)
+        ? AptitudeTuning.Load(modelName).ToModel(modelName)
+        : AptitudeModel.Load(modelName);
+    var actions = o.Actions is { } an ? ActionSet.Load(an) : null;
+    Analytic.Status = o.Status ? StatusProfile.Default : null;
+    var theta = o.Thetas is { } th ? int.Parse(th.Split(',')[0]) : 100;
+    var depth = o.Steps ?? 10;
+    var restarts = o.Restarts ?? 4;
+    var iters = o.Trials ?? 250;
+    var tol = o.To ?? 8.0;
+    Analytic.RoundLimit = o.Rounds;
+
+    Console.WriteLine();
+    Console.WriteLine($"  TRINITY TEST — best-response iteration · Θ {theta} · {model.Name}");
+    Console.WriteLine($"  depth {depth} · {restarts} restarts x {iters} iters per response · cycle tolerance {tol:0.#}/100");
+    Console.WriteLine($"  actions {(actions is null ? "off" : actions.Name)} · status {(Analytic.Status is null ? "off" : Analytic.Status.StatusId)}"
+                      + $" · clock {(o.Rounds is { } rl ? rl + " rounds (timeout = loss for both)" : "off — a fight can run forever")}");
+    Console.WriteLine();
+    Console.WriteLine("  A CYCLE means no build dominates — the trinity is real structure.");
+    Console.WriteLine("  CONVERGENCE means one build is its own best response — there is one correct build.");
+
+    var jsonChains = new List<JsonEmit.TrinityChain>();
+    foreach (var name in (o.Archetypes ?? "force,finesse,bastion")
+             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    {
+        var rng = new Random(o.Seed ?? 20260826);
+        var (chain, cycleStart, cycleLen) =
+            BestResponse.Chase(Build.Load(name), model, ladder, theta, actions, rng, depth, restarts, iters, tol);
+
+        Console.WriteLine();
+        Console.WriteLine($"  ── chain from {name} ──");
+        Console.WriteLine($"    {"step",5}{"beats prev",12}{"moved",9}   top aptitudes");
+        foreach (var st in chain)
+        {
+            var top = string.Join(", ", st.Points.OrderByDescending(x => x.Value).Take(3)
+                .Select(x => $"{x.Key} {x.Value:0}"));
+            Console.WriteLine(st.Index == 0
+                ? $"    {st.Index,5}{"—",12}{"—",9}   {top}"
+                : $"    {st.Index,5}{st.WinAgainstPrev,12:P1}{st.DistToPrev,9:0.0}   {top}");
+        }
+        // A repeat at length 1 is a FIXED POINT, not a cycle — the build is its own best response.
+        // Naming it a "cycle" would report the disproving outcome as the proving one.
+        var isCycle = cycleStart >= 0 && cycleLen >= 2;
+        var isFixedPoint = cycleStart >= 0 && !isCycle;
+        Console.WriteLine(isCycle
+            ? $"    → CYCLE of length {cycleLen}, returning to step {cycleStart}. No build dominates this chain."
+            : isFixedPoint
+                ? $"    → FIXED POINT at step {cycleStart} — nothing found that beats it. "
+                  + "That is CONVERGENCE, not a cycle."
+                : $"    → no repeat in {depth} steps; last move {chain[^1].DistToPrev:0.0}/100 — still wandering.");
+        jsonChains.Add(new JsonEmit.TrinityChain(name,
+            chain.Select(st => new JsonEmit.TrinityStep(st.Index, st.WinAgainstPrev, st.DistToPrev, st.Points)).ToList(),
+            cycleStart, cycleLen, isCycle, isFixedPoint));
+    }
+
+    // The exhaustive form — a hill-climb can miss a counter; a sweep of the corners cannot.
+    var roster = Marginal.Roster;
+    var floor = 100.0 / roster.Length / 2.0;   // half an even split: leaves a real spike, stays legal
+    var (names, wins, unending) = BestResponse.DominanceMatrix(
+        Build.Load((o.Archetypes ?? "force").Split(',')[0]), roster, model, ladder, theta, actions, floor);
+
+    Console.WriteLine();
+    Console.WriteLine($"  DOMINANCE MATRIX — each aptitude spiked to {100.0 - floor * (roster.Length - 1):0.#}/100, others at {floor:0.#}");
+    Console.WriteLine("  Row beats column. A row that beats EVERY other is a dominant build: one correct answer.");
+    Console.WriteLine();
+    Console.WriteLine("    " + "".PadRight(13) + string.Join("", names.Select(n => n[..Math.Min(5, n.Length)].PadLeft(7))));
+    for (var i = 0; i < names.Length; i++)
+    {
+        var row = $"    {names[i],-13}";
+        for (var j = 0; j < names.Length; j++)
+            row += (i == j ? "  —" : unending[i, j] ? "   ∞" : $"{wins[i, j],6:P0}").PadLeft(7);
+        var beaten = Enumerable.Range(0, names.Length).Count(j => j != i && wins[i, j] > 0.5);
+        row += $"   beats {beaten}/{names.Length - 1}";
+        Console.WriteLine(row);
+    }
+
+    var stuck = new List<string>();
+    for (var i = 0; i < names.Length; i++)
+    for (var j = i + 1; j < names.Length; j++)
+        if (unending[i, j]) stuck.Add($"{names[i]} v {names[j]}");
+    if (stuck.Count > 0)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"  ⛔ TERMINATION INVARIANT VIOLATED — {stuck.Count} pairing(s) can never end (marked ∞):");
+        Console.WriteLine("     " + string.Join(", ", stuck.Take(10)) + (stuck.Count > 10 ? ", …" : ""));
+        Console.WriteLine("     Recovery >= damage on BOTH sides. Unless both bought no offence at all, this is a");
+        Console.WriteLine("     RESOURCE ECONOMY DEFECT: regeneration outpacing consumption (§5d).");
+    }
+
+    var dominant = Enumerable.Range(0, names.Length)
+        .Where(i => Enumerable.Range(0, names.Length).All(j => j == i || wins[i, j] > 0.5)).ToList();
+    Console.WriteLine();
+    if (dominant.Count > 0)
+    {
+        Console.WriteLine($"  ⛔ DOMINANT: {string.Join(", ", dominant.Select(i => names[i]))} beats every other corner.");
+        Console.WriteLine("     Free build has ONE correct answer here. The posture trinity does not survive these");
+        Console.WriteLine("     coefficients — it is vocabulary, not structure, until this row stops existing.");
+    }
+    else
+    {
+        Console.WriteLine("  ✅ NO DOMINANT CORNER — every spike loses to something. The space supports a cycle.");
+    }
+    Console.WriteLine();
+    Console.WriteLine("  This is an ACCEPTANCE CRITERION, not a one-off: a coefficient set is not balanced");
+    Console.WriteLine("  until no row here dominates. It costs 144 closed-form evaluations, so it can be a guard.");
+
+    if (o.Json && o.Out is { } trinityJsonPath)
+    {
+        var winsJagged = new double[names.Length][];
+        var unendingJagged = new bool[names.Length][];
+        for (var i = 0; i < names.Length; i++)
+        {
+            winsJagged[i] = new double[names.Length];
+            unendingJagged[i] = new bool[names.Length];
+            for (var j = 0; j < names.Length; j++)
+            {
+                winsJagged[i][j] = wins[i, j];
+                unendingJagged[i][j] = unending[i, j];
+            }
+        }
+        var coverage = new JsonEmit.CoverageBlock("neutral", actions is not null,
+            JsonEmit.ReservedFamilies(model, actions is not null));
+        var doc = new JsonEmit.TrinityDocument(model.Name, theta, jsonChains,
+            new JsonEmit.DominanceMatrixDocument(names, winsJagged, unendingJagged),
+            dominant.Select(i => names[i]).ToList(), coverage);
+        JsonEmit.Write(trinityJsonPath, doc);
+        Console.WriteLine();
+        Console.WriteLine($"  wrote {trinityJsonPath}");
+    }
     return 0;
 }
 
@@ -755,6 +993,7 @@ Options ParseArgs(string[] a)
             case "--to": o.To = double.Parse(Next("--to"), CultureInfo.InvariantCulture); break;
             case "--steps": o.Steps = int.Parse(Next("--steps")); break;
             case "--csv" or "--out": o.Out = Next("--csv"); break;
+            case "--json": o.Json = true; break;
             case "--variants" or "-v": o.Variants = Next("--variants"); break;
             case "--fight": o.FightMode = true; break;
             case "--archetypes" or "--builds" or "-a": o.Archetypes = Next("--archetypes"); break;
@@ -766,6 +1005,7 @@ Options ParseArgs(string[] a)
             case "--analytic": o.Analytic = true; break;
             case "--actions": o.Actions = Next("--actions"); break;
             case "--status": o.Status = true; break;
+            case "--trace": o.Trace = true; break;
             default: throw new InvalidOperationException($"unknown option '{a[i]}'");
         }
     }
@@ -808,6 +1048,7 @@ sealed class Options
     public double? To;
     public int? Steps;
     public string? Out;
+    public bool Json;
     public string? Variants;
     public bool FightMode;
     public string? Archetypes;
@@ -819,5 +1060,6 @@ sealed class Options
     public bool Analytic;
     public string? Actions;
     public bool Status;
+    public bool Trace;
     public List<string> Sets = new();
 }

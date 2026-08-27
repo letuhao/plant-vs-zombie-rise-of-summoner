@@ -24,7 +24,12 @@ public sealed record DerivedStatDef(
     double? Cap = null,
     StatClass? Class = null,
     UnitClass? Unit = null,
-    string? CounterpartOf = null);
+    string? CounterpartOf = null,
+    /// <summary>class-system P1.6 (2026-08-26) — required whenever <see cref="Unit"/> is null: names
+    /// the missing reader, so "not classified yet" (an oversight) and "classified as unread" (a
+    /// documented fact, re-checked by the census) are never the same shape in the data. Mirrors
+    /// catalog.json's own <c>unitClassNote</c> field.</summary>
+    string? UnitClassNote = null);
 
 /// <summary>Catalog SSOT for derived channels — unknown id → reject.</summary>
 public sealed class DerivedStatRegistry
@@ -105,55 +110,71 @@ public sealed class DerivedStatRegistry
     void RegisterNonElementExtensions()
     {
         // H.2 -- status potency, attacker-side (duration/intensity) mirrors status.power exactly.
+        // Unit: StatusPotencyPoints (class-system P1.5, 2026-08-26) -- ResistanceEvaluator.cs:331-336's
+        // ComputePotencyDelta reads these through the SAME formula shape as status.power/status.resist
+        // (a dynamically-built "status.{family}.{omni|category|statusId}" lookup, not the named
+        // constant, which is why a constant-name grep alone misses this reader).
         Register(new(DerivedStatChannels.StatusDurationOmni, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusDurationReductionOmni));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusDurationReductionOmni));
         Register(new(DerivedStatChannels.StatusDurationDot, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusDurationReductionDot));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusDurationReductionDot));
         Register(new(DerivedStatChannels.StatusDurationCc, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusDurationReductionCc));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusDurationReductionCc));
         Register(new(DerivedStatChannels.StatusDurationContagion, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusDurationReductionContagion));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusDurationReductionContagion));
 
         Register(new(DerivedStatChannels.StatusDurationReductionOmni, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusDurationOmni));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusDurationOmni));
         Register(new(DerivedStatChannels.StatusDurationReductionDot, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusDurationDot));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusDurationDot));
         Register(new(DerivedStatChannels.StatusDurationReductionCc, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusDurationCc));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusDurationCc));
         Register(new(DerivedStatChannels.StatusDurationReductionContagion, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusDurationContagion));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusDurationContagion));
 
         Register(new(DerivedStatChannels.StatusIntensityOmni, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusIntensityReductionOmni));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusIntensityReductionOmni));
         Register(new(DerivedStatChannels.StatusIntensityDot, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusIntensityReductionDot));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusIntensityReductionDot));
         Register(new(DerivedStatChannels.StatusIntensityCc, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusIntensityReductionCc));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusIntensityReductionCc));
         Register(new(DerivedStatChannels.StatusIntensityContagion, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusIntensityReductionContagion));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusIntensityReductionContagion));
 
         Register(new(DerivedStatChannels.StatusIntensityReductionOmni, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusIntensityOmni));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusIntensityOmni));
         Register(new(DerivedStatChannels.StatusIntensityReductionDot, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusIntensityDot));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusIntensityDot));
         Register(new(DerivedStatChannels.StatusIntensityReductionCc, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusIntensityCc));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusIntensityCc));
         Register(new(DerivedStatChannels.StatusIntensityReductionContagion, DerivedComposeKind.SumIncreased, 0,
-                     Class: StatClass.Contest, CounterpartOf: DerivedStatChannels.StatusIntensityContagion));
+                     Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusIntensityContagion));
 
         // H.3 -- action-category. cooldown is Race (Q3, unpaired by nature); effectiveness is Feeder
         // (Q3, inherits its pair from combat.defense downstream — no CounterpartOf at this layer).
+        // Unit stays null (class-system P1.5/P1.6 census, 2026-08-26): skill.cooldown has TWO reader
+        // stubs with zero callers (CooldownMath.ApplyReduction's own doc comment: "No caller wired yet
+        // -- the action system... is still being specified"; ActionEnvelope.CooldownChannel is never
+        // dereferenced). skill.effectiveness's OverlayCombatRequest.EffectivenessMultiplier genuinely
+        // participates in the formula but every one of its three construction sites (OverlayCombatMath.cs,
+        // DebugCombatActions.cs, BattleEngine.cs) leaves it at the default 1.0 no-op -- nothing sets it
+        // from this channel. Both await the action/timeline layer (action-map.md, approved unbuilt).
         foreach (var category in DerivedStatChannels.ActionCategories)
         {
             Register(new(DerivedStatChannels.SkillCooldown(category), DerivedComposeKind.FlatSum, 0,
-                         Class: StatClass.Race));
+                         Class: StatClass.Race,
+                         UnitClassNote: "No reader: CooldownMath.ApplyReduction and ActionEnvelope.CooldownChannel both exist with zero callers -- the action/timeline layer that would wire them is unbuilt (action-map.md)."));
             Register(new(DerivedStatChannels.SkillEffectiveness(category), DerivedComposeKind.FlatSum, 0,
-                         Class: StatClass.Feeder));
+                         Class: StatClass.Feeder,
+                         UnitClassNote: "No reader: OverlayCombatRequest.EffectivenessMultiplier is multiplied into the damage formula, but every construction site leaves it at its default 1.0 no-op -- nothing sets it from this channel."));
         }
 
         // H.4 -- healing. Pool, unpaired (owner decision 2026-08-24 — dissolves §4.3 rather than
-        // reopening it: no defender-side term means no delta on the heal path at all).
-        Register(new(DerivedStatChannels.CombatHealPower, DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool));
+        // reopening it: no defender-side term means no delta on the heal path at all). Unit: GameUnits
+        // (class-system P1.5, 2026-08-26) -- OverlayCombatMath.cs:81,86 reads it as a flat additive
+        // magnitude (effectiveHeal = max(0, signedAmount + healPower)), same shape as combat.power.
+        Register(new(DerivedStatChannels.CombatHealPower, DerivedComposeKind.FlatSum, 0,
+                     Class: StatClass.Pool, Unit: UnitClass.GameUnits));
 
         // H.5 -- resource. Pool throughout (Q4): the counters are statuses, not stats. max/regen are
         // magnitudes and stay FlatSum/uncapped (spec-actor-channels.md §2.2). efficiency is a bounded
@@ -162,16 +183,27 @@ public sealed class DerivedStatRegistry
         // no-op. SumIncreased also reads Increased-op modifiers, the correct shape for a percentage-
         // like stacking ratio (matching status.power/status.resist's own SumIncreased+Cap precedent,
         // the only other capped channel family in this registry).
+        // Unit stays null (class-system P1.5/P1.6 census, 2026-08-26): no src/ code reads any
+        // resource.max/regen/efficiency.{id} for any of the six resource ids. tools/CombatSim's POC
+        // reads resource.max.hp/resource.regen.hp specifically (AptitudeModel.cs, Analytic.cs) but a
+        // standalone tool is not a shipped reader; its own JsonEmit.cs marks every non-hp id and all
+        // of efficiency as "reserved" (action-priced, action layer unbuilt).
         foreach (var resourceId in DerivedStatChannels.ResourceIds)
         {
-            Register(new(DerivedStatChannels.ResourceMax(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool));
-            Register(new(DerivedStatChannels.ResourceRegen(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool));
+            Register(new(DerivedStatChannels.ResourceMax(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
+                         UnitClassNote: "No shipped reader for any resource id. tools/CombatSim's POC reads resource.max.hp only (AptitudeModel.cs) -- not a shipped consumer. Action/resource economy unbuilt (action-map.md)."));
+            Register(new(DerivedStatChannels.ResourceRegen(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
+                         UnitClassNote: "No shipped reader for any resource id. tools/CombatSim's POC reads resource.regen.hp only (Analytic.cs) -- not a shipped consumer. Action/resource economy unbuilt (action-map.md)."));
             Register(new(DerivedStatChannels.ResourceEfficiency(resourceId), DerivedComposeKind.SumIncreased, 0,
-                         DerivedStatPolicy.ResourceEfficiencyCap, Class: StatClass.Pool));
+                         DerivedStatPolicy.ResourceEfficiencyCap, Class: StatClass.Pool,
+                         UnitClassNote: "No reader: action cost reduction has no consumer until the action layer exists (action-map.md). CombatSim's own tuning explicitly marks this family 'reserved'."));
         }
 
-        // H.6 -- movement. Pool (Q4, same reasoning as resource).
-        Register(new(DerivedStatChannels.MoveRange, DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool));
+        // H.6 -- movement. Pool (Q4, same reasoning as resource). Unit stays null: no range-check
+        // consumer exists yet (the battle grid is deferred -- action-map.md: "with no board, every
+        // range check passes"), and CombatSim marks this family reserved too.
+        Register(new(DerivedStatChannels.MoveRange, DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
+                     UnitClassNote: "No reader: the battle grid is deferred (action-map.md), so no range check exists to consume this channel yet."));
 
         // H.7 -- progression. xpRate: Class null, matching progression.power/progression.realm — a
         // rate/magnitude the counterbalance rule does not apply to ("Non-combat" row, H.0); FlatSum,
@@ -179,10 +211,14 @@ public sealed class DerivedStatRegistry
         // actor's OWN roll probability, no pair -- Pool fits it the same way it fits resource.efficiency,
         // and EveryCapIsClassified (spec-stat-taxonomy.md §6.1, StatTaxonomyTests.cs) requires any
         // capped channel to carry a StatClass, not stay ambiguous. SumIncreased + Cap, same reasoning
-        // as resource.efficiency above.
-        Register(new(DerivedStatChannels.ProgressionXpRate, DerivedComposeKind.FlatSum, 0, Class: null));
+        // as resource.efficiency above. Unit stays null on both (class-system P1.5/P1.6, 2026-08-26):
+        // RpgXpAwardMap.cs's NoKillPowerScaleYet is a hardcoded 1.0 placeholder, not sourced from
+        // progression.xpRate; no breakthrough roll/grant mechanism is wired to progression.breakthroughSuccess.
+        Register(new(DerivedStatChannels.ProgressionXpRate, DerivedComposeKind.FlatSum, 0, Class: null,
+                     UnitClassNote: "No reader: RpgXpAwardMap's NoKillPowerScaleYet is a hardcoded 1.0 placeholder, not sourced from this channel."));
         Register(new(DerivedStatChannels.ProgressionBreakthroughSuccess, DerivedComposeKind.SumIncreased, 0,
-                     DerivedStatPolicy.BreakthroughSuccessCap, Class: StatClass.Pool));
+                     DerivedStatPolicy.BreakthroughSuccessCap, Class: StatClass.Pool,
+                     UnitClassNote: "No reader: the breakthrough roll/grant mechanism this probability would drive is unbuilt."));
     }
 
     void RegisterCombatDefaults()
@@ -246,7 +282,7 @@ public sealed class DerivedStatRegistry
         {
             var counterpart = "status.duration." + channelId["status.durationReduction.".Length..];
             def = new DerivedStatDef(channelId, DerivedComposeKind.SumIncreased, 0,
-                Class: StatClass.Contest, CounterpartOf: counterpart);
+                Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: counterpart);
             return true;
         }
 
@@ -254,7 +290,7 @@ public sealed class DerivedStatRegistry
         {
             var counterpart = "status.durationReduction." + channelId["status.duration.".Length..];
             def = new DerivedStatDef(channelId, DerivedComposeKind.SumIncreased, 0,
-                Class: StatClass.Contest, CounterpartOf: counterpart);
+                Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: counterpart);
             return true;
         }
 
@@ -262,7 +298,7 @@ public sealed class DerivedStatRegistry
         {
             var counterpart = "status.intensity." + channelId["status.intensityReduction.".Length..];
             def = new DerivedStatDef(channelId, DerivedComposeKind.SumIncreased, 0,
-                Class: StatClass.Contest, CounterpartOf: counterpart);
+                Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: counterpart);
             return true;
         }
 
@@ -270,7 +306,7 @@ public sealed class DerivedStatRegistry
         {
             var counterpart = "status.intensityReduction." + channelId["status.intensity.".Length..];
             def = new DerivedStatDef(channelId, DerivedComposeKind.SumIncreased, 0,
-                Class: StatClass.Contest, CounterpartOf: counterpart);
+                Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: counterpart);
             return true;
         }
 

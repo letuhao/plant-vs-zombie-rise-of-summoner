@@ -1,6 +1,11 @@
 # Combat action — capability map
 
-**Status:** **Proposed capability map (2026-08-22)** — module ids, dependency direction, and build order for review. No specs written, no build authorized. **Blocked by owner decision D1: the effect-atom program is specced first** ([effect-atom-map.md](effect-atom-map.md)), so nothing here starts until that map and its module specs exist. Grounding: [effect-atom-ideal.md](effect-atom-ideal.md), [battle-turn-ideal.md](battle-turn-ideal.md), [battle-timeline-map.md](battle-timeline-map.md), the code audit in §2, and the Chaos `action-core` / `combat-core` doc set (§7).
+**Status:** **REVISED 2026-08-27** against the sealed [action-ideal.md](action-ideal.md) — 16 modules (10 revised, 6 new), awaiting owner approval before module specs are written. Superseded header follows for history: **Proposed capability map (2026-08-22)** — module ids, dependency direction, and build order for review. No specs written, no build authorized. **Blocked by owner decision D1: the effect-atom program is specced first** ([effect-atom-map.md](effect-atom-map.md)), so nothing here starts until that map and its module specs exist. Grounding: [effect-atom-ideal.md](effect-atom-ideal.md), [battle-turn-ideal.md](battle-turn-ideal.md), [battle-timeline-map.md](battle-timeline-map.md), the code audit in §2, and the Chaos `action-core` / `combat-core` doc set (§7).
+
+> **⛔ RE-DESIGNED 2026-08-27 — read [action-ideal.md](action-ideal.md) first.** The owner reopened this
+> program. The ten module specs below are stale in the places that ideal's §8 lists (five resources vs six,
+> the 84-channel claim, guard as a reaction rather than a stance). The ideal is the current design record;
+> this map is reconciled to it, not the other way round.
 
 Prefix: `action`. Specs live at [`docs/architecture/action/`](action/) — **all ten written**. Plan and tasks at [`tasks/action-plan.md`](../../tasks/action-plan.md) / [`tasks/action-todo.md`](../../tasks/action-todo.md), written 2026-08-22 (AGENTS.md parallel-programs convention; `SPEC.md` and `tasks/plan.md` hold other streams — the latter is Perf v3's).
 
@@ -48,91 +53,106 @@ An action is the join row: **an envelope (when) + a container of atoms (what) + 
 
 **Dependency hazard, stated up front.** The atom program is an *ideal*, not a spec — no module ids, no build order. If `action-model` depends on containers, this program blocks on unbuilt work. The proposed answer is a **narrow declared seam**: the action holds a `ContainerRef` and calls one resolve entry point, and nothing else about atoms. If that seam cannot be agreed cheaply, the fallback is that the first actions carry their effect inline and adopt containers later — worse, but not blocking. **This is decision D1 below.**
 
-## 4. Modules
+## 4. Modules — revised 2026-08-27 against the sealed ideal
 
-| id | Name | What it owns | Depends on |
-|---|---|---|---|
-| **A1** | `action-model` | The action record: identity, container ref, envelope, target rule, costs, conditions. The join. | atoms (seam), timeline envelope |
-| **A2** | `targeting` | Target *rules* and their resolution: self, ally, enemy, lowest-HP, row, lane, area, projectile. Deterministic ordering, no dictionary order. Lawn geometry where it applies. | A1 |
-| **A3** | `action-costs` | What an action takes to use, over the four locked pools (`hp`, `sun`, `soul`, `stamina`): max/regen derived channels, accrual rules, validate → reserve → consume → refund-on-fizzle, and the two layer questions in §9.1. | A1 |
-| **A4** | `usability-conditions` | May this action be selected right now: typed predicate tree over a **closed** leaf list, reusing the atom ideal's predicate design rather than inventing a second one. | A1 |
-| **A5** | `basic-attack-adoption` | **The seam proof.** The engine's existing attack becomes a real action driven through the envelope, byte-identical. | A1, A2, A4 |
-| **A6** | `action-catalog` | Where actions live: SQLite rows, server-compiled, pushed to the injector (the atom ideal's plumbing stance, not a second one). | A1, A5 |
-| **A7** | `action-selection` | The `IIntentSource` implementations — the AI/policy layer the atom ideal disclaims. Auto-battle policy for expeditions and sweeps; the player-input seam for interactive modes. | A2, A4, A6 |
-| **A8** | `defence-actions` | Block, guard, brace as first-class actions; the reaction lane's first real content. Ties to shields. | A5, timeline B6 |
-| **A9** | `movement-actions` | Movement as an ordinary action priced by `TimeCostTicks`, using `move.range` and the grid's distance metric. **Battle grid only** — never the lawn (§10.2). | A5, A10 |
-| **A10** | `battle-board` | The grid itself: per-encounter dimensions from the seeded generator, actor cell positions, **one-actor-per-cell occupancy**, the Chebyshev distance function, destination-is-free and pathing, and free-cell spawn placement. Builds a `BoardSnapshot` so the existing `TargetResolver` works unchanged. **Deferred by the owner — built with the board map / battle area**, but its absence is why `A2` and `A9` carry parameters that are inert in wave 1. | A1 |
+**Source of truth for every row: [action-ideal.md](action-ideal.md), sealed 2026-08-27** (26 decisions,
+0 open, 6 retractions). Where a module spec disagrees with the ideal, the ideal wins until that spec is
+reconciled; §9 of the ideal is the reconciliation list.
 
-## 4a. `A1` — the foundation deliverable, sketched
+### 4.0 What the scan found
 
-Not the spec. A sketch concrete enough to argue with, so the spec starts from something rather than a paragraph.
+A sweep of every document that references this program, run before revising the map. **Three sources of
+unowned work**, none of which was visible from inside the action specs:
 
-### Tables
-
-**`rpg_action`** — one row per action. Every value that scales is a **value spec** (`{min, max, roll, scale}`), so the atom program's curve table serves actions too and no second scaling mechanism appears.
-
-| Group | Columns |
-|---|---|
-| identity | `action_id` PK · `name` · `tags_json` (`offensive` · `heal` · `buff` · `movement` · `summon` — what `A7` chooses on) · `enabled` · `revision` |
-| effects | `container_id` FK → `effect_container` |
-| timing (the envelope) | `time_cost_ticks` · `speed_channel` · `windup_ticks` · `resolve_offsets_json` · `recovery_ticks` · `commitment` · `interruptible` · `interrupt_refund_milli` · `slot_consuming` · `priority_band` |
-| cooldown | `cooldown_class` · `cooldown_key` · `cooldown_ticks` · `starts_at` · `interrupt_cooldown_milli` |
-| targeting | `target_spec_json` (**typed**, compiling to `TargetResolver`) · `min_range` · `max_range` · `range_channel` · `anchor_source` · `requires_line_of_sight` |
-| usability | `conditions_json` — a predicate tree over `E3`'s **closed** leaf list, extended by `A4` |
-
-**`rpg_action_cost`** — `(action_id, resource_id, amount_spec, when)`. A table rather than a column because an action costs several resources; a value spec because costs scale; and `when` is `onCommit` (default) or `perTick`, which is how every game with channelled abilities does it.
-
-### Copy first, decide only what is ours
-
-Most of what an action does is a solved problem, and the genre's answers are better tested than anything invented here. The rule for this spec: **name the game that solved it and take its shape.** A design question is only genuinely open when it comes from something specific to *this* game.
-
-| Question | Taken from | Answer |
+| Source | Owed | State |
 |---|---|---|
-| Per-tick channel cost | Diablo 3 / 4 channelled skills | Cost carries `when`; running dry ends the channel |
-| Effects with different recipients in one skill | D&D, WoW, PoE — universal | Each effect declares its own target scope |
-| Multi-hit against a dying target | ARPG standard | Locked target for single-target, re-resolved per hit for area — which is exactly what `Commitment` already encodes |
-| One target of several dodges | Universal | Per-target roll; the rest land |
-| Summon with no free cell | Every tactics game | Nearest free cell, else refuse |
-| Where actions come from | Universal | Basic attack intrinsic, everything else learned or granted |
-| Ability tags for AI | Universal | Tag the action; AI reads tags, never internals |
+| [item/ssot-granted-actions.md](item/ssot-granted-actions.md) §5.5 | A **nine-item handshake** the action program must expose | **6 of 9 unanswered.** Item 5 is a *correction* to `A1` §5 |
+| [item/ssot-consumables.md](item/ssot-consumables.md) §5 | Three widenings: `grants_action_id` meaning, an **item-as-cost** shape, an **inventory leaf** | **All three unanswered** |
+| [action-ideal.md](action-ideal.md) §0.1 | 26 sealed decisions | **5 have no module at all** — the unlock ladder, the rung table, seeding, the duration resolver, the grant seam |
 
-**Genuinely ours, because no other game has our constraints:** the ordering of four streams against one set of golden hashes; keeping the basic attack byte-identical through the migration; and the zero-allocation budget inside the Unity frame. Those are worth arguing about. The table above is not.
+> **`A1` §5 is wrong, and another program found it.** It says granted actions *"reuse `effect_binding`'s
+> owner vocabulary; no second binding concept."* The item lane verified in code that
+> `effect_binding.instance_id` is `TEXT NOT NULL` and points at an `effect_instance` carrying `roll_seed`
+> and frozen `values_json` — **a granted action has no instance and no rolls.** The *vocabulary* is
+> reusable; the *table* is not. `A1` gains `rpg_action_grant` as its own table, reusing the seven owner
+> scopes and the `source` withdraw key.
 
-A fourth item was on this list — *"how `sun` and `soul` cross the PvZ/RPG layer boundary"* — and the owner removed it on 2026-08-22 as a false problem. **The two games have two state machines and share no state in either direction.** What crosses is messages: captured events coming out, `pvz.*` intent commands and Writer stat changes going in. Lawn sun and RPG sun are two different things that share a word. There is no boundary for a resource to cross, and treating one as if there were is the layer confusion this map has now made twice.
+### 4.1 The modules
 
-**`rpg_action_effect_scope`** — `(action_id, atom_id, scope)` where scope is `caster` · `primaryTarget` · `eachTarget` · `casterAllies`. This is the "strike an enemy and heal yourself" problem. Kept **action-side** deliberately: putting `scope` on `effect_container_atom` would change the atom contract and make atoms less reusable outside actions.
+**Ten existing, six new.** Revision load is marked: ● major rewrite · ◐ revision · ○ intact.
 
-**Action availability** — intrinsic actions come from the species row; granted ones are bindings, reusing `effect_binding`'s owner vocabulary rather than inventing a second one.
+| id | Name | What it owns | Rev | Depends on |
+|---|---|---|---|---|
+| **A1** | `action-model` | The action record and its tables. **Now also**: the three action kinds, loadout capacity vs intrinsic, `rpg_action_grant` (handshake 5), the `grantable` and `default_attack_eligible` flags (handshake 2, 3) | ● | atoms, envelope |
+| **A2** | `targeting` | Typed target spec, `Relation` compiled per side, Chebyshev range, the `target` RNG stream | ○ | A1 |
+| **A3** | `action-costs` | Cost table over the **six** resources. **Now also**: cost/cooldown rung multipliers, the item-as-cost question, the *cost is authored against regen* rule | ● | A1, A12 |
+| **A4** | `usability-conditions` | The gate chain. **Now also**: the stance refusal, and an **inventory leaf** for consumables | ◐ | A1 |
+| **A5** | `basic-attack-adoption` | The byte-identity proof | ○ | A1, A2, A4 |
+| **A6** | `action-catalog` | Load, compile, cache, content-hash registration | ◐ | A1 |
+| **A7** | `action-selection` | `IBattleView` seam + stub AI | ○ | A1, A2, A4 |
+| **A8** | `defence-actions` | **Guard is a STANCE, not a reaction** — so this is **no longer blocked on timeline B6** (it still lands *after* `A5`'s gate, never inside it — freeze first, move last). Slot-free while held, per-tick poise hold cost, riposte on release | ● | A1, A3 |
+| **A9** | `movement-actions` | Move as an ordinary row, `slot_consuming = false` | ○ | A5, A10 |
+| **A10** | `battle-board` | Grid, occupancy, distance | ○ | — |
+| **A11** | `unlock-ladder` | **NEW.** Earn history, chance decay to a floor, rung, cap 10, discard priced in `soul`. Decisions 5–8, 24 | ➕ | A12 |
+| **A12** | `rung-table` | **NEW.** The authored rung rows — tier window, `pool_rolls`, cost and cooldown multipliers, **structure budget** — plus the E9 monotonicity assertion. **One table, many faucets.** Decisions 9, 11, 12, 16 | ➕ | A1 |
+| **A13** | `action-seeding` | **NEW.** The **runtime generator** — the loot model: seed → pool → atoms → variant. Type weight vectors, **target-spec rolling**, **enabler/payoff pairing**. Decisions 4, 13, 17, 20. **Not seedsmith** | ➕ | A12, A6 |
+| **A14** | `duration-resolver` | **NEW.** Control duration in **victim turns**, per-mode resolution behind one interface, clamp-and-convert to intensity. Decisions 10, 14 | ➕ | A1 |
+| **A15** | `grant-seam` | **NEW.** The item handshake: action-set assembly, snapshot moment, removal semantics per FSM state, cap policy, no per-grant overrides. Handshake items 4, 6, 7, 8, 9 | ➕ | A1, A11 |
+| **A16** | `loadout` | **NEW — audit C3.** Which 5 are equipped: the persisted set, its validation, and **auto-equip by power scale** so every AI actor arrives equipped | ➕ | A11, A12 |
 
-### Dataflow
+### 4.2 Build order
 
+```text
+PHASE 0 (other programs)   linkage -> predicate pricing -> holdsStock leaf
+                                        |
+                                        v
+A1 model ---+--> A12 rung-table --+--> A11 unlock-ladder --+--> A15 grant-seam
+            |                     |                        |
+            +--> A2 targeting     +--> A3 costs            +--> A13 seeding
+            |                     |
+            +--> A4 usability     +--> A14 duration-resolver
+            |
+            +--> A5 PROOF (byte-identical)  <-- A2, A4
+                    |
+                    +--> A8 guard stance   (NO LONGER waits on B6)
+                    +--> A7 selection
+                    +--> A9 movement --> A10 board
 ```
-author (SQLite rows)
-  → server compiles action + container to a typed runtime form and pushes it   [A6]
-  → IIntentSource selects (action_id, target)                                  [A7]
-  → usability: predicate + cooldown + range + affordability                    [A4]
-  → commit: validate all costs, consume all, roll back on any failure          [A3]
-            acquire slot, schedule resolve handles                             [kernel]
-  → resolve: resolve target set per Commitment                                 [A2 → TargetResolver]
-             for each atom × scope → contributions
-             → DamageApplyPipeline / status / spawn                            [existing]
-  → finish: release slot, start cooldown, schedule recovery                    [kernel]
-```
 
-Nothing in that chain is new machinery except the two shaded steps — the typed target contract and the cost table. Everything else is a call into something that ships.
+**`A12` before `A11` and `A3`** — both read the rung multipliers, and two readers of one table is the
+point of it existing separately.
 
-### What the sketch has to prove
+### 4.3 ⛔ Phase 0 — dependencies are EXTENDED FIRST, before any action module builds
 
-The corpus, not the design. Each of these is either expressible in the structure above or explicitly excluded by it, and `A1` is where that gets demonstrated:
+**Owner, 2026-08-27:** *"we will extend atom effect before we build any action — so build order is extend
+dependencies first, before build action."*
 
-| Case | Exercises |
-|---|---|
-| Basic attack | The whole chain at its simplest — and must stay **byte-identical** (`A5`) |
-| Strike + self-heal | `rpg_action_effect_scope` with two scopes in one action |
-| Multi-hit combo | `resolve_offsets_json` × `commitment` over a target **set**, not one ptr |
-| Ranged attack with a minimum | `min_range` / `max_range`, inert until the board exists |
-| Summon into a cell | Costs, `anchor_source`, free-cell placement, `spawn.entity` — the game's core verb |
-| Drain-channel | Costs carry a **when** — `onCommit` (default) or `perTick`. Failing to pay a tick ends the action through the existing interrupt path. Diablo 3 Disintegrate / D4 channels: pay per second, drop the channel when you run dry |
+These are **prerequisites, not requests.** Each is another program's to land, and this program supplies the
+requirement and the tests — but **no action module builds until they are in.**
+
+> **One consequence worth naming:** `A12`'s monotonicity assertion had a caveat — until E9 prices
+> predicates, a rung spending its budget on a condition prices above its true worth and the test passes for
+> the wrong reason. **Building dependencies first dissolves that caveat**, so `A12` ships with an assertion
+> that means what it says from day one. The caveat text in `A12` §5 stays as a record of why the order
+> matters.
+
+| Ask | Owner | Why |
+|---|---|---|
+| **Linkage** — a magnitude that reads `EffectEventDto.Damage` (GAS's `SetByCaller` shape) | **effect-atom** | Ideal §8.5. Lifesteal and every *"X equal to Y"* effect. The special case ships as the `leech` status; the general case cannot be authored |
+| **Predicate pricing** — `power_predicate_frequency`, the four-factor chain, the 2.5× floor | **effect-atom** (E9) | Ideal §8.6. Without it the structure ladder is unaffordable by construction |
+| **`recovery.scaleMilli` per family** | **class-system** | Ideal §2.1. Already scheduled as `residual-fit`'s second fixed step |
+| **`turn.speed` registered with a reader** | **battle-timeline** | Audit C1. `A14` ships the seam and **no resolver** until it lands |
+
+> ### ⛔ Seedsmith is NOT a dependency — it is a development tool, and it comes after
+>
+> **Owner, 2026-08-27:** *"seedsmith is a tool for developing the game, not the running game. The running
+> game has its own generator, but it uses generated seed to add atom effects to a list and solve variants
+> for concrete effects — like a loot system in a Diablo-like game. Seedsmith build order is later, after we
+> complete the action feature."*
+>
+> An earlier draft of this map listed a seedsmith coverage metric as a prerequisite. **That was wrong in
+> both direction and order**: seedsmith measures a corpus that does not exist yet, and it cannot gate the
+> feature that produces it. `A13` is the **runtime** generator and depends on seedsmith for nothing.
 
 ## 5. Dependency direction and build order
 

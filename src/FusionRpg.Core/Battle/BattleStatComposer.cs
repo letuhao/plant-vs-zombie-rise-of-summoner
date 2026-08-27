@@ -45,18 +45,17 @@ public static class BattleStatComposer
 
     static HashSet<string> BuildKnownChannels()
     {
-        // Combat channels plus the status power/resist families the ResistanceEvaluator reads.
-        var set = new HashSet<string>(DerivedStatChannels.AllCombatChannelIds, StringComparer.Ordinal)
-        {
-            DerivedStatChannels.StatusPowerOmni,
-            DerivedStatChannels.StatusPowerDot,
-            DerivedStatChannels.StatusPowerCc,
-            DerivedStatChannels.StatusPowerContagion,
-            DerivedStatChannels.StatusResistOmni,
-            DerivedStatChannels.StatusResistDot,
-            DerivedStatChannels.StatusResistCc,
-            DerivedStatChannels.StatusResistContagion
-        };
+        // class-system-todo.md P1.11 (2026-08-26): widened from "combat channels plus the eight
+        // status power/resist families" to every registered channel — aptitude edges reach
+        // resource.*/skill.*/move.range/progression.*/status.duration/intensity.*, all outside the
+        // old set (distribution-reconcile's finding: 47 of 84 edge channels threw here before this
+        // change). T3's own repair (spec-readiness-model.md), reused: widen the known-channel set,
+        // change no compose logic — a ChannelMods producer moving nothing while nobody has an
+        // allocation is what keeps this byte-identical (battle-timeline-map.md; see also
+        // class-system-map.md §2a.0's "the composers stay separate" decision).
+        var set = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var def in DerivedStatRegistry.CreateDefault().AllRegistered)
+            set.Add(def.ChannelId);
         return set;
     }
 

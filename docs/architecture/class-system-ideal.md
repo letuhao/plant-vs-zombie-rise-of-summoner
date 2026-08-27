@@ -34,6 +34,252 @@ seen to (§5c.7).
 
 ---
 
+## 0.0 State of the design — read this before anything else
+
+**This document is 1,900 lines and it grew as a log.** Sections were written, measured against, and
+several were **retracted in place**. That trail is worth keeping — §4 of the design gate is the
+argument for recording what a wrong turn cost — but a spec author must not have to reconstruct the
+present from it.
+
+**This section is the present. Where it disagrees with a later section, this one wins.**
+
+> **⛔ One ranking decides how to read every number below — the two acceptance criteria are not equals.**
+>
+> The **termination invariant** (§5d) is **HARD**: measured on quantities that are all live, unfixable
+> by any later layer, and it **passes**. The **dominance matrix** (§8.8b) is **SOFT**: measured on a
+> partial model, filled by the action/passive/skill layer, and it currently fails **as an upper bound on
+> severity rather than as a verdict on the design** (§8.8a).
+>
+> **A red SOFT row beside a green HARD row is this design working as intended** (§0.2) — not a system in
+> two minds, and not a reason to hold the spec. Full argument: §0.2.1.
+
+### 0.0.1 Decided — do not reopen
+
+| | Where | Owner decision |
+|---|---|---|
+| **Free build** — the player has no class; points go anywhere at one price | §1, §7a.3 | 2026-08-25 |
+| **Classes are Zomboss AI patterns**, not player containers | §6 | 2026-08-25 |
+| **`spirit` is the status pool** — drained by being afflicted, never an action cost | §5c.3, §5c.7 | 2026-08-25 |
+| **Buffs and debuffs cost `qi`**, not `spirit` | §5c.6 | 2026-08-26 |
+| **Every pool is shared across all 12 aptitudes** at different scales, with a nonzero floor | §5a.2 | 2026-08-25 |
+| **Win rate is the metric** — never fight length, damage dealt or kill time | §0.1 | 2026-08-26 |
+| **Termination invariant** — an unending fight between non-degenerate builds is an economy defect | §5d | 2026-08-26 |
+| **Deliberate holes** — the aptitude layer is not meant to be complete | §0.2 | 2026-08-26 |
+
+### 0.0.1a Decisions taken 2026-08-26 — the pre-spec gate
+
+Four questions were put to the owner before spec. All four answered; recorded here because §0.0.1 is
+what a spec author reads.
+
+| # | Decision | Consequence |
+|---|---|---|
+| **1** | **Allocation is scoped four ways: commander → demon type → type variant → unique demon.** An actor's allocation is the SUM of four | §7c. **All four map onto shipped concepts** (§7c.5). `aspect` = the actor's element typing — `ActorElementTypes` + `BattleStatComposer`'s affinity divisors are its precedent. **The work it creates is a migration, not a design**: `ElementPrimary`/`ElementSecondary` and `TraitPool` sit on `DemonSpeciesDef` today and move down a tier |
+| **2** | **Register `poise`** — `decisions.md` **Resource model** amendment, five → six | Unblocks §5.1 (guard costs something), §5b.3 (its cost shape), §8.9 (BASTION's missing offence). §5b.3's recommendation stands: a flat commit cost **plus** an absorb drain |
+| **3** | **Status apply shape: `sigmoid` + a positive `applyOffsetK`** — keep the curve soft, move the neutral point off 50% | Chosen over `linearFromZero` so no amount of resistance confers immunity (rule 5). **It needs a second number** — see §0.0.1b |
+| **4** | **Keep 12 aptitudes**, and strengthen `Focus` rather than cut it | §8.1a answers what `Focus` feeds and why it measures dead; §8.1b found the reason is not `Focus` |
+
+**Confirmed the same day, on a veto pass** — each had a standing recommendation and a reason, so they
+were put as "change any of these?" rather than re-asked:
+
+| # | Decision | Where |
+|---|---|---|
+| **5** | **`poise` cost = flat commit + absorb drain ∝ what the guard stopped.** The flat part obeys *committing costs*; the proportional part obeys *price the output* — two rules governing two things, instead of breaking one | §5b.3 |
+| **6** | **`poise` regen = per-tick, sized LOW against peer pressure.** Not a binary with per-encounter — that is the `r = 0` corner of the same continuum. Heavy hits break the guard, attrition does not | §8.3 |
+| **7** | **BASTION gets a riposte** — spent `poise` converts into damage, so it is no longer the only posture with nothing to spend on winning | §8.9 |
+| **8** | **Tier weights: commander SMALLEST, unique LARGEST.** A commander allocation replicates across the whole roster, so a dominant one is the worst case; unique investment is what makes a team diverse | §7c.2 |
+
+**Together, 5 + 6 + 7 make the guard economy a single ratio.** `poise` drains proportionally to what it
+stopped, regenerates at a rate sized against incoming pressure, and converts on release — so a heavy
+attacker beats a guard by **arithmetic**, not by a special case, and BASTION's defensive spend also
+wins fights.
+
+### 0.0.1b Decision 3 needs `applyScaleK` to move with it — measured
+
+`applyOffsetK` alone cannot deliver the chosen shape, because `applyScaleK = 100` is **wide relative to
+the ~57-point delta range** an aptitude allocation produces. A sigmoid over ±0.57 of its own scale is
+nearly flat, so raising the offset suppresses the specialist almost as fast as the non-investor:
+
+| `applyScaleK` | `applyOffsetK` | non-investor apply | specialist apply | **spread** | non-investor cc lock |
+|---|---|---|---|---|---|
+| **100** (today) | any | 35–50% | 49–64% | **≤ 14 pts — dead contest** | 73–88% |
+| 40 | 25 | 34.9% | 69.0% | 34 pts | 72% — still a near-lock |
+| **30** | **60** | 11.9% | 47.5% | **36 pts** | **32%** ✅ |
+| **15** | **40** | 6.9% | 75.6% | **69 pts** | **18%** ✅ **widest usable band** |
+
+**Target: a specialist beats a non-investor by more than 30 points, and a non-investor cannot lock.**
+Only `applyScaleK` in the **15–30** range satisfies both.
+
+> This is §5c.8's finding arriving from the other side. `applyScaleK = 100` was sized when status power
+> came from items; aptitude deltas are an order of magnitude smaller, and **the scale never followed**.
+> Offset and scale are one decision, not two: **scale sets how much investment moves the result, offset
+> sets where zero sits.**
+
+`applyScaleK` is a `status`-domain tunable, so the value is theirs — but the class system cannot size a
+single status coefficient until it lands, and the number is now derived rather than open.
+
+### 0.0.2 Built in `src/` — shipped, tests green, no goldens moved
+
+| | Where |
+|---|---|
+| `applyShape` (`sigmoid` \| `linearFromZero`) + `applyOffsetK` in `data/tuning/status.v1.json`, defaulting to the shipped behaviour byte-identically | §5c.12 |
+
+Core 3486 · Guard 90 · Data 475, all green.
+
+### 0.0.3 Measured — current numbers, superseding every earlier table
+
+Everything below is on the **current** model: resources purchasable, actions costed, status applied,
+regeneration ticked, both model bugs fixed (§8.8c).
+
+| Measurement | Result |
+|---|---|
+| Closed form vs simulator — core combat | **1.8% mean / 2.4% max** |
+| — with the action economy | 0.9% / 2.4% |
+| — with status | 4.0% / 5.3% |
+| — all four axes live | **4.1% / 7.7%** |
+| `Θ`-invariance | **exact** — identical win rates `Θ` 10 → 5,000 |
+| **Termination invariant** — the **HARD** criterion (§0.2.1) | ✅ **PASSES everywhere** — net attrition +3,937 to +14,107. Measured on live quantities only (damage, recovery), so nothing in the reservation list can be hiding a failure. **This is the one that had to pass at this layer, and it does.** |
+| **Dominance** (win rate, no clock) — the **SOFT** criterion (§0.2.1) | ⛔ `Bulwark` beats all 11 corners — an **UPPER BOUND on severity, not a verdict on the design**: elements were neutralised (§7c.7) and 15–47% of every aptitude is unmeasurable (§8.1d). Owned by the action / passive / skill layer |
+| Recovery share `r` | **0.670** — a max-sustain build stretches a fight exactly 3× |
+| Marginal value of one point | best is **under 1%** everywhere (`Fortitude` +0.35%, `Vigor` +0.95%, `Bulwark` +0.56%) |
+
+> **The marginal test has lost its resolution, and that is a result rather than a problem.** It was the
+> primary instrument at ±3.6%; coefficient work compressed it 10× and every aptitude is now worth
+> within a percent of every other. A local gradient that flat cannot rank twelve options. **The
+> dominance matrix still shows a 100% spread on the same builds** — because free build converges to
+> *corners*, and corners are where the differences live. **Use the corner test; keep the marginal test
+> as a secondary read.**
+
+### 0.0.4 Open — every hole named, with the layer that owns it
+
+Per §0.2, a gap a later layer can fill is a design opportunity; a gap no layer can fill is a defect.
+**There are no defects in this list.**
+
+| Hole | Owned by | Blocks spec? |
+|---|---|---|
+| `Bulwark` dominates the corner matrix — **SOFT, and an upper bound** (§8.8a) | **action / passive / skill layer** — a passive scaling damage with damage taken, a reflect build, an anti-turtle status | **No** (§0.2.1: soft). The HARD criterion, §5d, passes |
+| 29 catalog families still `unitClass: null` | `unit-class-close` — module 1 of the map | **No** — it is already the first build step |
+| ~~Status apply neutral point~~ | **DECIDED: sigmoid + positive offset.** Needs `applyScaleK` 100 → 15–30 with it (§0.0.1b) — status program owns the value | No |
+| `netFactorScale = 10` sized for item-tier deltas, not aptitude-scale | status program | No |
+| `ApplyScaleKForCategory` ignores its parameter — per-category tuning stubbed | status program | No |
+| ~~`poise` is not registered~~ | **DECIDED 2026-08-26: register it.** ADR amendment owed | No |
+| `contagion` unmeasurable — a 1v1 has no second host | party simulation, unbuilt | No |
+| `cc` turn-loss is modelled crudely, not through readiness | `battle-timeline` owns the readiness model | No |
+| ~~Does `Focus` need a mechanism?~~ | **DECIDED: keep 12, and DELEGATE the fix to the action layer** (§8.1c) — flattening it into damage would trade a gameplay mechanism for a measurable number. §8.1a: two of its three dead levers are dead because the HARNESS lacks cooldowns and cost reduction | No |
+| ~~The 4th tier is undefined~~ | **DECIDED: it is `aspect` — the element typing** (§7c.4–7c.6). Carries element + derived trait bias + starting skills; strengths/weaknesses are the shipped element ring | No |
+| **NEW — move element off the species** | `variant-scope` module. `DemonSpeciesDef.ElementPrimary/Secondary` + `TraitPool` currently sit on the SPECIES, so one species is one element today. Moving them down is a schema + generator change | No — but it is the largest single piece of work §7c creates |
+| **NEW — every measurement neutralised elements** (§7c.7) | `residual-fit`, and it should be its FIRST step, not its last | No — but §8.8a's dominance severity is an upper bound until it is redone |
+| **NEW — `stamina` is free** (§8.1b): `strike` regen 3,784 > cost 1,544, so it never runs dry | `residual-fit` — an action cost only matters if it exceeds the regen of its pool. **It is the top reservation for 9 of 12 aptitudes (§8.1d)** — one number, more effect than any per-aptitude tuning | No |
+| The two acceptance criteria are **coupled** and must be solved jointly | `residual-fit` (§5d.4b) | No |
+
+### 0.0.5 Retracted — do not act on these
+
+| Claim | Where | Why |
+|---|---|---|
+| A round clock removes the dominant corner, so the design is sound | §8.7a | It changes the **win condition**, penalising long fights. On win rate with no clock the dominance never left (§0.1.2) |
+| Status power scales both potency axes from one delta | §5c.4 | The duration/intensity split **already exists** in shipped code; the axes were merely unfed (§5c.11) |
+| The class price (in-posture 1, out-of-posture 2–3) | §7a.3 | There is no class to be outside of. `gamma` does that job now |
+| The re-solved allocation in `builds/*.json` | §5c.13 | It **failed its falsification** — treat as unverified, not as balance |
+| §4.3's "five of twelve are live" and §7b.3's marginal table | §4.3, §7b.3 | Measured on a model with no resources, actions or status and two live bugs. Superseded by §0.0.3 |
+
+### 0.0.6 How to re-verify any of it
+
+```powershell
+cd tools\CombatSim
+dotnet run --no-build -- predict  --actions basic --status -a force,finesse,bastion --theta 100 -n 4000
+dotnet run --no-build -- trinity  --actions basic -a force --theta 100      # dominance + termination
+dotnet run --no-build -- marginal --actions basic -a force,finesse,bastion --theta 100
+dotnet run --no-build -- status   --actions basic -a force,finesse,bastion --theta 100
+```
+
+**No claim in this document should be believed without one of these producing it.** Two of the
+measurements it was built on turned out to be model bugs in the tool rather than facts about the
+design (§8.8c), and both were found by cross-checking the closed form against the simulator rather
+than by reasoning.
+
+---
+
+## 0.1 The metric — win rate, and nothing else
+
+**Owner correction, 2026-08-26.** Recorded first, before anything it invalidates, because it changes
+how every measurement in this document should be read:
+
+> **Count win rate. Not fight length, not total damage dealt, not kill time.** A survival or cc build
+> makes a fight legitimately longer — a survivalist against a damage dealer takes longer *because* it
+> has defence, heal and hp — and it still **loses** if the damage dealer wins the RPS. The damage
+> dealer still loses if *it* loses the RPS: it dies to reflection, or to a passive that scales the
+> survivalist's damage with damage taken. **Length is not the outcome. The outcome is the outcome.**
+
+### 0.1.1 It reversed a finding on measurement alone
+
+The status sweep (§5c.5) ranked categories by kill time as a share of the no-status baseline. Switching
+that one column to win-rate swing, changing nothing else:
+
+| Category | by kill time (wrong) | **by win-rate swing (right)** |
+|---|---|---|
+| `cc` | **207% of baseline** — read as *cc failing* | **51.9% mean swing — the LARGEST of the three** |
+| `dot` | 68% — read as best | 31.2% |
+| `contagion` | 70% | 16.3% |
+
+**`cc` went from last to first.** A duration metric scores a crowd-control status as a failure *for
+doing its job*, and it did. Nothing about the game changed; the ruler did.
+
+### 0.1.2 ⛔ It retracts §8.7a's clock conclusion
+
+§8.7a reported that a 25-round clock removes the dominant corner, and treated that as evidence the
+design was sound once the harness was fixed. **That is withdrawn.**
+
+A clock penalises fights for being **long**. It does clear the dominant corner — by **changing the win
+condition**, not by fixing anything. Under win rate alone, with no clock, **the dominance never left**:
+`Bulwark` beats every other corner at none, 40, 30, 25 and 20 rounds once win rate is what is counted.
+
+> **The clock manufactured a balance that does not exist.** It is retained as an *encounter design*
+> parameter — a real encounter may have a timer — and it must be **off** for any balance judgement.
+
+What §8.7a was reaching for is real, and the **termination invariant (§5d) is the instrument for it**:
+that targets fights which can never **resolve**, not fights which are merely long. One is a defect; the
+other is a build.
+
+---
+
+## 0.2 Deliberate holes — the system is not supposed to be complete here
+
+**Owner principle, 2026-08-26:**
+
+> The system is not complete. **Leave holes in the matrix and fill them later** with actions, passive
+> skills and builds. A perfect system from the beginning is boring, because there is no way to improve
+> it.
+
+This is not a licence to ship defects. It is a statement about **which layer owns which gap**, and it
+sharpens the two acceptance criteria this document had been treating as equals.
+
+### 0.2.1 The two criteria are not equals
+
+| Criterion | Can a later layer fix it? | Status at the aptitude layer |
+|---|---|---|
+| **Unkillable pair** (§5d) — recovery ≥ damage on both sides | **No.** It is an economy identity. No passive, action or skill changes the fact that a pool refills faster than it drains — content added on top inherits the defect | **HARD. Must pass here.** |
+| **Dominant corner** (§8.8b) — one spike beats all eleven | **Yes.** A passive that scales damage with damage taken, a reflect build, a counter-action, a status that punishes turtling — these are exactly what an anti-tank answer looks like, and they are the owner's own examples | **SOFT here. Hard only once the layers that could fill it exist.** |
+
+> **A gap a later layer can fill is a design opportunity. A gap no layer can fill is a defect.**
+> That is the whole distinction, and it is what decides whether an open item blocks the spec.
+
+### 0.2.2 What it changes about "ready to spec"
+
+The ideal does **not** need a perfect dominance matrix. It needs:
+
+1. **No unfixable defect** — the termination invariant passes. ✅ (as of the recovery dial, §5d.4a)
+2. **Every gap named, with the layer that owns it** — so a hole is a commitment rather than an oversight.
+3. **The tests to exist**, so the layer that fills a hole can prove it did.
+
+The dominant corner is then a **named hole owned by the action/passive/skill layer**, not a blocker.
+It is even a useful one: a game whose aptitude layer already answered every question would leave those
+layers with nothing to do, which is the owner's point exactly.
+
+**What this does not excuse.** A hole must be *named and assigned*. `Bulwark` dominating is a hole for
+the passive layer; it is not "we will get to it". The difference is that the first is written down with
+an owner and a test, and the second is discovered later by a player.
+
+---
+
 ## 1. The one-paragraph version
 
 Three **postures** — FORCE, FINESSE, BASTION — form a rock-paper-scissors cycle. Each owns **two
@@ -81,6 +327,22 @@ group into 6 defence mechanisms and their 6 breaks** — exactly 2 + 2 across th
 ### 3.1 The assignment rule
 
 > **A posture owns the breaks for the mechanisms of the posture it counters.**
+
+> **⚠️ "Owns" means the STRONGEST source, never the only one.** Read literally as exclusivity, the
+> tables in §3.1 and §5 contradict two later findings, and the later ones win:
+>
+> - **Rule 9 (§8.5c):** *a general mechanic cannot be posture-exclusive.* Each time one was left
+>   exclusive — `power`, `accuracy`, `crit`, `mitigation` — its owner's counter went **absolute
+>   (100/0) and no allocation could fix it.**
+> - **§5a.2:** *a resource is as general as the actions it pays for.* `hp` and `stamina` are universal,
+>   so they take **five sources each at five weights**, and every pool carries a **nonzero floor** on
+>   every aptitude — because a build that can reach zero of a universal pool cannot act at all
+>   (measured: 8,725-round fights).
+>
+> So the correct reading throughout is **specialist-plus-weaker-peers**: the owner keeps the largest
+> coefficient and the other postures get real but smaller sources. That is what turns a hard counter
+> into a favourable matchup, and it is what the shipped distribution does.
+
 
 | Posture | Defends with | Breaks | ⇒ beats |
 |---|---|---|---|
@@ -155,15 +417,26 @@ Each aptitude owns **one mechanism role** plus a share of the utility load.
    is a **magnitude** edge; `Precision → combat.accuracy` is a **contest** edge. Every edge declares
    which. Without this we re-create the three-incompatible-curves defect the power ladder ended.
 2. **Aptitudes feed `omni` only** — the base element. Element-specific channels belong exclusively to
-   the skill layer. Both halves stay additive, and they never come from the same currency.
+   the skill layer. **Refined by §5c.10:** the rule is *an aptitude reaches a MECHANISM, never a
+   FLAVOUR.* Elements are flavours, so aptitudes stop at `omni`. Status **categories** (`dot`/`cc`/
+   `contagion`) are mechanisms, so aptitudes reach those too — and the per-status-**id** tier is
+   flavour again, so it stays the skill layer's. Both halves stay additive, and they never come from the same currency.
 
 ### 4.2 What aptitudes deliberately do not reach
 
-Measured against all 256 registered channels, aptitudes reach **83 — 32%.**
+Measured against all 259 registered channels (256 → 259, `poise-resource` 2026-08-26 — the three new
+channels are resource pool channels, reached by neither this count nor §4.2's skill-layer count),
+aptitudes reach **84 — 32%.**
+
+> **Corrected 2026-08-26: 83 → 84**, counted from the shipped edge list in
+> `tools/CombatSim/tuning/aptitudes.v1.json` rather than restated. The same count found that
+> **all 84 are registered** in the catalog, but **47 of them (56%) fall outside
+> `BattleStatComposer`'s known-channel set** and would throw today — see
+> [class-system/spec-distribution-reconcile.md](class-system/spec-distribution-reconcile.md) §3.2a.
 
 | Source | Channels |
 |---|---|
-| Aptitudes | 83 |
+| Aptitudes | 84 |
 | **Skills / items — every element slot** | **168 (66%)** |
 | Structural — `progression.power`/`realm` (they *are* `Θ`) | 2 |
 | Unwired — `status.immune`/`immuneReduction`/`expose` (sparse, nothing reads them) | 0 registered |
@@ -172,6 +445,11 @@ Measured against all 256 registered channels, aptitudes reach **83 — 32%.**
 surface for depth.
 
 ### 4.3 The twelve as a player reads them — and how many are actually live
+
+> **⚠️ The "live?" column is STALE.** It was measured before resources, actions or status existed and
+> with two model bugs live (§8.8c). The one-line readings are still good; the counts are superseded by
+> §0.0.3. The *shape* of the finding survived every correction — one mandatory, most dead — but the
+> magnitudes fell about 10×.
 
 A channel list is not an identity. Under free build there is no class name to carry meaning, so **the
 aptitude's own one-line reading is the entire identity the player gets**, and every one of the twelve
@@ -240,6 +518,10 @@ The SSOT's own class taxonomy was already **2/2/1** before postures existed:
 **One new pool completes a taxonomy that already existed.** Each posture ends with one thing it *is*
 and one thing it *spends*.
 
+> **⚠️ "Posture" here names the STRONGEST source, not the only one.** Every pool is sourced by all
+> twelve aptitudes at different scales with a nonzero floor (§5a.2) — the column above says who leads,
+> not who has it. Read as exclusivity it produces builds that cannot act at all.
+
 ### 5.1 `poise` — the point of it
 
 BASTION currently reacts **for free**: parry and block are passive procs on the attack roll, with no
@@ -299,7 +581,7 @@ Each posture holds **one pool it *is* and one pool it *spends*** — confirmed a
 > `poise` into damage. **Undecided; §8.9.**
 
 **`poise` is blocked, not merely unbuilt.** `DerivedStatChannels.ResourceIds` is the locked five —
-`hp`, `stamina`, `hunger`, `spirit`, `qi` — so `resource.max.poise` is not a registered channel and
+`hp`, `stamina`, `hunger`, `spirit`, `qi` — so there is no `resource.max` channel for **poise**, and
 the config cannot author it. It needs the `decisions.md` **Resource model** amendment (five → six)
 this document has owed since it was written.
 
@@ -469,13 +751,13 @@ Three ways out:
 | **B** | Guard becomes an **active declared action** (A8, reaction lane) with a flat commit cost | Obeys "committing costs", but throws away the "big hits drain you faster" pressure that made `poise` interesting |
 | **C** | **Both components** — a small flat cost to *raise* the guard, plus an absorb drain ∝ what it stopped | Obeys both rules instead of breaking one |
 
-> **Recommend C.** The flat part is the *action* (committing costs, always), the proportional part is
+> **DECIDED 2026-08-26 (owner veto pass): C.** The flat part is the *action* (committing costs, always), the proportional part is
 > the *mitigation* (output is priced) — two different rules governing two different things, which is
 > what they were each written for. It also makes guard a **decision** rather than a proc, and a
 > decision is exactly what BASTION's economy is missing: it is currently the only posture with no
 > resource it spends on winning (§8.9).
 
-**Blocked regardless.** `DerivedStatChannels.ResourceIds` is the locked five, so `resource.max.poise`
+**Blocked regardless.** `DerivedStatChannels.ResourceIds` is the locked five, so a `resource.max` channel for poise
 is not a registered channel and none of this is testable until the `decisions.md` **Resource model**
 amendment lands. Until then guard costs `stamina`, which is what
 [resource-hub-ssot.md](resource-hub-ssot.md) §2 already says it does.
@@ -906,8 +1188,8 @@ defect was in a *curve*, and no value of any existing tunable could reach it.
 
 | Key | Values | Default |
 |---|---|---|
-| `status.applyShape` | `sigmoid` · `linearFromZero` | **`sigmoid`** — unchanged |
-| `status.applyOffsetK` | delta units | **`0.0`** — unchanged |
+| `applyShape` | `sigmoid` · `linearFromZero` | **`sigmoid`** — unchanged |
+| `applyOffsetK` | delta units | **`0.0`** — unchanged |
 
 ```csharp
 public static double ApplyChance(double delta, double scale, double steepness)
@@ -931,7 +1213,7 @@ decided by measurement rather than by whoever writes the patch.
 old expression exactly (`delta - 0.0` is exact in IEEE). Loader rejects an unknown shape by name (T5).
 
 **A guard caught a real thing on the way.** `SpecChannelClaimTests` failed on
-`` `resource.max.poise` `` in the new docs — a channel that does not exist. It is genuinely proposed
+a `resource.max` claim for **poise** in the new docs — a channel that does not exist. It is genuinely proposed
 and blocked, so the two sections were marked **PROPOSED**, which is the guard's own first remedy.
 Working as designed.
 
@@ -1002,6 +1284,155 @@ neither engine has been cross-checked on with reflect, dodge and status all live
 | `netFactorScale` 10 → 100 | **Proposed**, measured, not published — it moves goldens |
 | Six status families fed at omni+category | **Authored** in the POC config |
 | The re-solved allocation | **Unverified — do not treat as balance** |
+
+
+## 5d. The termination invariant — an unending fight is an economy defect
+
+**Owner principle, 2026-08-26.** Stated as given, because it is exactly right and it is testable:
+
+> **Two actors at the same power scale, neither of which is a pure-survival build with no damage,
+> must not fight forever.** That one case excepted, a fight that never ends is not a build outcome —
+> it means the **resource economy is defective and needs rebalancing**. It usually happens because
+> resources regenerate faster than they are consumed.
+
+### 5d.1 The formal condition
+
+Recovery is the quantity a fight is actually decided by, and damage alone is not:
+
+```text
+netAttrition(X) = damage taken by X per round  −  recovery by X per round
+                  where recovery = resource.regen.hp + shield regen × (input / damageToShield)
+
+TERMINATION:  netAttrition ≤ 0 on BOTH sides  ⇒  neither can ever die.
+```
+
+**The exemption is narrow and it is real.** Two builds that bought *no offence at all* genuinely cannot
+resolve, and that must stay **possible** — banning it would be a hard restriction, and PS-8 refuses
+those. It is a degenerate pair, not a defect, and it sits outside the invariant rather than inside it
+as an exception.
+
+**Everything else that never ends is a defect.**
+
+### 5d.2 It fires, on the exact case the principle describes
+
+Two identical max-`Vigor` corners at Θ=100 — same power scale, both holding offence, so the exemption
+does **not** apply:
+
+| | per round |
+|---|---|
+| damage taken | 7,535 |
+| **recovery** | **9,992** |
+| **net attrition** | **−2,457** |
+
+**Recovery is 133% of damage. The fight cannot end.** Not "takes a long time" — cannot end, at any
+length, at any clock.
+
+And it was invisible until 2026-08-26, because **neither engine ticked regeneration**. A pool that
+refills read as a pool that does not, so the whole class of defect this principle names was outside
+what the harness could express. Both engines tick it now.
+
+> **A second confirmation, unplanned.** Before regen was ticked, the dominance matrix crowned
+> `Bulwark`. With regen ticked it crowns `Vigor` — the aptitude that holds `resource.regen.hp` and
+> `combat.shield.regen`. **Adding regeneration changed who wins the game.** That is the principle's
+> own diagnosis — *regeneration outpacing consumption* — arriving from a direction nobody aimed at it.
+
+### 5d.3 The sizing rule this yields, and it is the actionable part
+
+Let `r = recovery / peer damage`. Then net attrition is `damage × (1 − r)` and a fight stretches by:
+
+| `r` | Fight length |
+|---|---|
+| 0 | ×1 |
+| 0.5 | ×2 |
+| 0.67 | ×3 |
+| 0.9 | ×10 |
+| **≥ 1** | **∞ — never ends** |
+
+> **Regeneration must be sized against the damage a peer deals, never against the pool it refills.**
+>
+> `regen / maxPool` is a comfortable-looking number that says nothing about whether anything can die.
+> `regen / peerDamage` is the one that decides it — and it is the only one with a hard ceiling at 1.
+
+This is the same family as §2.2 (*size a coefficient against the shape of what consumes it*) and
+§7b.4 (*sigmoid saturates, reciprocal compounds*). Third instance of one idea: **a number is only
+meaningful relative to the thing that opposes it.**
+
+**Concretely:** the shipped POC has `r = 1.33`. Choosing "a max-sustain build's fights run 3× longer"
+sets `r = 0.67`, so `resource.regen.hp` and `combat.shield.regen` together must come down by about
+**2×**. That is a derivation, not a guess — which is the whole point of having the invariant.
+
+### 5d.4 Why this is better than the clock
+
+§8.7a found that a round limit removes the dominant corner, and it does. But the two do different work
+and only one of them is a fix:
+
+| | What it does |
+|---|---|
+| **Round clock** (§8.7a) | **Bounds the symptom.** A fight that would run forever is cut off. Necessary for encounter design — an encounter needs a worst case — but it makes the unkillable build a *draw* rather than a loss, which is still the best outcome available to it |
+| **Termination invariant** (this section) | **Removes the cause.** No pairing of non-degenerate builds can reach the state in the first place, so the clock never has to save the fight |
+
+**A clock over a broken economy hides the break.** With one, "cannot lose" scores draws forever and
+still beats everything else on the scoreboard; the invariant is what stops that build existing.
+
+### 5d.4a The dial, solved — and what nerfing it cost
+
+`recovery.scaleMilli` in `aptitudes.v{n}.json`: **one multiplier over every recovery family**, because
+`r` is a global ratio and nerfing 24 regen rows one at a time cannot target it.
+
+**Solved, not inverted.** `r` is *not* linear in the dial — cutting recovery also shortens the fight,
+which moves damage — so it took three measured passes:
+
+| dial | recovery | damage |  | stretch |
+|---|---|---|---|---|
+| 1000 (none) | 9,992 | 7,535 | **1.33** | **∞ — never ends** |
+| 500 | 5,508 | 6,967 | 0.79 | 4.8× |
+| 424 | 5,043 | 6,638 | 0.76 | 4.2× |
+| **374** | **4,449** | **6,638** | **0.670** | **3.0× — target** |
+
+**Re-solve after any coefficient change that touches damage.** The coupling means the dial does not
+hold still on its own, and that is a property of the system rather than a defect in the dial.
+
+### 5d.4b ⛔ The two invariants trade against each other
+
+Nerfing recovery did its job — every pairing now terminates, net attrition 3,937 to 14,107, and the
+closed form is back to **1.8% / 2.4%** against the simulator with regen live.
+
+**It also made the dominance problem worse.** Before the nerf, a 25-round clock cleared the dominant
+corner (§8.7a). After it, `Bulwark` dominates at **every** clock tested — none, 40, 30, 25, 20.
+
+The reason is not subtle once seen: **regeneration was the counterplay.** It is the one defence that
+scales with *time survived* rather than with a proc, so removing it globally transfers advantage to
+whichever defence does not depend on it — here, guard.
+
+> **A global recovery nerf is not distribution-neutral.** It is a nerf to every build that survives by
+> outlasting, and a buff, relatively, to every build that survives by refusing hits.
+
+**This does not argue against the nerf.** An unkillable pair is a worse defect than a dominant corner:
+one breaks the game, the other unbalances it. But it settles how the two acceptance criteria relate:
+
+> **§8.8b (nothing unbeatable) and §5d (nothing unkillable) are COUPLED and must be solved jointly.**
+> Fixing either alone moves the other. `residual-fit` is a joint optimisation over both, not two
+> independent passes — and any plan that sequences them will oscillate.
+
+### 5d.5 It becomes a guard
+
+Cheap, exact, closed-form, and it needs no trials:
+
+```powershell
+dotnet run --no-build -- predict  --actions basic -a <builds> --theta 100   # flags ⛔ NEVER ENDS
+dotnet run --no-build -- trinity  --actions basic -a force  --theta 100     # marks ∞ in the matrix
+```
+
+> **The HARD acceptance criterion for `balance-guard` — see §0.2.1 for why it outranks §8.8b's:**
+> **no pairing of builds that both hold offence may have `netAttrition ≤ 0` on both sides.**
+>
+> This one is hard because **no later layer can fix it.** A passive, an action or a skill cannot change
+> the arithmetic that a pool refilling faster than it drains never empties — content added on top
+> inherits the defect. A dominant corner, by contrast, is exactly what a counter-passive is for.
+
+The two together are the free-build health check: *nothing is unbeatable* (§8.8b) and *nothing is
+unkillable* (this). They fail differently and they catch different defects — the dominance matrix
+found `Vigor` winning at 100%; only this one explains that a `Vigor` **mirror** never resolves at all.
 
 
 ---
@@ -1184,6 +1615,150 @@ build pays"**, and it is a curve rather than a fee. That puts real weight on one
 
 ---
 
+## 7c. Allocation scope — four tiers, and three of them already ship
+
+**Owner decision, 2026-08-26.** The question *"who holds an allocation?"* was never asked in this
+document, and the answer is not one of the obvious three:
+
+> **commander → demon type → **aspect** → unique demon.**
+
+**An actor's allocation is the SUM of four allocations**, one per scope. That is not a new mechanism —
+it is the same tiered-additive shape the game already uses everywhere: `status.power.omni + .{category}
++ .{statusId}`, `combat.power.omni + .{element}`, `omni + category` never multiplied. One more instance
+of a pattern, not a new one.
+
+### 7c.1 Three tiers map onto the shipped identity grammar exactly
+
+[unique-actor-runtime.md](unique-actor-runtime.md) §3 already locks *"three orthogonal IDs — never
+collapse these"*, and §7 already splits type from specimen:
+
+| Scope | Shipped key | Where it lives today |
+|---|---|---|
+| **commander** | `player_id` (`kind=player`) | `rpg_actor_progression`; it is what `Θ_actor`'s `daveLevel` term already reads |
+| **demon type** | `(player_id, kind, type_id)` | §7's *"Type almanac — all Peashooters share one plant actor XP"* |
+| **aspect** (was “variant”) | `ActorElementTypes` + `BattleStatComposer` affinity | §7c.5 — it has MORE shipped support than any other tier; §7c.1 said “nothing” and that was wrong |
+| **unique demon** | `instance_id` (+ `player_id`) | §7's *"Unique specimen — one named Peashooter with gear/level across runs"*, `instance:{guid}` owner key |
+
+**Three of four are shipped concepts with their own progression rows.** The design does not need new
+identity plumbing; it needs a point budget per tier.
+
+**The variant tier is the gap.** There is no `variant` between type and instance. Candidates already in
+the demon program — `rarity`, `star` (`Demons/Fusion/StarPolicy.cs`), `personality` — but **nothing
+declares which one is the allocation scope**, and it must be one thing rather than three. That is the
+one genuinely new concept this decision introduces, and it belongs in the spec's Phase 0.
+
+### 7c.2 The tier weights are a design decision, and they have a clear direction
+
+Each tier draws points from its own progression source, which is what makes four budgets tractable
+rather than arbitrary:
+
+| Tier | Points scale with | What it expresses |
+|---|---|---|
+| commander | `Θ_player` — daveLevel, realms, runs | **who you are.** Shared by every demon you field |
+| type | type almanac XP | **what a species is.** Shared by every specimen of it |
+| variant | (undecided — rarity/star) | **which strain** |
+| unique | specimen level (`instance_id`) | **this one, that you invested in** |
+
+> **DECIDED 2026-08-26: the commander tier is the SMALLEST and the unique tier the LARGEST.**
+>
+> The commander tier applies to *every* demon you field, so a dominant commander allocation is the
+> worst possible version of §8.8a's finding — one wrong build, replicated across your whole roster.
+> The unique tier applies to one specimen, so a strong unique allocation is *specialisation*, which is
+> what makes a team diverse.
+>
+> **Per-demon allocation is also what most blunts the dominance problem** (§0.2.1): when you field a
+> mix, "one corner beats all eleven" stops being the whole game, because the question becomes which
+> *team* to bring rather than which build to play. That is the summoner fantasy doing balance work.
+
+### 7c.3 What it changes elsewhere in this document
+
+| Section | Change |
+|---|---|
+| §7a.2 (3 aptitude points per `Θ`) | **Per tier now, not per actor.** Four grants, four sources. The single number becomes a table |
+| §7b (free build) | Unchanged in principle — every tier is still free within itself. But "a build" now means a *stack* of four |
+| §8.8a (dominance) | Still measured per-actor and still valid; its *severity* drops, because a player fields several actors rather than one |
+| §6 (Zomboss patterns) | **Newly symmetric.** A pattern is an allocation at the type/variant tier, which is exactly what an authored enemy is — and the player's demons now work the same way |
+| `residual-fit` | Must fit **four** budgets, not one. Larger job, and the tier weights are its first output |
+
+### 7c.4 The fourth tier is `aspect` — element, and what element implies
+
+**Owner, 2026-08-26:** *"one plant type maybe have many element type… not only element types, maybe
+affect trait / initial skills or something? strong and weakness?"*
+
+**Yes — carry more than element, and that is the argument for it being one tier rather than several.**
+A sub-tier that carried *only* an element would be thin: a fire Peashooter and an ice Peashooter
+differing by a damage type is not a build decision. Carrying trait bias and starting skills makes each
+one a character.
+
+**But derive it, never author it.** That is the whole discipline, and the repo already has the machinery:
+
+```csharp
+DemonSpeciesGenerator:  TraitPool = TraitsFor(rarity, typeId)      // today
+                        TraitPool = TraitsFor(rarity, typeId, element)   // one more argument
+```
+
+Species are **generated from captured game data, output checked in**. So 20 species × 6 elements is
+**120 generated aspects, not 120 authored ones** — and the alternative is the fifth content system the
+atom program exists to stop. One generator argument versus a content project.
+
+**Strengths and weaknesses need nothing at all.** They already ship: `fire → ice → earth → air → fire`
+plus `light ⇄ dark`, with `MatchupShareK`. §2 is explicit that the posture cycle *"needs no second
+matchup table competing with the element ring"* — and this needs no third. **An aspect's strength and
+weakness ARE its element's.**
+
+### 7c.5 What already ships, and the one thing that has to move
+
+**Correcting §7c.1**, which said this tier had no shipped home. It has more than any other:
+
+| Piece | Ships as |
+|---|---|
+| An actor's element identity | **`ActorElementTypes`** — `Primary` + `Secondary`, validated (secondary requires a primary; the two must differ) |
+| Element routing a share of stats onto its own channels | **`BattleStatComposer`** — *"element affinity fills the actor's own element channels"*, `PrimaryAffinityDivisor` +25%, `SecondaryAffinityDivisor` +12.5% |
+| Strength / weakness | the element ring + `ShieldElementMatrix` |
+| Trait pools, generated per species | `DemonSpeciesGenerator.TraitsFor(rarity, typeId)` |
+
+**`BattleStatComposer`'s affinity is this tier's shipped precedent, with a fixed share instead of a
+budget.** The aspect tier is the same idea made allocatable: instead of a divisor handing you +25% on
+your own element, you *spend points* there.
+
+> **The one real migration.** `DemonSpeciesDef` carries `ElementPrimary` / `ElementSecondary`
+> **on the species**, so today one species **is** one element — a fire Peashooter and an ice Peashooter
+> would be two species, not two aspects of one. Making element an aspect means moving those two fields
+> (and probably `TraitPool`) **down** a tier. That is a schema and generator change, not a rename, and
+> it is the single largest piece of work this decision creates.
+
+### 7c.6 The name — `aspect`
+
+`race` is taken (`StatClass.Race`). `variant` is taken and means something else entirely —
+`DemonSpeciesCatalog.KnownVariants` is a shipped closed list of `normal · ancient · mutated · corrupted
+· blessed · cursed · shiny`, i.e. **cosmetic-rarity finishes**. Adopting it would create exactly the
+collision `race` was avoided for.
+
+`affinity` was the natural pick while this tier was element-only, and **it is now too narrow** — the
+tier carries traits and starting skills, and `affinity` names a divisor share.
+
+**`aspect`** — free everywhere in `src/`, reads correctly for what it is (*"the fire aspect of
+Peashooter"*), implies more than a damage type, and carries no biological framing, which matters
+because zombies and demons take element typings too.
+
+### 7c.7 ⚠️ Every dominance measurement neutralised elements
+
+Worth stating plainly next to the decision that makes elements a build axis.
+
+The measurement record's §5.1 records elements being **deliberately switched off** — all builds set to
+one element — because an uncontrolled element matchup was silently adding ±25% to two of three arrows.
+That control was correct then and it means:
+
+> **Every result in this document, including §8.8a's dominant corner, was measured on a 1-D slice of
+> what is now a 2-D matchup space.**
+
+With `aspect` as a tier, a team is chosen on **posture × element**, and a single dominant posture is
+much less decisive — you would still be picking aspects against the ring. **§8.8a's severity is
+therefore an upper bound**, and re-measuring with elements live is the first thing `residual-fit`
+should do rather than the last.
+
+---
+
 ## 7b. What free build changes about the distribution
 
 This is the section the owner's correction forces, and it is the important one. **Free build does not
@@ -1232,7 +1807,20 @@ cd tools\CombatSim
 dotnet run --no-build -- marginal -a force-ns,finesse-ns,bastion-ns --theta 100
 ```
 
-### 7b.3 Measured, 2026-08-25 — and the current distribution fails badly
+### 7b.3 Measured, 2026-08-25 — ⚠️ **SUPERSEDED**, and its verdict was overstated
+
+> **⚠️ SUPERSEDED by §0.0.3.** These numbers predate resources, actions, status and two model-bug
+> fixes. Re-measured on the current model, the best marginal fell from **+3.56% to under 1%**, and the
+> best point now differs per build (`Fortitude` +0.35% / `Vigor` +0.95% / `Bulwark` +0.56%) rather than
+> being `Fortitude` everywhere. **The three structural findings below still hold; the table does not** —
+> and the flattening is itself a result: a gradient that shallow cannot rank twelve options, which is
+> why the corner test (§8.8b) is now the primary instrument.
+
+
+> **⚠️ SUPERSEDED by §0.0.3.** These numbers predate resources, actions, status and two model-bug
+> fixes. Re-measured, the best marginal fell from **+3.56% to under 1%** and the best point now differs
+> per build ( /  / ) rather than being  everywhere. **The three
+> structural findings below still hold**; the table does not.
 
 Marginal win rate of one point, at the converged §8.5c allocation, `Θ`=100. **Renormalised**, so every
 other share falls: this is the point's value *net of what it costs elsewhere*, which is the only
@@ -1337,17 +1925,176 @@ bundled with a posture and got taken anyway; with no class, nothing makes a play
 measures at -1.87% / -4.00% (7b.3). Either its value becomes visible inside a fight, or it is not an
 aptitude - it is a progression setting wearing an aptitude costume.
 
+### 8.1a Focus — what it actually feeds, and why it still measures dead
+
+Asked directly by the owner, 2026-08-26. **Focus is not starved of channels — it has 42 edges, more
+than most aptitudes.** The problem is which ones, and one of them is inert for a reason that has
+nothing to do with Focus.
+
+**What Focus leads on** (largest source of, not merely a contributor):
+
+| Channel | `k` | Live in a duel? |
+|---|---|---|
+| `resource.max.qi` | **30.0** | **yes** — `qi` binds (§8.1b) |
+| `resource.regen.qi` | **1.8** | **yes** |
+| `resource.max.spirit` · `regen.spirit` | 14.0 · 0.7 | only once `spirit` is the status pool and something drains it |
+| `resource.efficiency.qi` | 0.5 | **no** — no cost-reduction path is modelled |
+| `skill.cooldown.{attack,support,status}` | 1.5 each | **no** — neither engine has cooldowns |
+| `progression.xpRate` · `breakthroughSuccess` | 0.6 · 0.4 | **no, and correctly so** — meta, not combat |
+| `status.duration.cc` | 1.2 | yes, once status is live |
+
+**So its live lever is real: `qi` throughput → `skill-strike` uptime.** A `skill-strike` hits for ×1.8,
+`qi` genuinely binds, and Focus roughly doubles `qi` throughput over the next-best source.
+
+**Why it still measures −0.36%:** a point moved *into* Focus comes *out* of everything else, and
+everything else is currently defence-dominated (§8.8a). Focus is not weak in isolation — it is
+**out-competed by the same over-weighted defence that beats every other offensive aptitude**. Fixing
+the dominance fixes Focus without touching Focus.
+
+> **⛔ Superseded by §8.1c.** The owner's decision is to **delegate the fix to the action layer**
+> rather than strengthen `Focus` here — the mechanisms it depends on (cooldowns, cost reduction) are
+> *different gameplay*, and flattening them into damage would trade a mechanism for a number. The list
+> below is retained as the menu that was considered, not as a plan.
+
+**Three ways to strengthen it deliberately**, cheapest first:
+
+1. **Raise the `skill-strike` multiplier** — makes `qi` throughput worth more per point. One number in
+   `actions/basic.json`, and it lifts every `qi` source, not only Focus.
+2. **Model cooldowns.** `skill.cooldown.*` is three of Focus's biggest coefficients and **neither
+   engine has cooldowns at all**, so a third of what Focus buys is unmeasurable by construction. This
+   is the largest single unlock and it belongs to `battle-timeline`'s readiness model.
+3. **Model `resource.efficiency`.** Another Focus lever nothing reads.
+
+**Not recommended: giving Focus a new combat mechanism.** Two of its three dead levers are dead
+because the *harness* lacks cooldowns and cost reduction, not because Focus lacks a job. Inventing a
+fourth mechanism would paper over that, and §8.1 already warns that status offence sits outside the
+cycle for want of exactly this kind of discipline.
+
+### 8.1b ⛔ `stamina` is free — one of the two action pools does nothing
+
+Found while answering §8.1a, and it is a defect in its own right.
+
+```text
+strike        cost 1,544 stamina/round   vs   regen 3,784/round   →  NEVER runs dry
+skill-strike  cost 3,791 qi/round        vs   regen 1,872/round   →  binds
+```
+
+**An actor can `strike` forever.** So `resource.max.stamina` and `resource.regen.stamina` — five
+sources each across all twelve aptitudes (§5a.2) — currently buy **nothing**, and the physical half of
+the action economy exerts no pressure at all.
+
+> **The sizing rule, and it is the same family as every other one in this document:**
+> **an action cost only matters if it exceeds the regeneration of the pool it draws on.** A cost
+> sized against the *pool* looks meaningful and is not; sized against the *regen rate* it decides
+> whether the economy exists.
+>
+> Compare §5d.3 (*regen is sized against peer damage, never against the pool*) — same shape, other
+> direction. **A number is only meaningful relative to the thing that opposes it.** Fourth instance.
+
+**Consequence for §5b.4's claim.** That section reported the action economy as *"the biggest single
+change to the model so far"*. Half of that is true: `qi` binds and does real work. The `stamina` half
+has been inert since it was written, which also means every `stamina` coefficient in the distribution
+is unfalsified rather than balanced.
+
+### 8.1c Reservation — delegating a balance fix to the layer that owns the mechanism
+
+**Owner decision, 2026-08-26:** *"Focus depends on an action mechanism that is not built yet, so we
+delegate the balance fix to the action layer. That makes the game more detailed and less boring
+through different gameplay mechanisms."*
+
+**Recorded as a decision, and generalised, because it is the reason §0.2's holes are good rather than
+merely tolerable:**
+
+> **An aptitude whose value depends on an unbuilt mechanism is a RESERVATION, not a defect.**
+>
+> The tempting fix is to flatten it into something the current harness can measure — give `Focus` more
+> damage and it stops reading as dead. That trades **a gameplay mechanism for a measurable number**,
+> and the mechanism is the point. Cooldown play, cost-reduction play and positioning play are
+> *different kinds of decision*; collapsing them into damage makes the game smaller and duller in
+> exchange for a green test.
+>
+> **Delegate the fix to the layer that owns the mechanism. Do not fix it here.**
+
+### 8.1d ⛔ It is not a `Focus` problem — every aptitude is 15–47% reserved
+
+Measured across the whole distribution, weighted by coefficient (an edge at `k=30` is not an edge at
+`k=0.2`):
+
+| Aptitude | reserved | biggest reservation |
+|---|---|---|
+| **Agility** | **47%** | `stamina` is free; nothing drains `spirit` |
+| Might | 42% | `stamina` is free; `progression.*` is meta |
+| Composure | 42% | nothing drains `spirit` (29k) |
+| Fortitude | 39% | `progression.*` is meta (18k) |
+| **Focus** | **36%** | nothing drains `spirit`; `stamina` is free |
+| Vigor | 32% | `stamina` is free (28k) |
+| Precision · Onslaught | 32% | `stamina` is free |
+| Ferocity | 28% | `stamina` is free |
+| Bulwark | 27% | `stamina` is free |
+| Pierce | 21% | `stamina` is free |
+| Retribution | **15%** | `stamina` is free |
+
+**This corrects §8.1a's framing.** `Focus` was presented as the aptitude waiting on unbuilt mechanisms.
+It is **fifth**, and four aptitudes are more reserved than it. `Focus` is not special — it is simply
+where the reservation became *visible*, because its live remainder happens to be out-competed.
+
+**And the single largest reservation is not per-aptitude at all: `stamina` is free** (§8.1b). It is the
+top reservation for **nine of twelve**. Fixing that one number does more for the distribution than any
+per-aptitude adjustment could.
+
+### 8.1e What this does to §8.8a's dominance result
+
+Two independent reasons the dominant corner is an **upper bound** rather than a measurement:
+
+1. **Elements were neutralised** in every run (§7c.7) — a 1-D slice of a 2-D matchup space.
+2. **15–47% of every aptitude is unmeasurable** — the corner test sees roughly **two thirds** of each
+   build, and not the same two thirds for each.
+
+> **`Bulwark` beats all eleven corners on the part of the game that currently exists.** That is a real
+> finding about the shipped coefficients and it is worth acting on — but it is not a finding about the
+> finished design, and the document should stop implying it is.
+
+**What this does NOT excuse.** The termination invariant (§5d) is measured on quantities that are all
+live — damage and recovery — so it is unaffected. It remains the hard criterion, and it passes.
+
 ### 8.2 `unitClass: null` blocks every coefficient
 
 All 16 newer combat families ship no declared unit while the code has already committed to one. We can
 say *Pierce feeds `combat.penetration`*; we cannot say *how much per point* until it is known whether
 `penetration` is `Θ`-scale or `P(Θ)`-scale. **This blocks the numbers, not the structure.**
 
-### 8.3 `poise` regeneration — per-tick or per-encounter
+### 8.3 `poise` regeneration — **DECIDED: per-tick, sized low. The binary dissolves (§5d.3)**
 
-Per-encounter makes guard break a decisive once-per-fight event; per-tick makes it a throttle that
-punishes burst and forgives attrition. This single choice decides whether BASTION is a burst-defender
-or a sustain-defender.
+The question was posed as per-tick *or* per-encounter: per-encounter makes guard break a decisive
+once-per-fight event, per-tick makes it a throttle that punishes burst and forgives attrition. It
+looked like it decided whether BASTION is a burst-defender or a sustain-defender.
+
+**It is not a binary, and the answer is already a rule in this document.** §5d.3:
+
+> *Regeneration must be sized against the damage a peer deals, never against the pool it refills.*
+
+Apply it to `poise` with `r = poiseRegen / peerPressure`:
+
+| `r` | What guard behaves like |
+|---|---|
+| `0` | **per-encounter** — a finite budget; break it and BASTION is defenceless for the rest of the fight |
+| **low** | pressure outpaces regen: **heavy hits break the guard, attrition does not** |
+| `≥ 1` | per-tick and unbreakable — guard never runs out, which is the same defect §5d names |
+
+**Per-encounter is the `r = 0` corner of a continuum, not a rival to it.** So: **per-tick regen, sized
+low against peer pressure** — that keeps the FORCE→BASTION arrow the *pressure race* §5.1 says it
+should be (*"heavy hits drain poise fast"*) without making guard a coin-flip on fight length, which is
+what a hard per-encounter budget does: in a long enough fight the break is guaranteed, and in a short
+enough one it never happens.
+
+**And it is the same dial as everything else.** `poise` joins `recovery.families` in
+`aptitudes.v{n}.json` and gets solved the way `resource.regen.hp` was (§5d.4a) — measured, not guessed,
+and re-solved whenever damage moves. **One mechanism, not a second.**
+
+> **Consequence worth stating:** this makes §5b.3's recommendation C *necessary* rather than merely
+> tidy. If `poise` drains proportionally to what the guard stopped, and regenerates at a rate sized
+> against incoming pressure, then the whole guard economy is one ratio — and a heavy attacker beats it
+> by arithmetic rather than by a special case.
 
 ### 8.4 Naming
 
@@ -1485,7 +2232,7 @@ are `Θ`-scale or `P(Θ)`-scale. **Until `unitClass` is decided, every archetype
 coefficient is a guess with a measurement attached, not a derivation.** The measurement is still worth
 having; it just cannot be calibrated yet.
 
-### 8.7 The residue after coefficient resizing — real, and not explained
+### 8.7 The residue after coefficient resizing — **RESOLVED, see §8.7a**
 
 §7b.4 shows that sizing coefficients by scale rather than by consumer *shape* is **most** of why
 defence dominates. It is not all of it: after resizing, `Fortitude` is still the best point in every
@@ -1511,7 +2258,7 @@ duel a round limit that counts as a loss for both, and see whether offence comes
 > than absorbed into a coefficient.** Fitting `Fortitude` down until the table looks flat would close
 > the symptom and leave whichever of the three above is real still running.
 
-### 8.8 Does the posture trinity survive free build?
+### 8.8 Does the posture trinity survive free build? — **MEASURED: not on today's slice. See §8.8a**
 
 Genuinely open, and it is the biggest one on this page.
 
@@ -1535,7 +2282,7 @@ whether the sequence cycles or converges. **A cycle proves the trinity; converge
 That is a fixed-point question, it costs milliseconds per step, and until it is run the trinity is a
 hypothesis with three data points.
 
-### 8.9 BASTION has no offensive resource
+### 8.9 BASTION has no offensive resource — **DECIDED 2026-08-26: reading 2, the riposte**
 
 FORCE spends `stamina` to attack and FINESSE spends `qi` to cast. BASTION spends `poise` to **block**.
 So two postures have an offence economy and one does not (§5a.1).
@@ -1554,6 +2301,160 @@ Three readings, and they are genuinely different games:
 **Blocked either way**: `poise` is not a registered resource, so none of this is testable until the
 `decisions.md` **Resource model** amendment (five → six) lands. Recommend reading 2 when it does — it
 is the only one that gives every posture something to spend on winning rather than on not-losing.
+
+### 8.8a MEASURED — the trinity does not survive the coefficients *on the part of the game that exists today*
+
+> **⚠️ Read the scope before the result.** Everything in this section is an **UPPER BOUND on the
+> severity of the problem, not a verdict on the design.** Two independent reasons, both measured rather
+> than argued:
+>
+> 1. **Elements were neutralised in every run** (§7c.7) — every build set to one element, so this is a
+>    1-D slice of what §7c turns into a 2-D matchup space.
+> 2. **15–47% of every aptitude is unmeasurable** (§8.1d) — the corner test sees roughly **two thirds**
+>    of each build, and not the same two thirds for each.
+>
+> It is a real finding about the **shipped coefficients** and it is worth acting on. It is **not** a
+> finding about the finished design. It is also the **SOFT** criterion (§0.2.1) — the **HARD** one is
+> the termination invariant (§5d), which is measured on live quantities only, and it **passes**.
+
+§8.8 asked whether the posture trinity is structure or vocabulary under free build, and named the test:
+best-response iteration — does the allocation space cycle, or converge? **It was run on 2026-08-26.**
+
+**Answer, within that scope: it converges. One build beats all eleven others.**
+
+#### The test that works, and the one that does not
+
+Best-response *chasing* was the first attempt and it is **unreliable**: it reported a fixed point at
+`Bulwark 55` — *"nothing beats it"* — while a direct check showed `Vigor 55` beating that same build
+**100%**. A hill-climb that misses a 100% counter is not evidence of absence.
+
+The reliable form is exhaustive: **spike each of the twelve aptitudes to the maximum a legal allocation
+permits and play every spike against every other.** 144 closed-form evaluations, instant, and it cannot
+miss. The corners are the right sample precisely because *every chain that converged, converged on a
+corner*.
+
+```powershell
+dotnet run --no-build -- trinity --actions basic --status -a force --theta 100
+```
+
+#### What it found, three times over
+
+| Pass | Change made | Dominant row |
+|---|---|---|
+| 1 | as authored | **Vigor** — beat all 11 at **100%**, and nothing beat Vigor |
+| 2 | split Vigor's pool from its mitigation (§5a.4) | **Fortitude** — 11/11 |
+| 3 | mitigation chain spread one stage per aptitude | **Bulwark** — 11/11 |
+
+> **Dominance moved three times and never disappeared.** That is the finding, and it is about the
+> *shape* rather than about *which* aptitude — moving one channel moved the crown.
+>
+> **What it does not license: *"so no redistribution can ever fix it."*** Three passes over a 1-D slice,
+> with a third of each build unmeasurable, cannot support a claim about the whole space. The supported
+> claim is narrower and still useful: **redistribution alone failed three times running, so the next
+> attempt should not be a fourth redistribution.** §8.1d names the cheaper move — `stamina` is free, and
+> it is the top reservation for nine of twelve aptitudes.
+
+#### §5a.4 was stated too narrowly
+
+The rule said *no aptitude may feed both sides of a multiplication*, framed as pool-versus-mitigation.
+The mitigation chain is a **product of four stages**:
+
+```text
+base + power  →  × K/(K + defense · pierceFactor(absorption))  →  × critMult(crit.resist)  →  × ampFactor(reduction)
+```
+
+> **Generalised: no aptitude may accumulate several channels that multiply each other.** Any set of
+> mitigation stages multiplies, so an aptitude holding three of them is *cubic* in its own share
+> regardless of what pool it feeds. One primary stage per aptitude; secondaries strictly weaker.
+
+Necessary, and — pass 3 proves — **not sufficient.**
+
+### 8.7a ⛔ PARTLY RETRACTED — the clock was the wrong instrument (see §0.1.2)
+
+§8.7 listed three candidates for why defence beat offence after coefficient resizing, and said of the
+third:
+
+> *"The duel has no clock. Nothing rewards killing fast, so trading kill speed for survival is free…
+> Candidate 3 would mean the measurement, not the design, is what is asymmetric — and it is the one
+> that would invalidate the other two, so it is the one to test first."*
+
+**It was never tested. It is now, and it is right.** With a round limit where a timeout is a loss for
+both sides:
+
+| Clock | Result |
+|---|---|
+| none (every measurement before 2026-08-26) | ⛔ Bulwark dominates 11/11 |
+| 40 rounds | ⛔ Bulwark dominates |
+| **25 rounds** | ✅ no dominant corner — **and this reading is WITHDRAWN, §0.1.2** |
+| 15 rounds | ⛔ Bulwark dominates again |
+
+> **⛔ Withdrawn.** These numbers are real and the conclusion drawn from them was not. A clock removes
+> the dominant corner by **changing the win condition** — it penalises fights for being LONG, which is
+> what a survival or cc build legitimately makes them. Re-measured on **win rate with no clock**,
+> `Bulwark` dominates at every setting: the balance the clock appeared to find does not exist.
+> The termination invariant (§5d) is the instrument for the defect §8.7 was actually chasing.
+
+> **Without a clock, "cannot lose" is optimal even when it also cannot win.** That is not a property of
+> the design — it is what an unbounded duel measures. Every dominance result above was partly an
+> artifact of a harness that let a fight run forever.
+
+**The clock is not the fix — see §5d.4.** It bounds the symptom; the termination invariant removes
+the cause. Both are needed and only one is a repair.
+
+**And there is a BAND, not a threshold.** Too long and the turtle wins; too short and it degenerates
+again. So:
+
+> **Encounter length is a balance parameter with a window, and it belongs in the tuning config.**
+
+This sharpens the very first thing the simulator ever found (measurement rule 1: *"fight length decides
+whether RPS is probabilistic or deterministic — the largest single lever, and it is not a stat"*). It is
+not only a variance lever. **It is what makes offence viable at all.**
+
+### 8.8b The acceptance criterion this produces
+
+The most durable output of this pass is not a number, it is a test:
+
+> **A coefficient set is not balanced until no row of the dominance matrix beats every other** —
+> measured on **win rate**, with **no clock** (§0.1.2: a clock manufactures a pass by penalising long
+> fights).
+>
+> **This is the SOFT criterion (§0.2.1).** A dominant corner is a hole the action/passive/skill layer
+> can fill — a passive that scales damage with damage taken, a reflect build, a status that punishes
+> turtling. It blocks *shipping a balanced game*; it does **not** block specifying this layer, provided
+> the hole is named and assigned rather than left to be discovered by a player.
+
+> **A RED result must be reported with its scope, or the guard lies in the same way §8.8a did.** The
+> matrix measures what is measurable, and today that is a 1-D element slice covering roughly two thirds
+> of each build (§7c.7, §8.1d). So `balance-guard` prints the **coverage alongside the verdict** —
+> which element axis was live, and which channel families were reserved — and a red row means *"the
+> live part of these builds is unbalanced"*, never *"this design is unbalanced"*. The two converge only
+> once `residual-fit` has done its two fixed first steps: elements live, and `stamina` binding.
+
+144 closed-form evaluations. It is cheap enough to be a **guard**, it is exactly the free-build
+condition §7b.2 asks for taken to the corners rather than to a local gradient, and it is the thing
+`balance-guard` should assert. The marginal test (§7b.3) measures one point's value *from where you
+already are*; the dominance matrix asks whether anywhere is unbeatable. **Free build converges to
+corners, so corners are what must be checked.**
+
+### 8.8c Model corrections found on the way — both mine, both material
+
+Recorded because each invalidated earlier numbers in this document.
+
+1. **Shield double-count.** `Build.At` seeded the granted shield pool with
+   `combat.shield.capacity.omni` while `ShieldRuntime` computes `maxHp = grant.BaseHp + capacity` and
+   reads the channel itself — so every shielded actor had **twice** the shield it bought. The warning
+   was in my own adjacent comment. Fixing it took the core-combat residual from **30.8% to 3.5%**.
+   *Corollary discovered by the fix:* a shield needs a **grant** to exist; capacity only adds to one, so
+   with a zero baseline, buying capacity did nothing at all.
+2. **Status rode the wrong base.** The simulator applies a status with the **action-multiplied** hit
+   (a `skill-strike` at ×1.8 applies a ×1.8 status, because the status scales off the packet it rode in
+   on); the closed form used the authored base. Residual with actions *and* status live: **15.4% → 4.1%**.
+   Each layer alone had been under 4% — **the error was invisible until both were on**, which is an
+   argument for measuring combinations rather than features.
+
+**Current residuals:** core combat **1.8% / 3.5%** · actions **0.9% / 2.4%** · status **4.0% / 5.3%** ·
+all four axes **4.1% / 7.7%**.
+
 
 ---
 

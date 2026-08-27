@@ -62,7 +62,7 @@ puts `+9 hp` and `+5 accuracy` in the same numeric column.
 
 ---
 
-## 3. The unit ledger — ten classes, each verified
+## 3. The unit ledger — twelve classes, each verified
 
 Every derived and primary magnitude belongs to exactly one class. The right-hand column is the consumer
 I read this session; a channel whose consumer I could not name does not get a class, it gets a
@@ -80,19 +80,29 @@ rejection (§8).
 | `Count` | `2 bullets` | none | `count`, `maxTargets` | atom param schemas |
 | `Flag` | present / absent, **never a number** | none | `status.immune.{tag}` `status.immuneReduction.{tag}` | [DerivedStatRegistry.cs:92-104](../../src/FusionRpg.Core/Stats/Derived/DerivedStatRegistry.cs) — `MaxPriorityFlag`, cap `1` |
 | `LadderIndex` | `Θ 20` | `→ 680 power` — **exact, not an estimate** (§3.2) | `progression.power` `progression.realm` | [ResistanceEvaluator.cs:190-217](../../src/FusionRpg.Core/Status/ResistanceEvaluator.cs) reads it **linearly** as a contest delta; `PowerLadder.Value(Θ)` reads it as `P(Θ)` for magnitudes |
+| `AptitudePoints` | `Might 55` | `→ +2,200 omni power` — **an estimate, allowed only on a surface with a real allocation** (§3.2's precedent; class-system/spec-primary-stats.md §3.2) | the twelve aptitudes (sources, never registered channels — class-system-map.md §2aa) | Read by both PS-3 functions the aptitude-tuning module owns; class-system, authorised 2026-08-26 |
+| `ReciprocalPoints` | `Onslaught 40 penetration` | an estimate, same suppression rule as `StatusPotencyPoints` | `combat.penetration` `combat.absorption` `combat.amplification` `combat.reduction` | [OverlayCombatCalculator.cs](../../src/FusionRpg.Core/Combat/OverlayCombatCalculator.cs)'s mitigation chain — `PierceFactor`/`AmpFactorReciprocal`, both asymptotic rather than sigmoid; class-system/spec-unit-class-close.md §3.3/§3.5, authorised 2026-08-26 |
 
-**Ten, not four** (nine when this document was written; `LadderIndex` added 2026-08-24). [tech-stack.md:201-208](tech-stack.md) and [web/spec.md:177](../web/spec.md) declare
+**Twelve, not four** (nine when this document was written; `LadderIndex` added 2026-08-24;
+`AptitudePoints`/`ReciprocalPoints` added 2026-08-26 by the class-system program). [tech-stack.md:201-208](tech-stack.md) and [web/spec.md:177](../web/spec.md) declare
 `gameUnits · resolverPoints · permille · ms`. `resolverPoints` must be **split into the three real
 behaviours** (`SigmoidPoints`, `SigmoidMultiplierPoints`, `StatusPotencyPoints`), the six flat families
-moved to `GameUnits`, and `GameUnitsPerSecond`, `Count`, `Flag` and `LadderIndex` added. Both files are
-corrected by this document.
+moved to `GameUnits`, and `GameUnitsPerSecond`, `Count`, `Flag`, `LadderIndex`, `AptitudePoints` and
+`ReciprocalPoints` added. Both files are corrected by this document.
 
 > **Tenth class added 2026-08-24.** The ledger shipped with nine and had no class for `Θ`, which is the
 > most load-bearing derived channel in the game — the `derived-stats` program found the hole while
 > classifying 157 new channels and could not assign `progression.power` a class at all. `Magnitude.unit`
 > is a **required** field, so `Θ` was not expressible in the render contract. Owner authorised the
-> addition the same day. **Contract change owed:** the `UnitClass` union in
-> [contract/types.ts](../../web/fusion-rpg-web/src/contract/types.ts) gains `"ladderIndex"`.
+> addition the same day.
+>
+> **Eleventh and twelfth classes added 2026-08-26** (class-system program): `AptitudePoints`
+> (spec-primary-stats.md §3.2) and `ReciprocalPoints` (spec-unit-class-close.md §3.3/§3.5), both
+> authorised the same day they were proposed, same terms as `LadderIndex`.
+>
+> **Contract change landed 2026-08-26:** the `UnitClass` union in
+> [contract/types.ts](../../web/fusion-rpg-web/src/contract/types.ts) gains all three strings in one
+> edit — `"ladderIndex"` (owed since 2026-08-24), `"aptitudePoints"`, `"reciprocalPoints"`.
 
 ### 3.1 One rule that falls out and will otherwise be broken
 

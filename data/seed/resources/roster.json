@@ -3,9 +3,9 @@
   "kind": "resource",
   "_meta": {
     "owner": "docs/architecture/resource-hub-ssot.md",
-    "note": "The five actor resources. One shared set - both factions carry all five, with the same ids, polarity and mechanics. Faction difference is a display label only, never a branch and never an id (resource-hub-ssot.md SS1-SS3, decisions.md 'Resource model (2026-08-22)'). Labels are repeated here so a reader does not need a second file; they remain content, not keys.",
+    "note": "The six actor resources. One shared set - both factions carry all six, with the same ids, polarity and mechanics. Faction difference is a display label only, never a branch and never an id (resource-hub-ssot.md SS1-SS3, decisions.md 'Resource model (2026-08-22, six 2026-08-26)'). Labels are repeated here so a reader does not need a second file; they remain content, not keys.",
     "warning": "The plant label 'Sun' on `hunger` is the ACTOR pool, not the lawn sun bank. The lawn bank is pvz.* and match-scoped, owned by SimEngine. See resource-hub-ssot.md SS4 before writing any UI.",
-    "status": "Vocabulary locked 2026-08-22, runtime not yet built. resource.max/regen/efficiency channels are PROPOSED - actor-hub-ssot.md SS3H.5."
+    "status": "Vocabulary locked 2026-08-22, poise appended 2026-08-26 (class-system, poise-resource). resource.max/regen/efficiency channels are REGISTERED (DerivedStatRegistry.cs, F8 reconcile pass 2026-08-25) but have no reader yet on any of the six ids - actor-hub-ssot.md SS3H.5."
   },
   "entries": [
     {
@@ -24,7 +24,7 @@
       "exhaustion": true,
       "actionCost": true,
       "pays": "physical",
-      "paysNote": "Move, basic attack, guard, reposition.",
+      "paysNote": "Move, basic attack, reposition.",
       "labels": { "plant": "Stamina", "zombie": "Stamina" }
     },
     {
@@ -56,6 +56,16 @@
       "pays": "skill",
       "paysNote": "Skills and abilities - anything with a trigger, an element, or a container of atoms behind it.",
       "labels": { "plant": "Yang", "zombie": "Yin" }
+    },
+    {
+      "id": "poise",
+      "class": "body",
+      "ordinal": 5,
+      "exhaustion": true,
+      "actionCost": true,
+      "pays": "guard",
+      "paysNote": "Raising a guard costs a flat commit; absorbing drains it in proportion to what the guard stopped (spec-guard-economy.md SS3). Spent poise converts to damage on release.",
+      "labels": { "plant": "Poise", "zombie": "Poise" }
     }
   ]
 }

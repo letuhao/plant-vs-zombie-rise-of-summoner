@@ -35,6 +35,9 @@ const AlmanacLayer = lazy(() => import("@/layers/almanac/AlmanacLayer").then((m)
 const ChronicleLayer = lazy(() =>
   import("@/layers/chronicle/ChronicleLayer").then((m) => ({ default: m.ChronicleLayer }))
 );
+const AptitudesLayer = lazy(() =>
+  import("@/layers/aptitudes/AptitudesLayer").then((m) => ({ default: m.AptitudesLayer }))
+);
 
 /** T20 (GG-20): every rail entry is a rebindable action, so this reads the live table instead of
  * a hardcoded key literal — `useKeybindingsVersion` below forces a re-read after any rebind. */
@@ -247,6 +250,12 @@ export function SanctumStage() {
       {mountedLayers.has("chronicle") ? (
         <Suspense fallback={<ChunkFallback testId="chunk-fallback-chronicle" />}>
           <ChronicleLayer open={openLayer === "chronicle"} onOpenChange={(open) => !open && closeLayer()} />
+        </Suspense>
+      ) : null}
+
+      {mountedLayers.has("aptitudes") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-aptitudes" />}>
+          <AptitudesLayer open={openLayer === "aptitudes"} onOpenChange={(open) => !open && closeLayer()} />
         </Suspense>
       ) : null}
     </StageHost>

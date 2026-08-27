@@ -1,5 +1,46 @@
 # Spec: action-catalog (A6)
 
+**Status: REVISED 2026-08-27** against the sealed [action-ideal.md](../action-ideal.md).
+
+**What changed:**
+
+| | Change | Source |
+|---|---|---|
+| 1 | **Six resources** validated, not five | `decisions.md` Resource model, six 2026-08-26 |
+| 2 | The catalog validates **structure against the rung budget** | ideal §8.3 · `A12` §4 |
+| 3 | **Three tables register into E8's hash**, plus a fourth when predicate pricing lands | [spec-content-hash.md](../effect-atom/spec-content-hash.md) |
+| 4 | **`grantable` / `default_attack_eligible`** are load-validated | `A1` §2.1, handshake 2 and 3 |
+
+### R1. Structure validation — new, and it is what keeps the ladder honest
+
+`A12` gives each rung a **`structureBudget`**: which complexity axes it may spend on. An authored or seeded
+action whose structure exceeds its rung's budget is **rejected at load, naming the rung and the axis**.
+
+Without this the ladder is advisory: a rung-2 action carrying a reaction would price above its rung, and
+`A12`'s monotonicity assertion would pass while the content lied.
+
+### R2. Content-hash registration — what registers, and when
+
+Actions are **content by the same definition as an atom**: authored rows whose values change battle
+outcomes. Left out of the hash, *"a balance tweak to an action would silently invalidate every golden and
+every recorded battle."*
+
+| Table | Registers |
+|---|---|
+| `rpg_action` · `rpg_action_cost` · `rpg_action_effect_scope` | **after `A1` ships its DDL**, as their own version bump |
+| `action-rungs.v1.json` → its table form | with `A12` |
+| `power_predicate_frequency` | with the **atom program**, when predicate pricing lands |
+| `rpg_action_grant` | **never** — it is per-player state, like `effect_binding` |
+
+**Registering a table before its DDL exists makes `ComputeContentHash` throw on every call.** Same rule
+already applied to `effect_element` and `power_coefficient`.
+
+### R3. Six resources, asserted
+
+A cost row naming a seventh id is rejected; a row naming `poise` is **accepted**. Both asserted, so a
+five-resource regression and a runaway-vocabulary regression are each a red test.
+
+
 Module **A6** in the [action map](../action-map.md). Depends on **A1**, **A5**.
 
 ## Objective

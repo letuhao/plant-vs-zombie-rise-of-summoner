@@ -1,5 +1,11 @@
 # Spec: battle-board (A10)
 
+> **Reconciled 2026-08-27.** Checked against the sealed [action-ideal.md](../action-ideal.md) and
+> found **substantively intact**; only the notes below change.
+> — Still owner-deferred. Two things now wait on it explicitly: `A14`'s **`coincidence`** factor is `1000‰`
+> until a board exists, and `A13`'s **area shapes** are bind-time rejected while there is none.
+
+
 Module **A10** in the [action map](../action-map.md). Depends on **A1**.
 
 > **Deferred by the owner** — built with the board map / battle area, not in wave 1. Specced ahead because documents reconcile cheaply and code does not, and because `A2`, `A7`, and `A9` all carry parameters that are inert precisely until this exists.

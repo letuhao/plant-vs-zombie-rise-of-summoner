@@ -1,0 +1,140 @@
+using FusionRpg.Core.Battle;
+using FusionRpg.Core.Power;
+using FusionRpg.Core.Stats.Derived;
+
+namespace FusionRpg.Core.Stats.Aptitudes;
+
+/// <summary>
+/// spec-aptitude-resolve.md — turns an allocation into derived-channel modifiers, through the two
+/// PS-3 read functions <see cref="AptitudeReadFunctions"/> owns. Pure: no I/O, no statics, no cache
+/// (§5 rule 3 — the second-cheapest option after having none at all is copying `BattleStatComposer`'s
+/// `AsyncLocal` idiom verbatim; this needs neither, since it holds no state between calls).
+///
+/// <para>Every dependency arrives as a parameter — including <see cref="PowerLadder"/> — so this stays
+/// callable with nothing configured globally: the caller (a subsystem, a test, `deterministic-core`)
+/// owns wiring <c>PowerTuningHub.Tuning</c>/<c>AptitudeTuningHub.Tuning</c> into concrete objects.</para>
+/// </summary>
+public static class AptitudeResolver
+{
+    /// <summary>
+    /// Resolve every funded edge into a <see cref="DerivedModifier"/>. An aptitude with zero share
+    /// contributes nothing — not a zero-valued modifier (§7 test 5) — so an empty allocation resolves
+    /// to an empty list, and the composer sees no aptitude contribution at all.
+    /// </summary>
+    public static IReadOnlyList<DerivedModifier> Resolve(
+        AptitudeAllocation allocation, AptitudeTuning tuning, PowerLadder ladder, int theta, DerivedStatRegistry registry)
+    {
+        if (allocation is null) throw new ArgumentNullException(nameof(allocation));
+        if (tuning is null) throw new ArgumentNullException(nameof(tuning));
+        if (ladder is null) throw new ArgumentNullException(nameof(ladder));
+        if (registry is null) throw new ArgumentNullException(nameof(registry));
+
+        var mods = new List<DerivedModifier>();
+        long? pTheta = null; // computed at most once, lazily -- only if a funded edge actually reads it
+
+        foreach (var edge in tuning.Edges)
+        {
+            var share = allocation.Share(edge.Source);
+            if (share <= 0.0) continue;
+
+            if (!registry.TryResolveChannel(edge.Channel, out var def))
+                throw new InvalidOperationException(
+                    $"aptitude edge targets unregistered channel '{edge.Channel}' (source '{edge.Source}') — " +
+                    "spec-aptitude-tuning.md's own reader-census test (AptitudeTuningTests.EveryEdgeChannel_" +
+                    "isRegistered_inDerivedStatRegistry) should have caught this before it ever reached here.");
+
+            var kMilli = EffectiveKMilli(tuning, edge);
+            var value = edge.Mode == AptitudeReadMode.Contest
+                ? AptitudeReadFunctions.Contest(kMilli, share, tuning.Read.Contest.ShareExponentMilli, tuning.Read.Contest.SpanPointsMilli)
+                : AptitudeReadFunctions.Magnitude(kMilli, share, tuning.Read.Magnitude.ShareExponentMilli, pTheta ??= ladder.Value(theta));
+
+            // The op a contribution composes with is a property of the TARGET CHANNEL's registered
+            // DerivedComposeKind, not of the read mode — these are independent axes (how the value is
+            // computed vs. how multiple sources combine). FlatSum/FlatReplace both take an additive
+            // Flat contribution (DerivedComposer.ComposeFlatReplace sums Flat as the baseline before any
+            // Replace wins); an aptitude point is additive by nature, never a hard override. No shipped
+            // edge targets a MaxPriorityFlag channel today; Flat is still the least-surprising fallback
+            // if one ever does, since Flag/Replace/Increased in that kind's "max of" set would let one
+            // point silently overrule every other source.
+            var op = def.Compose == DerivedComposeKind.SumIncreased ? DerivedModifierOp.Increased : DerivedModifierOp.Flat;
+
+            mods.Add(new DerivedModifier(edge.Channel, op, value, SourceId: $"aptitude.{edge.Source}"));
+        }
+
+        return mods;
+    }
+
+    /// <summary>
+    /// The battle-path twin of <see cref="Resolve"/> — spec-aptitude-resolve.md §2a: "this module emits
+    /// one thing and it is adapted at two seams." Same edges, same <see cref="AptitudeReadFunctions"/>
+    /// calls, packaged as <see cref="BattleChannelMod"/> instead of <see cref="DerivedModifier"/> —
+    /// <c>BattleChannelMod.Amount</c> is already `long`, and <c>BattleStatComposer</c>'s ChannelMods
+    /// loop has no op concept at all (always additive, no cap application — true for every other
+    /// producer feeding it, `StarChannelMods`/`LoyaltyChannelMods`/trait mods included, not something
+    /// this method introduces), so there is no compose-kind lookup to do here the way <see cref="Resolve"/>
+    /// needs one. The Contest branch narrows to `long` here (never inside
+    /// <see cref="AptitudeReadFunctions.Contest"/> itself, which stays `double` for every caller) because
+    /// only THIS caller's output type demands it.
+    /// </summary>
+    public static IReadOnlyList<BattleChannelMod> ResolveForBattle(
+        AptitudeAllocation allocation, AptitudeTuning tuning, PowerLadder ladder, int theta, DerivedStatRegistry registry)
+    {
+        if (allocation is null) throw new ArgumentNullException(nameof(allocation));
+        if (tuning is null) throw new ArgumentNullException(nameof(tuning));
+        if (ladder is null) throw new ArgumentNullException(nameof(ladder));
+        if (registry is null) throw new ArgumentNullException(nameof(registry));
+
+        var mods = new List<BattleChannelMod>();
+        long? pTheta = null;
+
+        foreach (var edge in tuning.Edges)
+        {
+            var share = allocation.Share(edge.Source);
+            if (share <= 0.0) continue;
+
+            if (!registry.TryResolveChannel(edge.Channel, out _))
+                throw new InvalidOperationException(
+                    $"aptitude edge targets unregistered channel '{edge.Channel}' (source '{edge.Source}')");
+
+            var kMilli = EffectiveKMilli(tuning, edge);
+            long amount;
+            if (edge.Mode == AptitudeReadMode.Contest)
+            {
+                var contest = AptitudeReadFunctions.Contest(kMilli, share, tuning.Read.Contest.ShareExponentMilli, tuning.Read.Contest.SpanPointsMilli);
+                amount = checked((long)Math.Round(contest, MidpointRounding.AwayFromZero));
+            }
+            else
+            {
+                amount = AptitudeReadFunctions.Magnitude(kMilli, share, tuning.Read.Magnitude.ShareExponentMilli, pTheta ??= ladder.Value(theta));
+            }
+
+            mods.Add(new BattleChannelMod(edge.Channel, amount));
+        }
+
+        return mods;
+    }
+
+    /// <summary>
+    /// <c>tuning.Recovery.ScaleMilli</c> is the termination-invariant dial (class-system-ideal.md §5d)
+    /// — one multiplier over every edge whose channel starts with one of <c>tuning.Recovery.Families</c>,
+    /// because <c>r = recovery/peerDamage</c> is a global ratio a single edge's own coefficient cannot
+    /// target. Found missing here 2026-08-27 (this program's own POC, <c>tools/CombatSim</c>, had the
+    /// identical gap and fixed it the same session) — every recovery-family edge was reading its raw,
+    /// undamped coefficient, silently discarding the dial the shipped tuning file's own
+    /// <c>recovery._scaleWhy</c> note says was solved against a measured r=1.33 (an unkillable pair).
+    /// Both factors are per-mille; widen before multiplying, divide by their combined scale once.
+    /// </summary>
+    static long EffectiveKMilli(AptitudeTuning tuning, AptitudeEdge edge)
+    {
+        var isRecovery = tuning.Recovery.Families.Any(f => edge.Channel.StartsWith(f, StringComparison.Ordinal));
+        if (isRecovery) return checked(edge.KMilli * tuning.Recovery.ScaleMilli) / 1000;
+
+        // tuning.Mitigation.ScaleMilli — Recovery's own sibling dial (class-system-todo.md P8.3,
+        // AptitudeMitigation's own doc comment): the SAME termination invariant also depends on
+        // defense/dodge/parry/block/absorption/heal-power, channels Recovery's own Families list never
+        // reached, so a build whose survival leans on those instead of hp-regen was invisible to the
+        // one dial that existed before this task.
+        var isMitigation = tuning.Mitigation.Families.Any(f => edge.Channel.StartsWith(f, StringComparison.Ordinal));
+        return isMitigation ? checked(edge.KMilli * tuning.Mitigation.ScaleMilli) / 1000 : edge.KMilli;
+    }
+}

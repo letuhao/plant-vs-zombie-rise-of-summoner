@@ -29,7 +29,8 @@ import type {
   UniqueActorDto,
   UniqueActorListDto,
   UniqueEquipmentListDto,
-  RelicCatalogListDto
+  RelicCatalogListDto,
+  AptitudesState
 } from "./types";
 
 function hubConnected(status: string): boolean {
@@ -85,6 +86,16 @@ export function usePvzStatsSheet(playerId: number | null | undefined) {
   return useQuery({
     queryKey: queryKeys.pvzStats(playerId ?? 0),
     queryFn: () => getJson<PvzStatsSheet>(`/api/pvz-stats/${playerId}`),
+    enabled: playerId != null && playerId > 0,
+    refetchInterval: hubConnected(hub) ? false : 8000
+  });
+}
+
+export function useAptitudes(playerId: number | null | undefined) {
+  const hub = useHubStatus();
+  return useQuery({
+    queryKey: queryKeys.aptitudes(playerId ?? 0),
+    queryFn: () => getJson<AptitudesState>(`/api/aptitudes/${playerId}`),
     enabled: playerId != null && playerId > 0,
     refetchInterval: hubConnected(hub) ? false : 8000
   });

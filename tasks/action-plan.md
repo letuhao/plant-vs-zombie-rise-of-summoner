@@ -1,116 +1,217 @@
 # Plan: action program
 
-Map: [../docs/architecture/action-map.md](../docs/architecture/action-map.md) · Specs: [../docs/architecture/action/](../docs/architecture/action/) (ten modules) · Audit: [../docs/architecture/action/audit-2026-08-22.md](../docs/architecture/action/audit-2026-08-22.md)
+**Rewritten 2026-08-27** against the sealed [action-ideal.md](../docs/architecture/action-ideal.md),
+the revised [map](../docs/architecture/action-map.md) (16 modules) and
+[audit-2026-08-27.md](../docs/architecture/action/audit-2026-08-27.md) (11 findings, all resolved).
 
-Task list: [action-todo.md](action-todo.md). Paths are prefixed because `tasks/plan.md` and `tasks/todo.md` hold **Perf v3**.
+Task list: [action-todo.md](action-todo.md). Paths are prefixed because `tasks/plan.md` and `tasks/todo.md`
+hold **Perf v3**.
 
 ---
 
-## ⛔ Gate 0 — this program does not start until the effect-atom program has built
+## 0. Two owner instructions that shape this plan
 
-Owner decision, 2026-08-22: **spec and plan now, build after they build.** Documents reconcile cheaply; code does not.
+**2026-08-27, and they change how it is written:**
 
-`A1` carries a foreign key into `effect_container`, `A4` needs two predicate leaves added to `E3`, and `A6` registers tables into `E8`'s hash. All three are approved and written into their specs, and all three are **theirs to land**. Starting before they do means building against a moving contract and reconciling in code, which is the cost this ordering exists to avoid.
+> *"Don't add a gate if it blocks the build."*
+> *"Better to build then tune later by tunable variable, instead of trying to build a perfect system
+> without data to prove it perfect."*
 
-**Nothing below is authorized until that gate clears.**
+### 0.1 No human gates. Mechanical assertions only.
 
-## Shape of the work
+The previous plan had two ⛔ checkpoints that **stopped and waited for a sign-off**. Those are gone.
 
-Seven modules build; three wait behind dependencies. The spine is:
+| | Old shape | This plan |
+|---|---|---|
+| Byte-identity | ⛔ *"stop, do not bless"* | `BattleGoldenTests` **already refuses a silent re-bless**. A moved golden is a **red test**, which stops the build without stopping the builder |
+| Balance | ⛔ owner sweep sign-off | a **recorded number** in a baseline file, diffed by a script |
 
+**A checkpoint here means: run these commands, record the numbers, continue.** The only stop is a failing
+test — and a failing test is information, not a queue.
+
+### 0.2 Every balance number ships as a tunable with a working value
+
+This is not a shortcut; it is the repo's own standard. PS-7: *"being wrong costs a config version, not a
+refactor."* `tier-bands.v1.json` says it of itself: *"working values chosen to make the corpus resolvable,
+**not a validated balance decision**."*
+
+So every number below — `p1`, `delta`, `floor`, `cap`, the rung multipliers, the cost tax, the predicate
+floor — **lands with a starting value and a declared metric**, and is solved from play data later. **No task
+waits on a measurement.**
+
+> The one thing that is *not* deferred is a number's **shape**: `long` not `float`, per-mille not
+> fractional, tunable not `const`. Getting the shape wrong costs a refactor; getting the value wrong costs a
+> file save.
+
+---
+
+## 1. Shape of the work
+
+**16 modules, 11 phases, ~36 vertical slices.** Every slice is one complete path — row to read, or seam to
+consumer — never a horizontal layer.
+
+```text
+P0 prerequisites (2 other programs + our guard)
+    |
+P1 the row + the ladder        A1 A12
+    |
+P2 targeting + usability       A2 A4
+    |
+P3 THE PROOF                   A5        <- freezer; nothing else lands in this window
+    |
+P4 costs + pools               A3
+    |
+P5 progression                 A11 A16
+    |
+P6 grants                      A15
+    |
+P7 defence                     A8
+    |
+P8 duration                    A14
+    |
+P9 catalog + generation        A6 A13
+    |
+P10 selection                  A7
+    |
+deferred                       A9 A10
 ```
-P1 guard  →  A1 model  →  A2 targeting  →  A4 usability  →  A5 PROOF  →  A3 costs  →  A6 catalog  →  A7 selection
-                                                             ⛔ byte-identical
-```
 
-Three ordering constraints are not negotiable, and each has a reason that has already cost this repo something:
+### 1.1 Three orderings that are not negotiable, and why
 
-1. **The guard extension comes before the first line of action code.** Audit C1: `Core/Actions/` has no determinism enforcement today. A file landing before the guard is a file nobody checked, and wall-clock or ambient-RNG damage is invisible until a replay fails.
-2. **Parity capture comes before any engine change.** You cannot prove byte-identity against a baseline you did not record. The timeline program learned this at B1 and it is the same lesson.
-3. **`A3` lands after `A5`, not before.** Costs inside the byte-identity gate would put a behaviour change inside the one module whose entire job is proving nothing changed. `A4` ships its affordability gate as a seam instead.
+1. **`P0.1` (purity guard) before the first line of `Core/Actions/`.** Audit C1 of the *previous* audit:
+   that directory has no determinism enforcement. A file landing before the guard is a file nobody checked,
+   and wall-clock or ambient-RNG damage is invisible until a replay fails.
+2. **Parity capture (`T11`) before any engine change.** You cannot prove byte-identity against a baseline
+   you did not record.
+3. **`A3` after `A5`, and `A8` after `A5`'s window closes.** `decisions.md` Golden ordering: *"freeze first,
+   move last — if a mover overlaps a freezer, neither can attribute a hash change to its own work."*
+   **This is a sequencing rule, not a gate** — nothing waits on a person.
 
-## Phases
+Everything else may be reordered if it helps.
 
-### Phase 0 — prerequisites *(nothing builds before these)*
+### 1.2 Phase 0 is work, not a gate
 
-`P1` extends the purity scan to `Core/Actions/` — purity rules on, tick-path rules off. The mechanism exists (`DiagnosticsExemptFromTickPath` already does this for `BattleTrace.cs`); this is a directory and an exemption entry. It must be **proven able to fail** against a planted `DateTime.UtcNow` before it is trusted, or it is decoration.
+**Owner, 2026-08-27:** *"we will extend atom effect before we build any action — so build order is extend
+dependencies first."* That is the order, and the plan follows it.
 
-`P0` (decisions rows) is already done — three rows landed 2026-08-22.
+But three of the five prerequisites have **seams that let the dependent slice ship without them**, which is
+what keeps this an order rather than a blocker:
 
-### Phase 1 — the foundation (A1)
-
-Three vertical slices, each a complete path from row to read:
-
-- **T1** the `rpg_action` table, its record, its validator, and store round-trip
-- **T2** costs and effect-scope tables
-- **T3** action binding and resolution — intrinsic ∪ granted, ordinal order
-
-`T3` is easy to skip and expensive to add later: it is the first question `A4` and `A7` ask, and neither can be built without it.
-
-### Phase 2 — targeting (A2)
-
-- **T4** the typed spec, its filters, and compilation to `TargetSpec[2]` plus a filter predicate
-- **T5** `GridDistance` and the range gate, with the no-board pass-through
-- **T6** the `target` RNG stream
-
-`T5`'s **no-board pass-through is the single line `A5`'s freeze rests on.** It is asserted here and again in `A5` — deliberately twice, because one test proves the rule and the other proves the freeze depends on it.
-
-### Phase 3 — usability (A4)
-
-- **T7** the five gates, ordered and short-circuiting, with typed refusals and the affordability seam
-
-Gate order is not style: it is what lets `A7` hoist per-actor and per-action work out of the target loop. It is asserted by **read count**, not by reading the code.
-
-### Phase 4 — the proof (A5) ⛔
-
-- **T8** parity capture — **before any engine change**
-- **T9** the three envelope gaps, additive and inert
-- **T10** the basic attack as a declared action, engine calling the action path
-- **T11** gate verification
-
-### Phase 5 — costs (A3)
-
-- **T12** resource catalog, channels, lazy pools
-- **T13** exhaustion as a status, with hysteresis
-- **T14** cost validate / consume / roll back, and `perTick`
-- **T15** run-scoped pools and rest
-
-### Phase 6 — catalog (A6)
-
-- **T16** load, compile, cache, and hash registration
-
-### Phase 7 — selection (A7)
-
-- **T17** the `IBattleView` seam
-- **T18** the stub AI
-
-`T17` before `T18` matters: the seam is what makes deferred fog an implementation swap instead of an AI rewrite, and it erodes on the first convenient shortcut if the AI is written first.
-
-## Checkpoints
-
-| | Gate |
+| Prerequisite | If it is late |
 |---|---|
-| **⛔ A — byte-identical** | After `T11`. Eight goldens unchanged, `RulesetVersion` still 2, six suites green **with no test edited**. A re-bless here means the model is wrong: **stop, do not bless.** |
-| **✅ B — actions are content** | After `T16`. A second and third action exist as rows, with costs, and a changed value moves the content hash. |
-| **✅ C — something chooses** | After `T18`. `SelectTarget` has a replacement both auto-battle and interactive enter through, and replay holds across runs and across list order. |
-| **⛔ D — the movers** | `A10` + `A9` + `A7`'s distance targeting + fog, together with timeline T9 and atom E12: **one combined re-bless, one sweep, `RulesetVersion` advances once.** |
+| `P0.2` linkage | only linked actions wait. Nothing else in 36 slices touches it |
+| `P0.3` predicate pricing | `T5`'s monotonicity assertion ships with `_meta.measurable` recording its state, and is re-run when pricing lands |
+| `P0.5` `turn.speed` | `A14` ships `IDurationResolver` + the clamp; only `BattleDurationResolver` waits |
+| `P0.4` `holdsStock` | only consumable actions wait |
+| **`P0.1` purity guard** | **no seam. This one really is first** |
 
-## Deferred, and why
+---
+
+## 2. Phases
+
+### Phase 0 — prerequisites
+
+`P0.1` is ours and blocks the first line of action code. `P0.2`–`P0.5` belong to two other programs; this
+program supplies the requirement and the tests.
+
+### Phase 1 — the row and the ladder (`A1`, `A12`)
+
+Five slices, each row → store → read. `A12` lands **with** `A1` rather than after it, because `A3` and `A11`
+both read the rung and two readers of one table is why it exists separately.
+
+**`T3` is easy to skip and expensive to add later** — `rpg_action_grant` is the correction another program
+found, and the item lane is blocked on it.
+
+### Phase 2 — targeting and usability (`A2`, `A4`)
+
+`T7`'s **no-board pass-through is the single line `A5`'s freeze rests on.** Asserted here and again in `A5`
+— deliberately twice, because one test proves the rule and the other proves the freeze depends on it.
+
+Gate order is not style: it is what lets `A7` hoist per-actor and per-action work out of the target loop,
+and it is asserted by **read count**, not by reading the code.
+
+### Phase 3 — the proof (`A5`)
+
+The byte-identity slice. **This is the freezer**, so `A3`, `A8` and `A13` all sit outside its window.
+
+`T14` is where the two shipped `D6` comments close: if an action's atoms resolve in battle, `resource.delta`
+and `shield.grant` go **Full** there.
+
+### Phase 4 — costs and pools (`A3`)
+
+The pools are **already registered** (`DerivedStatRegistry.cs:165-171`); this phase is their **reader**.
+
+### Phase 5 — progression (`A11`, `A16`)
+
+`A16` lands with `A11` because a held pool nothing can equip from is not testable, and because **auto-equip
+is what lets every non-player actor arrive equipped**.
+
+### Phase 6 — grants (`A15`)
+
+Closes the nine-item handshake. `T23`'s assembly is the entry point the item lane is explicitly forbidden
+from implementing.
+
+### Phase 7 — defence (`A8`)
+
+Guard as a stance. **Not blocked on timeline B6** — but it lands after `A5`'s window, per §1.1(3).
+
+### Phase 8 — duration (`A14`)
+
+Ships the seam and the clamp; the battle resolver waits on `P0.5`.
+
+### Phase 9 — catalog and generation (`A6`, `A13`)
+
+`A13` is the **runtime** generator — the loot model. Seedsmith is a dev tool and comes **after** this whole
+program.
+
+### Phase 10 — selection (`A7`)
+
+`T35` before `T36`: the `IBattleView` seam erodes on the first convenient shortcut if the AI is written
+first.
+
+---
+
+## 3. Checkpoints — all reporting, none blocking
+
+| After | Record | Red means |
+|---|---|---|
+| **P1** | schema round-trips; every validator rejects a planted row | a validator that cannot fail |
+| **P2** | `FactReader.Reads` per gate; zero-alloc evaluation | the hoist is not happening |
+| **P3** | 8 goldens byte-identical · `RulesetVersion` 2 · six suites green **with no test edited** | the model is wrong — **not** a re-bless |
+| **P4** | lazy regen == scheduled regen; **zero** timers at 200 actors | a scheduled-event regression |
+| **P5** | discard does not restore chance; auto-equip deterministic across shuffled input | the ratchet leaks |
+| **P6** | all nine handshake items tickable by the item lane | the seam is still one-sided |
+| **P7** | `r = poiseRegen / peerPressure < 1` from **emitted metrics** | guard is unbreakable |
+| **P8** | a duration-stacking build stays bounded | the clamp is in the wrong place |
+| **P9** | every conditional payoff has an enabler in its pool | the discount pays for an unreal combo |
+| **P10** | battle **terminates** when nobody can declare | a hang, which is a stopped clock |
+
+**None of these waits on a person.** Each is a command that exits non-zero.
+
+---
+
+## 4. Risks
+
+**The parity harness is the whole program's insurance.** If `T11` is thin, `T14` can only say *"the hashes
+match"* — and when they do not, there is no way to tell **which** draw moved. Record values per stream, not
+counts.
+
+**`A7` is golden-neutral only while there is no board.** With no coordinates, "nearest" falls back to source
+order, which is what `SelectTarget` already does. The moment `A10` lands, this module starts moving hashes.
+
+**This program does not prove `W`.** No wave-1 action consumes a slot in a way that exercises concurrency
+width. *"The slot tests pass"* must not be mistaken for coverage that does not exist here.
+
+**Auto-equip is invisible to the dominance guard.** That matrix compares **allocations, not loadouts**, so
+`T22` records the auto-equipped set in the report — otherwise a dominant auto-loadout ships green.
+
+---
+
+## 5. Deferred, and why
 
 | Module | Waits on |
 |---|---|
-| `A8` defence | Timeline **B6**, the reaction lane — unbuilt |
 | `A9` movement | `A10` |
-| `A10` battle-board | Owner deferral — built with the board map / battle area |
-
-Specced but not scheduled. Each names its dependency rather than being a hole.
-
-## Risks
-
-**The parity harness is the whole program's insurance.** If `T8` is thin, `T11` can only say "the hashes match" — and when they do not, there is no way to tell *which* draw moved. Record values per stream, not counts.
-
-**`A7` is golden-neutral only while there is no board.** With no coordinates "nearest" falls back to source order, which is what `SelectTarget` already does. The moment `A10` lands, this module starts moving hashes — a transition that needs its own fixture rather than being noticed afterwards.
-
-**This program does not prove `W`.** No wave-1 action consumes a slot (audit R2-2). The action → slot path is the timeline's `B12` to prove, and "the slot tests pass" must not be mistaken for coverage that does not exist here.
-
-**The cost ceiling is the sweep, not a frame.** `A7` runs actions × targets every turn of every battle in the win-rate sweep. The target number comes from a measurement, and it is not yet taken.
+| `A10` battle-board | owner deferral — built with the board map |
+| `A8`'s reaction lane | timeline **B6** — the *stance* half ships in P7 |
+| seedsmith | **after this program**, as a dev tool |

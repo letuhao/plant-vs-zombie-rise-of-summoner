@@ -6,7 +6,8 @@
 #   .\scripts\deploy-play.ps1 -RebuildUi
 # Server data (rpg-hot / rpg-media) lives next to the published exe: dist\FusionRpg.Server\data\
 # Runs guard-single-writer.ps1 + guard-dal.ps1 + guard-secondary-no-unity.ps1 + guard-funnel-delta.ps1
-# + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1 before build.
+# + guard-overflow.ps1 + guard-magic-numbers.ps1 + guard-power.ps1 + guard-stat-pairs.ps1
+# + guard-class-system.ps1 before build.
 param(
     [ValidateSet("BepInEx", "MelonLoader")]
     [string]$LoaderHost = "BepInEx",
@@ -99,6 +100,10 @@ if ($LASTEXITCODE -ne 0) { throw "POWER guard failed" }
 Write-Host "==> STAT-PAIRS guard"
 & (Join-Path $Root "scripts\guard-stat-pairs.ps1")
 if ($LASTEXITCODE -ne 0) { throw "STAT-PAIRS guard failed" }
+
+Write-Host "==> CLASS-SYSTEM guard"
+& (Join-Path $Root "scripts\guard-class-system.ps1")
+if ($LASTEXITCODE -ne 0) { throw "CLASS-SYSTEM guard failed" }
 
 Write-Host "==> Building $LoaderHost injector ($GameProfile) into $PluginDir"
 & (Join-Path $Root "scripts\guard-game-profile.ps1") -GameDir $GameDir -ExpectedProfile $GameProfile
