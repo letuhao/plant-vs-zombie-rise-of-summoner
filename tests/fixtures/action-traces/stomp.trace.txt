@@ -1,0 +1,110 @@
+== digest ==
+phase 1 post-flush
+phase 1 initiative
+draw initiative 273
+draw initiative 720
+draw initiative 604
+draw initiative 889
+draw initiative 420
+draw crit 256938
+draw crit 772567
+draw crit 35312
+draw crit 660916
+draw crit 11649
+draw crit 257808
+draw crit 382313
+draw crit 467146
+draw crit 712964
+phase 1 shield-upkeep
+state 1 squad:0 hp=343 abs=0
+state 1 squad:1 hp=360 abs=0
+state 1 wave:0 hp=16 abs=0
+state 1 wave:1 hp=133 abs=0
+state 1 wave:2 hp=133 abs=0
+phase 2 post-flush
+phase 2 initiative
+draw initiative 776
+draw initiative 965
+draw initiative 477
+draw initiative 336
+draw initiative 996
+draw crit 317816
+draw crit 161236
+draw crit 934605
+draw crit 244488
+draw crit 976846
+draw crit 751191
+phase 2 shield-upkeep
+state 2 squad:0 hp=343 abs=0
+state 2 squad:1 hp=360 abs=0
+state 2 wave:0 hp=0 abs=0
+state 2 wave:1 hp=80 abs=0
+state 2 wave:2 hp=133 abs=0
+phase 3 post-flush
+phase 3 initiative
+draw initiative 114
+draw initiative 171
+draw initiative 24
+draw initiative 438
+draw crit 406614
+draw crit 356400
+draw crit 148692
+draw crit 327313
+draw crit 796377
+draw crit 754565
+draw crit 395888
+draw crit 303895
+phase 3 shield-upkeep
+state 3 squad:0 hp=324 abs=0
+state 3 squad:1 hp=360 abs=0
+state 3 wave:0 hp=0 abs=0
+state 3 wave:1 hp=0 abs=0
+state 3 wave:2 hp=133 abs=0
+phase 4 post-flush
+phase 4 initiative
+draw initiative 742
+draw initiative 695
+draw initiative 275
+draw crit 628376
+draw crit 550296
+draw crit 375331
+draw crit 576577
+draw crit 295259
+draw crit 174881
+phase 4 shield-upkeep
+state 4 squad:0 hp=316 abs=0
+state 4 squad:1 hp=360 abs=0
+state 4 wave:0 hp=0 abs=0
+state 4 wave:1 hp=0 abs=0
+state 4 wave:2 hp=0 abs=0
+== targets ==
+1 squad:0->wave:0
+1 wave:2->squad:0
+1 wave:0->squad:0
+1 squad:1->wave:0
+1 wave:1->squad:0
+2 squad:0->wave:0
+2 wave:1->squad:0
+2 squad:1->wave:1
+2 wave:2->squad:0
+3 squad:0->wave:1
+3 wave:1->squad:0
+3 squad:1->wave:1
+3 wave:2->squad:0
+4 squad:0->wave:2
+4 wave:2->squad:0
+4 squad:1->wave:2
+== applies ==
+1 wave:0 -64
+1 squad:0 -8
+1 squad:0 -9
+1 wave:0 -53
+2 wave:0 -64
+2 wave:1 -53
+3 wave:1 -53
+3 squad:0 -11
+3 wave:1 -53
+3 squad:0 -8
+4 wave:2 -53
+4 squad:0 -8
+4 wave:2 -80

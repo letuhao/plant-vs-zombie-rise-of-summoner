@@ -1,8 +1,18 @@
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
-/// The closed leaf list — eight ids. Adding one is a reviewed code change, because each needs a
-/// reader on <see cref="FactReader"/>; a leaf with no reader is the `status.expose.*` failure again.
+/// The closed leaf list. Adding one is a reviewed code change, because each needs a reader on
+/// <see cref="FactReader"/>; a leaf with no reader is the `status.expose.*` failure again.
+///
+/// <para><b><see cref="HoldsStock"/> approved 2026-08-27</b> (spec-predicate-tree.md, "a third leaf
+/// requested by the action program") — landed 2026-08-28 under explicit owner authorization to build
+/// across the program boundary (the action program's own `P0.4`/T10). <c>(stockId, minQty)</c>: "do I
+/// hold ≥ 1 of this?" — the precondition a consumable action checks. The underlying inventory/stock
+/// SYSTEM (`rpg_item_stock`, item/ssot-consumables.md) is unbuilt — confirmed absent by search, not
+/// assumed — so this leaf's `FactReader` probe reads from CALLER-SUPPLIED quantities, resolved at
+/// evaluation setup exactly as every other fact is (never I/O from inside the leaf), same as
+/// `IAffordabilityCheck`/`IStanceCheck` stand in for their own not-yet-built systems elsewhere in
+/// this codebase.</para>
 /// </summary>
 public enum LeafId
 {
@@ -17,6 +27,7 @@ public enum LeafId
     RowIs,
     ColIs,
     IsMindControlled,
+    HoldsStock,
 }
 
 /// <summary>

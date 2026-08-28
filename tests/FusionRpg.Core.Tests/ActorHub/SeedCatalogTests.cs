@@ -10,12 +10,14 @@ namespace FusionRpg.Core.Tests.ActorHub;
 public class SeedCatalogTests
 {
     [Fact]
-    public void CatalogResolves259()
+    public void CatalogResolves261()
     {
         // Derived, not literal: the two independent sources (the family-count formula and the
         // registered-def count) must agree, and whatever they agree ON is the assertion.
         // 256 -> 259 (class-system `poise-resource`, 2026-08-26): a sixth resource id adds three
         // channels (resource.max/regen/efficiency.poise) through the existing resource-id axis loop.
+        // 259 -> 261 (P0.5 / battle-timeline B9, 2026-08-28): turn.speed + turn.haste registered now
+        // that TurnReadiness.cs gives them a reader.
         var combatExpected = DerivedStatChannels.CombatChannelFamilies.Count * (ElementRoster.Concrete.Count + 1);
         var registry = DerivedStatRegistry.CreateDefault();
 
@@ -23,7 +25,7 @@ public class SeedCatalogTests
             Assert.True(registry.IsKnown(channelId), $"missing combat channel: {channelId}");
 
         Assert.Equal(combatExpected, DerivedStatChannels.AllCombatChannelIds.Count);
-        Assert.Equal(259, registry.AllRegistered.Count);
+        Assert.Equal(261, registry.AllRegistered.Count);
     }
 
     [Fact]

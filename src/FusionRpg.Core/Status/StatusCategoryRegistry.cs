@@ -30,6 +30,21 @@ public static class StatusCategoryRegistry
 
     public static IReadOnlyCollection<string> AllStatusIds => Map.Keys.ToList();
 
+    /// <summary>
+    /// Adds a new statusId → L2b category entry for a consumer outside the 21 locked ids
+    /// (status-ssot.md §9) — e.g. the action program's exhaustion debuffs (spec-action-costs.md §7).
+    /// Extensibility is deliberately code, not a runtime loader (status-ssot.md §3): this is that
+    /// code path made callable instead of only reachable by hand-editing <see cref="Map"/> above.
+    /// </summary>
+    public static void Register(string statusId, string category)
+    {
+        if (string.IsNullOrWhiteSpace(statusId))
+            throw new ArgumentException("statusId required", nameof(statusId));
+        if (category != StatusL2bCategory.Dot && category != StatusL2bCategory.Cc && category != StatusL2bCategory.Contagion)
+            throw new ArgumentException($"unknown L2b category '{category}'", nameof(category));
+        Map[statusId] = category;
+    }
+
     public static bool TryGetCategory(string statusId, out string category) =>
         Map.TryGetValue(statusId, out category!);
 

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using FusionRpg.Core.Tests.TestSupport;
 using Microsoft.Data.Sqlite;
 using Xunit;
 
@@ -148,17 +149,10 @@ public class RealDataAggregateTests : IDisposable
         {
             FileName = "dotnet",
             Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "RealDataAggregate")}\" -c Release --no-build -- --data \"{_dbPath}\" {args}",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
             CreateNoWindow = true,
             WorkingDirectory = repoRoot
         };
-        using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        Assert.True(p.WaitForExit(120_000), "RealDataAggregate invocation timed out");
-        return (p.ExitCode, stdout, stderr);
+        return ExternalProcess.Run(psi, 120_000, "RealDataAggregate invocation timed out");
     }
 
     static string FindRepoRoot()

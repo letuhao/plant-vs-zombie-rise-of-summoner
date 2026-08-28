@@ -22,6 +22,20 @@ public sealed record PowerCoefficientRow(
 public sealed record TriggerFrequencyRow(string Trigger, int PerMinute);
 
 /// <summary>
+/// `P0.3` (spec-power-vector.md, "predicates ARE priced — owner decision, 2026-08-27"): one leaf's
+/// four-factor conditionality chain — <c>reachability × susceptibility × coincidence × uptime</c>,
+/// each per-mille. Keyed on <paramref name="LeafId"/> and <paramref name="ArgKey"/> because
+/// <c>hasStatus</c> differs per status and <c>hpBelowMilli</c> per threshold — the SAME reasoning
+/// <see cref="PowerCoefficientRow"/>'s <c>Channel</c> key already applies one level up.
+/// </summary>
+/// <param name="LeafId">The <c>LeafId</c> enum member's own name (e.g. <c>"HasStatus"</c>) — a plain
+/// string at the data layer, matching how every other table here keys on strings, never an enum.</param>
+/// <param name="ArgKey">The leaf's own arg — a status id, a threshold, or empty for an arg-independent
+/// leaf. Mirrors <see cref="PowerCoefficientRow.Channel"/>'s "empty means priced the same regardless" shape.</param>
+public sealed record PredicateFrequencyRow(
+    string LeafId, string ArgKey, int ReachabilityMilli, int SusceptibilityMilli, int CoincidenceMilli, int UptimeMilli);
+
+/// <summary>
 /// The coefficients and trigger frequencies a price is computed from.
 ///
 /// <para><b>Authored values live in rows; a sweep writes proposals to a side table and never touches
@@ -32,19 +46,25 @@ public sealed class PowerTables
 {
     readonly Dictionary<(string Kind, string Channel), PowerCoefficientRow> _coefficients;
     readonly Dictionary<string, int> _frequency;
+    readonly Dictionary<(string LeafId, string ArgKey), PredicateFrequencyRow> _predicateFrequency;
 
     public PowerTables(
-        IReadOnlyList<PowerCoefficientRow> coefficients, IReadOnlyList<TriggerFrequencyRow> frequencies)
+        IReadOnlyList<PowerCoefficientRow> coefficients, IReadOnlyList<TriggerFrequencyRow> frequencies,
+        IReadOnlyList<PredicateFrequencyRow>? predicateFrequencies = null)
     {
         Coefficients = coefficients;
         Frequencies = frequencies;
+        PredicateFrequencies = predicateFrequencies ?? Array.Empty<PredicateFrequencyRow>();
         _coefficients = new Dictionary<(string, string), PowerCoefficientRow>();
         foreach (var c in coefficients) _coefficients[(c.KindId, c.Channel)] = c;
         _frequency = frequencies.ToDictionary(f => f.Trigger, f => f.PerMinute, StringComparer.Ordinal);
+        _predicateFrequency = new Dictionary<(string, string), PredicateFrequencyRow>();
+        foreach (var p in PredicateFrequencies) _predicateFrequency[(p.LeafId, p.ArgKey)] = p;
     }
 
     public IReadOnlyList<PowerCoefficientRow> Coefficients { get; }
     public IReadOnlyList<TriggerFrequencyRow> Frequencies { get; }
+    public IReadOnlyList<PredicateFrequencyRow> PredicateFrequencies { get; }
 
     /// <summary>
     /// The row for a kind and channel, falling back to the kind's channel-less row.
@@ -64,6 +84,27 @@ public sealed class PowerTables
     /// <summary>Fires per battle-minute. Zero for an unlisted trigger, which the ICD factor handles.</summary>
     public int FrequencyOf(string? trigger) =>
         trigger is not null && _frequency.TryGetValue(trigger, out var f) ? f : 0;
+
+    /// <summary>
+    /// The floored four-factor chain for one leaf, per-mille: <c>max(floorMilli, reachability ×
+    /// susceptibility × coincidence × uptime)</c>. <b>1000‰ (never discounted) for an unlisted
+    /// leaf/arg</b> — the safe default: an unauthored row can only ever FAIL to give a deserved
+    /// discount, never hand out an undeserved one (the same reasoning
+    /// <see cref="FusionRpg.Core.Actions.Rungs.RungMonotonicity.PredicatePricingLanded"/> records at
+    /// the call site). This is the opposite default from <see cref="FrequencyOf"/> deliberately —
+    /// <c>0</c> is safe there because the ICD factor neutralises it; <c>1000</c> is the neutral value
+    /// here.
+    /// </summary>
+    public long PredicateFrequencyOf(LeafId leafId, string argKey, int floorMilli)
+    {
+        if (!_predicateFrequency.TryGetValue((leafId.ToString(), argKey), out var row))
+            return PowerMath.One;
+
+        var chain = PowerMath.CombineMilli(row.ReachabilityMilli, row.SusceptibilityMilli);
+        chain = PowerMath.CombineMilli(chain, row.CoincidenceMilli);
+        chain = PowerMath.CombineMilli(chain, row.UptimeMilli);
+        return Math.Max(floorMilli, chain);
+    }
 
     // ---- the authored defaults --------------------------------------------------------------------
 

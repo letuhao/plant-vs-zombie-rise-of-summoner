@@ -605,6 +605,12 @@ public sealed partial class RpgStore : IRpgDb
         // rpg_aptitude_allocation — class-system P6.2, spec-point-economy.md. Inputs only, one row
         // per (scope, scopeKey, aptitude) with a nonzero spend.
         EnsureAptitudeAllocationSchemaUnlocked(db);
+        // rpg_action + cost/scope/grant/species-basics (spec-action-model.md, A1).
+        EnsureActionSchemaUnlocked(db);
+        // rpg_run_pool — persisted resource pools across a run's encounter boundaries (spec-action-costs.md §9, T18).
+        EnsureRunPoolSchemaUnlocked(db);
+        // rpg_actor_loadout — the equipped-skill set (spec-loadout.md §1, T21).
+        EnsureLoadoutSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)

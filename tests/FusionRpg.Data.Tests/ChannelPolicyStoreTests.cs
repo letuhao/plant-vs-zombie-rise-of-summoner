@@ -95,12 +95,18 @@ public class ChannelPolicyStoreTests : IDisposable
     // ---- the hash --------------------------------------------------------------------------------
 
     [Fact]
-    public void The_registry_is_at_version_five_and_covers_the_policy_table()
+    public void The_registry_is_at_version_seven_and_covers_the_policy_table()
     {
         // Bumped 4 -> 5 by cap-consolidation (T1, 2026-08-24): default_value/cap_milli/compose_kind
         // retired as dead columns — a table-SHAPE change, asserted separately from golden stability
         // (spec-cap-consolidation.md §3.1) so "hash changed" is never mistaken for "gameplay changed".
-        Assert.Equal(5, ContentHashRegistry.CurrentSchemaVersion);
+        // Bumped 5 -> 6 by the action program (T30, 2026-08-28): rpg_action/rpg_action_cost/
+        // rpg_action_effect_scope joined the hash. Bumped 6 -> 7 by the action program (P0.3,
+        // 2026-08-28): power_predicate_frequency joined the hash. Both bumps are unrelated to
+        // effect_channel_policy, but this literal is a deliberate drift canary (same reason the 4->5
+        // bump updated it rather than asserting the property symbolically) so a future version bump
+        // is caught here too.
+        Assert.Equal(7, ContentHashRegistry.CurrentSchemaVersion);
         Assert.Contains("effect_channel_policy",
             ContentHashRegistry.Current.Select(t => t.TableName));
     }

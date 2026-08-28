@@ -151,8 +151,13 @@ public static class Instantiator
     /// <summary>
     /// Weighted draw, <b>at most one atom per group</b>, <c>pool_rolls</c> times. Zero-weight rows are
     /// present in the pool and never drawn — validation has already proven enough groups are drawable.
+    ///
+    /// <para><b>Public since T31 (action program, A13):</b> "the generator already exists" — a
+    /// container's own weighted pool-plus-group-exclusion roll is exactly what the action-seeding
+    /// runtime generator needs for "which atoms", and it must not be reinvented. Visibility widened,
+    /// no behavior changed — every existing caller and test is untouched.</para>
     /// </summary>
-    static List<string> Draw(ContainerRow container, Func<string, AtomRow?> lookupAtom, long rollSeed)
+    public static List<string> Draw(ContainerRow container, Func<string, AtomRow?> lookupAtom, long rollSeed)
     {
         var picked = new List<string>();
         if (container.PoolRolls <= 0 || container.Pool.Count == 0) return picked;

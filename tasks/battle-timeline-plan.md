@@ -44,16 +44,61 @@ The `decisions.md` row, and the RNG observation seam plus pre-adoption fixtures 
 ### Phase P — the performance contract *(P1a complete)*
 Budgets inherited from `perf-probe-plan.md`, never restated. Zero steady-state allocation, asserted in CI as **bytes not milliseconds** — a wall-clock assertion in CI measures the build agent's mood and gets muted the first time it flakes. P1d (tick-path source guard) and P2 (stress harness) can run now; P1b/P1c need something ticking in the injector and land with T13.
 
-### Phase 1 — the kernel (T1–T4) *(B2–B4 complete)*
+### Phase 1 — the kernel (T1–T4) *(B2–B12 complete — Checkpoint A CLOSED 2026-08-28)*
 Pure, no game attached, ending with a real attack under `galaxy-sync`.
 **Checkpoint A — capability.**
 
-### Phase 2 — the gate (T5)
+**Session scope through Checkpoint A, set explicitly 2026-08-28 — fully delivered.** (the 2026-08-22 hold on B6+ —
+"define the action architecture before building on an unvalidated seam" — is lifted: `action-map.md`
+is sealed and its own Checkpoints A/B/C are ✅). B6 (reaction lane) is done. Remaining: B7–B12, in
+the map's own dependency order (T2 finishes with B7–B8 before T3's B9–B10, before T4's B11–B12).
+B12 is documented `Scope: L` and is its own session, not part of this push. Full task breakdown,
+acceptance criteria, and verification commands live per-item in `battle-timeline-todo.md`; the two
+design calls made **up front so they are not discovered mid-build**:
+
+1. **B7 (rendezvous) stays FSM-neutral, deliberately avoiding the spec's "ask first" boundary on
+   adding a `TurnState`.** A reserving actor stays in `Ready`; an external coordinator tracks
+   reservation membership and the bounded dwell timeout. "Two actors commit together and produce
+   one `Resolving`" is satisfied at the **scheduling** level — one shared resolve `EventHandle` for
+   every linked participant, not a merged state machine — so no new `TurnState` and no new legal
+   transition row are needed.
+2. **B10's `PressTurn` does not need the spec's sketched `ISchedulable` union type.** `EventQueue`
+   already schedules against an opaque string `OwnerKey`; a side-scheduled event is a distinct key
+   namespace (`"side:left"`), the same trick `CooldownSlot` already uses, not a new type.
+
+### Phase 2 — the gate (T5) *(B13–B15 complete — Checkpoint B CLOSED 2026-08-28)*
 `BattleEngine` gives up its loop. Byte-identical: eight goldens still, six suites green with no test edits.
-**Checkpoint B — safety.** Nothing proceeds past a drift.
+**Checkpoint B — safety.** Nothing proceeds past a drift. **No drift occurred** — every verification
+pass (goldens, expedition hashes, pre-adoption trace fixtures, the new event-sequence fixtures, all
+6 suites, all 4 guards) matched on first attempt. `BattleEngine.Resolve` now runs its round boundary
+on `Timeline.EventQueue`/`Timeline.SimulationClock` instead of a raw integer counter; the ten-step
+round body stays synchronous and unchanged, per Design decision 2 above. Full evidence:
+`battle-timeline-todo.md` B13–B15.
+
+**Scope set 2026-08-28, owner-directed.** With multiple battle types/maps planned, the owner chose
+to build the complete correct engine now rather than the minimal-risk slice — Phase 2 **and** Phase
+3 in the same push, sequenced (byte-identical first, so an adoption bug can't hide inside an
+intentional timing change) rather than combined into one re-bless. Design calls made up front:
+
+1. **The profile parameter is a 5th optional trailing parameter on `Resolve`, not a new overload.**
+   The spec's "53 call sites / 2-arg overload" framing is stale — the real count is **~80 call
+   sites across 18 files**, and `Resolve` already has two optional trailing parameters
+   (`trace`, `onEffectHostReady`). Adding `BattleModeProfile? profile = null` after them preserves
+   every existing call site verbatim; `null` resolves to `ClassicRound`, mirroring B12's
+   `WaveDef.Profile` resolution.
+2. **B14 schedules the existing 10 round-skeleton steps as kernel events — it does not route
+   combat through the per-actor turn FSM.** `ActorTurnMachine`/`ActionRunner`'s envelope is future
+   enrichment work (`battle-timeline-map.md`: "E2 skills... respec after T5"), not this gate's job.
+   Every step's body stays exactly as it is today; only what sequences the steps changes from
+   inline statement order to `EventQueue`-scheduled offsets — which is how the seven named
+   byte-identity hazards stay preserved by construction.
+3. **The parity ladder validates against the existing pre-adoption fixtures before any golden hash
+   is checked.** `PreAdoptionTraceTests.cs` + `tests/fixtures/battle-traces/{stomp,close,wipe}.trace.txt`
+   already exist (B1) and are real, live-asserting fixtures, not just commit-note claims — confirmed
+   by direct research before this plan was written.
 
 ### Phase 3 — the deliberate change (T9)
-Status pulses and shield upkeep move onto kernel ticks and start firing at true times. A **behaviour change**: version bump, one re-bless, win-rate sweep.
+Status pulses and shield upkeep move onto kernel ticks and start firing at true times. A **behaviour change**: version bump, one re-bless, win-rate sweep. **Genuinely gated behind Phase 2 closing green** — B16/B17 need the kernel actually driving real ticks to be buildable at all. **B18's win-rate sweep still needs the owner's own sign-off** (`⛔` in `battle-timeline-todo.md`) — producing the sweep is this push's job; approving it is not.
 **Checkpoint B2 — versioned.**
 
 ### Phase 4 — interactive battles (T8, T6, T10, T11)

@@ -81,22 +81,31 @@ order of strength, and the third is the one that actually holds:
 Reuses `RespecPolicy`'s shape rather than authoring a second pricing mechanism: ***always available, always
 priced, never on a cooldown, never capped.***
 
-**Flat tax, paid in `soul`** (owner, 2026-08-27) — summoner-scoped currency for a summoner-scoped decision.
+**Paid in `soul`** (owner, 2026-08-27) — summoner-scoped currency for a summoner-scoped decision.
+
+> ⛔ **REVISED 2026-08-28 (owner, live override) — the tax is power-scaled, not flat.** The two paragraphs
+> below (kept for the reasoning trail, now superseded) argued for a flat tax and retracted a scaled one on
+> the grounds that "the farm it priced against does not exist." The owner's direct instruction overrode
+> that: `cost(Θ) = discardTaxCoeffMilli × P(Θ) / 1000`, reading the SAME `P(Θ)` SSOT every other
+> level-derived magnitude reads (PS-3) — never a private curve. `discardTaxCoeffMilli` is an explicit,
+> flagged placeholder ("pick 0.01, 0.1, or any number, rebalance later" — owner's own words): the RULE is
+> decided, the NUMBER is not. Shipped in `DiscardPolicy.cs` / `data/tuning/action-unlock.v1.json`.
+>
+> ~~Flat tax, paid in `soul`.~~ ~~A rung-scaled tax was considered and retracted: the farm it priced
+> against does not exist, because chance keys on earn history and never rewinds. A scaled tax would have
+> double-charged the same behaviour.~~
 
 > ⛔ **"Always available" has exactly one exception, and it is not a new rule.** `A15` freezes the action
 > set at run start, so a mid-run discard would leave the frozen set holding an action the actor no longer
 > owns. **Discard is available out of a run and refused during one**, with a typed reason — the same shape
 > as the shipped equip gate (`phase != Roster` refuses equip). One freeze moment, not two.
 
-**A rung-scaled tax was considered and retracted:** the farm it priced against does not exist, because
-chance keys on earn history and never rewinds. A scaled tax would have double-charged the same behaviour.
-
 **Three compounding brakes, and two already ship:**
 
 | | Brake | State |
 |---|---|---|
 | 1 | **The chance ratchet** — never rewinds | new; does the real work |
-| 2 | The discard tax — flat, `soul` | new; one policy |
+| 2 | The discard tax — `soul`, scaled by `P(Θ)` (revised 2026-08-28) | new; one policy |
 | 3 | The levelup cadence — `XpToNext(L) = first + (L−1)·step` | **ships**. Power SSOT §10.1 row 6 keeps it as *"the **cost** ladder, not a power ladder"* |
 
 **None is a wall. Each is a price** — §11.1a's *"a cap is a cliff; the continuous instrument is the real

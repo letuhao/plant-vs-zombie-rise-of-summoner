@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.ClassSystem;
@@ -99,17 +100,10 @@ public class ProveAptitudeJsonEmitTests : IClassFixture<ProveAptitudeJsonEmitTes
             {
                 FileName = "dotnet",
                 Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "ProveAptitude")}\" -- {args}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = repoRoot
             };
-            using var p = Process.Start(psi)!;
-            var stdout = p.StandardOutput.ReadToEnd();
-            var stderr = p.StandardError.ReadToEnd();
-            Assert.True(p.WaitForExit(120_000), "ProveAptitude invocation timed out");
-            return (p.ExitCode, stdout, stderr);
+            return ExternalProcess.Run(psi, 120_000, "ProveAptitude invocation timed out");
         }
 
         public void Dispose()

@@ -35,7 +35,8 @@ public static class PredicateCompiler
         PredicateNode? tree,
         Func<string, int>? statusBit,
         out ICompiledPredicate compiled,
-        Func<string, int>? elementId = null)
+        Func<string, int>? elementId = null,
+        Func<string, int>? stockBit = null)
     {
         compiled = Always;
         if (tree is null) return AtomRejection.Ok;
@@ -47,7 +48,7 @@ public static class PredicateCompiler
         // E13's winner (2026-08-22): the flattened non-recursive form, chosen on a cold-cache median
         // over a 200-predicate corpus. The typed graph below stays as the reference implementation the
         // equivalence fuzz checks against, and as a candidate the benchmark can re-run.
-        compiled = FlatPredicate.Build(tree, statusBit, elementId);
+        compiled = FlatPredicate.Build(tree, statusBit, elementId, stockBit);
         return AtomRejection.Ok;
     }
 
@@ -129,6 +130,13 @@ public static class PredicateCompiler
                 => AtomRejection.Fail(AtomRejectionReason.BadParamValue,
                     $"{leaf.Id} takes per-mille in [0, 1000], got {leaf.Value}"),
 
+            LeafId.HoldsStock when string.IsNullOrWhiteSpace(leaf.Text)
+                => AtomRejection.Fail(AtomRejectionReason.BadParamValue, "holdsStock needs a stockId text arg"),
+
+            LeafId.HoldsStock when leaf.Value < 1
+                => AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                    $"holdsStock minQty must be >= 1, got {leaf.Value} -- \"do I hold ANY\" is minQty 1, never 0"),
+
             _ => AtomRejection.Ok,
         };
     }
@@ -145,21 +153,21 @@ public static class PredicateCompiler
     // benchmark needs a second candidate to have a comparison at all.
 
     internal static ICompiledPredicate BuildTypedGraph(
-        PredicateNode? tree, Func<string, int>? statusBit, Func<string, int>? elementId) =>
-        tree is null ? Always : Build(tree, statusBit, elementId);
+        PredicateNode? tree, Func<string, int>? statusBit, Func<string, int>? elementId, Func<string, int>? stockBit = null) =>
+        tree is null ? Always : Build(tree, statusBit, elementId, stockBit);
 
     static ICompiledPredicate Build(
-        PredicateNode node, Func<string, int>? statusBit, Func<string, int>? elementId) => node switch
+        PredicateNode node, Func<string, int>? statusBit, Func<string, int>? elementId, Func<string, int>? stockBit) => node switch
     {
-        PredicateNode.And a => new AndNode(a.Children.Select(c => Build(c, statusBit, elementId)).ToArray()),
-        PredicateNode.Or o => new OrNode(o.Children.Select(c => Build(c, statusBit, elementId)).ToArray()),
-        PredicateNode.Not n => new NotNode(Build(n.Child, statusBit, elementId)),
-        PredicateNode.Leaf l => BuildLeaf(l, statusBit, elementId),
+        PredicateNode.And a => new AndNode(a.Children.Select(c => Build(c, statusBit, elementId, stockBit)).ToArray()),
+        PredicateNode.Or o => new OrNode(o.Children.Select(c => Build(c, statusBit, elementId, stockBit)).ToArray()),
+        PredicateNode.Not n => new NotNode(Build(n.Child, statusBit, elementId, stockBit)),
+        PredicateNode.Leaf l => BuildLeaf(l, statusBit, elementId, stockBit),
         _ => Always,
     };
 
     static ICompiledPredicate BuildLeaf(
-        PredicateNode.Leaf l, Func<string, int>? statusBit, Func<string, int>? elementId) => l.Id switch
+        PredicateNode.Leaf l, Func<string, int>? statusBit, Func<string, int>? elementId, Func<string, int>? stockBit) => l.Id switch
     {
         // Strings are interned here, at compile time, so the hot path compares ints.
         LeafId.SideIs => new SideNode(l.Subject, SideOrdinal(l.Text)),
@@ -176,6 +184,8 @@ public static class PredicateCompiler
         LeafId.RowIs => new RowNode(l.Subject, l.Value),
         LeafId.ColIs => new ColNode(l.Subject, l.Value),
         LeafId.IsMindControlled => new CharmNode(l.Subject, l.Value != 0),
+        // stockId interned to a slot (0-3) here, same as HasStatus; minQty stays a plain runtime int.
+        LeafId.HoldsStock => new StockNode(l.Subject, stockBit?.Invoke(l.Text!) ?? -1, l.Value),
         _ => Always,
     };
 
@@ -282,6 +292,13 @@ public static class PredicateCompiler
         readonly Subject _s; readonly int _v;
         public StatusNode(Subject s, int bit) { _s = s; _v = bit; }
         public bool Evaluate(ref FactReader f) => f.HasStatusBit(_s, _v);
+    }
+
+    sealed class StockNode : ICompiledPredicate
+    {
+        readonly Subject _s; readonly int _stockIndex; readonly int _minQty;
+        public StockNode(Subject s, int stockIndex, int minQty) { _s = s; _stockIndex = stockIndex; _minQty = minQty; }
+        public bool Evaluate(ref FactReader f) => f.StockQty(_s, _stockIndex) >= _minQty;
     }
 
     sealed class KillerNode : ICompiledPredicate

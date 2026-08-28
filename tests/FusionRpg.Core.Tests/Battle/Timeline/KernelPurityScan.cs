@@ -28,8 +28,12 @@ static class KernelPurityScan
     /// <summary>Determinism hazards. No file is exempt.</summary>
     public static readonly string[] BannedEverywhere =
     {
-        // wall clock
-        "DateTime", "DateTimeOffset", "Stopwatch", "Environment.Tick", "TimeProvider",
+        // wall clock. Written with a trailing dot, like `.GetHashCode(` below: the danger is the
+        // STATIC MEMBER ACCESS (`DateTime.UtcNow`, `DateTimeOffset.Now`), not the bare type name —
+        // BattleEngine already uses `DateTimeOffset` as a deterministic VALUE (the synthetic round
+        // clock, passed by the caller, never read from the wall clock), and the action program's
+        // extracted step functions need the same parameter type to interoperate with it.
+        "DateTime.", "DateTimeOffset.", "Stopwatch", "Environment.Tick", "TimeProvider",
         // randomness — including the ones that do not look like randomness. `.GetHashCode(` is a
         // CALL: string and object hash codes are seeded per process, so using one as a value makes
         // a run unreproducible. Written with the leading dot so it does not flag the perfectly
@@ -39,10 +43,11 @@ static class KernelPurityScan
         "float ", "double ", "decimal ", "(double)", "(float)", "<double>", "<float>",
         // dictionary enumeration
         ".Keys", ".Values",
-        // the escape hatches: a `using static` or a using-alias makes every tick-path rule below
-        // invisible, because the call is no longer dotted. One innocuous-looking line would
-        // otherwise disable all of them for a whole file.
-        "using static", "using System.Linq"
+        // `using static` is a true purity bypass, not just a tick-path one: `using static
+        // System.Guid;` turns `NewGuid()` into a bare call the dotted `Guid.NewGuid` substring
+        // check can no longer see. It stays banned everywhere, including inside a tick-path-exempt
+        // directory, because it can hide a wall-clock or RNG call just as easily as it hides LINQ.
+        "using static"
     };
 
     /// <summary>
@@ -56,7 +61,12 @@ static class KernelPurityScan
         ".ToList(", ".ToArray(", ".ToDictionary(", ".Any(", ".All(", ".First(", ".FirstOrDefault(",
         ".Last(", ".Single(", ".SequenceEqual(", ".Concat(", ".Distinct(", ".Reverse(",
         ".Skip(", ".Take(", ".Aggregate(", ".Sum(", ".Min(", ".Max(", ".Count(",
-        "FindObjectsOfType", "GetComponent", "StatSystem.Resolve"
+        "FindObjectsOfType", "GetComponent", "StatSystem.Resolve",
+        // A plain `using System.Linq;` is not itself a bypass — dotted calls still have their dot,
+        // so the tokens above still match. It lives here rather than in BannedEverywhere because
+        // its only cost IS the tick-path one: a directory exempted from LINQ's frame cost has no
+        // reason to also ban declaring the intent to use it.
+        "using System.Linq"
     };
 
     /// <summary>
@@ -70,6 +80,19 @@ static class KernelPurityScan
     public static readonly string[] DiagnosticsExemptFromTickPath = { "BattleTrace.cs" };
 
     /// <summary>
+    /// Directory prefixes (relative to the scanned root, trailing slash) whose files are exempt
+    /// from the TICK-PATH rules only — never purity. The action layer's targeting and generation
+    /// code (<c>TargetResolver</c> and its compiler) legitimately uses LINQ throughout; unlike the
+    /// per-frame battle kernel this scan was built for, action-layer allocation is asserted
+    /// directly by its own tests (e.g. <c>FactReader.Reads</c> counts, zero-alloc assertions)
+    /// rather than by this blunt static ban.
+    ///
+    /// Still a narrow named list, one entry per directory that has actually earned the exemption —
+    /// not a wildcard, and not "everything under src/".
+    /// </summary>
+    public static readonly string[] TickPathExemptDirectories = { "Actions/" };
+
+    /// <summary>
     /// Returns "file:line → token" for every offending line. Empty means clean.
     ///
     /// Recursive on purpose. A top-level-only scan silently stops covering the kernel the moment
@@ -78,6 +101,13 @@ static class KernelPurityScan
     /// </summary>
     public static List<string> Scan(string dir)
     {
+        // A directory exemption must fire whether the caller scans an ANCESTOR of the exempt
+        // directory (so the relative path is prefixed, e.g. "Actions/Rungs/Foo.cs") or scans the
+        // exempt directory ITSELF as the root (so the relative path has no prefix at all, e.g.
+        // "Rungs/Foo.cs" when `dir` already IS ".../Actions"). Computed once per scan, not per file.
+        var rootName = Path.GetFileName(Path.GetFullPath(dir).TrimEnd('/', '\\')) + "/";
+        var rootItselfExempt = TickPathExemptDirectories.Contains(rootName, StringComparer.Ordinal);
+
         var offences = new List<string>();
         foreach (var file in Directory.GetFiles(dir, "*.cs", SearchOption.AllDirectories)
                      .OrderBy(f => f, StringComparer.Ordinal))
@@ -87,7 +117,9 @@ static class KernelPurityScan
             // the wildcard growth this list exists to prevent. It also disambiguates offences
             // between same-named files in different folders.
             var name = Path.GetRelativePath(dir, file).Replace('\\', '/');
-            var tickPathExempt = DiagnosticsExemptFromTickPath.Contains(name, StringComparer.Ordinal);
+            var tickPathExempt = rootItselfExempt
+                || DiagnosticsExemptFromTickPath.Contains(name, StringComparer.Ordinal)
+                || TickPathExemptDirectories.Any(p => name.StartsWith(p, StringComparison.Ordinal));
             var lines = File.ReadAllLines(file);
             var inBlockComment = false;
 

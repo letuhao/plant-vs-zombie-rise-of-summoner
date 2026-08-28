@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
@@ -441,9 +442,19 @@ public class StatusCategoryRegistryTests
     }
 
     [Fact]
-    public void All_twenty_one_ids_registered()
+    public void All_twenty_one_locked_ids_are_registered()
     {
-        Assert.Equal(21, StatusCategoryRegistry.AllStatusIds.Count);
+        // NOT an exact-count assertion: StatusCategoryRegistry.Register (T16, action-todo.md) is a
+        // real, additive extension point (status-ssot.md §3 — "New status id: Register def in Core
+        // catalog"), and other in-process tests (ExhaustionPolicyTests) legitimately register their
+        // own ids into this SAME static, process-wide dictionary. An exact-count assertion here is
+        // the identical defect ActorChannelsTests's old "exactly 84 channels" row already was —
+        // "left in place it becomes a red test on day one" once a second registrant exists. The 21
+        // locked ids (status-ssot.md §9) must always be a SUBSET of whatever else got registered.
+        var locked = StatusCatalogBootstrap.CreateDefault().All().Select(d => d.StatusId);
+        foreach (var id in locked)
+            Assert.Contains(id, StatusCategoryRegistry.AllStatusIds);
+        Assert.Equal(21, locked.Count());
     }
 }
 

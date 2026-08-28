@@ -1,4 +1,5 @@
 using System.Reflection;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
 
@@ -169,20 +170,23 @@ public class StatTaxonomyTests
     {
         // 9 progression (7 + H.7's 2) + 24 status constants (8 + H.2's 16) + 196 combat (84 + H.1's 112)
         // + 1 healing + 18 resource (15 + `poise`'s 3, 2026-08-26) + 1 move.range + 10 action-category
-        // = 259 (99 -> 256 T2 -> 259 class-system `poise-resource`).
-        Assert.Equal(259, AllRegistered.Count);
+        // + 2 turn (speed/haste, P0.5, 2026-08-28) = 261 (99 -> 256 T2 -> 259 class-system
+        // `poise-resource` -> 261 P0.5/battle-timeline B9).
+        Assert.Equal(261, AllRegistered.Count);
 
-        // Every def classifies except three non-combat Theta/progression channels the counterbalance
-        // rule does not apply to (actor-hub-ssot.md §H.0's "Non-combat" row). breakthroughSuccess
-        // (T4.4) is NOT among them despite being "progression" by name: unlike power/realm's
-        // LadderIndex shape, it is the actor's own roll probability with no pair, so it classifies as
-        // Pool -- and EveryCapIsClassified requires that, since it also carries a Cap.
+        // Every def classifies except five non-combat channels the counterbalance rule does not apply
+        // to: the two Theta/progression channels (actor-hub-ssot.md §H.0's "Non-combat" row), plus
+        // turn.speed/turn.haste (P0.5, same reasoning -- a pacing axis, not a combat stat with a
+        // counterpart). breakthroughSuccess (T4.4) is NOT among them despite being "progression" by
+        // name: unlike power/realm's LadderIndex shape, it is the actor's own roll probability with no
+        // pair, so it classifies as Pool -- and EveryCapIsClassified requires that, since it also
+        // carries a Cap.
         var unclassified = AllRegistered.Where(d => d.Class is null).Select(d => d.ChannelId).ToList();
         Assert.Equal(
             new[]
             {
                 DerivedStatChannels.ProgressionPower, DerivedStatChannels.ProgressionRealm,
-                DerivedStatChannels.ProgressionXpRate
+                DerivedStatChannels.ProgressionXpRate, DerivedTurnChannels.Speed, DerivedTurnChannels.Haste
             }.OrderBy(x => x),
             unclassified.OrderBy(x => x));
 

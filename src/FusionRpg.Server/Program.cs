@@ -93,6 +93,11 @@ FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
     FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
         // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. v1 stays on disk -- reverting is pointing this back at aptitudes.v1.json.
         File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v2.json"))));
+// Server-side only (spec-action-catalog.md, T30): actions are battle-mode and the injector never
+// sees one, so the rung ladder has no reason to load there.
+FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
+    FusionRpg.Core.Actions.Rungs.RungTableLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "action-rungs.v1.json"))));
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");

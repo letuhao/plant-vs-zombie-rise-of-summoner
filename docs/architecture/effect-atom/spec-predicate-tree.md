@@ -40,7 +40,14 @@ Added by the action stream, owner-approved, and recorded here because this list 
 
 **Reader requirement:** `EntityFacts` gains resource values, following `HpMilli`'s existing shape. Four ints (`stamina`, `hunger`, `spirit`, `qi` as ‰ of max) — `hp` already has its own. Resource semantics are the [resource hub](../resource-hub-ideal.md)'s; this list only needs the numbers readable.
 
-#### A third leaf requested by the action program — approved 2026-08-27
+#### A third leaf requested by the action program — approved 2026-08-27, **shipped 2026-08-28**
+
+Built by the action program, across the program boundary, under explicit owner authorization
+(`LeafId.HoldsStock`; the four-slot interned `FactReader`/`EntityFacts` stock probe; both compiled
+forms — the typed-graph reference and the shipped flat encoding — updated and fuzz-proven equivalent
+over 10⁴ random trees; the JSON grammar's compound `{"stockId","minQty"}` object value). The
+underlying inventory system (`rpg_item_stock`) remains unbuilt by design — the leaf reads
+caller-supplied quantities, resolved at evaluation setup, never I/O from inside the leaf itself.
 
 | Leaf | Param | Reads | Why |
 |---|---|---|---|

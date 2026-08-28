@@ -1,4 +1,4 @@
-# The derived-stat sheet — 259 channels, five open families, and six states
+# The derived-stat sheet — 261 channels, five open families, and six states
 
 **Status:** Detail design, 2026-08-23. **Document 9 of 9** owed by
 [gap-audit-2026-08-22.md](gap-audit-2026-08-22.md) §7 (gap **A26**), built second because it is the
@@ -35,7 +35,7 @@ against the generator, not hand-recomputed and left to go stale again.**
 | `resource.max/regen/efficiency.*` (H.5, T2 + `poise` 2026-08-26) | 18 | same — six resource ids × 3 channels |
 | `move.range` (H.6, T2) | 1 | same |
 | `skill.cooldown/effectiveness.*` (H.3, T2) | 10 | same |
-| **Pre-registered total** | **259** | 99 → 256 (T2) → 259 (class-system `poise-resource`, 2026-08-26) |
+| **Pre-registered total** | **261** | 99 → 256 (T2) → 259 (class-system `poise-resource`, 2026-08-26) → 261 (P0.5 / battle-timeline B9, `turn.speed`+`turn.haste`, 2026-08-28) |
 | Nine **open-ended prefix families** — `status.power.{id}` · `status.resist.{id}` · `status.duration.{id}` · `status.durationReduction.{id}` · `status.intensity.{id}` · `status.intensityReduction.{id}` · `status.immune.{tag}` · `status.immuneReduction.{tag}` · `status.expose.{category}` | **unbounded** | resolved dynamically in `TryResolveChannel` (5 original + 4 from H.2, T2) |
 | …of which the locked 21-status catalog could expand the first **six** by | **+126** | [status-ssot.md §9](../architecture/status-ssot.md) — 21 statuses × 6 sparse-eligible dimensions. **Corrected from a "+42, ~298" estimate** that counted only power/resist — H.2's four new sparse families are exercisable by the same 21-status catalog and were omitted from that arithmetic |
 

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.ClassSystem;
@@ -176,16 +177,9 @@ public class ReaderCensusTests
             FileName = "python",
             Arguments = $"\"{script}\" {args}",
             WorkingDirectory = repoRoot,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
             CreateNoWindow = true
         };
-        using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        Assert.True(p.WaitForExit(60_000), "census script timed out");
-        return (p.ExitCode, stdout, stderr);
+        return ExternalProcess.Run(psi, 60_000, "census script timed out");
     }
 
     static string FindRepoRoot()

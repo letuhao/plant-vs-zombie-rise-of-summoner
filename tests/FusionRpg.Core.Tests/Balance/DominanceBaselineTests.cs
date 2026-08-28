@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using FusionRpg.Core.Tests.TestSupport;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Balance;
@@ -86,17 +87,10 @@ public class DominanceBaselineTests
         {
             FileName = "dotnet",
             Arguments = $"run --project \"{Path.Combine(repoRoot, "tools", "DominanceBaseline")}\" -c Release --no-build -- {args}",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
             CreateNoWindow = true,
             WorkingDirectory = repoRoot
         };
-        using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        Assert.True(p.WaitForExit(120_000), "DominanceBaseline invocation timed out");
-        return (p.ExitCode, stdout, stderr);
+        return ExternalProcess.Run(psi, 120_000, "DominanceBaseline invocation timed out");
     }
 
     static string FindRepoRoot()

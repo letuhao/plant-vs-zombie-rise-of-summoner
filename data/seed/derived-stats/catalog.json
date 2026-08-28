@@ -6,7 +6,7 @@
     "note": "Machine-readable mirror of the DerivedStatCatalog for tooling that cannot reference FusionRpg.Core (seedsmith, the web app, importers). Registration itself stays code-first in Stats/Derived/DerivedStatRegistry.cs - this file describes it, it does not drive it.",
     "families-not-channels": "Entries are FAMILIES plus the axis they expand over, never the expanded channel list. The 196 combat channels are generated from CombatChannelFamilies x (omni + roster) precisely so adding an element or a family changes the count by construction; hand-listing the expansion here would create a second source of truth with a delay fuse. Expand axis='element' over data/seed/elements/roster.json the same way Core does.",
     "shipped-only": "Registered channels only, still true. catalog-extension (T2, derived-stats program, 2026-08-24) registered the 157-channel combat-balance extension (H.1-H.7 in actor-hub-ssot.md SS3H) in DerivedStatRegistry -- it is no longer PROPOSED, it is SHIPPED, with every new channel defaulting to 0 and zero readers wired (registration only; the reader modules land in later phases). move.range moved here from notRegistered accordingly.",
-    "counts": "9 progression (7 + 2 new) + 24 status constants (8 + 16 new) + 196 combat (84 + 112 new) + 1 healing + 18 resource (15 + 3 poise, 2026-08-26) + 1 move.range + 10 action-category = 259 named, plus 9 open prefix families (5 original + 4 new status-duration/intensity). Verified against DerivedStatRegistry.CreateDefault() 2026-08-24, resource-id axis re-verified 2026-08-26 (class-system, poise-resource); DerivedStatRegistryTests asserts the combat total (196) and SeedCatalogMatchesCode asserts this mirror against the live registry -- the resource-id axis expands over DerivedStatChannels.ResourceIds directly, so a seventh resource would not need this note updated by hand.",
+    "counts": "9 progression (7 + 2 new) + 24 status constants (8 + 16 new) + 196 combat (84 + 112 new) + 1 healing + 18 resource (15 + 3 poise, 2026-08-26) + 1 move.range + 10 action-category + 2 turn (speed/haste, P0.5, 2026-08-28) = 261 named, plus 9 open prefix families (5 original + 4 new status-duration/intensity). Verified against DerivedStatRegistry.CreateDefault() 2026-08-24, resource-id axis re-verified 2026-08-26 (class-system, poise-resource), turn.speed/turn.haste added 2026-08-28; DerivedStatRegistryTests asserts the combat total (196) and SeedCatalogMatchesCode asserts this mirror against the live registry -- the resource-id axis expands over DerivedStatChannels.ResourceIds directly, so a seventh resource would not need this note updated by hand.",
     "composeKinds": "FlatSum | FlatReplace | SumIncreased | MaxPriorityFlag - see DerivedComposeKind.",
     "classification": "TWO orthogonal axes, both required, neither inferred from the other. statClass (Contest|Race|Pool|Feeder) answers 'does it need a counterpart' - spec-stat-taxonomy.md; null statClass means the counterbalance rule does not apply (the two Theta channels only). unitClass answers 'what arithmetic is it and how does it render' - the TEN-class ledger in docs/design/spec-magnitude-and-units.md SS3 (nine plus LadderIndex, added 2026-08-24), each class verified against its consumer in src/. null unitClass means that ledger has not assigned one; per its SS8 a channel whose consumer cannot be named gets a REJECTION, never an invented placeholder -- true of every one of catalog-extension's 157 new channels at registration time. Do not add a third scheme."
   },
@@ -632,6 +632,26 @@
       "statClass": "Pool",
       "note": "H.7, 2026-08-24; compose/cap/statClass corrected T4.4, 2026-08-25. A roll chance; what a success grants is Theta, never a multiplier on progression.realm (ADR P1 stays pinned at 1.0). Class Pool (not null like power/realm's LadderIndex shape) -- the actor's own roll probability, no pair; EveryCapIsClassified requires a StatClass on any capped channel. Cap: DerivedStatPolicy.BreakthroughSuccessCap (1.0), PS-8 exempt bounded ratio.",
       "unitClassNote": "No reader: the breakthrough roll/grant mechanism this probability would drive is unbuilt."
+    },
+    {
+      "family": "turn.speed",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 100,
+      "cap": null,
+      "unitClass": "GameUnits",
+      "statClass": null,
+      "note": "P0.5 / battle-timeline B9, 2026-08-28 (spec-readiness-model.md). Moved here from notRegistered now that TurnReadiness.cs gives it a reader. Class: null, same 'Non-combat'/pacing-axis reasoning as progression.power/realm -- a turn-cadence rate, not a combat stat with a counterpart. Default 100 (DerivedTurnChannels.BaseSpeed) is load-bearing: 0 would divide-by-zero in the readiness formula."
+    },
+    {
+      "family": "turn.haste",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 1000,
+      "cap": null,
+      "unitClass": "PerMilleRatio",
+      "statClass": null,
+      "note": "P0.5 / battle-timeline B9, 2026-08-28. Same as turn.speed. Default 1000 (DerivedTurnChannels.NominalHasteMilli) is load-bearing: 0 would mean instant actions. Per-mille: 1000 = normal pace, 500 = twice as fast."
     }
   ],
   "prefixFamilies": [
@@ -719,19 +739,9 @@
   ],
   "notRegistered": [
     {
-      "channel": "turn.speed",
-      "declaredIn": "src/FusionRpg.Core/Battle/Timeline/DerivedTurnChannels.cs",
-      "reason": "Battle stream vocabulary. No registry entry, no reader - the only reference is ActionEnvelope.SpeedChannel's default string. Race class per actor-hub-ssot.md SS3H.0 -- would classify unpaired if registered, but stays out until the battle stream gives it a reader."
-    },
-    {
-      "channel": "turn.haste",
-      "declaredIn": "src/FusionRpg.Core/Battle/Timeline/DerivedTurnChannels.cs",
-      "reason": "Same."
-    },
-    {
       "channel": "turn.moveSpeed",
       "declaredIn": "src/FusionRpg.Core/Battle/Timeline/DerivedTurnChannels.cs",
-      "reason": "Same."
+      "reason": "Reserved movement vocabulary (Chaos combat-core). Not build scope for P0.5/B9 -- turn.speed/turn.haste moved here to entries below (2026-08-28) once battle-timeline's readiness reader (TurnReadiness.cs) gave them one; move.speed still has none."
     }
   ]
 }

@@ -1,5 +1,8 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Loadout;
+using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Demons.Contracts;
 using FusionRpg.Core.Effects.Atoms;
@@ -300,7 +303,8 @@ public sealed class WebMatchService
                     .Concat(LoyaltyChannelMods(
                         contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
                     .Concat(AptitudeChannelMods(level, playerId, _store))
-                    .ToList()
+                    .ToList(),
+                EquippedActionIds = EquippedActionIdsFor(s.Profile.InstanceId, _store),
             });
         }
 
@@ -365,6 +369,31 @@ public sealed class WebMatchService
         return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
             allocation, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
             FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
+    }
+
+    /// <summary>
+    /// T22 (action-todo.md): "the auto-equipped set appears in the battle report." A real loadout row
+    /// wins if the specimen has one; otherwise it is auto-equipped live from whatever skills the
+    /// specimen currently holds, ranked by <see cref="RungPolicy.Table"/> — never persisted, so a
+    /// later unlock/discard is reflected immediately with no stale cache to invalidate (the same
+    /// contract `RpgStore.GetLoadoutOrAutoEquip`'s own doc comment states).
+    ///
+    /// <para>Keyed on <see cref="OwnerKind.Entity"/> + the specimen's own instance id, matching
+    /// `LoadoutStoreTests.cs`'s own convention for "one demon's loadout, independent of who currently
+    /// owns it" — never the player id, since two specimens of the same species held by one player can
+    /// carry different loadouts.</para>
+    /// </summary>
+    static IReadOnlyList<string> EquippedActionIdsFor(string instanceId, RpgStore store)
+    {
+        var scope = new OwnerScope(OwnerKind.Entity, instanceId);
+
+        var candidates = store.ListGrants(scope)
+            .Select(g => store.GetAction(g.ActionId))
+            .Where(a => a is { Kind: ActionKind.Skill })
+            .Select(a => new AutoEquipCandidate(a!.ActionId, a.Rung))
+            .ToList();
+
+        return store.GetLoadoutOrAutoEquip(scope, candidates);
     }
 
     static BattleActorSetup Synthetic(int i) => new()

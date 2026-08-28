@@ -66,7 +66,8 @@ public class ElementHubDocDriftTests
         Assert.Contains($"**{combatExpected}**", text);
         Assert.Contains($"**{registry.AllRegistered.Count}**", text);
         // 256 -> 259 (class-system `poise-resource`, 2026-08-26): a sixth resource id.
-        Assert.Equal(259, registry.AllRegistered.Count);
+        // 259 -> 261 (P0.5 / battle-timeline B9, 2026-08-28): turn.speed + turn.haste registered.
+        Assert.Equal(261, registry.AllRegistered.Count);
     }
 
     [Fact]

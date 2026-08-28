@@ -31,8 +31,9 @@ public sealed record ContentHashTable(string TableName, IReadOnlyList<ContentHas
 public static class ContentHashRegistry
 {
     /// <summary>Bump when a table joins or leaves, or a covered table's column list changes.
-    /// E18 → 2, E9 → 3, E16 → 4, cap-consolidation (T1) → 5 — all done.</summary>
-    public const int CurrentSchemaVersion = 5;
+    /// E18 → 2, E9 → 3, E16 → 4, cap-consolidation (T1) → 5, action program T30 → 6,
+    /// action program P0.3 → 7 — all done.</summary>
+    public const int CurrentSchemaVersion = 7;
 
     /// <summary>
     /// Version 1: the tables E2, E4 and E5 actually created. Instances, bindings and
@@ -200,6 +201,84 @@ public static class ContentHashRegistry
           }))
           .ToArray());
 
+    /// <summary>
+    /// Version 6 (T30, action program, spec-action-catalog.md R2): actions are content by the same
+    /// definition as an atom — authored rows whose values change battle outcomes — so
+    /// <c>rpg_action</c>, <c>rpg_action_cost</c> and <c>rpg_action_effect_scope</c> join the hash.
+    /// <c>rpg_action_grant</c> stays excluded (per-player state, like <c>effect_binding</c>);
+    /// <c>rpg_action_species_basics</c> is not named by the spec's own R2 table and stays out until a
+    /// future revision explicitly adds it.
+    /// </summary>
+    static readonly ContentHashTable[] V6 = Sorted(V5.Concat(new[]
+    {
+        new ContentHashTable("rpg_action", new[]
+        {
+            ContentHashColumn.Text("action_id"),
+            ContentHashColumn.Text("name"),
+            ContentHashColumn.Text("kind"),
+            ContentHashColumn.Text("rung"),
+            ContentHashColumn.Json("tags_json"),
+            ContentHashColumn.Text("enabled"),
+            ContentHashColumn.Text("revision"),
+            ContentHashColumn.Text("grantable"),
+            ContentHashColumn.Text("default_attack_eligible"),
+            ContentHashColumn.Text("container_id"),
+            ContentHashColumn.Text("time_cost_ticks"),
+            ContentHashColumn.Text("speed_channel"),
+            ContentHashColumn.Text("cooldown_channel"),
+            ContentHashColumn.Text("windup_ticks"),
+            ContentHashColumn.Json("resolve_offsets_json"),
+            ContentHashColumn.Text("recovery_ticks"),
+            ContentHashColumn.Text("commitment"),
+            ContentHashColumn.Text("interruptible"),
+            ContentHashColumn.Text("interrupt_refund_milli"),
+            ContentHashColumn.Text("slot_consuming"),
+            ContentHashColumn.Text("priority_band"),
+            ContentHashColumn.Text("cooldown_class"),
+            ContentHashColumn.Text("cooldown_key"),
+            ContentHashColumn.Text("cooldown_ticks"),
+            ContentHashColumn.Text("starts_at"),
+            ContentHashColumn.Text("interrupt_cooldown_milli"),
+            ContentHashColumn.Json("target_spec_json"),
+            ContentHashColumn.Text("min_range"),
+            ContentHashColumn.Text("max_range"),
+            ContentHashColumn.Text("range_channel"),
+            ContentHashColumn.Text("requires_line_of_sight"),
+            ContentHashColumn.Json("conditions_json"),
+        }),
+        new ContentHashTable("rpg_action_cost", new[]
+        {
+            ContentHashColumn.Text("action_id"),
+            ContentHashColumn.Text("resource_id"),
+            ContentHashColumn.Json("amount_spec_json"),
+            ContentHashColumn.Text("when_paid"),
+        }),
+        new ContentHashTable("rpg_action_effect_scope", new[]
+        {
+            ContentHashColumn.Text("action_id"),
+            ContentHashColumn.Text("atom_id"),
+            ContentHashColumn.Text("scope"),
+        }),
+    }).ToArray());
+
+    /// <summary>
+    /// Version 7 (P0.3, action program, spec-power-vector.md "predicates ARE priced"): adds
+    /// <c>power_predicate_frequency</c>, the four-factor conditionality chain per predicate leaf —
+    /// same shape and same reasoning as V3's <c>power_trigger_frequency</c> join.
+    /// </summary>
+    static readonly ContentHashTable[] V7 = Sorted(V6.Concat(new[]
+    {
+        new ContentHashTable("power_predicate_frequency", new[]
+        {
+            ContentHashColumn.Text("leaf_id"),
+            ContentHashColumn.Text("arg_key"),
+            ContentHashColumn.Text("reachability_milli"),
+            ContentHashColumn.Text("susceptibility_milli"),
+            ContentHashColumn.Text("coincidence_milli"),
+            ContentHashColumn.Text("uptime_milli"),
+        }),
+    }).ToArray());
+
     public static IReadOnlyList<ContentHashTable> For(int schemaVersion) => schemaVersion switch
     {
         1 => V1,
@@ -207,6 +286,8 @@ public static class ContentHashRegistry
         3 => V3,
         4 => V4,
         5 => V5,
+        6 => V6,
+        7 => V7,
         _ => throw new ArgumentOutOfRangeException(nameof(schemaVersion),
             $"contentHashSchemaVersion {schemaVersion} is not a known registry version " +
             $"(latest is {CurrentSchemaVersion})"),

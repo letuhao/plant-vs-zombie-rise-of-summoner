@@ -1,3 +1,5 @@
+using FusionRpg.Core.Battle.Timeline;
+
 namespace FusionRpg.Core.Stats.Derived;
 
 public enum DerivedComposeKind
@@ -98,6 +100,17 @@ public sealed class DerivedStatRegistry
                      Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusPowerCc));
         Register(new(DerivedStatChannels.StatusResistContagion, DerivedComposeKind.SumIncreased, 0, _categoryResistCap,
                      Class: StatClass.Contest, Unit: UnitClass.StatusPotencyPoints, CounterpartOf: DerivedStatChannels.StatusPowerContagion));
+
+        // P0.5 (battle-timeline B9, spec-readiness-model.md): flat and non-elemental on purpose — see
+        // DerivedTurnChannels' own doc comment for why these stay out of the generated combat roster.
+        // Non-zero defaults are load-bearing: 0 would divide-by-zero (Speed) or mean instant actions
+        // (Haste). Class: null matches the Progression channels above — a pacing axis, not a combat
+        // stat with a counterpart. FlatSum, not FlatReplace: a haste buff/item contributes an amount,
+        // it does not replace the whole channel.
+        Register(new(DerivedTurnChannels.Speed, DerivedComposeKind.FlatSum, DerivedTurnChannels.BaseSpeed,
+                     Class: null, Unit: UnitClass.GameUnits));
+        Register(new(DerivedTurnChannels.Haste, DerivedComposeKind.FlatSum, DerivedTurnChannels.NominalHasteMilli,
+                     Class: null, Unit: UnitClass.PerMilleRatio));
 
         RegisterNonElementExtensions();
         RegisterCombatDefaults();

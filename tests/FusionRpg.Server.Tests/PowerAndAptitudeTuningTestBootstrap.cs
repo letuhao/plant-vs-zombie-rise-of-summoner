@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -11,7 +12,10 @@ namespace FusionRpg.Server.Tests;
 /// assembly, so not directly reusable) — just the hubs this assembly's tests actually touch today
 /// (class-system-todo.md P2.5, <c>WebMatchService.AptitudeChannelMods</c>, which transitively needs
 /// <see cref="DerivedStatPolicy"/> too: <c>DerivedStatRegistry.CreateDefault()</c> reads
-/// <see cref="DerivedStatPolicy.CategoryResistCap"/> in its constructor).
+/// <see cref="DerivedStatPolicy.CategoryResistCap"/> in its constructor; T22 (action-todo.md) added
+/// <see cref="RungPolicy"/> — <c>WebMatchService.BuildSquad</c> now resolves each specimen's equipped
+/// action set via <c>RpgStore.GetLoadoutOrAutoEquip</c>, which ranks candidates through
+/// <c>RungPolicy.Table</c>).
 /// </summary>
 internal static class PowerAndAptitudeTuningTestBootstrap
 {
@@ -21,10 +25,19 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         PowerTuningHub.Configure(DefaultPower);
         AptitudeTuningHub.Configure(DefaultAptitudes);
         DerivedStatPolicy.Configure(DefaultDerivedStats);
+        RungPolicy.Configure(DefaultRungs);
     }
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(
         SchemaVersion: 1, Version: 1, CategoryResistCap: 0.95);
+
+    // Minimal, hand-authored -- not the shipped data/tuning/action-rungs.v1.json (tunables-ssot.md's
+    // "construct one inline" convention). Every specimen in this assembly's tests holds zero action
+    // grants today (T22's own note: no production caller grants actions to a demon instance yet), so
+    // AutoEquip.Select never actually ranks a real candidate against this table -- it only needs to be
+    // a STRUCTURALLY valid one-rung table so RungPolicy.Table does not throw "not configured".
+    public static readonly RungTable DefaultRungs = new(
+        cap: 1, rows: new[] { new RungRow(1, 1, 1, 1, 1000, 1000, 1000, Array.Empty<string>()) });
 
     // Same working values as data/tuning/power-scale.v2.json (T4.2: bMilli=400) — the shipped dial,
     // not the historical bMilli=0 baseline ContractTuningTestBootstrap pins for its own reasons.

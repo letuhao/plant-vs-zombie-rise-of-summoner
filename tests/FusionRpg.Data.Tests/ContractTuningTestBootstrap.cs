@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using FusionRpg.Core;
+using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Shield;
@@ -45,6 +46,7 @@ internal static class ContractTuningTestBootstrap
         SoulEarnPolicy.Configure(DefaultSouls);
         PatronPolicy.Configure(DefaultPatron);
         ShieldPolicy.Configure(DefaultShield);
+        RungPolicy.Configure(DefaultActionRungs);
         CombatPolicy.Configure(DefaultCombat);
         StarPolicy.Configure(DefaultFusion);
         StatusPolicy.Configure(DefaultStatus);
@@ -369,4 +371,19 @@ internal static class ContractTuningTestBootstrap
             ["atk"] = new PowerChannelTuning(CMilli: 12_000, PinValue: 92),
             ["defense"] = new PowerChannelTuning(CMilli: 2_000, PinValue: 22),
         });
+
+    // Matches data/tuning/action-rungs.v1.json exactly (spec-rung-table.md, A12).
+    public static readonly RungTable DefaultActionRungs = new(10, new[]
+    {
+        new RungRow(1,  1, 1, 1, 1000,  1000,  1000, Array.Empty<string>()),
+        new RungRow(2,  1, 1, 1, 1323,  1380,  1150, Array.Empty<string>()),
+        new RungRow(3,  2, 2, 1, 1750,  1904,  1322, new[] { "scopeSplit", "riderStatus" }),
+        new RungRow(4,  2, 2, 1, 2315,  2628,  1521, new[] { "scopeSplit", "riderStatus" }),
+        new RungRow(5,  3, 3, 2, 3062,  3627,  1749, new[] { "scopeSplit", "riderStatus", "condition" }),
+        new RungRow(6,  3, 3, 2, 4051,  5005,  2011, new[] { "scopeSplit", "riderStatus", "condition" }),
+        new RungRow(7,  4, 4, 2, 5359,  6907,  2313, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption" }),
+        new RungRow(8,  4, 4, 2, 7090,  9531,  2660, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption" }),
+        new RungRow(9,  5, 5, 3, 9379,  13153, 3059, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption", "reaction", "restriction" }),
+        new RungRow(10, 5, 5, 3, 12407, 18151, 3518, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption", "reaction", "restriction" }),
+    });
 }

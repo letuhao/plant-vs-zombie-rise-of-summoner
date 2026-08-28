@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Diagnostics;
@@ -423,7 +424,12 @@ public sealed class EffectBag
                     grant.GrantId,
                     def.EffectId,
                     grant.PluginId);
-                if (merged.ContainsKey("amount") && packet.SignedAmount == 0)
+                // `P0.2`: skip the re-read when "amount" is the event-linked marker object, not a
+                // number — DamagePacketBuilder already resolved it correctly (possibly a genuine
+                // zero, e.g. no damage this tick), and JsonOverlay.GetDouble cannot convert an object.
+                if (merged.ContainsKey("amount") && packet.SignedAmount == 0
+                    && merged["amount"] is not (Dictionary<string, object?> or Dictionary<string, object>)
+                    && merged["amount"] is not JsonElement { ValueKind: JsonValueKind.Object })
                     packet.SignedAmount = (long)JsonOverlay.GetDouble(merged, "amount");
                 BindSelected(packet);
 

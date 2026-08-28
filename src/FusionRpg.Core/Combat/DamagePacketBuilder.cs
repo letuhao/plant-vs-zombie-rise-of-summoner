@@ -1,5 +1,7 @@
+using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Effects.Atoms.Power;
 
 namespace FusionRpg.Core.Combat;
 
@@ -15,7 +17,7 @@ public static class DamagePacketBuilder
         long? amountOverride = null)
     {
         overlay ??= new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
-        var amount = amountOverride ?? (long)JsonOverlay.GetDouble(overlay, "amount");
+        var amount = amountOverride ?? ResolveAmount(overlay, ev);
         var packet = new DamagePacket
         {
             PacketId = Guid.NewGuid().ToString("N"),
@@ -47,6 +49,42 @@ public static class DamagePacketBuilder
 
         return packet;
     }
+
+    /// <summary>
+    /// `P0.2` (spec-value-spec-and-curve.md "Event-linked magnitudes"): the compiled "amount" is
+    /// either a plain number (the normal case, unchanged) or the marker
+    /// <c>{"eventField": "damage", "multiplierMilli": ...}</c> `AtomCompiler.ResolvedParams` bakes for
+    /// an event-linked spec. The marker survives either as an in-memory <see
+    /// cref="Dictionary{TKey,TValue}"/> (no JSON round trip, e.g. a test building the grant directly)
+    /// or as a <see cref="JsonElement"/> object (after a real JSON round trip through E19) —
+    /// <see cref="JsonOverlay.FromObject"/> already normalises both, the same way every other overlay
+    /// object value in this codebase is read.
+    /// </summary>
+    static long ResolveAmount(Dictionary<string, object?> overlay, EffectEventDto? ev)
+    {
+        if (overlay.TryGetValue("amount", out var raw) && IsObjectShape(raw))
+        {
+            var marker = JsonOverlay.FromObject(raw);
+            if (JsonOverlay.GetString(marker, "eventField") is { } field)
+            {
+                var multiplierMilli = JsonOverlay.GetInt(marker, "multiplierMilli", 1000);
+                // Absent damage (no combat event, or an event with none) heals nothing rather than
+                // throwing — the same "never crash the hot path" rule every other overlay read follows.
+                var fieldValue = field switch
+                {
+                    "damage" => ev?.Damage ?? 0,
+                    _ => 0,
+                };
+                return PowerMath.DivRound(fieldValue * multiplierMilli, PowerMath.One);
+            }
+        }
+
+        return (long)JsonOverlay.GetDouble(overlay, "amount");
+    }
+
+    static bool IsObjectShape(object? v) =>
+        v is Dictionary<string, object?> or Dictionary<string, object>
+        || v is JsonElement { ValueKind: JsonValueKind.Object };
 
     static List<ElementPayloadComponentDto>? ParseElementPayload(Dictionary<string, object?> overlay)
     {

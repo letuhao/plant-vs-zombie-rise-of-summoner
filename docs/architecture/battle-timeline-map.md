@@ -1,6 +1,6 @@
 # Capability map — battle-timeline (the virtual-time battle kernel)
 
-**Status:** **Map approved 2026-08-21.** T1–T5 specced ([battle/](battle/spec-virtual-time-core.md)); T6–T8 held pending the open questions below. Nothing built. Ideal: [battle-turn-ideal.md](battle-turn-ideal.md). Grounding: `chaos-backend-service/docs/combat-core/{01,05,08}`.
+**Status:** **Map approved 2026-08-21.** T1–T5 specced ([battle/](battle/spec-virtual-time-core.md)); T6–T8 held pending the open questions below. **Phase 1 (T1–T4, Checkpoint A) and Phase 2 (T5, `BattleEngine` adoption, Checkpoint B) both built and closed 2026-08-28** — see `tasks/battle-timeline-todo.md` B2–B15. Phase 3 (T9, the deliberate timing fix) is next and unbuilt. Ideal: [battle-turn-ideal.md](battle-turn-ideal.md). Grounding: `chaos-backend-service/docs/combat-core/{01,05,08}`.
 
 | Module | Spec | State |
 |---|---|---|
@@ -97,9 +97,9 @@ flowchart TB
 ## Build order and checkpoints
 
 1. **T1 → T2 → T3 → T4** — the kernel, pure, with **a real action driven through it** (T4's validation profile), not just a no-op.
-   **Checkpoint A — capability:** every state and transition covered; `W` proven by contrast at `W=1` vs `W=2` with non-zero wind-up; the `Downed` revive path proven; a basic attack runs end to end under `galaxy-sync`. Zero production code rewired.
+   **Checkpoint A — capability — closed 2026-08-28:** every state and transition covered; `W` proven by contrast at `W=1` vs `W=2` with non-zero wind-up; the `Downed` revive path proven; a basic attack runs end to end under `galaxy-sync`. Zero production code rewired. Full evidence: `tasks/battle-timeline-todo.md` Checkpoint A.
 2. **T5** — adoption.
-   **Checkpoint B — safety:** goldens byte-identical, six suites green with no test edits, four boundary guards green. Nothing proceeds past a drift.
+   **Checkpoint B — safety — closed 2026-08-28:** goldens byte-identical, six suites green with no test edits, four boundary guards green. Nothing proceeds past a drift. Full evidence: `tasks/battle-timeline-todo.md` Checkpoint B (B13–B15).
 3. **T9** — subsystems onto the timeline.
    **Checkpoint B2 — the deliberate change:** status pulses and shield upkeep fire at true times; `RulesetVersion` bumps; goldens re-blessed **once** with a predicted delta; win-rate sweep run and signed off.
 4. **T8 → T6 → T7** — the new capabilities, cheapest and safest first.

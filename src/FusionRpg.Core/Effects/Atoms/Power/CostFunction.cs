@@ -101,6 +101,12 @@ public static class CostFunction
         PowerTables tables)
     {
         var trigger = StringOf(when, "trigger");
+        // A predicate on a TRIGGERLESS atom is not priced here — out of this decision's stated scope.
+        // spec-power-vector.md's own reasoning and every worked example (`hasStatus(rot)` gating an
+        // on-hit proc) are about EVENT-DRIVEN atoms; a permanent modifier's own early return already
+        // exists for the same class of reason (dividing by a trigger frequency that does not apply),
+        // and inventing pricing for an unspecified case risks moving goldens for content nobody
+        // reviewed this decision against.
         if (string.IsNullOrEmpty(trigger)) return PowerMath.One;
 
         var chanceMilli = IntOf(when, "chance") ?? 1000;
@@ -113,7 +119,26 @@ public static class CostFunction
         var factor = PowerMath.CombineMilli(chanceMilli, frequencyMilli);
         factor = PowerMath.CombineMilli(factor, IcdFactorMilli(IntOf(when, "icd_ms") ?? 0, perMinute));
         factor = PowerMath.CombineMilli(factor, TargetFactorMilli(pars));
+        factor = PowerMath.CombineMilli(factor, PredicateFrequencyMilli(when, tables));
         return factor;
+    }
+
+    /// <summary>
+    /// `P0.3`: the fifth conditionality factor — "a predicate is priced exactly the way a trigger
+    /// already is" (owner, 2026-08-27). <c>1000‰ (unconditional)</c> when the atom declares no
+    /// predicate, is malformed, or fails E3 validation — never a silent discount for content this
+    /// function cannot parse.
+    /// </summary>
+    static long PredicateFrequencyMilli(IReadOnlyDictionary<string, JsonElement> when, PowerTables tables)
+    {
+        if (!when.TryGetValue("predicate", out var predEl) || predEl.ValueKind != JsonValueKind.Object)
+            return PowerMath.One;
+
+        var readRejection = AtomJson.TryReadPredicate(predEl, out var tree);
+        if (!readRejection.IsOk || tree is null)
+            return PowerMath.One;
+
+        return PredicatePricer.PriceTree(tree, tables, PowerPredicateTuningHub.Current.DiscountFloorMilli);
     }
 
     /// <summary>

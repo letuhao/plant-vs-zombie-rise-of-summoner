@@ -317,6 +317,21 @@ public static class AtomCompiler
 
             if (!AtomJson.TryReadValueSpec(raw, out var spec).IsOk) continue;
 
+            // `P0.2`: an event-linked spec has no number to bake — `spec.Min` is unused (always 0) —
+            // so a marker rides through the compiled params instead, resolved live by
+            // `DamagePacketBuilder.FromOverlay` once the firing event exists (spec-value-spec-and-
+            // curve.md, "Event-linked magnitudes"). `AtomRowValidator` already refused this shape on
+            // any kind but `resource.delta` at load, so nothing downstream needs to re-check the kind.
+            if (spec.EventField is not null)
+            {
+                result[key] = new Dictionary<string, object?>(StringComparer.Ordinal)
+                {
+                    ["eventField"] = spec.EventField,
+                    ["multiplierMilli"] = spec.MultiplierMilli,
+                };
+                continue;
+            }
+
             // Compiled atoms never carry a range — rule 3 sent those to the runner — so one number.
             result[key] = CurveTable.ApplyMilli(spec.Min, MultiplierFor(spec, curves, ownerLevel));
         }

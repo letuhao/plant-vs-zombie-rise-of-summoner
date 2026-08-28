@@ -98,6 +98,13 @@ public static class AtomRowValidator
             var specCheck = AtomJson.TryReadValueSpec(el, out var spec);
             if (!specCheck.IsOk) return Fail(specCheck.Reason, $"{def.Name}: {specCheck.Detail}");
 
+            // `P0.2`: an event-linked magnitude is scoped to `resource.delta` — the kind lifesteal/
+            // Corrosion content actually needs — so a marker never reaches a sink that has no idea
+            // how to unwrap it (spec-value-spec-and-curve.md, "Event-linked magnitudes").
+            if (spec.EventField is not null && !string.Equals(row.KindId, "resource.delta", StringComparison.Ordinal))
+                return Fail(AtomRejectionReason.BadValueSpec,
+                    $"{def.Name}: eventField is only authorable on resource.delta, not {row.KindId}");
+
             var curveCheck = ValidateCurve(def.Name, spec, curveInput);
             if (!curveCheck.IsOk) return curveCheck;
         }

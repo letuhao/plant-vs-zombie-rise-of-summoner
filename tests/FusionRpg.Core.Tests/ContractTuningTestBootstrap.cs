@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using FusionRpg.Core;
+using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Shield;
@@ -60,6 +61,7 @@ internal static class ContractTuningTestBootstrap
         WorldAiPolicy.Configure(DefaultAi);
         VfxTuningHub.Configure(DefaultVfx);
         PowerTuningHub.Configure(DefaultPower);
+        RungPolicy.Configure(DefaultActionRungs);
     }
 
     public static readonly ContractTuning DefaultContracts = new(
@@ -356,6 +358,21 @@ internal static class ContractTuningTestBootstrap
     // bMilli=0 matches the shipped power-scale.v1.json exactly (plan.md "B=0 first, dial second") —
     // BattleRuleset.BaseHp/Atk/Defense must stay byte-identical to their pre-T2.1 literal formulas
     // for every test in this assembly, the same zero-golden-movement guarantee production gets.
+    // Matches data/tuning/action-rungs.v1.json exactly (spec-rung-table.md, A12).
+    public static readonly RungTable DefaultActionRungs = new(10, new[]
+    {
+        new RungRow(1,  1, 1, 1, 1000,  1000,  1000, Array.Empty<string>()),
+        new RungRow(2,  1, 1, 1, 1323,  1380,  1150, Array.Empty<string>()),
+        new RungRow(3,  2, 2, 1, 1750,  1904,  1322, new[] { "scopeSplit", "riderStatus" }),
+        new RungRow(4,  2, 2, 1, 2315,  2628,  1521, new[] { "scopeSplit", "riderStatus" }),
+        new RungRow(5,  3, 3, 2, 3062,  3627,  1749, new[] { "scopeSplit", "riderStatus", "condition" }),
+        new RungRow(6,  3, 3, 2, 4051,  5005,  2011, new[] { "scopeSplit", "riderStatus", "condition" }),
+        new RungRow(7,  4, 4, 2, 5359,  6907,  2313, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption" }),
+        new RungRow(8,  4, 4, 2, 7090,  9531,  2660, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption" }),
+        new RungRow(9,  5, 5, 3, 9379,  13153, 3059, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption", "reaction", "restriction" }),
+        new RungRow(10, 5, 5, 3, 12407, 18151, 3518, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption", "reaction", "restriction" }),
+    });
+
     public static readonly PowerTuning DefaultPower = PowerTuning.Build(
         schemaVersion: 1, version: 1,
         cMilli: PowerTuning.FixedCMilli, bMilli: 400, pinIndex: PowerTuning.FixedPinIndex, pinValue: PowerTuning.FixedPinValue, // T4.2 (power-dial, 2026-08-24): 0 -> 400, matches shipped power-scale.v2.json
