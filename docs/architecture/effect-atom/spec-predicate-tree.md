@@ -12,7 +12,7 @@ This is the single place in the schema that can quietly become a programming lan
 
 ## Design (locked on approval)
 
-### Closed leaf list — 8
+### Closed leaf list — 8 (plus three approved additions below — 11 total)
 
 | Leaf | Param | Reads | Source in today's code |
 |---|---|---|---|
@@ -39,6 +39,29 @@ Added by the action stream, owner-approved, and recorded here because this list 
 **These generalise `hpBelowMilli` / `hpAboveMilli` rather than adding a new idea** — same per-mille shape, same actor read, one extra parameter naming which pool. `hp` is one of the five resources, so the existing pair becomes the special case of the new one; whether to collapse them is an implementation choice, not a vocabulary one.
 
 **Reader requirement:** `EntityFacts` gains resource values, following `HpMilli`'s existing shape. Four ints (`stamina`, `hunger`, `spirit`, `qi` as ‰ of max) — `hp` already has its own. Resource semantics are the [resource hub](../resource-hub-ideal.md)'s; this list only needs the numbers readable.
+
+#### A third leaf requested by the action program — approved 2026-08-27, **shipped 2026-08-28**
+
+Built by the action program, across the program boundary, under explicit owner authorization
+(`LeafId.HoldsStock`; the four-slot interned `FactReader`/`EntityFacts` stock probe; both compiled
+forms — the typed-graph reference and the shipped flat encoding — updated and fuzz-proven equivalent
+over 10⁴ random trees; the JSON grammar's compound `{"stockId","minQty"}` object value). The
+underlying inventory system (`rpg_item_stock`) remains unbuilt by design — the leaf reads
+caller-supplied quantities, resolved at evaluation setup, never I/O from inside the leaf itself.
+
+| Leaf | Param | Reads | Why |
+|---|---|---|---|
+| `holdsStock` | `(stockId, minQty)` | inventory | *"do I hold ≥ 1 of this?"* — the precondition a consumable action checks |
+
+**Owed to [item/ssot-consumables.md](../item/ssot-consumables.md) §5(c)** since 2026-08-22, and it lands
+here rather than as a cost because [action/spec-action-costs.md](../action/spec-action-costs.md) §8
+declined to widen `resource_id`: **costs scale with `Θ` and rungs; an item does not.** *One potion is one
+potion at every level*, so an item fails the pure-number property the cost economy rests on. It is a
+**precondition**, and preconditions are leaves.
+
+**Reader requirement:** `FactReader` gains a narrow, readonly stock probe following `HpMilli`'s shape. The
+count is read into the fact struct at evaluation setup — **the leaf itself performs no I/O**, per this
+module's own boundary (*"never a leaf that performs I/O, reads a clock, or draws RNG"*).
 
 **Not requested, deliberately:** `cellFree` — it needs a board, the battle board is deferred, and a leaf with nothing to read is a leaf that cannot be tested. It comes with `A10` or not at all.
 

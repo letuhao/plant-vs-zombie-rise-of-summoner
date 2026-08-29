@@ -93,8 +93,9 @@ public static class ActorDerivedProfiles
         });
 
     /// <summary>
-    /// Category resist is capped at <see cref="StatusPolicy.CategoryResistCap"/> (0.95).
-    /// Omni is uncapped and carries the potency floor.
+    /// Category resist is capped at <see cref="Stats.Derived.DerivedStatPolicy.CategoryResistCap"/>
+    /// (0.95) — applied once, at compose (cap-consolidation, T1). Omni is uncapped and carries the
+    /// potency floor.
     /// </summary>
     static ActorDerivedSnapshot Iron(string categoryChannel) =>
         ActorDerivedSnapshot.FromValues(new[]

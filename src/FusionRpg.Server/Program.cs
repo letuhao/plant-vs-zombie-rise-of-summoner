@@ -53,6 +53,9 @@ FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
 FusionRpg.Core.Status.StatusPolicy.Configure(
     FusionRpg.Core.Status.StatusTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "status.v1.json"))));
+FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
+    FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
 FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
     FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "overlay.v1.json"))));
@@ -86,6 +89,15 @@ FusionRpg.Core.Power.PowerTuningHub.Configure(
         // reverting is pointing this back at power-scale.v1.json and un-bumping RulesetVersion, no
         // other code change (PS-7).
         File.ReadAllText(Path.Combine(tuningDir, "power-scale.v2.json"))));
+FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
+    FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
+        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. v1 stays on disk -- reverting is pointing this back at aptitudes.v1.json.
+        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v2.json"))));
+// Server-side only (spec-action-catalog.md, T30): actions are battle-mode and the injector never
+// sees one, so the rung ladder has no reason to load there.
+FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
+    FusionRpg.Core.Actions.Rungs.RungTableLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "action-rungs.v1.json"))));
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
@@ -161,6 +173,7 @@ app.MapFusion();
 app.MapPatron();
 app.MapContracts();
 app.MapWorld();
+app.MapAptitudes();
 PatronEndpoints.RefreshRuntimeState(app.Services.GetRequiredService<RpgStore>()); // SIM plugins read it
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));

@@ -18,6 +18,8 @@ public sealed class BattleTrace
     readonly List<string> _lines = new();
     readonly Dictionary<string, List<int>> _draws = new(StringComparer.Ordinal);
     readonly List<string> _phases = new();
+    readonly List<string> _targets = new();
+    readonly List<string> _applies = new();
 
     /// <summary>
     /// Intra-round phase markers in the order they actually ran. A snapshot, not a live view:
@@ -57,8 +59,36 @@ public sealed class BattleTrace
         _lines.Add($"phase {round} {phase}");
     }
 
+    /// <summary>
+    /// One reaction-lane outcome (B6 — <see cref="ReactionLane.TryEnter"/>): entered, or dropped for
+    /// having no lane, an exhausted depth stack, or an exhausted <c>WReact</c> pool. Exists so a
+    /// dropped reaction is observable without a debugger — the same reason every other line here
+    /// exists — and it is additive: no path that predates the reaction lane ever calls it, so
+    /// existing trace fixtures are untouched.
+    /// </summary>
+    public void Reaction(string actorKey, string outcome) => _lines.Add($"reaction {actorKey} {outcome}");
+
     public void State(int round, string actorKey, long hp, long shieldAbsorbed) =>
         _lines.Add($"state {round} {actorKey} hp={hp} abs={shieldAbsorbed}");
+
+    /// <summary>
+    /// The resolved target ptr of one attack (action-todo.md T11 — the action-adoption parity
+    /// ladder). Deliberately NOT folded into <see cref="Digest"/>: the kernel-adoption program's own
+    /// pre-adoption fixtures (`PreAdoptionTraceTests`) already compare that string byte-for-byte, and
+    /// this module does not own those files — a count-matching, target-differing run is exactly the
+    /// failure this parity ladder exists to catch, so it gets its own accessor instead.
+    /// </summary>
+    public void Target(int round, string attackerKey, string targetKey) =>
+        _targets.Add($"{round} {attackerKey}->{targetKey}");
+
+    /// <summary>Target lines in order, for the same reason <see cref="Draws"/> is separate from <see cref="Digest"/>.</summary>
+    public IReadOnlyList<string> Targets => _targets.ToArray();
+
+    /// <summary>The signed HP delta one apply actually produced, for the same reason as <see cref="Target"/>.</summary>
+    public void Apply(int round, string ownerKey, long signedDelta) =>
+        _applies.Add($"{round} {ownerKey} {signedDelta}");
+
+    public IReadOnlyList<string> Applies => _applies.ToArray();
 
     /// <summary>
     /// Decorates the combat RNG so crit-stream draws are recorded without touching

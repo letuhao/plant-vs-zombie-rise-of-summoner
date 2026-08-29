@@ -596,6 +596,13 @@ Swept 2026-08-23 across `src/` and `docs/architecture/`.
 | 5 | `LoamPolicy.DevelopmentUpkeepPerLevel = 5` | linear | `LoamPolicy.cs:30` | **Economy magnitude — scales on `P(Θ)` only if its matching faucet does** (§10.4) |
 | 6 | `XpToNext = first + (L−1)·step` | arithmetic | `rpg-progression.md` | **Kept, unchanged.** It is the *cost* ladder, not a power ladder — see §10.5 |
 
+Row 17 (`RpgProgressionSubsystem`'s `level`-gated bonus flats, found latent by class-system P1.13,
+2026-08-26) is **retired, not merely re-verdicted** — class-system P3.3 (2026-08-27) deleted the stub
+from `RpgProgressionSubsystem.cs` entirely; `progression.bonus.{maxHp,atk,defense,arm1,arm2}` are
+allocation-sourced now, through `AptitudeSubsystem`/`AptitudeResolver` (already governed by `aptitude-
+tuning`'s PS-3 read functions, not a private `f(level)`), so there is nothing left for this table to
+hold. The row number is retired with it, not reassigned.
+
 ### 10.2 Non-level scales — these are legitimate and stay
 
 Each is bounded, or operates in relative space, so none can drift with level. They are listed so
@@ -844,6 +851,21 @@ Depth limits that stop a cycle. None sits on a magnitude or a progress axis.
 
 **No conflict** — all of them. A cycle guard is not a ceiling on growth.
 
+**The divisor rule (derived-stats program, T0.4).** [battle-turn-ideal.md:153](../battle-turn-ideal.md)
+computes `nextReadyTick = now + (BaseCost × ActionRank × HasteFactor) / Speed` — a `Race`-class stat
+(spec-stat-taxonomy.md §2.1) used as a divisor.
+
+> A `Race` stat used as a divisor requires a floor above zero. That floor is a *structural limit* —
+> division by zero is a crash, not a balance outcome — so it is PS-8 exempt and must say so in a
+> comment where it is declared.
+
+The overflow concern **inverts** for a denominator: the hazard is a very *small* value approaching
+zero, not a large one, which is why this floor is registered here (recursion and termination guards)
+rather than in §11.2 (progression ceilings) — it bounds a crash, not a player's power. No such stat is
+registered yet: `turn.speed` / `turn.haste` / `turn.moveSpeed` stay declared-but-unregistered vocabulary
+(actor-hub-ssot.md §H.6), owned by the battle stream. This row exists so the floor lands here, not in
+§11.2, the day that stream gives one of them a reader.
+
 ### 11.5 Presentation caps — VFX and UI
 
 How much can be drawn. Invisible to progression entirely.
@@ -869,6 +891,8 @@ Cannot overflow and cannot wall anything, because their domain is closed.
 | Expedition `QuietCeilMilli` / `FoundSoulsCeilMilli` / `WildCeilMilli` | 400 / 750 / 900 | Per-mille roll thresholds on an event table |
 | `ModifierOp.MinimumInterval` | 0.01 | Attack interval floor — a divide-by-zero guard |
 | `ContractPolicy.MaxSettleDays` | 30 | Offline settlement window: *"a six-month absence settles thirty days"* |
+| `DerivedStatPolicy.ResourceEfficiencyCap` | 1.0 | `resource.efficiency.{id}` — a cost-reduction ratio; 100% is the ceiling of "reduces cost", not a chosen balance value (spec-actor-channels.md §2.2, T4.4) |
+| `DerivedStatPolicy.BreakthroughSuccessCap` | 1.0 | `progression.breakthroughSuccess` — a roll probability; 100% is the ceiling of "chance" (spec-actor-channels.md §4.2, T4.4) |
 
 **No conflict.** `MaxSettleDays` is the only one worth a second look — it bounds *retroactive* upkeep
 after a long absence, which is mercy, not a ceiling on progress.

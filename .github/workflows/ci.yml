@@ -40,6 +40,28 @@ jobs:
           python scripts/audit-magic-numbers.py
           if ($LASTEXITCODE -ne 0) { throw "magic-number audit found an M1/M2 finding — see output above" }
 
+      - name: Balance guard (class-system-todo.md P5.3 — termination HARD, dominance-mechanism HARD, dominance-verdict SOFT)
+        shell: pwsh
+        run: |
+          # Deliberately its OWN step, not folded into "Restore / test (.NET)" below: that step runs
+          # ten `dotnet test` calls in one script with no exit-code check between them, so only the
+          # LAST one determines the step's pass/fail (confirmed against a real CI run, 2026-08-24 —
+          # Core.Tests and Guard.Tests both failed and were silently swallowed because E2E.Tests, the
+          # last call, also happened to fail that day) — a guard whose whole job is "fail the build"
+          # cannot share that step. See docs/architecture/class-system/spec-balance-guard.md §2/§5.
+          #
+          # Filters to `Category=BalanceGuard` only, NOT the wider `Category=BalanceGuardBaseline` --
+          # that second trait marks the one DominanceGuardTests case that asserts a fact about TODAY'S
+          # TUNING DATA (no dominant corner), not the guard's own mechanism. spec-balance-guard.md §2 is
+          # explicit a dominance verdict must never fail the build; blocking on it here would silently
+          # reintroduce exactly that violation the day the data legitimately goes red (e.g. a deliberate
+          # Phase 8 residual-fit trade-off). `Category=BalanceGuard` covers TerminationGuard's own tests
+          # (HARD by design — a violation SHOULD fail CI) and DominanceGuard's MECHANISM tests only
+          # (returns without throwing, coverage populated, no clock applied — code regressions, safe to
+          # block on regardless of what the verdict itself says).
+          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --filter "Category=BalanceGuard"
+          if ($LASTEXITCODE -ne 0) { throw "balance-guard: a termination invariant or dominance-guard-mechanism test failed — see output above" }
+
       - name: Restore / test (.NET)
         shell: pwsh
         run: |

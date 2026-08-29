@@ -26,7 +26,10 @@ public static class StatusCatalogBootstrap
         Register(catalog, "wither", StatusKind.OverTime, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.PulseHp);
         Register(catalog, "bond", StatusKind.Counter, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.PulseHp);
         Register(catalog, "rally", StatusKind.Buff, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.ModifyStat);
-        Register(catalog, "leech", StatusKind.OverTime, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.PulseHp);
+        // pulseHealsAttacker: true -- spec-healing-pair.md §3, finishing the half the catalog shipped
+        // half-built ("damage half only — the heal half was never built").
+        RegisterWithOptions(catalog, "leech", StatusKind.OverTime, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh,
+            new[] { StatusPayloadKind.PulseHp }, pulseHealsAttacker: true);
         Register(catalog, "expose", StatusKind.Debuff, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.ModifyStat);
         Register(catalog, "command", StatusKind.Meter, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.ModifyStat);
         Register(catalog, "shatter", StatusKind.Debuff, "overlay", StatusL2bCategory.Dot, StatusStacking.Refresh, StatusPayloadKind.ModifyStat);
@@ -72,5 +75,34 @@ public static class StatusCatalogBootstrap
             Array.Empty<string>(),
             stacking,
             payloadKinds));
+    }
+
+    /// <summary>
+    /// A separate name, not an overload of <see cref="Register"/> — <c>params</c> must be a method's
+    /// last parameter, so it cannot sit before trailing optional ones, and giving both methods the
+    /// same name at the same arity would make every existing 7-argument call site ambiguous between
+    /// them. Only <c>leech</c> uses this one.
+    /// </summary>
+    static void RegisterWithOptions(
+        StatusCatalog catalog,
+        string statusId,
+        StatusKind kind,
+        string family,
+        string primaryCategory,
+        StatusStacking stacking,
+        StatusPayloadKind[] payloadKinds,
+        string? element = null,
+        bool pulseHealsAttacker = false)
+    {
+        catalog.Register(new StatusDef(
+            statusId,
+            kind,
+            family,
+            new[] { primaryCategory },
+            Array.Empty<string>(),
+            stacking,
+            payloadKinds,
+            Element: element,
+            PulseHealsAttacker: pulseHealsAttacker));
     }
 }

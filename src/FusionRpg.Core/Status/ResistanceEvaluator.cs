@@ -37,7 +37,19 @@ public sealed record StatusDef(
     IReadOnlyList<string> Categories,
     IReadOnlyList<string> Tags,
     StatusStacking Stacking,
-    IReadOnlyList<StatusPayloadKind> PayloadKinds);
+    IReadOnlyList<StatusPayloadKind> PayloadKinds,
+    /// <summary>
+    /// spec-status-potency.md §2.3 (Q1) — the element the combine rule reads for
+    /// <c>+ resist.{element}</c>, from the status def's OWN tag, never the attacker's. Null means a
+    /// genuine absence, not a default (T5): an untagged status contributes nothing to the element term.
+    /// </summary>
+    string? Element = null,
+    /// <summary>
+    /// Leech's heal half (spec-healing-pair.md §3) — true only for <c>leech</c>. Copied onto
+    /// <see cref="StatusInstance.PulseHealsAttacker"/> at apply time so the pulse loop never needs a
+    /// second catalog lookup.
+    /// </summary>
+    bool PulseHealsAttacker = false);
 
 public sealed class UnknownStatusIdException : Exception
 {
@@ -111,11 +123,43 @@ public sealed class ResistanceEvaluator
     public static double Sigmoid(double x, double steepness = 1.0) =>
         1.0 / (1.0 + Math.Exp(-x * steepness));
 
+    /// <summary>
+    /// delta → apply chance. Two shapes, both reachable from tuning, defaulting to the shipped one
+    /// (<see cref="StatusApplyShape.Sigmoid"/> at <c>ApplyOffsetK = 0</c>, which is byte-identical to
+    /// the previous <c>Sigmoid(delta / scale, steepness)</c> — <c>delta - 0.0</c> is exact in IEEE).
+    ///
+    /// <para><b>Why this became a shape rather than a number.</b> A sigmoid is 0.5 at its own zero for
+    /// EVERY scale and EVERY steepness, so no value of any existing tunable could move the neutral
+    /// point — an unequipped attacker landed every status on a coin flip, and a <c>cc</c> at parity
+    /// was a permanent lock. That is the same defect the evasion chain refused for parry
+    /// (<c>OverlayCombatCalculator</c>: <i>"a sigmoid would give 0.5 at delta=0 … a new default nobody
+    /// chose"</i>), and this is the same fix, made selectable rather than imposed.</para>
+    /// </summary>
+    public static double ApplyChance(double delta, double scale, double steepness)
+    {
+        var shifted = delta - StatusPolicy.ApplyOffsetK;
+        return StatusPolicy.ApplyShape switch
+        {
+            StatusApplyShape.LinearFromZero => scale <= 0 ? 0 : Math.Clamp(shifted / scale, 0.0, 1.0),
+            _ => Sigmoid(shifted / scale, steepness)
+        };
+    }
+
+    /// <summary>
+    /// spec-status-potency.md §2.1 — Phase 1 (this method's apply-chance roll) is untouched; only
+    /// Phase 2 (potency) splits into independent duration and intensity deltas.
+    /// <paramref name="statusElement"/> is Q1's term (§2.3): the status DEF's own element tag, never
+    /// the attacker's, read once by the caller (<see cref="StatusRuntime.Apply"/> already resolves the
+    /// def) rather than giving this stateless calculator a <see cref="StatusCatalog"/> dependency.
+    /// Null — a genuine absence, not a default (T5) — for every one of the 21 shipped statuses, none of
+    /// which carries an element tag yet.
+    /// </summary>
     public StatusApplyResult Evaluate(
         StatusApplyRequest request,
         ActorDerivedSnapshot? attacker,
         ActorDerivedSnapshot defender,
-        IStatusRng rng)
+        IStatusRng rng,
+        string? statusElement = null)
     {
         if (rng == null) throw new ArgumentNullException(nameof(rng));
 
@@ -127,25 +171,48 @@ public sealed class ResistanceEvaluator
             var immuneKey = DerivedStatChannels.StatusImmune(tag);
             if (defender.Get(immuneKey) >= 1.0)
             {
-                return Resisted(request, 0, 0, 0, 0, 0, StatusResistReason.Immunity);
+                return Resisted(request, StatusResistReason.Immunity);
             }
         }
 
         var attackerLess = request.AttackerLess || attacker == null;
         var attackerSnap = ResolveAttackerSnapshot(request, attacker);
-        var delta = ComputeDelta(request.StatusId, category, attackerSnap, defender, attackerLess);
+
+        // Phase 1 — unchanged shape, now reading Q1's + resist.{element} term (part of the shared base
+        // formula, not a Phase-2-only addition). netFactor here is Phase 1's OWN value (StatusApplyResult
+        // doc: "untouched by the split") -- ComputeNetFactor(delta) on the unsplit delta, same as before
+        // the split existed. It is distinct from durationNetFactor/intensityNetFactor below.
+        var delta = ComputeDelta(request.StatusId, category, attackerSnap, defender, attackerLess, statusElement);
         var netFactor = ComputeNetFactor(delta);
+
+        // Phase 2 — split (§2.1). Each reuses the same base totalPower/totalResist (element term
+        // included) and adds its OWN duration- or intensity-specific term on top.
+        var durationDelta = ComputePotencyDelta(
+            request.StatusId, category, attackerSnap, defender, attackerLess, statusElement, "duration");
+        var intensityDelta = ComputePotencyDelta(
+            request.StatusId, category, attackerSnap, defender, attackerLess, statusElement, "intensity");
+
+        var durationNetFactor = ComputeNetFactor(durationDelta);
+        var intensityNetFactor = ComputeNetFactor(intensityDelta);
 
         foreach (var tag in tags)
         {
             var reductionKey = DerivedStatChannels.StatusImmuneReduction(tag);
             var reduction = Math.Clamp(defender.Get(reductionKey), 0, 1);
-            netFactor *= 1.0 - reduction;
+            // PartialImmunityScalesBoth (§6): (1 - immuneReduction) applies to both potency axes —
+            // partial immunity blunts a status overall, not selectively by axis.
+            durationNetFactor *= 1.0 - reduction;
+            intensityNetFactor *= 1.0 - reduction;
         }
 
-        if (netFactor <= StatusPolicy.MinNetFactor)
+        // §2.2: the potency floor fires on INTENSITY only now. A zero-duration status is
+        // instantaneous — a legitimate effect (IsUseless below still catches truly-nothing) — but a
+        // zero-intensity one does nothing at all, which is what "resisted" means.
+        if (intensityNetFactor <= StatusPolicy.MinNetFactor)
         {
-            return Resisted(request, delta, netFactor, 0, 0, 0, StatusResistReason.PotencyFloor);
+            return Resisted(request, StatusResistReason.PotencyFloor,
+                delta: delta, netFactor: netFactor,
+                durationNetFactor: durationNetFactor, intensityNetFactor: intensityNetFactor);
         }
 
         // T3.2 (audit F3): no longer scaled by matchPower. Under linear Theta, a power-scaled divisor
@@ -157,20 +224,26 @@ public sealed class ResistanceEvaluator
             StatusPolicy.ApplyScaleFloor,
             StatusPolicy.ApplyScaleKForCategory(category));
         var steepness = StatusPolicy.ApplySteepnessForCategory(category);
-        var pApply = Sigmoid(delta / effectiveApplyScale, steepness);
+        var pApply = ApplyChance(delta, effectiveApplyScale, steepness);
         var pFinal = request.GrantChance * pApply;
 
         if (rng.NextUnit() >= pFinal)
         {
-            return Resisted(request, delta, netFactor, pApply, pFinal, effectiveApplyScale, StatusResistReason.ApplyRoll);
+            return Resisted(request, StatusResistReason.ApplyRoll,
+                delta: delta, netFactor: netFactor, pApply: pApply, pFinal: pFinal,
+                durationNetFactor: durationNetFactor, intensityNetFactor: intensityNetFactor,
+                effectiveApplyScale: effectiveApplyScale);
         }
 
-        var effectiveMagnitude = request.BaseMagnitude * netFactor;
-        var effectiveDuration = request.BaseDuration * netFactor;
+        var effectiveMagnitude = request.BaseMagnitude * intensityNetFactor;
+        var effectiveDuration = request.BaseDuration * durationNetFactor;
 
         if (IsUseless(effectiveMagnitude, effectiveDuration))
         {
-            return Resisted(request, delta, netFactor, pApply, pFinal, effectiveApplyScale, StatusResistReason.UselessMagnitude);
+            return Resisted(request, StatusResistReason.UselessMagnitude,
+                delta: delta, netFactor: netFactor, pApply: pApply, pFinal: pFinal,
+                durationNetFactor: durationNetFactor, intensityNetFactor: intensityNetFactor,
+                effectiveApplyScale: effectiveApplyScale);
         }
 
         return new StatusApplyResult(
@@ -182,7 +255,9 @@ public sealed class ResistanceEvaluator
             PFinal: pFinal,
             EffectiveApplyScale: effectiveApplyScale,
             EffectiveMagnitude: effectiveMagnitude,
-            EffectiveDuration: effectiveDuration);
+            EffectiveDuration: effectiveDuration,
+            DurationNetFactor: durationNetFactor,
+            IntensityNetFactor: intensityNetFactor);
     }
 
     static ActorDerivedSnapshot ResolveAttackerSnapshot(StatusApplyRequest request, ActorDerivedSnapshot? attacker)
@@ -197,15 +272,24 @@ public sealed class ResistanceEvaluator
         string category,
         ActorDerivedSnapshot attacker,
         ActorDerivedSnapshot defender,
-        bool attackerLess = false)
+        bool attackerLess = false,
+        string? element = null)
     {
         var totalPower = (StatusPolicy.IncludeTierPowerInDelta ? attacker.TierPower : 0)
                          + attacker.Get(DerivedStatChannels.StatusPowerOmni)
                          + attacker.Get($"status.power.{category}")
                          + attacker.Get(DerivedStatChannels.StatusPower(statusId));
 
-        var categoryResist = Math.Min(defender.Get($"status.resist.{category}"), StatusPolicy.CategoryResistCap);
-        var perIdResist = Math.Min(defender.Get(DerivedStatChannels.StatusResist(statusId)), StatusPolicy.CategoryResistCap);
+        // Not re-clamped here: DerivedComposer already capped this value at compose time, against
+        // DerivedStatPolicy.CategoryResistCap (cap-consolidation, T1) — one enforcement point. A second
+        // clamp here against the SAME tunable made raising it a silent no-op, since compose ran first.
+        var categoryResist = defender.Get($"status.resist.{category}");
+        var perIdResist = defender.Get(DerivedStatChannels.StatusResist(statusId));
+
+        // Q1 (spec-status-potency.md §2.3): status.resist.{element} already resolves through the open
+        // prefix and nothing read it. {element} is the STATUS DEF's own tag, never the attacker's —
+        // null/blank is a genuine absence (T5), not a default, so an untagged status contributes 0.
+        var elementResist = string.IsNullOrWhiteSpace(element) ? 0 : defender.Get($"status.resist.{element}");
 
         // T3.1 fix (power-plan.md, found via BattleStatusTests going Victory -> Stalemate, not
         // assumed safe): the tier-power term is a CONTEST between two sides, so it is symmetric —
@@ -214,13 +298,44 @@ public sealed class ResistanceEvaluator
         // t0") has no real attacker side to contest with; without this guard, ResistFromPowerRatio=1.0
         // makes attacker.TierPower=0 net negative against ANY normal-power defender, netFactor clamps
         // to MinNetFactor (0.0), and the scripted effect becomes permanently, completely inert.
-        // Category/per-id/omni resist (actual immunities and resistances) still apply normally.
+        // Category/per-id/omni/element resist (actual immunities and resistances) still apply normally.
         var totalResist = (attackerLess ? 0 : defender.TierPower * StatusPolicy.ResistFromPowerRatio)
                           + defender.Get(DerivedStatChannels.StatusResistOmni)
                           + categoryResist
-                          + perIdResist;
+                          + perIdResist
+                          + elementResist;
 
         return totalPower - totalResist;
+    }
+
+    /// <summary>
+    /// spec-status-potency.md §2.1 — durationDelta/intensityDelta share Phase 1's totalPower/totalResist
+    /// base (element term included) and each add ONE <paramref name="family"/>-specific term:
+    /// attacker's status.{family}.omni/{category}/{statusId} minus defender's
+    /// status.{family}Reduction.omni/{category}/{statusId} — the identical omni+category+perId shape as
+    /// status.power/status.resist (DerivedStatChannels.cs H.2: "same axis, same combine rule").
+    /// <paramref name="family"/> is "duration" or "intensity", never a balance value — a channel-id
+    /// fragment, not a magic number.
+    /// </summary>
+    public static double ComputePotencyDelta(
+        string statusId,
+        string category,
+        ActorDerivedSnapshot attacker,
+        ActorDerivedSnapshot defender,
+        bool attackerLess,
+        string? element,
+        string family)
+    {
+        var baseDelta = ComputeDelta(statusId, category, attacker, defender, attackerLess, element);
+
+        var attackerTerm = attacker.Get($"status.{family}.omni")
+                          + attacker.Get($"status.{family}.{category}")
+                          + attacker.Get($"status.{family}.{statusId}");
+        var defenderReductionTerm = defender.Get($"status.{family}Reduction.omni")
+                                   + defender.Get($"status.{family}Reduction.{category}")
+                                   + defender.Get($"status.{family}Reduction.{statusId}");
+
+        return baseDelta + attackerTerm - defenderReductionTerm;
     }
 
     // T3.2 (audit F4): a raw delta used directly as a multiplier made parity and +1 both give 1.0x
@@ -237,12 +352,14 @@ public sealed class ResistanceEvaluator
 
     static StatusApplyResult Resisted(
         StatusApplyRequest request,
-        double delta,
-        double netFactor,
-        double pApply,
-        double pFinal,
-        double effectiveApplyScale,
-        StatusResistReason reason) =>
+        StatusResistReason reason,
+        double delta = 0,
+        double netFactor = 0,
+        double pApply = 0,
+        double pFinal = 0,
+        double durationNetFactor = 0,
+        double intensityNetFactor = 0,
+        double effectiveApplyScale = 0) =>
         new(
             Applied: false,
             ResistReason: reason,
@@ -252,5 +369,7 @@ public sealed class ResistanceEvaluator
             PFinal: pFinal,
             EffectiveApplyScale: effectiveApplyScale,
             EffectiveMagnitude: 0,
-            EffectiveDuration: 0);
+            EffectiveDuration: 0,
+            DurationNetFactor: durationNetFactor,
+            IntensityNetFactor: intensityNetFactor);
 }

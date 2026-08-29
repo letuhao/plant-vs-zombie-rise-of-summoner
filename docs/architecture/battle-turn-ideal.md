@@ -153,6 +153,12 @@ flowchart TB
 nextReadyTick = now + (BaseCost × ActionRank × HasteFactor) / Speed
 ```
 
+`Speed` is a `Race` stat in a denominator — it needs a floor above zero, a **structural limit** (PS-8
+exempt, must say so in a comment where it's implemented), not a re-derivation here. See
+[spec-stat-taxonomy.md §2.4](derived-stats/spec-stat-taxonomy.md) (the divisor rule; the overflow
+hazard inverts to *small* values for a denominator, registered in
+[power/ssot-power-scale.md](power/ssot-power-scale.md) §11.4, termination guards — not §11.2).
+
 - **FFX CTB** uses the same factors: *"Counter = Tick Speed × Rank × Haste Status"*. **But CTB decrements every tick and ATB fills continuously, so a precomputed arrival time is only equivalent while speed and haste stay constant.** An earlier draft of this document claimed CTB "is literally this" — the audit falsified it: under a precomputed deadline, a Haste landing mid-wait does nothing until the *next* action. Readiness therefore accrues **work**, and rebases when speed or haste change (see [spec-readiness-model.md](combat/../battle/spec-readiness-model.md)).
 - **ATB** (FF4+) is the same relation inverted — a gauge filling at a rate set by Speed.
 - **Today's engine** is the degenerate case: `Speed` equal for all, `ActionRank` constant → everyone becomes ready together → round-robin.
@@ -239,6 +245,13 @@ The whole match-source contract is byte-identical replay, so the scheduler inher
 The owner's own backend design already solved several of these, and we should inherit rather than reinvent. Source: `chaos-backend-service/docs/combat-core/{01_Cultivation_System_Integration, 05_Flexible_Action_System, 08_World_Core_Binding}.md`.
 
 **Speed family (01).** `speed`, `haste` (attack speed), `moveSpeed`, plus `climbSpeed` / `swimSpeed` / `flightSpeed` / `jumpHeight` for movement modes we don't have yet. Our readiness function needs `speed` and `haste`; the rest are reserved names, not build scope.
+
+**Classified `Race` (reconcile pass, F7, 2026-08-25).** All seven names above are `StatClass.Race`
+([spec-stat-taxonomy.md](derived-stats/spec-stat-taxonomy.md) §2.1) — none of them ever needed a
+counterpart, which used to be an unexamined absence and is now a stated rule. They stay
+**unregistered**: this battle stream registers each one when it gives it a reader, not the derived-
+stats program (spec-unbuilt-reconcile.md §3's own ban — registering `turn.*` here is out of that
+module's scope).
 
 **Initiative formula (08).** `initiative = speed × 1.0 + haste × 0.5 + seeded_tiebreaker`. Note it already carries a **seeded** tiebreaker — the same determinism discipline we enforce, arrived at independently.
 

@@ -1,4 +1,5 @@
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
@@ -118,5 +119,32 @@ public class BattleStatComposerTests
             Wave = new[] { Actor("wave:0", "wave", mods: defenderMods) }
         }, seed);
         return report.Actors.Single(a => a.Side == "squad").DamageDealt;
+    }
+
+    [Fact]
+    public void ATurnDotChannelModThroughTheComposePathDoesNotThrow()
+    {
+        // battle-timeline B9's own acceptance line: "a turn.* modifier through the compose path does
+        // not throw." Before P0.5, turn.speed/turn.haste were unregistered, so BattleStatComposer's
+        // KnownChannels check would have rejected this mod as unknown.
+        //
+        // Real finding while writing this test, not assumed: BattleStatComposer.Compose seeds only
+        // the specific channels its own level-formula logic computes (defense/accuracy/dodge/
+        // critrate/critresist) -- everything else, including turn.speed/turn.haste, starts at an
+        // implicit 0 and a ChannelMod overlays ADDITIVELY on that 0, not on DerivedStatRegistry's own
+        // declared default (100/1000). This is the SAME established pattern this codebase already
+        // uses elsewhere (e.g. resource channels default through their OWN reader, not the composer) --
+        // so the consumer (BattleDurationResolver), not this composer, is where the real default gets
+        // applied. See BattleDurationResolverTests for that half of the proof.
+        var setup = Actor("squad:0", "squad", mods: new[]
+        {
+            new BattleChannelMod(DerivedTurnChannels.Speed, 50),
+            new BattleChannelMod(DerivedTurnChannels.Haste, -200),
+        });
+
+        var snap = BattleStatComposer.Compose(setup);
+
+        Assert.Equal(50, (int)snap.Get(DerivedTurnChannels.Speed)); // implicit 0 + the mod's own 50
+        Assert.Equal(-200, (int)snap.Get(DerivedTurnChannels.Haste)); // implicit 0 + the mod's own -200
     }
 }

@@ -109,7 +109,80 @@ public static class DerivedStatChannels
     public static string CombatShieldPen(ElementTypeId e) => $"{CombatShieldPenPrefix}.{e.ToElementId()}";
     public static string CombatShieldRegen(ElementTypeId e) => $"{CombatShieldRegenPrefix}.{e.ToElementId()}";
 
-    /// <summary>Combat channel family prefixes — 12 families × (omni + roster) slots.</summary>
+    // H.1 (actor-hub-ssot.md) — 16 new element-typed combat families (8 pairs), 2026-08-24. Generated
+    // over omni + roster exactly like the shipped 12 — prefix + element helper only, never a
+    // hand-listed per-element const (spec-catalog-extension.md §5). Six of the eight pairs are
+    // ROLE-INVERTED: for parry/block/reflection the DEFENDER owns the half that raises an outcome and
+    // the ATTACKER owns the half that suppresses it — the opposite of power/defense. The seed catalog's
+    // `role` field (attacker/defender/owner) carries this, never a name parse (H.9 Q2).
+    public const string CombatPenetrationPrefix = "combat.penetration";
+    public const string CombatAbsorptionPrefix = "combat.absorption";
+    public const string CombatAmplificationPrefix = "combat.amplification";
+    public const string CombatReductionPrefix = "combat.reduction";
+
+    // T5.1 (spec-mitigation-chain.md) reader support — omni consts for the one H.1 pair a reader now
+    // exists for, matching the older H.0/Shield style (CombatPowerOmni etc.) rather than raw
+    // ElementRoster.OmniId interpolation, so CombatDerivedReader's new methods read the same way its
+    // existing ones do.
+    public const string CombatPenetrationOmni = "combat.penetration.omni";
+    public const string CombatAbsorptionOmni = "combat.absorption.omni";
+    public const string CombatAmplificationOmni = "combat.amplification.omni";
+    public const string CombatReductionOmni = "combat.reduction.omni";
+
+    // T5.3 (spec-evasion-chain.md) reader support — omni consts for parry/block, the pair a reader
+    // now exists for. Omni-only: parry/block read no per-component breakdown (spec §3 never describes
+    // one, and block/parry are explicitly not element-typed, §7 — "block is not a shield"). The
+    // per-element slots these families' generator methods can still build stay registered (H.1) and
+    // unread, same honest partial-wiring as every other not-yet-consumed sparse slot in this catalog.
+    public const string CombatParryRateOmni = "combat.parry.rate.omni";
+    public const string CombatParryBreakOmni = "combat.parry.break.omni";
+    public const string CombatParryStrengthOmni = "combat.parry.strength.omni";
+    public const string CombatParryShredOmni = "combat.parry.shred.omni";
+    public const string CombatBlockRateOmni = "combat.block.rate.omni";
+    public const string CombatBlockBreakOmni = "combat.block.break.omni";
+    public const string CombatBlockStrengthOmni = "combat.block.strength.omni";
+    public const string CombatBlockShredOmni = "combat.block.shred.omni";
+
+    // T5.4 (spec-reflection.md) reader support — omni consts for reflection, resolved OMNI only,
+    // same reasoning as parry/block (T5.3): no per-component breakdown described anywhere in the
+    // spec, and reflection reads post-mitigation finalDamage, which by then has no per-element shape
+    // left to weight against.
+    public const string CombatReflectRateOmni = "combat.reflect.rate.omni";
+    public const string CombatReflectResistRateOmni = "combat.reflect.resist.rate.omni";
+    public const string CombatReflectDamageOmni = "combat.reflect.damage.omni";
+    public const string CombatReflectResistDamageOmni = "combat.reflect.resist.damage.omni";
+    public const string CombatReflectResistRatePrefix = "combat.reflect.resist.rate";
+    public const string CombatReflectRatePrefix = "combat.reflect.rate";
+    public const string CombatReflectResistDamagePrefix = "combat.reflect.resist.damage";
+    public const string CombatReflectDamagePrefix = "combat.reflect.damage";
+    public const string CombatParryBreakPrefix = "combat.parry.break";
+    public const string CombatParryRatePrefix = "combat.parry.rate";
+    public const string CombatParryShredPrefix = "combat.parry.shred";
+    public const string CombatParryStrengthPrefix = "combat.parry.strength";
+    public const string CombatBlockBreakPrefix = "combat.block.break";
+    public const string CombatBlockRatePrefix = "combat.block.rate";
+    public const string CombatBlockShredPrefix = "combat.block.shred";
+    public const string CombatBlockStrengthPrefix = "combat.block.strength";
+
+    public static string CombatPenetration(ElementTypeId e) => $"{CombatPenetrationPrefix}.{e.ToElementId()}";
+    public static string CombatAbsorption(ElementTypeId e) => $"{CombatAbsorptionPrefix}.{e.ToElementId()}";
+    public static string CombatAmplification(ElementTypeId e) => $"{CombatAmplificationPrefix}.{e.ToElementId()}";
+    public static string CombatReduction(ElementTypeId e) => $"{CombatReductionPrefix}.{e.ToElementId()}";
+    public static string CombatReflectResistRate(ElementTypeId e) => $"{CombatReflectResistRatePrefix}.{e.ToElementId()}";
+    public static string CombatReflectRate(ElementTypeId e) => $"{CombatReflectRatePrefix}.{e.ToElementId()}";
+    public static string CombatReflectResistDamage(ElementTypeId e) => $"{CombatReflectResistDamagePrefix}.{e.ToElementId()}";
+    public static string CombatReflectDamage(ElementTypeId e) => $"{CombatReflectDamagePrefix}.{e.ToElementId()}";
+    public static string CombatParryBreak(ElementTypeId e) => $"{CombatParryBreakPrefix}.{e.ToElementId()}";
+    public static string CombatParryRate(ElementTypeId e) => $"{CombatParryRatePrefix}.{e.ToElementId()}";
+    public static string CombatParryShred(ElementTypeId e) => $"{CombatParryShredPrefix}.{e.ToElementId()}";
+    public static string CombatParryStrength(ElementTypeId e) => $"{CombatParryStrengthPrefix}.{e.ToElementId()}";
+    public static string CombatBlockBreak(ElementTypeId e) => $"{CombatBlockBreakPrefix}.{e.ToElementId()}";
+    public static string CombatBlockRate(ElementTypeId e) => $"{CombatBlockRatePrefix}.{e.ToElementId()}";
+    public static string CombatBlockShred(ElementTypeId e) => $"{CombatBlockShredPrefix}.{e.ToElementId()}";
+    public static string CombatBlockStrength(ElementTypeId e) => $"{CombatBlockStrengthPrefix}.{e.ToElementId()}";
+
+    /// <summary>Combat channel family prefixes — 28 families × (omni + roster) slots (12 shipped + 16
+    /// from H.1, derived-stats program, 2026-08-24).</summary>
     public static readonly IReadOnlyList<string> CombatChannelFamilies = new[]
     {
         "combat.power",
@@ -123,15 +196,160 @@ public static class DerivedStatChannels
         CombatShieldCapacityPrefix,
         CombatShieldToughnessPrefix,
         CombatShieldPenPrefix,
-        CombatShieldRegenPrefix
+        CombatShieldRegenPrefix,
+        CombatPenetrationPrefix,
+        CombatAbsorptionPrefix,
+        CombatAmplificationPrefix,
+        CombatReductionPrefix,
+        CombatReflectResistRatePrefix,
+        CombatReflectRatePrefix,
+        CombatReflectResistDamagePrefix,
+        CombatReflectDamagePrefix,
+        CombatParryBreakPrefix,
+        CombatParryRatePrefix,
+        CombatParryShredPrefix,
+        CombatParryStrengthPrefix,
+        CombatBlockBreakPrefix,
+        CombatBlockRatePrefix,
+        CombatBlockShredPrefix,
+        CombatBlockStrengthPrefix
     };
 
     /// <summary>
+    /// Per-family classification — declared here, beside the family list, rather than inferred from a
+    /// channel's name (spec-stat-taxonomy.md §5). <c>Pool</c> families carry a null counterpart family;
+    /// <c>Contest</c> families name the family whose same element-slot is their counterpart — see
+    /// actor-hub-ssot.md §H.0. Extending this table (T2.2) is how the 16 new element-typed families
+    /// register their classification too — never a hand-written per-channel Register call.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, (StatClass Class, string? CounterpartFamily)> CombatFamilyClassification =
+        new Dictionary<string, (StatClass, string?)>(StringComparer.Ordinal)
+        {
+            ["combat.power"] = (StatClass.Contest, "combat.defense"),
+            ["combat.defense"] = (StatClass.Contest, "combat.power"),
+            ["combat.crit.rate"] = (StatClass.Contest, "combat.crit.resist"),
+            ["combat.crit.resist"] = (StatClass.Contest, "combat.crit.rate"),
+            ["combat.crit.damage"] = (StatClass.Contest, "combat.crit.resist.damage"),
+            ["combat.crit.resist.damage"] = (StatClass.Contest, "combat.crit.damage"),
+            ["combat.accuracy"] = (StatClass.Contest, "combat.dodge"),
+            ["combat.dodge"] = (StatClass.Contest, "combat.accuracy"),
+            // Pool: the owner's own capacity/rate, no attacker-side counterpart (actor-hub-ssot.md §H.0).
+            [CombatShieldCapacityPrefix] = (StatClass.Pool, null),
+            [CombatShieldToughnessPrefix] = (StatClass.Contest, CombatShieldPenPrefix),
+            [CombatShieldPenPrefix] = (StatClass.Contest, CombatShieldToughnessPrefix),
+            [CombatShieldRegenPrefix] = (StatClass.Pool, null),
+
+            // H.1 -- all 8 new pairs are Contest (actor-hub-ssot.md §H.1). Six are role-inverted (the
+            // seed catalog's `role` field carries which actor owns which half); the classification
+            // table only needs to know the pairing, not the ownership.
+            [CombatPenetrationPrefix] = (StatClass.Contest, CombatAbsorptionPrefix),
+            [CombatAbsorptionPrefix] = (StatClass.Contest, CombatPenetrationPrefix),
+            [CombatAmplificationPrefix] = (StatClass.Contest, CombatReductionPrefix),
+            [CombatReductionPrefix] = (StatClass.Contest, CombatAmplificationPrefix),
+            [CombatReflectResistRatePrefix] = (StatClass.Contest, CombatReflectRatePrefix),
+            [CombatReflectRatePrefix] = (StatClass.Contest, CombatReflectResistRatePrefix),
+            [CombatReflectResistDamagePrefix] = (StatClass.Contest, CombatReflectDamagePrefix),
+            [CombatReflectDamagePrefix] = (StatClass.Contest, CombatReflectResistDamagePrefix),
+            [CombatParryBreakPrefix] = (StatClass.Contest, CombatParryRatePrefix),
+            [CombatParryRatePrefix] = (StatClass.Contest, CombatParryBreakPrefix),
+            [CombatParryShredPrefix] = (StatClass.Contest, CombatParryStrengthPrefix),
+            [CombatParryStrengthPrefix] = (StatClass.Contest, CombatParryShredPrefix),
+            [CombatBlockBreakPrefix] = (StatClass.Contest, CombatBlockRatePrefix),
+            [CombatBlockRatePrefix] = (StatClass.Contest, CombatBlockBreakPrefix),
+            [CombatBlockShredPrefix] = (StatClass.Contest, CombatBlockStrengthPrefix),
+            [CombatBlockStrengthPrefix] = (StatClass.Contest, CombatBlockShredPrefix),
+        };
+
+    /// <summary>H.1's role field (H.9 Q2) — which actor owns each new element-typed family's half. Not
+    /// asked of the shipped 12 (their existing "role" values already live only in catalog.json; this
+    /// table is what <see cref="DerivedStatRegistry"/> needs to populate it without re-deriving from a
+    /// name). Six of eight pairs are role-inverted: attacker owns the SUPPRESSING half.</summary>
+    public static readonly IReadOnlyDictionary<string, string> CombatFamilyRole =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            [CombatPenetrationPrefix] = "attacker",
+            [CombatAbsorptionPrefix] = "defender",
+            [CombatAmplificationPrefix] = "attacker",
+            [CombatReductionPrefix] = "defender",
+            [CombatReflectResistRatePrefix] = "attacker",
+            [CombatReflectRatePrefix] = "defender",
+            [CombatReflectResistDamagePrefix] = "attacker",
+            [CombatReflectDamagePrefix] = "defender",
+            [CombatParryBreakPrefix] = "attacker",
+            [CombatParryRatePrefix] = "defender",
+            [CombatParryShredPrefix] = "attacker",
+            [CombatParryStrengthPrefix] = "defender",
+            [CombatBlockBreakPrefix] = "attacker",
+            [CombatBlockRatePrefix] = "defender",
+            [CombatBlockShredPrefix] = "attacker",
+            [CombatBlockStrengthPrefix] = "defender",
+        };
+
+    /// <summary>Every combat family's <see cref="UnitClass"/> — GameUnits for flat magnitudes,
+    /// SigmoidPoints/SigmoidMultiplierPoints for the four probability-shaped families
+    /// (spec-magnitude-and-units.md §3, each verified against its consumer there).</summary>
+    public static readonly IReadOnlyDictionary<string, UnitClass> CombatFamilyUnitClass =
+        new Dictionary<string, UnitClass>(StringComparer.Ordinal)
+        {
+            ["combat.power"] = UnitClass.GameUnits,
+            ["combat.defense"] = UnitClass.GameUnits,
+            ["combat.crit.rate"] = UnitClass.SigmoidPoints,
+            ["combat.crit.resist"] = UnitClass.SigmoidPoints,
+            ["combat.crit.damage"] = UnitClass.SigmoidMultiplierPoints,
+            ["combat.crit.resist.damage"] = UnitClass.SigmoidMultiplierPoints,
+            ["combat.accuracy"] = UnitClass.SigmoidPoints,
+            ["combat.dodge"] = UnitClass.SigmoidPoints,
+            [CombatShieldCapacityPrefix] = UnitClass.GameUnits,
+            [CombatShieldToughnessPrefix] = UnitClass.GameUnits,
+            [CombatShieldPenPrefix] = UnitClass.GameUnits,
+            [CombatShieldRegenPrefix] = UnitClass.GameUnitsPerSecond,
+
+            // class-system P1.5 reader census (2026-08-26) — 16 of H.1's families verified against a
+            // live production consumer, not a doc comment. ReciprocalPoints (class-system/spec-unit-
+            // class-close.md §3.3/§3.5, authorised 2026-08-26 — NOT GameUnits, corrected after an
+            // initial pass wrongly grouped these with combat.defense by tuning-file section rather
+            // than by formula shape): an uncapped point delta feeding PierceFactor/AmpFactorReciprocal,
+            // both asymptotic — verified at OverlayCombatCalculator.cs's mitigation chain.
+            // PerMilleRatio: a linear-from-zero share clamped to [0,1] feeding a chance or a bounded
+            // damage share — verified at OverlayCombatCalculator.cs:162-169 ("Rate contests are linear
+            // and permille, not sigmoid") and CombatDamageDispatcher.cs:96-104 (reflect, same shape).
+            [CombatPenetrationPrefix] = UnitClass.ReciprocalPoints,
+            [CombatAbsorptionPrefix] = UnitClass.ReciprocalPoints,
+            [CombatAmplificationPrefix] = UnitClass.ReciprocalPoints,
+            [CombatReductionPrefix] = UnitClass.ReciprocalPoints,
+            [CombatReflectRatePrefix] = UnitClass.PerMilleRatio,
+            [CombatReflectResistRatePrefix] = UnitClass.PerMilleRatio,
+            [CombatReflectDamagePrefix] = UnitClass.PerMilleRatio,
+            [CombatReflectResistDamagePrefix] = UnitClass.PerMilleRatio,
+            [CombatParryRatePrefix] = UnitClass.PerMilleRatio,
+            [CombatParryBreakPrefix] = UnitClass.PerMilleRatio,
+            // strength/shred: class-system/spec-unit-class-close.md §3.4 flags these "needs care" and
+            // stops short of a definitive class rather than stretching one to fit (§2 step 4) — neither
+            // SigmoidMultiplierPoints (not a sigmoid) nor ReciprocalPoints (not asymptotic) matches
+            // ClampedContest.Apply's shape (a raw delta clamped LINEARLY to a permille share).
+            // GameUnits is kept as the least-wrong fit: an uncapped ladder-scaled point delta at the
+            // CHANNEL level, same as combat.power/defense, with the bounding happening downstream in
+            // the clamp rather than in the channel's own arithmetic.
+            [CombatParryStrengthPrefix] = UnitClass.GameUnits,
+            [CombatParryShredPrefix] = UnitClass.GameUnits,
+            [CombatBlockRatePrefix] = UnitClass.PerMilleRatio,
+            [CombatBlockBreakPrefix] = UnitClass.PerMilleRatio,
+            [CombatBlockStrengthPrefix] = UnitClass.GameUnits,
+            [CombatBlockShredPrefix] = UnitClass.GameUnits,
+        };
+
+    /// <summary>One generated combat channel id together with the family and slot it came from — the
+    /// richer form <see cref="AllCombatChannelIds"/> flattens away. Kept as a record struct so building
+    /// it costs nothing extra over the flat list (see <see cref="BuildAllCombatChannelIds"/>).</summary>
+    public readonly record struct CombatChannelEntry(string ChannelId, string Family, string Slot);
+
+    /// <summary>
     /// All overlay combat derived channels — generated family × (omni + roster) so the list is
-    /// exhaustive by construction (element-hub-ssot.md §6; 12 × 7 = 84 today).
+    /// exhaustive by construction (element-hub-ssot.md §6; 28 × 7 = 196 as of the derived-stats
+    /// program's H.1, 2026-08-24 — was 12 × 7 = 84).
     ///
     /// <para><b>Generated from the roster TABLE, not the enum</b> (E18). That is what makes a seventh
-    /// element rows plus regeneration: its 12 channels appear here, and every consumer picks them up
+    /// element rows plus regeneration: its 28 channels appear here, and every consumer picks them up
     /// because <c>CombatDerivedReader</c> matches channels by pattern rather than by name.</para>
     ///
     /// <para><b>Cached by reference to the source table</b> (E25, completeness-audit.md B3). The
@@ -139,54 +357,168 @@ public static class DerivedStatChannels
     /// reason once E20 shipped: <see cref="ElementTable.Use"/>/<see cref="ElementTable.UseScoped"/>
     /// always assign a <b>new</b> immutable instance rather than mutating one in place, so comparing
     /// <see cref="ElementTable.Current"/> by reference against what this cache was last built from is
-    /// exactly as fresh as rebuilding every call, at 84 fewer string allocations per read.
+    /// exactly as fresh as rebuilding every call, at 196 fewer string allocations per read.
     /// <see cref="BattleStatComposer.Compose"/> called this once per actor composed.</para>
     /// </summary>
-    public static IReadOnlyList<string> AllCombatChannelIds
-    {
-        get { lock (CacheGate) { EnsureCacheUnlocked(); return _cacheList!; } }
-    }
+    public static IReadOnlyList<string> AllCombatChannelIds => EnsureCache().List;
+
+    /// <summary>Same generation, same cache slot as <see cref="AllCombatChannelIds"/> — the (family,
+    /// slot) pair every channel id was built from, so a counterpart id can be computed as
+    /// <c>counterpartFamily + "." + Slot</c> without re-parsing the id string. Built in the same pass
+    /// as the flat list so the two can never desync (<see cref="EnsureCache"/>).</summary>
+    public static IReadOnlyList<CombatChannelEntry> AllCombatChannelEntries => EnsureCache().Entries;
 
     /// <summary>
     /// O(1) membership over the same cached generation <see cref="AllCombatChannelIds"/> uses — the
     /// other half of E25: <c>StatusStatPayload.IsKnownChannel</c> used to <c>.Contains</c> a freshly
     /// allocated 84-element list on every channel it parsed.
     /// </summary>
-    public static bool IsCombatChannel(string channel)
-    {
-        lock (CacheGate) { EnsureCacheUnlocked(); return _cacheSet!.Contains(channel); }
-    }
+    public static bool IsCombatChannel(string channel) => EnsureCache().Set.Contains(channel);
 
-    static void EnsureCacheUnlocked()
+    /// <summary>
+    /// Found 2026-08-25 re-running the full suite after adding more <c>ElementTable.UseScoped</c>-based
+    /// tests (T2.6, T3): the cache used to be a single <c>static</c> slot guarded by a lock, keyed only
+    /// by reference to <see cref="ElementTable.Current"/>. <c>Current</c> itself is <c>AsyncLocal</c>-
+    /// scoped (different concurrently-running tests can legitimately see different rosters), but the
+    /// CACHE was one shared slot for the whole process — so two tests scoped to different rosters,
+    /// interleaved by the test runner, could thrash each other's cache and break
+    /// <c>ChannelCacheTests.Repeated_reads_with_no_roster_change_return_the_same_list_instance</c>'s
+    /// same-instance guarantee non-deterministically (reproduced: failed once in ~4 full-suite runs,
+    /// passed in isolation and on retry — the signature of a race, not a regression). The cache is now
+    /// itself <c>AsyncLocal</c>, one slot per scope, exactly matching how <see cref="ElementTable"/>
+    /// already scopes the roster pointer it is keyed on.
+    /// </summary>
+    static readonly AsyncLocal<CacheSlot?> Local = new();
+
+    readonly record struct CacheSlot(
+        ElementTable Source, IReadOnlyList<string> List, HashSet<string> Set, IReadOnlyList<CombatChannelEntry> Entries);
+
+    static CacheSlot EnsureCache()
     {
         var current = ElementTable.Current;
-        if (ReferenceEquals(_cacheSource, current)) return;
+        var slot = Local.Value;
+        if (slot is { } s && ReferenceEquals(s.Source, current))
+            return s;
 
-        _cacheSource = current;
-        var built = BuildAllCombatChannelIds(current.Elements.Where(e => e.Enabled).Select(e => e.ElementId));
-        _cacheList = built;
-        _cacheSet = new HashSet<string>(built, StringComparer.Ordinal);
+        var entries = BuildAllCombatChannelEntries(current.Elements.Where(e => e.Enabled).Select(e => e.ElementId));
+        var list = entries.Select(e => e.ChannelId).ToList();
+        var built = new CacheSlot(current, list, new HashSet<string>(list, StringComparer.Ordinal), entries);
+        Local.Value = built;
+        return built;
     }
-
-    static readonly object CacheGate = new();
-    static ElementTable? _cacheSource;
-    static IReadOnlyList<string>? _cacheList;
-    static HashSet<string>? _cacheSet;
 
     /// <summary>The channel set for an explicit roster — how a test can add a seventh element.</summary>
-    public static IReadOnlyList<string> BuildAllCombatChannelIds(IEnumerable<string> elementIds)
+    public static IReadOnlyList<string> BuildAllCombatChannelIds(IEnumerable<string> elementIds) =>
+        BuildAllCombatChannelEntries(elementIds).Select(e => e.ChannelId).ToList();
+
+    /// <summary>Same generation as <see cref="BuildAllCombatChannelIds"/>, with family and slot kept
+    /// alongside each id. The single source both that method and the cache build from, so they cannot
+    /// desync.</summary>
+    public static IReadOnlyList<CombatChannelEntry> BuildAllCombatChannelEntries(IEnumerable<string> elementIds)
     {
         var roster = elementIds.ToList();
-        var ids = new List<string>(CombatChannelFamilies.Count * (roster.Count + 1));
+        var entries = new List<CombatChannelEntry>(CombatChannelFamilies.Count * (roster.Count + 1));
         foreach (var family in CombatChannelFamilies)
         {
-            ids.Add($"{family}.{ElementRoster.OmniId}");
+            entries.Add(new CombatChannelEntry($"{family}.{ElementRoster.OmniId}", family, ElementRoster.OmniId));
             foreach (var element in roster)
-                ids.Add($"{family}.{element}");
+                entries.Add(new CombatChannelEntry($"{family}.{element}", family, element));
         }
 
-        return ids;
+        return entries;
     }
+
+    // ================================================================================================
+    // Non-element families (actor-hub-ssot.md §H.2-H.7, derived-stats program, 2026-08-24). Three
+    // separate generators, per spec-catalog-extension.md §2.1 — none of these join
+    // CombatChannelFamilies/AllCombatChannelIds. A non-element family that leaked in there would break
+    // the roster assertion AND get swept into element expansion (actor-hub-ssot.md §3G rule 1).
+    // ================================================================================================
+
+    // H.2 -- status potency, 4 families x (omni|dot|cc|contagion) = 16, plus a sparse {statusId}
+    // override exactly like status.power/status.resist's existing shape (same axis, same combine rule
+    // per §3C/§3D). status.duration/status.intensity are the attacker-side terms; the Reduction
+    // siblings are the defender-side terms.
+    public const string StatusDurationOmni = "status.duration.omni";
+    public const string StatusDurationDot = "status.duration.dot";
+    public const string StatusDurationCc = "status.duration.cc";
+    public const string StatusDurationContagion = "status.duration.contagion";
+
+    public const string StatusDurationReductionOmni = "status.durationReduction.omni";
+    public const string StatusDurationReductionDot = "status.durationReduction.dot";
+    public const string StatusDurationReductionCc = "status.durationReduction.cc";
+    public const string StatusDurationReductionContagion = "status.durationReduction.contagion";
+
+    public const string StatusIntensityOmni = "status.intensity.omni";
+    public const string StatusIntensityDot = "status.intensity.dot";
+    public const string StatusIntensityCc = "status.intensity.cc";
+    public const string StatusIntensityContagion = "status.intensity.contagion";
+
+    public const string StatusIntensityReductionOmni = "status.intensityReduction.omni";
+    public const string StatusIntensityReductionDot = "status.intensityReduction.dot";
+    public const string StatusIntensityReductionCc = "status.intensityReduction.cc";
+    public const string StatusIntensityReductionContagion = "status.intensityReduction.contagion";
+
+    public static string StatusDuration(string statusId) => $"status.duration.{statusId}";
+    public static string StatusDurationReduction(string statusId) => $"status.durationReduction.{statusId}";
+    public static string StatusIntensity(string statusId) => $"status.intensity.{statusId}";
+    public static string StatusIntensityReduction(string statusId) => $"status.intensityReduction.{statusId}";
+
+    // H.3 -- action-category, 2 families x (attack|defense|support|movement|status) = 10. New axis,
+    // not element-typed, not status-category-typed. skill.cooldown.* is Race (Q3: unpaired by nature —
+    // the opponent's own cooldown is the counter). skill.effectiveness.* is Feeder (Q3: applied to
+    // baseOverlayDamage before the power/defense delta, so it inherits its pair from combat.defense).
+    public const string ActionCategoryAttack = "attack";
+    public const string ActionCategoryDefense = "defense";
+    public const string ActionCategorySupport = "support";
+    public const string ActionCategoryMovement = "movement";
+    public const string ActionCategoryStatus = "status";
+
+    public static readonly IReadOnlyList<string> ActionCategories = new[]
+    {
+        ActionCategoryAttack, ActionCategoryDefense, ActionCategorySupport, ActionCategoryMovement, ActionCategoryStatus
+    };
+
+    public const string SkillCooldownPrefix = "skill.cooldown";
+    public const string SkillEffectivenessPrefix = "skill.effectiveness";
+
+    public static string SkillCooldown(string category) => $"{SkillCooldownPrefix}.{category}";
+    public static string SkillEffectiveness(string category) => $"{SkillEffectivenessPrefix}.{category}";
+
+    // H.4 -- healing, 1 channel. Pool class (owner decision 2026-08-24): the healer's own output
+    // capacity, like combat.shield.capacity — not a Contest with a missing half. No counterpart.
+    public const string CombatHealPower = "combat.heal.power";
+
+    // H.5 -- resource, 3 families x 5 ids = 15 (supersedes §3G's 10). Pool class throughout (Q4): the
+    // counters are statuses (root/qi-burn), never a paired channel. max/regen are magnitudes, FlatSum,
+    // uncapped. efficiency is a bounded ratio (T4.4) -- SumIncreased + Cap: DerivedStatPolicy.
+    // ResourceEfficiencyCap, since ComposeChannel's FlatSum case never applies Cap. None of the three
+    // carries a UnitClass yet (§2.3: no reader at registration).
+    public const string ResourceMaxPrefix = "resource.max";
+    public const string ResourceRegenPrefix = "resource.regen";
+    public const string ResourceEfficiencyPrefix = "resource.efficiency";
+
+    public static string ResourceMax(string resourceId) => $"{ResourceMaxPrefix}.{resourceId}";
+    public static string ResourceRegen(string resourceId) => $"{ResourceRegenPrefix}.{resourceId}";
+    public static string ResourceEfficiency(string resourceId) => $"{ResourceEfficiencyPrefix}.{resourceId}";
+
+    /// <summary>The six actor resource ids — data/seed/resources/roster.json is the authored mirror;
+    /// this is the code-side list registration walks. Kept in ordinal order to match that file's
+    /// <c>ordinal</c> field. <c>poise</c> appended 2026-08-26 (class-system, module `poise-resource`,
+    /// decisions.md "Resource model") — append-only, never reorder: the ordinal coupling is a comment,
+    /// not a compiler-checked invariant, so reordering silently desyncs the two files.</summary>
+    public static readonly IReadOnlyList<string> ResourceIds = new[] { "hp", "stamina", "hunger", "spirit", "qi", "poise" };
+
+    // H.6 -- movement, 1 channel. Pool class (Q4, same reasoning as resource). Lands with §H.5 per
+    // action-map.md's own promise ("registers in actor-hub-ssot.md §3 with resource.*").
+    public const string MoveRange = "move.range";
+
+    // H.7 -- progression, 2 channels. xpRate: Class null (non-combat rate, same as progression.power/
+    // progression.realm above), uncapped. breakthroughSuccess (T4.4): Class Pool -- the actor's own
+    // roll probability, no pair; capped at DerivedStatPolicy.BreakthroughSuccessCap (EveryCapIsClassified
+    // requires a StatClass on any capped channel, spec-stat-taxonomy.md §6.1).
+    public const string ProgressionXpRate = "progression.xpRate";
+    public const string ProgressionBreakthroughSuccess = "progression.breakthroughSuccess";
 }
 
 /// <summary>Actor element type metadata field names — see element-hub-ssot.md §5.</summary>

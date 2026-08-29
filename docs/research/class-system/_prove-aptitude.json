@@ -1,0 +1,15 @@
+{
+  "Theta": 1000,
+  "Source": "Might",
+  "Points": 100,
+  "PerChannel": {
+    "combat.power.omni": {
+      "Overlay": 497376,
+      "Battle": 497376
+    }
+  },
+  "Deltas": {
+    "combat.power.omni": 0
+  },
+  "Pass": true
+}

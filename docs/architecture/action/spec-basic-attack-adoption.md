@@ -1,5 +1,13 @@
 # Spec: basic-attack-adoption (A5)
 
+> **Reconciled 2026-08-27.** Checked against the sealed [action-ideal.md](../action-ideal.md) and
+> found **substantively intact**; only the notes below change.
+> — The basic attack **costs `stamina`** (decision 22), but *"stamina is free"* is a tuning defect owned by
+> the class system, not a reason to change this module. The byte-identity gate is unaffected.
+> — This module is the **proof of the "grant path"** two shipped `D6` comments wait on: if these atoms
+> resolve in battle, `resource.delta` and `shield.grant` go Full there (`A1` §6).
+
+
 Module **A5** in the [action map](../action-map.md). Depends on **A1**, **A2**, **A4**. **This is the seam proof.**
 
 > **The whole point of this module is to fail loudly if the design is wrong.** The action envelope's fields were chosen from FFX, SMT, and FF15, and no real action has ever been driven through them. `A5` drives the one action that already exists — and the eight goldens must not move by a byte. If they do, the model is wrong and we find out here, before six more modules are built on it.

@@ -1,5 +1,14 @@
 # Spec: movement-actions (A9)
 
+> **Reconciled 2026-08-27.** Checked against the sealed [action-ideal.md](../action-ideal.md) and
+> found **substantively intact**; only the notes below change.
+> — Unchanged, and its two load-bearing claims are now cited by two other modules: `slot_consuming = false`
+> is the precedent `A8` §2.1 reuses for the guard stance, and *"if this module grows a runtime of its own,
+> something is wrong"* is the rule `A8` §1 adopts verbatim.
+> — An **earned** movement action must be a move **plus a rider** (ideal §5 of the roster), or it is strictly
+> worse than the free basic move and would never take a loadout place.
+
+
 Module **A9** in the [action map](../action-map.md). Depends on **A5**, **A10**.
 
 ## Objective

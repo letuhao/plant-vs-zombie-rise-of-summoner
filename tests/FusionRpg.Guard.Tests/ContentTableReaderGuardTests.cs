@@ -15,14 +15,23 @@ namespace FusionRpg.Guard.Tests;
 ///
 /// <para><b>Scope, honestly stated.</b> This covers the six tables <c>RpgStore
 /// .LoadContentIntoRuntime</c> makes live: the element roster, both matchup matrices, both power
-/// tables (E20), and <c>effect_channel_policy</c>'s <c>direction</c> column (E22) — the one column of
-/// four with an existing consumer (<c>StatChannels.IsLowerBetter</c>); see
-/// <c>ChannelPolicyTable</c>'s doc comment for why <c>default_value</c>/<c>cap_milli</c>/
-/// <c>compose_kind</c> are not claimed here. The five container/atom/curve/rarity tables are
-/// deliberately <b>not</b> asserted — <c>AtomPushService</c> already reads them for a real compiled
-/// push, a different, already-closed gap (E19); the registry's remaining entry, <c>rarity</c>, is read
-/// only by its own import's validation, never by a gameplay consumer, which is the runtime-producer
-/// gap tracked as A4 and explicitly out of wave 6.</para>
+/// tables (E20, now three rows counting <c>power_predicate_frequency</c> — <c>P0.3</c> rides along
+/// with the existing <c>GetPowerTables()</c>/<c>PowerTables.Use()</c> pair, so it needs no new claim
+/// here), and <c>effect_channel_policy</c>'s <c>direction</c> column (E22) — the one column of four
+/// with an existing consumer (<c>StatChannels.IsLowerBetter</c>); see <c>ChannelPolicyTable</c>'s doc
+/// comment for why <c>default_value</c>/<c>cap_milli</c>/<c>compose_kind</c> are not claimed here. The
+/// five container/atom/curve/rarity tables are deliberately <b>not</b> asserted — <c>AtomPushService</c>
+/// already reads them for a real compiled push, a different, already-closed gap (E19); the registry's
+/// remaining entry, <c>rarity</c>, is read only by its own import's validation, never by a gameplay
+/// consumer, which is the runtime-producer gap tracked as A4 and explicitly out of wave 6.</para>
+///
+/// <para><b><c>rpg_action</c>/<c>rpg_action_cost</c>/<c>rpg_action_effect_scope</c> (V6, T30) are a
+/// third reader shape</b>, neither the <c>.Use()</c> static-swap the first six use nor the
+/// AtomPushService compiled-push path — <c>RpgStore.Actions.cs</c>'s own
+/// <c>GetAction</c>/<c>ListActionIds</c> read them directly by SQL, and <c>ActionCompiler</c> is what
+/// calls those. Named in the count below so the trip-wire test stays accurate; not re-proven by a
+/// dedicated reader assertion here since <c>ActionStoreTests</c>/<c>ActionCatalogStoreTests</c>
+/// already exercise that path end to end.</para>
 /// </summary>
 public class ContentTableReaderGuardTests
 {
@@ -46,9 +55,9 @@ public class ContentTableReaderGuardTests
     }
 
     [Fact]
-    public void The_registry_names_exactly_the_twelve_tables_this_guard_accounts_for()
+    public void The_registry_names_exactly_the_sixteen_tables_this_guard_accounts_for()
     {
-        // A regression trip-wire for the registry itself: if a thirteenth table joins
+        // A regression trip-wire for the registry itself: if a seventeenth table joins
         // ContentHashRegistry.Current, this guard's scope claim above goes stale silently unless
         // something notices. It should fail loudly instead.
         var registry = ReadCore("Effects", "Atoms", "ContentHashRegistry.cs");
@@ -63,8 +72,9 @@ public class ContentTableReaderGuardTests
             "effect_atom", "effect_container", "effect_container_atom", "effect_container_pool",
             "effect_curve", "rarity",
             "effect_element", "effect_element_matrix_combat", "effect_element_matrix_shield",
-            "power_coefficient", "power_trigger_frequency",
+            "power_coefficient", "power_trigger_frequency", "power_predicate_frequency",
             "effect_channel_policy",
+            "rpg_action", "rpg_action_cost", "rpg_action_effect_scope",
         };
 
         Assert.Equal(expected.OrderBy(x => x, StringComparer.Ordinal), names.OrderBy(x => x, StringComparer.Ordinal));

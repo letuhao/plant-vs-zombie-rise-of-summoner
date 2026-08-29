@@ -1,5 +1,7 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats;
+using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Stats.Derived.Subsystems;
 using Xunit;
@@ -53,16 +55,42 @@ public class ActorHubResolveTests
     [Fact]
     public void Applied_combat_includes_progression_bonus_flats()
     {
+        // class-system-todo.md P3.3 (2026-08-27): progression.bonus.* is allocation-sourced now --
+        // RpgProgressionSubsystem's retired level-gated stub used to be what this test exercised
+        // directly. AptitudeSubsystem is the new feeder, through the same ActorHub.Register seam.
+        var tuning = AptitudeTuningLoader.Parse("""
+            {
+              "schemaVersion": 1, "version": 1,
+              "grant": { "aptitudePointsPerTheta": 3, "skillPointsPerTheta": 1 },
+              "pointEconomy": { "aptitudePointsPerThetaMilliByScope": { "commander": 3, "demonType": 4, "aspect": 4, "uniqueDemon": 6 }, "respecPrice": 10 }, "guardEconomy": { "flatCommitCost": 50, "absorbDrainSharePermille": 300, "riposteShareCapPermille": 400 }, "mitigation": { "scaleMilli": 1000, "families": ["combat.defense", "combat.dodge", "combat.parry", "combat.block", "combat.absorption", "combat.heal"] },
+              "read": { "contest": { "spanPoints": 100.0, "shareExponentMilli": 1000 }, "magnitude": { "shareExponentMilli": 1000 } },
+              "recovery": { "scaleMilli": 374, "targetRecoveryShareMilli": 670, "families": ["resource.regen"] },
+              "familyRead": { "progression.bonus.maxHp": "magnitude", "progression.bonus.atk": "magnitude" },
+              "edges": [
+                { "channel": "progression.bonus.maxHp", "source": "Vigor", "kMilli": 12000 },
+                { "channel": "progression.bonus.atk", "source": "Might", "kMilli": 10000 }
+              ]
+            }
+            """);
+        var allocation = AptitudeAllocation.Single(AllocationScope.Commander, "Vigor", 50)
+                        + AptitudeAllocation.Single(AllocationScope.Commander, "Might", 50);
+        var ladder = new PowerLadder(PowerTuningHub.Tuning);
+        const int theta = 100;
+
         var stats = StatSystemBootstrap.CreateDefault();
         var hub = new FusionRpg.Core.Stats.Derived.ActorHub(stats);
-        hub.Register(new RpgProgressionSubsystem(_ => 5));
+        hub.Register(new AptitudeSubsystem(tuning, ladder, new FixedPowerIndexProvider(theta), _ => allocation));
 
         var ctx = stats.Contexts.ForPlant("P1", new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 });
         var result = hub.Resolve(ctx);
 
-        Assert.Equal(150, result.AppliedCombat.MaxHp);
-        Assert.Equal(150, result.AppliedCombat.Hp);
-        Assert.Equal(15, result.AppliedCombat.Atk);
+        var pTheta = ladder.Value(theta);
+        var expectedBonusMaxHp = (double)AptitudeReadFunctions.Magnitude(12000, 0.5, 1000, pTheta);
+        var expectedBonusAtk = (double)AptitudeReadFunctions.Magnitude(10000, 0.5, 1000, pTheta);
+
+        Assert.Equal(100 + expectedBonusMaxHp, result.AppliedCombat.MaxHp);
+        Assert.Equal(100 + expectedBonusMaxHp, result.AppliedCombat.Hp);
+        Assert.Equal(10 + expectedBonusAtk, result.AppliedCombat.Atk);
         Assert.Equal(100, result.RuntimePrimary.MaxHp);
     }
 
@@ -186,4 +214,12 @@ public class ActorHubResolveTests
         Assert.Equal(neutral.RuntimePrimary.Hp, typed.RuntimePrimary.Hp);
     }
 
+    sealed class FixedPowerIndexProvider : IPowerIndexProvider
+    {
+        readonly int _theta;
+        public FixedPowerIndexProvider(int theta) => _theta = theta;
+        public int ActorIndex(StatContext ctx) => _theta;
+        public int ContentIndex(ContentContext ctx) => _theta;
+        public PowerAxisReport Explain(StatContext ctx) => throw new NotSupportedException();
+    }
 }

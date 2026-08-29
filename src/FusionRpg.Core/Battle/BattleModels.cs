@@ -38,6 +38,24 @@ public sealed record BattleActorSetup
 
     /// <summary>Innate shield content row (battle-adoption) — applied at setup, no expiry unless set.</summary>
     public BattleInnateShield? InnateShield { get; init; }
+
+    /// <summary>
+    /// T22: which actions this actor is entering battle with — a real loadout if one exists, else the
+    /// caller's own `RpgStore.GetLoadoutOrAutoEquip` resolution. Purely carried data: nothing in
+    /// `BattleEngine`'s round loop reads it today (the engine's only declared action is the fixed
+    /// basic attack, see `BasicAttack.cs`) — this exists so it can ride, unread, into
+    /// <see cref="BattleActorResult.EquippedActionIds"/> for reporting. <c>null</c> when the caller has
+    /// no action/loadout system to consult (every existing test builder).
+    ///
+    /// <para><b><see cref="JsonIgnoreAttribute"/> is load-bearing here, not decoration</b> — found the
+    /// hard way, exactly like <see cref="Index"/>'s own comment warns: this record rides unchanged
+    /// into <c>ExpeditionResolution</c>'s own serialized+hashed shape
+    /// (<c>ExpeditionResolverTests.Tier_goldens_are_locked</c>), and a brand-new nullable field with no
+    /// suppression serializes as an added `"EquippedActionIds":null` key for every existing squad
+    /// builder, moving that golden for a shape change nobody reviewed as a determinism break.</para>
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyList<string>? EquippedActionIds { get; init; }
 }
 
 /// <summary>
@@ -67,8 +85,14 @@ public static class BattleRuleset
     /// <summary>v2 (combat-unification battle-adoption): the SSOT resolver replaced the
     /// per-mille curves; baselines re-expressed in resolver-scale points (owner decision 5).
     /// v3 (T4.2, power-dial, 2026-08-24): power-scale.v2.json's bMilli 0 -> 400 — every magnitude
-    /// away from the Theta=20 pin moves; the pin itself and every rate golden must not (PS-3).</summary>
-    public const int RulesetVersion = 3;
+    /// away from the Theta=20 pin moves; the pin itself and every rate golden must not (PS-3).
+    /// v4 (defense-shape, 2026-08-25): combat.defense stops SUBTRACTING and starts DIVIDING
+    /// (combat-damage-ssot.md SS6.3, DefenseShape.Divisive). Every mitigated magnitude moves; no
+    /// rate does, and PS-3 still does not apply to these hashes. Adopted because the subtractive
+    /// shape floors damage at zero once defense outruns offense -- total immunity, the same defect
+    /// removed from ampFactor in the same session, measured at 17.1% of LANDED hits dealing
+    /// nothing. Divisive approaches zero asymptotically and never reaches it.</summary>
+    public const int RulesetVersion = 4;
 
     static BattleTuning? _tuning;
 
@@ -174,7 +198,22 @@ public static class BattleEventKinds
 public sealed record BattleActorResult(
     string Key, string Side, string SpeciesId, int TypeId,
     long HpRemaining, long DamageDealt, int Kills, bool Survived,
-    bool Retreated, int XpMilli, long ShieldAbsorbed = 0);
+    bool Retreated, int XpMilli, long ShieldAbsorbed = 0)
+{
+    /// <summary>
+    /// T22 (action-todo.md): "the auto-equipped set appears in the battle report — otherwise a
+    /// dominant auto-loadout is invisible to a matrix that compares allocations, not loadouts."
+    /// Carried straight from <see cref="BattleActorSetup.EquippedActionIds"/> — pure observability,
+    /// read by nothing in the round loop, damage math, targeting, or trait tail (confirmed by search,
+    /// not assumed). <c>null</c>, never <see cref="Array.Empty{T}"/>, when the caller never resolved
+    /// one: matches <see cref="BattleReport.ContentHash"/>'s own pattern one property up, and for the
+    /// same reason — the field must serialize as ABSENT, not as an empty array, or every existing
+    /// golden actor gains a `"EquippedActionIds":[]` and all four hashes move for a reason that is not
+    /// a determinism break.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyList<string>? EquippedActionIds { get; init; }
+}
 
 /// <summary>
 /// Process environment fingerprint for the report's platform stamp — the coordinates that

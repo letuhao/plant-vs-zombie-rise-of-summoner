@@ -37,9 +37,13 @@ public sealed record CurveSeed(string CurveId, CurveInput Input, IReadOnlyList<C
 /// One authored channel policy row (E22). Core-side mirror of <c>FusionRpg.Data.ChannelPolicyRow</c> —
 /// Core cannot reference Data, and every other seeded table (elements, curves, rarity) already carries
 /// its own Core-side row type for the same reason.
+///
+/// <para><c>DefaultValue</c>/<c>CapMilli</c>/<c>ComposeKind</c> retired (cap-consolidation, T1,
+/// 2026-08-24) — dead columns nothing read; a derived cap's one home is
+/// <c>data/tuning/derived-stats.v1.json</c> now. <c>Direction</c> is the one column with a live
+/// consumer and stays.</para>
 /// </summary>
-public sealed record ChannelPolicySeedRow(
-    string ChannelId, int Direction, int DefaultValue, int CapMilli, string ComposeKind);
+public sealed record ChannelPolicySeedRow(string ChannelId, int Direction);
 
 /// <summary>
 /// Everything one import wants to write, collected from every file and already checked for the
@@ -333,11 +337,7 @@ public static class AtomSeedFile
             return;
         }
 
-        into.ChannelPolicies.Add(new ChannelPolicySeedRow(
-            channel, direction,
-            IntOrNull(e, "defaultValue") ?? 0,
-            IntOrNull(e, "capMilli") ?? -1,
-            string.IsNullOrWhiteSpace(Str(e, "composeKind")) ? "phased" : Str(e, "composeKind")));
+        into.ChannelPolicies.Add(new ChannelPolicySeedRow(channel, direction));
     }
 
     /// <summary>

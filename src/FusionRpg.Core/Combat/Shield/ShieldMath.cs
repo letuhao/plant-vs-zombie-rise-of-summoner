@@ -78,11 +78,17 @@ public static class ShieldMath
 
         // elemMod = relUnitPm × KPm × input / 1e6 (permille × permille), half away from zero.
         var elemMod = RoundDivSigned(weightedRelationUnitPm * ShieldPolicy.MatchupShareKPm * input, 1_000_000);
-        var raw = input + elemMod + hitCount * breakerDelta;
+        var baseValue = input + elemMod;
 
-        var floor = CeilDiv(ShieldPolicy.ChipFloorKPm * input, 1000);
-        var cap = ShieldPolicy.PenCapKPm * input / 1000;
-        var damageToShield = Math.Clamp(raw, floor, cap);
+        // spec-evasion-chain.md §2 (T5.2): the clamp+delta shape extracted to ClampedContest, reused
+        // unmodified by block/parry (T5.3) rather than a second saturation curve (Q6). Exactly the
+        // same constants as before extraction — refactor and behaviour change stay separate. Floor
+        // and cap bound against RAW input, not baseValue (input + elemMod) — the shipped math always
+        // has, even though spec-evasion-chain.md §2's own pseudocode describes one shared "base" for
+        // both; see ClampedContest.Apply's boundsBase doc for the discrepancy and why shipped code
+        // wins over the spec's prose here.
+        var damageToShield = ClampedContest.Apply(
+            baseValue, breakerDelta, hitCount, input, ShieldPolicy.ChipFloorKPm, ShieldPolicy.PenCapKPm);
 
         var spent = Math.Min(shieldHp, damageToShield);
         // Proportional remainder, half away from zero; operands non-negative here.
@@ -110,8 +116,6 @@ public static class ShieldMath
 
         return sum;
     }
-
-    static long CeilDiv(long num, long div) => (num + div - 1) / div;
 
     static long RoundDivSigned(long num, long div)
     {

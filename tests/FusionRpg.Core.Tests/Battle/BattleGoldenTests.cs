@@ -38,10 +38,26 @@ public class BattleGoldenTests
     // test (RateParityTests.cs, BattleAdoptionTests.cs's BattleRateTests) stayed green with zero
     // changes, confirming zero rate goldens moved. Golden_outcomes_hold_their_shapes (Victory/
     // Defeat/retreat) also stayed green, unchanged — the shapes held, only the numbers moved.
-    const string StompHash = "A9B076C2B8C4D1AEA629C2FE20C8E3A706AA8BB05BA775925902FD78B93E76C9";
-    const string CloseHash = "DEE290C1E84D57B150D2650043B538949220CFDC267DB42763BB7BD572902F5A";
-    const string WipeHash = "8BD6365E32BEC3E73733147916611FE5A21AB4926D53F490EDB6592ED361C530";
-    const string SeedSweepHash = "9D8F88A2B1D98E4E71F927AF9A43A2E77CF843BF98337ED4223511721B673890";
+    //
+    // Re-blessed 2026-08-25 at RulesetVersion 4 (defense-shape): `combat.defense` stops SUBTRACTING
+    // and starts DIVIDING (combat-damage-ssot.md §6.3, DefenseShape.Divisive), so every mitigated
+    // magnitude moves. Triaged BEFORE the re-bless, exactly as the 2026-08-24 pass was: the whole
+    // battle suite was 314/319 with the ONLY five failures being these hash goldens and the three
+    // trace fixtures. Every rate test stayed green untouched — `Parity_hit_rate_is_ninety_percent`
+    // and `Parity_crit_rate_is_five_to_ten_percent` still hold their locked bands (0.90±0.02,
+    // 0.05–0.10), so no rate golden moved and PS-3 does not apply to these hashes.
+    // `Golden_outcomes_hold_their_shapes` also stayed green with no change: stomp is still Victory,
+    // wipe still Defeat, the coward still walks away. Shapes held; only numbers moved.
+    //
+    // Why the shape changed at all: subtractive mitigation floors damage at zero once defense
+    // outruns offense, which is total immunity — the same defect removed from `ampFactor` in the
+    // same session, measured over 50,000 simulated fights at 17.1% of LANDED hits dealing nothing.
+    // Divisive approaches zero asymptotically and never reaches it. Negative defense still
+    // amplifies (mirrored branch), so glass profiles are unaffected in kind.
+    const string StompHash = "1523E697B5F110F43530710FCD795470A69FAA5876FC32021DD74955E3DEAB50";
+    const string CloseHash = "EEA316E877EC270BD4CDE0A2C18FCEC15026843670F34F5DACA8B77303FAC63F";
+    const string WipeHash = "4AB4D8D26FECC8A068D2A1E231EF567793183DF164B2E818C430EF6505B59684";
+    const string SeedSweepHash = "A06B6BF14199B40BD76879680E39927EDB0BFBEF5DE632182F49472497FD2450";
 
     static BattleActorSetup Actor(string key, string side, int level,
         ElementTypeId? elem = null, params string[] traits) => new()

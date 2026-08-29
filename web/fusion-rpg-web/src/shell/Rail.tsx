@@ -12,7 +12,8 @@ const RAIL_ICON: Record<RailEntry["id"], string> = {
   pacts: "👹",
   expeditions: "⛵",
   almanac: "📖",
-  chronicle: "🕮"
+  chronicle: "🕮",
+  aptitudes: "◎"
 };
 
 /**

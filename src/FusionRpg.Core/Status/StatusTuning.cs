@@ -6,9 +6,10 @@ namespace FusionRpg.Core.Status;
 /// <see cref="StatusPolicy.Configure"/> and <see cref="StatusTuningLoader"/>.</summary>
 public sealed record StatusTuning(
     int SchemaVersion, int Version,
-    double CategoryResistCap, double ApplyScaleK, double ApplyScaleFloor,
+    double ApplyScaleK, double ApplyScaleFloor,
     double ResistFromPowerRatio, double MinNetFactor, double MaxNetFactor, double NetFactorScale,
-    double ProgressionPowerStubDefault, int ProcDepthLimitDefault, double ApplySteepnessDefault);
+    double ProgressionPowerStubDefault, int ProcDepthLimitDefault, double ApplySteepnessDefault,
+    StatusApplyShape ApplyShape, double ApplyOffsetK);
 
 public sealed class StatusTuningRejection : Exception
 {
@@ -33,7 +34,6 @@ public static class StatusTuningLoader
             return new StatusTuning(
                 SchemaVersion: Int(root, "schemaVersion"),
                 Version: Int(root, "version"),
-                CategoryResistCap: Dbl(root, "categoryResistCap"),
                 ApplyScaleK: Dbl(root, "applyScaleK"),
                 ApplyScaleFloor: Dbl(root, "applyScaleFloor"),
                 ResistFromPowerRatio: Dbl(root, "resistFromPowerRatio"),
@@ -42,8 +42,25 @@ public static class StatusTuningLoader
                 NetFactorScale: Dbl(root, "netFactorScale"),
                 ProgressionPowerStubDefault: Dbl(root, "progressionPowerStubDefault"),
                 ProcDepthLimitDefault: Int(root, "procDepthLimitDefault"),
-                ApplySteepnessDefault: Dbl(root, "applySteepnessDefault"));
+                ApplySteepnessDefault: Dbl(root, "applySteepnessDefault"),
+                ApplyShape: Shape(root, "applyShape"),
+                ApplyOffsetK: Dbl(root, "applyOffsetK"));
         }
+    }
+
+    static StatusApplyShape Shape(JsonElement parent, string key)
+    {
+        if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.String)
+            throw new StatusTuningRejection($"status tuning: missing or non-string '$.{key}'");
+        // Explicit list, no Enum.TryParse: a typo'd shape must reject loudly rather than fall back to
+        // a default, exactly like every other missing tunable (tunables-ssot.md T5).
+        return el.GetString() switch
+        {
+            "sigmoid" => StatusApplyShape.Sigmoid,
+            "linearFromZero" => StatusApplyShape.LinearFromZero,
+            var other => throw new StatusTuningRejection(
+                $"status tuning: '$.{key}' must be 'sigmoid' or 'linearFromZero', got '{other}'")
+        };
     }
 
     static int Int(JsonElement parent, string key)

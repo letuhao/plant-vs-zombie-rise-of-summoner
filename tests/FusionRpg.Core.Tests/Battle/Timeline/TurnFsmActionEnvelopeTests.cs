@@ -447,28 +447,66 @@ public class TurnFsmActionEnvelopeTests
     }
 
     [Fact]
-    public void An_interrupted_action_never_starts_a_resolve_scoped_cooldown()
+    public void An_interrupted_action_now_charges_its_cooldown_by_default()
     {
-        // A real consequence of the StartsAt rule, and one a player will notice: a swing broken
-        // before it lands costs nothing but the readiness it did not get refunded.
+        // action-todo.md T12 (spec-basic-attack-adoption.md §5, decision D3): InterruptCooldownMilli
+        // defaults to 1000 -- full cooldown -- replacing the previous behaviour of starting none at
+        // all. A resolve-scoped cooldown had nothing to charge before the interrupt; now the
+        // interrupt itself starts it.
         var rig = new Rig();
         var a = rig.Add("a");
         var env = Strike(windup: 100) with
         {
             Class = CooldownClass.Specific, CooldownTicks = 1000, StartsAt = CooldownStart.Resolve
         };
+        Assert.Equal(1000, env.InterruptCooldownMilli); // the default, asserted so this test states it
 
         rig.Commit("a", env, target: "b");
         rig.Runner.Interrupt(a, 10, InterruptCause.CrowdControl);
 
-        Assert.True(rig.Cooldowns.IsReady("a", env, 10));
+        Assert.False(rig.Cooldowns.IsReady("a", env, 10));
+        Assert.True(rig.Cooldowns.IsReady("a", env, 1010)); // full 1000 ticks from the interrupt tick
 
-        // Contrast: a commit-scoped cooldown is already spent when the interrupt lands.
+        // Contrast: a commit-scoped cooldown was already started at commit, before the interrupt.
         var atCommit = env with { StartsAt = CooldownStart.Commit };
         var b = rig.Add("b2");
         rig.Commit("b2", atCommit, target: "x");
         rig.Runner.Interrupt(b, 10, InterruptCause.CrowdControl);
         Assert.False(rig.Cooldowns.IsReady("b2", atCommit, 10));
+    }
+
+    [Fact]
+    public void InterruptCooldownMilli_at_zero_restores_the_old_free_interrupt_behaviour()
+    {
+        // Additive and opt-out: a spec that wants the pre-T12 behaviour back sets this to 0.
+        var rig = new Rig();
+        var a = rig.Add("a");
+        var env = Strike(windup: 100) with
+        {
+            Class = CooldownClass.Specific, CooldownTicks = 1000, StartsAt = CooldownStart.Resolve,
+            InterruptCooldownMilli = 0,
+        };
+
+        rig.Commit("a", env, target: "b");
+        rig.Runner.Interrupt(a, 10, InterruptCause.CrowdControl);
+
+        Assert.True(rig.Cooldowns.IsReady("a", env, 10));
+    }
+
+    [Fact]
+    public void InterruptCooldownMilli_is_inert_for_a_zero_cooldown_envelope()
+    {
+        // "Additive and inert for a zero envelope" -- every action adopted so far has CooldownTicks
+        // at zero, so this field changes nothing for them.
+        var rig = new Rig();
+        var a = rig.Add("a");
+        var env = Strike(windup: 100); // CooldownTicks defaults to 0
+
+        rig.Commit("a", env, target: "b");
+        var result = rig.Runner.Interrupt(a, 10, InterruptCause.CrowdControl);
+
+        Assert.True(result.Broken);
+        Assert.True(rig.Cooldowns.IsReady("a", env, 10));
     }
 
     [Fact]

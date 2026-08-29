@@ -19,12 +19,12 @@ public class PredicateEquivalenceTests
 
     static ICompiledPredicate Compile(Form form, PredicateNode tree, out AtomRejection r)
     {
-        r = PredicateCompiler.TryCompile(tree, StatusBit, out var typed, ElementId);
+        r = PredicateCompiler.TryCompile(tree, StatusBit, out var typed, ElementId, StockBit);
         if (!r.IsOk) return typed;
 
         return form == Form.TypedGraph
             ? typed
-            : FlatPredicate.Build(tree, StatusBit, ElementId);
+            : FlatPredicate.Build(tree, StatusBit, ElementId, StockBit);
     }
 
     [Theory]
@@ -69,7 +69,7 @@ public class PredicateEquivalenceTests
         {
             var tree = RandomNode(rng, depth: 1);
 
-            var r = PredicateCompiler.TryCompile(tree, StatusBit, out var compiled, ElementId);
+            var r = PredicateCompiler.TryCompile(tree, StatusBit, out var compiled, ElementId, StockBit);
             if (!r.IsOk) continue; // rejected trees are the other tests' business
 
             for (var k = 0; k < 4; k++)
@@ -100,7 +100,7 @@ public class PredicateEquivalenceTests
         for (var i = 0; i < 2000; i++)
         {
             var tree = RandomNode(rng, depth: 1, allowInvalid: true);
-            if (PredicateCompiler.TryCompile(tree, StatusBit, out _, ElementId).IsOk) ok++; else rejected++;
+            if (PredicateCompiler.TryCompile(tree, StatusBit, out _, ElementId, StockBit).IsOk) ok++; else rejected++;
         }
 
         Assert.True(ok > 0 && rejected > 0, $"ok={ok} rejected={rejected}");
@@ -130,10 +130,16 @@ public class PredicateEquivalenceTests
         LeafId.RowIs => e.Row == l.Value,
         LeafId.ColIs => e.Col == l.Value,
         LeafId.IsMindControlled => e.IsMindControlled == (l.Value != 0),
+        LeafId.HoldsStock => StockQtyRef(e, StockBit(l.Text!)) >= l.Value,
         _ => true,
     };
 
     static bool Bit(ulong mask, int bit) => bit >= 0 && bit < 64 && (mask & (1UL << bit)) != 0;
+
+    static int StockQtyRef(EntityFacts e, int stockIndex) => stockIndex switch
+    {
+        0 => e.Stock0Qty, 1 => e.Stock1Qty, 2 => e.Stock2Qty, 3 => e.Stock3Qty, _ => 0,
+    };
 
     static int SideOrdinal(string? s) => s switch { "plant" => 0, "zombie" => 1, "bullet" => 2, _ => -1 };
 
@@ -143,10 +149,15 @@ public class PredicateEquivalenceTests
     // an element through the status resolver again, the fuzz diverges instead of agreeing.
     static int ElementId(string id) => id switch { "chilled" => 3, "burning" => 0, "wet" => 2, _ => -1 };
 
+    // Deliberately DIFFERENT numbers again, and only 4 slots (0-3) so the "unknown-stock" name and an
+    // out-of-range index are both exercised, matching StockQty's own "reads as 0" contract.
+    static int StockBit(string id) => id switch { "potion" => 2, "bandage" => 0, "elixir" => 3, _ => -1 };
+
     // ---- generators ---------------------------------------------------------------------------
 
     static readonly string[] Sides = { "plant", "zombie", "bullet" };
     static readonly string[] Statuses = { "chilled", "burning", "wet", "unknown-status" };
+    static readonly string[] StockIds = { "potion", "bandage", "elixir", "unknown-stock" };
 
     static PredicateNode RandomNode(Random rng, int depth, bool allowInvalid = false)
     {
@@ -173,7 +184,7 @@ public class PredicateEquivalenceTests
         var subject = rng.Next(2) == 0 ? Subject.Self : Subject.Target;
         if (allowInvalid && rng.Next(25) == 0) subject = (Subject)9; // omitted-subject shape
 
-        return rng.Next(11) switch
+        return rng.Next(12) switch
         {
             0 => new PredicateNode.Leaf(LeafId.SideIs, subject, Text: Sides[rng.Next(Sides.Length)]),
             1 => new PredicateNode.Leaf(LeafId.TypeIdIs, subject, Value: rng.Next(300)),
@@ -186,7 +197,10 @@ public class PredicateEquivalenceTests
             7 => new PredicateNode.Leaf(LeafId.ElementIs, subject, Text: Statuses[rng.Next(Statuses.Length)]),
             8 => new PredicateNode.Leaf(LeafId.RowIs, subject, Value: rng.Next(6)),
             9 => new PredicateNode.Leaf(LeafId.ColIs, subject, Value: rng.Next(10)),
-            _ => new PredicateNode.Leaf(LeafId.IsMindControlled, subject, Value: rng.Next(2)),
+            10 => new PredicateNode.Leaf(LeafId.IsMindControlled, subject, Value: rng.Next(2)),
+            _ => new PredicateNode.Leaf(LeafId.HoldsStock, subject,
+                     Value: allowInvalid && rng.Next(10) == 0 ? 0 : 1 + rng.Next(5), // occasionally invalid (minQty < 1)
+                     Text: StockIds[rng.Next(StockIds.Length)]),
         };
     }
 
@@ -201,7 +215,11 @@ public class PredicateEquivalenceTests
             Col: rng.Next(-1, 10),
             IsMindControlled: rng.Next(2) == 0,
             IsKiller: rng.Next(2) == 0,
-            StatusMask: (ulong)rng.Next(0, 16));
+            StatusMask: (ulong)rng.Next(0, 16),
+            Stock0Qty: rng.Next(0, 6),
+            Stock1Qty: rng.Next(0, 6),
+            Stock2Qty: rng.Next(0, 6),
+            Stock3Qty: rng.Next(0, 6));
 
         return (One(), One());
     }

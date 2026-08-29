@@ -118,7 +118,7 @@ public class ElementRosterDataTests
     // ---- the seventh element -------------------------------------------------------------------
 
     [Fact]
-    public void A_seventh_element_generates_its_twelve_channels_with_no_code_change()
+    public void A_seventh_element_generates_its_twenty_eight_channels_with_no_code_change()
     {
         // The whole claim. No new enum member, no new constant, no new family — a row.
         var before = DerivedStatChannels.AllCombatChannelIds.Count;
@@ -134,9 +134,10 @@ public class ElementRosterDataTests
     }
 
     [Fact]
-    public void The_channel_count_is_the_formula_not_the_literal_eighty_four()
+    public void The_channel_count_is_the_formula_not_a_literal()
     {
-        // 12 × (6 + omni) = 84 today, and it must track the roster rather than contradict it.
+        // 28 × (6 + omni) = 196 today (was 12 × 7 = 84 before H.1's 16 new families), and it must
+        // track the roster rather than contradict it.
         Assert.Equal(
             DerivedStatChannels.CombatChannelFamilies.Count * (ElementTable.Shipped().Elements.Count + 1),
             DerivedStatChannels.AllCombatChannelIds.Count);

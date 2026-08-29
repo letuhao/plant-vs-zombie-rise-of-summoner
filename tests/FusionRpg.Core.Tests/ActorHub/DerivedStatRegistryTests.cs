@@ -14,11 +14,15 @@ public class DerivedStatRegistryTests
     }
 
     [Fact]
-    public void Combat_channel_count_is_12_families_x_roster_plus_omni()
+    public void Combat_channel_count_is_28_families_x_roster_plus_omni()
     {
-        // 12 families × (omni + ElementRoster.Concrete) — 84 since the combat.shield.* families landed.
+        // 28 families × (omni + ElementRoster.Concrete) — 196 since H.1's 16 new element-typed families
+        // landed (derived-stats program, 2026-08-24; was 12 families / 84 before). The literal below IS
+        // meant to be here — spec-catalog-extension.md §2.4: this test already computes the formula and
+        // asserts what it CURRENTLY equals, so a silent roster change is caught. Only this canary moves;
+        // rewriting the formula itself would be re-deriving something already correct.
         var expected = DerivedStatChannels.CombatChannelFamilies.Count * (ElementRoster.Concrete.Count + 1);
-        Assert.Equal(84, expected);
+        Assert.Equal(196, expected);
         Assert.Equal(expected, DerivedStatChannels.AllCombatChannelIds.Count);
         var reg = DerivedStatRegistry.CreateDefault();
         var combatRegistered = reg.AllRegistered.Count(d => DerivedStatChannels.AllCombatChannelIds.Contains(d.ChannelId));

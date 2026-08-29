@@ -1,3 +1,4 @@
+using FusionRpg.Core.Actions;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
@@ -17,9 +18,9 @@ namespace FusionRpg.Core.Battle;
 /// Per-system RNG streams (`initiative`, `crit`, `essence`, `status`, `proc`; the v1 `damage`
 /// stream name stays reserved — its variance roll retired with the v1 curves).
 /// </summary>
-public static class BattleEngine
+public static partial class BattleEngine
 {
-    sealed class ActorState : IBattleHpTarget
+    sealed class ActorState : IBattleHpTarget, IBattleStatTarget
     {
         public ActorState(BattleActorSetup setup, int sideIndex)
         {
@@ -58,6 +59,17 @@ public static class BattleEngine
         public bool Active => Alive && !Retreated;
 
         public bool Has(string traitId) => _traits.Contains(traitId);
+
+        /// <summary>A18e: <see cref="IBattleStatTarget"/>'s own baseline — the same `Setup.Defense`
+        /// `BattleStatComposer.Compose` already seeded `Derived`'s `CombatDefenseOmni` channel from at
+        /// spawn.</summary>
+        public long BaselineDefense => Setup.Defense;
+
+        /// <summary>A18e (spec-battle-live-stat-modifiers.md §2): the one live-read `Setup.Atk` itself
+        /// never composes through — byte-identical to `Setup.Atk` when the ledger holds no `atk` mods
+        /// for this actor (every battle today), since `ComposeChannel` over an empty mod list returns
+        /// the baseline unchanged.</summary>
+        public long LiveAtk(BattleStatModifierLedger ledger) => ledger.Recompose(Setup.Key, "atk", Setup.Atk);
     }
 
     /// <summary>Owned-PRNG adapter for the L2b apply roll — `status` stream, never System.Random.</summary>
@@ -105,7 +117,49 @@ public static class BattleEngine
     /// Optional observation for the kernel-adoption parity ladder. Null in production, and every
     /// record site is null-conditional — tracing cannot change an outcome.
     /// </param>
-    public static BattleReport Resolve(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace = null)
+    /// <param name="onEffectHostReady">
+    /// T14 (action-todo.md, spec-basic-attack-adoption.md): a test-only seam proving the "grant
+    /// path" two atom `D6` comments wait on — <c>resource.delta</c> and <c>shield.grant</c> can now
+    /// reach <see cref="BattleEffectHost.Bag"/>'s sink and this method's own <see cref="ShieldGate"/>
+    /// once <see cref="EffectBag.ShieldGate"/> is wired (done below, unconditionally). Null in every
+    /// production and golden call site — the callback fires once, before round 1, with the fully
+    /// wired host handed to it; nothing else about <see cref="Resolve"/> changes when it is null.
+    /// </param>
+    /// <param name="profile">
+    /// B14 (spec-kernel-adoption.md): a 5th optional trailing parameter, not a new overload — every
+    /// existing call site (positional 2-arg, or naming <paramref name="trace"/>/
+    /// <paramref name="onEffectHostReady"/>) compiles unchanged. <c>null</c> means "content did not
+    /// choose," resolving to <see cref="Timeline.BattleModeProfileCatalog.ClassicRound"/>, mirroring
+    /// how B12's <see cref="WaveDef.Profile"/> resolution already works. <b>Scope of what this
+    /// actually changes today:</b> only the round-boundary tick sequencing runs through the
+    /// profile's chosen advance mechanism — <see cref="Resolve"/> is a batch resolver, not a live
+    /// per-frame loop, so <see cref="Timeline.AdvancePolicyKind.NextEvent"/> is used regardless of
+    /// which profile is passed (a <see cref="Timeline.FixedIncrementAdvance"/> has no meaning
+    /// without a caller supplying per-frame ticks, which nothing here does). The profile's other
+    /// fields (`W`, `WScope`, `Commitment`, `Economy`) are accepted and available for future
+    /// enrichment but are inert here — this gate proves the kernel can carry the round skeleton
+    /// byte-identically, not that combat routes through the per-actor turn FSM, which is explicitly
+    /// out of scope (`battle-timeline-map.md`: "E2 skills... respec after T5").
+    /// </param>
+    /// <param name="actionCatalog">
+    /// A17 (spec-action-selection-adoption.md §2): a 7th optional trailing parameter, same additive
+    /// pattern as <paramref name="profile"/>. Required only if some actor's
+    /// <see cref="BattleActorSetup.EquippedActionIds"/> is non-empty — every id in it must resolve
+    /// against this catalog, loudly (an `ArgumentException`, not a silent skip) if it does not. An
+    /// actor with no loadout needs no catalog at all: it falls back to the single hand-built basic
+    /// attack. Synthetic/test-constructed today (`A20`'s own job is a clean harness for that) — this
+    /// module does not read a live grant pipeline, per `action-map.md` §12's own explicit scope call.
+    /// </param>
+    /// <param name="containerResolver">
+    /// A18a (spec-action-container-binding.md §2): an 8th optional trailing parameter, same additive
+    /// pattern as <paramref name="actionCatalog"/>. Required only if some held action's `ContainerId`
+    /// is non-empty — every such container must resolve against it, loudly, if it does not. `null` is
+    /// legal exactly when nothing in the loadout carries a real container, which is every caller
+    /// today (`A20`'s own job is a clean harness for real content).
+    /// </param>
+    public static BattleReport Resolve(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace = null,
+        Action<BattleEffectHost>? onEffectHostReady = null, Timeline.BattleModeProfile? profile = null,
+        ActionCatalog? actionCatalog = null, IContainerEffectResolver? containerResolver = null)
     {
         if (setup.Squad.Count == 0) throw new ArgumentException("Squad is empty.");
         if (setup.Wave.Count == 0) throw new ArgumentException("Wave is empty.");
@@ -129,336 +183,179 @@ public static class BattleEngine
                 throw new ArgumentException($"Actor '{a.Key}' must have MaxHp >= 1.");
         }
 
-        var initiativeRng = SeededRng.DeriveStream(seed, "initiative");
-        ICombatRng critRng = new SeededRngCombatAdapter(SeededRng.DeriveStream(seed, "crit")); // hit + crit rolls
-        if (trace != null) critRng = trace.WrapCombat("crit", critRng);
-        var essenceRng = SeededRng.DeriveStream(seed, "essence"); // void/chaos rider procs
-        var statusRng = new BattleStatusRng(seed, trace);
-        var calculator = new OverlayCombatCalculator();
+        // B13 (spec-kernel-adoption.md): every local this method used to hold — actors, byKey,
+        // host, shields, gate, sink, events, RNG streams — plus the eight closures over them, now
+        // live on BattleRunState (BattleRunState.cs, nested in this partial class). Zero behavior
+        // change: every line below is the same statement sequence as before extraction, reading
+        // through `state.` instead of a captured local.
+        var state = new BattleRunState(setup, seed, trace, onEffectHostReady, actionCatalog, containerResolver);
 
-        // Stable ordered state — never dictionary-enumerated (determinism discipline).
-        var actors = setup.Squad.Select((a, i) => new ActorState(a, i))
-            .Concat(setup.Wave.Select((a, i) => new ActorState(a, i)))
-            .ToList();
-        var byKey = new Dictionary<string, ActorState>(StringComparer.Ordinal);
-        foreach (var a in actors)
-            byKey[a.Setup.Key] = a;
+        // B14: the round boundary runs on the kernel's own EventQueue/SimulationClock — the same
+        // primitives every other Timeline module uses — instead of a raw integer counter. `Resolve`
+        // is a batch resolver, so `NextEventAdvance` drives it regardless of the chosen profile's
+        // `AdvancePolicy` (see the `profile` parameter's own doc comment for why).
+        //
+        // B16 (spec-kernel-adoption.md hazard 5, the deliberate fix): status pulses now share this
+        // SAME queue as their own event kind, scheduled at each instance's true `NextPulse` tick
+        // instead of being folded into the once-per-1000ms round-open call. The round-open call to
+        // `Status.Tick` is GONE — round-open now only runs the regenerator trait pulse (step 1's
+        // OTHER half); status delivery is fully event-driven. Exactly one event of EACH kind is ever
+        // pending at a time, recomputed and rescheduled after it fires — the same "does the queue
+        // still hold a scheduled X" pattern B14 already established for rounds, now applied twice.
+        var roundQueue = new Timeline.EventQueue(expectedEvents: 4);
+        var roundClock = new Timeline.SimulationClock();
+        var roundAdvance = new Timeline.NextEventAdvance();
+        var roundEventBuffer = new List<Timeline.ScheduledEvent>(2);
+        const int RoundEventKind = 0;
+        const int StatusPulseEventKind = 1;
+        const string RoundEventOwnerKey = "round";
+        const string StatusPulseEventOwnerKey = "status-pulse";
 
-        // Battle-local effect stack: funnel → FA10 sink over engine state; statuses over the
-        // composed derived profiles; the clock is the synthetic round clock.
-        var host = new BattleEffectHost(key => byKey.TryGetValue(key, out var a) ? a : null, seed);
-        var t0 = host.Clock.UtcNow;
-        var status = new StatusRuntime(StatusCatalogBootstrap.CreateDefault(),
-            (ptr, attackerLess) => attackerLess || ptr == null || !byKey.TryGetValue(ptr, out var a)
-                ? ActorDerivedSnapshot.AttackerLess()
-                : a.Derived);
+        // The battle's own absolute horizon (BattleRuleset.MaxRounds, converted to a tick). The
+        // pre-B16 loop was ALWAYS bounded by `rounds < MaxRounds`; status pulses now live on the
+        // same timeline and need the identical ceiling, or a long/unbounded-duration status against
+        // two sides that never wipe each other schedules forever once round events stop — a real
+        // infinite loop this exact scenario hit and was caught by, not a hypothetical.
+        var maxBattleTick = (long)BattleRuleset.MaxRounds * BattleRuleset.RoundDurationMs;
 
-        // Shield stack (battle-adoption): battle-local runtime + gate; every HP delta goes
-        // through the shared pipeline so the one-key discipline holds (single FA10 slot per
-        // actor per window) and shields absorb before HP — overlay-identical semantics.
-        var shields = new ShieldRuntime();
-        var shieldGate = new ShieldGate(shields, (ptr, attackerLess) =>
-            attackerLess || ptr == null || !byKey.TryGetValue(ptr, out var a)
-                ? CombatActorSnapshot.AttackerLess()
-                : new CombatActorSnapshot(a.Derived, a.ElementTypes));
-        var hpSink = new FunnelHpDeltaSink(host.Funnel);
-
-        DamageApplyResult ApplyHp(
-            ActorState owner, long amount, string effectId,
-            ElementPayloadComponent[]? components = null, ActorState? attacker = null, string? grantId = null)
+        void ScheduleNextStatusPulse()
         {
-            var result = DamageApplyPipeline.Apply(
-                owner.Setup.Key, amount, hitCount: 1,
-                components ?? Array.Empty<ElementPayloadComponent>(),
-                attacker?.Derived, owner.Derived, shieldGate, hpSink,
-                pluginId: "battle", effectId: effectId, grantId: grantId);
-            owner.ShieldAbsorbed += result.AbsorbedAmount;
-            return result;
-        }
-
-        var pulseSink = new BattlePulseSink((hostPtr, amount, effectId) =>
-            byKey.TryGetValue(hostPtr, out var owner)
-                ? ApplyHp(owner, amount, effectId)
-                : new DamageApplyResult(DamageApplyOutcome.SinkRefused, 0, 0));
-
-        var events = new List<BattleEventRec>();
-        var recordedDeaths = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var a in actors)
-            events.Add(new BattleEventRec(0, BattleEventKinds.Spawn, a.Setup.Key, a.Setup.TypeId, a.Setup.Side));
-
-        // Innate shields (battle-adoption): direct apply at setup — snapshots composed in the
-        // ActorState ctor, so the shield spec's capacity barrier is satisfied by construction.
-        // Content durations are ms; battle ticks are rounds.
-        foreach (var a in actors)
-        {
-            if (a.Setup.InnateShield is not { } innate) continue;
-            shields.Apply(new ShieldGrant
-            {
-                OwnerKey = Contracts.EffectOwnerKeys.Entity(a.Setup.Key),
-                SourceId = "innate:" + a.Setup.TypeId,
-                Element = innate.Element,
-                BaseHp = innate.BaseHp,
-                Priority = innate.Priority,
-                DurationTicks = innate.DurationMs is { } ms
-                    ? (ms + BattleRuleset.RoundDurationMs - 1) / BattleRuleset.RoundDurationMs
-                    : null,
-                RefillOnMerge = false,
-                IsInnate = true
-            }, a.Derived, nowTick: 0);
-        }
-
-        var shieldEventScratch = new List<ShieldEventRec>();
-        void DrainShieldEvents(int round)
-        {
-            shieldEventScratch.Clear();   // caller owns the scratch on EVERY path (DrainEvents appends)
-            if (shields.DrainEvents(shieldEventScratch) == 0) return;
-            foreach (var rec in shieldEventScratch)
-            {
-                var key = rec.OwnerKey.StartsWith("entity:", StringComparison.Ordinal)
-                    ? rec.OwnerKey.Substring("entity:".Length)
-                    : rec.OwnerKey;
-                if (!byKey.TryGetValue(key, out var owner)) continue;
-                events.Add(new BattleEventRec(round, rec.Kind,
-                    key, owner.Setup.TypeId, owner.Setup.Side, rec.Amount, rec.Element, rec.ShieldId));
-            }
-
-            shieldEventScratch.Clear();
-        }
-
-        void SweepDeaths(int round)
-        {
-            foreach (var a in actors)
-            {
-                if (!a.Alive && recordedDeaths.Add(a.Setup.Key))
-                {
-                    events.Add(new BattleEventRec(round, BattleEventKinds.Die, a.Setup.Key, a.Setup.TypeId, a.Setup.Side));
-                    shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
-                }
-            }
-        }
-
-        // Initial statuses land attacker-less at t0 (trait/attack riders reuse this path later).
-        // Scripted setup statuses apply deterministically — the L2b evaluator still blocks them
-        // on immunity/potency floor (resist channels), but the apply roll is bypassed (0.0 roll).
-        var scriptedApplyRng = new FixedStatusRng(0.0);
-        foreach (var a in actors)
-        {
-            foreach (var spec in a.Setup.InitialStatuses)
-            {
-                status.Apply(new StatusApplyInput(
-                    spec.StatusId,
-                    HostPtr: a.Setup.Key,
-                    AttackerPtr: null,
-                    GrantId: "battle:init:" + a.Setup.Key + ":" + spec.StatusId,
-                    BaseMagnitude: spec.MagnitudePerPulse,
-                    BaseDuration: spec.DurationMs,
-                    PeriodMs: spec.PeriodMs,
-                    DurationMs: spec.DurationMs,
-                    GrantChance: spec.GrantChanceMilli / 1000.0,
-                    EffectId: "battle.status." + spec.StatusId,
-                    PluginId: "battle",
-                    AttackerLess: true), scriptedApplyRng, t0);
-            }
-        }
-
-        // Immortal death refusal: a queued +1 through the pipeline turns the death into survive-at-1.
-        void ReviveImmortals()
-        {
-            var queued = false;
-            foreach (var a in actors)
-            {
-                if (!a.Alive && !a.Retreated && a.ImmortalCharges > 0 && !recordedDeaths.Contains(a.Setup.Key))
-                {
-                    a.ImmortalCharges--;
-                    ApplyHp(a, 1, "battle.trait.immortal");
-                    queued = true;
-                }
-            }
-
-            if (queued)
-                host.Flush();
-        }
-
-        // Coward retreat: below the threshold the actor leaves the battle alive (no die event).
-        void CheckRetreats()
-        {
-            foreach (var a in actors)
-            {
-                if (!a.Active || !a.Has("coward")) continue;
-                var def = TraitBattleCatalog.Get("coward");
-                if ((long)a.Hp * 1000 < (long)a.MaxHp * def.RetreatBelowMilli)
-                {
-                    a.Retreated = true;
-                    status.WithdrawEntity(a.Setup.Key);
-                    shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
-                }
-            }
-        }
-
-        void PostFlush(int round)
-        {
-            ReviveImmortals();
-            SweepDeaths(round);
-            CheckRetreats();
+            if (state.NextStatusPulseAt() is not { } at) return;
+            var tick = (long)Math.Round((at - state.T0).TotalMilliseconds);
+            if (tick > maxBattleTick) return;
+            roundQueue.Schedule(Math.Max(tick, roundClock.Now), StatusPulseEventOwnerKey, StatusPulseEventKind, 0);
         }
 
         var rounds = 0;
-        while (rounds < BattleRuleset.MaxRounds && AnyActive(actors, "squad") && AnyActive(actors, "wave"))
+        if (rounds < BattleRuleset.MaxRounds && state.AnyActive("squad") && state.AnyActive("wave"))
+            roundQueue.Schedule(BattleRuleset.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
+        ScheduleNextStatusPulse();   // initial statuses may already carry a due pulse in flight
+
+        // Belt-and-suspenders on top of `maxBattleTick`, the same shape the kernel's own test rigs
+        // already use (e.g. TurnFsmActionEnvelopeTests.Rig.Pump's `guard < 10_000`): `maxBattleTick`
+        // is the domain-correct fix, but a hard iteration cap means a bug this shape ever produces
+        // again throws loudly and fast instead of spinning to an OOM crash — which is exactly what
+        // happened here once already, from status-pulse events not being bounded by MaxRounds.
+        // 200k comfortably covers the worst realistic case (a 1 ms period for the full 50-round
+        // horizon is 50,000 pulses) with headroom, and a real runaway still fails fast well short
+        // of exhausting memory.
+        const int MaxLoopIterations = 200_000;
+        var loopGuard = 0;
+
+        while (roundQueue.Count > 0)
         {
-            rounds++;
-            var now = t0.AddMilliseconds((double)rounds * BattleRuleset.RoundDurationMs);
-            host.Clock.UtcNow = now;
+            if (++loopGuard > MaxLoopIterations)
+                throw new InvalidOperationException(
+                    $"BattleEngine.Resolve exceeded {MaxLoopIterations} scheduling iterations — a runaway event loop, not a long battle. WaveId '{setup.WaveId}', seed {seed}.");
 
-            // 1) Status ticks + regenerator pulses share one FA10 window per round.
-            foreach (var a in actors)
+            if (!state.AnyActive("squad") || !state.AnyActive("wave")) break;   // decided by an earlier sub-round pulse; a stale scheduled event is never acted on
+
+            roundClock.TryAdvance(roundAdvance, roundQueue);
+            roundEventBuffer.Clear();
+            roundQueue.PopDue(roundClock.Now, roundEventBuffer);
+
+            foreach (var ev in roundEventBuffer)
             {
-                if (a.Active && a.Has("regenerator"))
+                if (!state.AnyActive("squad") || !state.AnyActive("wave")) break;   // decided by an earlier event in THIS same batch
+                var now = state.T0.AddMilliseconds((double)roundClock.Now);
+                state.Host.Clock.UtcNow = now;
+
+                if (ev.Kind == StatusPulseEventKind)
                 {
-                    var def = TraitBattleCatalog.Get("regenerator");
-                    ApplyHp(a, Math.Max(1, a.MaxHp * def.RegenPerRoundMilli / 1000), "battle.trait.regenerator");
-                }
-            }
-
-            trace?.Phase(rounds, "status");
-            status.Tick(now, pulseSink, board: null, spreadRng: statusRng);
-            host.Flush();
-            trace?.Phase(rounds, "post-flush");
-            PostFlush(rounds);
-            if (!AnyActive(actors, "squad") || !AnyActive(actors, "wave"))
-                break;
-
-            // 2) Initiative-ordered attacks: stable order, per-round jitter from the initiative
-            //    stream; swift subtracts a full band so it always acts before non-swift kin.
-            trace?.Phase(rounds, "initiative");
-            var order = actors
-                .Where(a => a.Active)
-                .OrderBy(a =>
-                {
-                    // Key selectors run once per element in SOURCE order, so the draw sequence
-                    // is "actors list order, filtered to Active" — T5 hazard 1, and note that
-                    // CC-locked actors are Active and therefore DO draw (hazard 4).
-                    var roll = initiativeRng.NextInt(1000);
-                    trace?.Draw("initiative", roll);
-                    return roll - (a.Has("swift") ? TraitBattleCatalog.Get("swift").InitiativeBonusMilli : 0);
-                })
-                .ToList();
-
-            foreach (var attacker in order)
-            {
-                if (!attacker.Active) continue;
-                if (IsCcLocked(status, attacker.Setup.Key, now)) continue; // CC skips the turn
-                var target = SelectTarget(actors, attacker, status, now);
-                if (target is null) break;
-
-                // SSOT resolution (combat-unification): base = Atk; typed power/defense,
-                // sigmoid hit/crit, matchup, and the battle-profile min-chip all live in the
-                // resolver. Natural rolls only — Force* would desync the crit stream.
-                var (signedDelta, breakdown) = calculator.Compute(new OverlayCombatRequest
-                {
-                    BaseOverlayDamage = attacker.Setup.Atk,
-                    Components = attacker.AttackComponents,
-                    Attacker = new CombatActorSnapshot(attacker.Derived, attacker.ElementTypes),
-                    Defender = new CombatActorSnapshot(target.Derived, target.ElementTypes),
-                    Profile = CombatProfile.BattleSim
-                }, critRng);
-                if (!breakdown.Hit)
-                    continue; // miss — no damage, no HP change
-
-                var damage = (int)(-signedDelta);
-
-                // Berserker ramp: battle mechanic on resolver OUTPUT, never inside the formula.
-                if (attacker.Has("berserker"))
-                    damage = damage * TraitBattleMath.BerserkerRampMilli(
-                        TraitBattleCatalog.Get("berserker"), attacker.Hp, attacker.MaxHp) / 1000;
-
-                // Essence riders (void-touched / chaos-marked): per-landed-hit proc on its own stream.
-                var rider = 0;
-                foreach (var essenceId in EssenceTraits)
-                {
-                    if (!attacker.Has(essenceId)) continue;
-                    var def = TraitBattleCatalog.Get(essenceId);
-                    var essenceRoll = essenceRng.NextPerMille();
-                    trace?.Draw("essence", essenceRoll);
-                    if (essenceRoll < def.EssenceProcMilli)
-                        rider += Math.Max(1, damage * def.EssenceRiderMilli / 1000);
+                    trace?.Phase(rounds, "status-pulse");
+                    state.Status.Tick(now, state.PulseSink, board: null, spreadRng: state.StatusRng);
+                    state.Host.Flush();
+                    state.PostFlush(rounds);
+                    if (state.AnyActive("squad") && state.AnyActive("wave"))
+                        ScheduleNextStatusPulse();
+                    continue;
                 }
 
-                // Guardian: an adjacent active guardian pulls a share of the hit onto itself.
-                // Each slice passes the gate separately — both actors' shields absorb their own
-                // portion (spec: guardian two-slice semantics).
-                var guardian = FindAdjacentWithTrait(actors, target, "guardian");
-                var share = guardian != null
-                    ? damage * TraitBattleCatalog.Get("guardian").GuardShareMilli / 1000
-                    : 0;
+                // RoundEventKind — steps 1 (regen only — status delivery moved off this call in
+                // B16), 2 (initiative + attacks), 3/4 (death cleanup + shield upkeep).
+                rounds++;
+                state.RunRegeneratorPulses();
+                state.Host.Flush();
+                trace?.Phase(rounds, "post-flush");
+                state.PostFlush(rounds);
+                if (!state.AnyActive("squad") || !state.AnyActive("wave"))
+                    break;
 
-                ApplyHp(target, -(damage - share + rider), "battle.attack",
-                    attacker.AttackComponents, attacker);
-                if (share > 0)
-                    ApplyHp(guardian!, -share, "battle.trait.guardian",
-                        attacker.AttackComponents, attacker);
-                host.Flush();
-                attacker.DamageDealt += damage + rider;   // resolver output, pre-absorb (spec)
-
-                ReviveImmortals();
-                var killsThisHit = 0;
-                foreach (var victim in guardian == null ? new[] { target } : new[] { target, guardian })
-                {
-                    if (!victim.Alive && recordedDeaths.Add(victim.Setup.Key))
+                // 2) Initiative-ordered attacks: stable order, per-round jitter from the initiative
+                //    stream; swift subtracts a full band so it always acts before non-swift kin.
+                trace?.Phase(rounds, "initiative");
+                var order = state.Actors
+                    .Where(a => a.Active)
+                    .OrderBy(a =>
                     {
-                        attacker.Kills++;
-                        killsThisHit++;
-                        events.Add(new BattleEventRec(rounds, BattleEventKinds.Die, victim.Setup.Key, victim.Setup.TypeId, victim.Setup.Side));
-                        shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(victim.Setup.Key));
+                        // Key selectors run once per element in SOURCE order, so the draw sequence
+                        // is "actors list order, filtered to Active" — T5 hazard 1, and note that
+                        // CC-locked actors are Active and therefore DO draw (hazard 4).
+                        var roll = state.InitiativeRng.NextInt(1000);
+                        trace?.Draw("initiative", roll);
+                        return roll - (a.Has("swift") ? TraitBattleCatalog.Get("swift").InitiativeBonusMilli : 0);
+                    })
+                    .ToList();
+
+                foreach (var attacker in order)
+                {
+                    // action-todo.md T13 (spec-basic-attack-adoption.md §1): the first four steps —
+                    // active check, CC-lock, target, calculator.Compute — are the declared action
+                    // `act.attack` (BasicAttack.cs). Everything below this call is EngineBehavior
+                    // trait tail (E12), extracted to BattleRunState.DispatchHit (B13) but otherwise
+                    // unchanged.
+                    var step = RunBasicAttackStep(attacker, state, now, roundClock.Now, state.Calculator, state.CritRng, trace, rounds);
+                    if (step.Outcome == AttackStepOutcome.Continue) continue;
+                    if (step.Outcome == AttackStepOutcome.Break) break;
+
+                    state.DispatchHit(attacker, step.Target!, step.SignedDelta, rounds);
+                }
+
+                // 3) Death cleanup happens inline (Hp gate); 4) shield upkeep AFTER dispatch —
+                // an expiring shield still absorbed this round's damage (shield spec order).
+                foreach (var a in state.Actors)
+                {
+                    if (!a.Alive)
+                    {
+                        state.Status.WithdrawEntity(a.Setup.Key);
+                        state.Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
                     }
                 }
 
-                // Soul-eater: on-kill heal through the pipeline.
-                if (killsThisHit > 0 && attacker.Has("soul-eater"))
+                trace?.Phase(rounds, "shield-upkeep");
+                // B17: true ms tick, not the round counter — matches DurationTicks now carrying
+                // true ms (BattleRunState.cs), so an innate shield expires at its authored duration
+                // instead of being silently extended to the next whole round boundary.
+                state.Shields.Tick(roundClock.Now, BattleRuleset.RoundDurationMs, ownerKey =>
                 {
-                    var def = TraitBattleCatalog.Get("soul-eater");
-                    ApplyHp(attacker,
-                        (long)killsThisHit * Math.Max(1, attacker.MaxHp * def.OnKillHealMilli / 1000),
-                        "battle.trait.soul-eater");
-                    host.Flush();
-                }
+                    var key = ownerKey.StartsWith("entity:", StringComparison.Ordinal)
+                        ? ownerKey.Substring("entity:".Length)
+                        : ownerKey;
+                    return state.ByKey.TryGetValue(key, out var a) ? a.Derived : ActorDerivedSnapshot.AttackerLess();
+                });
+                state.DrainShieldEvents(rounds);
+                if (trace != null)
+                    foreach (var a in state.Actors)
+                        trace.State(rounds, a.Setup.Key, a.Hp, a.ShieldAbsorbed);
 
-                CheckRetreats();
+                // Schedule the NEXT round only now — mirrors the original while-header's
+                // re-evaluated `rounds < Max && bothActive` exactly, just checked once per round
+                // instead of once per loop entry, since `rounds` here already holds the round that
+                // just finished.
+                if (rounds < BattleRuleset.MaxRounds && state.AnyActive("squad") && state.AnyActive("wave"))
+                    roundQueue.Schedule(roundClock.Now + BattleRuleset.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
             }
-
-            // 3) Death cleanup happens inline (Hp gate); 4) shield upkeep AFTER dispatch —
-            // an expiring shield still absorbed this round's damage (shield spec order).
-            foreach (var a in actors)
-            {
-                if (!a.Alive)
-                {
-                    status.WithdrawEntity(a.Setup.Key);
-                    shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
-                }
-            }
-
-            trace?.Phase(rounds, "shield-upkeep");
-            shields.Tick(rounds, BattleRuleset.RoundDurationMs, ownerKey =>
-            {
-                var key = ownerKey.StartsWith("entity:", StringComparison.Ordinal)
-                    ? ownerKey.Substring("entity:".Length)
-                    : ownerKey;
-                return byKey.TryGetValue(key, out var a) ? a.Derived : ActorDerivedSnapshot.AttackerLess();
-            });
-            DrainShieldEvents(rounds);
-            if (trace != null)
-                foreach (var a in actors)
-                    trace.State(rounds, a.Setup.Key, a.Hp, a.ShieldAbsorbed);
         }
 
-        DrainShieldEvents(rounds);   // trailing grants/absorbs when the loop exits mid-round
+        state.DrainShieldEvents(rounds);   // trailing grants/absorbs when the loop exits mid-round
 
-        var outcome = !AnyActive(actors, "wave") ? BattleOutcome.Victory
-            : !AnyActive(actors, "squad") ? BattleOutcome.Defeat
+        var outcome = !state.AnyActive("wave") ? BattleOutcome.Victory
+            : !state.AnyActive("squad") ? BattleOutcome.Defeat
             : BattleOutcome.Stalemate;
 
         var greedyDef = TraitBattleCatalog.Get("greedy");
         var geniusDef = TraitBattleCatalog.Get("genius");
-        var greedySurvivors = actors.Count(a =>
+        var greedySurvivors = state.Actors.Count(a =>
             a.Setup.Side == "squad" && a.Alive && a.Has("greedy"));
 
         return new BattleReport
@@ -468,12 +365,13 @@ public static class BattleEngine
             Outcome = outcome,
             Rounds = rounds,
             SoulLootMilli = 1000 + greedyDef.SoulLootBonusMilli * greedySurvivors,
-            Events = events,
-            Actors = actors.Select(a => new BattleActorResult(
+            Events = state.Events,
+            Actors = state.Actors.Select(a => new BattleActorResult(
                 a.Setup.Key, a.Setup.Side, a.Setup.SpeciesId, a.Setup.TypeId,
                 a.Hp, a.DamageDealt, a.Kills, a.Alive, a.Retreated,
                 a.Has("genius") ? 1000 + geniusDef.SpecimenXpBonusMilli : 1000,
-                a.ShieldAbsorbed)).ToList()
+                a.ShieldAbsorbed)
+            { EquippedActionIds = a.Setup.EquippedActionIds }).ToList()
         };
     }
 
@@ -496,41 +394,6 @@ public static class BattleEngine
 
     static bool AnyActive(List<ActorState> actors, string side) =>
         actors.Any(a => a.Active && a.Setup.Side == side);
-
-    /// <summary>
-    /// Target policy: first active opponent, unless the attacker is bloodthirsty (lowest-HP
-    /// active opponent, ties by list order). A loyal actor adjacent to the chosen target then
-    /// intercepts the hit entirely.
-    /// </summary>
-    static ActorState? SelectTarget(List<ActorState> actors, ActorState attacker, StatusRuntime status, DateTimeOffset now)
-    {
-        ActorState? target = null;
-        if (attacker.Has("bloodthirsty"))
-        {
-            foreach (var a in actors)
-                if (a.Active && a.Setup.Side != attacker.Setup.Side && (target == null || a.Hp < target.Hp))
-                    target = a;
-        }
-        else
-        {
-            foreach (var a in actors)
-            {
-                if (a.Active && a.Setup.Side != attacker.Setup.Side)
-                {
-                    target = a;
-                    break;
-                }
-            }
-        }
-
-        if (target == null)
-            return null;
-
-        var bodyguard = FindAdjacentWithTrait(actors, target, "loyal");
-        if (bodyguard != null && !IsCcLocked(status, bodyguard.Setup.Key, now))
-            return bodyguard;
-        return target;
-    }
 
     /// <summary>First active same-side setup-order neighbor (index ±1) carrying the trait.</summary>
     static ActorState? FindAdjacentWithTrait(List<ActorState> actors, ActorState around, string traitId)

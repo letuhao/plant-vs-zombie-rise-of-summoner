@@ -24,6 +24,44 @@ Module id `battle-adoption` in the [combat unification map](../combat-unificatio
 
   Behavior note, stated so it's a choice: matchup bonus now scales with `Atk` (±0.25 × Atk) instead of with `(power − defense)`. `BattleStatComposerTests`' `power.omni == Atk` assert inverts; the defense asserts stay green.
 
+### ⛔ Cap enforcement is missing from `ChannelMods` — found 2026-08-27, cross-program (class-system)
+
+**This spec's own mapping table does not yet say what happens to a capped channel, and the shipped
+code's answer is "nothing" — found while building `class-system` P2.6's cross-composer proof, not
+guessed.** `DerivedComposer.ComposeChannel`'s `SumIncreased` case applies `Cap(def, ...)` against the
+channel's registered cap (e.g. `status.resist.*` against `DerivedStatPolicy.CategoryResistCap = 0.95`)
+— **exactly once, by design**: `ResistanceEvaluator.cs:283-286` reads the composed value raw and says
+so in its own comment, "not re-clamped here... a second clamp here... made raising it a silent no-op."
+`BattleStatComposer`'s `ChannelMods` loop (`snap.Set(id, snap.Get(id) + mod.Amount)`, confirmed: zero
+`Cap(` calls anywhere in that file) has no equivalent enforcement, for any producer — `StarChannelMods`,
+`LoyaltyChannelMods`, trait mods, and now `AptitudeChannelMods` all feed it uncapped.
+
+**Consequence, verified empirically, not assumed:** `tools/ProveAptitude` run against all twelve
+aptitudes at full (100%) share landed `status.resist.cc/contagion/dot` at **~30** on the battle side
+against **0.95** (the intended cap) on the overlay side — a battle-mode actor could become
+functionally near-immune to a whole status category. **Latent today** — `point-economy` (class-system
+Phase 6, the only thing that will ever let a player fund an aptitude this way) does not exist yet, so
+nothing reachable in production can trigger it. It becomes live the day Phase 6 ships, unless this spec
+resolves it first.
+
+**Not fixable by the class-system program**: `spec-aptitude-resolve.md` §8 forbids that program from
+touching `BattleStatComposer`'s compose logic — this composer, and what caps mean inside it, belongs to
+`battle-adoption`. Options this spec's own build should weigh (not decided here — this section states
+the finding, not the resolution, per the owner's instruction not to let an incomplete feature satisfy a
+class-system gate):
+
+1. Give `ChannelMods` consumption its own cap-lookup, mirroring `DerivedComposer.ComposeChannel`'s
+   `SumIncreased` case (same registry, same `Cap` field) — the composer-logic change this spec (not
+   `class-system`) owns making.
+2. Decide capped channels are structurally off-limits as a `ChannelMods`/aptitude-edge target, and
+   enforce that at tuning-load or guard time instead of at compose time.
+3. Some other resolution this spec's owner picks.
+
+**Tracked:** `tasks/class-system-todo.md` P3.1 (blocked on this — "prove-aptitude.ps1 covers all twelve
+with zero deltas" cannot be true while this gap stands) and `.remember/now.md` (cross-program pending
+item). Reproduce: `.\scripts\prove-aptitude.ps1 -Source <any of the twelve> -Channels ""` — exits 1
+every time, none of the twelve pass unfiltered.
+
 ### Baseline re-tune (owner decision: preserve today's feel — the Chaos-style balance mechanism)
 
 The sigmoid at battle's current stat magnitudes yields ~56 % hit / ~52 % crit (vs 99.5 % / 10 % today) and halves per-point stat sensitivity. Dedicated subtask, with **rate-test acceptance criteria**, not golden inspection:

@@ -15,7 +15,7 @@ current is the mistake this file exists to prevent.
 
 ## 1. The model
 
-**Five actor resources. One shared set. Both factions carry all five.**
+**Six actor resources. One shared set. Both factions carry all six.**
 
 | id | Class | Exhaustion | Notes |
 |---|---|---|---|
@@ -24,8 +24,9 @@ current is the mistake this file exists to prevent.
 | `hunger` | energy | ✅ debuff | |
 | `spirit` | essence | ✅ debuff | Extinguished spirit is what the summoner harvests *as* soul. **Never an action cost** |
 | `qi` | essence | ✅ debuff | **Skill fuel** — see §2 |
+| `poise` | body | ✅ debuff | **Guard** — see §2. Registered 2026-08-26 (class-system, `poise-resource`); exhaustion is breaking guard, not death, so it stays a debuff like the other four |
 
-There is **no faction branch anywhere in the model.** Plants and zombies hold the same five pools
+There is **no faction branch anywhere in the model.** Plants and zombies hold the same six pools
 with the same ids, the same polarity, the same channels and the same mechanics. Everything that
 differs between them is a string chosen at the display layer.
 
@@ -33,19 +34,24 @@ differs between them is a string chosen at the display layer.
 
 ## 2. What each resource pays for
 
-**Decided 2026-08-22.** Two pools are action costs and they split by *kind of effort*:
+**Decided 2026-08-22, `poise` added 2026-08-26.** Three pools are action costs and they split by
+*kind of effort*:
 
 | Pool | Pays for | Exhausted means |
 |---|---|---|
-| `stamina` | **Physical actions** — move, basic attack, guard, reposition | The actor can still act, but the body is failing: derived-stat debuff |
+| `stamina` | **Physical actions** — move, basic attack, reposition | The actor can still act, but the body is failing: derived-stat debuff |
 | `qi` | **Skills and abilities** — anything with a trigger, an element, or a container of atoms behind it | No skills. The actor falls back to physical actions only |
+| `poise` | **Guarding** — a flat commit cost to raise a guard, drained further in proportion to what it absorbs (spec-guard-economy.md §3) | Guard breaks. The actor can still act, but cannot absorb: derived-stat debuff, never death |
 | `hunger` | Nothing directly. It is **sustain**: it gates regeneration and condition rather than being spent per action | Metabolic failure: derived-stat debuff |
 | `spirit` | **Nothing. `spirit` is never an action cost** — it is what the actor *is*, and what the summoner harvests as soul when it is extinguished | Identity failure: derived-stat debuff |
 | `hp` | Nothing | Death — owned by the turn FSM's `Downed` state, not by exhaustion |
 
-This is the distinction `qi` and `spirit` needed, since both sit in the `essence` class: **`qi` is
-what an actor channels; `spirit` is what an actor is.** One is spendable and refills; the other is
-depleted only by harm and is the thing the summoner mechanism ultimately collects.
+**`stamina` no longer claims guard** (moved 2026-08-26): a guard is its own kind of effort, not a
+physical action, and it needed its own pool once `guard-economy` required one the resolver could
+target without also draining move/attack. This is the distinction `qi` and `spirit` needed, since
+both sit in the `essence` class: **`qi` is what an actor channels; `spirit` is what an actor is.**
+One is spendable and refills; the other is depleted only by harm and is the thing the summoner
+mechanism ultimately collects.
 
 **Consumer note.** [action-map.md](action-map.md) currently models a single cost pool. Two cost
 pools means an action declares *which* it draws on. That is a field on the action, not a branch —
@@ -63,6 +69,7 @@ applies unchanged across both.
 | `hunger` | **Sun** | Hunger |
 | `spirit` | Spirit | Spirit |
 | `qi` | **Yang** | **Yin** |
+| `poise` | Poise | Poise |
 
 **Labels are content.** They are never a channel id, never a branch, never a key, and never
 serialized into a battle report. A label change is a content edit and moves nothing.
@@ -99,7 +106,7 @@ Every resource declares:
 
 | Field | Values | Why it exists |
 |---|---|---|
-| `id` | `hp` · `stamina` · `hunger` · `spirit` · `qi` | Closed set; adding one is an ADR |
+| `id` | `hp` · `stamina` · `hunger` · `spirit` · `qi` · `poise` | Closed set; adding one is an ADR (`poise` added 2026-08-26 — decisions.md *Resource model*) |
 | `scope` | `actor` · `side` · `match` · `player` | Resolves the sun and soul ambiguities without renaming anything |
 | `class` | `body` · `energy` · `essence` | |
 | `polarity` | `asset` · `burden` | Decides what every generic operation means — §6 |
@@ -152,15 +159,22 @@ does not.
 
 ## 8. Channels and current values
 
-**Magnitudes are Actor-Hub derived channels:**
+**Magnitudes are registered Actor-Hub derived channels (F8, reconcile pass, 2026-08-25 — shipped by
+[spec-actor-channels.md](derived-stats/spec-actor-channels.md), no longer hypothetical):**
 
 ```text
 resource.max.{id}      resource.regen.{id}
 ```
 
-They form **their own family list and must not join `AllCombatChannelIds`**, which a test asserts is
-exactly **84**. Registration rules are the Actor Hub's ([actor-hub-ssot.md](actor-hub-ssot.md) §3.G):
-unknown channel → reject.
+`resource.efficiency.*` is a third, registered alongside them (`SumIncreased`, capped at 1.0 —
+`DerivedStatPolicy.ResourceEfficiencyCap`). All three form **their own family list and do not join
+`CombatChannelFamilies`/`AllCombatChannelIds`**, which is exactly **28 families / 196 channels** today
+(reconcile pass, F6/F9, 2026-08-25 — was 12/84 when this doc was first drafted; see
+`src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs`'s `CombatChannelFamilies` for the canonical
+count, not a hand-copied number). Registration rules are the Actor Hub's
+([actor-hub-ssot.md](actor-hub-ssot.md) §3.G): unknown channel → reject. Proven live end-to-end by
+`tests/FusionRpg.Core.Tests/Stats/ActorChannelsTests.cs` (`ResourceChannelsNotInCombatRoster`,
+`LazyValueMatchesTicked`, `EfficiencyCannotExceedOne`, `MaxAndRegenUncapped`).
 
 **Current values are not channels.** They are per-actor runtime state resolved **lazily**:
 

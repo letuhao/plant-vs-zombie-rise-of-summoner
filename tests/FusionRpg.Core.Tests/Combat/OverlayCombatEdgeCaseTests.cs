@@ -139,6 +139,18 @@ public class OverlayCombatEdgeCaseTests
         var (_, breakdown) = calc.Compute(request, new SeededCombatRng(1));
         Assert.Equal(0, breakdown.FinalSignedDelta);
         Assert.True(breakdown.Hit);
-        Assert.True(breakdown.PowerAdjustedDamage < 0);
+
+        // Under DefenseShape.Divisive (2026-08-25) powerAdjusted can no longer go negative at all:
+        // `offense × K/(K + defense)` is asymptotic, so overwhelming defense drives it toward zero
+        // without ever crossing. The applied delta still lands on 0 here — but by ROUNDING a very
+        // small positive number (10 × 45/(45+19,998) ≈ 0.02), not by a floor catching a negative.
+        //
+        // The old assertion was `PowerAdjustedDamage < 0`, which asserted the subtractive shape's
+        // internals: that the delta really did go negative and `Math.Max(0, ...)` really did catch
+        // it. That mechanism is what made defense capable of total immunity, and removing it is the
+        // point of the shape change — so the test now pins the guarantee (never negative) rather
+        // than the old implementation of it.
+        Assert.True(breakdown.PowerAdjustedDamage >= 0,
+            $"divisive mitigation must never cross zero, got {breakdown.PowerAdjustedDamage}");
     }
 }

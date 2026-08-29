@@ -43,6 +43,10 @@ public sealed class StatusInstance
     /// out of their turn in battle because of how it is delivered rather than what it does.</para>
     /// </summary>
     public bool IsCrowdControl { get; init; }
+
+    /// <summary>Copied from <see cref="StatusDef.PulseHealsAttacker"/> at apply time (spec-healing-pair.md
+    /// §3) — leech's heal half. True only for <c>leech</c>.</summary>
+    public bool PulseHealsAttacker { get; init; }
     public int SpreadIcdMs { get; init; }
     public TargetSpec? SpreadTarget { get; init; }
     public int HopDepth { get; init; }
@@ -85,6 +89,14 @@ public sealed record StatusApplyOutcome(
 public interface IStatusPulseSink
 {
     void PulseHp(StatusInstance instance, double amount);
+
+    /// <summary>
+    /// Leech's heal half (spec-healing-pair.md §3) — a SEPARATE signed packet to the attacker, not a
+    /// negative damage folded into the same one. Default no-op so every existing implementer (test
+    /// harnesses, <see cref="Battle.BattleEngine"/>) is unaffected unless it opts in; only
+    /// <see cref="StatusFunnelPulseSink"/> — the real Funnel dispatch path — overrides it.
+    /// </summary>
+    void PulseHealAttacker(StatusInstance instance, double baseHealAmount) { }
 }
 
 public delegate ActorDerivedSnapshot ActorDerivedResolve(string? entityPtr, bool attackerLess);
@@ -171,7 +183,8 @@ public sealed class StatusRuntime
                 input.ImmunityTags),
             input.AttackerLess ? null : attacker,
             defender,
-            rng);
+            rng,
+            statusElement: def.Element);
 
         if (!eval.Applied)
         {
@@ -213,6 +226,7 @@ public sealed class StatusRuntime
             HopDepth = input.HopDepth,
             StatMods = input.StatMods ?? Array.Empty<StatusStatMod>(),
             IsCrowdControl = def.Categories.Contains(StatusL2bCategory.Cc),
+            PulseHealsAttacker = def.PulseHealsAttacker,
             NextPulse = input.PeriodMs > 0 ? now.AddMilliseconds(input.PeriodMs) : DateTimeOffset.MaxValue,
             LastApplied = now,
             LastSpread = DateTimeOffset.MinValue
@@ -325,6 +339,14 @@ public sealed class StatusRuntime
                 while (now >= inst.NextPulse && inst.NextPulse <= inst.ExpiresAt && firedThisPulse < budget)
                 {
                     sink?.PulseHp(inst, inst.EffectiveMagnitude);
+
+                    // spec-healing-pair.md §3: leech's heal half, a SEPARATE signed packet to the
+                    // attacker -- never folded into the damage pulse above (§4.3's "one mailbox" rule
+                    // is about the mailbox, not about merging two effects into one packet). No one to
+                    // heal on an attacker-less application; skip rather than invent a target.
+                    if (inst.PulseHealsAttacker && !string.IsNullOrWhiteSpace(inst.AttackerPtr))
+                        sink?.PulseHealAttacker(inst, Math.Abs(inst.EffectiveMagnitude));
+
                     inst.PulsesFired++;
                     firedThisPulse++;
                     pulses++;

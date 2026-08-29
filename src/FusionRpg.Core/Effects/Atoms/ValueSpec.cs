@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
@@ -34,8 +36,28 @@ public enum RollPolicy
 /// <param name="Max">Inclusive upper bound.</param>
 /// <param name="Roll">When the value resolves.</param>
 /// <param name="CurveId">Optional <c>effect_curve</c> row scaling Min and Max before any roll.</param>
-public readonly record struct ValueSpec(int Min, int Max, RollPolicy Roll, string? CurveId = null)
+/// <param name="EventField">
+/// `P0.2` (spec-value-spec-and-curve.md "Event-linked magnitudes", landed 2026-08-28): GAS's
+/// `SetByCaller` shape — read a field the FIRING event already carries (`ev.Damage`) instead of
+/// rolling Min/Max. <b>Closed to <c>"damage"</c> today.</b> Mutually exclusive with
+/// Min/Max/Roll/CurveId — an authored spec picks one source, never both. Never resolved through
+/// <see cref="Resolve"/>: no caller of that method has a firing event in scope (traced, not assumed —
+/// see the spec section), so this resolves downstream instead, in
+/// `AtomCompiler.ResolvedParams`/`DamagePacketBuilder.FromOverlay`.
+/// </param>
+/// <param name="MultiplierMilli">
+/// Per-mille multiplier applied to the event field's value — the balance number ("500" = 50%
+/// lifesteal). <b>Required whenever <paramref name="EventField"/> is set</b> (enforced in
+/// <see cref="AtomJson.TryReadValueSpec"/>, never silently defaulted) since it is authored content,
+/// not a structural constant; unused and ignored otherwise.
+/// </param>
+public readonly record struct ValueSpec(
+    int Min, int Max, RollPolicy Roll, string? CurveId = null,
+    string? EventField = null, int MultiplierMilli = 1000)
 {
+    /// <summary>The closed set of fields an event-linked spec may read. One member today.</summary>
+    public static readonly IReadOnlyCollection<string> EventFields = new[] { "damage" };
+
     /// <summary>A single number that never rolls.</summary>
     public static ValueSpec Of(int value) => new(value, value, RollPolicy.Fixed);
 
@@ -50,6 +72,20 @@ public readonly record struct ValueSpec(int Min, int Max, RollPolicy Roll, strin
     /// </summary>
     public AtomRejection Validate()
     {
+        if (EventField is not null)
+        {
+            if (!EventFields.Contains(EventField))
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    $"unknown eventField '{EventField}' — the closed set is: {string.Join(", ", EventFields)}");
+
+            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    "eventField is exclusive of min/max/roll/curve — author only " +
+                    "{\"eventField\": ..., \"multiplierMilli\": ...}");
+
+            return AtomRejection.Ok;
+        }
+
         if (Min > Max)
             return AtomRejection.Fail(AtomRejectionReason.BadValueSpec, $"min {Min} > max {Max}");
 

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using FusionRpg.Core;
+using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Shield;
@@ -45,9 +46,11 @@ internal static class ContractTuningTestBootstrap
         SoulEarnPolicy.Configure(DefaultSouls);
         PatronPolicy.Configure(DefaultPatron);
         ShieldPolicy.Configure(DefaultShield);
+        RungPolicy.Configure(DefaultActionRungs);
         CombatPolicy.Configure(DefaultCombat);
         StarPolicy.Configure(DefaultFusion);
         StatusPolicy.Configure(DefaultStatus);
+        DerivedStatPolicy.Configure(DefaultDerivedStats);
         OverlayTuningHub.Configure(DefaultOverlay);
         StatsTuningHub.Configure(DefaultStats);
         ExpeditionTuningHub.Configure(DefaultExpeditions);
@@ -189,7 +192,19 @@ internal static class ContractTuningTestBootstrap
         AreaDefaultRectangleWidth: 3,
         AreaDefaultRectangleHeight: 3,
         DotDefaultPeriodMs: 1000,
-        DotDefaultDurationMs: 5000);
+        DotDefaultDurationMs: 5000,
+        PierceScale: 10.0,
+        AmpScale: 10.0,
+        BlockCapPermille: 950,
+        ParryCapPermille: 950,
+        AvoidanceBandCapPermille: 950,
+        ReflectRateScale: 10.0,
+        ReflectShareScale: 100.0,
+        ParryNeutralShareKPm: 500,
+        DefenseShape: DefenseShape.Divisive,
+        DefenseDivisorK: 0.45,
+        ReflectReadsPostShield: true,
+        AmpShape: AmpShape.Reciprocal);
 
     public static readonly FusionTuning DefaultFusion = new(
         SchemaVersion: 1,
@@ -212,10 +227,12 @@ internal static class ContractTuningTestBootstrap
             [DemonRarity.Legendary] = new(Souls: 1000, ShardRarity: DemonRarity.Epic, ShardCount: 4, EssenceCount: 8),
         });
 
+    public static readonly DerivedStatTuning DefaultDerivedStats = new(
+        SchemaVersion: 1, Version: 1, CategoryResistCap: 0.95);
+
     public static readonly StatusTuning DefaultStatus = new(
         SchemaVersion: 1,
         Version: 1,
-        CategoryResistCap: 0.95,
         ApplyScaleK: 100.0,
         ApplyScaleFloor: 1.0,
         ResistFromPowerRatio: 1.0, // T3.1 (power-plan.md, done 2026-08-24): 0 -> 1.0, matched pair contests at delta=0
@@ -224,7 +241,9 @@ internal static class ContractTuningTestBootstrap
         NetFactorScale: 10.0, // T3.2 (power-plan.md, done 2026-08-24): netFactor = 1 + delta/NetFactorScale (audit F4)
         ProgressionPowerStubDefault: 1.0,
         ProcDepthLimitDefault: 6,
-        ApplySteepnessDefault: 1.0);
+        ApplySteepnessDefault: 1.0,
+        ApplyShape: StatusApplyShape.Sigmoid,
+        ApplyOffsetK: 0.0);
 
     public static readonly OverlayTuning DefaultOverlay = new(
         SchemaVersion: 1,
@@ -352,4 +371,19 @@ internal static class ContractTuningTestBootstrap
             ["atk"] = new PowerChannelTuning(CMilli: 12_000, PinValue: 92),
             ["defense"] = new PowerChannelTuning(CMilli: 2_000, PinValue: 22),
         });
+
+    // Matches data/tuning/action-rungs.v1.json exactly (spec-rung-table.md, A12).
+    public static readonly RungTable DefaultActionRungs = new(10, new[]
+    {
+        new RungRow(1,  1, 1, 1, 1000,  1000,  1000, Array.Empty<string>()),
+        new RungRow(2,  1, 1, 1, 1323,  1380,  1150, Array.Empty<string>()),
+        new RungRow(3,  2, 2, 1, 1750,  1904,  1322, new[] { "scopeSplit", "riderStatus" }),
+        new RungRow(4,  2, 2, 1, 2315,  2628,  1521, new[] { "scopeSplit", "riderStatus" }),
+        new RungRow(5,  3, 3, 2, 3062,  3627,  1749, new[] { "scopeSplit", "riderStatus", "condition" }),
+        new RungRow(6,  3, 3, 2, 4051,  5005,  2011, new[] { "scopeSplit", "riderStatus", "condition" }),
+        new RungRow(7,  4, 4, 2, 5359,  6907,  2313, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption" }),
+        new RungRow(8,  4, 4, 2, 7090,  9531,  2660, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption" }),
+        new RungRow(9,  5, 5, 3, 9379,  13153, 3059, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption", "reaction", "restriction" }),
+        new RungRow(10, 5, 5, 3, 12407, 18151, 3518, new[] { "scopeSplit", "riderStatus", "condition", "sequence", "consumption", "reaction", "restriction" }),
+    });
 }

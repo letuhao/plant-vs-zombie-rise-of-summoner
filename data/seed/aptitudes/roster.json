@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "aptitude",
+  "_meta": {
+    "owner": "docs/architecture/class-system/spec-primary-stats.md",
+    "note": "The twelve aptitudes (RPG primary stats). Checked-in mirror of src/FusionRpg.Core/Progression/Aptitudes/Aptitude.cs's AptitudeCatalog.All for tooling that cannot reference FusionRpg.Core (scripts/guard-class-system.ps1, the web app). Code is the load source; this file describes it, it does not drive it (tunables-ssot.md SS7.2).",
+    "status": "class-system module 1 (primary-stats), landed 2026-08-26. Ids and postures ported verbatim from tools/CombatSim/tuning/aptitudes.v1.json's edge `source` values so the closed-form POC and the shipped catalog agree on spelling.",
+    "warning": "An aptitude is a SOURCE, not a registered channel (class-system-map.md SS2aa). It never appears in data/seed/derived-stats/catalog.json."
+  },
+  "entries": [
+    { "id": "Might", "posture": "force", "ordinal": 0, "role": "universal offence — power", "reading": "Hit harder." },
+    { "id": "Fortitude", "posture": "force", "ordinal": 1, "role": "mitigation — defense · absorption · reduction", "reading": "Take less of everything." },
+    { "id": "Vigor", "posture": "force", "ordinal": 2, "role": "shield — shield.capacity/regen/toughness", "reading": "More to lose before you lose." },
+    { "id": "Onslaught", "posture": "force", "ordinal": 3, "role": "breaks guard + reflect", "reading": "Their guard stops mattering." },
+    { "id": "Agility", "posture": "finesse", "ordinal": 4, "role": "dodge", "reading": "Be somewhere else." },
+    { "id": "Composure", "posture": "finesse", "ordinal": 5, "role": "crit-denial", "reading": "Nothing lands clean on you." },
+    { "id": "Pierce", "posture": "finesse", "ordinal": 6, "role": "breaks mitigation + shield", "reading": "Armour stops mattering." },
+    { "id": "Focus", "posture": "finesse", "ordinal": 7, "role": "utility — qi, efficiency, cooldowns", "reading": "Do it again, sooner, cheaper." },
+    { "id": "Bulwark", "posture": "bastion", "ordinal": 8, "role": "guard — parry/block rate and strength", "reading": "Stop it outright, sometimes." },
+    { "id": "Retribution", "posture": "bastion", "ordinal": 9, "role": "reflect", "reading": "Hitting you costs them." },
+    { "id": "Precision", "posture": "bastion", "ordinal": 10, "role": "breaks dodge — accuracy", "reading": "They cannot dodge." },
+    { "id": "Ferocity", "posture": "bastion", "ordinal": 11, "role": "breaks crit-denial — crit.rate/damage", "reading": "Sometimes it is much worse." }
+  ]
+}

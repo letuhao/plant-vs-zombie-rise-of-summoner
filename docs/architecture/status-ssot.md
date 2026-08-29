@@ -104,55 +104,84 @@ Grants reference `statusId` + overlay — not a full embedded status blob in eng
 
 Design reference (do not vendor): Chaos `status-core` + Element Core probability — see [../research/status-core-chaos-mapping.md](../research/status-core-chaos-mapping.md). Derived inputs: [actor-hub-ssot.md](actor-hub-ssot.md) **ActorDerivedSnapshot** (blocked until Actor Hub code lands).
 
-**Prerequisite:** L2b reads **attacker** and **defender** derived snapshots — not primary `hp`/`atk`. v1 uses hardcoded `progression.power = 1.0` stub until power ADR.
+**Prerequisite:** L2b reads **attacker** and **defender** derived snapshots — not primary `hp`/`atk`. `progression.power` is **`Θ`** from `IPowerIndexProvider.ActorIndex` (**0** when un-hydrated) — see [actor-hub-ssot.md §3B](actor-hub-ssot.md).
+
+> **Corrected 2026-08-25** (spec-status-potency.md §3), each check run against the shipped source, not
+> inferred: **`matchPower`** was **dropped** from `effectiveApplyScale`
+> (`ResistanceEvaluator.cs` — *"T3.2 (audit F3): no longer scaled by matchPower"*); **`ResistFromPowerRatio`**
+> is **`1.0`**, not the old "ratio 0 v1 stub" (`data/tuning/status.v1.json`, T3.1); **`progression.power`**
+> is **`Θ`**, not a hardcoded `1.0` (ADR P1 amended, [actor-hub-ssot.md §3B](actor-hub-ssot.md)); the
+> **`effectiveApplyScale = 100`** v1-stub value no longer applies, since it followed from the retired
+> stub. Found while fixing these, a fifth: `netFactor` was documented below as `clamp(delta, Min, Max)`
+> with a `delta = 0` special case — the shipped formula (`ResistanceEvaluator.ComputeNetFactor`, T3.2 /
+> audit F4) is the linear `1 + delta/NetFactorScale`, clamped, with **no** special case
+> (`RedTest_MatchedPairAtTheta12_NetFactorFlips4096To1` asserts the special case is actually absent
+> from source, not just that the numeric outcome happens to match). All four predate the power program
+> (2026-08-24) and the potency split (T4.1, this correction); status was shipped (S0–S7) describing
+> retired math, which is worse than an unbuilt spec describing it — a shipped doc is read as current.
 
 ### Two-phase resolve (locked)
 
 | Phase | Question | Formula |
 |---|---|---|
 | **1 — Apply chance** | Will status land? | `p_apply = sigmoid(delta / effectiveApplyScale)` |
-| **2 — Potency** | How strong / long? | `effectiveMagnitude = base × netFactor`, same for duration |
+| **2 — Potency** | How strong, how long? | Two **independent** deltas (spec-status-potency.md §2.1) — locked to one number before T4.1 |
 
 ```text
-// tierPower = progression.power × progression.realm (see actor-hub-ssot.md)
+// tierPower = progression.power × progression.realm (see actor-hub-ssot.md §3B)
 totalAttackerPower = tierPower(attacker)
                    + status.power.omni + status.power.{category} + status.power.{statusId}
 
-totalDefenderResist = tierPower(defender) × StatusPolicy.ResistFromPowerRatio   // ratio 0 v1 stub
+totalDefenderResist = tierPower(defender) × ResistFromPowerRatio   // 1.0 (T3.1); 0 for an
+                                                                    // attacker-less application —
+                                                                    // symmetric contest, no real
+                                                                    // attacker side to contest WITH
                     + status.resist.omni + status.resist.{category} + status.resist.{statusId}
+                    + status.resist.{element}   // Q1 (T4.1) — the STATUS DEF's own tag, never the
+                                                 // attacker's; absent -> contributes nothing (T5)
 
-delta = totalAttackerPower - totalDefenderResist
-netFactor = clamp(delta, Min, Max); if delta = 0 exactly → netFactor = 1.0 for potency
+delta = totalAttackerPower - totalDefenderResist        // Phase 1's delta — unchanged by the split
+netFactor(x) = clamp(1 + x / NetFactorScale, Min, Max)   // linear; no delta==0 special case (T3.2/F4)
 
-matchPower = avg(tierPower(attacker), tierPower(defender))
-effectiveApplyScale = max(StatusPolicy.ApplyScaleFloor, StatusPolicy.ApplyScaleK.{category} × matchPower)
+durationDelta  = delta + status.duration.omni  + status.duration.{category}  + status.duration.{statusId}
+               - status.durationReduction.omni - status.durationReduction.{category} - status.durationReduction.{statusId}
+intensityDelta = delta + status.intensity.omni + status.intensity.{category} + status.intensity.{statusId}
+               - status.intensityReduction.omni - status.intensityReduction.{category} - status.intensityReduction.{statusId}
+
+effectiveApplyScale = max(StatusPolicy.ApplyScaleFloor, StatusPolicy.ApplyScaleK.{category})   // no matchPower (T3.2/F3)
 
 p_apply = sigmoid(delta / effectiveApplyScale)
 p_final = grant.chance × p_apply    // chance defaults 1.0 — effect-data.md
 ```
 
-**Do not** use `p_apply` for potency — apply uses sigmoid; potency uses linear netFactor.
+**Do not** use `p_apply` for potency — apply uses sigmoid; potency uses the linear `netFactor`.
 
-**Attacker-less:** no ActorPtr → `tierPower = 1.0` stub, `status.power.* = 0`.
+**Attacker-less:** no ActorPtr → `tierPower = 0`, `status.power.* = 0`, and the defender's own
+`tierPower × ResistFromPowerRatio` term drops out of `totalDefenderResist` — a scripted/riderless
+application (e.g. a trait rider landing at match start) has no real attacker side to contest tier
+power with; treating it as one-sided instead of symmetric-exclude sent every scripted DoT/CC to the
+potency floor (found via `BattleStatusTests`, T3.1).
 
 ```text
 Apply(hostPtr, statusId, baseMagnitude, baseDuration):
   Validate def + family mutex
   → Complete immunity → Resisted
   → Resolve attacker + defender ActorDerivedSnapshot
-  → delta, netFactor; partial immunity: netFactor *= (1 - immuneReduction.{tag})
-  → if netFactor <= 0 → Resisted (reason: potency_floor) — skip roll
+  → delta, netFactor(delta) — Phase 1's own, reported unchanged by the split (spec-status-potency.md §2.1)
+  → durationDelta, intensityDelta; durationNetFactor = netFactor(durationDelta), intensityNetFactor = netFactor(intensityDelta)
+  → partial immunity: (1 - immuneReduction.{tag}) multiplies BOTH durationNetFactor and intensityNetFactor
+  → if intensityNetFactor <= 0 → Resisted (reason: potency_floor) — skip roll. Zero DURATION alone is
+    instantaneous, a legitimate effect, not a resist (§2.2 below)
   → Phase 1: roll rng < p_final else Resisted (reason: apply_roll)
-  → Phase 2: effectiveMagnitude = base × netFactor; effectiveDuration = base × netFactor
+  → Phase 2: effectiveMagnitude = base × intensityNetFactor; effectiveDuration = base × durationNetFactor
   → If useless → Resisted
   → Else create/refresh instance (snapshot at Apply v1)
 ```
 
-- **Power/resist SSOT on actor derived catalog** — e.g. `status.resist.{category}`, `status.power.{category}`, `progression.power`; not on StatusDef payload.
-- **Category resist cap:** `status.resist.{category}` capped at **`StatusPolicy.CategoryResistCap` (0.95)** before sum; **`status.resist.omni` uncapped**. Deprecated alias: `ResistanceCap`.
-- **Dynamic ApplyScale (Fusion lock):** divisor scales with `avg(progression.power)` — differs from Chaos fixed `trigger_scale`; see [actor-hub-ssot.md §5](actor-hub-ssot.md).
-- **v1 stub:** `progression.power = 1.0` → `effectiveApplyScale = 100` (default K).
-- **v1:** snapshot derived values at Apply/Refresh; mid-duration re-eval is an open question (§12).
+- **Power/resist SSOT on actor derived catalog** — e.g. `status.resist.{category}`, `status.power.{category}`, `progression.power`; not on StatusDef payload. `status.duration.*` / `status.intensity.*` and their `Reduction` siblings follow the identical omni+category+perId shape (T4.1).
+- **Category resist cap:** `status.resist.{category}` capped at **`StatusPolicy.CategoryResistCap` (0.95)** before sum; **`status.resist.omni` and `status.resist.{element}` uncapped**. Deprecated alias: `ResistanceCap`.
+- **`effectiveApplyScale`** is `max(Floor, K.{category})` — no power scaling (T3.2, audit F3: a power-scaled divisor made a fixed gap decay toward a coin flip as both sides climbed, measured p_apply 0.5010 at Θ=10 vs 0.5000 at Θ=10,000).
+- **v1:** snapshot derived values at Apply/Refresh; mid-duration re-eval is an open question (§12), sharpened but not decided by the potency split — a duration buff landing mid-DoT still does nothing until the next Apply.
 - **Contagion** re-runs full Apply on each new host (infection can fail).
 
 Telemetry (when implemented): `debug.status.resisted` (`reason: potency_floor` | `apply_roll` | `immunity`), `debug.status.partial`.
@@ -339,7 +368,7 @@ Keep scenario ids (`combat-dot`, `combat-counter-*`); change overlay shape per [
 | DeliverySpec OverTime/Counter? | **Removed from combat SSOT** — scheduling belongs to StatusRuntime ([combat-damage-ssot.md](combat-damage-ssot.md)). |
 | Chaos Element Core bridge? | Map to **L2b category** registry (§9.5), not element mastery SQL |
 | Category power default 0? | **Yes** — neutral stub delta; see [actor-hub-ssot.md](actor-hub-ssot.md) |
-| Potency floor before sigmoid? | **Yes** — `netFactor <= 0` → skip roll |
+| Potency floor before sigmoid? | **Yes** — `intensityNetFactor <= 0` → skip roll (T4.1: intensity only; zero duration alone is instantaneous, not a resist, §6) |
 | Plant status apply for Unity CC? | L4 adapter may **no-op** until plant CC probed; L2 index still `entity:{ptr}`. |
 | Chaos plugin registry? | **Not ported** — see chaos mapping not-shipped list. |
 

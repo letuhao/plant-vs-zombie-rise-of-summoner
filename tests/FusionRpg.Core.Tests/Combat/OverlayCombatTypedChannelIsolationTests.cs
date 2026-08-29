@@ -54,8 +54,12 @@ public class OverlayCombatTypedChannelIsolationTests
         var ice = calc.Compute(Build(ElementTypeId.Ice, atk, defender), new SeededCombatRng(1));
         var fire = calc.Compute(Build(ElementTypeId.Fire, atk, defender), new SeededCombatRng(1));
 
-        Assert.Equal(70, ice.Breakdown.PowerAdjustedDamage, 3);
-        Assert.Equal(-70, ice.Breakdown.FinalSignedDelta);
+        // DefenseShape.Divisive (2026-08-25): offense 100, ladderScale 100, K = 0.45 x 100 = 45,
+        // ice defense 30 -> 100 x 45/(45+30) = 60. Was 70 under the subtractive shape (100 - 30).
+        // The fire case is unchanged at 125: matchup is excluded from ladderScale, and the ice
+        // tank has no fire defense, so its divisor bites nothing.
+        Assert.Equal(60, ice.Breakdown.PowerAdjustedDamage, 3);
+        Assert.Equal(-60, ice.Breakdown.FinalSignedDelta);
         Assert.Equal(100, fire.Breakdown.PowerAdjustedDamage, 3);
         Assert.Equal(-100, fire.Breakdown.FinalSignedDelta);
     }

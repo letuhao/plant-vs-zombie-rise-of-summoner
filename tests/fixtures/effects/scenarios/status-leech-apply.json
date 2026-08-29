@@ -30,7 +30,8 @@
       "expect": {
         "trigger": "OnTimer",
         "actions": [
-          { "action": "ApplyResourceDelta", "params": { "channel": "hp", "amount": -12, "targetPtr": "Z1" } }
+          { "action": "ApplyResourceDelta", "params": { "channel": "hp", "amount": -12, "targetPtr": "Z1" } },
+          { "action": "ApplyResourceDelta", "params": { "channel": "hp", "amount": 12, "targetPtr": "P1" } }
         ]
       }
     }

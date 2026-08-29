@@ -53,9 +53,11 @@ public enum RuntimeId
 }
 
 /// <summary>
-/// The 7 triggers an atom's <c>when</c> may name. E1 owns this because E4 validates against it at
+/// The 8 triggers an atom's <c>when</c> may name. E1 owns this because E4 validates against it at
 /// load and nothing else did. <c>OnTimer</c> is included even though `effect-system.md` never gave
-/// it an FT number — it is real in code and in `effect-data.md`.
+/// it an FT number — it is real in code and in `effect-data.md`. <c>OnActivate</c> is the eighth,
+/// added A18b (spec-on-activate-trigger.md) — a cross-program vocabulary change, reviewed via that
+/// spec, not a unilateral addition.
 /// </summary>
 public static class AtomTriggers
 {
@@ -66,9 +68,10 @@ public static class AtomTriggers
     public const string OnGranted = "OnGranted";
     public const string OnRemoved = "OnRemoved";
     public const string OnTimer = "OnTimer";
+    public const string OnActivate = "OnActivate";
 
     public static readonly string[] All =
-        { OnSpawn, OnDamageDealt, OnDamageTaken, OnDeath, OnGranted, OnRemoved, OnTimer };
+        { OnSpawn, OnDamageDealt, OnDamageTaken, OnDeath, OnGranted, OnRemoved, OnTimer, OnActivate };
 
     /// <summary>The four that fire from a board event.</summary>
     public static readonly string[] Events = { OnSpawn, OnDamageDealt, OnDamageTaken, OnDeath };
@@ -80,6 +83,14 @@ public static class AtomTriggers
     /// was how a permanent buff could leak, so no kind carries these.
     /// </summary>
     public static readonly string[] Lifecycle = { OnGranted, OnRemoved };
+
+    /// <summary>
+    /// An actor's own decision to act, independent of any board event or grant lifecycle — the third
+    /// category `OnActivate` starts (A18b). Not a board event (no target has necessarily been
+    /// damaged, spawned, or killed) and not a lifecycle transition (the grant that owns this atom was
+    /// already bound, possibly turns ago, at loadout compile — A18a).
+    /// </summary>
+    public static readonly string[] Actions = { OnActivate };
 
     /// <summary>A permanent modifier declares no trigger at all — it is not event-driven.</summary>
     public static readonly string[] None = Array.Empty<string>();
@@ -117,7 +128,15 @@ public sealed record AtomKind(
     RuntimeSupportMatrix Support,
     IReadOnlyList<string> Triggers,
     PowerCategory Categories,
-    string Note = "")
+    string Note = "",
+    // A18e (spec-battle-live-stat-modifiers.md §4): every kind before stat.modify was either
+    // Triggers.Count == 0 (no trigger allowed, none required -- the permanent-modifier case) or
+    // Count > 0 (some triggers allowed, one required -- AtomRowValidator.ValidateWhen's own "mirror
+    // case" inference). stat.modify's OnActivate widen needed a THIRD case neither binary covered:
+    // triggers allowed, but still not required, since "permanent, no-trigger" must keep working
+    // exactly as it did when Triggers was empty. Defaults false so every other kind's existing
+    // Count>0-implies-required inference is completely unchanged.
+    bool TriggerOptional = false)
 {
     public RuntimeState SupportIn(RuntimeId runtime) => Support.For(runtime);
 

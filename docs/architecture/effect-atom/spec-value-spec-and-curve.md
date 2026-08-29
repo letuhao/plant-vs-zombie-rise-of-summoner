@@ -110,3 +110,76 @@ tests/FusionRpg.Core.Tests/Atoms/CurveTableTests.cs
 **Ask first:** adding a roll policy; adding a curve `input`; changing interpolation or rounding.
 
 **Never:** a formula string; `System.Random` on a replayable path; a string lookup in the resolve path; extrapolating past a curve's ends; copying a tier band between channel families.
+
+## Event-linked magnitudes (`P0.2`, "SetByCaller" shape — landed 2026-08-28)
+
+**Owner, action-ideal.md §8.5, 2026-08-27**, correcting an earlier draft: lifesteal-shaped content
+("heal for 50% of the damage this attack dealt") is a **2-step trigger chain** — atom 1 deals damage,
+atom 2 fires `OnDamageDealt` and reads the event's own `Damage` field — not a new mechanism. Three of
+the four pieces already shipped (`OnDamageDealt`, `EffectEventDto.Damage`, the `ChainDepth`/
+`ProcDepthLimit` recursion guard); **the one missing link was a magnitude that could read the field the
+firing event already carries.** Landed under the same explicit cross-program authorization as
+`P0.3`–`P0.5` (a stop-hook rejected leaving all four as external blockers; the owner chose to have them
+built rather than reconfigure the hook), and scoped to exactly GAS's **`SetByCaller`** shape — "Ask 1,
+the small one, take it first" per the owner's own two-ask split. GAS's **`AttributeBased`** shape
+("10% of the target's max HP") is Ask 2, explicitly **not built** here — a separate, larger change with
+no shipped-code dependency forcing it now.
+
+**Grammar** — `ValueSpec`'s existing object form gains two new optional properties, mutually exclusive
+with `min`/`max`/`roll`/`curve` (an authoring ambiguity, not a stacking rule):
+
+```json
+{ "eventField": "damage", "multiplierMilli": 500 }
+```
+
+`eventField` is a **closed one-member set today** (`"damage"` only, reading `EffectEventDto.Damage`) —
+adding a second member is a reviewed change here, the same discipline `LeafId` already follows.
+`multiplierMilli` is **required whenever `eventField` is present** (`AtomJson.TryReadValueSpec` rejects
+an `eventField` with no `multiplierMilli` as `BadValueSpec`) — it is the balance number ("50% lifesteal"),
+so it is never silently defaulted the way an omitted `roll` may be.
+
+**Why this could not resolve through `ValueSpec.Resolve(IAtomRandom?)`.** That method has exactly two
+callers in the runtime (`Instantiator.Freeze` at item-drop time, `CostLedger.TryPay` at action-cast
+time) and **neither has a firing combat event in scope** — confirmed by tracing both call stacks, not
+assumed. The actual "atom fires on `OnDamageDealt`" path never calls `ValueSpec.Resolve` at all: a
+`Fixed`-shaped spec is baked to a literal number once, at catalog-compile time, by
+`AtomCompiler.ResolvedParams` — and no event exists yet at compile time for ANY spec, event-linked or
+not. So an event-linked magnitude cannot be a new `Resolve` overload; it has to defer resolution past
+compile time, to the one place downstream that already holds both the compiled params AND the firing
+event: `EffectBag.FireGrant` → `DamagePacketBuilder.FromOverlay(merged, ev, ...)`.
+
+**The mechanism, concretely:**
+
+1. `Compilability.Classify` needs no new rule — an event-linked spec is authored with `Min=Max=0,
+   Roll=Fixed`, which Rule 3 already treats as compilable (a "no-roll" shape), so it takes the
+   ordinary `Compiled` path.
+2. `AtomCompiler.ResolvedParams` (`AtomCompiler.cs`) special-cases a spec with `EventField != null`:
+   instead of baking `CurveTable.ApplyMilli(spec.Min, ...)` (which would always bake to **zero**, since
+   `Min` is unused for this shape), it bakes a **marker object** —
+   `{"eventField": spec.EventField, "multiplierMilli": spec.MultiplierMilli}` — into the compiled
+   params in place of a plain number. Scoped to `resource.delta` only (the kind lifesteal/Corrosion
+   content actually needs, matching the shipped `leech` status's own channel) — any other kind
+   authoring `eventField` is rejected at compile time rather than silently reaching a sink that does
+   not know how to unwrap the marker.
+3. `DamagePacketBuilder.FromOverlay` recognises the marker shape on its `"amount"` key and computes
+   `ev.Damage × multiplierMilli / 1000` (widened to `long`, divided once, rounded half-away-from-zero
+   via the same `PowerMath.DivRound` every other per-mille path in this codebase already uses) instead
+   of `JsonOverlay.GetDouble(overlay, "amount")`, which would throw trying to convert a
+   `Dictionary<string, object?>` to `double`. `ev.Damage` absent (`null`) resolves to `0` — a
+   heal-on-damage-dealt atom firing with no real damage figure heals nothing, rather than throwing.
+4. `EffectBag.FireGrant`'s own pre-existing zero-amount fallback re-read
+   (`packet.SignedAmount = (long)JsonOverlay.GetDouble(merged, "amount")`, guarding a legitimately-zero
+   `SignedAmount`) is skipped when the raw `"amount"` value is the marker `Dictionary`, not a number —
+   otherwise a real zero-damage lifesteal tick (an existing, unrelated safety net) would crash trying
+   to convert the marker the same way.
+
+**Recursion is already bounded — no new guard needed.** `EffectBag.NoteOverlayDamage` only queues a
+fresh `OnDamageDealt` event for a **negative** delta; a heal (a positive `resource.delta`) never itself
+synthesizes another damage event, so a lifesteal atom cannot recurse into itself. The pre-existing
+`ChainDepth`/`ProcDepthLimit` check in `CombatDamageDispatcher.DispatchInstant` runs before ANY
+magnitude for that dispatch is computed — compiled-literal, runner-rolled, or event-linked alike — so
+it protects this shape for free, proven by the pre-existing `OverlayProcTests.
+Overlay_proc_respects_proc_depth_on_second_grant`.
+
+**Ask first, extending this section:** adding a second `eventField` member (e.g. `killerPtr`, `tick`);
+allowing `eventField` on a kind other than `resource.delta`; the `AttributeBased` shape (Ask 2).

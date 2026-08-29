@@ -31,6 +31,19 @@ public sealed partial class RpgStore
               per_minute INTEGER NOT NULL
             );
 
+            -- P0.3 (spec-power-vector.md, "predicates ARE priced"): the four-factor chain per leaf.
+            -- arg_key defaults to '' for an arg-independent leaf, mirroring power_coefficient's own
+            -- channel-defaults-to-'' shape.
+            CREATE TABLE IF NOT EXISTS power_predicate_frequency (
+              leaf_id               TEXT    NOT NULL,
+              arg_key               TEXT    NOT NULL DEFAULT '',
+              reachability_milli    INTEGER NOT NULL,
+              susceptibility_milli  INTEGER NOT NULL,
+              coincidence_milli     INTEGER NOT NULL,
+              uptime_milli          INTEGER NOT NULL,
+              PRIMARY KEY (leaf_id, arg_key)
+            );
+
             -- The sweep's output. Uncovered by the content hash on purpose: a proposal is a
             -- suggestion, and a suggestion must not move a stamp.
             CREATE TABLE IF NOT EXISTS power_coefficient_proposal (
@@ -54,7 +67,7 @@ public sealed partial class RpgStore
             var coefficients = ReadCoefficients(db, "power_coefficient");
             if (coefficients.Count == 0) return PowerTables.Authored();
 
-            return new PowerTables(coefficients, ReadFrequencies(db));
+            return new PowerTables(coefficients, ReadFrequencies(db), ReadPredicateFrequencies(db));
         }
     }
 
@@ -69,6 +82,20 @@ public sealed partial class RpgStore
                     $"{c.KindId}/{(c.Channel.Length == 0 ? "*" : c.Channel)}: reference scale " +
                     $"{c.ReferenceScale} — normalisation divides by it, and a zero scale prices " +
                     "every magnitude alike, which is the units trap this column exists to close");
+
+        foreach (var p in tables.PredicateFrequencies)
+        {
+            var key = $"{p.LeafId}/{(p.ArgKey.Length == 0 ? "*" : p.ArgKey)}";
+            foreach (var (name, value) in new (string, int)[]
+                     {
+                         ("reachability", p.ReachabilityMilli), ("susceptibility", p.SusceptibilityMilli),
+                         ("coincidence", p.CoincidenceMilli), ("uptime", p.UptimeMilli),
+                     })
+                if (value is < 0 or > 1000)
+                    return (false,
+                        $"{key}: {name}Milli {value} — every factor in the chain is a per-mille " +
+                        "probability (PS-8 bounded ratio) and must sit in [0, 1000]");
+        }
 
         lock (_gate)
         {
@@ -98,6 +125,15 @@ public sealed partial class RpgStore
             ExecIn(db, tx,
                 "INSERT INTO power_trigger_frequency (trigger_id, per_minute) VALUES ($t, $p);",
                 ("$t", f.Trigger), ("$p", f.PerMinute));
+
+        ExecIn(db, tx, "DELETE FROM power_predicate_frequency;");
+        foreach (var p in tables.PredicateFrequencies)
+            ExecIn(db, tx,
+                "INSERT INTO power_predicate_frequency " +
+                "(leaf_id, arg_key, reachability_milli, susceptibility_milli, coincidence_milli, uptime_milli) " +
+                "VALUES ($l, $a, $r, $s, $c, $u);",
+                ("$l", p.LeafId), ("$a", p.ArgKey ?? ""), ("$r", p.ReachabilityMilli),
+                ("$s", p.SusceptibilityMilli), ("$c", p.CoincidenceMilli), ("$u", p.UptimeMilli));
     }
 
     /// <summary>
@@ -216,6 +252,21 @@ public sealed partial class RpgStore
 
         var list = new List<TriggerFrequencyRow>();
         while (r.Read()) list.Add(new TriggerFrequencyRow(r.GetString(0), r.GetInt32(1)));
+        return list;
+    }
+
+    static List<PredicateFrequencyRow> ReadPredicateFrequencies(SqliteConnection db)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = """
+            SELECT leaf_id, arg_key, reachability_milli, susceptibility_milli, coincidence_milli, uptime_milli
+            FROM power_predicate_frequency ORDER BY leaf_id, arg_key;
+            """;
+        using var r = cmd.ExecuteReader();
+
+        var list = new List<PredicateFrequencyRow>();
+        while (r.Read())
+            list.Add(new PredicateFrequencyRow(r.GetString(0), r.GetString(1), r.GetInt32(2), r.GetInt32(3), r.GetInt32(4), r.GetInt32(5)));
         return list;
     }
 }

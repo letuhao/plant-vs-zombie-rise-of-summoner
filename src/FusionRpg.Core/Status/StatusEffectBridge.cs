@@ -77,6 +77,49 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
         CombatDamageDispatcher.DispatchInstant(
             packet, _board, ev, _funnel, _policy, _rng, _math, _skipped, _shieldGate);
     }
+
+    /// <summary>
+    /// Leech's heal half (spec-healing-pair.md §3). A SEPARATE <see cref="DamagePacket"/>, targeting
+    /// the attacker rather than <see cref="StatusInstance.HostPtr"/> — mirrors <see cref="PulseHp"/>'s
+    /// shape exactly except <c>Target</c>/<c>ActorPtr</c> both point at the healer. The positive
+    /// <see cref="DamagePacket.SignedAmount"/> reaches <see cref="OverlayCombatMath.Finalize"/>'s heal
+    /// branch through the SAME dispatch path as any other heal, so <c>combat.heal.power</c> applies for
+    /// free — this method does not re-implement spec-healing-pair.md §2.1's formula, it only supplies
+    /// <c>baseOverlayHeal</c> (the absolute damage dealt) as the packet's starting amount.
+    /// </summary>
+    public void PulseHealAttacker(StatusInstance instance, double baseHealAmount)
+    {
+        var packet = new DamagePacket
+        {
+            PacketId = Guid.NewGuid().ToString("N"),
+            SourceGrantId = instance.GrantId,
+            EffectId = instance.EffectId ?? _effectId,
+            PluginId = instance.PluginId ?? _pluginId,
+            ActorPtr = instance.AttackerPtr,
+            SignedAmount = (long)Math.Round(Math.Abs(baseHealAmount)),
+            Channel = "hp",
+            ChainDepth = _eventTemplate.ChainDepth + 1,
+            Target = new TargetSpec { Mode = TargetModes.Single, Ptr = instance.AttackerPtr },
+            Delivery = new DeliverySpec { Mode = DeliveryModes.Instant }
+        };
+
+        var ev = new EffectEventDto
+        {
+            Trigger = EffectTriggers.OnTimer,
+            MatchKey = _eventTemplate.MatchKey,
+            Side = _eventTemplate.Side,
+            ActorPtr = instance.AttackerPtr,
+            TargetPtr = instance.AttackerPtr,
+            TypeId = _eventTemplate.TypeId,
+            TargetTypeId = _eventTemplate.TargetTypeId,
+            Tick = _eventTemplate.Tick,
+            ScenarioId = _eventTemplate.ScenarioId,
+            ChainDepth = packet.ChainDepth
+        };
+
+        CombatDamageDispatcher.DispatchInstant(
+            packet, _board, ev, _funnel, _policy, _rng, _math, _skipped, _shieldGate);
+    }
 }
 
 public static class StatusEffectBridge

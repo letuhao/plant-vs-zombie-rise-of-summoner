@@ -13,7 +13,14 @@ public enum TimelineEventKind
     /// <summary>Post-action lockout elapsed.</summary>
     Recovery = 2,
     /// <summary>An actor with no legal intent re-contends after the profile's pass quantum.</summary>
-    Pass = 3
+    Pass = 3,
+    /// <summary>B7 — the single shared hit of a rendezvous (link-strike). <c>OwnerKey</c> is the
+    /// reservation id, not an actor key — <see cref="RendezvousLane.OnLinkedResolveDue"/> resolves
+    /// it to every linked participant.</summary>
+    LinkedResolve = 4,
+    /// <summary>B7 — a rendezvous's bounded dwell elapsed before every participant joined.
+    /// <c>OwnerKey</c> is the reservation id.</summary>
+    RendezvousTimeout = 5
 }
 
 /// <summary>Why a commit did not happen. Refusals are values, not exceptions — every one is expected.</summary>
@@ -41,7 +48,10 @@ public enum ActionOutcome
 public enum InterruptCause
 {
     CrowdControl,
-    Damage
+    Damage,
+    /// <summary>A `perTick` cost (spec-action-costs.md §3) could not be paid — a mechanical fact
+    /// about the actor's own resources, never an inventory/content concept reaching this enum.</summary>
+    ResourceExhausted
 }
 
 /// <summary>
@@ -233,8 +243,16 @@ public sealed class ActionRunner
         run.Active = false;
         actor.TransitionTo(TurnState.Charging);
 
-        // No recovery is scheduled, and no Resolve/RecoveryEnd cooldown is ever started: an action
-        // broken before it landed costs only what it already spent.
+        // No recovery is scheduled: an action broken before it landed never reaches RecoveryEnd.
+        // The cooldown IS charged, though — action-todo.md T12, replacing the previous behaviour of
+        // starting none at all. InterruptCooldownMilli scales it; 1000 (the default) means full,
+        // and it is inert for any envelope with CooldownTicks at zero.
+        if (run.Envelope.CooldownTicks > 0 && run.Envelope.InterruptCooldownMilli > 0)
+        {
+            var scaledTicks = run.Envelope.CooldownTicks * run.Envelope.InterruptCooldownMilli / 1000;
+            _cooldowns.Start(actor.ActorKey, run.Envelope with { CooldownTicks = scaledTicks }, nowTick);
+        }
+
         return new InterruptResult(true, run.Envelope.InterruptRefundMilli);
     }
 

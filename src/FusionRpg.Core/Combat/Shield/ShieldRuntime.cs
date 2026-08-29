@@ -405,14 +405,26 @@ public sealed class ShieldRuntime
                     MidpointRounding.AwayFromZero);
                 if (ratePm > 0)
                 {
+                    // B17 (battle-timeline-todo.md): the carry accumulates the RAW `ratePm * deltaMs`
+                    // product, never an already-divided per-call increment. The previous shape —
+                    // `carry += ratePm * deltaMs / 1000` — divided BEFORE accumulating, so any call
+                    // where `ratePm * deltaMs < 1000` contributed exactly zero and that fractional
+                    // regen was gone forever, not merely deferred. At the 1000ms-per-call cadence
+                    // this engine has always used that never bit (ratePm*1000 is always >= 1000 for
+                    // any ratePm > 0), which is exactly why it went unnoticed — but a caller ticking
+                    // at finer granularity (the injector's eventual per-frame drive, B26) would see
+                    // regen truncate to zero below 1000‰. Dividing once, only when extracting whole
+                    // HP, makes the accumulator granularity-independent and produces the IDENTICAL
+                    // result to the old formula at deltaMs=1000 (proven: `ratePm*1000/1_000_000 ==
+                    // (ratePm*1000/1000)/1000` for every ratePm, since 1000 divides 1000 exactly).
                     _regenCarryMilliHp.TryGetValue(ownerKey, out var carry);
-                    carry += ratePm * deltaMs / 1000;
-                    var whole = carry / 1000;
+                    carry += ratePm * deltaMs;
+                    var whole = carry / 1_000_000;
                     if (whole > 0)
                     {
                         var gain = Math.Min(whole, shield.MaxHp - shield.Hp);
                         shield.Hp += gain;
-                        carry -= whole * 1000;   // no spill: excess whole HP beyond cap is forfeited
+                        carry -= whole * 1_000_000;   // no spill: excess whole HP beyond cap is forfeited
                     }
 
                     _regenCarryMilliHp[ownerKey] = carry;

@@ -1,4 +1,3 @@
-phase 1 status
 phase 1 post-flush
 phase 1 initiative
 draw initiative 273
@@ -16,12 +15,11 @@ draw crit 382313
 draw crit 467146
 draw crit 712964
 phase 1 shield-upkeep
-state 1 squad:0 hp=345 abs=0
+state 1 squad:0 hp=343 abs=0
 state 1 squad:1 hp=360 abs=0
-state 1 wave:0 hp=7 abs=0
+state 1 wave:0 hp=16 abs=0
 state 1 wave:1 hp=133 abs=0
 state 1 wave:2 hp=133 abs=0
-phase 2 status
 phase 2 post-flush
 phase 2 initiative
 draw initiative 776
@@ -36,12 +34,11 @@ draw crit 244488
 draw crit 976846
 draw crit 751191
 phase 2 shield-upkeep
-state 2 squad:0 hp=345 abs=0
+state 2 squad:0 hp=343 abs=0
 state 2 squad:1 hp=360 abs=0
 state 2 wave:0 hp=0 abs=0
-state 2 wave:1 hp=76 abs=0
+state 2 wave:1 hp=80 abs=0
 state 2 wave:2 hp=133 abs=0
-phase 3 status
 phase 3 post-flush
 phase 3 initiative
 draw initiative 114
@@ -57,12 +54,11 @@ draw crit 754565
 draw crit 395888
 draw crit 303895
 phase 3 shield-upkeep
-state 3 squad:0 hp=325 abs=0
+state 3 squad:0 hp=324 abs=0
 state 3 squad:1 hp=360 abs=0
 state 3 wave:0 hp=0 abs=0
 state 3 wave:1 hp=0 abs=0
 state 3 wave:2 hp=133 abs=0
-phase 4 status
 phase 4 post-flush
 phase 4 initiative
 draw initiative 742
@@ -75,7 +71,7 @@ draw crit 576577
 draw crit 295259
 draw crit 174881
 phase 4 shield-upkeep
-state 4 squad:0 hp=317 abs=0
+state 4 squad:0 hp=316 abs=0
 state 4 squad:1 hp=360 abs=0
 state 4 wave:0 hp=0 abs=0
 state 4 wave:1 hp=0 abs=0

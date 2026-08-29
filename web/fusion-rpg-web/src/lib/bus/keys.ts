@@ -41,6 +41,7 @@ export const queryKeys = {
   uniqueActors: (playerId: number) => ["uniqueActors", playerId] as const,
   uniqueEquipment: (instanceId: string) => ["uniqueEquipment", instanceId] as const,
   relics: ["relics"] as const,
+  aptitudes: (playerId: number) => ["aptitudes", playerId] as const,
   allSnapshots: [
     ["health"],
     ["players"],

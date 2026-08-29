@@ -9,7 +9,16 @@ namespace FusionRpg.Core.Battle;
 /// in the repo), so this is a full rename, not an alias — unlike <see cref="BattleActorSetup.Level"/>,
 /// nothing serializes <c>WaveDef</c> itself.
 /// </summary>
-public sealed record WaveDef(string WaveId, string Name, int ContentIndex, IReadOnlyList<BattleActorSetup> Enemies);
+/// <summary>
+/// <see cref="Profile"/> is a battle-timeline mode-profile id (B12, battle-timeline-map.md §"Decision
+/// 4"), resolved via <c>BattleModeProfileCatalog.Resolve</c> — <c>null</c> means "content did not
+/// choose," which resolves to <c>classic-round</c>. Deliberately optional-with-default rather than a
+/// required 5th positional argument, so the four waves already authored below need no edit and this
+/// stays additive. **Never reaches <c>BattleSetup</c>** — the profile is looked up from the existing
+/// <c>WaveId</c> at resolve time, never serialized (a field on `BattleSetup` would move all four
+/// expedition hashes; named a "Never" in both `battle-timeline-map.md` and `spec-mode-profiles.md`).
+/// </summary>
+public sealed record WaveDef(string WaveId, string Name, int ContentIndex, IReadOnlyList<BattleActorSetup> Enemies, string? Profile = null);
 
 /// <summary>
 /// Code-authored wave roster built over the generated demon species catalog — enemies are wild

@@ -30,6 +30,47 @@ public static class CombatDerivedReader
     public static double CritResistDamage(ActorDerivedSnapshot snap, ElementTypeId element) =>
         snap.Get(DerivedStatChannels.CombatCritResistDamageOmni) + snap.Get(CritResistDamageChannel(element));
 
+    // T5.1 (spec-mitigation-chain.md §2): penetration/absorption scale defense inside the delta.
+    // Contest, paired, neither half capped — the omni + element additive rule applies exactly like
+    // Power/Defense above.
+    public static double Penetration(ActorDerivedSnapshot snap, ElementTypeId element) =>
+        snap.Get(DerivedStatChannels.CombatPenetrationOmni) + snap.Get(DerivedStatChannels.CombatPenetration(element));
+
+    public static double Absorption(ActorDerivedSnapshot snap, ElementTypeId element) =>
+        snap.Get(DerivedStatChannels.CombatAbsorptionOmni) + snap.Get(DerivedStatChannels.CombatAbsorption(element));
+
+    // amplification/reduction (spec-mitigation-chain.md §2.3) apply ONCE to the already-summed final
+    // damage, not per component -- but reading omni+element here and weight-accumulating across
+    // components in the SAME loop as weightedDelta produces the identical result, since component
+    // weights sum to 1.0 (ElementPayload.Validate): Sigma(w * omni) = omni * Sigma(w) = omni. No
+    // separate "add omni once" code path needed.
+    public static double Amplification(ActorDerivedSnapshot snap, ElementTypeId element) =>
+        snap.Get(DerivedStatChannels.CombatAmplificationOmni) + snap.Get(DerivedStatChannels.CombatAmplification(element));
+
+    public static double Reduction(ActorDerivedSnapshot snap, ElementTypeId element) =>
+        snap.Get(DerivedStatChannels.CombatReductionOmni) + snap.Get(DerivedStatChannels.CombatReduction(element));
+
+    // T5.3 (spec-evasion-chain.md §3): parry/block are role-inverted Contest pairs, resolved OMNI
+    // ONLY -- the spec never describes a per-component breakdown for them, and §7 explicitly bans
+    // reading ShieldElementMatrix ("block is not a shield"). The per-element slots H.1's generator
+    // still builds stay registered and unread, the same honest partial-wiring every other
+    // not-yet-consumed sparse slot in this catalog already has.
+    public static double ParryRate(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatParryRateOmni);
+    public static double ParryBreak(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatParryBreakOmni);
+    public static double ParryStrength(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatParryStrengthOmni);
+    public static double ParryShred(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatParryShredOmni);
+    public static double BlockRate(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatBlockRateOmni);
+    public static double BlockBreak(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatBlockBreakOmni);
+    public static double BlockStrength(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatBlockStrengthOmni);
+    public static double BlockShred(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatBlockShredOmni);
+
+    // T5.4 (spec-reflection.md §3): reflection reads finalDamage (post-mitigation) -- omni only, same
+    // reasoning as parry/block.
+    public static double ReflectRate(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatReflectRateOmni);
+    public static double ReflectResistRate(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatReflectResistRateOmni);
+    public static double ReflectDamage(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatReflectDamageOmni);
+    public static double ReflectResistDamage(ActorDerivedSnapshot snap) => snap.Get(DerivedStatChannels.CombatReflectResistDamageOmni);
+
     // Shield families (shield-system-spec.md §2.3): element is nullable — an untyped shield
     // (element = none) reads the omni half only. Channel ids are roster-generated, so these
     // never fall through a hand-maintained switch.

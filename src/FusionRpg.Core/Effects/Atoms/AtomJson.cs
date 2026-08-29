@@ -34,6 +34,23 @@ public static class AtomJson
             return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
                 $"expected a number or a value-spec object, got {el.ValueKind}");
 
+        // `P0.2` (spec-value-spec-and-curve.md "Event-linked magnitudes"): a completely separate
+        // grammar branch, mutually exclusive with min/max/roll/curve — {"eventField": "damage",
+        // "multiplierMilli": 500}. Checked first so this shape never falls into the "needs an integer
+        // 'min'" rejection below, which would otherwise fire for every event-linked spec.
+        if (el.TryGetProperty("eventField", out var eventFieldEl))
+        {
+            if (eventFieldEl.ValueKind != JsonValueKind.String)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec, "'eventField' must be a string");
+
+            if (!TryInt(el, "multiplierMilli", out var multiplierMilli))
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    "eventField requires an explicit integer 'multiplierMilli' — the balance number is never defaulted");
+
+            spec = new ValueSpec(0, 0, RollPolicy.Fixed, EventField: eventFieldEl.GetString(), MultiplierMilli: multiplierMilli);
+            return spec.Validate();
+        }
+
         if (!TryInt(el, "min", out var min))
             return AtomRejection.Fail(AtomRejectionReason.BadValueSpec, "value spec needs an integer 'min'");
         if (!TryInt(el, "max", out var max))
@@ -159,6 +176,16 @@ public static class AtomJson
                 case JsonValueKind.String: text = valEl.GetString(); break;
                 case JsonValueKind.True: value = 1; break;
                 case JsonValueKind.False: value = 0; break;
+                // holdsStock is the first leaf needing BOTH a string and a number arg at once
+                // (stockId, minQty) -- an object shape, additive to the existing Number/String/
+                // True/False/Array cases, never replacing them.
+                case JsonValueKind.Object:
+                    if (valEl.TryGetProperty("stockId", out var stockIdEl) && stockIdEl.ValueKind == JsonValueKind.String)
+                        text = stockIdEl.GetString();
+                    if (valEl.TryGetProperty("minQty", out var minQtyEl) && minQtyEl.ValueKind == JsonValueKind.Number
+                        && minQtyEl.TryGetInt32(out var minQty))
+                        value = minQty;
+                    break;
                 case JsonValueKind.Array:
                     values = new List<int>();
                     foreach (var item in valEl.EnumerateArray())

@@ -146,10 +146,15 @@ dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~TurnFsm"
 ```
 src/FusionRpg.Core/Battle/Timeline/TurnState.cs        (states, table, meta-test source, illegal throw)
 src/FusionRpg.Core/Battle/Timeline/ActorTurnMachine.cs (per-actor machine, derived suspension, pending handle)
-src/FusionRpg.Core/Battle/Timeline/ActionSlots.cs      (W + WReact, deterministic contention, release-on-exit)
+src/FusionRpg.Core/Battle/Timeline/ActionSlots.cs      (W, deterministic contention, release-on-exit)
+src/FusionRpg.Core/Battle/Timeline/ReactionLane.cs     (B6 — WReact as a separate pool, bounded nested-resolution depth, FSM-neutral)
+src/FusionRpg.Core/Battle/Timeline/RendezvousLane.cs   (B7 — N-actor atomic SlotReservation, bounded dwell, one shared LinkedResolve, FSM-neutral)
 src/FusionRpg.Core/Battle/Timeline/ActionEnvelope.cs   (the seam)
 src/FusionRpg.Core/Battle/Timeline/IntentSource.cs     (IIntentSource, ActionIntent)
-src/FusionRpg.Core/Battle/Timeline/TriggerPhase.cs     (post-apply listeners, deterministic order)
+src/FusionRpg.Core/Battle/Timeline/TriggerPhase.cs     (B8 — post-apply listeners, deterministic order, death veto)
+src/FusionRpg.Core/Battle/Timeline/ReadinessDriver.cs  (B9 — live accruedWork, mid-flight rebase via Reschedule, drives Charging -> Ready)
+src/FusionRpg.Core/Battle/Timeline/TurnEconomy.cs      (B10 — ITurnEconomy: OneActionPerTurn, ActionPoints, side-scoped PressTurn)
+src/FusionRpg.Core/Battle/Timeline/BattleModeProfile.cs (B11 — mode as data; B12 — BattleModeProfileCatalog: classic-round/galaxy-sync/hybrid-atb rows + Resolve())
 tests/FusionRpg.Core.Tests/Battle/Timeline/
 ```
 

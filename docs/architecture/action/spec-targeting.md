@@ -1,5 +1,11 @@
 # Spec: targeting (A2)
 
+> **Reconciled 2026-08-27.** Checked against the sealed [action-ideal.md](../action-ideal.md) and
+> found **substantively intact**; only the notes below change.
+> — **Seedsmith now rolls the target spec** (ideal §8.4, decision 17). This spec still owns the *shape*;
+> `A13` owns which shape a generated action gets. No change to the compiler or the RNG stream.
+
+
 Module **A2** in the [action map](../action-map.md). Depends on **A1**.
 
 > **This module does not build targeting.** `TargetSpec`, `TargetResolver`, `BoardSnapshot`, and `CombatPolicy` ship and work — every mode the action program needs (`Single` · `Multi` · `Random` · `All` · `Area`) already resolves, sorts deterministically by ordinal ptr, and takes an injected `ICombatRng`. What is missing is an **authoring contract** and two **caster-relative** gates.

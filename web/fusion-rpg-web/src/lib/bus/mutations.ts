@@ -11,7 +11,8 @@ import type {
   StoragePurgeResult,
   UniqueActorDeployResultDto,
   UniqueActorDto,
-  UniqueEquipmentListDto
+  UniqueEquipmentListDto,
+  AptitudesState
 } from "./types";
 
 /**
@@ -236,6 +237,18 @@ export function useSeedPvzStatsDemo() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["pvzStats"] });
       void qc.invalidateQueries({ queryKey: ["pvzStatsChannel"] });
+    }
+  });
+}
+
+export function useSaveAptitudes() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Aptitudes" },
+    mutationFn: (body: { playerId: number; shares: Record<string, number> }) =>
+      sendJson<AptitudesState>("/api/aptitudes/allocate", "POST", body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.aptitudes(vars.playerId) });
     }
   });
 }

@@ -6,8 +6,10 @@ namespace FusionRpg.Core.Tests.Stats;
 
 /// <summary>
 /// E25 (completeness-audit.md finding B3): <c>AllCombatChannelIds</c> rebuilt 84 interpolated strings
-/// on every read, and <c>StatusStatPayload.IsKnownChannel</c> did an O(n) scan of a freshly allocated
-/// list per channel parsed. Both are now cached by reference to <see cref="ElementTable.Current"/>,
+/// on every read (84 was the family count at the time; 196 today, reconcile pass F6 2026-08-25 — the
+/// caching this test proves is what keeps that growth free), and <c>StatusStatPayload.IsKnownChannel</c>
+/// did an O(n) scan of a freshly allocated list per channel parsed. Both are now cached by reference to
+/// <see cref="ElementTable.Current"/>,
 /// which is always a *new* immutable instance on a swap — never mutated in place — so a reference
 /// check is exactly as fresh as a rebuild.
 /// </summary>

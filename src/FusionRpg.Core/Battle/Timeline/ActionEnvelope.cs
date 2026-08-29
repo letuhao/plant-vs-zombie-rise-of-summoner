@@ -59,7 +59,25 @@ public sealed record ActionEnvelope
     /// </summary>
     public string SpeedChannel { get; init; } = DerivedTurnChannels.Speed;
 
+    /// <summary>
+    /// Which <c>skill.cooldown.{category}</c> channel this action's cooldown reads for its reduction
+    /// (spec-skill-modifiers.md §1.1 — closes action-map.md:177's gap; D3 repointed here rather than
+    /// inventing a second cooldown-reduction mechanism on the envelope). A <b>reference</b>, mirroring
+    /// <see cref="SpeedChannel"/> — no new channel is declared here, and unlike <c>SpeedChannel</c>
+    /// there is no single universal default: which of the five categories applies is the action's own
+    /// choice, so an action that declares none reads no reduction (<c>null</c>, not a guessed category).
+    /// </summary>
+    public string? CooldownChannel { get; init; }
+
     public long WindupTicks { get; init; }
+
+    /// <summary>
+    /// Bounds a duration a stat could otherwise drive to zero (action-todo.md T12, decision D3).
+    /// Null means no bound. Additive and inert until a resolver actually scales a duration by a
+    /// stat — `A14`'s job — so these fields carry no behavior yet; they only reserve the columns.
+    /// </summary>
+    public long? DurationMinTicks { get; init; }
+    public long? DurationMaxTicks { get; init; }
 
     /// <summary>Single hit at wind-up end. Genuinely immutable, and shared rather than re-allocated.</summary>
     static readonly IReadOnlyList<long> SingleResolve =
@@ -101,6 +119,14 @@ public sealed record ActionEnvelope
     /// <summary>Per-mille of accrued readiness returned when an interrupt breaks this action.</summary>
     public int InterruptRefundMilli { get; init; }
 
+    /// <summary>
+    /// Per-mille of <see cref="CooldownTicks"/> an interrupt still charges (action-todo.md T12,
+    /// decision D3). Defaults to <c>1000‰</c> — full cooldown — replacing
+    /// <see cref="ActionRunner.Interrupt"/>'s previous behaviour of starting none at all. Inert for
+    /// any action with <see cref="CooldownTicks"/> at zero, which is every action adopted so far.
+    /// </summary>
+    public int InterruptCooldownMilli { get; init; } = 1000;
+
     public Commitment Commitment { get; init; } = Commitment.LateBound;
 
     /// <summary>
@@ -120,7 +146,10 @@ public sealed record ActionEnvelope
         ActionId == other.ActionId &&
         TimeCostTicks == other.TimeCostTicks &&
         SpeedChannel == other.SpeedChannel &&
+        CooldownChannel == other.CooldownChannel &&
         WindupTicks == other.WindupTicks &&
+        DurationMinTicks == other.DurationMinTicks &&
+        DurationMaxTicks == other.DurationMaxTicks &&
         RecoveryTicks == other.RecoveryTicks &&
         Class == other.Class &&
         CooldownKey == other.CooldownKey &&
@@ -130,6 +159,7 @@ public sealed record ActionEnvelope
         PriorityBand == other.PriorityBand &&
         Interruptible == other.Interruptible &&
         InterruptRefundMilli == other.InterruptRefundMilli &&
+        InterruptCooldownMilli == other.InterruptCooldownMilli &&
         Commitment == other.Commitment &&
         OffsetsEqual(ResolveOffsets, other.ResolveOffsets);
 
@@ -159,7 +189,10 @@ public sealed record ActionEnvelope
         hash.Add(ActionId);
         hash.Add(TimeCostTicks);
         hash.Add(SpeedChannel);
+        hash.Add(CooldownChannel);
         hash.Add(WindupTicks);
+        hash.Add(DurationMinTicks);
+        hash.Add(DurationMaxTicks);
         hash.Add(RecoveryTicks);
         hash.Add((int)Class);
         hash.Add(CooldownKey);
@@ -169,6 +202,7 @@ public sealed record ActionEnvelope
         hash.Add(PriorityBand);
         hash.Add((int)Interruptible);
         hash.Add(InterruptRefundMilli);
+        hash.Add(InterruptCooldownMilli);
         hash.Add((int)Commitment);
         // Indexed, not foreach: iterating an IReadOnlyList<long> boxes its enumerator — 32 bytes
         // per call, on the operation a cache key uses most. Same reason OffsetsEqual is a manual

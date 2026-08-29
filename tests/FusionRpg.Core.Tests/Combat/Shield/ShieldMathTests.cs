@@ -9,6 +9,35 @@ namespace FusionRpg.Core.Tests.Combat.Shield;
 public class ShieldMathTests
 {
     [Fact]
+    public void ShieldGoldensByteIdentical()
+    {
+        // spec-evasion-chain.md §6.1 (T5.2) -- "extracting ClampedContest must not move a single
+        // shield golden," run explicitly BEFORE parry/block exist (a two-step landing, not one). One
+        // representative worked example per branch this file's other tests cover individually,
+        // gathered under the name the spec asks for so the claim is traceable to one place: the
+        // element-matchup branch (elemMod nonzero -- the exact case that caught T5.2's own extraction
+        // bug, since bounds must scale against raw `input`, not `input + elemMod`), the chip floor,
+        // the pen cap, and the plain no-modifier case.
+        var neutral = ShieldMath.AbsorbLayer(input: 100, shieldHp: 500, weightedRelationUnitPm: 0, breakerDelta: 0, hitCount: 1);
+        Assert.Equal(100, neutral.DamageToShield);
+
+        var elemMatchup = ShieldMath.AbsorbLayer(240, 60, 1000, 0, 1);
+        Assert.Equal(300, elemMatchup.DamageToShield);
+        Assert.Equal(60, elemMatchup.Spent);
+        Assert.Equal(192, elemMatchup.Remainder);
+
+        var chipFloor = ShieldMath.AbsorbLayer(100, 50, 0, -120, 1);
+        Assert.Equal(10, chipFloor.DamageToShield);
+        Assert.Equal(10, chipFloor.Spent);
+
+        var penCap = ShieldMath.AbsorbLayer(2, 200, 0, 200, 1);
+        Assert.Equal(6, penCap.DamageToShield);
+
+        var weakRelation = ShieldMath.AbsorbLayer(100, 500, -1000, 0, 1);
+        Assert.Equal(75, weakRelation.DamageToShield);
+    }
+
+    [Fact]
     public void Neutral_hold_full_absorb_leaves_zero_remainder()
     {
         var r = ShieldMath.AbsorbLayer(input: 100, shieldHp: 500, weightedRelationUnitPm: 0, breakerDelta: 0, hitCount: 1);

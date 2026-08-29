@@ -1,3 +1,5 @@
+using FusionRpg.Core.Combat.Element;
+
 namespace FusionRpg.Core.Stats;
 
 /// <summary>
@@ -34,15 +36,47 @@ public static class PvzStatsSheetComposer
 
         if (string.IsNullOrWhiteSpace(channel)) return null;
         var trimmed = channel.Trim();
-        try
-        {
-            Derived.DerivedStatRegistry.CreateDefault().ValidateChannel(trimmed);
-            return trimmed;
-        }
-        catch (Derived.UnknownDerivedChannelException)
-        {
-            return null;
-        }
+        return CachedDerivedRegistry().TryResolveChannel(trimmed, out _) ? trimmed : null;
+    }
+
+    /// <summary>
+    /// E25's own idiom (<see cref="Derived.DerivedStatChannels.AllCombatChannelIds"/>'s
+    /// <c>EnsureCacheUnlocked</c>) applied to the second instance of the same defect
+    /// (spec-catalog-extension.md §6.3): this method used to call
+    /// <see cref="Derived.DerivedStatRegistry.CreateDefault"/> — a fresh dictionary plus one
+    /// <see cref="Derived.DerivedStatDef"/> per channel — on <b>every</b> call, on a path invoked per
+    /// modifier row, and signalled the unknown case with a <b>thrown exception</b> caught one line
+    /// later (the normal path for any primary channel).
+    ///
+    /// <para><b>Cached by reference identity against <see cref="ElementTable.Current"/>, not a bare
+    /// <c>static readonly</c></b> — a plain static would break <see cref="ElementTable.UseScoped"/>,
+    /// which tests rely on to swap rosters beside one another. A registry's content is a pure function
+    /// of the active element table (<see cref="Derived.DerivedStatChannels.AllCombatChannelEntries"/>
+    /// is itself keyed the same way), so this cache is exactly as fresh as rebuilding every call.</para>
+    ///
+    /// <para><b>Exception-as-control-flow removed</b>: <see cref="Derived.DerivedStatRegistry.TryResolveChannel"/>
+    /// answers validity directly instead of a caught <see cref="Derived.UnknownDerivedChannelException"/>.</para>
+    ///
+    /// <para><b>AsyncLocal, not a shared static slot</b> (found 2026-08-25 re-running the full suite —
+    /// see <see cref="Derived.DerivedStatChannels"/>'s matching fix and its doc comment for the full
+    /// race description). <see cref="ElementTable.Current"/> is itself <c>AsyncLocal</c>-scoped, so a
+    /// single shared cache keyed only by reference to it can be thrashed by two concurrently-running
+    /// tests scoped to different rosters. One slot per scope avoids that by construction.</para>
+    /// </summary>
+    static readonly AsyncLocal<CacheSlot?> Local = new();
+
+    readonly record struct CacheSlot(ElementTable Source, Derived.DerivedStatRegistry Registry);
+
+    static Derived.DerivedStatRegistry CachedDerivedRegistry()
+    {
+        var current = ElementTable.Current;
+        var slot = Local.Value;
+        if (slot is { } s && ReferenceEquals(s.Source, current))
+            return s.Registry;
+
+        var registry = Derived.DerivedStatRegistry.CreateDefault();
+        Local.Value = new CacheSlot(current, registry);
+        return registry;
     }
 
     public static PvzStatsSheetResult Build(IEnumerable<StatModifier> mods)

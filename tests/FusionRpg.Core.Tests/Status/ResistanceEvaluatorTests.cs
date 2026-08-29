@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
@@ -248,6 +249,185 @@ public class ResistanceEvaluatorTests
     // Its coverage intent -- "a power value correctly reaches delta" -- is already proven by
     // MatchedPair_ContestsAtDeltaZero_AtEveryTheta and Delta_IsAntisymmetric below, now exercising
     // progression.power = Theta directly.
+
+    // ============================================================================================
+    // spec-status-potency.md §6 -- the two-delta split (T4.1). Matched-tier attacker/defender pairs
+    // (ProgressionPower=1, ProgressionRealm=1) throughout, isolating whatever extra term each test
+    // adds from the tier-power contest, which cancels to 0 for a matched pair (T3.1).
+    // ============================================================================================
+
+    static ActorDerivedSnapshot MatchedTier(params (string Channel, double Value)[] extra)
+    {
+        var values = new List<KeyValuePair<string, double>>
+        {
+            new(DerivedStatChannels.ProgressionPower, 1.0),
+            new(DerivedStatChannels.ProgressionRealm, 1.0)
+        };
+        foreach (var (channel, value) in extra)
+            values.Add(new KeyValuePair<string, double>(channel, value));
+        return ActorDerivedSnapshot.FromValues(values);
+    }
+
+    [Fact]
+    public void AllStatusGoldensUnchanged()
+    {
+        // spec-status-potency.md §2.2 -- the acceptance test. All four new families default to 0, so
+        // durationDelta/intensityDelta collapse to the SAME single `delta` Phase 1 already computed,
+        // and every netFactor the result carries (Phase 1's own, plus both new potency ones) is
+        // identical -- proven against a non-trivial delta (not 0, which every formula agrees on
+        // trivially) so a reintroduced coupling bug would actually surface here.
+        var attacker = MatchedTier((DerivedStatChannels.StatusPowerOmni, 20.0));
+        var defender = MatchedTier();
+        var request = Req();
+
+        var result = Eval.Evaluate(request, attacker, defender, new FixedStatusRng(0.0));
+
+        var expectedDelta = ResistanceEvaluator.ComputeDelta("wither", StatusL2bCategory.Dot, attacker, defender);
+        var expectedNetFactor = ResistanceEvaluator.ComputeNetFactor(expectedDelta);
+        Assert.Equal(3.0, expectedNetFactor); // non-trivial baseline, not the delta=0 case
+
+        Assert.True(result.Applied);
+        Assert.Equal(expectedNetFactor, result.NetFactor);
+        Assert.Equal(expectedNetFactor, result.DurationNetFactor);
+        Assert.Equal(expectedNetFactor, result.IntensityNetFactor);
+        Assert.Equal(request.BaseDuration * expectedNetFactor, result.EffectiveDuration, 6);
+        Assert.Equal(request.BaseMagnitude * expectedNetFactor, result.EffectiveMagnitude, 6);
+    }
+
+    [Fact]
+    public void LongWeakIsExpressible()
+    {
+        // spec-status-potency.md §1 -- the objective. Duration up, intensity down, independently.
+        // Locked together before this module (both moved by the same netFactor); this is only
+        // expressible because duration/intensity now read distinct channels.
+        var attacker = MatchedTier(
+            (DerivedStatChannels.StatusDuration("wither"), 15.0),
+            (DerivedStatChannels.StatusIntensity("wither"), -5.0));
+        var defender = MatchedTier();
+        var request = Req();
+
+        var result = Eval.Evaluate(request, attacker, defender, new FixedStatusRng(0.0));
+
+        Assert.True(result.Applied);
+        Assert.True(result.DurationNetFactor > 1.0, $"expected longer duration, got {result.DurationNetFactor}");
+        Assert.True(result.IntensityNetFactor < 1.0, $"expected weaker intensity, got {result.IntensityNetFactor}");
+        Assert.True(result.EffectiveDuration > request.BaseDuration);
+        Assert.True(result.EffectiveMagnitude < request.BaseMagnitude);
+    }
+
+    [Fact]
+    public void ShortBrutalIsExpressible()
+    {
+        // The mirror of LongWeakIsExpressible.
+        var attacker = MatchedTier(
+            (DerivedStatChannels.StatusDuration("wither"), -5.0),
+            (DerivedStatChannels.StatusIntensity("wither"), 15.0));
+        var defender = MatchedTier();
+        var request = Req();
+
+        var result = Eval.Evaluate(request, attacker, defender, new FixedStatusRng(0.0));
+
+        Assert.True(result.Applied);
+        Assert.True(result.DurationNetFactor < 1.0, $"expected shorter duration, got {result.DurationNetFactor}");
+        Assert.True(result.IntensityNetFactor > 1.0, $"expected brutal intensity, got {result.IntensityNetFactor}");
+        Assert.True(result.EffectiveDuration < request.BaseDuration);
+        Assert.True(result.EffectiveMagnitude > request.BaseMagnitude);
+    }
+
+    [Fact]
+    public void DeltaZeroStillOne()
+    {
+        // Both new deltas honour the same T3.2 rule Phase 1's delta already does: 0 -> netFactor 1.0.
+        var neutral = ActorDerivedSnapshot.StubNeutral();
+        var durationDelta = ResistanceEvaluator.ComputePotencyDelta(
+            "wither", StatusL2bCategory.Dot, neutral, neutral, attackerLess: false, element: null, family: "duration");
+        var intensityDelta = ResistanceEvaluator.ComputePotencyDelta(
+            "wither", StatusL2bCategory.Dot, neutral, neutral, attackerLess: false, element: null, family: "intensity");
+
+        Assert.Equal(0.0, durationDelta, 3);
+        Assert.Equal(0.0, intensityDelta, 3);
+        Assert.Equal(1.0, ResistanceEvaluator.ComputeNetFactor(durationDelta));
+        Assert.Equal(1.0, ResistanceEvaluator.ComputeNetFactor(intensityDelta));
+    }
+
+    [Fact]
+    public void PotencyFloorOnIntensityOnly()
+    {
+        // spec-status-potency.md §2.2 -- a zero-DURATION status is instantaneous (a legitimate effect,
+        // still Applied); a zero-INTENSITY status does nothing and IS Resisted. The floor checks
+        // intensity only.
+        var defender = MatchedTier();
+
+        var zeroDurationAttacker = MatchedTier((DerivedStatChannels.StatusDuration("wither"), -1000.0));
+        var instantResult = Eval.Evaluate(Req(), zeroDurationAttacker, defender, new FixedStatusRng(0.0));
+        Assert.True(instantResult.Applied);
+        Assert.Equal(0.0, instantResult.EffectiveDuration);
+        Assert.NotEqual(0.0, instantResult.EffectiveMagnitude);
+
+        var zeroIntensityAttacker = MatchedTier((DerivedStatChannels.StatusIntensity("wither"), -1000.0));
+        var resistedResult = Eval.Evaluate(Req(), zeroIntensityAttacker, defender, new FixedStatusRng(0.0));
+        Assert.False(resistedResult.Applied);
+        Assert.Equal(StatusResistReason.PotencyFloor, resistedResult.ResistReason);
+    }
+
+    [Fact]
+    public void PartialImmunityScalesBoth()
+    {
+        // (1 - immuneReduction) applies to BOTH potency axes -- partial immunity blunts a status
+        // overall, not selectively by axis.
+        var attacker = MatchedTier((DerivedStatChannels.StatusPowerOmni, 20.0));
+        var defender = MatchedTier();
+        var request = Req("poison") with { ImmunityTags = new[] { "poison" } };
+
+        var baseline = Eval.Evaluate(request, attacker, defender, new FixedStatusRng(0.0));
+
+        var partiallyImmuneDefender = MatchedTier((DerivedStatChannels.StatusImmuneReduction("poison"), 0.5));
+        var reduced = Eval.Evaluate(request, attacker, partiallyImmuneDefender, new FixedStatusRng(0.0));
+
+        Assert.True(baseline.Applied);
+        Assert.True(reduced.Applied);
+        Assert.Equal(baseline.DurationNetFactor * 0.5, reduced.DurationNetFactor, 6);
+        Assert.Equal(baseline.IntensityNetFactor * 0.5, reduced.IntensityNetFactor, 6);
+    }
+
+    [Fact]
+    public void ElementResistRead()
+    {
+        // spec-status-potency.md §2.3 (Q1) -- status.resist.fire already resolved through the open
+        // prefix; nothing read it before this module. A fire-tagged status now pays it.
+        var attacker = ActorDerivedSnapshot.StubNeutral();
+        var defender = MatchedTier(("status.resist.fire", 15.0));
+
+        var taggedDelta = ResistanceEvaluator.ComputeDelta(
+            "wither", StatusL2bCategory.Dot, attacker, defender, element: "fire");
+        var untaggedDelta = ResistanceEvaluator.ComputeDelta(
+            "wither", StatusL2bCategory.Dot, attacker, defender, element: null);
+
+        Assert.Equal(untaggedDelta - 15.0, taggedDelta, 6);
+    }
+
+    [Fact]
+    public void UntaggedContributesNothing()
+    {
+        // T5: a missing element tag is a genuine absence, not a default. Even though the defender
+        // DOES carry status.resist.fire, an untagged status (element: null) must not read it -- the
+        // delta with no tag must equal the delta against a defender with no fire resist at all, and
+        // omitting the parameter must behave identically to passing null explicitly (proving the
+        // default really is "nothing", not a silent fallback to some other channel).
+        var attacker = ActorDerivedSnapshot.StubNeutral();
+        var defenderWithFireResist = MatchedTier(("status.resist.fire", 15.0));
+        var cleanDefender = MatchedTier();
+
+        var untaggedDelta = ResistanceEvaluator.ComputeDelta(
+            "wither", StatusL2bCategory.Dot, attacker, defenderWithFireResist, element: null);
+        var omittedDelta = ResistanceEvaluator.ComputeDelta(
+            "wither", StatusL2bCategory.Dot, attacker, defenderWithFireResist);
+        var cleanDelta = ResistanceEvaluator.ComputeDelta(
+            "wither", StatusL2bCategory.Dot, attacker, cleanDefender, element: null);
+
+        Assert.Equal(untaggedDelta, omittedDelta, 6);
+        Assert.Equal(cleanDelta, untaggedDelta, 6);
+    }
 }
 
 public class StatusCategoryRegistryTests
@@ -262,9 +442,19 @@ public class StatusCategoryRegistryTests
     }
 
     [Fact]
-    public void All_twenty_one_ids_registered()
+    public void All_twenty_one_locked_ids_are_registered()
     {
-        Assert.Equal(21, StatusCategoryRegistry.AllStatusIds.Count);
+        // NOT an exact-count assertion: StatusCategoryRegistry.Register (T16, action-todo.md) is a
+        // real, additive extension point (status-ssot.md §3 — "New status id: Register def in Core
+        // catalog"), and other in-process tests (ExhaustionPolicyTests) legitimately register their
+        // own ids into this SAME static, process-wide dictionary. An exact-count assertion here is
+        // the identical defect ActorChannelsTests's old "exactly 84 channels" row already was —
+        // "left in place it becomes a red test on day one" once a second registrant exists. The 21
+        // locked ids (status-ssot.md §9) must always be a SUBSET of whatever else got registered.
+        var locked = StatusCatalogBootstrap.CreateDefault().All().Select(d => d.StatusId);
+        foreach (var id in locked)
+            Assert.Contains(id, StatusCategoryRegistry.AllStatusIds);
+        Assert.Equal(21, locked.Count());
     }
 }
 

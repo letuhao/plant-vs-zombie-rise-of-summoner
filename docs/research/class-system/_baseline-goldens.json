@@ -1,0 +1,11 @@
+﻿{
+    "rulesetVersion":  4,
+    "stompHash":  "1523E697B5F110F43530710FCD795470A69FAA5876FC32021DD74955E3DEAB50",
+    "closeHash":  "EEA316E877EC270BD4CDE0A2C18FCEC15026843670F34F5DACA8B77303FAC63F",
+    "wipeHash":  "4AB4D8D26FECC8A068D2A1E231EF567793183DF164B2E818C430EF6505B59684",
+    "seedSweepHash":  "A06B6BF14199B40BD76879680E39927EDB0BFBEF5DE632182F49472497FD2450",
+    "_meta":  {
+                  "measuredAt":  "2026-08-28T17:38:49.8830509Z",
+                  "conditions":  "Extracted from tests/FusionRpg.Core.Tests/Battle/BattleGoldenTests.cs\u0027s four const string Hash declarations — never hand-retyped, so this file cannot itself drift from the test."
+              }
+}

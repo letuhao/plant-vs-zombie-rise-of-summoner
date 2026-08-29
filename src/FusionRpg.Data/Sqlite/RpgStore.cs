@@ -598,8 +598,19 @@ public sealed partial class RpgStore : IRpgDb
         EnsureElementSchemaUnlocked(db);
         // power_coefficient + power_trigger_frequency + the sweep's proposal table (E9).
         EnsurePowerSchemaUnlocked(db);
-        // effect_channel_policy — a channel's caps and defaults, never its identity (E16).
+        // effect_channel_policy — a channel's direction, never its identity (E16). Caps/defaults
+        // columns retired T1.4 (cap-consolidation, 2026-08-25): they were dead, direction is the only
+        // live column.
         EnsureChannelPolicySchemaUnlocked(db);
+        // rpg_aptitude_allocation — class-system P6.2, spec-point-economy.md. Inputs only, one row
+        // per (scope, scopeKey, aptitude) with a nonzero spend.
+        EnsureAptitudeAllocationSchemaUnlocked(db);
+        // rpg_action + cost/scope/grant/species-basics (spec-action-model.md, A1).
+        EnsureActionSchemaUnlocked(db);
+        // rpg_run_pool — persisted resource pools across a run's encounter boundaries (spec-action-costs.md §9, T18).
+        EnsureRunPoolSchemaUnlocked(db);
+        // rpg_actor_loadout — the equipped-skill set (spec-loadout.md §1, T21).
+        EnsureLoadoutSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)
@@ -668,6 +679,7 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_fusion_discovery;", "DELETE FROM rpg_patron;",
                              "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
+                             "DELETE FROM rpg_aptitude_allocation;",
                              "DELETE FROM archive_catalog;",
                              "DELETE FROM players;"
                          })

@@ -1,3 +1,4 @@
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Battle;
@@ -11,22 +12,50 @@ namespace FusionRpg.Core.Battle;
 /// </summary>
 public static class BattleStatComposer
 {
-    static readonly HashSet<string> KnownChannels = BuildKnownChannels();
+    // Found while re-measuring this class for catalog-extension's ComposerAllocationAt196 (a THIRD
+    // instance of the defect E25 fixed once and spec-catalog-extension.md §6.3 fixed a second time in
+    // PvzStatsSheetComposer): a bare `static readonly` captured AllCombatChannelIds ONCE at type-load
+    // and never refreshed, so a roster swapped in later via ElementTable.UseScoped (a 7th element, or
+    // any test scenario) had its channels silently rejected at line ~101 as "unknown" even though they
+    // were legitimately registered. Cached by reference identity against ElementTable.Current instead —
+    // the same idiom, same reasoning, same fix.
+    //
+    // AsyncLocal, not a shared static slot (found 2026-08-25 re-running the full suite): Current is
+    // itself AsyncLocal-scoped, so a single shared cache keyed only by reference to it can be thrashed
+    // by two concurrently-running tests scoped to different rosters -- see DerivedStatChannels' matching
+    // fix for the full race description. One slot per scope avoids that by construction.
+    static readonly AsyncLocal<CacheSlot?> Local = new();
+
+    readonly record struct CacheSlot(ElementTable Source, HashSet<string> Channels);
+
+    static HashSet<string> KnownChannels
+    {
+        get
+        {
+            var current = ElementTable.Current;
+            var slot = Local.Value;
+            if (slot is { } s && ReferenceEquals(s.Source, current))
+                return s.Channels;
+
+            var built = BuildKnownChannels();
+            Local.Value = new CacheSlot(current, built);
+            return built;
+        }
+    }
 
     static HashSet<string> BuildKnownChannels()
     {
-        // Combat channels plus the status power/resist families the ResistanceEvaluator reads.
-        var set = new HashSet<string>(DerivedStatChannels.AllCombatChannelIds, StringComparer.Ordinal)
-        {
-            DerivedStatChannels.StatusPowerOmni,
-            DerivedStatChannels.StatusPowerDot,
-            DerivedStatChannels.StatusPowerCc,
-            DerivedStatChannels.StatusPowerContagion,
-            DerivedStatChannels.StatusResistOmni,
-            DerivedStatChannels.StatusResistDot,
-            DerivedStatChannels.StatusResistCc,
-            DerivedStatChannels.StatusResistContagion
-        };
+        // class-system-todo.md P1.11 (2026-08-26): widened from "combat channels plus the eight
+        // status power/resist families" to every registered channel — aptitude edges reach
+        // resource.*/skill.*/move.range/progression.*/status.duration/intensity.*, all outside the
+        // old set (distribution-reconcile's finding: 47 of 84 edge channels threw here before this
+        // change). T3's own repair (spec-readiness-model.md), reused: widen the known-channel set,
+        // change no compose logic — a ChannelMods producer moving nothing while nobody has an
+        // allocation is what keeps this byte-identical (battle-timeline-map.md; see also
+        // class-system-map.md §2a.0's "the composers stay separate" decision).
+        var set = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var def in DerivedStatRegistry.CreateDefault().AllRegistered)
+            set.Add(def.ChannelId);
         return set;
     }
 

@@ -1,5 +1,12 @@
 # Spec: action-selection (A7)
 
+> **Reconciled 2026-08-27.** Checked against the sealed [action-ideal.md](../action-ideal.md) and
+> found **substantively intact**; only the notes below change.
+> — The stub AI must now respect **gate 0** (`A4` §1a): an actor mid-stance refuses every candidate, and the
+> check is **hoisted out of both loops** because it is per-actor.
+> — Preference key stays the stub's own — **not `priority_band`**, which is a scheduling concept.
+
+
 Module **A7** in the [action map](../action-map.md). Depends on **A2**, **A4**, **A6**.
 
 > **This is the game's first AI layer.** The effect-atom ideal disclaims AI entirely — *"targeting, retreat, and decision-making need an AI layer spec, and this game has no AI layer yet."* That hole is this module. The owner scoped it deliberately small: **build a stub first.**

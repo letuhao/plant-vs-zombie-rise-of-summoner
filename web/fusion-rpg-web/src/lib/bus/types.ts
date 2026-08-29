@@ -441,3 +441,13 @@ export const emptyMod = (): StatMod => ({
   defensePercent: 1,
   defenseFlat: 0
 });
+
+/** spec-aptitude-allocation-surface.md — GET/POST /api/aptitudes. Commander scope only; `shares` always
+ * carries all twelve aptitude ids (zero if unset, never omitted). */
+export type AptitudesState = {
+  theta: number;
+  budget: number;
+  spent: number;
+  withinBudget: boolean;
+  shares: Record<string, number>;
+};

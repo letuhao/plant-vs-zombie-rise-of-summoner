@@ -142,6 +142,12 @@ public sealed class FoundationHarness
         }, _derived.Resolve(CombatPtr.Normalize(ptr), attackerLess: false), nowTick: 0);
     }
 
+    /// <summary>The same actor-resolution function <see cref="WithOverlayCombatMath"/> wires into
+    /// the combat calculator — exposed so a caller can ALSO pass it as
+    /// <see cref="Combat.CombatDamageDispatcher.DispatchInstant"/>'s <c>actorResolve</c> parameter
+    /// (T5.4 reflection), reading the SAME pinned actors rather than a second, divergent lookup.</summary>
+    public CombatActorResolve Resolve => ResolveCombatActor;
+
     CombatActorSnapshot ResolveCombatActor(string? ptr, bool attackerLess)
     {
         if (attackerLess)

@@ -240,4 +240,88 @@ public class PowerStoreTests : IDisposable
 
         Assert.True(_store.GetCatalogRevision() > before);
     }
+
+    // ---- P0.3: power_predicate_frequency ----------------------------------------------------------
+
+    [Fact]
+    public void An_empty_database_has_no_predicate_frequency_rows()
+    {
+        Assert.Empty(_store.GetPowerTables().PredicateFrequencies);
+    }
+
+    [Fact]
+    public void Predicate_frequency_rows_round_trip()
+    {
+        var withRows = new PowerTables(
+            PowerTables.Authored().Coefficients, PowerTables.Authored().Frequencies,
+            new[]
+            {
+                new PredicateFrequencyRow("HasStatus", "burn", 900, 800, 700, 600),
+                new PredicateFrequencyRow("HpBelowMilli", "300", 500, 500, 500, 500),
+            });
+
+        Assert.True(_store.UpsertPowerTables(withRows).Ok);
+        var read = _store.GetPowerTables();
+
+        Assert.Equal(
+            withRows.PredicateFrequencies.OrderBy(p => p.LeafId + p.ArgKey, StringComparer.Ordinal),
+            read.PredicateFrequencies.OrderBy(p => p.LeafId + p.ArgKey, StringComparer.Ordinal));
+        // The floored chain reads back correctly too, not just the raw row:
+        // 900x800/1000=720; 720x700/1000=504; 504x600/1000=302.4 -> 302.
+        Assert.Equal(302L, read.PredicateFrequencyOf(LeafId.HasStatus, "burn", floorMilli: 0));
+    }
+
+    [Fact]
+    public void Rewriting_predicate_frequency_rows_replaces_rather_than_accumulates()
+    {
+        _store.UpsertPowerTables(new PowerTables(
+            PowerTables.Authored().Coefficients, PowerTables.Authored().Frequencies,
+            new[] { new PredicateFrequencyRow("HasStatus", "burn", 900, 900, 900, 900) }));
+
+        _store.UpsertPowerTables(new PowerTables(
+            PowerTables.Authored().Coefficients, PowerTables.Authored().Frequencies,
+            new[] { new PredicateFrequencyRow("HasStatus", "freeze", 500, 500, 500, 500) }));
+
+        var read = _store.GetPowerTables();
+        Assert.Single(read.PredicateFrequencies);
+        Assert.Equal("freeze", read.PredicateFrequencies[0].ArgKey);
+    }
+
+    [Theory]
+    [InlineData(-1, 1000, 1000, 1000)]
+    [InlineData(1000, 1001, 1000, 1000)]
+    public void An_out_of_range_predicate_factor_is_refused(
+        int reachability, int susceptibility, int coincidence, int uptime)
+    {
+        // Every factor is a per-mille probability (PS-8 bounded ratio) — [0, 1000], not open-ended.
+        var broken = new PowerTables(
+            PowerTables.Authored().Coefficients, PowerTables.Authored().Frequencies,
+            new[] { new PredicateFrequencyRow("HasStatus", "burn", reachability, susceptibility, coincidence, uptime) });
+
+        var verdict = _store.UpsertPowerTables(broken);
+
+        Assert.False(verdict.Ok);
+        Assert.Contains("per-mille probability", verdict.Reason, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_predicate_frequency_edit_moves_the_content_hash()
+    {
+        _store.UpsertPowerTables(PowerTables.Authored());
+        var before = _store.ComputeContentHash().Hash;
+
+        _store.UpsertPowerTables(new PowerTables(
+            PowerTables.Authored().Coefficients, PowerTables.Authored().Frequencies,
+            new[] { new PredicateFrequencyRow("HasStatus", "burn", 900, 900, 900, 900) }));
+
+        Assert.NotEqual(before, _store.ComputeContentHash().Hash);
+    }
+
+    [Fact]
+    public void The_content_hash_schema_version_is_seven_now_that_P0_3_has_landed()
+    {
+        _store.UpsertPowerTables(PowerTables.Authored());
+
+        Assert.Equal(7, _store.ComputeContentHash().SchemaVersion);
+    }
 }

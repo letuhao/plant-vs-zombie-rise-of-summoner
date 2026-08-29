@@ -78,12 +78,14 @@ public class PreAdoptionTraceTests
     }
 
     [Fact]
-    public void Sub_round_period_under_delivers_today()
+    public void Sub_round_period_delivers_the_true_pulse_count()
     {
-        // Hazard 5: TickBudget defaults to 1 and the clock jumps a whole round, so a 250 ms
-        // period fires ONCE per round instead of four times. 4000 ms / 250 ms = 16 true pulses;
-        // today's engine delivers 4. T5 must PRESERVE this; T9 fixes it with a version bump.
-        // Nothing covered this before — every existing caller uses PeriodMs: 1000.
+        // Hazard 5, CLOSED by B16 (spec-kernel-adoption.md's T9 fix). Through Checkpoint B this
+        // test asserted `1_000_000 - 100` (4 pulses x 25) — TickBudget defaulting to 1 while the
+        // round-open call only advanced `now` once per 1000 ms meant a 250 ms period under-fired
+        // 4x. B16 made status delivery fully event-driven at each instance's own true `NextPulse`
+        // tick, so the same setup now delivers the CORRECT 16 pulses (4000 ms / 250 ms). This is
+        // the deliberate, golden-moving change B18 re-blesses for — not a regression.
         var tank = Actor("wave:0", "wave", maxHp: 1_000_000) with
         {
             ChannelMods = new[] { new BattleChannelMod(DerivedStatChannels.CombatDodgeOmni, 100_000) },
@@ -97,7 +99,7 @@ public class PreAdoptionTraceTests
         }, 13);
 
         var hp = report.Actors.Single(a => a.Key == "wave:0").HpRemaining;
-        Assert.Equal(1_000_000 - 100, hp);   // 4 pulses × 25, NOT 16 × 25
+        Assert.Equal(1_000_000 - 400, hp);   // 16 pulses × 25 — the TRUE schedule, not the old 4
     }
 
     // Captured 2026-08-21 from the pre-adoption engine (RulesetVersion 2). T5 replays against

@@ -1,0 +1,11 @@
+{
+  "base": {
+    "atom.strike": "Strike",
+    "atom.fireball": "Fireball",
+    "atom.vitality": "Vigor"
+  },
+  "modifiers": {
+    "atom.poison-rider": "Venomous {name}",
+    "atom.haste-rider": "{name} of Swiftness"
+  }
+}

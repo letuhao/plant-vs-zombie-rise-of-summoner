@@ -1,0 +1,4 @@
+{
+  "atom.chill-punisher": ["atom.chill-applier"],
+  "atom.rot-punisher": ["atom.rot-applier", "atom.blight-applier"]
+}
