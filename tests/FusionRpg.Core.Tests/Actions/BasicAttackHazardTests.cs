@@ -157,7 +157,7 @@ public class BasicAttackHazardTests
         var spec = new FusionRpg.Core.Actions.ActionTargetSpec
         {
             Mode = FusionRpg.Core.Actions.ActionTargetMode.Single,
-            Relation = FusionRpg.Core.Actions.ActionRelation.Enemy,
+            Relation = FusionRpg.Contracts.RelationKind.Enemy,
             Ordering = FusionRpg.Core.Actions.ActionTargetOrdering.OrdinalPtr,
         };
         var compiled = FusionRpg.Core.Actions.TargetSpecCompiler.Compile(spec);

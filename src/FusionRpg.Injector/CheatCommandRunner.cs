@@ -357,6 +357,12 @@ public static class CheatCommandRunner
             case "debug.effect.enqueue-delta":
                 RunEnqueueDelta(p);
                 break;
+            case "debug.scope.start-own-side":
+                RunScopeStartOwnSide(p);
+                break;
+            case "debug.scope.stop-own-side":
+                FusionRpg.Injector.Effects.DebugScopeRuntime.StopOwnSide();
+                break;
             case "debug.shield.grant":
                 RunShieldGrant(p);
                 break;
@@ -1778,6 +1784,68 @@ public static class CheatCommandRunner
 
         raw = CombatPtr.Normalize(raw);
         return string.IsNullOrEmpty(raw) ? null : raw;
+    }
+
+    /// <summary>
+    /// T11 test harness (buff-debuff-scope-todo.md): wires a live `BattlefieldOwnSideReactor` to this
+    /// match's real `EffectBag`/`MembershipChanged`. Params: `effectId` (required), `pluginId` (default
+    /// "debug-scope"), `relation` ("ally"/"enemy", default "ally"), `atomKindId` (default
+    /// "resource.delta" — the normal per-entity-grant case), `channel` (optional), `host` ("sim"/"live",
+    /// default "live" — this command only makes sense against a real running match). A G8-shaped
+    /// kind/channel/host combination throws `ScopeUnsupportedException` here, live — the same refusal
+    /// T10's own tests already proved against `BattleEffectHost`, now reachable from a real match.
+    /// </summary>
+    static void RunScopeStartOwnSide(JsonElement p)
+    {
+        try
+        {
+            var effectId = Str(p, "effectId");
+            if (string.IsNullOrWhiteSpace(effectId))
+            {
+                CheatState.Error("debug.scope.start-own-side: effectId required");
+                return;
+            }
+
+            var pluginId = Str(p, "pluginId") ?? "debug-scope";
+            var atomKindId = Str(p, "atomKindId") ?? "resource.delta";
+            var channel = Str(p, "channel");
+
+            var hostText = Str(p, "host") ?? "live";
+            if (!FusionRpg.Core.Scope.ScopeHosts.TryParse(hostText, out var host))
+            {
+                CheatState.Error("debug.scope.start-own-side: unknown host '" + hostText + "' (want sim|live)");
+                return;
+            }
+
+            var relationText = Str(p, "relation") ?? "ally";
+            if (!FusionRpg.Contracts.RelationKinds.TryParse(relationText, out var relation))
+            {
+                CheatState.Error("debug.scope.start-own-side: unknown relation '" + relationText + "' (want ally|enemy)");
+                return;
+            }
+
+            FusionRpg.Injector.Effects.DebugScopeRuntime.StartOwnSide(effectId!, pluginId, atomKindId, host, channel, relation);
+            DebugRuntime.Emit("debug.scope.started", new Dictionary<string, object>
+            {
+                ["effectId"] = effectId!,
+                ["pluginId"] = pluginId,
+                ["atomKindId"] = atomKindId,
+                ["host"] = hostText,
+                ["relation"] = relationText
+            });
+        }
+        catch (FusionRpg.Core.Scope.ScopeUnsupportedException ex)
+        {
+            // The G8 refusal, live: proves T11's own criterion 4 the same way T10's tests already
+            // proved it against BattleEffectHost — this kind/host/channel combination is legal only
+            // as the side-wide-constant shape, so this command refuses rather than issuing a grant.
+            CheatState.Error("debug.scope.start-own-side: ScopeUnsupported — " + ex.Message);
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.scope.start-own-side: " + ex.Message);
+            DebugRuntime.Emit("debug.effect.error", new Dictionary<string, object> { ["error"] = ex.Message });
+        }
     }
 
     static void RunEffectGrant(JsonElement p)

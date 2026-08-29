@@ -78,6 +78,17 @@ public static class WorldCanonical
                     force.OwnerFactionId, force.Kind, force.Exact ? 1 : 0, force.Strength, force.BandIndex);
         }
 
+        // buff-debuff-scope T12: same non-breaking shape as Intel above — a world with no active
+        // scope modifier (every save/golden that predates this field) emits nothing here and
+        // produces exactly the bytes it always did. Appending this to the existing "faction" row
+        // instead would have moved every prior hash for a value that did not actually change
+        // (found live: it moved WorldWaveOneAcceptanceTests' own golden even at the neutral default).
+        foreach (var f in w.Factions)
+        {
+            if (f.ScopeModifierMilli != 1000)
+                Row(sb, "faction-scope", f.FactionId, f.ScopeModifierMilli);
+        }
+
         return sb.ToString();
     }
 

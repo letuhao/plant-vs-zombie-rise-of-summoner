@@ -1,3 +1,9 @@
+// buff-debuff-scope T1: ActionRelation/ActionRelations now alias the shared Contracts type so
+// Core/Scope/WhoSelector.cs can reference the same Ally/Enemy/Any vocabulary without either
+// namespace depending on the other. Same technique as TargetModeNames.cs's own AtomRng alias.
+global using ActionRelation = FusionRpg.Contracts.RelationKind;
+global using ActionRelations = FusionRpg.Contracts.RelationKinds;
+
 namespace FusionRpg.Core.Actions;
 
 /// <summary>
@@ -26,19 +32,11 @@ public enum ActionTargetMode
     Area,
 }
 
-/// <summary>
-/// Who an action may hit, resolved against the caster rather than an absolute side
-/// (spec-targeting.md §2). `Self` resolves directly; `Any` clears the side filter. Compiled to at
-/// most two concrete `TargetSpec`s — one per caster side — so one authored action serves both
-/// factions without duplicate rows.
-/// </summary>
-public enum ActionRelation
-{
-    Self = 0,
-    Ally,
-    Enemy,
-    Any,
-}
+// ActionRelation (Self/Ally/Enemy/Any, resolved against the caster rather than an absolute side —
+// spec-targeting.md §2) is now FusionRpg.Contracts.RelationKind, aliased at the top of this file.
+// Compiled to at most two concrete `TargetSpec`s — one per caster side — so one authored action
+// serves both factions without duplicate rows. Behaviour unchanged; see RelationKind.cs's own doc
+// comment for why this moved.
 
 /// <summary>`Area`-only shapes, matching the shipped resolver's `AreaShapes`.</summary>
 public enum ActionAreaShape
@@ -128,29 +126,8 @@ public static class ActionTargetModes
     }
 }
 
-public static class ActionRelations
-{
-    public static string Name(ActionRelation relation) => relation switch
-    {
-        ActionRelation.Self => "self",
-        ActionRelation.Ally => "ally",
-        ActionRelation.Enemy => "enemy",
-        ActionRelation.Any => "any",
-        _ => "",
-    };
-
-    public static bool TryParse(string? text, out ActionRelation relation)
-    {
-        switch (text)
-        {
-            case "self": relation = ActionRelation.Self; return true;
-            case "ally": relation = ActionRelation.Ally; return true;
-            case "enemy": relation = ActionRelation.Enemy; return true;
-            case "any": relation = ActionRelation.Any; return true;
-            default: relation = default; return false;
-        }
-    }
-}
+// ActionRelations (Name/TryParse for the relation enum) is now FusionRpg.Contracts.RelationKinds,
+// aliased at the top of this file. Same four string mappings, unchanged.
 
 public static class ActionAreaShapes
 {

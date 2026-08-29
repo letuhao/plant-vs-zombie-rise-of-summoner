@@ -16,6 +16,22 @@ public sealed class MatchRuntime
     readonly MatchState _state = new();
     UniqueBinding? _lastBound;
 
+    /// <summary>
+    /// buff-debuff-scope T5/T6: forwards Bound/Cleared (from `_state.UniqueBindings`, resubscribed
+    /// every reset below since that facet is a whole new instance each match — see
+    /// <see cref="ResetForNewMatch"/>) and MindControlToggled (raised directly from `Apply` below).
+    /// One stable event surviving match resets, rather than a subscription that goes silently stale
+    /// after the first one.
+    /// </summary>
+    public event Action<ScopeMembershipEvent>? MembershipChanged;
+
+    public MatchRuntime()
+    {
+        _state.UniqueBindings.MembershipChanged += RaiseMembershipChanged;
+    }
+
+    void RaiseMembershipChanged(ScopeMembershipEvent e) => MembershipChanged?.Invoke(e);
+
     public MatchPhase Phase
     {
         get { lock (_gate) return _state.Phase; }
@@ -107,7 +123,25 @@ public sealed class MatchRuntime
                 return;
             }
 
-            // W1 later: bullet.init, zombie.hypno, …
+            if (string.Equals(kind, "zombie.hypno", StringComparison.OrdinalIgnoreCase))
+            {
+                var ptr = ReadPtr(payload);
+                if (string.IsNullOrWhiteSpace(ptr)) return;
+                var p = MatchUniqueBindingsFacet.NormalizePtr(ptr!);
+                var mc = ReadBool(payload, "isMindControlled");
+
+                // Idempotent: two events reporting the same state in a row (the real Harmony postfix
+                // fires on every SetMindControl call, not only on an actual flip) must not double-Bump,
+                // matching plant.die/zombie.die's own "if (...TryRemove...) Bump()" pattern of only
+                // bumping on a real change.
+                var changed = mc ? _state.MindControl.Add(p) : _state.MindControl.Remove(p);
+                if (changed)
+                    Bump();
+                RaiseMembershipChanged(new ScopeMembershipEvent(p, ScopeMembershipTransition.MindControlToggled, mc));
+                return;
+            }
+
+            // W1 later: bullet.init, …
         }
     }
 
@@ -328,6 +362,7 @@ public sealed class MatchRuntime
         _state.Debug = new MatchDebugSessionFacet();
         _state.Effect = new MatchEffectSessionFacet();
         _state.UniqueBindings = new MatchUniqueBindingsFacet();
+        _state.UniqueBindings.MembershipChanged += RaiseMembershipChanged;
         _lastBound = null;
     }
 
@@ -340,6 +375,7 @@ public sealed class MatchRuntime
         _state.Debug = new MatchDebugSessionFacet();
         _state.UniqueBindings.ClearAll();
         _state.UniqueBindings = new MatchUniqueBindingsFacet();
+        _state.MindControl.Clear();
         _lastBound = null;
     }
 
@@ -373,6 +409,20 @@ public sealed class MatchRuntime
         if (!TryGetPayload(payload, key, out var v) || v == null) return null;
         var s = Convert.ToString(v, System.Globalization.CultureInfo.InvariantCulture);
         return string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+    }
+
+    static bool ReadBool(IReadOnlyDictionary<string, object>? payload, string key)
+    {
+        if (payload == null) return false;
+        if (!TryGetPayload(payload, key, out var v) || v == null) return false;
+        try
+        {
+            return Convert.ToBoolean(v, System.Globalization.CultureInfo.InvariantCulture);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     static int ReadTypeId(IReadOnlyDictionary<string, object>? payload)

@@ -71,6 +71,16 @@ public sealed record WorldFaction
     /// lever, not a cheat — hashed, replayed, and named in the turn report whenever it is not 1000.
     /// </summary>
     public int UpkeepHandicapMilli { get; init; } = 1000;
+
+    /// <summary>
+    /// buff-debuff-scope T12: a standing world-map buff/debuff on this faction, per-mille,
+    /// 1000 = no modifier. Follows <see cref="UpkeepHandicapMilli"/>'s exact precedent — hashed via
+    /// <c>WorldCanonical.Write</c>, replay-safe, applied by whichever future consumer's own compute
+    /// path reads it (resolved during audit: `UpkeepHandicapMilli` itself has no single compute path
+    /// — three independent consumers read it, each for its own reason — so this module declares and
+    /// hashes the modifier without wiring itself into any consumer ahead of need).
+    /// </summary>
+    public int ScopeModifierMilli { get; init; } = 1000;
 }
 
 public sealed record WorldSlot
