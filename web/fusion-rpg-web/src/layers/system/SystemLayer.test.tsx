@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "@/test/render";
@@ -159,11 +159,14 @@ describe("SystemLayer (T20)", () => {
       expect(screen.getByTestId("pref-damage-numbers")).toHaveAttribute("aria-checked", "true");
     });
 
-    it("Quit to title is disabled and states why, since no Title stage exists yet", () => {
-      renderWithProviders(<SystemLayer open onOpenChange={() => {}} />, { withGlobalKeys: true });
+    it("Quit to title closes the layer and navigates to the real Title screen", async () => {
+      const user = userEvent.setup();
+      const onOpenChange = vi.fn();
+      renderWithProviders(<SystemLayer open onOpenChange={onOpenChange} />, { withGlobalKeys: true });
       const quit = screen.getByTestId("system-quit-to-title");
-      expect(quit).toBeDisabled();
-      expect(quit).toHaveAttribute("title", expect.stringContaining("title screen"));
+      expect(quit).not.toBeDisabled();
+      await user.click(quit);
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
     it("the connection row summarizes real health/hub state, and Details reveals the raw fields", async () => {

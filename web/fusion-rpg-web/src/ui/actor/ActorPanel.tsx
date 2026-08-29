@@ -1,10 +1,35 @@
+import { useState } from "react";
 import { PanelShell } from "@/shell/PanelShell";
 import { Button } from "@/ui/Button";
+import { TabList, type TabItem } from "@/ui";
 import type { ActorRungState } from "./actorRungState";
 import { RungStateFallback } from "./RungStateFallback";
 import { ActorFrame, LevelTag, PendingNote, SideBadge, displayInitial } from "./shared";
+import { GearTab } from "./GearTab";
+import { ActionsTab } from "./ActionsTab";
+import { PassivesTab } from "./PassivesTab";
+import { DerivedStatsTab } from "./DerivedStatsTab";
+import { ProgressionTab } from "./ProgressionTab";
 
-/** Rung 5 — band 2, opens over any stage (GG-9: the one canonical actor surface, not a sixth one per screen). */
+type ActorSheetTab = "overview" | "progression" | "derived-stats" | "actions" | "passives" | "gear";
+
+const TABS: TabItem[] = [
+  { id: "overview", label: "Overview", testId: "actor-sheet-tab-overview" },
+  { id: "progression", label: "Progression", testId: "actor-sheet-tab-progression" },
+  { id: "derived-stats", label: "Derived Stats", testId: "actor-sheet-tab-derived-stats" },
+  { id: "actions", label: "Actions", testId: "actor-sheet-tab-actions" },
+  { id: "passives", label: "Passives", testId: "actor-sheet-tab-passives" },
+  { id: "gear", label: "Gear", testId: "actor-sheet-tab-gear" }
+];
+
+/**
+ * Rung 5 — band 2, opens over any stage (GG-9: the one canonical actor surface, not a sixth one per
+ * screen). actor-sheet-shell: six tabs, one door instead of five scattered surfaces
+ * (actor-sheet-map.md). Standing/Element-typing stay Overview's own content, unchanged from before
+ * this tab bar existed — this module relocates, it does not redesign. Progression/Derived Stats/
+ * Actions/Passives/Gear are each a later module's own tab body; until each lands, its slot is simply
+ * empty (never a duplicate of another tab's content).
+ */
 export function ActorPanel({
   state,
   open,
@@ -14,6 +39,8 @@ export function ActorPanel({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const [tab, setTab] = useState<ActorSheetTab>("overview");
+
   if (state.kind !== "ready") {
     return (
       <PanelShell open={open} onOpenChange={onOpenChange} title="Actor" testId="actor-panel">
@@ -32,10 +59,10 @@ export function ActorPanel({
       testId="actor-panel"
       footer={
         <>
-          <Button variant="ghost" size="sm" data-testid="actor-panel-release">
+          <Button variant="ghost" size="sm" data-testid="actor-panel-release" onClick={() => onOpenChange(false)}>
             Release
           </Button>
-          <Button size="sm" data-testid="actor-panel-deploy">
+          <Button size="sm" data-testid="actor-panel-deploy" onClick={() => onOpenChange(false)}>
             Deploy
           </Button>
         </>
@@ -55,24 +82,32 @@ export function ActorPanel({
         </div>
       </div>
 
-      <div className="mt-4">
-        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Standing</p>
-        <PendingNote pending={data.channelSummary} testId="actor-standing-pending" />
-      </div>
+      <TabList tabs={TABS} value={tab} onChange={(id) => setTab(id as ActorSheetTab)} testId="actor-sheet-tabs" className="mt-4" />
 
-      <div className="mt-4">
-        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Element typing</p>
-        <PendingNote pending={data.elementTyping} testId="actor-element-pending" />
-      </div>
+      <div data-testid="actor-sheet-tab-panel">
+        {tab === "overview" ? (
+          <>
+            <div className="mt-4">
+              <p className="text-2xs font-bold uppercase tracking-wide text-muted">Standing</p>
+              <PendingNote pending={data.channelSummary} testId="actor-standing-pending" />
+            </div>
 
-      <div className="mt-4">
-        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Shield</p>
-        <PendingNote pending={data.shieldStack} testId="actor-shield-pending" />
-      </div>
+            <div className="mt-4">
+              <p className="text-2xs font-bold uppercase tracking-wide text-muted">Element typing</p>
+              <PendingNote pending={data.elementTyping} testId="actor-element-pending" />
+            </div>
 
-      <div className="mt-4">
-        <p className="text-2xs font-bold uppercase tracking-wide text-muted">Equipment</p>
-        <PendingNote pending={data.equipSlots} testId="actor-equip-pending" />
+            <div className="mt-4">
+              <p className="text-2xs font-bold uppercase tracking-wide text-muted">Shield</p>
+              <PendingNote pending={data.shieldStack} testId="actor-shield-pending" />
+            </div>
+          </>
+        ) : null}
+        {tab === "progression" ? <ProgressionTab data={data} /> : null}
+        {tab === "derived-stats" ? <DerivedStatsTab data={data} /> : null}
+        {tab === "actions" ? <ActionsTab /> : null}
+        {tab === "passives" ? <PassivesTab /> : null}
+        {tab === "gear" ? <GearTab data={data} /> : null}
       </div>
     </PanelShell>
   );

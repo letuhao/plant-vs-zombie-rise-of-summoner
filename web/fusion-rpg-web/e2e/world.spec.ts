@@ -8,7 +8,14 @@ import { test, expect, type Page, type Route } from "@playwright/test";
 const fixture = JSON.parse(
   readFileSync(fileURLToPath(new URL("../src/features/world/fixtures/first-light.json", import.meta.url)), "utf8")
 ) as {
-  sectors: { sectorId: string; intel: string; intelAge: number; lifeline: boolean; lifelineCost: number }[];
+  sectors: {
+    sectorId: string;
+    intel: string;
+    intelAge: number;
+    lifeline: boolean;
+    lifelineCost: number;
+    slots: { slotIndex: number; slotTypeId: string }[];
+  }[];
 };
 
 /**
@@ -117,7 +124,12 @@ test.describe("the map draws what you know", () => {
     const home = page.getByTestId("sector-node-homeworld");
     await expect(home).toContainText("Homeworld");
     await expect(home).toHaveAttribute("data-ownership", "mine");
-    await expect(home.getByTestId("sector-slots").locator("span")).toHaveCount(3);
+
+    // Count comes from the fixture itself, not a hardcoded literal — a fixed number here is exactly
+    // what let this go stale once already (the loam program added a fourth "rootbed" slot to
+    // homeworld and this assertion silently kept expecting three).
+    const homeworldSlots = fixture.sectors.find((s) => s.sectorId === "homeworld")!.slots;
+    await expect(home.getByTestId("sector-slots").locator("span")).toHaveCount(homeworldSlots.length);
   });
 
   test("a remembered sector says how old the memory is", async ({ page }) => {

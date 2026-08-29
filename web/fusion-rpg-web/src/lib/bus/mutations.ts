@@ -6,6 +6,7 @@ import { clearCheatFloatDirty } from "./cheat-dirty";
 import type {
   CheatEntry,
   CheatSnapshot,
+  PlayerDto,
   ProbeRunResult,
   StatsConfig,
   StoragePurgeResult,
@@ -169,7 +170,7 @@ export function useCreatePlayer() {
   const qc = useQueryClient();
   return useMutation({
     meta: { entity: "Player" },
-    mutationFn: (name: string) => sendJson("/api/players", "POST", { name }),
+    mutationFn: (name: string) => sendJson<PlayerDto>("/api/players", "POST", { name }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.players });
     }

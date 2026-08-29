@@ -4,10 +4,10 @@ Plan: [fe-essentials-plan.md](fe-essentials-plan.md) · Map:
 [../docs/architecture/fe-essentials-map.md](../docs/architecture/fe-essentials-map.md) · Specs:
 [../docs/architecture/fe-essentials/](../docs/architecture/fe-essentials/).
 
-**7 tasks · 3 phases, plus one owner-directed addendum (AuditNav removal).** Scope: **XS** ≈ under
-20 min · **S** ≈ under an hour · **M** ≈ a focused session. **All 7 tasks + the addendum closed
-2026-08-29** — build, full unit suite, full E2E suite (functional + visual, screenshots actually
-inspected) all green.
+**7 tasks · 3 phases, plus two owner-directed addenda (AuditNav removal; Title + Save select).**
+Scope: **XS** ≈ under 20 min · **S** ≈ under an hour · **M** ≈ a focused session. **All 7 tasks + both
+addenda closed 2026-08-29** — build, full unit suite, full E2E suite (functional + visual, screenshots
+actually inspected) all green.
 
 > ## ⛔ Rules binding on every slice below
 >
@@ -101,6 +101,75 @@ own visual pass found — removing it fixed both concerns in one change.
   screenshots post-removal. Mobile went from clipped/overlapping (AuditNav's 176px column pushing
   everything else off-screen) to clean, fully-visible, no overflow. Desktop/tablet reflowed correctly,
   no regression.
+
+---
+
+## ⛔ Addendum 2 — Title screen + Save select + HudBar retirement (owner-directed, 2026-08-29)
+
+The owner reviewed the live app after the AuditNav fix and correctly called this program incomplete:
+*"we still haven't implement onboard screen and essentials screen yet... the current FE is almost
+empty."* Re-reading `01-shell-home.html` in full (not just §D, already read for T1) showed the real
+gap — plate §A (Title) and §B (Save select) never got built at all, and the plate's own §F table
+("Where does the player picker live? → Save select, band -1... The HudBar loses it entirely" / "What
+is in the top bar? → Identity, souls, XP, menu... No API address, no injector dot, no hub state —
+those are developer surfaces") was never satisfied. Live inspection confirmed it directly: the header
+showed a raw player dropdown, "injector off", "live on", and the literal server URL — exactly the
+"developer surfaces" the plate says don't belong there — stacked **on top of** `SanctumHud.tsx`, which
+already existed and already matched the plate's design (its own doc comment says so explicitly). Two
+HUDs were rendering at once; nobody had ever removed the old one once the new one shipped.
+
+- [x] **`TitleScreen.tsx`** (new, plate §A) — Continue/New summoner/Saves/Settings/Quit. Continue
+  disabled with no summoner yet (real check against `/api/players`, not assumed). Settings reuses the
+  existing `?system=1` mechanism rather than inventing a title-only settings surface. Quit disabled
+  with a reason (no real "quit" concept in a browser tab).
+- [x] **`SaveSelect.tsx`** (new, plate §B) — real player slots from `usePlayers()`, "Continue" selects
+  and enters Sanctum, "+ New summoner" creates and auto-continues. **The plate mocks up level/
+  creatures-bound/sectors-held/last-played per slot — `PlayerDto` only carries `id`/`name`/
+  `createdUtc`. Shipped the honest, narrower version (name + creation date) rather than fabricating
+  stats that don't exist anywhere in the data model** — confirmed by reading the DTO and the server's
+  own `RpgStore.CreatePlayer`, not assumed.
+- [x] **Routing restructured**: `/` and `/saves` moved outside the `AppShell` wrapper entirely (plate's
+  own "no rail, no per-stage hud" framing for these two) — `AppRoutes` in `routes.tsx` now has Title/
+  SaveSelect as siblings to the `AppShell`-wrapped tree, not children of it. `Toasts` moved from inside
+  `AppShell` to the app root (`App.tsx`) specifically so mutation feedback (e.g. a failed create on
+  `/saves`) still reaches the player on routes outside `AppShell`.
+- [x] **`HudBar.tsx` deleted** — its dev-facing fields are fully retired (not moved anywhere — they were
+  the thing being removed); its player-picker/create UI was rebuilt fresh inside `SaveSelect`, not
+  reused verbatim (different shape: a header dropdown vs. a full slot list).
+- [x] **`SystemLayer.tsx`'s "Quit to title" enabled** — it had been sitting disabled since an earlier
+  program (T25/T29, plate 06 §C) with the comment "no Title stage exists yet," waiting for exactly this.
+  Now navigates to `/` for real.
+- [x] **A real accessibility regression found and fixed, not just a test updated**: removing `HudBar`
+  removed the page's only `<h1>` (its own `data-testid="hud-title"` heading), which every AppShell page
+  had relied on — an axe scan caught "page must have a level-one heading" immediately. Fixed by
+  promoting `SanctumHud`'s player-name span to a real `<h1>` (semantically correct — it *is* the page's
+  identity), and adding a visually-hidden `<h1>` to `LawnStage.tsx` (its own `LawnHud` is deliberately
+  "ornament-free," T28 — a visible heading would violate that, so `sr-only` satisfies accessibility
+  without adding chrome the plate explicitly says shouldn't be there).
+- [x] **5 existing E2E tests updated for real behavior changes**, not weakened: `sanctum.spec.ts` (index
+  no longer redirects to Sanctum — replaced with a direct-navigation check, plus a proper new test for
+  the real Title/Sanctum split in `title-and-saves.spec.ts`), `system.spec.ts` ("Quit to title" now
+  proven to actually navigate, not just proven disabled), `audit.spec.ts` and `toasts.spec.ts` (player
+  creation trigger moved from HudBar to Save select, same underlying mutation).
+- [x] **New E2E coverage**: `title-and-saves.spec.ts` (10 tests — Title's five actions, Save select's
+  slot list/continue/create/back, all against real navigation and real mutations, not just element
+  presence) and `title-saves-visual.spec.ts` (6 screenshots — Title, Save select, and Sanctum-with-a-
+  populated-roster at desktop/mobile, all actually inspected).
+- [x] **Full regression sweep**: `npm run test` 674/674 unchanged. `npx playwright test` 178/179 →
+  183/184 (9 new tests), the same one pre-existing/unrelated `world.spec.ts` failure, plus one
+  `checkpoint-f.spec.ts` viewport-sweep flake confirmed non-reproducing (3/3 pass in isolation) — same
+  class of flake already documented earlier this session.
+- [x] **Visual proof, the actual point of this addendum**: Title and Save select screenshot cleanly at
+  desktop and mobile, matching the plate's intent. Sanctum-with-a-bound-roster now shows exactly one
+  header row (`SanctumHud` alone) instead of two stacked ones — the specific defect that triggered this
+  whole addendum, confirmed gone by direct visual inspection, not assumed from the code change alone.
+
+Files: `src/app/TitleScreen.tsx`, `SaveSelect.tsx` (new); `src/app/AppShell.tsx`, `App.tsx`,
+`routes.tsx` (edit); `src/app/HudBar.tsx` (deleted); `src/stages/sanctum/SanctumHud.tsx`,
+`src/stages/lawn/LawnStage.tsx`, `src/layers/system/SystemLayer.tsx` (edit);
+`src/layers/system/SystemLayer.test.tsx` (edit); `e2e/sanctum.spec.ts`, `system.spec.ts`,
+`audit.spec.ts`, `toasts.spec.ts` (edit); `e2e/title-and-saves.spec.ts`,
+`title-saves-visual.spec.ts` (new).
 
 ---
 

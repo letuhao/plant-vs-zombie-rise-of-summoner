@@ -44,10 +44,13 @@ async function mockSanctum(page: Page) {
 }
 
 test.describe("Sanctum stage (T9)", () => {
-  test("the bare index route redirects to the sanctum", async ({ page }) => {
+  // fe-essentials: the bare index route is now the Title screen (plate 01 §A), not an auto-redirect
+  // — see title-and-saves.spec.ts for that flow. Sanctum itself is still directly reachable.
+  test("navigating straight to /sanctum reaches it without any redirect", async ({ page }) => {
     await mockSanctum(page);
-    await page.goto("/");
+    await page.goto("/#/sanctum");
     await expect(page).toHaveURL(/#\/sanctum/);
+    await expect(page.getByTestId("sanctum-hud")).toBeVisible();
   });
 
   test("first paint contains a playable affordance, not a blank stage (GG-2)", async ({ page }) => {

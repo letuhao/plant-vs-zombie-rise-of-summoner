@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { ChunkFallback } from "@/shell/ChunkFallback";
 import { SanctumStage } from "@/stages/sanctum/SanctumStage";
 import { AppShell } from "./AppShell";
+import { SaveSelect } from "./SaveSelect";
+import { TitleScreen } from "./TitleScreen";
 
 // GG-38: entry loads the Sanctum only. Lawn (Phaser) and World (@xyflow/react) are the two
 // heaviest dependencies in the tree (tech-stack.md §2) and neither is needed to reach the Sanctum
@@ -34,8 +36,12 @@ const DEV_ROUTE_REDIRECTS: Record<string, string> = {
 export function AppRoutes() {
   return (
     <Routes>
+      {/* Plate 01 §A/§B — band -1, the door. Deliberately outside the AppShell wrapper: no rail,
+          no per-stage hud, nothing but the screen itself (plate's own "no server address, no
+          connection state" instruction). */}
+      <Route path="/" element={<TitleScreen />} />
+      <Route path="/saves" element={<SaveSelect />} />
       <Route element={<AppShell />}>
-        <Route index element={<Navigate to="/sanctum" replace />} />
         <Route path="sanctum" element={<SanctumStage />} />
         {Object.entries(DEV_ROUTE_REDIRECTS).map(([routePath, devId]) => (
           <Route key={routePath} path={routePath} element={<Navigate to={`/sanctum?dev=${devId}`} replace />} />

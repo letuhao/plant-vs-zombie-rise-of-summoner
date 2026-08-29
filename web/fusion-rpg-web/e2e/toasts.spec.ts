@@ -48,27 +48,32 @@ async function mockShell(page: Page) {
 test.describe("Mutation feedback toasts (T11)", () => {
   test("a forced 500 produces a failure toast naming the entity, and it doesn't block input", async ({ page }) => {
     await mockShell(page);
-    await page.goto("/#/sanctum");
+    // fe-essentials: player creation moved from HudBar (removed — plate 01 §F) to /saves.
+    // Toasts are mounted at the app root (App.tsx), not inside AppShell, specifically so they
+    // still fire on routes like this one that sit outside AppShell entirely.
+    await page.goto("/#/saves");
 
-    await page.getByTestId("player-create-input").fill("New Save");
-    await page.getByTestId("player-create-btn").click();
+    await page.getByTestId("save-slot-new").click();
+    await page.getByTestId("save-slot-create-input").fill("New Save");
+    await page.getByTestId("save-slot-create-submit").click();
 
     const stack = page.getByTestId("toast-stack");
     await expect(stack).toBeVisible();
     await expect(page.getByTestId("toast-title")).toHaveText("Player update failed");
     await expect(page.getByTestId("toast-message")).toContainText("Nothing changed");
 
-    // The rail behind the toast stack is still clickable — a toast never blocks input.
-    await page.getByTestId("rail-creatures").click();
-    await expect(page.getByTestId("creatures-layer")).toBeVisible();
+    // The rest of the page behind the toast stack is still clickable — a toast never blocks input.
+    await page.getByTestId("save-select-back").click();
+    await expect(page).toHaveURL(/#\/$/);
   });
 
   test("the toast auto-expires without needing a close click", async ({ page }) => {
     await mockShell(page);
-    await page.goto("/#/sanctum");
+    await page.goto("/#/saves");
 
-    await page.getByTestId("player-create-input").fill("New Save");
-    await page.getByTestId("player-create-btn").click();
+    await page.getByTestId("save-slot-new").click();
+    await page.getByTestId("save-slot-create-input").fill("New Save");
+    await page.getByTestId("save-slot-create-submit").click();
     await expect(page.getByTestId("toast-title")).toBeVisible();
 
     await expect(page.getByTestId("toast-title")).not.toBeVisible({ timeout: 7000 });

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actor Sheet — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+<style>
+  /* Draft-only additions — not yet in _kit/screens.css. Promote into the shared kit if this
+     plate is approved; kept inline here so the diff against the existing kit stays reviewable. */
+  .lockpanel { display: grid; place-items: center; gap: var(--sp-3); min-height: 220px;
+      text-align: center; padding: var(--sp-6) var(--sp-4); }
+  .lockpanel .g { font-size: 40px; opacity: .5; filter: grayscale(1); }
+  .lockpanel .t { font-family: var(--font-display); font-size: var(--text-lg); color: var(--muted); }
+  .lockpanel .s { font-size: var(--text-sm); color: var(--faint); max-width: 46ch; }
+  .actionslot.is-locked { opacity: .35; cursor: default; border-style: dashed; }
+  .actionslot.is-locked .g { filter: grayscale(1); }
+  .actionslot .lockpin { position: absolute; inset: 0; display: grid; place-items: center;
+      background: rgb(11 9 7 / .55); border-radius: var(--r-md); font-size: var(--text-sm); }
+  .passnode { position: relative; display: grid; place-items: center; gap: 2px; width: 74px; height: 74px;
+      border-radius: 50%; border: 1px solid var(--border-control); background: var(--panel); }
+  .passnode.is-keystone { width: 92px; height: 92px; border-color: var(--rarity-4);
+      box-shadow: 0 0 8px rgb(185 142 222 / .3); }
+  .passnode.is-locked { opacity: .35; border-style: dashed; }
+  .passnode .g { font-size: var(--text-lg); }
+  .passnode .n { font-size: 9px; font-weight: 800; text-align: center; max-width: 64px; }
+  .xpchart { display: flex; align-items: flex-end; gap: 3px; height: 64px; }
+  .xpchart i { flex: 1; background: var(--lawn-hot); border-radius: 2px 2px 0 0; opacity: .85; }
+  .xpchart i.is-future { background: var(--panel-inset); opacity: .5; }
+</style>
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Actor Sheet</h1>
+  <p>
+    One centralized character menu, not five scattered surfaces. Today a specimen's progression,
+    primary-stat distribution, derived stats, actions and passives each live in a different place
+    (or nowhere) — Primary Stats is its own rail layer, derived stats has a locked spec but zero
+    render path, actions/passives have no menu at all outside live battle. This plate proposes the
+    single door: open one specimen, see everything about them, some sections already playable, some
+    visibly locked with the real reason why (GG-17).
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 08</span>
+    <span class="tag">GG-17 · GG-41 · GG-44</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="#a">A · Why one door</a>
+  <a href="#b">B · Overview</a>
+  <a href="#c">C · Progression</a>
+  <a href="#d">D · Derived stats</a>
+  <a href="#e">E · Actions</a>
+  <a href="#f">F · Passives</a>
+  <a href="#g">G · Gear</a>
+  <a href="#h">H · What this plate settles</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Why one door, not five</h2>
+  <p class="lede">
+    Reference sweep before drawing anything: Diablo 4's character screen pairs four primary
+    attributes with the derived combat stats they produce, on one screen — attributes are never
+    shown without their consequence. Baldur's Gate 3 keeps Abilities/Skills/Inventory/Spellbook as
+    tabs of <em>one</em> character sheet, not five separate menus, and visibly separates "known"
+    from "prepared/equipped" wherever a creature knows more than it can use at once. Path of Exile
+    keeps its passive tree a deliberately separate, deep surface from the character panel — useful
+    here as a warning, not a pattern to copy: this game's action/passive lists are small enough
+    that a full skill-tree canvas would be over-engineering. What's worth keeping from PoE is purely
+    the <em>locked-node treatment</em> — dim, dashed, dead center on "here's what unlocks it," a
+    small notable/keystone size distinction for bigger-effect nodes.
+  </p>
+  <div class="spec">
+    <table class="t">
+      <thead><tr><th>Today, scattered across</th><th>Becomes</th></tr></thead>
+      <tbody>
+        <tr><td>Sanctum rail's own "Primary Stats" layer (commander scope only)</td><td>Progression tab, §C</td></tr>
+        <tr><td><code>spec-derived-stat-sheet.md</code> — specified, zero render path</td><td>Derived Stats tab (summary) + the spec's own full sheet, opened from here, §D</td></tr>
+        <tr><td>Live-battle action bar only (<code>04-run-stages.html</code> §C/§D)</td><td>Actions tab — same visual grammar, browsable, locked outside battle context, §E</td></tr>
+        <tr><td>Nothing (class-system's own "later" note, no module id)</td><td>Passives tab — locked, honest about why, §F</td></tr>
+        <tr><td>Actor Panel's existing Overview tab (Standing, resources, Effects)</td><td>Kept, becomes the landing tab, §B</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>Six tabs, not the existing shell's Overview/Effects/Gear/History four.</strong> Effects
+      (active buff chips) folds into Overview — it's three chips today, its own tab is more
+      navigation than content. History had no requirement driving it in this pass and is dropped
+      rather than shipped as a seventh placeholder nobody asked for.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Overview — the landing tab, mostly already drawn</h2>
+  <p class="lede">
+    Real content that already exists in <code>00-foundation.html</code>'s Panel rung, kept as-is:
+    identity, resource meters, condition tray, the five-axis Standing power vector. Effects (active
+    buffs) join it here instead of owning a separate tab.
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div class="panel-shell actor-panel" style="width:min(720px,92%)">
+        <header>
+          <span class="frame frame--panel" data-rarity="3">🌻</span>
+          <div style="flex:1;min-width:0">
+            <h3>Emberling</h3>
+            <div class="meta row-flex">
+              <span class="side" data-side="plant"><i class="pip"></i>Plant</span>
+              <span class="tag">Sunflower</span>
+              <span class="tag">Lv 14</span>
+            </div>
+          </div>
+          <span class="esc">Esc</span>
+          <button class="btn btn--icon btn--ghost" aria-label="Close">✕</button>
+        </header>
+        <div class="tabs" style="padding:var(--sp-3) var(--sp-4) 0;border-bottom:1px solid var(--border)">
+          <button class="tab is-active">Overview</button>
+          <button class="tab">Progression</button>
+          <button class="tab">Derived Stats</button>
+          <button class="tab">Actions <span class="tag" style="margin-left:4px">locked</span></button>
+          <button class="tab">Passives <span class="tag" style="margin-left:4px">locked</span></button>
+          <button class="tab">Gear</button>
+        </div>
+        <div class="body">
+          <div class="actor-body">
+            <div class="col-flex" style="gap:var(--sp-4)">
+              <div class="res col-flex">
+                <div class="meter"><span class="cap">Vitality <b>1 240 / 1 800</b></span><span class="track"><span class="fill" style="width:69%"></span></span></div>
+                <div class="meter"><span class="cap">Stamina <b>44 / 60</b></span><span class="track"><span class="fill" style="width:73%"></span></span></div>
+              </div>
+              <div>
+                <p class="spec-label">Standing</p>
+                <div class="pw">
+                  <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" style="width:64%"></span></span><b>77</b></div>
+                  <div class="bar" data-c="survivability"><span>Survivability</span><span class="t"><span class="f" style="width:48%"></span></span><b>58</b></div>
+                  <div class="bar" data-c="control"><span>Control</span><span class="t"><span class="f" style="width:30%"></span></span><b>36</b></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-flex" style="gap:var(--sp-4)">
+              <div>
+                <p class="spec-label">Effects — folded in from the old Effects tab</p>
+                <div class="row-flex">
+                  <span class="chip"><span class="frame frame--chip" data-rarity="3">✦</span><span class="nm">Ember Force</span> <span class="val">+150<span class="unit">fire power</span></span></span>
+                  <span class="chip"><span class="frame frame--chip" data-rarity="2">✦</span><span class="nm">Hardened Rind</span> <span class="val">+240<span class="unit">HP</span></span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      The tab row above is what every section on this plate shares — six tabs, two shown locked
+      inline (not just on open, so the player never has to click in to learn a section is unavailable).
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · Progression — unlocked: level, XP, primary-stat distribution</h2>
+  <p class="lede">
+    The one tab consolidating two things that are each already real but currently live nowhere near
+    each other: per-actor level/XP (typed on <code>ActorView</code>, never rendered — <code>xp</code>
+    and <code>xpToNext</code> are unused today) and primary-stat distribution (already a full round
+    trip via <code>AptitudeEndpoints</code>, but drawn as its own standalone rail layer). Promote is
+    deliberately absent from this draft — no definition exists yet (owner: "ignore it for now").
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div style="padding:var(--sp-4);display:grid;gap:var(--sp-5)">
+        <div>
+          <p class="spec-label">Level &amp; XP</p>
+          <div class="row-flex" style="justify-content:space-between;align-items:baseline">
+            <span style="font-family:var(--font-display);font-size:var(--text-xl)">Level 14</span>
+            <span class="readout">2 140 / 3 100 xp to next</span>
+          </div>
+          <div class="meter" style="margin-top:var(--sp-2)"><span class="track"><span class="fill" style="width:69%"></span></span></div>
+          <p class="spec-label" style="margin-top:var(--sp-4)">Recent XP, last 10 gains</p>
+          <div class="xpchart">
+            <i style="height:40%"></i><i style="height:65%"></i><i style="height:30%"></i>
+            <i style="height:80%"></i><i style="height:55%"></i><i style="height:70%"></i>
+            <i style="height:20%"></i><i style="height:90%"></i><i style="height:45%"></i>
+            <i class="is-future" style="height:100%"></i>
+          </div>
+        </div>
+        <div>
+          <p class="row-flex" style="justify-content:space-between;align-items:baseline">
+            <span class="spec-label" style="margin:0">Primary stats — commander scope</span>
+            <span class="readout">4 points remaining</span>
+          </p>
+          <div class="col-flex" style="gap:var(--sp-2);margin-top:var(--sp-2)">
+            <div class="setrow" style="padding:var(--sp-2) 0">
+              <div><div class="k">Might</div><div class="d">Physical damage dealt</div></div>
+              <span class="stepper"><button aria-label="less">−</button><input value="12"><button aria-label="more">+</button></span>
+            </div>
+            <div class="setrow" style="padding:var(--sp-2) 0">
+              <div><div class="k">Fortitude</div><div class="d">Max HP and physical resist</div></div>
+              <span class="stepper"><button aria-label="less">−</button><input value="8"><button aria-label="more">+</button></span>
+            </div>
+            <div class="setrow" style="padding:var(--sp-2) 0">
+              <div><div class="k">Agility</div><div class="d">Speed and evasion</div></div>
+              <span class="stepper"><button aria-label="less">−</button><input value="5"><button aria-label="more">+</button></span>
+            </div>
+          </div>
+          <p class="statenote" style="margin-top:var(--sp-3)">
+            Only the commander scope is wired today — points spent here apply account-wide, the same
+            allocation the standalone Primary Stats layer already saves. Demon-type / aspect /
+            unique-demon scopes need a specimen-picker this plate does not design (open fork,
+            <code>spec-aptitude-allocation-surface.md</code> §1).
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>This does not replace the standalone "Primary Stats" rail entry — it fronts the same
+      data and the same save endpoint.</strong> Whether the rail entry stays as a shortcut into this
+      tab or retires once this ships is an open question, §H.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · Derived stats — unlocked: summary here, full sheet one tap away</h2>
+  <p class="lede">
+    <code>spec-derived-stat-sheet.md</code> already locks the full design (six render states, a
+    12-column grid, zero-suppression, drill-down attribution) as its own Panel — "reachable from the
+    Actor panel... not a tenth rail entry." This tab is that doorway: a short, real headline list
+    plus the button that opens the already-specified full sheet, not a second competing design.
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div style="padding:var(--sp-4)">
+        <div class="statgrid">
+          <div class="s"><div class="k">Attack</div><div class="v">140</div></div>
+          <div class="s"><div class="k">Defence</div><div class="v">22</div></div>
+          <div class="s"><div class="k">Crit rate</div><div class="v">150<span class="unit">pts</span></div></div>
+          <div class="s"><div class="k">Crit damage</div><div class="v">200<span class="unit">%</span></div></div>
+        </div>
+        <p class="statenote" style="margin-top:var(--sp-3)">
+          Four headline channels, the same sigmoid-points convention as the existing statgrid — not
+          a re-derivation, the identical component already drawn on the Overview tab today, just a
+          different channel subset.
+        </p>
+        <button class="btn" style="margin-top:var(--sp-4)">Open full derived-stat sheet <span class="hotkey">↵</span></button>
+      </div>
+    </div>
+    <div class="note">
+      Building this tab is mechanically two pieces: the summary statgrid above (small — four cells,
+      the pattern already exists), and the server endpoint <code>channelSummary</code> is still
+      unconditionally "pending" for (<code>adaptActor</code>'s own honest reason string: "no server
+      endpoint yet"). The full sheet behind the button is <code>spec-derived-stat-sheet.md</code>'s
+      job, unchanged by this plate.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · Actions — locked, honestly, same grammar as the live battle bar</h2>
+  <p class="lede">
+    <code>spec-action-layer.md</code> and its eleven module specs are a complete, approved design —
+    "approved 2026-08-22, not yet built." Nothing here invents a new visual language for actions;
+    it reuses <code>04-run-stages.html</code>'s own <code>.actionslot</code> exactly, adding one
+    state that combat doesn't need: locked, browsable outside a fight.
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div style="padding:var(--sp-4)">
+        <div class="actionbar" style="flex-wrap:wrap">
+          <div class="actionslot"><span class="key">1</span><span class="g">⚔</span><span class="n">Strike</span></div>
+          <div class="actionslot is-locked"><span class="lockpin">🔒</span><span class="g">🔥</span><span class="n">Firebolt</span></div>
+          <div class="actionslot is-locked"><span class="lockpin">🔒</span><span class="g">🛡</span><span class="n">Guard</span></div>
+          <div class="actionslot is-locked"><span class="lockpin">🔒</span><span class="g">✦</span><span class="n">Overgrowth</span></div>
+        </div>
+        <p class="statenote" style="margin-top:var(--sp-3)">
+          One basic action (equivalent to today's basic attack, already resolves in battle) shown
+          unlocked; the rest locked with a real reason on hover — "Unlocks once the action system
+          ships" today, later a real per-action gate once the system exists.
+        </p>
+      </div>
+    </div>
+    <div class="note">
+      This tab has nothing to build against yet beyond the static grid above — the action system
+      itself has zero code (confirmed: <code>rpg_action</code> returns zero hits in <code>src/</code>).
+      Shipping this tab as a locked preview is honest about that; shipping it as a working menu would
+      require the action program to land first.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · Passives — locked, small, not a Path-of-Exile tree</h2>
+  <p class="lede">
+    Passive skills are the owner's own explicitly deferred sub-feature ("will be added later," no
+    module id, no spec). PoE's tree works at PoE's scale — thousands of nodes across a shared web.
+    This game doesn't have that scale of content, and won't for a long time, so the honest draft is
+    a small locked grid with a notable-sized node reserved for whenever one big passive exists — not
+    a scaffold for a tree this game may never need.
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div style="padding:var(--sp-6);display:grid;place-items:center">
+        <div class="row-flex" style="justify-content:center;gap:var(--sp-4)">
+          <div class="passnode is-locked"><span class="g">🌱</span><span class="n">Root Deep</span></div>
+          <div class="passnode is-locked"><span class="g">☀</span><span class="n">Sunlit</span></div>
+          <div class="passnode is-locked is-keystone"><span class="g">🌻</span><span class="n">Bloom Everlasting</span></div>
+          <div class="passnode is-locked"><span class="g">🍃</span><span class="n">Wind-Sown</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Nothing here is a commitment to a node-graph passive system.</strong> A flat locked
+      list would show the same honesty with far less to build; the small notable-node treatment is
+      included only because the owner's own list named "passive skills" as a thing this sheet locks,
+      not because a tree-shaped passive system has been decided anywhere.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== G -->
+<section class="sec" id="g">
+  <h2>G · Gear — real slots, empty is the honest state today</h2>
+  <p class="lede">
+    <code>equipSlots</code> is already typed on <code>ActorView</code>, already unconditionally
+    "pending" from the same adapter as derived stats. Unlike Actions/Passives this is not
+    level-gated — it's just genuinely empty because no acquisition system exists yet, so the
+    right state is an honest empty-state, not a lock icon (locks imply a gate; there isn't one here,
+    only "nothing to equip yet").
+  </p>
+  <div class="spec">
+    <div class="viewport short">
+      <div class="lockpanel">
+        <span class="g">⛭</span>
+        <span class="t">No gear slots wired yet</span>
+        <span class="s">Equipment has its own spec (<code>spec-equip-and-paperdoll.md</code>) — this
+          tab is the doorway into it once that system has a server endpoint, the same relationship
+          this plate gives Derived Stats.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== H -->
+<section class="sec" id="h">
+  <h2>H · What this plate settles</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>Where does a player manage one specimen?</td><td>One Panel, six tabs</td><td>Not five separate surfaces; the standalone Aptitudes rail layer becomes a shortcut into Progression, not a competing screen</td></tr>
+      <tr><td>What's unlocked today vs. locked?</td><td>Overview, Progression, Derived Stats (summary) unlocked; Actions, Passives locked; Gear honestly empty</td><td>Matches what's actually built — nothing here fakes availability</td></tr>
+      <tr><td>Does this replace <code>spec-derived-stat-sheet.md</code>?</td><td>No — this tab is its doorway, per that spec's own §8</td><td>No redesign of the full sheet; only a 4-cell summary + button is new surface</td></tr>
+      <tr><td>Does Passives commit to a node-graph tree?</td><td>No</td><td>A flat locked list is equally valid; the notable-node visual is decoration, not a system commitment</td></tr>
+      <tr><td>Is "Promote" anywhere on this sheet?</td><td>No</td><td>Explicitly deferred by the owner; revisit only once a definition exists</td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <strong>Still open.</strong> Whether the standalone "Primary Stats" rail entry retires once
+    Progression ships, or stays as a fast-path (owner call). Whether Actions should show ALL
+    designed-but-unbuilt actions locked, or only the ones a specimen could plausibly ever hold
+    (avoids a wall of permanently-locked slots for actions that will never apply to this specimen's
+    kind). Neither blocks building the unlocked tabs (Overview/Progression/Derived Stats summary)
+    first.
+  </div>
+</section>
+
+<footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
+  Plate 08 · Actor Sheet · draft 2026-08-29 · governed by architecture/game-gui-principles.md ·
+  references Diablo IV, Path of Exile and Baldur's Gate 3 character-menu conventions (research only,
+  no assets or text reused)
+</footer>
+
+</div>
+</body>
+</html>

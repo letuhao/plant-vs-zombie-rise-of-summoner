@@ -72,6 +72,10 @@ export function LawnStage() {
 
   return (
     <StageHost>
+      {/* LawnHud is deliberately ornament-free (T28, plate 04 §A) — this is the page's only
+          heading, visually hidden so axe's page-has-heading-one rule is satisfied without adding
+          chrome the plate explicitly says shouldn't be here. */}
+      <h1 className="sr-only">Lawn</h1>
       <div className="flex items-start" data-testid="lawn-frame">
         <Rail entries={railEntries} onSelect={(id) => (id === "sanctum" ? navigate("/sanctum") : openLayerOnSanctum(id))} />
         <div className="min-w-0 flex-1">

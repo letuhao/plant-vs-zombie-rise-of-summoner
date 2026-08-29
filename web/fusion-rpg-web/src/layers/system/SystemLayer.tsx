@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiBase, useHealth, useHubStatus } from "@/lib/bus";
 import { PanelShell } from "@/shell/PanelShell";
 import { captureNextKey, listForbiddenKeys } from "@/shell/keymap";
@@ -84,6 +84,7 @@ function Toggle({ on, onToggle, testId }: { on: boolean; onToggle: () => void; t
  * registry (GG-20) with real, working rebinding and conflict detection.
  */
 export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const navigate = useNavigate();
   const [, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState<Tab>("preferences");
   const [prefs, setPrefs] = useState<SystemPreferences>(DEFAULT_PREFERENCES);
@@ -180,13 +181,14 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
       band="system"
       footer={
         <>
-          {/* T25/T29 (plate 06 §C): no Title stage exists yet (that's its own gap, outside this
-              task) — say so on the button itself rather than a silent no-op. */}
+          {/* fe-essentials: the Title screen this button was waiting on now exists (plate 01 §A). */}
           <Button
             variant="ghost"
-            disabled
-            title="No title screen exists yet"
             data-testid="system-quit-to-title"
+            onClick={() => {
+              onOpenChange(false);
+              navigate("/");
+            }}
           >
             Quit to title
           </Button>
