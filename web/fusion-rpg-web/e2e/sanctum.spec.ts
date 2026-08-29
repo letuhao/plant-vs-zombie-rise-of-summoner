@@ -58,6 +58,29 @@ test.describe("Sanctum stage (T9)", () => {
     await expect(page.getByTestId("focus-card-cta")).toBeVisible();
   });
 
+  // fe-essentials T1: the authored first-run reveal (plate 01 §D) replaces the old bare
+  // "Bind your first creature" CTA — real copy, real navigation, not just testid presence.
+  test("a fresh, empty-roster save shows the authored reveal, and Bind reaches Creatures for real", async ({ page }) => {
+    await mockSanctum(page);
+    await page.goto("/#/sanctum");
+
+    await expect(page.getByTestId("focus-card-first-run")).toBeVisible();
+    await expect(page.getByText("This one answered")).toBeVisible();
+    await expect(page.getByText(/A sunflower has bound itself to you/)).toBeVisible();
+    await expect(page.getByText("Bind your first creature")).toHaveCount(0);
+    await expect(page.getByText("Open Creatures")).toHaveCount(0);
+
+    const consoleLogs: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "debug") consoleLogs.push(msg.text());
+    });
+
+    await page.getByTestId("focus-card-cta").click();
+    await expect(page.getByTestId("creatures-layer")).toBeVisible();
+    await expect(page).toHaveURL(/panel=creatures/);
+    await expect.poll(() => consoleLogs.some((l) => l.includes("first-run reveal: bind clicked"))).toBe(true);
+  });
+
   test("the rail's Sanctum entry is active and locked entries say what unlocks them", async ({ page }) => {
     await mockSanctum(page);
     await page.goto("/#/sanctum");
@@ -143,6 +166,26 @@ test.describe("Sanctum home (T26)", () => {
     // populated home body (creature strip, map table, tonight, run prompt) T26 added.
     const results = await new AxeBuilder({ page }).include('[data-testid="sanctum-home"]').analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+  });
+
+  // fe-essentials: AuditNav (the flat "AUDIT: Lawn/World/Roster/Demons/Storage" leftover sidebar,
+  // AppShell.tsx) is gone entirely — the plate's own design (00-foundation.html F.2, GG-40) never
+  // had it, and its fixed 176px column was the direct cause of the mobile-viewport clipping this
+  // program's visual pass found. Real replacements exist for two of its five links: SanctumHome's
+  // own "Travel to the map"/"Defend the lawn" buttons — this proves they still really navigate.
+  test("AuditNav is gone, and Travel to the map / Defend the lawn navigate for real", async ({ page }) => {
+    await mockBoundRoster(page);
+    await page.goto("/#/sanctum");
+    await expect(page.getByTestId("sanctum-home")).toBeVisible();
+    await expect(page.getByTestId("audit-nav")).toHaveCount(0);
+
+    await page.getByTestId("sanctum-home-travel").click();
+    await expect(page).toHaveURL(/#\/world/);
+
+    await page.goBack();
+    await expect(page.getByTestId("sanctum-home-defend")).toBeVisible();
+    await page.getByTestId("sanctum-home-defend").click();
+    await expect(page).toHaveURL(/#\/lawn/);
   });
 
   test("an overdue pact takes the banner, and its CTA opens the real Pacts layer", async ({ page }) => {

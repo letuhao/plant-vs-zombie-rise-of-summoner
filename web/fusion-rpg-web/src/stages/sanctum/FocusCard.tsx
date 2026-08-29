@@ -1,6 +1,7 @@
 import type { ActorRungState } from "@/ui/actor";
 import { ActorCard } from "@/ui/actor";
 import { Button } from "@/ui";
+import { FirstRunReveal } from "./FirstRunReveal";
 
 export type OverdueContract = {
   instanceId: string;
@@ -42,25 +43,7 @@ export function FocusCard({
   onOpenExpeditions?: () => void;
 }) {
   if (actorCount === 0 || !firstActor) {
-    return (
-      <div
-        className="max-w-md rounded-md border border-border-control bg-panel p-4"
-        data-testid="focus-card-first-run"
-      >
-        <p className="font-display text-lg text-text">Bind your first creature</p>
-        <p className="mt-1 text-sm text-muted">
-          Everything else in the Sanctum opens up from there — one instruction at a time.
-        </p>
-        <button
-          type="button"
-          data-testid="focus-card-cta"
-          onClick={onOpenCreatures}
-          className="mt-3 rounded-sm bg-lawn px-3 py-1.5 text-sm font-semibold text-text hover:bg-lawn-hot"
-        >
-          Open Creatures
-        </button>
-      </div>
-    );
+    return <FirstRunReveal onBind={onOpenCreatures} />;
   }
 
   if (overdueContract) {

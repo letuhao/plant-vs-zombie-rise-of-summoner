@@ -12,6 +12,9 @@ const LawnStage = lazy(() => import("@/stages/lawn/LawnStage").then((m) => ({ de
 const ActorLadderDemoPage = lazy(() =>
   import("@/ui/actor/ActorLadderDemoPage").then((m) => ({ default: m.ActorLadderDemoPage }))
 );
+const ActorMenuScopePickerDemoPage = lazy(() =>
+  import("@/ui/scope/ActorMenuScopePickerDemoPage").then((m) => ({ default: m.ActorMenuScopePickerDemoPage }))
+);
 const StoragePage = lazy(() => import("@/features/storage/StoragePage").then((m) => ({ default: m.StoragePage })));
 const WorldPage = lazy(() => import("@/features/world/WorldPage").then((m) => ({ default: m.WorldPage })));
 
@@ -66,6 +69,14 @@ export function AppRoutes() {
           element={
             <Suspense fallback={<ChunkFallback testId="chunk-fallback-actor-ladder-demo" />}>
               <ActorLadderDemoPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="actor-menu-scope-picker-demo"
+          element={
+            <Suspense fallback={<ChunkFallback testId="chunk-fallback-actor-menu-scope-picker-demo" />}>
+              <ActorMenuScopePickerDemoPage />
             </Suspense>
           }
         />

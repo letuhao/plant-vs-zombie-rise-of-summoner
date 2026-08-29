@@ -5,7 +5,6 @@ import { SystemHost } from "@/layers/system/SystemHost";
 import { useGlobalKeys } from "@/shell/useGlobalKeys";
 import { Toasts } from "@/shell/Toasts";
 import { Banner } from "@/ui";
-import { AuditNav } from "./AuditNav";
 import { HudBar } from "./HudBar";
 
 export function AppShell() {
@@ -31,7 +30,6 @@ export function AppShell() {
       ) : null}
       <HudBar />
       <div className="flex min-h-0 flex-1" data-testid="shell-body">
-        <AuditNav />
         <main className="min-w-0 flex-1 overflow-auto p-5" data-testid="page-outlet">
           <Outlet />
         </main>

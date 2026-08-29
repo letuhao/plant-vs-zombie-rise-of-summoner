@@ -117,15 +117,13 @@ test.describe("Expeditions layer (T17)", () => {
     await expect(page.getByTestId("expeditions-layer")).not.toBeVisible();
   });
 
-  test("#/expeditions redirects into the layer, and Expeditions is absent from AuditNav", async ({ page }) => {
+  // AuditNav (the flat leftover sidebar this test used to check for a redundant link) is gone
+  // entirely (GG-40, foundation.html F.2) — Expeditions is reachable only through the rail now.
+  test("#/expeditions redirects into the layer", async ({ page }) => {
     await mockSanctum(page, { contracts: [boundDemon] });
     await page.goto("/#/expeditions");
     await expect(page).toHaveURL(/#\/sanctum\?panel=expeditions/);
     await expect(page.getByTestId("expeditions-layer")).toBeVisible();
-
-    await page.keyboard.press("Escape");
-    const nav = page.getByTestId("audit-nav");
-    await expect(nav.getByText("Expeditions", { exact: true })).toHaveCount(0);
   });
 
   // T30 (plate 03 §C): the active-expedition card — status pill, real progress %, real roster chips.

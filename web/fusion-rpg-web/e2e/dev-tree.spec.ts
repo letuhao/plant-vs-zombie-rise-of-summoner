@@ -131,9 +131,11 @@ test.describe("Developer tree (T12)", () => {
   test("none of the nine developer surfaces appear in player navigation", async ({ page }) => {
     await mockShell(page);
     await page.goto("/#/sanctum");
-    const nav = page.getByTestId("audit-nav");
+    // AuditNav (the flat leftover sidebar) is gone entirely (GG-40, foundation.html F.2) — the
+    // developer tree lives behind its own gate, not any standing player-facing nav.
+    const shell = page.getByTestId("shell-body");
     for (const label of ["Status", "Stats", "PvzActivity", "IconDump", "AlmanacText", "Cheats", "Sim", "Log", "Runs"]) {
-      await expect(nav.getByText(label, { exact: true })).toHaveCount(0);
+      await expect(shell.getByText(label, { exact: true })).toHaveCount(0);
     }
   });
 });
