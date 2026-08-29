@@ -1,3 +1,4 @@
+using FusionRpg.Core.Actions;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
@@ -19,7 +20,7 @@ namespace FusionRpg.Core.Battle;
 /// </summary>
 public static partial class BattleEngine
 {
-    sealed class ActorState : IBattleHpTarget
+    sealed class ActorState : IBattleHpTarget, IBattleStatTarget
     {
         public ActorState(BattleActorSetup setup, int sideIndex)
         {
@@ -58,6 +59,17 @@ public static partial class BattleEngine
         public bool Active => Alive && !Retreated;
 
         public bool Has(string traitId) => _traits.Contains(traitId);
+
+        /// <summary>A18e: <see cref="IBattleStatTarget"/>'s own baseline — the same `Setup.Defense`
+        /// `BattleStatComposer.Compose` already seeded `Derived`'s `CombatDefenseOmni` channel from at
+        /// spawn.</summary>
+        public long BaselineDefense => Setup.Defense;
+
+        /// <summary>A18e (spec-battle-live-stat-modifiers.md §2): the one live-read `Setup.Atk` itself
+        /// never composes through — byte-identical to `Setup.Atk` when the ledger holds no `atk` mods
+        /// for this actor (every battle today), since `ComposeChannel` over an empty mod list returns
+        /// the baseline unchanged.</summary>
+        public long LiveAtk(BattleStatModifierLedger ledger) => ledger.Recompose(Setup.Key, "atk", Setup.Atk);
     }
 
     /// <summary>Owned-PRNG adapter for the L2b apply roll — `status` stream, never System.Random.</summary>
@@ -129,8 +141,25 @@ public static partial class BattleEngine
     /// byte-identically, not that combat routes through the per-actor turn FSM, which is explicitly
     /// out of scope (`battle-timeline-map.md`: "E2 skills... respec after T5").
     /// </param>
+    /// <param name="actionCatalog">
+    /// A17 (spec-action-selection-adoption.md §2): a 7th optional trailing parameter, same additive
+    /// pattern as <paramref name="profile"/>. Required only if some actor's
+    /// <see cref="BattleActorSetup.EquippedActionIds"/> is non-empty — every id in it must resolve
+    /// against this catalog, loudly (an `ArgumentException`, not a silent skip) if it does not. An
+    /// actor with no loadout needs no catalog at all: it falls back to the single hand-built basic
+    /// attack. Synthetic/test-constructed today (`A20`'s own job is a clean harness for that) — this
+    /// module does not read a live grant pipeline, per `action-map.md` §12's own explicit scope call.
+    /// </param>
+    /// <param name="containerResolver">
+    /// A18a (spec-action-container-binding.md §2): an 8th optional trailing parameter, same additive
+    /// pattern as <paramref name="actionCatalog"/>. Required only if some held action's `ContainerId`
+    /// is non-empty — every such container must resolve against it, loudly, if it does not. `null` is
+    /// legal exactly when nothing in the loadout carries a real container, which is every caller
+    /// today (`A20`'s own job is a clean harness for real content).
+    /// </param>
     public static BattleReport Resolve(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace = null,
-        Action<BattleEffectHost>? onEffectHostReady = null, Timeline.BattleModeProfile? profile = null)
+        Action<BattleEffectHost>? onEffectHostReady = null, Timeline.BattleModeProfile? profile = null,
+        ActionCatalog? actionCatalog = null, IContainerEffectResolver? containerResolver = null)
     {
         if (setup.Squad.Count == 0) throw new ArgumentException("Squad is empty.");
         if (setup.Wave.Count == 0) throw new ArgumentException("Wave is empty.");
@@ -159,7 +188,7 @@ public static partial class BattleEngine
         // live on BattleRunState (BattleRunState.cs, nested in this partial class). Zero behavior
         // change: every line below is the same statement sequence as before extraction, reading
         // through `state.` instead of a captured local.
-        var state = new BattleRunState(setup, seed, trace, onEffectHostReady);
+        var state = new BattleRunState(setup, seed, trace, onEffectHostReady, actionCatalog, containerResolver);
 
         // B14: the round boundary runs on the kernel's own EventQueue/SimulationClock — the same
         // primitives every other Timeline module uses — instead of a raw integer counter. `Resolve`
@@ -182,10 +211,18 @@ public static partial class BattleEngine
         const string RoundEventOwnerKey = "round";
         const string StatusPulseEventOwnerKey = "status-pulse";
 
+        // The battle's own absolute horizon (BattleRuleset.MaxRounds, converted to a tick). The
+        // pre-B16 loop was ALWAYS bounded by `rounds < MaxRounds`; status pulses now live on the
+        // same timeline and need the identical ceiling, or a long/unbounded-duration status against
+        // two sides that never wipe each other schedules forever once round events stop — a real
+        // infinite loop this exact scenario hit and was caught by, not a hypothetical.
+        var maxBattleTick = (long)BattleRuleset.MaxRounds * BattleRuleset.RoundDurationMs;
+
         void ScheduleNextStatusPulse()
         {
             if (state.NextStatusPulseAt() is not { } at) return;
             var tick = (long)Math.Round((at - state.T0).TotalMilliseconds);
+            if (tick > maxBattleTick) return;
             roundQueue.Schedule(Math.Max(tick, roundClock.Now), StatusPulseEventOwnerKey, StatusPulseEventKind, 0);
         }
 
@@ -194,8 +231,23 @@ public static partial class BattleEngine
             roundQueue.Schedule(BattleRuleset.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
         ScheduleNextStatusPulse();   // initial statuses may already carry a due pulse in flight
 
+        // Belt-and-suspenders on top of `maxBattleTick`, the same shape the kernel's own test rigs
+        // already use (e.g. TurnFsmActionEnvelopeTests.Rig.Pump's `guard < 10_000`): `maxBattleTick`
+        // is the domain-correct fix, but a hard iteration cap means a bug this shape ever produces
+        // again throws loudly and fast instead of spinning to an OOM crash — which is exactly what
+        // happened here once already, from status-pulse events not being bounded by MaxRounds.
+        // 200k comfortably covers the worst realistic case (a 1 ms period for the full 50-round
+        // horizon is 50,000 pulses) with headroom, and a real runaway still fails fast well short
+        // of exhausting memory.
+        const int MaxLoopIterations = 200_000;
+        var loopGuard = 0;
+
         while (roundQueue.Count > 0)
         {
+            if (++loopGuard > MaxLoopIterations)
+                throw new InvalidOperationException(
+                    $"BattleEngine.Resolve exceeded {MaxLoopIterations} scheduling iterations — a runaway event loop, not a long battle. WaveId '{setup.WaveId}', seed {seed}.");
+
             if (!state.AnyActive("squad") || !state.AnyActive("wave")) break;   // decided by an earlier sub-round pulse; a stale scheduled event is never acted on
 
             roundClock.TryAdvance(roundAdvance, roundQueue);
@@ -252,7 +304,7 @@ public static partial class BattleEngine
                     // `act.attack` (BasicAttack.cs). Everything below this call is EngineBehavior
                     // trait tail (E12), extracted to BattleRunState.DispatchHit (B13) but otherwise
                     // unchanged.
-                    var step = RunBasicAttackStep(attacker, state.Actors, state.Status, now, state.Calculator, state.CritRng, trace, rounds);
+                    var step = RunBasicAttackStep(attacker, state, now, roundClock.Now, state.Calculator, state.CritRng, trace, rounds);
                     if (step.Outcome == AttackStepOutcome.Continue) continue;
                     if (step.Outcome == AttackStepOutcome.Break) break;
 
@@ -271,7 +323,10 @@ public static partial class BattleEngine
                 }
 
                 trace?.Phase(rounds, "shield-upkeep");
-                state.Shields.Tick(rounds, BattleRuleset.RoundDurationMs, ownerKey =>
+                // B17: true ms tick, not the round counter — matches DurationTicks now carrying
+                // true ms (BattleRunState.cs), so an innate shield expires at its authored duration
+                // instead of being silently extended to the next whole round boundary.
+                state.Shields.Tick(roundClock.Now, BattleRuleset.RoundDurationMs, ownerKey =>
                 {
                     var key = ownerKey.StartsWith("entity:", StringComparison.Ordinal)
                         ? ownerKey.Substring("entity:".Length)
@@ -339,41 +394,6 @@ public static partial class BattleEngine
 
     static bool AnyActive(List<ActorState> actors, string side) =>
         actors.Any(a => a.Active && a.Setup.Side == side);
-
-    /// <summary>
-    /// Target policy: first active opponent, unless the attacker is bloodthirsty (lowest-HP
-    /// active opponent, ties by list order). A loyal actor adjacent to the chosen target then
-    /// intercepts the hit entirely.
-    /// </summary>
-    static ActorState? SelectTarget(List<ActorState> actors, ActorState attacker, StatusRuntime status, DateTimeOffset now)
-    {
-        ActorState? target = null;
-        if (attacker.Has("bloodthirsty"))
-        {
-            foreach (var a in actors)
-                if (a.Active && a.Setup.Side != attacker.Setup.Side && (target == null || a.Hp < target.Hp))
-                    target = a;
-        }
-        else
-        {
-            foreach (var a in actors)
-            {
-                if (a.Active && a.Setup.Side != attacker.Setup.Side)
-                {
-                    target = a;
-                    break;
-                }
-            }
-        }
-
-        if (target == null)
-            return null;
-
-        var bodyguard = FindAdjacentWithTrait(actors, target, "loyal");
-        if (bodyguard != null && !IsCcLocked(status, bodyguard.Setup.Key, now))
-            return bodyguard;
-        return target;
-    }
 
     /// <summary>First active same-side setup-order neighbor (index ±1) carrying the trait.</summary>
     static ActorState? FindAdjacentWithTrait(List<ActorState> actors, ActorState around, string traitId)

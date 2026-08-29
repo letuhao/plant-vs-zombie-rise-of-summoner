@@ -1,18 +1,23 @@
 using System.Text.Json;
+using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Effects.Atoms;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Battle;
 
 /// <summary>
 /// T22 (action-todo.md, Checkpoint 5): "the auto-equipped set appears in the battle report."
-/// `BattleEngine` itself has no notion of actions/skills at all — its round loop always runs the one
-/// fixed basic attack (confirmed by search, not assumed) — so this is pure observability: a value that
-/// rides from <see cref="BattleActorSetup"/> to <see cref="BattleActorResult"/> unread by anything in
-/// between. `WebMatchService`'s own real wiring (populating the field from
-/// <c>RpgStore.GetLoadoutOrAutoEquip</c>) is proven separately in `BuildSquadEquippedActionsTests.cs`
-/// (FusionRpg.Server.Tests) — this file proves the engine's OWN half: it carries what it is given, and
-/// carries nothing when it is given nothing.
+/// **Reopened 2026-08-28 (A17, action-map.md §12):** the doc comment this file originally shipped
+/// with claimed "`BattleEngine` itself has no notion of actions/skills at all" as a settled fact —
+/// which a completeness audit found was true only because nothing had ever wired it, not because it
+/// was structurally inert. A17's own module spec makes equipped loadouts meaningful; this file's
+/// tests now supply a real (if synthetic) <see cref="ActionCatalog"/> so the loud "an equipped id
+/// must resolve against a real catalog" validation A17 added doesn't refuse them. The
+/// "fight identically" test below is still TRUE today — A17's own build order (T35/T36 land the
+/// plumbing; T37 wires actual consumption) means nothing reads `HeldActionsOf` for real behavior
+/// yet — but its premise is explicitly scheduled to flip once T37 lands, and its own evidence there
+/// must update this file rather than leave it stale.
 /// </summary>
 public class EquippedActionIdsReportingTests
 {
@@ -29,6 +34,21 @@ public class EquippedActionIdsReportingTests
         EquippedActionIds = equipped,
     };
 
+    /// <summary>A minimal, degenerate compiled action for an arbitrary id — enough to satisfy A17's
+    /// loud loadout validation, carrying no real atoms/costs (this file tests reporting, not
+    /// resolution).</summary>
+    static CompiledAction Dummy(string actionId) => new(
+        ActionId: actionId, Kind: ActionKind.Skill, Rung: 0, Tags: Array.Empty<ActionTag>(),
+        Enabled: true, Revision: 0, Grantable: false, DefaultAttackEligible: false, ContainerId: "",
+        Envelope: FusionRpg.Core.Battle.Timeline.ActionEnvelope.NoOp with { ActionId = actionId },
+        Targeting: TargetSpecCompiler.Compile(new ActionTargetSpec()),
+        MinRange: 0, MaxRange: int.MaxValue, RangeChannel: null, RequiresLineOfSight: false,
+        Condition: PredicateCompiler.Always, Costs: Array.Empty<CompiledActionCost>(),
+        Scopes: Array.Empty<ActionScopeRow>());
+
+    static ActionCatalog CatalogFor(params string[] actionIds) =>
+        ActionCatalog.Build(actionIds.Select(Dummy).ToList());
+
     [Fact]
     public void A_populated_EquippedActionIds_rides_from_setup_to_the_final_result()
     {
@@ -39,7 +59,7 @@ public class EquippedActionIdsReportingTests
             Wave = new[] { Actor("wave:0", "wave") },
         };
 
-        var report = BattleEngine.Resolve(setup, seed: 1);
+        var report = BattleEngine.Resolve(setup, seed: 1, actionCatalog: CatalogFor("skill.fireball", "skill.heal"));
 
         var squadActor = report.Actors.Single(a => a.Key == "squad:0");
         Assert.Equal(new[] { "skill.fireball", "skill.heal" }, squadActor.EquippedActionIds);
@@ -74,7 +94,8 @@ public class EquippedActionIdsReportingTests
         };
 
         var withNone = BattleEngine.Resolve(SetupWith(null), seed: 7);
-        var withSomething = BattleEngine.Resolve(SetupWith(new[] { "skill.anything" }), seed: 7);
+        var withSomething = BattleEngine.Resolve(SetupWith(new[] { "skill.anything" }), seed: 7,
+            actionCatalog: CatalogFor("skill.anything"));
 
         // Strip the field itself before comparing everything else byte-for-byte.
         string Canonical(BattleReport r) => JsonSerializer.Serialize(r with

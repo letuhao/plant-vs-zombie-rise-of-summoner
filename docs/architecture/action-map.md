@@ -1,6 +1,19 @@
 # Combat action — capability map
 
-**Status:** **REVISED 2026-08-27** against the sealed [action-ideal.md](action-ideal.md) — 16 modules (10 revised, 6 new), awaiting owner approval before module specs are written. Superseded header follows for history: **Proposed capability map (2026-08-22)** — module ids, dependency direction, and build order for review. No specs written, no build authorized. **Blocked by owner decision D1: the effect-atom program is specced first** ([effect-atom-map.md](effect-atom-map.md)), so nothing here starts until that map and its module specs exist. Grounding: [effect-atom-ideal.md](effect-atom-ideal.md), [battle-turn-ideal.md](battle-turn-ideal.md), [battle-timeline-map.md](battle-timeline-map.md), the code audit in §2, and the Chaos `action-core` / `combat-core` doc set (§7).
+**Status:** **REOPENED 2026-08-28.** A1–A16 (minus the named-deferred A9/A10/A8-reaction-lane) built
+and closed — see `tasks/action-todo.md`. **Correction, propagated from a completeness audit:** §6's
+Checkpoint A/C lines below read as "the engine runs battles through the action model," which is not
+what shipped — verified directly against `BattleEngine.cs`/`BattleRunState.cs`, which import zero
+action-program types except one inert, unread data declaration (`BasicAttack.cs`'s
+`BasicAttackEnvelope`/`BasicAttackTargeting`). `A5`'s own spec (`spec-basic-attack-adoption.md`) is
+completely honest about this — its whole point was an **inert, byte-identical proof that the
+envelope shape works**, explicitly never routing runtime combat through it ("If a player could tell
+the difference, this module failed"). `A7`'s own task evidence (`action-todo.md` T34) is equally
+honest: *"wiring a real kernel loop around `IIntentSource` is a different module's work, not
+invented as a scope reduction here."* The overclaim was only ever in this map's own §6 summary
+wording, corrected below. **A17–A20 (this reopening) are that different module's work** — see §12.
+
+**Status (2026-08-27, prior reopening):** **REVISED** against the sealed [action-ideal.md](action-ideal.md) — 16 modules (10 revised, 6 new), awaiting owner approval before module specs are written. Superseded header follows for history: **Proposed capability map (2026-08-22)** — module ids, dependency direction, and build order for review. No specs written, no build authorized. **Blocked by owner decision D1: the effect-atom program is specced first** ([effect-atom-map.md](effect-atom-map.md)), so nothing here starts until that map and its module specs exist. Grounding: [effect-atom-ideal.md](effect-atom-ideal.md), [battle-turn-ideal.md](battle-turn-ideal.md), [battle-timeline-map.md](battle-timeline-map.md), the code audit in §2, and the Chaos `action-core` / `combat-core` doc set (§7).
 
 > **⛔ RE-DESIGNED 2026-08-27 — read [action-ideal.md](action-ideal.md) first.** The owner reopened this
 > program. The ten module specs below are stale in the places that ideal's §8 lists (five resources vs six,
@@ -182,9 +195,16 @@ Scope questions like *"is summoning an action?"* and *"do drain-channels ship in
 
 ## 6. Checkpoints
 
-- **✅ Checkpoint A — the seam is real.** A1+A2+A4+A5: the engine's existing attack runs as a declared action through the envelope, all eight goldens byte-identical. If the envelope needs fields it does not have, this is where we find out — before six more timeline modules are built on it.
+- **✅ Checkpoint A — the seam is provably compatible (corrected wording, 2026-08-28).** A1+A2+A4+A5:
+  the engine's existing attack is **expressible** as a declared action through the envelope — proven
+  by an inert, byte-identical fixture, all eight goldens untouched. `BattleEngine` itself still calls
+  its own `SelectTarget`/`RunBasicAttackStep` at runtime; the envelope was never wired in as the live
+  path. That wiring is A17 (§12), not something this checkpoint already delivered.
 - **✅ Checkpoint B — actions are content.** A3+A6: a second and third action exist as data, not code, with costs.
-- **✅ Checkpoint C — something chooses.** A7: auto-battle policy replaces `SelectTarget`, and the interactive seam has a real implementation behind it.
+- **✅ Checkpoint C — the AI exists but nothing drives it (corrected wording, 2026-08-28).** A7 built
+  and exhaustively tested `StubIntentSource`/`IBattleView` in isolation — deterministic, zero-alloc,
+  proven to terminate — but, per its own task evidence, **no kernel loop calls it**. `SelectTarget`
+  remains the only targeting path any real battle executes. A17 is where a real loop finally drives it.
 - **⛔ Checkpoint D — new action kinds.** A8+A9 change what a turn can contain; they need the timeline's reaction lane and a decision on movement geometry.
 
 ## 7. What is inherited from Chaos, and what is refused
@@ -647,3 +667,95 @@ The atom specs are **audited and sealed**, so nothing here waits on their review
 3. Targeting is a system with deterministic ordering, not a private method.
 4. `SelectTarget` is gone, replaced by an `IIntentSource` implementation that both auto-battle and interactive play use.
 5. No condition language, no power currency, and no effect vocabulary is invented here that the atom program already owns.
+
+## 12. Reopening 2026-08-28 — A17–A20, delivering on Checkpoint A/C for real
+
+**Why now.** A completeness audit (owner-requested, ahead of Phaser frontend work) found that
+`BattleEngine` — the only thing that decides who hits whom — imports zero action-program types
+except `BasicAttack.cs`'s inert proof data. A player's equipped loadout (`A16`) reaches a battle
+report as pure metadata and has never once changed what happens in a battle. **Owner priority:
+backend correctness for balance tuning first, not the frontend** — a Phaser client would be built
+against a system that doesn't yet do anything a loadout-comparison tool could measure.
+
+**Scope, decided explicitly (not the narrowest reading):**
+- **Full switch-over, not a staged/parallel path.** Unlike B16/B17 (battle-timeline, same repo, same
+  week — additive, byte-identical-by-default, observable only for new content), the owner chose to
+  route **every** battle through the new action-driven path, including actors with no explicit
+  loadout. **Correction, propagated 2026-08-28 after A17 actually landed:** this paragraph originally
+  predicted the switch-over "will move the eight goldens" — verified false, not merely optimistic.
+  Full suite run post-swap: Core 4353/4353, all 8 goldens byte-identical, zero test edited outside
+  A17's own new files. The prediction assumed the mechanism change would be observable; it wasn't,
+  because every `UsabilityEvaluator` gate trivially passes for today's content and the no-board
+  `NearestEnemy` fallback is provably the same pick `SelectTarget` made (see `action-todo.md` T37/T39
+  evidence). Owner chose to hold the `RulesetVersion` bump rather than version a mechanism change with
+  no measured delta — recorded in `decisions.md`'s new "Action selection (battle adoption)" row, with
+  the real trigger condition for the next bump. **A18 is not exempt from this lesson**: predicting it
+  moves goldens is not the same as testing that it does — run the suite before asserting either way.
+- **Full multi-action loadouts**, not "one skill replaces the hardcoded attack." An actor holds
+  several actions; `StubIntentSource`'s already-built, already-tested preference ranking chooses one
+  per turn. This is what actually lets a balance pass compare build X against build Y — a
+  single-action slice would not.
+- **Explicitly out of scope:** the grant-writer (no real player-owned loadout persistence yet —
+  synthetic loadouts, constructed directly like `CombatSim` already does for `ChannelMods`, are the
+  test input); any Server/API surface; any frontend; movement (`A9`), the battle-board (`A10`), and
+  the reaction lane (`A8`'s other half) — all still separately deferred, per §"Deferred" in
+  `tasks/action-todo.md`.
+
+### 12.1 The modules
+
+| id | Name | What it owns | Depends on |
+|---|---|---|---|
+| **A17** | `action-selection-adoption` | Wires `IBattleView` + `StubIntentSource` into `BattleEngine`'s per-actor turn, replacing `SelectTarget` — who gets targeted and which equipped action fires, each turn | A2, A4, A7 (all built) |
+| **A19** | `action-costs-cooldowns-adoption` | Wires `ActionRunner`/`CooldownLedger`/`CostLedger` so a skill's cooldown and resource cost are actually enforced turn to turn — without this, a "3-turn-cooldown nuke" has no cooldown at all | A17, A18, A3 (built) |
+| **A20** | `synthetic-loadout-harness` | A clean, test/tool-facing way to hand `BattleEngine` a specific multi-action loadout for balance comparison — the direct input this whole reopening exists to serve | A17 (developed alongside once A17/A18 prove out) |
+
+**A18 splits (2026-08-28), same shape as `effect-atom-map.md`'s own E14a/E14b precedent** — what
+looked like one module ("resolve whichever action A17 chose") turned out to bundle five
+independently testable capabilities once the ground truth was checked: `AtomKindRegistry.cs` marks
+`resource.delta`/`shield.grant` as Battle-capable except for a missing grant path (H3, below);
+`stat.modify`/`status.apply` are markedly further from live in battle (`stat.modify` because
+`BattleEffectSink` ignores FA1 outright, `status.apply` because battle's only status path today is
+scripted setup, never atom-triggered); and there is no trigger in the atom layer's closed 7-trigger
+vocabulary for "an actor just used this action," which every other sub-module needs before it has
+anything to fire.
+
+| id | Name | What it owns | Depends on |
+|---|---|---|---|
+| **A18a** | `action-container-binding` | The ephemeral binding seam: what "bind action X's compiled container to attacker+target, for this one use" means in battle, given the grant-writer stays out of scope (no durable `EffectBinding` row — synthetic/direct construction, matching A17's own test-input pattern) | A17 |
+| **A18b** | `on-activate-trigger` | New atom trigger `OnActivate` — fires once per declared action use, independent of hit/miss (self-buffs, cast-time effects; `OnDamageDealt`-triggered riders like `fx.poison_on_hit` keep firing on landed hits, unchanged). A cross-program vocabulary change to the atom layer's closed 7-trigger list (effect-atom-map.md H4) — this module's own spec is the reviewed-change proposal, not a unilateral addition | A18a |
+| **A18c** | `battle-resource-shield-grants` | Wires the grant path for `resource.delta` (FA10 riders, plus the DoT/contagion payload that already piggybacks on it) and `shield.grant` (finishes T14 — `Bag.ShieldGate` is wired, nothing calls `Bag.Grant`/`OnEvent` yet) | A18a, A18b |
+| **A18d** | `battle-status-apply` | New `BattleEffectSink` branch for `status.apply` (FA2) — an atom-triggered `StatusRuntime.Apply` call, distinct from today's scripted-initial-statuses-only path | A18a, A18b |
+| **A18e** | `battle-live-stat-modifiers` | A sourced, revertible modifier layer over `ActorDerivedSnapshot` (today a spawn-time-only, last-write-wins snapshot — no Flat/Increased/More/Override phases, no re-compose step anywhere in the round loop) plus the live recompose step itself, so `stat.modify` (FA1) actually affects ongoing combat, not just the pre-battle setup composition it already does | A18a, A18b |
+
+**Build order:** A17 → A18a → A18b → {A18c, A18d in parallel} → A18e → A19, with A20 developed
+alongside once A17/A18a/A18b prove out. A18e lands last — highest-risk and most novel (new
+architecture on `ActorDerivedSnapshot`'s currently-immutable-after-spawn shape), so the grant-path
+concept proves out on the better-understood kinds (A18c/A18d) first.
+
+### 12.2 Golden ordering
+
+Per this repo's own established rule ("freeze first, move last" — §10.3 above, and
+`spec-kernel-adoption.md`'s identical rule for battle-timeline): this reopening is a **mover**, not a
+freezer. It lands **after** any currently-in-flight freezer work on the battle goldens, with its own
+single combined re-bless, predicted-delta writeup, and win-rate sweep — not folded into any other
+program's re-bless event.
+
+### 12.3 Checkpoints
+
+- **✅ Checkpoint E — selection is real — CLOSED 2026-08-28.** A17: `SelectTarget` is gone from the
+  live path; `StubIntentSource` decides targeting and action choice for every actor, every turn.
+  Closed on the finding that there was nothing to re-bless — zero goldens moved, verified not
+  assumed — rather than a forced version bump; see `action-todo.md` T35–T39.
+- **✅ Checkpoint F — actions resolve for real — CLOSED 2026-08-28.** A18a–e: a real skill's atoms
+  fire through the same path the basic attack always used, target-for-target, hit-for-hit — grants
+  (`resource.delta`, `shield.grant`), statuses (`status.apply`), and live stat modifiers (`stat.modify`)
+  all reach a real actor in a real battle, each proven against real shipped content
+  (`fx.board_cherry`/`fx.overlay_damage`/`fx.shield_grant`/`fx.poison_on_hit`/`fx.passive_atk_flat`)
+  where one exists. Zero goldens moved across all five sub-modules — measured at every checkpoint, not
+  assumed; `RulesetVersion` stays 4. See `action-todo.md` T40–T54.
+- **⛔ Checkpoint G — costs bite.** A19: a skill on cooldown, or one an actor cannot afford, is
+  refused by the same gate `UsabilityEvaluator` already defines — proven with a fixture that would
+  pass silently if the gate were bypassed.
+- **⛔ Checkpoint H — a balance pass can actually run.** A20: two different synthetic loadouts on the
+  same actor produce measurably different aggregate outcomes across many seeds — the acceptance bar
+  this whole reopening was built to reach.

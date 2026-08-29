@@ -392,23 +392,123 @@ overload to preserve since `Resolve` already carries two optional trailing param
 
 ## Phase 3 — the deliberate change (T9)
 
-- [ ] **B16: status pulses on the timeline**
-  - Kernel schedules pulses at true times and drives `StatusRuntime.Tick` at those ticks with an exact ms→`DateTimeOffset` conversion. (Its bounded catch-up loop already exists — this may need no `StatusRuntime` rewrite.)
+- [x] **B16: status pulses on the timeline** — **built 2026-08-28.** Kernel schedules pulses at
+    true times and drives `StatusRuntime.Tick` at those ticks with an exact ms→`DateTimeOffset`
+    conversion. `StatusRuntime` itself needed **no rewrite**, matching the spec's own hope — its
+    bounded catch-up loop was already correct; the fix lives entirely in `BattleEngine`/`BattleRunState`.
+  - `BattleRunState.NextStatusPulseAt()`: the earliest live instance's own `NextPulse`, so the kernel
+    always schedules against the TRUE next-due tick rather than a fixed round-open cadence.
+  - `BattleEngine.Resolve`'s round loop gained a second event kind (`StatusPulseEventKind`) sharing
+    the same `EventQueue`/`SimulationClock` B14 already built. The round-open call to `Status.Tick`
+    is **gone** — status delivery is now fully event-driven; round-open only runs the regenerator
+    trait pulse. Exactly one status-pulse event is pending at a time, recomputed and rescheduled
+    after each fire, same pattern B14 already established for rounds.
+  - **A real infinite-loop bug was found and fixed during verification, not assumed away.** First
+    implementation only gated `NextStatusPulseAt()` by `PeriodMs > 0`, missing that
+    `StatusRuntime.Tick` itself additionally requires `Kind == OverTime || Kind == Contagion` before
+    it will ever fire or advance `NextPulse` — a pure-CC status like `butter`
+    (`StatusKind.UnityCc`, authored with `PeriodMs: 1000` purely as an artifact of the shared
+    `BattleStatusSpec` shape) has a `NextPulse` that **never advances**, so the scheduler kept
+    rescheduling the exact same stuck tick forever. Caught live: a background full-suite run hit a
+    30 GB test-host process before being killed; `BasicAttackHazardTests.Hazard2` (a `butter`-CC'd
+    actor) was the exact trigger once isolated. Fixed by mirroring `Tick`'s own `Kind` gate in
+    `NextStatusPulseAt()` — not a `MaxRounds` band-aid, per the owner's own correction mid-debug: the
+    real defect was in the status-eligibility check, and a battle-length cap alone would not have
+    stopped a stuck-tick loop (it was never advancing far enough to reach that ceiling anyway).
+  - **Two defensive measures added on top of the real fix, not instead of it:** (1) `maxBattleTick`
+    (`MaxRounds × RoundDurationMs`, reusing the EXISTING tunable — no new magic number) bounds status
+    scheduling to the battle's own horizon, since a status's `DurationMs` can legitimately outlive
+    `MaxRounds` rounds; (2) a hard `MaxLoopIterations = 200_000` guard on the driving `while`, the
+    same `for (var guard = 0; guard < N; guard++)` circuit-breaker shape this codebase's own test
+    rigs already use (e.g. `TurnFsmActionEnvelopeTests.Rig.Pump`) — throws loudly and fast (proven:
+    ~1 second) instead of spinning to an OOM crash, so a bug this shape ever produces again fails
+    safely rather than repeating the incident.
+  - **Goldens and expedition hashes: unchanged.** None of the four canonical battle scenarios or
+    four expedition tiers use a sub-1000ms-period status, so B16 has zero observable effect on them
+    — verified by diffing old vs. newly-captured trace digests line-for-line before re-blessing, not
+    assumed. The **only** diff across all 11 affected trace fixtures (3 in `Battle/Adoption/`, 8 in
+    `Actions/`) is the removed `phase N status` marker (status ticking moved off round-open) — zero
+    `draw`/`state`/`target`/`apply` lines differ anywhere. Both fixture families re-blessed after
+    manual diff review.
+  - `PreAdoptionTraceTests.Sub_round_period_under_delivers_today` renamed to
+    `Sub_round_period_delivers_the_true_pulse_count`, assertion updated from `1_000_000 - 100` (4
+    pulses × 25, the old bug) to `1_000_000 - 400` (16 pulses × 25, the true schedule) — this test
+    **is** the acceptance criterion's own fixture (`PeriodMs=250, DurationMs=4000`), now proving 16
+    pulses land, not 4. Legitimate test edit: Checkpoint B (which this test locked through) is
+    already closed and separate from Phase 3's deliberate-change territory.
+  - Verified: `Hazard2` isolated 28ms (was: runaway); full Core suite **4347/4347 clean** (one
+    unrelated pre-existing flake — `ActionUsabilityEvaluatorTests.Evaluation_allocates_zero_bytes_once_warm`,
+    a test-order-sensitive allocation warmup check untouched by this work, confirmed passing in
+    isolation); Data 532/532, Guard 116/116, CheatCore 40/40, Launcher 162/162, E2E 194/194 — all at
+    their exact pre-B16 counts; all 4 boundary guards green.
   - Acceptance: a `PeriodMs=250, DurationMs=4000` status delivers **16** pulses, not 4.
   - Verify: `--filter ~Status`. Scope: M.
 
-- [ ] **B17: shield upkeep on the timeline**
+- [x] **B17: shield upkeep on the timeline** — **built 2026-08-28.**
   - Round-ticks → ms ticks; **fix the regen carry**, which truncates to zero below 1000‰ if driven at 1 ms.
+  - `ShieldRuntime.Tick`'s regen carry (`src/FusionRpg.Core/Combat/Shield/ShieldRuntime.cs`): the
+    carry now accumulates the RAW `ratePm * deltaMs` product and divides only once, when extracting
+    whole HP (`/1_000_000` instead of dividing the per-call increment by `1000` before adding it).
+    The old shape divided BEFORE accumulating, so any call where `ratePm*deltaMs < 1000` contributed
+    exactly zero — silently losing that fraction forever rather than deferring it. **Proven
+    byte-identical at the existing 1000ms-per-call cadence by induction** (not just empirically): for
+    every call, `carry_new = 1000 × carry_old` and `whole_new = whole_old` holds exactly, because
+    1000 divides `1000×ratePm` cleanly — verified in the todo before touching the code, then
+    confirmed by all 238 shield tests passing unedited.
+  - `BattleRunState`'s innate-shield application: `DurationTicks` is now `innate.DurationMs` directly
+    — no more `(ms + RoundDurationMs - 1) / RoundDurationMs` ceiling to whole rounds.
+    `BattleEngine.Resolve`'s shield-upkeep call now passes `roundClock.Now` (the true simulated ms
+    tick) instead of the round counter, so both sides of the expiry comparison agree on true-ms units.
+  - **Observable effect today: none, and this is mathematically necessary, not a lucky coincidence.**
+    Shield-upkeep is still only CHECKED once per round (B26, not B17, is where it becomes genuinely
+    sub-round event-driven — `battle-timeline-map.md`'s own Phase 6 language). Since checks happen
+    only at round boundaries (ticks 1000, 2000, 3000…), "the first round boundary ≥ true-ms
+    duration" is *identically* `ceil(duration/1000)` — the round-ceiling and true-ms representations
+    can only ever disagree on the round the check *evaluates on*, and they never do while checks stay
+    round-quantized. Confirmed directly: `BattleShieldTests.Timed_innate_shield_expires_by_rounds`
+    (a 2500ms shield, the exact case that would reveal any mismatch) still expires at round 3,
+    unedited. The fix's real value is removing a silent unit mismatch (a "1000‰" precision hazard
+    already recorded in the todo) and setting up B26's eventual per-frame drive correctly, not a
+    behavior change today.
+  - Verified: shield suite **238/238** unedited (including the regen-precision and 2500ms-expiry
+    cases that would have caught either fix being wrong); full Core suite 4347/4347; goldens +
+    expedition hashes unchanged (13/13); Data 532/532, E2E 194/194, Guard 116/116, CheatCore 40/40,
+    Launcher 162/162 — all at exact pre-B17 counts; all 4 boundary guards green.
   - Acceptance: shield durations honour true ms; regen accrues correctly at fine granularity; shield suite green.
   - Verify: `--filter ~Shield`. Scope: M.
 
-- [ ] **B18: version bump + re-bless + sweep**
-  - `RulesetVersion` 2 → 3; goldens re-blessed **once** with a written predicted delta; win-rate sweep produced.
-  - Acceptance: every re-blessed hash justified against a predicted delta; shape tests hold without seed re-selection, or the exception is named. **⛔ owner sign-off on the sweep.**
+- [x] **B18: version bump + re-bless + sweep** — **closed 2026-08-28, no bump — owner-confirmed
+  finding, not a unilateral call.** `RulesetVersion` (currently **4**, already past the "2 → 3" this
+  line's text predates — bumped separately by the 2026-08-25 combat-mitigation-shapes decision)
+  **stays 4.**
+  - **Verified, not assumed: B16+B17 produce zero measurable delta on any content that exists
+    today.** No canonical battle golden, expedition tier, hazard fixture, or shield test uses a
+    sub-1000ms status `PeriodMs` or a shield `DurationMs` that isn't already a multiple of
+    `RoundDurationMs` — confirmed by grep across the authored corpus, not inferred from the tests
+    passing. `tools/CombatSim` (the repo's one existing sweep tool, used for the 2026-08-25
+    mitigation-shape bump) **cannot measure this change at all** — its own README states it runs a
+    separate `StatusModel.cs` bookkeeping model, never `StatusRuntime.Tick` or the real
+    `BattleEngine` round loop, so it has zero mechanical path to the code B16/B17 touched.
+  - **Decision, put to the owner rather than made unilaterally:** bump anyway as a forward capability
+    marker, or hold the bump until real content actually exercises the changed path (at which point
+    it has a genuine, sweep-measurable delta to justify it) — matching every prior `RulesetVersion`
+    bump in this repo's history, each tied to an actual measured hash movement, never a "just in
+    case." **Owner chose: hold the bump.**
+  - **Trigger condition recorded, not just closed and forgotten:** the next content author who
+    grants a status with `PeriodMs < RoundDurationMs (1000)`, or an innate/granted shield with a
+    `DurationMs` not a multiple of 1000, makes this a live, measurable change — at that point
+    `RulesetVersion` bumps to 5, the specific golden(s) that moved get a predicted-delta writeup, and
+    (since `CombatSim` still can't see this path) a small `BattleEngine`-driven sweep script is the
+    right tool, not `CombatSim`. Recorded in `docs/architecture/decisions.md`'s Battle time model row
+    so it isn't rediscovered as a surprise.
+  - Acceptance: every re-blessed hash justified against a predicted delta; shape tests hold without seed re-selection, or the exception is named. **⛔ owner sign-off on the sweep — satisfied: the sweep's finding (nothing to sweep) was put to the owner directly, and the no-bump decision is theirs.**
   - Verify: full suites. Scope: M.
 
-### ⛔ Checkpoint B2 — versioned change
-- [ ] Timing correct, one re-bless, sweep signed off by the owner.
+### ✅ Checkpoint B2 — versioned change — **CLOSED 2026-08-28 (no version change)**
+- [x] Timing correct (B16/B17 both verified against their own acceptance lines); no re-bless needed
+  (zero goldens moved — verified by direct diff, not assumption); sweep finding — "nothing to
+  measure, confirmed mechanically" — put to the owner, who chose to hold the bump. This checkpoint
+  closes on that finding rather than on a forced version change.
 
 ## Phase 4 — interactive battles
 

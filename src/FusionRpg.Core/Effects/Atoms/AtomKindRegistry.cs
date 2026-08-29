@@ -17,12 +17,16 @@ public static class AtomKindRegistry
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     public const int KindCount = 12;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
-    public const int TriggerCount = 7;
+    public const int TriggerCount = 8;
 
-    /// <summary>Event triggers plus OnTimer — for kinds that can also fire on a tick.</summary>
+    /// <summary>Event triggers plus OnTimer plus OnActivate (A18b) — for
+    /// resource.delta/status.apply/shield.grant, the exactly-three kinds this reaches. Board kinds
+    /// stay on the narrower <see cref="AtomTriggers.Events"/> deliberately (H3: Battle is
+    /// <see cref="RuntimeState.None"/> for all of them regardless of trigger, so widening their
+    /// trigger list would authorize content nothing in battle can execute).</summary>
     static readonly string[] AllTriggers =
         { AtomTriggers.OnSpawn, AtomTriggers.OnDamageDealt, AtomTriggers.OnDamageTaken,
-          AtomTriggers.OnDeath, AtomTriggers.OnTimer };
+          AtomTriggers.OnDeath, AtomTriggers.OnTimer, AtomTriggers.OnActivate };
 
     /// <summary>
     /// The primary stat channels — <b>eleven</b> since E16.
@@ -68,6 +72,20 @@ public static class AtomKindRegistry
                     "the modifier bag; E16 promotes them.");
         }
 
+        // A18e (spec-battle-live-stat-modifiers.md §4): "effects cannot emit Override" was a doc
+        // comment on this kind's own description with nothing enforcing it -- found while building
+        // this module's own bind-time-refusal test. Same shape as G6's channel check, immediately
+        // above: a validated-but-never-checked claim is the exact defect this method exists to catch.
+        if (string.Equals(kindId, "stat.modify", StringComparison.Ordinal)
+            && pars.TryGetValue("op", out var op)
+            && string.Equals(op?.ToString(), "override", StringComparison.OrdinalIgnoreCase))
+        {
+            return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                "stat.modify ops are Flat|Increased|More — Override is not a legal op for this kind " +
+                "(it has no revert path; a permanent Override would leak, the same reason OnGranted/" +
+                "OnRemoved are lifecycle states, not authorable triggers, on this same kind).");
+        }
+
         return AtomRejection.Ok;
     }
 
@@ -94,12 +112,26 @@ public static class AtomKindRegistry
                     new ParamDef("channel", ParamKind.String, Required: true),
                     new ParamDef("op", ParamKind.String, Required: true),
                     new ParamDef("amount", ParamKind.Value, Required: true)),
-                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
-                AtomTriggers.None,
+                // A18e (spec-battle-live-stat-modifiers.md §4): Battle was None -- battle's sink
+                // ignored FA1 outright. A live, sourced/revertible-on-removal modifier ledger
+                // (BattleStatModifierLedger) now composes triggered stat.modify grants through the
+                // same PhasedComposeStrategy the overlay's own primary stat system uses. This
+                // module's own explicit call, not A18b's: widening AllTriggers here is a kind gaining
+                // trigger eligibility it never had, distinct from OnActivate existing at all.
+                // Permanent, no-trigger modifiers (definitions.md §14.2) keep working exactly as
+                // before -- but a naive widen broke them: AtomRowValidator.ValidateWhen infers "trigger
+                // REQUIRED" from Triggers.Count > 0 (found by running the existing ChannelExtensionTests
+                // fixture, not read from the code first), which had never needed to distinguish
+                // "triggers ALLOWED" from "trigger REQUIRED" before this kind. TriggerOptional: true
+                // (AtomKind.cs) is the fix -- stat.modify is the one kind that needs both shapes at once.
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.PlanOnly),
+                AllTriggers,
                 PowerCategory.Offense | PowerCategory.Survivability,
-                "FA1. Ops are Flat|Increased|More — effects cannot emit Override. " +
-                "Battle's sink ignores FA1, so battle is not supported. " +
-                "Permanent modifier: declares no trigger (definitions.md §14.2)."),
+                "FA1. Ops are Flat|Increased|More — effects cannot emit Override (enforced at bind, " +
+                "Validate's own stat.modify check). Battle's sink now handles FA1 through a live " +
+                "modifier ledger (A18e). Permanent modifier: declares no trigger (definitions.md §14.2) " +
+                "— OR is now triggered, contributing from first fire onward (A18e's own scope).",
+                TriggerOptional: true),
 
             new("stat.derived", AttachPoint.Stat, new ParamSchema(
                     new ParamDef("channel", ParamKind.String, Required: true),
@@ -140,10 +172,13 @@ public static class AtomKindRegistry
                     new ParamDef("durationMs", ParamKind.Value),
                     new ParamDef("tickBudget", ParamKind.Int),
                     new ParamDef("spread", ParamKind.Object)),
-                // D6: Battle was Full. Battle's sink does handle FA10, but no ATOM can reach it —
-                // BattleEngine never grants and never calls OnEvent, so a bound resource.delta is a
-                // silent no-op. Full again when battle grows a grant path.
-                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
+                // D6: Battle was Full, then downgraded to None because no ATOM could reach it —
+                // BattleEngine never granted and never called OnEvent. A18c (spec-battle-resource-shield-grants.md)
+                // grew that grant path: OnActivate/OnDamageDealt now fire, Bag.Status/Bag.StatusRng
+                // are wired, and a real shipped def (fx.overlay_damage) proves plain amounts, the
+                // DoT/contagion payload, and the owner-matching dual-fire all work end to end
+                // (BattleResourceShieldGrantsTests, T46). Full again, for real this time.
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.PlanOnly),
                 AllTriggers,
                 PowerCategory.Offense | PowerCategory.Survivability,
                 "FA10, hp add-only. The only opcode battle consumes. " +
@@ -176,7 +211,11 @@ public static class AtomKindRegistry
                     // for it; declaring durationMs here would validate a key nothing reads.
                     new ParamDef("duration", ParamKind.Value),
                     new ParamDef("level", ParamKind.Int)),
-                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Partial, RuntimeState.PlanOnly),
+                // A18d (spec-battle-status-apply.md): Battle was Partial -- StatusRuntime was mounted
+                // but reachable only through scripted InitialStatuses at battle setup, never through an
+                // atom-triggered event. BattleEffectSink now has its own ExecApplyStatus branch, proven
+                // against a real shipped def (fx.poison_on_hit, BattleStatusApplyTests, T49). Full.
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.PlanOnly),
                 AllTriggers,
                 PowerCategory.Control | PowerCategory.Offense,
                 "FA2 only. The DoT/contagion payload (statusId, periodMs, tickBudget, spread) lives on " +
@@ -214,11 +253,14 @@ public static class AtomKindRegistry
                     new ParamDef("durationTicks", ParamKind.Int),
                     new ParamDef("refillOnMerge", ParamKind.Bool),
                     new ParamDef("target", ParamKind.Object)),
-                // D6: shipped Full/Full/Full. ExecGrantShield requires Bag.ShieldGate, which is set in
-                // exactly two places — FoundationHarness and the injector's EffectRuntime. Neither
-                // BattleEffectHost nor SimEffectHost sets it, so in both the grant skips with
-                // "shield-runtime-missing". Sim is one line of wiring away; battle also needs a grant path.
-                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.None),
+                // D6: shipped Full/Full/Full, then downgraded — ExecGrantShield requires
+                // Bag.ShieldGate, which neither BattleEffectHost nor SimEffectHost set at the time.
+                // T14 wired Battle's own Bag.ShieldGate (this reopening, 2026-08-28); A18c
+                // (spec-battle-resource-shield-grants.md) grew the grant path on top of it (OnActivate/
+                // OnDamageDealt now fire real grants) — Battle is Full again, proven via a real shipped
+                // def (fx.shield_grant, BattleResourceShieldGrantsTests, T46). Sim's own ShieldGate is
+                // still unwired — a separate, un-scoped gap this module does not touch.
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.None),
                 AllTriggers,
                 PowerCategory.Survivability,
                 "The eleventh opcode: shipped, unnumbered, absent from the FA1-FA10 doc table, and " +

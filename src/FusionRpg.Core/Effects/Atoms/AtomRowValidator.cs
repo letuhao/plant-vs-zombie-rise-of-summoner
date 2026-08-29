@@ -177,9 +177,11 @@ public static class AtomRowValidator
             var t = AtomKindRegistry.ValidateTrigger(kind.KindId, trigger);
             if (!t.IsOk) return t;
         }
-        else if (kind.Triggers.Count > 0)
+        else if (kind.Triggers.Count > 0 && !kind.TriggerOptional)
         {
-            // The mirror case: a kind that fires on events must say which.
+            // The mirror case: a kind that fires on events must say which -- unless the kind itself
+            // declares the trigger optional (A18e: stat.modify may be a permanent, no-trigger
+            // modifier OR a triggered one, the one kind that needs both shapes at once).
             return AtomRejection.Fail(AtomRejectionReason.MissingParam,
                 $"{kind.KindId} requires a trigger");
         }

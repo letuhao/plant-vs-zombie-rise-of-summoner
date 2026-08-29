@@ -1,6 +1,8 @@
+using FusionRpg.Core.Actions;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Status;
 
@@ -12,7 +14,7 @@ namespace FusionRpg.Core.Battle;
 // rather than silent: putting it under Battle/Timeline/ would put every LINQ call and DateTimeOffset
 // use in this file under KernelPurityScan's full purity+tick-path rules (that directory has no
 // per-file exemption model for "ordinary battle-domain code that happens to be adjacent to the
-// kernel"), and it would force ActorState / SelectTarget / IsCcLocked / FindAdjacentWithTrait /
+// kernel"), and it would force ActorState / IsCcLocked / FindAdjacentWithTrait /
 // AnyActive / RunBasicAttackStep / EssenceTraits from `private` to `internal` just to stay
 // reachable across namespaces — a visibility change with no zero-behavior-change refactor should
 // need. Nesting BattleRunState inside `BattleEngine` instead (same trick BasicAttack.cs already
@@ -28,8 +30,39 @@ public static partial class BattleEngine
     /// skeleton (the `while` loop, initiative ordering, the per-attacker `Continue`/`Break` check) —
     /// turning that skeleton into scheduled kernel events is B14's job, deliberately not this one's.
     /// </summary>
-    sealed class BattleRunState
+    sealed class BattleRunState : IBattleView
     {
+        /// <summary>
+        /// A17 (spec-action-selection-adoption.md §2): the fallback held action for any actor whose
+        /// `EquippedActionIds` is null or empty — "no loadout" must still produce a legal, single-
+        /// action AI decision, never `ActionIntent.None` by construction. Hand-built rather than run
+        /// through `ActionCompiler.Compile`: the basic attack has no rung, no container, no atoms —
+        /// forcing it through the real-content compiler would mean inventing fake rung/container rows
+        /// for something that fundamentally has neither, exactly the trap `A5`'s own degenerate
+        /// envelope was designed to sidestep. `TargetSpecCompiler.Compile` and `PredicateCompiler.Always`
+        /// are still the REAL compiler pieces, reused rather than re-guessed, for the two fields that
+        /// have one.
+        /// </summary>
+        static readonly CompiledAction BasicAttackCompiled = new(
+            ActionId: BasicAttackEnvelope.ActionId,
+            Kind: ActionKind.Basic,
+            Rung: 0,
+            Tags: new[] { ActionTag.Offensive },
+            Enabled: true,
+            Revision: 0,
+            Grantable: false,
+            DefaultAttackEligible: true,
+            ContainerId: "",
+            Envelope: BasicAttackEnvelope,
+            Targeting: TargetSpecCompiler.Compile(BasicAttackTargeting),
+            MinRange: 0,
+            MaxRange: int.MaxValue,
+            RangeChannel: null,
+            RequiresLineOfSight: false,
+            Condition: PredicateCompiler.Always,
+            Costs: Array.Empty<CompiledActionCost>(),
+            Scopes: Array.Empty<ActionScopeRow>());
+
         public readonly List<ActorState> Actors;
         public readonly Dictionary<string, ActorState> ByKey;
         public readonly BattleEffectHost Host;
@@ -48,9 +81,21 @@ public static partial class BattleEngine
         public readonly HashSet<string> RecordedDeaths = new(StringComparer.Ordinal);
         public readonly Timeline.BattleTrace? Trace;
 
-        readonly List<ShieldEventRec> _shieldEventScratch = new();
+        /// <summary>A17: real ledger, per spec-action-selection-adoption.md §6 — inert for the
+        /// all-zero basic-attack envelope (`Class.None`), so A19's real cooldowns need no further
+        /// wiring here when they arrive.</summary>
+        public readonly Timeline.CooldownLedger Cooldowns = new();
 
-        public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace, Action<BattleEffectHost>? onEffectHostReady)
+        /// <summary>A18e (spec-battle-live-stat-modifiers.md §1): one instance per battle, same
+        /// lifetime as Cooldowns/Shields above.</summary>
+        public readonly BattleStatModifierLedger Ledger = new();
+
+        readonly List<ShieldEventRec> _shieldEventScratch = new();
+        readonly Dictionary<string, IReadOnlyList<CompiledAction>> _heldActions = new(StringComparer.Ordinal);
+
+        public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace,
+            Action<BattleEffectHost>? onEffectHostReady, ActionCatalog? actionCatalog = null,
+            IContainerEffectResolver? containerResolver = null)
         {
             Trace = trace;
 
@@ -94,6 +139,31 @@ public static partial class BattleEngine
             // comment) — wired here, to the SAME gate ordinary attacks already absorb through, so a
             // granted shield and a swing-dealt hit share one shield stack rather than two.
             Host.Bag.ShieldGate = ShieldGate;
+
+            // A18c (spec-battle-resource-shield-grants.md §1): the SAME shape as ShieldGate above,
+            // one line down. `EffectBag.cs:439`'s DoT/contagion piggyback (StatusEffectBridge.TryApplyFromGrant,
+            // called from the ApplyResourceDelta branch of FireGrant) is gated on Bag.Status/Bag.StatusRng
+            // being set -- neither BattleEffectHost nor SimEffectHost ever did, the exact same gap
+            // ShieldGate had. Wired to the SAME StatusRuntime/stream the round loop's own Status.Tick
+            // already uses -- one status system, one "status" RNG stream, every application path,
+            // never a second instance a grant-applied DoT would roll against differently than a
+            // scripted or pulse-delivered one.
+            Host.Bag.Status = Status;
+            Host.Bag.StatusRng = StatusRng;
+
+            // A18d (spec-battle-status-apply.md §1): the SAME shape, one level over -- BattleEffectSink
+            // (not Bag) needs its own Status/StatusRng reference to call StatusRuntime.Apply directly
+            // for a standalone status.apply (FA2) plan item, forwarded through Host's own settable
+            // properties since BattleEffectSink is private to BattleEffectHost.
+            Host.Status = Status;
+            Host.StatusRng = StatusRng;
+
+            // A18e (spec-battle-live-stat-modifiers.md §3): the same forwarding shape, one more
+            // property. ActorState already implements IBattleStatTarget (its own Derived/BaselineDefense
+            // are already public), so the SAME lambda shape resolveActor (below) already uses works
+            // here too -- just returning the wider interface.
+            Host.Ledger = Ledger;
+            Host.ResolveStatTarget = key => ByKey.TryGetValue(key, out var a) ? a : null;
             onEffectHostReady?.Invoke(Host);
 
             PulseSink = new BattlePulseSink((hostPtr, amount, effectId) =>
@@ -106,7 +176,11 @@ public static partial class BattleEngine
 
             // Innate shields (battle-adoption): direct apply at setup — snapshots composed in the
             // ActorState ctor, so the shield spec's capacity barrier is satisfied by construction.
-            // Content durations are ms; battle ticks are rounds.
+            // B17 (battle-timeline-todo.md): `DurationTicks` is now TRUE ms, passed straight
+            // through with no round-ceiling — "battle ticks are rounds" stopped being true the
+            // moment `ShieldRuntime.Tick` started being called with `roundClock.Now` (below)
+            // instead of a round counter. Round-ceiling meant a 100 ms innate shield silently lived
+            // a full 1000 ms round; the true value now expires exactly when authored.
             foreach (var a in Actors)
             {
                 if (a.Setup.InnateShield is not { } innate) continue;
@@ -117,9 +191,7 @@ public static partial class BattleEngine
                     Element = innate.Element,
                     BaseHp = innate.BaseHp,
                     Priority = innate.Priority,
-                    DurationTicks = innate.DurationMs is { } ms
-                        ? (ms + BattleRuleset.RoundDurationMs - 1) / BattleRuleset.RoundDurationMs
-                        : null,
+                    DurationTicks = innate.DurationMs,
                     RefillOnMerge = false,
                     IsInnate = true
                 }, a.Derived, nowTick: 0);
@@ -148,7 +220,118 @@ public static partial class BattleEngine
                         AttackerLess: true), scriptedApplyRng, T0);
                 }
             }
+
+            // A17 (spec-action-selection-adoption.md §2): compile each actor's loadout ONCE, here —
+            // never per decision, matching HeldActionsOf's own documented contract that the AI relies
+            // on for its "Reads scales with targets, not actions" acceptance bar. Null or empty
+            // EquippedActionIds (BattleModels.cs's own doc: "null when the caller has no
+            // action/loadout system to consult") falls back to the single hand-built basic attack —
+            // "no loadout" must still be a legal, single-action decision, never ActionIntent.None by
+            // construction. A non-empty list MUST resolve against a real, supplied ActionCatalog —
+            // loud failure on a missing id, never a silent skip, matching this codebase's standing
+            // "loud validation over silent corruption" stance.
+            foreach (var a in Actors)
+            {
+                var ids = a.Setup.EquippedActionIds;
+                IReadOnlyList<CompiledAction> held;
+                if (ids is null || ids.Count == 0)
+                {
+                    held = new[] { BasicAttackCompiled };
+                }
+                else
+                {
+                    if (actionCatalog is null)
+                        throw new ArgumentException(
+                            $"Actor '{a.Setup.Key}' has {ids.Count} equipped action id(s) but no ActionCatalog was supplied to resolve them.",
+                            nameof(actionCatalog));
+
+                    var list = new List<CompiledAction>(ids.Count);
+                    foreach (var id in ids)
+                    {
+                        var compiled = actionCatalog.Get(id)
+                            ?? throw new ArgumentException($"Actor '{a.Setup.Key}' has equipped action id '{id}', which is not in the supplied ActionCatalog.", nameof(actionCatalog));
+                        list.Add(compiled);
+                    }
+
+                    list.Sort(ActionTagPreference.Compare);
+                    held = list;
+                }
+
+                _heldActions[a.Setup.Key] = held;
+                BindContainers(a, held, containerResolver);
+            }
         }
+
+        /// <summary>
+        /// A18a (spec-action-container-binding.md §2): bind each held action's real atom container,
+        /// once, alongside the loadout compile above — never per decision, matching the same
+        /// "compile once" discipline A17's own loadout loop already established. A `ContainerId` a
+        /// non-empty loadout resolves to (basic attack's own `""` always skips) MUST resolve against a
+        /// real, supplied resolver — loud failure on a missing container or an empty result, never a
+        /// silent skip, matching this codebase's standing "loud validation over silent corruption"
+        /// stance (the same shape the `ActionCatalog` check just above already uses).
+        /// </summary>
+        void BindContainers(ActorState a, IReadOnlyList<CompiledAction> held, IContainerEffectResolver? containerResolver)
+        {
+            foreach (var action in held)
+            {
+                if (string.IsNullOrEmpty(action.ContainerId)) continue;
+
+                if (containerResolver is null)
+                    throw new ArgumentException(
+                        $"Actor '{a.Setup.Key}' holds action '{action.ActionId}' with container '{action.ContainerId}' but no IContainerEffectResolver was supplied to resolve it.",
+                        nameof(containerResolver));
+
+                var effectIds = containerResolver.EffectIdsFor(action.ContainerId);
+                if (effectIds.Count == 0)
+                    throw new ArgumentException(
+                        $"Actor '{a.Setup.Key}' holds action '{action.ActionId}' with container '{action.ContainerId}', which the supplied IContainerEffectResolver could not resolve.",
+                        nameof(containerResolver));
+
+                foreach (var effectId in effectIds)
+                {
+                    Host.Bag.Grant(new Contracts.EffectGrantDto
+                    {
+                        GrantId = $"battle:{a.Setup.Key}:{action.ActionId}:{effectId}",
+                        EffectId = effectId,
+                        OwnerKind = "entity",
+                        OwnerKey = Contracts.EffectOwnerKeys.Entity(a.Setup.Key),
+                        PluginId = "battle",
+                        Priority = 0,
+                    });
+                }
+            }
+        }
+
+        // ---- IBattleView (A17): the read seam StubIntentSource is confined to — never a direct
+        // read of Actors/ByKey from outside this class. PositionOf is always null (no board exists
+        // yet), which is what makes NearestEnemy's own SourceOrder fallback the live behavior today.
+        public IReadOnlyList<string> LiveActorKeys
+        {
+            get
+            {
+                var live = new List<string>(Actors.Count);
+                foreach (var a in Actors) if (a.Active) live.Add(a.Setup.Key);
+                return live;
+            }
+        }
+
+        public int SideOf(string actorKey) => ByKey[actorKey].Setup.Side == "squad" ? 0 : 1;
+
+        public GridPos? PositionOf(string actorKey) => null;
+
+        public EntityFacts FactsOf(string actorKey)
+        {
+            var a = ByKey[actorKey];
+            var hpMilli = a.MaxHp > 0 ? (int)Math.Clamp(a.Hp * 1000 / a.MaxHp, 0, 1000) : 0;
+            var elementId = a.Setup.ElementPrimary is { } e ? (int)e : 0;
+            return new EntityFacts(
+                Side: SideOf(actorKey), TypeId: a.Setup.TypeId, HpMilli: hpMilli, ElementId: elementId,
+                Row: 0, Col: 0, IsMindControlled: false, IsKiller: false, StatusMask: 0);
+        }
+
+        public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) =>
+            _heldActions.TryGetValue(actorKey, out var held) ? held : Array.Empty<CompiledAction>();
 
         public DamageApplyResult ApplyHp(
             ActorState owner, long amount, string effectId,
@@ -177,6 +360,15 @@ public static partial class BattleEngine
             DateTimeOffset? earliest = null;
             foreach (var inst in Status.AllInstances())
             {
+                // MUST mirror StatusRuntime.Tick's own eligibility gate exactly — a status whose
+                // Kind isn't OverTime/Contagion never advances its NextPulse there (e.g. `butter`,
+                // a pure crowd-control status, is StatusKind.UnityCc with PeriodMs > 0 purely as an
+                // artifact of the shared authoring shape). Filtering only on PeriodMs > 0 without
+                // this check schedules a pulse Tick() will never actually fire — NextPulse never
+                // moves, this method keeps returning the same stuck tick, and the round loop spins
+                // forever rescheduling it. A real incident, not a hypothetical: this is the exact
+                // bug BasicAttackHazardTests.Hazard2 (a `butter`-CC'd actor) caught during B16.
+                if (inst.Kind != StatusKind.OverTime && inst.Kind != StatusKind.Contagion) continue;
                 if (inst.PeriodMs <= 0) continue;
                 if (inst.NextPulse > inst.ExpiresAt) continue;
                 if (earliest is null || inst.NextPulse < earliest.Value) earliest = inst.NextPulse;

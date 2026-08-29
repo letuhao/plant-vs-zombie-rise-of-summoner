@@ -1,6 +1,6 @@
 # Capability map — battle-timeline (the virtual-time battle kernel)
 
-**Status:** **Map approved 2026-08-21.** T1–T5 specced ([battle/](battle/spec-virtual-time-core.md)); T6–T8 held pending the open questions below. **Phase 1 (T1–T4, Checkpoint A) and Phase 2 (T5, `BattleEngine` adoption, Checkpoint B) both built and closed 2026-08-28** — see `tasks/battle-timeline-todo.md` B2–B15. Phase 3 (T9, the deliberate timing fix) is next and unbuilt. Ideal: [battle-turn-ideal.md](battle-turn-ideal.md). Grounding: `chaos-backend-service/docs/combat-core/{01,05,08}`.
+**Status:** **Map approved 2026-08-21.** T1–T5 specced ([battle/](battle/spec-virtual-time-core.md)); T6–T8 held pending the open questions below. **Phase 1 (Checkpoint A), Phase 2 (Checkpoint B), and Phase 3 / T9 (Checkpoint B2) all built and closed 2026-08-28** — see `tasks/battle-timeline-todo.md` B2–B18. `RulesetVersion` deliberately not bumped (T9's fix has zero measurable delta on today's content — see `decisions.md`'s Battle time model row for the recorded trigger condition). Phase 4 (interactive battles) is next and unbuilt. Ideal: [battle-turn-ideal.md](battle-turn-ideal.md). Grounding: `chaos-backend-service/docs/combat-core/{01,05,08}`.
 
 | Module | Spec | State |
 |---|---|---|

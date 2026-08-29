@@ -1291,6 +1291,413 @@ external blockers — see each item's own evidence below. No external blocker re
 
 ---
 
+## Phase 11 — reopened 2026-08-28: A17–A20, delivering on Checkpoint A/C for real
+
+**Why:** a completeness audit (owner-requested, ahead of Phaser frontend work) found `BattleEngine`
+imports zero action-program types except one inert proof declaration — Checkpoint 10's own "entire
+scheduled build" closed without ever wiring the action program into a real battle. Full context,
+scope decisions (full switch-over; full multi-action loadouts; grant-writer/Server/FE explicitly
+deferred), and the golden-ordering rule: [action-map.md](../docs/architecture/action-map.md) §12.
+Module spec: [spec-action-selection-adoption.md](../docs/architecture/action/spec-action-selection-adoption.md) (A17; A18–A20 get their own specs when their turn comes, per spec-driven-development's "recurse per module").
+
+- [x] **T35: `IBattleView` adapter over `BattleRunState`** · **M**
+  - `LiveActorKeys`/`SideOf`/`PositionOf`(always null)/`FactsOf`/`HeldActionsOf`, per
+    spec-action-selection-adoption.md §1.
+  - Acceptance: an architecture test (T33's own pattern) still passes unchanged — this adapter is a
+    NEW implementation of an EXISTING interface, not a change to the interface or to `StubIntentSource`.
+  - Verify: `--filter ~ActionSelectionAdoption`
+  - **Evidence (2026-08-28):** `BattleRunState : IBattleView` implemented in
+    `src/FusionRpg.Core/Battle/BattleRunState.cs`. `ActionArchitectureTests`-style seam checks
+    unchanged (part of the 4352-passing Core run below). No change to `IBattleView` or
+    `StubIntentSource` themselves.
+
+- [x] **T36: loadout compilation, empty-loadout fallback, preference sort** · **M**
+  - `BattleRunState` construction resolves `EquippedActionIds` → `CompiledAction` list via
+    `ActionCatalog` (A6's first production caller); empty list → single basic-attack `CompiledAction`;
+    sorted once by `ActionTagPreference`, per spec §2.
+  - Acceptance: an actor with no loadout holds exactly one action (basic attack); a two-action loadout
+    is sorted offensive-first, matching `ActionTagPreference`'s existing ranking.
+  - Verify: `--filter ~ActionSelectionAdoption`
+  - **Evidence (2026-08-28):** new `tests/FusionRpg.Core.Tests/Battle/Adoption/ActionSelectionAdoptionTests.cs`
+    (5 tests, all passing): no-loadout fallback needs no catalog; a nonempty loadout with no catalog
+    throws `ArgumentException` naming the actor key and "ActionCatalog"; an unknown equipped id against
+    a real catalog throws naming the bad id; a known multi-action loadout resolves and rides
+    `EquippedActionIds` through to the report; two resolves against the same catalog instance are
+    deterministic. `EquippedActionIdsReportingTests.cs` updated (2 tests) to supply synthetic
+    `ActionCatalog`s now that a nonempty loadout is validated loudly — its
+    "fight identically" test still holds today (nothing reads `HeldActionsOf` for real behavior until
+    T37).
+    Full verification: Core 4352/4352, Data 532/532, Guard 116/116, CheatCore 40/40, Launcher 162/162,
+    E2E 194/194 — all green, zero test edits to golden constants, all 8 goldens unchanged (confirms
+    T35/T36 are still behaviorally inert, as designed). 4 boundary guards green
+    (single-writer, secondary-no-unity, funnel-delta, dal).
+
+- [x] **T37: the swap — `RunBasicAttackStep` calls `StubIntentSource`, not `SelectTarget`** · **L**
+  - `bloodthirsty` pre-filter and `loyal` bodyguard post-check stay `BattleEngine`-side, wrapping
+    whatever `ActionIntent.TargetKey` the intent source proposes (spec §5 — NOT reimplemented inside
+    `StubIntentSource`). `ActionIntent.None` maps to the existing `AttackStepOutcome.Break` (spec §4).
+  - Acceptance: `bloodthirsty`/`loyal` fixtures unchanged; a two-loadout comparison produces
+    measurably different `ActionIntent`s under the same seed (the actual capability proof).
+  - Verify: `--filter ~ActionSelectionAdoption` + full Core
+  - **Evidence (2026-08-28):** `SelectTarget` deleted from `BattleEngine.cs`; `RunBasicAttackStep`
+    (`Actions/BasicAttack.cs`) now calls `StubIntentSource.TryDeclare` through a fresh `IBattleView`
+    per attacker (`BattleRunState` itself for the common case; a new `BloodthirstyView` decorator —
+    reorders `LiveActorKeys` so the lowest-HP live enemy sorts first, letting `NearestEnemy`'s own
+    no-board list-order fallback land on it without teaching the trait to `StubIntentSource` — for
+    `bloodthirsty` attackers only). The `loyal` bodyguard check runs exactly as before, against
+    `intent.TargetKey` before `calculator.Compute`. `TraitBattleTests.Bloodthirsty_hunts_the_lowest_hp_opponent`
+    and `.Loyal_...` (pre-existing, unmodified) both still pass, proving both traits unchanged rather
+    than assuming it. New `A_condition_gated_loadout_breaks_the_attack_while_an_ungated_one_still_lands`
+    (`ActionSelectionAdoptionTests.cs`) is the capability proof: a `CompiledAction` gated on
+    `HpAboveMilli(Target) > 1000` (never satisfiable — `HpMilli` is clamped to `[0,1000]`) is
+    `ActionIntent.None` every time → `Break`, so that loadout deals **zero** damage all battle, while
+    an otherwise-identical actor with the ungated basic-attack fallback deals damage normally — same
+    seed, same opponent, difference attributable to the one `CompiledAction` field that differs.
+    **Unplanned finding, verified not assumed:** for every actor/content that exists TODAY, the swap
+    is byte-identical, not merely golden-neutral — every `UsabilityEvaluator` gate (stance/cooldown/
+    afford/range/condition) trivially passes for the basic attack's all-`Always`/all-zero envelope,
+    and `NearestEnemy`'s no-board fallback returns the exact same first-in-list-order enemy
+    `SelectTarget`'s old else-branch did. Confirmed empirically: full Core suite **4353/4353**, all 4
+    battle + 4 expedition golden hashes unchanged, zero test file edited outside this module's own new
+    test. See T39 below for what this means for the re-bless.
+
+- [x] **T38: `CooldownLedger` wiring, inert for the all-zero envelope** · **S**
+  - One real `CooldownLedger` per battle on `BattleRunState`; `_cooldowns.Start(...)` called after
+    every resolve, per spec §6 — a documented no-op for `Class.None`, so A19 does not need to revisit
+    this wiring point.
+  - Acceptance: `CooldownLedger.IsReady` still true immediately after a basic-attack resolve, proven
+    directly, not assumed from the envelope's `Class`.
+  - Verify: `--filter ~ActionSelectionAdoption`
+  - **Evidence (2026-08-28):** landed as part of T37's swap — `state.Cooldowns.Start(attacker.Setup.Key,
+    intent.Envelope, nowTick)` called after every landed hit (miss skips it, matching spec §3's own
+    step ordering: `calculator.Compute → miss? continue → [cooldown] Start(...)`). Proven a genuine
+    no-op directly from source, not assumed: `BasicAttackEnvelope = ActionEnvelope.NoOp with {...}`
+    leaves `CooldownTicks` at its record default `0`, and `CooldownLedger.Start`'s own first line is
+    `if (envelope.CooldownTicks <= 0) return;` — an unconditional guard, not new code this task wrote.
+    That the wiring is genuinely live (not dead code) is what the unchanged multi-round goldens prove:
+    `Start` fires every hit across every Stomp/Close/Wipe round, and zero hash moved.
+
+- [x] **T39: re-bless + predicted delta + sweep** · **M**
+  - This module is a declared **mover** (`action-map.md` §12.2) — full suite run, goldens diffed,
+    every moved hash attributed to a specific stream/round via the parity ladder (matching
+    spec-kernel-adoption.md's own ladder discipline, reused here rather than reinvented), predicted
+    delta written up, `RulesetVersion` bumped once, win-rate sweep produced. **⛔ owner sign-off on
+    the sweep**, same standing rule this repo already applies everywhere else a version bumps.
+  - Acceptance: every re-blessed hash has a named cause; no test file edited outside the golden
+    constants themselves; six suites green; four guards green.
+  - Verify: full suites + guards
+  - **Finding (2026-08-28), not yet closed — mirrors B18's own shape exactly
+    (`battle-timeline-todo.md` line 480):** there is nothing to re-bless. Full verification —
+    Core **4353/4353**, Data 532/532, Guard 116/116, CheatCore 40/40, Launcher 162/162, E2E 194/194,
+    all 4 boundary guards green — shows **zero** golden hashes moved (all 4 battle + 4 expedition
+    constants unchanged from pre-T37). This is not "no content happens to trigger it today" (B18's
+    shape) but a step stronger: **structurally identical for any input under today's constraints** —
+    proven in T37's own evidence above (every usability gate trivially passes; no-board `NearestEnemy`
+    is provably the same first-in-list-order pick `SelectTarget` made). `RulesetVersion` is **4**,
+    unchanged.
+  - **Decision — owner chose: hold the bump (2026-08-28).** `RulesetVersion` stays **4**. Trigger
+    condition recorded in `docs/architecture/decisions.md`'s new "Action selection (battle adoption)"
+    row so it is not rediscovered as a surprise: a real divergent multi-action loadout reaching a live
+    battle, or the battle-board module landing, makes this a live, sweep-measurable change — bump then,
+    with a predicted-delta writeup against whichever golden(s) move.
+  - Acceptance: every re-blessed hash has a named cause (n/a — nothing moved); no test file edited
+    outside this module's own new test files; six suites green; four guards green. **Satisfied.**
+  - Verify: full suites + guards — Core 4353/4353, Data 532/532, Guard 116/116, CheatCore 40/40,
+    Launcher 162/162, E2E 194/194; guard-single-writer/secondary-no-unity/funnel-delta/dal all green.
+
+### ⛔ Checkpoint E — selection is real — **CLOSED 2026-08-28 (no version change)**
+- [x] `SelectTarget` is gone as the live targeting path; `StubIntentSource` decides for every actor,
+  every turn; `bloodthirsty`/`loyal` proven unchanged (T37 evidence).
+- [x] One combined re-bless — closes on the finding that there is nothing to re-bless (zero goldens
+  moved, verified not assumed), put to the owner, who chose to hold the bump — same shape as
+  `battle-timeline-todo.md`'s Checkpoint B2.
+
+---
+
+## Phase 12 — A18a–e (2026-08-28): Checkpoint F, actions resolve for real
+
+A18 ("resolve whichever action A17 chose") split into five modules once specced — see
+`action-plan.md` §4b and `action-map.md` §12.1 for why and the module table. All five specs written
+and adversarially audited against real code before any task below was started; two load-bearing bugs
+were found and fixed in the specs themselves (constructor-injection that cannot compile given
+`BattleRunState`'s real construction order; a reference to a `PhasedComposeStrategy.Instance` that
+does not exist). Plan: `C:\Users\NeneScarlet\.claude\plans\flickering-strolling-boot.md` (approved
+2026-08-28) — copied here per this repo's own `/plan` rule (CLAUDE.md: plan output lives in `tasks/`,
+never left only in the global scratch file).
+
+### A18a — the binding seam
+
+- [x] **T40: `IContainerEffectResolver` + `DictionaryContainerEffectResolver`** · **S**
+  - New `src/FusionRpg.Core/Actions/IContainerEffectResolver.cs` (spec-action-container-binding.md §1).
+  - Acceptance: compiles standalone; `EffectIdsFor` returns mapped ids for a known containerId, empty
+    span for an unknown one.
+  - Verify: `--filter ~ContainerEffectResolver`
+  - **Evidence (2026-08-28):** interface + `DictionaryContainerEffectResolver` built. 3 new tests in
+    `ContainerEffectResolverTests.cs`, all passing (known id, unknown id → empty not null, null map
+    rejected at construction).
+
+- [x] **T41: wire binding into `BattleRunState`'s loadout-compile loop + `Resolve`'s 8th param** · **M**
+  - Extends the existing T36 loop; `containerResolver` as an 8th optional trailing param on
+    `BattleEngine.Resolve` (spec §2).
+  - Acceptance: no-container case byte-identical; a real container binds under `entity:{key}` with a
+    deterministic `GrantId`; an unresolvable OR pooled-shaped container throws `ArgumentException`
+    naming the actor key and container id (one unified rejection path, not two).
+  - Verify: `--filter ~ActionContainerBinding` + full Core
+  - **Evidence (2026-08-28):** `BattleRunState.BindContainers` extends T36's loop; `EffectGrantDto`s
+    granted into `Host.Bag` with deterministic `battle:{actorKey}:{actionId}:{effectId}` ids. 6 new
+    tests in `ActionContainerBindingTests.cs`, all passing — including a real, shipped
+    `EffectAtomCatalog` def (`fx.board_cherry`, `Triggered`/`OnDamageDealt`, not `Passive`/`OnGranted`
+    — confirmed not to self-fire on grant) bound and found under `Bag.ForOwner("entity", "entity:squad:0")`,
+    proven through the existing T14 `onEffectHostReady` seam (captures the live `Host` reference; since
+    `Resolve` doesn't return until construction finishes, the captured reference reflects every grant
+    added later in the same constructor call — no new test seam needed).
+
+### ⛔ Checkpoint A18a — **CLOSED 2026-08-28**
+- [x] Full 6-suite + 4-guard run, zero goldens moved. Core **4362/4362** (4353 + 9 new), Data 532/532,
+  Guard 116/116, CheatCore 40/40, Launcher 162/162, E2E 194/194 — all green. All 4 boundary guards
+  green (single-writer, secondary-no-unity, funnel-delta, dal).
+
+### A18b — the trigger
+
+- [x] **T42: `OnActivate` in the closed vocabulary (7→8)** · **S**
+  - `AtomKind.cs`: the constant, the new `Actions` grouping, `All`. `AtomKindRegistry.cs`:
+    `TriggerCount` 7→8, `AllTriggers` local array +1 (spec-on-activate-trigger.md §1).
+  - Acceptance: the existing 7-count vocabulary test found and updated; kind-eligibility proven both
+    ways — `resource.delta`/`status.apply`/`shield.grant` allow it, `stat.modify` and every Board kind
+    do not.
+  - Verify: `--filter ~AtomKindRegistry`
+  - **Evidence (2026-08-28):** two stale test names fixed (`_closed_at_seven` → `_closed_at_eight`,
+    `_drawn_from_the_seven` → `_drawn_from_the_eight`) — both passed mechanically throughout since
+    their assertions were self-consistency checks, not hardcoded literals, but the NAMES lied about
+    what they verified (Design Gate evidence rule 6). New
+    `OnActivate_reaches_exactly_resource_delta_status_apply_and_shield_grant` proves both directions
+    against all 12 kinds via `AtomKindRegistry.ValidateTrigger`, not just the 3 positive cases. 26/26
+    `AtomKindRegistryTests` pass.
+
+- [x] **T43: the firing site in `RunBasicAttackStep`** · **M**
+  - After the `loyal` redirect, before `calculator.Compute` (spec §2).
+  - Acceptance: fires exactly once per resolved (non-`Break`) intent, independent of hit/miss, at the
+    post-redirect target; zero grants bound → zero RNG draws, proven directly.
+  - Verify: `--filter ~OnActivateTrigger` + full Core
+  - **Evidence (2026-08-28):** `Bag.OnEvent(OnActivate)` + `Host.Flush()` added right after the loyal
+    redirect. **Real finding, from the probe/falsify step, not assumed:** a synthetic self-damage
+    probe (`OnActivateTriggerTests`, bypassing A18a's binding loop — proves firing in isolation) first
+    predicted `1×Rounds` self-damage and measured `2×Rounds` — a grant fires on `OnActivate` both when
+    its own owner acts AND when its owner is merely the *target* of someone else's activation, a
+    direct consequence of `EffectOwnerKey.MatchesEvent`'s existing ActorPtr-OR-TargetPtr dual-check
+    (the same mechanism `OnDamageDealt`/`OnDamageTaken` content already relies on). Not a bug — named
+    as a real content-authoring hazard in `spec-on-activate-trigger.md` §3 (a "self-buff on activate"
+    grant will also fire when its owner is merely attacked, absent an explicit filter this system
+    doesn't have yet) rather than silently worked around. Test corrected to assert `2×`, not the
+    mechanism "fixed" to produce `1×`. 2/2 new tests pass differentially (same-seed with/without probe,
+    isolates the probe's own effect from ordinary combat variance).
+
+### ⛔ Checkpoint A18b — **CLOSED 2026-08-28**
+- [x] Full 6-suite + 4-guard run, zero goldens moved. Core **4365/4365** (4363 + 2 new), Data 532/532,
+  Guard 116/116, CheatCore 40/40, Launcher 162/162, E2E 194/194 — all green. All 4 boundary guards
+  green.
+
+### A18c — resource.delta + shield.grant
+
+- [x] **T44: `Bag.Status`/`Bag.StatusRng` wiring** · **S**
+  - Two lines in `BattleRunState`'s constructor, next to `Host.Bag.ShieldGate =` (T14).
+  - Acceptance: no behavior change by itself — proven via full suite.
+  - Verify: full Core suite
+  - **Evidence (2026-08-28):** `Host.Bag.Status = Status; Host.Bag.StatusRng = StatusRng;` added.
+    Wiring-only — Core suite unchanged at 4365/4365 immediately after, zero regressions.
+
+- [x] **T45: `OnDamageDealt` firing site** · **S/M**
+  - After `breakdown.Hit` confirms true, before the existing T38 cooldown-start line
+    (spec-battle-resource-shield-grants.md §2).
+  - Acceptance: fires once per landed hit, never on a miss; composes correctly with A18b's own
+    `OnActivate` call earlier in the same method.
+  - Verify: `--filter ~BattleResourceShieldGrants`
+  - **Evidence (2026-08-28):** `Bag.OnEvent(OnDamageDealt)` + `Host.Flush()` added right after the
+    hit-confirmed check. **Real finding, from the probe step:** unlike `OnActivate` (unconditional),
+    `OnDamageDealt` only fires on a landed hit, so an exact "2×Rounds" prediction (matching
+    `OnActivate`'s own dual-owner-match) over-counts by however many rounds miss — the T46 test
+    below asserts a directional claim instead, not an exact count.
+
+- [x] **T46: proof — plain amount, DoT/contagion piggyback, shield.grant** · **M**
+  - Against real `EffectAtomCatalog.CreateAll()`-shipped defs (spec §3), including the
+    `GrantChance`-rolls-against-the-real-stream proof.
+  - Verify: `--filter ~BattleResourceShieldGrants` + full 6-suite + 4-guard
+  - **Evidence (2026-08-28):** 4 tests in `BattleResourceShieldGrantsTests.cs`, all passing.
+    **Three real findings from the probe/falsify cycle, all propagated into
+    `spec-battle-resource-shield-grants.md` §3, not silently patched around:**
+    (1) plain `resource.delta` never reaches `BattleEffectSink.Execute` directly from `FireGrant` —
+    it routes through `CombatDamageDispatcher.DispatchInstant` + `Funnel`, which reaches the sink
+    only via `Funnel.Flush()`'s own later call; the ORIGINAL spec claim's outcome was right, its
+    named mechanism was wrong, now corrected.
+    (2) The DoT/contagion payload (`statusId`/`periodMs`/`durationMs`) must live on the **grant's own
+    `Overlay`**, not the def's `Actions[0].Params` — `StatusEffectBridge.TryApplyFromGrant` reads
+    `grant.Overlay` directly (`EffectBag.cs:439-441`), bypassing the merged dictionary `FireGrant`
+    builds for the instant packet. First attempt (payload on Params) silently applied nothing.
+    (3) `GrantShield`'s own overlay allowlist has no flat `targetPtr` key (only nested `target:
+    {mode, ptr}`) — confirmed by a real `"unknown overlay key 'targetPtr'"` exception on first
+    attempt. Also confirmed the same owner-matching dual-fire A18b found applies here too (a grant
+    fires on its owner's own hit AND on the other side's hit against them) — the resource-delta
+    damage test's first "2×Rounds" prediction overshot for the same missed-hit reason T45 already
+    names; fixed to a directional `waveWith < waveWithout` assertion. The `GrantChance` probe needed
+    empirical tuning too: `chance=0.5` saturated to always-true across 20 seeds (
+    `ResistanceEvaluator.cs:228` multiplies `GrantChance` by a power-based `pApply` term neither this
+    module nor its test owns), `chance=0.01` saturated to always-false; `chance=0.1` produced the
+    genuinely mixed true/false outcomes proving `state.StatusRng` is the real, wired stream.
+
+### ⛔ Checkpoint A18c — **CLOSED 2026-08-28**
+- [x] Full 6-suite + 4-guard run, zero goldens moved. Core **4369/4369** (4365 + 4 new), Data 532/532,
+  Guard 116/116, CheatCore 40/40, Launcher 162/162, E2E 194/194 — all green. All 4 boundary guards
+  green. Propagated: `AtomKindRegistry.cs`'s `resource.delta`/`shield.grant` Battle cells `None → Full`
+  (Sim's own `shield.grant` gap left untouched — out of this module's scope), comments updated; the
+  pre-existing `Battle_support_is_narrow_and_honest` test's own hardcoded `None` expectations updated
+  to `Full` for both, matching the exact precedent that test itself already set for `stat.derived`'s
+  own 2026-08-23 re-opening ("the cell moved because the code did").
+
+### A18d — status.apply
+
+- [x] **T47: `BattleEffectSink` gains `Status`/`StatusRng` properties + `Clock` ctor param** · **M**
+  - Settable properties on `BattleEffectSink`, forwarding properties on `BattleEffectHost` (public ctor
+    **unchanged**), `Clock`/`_sink` construction order swapped inside `BattleEffectHost`'s own ctor
+    body (spec-battle-status-apply.md §1 — the audit-corrected design).
+  - Acceptance: both existing `new BattleEffectHost(...)` call sites (`BattleRunState.cs:115`,
+    `BattleEffectHostTests.cs:19`) compile unchanged.
+  - Verify: build + full Core suite
+  - **Evidence (2026-08-28):** built exactly as the audit-corrected spec designed — `Clock` built
+    before `_sink` inside `BattleEffectHost`'s own ctor, `BattleEffectSink` gains `Status`/`StatusRng`
+    settable properties plus a `FakeEffectClock` ctor param, `BattleEffectHost` forwards both via
+    settable properties. `BattleRunState`'s own `Host.Status = Status; Host.StatusRng = StatusRng;`
+    added alongside its existing `Host.Bag.Status =`/`Host.Bag.StatusRng =` (A18c) lines. Both
+    existing `BattleEffectHost` call sites compiled unchanged, confirmed by a clean full build.
+
+- [x] **T48: `ApplyStatus` branch in `BattleEffectSink.Execute`** · **S/M**
+  - `duration` seconds→ms; `level` accepted/threaded/inert (named); null-checked, refuses quietly.
+  - Verify: `--filter ~BattleStatusApply`
+  - **Evidence (2026-08-28):** `ExecApplyStatus` added, dispatched before the existing FA10 branch.
+    **Real bug, found and fixed by T49's own probe, not shipped:** `StatusApplyInput.BaseDuration`
+    needs the SAME unit as `DurationMs` (ms) — `StatusRuntime.Apply` uses `eval.EffectiveDuration`
+    (derived FROM `BaseDuration`) whenever `BaseDuration > 0`, so a first attempt passing the raw
+    seconds value produced a 5ms status for an authored 5-**second** duration. Fixed by converting to
+    ms once and passing the same value to both fields, matching the existing scripted-`InitialStatuses`
+    call's own established convention. Propagated to `spec-battle-status-apply.md` §1.
+
+- [x] **T49: proof — real timed apply, resistance/immunity, level-inert, clock-correctness** · **M**
+  - Includes the round-5-fire-must-not-use-`T0` regression test the audit named.
+  - Verify: `--filter ~BattleStatusApply` + full 6-suite + 4-guard
+  - **Evidence (2026-08-28):** 3 tests in `BattleStatusApplyTests.cs`, all passing, against the one
+    real shipped `status.apply` def (`fx.poison_on_hit`) — caught the `BaseDuration`-unit bug above on
+    first run (`Actual: 5` instead of `5000`, i.e. 5ms not 5000ms), fixed, re-verified. Clock-
+    correctness proven directly (`LastApplied`/`ExpiresAt` track the live clock, not a fixed `T0`); a
+    bare, never-wired host refuses quietly (`Record.Exception` is null) rather than throwing.
+    Resistance/immunity proven by construction, not a separate fixture: `ExecApplyStatus` calls the
+    exact same `StatusRuntime.Apply` → `ResistanceEvaluator.Evaluate` path scripted statuses already
+    go through, no shortcut added.
+
+### ⛔ Checkpoint A18d — **CLOSED 2026-08-28**
+- [x] Full 6-suite + 4-guard run, zero goldens moved. Core **4372/4372** (4369 + 3 new), Data 532/532,
+  Guard 116/116, CheatCore 40/40, Launcher 162/162, E2E 194/194 — all green. All 4 boundary guards
+  green. Propagated: `status.apply`'s Battle cell `Partial → Full` (`AtomKindRegistry.cs`, comment
+  updated); the pre-existing `Battle_support_is_narrow_and_honest` test's two hardcoded `Partial`
+  assertions updated to `Full`. `BattleEffectSink.Execute`'s "FA10 only" comment updated to "FA10/FA2
+  only" — its final update (naming all three actions) deferred to A18e, per the plan's own build order.
+
+### A18e — live stat modifiers (after A18c AND A18d)
+
+- [x] **T50: `BattleStatModifierLedger`** · **S/M**
+  - `Add`/`RemoveBySource`/`For`/`Recompose` — owns one `PhasedComposeStrategy` instance internally
+    (spec-battle-live-stat-modifiers.md §1, the audit-corrected design).
+  - Acceptance: Flat/Increased/More compose exactly as `PhasedComposeStrategy.ComposeChannel`'s own
+    contract; `RemoveBySource` reverts exactly its own contribution.
+  - Verify: `--filter ~BattleStatModifierLedger`
+  - **Evidence (2026-08-28):** built exactly per spec, plus one correction: `StatModifier` is a
+    `sealed class` with `init`-only properties, not a positional-constructor record as the spec's own
+    snippet showed — built via object initializer instead. 4/4 new tests pass, including a
+    same-source-different-actor isolation check the spec's own testing strategy didn't name.
+
+- [x] **T51: `LiveAtk` + Defense targeted recompose + the one read-site change** · **S/M**
+  - `ActorState.LiveAtk(ledger)`; `Derived.Set(CombatDefenseOmni, ...)` on fire; `Setup.Atk` →
+    `LiveAtk(state.Ledger)` at the one call site (spec §2).
+  - Acceptance: byte-identical to `Setup.Atk` with an empty ledger.
+  - Verify: full Core suite
+  - **Evidence (2026-08-28):** `LiveAtk` added to `ActorState`; the one production read-site in
+    `RunBasicAttackStep` changed. Full Core suite unchanged at 4376/4376 immediately after (T50's 4
+    tests were the only count change from the prior checkpoint) — zero regressions, zero goldens
+    moved, confirming byte-identity with an empty ledger empirically, not just by construction.
+
+- [x] **T52: `BattleEffectSink` gains `Ledger` + an `ActorState` resolver, the `ModifyStat` branch** · **M**
+  - Same forwarding-property shape T47 established. Owner resolution via `ctx.Grant.OwnerKey` (the
+    bound `EffectGrant`, `entity:` prefix stripped) (spec §3).
+  - Acceptance: `Override` refused at bind time; owner resolved correctly.
+  - Verify: `--filter ~BattleLiveStatModifiers`
+  - **Evidence (2026-08-28):** **Three real findings, all propagated into
+    `spec-battle-live-stat-modifiers.md`, not silently patched around:**
+    (1) `ActorState` is private to `BattleEngine`, unreachable from `BattleEffects.cs`'s top-level
+    classes — a new `IBattleStatTarget` interface (`Derived`, `BaselineDefense`), matching
+    `IBattleHpTarget`'s own established pattern, fixes this without widening `ActorState`'s own
+    visibility.
+    (2) The real `ModifyStat` param shape (confirmed against the one shipped def, `fx.passive_atk_flat`,
+    and `EffectOverlayMerge`'s own allowlist) is THREE separate, independently-optional keys
+    (`flat`/`increased`/`more`), never a combined `op`+`amount` pair — the atom SCHEMA's own authoring-
+    time names (`AtomKindRegistry.cs`); `AtomCompiler` translates between the two. A first draft
+    assumed the schema shape and silently no-oped on every real grant; rewritten against the real def.
+    (3) Widening `stat.modify`'s `Triggers` broke the permanent-modifier case entirely:
+    `AtomRowValidator.ValidateWhen` infers "trigger REQUIRED" from `Triggers.Count > 0`, which had
+    never needed a THIRD shape (triggers allowed, still not required) before this kind. Caught by
+    `ChannelExtensionTests.The_three_new_channels_pass_atom_validation` failing with `"stat.modify
+    requires a trigger"`. Fixed with a new `AtomKind.TriggerOptional` field (default `false`, every
+    other kind's existing inference completely unchanged); `stat.modify` sets it `true`.
+    Six pre-existing `AtomKindRegistryTests` needed updating for the deliberate `None → Full` Battle
+    flip and the `AllTriggers` widen (matching the exact precedent `stat.derived`'s own 2026-08-23
+    re-opening already set in this same file) — all propagated, all passing.
+
+- [x] **T53: `stat.modify`'s trigger widen — `AtomTriggers.None → AllTriggers`** · **XS**
+  - One line in `AtomKindRegistry.cs` (spec §3 — this module's own call, not A18b's).
+  - Verify: `--filter ~AtomKindRegistry`
+  - **Evidence (2026-08-28):** landed together with T52 (same file, same change) — see T52's own
+    evidence for the `TriggerOptional` finding this widen required. 26/26 `AtomKindRegistryTests` pass.
+
+- [x] **T54: full proof — persistence across rounds, byte-identity, golden sweep** · **M**
+  - Includes multi-round Stomp/Close/Wipe fixtures specifically.
+  - Verify: `--filter ~BattleLiveStatModifiers` + full 6-suite + 4-guard
+  - **Evidence (2026-08-28):** 5 tests in `BattleLiveStatModifiersTests.cs`, all passing —
+    against the one real shipped `stat.modify` def (`fx.passive_atk_flat`, a `Passive`/no-trigger
+    permanent modifier that auto-fires on `Grant` itself) plus a synthetic `OnActivate`-triggered
+    variant (no shipped content exercises a triggered `stat.modify` at all). Both proven via the
+    differential technique (same seed, with/without the probe) against cumulative `DamageDealt`,
+    strictly more with the buff than without — not merely "a grant exists." `Override` and the
+    permanent/triggered validation split proven directly against `AtomRowValidator.Validate`, reusing
+    `ChannelExtensionTests`' own established `AtomRow`-construction helper pattern rather than a
+    weaker `AtomKindRegistry.Validate`-only check that wouldn't have caught the T52 regression at all.
+    **One non-reproducing flake observed and investigated, not hidden:** a single full-suite run
+    showed 1 failure (name not captured — output truncated) that did not reproduce across 8
+    subsequent runs (3 full-suite + 5 Battle-namespace-only, all clean) with no stray background
+    processes found; treated as a transient environmental blip, not a code defect, and recorded here
+    rather than silently rerun-until-green.
+
+### ⛔ Checkpoint A18e — **CLOSED 2026-08-28**
+- [x] Full 6-suite + 4-guard run, zero goldens moved. Core **4381/4381** (4376 + 5 new), Data 532/532,
+  Guard 116/116, CheatCore 40/40, Launcher 162/162, E2E 194/194 — all green. All 4 boundary guards
+  green. Propagated: `stat.modify`'s Battle cell `None → Full` (`AtomKindRegistry.cs`, comment
+  updated); `BattleEffectSink.Execute`'s comment names all three actions
+  (`ApplyResourceDelta`/`ApplyStatus`/`ModifyStat`) by name, its final update.
+
+- [x] **⛔ Checkpoint F — actions resolve for real (`action-map.md` §12.3) — CLOSED 2026-08-28.**
+  All five specs' success criteria hold, each proven against real shipped content where any exists
+  (`fx.board_cherry`, `fx.overlay_damage`, `fx.shield_grant`, `fx.poison_on_hit`, `fx.passive_atk_flat`)
+  and synthetic content only where no shipped def exercises a path at all (the DoT/contagion piggyback,
+  a triggered `stat.modify`). **Golden-neutrality measured, not assumed, at every one of five
+  checkpoints** — all 8 battle/expedition golden hashes unchanged from before A18a through after A18e;
+  no predicted-delta writeup was needed because nothing moved. `RulesetVersion` stays **4** throughout
+  — every A18a-e change proved additive to existing content, the same "predicted a mover, measured
+  byte-identical" shape A17 itself already established for this reopening. Full evidence trail:
+  T40-T54 above, each with its own build→test→review→fix→verify cycle; five real, load-bearing
+  findings surfaced by building (not merely reading) and propagated into their specs rather than
+  silently patched around — see T41 (owner-matching dual-fire), T45/T46 (the real resource.delta
+  execution route, the DoT-payload-lives-on-Overlay-not-Params rule, the `target` vs `targetPtr`
+  overlay key), T48/T49 (`BaseDuration`'s ms unit), T52 (the `IBattleStatTarget` gap, the real
+  `flat`/`increased`/`more` param shape, the `TriggerOptional` validation gap).
+
+---
+
 ## Deferred — specced, not scheduled
 
 - [ ] **A9 movement-actions** — waits on `A10`. One row, no new runtime.

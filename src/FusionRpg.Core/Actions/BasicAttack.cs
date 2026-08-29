@@ -1,6 +1,7 @@
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Status;
 
 namespace FusionRpg.Core.Battle;
@@ -27,13 +28,13 @@ public static partial class BattleEngine
 
     /// <summary>
     /// The authored targeting rule (spec-targeting.md §2a). `Ordering = SourceOrder` is the field
-    /// §3's hazard exists to name: <c>TargetResolver</c> sorts by ordinal ptr, but this action's
-    /// actual target comes from the engine's own <see cref="SelectTarget"/>, which is list order —
-    /// so the basic attack states which order it means rather than silently disagreeing with the
-    /// resolver. This spec is carried as data for that reason; the live loop below still calls
-    /// <see cref="SelectTarget"/> directly, because that function also encodes bloodthirsty
-    /// targeting and loyal-bodyguard interception — trait behaviour a generic target spec does not
-    /// (and should not) express.
+    /// §3's hazard exists to name: <c>TargetResolver</c> sorts by ordinal ptr, but
+    /// <see cref="StubIntentSource.TryDeclare"/>'s own <c>NearestEnemy</c> falls back to list order
+    /// whenever <see cref="IBattleView.PositionOf"/> is null (no board) — so the basic attack states
+    /// which order it means rather than silently disagreeing with the resolver. <c>bloodthirsty</c>
+    /// and <c>loyal</c> stay engine-side (spec-action-selection-adoption.md §5, <see cref="BloodthirstyViewFor"/>
+    /// below and the bodyguard check in <see cref="RunBasicAttackStep"/>) — trait behaviour a generic
+    /// target spec does not (and should not) express.
     /// </summary>
     public static readonly ActionTargetSpec BasicAttackTargeting = new()
     {
@@ -55,26 +56,52 @@ public static partial class BattleEngine
     readonly record struct AttackStep(AttackStepOutcome Outcome, ActorState? Target, long SignedDelta);
 
     /// <summary>
-    /// The four adopted steps (spec-basic-attack-adoption.md §1), moved here verbatim from the loop
-    /// in <see cref="Resolve"/>: active check → CC-lock → target → <c>calculator.Compute</c>.
-    /// Everything from the berserker ramp onward is `EngineBehavior` trait logic and stays in the
-    /// loop — this module's whole point is to prove the first four steps can be expressed as a
-    /// declared action without moving a single byte, not to relocate the trait tail.
+    /// A17 (spec-action-selection-adoption.md §3): active check → CC-lock →
+    /// <see cref="StubIntentSource.TryDeclare"/> → loyal-bodyguard redirect → <c>calculator.Compute</c>.
+    /// `SelectTarget` is gone as the live targeting path — the intent source decides who, using
+    /// <see cref="BloodthirstyViewFor"/> to steer it exactly where the old bloodthirsty branch did,
+    /// without teaching it the trait. Everything from the berserker ramp onward is `EngineBehavior`
+    /// trait logic and stays in the loop.
     /// </summary>
     static AttackStep RunBasicAttackStep(
-        ActorState attacker, List<ActorState> actors, StatusRuntime status, DateTimeOffset now,
+        ActorState attacker, BattleRunState state, DateTimeOffset now, long nowTick,
         OverlayCombatCalculator calculator, ICombatRng critRng, BattleTrace? trace, int round)
     {
         if (!attacker.Active) return new AttackStep(AttackStepOutcome.Continue, null, 0);
-        if (IsCcLocked(status, attacker.Setup.Key, now)) return new AttackStep(AttackStepOutcome.Continue, null, 0);
+        if (IsCcLocked(state.Status, attacker.Setup.Key, now)) return new AttackStep(AttackStepOutcome.Continue, null, 0);
 
-        var target = SelectTarget(actors, attacker, status, now);
-        if (target is null) return new AttackStep(AttackStepOutcome.Break, null, 0);
+        var view = BloodthirstyViewFor(state, attacker);
+        var source = new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, AlwaysAffordable.Instance);
+        var intent = source.TryDeclare(attacker.Setup.Key, nowTick);
+        if (intent.IsNone) return new AttackStep(AttackStepOutcome.Break, null, 0); // hazard 3: round breaks
+
+        var target = state.ByKey[intent.TargetKey!];
+        var bodyguard = FindAdjacentWithTrait(state.Actors, target, "loyal");
+        if (bodyguard != null && !IsCcLocked(state.Status, bodyguard.Setup.Key, now))
+            target = bodyguard;
+
+        // A18b (spec-on-activate-trigger.md §2): fires once per resolved (non-Break) intent,
+        // independent of hit/miss -- a cast succeeds even if the attack roll misses -- at the
+        // post-redirect target. A no-op today for every actor without a bound OnActivate grant
+        // (A18a's own scope: nothing binds one without a real ContainerId).
+        state.Host.Bag.OnEvent(new Contracts.EffectEventDto
+        {
+            Trigger = AtomTriggers.OnActivate,
+            ActorPtr = attacker.Setup.Key,
+            TargetPtr = target.Setup.Key,
+            Tick = nowTick,
+            HitCount = 1,
+        });
+        state.Host.Flush();
+
         trace?.Target(round, attacker.Setup.Key, target.Setup.Key);
 
         var (signedDelta, breakdown) = calculator.Compute(new OverlayCombatRequest
         {
-            BaseOverlayDamage = attacker.Setup.Atk,
+            // A18e (spec-battle-live-stat-modifiers.md §2): the one production read-site this module
+            // touches. Byte-identical to Setup.Atk whenever the ledger holds no atk mods for this
+            // actor -- every battle today, since nothing binds a stat.modify grant yet.
+            BaseOverlayDamage = attacker.LiveAtk(state.Ledger),
             Components = attacker.AttackComponents,
             Attacker = new CombatActorSnapshot(attacker.Derived, attacker.ElementTypes),
             Defender = new CombatActorSnapshot(target.Derived, target.ElementTypes),
@@ -83,6 +110,68 @@ public static partial class BattleEngine
 
         if (!breakdown.Hit) return new AttackStep(AttackStepOutcome.Continue, null, 0);
 
+        // A18c (spec-battle-resource-shield-grants.md §2): resource.delta's existing shipped content
+        // (fx.poison_on_hit, fx.freeze_on_hit, ...) is OnDamageDealt-triggered, not OnActivate -- a
+        // skill's on-hit rider fires when the hit actually lands, mirroring existing content exactly.
+        // Only on a landed hit (this line is unreachable on a miss, above); before DispatchHit's own
+        // trait tail runs, so a rider fires alongside the calculator-resolved damage, not nested
+        // inside EngineBehavior.
+        state.Host.Bag.OnEvent(new Contracts.EffectEventDto
+        {
+            Trigger = AtomTriggers.OnDamageDealt,
+            ActorPtr = attacker.Setup.Key,
+            TargetPtr = target.Setup.Key,
+            Damage = -signedDelta,
+            Tick = nowTick,
+            HitCount = 1,
+        });
+        state.Host.Flush();
+
+        state.Cooldowns.Start(attacker.Setup.Key, intent.Envelope, nowTick); // T38: inert for Class.None
         return new AttackStep(AttackStepOutcome.Proceed, target, signedDelta);
+    }
+
+    /// <summary>
+    /// spec-action-selection-adoption.md §5: `bloodthirsty` stays engine-side, reimplemented as a
+    /// pre-filter over the attacker's own enemy view rather than as a branch inside
+    /// <see cref="StubIntentSource"/>, which must not gain trait vocabulary it does not own. Moving
+    /// the lowest-HP live enemy to the front of <see cref="IBattleView.LiveActorKeys"/> is enough:
+    /// <c>NearestEnemy</c>'s own no-board fallback returns the first enemy it finds.
+    /// </summary>
+    static IBattleView BloodthirstyViewFor(BattleRunState state, ActorState attacker)
+    {
+        if (!attacker.Has("bloodthirsty")) return state;
+
+        ActorState? lowest = null;
+        foreach (var a in state.Actors)
+            if (a.Active && a.Setup.Side != attacker.Setup.Side && (lowest == null || a.Hp < lowest.Hp))
+                lowest = a;
+
+        return lowest is null ? state : new BloodthirstyView(state, lowest.Setup.Key);
+    }
+
+    /// <summary>The same live-actor set as <c>inner</c>, with one key moved to the front — the
+    /// mechanism <see cref="BloodthirstyViewFor"/> uses.</summary>
+    sealed class BloodthirstyView : IBattleView
+    {
+        readonly IBattleView _inner;
+        readonly IReadOnlyList<string> _order;
+
+        public BloodthirstyView(IBattleView inner, string priorityKey)
+        {
+            _inner = inner;
+            var live = inner.LiveActorKeys;
+            var ordered = new List<string>(live.Count) { priorityKey };
+            foreach (var key in live)
+                if (!string.Equals(key, priorityKey, StringComparison.Ordinal))
+                    ordered.Add(key);
+            _order = ordered;
+        }
+
+        public IReadOnlyList<string> LiveActorKeys => _order;
+        public int SideOf(string actorKey) => _inner.SideOf(actorKey);
+        public GridPos? PositionOf(string actorKey) => _inner.PositionOf(actorKey);
+        public EntityFacts FactsOf(string actorKey) => _inner.FactsOf(actorKey);
+        public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) => _inner.HeldActionsOf(actorKey);
     }
 }

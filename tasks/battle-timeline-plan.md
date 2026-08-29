@@ -97,8 +97,17 @@ intentional timing change) rather than combined into one re-bless. Design calls 
    already exist (B1) and are real, live-asserting fixtures, not just commit-note claims — confirmed
    by direct research before this plan was written.
 
-### Phase 3 — the deliberate change (T9)
-Status pulses and shield upkeep move onto kernel ticks and start firing at true times. A **behaviour change**: version bump, one re-bless, win-rate sweep. **Genuinely gated behind Phase 2 closing green** — B16/B17 need the kernel actually driving real ticks to be buildable at all. **B18's win-rate sweep still needs the owner's own sign-off** (`⛔` in `battle-timeline-todo.md`) — producing the sweep is this push's job; approving it is not.
+### Phase 3 — the deliberate change (T9) *(B16–B18 complete — Checkpoint B2 CLOSED 2026-08-28)*
+Status pulses and shield upkeep move onto kernel ticks and start firing at true times. **Landed
+with zero version bump** — verified, not assumed, that no authored content exercises a sub-1000ms
+status period or a non-round-aligned shield duration, so the fix has no measurable delta today;
+`tools/CombatSim` can't see this path either (separate `StatusModel.cs`, never the real engine
+loop). The bump-vs-hold call was put to the owner rather than decided unilaterally — owner chose to
+hold, with the trigger condition for the next bump recorded in `decisions.md`. **A real infinite-loop
+bug was found and fixed during B16** (a pure-CC status's `NextPulse` never advances under
+`StatusRuntime.Tick`'s own `Kind` gate, so naively scheduling against it spun forever) — caught by a
+30 GB runaway test host before being isolated and fixed at the root cause, not papered over with a
+round-count cap alone. Full evidence: `battle-timeline-todo.md` B16–B18.
 **Checkpoint B2 — versioned.**
 
 ### Phase 4 — interactive battles (T8, T6, T10, T11)

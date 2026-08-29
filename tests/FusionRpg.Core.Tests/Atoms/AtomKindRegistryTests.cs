@@ -47,7 +47,10 @@ public class AtomKindRegistryTests
         var awaitingConsumer = Array.Empty<string>();
 
         // Permanent modifiers are not event-driven, so they declare no trigger (definitions.md §14.2).
-        var permanentModifiers = new[] { "stat.modify", "stat.derived" };
+        // stat.modify moved out of this set 2026-08-28 (A18e) -- it is no longer PURELY permanent, it
+        // may ALSO be triggered (contributing from first fire onward); TriggerOptional (AtomKind.cs)
+        // is what keeps its OWN no-trigger case still legal despite Triggers now being non-empty.
+        var permanentModifiers = new[] { "stat.derived" };
 
         foreach (var kind in AtomKindRegistry.All)
         {
@@ -70,14 +73,16 @@ public class AtomKindRegistryTests
     }
 
     [Fact]
-    public void Trigger_vocabulary_is_closed_at_seven()
+    public void Trigger_vocabulary_is_closed_at_eight()
     {
+        // A18b (spec-on-activate-trigger.md): 7 -> 8 with OnActivate. Still a self-consistency check,
+        // not a hardcoded literal -- TriggerCount and AtomTriggers.All.Length moved together.
         Assert.Equal(AtomKindRegistry.TriggerCount, AtomTriggers.All.Length);
         Assert.Equal(AtomTriggers.All.Length, AtomTriggers.All.Distinct(StringComparer.Ordinal).Count());
     }
 
     [Fact]
-    public void Every_kinds_triggers_are_drawn_from_the_seven()
+    public void Every_kinds_triggers_are_drawn_from_the_eight()
     {
         foreach (var kind in AtomKindRegistry.All)
             foreach (var t in kind.Triggers)
@@ -90,17 +95,58 @@ public class AtomKindRegistryTests
         Assert.Equal(AtomRejectionReason.UnknownTrigger,
             AtomKindRegistry.ValidateTrigger("stat.modify", "OnWave").Reason);
 
-        // stat.modify is a permanent modifier: it carries no trigger at all. Not OnDamageDealt...
+        // stat.derived is STILL a pure permanent modifier (A18e only widened stat.modify): it carries
+        // no trigger at all. Not OnDamageDealt...
         Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
-            AtomKindRegistry.ValidateTrigger("stat.modify", AtomTriggers.OnDamageDealt).Reason);
+            AtomKindRegistry.ValidateTrigger("stat.derived", AtomTriggers.OnDamageDealt).Reason);
 
-        // ...and not OnGranted either. OnGranted/OnRemoved are runtime lifecycle states, not
-        // authorable triggers (definitions.md §14.2) — the bag injects the revert itself. Allowing
-        // content to name only the OnGranted half was how a permanent buff could leak.
+        // ...and not OnGranted either, for EITHER kind (stat.modify included, despite its own
+        // AllTriggers widen -- OnGranted/OnRemoved are the separate Lifecycle array, never part of
+        // AllTriggers). OnGranted/OnRemoved are runtime lifecycle states, not authorable triggers
+        // (definitions.md §14.2) — the bag injects the revert itself. Allowing content to name only
+        // the OnGranted half was how a permanent buff could leak.
         Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
             AtomKindRegistry.ValidateTrigger("stat.modify", AtomTriggers.OnGranted).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("stat.derived", AtomTriggers.OnGranted).Reason);
+
+        // stat.modify's own new case: OnDamageDealt (part of AllTriggers since A18e) is now allowed.
+        Assert.True(AtomKindRegistry.ValidateTrigger("stat.modify", AtomTriggers.OnDamageDealt).IsOk);
 
         Assert.True(AtomKindRegistry.ValidateTrigger("resource.delta", AtomTriggers.OnTimer).IsOk);
+    }
+
+    /// <summary>
+    /// A18b (spec-on-activate-trigger.md §1): the one-line `AllTriggers` widen reached exactly three
+    /// kinds at first (A18c/d's own) — this test's own original doc comment predicted `stat.modify`
+    /// would move separately, "A18e's own separate call." A18e (2026-08-28) made that call: updated
+    /// here to the post-A18e state (four kinds now), not a stale prediction left unfulfilled. Board
+    /// kinds stay refused (H3: Battle is `RuntimeState.None` for all of them regardless of trigger).
+    /// </summary>
+    [Fact]
+    public void OnActivate_reaches_exactly_resource_delta_status_apply_shield_grant_and_stat_modify()
+    {
+        Assert.True(AtomKindRegistry.ValidateTrigger("resource.delta", AtomTriggers.OnActivate).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("status.apply", AtomTriggers.OnActivate).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("shield.grant", AtomTriggers.OnActivate).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("stat.modify", AtomTriggers.OnActivate).IsOk);
+
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("stat.derived", AtomTriggers.OnActivate).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("spawn.entity", AtomTriggers.OnActivate).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("board.action", AtomTriggers.OnActivate).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("grid.spawn", AtomTriggers.OnActivate).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("grid.clear", AtomTriggers.OnActivate).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("box.set", AtomTriggers.OnActivate).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("resource.economy", AtomTriggers.OnActivate).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("status.clear", AtomTriggers.OnActivate).Reason);
     }
 
     // Four states, not three. PlanOnly must never read as Full, or sim silently accepts
@@ -110,12 +156,14 @@ public class AtomKindRegistryTests
     {
         var statModify = AtomKindRegistry.Get("stat.modify")!;
         Assert.Equal(RuntimeState.Full, statModify.SupportIn(RuntimeId.Lawn));
-        Assert.Equal(RuntimeState.None, statModify.SupportIn(RuntimeId.Battle));
+        // Battle moved None -> Full with A18e (2026-08-28) -- BattleStatModifierLedger. spawn.entity
+        // (below, Battle_support_is_narrow_and_honest) is this matrix's own live None example now.
+        Assert.Equal(RuntimeState.Full, statModify.SupportIn(RuntimeId.Battle));
         Assert.Equal(RuntimeState.PlanOnly, statModify.SupportIn(RuntimeId.Sim));
 
-        // status.apply in battle is Partial: StatusRuntime is mounted, but entered only
-        // through scripted InitialStatuses - there is no FA2 path.
-        Assert.Equal(RuntimeState.Partial,
+        // status.apply in battle is Full since A18d (2026-08-28): BattleEffectSink's own
+        // ExecApplyStatus branch means a real FA2 path exists now, not just scripted InitialStatuses.
+        Assert.Equal(RuntimeState.Full,
             AtomKindRegistry.Get("status.apply")!.SupportIn(RuntimeId.Battle));
     }
 
@@ -248,13 +296,19 @@ public class AtomKindRegistryTests
     [Fact]
     public void Battle_support_is_narrow_and_honest()
     {
-        // D6, 2026-08-22: this test used to assert Full for the first three. Re-verification against
-        // BattleEngine showed all three unreachable FROM AN ATOM: battle never grants and never calls
-        // OnEvent, so no trigger can fire; BattleEffectHost never sets Bag.ShieldGate, so a shield
-        // grant skips with "shield-runtime-missing"; and stat.derived has no executor anywhere at all.
-        // Battle having a working FA10 sink is not the same as an atom being able to reach it.
-        Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("resource.delta")!.SupportIn(RuntimeId.Battle));
-        Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("shield.grant")!.SupportIn(RuntimeId.Battle));
+        // D6, 2026-08-22: this test used to assert None for resource.delta/shield.grant.
+        // Re-verification against BattleEngine at the time showed both unreachable FROM AN ATOM:
+        // battle never granted and never called OnEvent, so no trigger could fire; BattleEffectHost
+        // never set Bag.ShieldGate, so a shield grant skipped with "shield-runtime-missing". Battle
+        // having a working FA10 sink was not the same as an atom being able to reach it.
+        //
+        // A18a-c (2026-08-28, action-map.md §12) grew that grant path for real: BattleRunState binds
+        // real EffectGrantDtos (A18a), OnActivate/OnDamageDealt actually fire (A18b/A18c), and
+        // Bag.Status/Bag.StatusRng/Bag.ShieldGate are all wired. Both cells move to Full for the same
+        // reason stat.derived's did below -- the cell moved because the code did, proven by real
+        // shipped defs in BattleResourceShieldGrantsTests (T46), not asserted from this test alone.
+        Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("resource.delta")!.SupportIn(RuntimeId.Battle));
+        Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("shield.grant")!.SupportIn(RuntimeId.Battle));
 
         // stat.derived RE-OPENED for battle 2026-08-23: E12 shipped the consumer. `BattleStatComposer`
         // reads bound stat.derived atoms at squad build, through `TraitAtomSource` — the same place it
@@ -262,12 +316,14 @@ public class AtomKindRegistryTests
         // cell in this matrix is ever allowed to move.
         Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Battle));
 
-        Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("stat.modify")!.SupportIn(RuntimeId.Battle));
+        // stat.modify moved to Full with A18e (2026-08-28) -- BattleStatModifierLedger. spawn.entity/
+        // board.action stay None: no A18 sub-module touches the Board attach point (H3's own boundary).
+        Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("stat.modify")!.SupportIn(RuntimeId.Battle));
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("spawn.entity")!.SupportIn(RuntimeId.Battle));
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("board.action")!.SupportIn(RuntimeId.Battle));
 
-        // status.apply stays Partial: InitialStatuses is a real, named side path (squad setup).
-        Assert.Equal(RuntimeState.Partial, AtomKindRegistry.Get("status.apply")!.SupportIn(RuntimeId.Battle));
+        // status.apply moved to Full with A18d (2026-08-28) -- see the dedicated test above.
+        Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("status.apply")!.SupportIn(RuntimeId.Battle));
 
         // Sim: shield.grant is one line of wiring away (SimEffectHost sets Bag.Status and Bag.UtcNow,
         // never Bag.ShieldGate), but until that line exists a bind would be a silent skip.

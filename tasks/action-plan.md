@@ -207,6 +207,50 @@ width. *"The slot tests pass"* must not be mistaken for coverage that does not e
 
 ---
 
+## 4a. Reopened 2026-08-28 — A17–A20 (Phase 11)
+
+The plan above closed with the action program built but never wired into a real battle — proven by
+a completeness audit, not assumed. **This reopening's whole point is Checkpoint A/C's own promise,
+delivered for real:** `BattleEngine` calling `StubIntentSource`/`ActionCatalog` at runtime instead
+of its own hardcoded `SelectTarget`. Full scope, the two explicit owner decisions (full switch-over;
+full multi-action loadouts), and what stays deferred: [action-map.md](../docs/architecture/action-map.md)
+§12. Tasks: `action-todo.md` Phase 11 (T35–T39). Module spec:
+[spec-action-selection-adoption.md](../docs/architecture/action/spec-action-selection-adoption.md).
+
+**Unlike the plan above, this is explicitly a golden-mover**, not gated by "don't block the build" —
+it needs its own re-bless, predicted delta, and win-rate sweep (§12.2's golden-ordering rule),
+following this repo's own established discipline for a deliberate change rather than skipping it.
+
+**Closed 2026-08-28.** T35-T39 landed; Checkpoint E closed on the finding that the switch-over was
+byte-identical for every battle that exists today (zero goldens moved, measured not assumed) —
+`RulesetVersion` held at 4 by owner choice. See `action-todo.md` Phase 11 for full evidence.
+
+## 4b. A18 split into A18a–e (2026-08-28, Phase 12)
+
+A18 ("resolve whichever action A17 chose") turned out to bundle five independently testable
+capabilities once specced — a genuine Phase 0 case, not a stylistic split. Same shape as
+`effect-atom-map.md`'s own E14a/E14b precedent. Capability map: `action-map.md` §12.1 (module table,
+dependency order, Checkpoints F). Module specs, all written and adversarially audited against the
+real code this session (two load-bearing bugs found and fixed before any code was written — see each
+spec's own corrected design, and `spec-battle-status-apply.md` §1 / `spec-battle-live-stat-modifiers.md`
+§1 for the specifics):
+
+| id | Spec | Owns |
+|---|---|---|
+| A18a | [spec-action-container-binding.md](../docs/architecture/action/spec-action-container-binding.md) | The ephemeral binding seam |
+| A18b | [spec-on-activate-trigger.md](../docs/architecture/action/spec-on-activate-trigger.md) | New `OnActivate` trigger (7→8) |
+| A18c | [spec-battle-resource-shield-grants.md](../docs/architecture/action/spec-battle-resource-shield-grants.md) | `resource.delta` + `shield.grant` execute for real |
+| A18d | [spec-battle-status-apply.md](../docs/architecture/action/spec-battle-status-apply.md) | `status.apply` executes for real |
+| A18e | [spec-battle-live-stat-modifiers.md](../docs/architecture/action/spec-battle-live-stat-modifiers.md) | Sourced/revertible modifier ledger for `stat.modify` |
+
+**Build order:** A18a → A18b → {A18c, A18d} → A18e → A19. Tasks: `action-todo.md` Phase 12 (T40–T54).
+**Architecture decision that binds every module after A18a:** every cross-module dependency is a
+settable property forwarded through `BattleEffectHost`, never a constructor parameter — because
+`BattleRunState`'s constructor builds `Host` before most of its own other fields exist
+(`BattleRunState.cs:115` vs. `Status` at line 117). This is the exact shape T14 already used for
+`ShieldGate`; A18d (`Status`/`StatusRng`) and A18e (`Ledger`) both reuse it rather than reinventing a
+constructor-injection approach that cannot compile against the real construction order.
+
 ## 5. Deferred, and why
 
 | Module | Waits on |
