@@ -4,14 +4,13 @@ using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Vfx;
 using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Hud;
-using FusionRpg.Injector.Lawn;
 using UnityEngine;
 using UObject = UnityEngine.Object;
 
 namespace FusionRpg.Injector.Fx;
 
 /// <summary>
-/// Shader world-space RPG shield bars — follow BodyWorld.
+/// Shader world-space RPG shield bars — follow <see cref="UnitFrameResolver"/> Body anchor.
 /// Fill length uses <see cref="ShieldBarVisual.DisplayRatio"/> (10% steps); track = max capacity.
 /// Uses <see cref="FxResources.ParticleMaterial"/> (same OverlayShaderProbe path as bursts).
 /// Never Unity GUI.
@@ -198,7 +197,12 @@ static class ShieldBarPool
                 if (follow == null) return;
 
                 Vector3 world;
-                try { world = BarAnchorWorld(follow); }
+                try
+                {
+                    var frame = UnitFrameResolver.Resolve(follow);
+                    world = frame.World(VfxAnchorKind.Body);
+                    world.y += WorldYOffset;
+                }
                 catch { return; }
 
                 var trueRatio = Mathf.Clamp01((float)hp / max);
@@ -317,29 +321,6 @@ static class ShieldBarPool
         }
 
         return true;
-    }
-
-    /// <summary>
-    /// Lane Y from BodyWorld; X from sprite renderer bounds center.
-    /// Zombie/plant pivots are often left of the art — transform.x alone mis-centers the bar.
-    /// </summary>
-    static Vector3 BarAnchorWorld(Transform follow)
-    {
-        var body = LawnCoords.BodyWorld(follow);
-        var x = body.x;
-        try
-        {
-            var r = follow.GetComponentInChildren<Renderer>();
-            if (r != null)
-            {
-                var b = r.bounds;
-                if (b.size.x > 0.01f)
-                    x = b.center.x;
-            }
-        }
-        catch { }
-
-        return new Vector3(x, body.y + WorldYOffset, body.z);
     }
 
     static void PlaceRenderer(

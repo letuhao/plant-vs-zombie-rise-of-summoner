@@ -118,7 +118,7 @@ public class AuraDeliveryLawnTests
         var t10 = T10Value();
         Assert.True(t10 > 1000, "test needs a large, unambiguous buff, not a rounding-noise one");
 
-        var hub = HubOver(StoreWith(AuraGrant("plant", PlantType.ToString(), DerivedStatChannels.CombatPowerOmni, t10)));
+        var hub = HubOver(StoreWith(AuraGrant("plant", EffectOwnerKeys.PlantType(PlantType), DerivedStatChannels.CombatPowerOmni, t10)));
 
         var derived = hub.Resolve(Plant()).Derived;
 
@@ -132,7 +132,7 @@ public class AuraDeliveryLawnTests
     public void A_type_scoped_aura_reaches_every_plant_of_that_type()
     {
         var t10 = T10Value();
-        var hub = HubOver(StoreWith(AuraGrant("plant", PlantType.ToString(), DerivedStatChannels.CombatPowerOmni, t10)));
+        var hub = HubOver(StoreWith(AuraGrant("plant", EffectOwnerKeys.PlantType(PlantType), DerivedStatChannels.CombatPowerOmni, t10)));
 
         foreach (var key in new[] { "0xA", "0xB", "0xC" })
             Assert.Equal(t10, hub.Resolve(Plant(key)).Derived.Get(DerivedStatChannels.CombatPowerOmni, 0), 6);
@@ -158,7 +158,7 @@ public class AuraDeliveryLawnTests
     [Fact]
     public void A_plant_side_aura_never_touches_a_zombie_even_at_the_same_type_id()
     {
-        var hub = HubOver(StoreWith(AuraGrant("plant", PlantType.ToString(), DerivedStatChannels.CombatPowerOmni, T10Value())));
+        var hub = HubOver(StoreWith(AuraGrant("plant", EffectOwnerKeys.PlantType(PlantType), DerivedStatChannels.CombatPowerOmni, T10Value())));
 
         var zombie = hub.Resolve(Zombie());
 
@@ -191,7 +191,7 @@ public class AuraDeliveryLawnTests
     [Fact]
     public void Withdrawing_the_aura_returns_the_channel_to_zero()
     {
-        var store = StoreWith(AuraGrant("plant", PlantType.ToString(), DerivedStatChannels.CombatPowerOmni, T10Value()));
+        var store = StoreWith(AuraGrant("plant", EffectOwnerKeys.PlantType(PlantType), DerivedStatChannels.CombatPowerOmni, T10Value()));
         var hub = HubOver(store);
 
         Assert.True(hub.Resolve(Plant()).Derived.Get(DerivedStatChannels.CombatPowerOmni, 0) > 0);
@@ -238,5 +238,160 @@ public class AuraDeliveryLawnTests
                              "delete this test and write the real end-to-end grant test that closes TC2.");
             Assert.Contains("derived.", error!, StringComparison.Ordinal);
         }
+    }
+
+    // ── TC2's last hop, now CLOSED: the real EffectBag.Grant path end to end ─────────────────────
+
+    /// <summary>
+    /// <b>⭐ TC2's remaining hop, closed 2026-08-30.</b> This is the test the task said could not be
+    /// written until Wave 6: a def carrying a <c>ModifyDerivedStat</c> action row, granted through the
+    /// <b>real <see cref="EffectBag.Grant"/></b> — surviving its catalog lookup <i>and</i> its overlay
+    /// validation — reaching <c>combat.power.omni</c> on a lawn plant via the real reader/subsystem/hub.
+    ///
+    /// <para>The blocker was real but narrower than recorded: it was one missing opcode
+    /// (<c>AtomCompiler.OpcodeOf</c> returned null for <c>stat.derived</c>) plus its
+    /// <c>AllowedByAction</c> row — not a whole loader/importer wave. Adding them moved <b>no</b>
+    /// goldens and <b>no</b> content hashes, measured before being kept.</para>
+    /// </summary>
+    [Fact]
+    public void A_real_def_granted_through_the_real_EffectBag_reaches_a_lawn_plant()
+    {
+        var t10 = T10Value();
+
+        var catalog = new InMemoryEffectCatalog();
+        catalog.Upsert(new EffectDef
+        {
+            EffectId = "aura.might.live",
+            // A permanent modifier declares no trigger, so it must be Passive or the bag never
+            // completes its lifecycle (definitions.md §14.2, AtomCompiler's own rule).
+            EffectType = EffectTypes.Passive,
+            Name = "Might (live aura)",
+            Actions =
+            {
+                new EffectActionRow
+                {
+                    Action = EffectActions.ModifyDerivedStat,
+                    Params = new Dictionary<string, object?>
+                    {
+                        ["channel"] = DerivedStatChannels.CombatPowerOmni,
+                        ["op"] = "flat",
+                        ["amount"] = (double)t10,
+                    },
+                },
+            },
+        });
+
+        var bag = new EffectBag(catalog, new InMemoryEffectGrantStore(),
+            new EffectProcPolicy(new FakeEffectClock(), new SeededEffectRandom(1)), new RecordingEffectSink());
+
+        // The exact shape BattlefieldOwnSideReactor.BuildGrant emits: id + owner, no overlay.
+        bag.Grant(new EffectGrantDto
+        {
+            GrantId = "aura.might.live:0xPLANT",
+            EffectId = "aura.might.live",
+            OwnerKind = "entity",
+            OwnerKey = EffectOwnerKeys.Entity("0xPLANT"),
+        });
+
+        var hub = new FusionRpg.Core.Stats.Derived.ActorHub(StatSystemBootstrap.CreateDefault());
+        hub.Register(new AtomDerivedSubsystem(ctx => GrantedDerivedAtomReader.Read(bag.Grants, bag.Catalog, ctx)));
+
+        var result = hub.Resolve(Plant("0xPLANT"));
+
+        Assert.Equal(t10, result.Derived.Get(DerivedStatChannels.CombatPowerOmni, 0), 6);
+
+        // ...and a plant that is NOT the grant's owner is untouched — per-entity scoping survives the
+        // real grant path, not just the hand-built one.
+        Assert.Equal(0, hub.Resolve(Plant("0xOTHER")).Derived.Get(DerivedStatChannels.CombatPowerOmni, 0), 6);
+    }
+
+    /// <summary>The collision guard, re-proven on the <b>catalog</b> path: an FA1 <c>ModifyStat</c> def
+    /// whose params use the bare <c>channel</c>/<c>op</c>/<c>amount</c> names yields no derived atom,
+    /// because the reader matches on the action id rather than on key names. This is what makes the
+    /// catalog path structurally collision-proof instead of collision-proof by naming convention.</summary>
+    [Fact]
+    public void An_FA1_def_on_the_catalog_path_still_yields_no_derived_atom()
+    {
+        var catalog = new InMemoryEffectCatalog();
+        catalog.Upsert(new EffectDef
+        {
+            EffectId = "fx.fa1.buff",
+            EffectType = EffectTypes.Passive,
+            Actions =
+            {
+                new EffectActionRow
+                {
+                    Action = EffectActions.ModifyStat,
+                    Params = new Dictionary<string, object?>
+                    {
+                        ["channel"] = "atk", ["flat"] = 50.0,
+                    },
+                },
+            },
+        });
+
+        var store = new InMemoryEffectGrantStore();
+        store.Upsert(new EffectGrant
+        {
+            GrantId = "g-fa1", EffectId = "fx.fa1.buff",
+            OwnerKind = "entity", OwnerKey = EffectOwnerKeys.Entity("0xPLANT"),
+        });
+
+        Assert.Empty(GrantedDerivedAtomReader.Read(store, catalog, Plant("0xPLANT")));
+    }
+
+    /// <summary>
+    /// <b>⛔ The defect this file's investigation actually uncovered, pinned so it cannot be lost.</b>
+    ///
+    /// <para><c>spec-derived-write-lawn.md</c> claimed <i>"This module's own half is done: the moment
+    /// such a def is grantable, the executor consumes it."</i> <b>That is false</b>, and this test is
+    /// why. The production grant path — <c>BattlefieldOwnSideReactor.BuildGrant</c> — emits a grant
+    /// carrying an <c>EffectId</c> and <b>no Overlay at all</b>. <see cref="GrantedDerivedAtomReader"/>
+    /// reads <c>grant.Overlay</c>. So a real reactor-issued grant yields <b>nothing</b>: the lawn
+    /// executor is <b>inert in production</b>, not merely waiting for content.</para>
+    ///
+    /// <para>Verified independently: no file under <c>src/</c> writes
+    /// <c>derived.channel</c>/<c>derived.op</c>/<c>derived.amount</c> onto a grant — the only writers
+    /// are this test project's fixtures. The values are supposed to live on the compiled def's
+    /// <b>action row params</b> (the <c>stat.derived</c> ParamSchema in <c>AtomKindRegistry</c> names
+    /// them <c>channel</c>/<c>op</c>/<c>amount</c>), which is a different transport entirely.</para>
+    ///
+    /// <para>This is a <b>wiring gap with four named missing links</b>, all in <c>effect-atom</c>
+    /// Wave 6 / E20-E25 — see <c>tasks/aura-skill-todo.md</c> Phase 5 TC2 for the work order.</para>
+    /// </summary>
+    [Fact]
+    public void The_production_grant_shape_carries_no_overlay_so_the_reader_is_inert_today()
+    {
+        // Exactly what BattlefieldOwnSideReactor.BuildGrant produces: id + owner, no overlay.
+        var productionShaped = new EffectGrant
+        {
+            GrantId = "aura:test-ember:0xPLANT",
+            EffectId = "aura.might.live",
+            OwnerKind = "entity",
+            OwnerKey = EffectOwnerKeys.Entity("0xPLANT"),
+            // Overlay deliberately left at its default (empty) -- BuildGrant sets none.
+        };
+
+        var atoms = GrantedDerivedAtomReader.Read(StoreWith(productionShaped), Plant("0xPLANT"));
+
+        Assert.Empty(atoms);
+
+        // The same grant WITH the overlay the reader expects does produce an atom -- so the emptiness
+        // above is specifically the missing transport, not a broken reader.
+        var withOverlay = new EffectGrant
+        {
+            GrantId = productionShaped.GrantId,
+            EffectId = productionShaped.EffectId,
+            OwnerKind = productionShaped.OwnerKind,
+            OwnerKey = productionShaped.OwnerKey,
+            Overlay = new Dictionary<string, object?>
+            {
+                [GrantedDerivedAtomReader.ChannelKey] = DerivedStatChannels.CombatPowerOmni,
+                [GrantedDerivedAtomReader.OpKey] = "flat",
+                [GrantedDerivedAtomReader.AmountKey] = 123.0,
+            },
+        };
+
+        Assert.Single(GrantedDerivedAtomReader.Read(StoreWith(withOverlay), Plant("0xPLANT")));
     }
 }

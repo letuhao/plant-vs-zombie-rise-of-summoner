@@ -202,7 +202,43 @@ part of Wave 6, not re-litigated here.**
 > | `EffectBag.Grant` unknown `EffectId` (`EffectBag.cs:196`) | Real for the **live** lawn. **Not** a testability wall: `EffectBag` takes an `IEffectCatalog` by ctor injection (`EffectBag.cs:144-150`) and `EffectBagTests.cs:121` already registers its own defs via `InMemoryEffectCatalog`. A **content** gap. |
 > | **`EffectOverlayMerge.AllowedByAction` (`EffectProcAndOwner.cs:130-154`)** | **The structural blocker, previously unrecorded.** Overlay keys are whitelisted per action across ten actions, **none of them a derived-stat action** — so even with the def registered, a grant carrying `derived.channel` is refused as `unknown overlay key`. |
 >
-> **What Wave 6 actually owes this module is one new effect action**, not a catalog entry.
+> #### ⛔⛔ Second correction, same day — **"this module's own half is done" was FALSE**
+>
+> The sentence above claims *"the moment such a def is grantable, the executor consumes it."* Probing
+> the real grant path proved it would consume **nothing**, for two independent reasons, both now fixed
+> or pinned:
+>
+> 1. **Wrong transport.** `BattlefieldOwnSideReactor.BuildGrant` — the only production grant path —
+>    emits `GrantId`/`EffectId`/`OwnerKind`/`OwnerKey` and **no `Overlay` at all**. The reader read
+>    `grant.Overlay`. Independently confirmed: **no file under `src/` ever writes
+>    `derived.channel`/`derived.op`/`derived.amount` onto a grant.** The values are meant to live on the
+>    compiled def's **action-row params** (the `stat.derived` ParamSchema names them
+>    `channel`/`op`/`amount`) — a different transport. Pinned by
+>    `AuraDeliveryLawnTests.The_production_grant_shape_carries_no_overlay_so_the_reader_is_inert_today`.
+> 2. **Wrong owner keys — a real bug, now FIXED.** The reader passed `ctx.TypeId.ToString()` and
+>    `ctx.EntityKey` **bare**, while the shipped grammar (and every real grant) uses `plant:{typeId}` /
+>    `entity:{ptr}`. `ForOwner` compares `StatApplyScope.Normalize` on both sides, and that normaliser
+>    is **not** prefix-agnostic — it maps `entity:0xAB` → `entity:ab` but leaves a bare `0xAB` as
+>    `0xab`. So **two of the three owner scopes matched nothing**; only `match` worked, and it hid the
+>    bug. Fixed in `GrantedDerivedAtomReader` to use `EffectOwnerKeys.*`; falsifier (reverting to bare
+>    keys) turns **5 of 8** `AuraDeliveryLawnTests` red.
+>
+> **The compile chain is broken too**: `AtomCompiler.OpcodeOf` maps eleven kinds to opcodes and
+> `stat.derived` falls through to `null`, so a compiled `stat.derived` atom gets **no action row** —
+> hence no params for anyone to read. Four missing links total, each pinned as a deliberately
+> fails-when-fixed assertion in `tests/FusionRpg.Core.Tests/Atoms/StatDerivedCompileGapTests.cs`.
+>
+> **So `AtomKindRegistry`'s `Lawn = Full` should be read as "a consumer exists and composes correctly",
+> NOT as "the path is live end to end."** It is not, yet.
+>
+> **What Wave 6 actually owes this module** — the corrected work order:
+> 1. an `EffectActions` constant for a derived-stat write;
+> 2. its `EffectOverlayMerge.AllowedByAction` row (`channel`/`op`/`amount`);
+> 3. `AtomCompiler.OpcodeOf: "stat.derived" => <that action>`;
+> 4. reconcile the two key namespaces — the reader uses namespaced `derived.*` overlay keys precisely
+>    because bare `channel`/`op`/`amount` collide with FA1 `ModifyStat`; reading the **def's action
+>    params** (via the catalog) instead of the grant overlay removes the collision structurally and is
+>    the better end state.
 >
 > Consequence: the offline half of A5 is **no longer blocked and has been built** —
 > `tests/FusionRpg.Core.Tests/Battle/AuraDeliveryLawnTests.cs` (7 green) proves aura delivery on a real

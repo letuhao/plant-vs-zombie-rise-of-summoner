@@ -32,6 +32,16 @@ public static class EffectActions
     public const string Economy = "Economy";
     public const string ApplyResourceDelta = "ApplyResourceDelta";
     public const string GrantShield = "GrantShield";
+
+    /// <summary>
+    /// aura-skill-todo.md Phase 5 / TC2 — the derived-channel write. Unlike every opcode above it,
+    /// this one is DECLARATIVE: nothing executes it. A `stat.derived` atom is a permanent modifier
+    /// that declares no trigger (AtomKindRegistry: "Permanent modifier: declares no trigger"), so the
+    /// bag never fires it; the grant's mere presence is the effect, folded at resolve time by
+    /// `GrantedDerivedAtomReader` -> `AtomDerivedSubsystem` -> `ActorHub`. It therefore needs no sink
+    /// executor, which is why adding it does not touch `InjectorEffectActionSink` or `BattleEffectSink`.
+    /// </summary>
+    public const string ModifyDerivedStat = "ModifyDerivedStat";
 }
 
 public static class EffectTypes

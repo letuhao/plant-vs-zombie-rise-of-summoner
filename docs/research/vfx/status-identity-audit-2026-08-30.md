@@ -26,7 +26,9 @@
 
 All thirteen custom statuses have distinct apply burst keys (batch 4). See [spec-status-identity-batch4-apply.md](../../architecture/vfx/spec-status-identity-batch4-apply.md), [spec-status-identity-batch5-pulsering.md](../../architecture/vfx/spec-status-identity-batch5-pulsering.md).
 
-**LIVE human eyeball:** not run in this session (server/game offline). Static analysis + unit tests + tracker stress tests completed. Owner should run `-Live -Stress` and fill the human columns in `_status-identity-audit.json` before calling vfx-v3 fully green for player-facing identity.
+**LIVE automated harness:** **13/13** `sustainedStarted: true` (2026-08-30, MelonLoader 3.9, `audit-status-vfx-identity.ps1 -Live -Stress` with all-in-one `Ensure-LiveLabBoard`). Stress two-status cap block recorded in JSON.
+
+**LIVE human eyeball (owner):** screenshots (13×3) and forced-choice trials (`humanCorrect` in JSON) still pending before vfx-v3 identity gate is fully green.
 
 ---
 

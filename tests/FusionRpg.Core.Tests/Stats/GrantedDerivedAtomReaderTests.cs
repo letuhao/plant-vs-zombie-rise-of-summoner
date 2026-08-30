@@ -171,8 +171,8 @@ public class GrantedDerivedAtomReaderTests
     {
         var store = new FakeGrantStore()
             .Add("match", EffectOwnerKeys.Match, DerivedOverlay("combat.power.omni", "flat", 1), grantId: "m")
-            .Add("plant", "7", DerivedOverlay("combat.defense.omni", "flat", 2), grantId: "t")
-            .Add("entity", "1A2B", DerivedOverlay("combat.accuracy.omni", "flat", 3), grantId: "e");
+            .Add("plant", EffectOwnerKeys.PlantType(7), DerivedOverlay("combat.defense.omni", "flat", 2), grantId: "t")
+            .Add("entity", EffectOwnerKeys.Entity("1A2B"), DerivedOverlay("combat.accuracy.omni", "flat", 3), grantId: "e");
 
         var atoms = GrantedDerivedAtomReader.Read(store, PlantCtx(typeId: 7, entityKey: "1A2B"));
 
@@ -186,8 +186,8 @@ public class GrantedDerivedAtomReaderTests
     public void Side_selects_the_type_scope_a_zombie_never_picks_up_plant_type_grants()
     {
         var store = new FakeGrantStore()
-            .Add("plant", "7", DerivedOverlay("combat.power.omni", "flat", 99))
-            .Add("zombie", "7", DerivedOverlay("combat.defense.omni", "flat", 5));
+            .Add("plant", EffectOwnerKeys.PlantType(7), DerivedOverlay("combat.power.omni", "flat", 99))
+            .Add("zombie", EffectOwnerKeys.ZombieType(7), DerivedOverlay("combat.defense.omni", "flat", 5));
 
         var zombie = GrantedDerivedAtomReader.Read(store,
             new StatContext { Side = StatSide.Zombie, TypeId = 7, EntityKey = "" });
@@ -201,7 +201,7 @@ public class GrantedDerivedAtomReaderTests
     [Fact]
     public void A_blank_entity_key_does_not_query_the_entity_scope()
     {
-        var store = new FakeGrantStore().Add("entity", "", DerivedOverlay("combat.power.omni", "flat", 42));
+        var store = new FakeGrantStore().Add("entity", EffectOwnerKeys.Entity(""), DerivedOverlay("combat.power.omni", "flat", 42));
 
         Assert.Empty(GrantedDerivedAtomReader.Read(store,
             new StatContext { Side = StatSide.Plant, TypeId = 7, EntityKey = "" }));

@@ -1497,7 +1497,7 @@ public static class CheatCommandRunner
             return;
         }
 
-        var hostPtr = Str(p, "hostPtr") ?? Str(p, "targetPtr");
+        var hostPtr = Str(p, "hostPtr") ?? Str(p, "targetPtr") ?? Str(p, "ptr");
         if (string.IsNullOrWhiteSpace(hostPtr) && CheatState.SelectedPtr != IntPtr.Zero)
             hostPtr = CheatState.SelectedPtr.ToString("X");
         if (string.IsNullOrWhiteSpace(hostPtr))
@@ -1507,7 +1507,7 @@ public static class CheatCommandRunner
         }
 
         var attackerPtr = Str(p, "attackerPtr");
-        var durationMs = IntProp(p, "durationMs", 4000);
+        var durationMs = ResolveStatusApplyDurationMs(p);
         var amount = LongProp(p, "amount", 0);
         var now = DateTimeOffset.UtcNow;
         var runtime = Effects.EffectRuntime.Status;
@@ -2062,6 +2062,21 @@ public static class CheatCommandRunner
 
     static int IntProp(JsonElement p, string name, int fallback) =>
         p.ValueKind == JsonValueKind.Object && p.TryGetProperty(name, out var el) && el.TryGetInt32(out var i) ? i : fallback;
+
+    /// <summary>debug.status.apply: durationMs wins; else duration (seconds, float) → ms; else 4000.</summary>
+    static int ResolveStatusApplyDurationMs(JsonElement p)
+    {
+        if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("durationMs", out var msEl) && msEl.TryGetInt32(out var ms))
+            return ms;
+        if (p.ValueKind == JsonValueKind.Object && p.TryGetProperty("duration", out var secEl))
+        {
+            if (secEl.TryGetDouble(out var sec))
+                return (int)Math.Max(1, Math.Round(sec * 1000.0));
+            if (secEl.TryGetInt32(out var secInt))
+                return Math.Max(1, secInt * 1000);
+        }
+        return 4000;
+    }
 
     static long LongProp(JsonElement p, string name, long fallback)
     {

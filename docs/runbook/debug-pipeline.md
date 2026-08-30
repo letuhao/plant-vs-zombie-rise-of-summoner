@@ -40,6 +40,77 @@ Preferred path for overlay combat / effect proves. Does **not** open a level —
 
 If the game looks stuck (“run never starts”), check `board.start`: `levelType=Explore` with `zombieSpeedMultiplier=0` is a bad lab surface — back to menu → Adventure day. See [level-entry.md](../research/level-entry.md).
 
+**One-call setup (preferred):**
+
+```powershell
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/lawn/quick-start `
+  -ContentType application/json `
+  -Body '{"scenario":"lab-overlay","levelNumber":1}' | ConvertTo-Json
+# → targetPtr, plantPtr after enter-level (if needed) + scenario steps
+```
+
+Shared status helpers: [`scripts/lib/DebugStatusApply.ps1`](../../scripts/lib/DebugStatusApply.ps1), [`scripts/lib/LiveLawnSetup.ps1`](../../scripts/lib/LiveLawnSetup.ps1) (`Ensure-LiveLabBoard`), [`tools/live_test/live_test/status_apply.py`](../../tools/live_test/live_test/status_apply.py). Skill: [`.claude/skills/live-lawn-quick-start/SKILL.md`](../../.claude/skills/live-lawn-quick-start/SKILL.md).
+
+## Status apply — two paths (do not mix)
+
+| Path | Endpoint | Event | Custom sustained VFX |
+|---|---|---|---|
+| **RPG / L2** | `POST /api/debug/status/apply` | `debug.status.apply` | Yes — `StatusRuntime.Apply` → `debug.fx.state.started` |
+| **Unity CC bypass** | `POST /api/debug/apply-status` | `debug.apply-status` | No — vanilla debuff visuals only |
+
+### Direct apply (VFX identity, prove-vfx organic path)
+
+Body (aliases accepted on injector: `ptr` → `hostPtr`, `duration` seconds → `durationMs`):
+
+```json
+{
+  "statusId": "wither",
+  "hostPtr": "<zombie hex ptr>",
+  "amount": 20,
+  "durationMs": 6000
+}
+```
+
+Neutral derived profiles can **resist** (~50% apply-roll). Retry until `debug.fx.state.started` with matching `payload.statusId` (see `Apply-StatusUntilStarted` in prove-vfx / DebugStatusApply.ps1).
+
+PowerShell:
+
+```powershell
+. .\scripts\lib\DebugStatusApply.ps1
+$ptr = Get-LiveTargetPtr
+Invoke-StatusApplyUntilStarted -StatusId rot -HostPtr $ptr -DurationMs 100000
+```
+
+### Organic apply via effects (integration)
+
+No separate `fx.rot_on_hit` catalog entry — grant `fx.overlay_damage` with a status overlay, then trigger damage:
+
+1. `POST /api/debug/scenario/status-l2-rot` (or `status-l2-wither`, …) — expands board + grant + `fire-synthetic`
+2. Assert `debug.run-steps.done`, then `debug.fx.state.started` and/or `debug.status.apply`
+
+Manual recipe (same as `StatusL2Board` in `DebugScenarios.cs`):
+
+```powershell
+# after lab-overlay board exists
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/effect/grant -ContentType application/json -Body (@{
+  grantId = "live-rot-hit"
+  effectId = "fx.overlay_damage"
+  ownerKey = "match"
+  overlay = @{
+    statusId = "rot"
+    amount = -12
+    icd_ms = 0
+    durationMs = 100000
+    periodMs = 1000
+    tickBudget = 5
+    spread = @{ chance = 1.0; icd_ms = 0; maxHops = 2; statusId = "rot"; target = @{ mode = "Column" } }
+  }
+} | ConvertTo-Json -Depth 8)
+Invoke-RestMethod -Method POST http://127.0.0.1:5088/api/debug/effect/fire-synthetic -ContentType application/json -Body '{"row":2,"x":7.5}'
+```
+
+Full L2 matrix: [`scripts/prove-status-full.ps1`](../../scripts/prove-status-full.ps1). Single scenario: [`scripts/prove-status-l2-one.ps1`](../../scripts/prove-status-l2-one.ps1).
+
 ## TypeId catalog (defaults — confirm with `/api/types`)
 
 | Role | Constant in code | Typical 3.8.1 |
@@ -93,7 +164,9 @@ Invoke-RestMethod 'http://127.0.0.1:5088/api/debug/events?kinds=combat.hit,zombi
 | POST | `/api/debug/board-stats` | Living plants/zombies ATK/HP + effect `sessionMods` (`debug.board-stats` event) |
 | POST | `/api/debug/apply-status` |
 | POST | `/api/debug/apply-status-float` |
+| POST | `/api/debug/status/apply` | StatusRuntime L2 apply → custom VFX (`statusId`, `hostPtr`, `amount`, `durationMs`) |
 | POST | `/api/debug/clear-status` |
+| POST | `/api/debug/lawn/quick-start` | Enter lawn (if needed) + scenario + `targetPtr`/`plantPtr` |
 | POST | `/api/debug/arm/{kind}` | `onkill-extra`, `onkill-status`, `onhit-extra`, `onhit-status` |
 | POST | `/api/debug/disarm` |
 | POST | `/api/debug/effect/grant` | Upsert Foundation grant (ack only; listen for `debug.effect.granted`) |

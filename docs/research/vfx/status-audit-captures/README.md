@@ -15,19 +15,28 @@ For each of the 13 custom statuses, save three files:
 ## How to apply
 
 ```powershell
-.\scripts\setup-lab-run.ps1
-.\scripts\audit-status-vfx-identity.ps1 -Live -Stress -TargetPtr <ZombiePtr>
+# All-in-one: enter level 1 + lab-overlay + 13 status applies + optional stress
+.\scripts\audit-status-vfx-identity.ps1 -Live -Stress
 ```
 
-Or per status:
+Per-status captures after setup (optional `-SkipSetup -TargetPtr <ptr>`):
+
+```powershell
+. .\scripts\lib\DebugStatusApply.ps1
+Invoke-StatusApplyUntilStarted -StatusId wither -HostPtr $TargetPtr -DurationMs 8000
+```
+
+Or HTTP (RPG path — custom VFX):
 
 ```http
 POST /api/debug/status/apply
-{ "status": "wither", "ptr": "<TargetPtr>", "duration": 8, "level": 1 }
+{ "statusId": "wither", "hostPtr": "<TargetPtr>", "amount": 20, "durationMs": 8000 }
 ```
+
+Do **not** use `/apply-status` for identity captures — that path skips StatusRuntime VFX.
 
 Clear between captures: `POST /api/debug/clear-status` `{ "ptr": "<TargetPtr>" }`.
 
 ## LIVE status (2026-08-30)
 
-Automated audit ran **static-only** — server was not running on the audit machine (`127.0.0.1:5088` refused). Re-run with game + server up to populate this folder.
+Automated harness green: **13/13** `sustainedStarted` via `audit-status-vfx-identity.ps1 -Live -Stress` (all-in-one `Ensure-LiveLabBoard`). Screenshots in this folder still pending owner capture.

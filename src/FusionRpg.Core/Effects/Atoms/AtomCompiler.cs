@@ -176,6 +176,7 @@ public static class AtomCompiler
     static string? OpcodeOf(string kindId) => kindId switch
     {
         "stat.modify" => EffectActions.ModifyStat,
+        "stat.derived" => EffectActions.ModifyDerivedStat,
         "resource.delta" => EffectActions.ApplyResourceDelta,
         "resource.economy" => EffectActions.Economy,
         "status.apply" => EffectActions.ApplyStatus,

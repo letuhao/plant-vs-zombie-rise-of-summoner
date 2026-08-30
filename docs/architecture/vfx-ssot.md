@@ -285,7 +285,7 @@ VFX animate on **`unscaledDeltaTime`**, matching today. Deliberate: floaters/bur
 
 - ptr → `Transform` lookups served from a cache — never `FindObjectsOfType` per cue.
 - **Fill strategy (locked, updated vfx-v2 T1): the shared `InjectorEntityRegistry`.** `AnchorResolver` is a thin facade over the combat path's hook-fed, IntPtr-keyed registry (`FindZombie/FindPlant(ptrHex)?.transform`) — VFX owns no cache and no scan of its own. A miss triggers the registry's frame-throttled resync (`ResyncFrames = 1024`, the mid-match-attach backstop); repeat misses inside the window skip with reason `missing`. The original VFX-private cache + 0.5s sweep was retired when the registry (built later for the event pipeline) superseded it.
-- Cell anchors go through `LawnCoords.CellCenter` + `ClampCol/ClampRow`; unit anchors through `LawnCoords.BodyWorld`. `EstimateCellSize` moves here from `OverlayWorldFx` as the shared size basis primitives scale against.
+- Cell anchors go through `LawnCoords.CellCenter` + `ClampCol/ClampRow`. Unit-attached cues: ptr→Transform via `AnchorResolver`, then anchor+scale via `UnitFrameResolver` only (`BodyWorld` and bounds reads are internal to the resolver — spec: [vfx/spec-unit-frame.md](vfx/spec-unit-frame.md)).
 - A destroyed/missing anchor at spawn time = skip. A destroyed anchor mid-life = the primitive instance expires silently (current floater behavior).
 
 ---

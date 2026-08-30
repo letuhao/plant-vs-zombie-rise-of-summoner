@@ -59,24 +59,57 @@ public static class GrantedDerivedAtomReader
     /// <see cref="AtomDerivedSubsystem"/>'s own "contribute nothing rather than a zero-valued modifier"
     /// rule holds by construction.
     /// </summary>
-    public static IReadOnlyList<BoundDerivedAtom> Read(IEffectGrantStore? grants, StatContext? ctx)
+    public static IReadOnlyList<BoundDerivedAtom> Read(IEffectGrantStore? grants, StatContext? ctx) =>
+        Read(grants, catalog: null, ctx);
+
+    /// <summary>
+    /// The full read, including the <b>production</b> transport.
+    ///
+    /// <para><b>Two transports, and the catalog one is the real path (TC2, 2026-08-30).</b>
+    /// <c>BattlefieldOwnSideReactor.BuildGrant</c> — the only production grant path — emits an
+    /// <c>EffectId</c> and <b>no overlay whatsoever</b>. The values live on the compiled def's
+    /// <c>ModifyDerivedStat</c> action rows, whose params are <c>channel</c>/<c>op</c>/<c>amount</c>
+    /// exactly as the <c>stat.derived</c> ParamSchema declares them. Passing <paramref name="catalog"/>
+    /// is what makes a real aura reach a lawn entity; without it this reader sees only the
+    /// direct-grant/debug shape below and a real grant yields nothing.</para>
+    ///
+    /// <para><b>Being catalog-aware also removes the FA1 collision structurally.</b> The namespaced
+    /// overlay keys existed only because the old reader scanned every grant's overlay blindly and could
+    /// not tell an FA1 <c>ModifyStat</c> grant from a derived one. Matching on the def's action id
+    /// cannot make that mistake: an FA1 def has no <c>ModifyDerivedStat</c> row. So the catalog path
+    /// reads the bare, schema-declared names safely, while the overlay path keeps its namespace for the
+    /// catalog-less case.</para>
+    /// </summary>
+    public static IReadOnlyList<BoundDerivedAtom> Read(IEffectGrantStore? grants, IEffectCatalog? catalog, StatContext? ctx)
     {
         if (grants is null || ctx is null) return Array.Empty<BoundDerivedAtom>();
 
         List<BoundDerivedAtom>? found = null;
 
-        Collect(grants, "match", EffectOwnerKeys.Match, ref found);
+        // ⚠️ Owner KEYS must be the full, prefixed ids from EffectOwnerKeys — never the bare typeId or
+        // ptr. `IEffectGrantStore.ForOwner` compares `StatApplyScope.Normalize(ownerKey)` on both
+        // sides, and that normaliser is NOT prefix-agnostic: it maps `entity:0xAB` -> `entity:ab` but
+        // leaves a bare `0xAB` as `0xab`, so the two can never be equal. An earlier version of this
+        // reader passed `ctx.TypeId.ToString()` and `ctx.EntityKey` raw, which meant **two of the three
+        // scopes silently matched nothing** against a real production grant — `match` worked (its key
+        // is already the literal "match") and hid the bug. Caught by a test built to mimic
+        // `BattlefieldOwnSideReactor.BuildGrant`'s actual output rather than the reader's own habits.
+        Collect(grants, catalog, "match", EffectOwnerKeys.Match, ref found);
 
         var sideKind = ctx.Side == StatSide.Plant ? "plant" : "zombie";
-        Collect(grants, sideKind, ctx.TypeId.ToString(CultureInfo.InvariantCulture), ref found);
+        var typeKey = ctx.Side == StatSide.Plant
+            ? EffectOwnerKeys.PlantType(ctx.TypeId)
+            : EffectOwnerKeys.ZombieType(ctx.TypeId);
+        Collect(grants, catalog, sideKind, typeKey, ref found);
 
         if (!string.IsNullOrWhiteSpace(ctx.EntityKey))
-            Collect(grants, "entity", ctx.EntityKey!, ref found);
+            Collect(grants, catalog, "entity", EffectOwnerKeys.Entity(ctx.EntityKey!), ref found);
 
         return (IReadOnlyList<BoundDerivedAtom>?)found ?? Array.Empty<BoundDerivedAtom>();
     }
 
-    static void Collect(IEffectGrantStore grants, string ownerKind, string ownerKey, ref List<BoundDerivedAtom>? into)
+    static void Collect(IEffectGrantStore grants, IEffectCatalog? catalog, string ownerKind, string ownerKey,
+        ref List<BoundDerivedAtom>? into)
     {
         IReadOnlyList<EffectGrant> list;
         try { list = grants.ForOwner(ownerKind, ownerKey); }
@@ -87,7 +120,14 @@ public static class GrantedDerivedAtomReader
         for (var i = 0; i < list.Count; i++)
         {
             var g = list[i];
-            if (g?.Overlay is null || g.Overlay.Count == 0) continue;
+            if (g is null) continue;
+
+            // ── the PRODUCTION transport: the def's own ModifyDerivedStat action rows ──────────────
+            // Matching on the action id is what makes this collision-proof: an FA1 ModifyStat def has
+            // no ModifyDerivedStat row, so its bare `channel` can never be mistaken for a derived one.
+            if (catalog is not null && CollectFromDef(catalog, g, ref into)) continue;
+
+            if (g.Overlay is null || g.Overlay.Count == 0) continue;
 
             if (!TryString(g.Overlay, ChannelKey, out var channel)) continue;
             if (!TryString(g.Overlay, OpKey, out var op)) continue;
@@ -101,6 +141,56 @@ public static class GrantedDerivedAtomReader
                 new BoundDerivedAtom(channel, parsed, amount,
                     SourceId: string.IsNullOrWhiteSpace(g.EffectId) ? g.GrantId : g.EffectId));
         }
+    }
+
+    /// <summary>
+    /// Reads every <c>ModifyDerivedStat</c> action row on this grant's def. Returns true when the def
+    /// was found and is a derived-stat one, so the caller skips the overlay fallback for it.
+    ///
+    /// <para>The grant's overlay, when present, <b>wins</b> over the def's authored params — that is
+    /// the whole point of an overlay, and it matches how <c>EffectOverlayMerge</c> treats every other
+    /// action. Overlay keys here are the bare, schema-declared names (<c>channel</c>/<c>op</c>/
+    /// <c>amount</c>), which is safe precisely because we already know this def is derived-stat.</para>
+    /// </summary>
+    static bool CollectFromDef(IEffectCatalog catalog, EffectGrant g, ref List<BoundDerivedAtom>? into)
+    {
+        EffectDef? def;
+        try { def = catalog.Get(g.EffectId); }
+        catch { return false; }
+
+        if (def is null || def.Actions is null || def.Actions.Count == 0) return false;
+
+        var sawDerivedRow = false;
+
+        for (var i = 0; i < def.Actions.Count; i++)
+        {
+            var row = def.Actions[i];
+            if (row?.Params is null) continue;
+            if (!string.Equals(row.Action, EffectActions.ModifyDerivedStat, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            sawDerivedRow = true;
+
+            if (!TryString(row.Params, "channel", out var channel) &&
+                !(g.Overlay is not null && TryString(g.Overlay, "channel", out channel))) continue;
+            if (g.Overlay is not null && TryString(g.Overlay, "channel", out var chOverride)) channel = chOverride;
+
+            if (!TryString(row.Params, "op", out var op) &&
+                !(g.Overlay is not null && TryString(g.Overlay, "op", out op))) continue;
+            if (g.Overlay is not null && TryString(g.Overlay, "op", out var opOverride)) op = opOverride;
+
+            if (!AtomDerivedSubsystem.TryParseOp(op, out var parsed)) continue;
+
+            if (!TryDouble(row.Params, "amount", out var amount) &&
+                !(g.Overlay is not null && TryDouble(g.Overlay, "amount", out amount))) continue;
+            if (g.Overlay is not null && TryDouble(g.Overlay, "amount", out var amtOverride)) amount = amtOverride;
+
+            (into ??= new List<BoundDerivedAtom>()).Add(
+                new BoundDerivedAtom(channel, parsed, amount,
+                    SourceId: string.IsNullOrWhiteSpace(g.EffectId) ? g.GrantId : g.EffectId));
+        }
+
+        return sawDerivedRow;
     }
 
     static bool TryString(IReadOnlyDictionary<string, object?> overlay, string key, out string value)

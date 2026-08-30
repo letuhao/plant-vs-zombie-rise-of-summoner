@@ -10,14 +10,14 @@ public sealed record VfxRulesTuning(
 
 public sealed record VfxSustainedTuning(
     int GlobalCap, int PerHostCap, double TtlGraceSeconds, double InfiniteTtlSeconds,
-    double AuraPulseSeconds, int AuraMaxParticles);
+    double AuraPulseSeconds, int AuraMaxParticles, double SpanScale);
 
 public sealed record VfxShieldBarTuning(
     double BarWorldWidth, double BarWorldHeight, double WorldYOffset, int MaxSegments, int Cap, int MaxPips);
 
 public sealed record VfxRenderTuning(
-    int BurstParticles, int ParticleSortingOrder, int ParticleTextureSize, double MarkerEdgeSoftness,
-    VfxShieldBarTuning ShieldBar, double TintReassertSeconds);
+    int BurstParticles, int ParticleSortingOrder, int SortOffsetAboveUnit, int ParticleTextureSize,
+    double MarkerEdgeSoftness, VfxShieldBarTuning ShieldBar, double TintReassertSeconds);
 
 /// <summary>`StatusVfxIdentity`'s own collision-detection thresholds (guard-magic-numbers.ps1 M2,
 /// 2026-08-30) — an offline dev-facing audit heuristic (how far apart two statuses' colors must be
@@ -91,10 +91,12 @@ public static class VfxTuningLoader
                     TtlGraceSeconds: Double(sustained, "ttlGraceSeconds", "sustained"),
                     InfiniteTtlSeconds: Double(sustained, "infiniteTtlSeconds", "sustained"),
                     AuraPulseSeconds: Double(sustained, "auraPulseSeconds", "sustained"),
-                    AuraMaxParticles: Int(sustained, "auraMaxParticles", "sustained")),
+                    AuraMaxParticles: Int(sustained, "auraMaxParticles", "sustained"),
+                    SpanScale: Double(sustained, "spanScale", "sustained")),
                 Render: new VfxRenderTuning(
                     BurstParticles: Int(render, "burstParticles", "render"),
                     ParticleSortingOrder: Int(render, "particleSortingOrder", "render"),
+                    SortOffsetAboveUnit: Int(render, "sortOffsetAboveUnit", "render"),
                     ParticleTextureSize: Int(render, "particleTextureSize", "render"),
                     MarkerEdgeSoftness: Double(render, "markerEdgeSoftness", "render"),
                     ShieldBar: new VfxShieldBarTuning(

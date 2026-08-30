@@ -12,7 +12,8 @@ public static class FxResources
 {
     /// <summary>Render ordering for overlay particles — one named home for the old magic 80.
     /// Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.particleSortingOrder.</summary>
-    public static int ParticleSortingOrder => VfxTuningHub.Tuning.Render.ParticleSortingOrder;
+    public static int ParticleSortingOrder =>
+        VfxTuningHub.Tuning.Render.ParticleSortingOrder + VfxTuningHub.Tuning.Render.SortOffsetAboveUnit;
 
     static Material? _particleMat;
     static Texture2D? _softDisc;

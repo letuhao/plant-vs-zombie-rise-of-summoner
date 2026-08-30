@@ -206,7 +206,8 @@ public static class VfxDirector
 
             try
             {
-                world = LawnCoords.BodyWorld(follow);
+                var frame = UnitFrameResolver.Resolve(follow);
+                world = frame.World(VfxAnchorKind.Body);
                 hasWorld = true;
             }
             catch { }
@@ -252,7 +253,9 @@ public static class VfxDirector
                 StartSustainedRender(startedSet, plan, follow);
         }
 
-        var cellSize = EstimateCellSize(sizeCol, sizeRow);
+        var cellSize = follow != null
+            ? UnitFrameResolver.Resolve(follow).CellSize
+            : UnitFrameResolver.ResolveCell(sizeCol, sizeRow).CellSize;
         var kinds = new List<string>(decision.SpecIndices.Count);
         string? failReason = null;
         var elementGated = false;
@@ -434,19 +437,24 @@ public static class VfxDirector
     {
         if (set.RenderState is not SustainedRender render) return;
         if (render.Aura == null && render.Marker == null) return;
-        Vector3 world;
-        try { world = LawnCoords.BodyWorld(anchor); }
+        VfxUnitFrame frame;
+        try { frame = UnitFrameResolver.Resolve(anchor); }
         catch { return; }
-        var cellSize = EstimateCellSize(CheatState.SpawnCol, CheatState.SpawnRow);
-        var span = Mathf.Max(0.35f, Mathf.Min(cellSize.x, cellSize.y));
+
         if (render.Aura != null && render.AuraSpec != null)
         {
-            var auraSpan = span * (render.AuraSpec.SizeScale > 0f ? render.AuraSpec.SizeScale : 1f);
+            var kind = VfxAnchorCatalog.AnchorKindFor(render.AuraSpec.AuraStyle);
+            var world = frame.World(kind);
+            var auraSpan = frame.Span(render.AuraSpec.SizeScale > 0f ? render.AuraSpec.SizeScale : 1f);
             AuraPool.Pulse(render.Aura, world, render.AuraSpec.AuraStyle, render.AuraRgb, auraSpan, dt);
         }
 
         if (render.Marker != null)
+        {
+            var world = frame.World(VfxAnchorKind.Crown);
+            var span = frame.Span();
             AuraPool.PulseSingle(render.Marker, world, render.MarkerRgb, span * 0.3f, span * 0.85f, dt);
+        }
     }
 
     static void EndSustainedRender(VfxSustainedSet set, string reason, bool emit)
@@ -545,7 +553,11 @@ public static class VfxDirector
             {
                 if (f.Follow == null || f.Age < 0f) continue;
                 Vector3 world;
-                try { world = LawnCoords.BodyWorld(f.Follow); }
+                try
+                {
+                    var frame = UnitFrameResolver.Resolve(f.Follow);
+                    world = frame.World(VfxAnchorKind.Body);
+                }
                 catch { continue; }
                 var t = f.Life > 0f ? Mathf.Clamp01(f.Age / f.Life) : 1f;
                 if (!LawnCoords.TryWorldToGui(cam, world, t, out var gui)) continue;
@@ -567,27 +579,6 @@ public static class VfxDirector
             style.fontStyle = oldFontStyle;
             style.alignment = oldAlign;
             GUI.color = Color.white;
-        }
-    }
-
-    static Vector2 EstimateCellSize(int col, int row)
-    {
-        try
-        {
-            var a = LawnCoords.CellCenter(col, row);
-            var col2 = col >= LawnCoords.LastCol ? Math.Max(0, col - 1) : col + 1;
-            var row2 = row >= LawnCoords.LastRow ? Math.Max(0, row - 1) : row + 1;
-            var b = LawnCoords.CellCenter(col2, row);
-            var c = LawnCoords.CellCenter(col, row2);
-            var w = Mathf.Abs(b.x - a.x);
-            var h = Mathf.Abs(c.y - a.y);
-            if (w < 0.05f) w = 1f;
-            if (h < 0.05f) h = 1f;
-            return new Vector2(w, h);
-        }
-        catch
-        {
-            return Vector2.one;
         }
     }
 

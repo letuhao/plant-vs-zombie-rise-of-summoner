@@ -34,4 +34,4 @@ Catalog: `pact_mark` aura `SizeScale` 0.9, `command` 1.05.
 
 ## Out of scope
 
-Injector Y-offset fields, LIVE eyeball, marker position per-status.
+~~Injector Y-offset fields~~ — satisfied by `VfxAnchorKind` + `UnitFrameResolver` (spec-unit-frame.md, 2026-08-30). LIVE eyeball and marker position per-status remain owner verification.

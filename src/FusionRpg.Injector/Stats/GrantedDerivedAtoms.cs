@@ -33,9 +33,20 @@ public static class GrantedDerivedAtoms
         if (ctx is null) return Array.Empty<BoundDerivedAtom>();
 
         IEffectGrantStore grants;
-        try { grants = Effects.EffectRuntime.Bag.Grants; }
+        IEffectCatalog catalog;
+        try
+        {
+            var bag = Effects.EffectRuntime.Bag;
+            grants = bag.Grants;
+            // The CATALOG is not optional in production (aura-skill-todo.md Phase 5 / TC2). The real
+            // grant path -- BattlefieldOwnSideReactor.BuildGrant -- emits an EffectId and NO overlay,
+            // so the values live on the def's ModifyDerivedStat action rows. Reading grants without
+            // the catalog is exactly the state that made this executor inert on the live lawn while
+            // every offline test passed.
+            catalog = bag.Catalog;
+        }
         catch { return Array.Empty<BoundDerivedAtom>(); }
 
-        return GrantedDerivedAtomReader.Read(grants, ctx);
+        return GrantedDerivedAtomReader.Read(grants, catalog, ctx);
     }
 }

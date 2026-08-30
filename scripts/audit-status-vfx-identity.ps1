@@ -1,10 +1,18 @@
 # Status VFX identity audit harness — static matrix export + optional LIVE stress/event checks.
 # Plan: docs/research/vfx/status-identity-audit-2026-08-30.md
+#
+# LIVE (-Live): all-in-one — requires game + injector only (no manual Adventure click).
+#   1. Start server: Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe
+#   2. Deploy: .\scripts\deploy-play.ps1 -LoaderHost MelonLoader -NoServer
+#   3. Launch game (deploy without -NoGame, or MelonLoader pack exe)
+#   4. Run: .\scripts\audit-status-vfx-identity.ps1 -Live [-Stress]
+# Optional: -SkipSetup if board already labbed; -TargetPtr to override ptr.
 param(
     [string]$BaseUrl = "http://127.0.0.1:5088",
     [string]$TargetPtr = "",
     [switch]$Live,
     [switch]$Stress,
+    [switch]$SkipSetup,
     [string]$OutJson = ""
 )
 
@@ -137,66 +145,37 @@ $forcedChoiceMatrix = foreach ($pair in $p0Pairs) {
     }
 }
 
+$liveSetup = $null
 $liveResults = @()
 if ($Live) {
-    function Get-MaxEventId([string]$url) {
-        $page = Invoke-RestMethod -Uri "$url/api/events?afterId=0&limit=1" -Method GET
-        if (@($page.items).Count -eq 0) { return 0L }
-        $lo = 0L; $hi = 1L
-        while ($true) {
-            $p = Invoke-RestMethod -Uri "$url/api/events?afterId=$hi&limit=1" -Method GET
-            if (@($p.items).Count -eq 0) { break }
-            $lo = $hi; $hi = $hi * 2L
-            if ($hi -gt 1000000) { break }
-        }
-        while ($lo + 1 -lt $hi) {
-            $mid = [long](($lo + $hi) / 2)
-            $p = Invoke-RestMethod -Uri "$url/api/events?afterId=$mid&limit=1" -Method GET
-            if (@($p.items).Count -gt 0) { $lo = $mid } else { $hi = $mid }
-        }
-        return $lo
-    }
+    . (Join-Path $PSScriptRoot "lib\LiveLawnSetup.ps1")
+    . (Join-Path $PSScriptRoot "lib\DebugStatusApply.ps1")
 
-    function Post-Debug([string]$path, $body) {
-        $json = $body | ConvertTo-Json -Depth 6
-        Invoke-RestMethod -Method POST "$BaseUrl/api/debug$path" -ContentType "application/json" -Body $json -TimeoutSec 12
-    }
+    $liveSetup = Ensure-LiveLabBoard -BaseUrl $BaseUrl -SkipSetup:$SkipSetup
+    if (-not $TargetPtr) { $TargetPtr = $liveSetup.TargetPtr }
+    if (-not $TargetPtr) { throw "Ensure-LiveLabBoard returned no TargetPtr" }
 
-    if (-not $TargetPtr) {
-        Write-Warning "Live mode needs -TargetPtr from setup-lab-run.ps1"
-    } else {
-        Write-Host "LIVE: applying 13 custom statuses sequentially on $TargetPtr..."
-        foreach ($id in $customIds) {
-            Start-Sleep -Milliseconds 300
-            $after = Get-MaxEventId $BaseUrl
-            Post-Debug "/status/apply" @{ status = $id; ptr = $TargetPtr; duration = 6; level = 1 } | Out-Null
-            Start-Sleep -Milliseconds 800
-            $state = Post-Debug "/fx/state" @{}
-            $started = $false
-            $page = Invoke-RestMethod -Uri "$BaseUrl/api/events?afterId=$after&limit=200" -Method GET
-            foreach ($ev in @($page.items)) {
-                if ($ev.kind -eq "debug.fx.state.started") {
-                    $p = if ($ev.payload -is [string]) { $ev.payload | ConvertFrom-Json } else { $ev.payload }
-                    if ($p.cueId -like "status.$id.apply") { $started = $true; break }
-                }
-            }
-            $liveResults += [pscustomobject]@{ statusId = $id; sustainedStarted = $started; fxState = $state }
-            Post-Debug "/clear-status" @{ ptr = $TargetPtr } | Out-Null
-            Start-Sleep -Milliseconds 400
-        }
-    }
-
-    if ($Stress -and $TargetPtr) {
-        Write-Host "LIVE stress: two-status cap + eviction..."
-        Post-Debug "/clear-status" @{ ptr = $TargetPtr } | Out-Null
+    Write-Host "LIVE: applying 13 custom statuses sequentially on $TargetPtr (StatusRuntime + retry)..."
+    foreach ($id in $customIds) {
+        Start-Sleep -Milliseconds 300
+        $started = Invoke-StatusApplyUntilStarted -BaseUrl $BaseUrl -StatusId $id -HostPtr $TargetPtr -DurationMs 6000
+        $state = Invoke-DebugPost $BaseUrl "/fx/state" @{}
+        $liveResults += [pscustomobject]@{ statusId = $id; sustainedStarted = $started; fxState = $state }
+        Clear-StatusTarget -BaseUrl $BaseUrl -HostPtr $TargetPtr
         Start-Sleep -Milliseconds 400
-        Post-Debug "/status/apply" @{ status = "pact_mark"; ptr = $TargetPtr; duration = 12; level = 1 } | Out-Null
-        Post-Debug "/status/apply" @{ status = "wither"; ptr = $TargetPtr; duration = 12; level = 1 } | Out-Null
+    }
+
+    if ($Stress) {
+        Write-Host "LIVE stress: two-status cap + eviction..."
+        Clear-StatusTarget -BaseUrl $BaseUrl -HostPtr $TargetPtr
+        Start-Sleep -Milliseconds 400
+        [void](Invoke-StatusApplyUntilStarted -BaseUrl $BaseUrl -StatusId "pact_mark" -HostPtr $TargetPtr -DurationMs 12000)
+        [void](Invoke-StatusApplyUntilStarted -BaseUrl $BaseUrl -StatusId "wither" -HostPtr $TargetPtr -DurationMs 12000)
         Start-Sleep -Milliseconds 600
-        $twoCap = Post-Debug "/fx/state" @{}
-        Post-Debug "/status/apply" @{ status = "spark"; ptr = $TargetPtr; duration = 12; level = 1 } | Out-Null
+        $twoCap = Invoke-DebugPost $BaseUrl "/fx/state" @{}
+        [void](Invoke-StatusApplyUntilStarted -BaseUrl $BaseUrl -StatusId "spark" -HostPtr $TargetPtr -DurationMs 12000)
         Start-Sleep -Milliseconds 600
-        $afterEvict = Post-Debug "/fx/state" @{}
+        $afterEvict = Invoke-DebugPost $BaseUrl "/fx/state" @{}
         $liveResults += [pscustomobject]@{
             case = "two-status-cap"
             pact_mark_plus_wither = $twoCap
@@ -213,6 +192,7 @@ $report = [pscustomobject]@{
     forcedChoiceMatrix = $forcedChoiceMatrix
     p0ForcedChoicePairs = $p0Pairs | ForEach-Object { @{ a = $_[0]; b = $_[1] } }
     staticTestPass = $true
+    liveSetup = $liveSetup
     live = $liveResults
     predictedSustainGlance = @{
         pass = @("leech","rally","pact_mark","expose","bond","command","wither","blight","rot","spark","shatter","spore","charm_pulse")

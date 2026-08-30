@@ -32,17 +32,49 @@ public class LawnCoordsGuardTests
     }
 
     [Fact]
-    public void Overlay_draw_uses_BodyWorld_and_TryWorldToGui()
+    public void Overlay_draw_uses_UnitFrame_and_TryWorldToGui()
     {
-        // vfx-ssot.md: VfxDirector owns all floater draw; Repaint-gated, LawnCoords-anchored.
+        // vfx-ssot.md §9.1: VfxDirector owns floater draw; UnitFrame anchor + Repaint gate.
         var text = ReadInjector(Path.Combine("Fx", "VfxDirector.cs"));
-        Assert.Contains("LawnCoords.BodyWorld", text, StringComparison.Ordinal);
+        Assert.Contains("UnitFrameResolver.Resolve", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("LawnCoords.BodyWorld", text, StringComparison.Ordinal);
         Assert.Contains("LawnCoords.TryWorldToGui", text, StringComparison.Ordinal);
         Assert.Contains("LawnCoords.CellCenter", text, StringComparison.Ordinal);
         Assert.Contains("GUI.Label", text, StringComparison.Ordinal);
         Assert.Contains("EventType.Repaint", text, StringComparison.Ordinal);
         Assert.Contains("BurstPool.Spawn", text, StringComparison.Ordinal);
         Assert.DoesNotContain("Follow.position", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ShieldBarPool_uses_UnitFrameResolver()
+    {
+        var text = ReadInjector(Path.Combine("Fx", "ShieldBarPool.cs"));
+        Assert.Contains("UnitFrameResolver.Resolve", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("LawnCoords.BodyWorld", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Fx_only_UnitFrameResolver_reads_BodyWorld_or_bounds()
+    {
+        var fxDir = Path.Combine(FindRepoRoot(), "src", "FusionRpg.Injector", "Fx");
+        var failures = new List<string>();
+        foreach (var file in Directory.GetFiles(fxDir, "*.cs", SearchOption.TopDirectoryOnly))
+        {
+            var name = Path.GetFileName(file);
+            if (string.Equals(name, "UnitFrameResolver.cs", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var text = File.ReadAllText(file);
+            if (text.Contains("BodyWorld", StringComparison.Ordinal))
+                failures.Add(name + ": BodyWorld");
+            if (text.Contains("GetComponentInChildren<Renderer>", StringComparison.Ordinal))
+                failures.Add(name + ": GetComponentInChildren<Renderer>");
+            if (System.Text.RegularExpressions.Regex.IsMatch(text, @"\.bounds\b"))
+                failures.Add(name + ": .bounds");
+        }
+
+        Assert.True(failures.Count == 0, string.Join("\n", failures));
     }
 
     [Fact]

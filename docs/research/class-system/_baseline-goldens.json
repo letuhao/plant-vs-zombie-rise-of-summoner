@@ -5,7 +5,7 @@
     "wipeHash":  "4AB4D8D26FECC8A068D2A1E231EF567793183DF164B2E818C430EF6505B59684",
     "seedSweepHash":  "A06B6BF14199B40BD76879680E39927EDB0BFBEF5DE632182F49472497FD2450",
     "_meta":  {
-                  "measuredAt":  "2026-08-30T15:09:20.5386467Z",
+                  "measuredAt":  "2026-08-30T15:37:12.7760984Z",
                   "conditions":  "Extracted from tests/FusionRpg.Core.Tests/Battle/BattleGoldenTests.cs\u0027s four const string Hash declarations — never hand-retyped, so this file cannot itself drift from the test."
               }
 }

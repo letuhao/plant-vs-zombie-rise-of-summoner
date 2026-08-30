@@ -1630,11 +1630,44 @@ Neither asserts a value. They are not substitutes for TC1.
     *"Wave 6 has landed; delete this test and write the real end-to-end grant test that closes TC2."*
     A tripwire beats a TODO comment: the gap now announces its own closure instead of waiting to be
     remembered.
-  - **Still open, precisely:** that one hop — a real authored aura compiling to a derived-stat effect
-    and surviving `EffectBag.Grant`'s overlay validation — plus **A5**'s live on-the-lawn proof in
-    `docs/architecture/effect-atom/spec-derived-write-lawn.md`. Nothing else.
-  - Files: `tests/FusionRpg.Core.Tests/Battle/AuraDeliveryLawnTests.cs` (new, 7 tests). No production
-    code changed.
+  - ### ⛔⛔ Pushing on TC2 uncovered a REAL BUG in this session's own shipped code
+    The stop-gate refused an early close, correctly. Continuing found that the lawn executor was
+    **inert in production** — for two independent reasons:
+
+    1. **Wrong owner keys — a genuine bug, now FIXED.** `GrantedDerivedAtomReader` passed
+       `ctx.TypeId.ToString()` and `ctx.EntityKey` **bare**, while every real grant uses the shipped
+       grammar `plant:{typeId}` / `entity:{ptr}`. `ForOwner` compares `StatApplyScope.Normalize` on
+       both sides and that normaliser is **not** prefix-agnostic — `entity:0xAB` → `entity:ab`, but a
+       bare `0xAB` → `0xab`. **Two of the three owner scopes therefore matched nothing.** Only `match`
+       worked (its key is literally `"match"`), which is exactly what hid it — and why every test I had
+       written passed: my fixtures used bare keys too, encoding the same wrong assumption.
+       **Falsifier: reverting to bare keys turns 5 of 8 `AuraDeliveryLawnTests` red.**
+    2. **Wrong transport — pinned, not fixable here.** `BattlefieldOwnSideReactor.BuildGrant`, the only
+       production grant path, emits **no `Overlay` at all**; the reader reads `grant.Overlay`.
+       Confirmed independently: **no file under `src/` ever writes those overlay keys.** The values
+       belong on the compiled def's action-row params.
+
+    **How it was caught:** by writing a test that mimics `BuildGrant`'s *actual* output instead of the
+    reader's own habits. Every prior test agreed with the reader because I wrote both. This is the same
+    defect shape as the original write-gate bug — plausible, self-consistent, and wrong.
+  - ### The four missing links, each pinned as a fails-when-fixed assertion
+    `tests/FusionRpg.Core.Tests/Atoms/StatDerivedCompileGapTests.cs` (4 tests) — `AtomCompiler.OpcodeOf`
+    maps eleven kinds to opcodes and **`stat.derived` falls through to `null`**, so a compiled
+    `stat.derived` atom gets no action row and therefore no params at all. Wave 6's corrected work
+    order: (1) an `EffectActions` constant, (2) its `AllowedByAction` row, (3) the `OpcodeOf` mapping,
+    (4) reconcile the namespaced `derived.*` overlay keys against the def's bare action params — reading
+    the **def's params via the catalog** removes the FA1 collision structurally and is the better end
+    state.
+  - ### ⚠️ Correction to this program's own record
+    `AtomKindRegistry`'s `Lawn = Full` and the spec's *"this module's own half is done"* must be read as
+    **"a consumer exists and composes correctly"**, not **"the path is live end to end."** Corrected in
+    `spec-derived-write-lawn.md` with both reasons and the falsifier evidence.
+  - **Still open, precisely:** the grant-transport hop (links 1-4 above) and **A5**'s live proof.
+    Nothing else.
+  - Files: `tests/FusionRpg.Core.Tests/Battle/AuraDeliveryLawnTests.cs` (new, 8 tests),
+    `tests/FusionRpg.Core.Tests/Atoms/StatDerivedCompileGapTests.cs` (new, 4 tests),
+    `src/FusionRpg.Core/Stats/Derived/Subsystems/GrantedDerivedAtomReader.cs` (**bug fix** — owner keys),
+    and the owner-key fixtures in `GrantedDerivedAtomReaderTests` corrected to the real grammar.
 
 - [x] ~~**TC2 (original spec)**~~ · **S** · ⛔ **BLOCKED, not deferred**
   - Today `AuraDeliveryTests` proves an active aura raises `combat.power.omni` on every friendly squad
@@ -1834,6 +1867,28 @@ Neither asserts a value. They are not substitutes for TC1.
 
 ---
 
+## ⭐ What refusing an early close bought — 2026-08-30
+
+The termination gate rejected a first attempt to close Phase 5 with three items named as "open but
+externally blocked." Pushing further on the hardest of them (TC2) found **two real bugs**, one of them
+in this session's own shipped code. Recorded because the lesson is the point: *"blocked on another
+program"* was, in part, a conclusion I had not earned.
+
+| # | Bug | How it was found | Status |
+|---|---|---|---|
+| 1 | **`GrantedDerivedAtomReader` used bare owner keys** (`"7"`, `"0xAB"`) where every real grant uses `plant:7` / `entity:0xAB`. `ForOwner` normalises both sides and the normaliser is **not** prefix-agnostic, so **2 of 3 owner scopes silently matched nothing.** Only `match` worked — and hid it. | Writing a test that mimics `BattlefieldOwnSideReactor.BuildGrant`'s **actual output** instead of the reader's own habits. Every earlier test agreed with the reader because I wrote both. | **FIXED**; falsifier turns 5 of 8 lawn tests red |
+| 2 | **`CommanderSnapshotBroadcastTests` never configured `AuraTuningHub`**, but `GET /api/commanders/{id}` reaches it via `AuraRuntimeEndpoints.ResolveRuntimeForEndpoints`. The hub throws when unconfigured → 500 → exception page → the test died on `'S' is an invalid start of a value`, three layers from the cause. | Serialising the Server assembly (my own earlier fix) made ordering deterministic, so this class could run **first**. Latent dependency became reproducible: **4/4 fail in isolation.** | **FIXED** in the assembly `[ModuleInitializer]`; 4 consecutive full-suite green |
+
+Bug 2 is worth a second look: my parallelism fix did not *cause* it — the dependency was always there —
+it **converted an invisible intermittent pass into a deterministic red**. That is the fix working, and
+it is the argument for preferring determinism over a green that depends on winning a race.
+
+Both bugs are the same shape as the original write-gate defect the owner found by playing the game:
+**plausible, self-consistent, and wrong** — invisible to tests written under the same assumption as the
+code.
+
+---
+
 ## Final proof — every audit requirement mapped to evidence, 2026-08-30
 
 Both audit files (`aura-skill-plan.md` + `aura-skill-todo.md`) re-read end to end after Phase 5. Every
@@ -1859,6 +1914,11 @@ requirement, and where its evidence actually is:
 | Plan open question 2 (W4) | **CLOSED — the question was stale** | all 5 call sites pass `actorResolve`; `EffectRuntime.cs:436` assigns a real resolver |
 | Plan open question 3 (`patron.aura`) | closed → T22 | |
 | Deferred: Zomboss dynamic AI | **explicitly out of scope for this program** by the audit's own text | needs its own capability map |
+
+**Post-gate additions:** `GrantedDerivedAtomReader` owner-key **bug fixed**; `AuraTuningHub` bootstrap
+**bug fixed**; `StatDerivedCompileGapTests` (4) + the inert-executor test pin the four missing links;
+`spec-derived-write-lawn.md`'s false *"our half is done"* claim **corrected**. Final sweep: **6,036
+tests, 0 failures**, five guards green, injector builds, no falsifier residue.
 
 **Remaining open, in full — nothing else:**
 

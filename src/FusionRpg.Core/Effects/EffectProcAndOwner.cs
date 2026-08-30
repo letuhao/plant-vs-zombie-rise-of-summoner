@@ -131,6 +131,12 @@ public static class EffectOverlayMerge
     {
         [EffectActions.ModifyStat] = new(StringComparer.OrdinalIgnoreCase)
             { "channel", "flat", "increased", "more", "byChannel", "chance", "icd_ms", "max_stacks", "filters" },
+        // aura-skill-todo.md Phase 5 / TC2. Param names mirror the `stat.derived` ParamSchema in
+        // AtomKindRegistry EXACTLY (channel/op/amount) -- the schema is the SSOT for what the atom
+        // carries, and a second spelling here would be a silent divergence. No `more`: the derived
+        // side has no More op (AtomDerivedSubsystem.TryParseOp accepts flat|increased|replace|flag).
+        [EffectActions.ModifyDerivedStat] = new(StringComparer.OrdinalIgnoreCase)
+            { "channel", "op", "amount", "chance", "icd_ms", "max_stacks", "filters" },
         [EffectActions.ApplyStatus] = new(StringComparer.OrdinalIgnoreCase)
             { "status", "duration", "level", "chance", "icd_ms", "max_stacks", "filters" },
         [EffectActions.ClearStatus] = new(StringComparer.OrdinalIgnoreCase)

@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using FusionRpg.Core.Actions.Rungs;
+using FusionRpg.Core.Aura;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -26,7 +27,40 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         AptitudeTuningHub.Configure(DefaultAptitudes);
         DerivedStatPolicy.Configure(DefaultDerivedStats);
         RungPolicy.Configure(DefaultRungs);
+        AuraTuningHub.Configure(DefaultAura);
     }
+
+    /// <summary>
+    /// aura-skill-todo.md Phase 5 / TC3 — added 2026-08-30 after a real, diagnosed failure.
+    ///
+    /// <para><b>The bug.</b> <c>CommanderSnapshotBroadcastTests</c> never configured
+    /// <see cref="AuraTuningHub"/>, but <c>GET /api/commanders/{playerId}</c> reaches it —
+    /// <c>CommanderEndpoints</c> calls <c>AuraRuntimeEndpoints.ResolveRuntimeForEndpoints</c>, and
+    /// <c>AuraTuningHub.Tuning</c> throws <c>InvalidOperationException</c> when unconfigured (there is
+    /// deliberately no built-in default). The endpoint 500'd, the developer exception page returned
+    /// text, and the test died on <c>'S' is an invalid start of a value</c> — a JSON parse error whose
+    /// real cause was three layers away.</para>
+    ///
+    /// <para><b>Why it only appeared now.</b> Two sibling classes
+    /// (<c>AuraRuntimeEndpointsTests</c>, <c>CommanderListEndpointsTests</c>) DO configure the hub in
+    /// their own <c>InitializeAsync</c>. Under xUnit's default cross-class parallelism one of them
+    /// usually won the race and configured the process-global first, so the gap was invisible. Once
+    /// <c>AssemblyParallelism.cs</c> serialised the assembly (to fix a different cross-class static
+    /// race), ordering became deterministic and this class could run first — turning an invisible
+    /// latent dependency into a reproducible failure. <b>That is the serialisation doing its job:</b>
+    /// the dependency was always there, and a deterministic red beats an intermittent green.</para>
+    ///
+    /// <para>Configuring it here, in the assembly's own <c>[ModuleInitializer]</c> alongside the other
+    /// four process-global hubs, fixes every class at once — including ones not yet written — instead
+    /// of adding a line to each. Classes that need the REAL shipped <c>aura.v1.json</c> still call
+    /// <c>Configure</c> themselves and simply overwrite this; the hub allows reconfiguration.</para>
+    /// </summary>
+    // Minimal and hand-authored, per tunables-ssot.md §7.2's "construct one inline" convention, and
+    // matching DefaultAptitudes/DefaultRungs above. Rungs 7-10 are the only legal span (AuraTuning
+    // rejects anything outside it at load), and maxActiveAuras just has to be positive.
+    public static readonly AuraTuning DefaultAura = new(
+        new Dictionary<int, long> { [7] = 5359, [8] = 7090, [9] = 9379, [10] = 12407 },
+        MaxActiveAuras: 1);
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(
         SchemaVersion: 1, Version: 1, CategoryResistCap: 0.95);
