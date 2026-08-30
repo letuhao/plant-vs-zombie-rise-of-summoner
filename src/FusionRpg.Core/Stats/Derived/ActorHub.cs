@@ -128,10 +128,17 @@ public static class ActorHubBootstrap
     /// name="aptitudeAllocation"/> defaults to <see cref="AptitudeAllocation.Empty"/>, matching P2.4's
     /// own proof that the wiring is inert until `point-economy` gives players something to spend.</para>
     /// </summary>
+    /// <summary><paramref name="boundDerivedAtoms"/> is the lawn executor for the `stat.derived` atom
+    /// kind (decisions.md "Derived-write lawn executor", 2026-08-30). Opt-in for the identical reason
+    /// <paramref name="aptitudeTuning"/> is: omitting it registers no
+    /// <see cref="Subsystems.AtomDerivedSubsystem"/> at all, so every existing caller — including the
+    /// hundreds of tests that call this bare — is unaffected. Pass it to give bound `stat.derived`
+    /// atoms a consumer on this host.</summary>
     public static ActorHub CreateDefault(StatSystem? stats = null,
         FusionRpg.Core.Power.IPowerIndexProvider? powerIndex = null,
         Aptitudes.AptitudeTuning? aptitudeTuning = null,
-        Func<StatContext, Aptitudes.AptitudeAllocation>? aptitudeAllocation = null)
+        Func<StatContext, Aptitudes.AptitudeAllocation>? aptitudeAllocation = null,
+        Func<StatContext, IReadOnlyList<Subsystems.BoundDerivedAtom>>? boundDerivedAtoms = null)
     {
         var sys = stats ?? StatSystemBootstrap.CreateDefault();
         var hub = new ActorHub(sys);
@@ -144,6 +151,8 @@ public static class ActorHubBootstrap
                 powerIndex,
                 aptitudeAllocation));
         }
+        if (boundDerivedAtoms is not null)
+            hub.Register(new Subsystems.AtomDerivedSubsystem(boundDerivedAtoms));
         return hub;
     }
 }

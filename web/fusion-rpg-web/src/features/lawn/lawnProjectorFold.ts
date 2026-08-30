@@ -193,7 +193,8 @@ function clearLiving(m: LawnViewModel): LawnViewModel {
     tiles: new Map(),
     mowers: new Map(),
     pets: new Map(),
-    hand: []
+    hand: [],
+    matchCommander: undefined
   };
 }
 
@@ -797,6 +798,25 @@ function applyDebugSnapshot(m: LawnViewModel, p: Payload): LawnViewModel {
       });
     }
     next = rebuilt;
+    changed = true;
+  }
+
+  const commander = asObj(match.commander);
+  const leadingName = str(commander.leadingCommanderDisplayName);
+  if (leadingName) {
+    const auraName = str(commander.activeAuraDisplayName) ?? null;
+    const leadingId = str(commander.leadingCommanderId) ?? "commander:dave";
+    const nextCommander = { id: leadingId, displayName: leadingName, auraDisplayName: auraName };
+    if (
+      next.matchCommander?.id !== nextCommander.id ||
+      next.matchCommander?.displayName !== nextCommander.displayName ||
+      next.matchCommander?.auraDisplayName !== nextCommander.auraDisplayName
+    ) {
+      next = { ...next, matchCommander: nextCommander };
+      changed = true;
+    }
+  } else if (next.matchCommander != null) {
+    next = { ...next, matchCommander: undefined };
     changed = true;
   }
 

@@ -329,9 +329,13 @@ public class AtomKindRegistryTests
         // never Bag.ShieldGate), but until that line exists a bind would be a silent skip.
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("shield.grant")!.SupportIn(RuntimeId.Sim));
 
-        // And stat.derived stays closed where it still has no consumer. Opening lawn and sim on the
-        // strength of battle's consumer would re-create exactly what the quarantine was for.
-        Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Lawn));
+        // stat.derived: LAWN opened 2026-08-30 (decisions.md "Derived-write lawn executor") because it
+        // finally has a consumer -- `AtomDerivedSubsystem`, registered on the injector's ActorHub. The
+        // rule this line has always enforced is unchanged: a runtime opens when, and only when, a
+        // consumer exists for it.
+        Assert.Equal(RuntimeState.Full, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Lawn));
+        // SIM still has none -- `SimEffectHost` has no derived consumer, so opening it on the strength
+        // of the other two would re-create exactly what the quarantine was for.
         Assert.Equal(RuntimeState.None, AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Sim));
     }
 

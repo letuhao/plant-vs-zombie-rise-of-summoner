@@ -69,7 +69,16 @@ public static class CheatCommandRunner
         if (name is "aptitudes.allocation.reload")
         {
             if (RpgHost.Client != null)
+            {
                 _ = RpgHost.Client.RefreshCommanderAllocationAsync();
+                _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
+            }
+            return;
+        }
+        if (name is "commander.snapshot.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
             return;
         }
         if (name is "power.index.reload")

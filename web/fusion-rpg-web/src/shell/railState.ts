@@ -7,13 +7,13 @@
  */
 export type RailLayerId =
   | "creatures"
+  | "commanders"
   | "relics"
   | "fusion"
   | "pacts"
   | "expeditions"
   | "almanac"
-  | "chronicle"
-  | "aptitudes";
+  | "chronicle";
 
 export type RailEntryState = "active" | "available" | "badged" | "locked";
 
@@ -51,21 +51,20 @@ export type RailUnlockInputs = {
 
 const UNLOCK_LADDER: Record<RailLayerId, { label: string; key: string; reason: string }> = {
   creatures: { label: "Creatures", key: "C", reason: "Unlocks at session start" },
+  commanders: { label: "Commanders", key: "K", reason: "Unlocks at session start" },
   relics: { label: "Relics", key: "R", reason: "Unlocks when you hold your first item" },
   fusion: { label: "Fusion", key: "F", reason: "Unlocks once you have a demon to fuse" },
   pacts: { label: "Pacts", key: "P", reason: "Unlocks when a contract is first offered" },
   expeditions: { label: "Expeditions", key: "E", reason: "Unlocks once you have a bound demon to field" },
   almanac: { label: "Almanac", key: "A", reason: "Unlocks after your first run" },
-  chronicle: { label: "Chronicle", key: "H", reason: "Unlocks after your first run" },
-  aptitudes: { label: "Primary Stats", key: "S", reason: "Unlocks at session start" }
+  chronicle: { label: "Chronicle", key: "H", reason: "Unlocks after your first run" }
 };
 
 function isUnlocked(id: RailLayerId, inputs: RailUnlockInputs): boolean {
   switch (id) {
     case "creatures":
+    case "commanders":
       return true; // GG-44: unlocks at session start, same as Sanctum
-    case "aptitudes":
-      return true; // same reasoning as creatures -- a foundational system, not an earned one
     case "relics":
       return inputs.hasAnyRelic;
     case "fusion":

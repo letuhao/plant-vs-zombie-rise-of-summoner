@@ -47,6 +47,20 @@ public class ContractFixtureTests : IAsyncLifetime
         await AssertFixtureMatches("unique-actor.json", actor);
     }
 
+    [Fact]
+    public async Task Commander_list_fixture_matches_live_dto()
+    {
+        var players = await _http.GetFromJsonAsync<JsonElement>("/api/players");
+        var playerId = players.GetProperty("currentPlayerId").GetInt64();
+
+        var resp = await _http.GetAsync($"/api/commanders/{playerId}");
+        resp.EnsureSuccessStatusCode();
+        var live = await resp.Content.ReadFromJsonAsync<JsonNode>();
+        Assert.NotNull(live);
+
+        await AssertFixtureMatches("commander-list.json", live!);
+    }
+
     static async Task AssertFixtureMatches(string fileName, JsonNode live)
     {
         var json = live.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n";

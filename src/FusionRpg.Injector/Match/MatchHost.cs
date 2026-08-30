@@ -1,4 +1,7 @@
 using FusionRpg.Core.Match;
+using FusionRpg.Core.Commanders;
+using FusionRpg.Injector.Commanders;
+using FusionRpg.Injector.Host;
 
 namespace FusionRpg.Injector.Match;
 
@@ -116,6 +119,7 @@ public static class MatchHost
                 if (isStart && _runtime.Phase is not MatchPhase.Idle)
                 {
                     var priorKey = _runtime.MatchKey;
+                    ClearCommanderSnapshot();
                     _runtime.Apply("board.end");
                     TryEffect("NotifyMatchEnd", () => Effects.EffectRuntime.NotifyMatchEnd(priorKey));
                     TryEffect("ClearAll", () => Effects.EffectRuntime.ClearAll("match"));
@@ -139,6 +143,7 @@ public static class MatchHost
                 {
                     TryEffect("NotifyMatchEnd", () => Effects.EffectRuntime.NotifyMatchEnd(endingKey));
                     TryEffect("ClearAll", () => Effects.EffectRuntime.ClearAll("match"));
+                    ClearCommanderSnapshot();
                 }
 
                 if (isStart)
@@ -151,6 +156,13 @@ public static class MatchHost
                             GameHooks.MatchKey = key;
                     }
                     catch { }
+                    var snapshot = MatchCommanderSnapshotSource.BuildFromSessionCache();
+                    if (MatchCommanderSnapshotSource.LastBuildUsedFallback)
+                    {
+                        try { RpgHost.Log.Warning("commander snapshot: cache miss — implicit Dave"); } catch { }
+                    }
+                    MatchCommanderSnapshotHolder.BeginMatch(snapshot);
+                    CheatState.RefreshCommanderAllocationCache();
                     TryEffect("NotifyMatchStart", () => Effects.EffectRuntime.NotifyMatchStart(_runtime.MatchKey ?? ""));
                 }
                 else if (isEnd)
@@ -168,6 +180,12 @@ public static class MatchHost
     static bool IsMatchEnd(string kind) =>
         string.Equals(kind, "board.end", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(kind, "match.result", StringComparison.OrdinalIgnoreCase);
+
+    static void ClearCommanderSnapshot()
+    {
+        MatchCommanderSnapshotHolder.EndMatch();
+        CheatState.RefreshCommanderAllocationCache();
+    }
 
     static void TryEffect(string label, Action action)
     {

@@ -139,16 +139,18 @@ public class BindGateTests
     [Fact]
     public void A_kind_binds_only_where_a_consumer_exists()
     {
-        // stat.derived was None/None/None under D6's quarantine. E12 shipped the battle consumer
-        // (`BattleStatComposer` reading bound atoms at squad build), so battle now accepts it —
-        // and lawn and sim still do not, because nothing there reads it.
+        // stat.derived was None/None/None under D6's quarantine. Each runtime has opened only on the
+        // strength of its OWN consumer, never a sibling's — which is the rule this test exists to pin:
+        //   battle  — E12 (2026-08-23), `BattleStatComposer` reads bound atoms at squad build
+        //   lawn    — decisions.md "Derived-write lawn executor" (2026-08-30), `AtomDerivedSubsystem`
+        //   sim     — still nothing reads it, so it still refuses
         var atom = Atom("stat.derived", "{\"channel\":\"combat.power.fire\",\"op\":\"flat\",\"amount\":5}");
 
-        Assert.True(Bind(atom, OwnerScope.Match, new BindContext(RuntimeId.Battle, IsPlanner: true)).IsOk);
+        foreach (var runtime in new[] { RuntimeId.Battle, RuntimeId.Lawn })
+            Assert.True(Bind(atom, OwnerScope.Match, new BindContext(runtime, IsPlanner: true)).IsOk);
 
-        foreach (var runtime in new[] { RuntimeId.Lawn, RuntimeId.Sim })
-            Assert.Equal(AtomRejectionReason.RuntimeUnsupported,
-                Bind(atom, OwnerScope.Match, new BindContext(runtime, IsPlanner: true)).Reason);
+        Assert.Equal(AtomRejectionReason.RuntimeUnsupported,
+            Bind(atom, OwnerScope.Match, new BindContext(RuntimeId.Sim, IsPlanner: true)).Reason);
     }
 
     // ---- world scopes, level, staleness ---------------------------------------------------------------

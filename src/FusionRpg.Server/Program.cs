@@ -174,6 +174,7 @@ app.MapSouls();
 app.MapExpeditions();
 app.MapFusion();
 app.MapPatron();
+app.MapCommanders();
 app.MapContracts();
 app.MapWorld();
 app.MapAptitudes();

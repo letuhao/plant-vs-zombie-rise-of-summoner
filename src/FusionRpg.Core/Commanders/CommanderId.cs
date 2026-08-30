@@ -38,6 +38,25 @@ public static class CommanderIds
 
     public static readonly IReadOnlyList<CommanderId> All = new[] { CommanderId.Dave, CommanderId.Zomboss };
 
+    /// <summary>Inverse of <see cref="ToStableId"/> — rejects unknown strings and bare faction ids.</summary>
+    public static bool TryParseStableId(string? stableId, out CommanderId id)
+    {
+        id = default;
+        if (string.IsNullOrWhiteSpace(stableId)) return false;
+        return stableId.Trim() switch
+        {
+            "commander:dave" => Assign(CommanderId.Dave, out id),
+            "commander:zomboss" => Assign(CommanderId.Zomboss, out id),
+            _ => false,
+        };
+
+        static bool Assign(CommanderId value, out CommanderId target)
+        {
+            target = value;
+            return true;
+        }
+    }
+
     /// <summary>
     /// The <see cref="Stats.Aptitudes.AllocationScope.Commander"/> scope key for this commander,
     /// within one player's save. Reuses <c>AptitudeEndpoints.ScopeKey</c>'s exact `"player:{id}"` shape

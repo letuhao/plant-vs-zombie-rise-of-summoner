@@ -76,6 +76,27 @@ public class CommanderIdTests
         Assert.Equal("zomboss:42", zombossKey);
     }
 
+    [Theory]
+    [InlineData("commander:dave", CommanderId.Dave)]
+    [InlineData("commander:zomboss", CommanderId.Zomboss)]
+    public void TryParseStableId_round_trips_known_ids(string stableId, CommanderId expected)
+    {
+        Assert.True(CommanderIds.TryParseStableId(stableId, out var parsed));
+        Assert.Equal(expected, parsed);
+        Assert.Equal(stableId, parsed.ToStableId());
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("dave")]
+    [InlineData("commander:penny")]
+    [InlineData("not-a-commander")]
+    public void TryParseStableId_rejects_unknown_strings(string? stableId)
+    {
+        Assert.False(CommanderIds.TryParseStableId(stableId, out _));
+    }
+
     [Fact]
     public void Different_players_get_different_scope_keys_for_the_same_commander()
     {

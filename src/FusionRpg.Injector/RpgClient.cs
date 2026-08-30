@@ -63,6 +63,7 @@ public sealed class RpgClient
         await RefreshStatsAsync().ConfigureAwait(false);
         await RefreshPvzStatsAsync().ConfigureAwait(false);
         await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+        await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
         await RefreshPowerIndexAsync().ConfigureAwait(false);
         try
         {
@@ -94,6 +95,10 @@ public sealed class RpgClient
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "aptitudes.allocation.reload" });
             });
+            _hub.On<object>("CommandersUpdated", _ =>
+            {
+                CheatCommandRunner.Enqueue(new CommandDto { Name = "commander.snapshot.reload" });
+            });
             _hub.On<CommandDto>("Command", cmd =>
             {
                 try { RpgHost.Log.Info("[cheat-cmd] signalr " + (cmd?.Name ?? "?")); } catch { }
@@ -119,6 +124,7 @@ public sealed class RpgClient
                     // allocation/Θ change made during the disconnected window was silently lost until
                     // the next full injector process restart, not just the next reconnect.
                     await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+                    await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
                     await RefreshPowerIndexAsync().ConfigureAwait(false);
                     RpgHost.Log.Info("SignalR reconnected + re-joined + Hello (grant rehydrate)");
                 }
@@ -367,6 +373,41 @@ public sealed class RpgClient
                     FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, share.Name, points);
             }
             CheatState.ApplyCommanderAllocation(allocation);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>commander-surface P2: session cache for match snapshot at board.start — same cadence
+    /// as <see cref="RefreshCommanderAllocationAsync"/> (StartAsync, reconnect, aptitudes reload).
+    /// Never called from MatchHost.Apply.</summary>
+    public async Task RefreshCommanderSnapshotCacheAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+
+            var json = await Http().GetStringAsync(_base + "/api/commanders/" + playerId).ConfigureAwait(false);
+            var list = JsonSerializer.Deserialize<CommanderListResponse>(json, Json);
+            if (list == null || string.IsNullOrWhiteSpace(list.DefaultLawnCommanderId)) return;
+
+            var row = list.Commanders.Find(c =>
+                string.Equals(c.Id, list.DefaultLawnCommanderId, StringComparison.Ordinal))
+                ?? list.Commanders.FirstOrDefault();
+
+            FusionRpg.Core.Commanders.MatchCommanderSessionCache.Apply(
+                list.DefaultLawnCommanderId,
+                row?.DisplayName ?? FusionRpg.Core.Commanders.PlayerEmpireCommanders.DisplayName(FusionRpg.Core.Commanders.CommanderId.Dave),
+                row?.ActiveAuraId,
+                row?.ActiveAuraName,
+                CheatState.FetchedCommanderAllocation);
         }
         catch (Exception ex)
         {

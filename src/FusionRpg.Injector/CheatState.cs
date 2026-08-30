@@ -46,7 +46,13 @@ public static class CheatState
     /// touches ActorHub.</summary>
     public static ActorHub ActorHub => _actorHub ??= ActorHubBootstrap.CreateDefault(
         Stats, powerIndex: PowerIndex, aptitudeTuning: FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning,
-        aptitudeAllocation: CommanderAllocation.Resolve);
+        aptitudeAllocation: CommanderAllocation.Resolve,
+        // The lawn's `stat.derived` consumer (decisions.md "Derived-write lawn executor", 2026-08-30).
+        // Registering it here is what lets the AtomKindRegistry Lawn cell be `Full` without recreating
+        // D6's "binds accepted, nothing applied" state.
+        // Fully qualified on purpose: a bare `Stats.` here is ambiguous with this class's own
+        // `Stats` StatSystem property.
+        boundDerivedAtoms: FusionRpg.Injector.Stats.GrantedDerivedAtoms.For);
 
     /// <summary>aura-skill T5 (W1): cached commander-scope allocation — <see cref="ActorHub"/>'s
     /// hot-path <c>aptitudeAllocation</c> delegate reads only this cache, never the server
@@ -55,9 +61,13 @@ public static class CheatState
     /// at session start and on the server's <c>"AptitudesUpdated"</c> SignalR broadcast — never on a
     /// per-hit poll.</summary>
     public static readonly FusionRpg.Core.Stats.Aptitudes.CommanderAllocationSource CommanderAllocation =
-        new(() => _fetchedCommanderAllocation);
+        new(() => FusionRpg.Core.Commanders.MatchCommanderSnapshotHolder.ResolveAllocation(_fetchedCommanderAllocation));
     static FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation _fetchedCommanderAllocation =
         FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+
+    /// <summary>Latest commander allocation from server poll — used when building match snapshot cache.</summary>
+    internal static FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation FetchedCommanderAllocation =>
+        _fetchedCommanderAllocation;
 
     /// <summary>Called from the transport (<c>RpgClient.RefreshCommanderAllocationAsync</c>) after a
     /// successful fetch. Stores the value and immediately refreshes the cache on this same call —
@@ -65,8 +75,18 @@ public static class CheatState
     public static void ApplyCommanderAllocation(FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation allocation)
     {
         _fetchedCommanderAllocation = allocation;
-        CommanderAllocation.Refresh();
+        RefreshCommanderAllocationCache();
+        // A commander reallocation changes what every living entity resolves to, so it is a stat
+        // invalidation like any other. Without this the new allocation only reached entities spawned
+        // AFTER it (owner-observed live 2026-08-30: reallocating mid-match changed nothing until the
+        // injector reconnected). Invalidate is edge-triggered -- ConsumeDirty clears it -- so this
+        // costs one reapply per real allocation change, not per frame.
+        Stats.Invalidate();
     }
+
+    /// <summary>Edge-triggered sync of <see cref="CommanderAllocation"/> hot-path cache — match
+    /// start/end and allocation poll, never per stat resolve.</summary>
+    internal static void RefreshCommanderAllocationCache() => CommanderAllocation.Refresh();
     static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;
     /// <summary>Θ ladder index. Lazy: PowerTuningHub.Configure runs in RpgHost.Initialize, which this
     /// must not race — <c>PowerTuningHub.Tuning</c> throws (not a stale default) before Configure runs,

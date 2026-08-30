@@ -130,7 +130,7 @@ Plates are numbered by the order they are *designed*, not by navigation order.
 
 ## 4. Plate index
 
-**The design is complete.** Every player-facing surface in the game is drawn across these eight
+**The design is complete.** Every player-facing surface in the game is drawn across these ten
 plates, and [information-architecture.md](information-architecture.md) is the map that connects them.
 
 | Plate | Covers | Status |
@@ -143,13 +143,15 @@ plates, and [information-architecture.md](information-architecture.md) is the ma
 | [05-chronicle-almanac.html](05-chronicle-almanac.html) | The Almanac as a book · element and affliction reference · Chronicle · the attribution ledger | **Draft — for review** |
 | [06-system-dev.html](06-system-dev.html) | Run result · level-up · confirms · toasts · Settings · rebinding · Display and Sound · the keymap · the developer tree | **Draft — for review** |
 | [07-flows.html](07-flows.html) | Loadout · deploy targeting · the pact offer · the four first-session beats · focus order · the last ladder rungs | **Draft — for review** |
+| [08-actor-sheet.html](08-actor-sheet.html) | One Actor panel · six tabs · specimen and commander role extensions | **Draft — for review** |
+| [09-commander-list.html](09-commander-list.html) | Player-empire commander list · persisted default (Dave) · Set default / Defend the lawn · location &amp; legion map stubs · list → Actor sheet | **Draft — for review** |
 
 ### Coverage
 
 | | Count | Where |
 |---|---|---|
 | Stages | 4 | Sanctum, World, Lawn, Battle — plates 01, 03, 04 |
-| Player layers | 8 | Creatures, Relics, Fusion, Pacts, Expeditions, Almanac, Chronicle, Sector inspector — plates 02, 03, 05 |
+| Player layers | 9 | Creatures, **Commanders**, Relics, Fusion, Pacts, Expeditions, Almanac, Chronicle, Sector inspector — plates 02, 03, 05, **09** |
 | Band-3 dialogs | 6 | Run result, level-up, destructive confirm, commit, loadout, pact offer — plates 03, 06, 07 |
 | Shell surfaces | 3 | Title, save select, unrecoverable — plates 01, 06 |
 | Developer surfaces | 13 | One tree — plate 06 |

@@ -4,7 +4,7 @@ import type { DemonProfileDto } from "@/lib/bus/demons";
 import type { RunItem, UniqueActorDto } from "@/lib/bus/types";
 import type { RelicDto } from "@/lib/bus/types";
 import { mockUniqueActor } from "@/test/mocks";
-import { adaptActor, adaptContract, adaptRelic, adaptRun } from "./adapt";
+import { adaptActor, adaptCommanderList, adaptCommanderSheet, adaptContract, adaptRelic, adaptRun } from "./adapt";
 import { assertNoEmptyPendingReasons } from "./contractGuard";
 
 describe("adaptActor against the shared server fixture (T5)", () => {
@@ -155,5 +155,76 @@ describe("adaptRelic (T14)", () => {
     expect(view.sockets).toEqual({ state: "absent" });
     expect(view.set).toEqual({ state: "absent" });
     expect(view.enhancement).toEqual({ state: "absent" });
+  });
+});
+
+describe("adaptCommanderSheet", () => {
+  it("maps commander list row fields into ActorView for the sheet role", () => {
+    const view = adaptCommanderSheet(
+      {
+        id: "commander:dave",
+        displayName: "Crazy Dave",
+        isDefault: true,
+        activeAuraId: "Might",
+        activeAuraName: "Might",
+        locationStub: "Sanctum",
+        legionStub: null
+      },
+      1
+    );
+    expect(view.instanceId).toBe("commander:dave");
+    expect(view.playerId).toBe(1);
+    expect(view.displayName).toEqual({ state: "known", value: "Crazy Dave" });
+    expect(view.level).toBe(1);
+    expect(view.channelSummary.state).toBe("pending");
+  });
+});
+
+describe("adaptCommanderList", () => {
+  it("maps the list envelope and rows through unchanged", () => {
+    const view = adaptCommanderList({
+      defaultLawnCommanderId: "commander:dave",
+      commanders: [
+        {
+          id: "commander:dave",
+          displayName: "Crazy Dave",
+          isDefault: true,
+          activeAuraId: null,
+          activeAuraName: null,
+          locationStub: null,
+          legionStub: null
+        }
+      ]
+    });
+    expect(view.defaultLawnCommanderId).toBe("commander:dave");
+    expect(view.commanders).toHaveLength(1);
+    expect(view.commanders[0]).toEqual({
+      id: "commander:dave",
+      displayName: "Crazy Dave",
+      isDefault: true,
+      activeAuraId: null,
+      activeAuraName: null,
+      locationStub: null,
+      legionStub: null
+    });
+  });
+
+  it("carries active aura fields when present", () => {
+    const view = adaptCommanderList({
+      defaultLawnCommanderId: "commander:dave",
+      commanders: [
+        {
+          id: "commander:dave",
+          displayName: "Crazy Dave",
+          isDefault: true,
+          activeAuraId: "Might",
+          activeAuraName: "Might",
+          locationStub: null,
+          legionStub: null
+        }
+      ]
+    });
+    expect(view.commanders[0]?.activeAuraId).toBe("Might");
+    expect(view.commanders[0]?.activeAuraName).toBe("Might");
   });
 });

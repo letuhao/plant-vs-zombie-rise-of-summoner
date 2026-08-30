@@ -7,3 +7,4 @@ export * from "./hub-provider";
 export * from "./log-store";
 export * from "./cheat-dirty";
 export * from "./demons";
+export * from "./commanders";

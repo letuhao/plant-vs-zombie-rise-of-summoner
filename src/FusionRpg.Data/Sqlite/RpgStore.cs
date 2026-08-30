@@ -611,6 +611,8 @@ public sealed partial class RpgStore : IRpgDb
         EnsureRunPoolSchemaUnlocked(db);
         // rpg_actor_loadout — the equipped-skill set (spec-loadout.md §1, T21).
         EnsureLoadoutSchemaUnlocked(db);
+        // rpg_player_commander — default lawn commander (commander-surface default-persistence).
+        EnsurePlayerCommanderSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)
@@ -677,6 +679,7 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_demon_materials;",
                              "DELETE FROM rpg_demon_lineage;", "DELETE FROM rpg_fusion_log;",
                              "DELETE FROM rpg_fusion_discovery;", "DELETE FROM rpg_patron;",
+                             "DELETE FROM rpg_player_commander;",
                              "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
                              "DELETE FROM rpg_aptitude_allocation;",

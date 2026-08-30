@@ -96,6 +96,15 @@ per-resolve: cache it, and invalidate on the existing revision/notification path
 already uses. **A per-resolve server read would violate the hot-path rule** (`overlay-control-loops.md`:
 *"Never await SignalR, HTTP, or SQLite for the roll or apply"*).
 
+**Cross-program: commander-surface `match-snapshot` (strengthen pass 2026-08-30).** During
+`MatchPhase.InMatch`, when `MatchCommanderSnapshotHolder.Current` is present, the allocation delegate
+reads the **frozen copy** from that snapshot — not a live server refresh and not a mid-match
+`AptitudesUpdated` cache invalidation. Mid-match aptitude saves persist on the server but **must not
+change lawn stats until the next `board.start`**. Outside a match, or before the holder is wired, keep
+the revision-based cache described above. See
+[spec-match-snapshot.md](../commander-surface/spec-match-snapshot.md) and
+[commander-surface-map.md](../commander-surface-map.md) cross-program snapshot rule.
+
 ### 4.2 W2 — ladder hydration
 
 `ActorLadderSnapshot(int DaveLevel, …)` (`PowerIndexComposer.cs:33`) is the input. `Θ_actor` reads

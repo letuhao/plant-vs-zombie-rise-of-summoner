@@ -289,6 +289,19 @@ reverified unaffected. `audit-overflow.py --paths src/FusionRpg.Core/Stats/Aptit
 - [~] `guard-class-system.ps1` exit 0 — **literally still exits 1, and by design stays that way** (decision 12): G3 is a deliberate, permanent, forward-looking safeguard, not a defect this program can or should clear by editing tuning. Every other rule — G1/G2/G4/G5/G6 — is green, confirmed by reading the script's own full output, not assumed. `guard-class-system.ps1`'s raw exit code is **not** this checkpoint's real gate for that one named, decided reason; treating a literal `exit 0` as required here would mean editing `data/tuning/aptitudes.v1.json` against a claim already refuted, or silencing a guard that is doing its job correctly
 - [x] `prove-aptitude.ps1` exit 0 across all twelve — **revised per decision 11**: zero deltas on every channel this program's producers own; the `SumIncreased`-capped channels are `battle-adoption`'s, tracked there
 - [x] goldens diff empty — reverified repeatedly through P3.2/P3.3/the recovery-scale fix, zero drift throughout
+- ⛔ **Coverage correction, 2026-08-30 — "widen to twelve" is proven as BALANCE, not as RESOLVE.**
+  An audit run from the `aura-skill` program (owner's question: *"did your matrix explicitly define what
+  are they and test it, include rpg layer stats and pvz engine stats?"*) read this phase's tests against
+  the tree and found the twelve are covered by **corner/win-rate** instruments — `DominanceGuardTests`'
+  real-twelve-corner shape, `prove-aptitude.ps1` across all twelve, `CombatSimJsonEmitTests`' twelve
+  gradient rows — but **no test resolves the twelve aptitudes' declared edges and asserts their values**.
+  Every unit-level resolver test builds a synthetic one-edge tuning (`AptitudeResolverTests.cs:42`,
+  `MightAllocation_resolvesCombatPowerOmni`); the 490 real edges in `aptitudes.v2.json` have no per-edge
+  assertion, and `ProveAptitudeJsonEmitTests.cs:18` proves the two engines agree for **one** edge.
+  This does not falsify anything above — the balance work is real — it means *"widen to twelve"* should
+  not be read as *"the twelve are covered end to end."*
+  **Owned as TC1 in `tasks/aura-skill-todo.md` Phase 5** (built there because the audit and the question
+  originated there; the data is this program's). Update this line when TC1 lands.
 - Status 2026-08-27: **P3.1 through P3.4 all done.** The one remaining open line is G3's own permanent, by-design red (decision 12) — not a gap, a standing safeguard. Nothing here is faked or silently marked passed — decisions 11 and 12 are both written up, dated, reasoned, and reference the evidence that grounds them, and the one literal-exit-code gap (`guard-class-system.ps1`) is marked partial rather than checked off, exactly because it is not literally zero and should not be misrepresented as such.
 
 ---

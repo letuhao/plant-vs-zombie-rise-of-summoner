@@ -159,12 +159,19 @@ public class AtomCompilerTests
     }
 
     [Fact]
-    public void A_quarantined_kind_is_rejected_everywhere()
+    public void A_quarantined_kind_is_rejected_in_the_runtime_that_still_lacks_a_consumer()
     {
         var atom = Atom("atom.power", "stat.derived",
             "{\"channel\":\"combat.power.fire\",\"op\":\"flat\",\"amount\":5}");
 
-        Assert.Equal(AtomPath.Rejected, PathOf(atom));
+        // SIM has no derived consumer, so a bind there is still the silent no-op the quarantine
+        // exists to refuse. This is the assertion that carries the rule.
+        Assert.Equal(AtomPath.Rejected, Compilability.Classify(atom, RuntimeId.Sim).Path);
+
+        // LAWN opened 2026-08-30 (decisions.md "Derived-write lawn executor") because it gained a real
+        // consumer -- `AtomDerivedSubsystem`. The rule did not change: a runtime opens only where a
+        // consumer exists, which is why the Sim assertion above still holds in the same test.
+        Assert.Equal(AtomPath.Runner, PathOf(atom));
     }
 
     // ---- emission ---------------------------------------------------------------------------------

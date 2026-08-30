@@ -35,8 +35,8 @@ const AlmanacLayer = lazy(() => import("@/layers/almanac/AlmanacLayer").then((m)
 const ChronicleLayer = lazy(() =>
   import("@/layers/chronicle/ChronicleLayer").then((m) => ({ default: m.ChronicleLayer }))
 );
-const AptitudesLayer = lazy(() =>
-  import("@/layers/aptitudes/AptitudesLayer").then((m) => ({ default: m.AptitudesLayer }))
+const CommandersLayer = lazy(() =>
+  import("@/layers/commanders/CommandersLayer").then((m) => ({ default: m.CommandersLayer }))
 );
 
 /** T20 (GG-20): every rail entry is a rebindable action, so this reads the live table instead of
@@ -112,6 +112,14 @@ export function SanctumStage() {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
       if (instanceId) next.set("sel", instanceId);
+      else next.delete("sel");
+      return next;
+    });
+  }
+  function selectCommander(commanderId: string | null) {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (commanderId) next.set("sel", commanderId);
       else next.delete("sel");
       return next;
     });
@@ -194,8 +202,10 @@ export function SanctumStage() {
           />
           {actors.length > 0 ? (
             <SanctumHome
+              playerId={playerId}
               actorStates={actors.map((a): ActorRungState => ({ kind: "ready", data: adaptActor(a) }))}
               onOpenCreatures={() => openLayerById("creatures")}
+              onOpenCommanders={() => openLayerById("commanders")}
               returnedExpeditionCount={returnedCount}
               onOpenExpeditions={() => openLayerById("expeditions")}
             />
@@ -209,8 +219,20 @@ export function SanctumStage() {
             open={openLayer === "creatures"}
             onOpenChange={(open) => !open && closeLayer()}
             playerId={playerId}
-            selectedId={selectedId}
+            selectedId={openLayer === "creatures" ? selectedId : null}
             onSelect={selectCreature}
+          />
+        </Suspense>
+      ) : null}
+
+      {mountedLayers.has("commanders") ? (
+        <Suspense fallback={<ChunkFallback testId="chunk-fallback-commanders" />}>
+          <CommandersLayer
+            open={openLayer === "commanders"}
+            onOpenChange={(open) => !open && closeLayer()}
+            playerId={playerId}
+            selectedId={openLayer === "commanders" ? selectedId : null}
+            onSelect={selectCommander}
           />
         </Suspense>
       ) : null}
@@ -248,12 +270,6 @@ export function SanctumStage() {
       {mountedLayers.has("chronicle") ? (
         <Suspense fallback={<ChunkFallback testId="chunk-fallback-chronicle" />}>
           <ChronicleLayer open={openLayer === "chronicle"} onOpenChange={(open) => !open && closeLayer()} />
-        </Suspense>
-      ) : null}
-
-      {mountedLayers.has("aptitudes") ? (
-        <Suspense fallback={<ChunkFallback testId="chunk-fallback-aptitudes" />}>
-          <AptitudesLayer open={openLayer === "aptitudes"} onOpenChange={(open) => !open && closeLayer()} />
         </Suspense>
       ) : null}
     </StageHost>

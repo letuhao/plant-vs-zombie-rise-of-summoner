@@ -45,4 +45,43 @@ public sealed class EntityFinal
     public double ZombieSpeed { get; init; }
 
     public IReadOnlyList<StatModifier> Contributions { get; init; } = Array.Empty<StatModifier>();
+
+    /// <summary>
+    /// True when composition produced anything the game does not already have — the **source-agnostic**
+    /// replacement for asking each feature "did you contribute?".
+    ///
+    /// <para>Why this exists (2026-08-30): <c>EntityApply</c> decided whether to write by enumerating
+    /// the contributors it knew about — Tab A scales, Tab B absolutes, PvzStats, effect-session mods.
+    /// A contributor missing from that list composed correctly and was then silently dropped on the
+    /// floor, with no error and no telemetry. Commander aptitudes were such a contributor: a 222-point
+    /// <c>Might</c> allocation resolved to <c>appliedAtk = 31010</c> and wrote nothing. The list is
+    /// unmaintainable by construction — every future producer (auras, atoms, items, injuries) has to
+    /// remember to add itself, and nothing fails when it forgets.</para>
+    ///
+    /// <para><see cref="Derived.ActorHub"/> already answers the real question: <c>AppliedCombat</c> is
+    /// the Writer input (actor-hub-ssot.md §7, stat-system.md — both state it unconditionally, with no
+    /// contributor gate). So the write decision is one value comparison against the immutable game
+    /// baseline: the RPG layer wants this entity to differ from vanilla, or it does not.</para>
+    ///
+    /// <para>Current <c>Hp</c> is compared against Y0, not against live Unity HP — both sides here are
+    /// composed from the same baseline, so a damaged entity does not read as "changed" and this never
+    /// fights Unity for ownership of current HP (effect-funnel.md §3).</para>
+    /// </summary>
+    public bool DiffersFrom(EntityBaseline y0)
+    {
+        if (y0 is null) throw new ArgumentNullException(nameof(y0));
+        return Hp != y0.Hp
+               || MaxHp != y0.MaxHp
+               || Atk != y0.Atk
+               || Arm1 != y0.Arm1
+               || Arm1Max != y0.Arm1Max
+               || Arm2 != y0.Arm2
+               || Arm2Max != y0.Arm2Max
+               || AttackInterval != y0.AttackInterval
+               || ProduceInterval != y0.ProduceInterval
+               || ZombieSpeed != y0.ZombieSpeed
+               // Baseline carries no defense fields: vanilla is the identity view (×1, +0).
+               || DefensePercent != 1f
+               || DefenseFlat != 0;
+    }
 }

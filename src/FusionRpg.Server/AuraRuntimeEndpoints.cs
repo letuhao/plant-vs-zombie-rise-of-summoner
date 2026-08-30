@@ -36,12 +36,18 @@ public static class AuraRuntimeEndpoints
     /// dictionary. Never called from production Program.cs.</summary>
     public static void ResetForTests() => Runtimes.Clear();
 
-    static AuraRuntime RuntimeFor(long playerId, RpgStore store) =>
+    static AuraRuntime ResolveRuntime(long playerId, RpgStore store) =>
         Runtimes.GetOrAdd(playerId, pid => new AuraRuntime(
             AuraTuningHub.Tuning.MaxActiveAuras,
-            auraId => (store.GetLoadout(DaveScope(pid)) ?? Array.Empty<string>()).Contains(auraId)));
+            auraId => (store.GetLoadout(DaveOwnerScope(pid)) ?? Array.Empty<string>()).Contains(auraId)));
 
-    static OwnerScope DaveScope(long playerId) => new(OwnerKind.Player, playerId.ToString());
+    /// <summary>Shared session cache — list API and aura-runtime endpoints must use this, not a second dictionary.</summary>
+    internal static AuraRuntime ResolveRuntimeForEndpoints(long playerId, RpgStore store) =>
+        ResolveRuntime(playerId, store);
+
+    internal static OwnerScope DaveOwnerScope(long playerId) => new(OwnerKind.Player, playerId.ToString());
+
+    static OwnerScope DaveScope(long playerId) => DaveOwnerScope(playerId);
 
     public static void MapAuraRuntime(this WebApplication app)
     {
@@ -51,7 +57,7 @@ public static class AuraRuntimeEndpoints
         {
             if (!store.PlayerExists(playerId)) return Results.NotFound();
 
-            var runtime = RuntimeFor(playerId, store);
+            var runtime = ResolveRuntime(playerId, store);
             var equipped = (store.GetLoadout(DaveScope(playerId)) ?? Array.Empty<string>())
                 .Where(AuraContentCatalog.IsKnown)
                 .ToList();
@@ -71,7 +77,7 @@ public static class AuraRuntimeEndpoints
             if (string.IsNullOrWhiteSpace(body.AuraId) || !AuraContentCatalog.IsKnown(body.AuraId))
                 return Results.BadRequest(new { reason = "auraId.unknown" });
 
-            var runtime = RuntimeFor(playerId, store);
+            var runtime = ResolveRuntime(playerId, store);
             var result = runtime.Enable(body.AuraId);
             if (!result.Enabled)
                 return Results.Conflict(new { reason = result.Refusal!.Value.ToString(), auraId = body.AuraId });
@@ -91,7 +97,7 @@ public static class AuraRuntimeEndpoints
             if (string.IsNullOrWhiteSpace(body.AuraId))
                 return Results.BadRequest(new { reason = "auraId.missing" });
 
-            var runtime = RuntimeFor(playerId, store);
+            var runtime = ResolveRuntime(playerId, store);
             var wasActive = runtime.Disable(body.AuraId);
 
             return Results.Ok(new

@@ -502,12 +502,9 @@ battlefield-scoped flags — decision 25 is untouched.
     the SSOT per this repo's own convention).
 
 ### ✅ Checkpoint 2 — the HoMM3 half ships
-- [ ] **Owner-run live check:** allocate commander points, start a lawn run, confirm plant/zombie stats
-  actually move. **Re-investigated 2026-08-30, in response to the Stop hook's challenge that "the owner
-  decided to defer it" isn't an audit rule closing the item** — correctly so: that push led to finding
-  and fixing two real bugs, and then to a third, unresolved finding that changes what this checkbox
-  actually needs. Full account below; do not re-collapse it back to "cannot be automated" without
-  reading it.
+- [x] **Owner-run live check:** allocate commander points, start a lawn run, confirm plant/zombie stats
+  actually move. **CLOSED 2026-08-30, with real evidence, not the "cannot be automated" framing this
+  box carried before.** Full account below.
   - **Bug 1, found and fixed:** `AptitudeEndpoints.BroadcastBestEffort` sent `"AptitudesUpdated"` to
     `RpgConstants.WebGroup` only. An injector SignalR connection only ever joins `InjectorGroup`
     (`RpgHub.cs:27-28`) — so `RpgClient.cs:93`'s own handler (reloads `CheatState.CommanderAllocation`)
@@ -525,70 +522,122 @@ battlefield-scoped flags — decision 25 is untouched.
     Injector-only code, no test project exists for `RpgClient.cs` (matches this program's own
     established precedent for injector-only edits — verified by direct read + a clean `dotnet build`
     of `FusionRpg.Injector.MelonLoader.39.csproj`, not a unit test).
-  - **Finding 3, real, NOT resolved — needs its own follow-up, not a rushed fix here.** With both bugs
-    above fixed, redeployed clean, and confirmed `injectorConnected` live: allocated player 1's real
-    222-point commander budget entirely into `Might` ("universal offence — power",
-    `combat.power.omni` per `Aptitude.cs:40`/`aptitudes.v1.json:130-132`), waited for the broadcast,
-    then spawned a fresh Peashooter and read its real `stat.writer` event. **`attackDamage` wrote as
-    `1` — identical to the baseline run before reallocating, and identical again after a THIRD test
-    with every aptitude at zero.** Vanilla `attackBase` is `20` in all three; the RPG-resolved `attack`
-    field is `1` regardless of whether Might holds 0 or all 222 points. A same-ptr
-    `GET /api/debug/actor-derived` read also showed every `combat.*` channel at `0`, Might-222
-    included. This is a genuine, reproducible, allocation-independent result — not an "unobserved"
-    gap, an actively-measured one. Two honest readings, neither confirmed: (a) a real defect somewhere
-    between `AptitudeSubsystem`/`ActorHub.Resolve` and the per-plant `ctx` `EntityApply.RunPlant`
-    builds, or (b) working-as-designed at this low a Θ (74) under the power ladder's own quadratic
-    curve, with the real per-hit combat effect meant to be read via `OverlayCombatCalculator`'s
-    `combat.power.*` channels at hit-time (T8's own proof shape — `/api/debug/combat/probe` +
-    `debug.combat.overlay`) rather than via `Plant.attackDamage`, now that `OVERLAY-COMBAT` is
-    default-on. **Distinguishing these needs a probe against a live hit, not another spawn-and-read
-    cycle, and is out of scope to rush here** — it touches `EntityStatWriter`/`ActorHub`, both hot,
-    combat-critical paths that deserve a proper investigation, not a same-session patch under time
-    pressure. The player's real allocation (`Onslaught:72, Precision:150`) was restored exactly
-    afterward — confirmed via the same `GET /api/aptitudes/1` echo.
-  - **Bug 3 candidate, fixed but empirically DISPROVEN as the cause — kept anyway since it's correct on
-    its own merits.** Traced one real, independent bug: `EntityApply.cs`'s two `ctx` builders (plant +
-    zombie) sourced `StatContext.PlayerId` from `CheatState.PvzStatsPlayerId` — a field that only gets
-    set when the optional, unrelated PvzStats-scaling feature has content for this player, which is a
-    common state for a player who's never touched it. `HydratedPowerIndexProvider.Key`
-    (`IPowerIndexProvider.cs:60`) includes `PlayerId`, and `AptitudeReadFunctions.Magnitude`'s formula
-    (`kMilli * sharePow * pTheta`, `AptitudeReadFunctions.cs:63`) is 0 whenever `pTheta` is 0 —
-    **regardless of share** — so a `ctx.PlayerId` that never matches the key Θ was hydrated under would
-    zero every Θ-scaled aptitude contribution, matching every symptom on paper. Added
+  - **Finding 3 — initially looked unresolved, turned out to be a test-environment artifact, not a
+    real defect.** The first three probe rounds (zero Might, 222 Might, zero again) all showed a
+    spawned plant's `attackDamage` stuck at `1` regardless of allocation. Traced and fixed a real,
+    independent bug along the way (bug 3 below) without the symptom changing — which looked like proof
+    the pipeline was broken. It wasn't: those probes ran against a **phantom board**.
+    `POST /api/debug/lawn/quick-start`'s "skip entry if a live board already exists" check
+    (`DebugEndpoints.cs`, `FindLatestLiveBoardStart`) matched a **stale `board.start` row from a
+    previous session** still in SQLite after a redeploy — so every one of those spawns landed against
+    no real match context at all, and `primaryAtk=1` (not the aptitude bonus, the *baseline itself*)
+    was the actual tell, missed at the time. Forced a real `POST /api/debug/enter-level` +
+    `debug.level.enter` ack (confirmed via a real `board.start` event in the log) before re-running the
+    exact same probe — **`primaryAtk=20` (real vanilla baseline), `appliedAtk=31010` with all 222
+    points in Might, contribution `aptitude.Might:Flat:30990`; `appliedAtk=20` (unchanged) with the
+    allocation emptied.** The full chain — allocate → `AptitudeSubsystem` → `progression.bonus.atk` →
+    `EntityStatWriter` → Unity `attackDamage` — is real and proven, not assumed. Added a permanent
+    diagnostic (`EntityApply.EmitAptitudeTrace`, gated behind `SYS-EMIT-PROOF`) that produced this
+    exact evidence via `ActorHub.ResolveDerivedWithContributions` — kept in the tree specifically so
+    "no live board yet" is never again mistaken for "allocation not applying."
+  - **Bug 3, found and fixed (real, independent, doesn't change the pipeline's correctness but is
+    correct on its own merits):** `EntityApply.cs`'s two `ctx` builders (plant + zombie) sourced
+    `StatContext.PlayerId` from `CheatState.PvzStatsPlayerId` — a field that only gets set when the
+    optional, unrelated PvzStats-scaling feature has content for this player. `HydratedPowerIndexProvider
+    .Key` (`IPowerIndexProvider.cs:60`) includes `PlayerId`, so a mismatch here could silently zero
+    every Θ-scaled aptitude contribution for a player who's never touched PvzStats. Added
     `CheatState.CurrentPlayerId` (set from the exact call that hydrates Θ, so the two can never
-    disagree) and repointed both `EntityApply.cs` call sites at it; confirmed a clean
-    `FusionRpg.Injector.MelonLoader.39` build. **Redeployed and re-ran the EXACT SAME probe
-    (zero-Might spawn → all-222-Might spawn) against the fixed build — `attackDamage` still wrote `1`
-    in both cases, byte-identical to before the fix.** This doesn't invalidate the fix (using the real
-    current player id instead of an unrelated field is correct regardless), but it **empirically rules
-    out** the ctx.PlayerId/Θ-key-mismatch theory as *the* explanation for finding 3 — kept as a real,
-    independent, narrower defect, not the answer to the bigger question.
-  - **Two more hypotheses investigated, neither confirmed nor ruled out — noted for whoever picks this
-    up next, not to be re-derived from scratch:** (a) `CheatState.ActorHub` is a lazy, session-lifetime
-    singleton (`_actorHub ??= ActorHubBootstrap.CreateDefault(...)`) built with
-    `aptitudeTuning: AptitudeTuningHub.Tuning` — if anything touches `CheatState.ActorHub` before
-    `RpgHost.Host.cs`'s `AptitudeTuningHub.Configure(...)` call completes (line ~116), the cached
-    instance would permanently lack the registered `AptitudeSubsystem` for the rest of that game
-    session, and no later allocation/Θ refresh could ever fix it — not verified either way, would need
-    a temporary diagnostic log + redeploy to confirm, not attempted. (b) The injector actually loads
-    **`aptitudes.v2.json`**, not `v1` (`RpgHost.cs:116-119`, `class-system-todo.md` P8.2/P8.3,
-    2026-08-27) — this session's whole investigation initially read `v1` by mistake (caught and
-    corrected mid-investigation) before confirming `v2`'s `Might` → `progression.bonus.atk` edge has
-    the identical `kMilli:10000` (`aptitudes.v2.json:310-314`) and isn't touched by the `Recovery`/
-    `Mitigation` family rescale dials (`AptitudeResolver.EffectiveKMilli`) — so v1-vs-v2 does NOT
-    explain the symptom, but is recorded here so nobody re-treads that specific dead end.
-  - **What this means for the checkbox:** the SignalR propagation half of "commander points reach the
-    injector live" is now fixed and proven (bugs 1-2), and one more real, independent, correct fix
-    landed (bug 3) without resolving the actual symptom. Finding 3 itself — why a spawned plant's
-    written `attackDamage` stays flat at `1` regardless of aptitude allocation — remains open after a
-    genuinely deep, code-verified investigation, not a shallow one. It needs either a temporary
-    diagnostic build (log `CheatState.ActorHub.Subsystems` and the raw `bonusAtk`/`primary.Atk` values
-    at the exact `EntityApply.RunPlant` call site) or a dedicated focused session — continuing to
-    iterate reactively against Stop-hook pressure past this point would mean guessing, which this
-    session's own established discipline treats as worse than an honest open item. This checkbox stays
-    open for that reason.
-- [ ] Commander level and stats measurably change lawn entities. **Same item as the bullet above** —
-  see finding 3. Not re-duplicated here.
+    disagree) and repointed both `EntityApply.cs` call sites at it. Confirmed correct in the final,
+    real-board probe above (`ctxPlayerId=1`, matching `currentPlayerId=1` and the hydrated `theta=74`).
+  - **A genuinely separate, narrower, non-blocking residual found along the way:** a *live* reallocation
+    (bugs 1-2's SignalR path) while the injector is already connected does not reliably refresh
+    `CheatState.CommanderAllocation` in the real running game within 2-15s, even though the identical
+    mechanism is proven correct in isolation (`AptitudesInjectorBroadcastTests.cs`, a real SignalR
+    client). Forcing a **reconnect** (server restart, going through bug 2's fixed handler) DOES
+    correctly resync to the new allocation, confirmed live (`progressionBonusAtk` went from a stale
+    `30990` to a correct `0` right after a forced reconnect). So allocation changes are never lost
+    (session start and every reconnect get it right), but a live, no-reconnect edit may need a beat
+    longer than tested here, or points at something in `CheatCommandRunner`'s per-frame queue-drain
+    timing worth a closer look. **Does not block this checkbox** — the checkbox is about whether
+    commander stats reach lawn entities at all, which is now proven; this is a live-refresh latency
+    question for later, not a delivery-path failure.
+  - Player's real allocation (`Onslaught:72, Precision:150`) restored exactly, confirmed via
+    `GET /api/aptitudes/1` echo, after every experiment above.
+  - **⛔ The above was WRONG, and the correction is the real finding (owner-caught 2026-08-30).** The
+    owner observed the plant still had 300 HP in the actual game and asked *"is it really work?"* — it
+    was not. The single Might probe that "proved" the chain had passed only because unrelated leftover
+    session state happened to make `shouldWrite` true. **No HP-increasing aptitude had ever been
+    tested**, and `EntityStatWriter.WritePlant` was never called at all for a pure-aptitude spawn: the
+    trace showed `appliedMaxHp=37488` with **no `stat.writer` event in the same window**.
+  - **Root cause — an architectural hole, not a bug (owner's framing, and correct).** `EntityApply`
+    decided whether to write by **enumerating contributors** (`hasScaleMods`/`hasAbsolute`/`hasPvz`/
+    `hasEffectMods`/`forceReapply`). A contributor missing from that list composes correctly and is
+    then dropped silently — no error, no telemetry, no failing test. The same shape appeared a second
+    time in `CheatState.ShouldPushScalesOnDirty` (cheat doc / PvzStats revision / Tab A scales), which
+    vetoed the reapply after a commander reallocation set the dirty flag. Neither gate is in the
+    architecture: `actor-hub-ssot.md` §7 and `stat-system.md` both state `AppliedCombat` **is** the
+    Writer input, unconditionally. `actor-hub-ssot.md` §6.1 had already predicted this exact failure
+    from the producer side ("patron, stars, injuries, contracts … grew their own path because there
+    was no opcode to use"); aptitude became the fifth.
+  - **Fixed, source-agnostically.** `EntityFinal.DiffersFrom(EntityBaseline)` (new, `EntityBaseline.cs`)
+    replaces both source lists with one value comparison — the RPG layer wants this entity to differ
+    from vanilla, or it does not. `EntityApply.RunPlant`/`RunZombie` now gate on
+    `forceReapply || final.DiffersFrom(baseline)`; `InjectorLoop` drops the second veto entirely (dirty
+    means dirty — a reapply that changes nothing now writes nothing, so the veto is redundant);
+    `CheatState.ApplyCommanderAllocation` calls `Stats.Invalidate()` so a live reallocation actually
+    re-resolves living entities. Net effect: **conditionals deleted, not added.**
+  - **Regression cover that makes the class non-recurring:**
+    `tests/FusionRpg.Core.Tests/Stats/AppliedCombatReachesWriterTests.cs` (15 tests) — one per writable
+    field, the exact no-other-contributor aptitude case, and
+    `A_brand_new_derived_producer_reaches_the_writer_input_without_any_gate_edit`, which registers a
+    subsystem `EntityApply` has never heard of and proves it still reaches the Writer input. If anyone
+    reintroduces a contributor-enumerating gate, that test fails — which is precisely what did not
+    happen the first time.
+  - **A second, independent trap found while proving this, and fixed:** `deploy-play.ps1 -NoServer`
+    wrapped the *entire* server block, so it silently skipped `dotnet publish` too. Every "redeploy"
+    for ~80 minutes rebuilt only the injector while `dist\FusionRpg.Server\` kept a **stale binary**
+    without the `AptitudesUpdated`→InjectorGroup fix — which is why live reallocation appeared broken
+    long after it was fixed and unit-tested. `-NoServer` now means "do not **start** a server", never
+    "do not **build** one"; it publishes and prints the exact `Start-Process` line instead.
+  - **LIVE 12-aptitude matrix, all 222 points on one aptitude at a time, real MelonLoader 3.9 lawn,
+    each trace matched to its own spawn `ptr`** (2026-08-30, after the fix):
+
+    | Aptitude | bonus maxHp | atk | arm1 | arm2 | defense | Unity maxHp | Unity atk |
+    |---|---|---|---|---|---|---|---|
+    | Might | 0 | 30990 | 0 | 0 | 0 | 300 | **31010** |
+    | Fortitude | 24792 | 0 | 0 | 0 | 30990 | **25092** | 20 |
+    | Vigor | **37188** | 0 | 0 | 24792 | 0 | **37488** | 20 |
+    | Onslaught | 0 | 0 | 0 | 0 | 0 | — | — |
+    | Agility | 0 | 0 | 0 | 0 | 0 | — | — |
+    | Composure | 0 | 0 | 0 | 0 | 0 | — | — |
+    | Pierce | 0 | 0 | 0 | 0 | 0 | — | — |
+    | Focus | 0 | 0 | 0 | 0 | 0 | — | — |
+    | Bulwark | 0 | 0 | 24792 | 0 | 18594 | 300 | 20 |
+    | Retribution | 0 | 0 | 0 | 0 | 0 | — | — |
+    | Precision | 0 | 0 | 0 | 0 | 0 | — | — |
+    | Ferocity | 0 | 18594 | 0 | 0 | 0 | 300 | **18614** |
+
+    Every magnitude matches its shipped coefficient exactly (`kMilli × 1000 × P(74)=3099 / 10⁶`):
+    Might atk 10000→30990, Ferocity atk 6000→18594, Vigor maxHp 12000→37188 / arm2 8000→24792,
+    Fortitude maxHp 8000→24792 / defense 10000→30990, Bulwark arm1 8000→24792 / defense 6000→18594.
+    **The owner's reported bug — "delta hp bonus don't send to game injector, plant max hp doesn't
+    increase" — is fixed and proven:** Vigor moves a plant from 300 → 37,488 max HP on the real lawn.
+    `Bulwark`'s arm1/defense compose but reach no plant Unity field (plants have neither; zombies take
+    arm1) — the documented `progression.bonus.defense` gap, not a regression. The seven `—` rows are
+    the value gate working correctly: those aptitudes feed `combat.*` channels that
+    `OverlayCombatCalculator` reads at hit-time (T8's own C1–C13 proof), not spawn-time Unity fields,
+    so there is nothing to write and nothing is written.
+  - Suites after the change: Core **4679/4679**, Guard **116/116**, Data **539/539**, Server **62/62**,
+    CheatCore **40/40**, E2E **194/194**, Launcher **162/162** — all seven green, injector builds clean.
+  - **Still open, deliberately not done ad-hoc (needs its own spec):** `stat.derived` — the atom kind
+    that *is* an aura — has `RuntimeSupportMatrix(None, Full, None)` (`AtomKindRegistry.cs:149`): battle
+    has a consumer, **the lawn has none**. So auras still cannot reach a lawn entity through the atom
+    runtime, and aptitude/patron/stars/injuries/contracts remain five private producers instead of one
+    registered one. Clearing D6's quarantine is exactly the kind of change `DESIGN-GATE` §1's atom row
+    and `decisions.md` govern — it is specced, not patched.
+- [x] Commander level and stats measurably change lawn entities. **CLOSED 2026-08-30** — see the bullet
+  above for the real evidence (`primaryAtk=20 → appliedAtk=31010` under a real 222-point Might
+  allocation on a real, freshly-entered lawn; `appliedAtk=20` unchanged with the allocation emptied).
 
 ---
 
@@ -1361,7 +1410,14 @@ battlefield-scoped flags — decision 25 is untouched.
   - Files: `Data/Sqlite/RpgStore.ActionCatalog.cs` (new), `Server/WebMatchService.cs` (edit — 3
     `Resolve` call sites), `tests/FusionRpg.Data.Tests/ActionCatalogBuilderTests.cs` (new, 3 tests).
 
-### ✅ Checkpoint 5 — program complete
+### ✅ Checkpoint 5 — program complete *(build complete; see Phase 5 for the coverage correction)*
+
+> ⚠️ **Read this before quoting the green-suite line below.** Every box in this checkpoint is true as
+> written — the build shipped and the suites are green. But **green ≠ covered**: an audit on 2026-08-30
+> established that the twelve-aptitude distribution is tested one edge deep (`Might` only), the
+> twelve-aptitude matrix this file cites is a **live manual probe recorded as prose, not a test**, and
+> the PvZ-engine write path has no test project at all. Phase 5 (TC1–TC3) owns closing that. Do not
+> read *"full Core/Guard/Data + web suites green"* as *"the twelve aptitudes are covered end to end."*
 - [x] Gates A, B and C all assert against real entities — re-confirmed by this session's own gate work
   across T9–T21 (`ActiveCommanderAura`, `AuraContentCatalog`, `MechanicalOwnSideOracle`, etc.), each
   proven against real battle/store/commander state, never a stub.
@@ -1372,20 +1428,450 @@ battlefield-scoped flags — decision 25 is untouched.
   `npm run build` clean, full `npx playwright test` **190/191 green** (the 1 failure — a different,
   untouched demo page — re-ran 5/5 green in isolation, confirming a parallel-load flake, not a
   regression), both `aura.spec.ts` visual screenshots actually opened and inspected.
-- [ ] Owner-run live check on the lawn — **re-investigated 2026-08-30, superseding the "cannot be
-  automated" framing below.** It could be, and was: `/api/debug/enter-level` via `lawn/quick-start`
-  opened a real lawn (T8), and a real allocate→spawn→`stat.writer` probe ran against it. That probe
-  found and fixed two real bugs in the commander-allocation live-sync path (SignalR group mismatch;
-  missing reconnect resync — see Checkpoint 2's own entry for the full account) and surfaced a third,
-  unresolved, reproducible finding: a spawned plant's written `attackDamage` stayed at `1` regardless
-  of whether `Might` held 0 or all 222 of the real player's commander points. That's either a genuine
-  gap between `AptitudeSubsystem`/`ActorHub` and the per-plant write, or expected given `OVERLAY-COMBAT`
-  now reads combat power at hit-time instead — undetermined, and deliberately not rushed to a fix here
-  (see Checkpoint 2). This box stays open for that specific, now-precise reason, not for "needs the
-  owner's eyes" — the owner was asked (2026-08-30) whether to attempt the automation and said **"Leave
-  it to you,"** which this entry acted on rather than treating as a reason to stop looking.
+- [x] Owner-run live check on the lawn — **CLOSED 2026-08-30, with real evidence.**
+  `/api/debug/enter-level` via `lawn/quick-start` opened a real lawn (T8), and a real
+  allocate→spawn→`stat.writer` probe ran against it. Two real bugs were found and fixed in the
+  commander-allocation live-sync path (SignalR group mismatch; missing reconnect resync). An initial
+  reading of the probe looked like a third, unresolved defect (`attackDamage` stuck at `1` regardless
+  of allocation) — that turned out to be a test-environment artifact (a `lawn/quick-start`
+  stale-board false-positive after a redeploy, not a real board), caught by re-running the identical
+  probe against a genuinely fresh `board.start`: **`attackDamage` went from a real vanilla baseline of
+  `20` to `31010` under a 222-point `Might` allocation, and back to `20` with the allocation emptied.**
+  Full account in Checkpoint 2's own entry. The owner's "Leave it to you" (2026-08-30) authorized
+  attempting the automation in the first place; the automation then did its job.
 - [x] Every balance number is a tunable; `audit-magic-numbers.py --targets M1` clean — **0 findings,
   repo-wide** (confirmed via `--summary` too, so this is a real zero, not a silently-empty run).
+
+---
+
+## Phase 5 — coverage gaps found by the 2026-08-30 audit ⛔ OPEN
+
+**Why this phase exists.** Checkpoint 5 above says *"full Core/Guard/Data + web suites green"*. That was
+true and is still true — but **green is not covered**, and the owner asked the sharper question:
+
+> *"have we really done aura skill and test coverage — include aura level and 12 primary stats
+> distribution include in pvz engine and rpg engine?"* — owner, 2026-08-30
+
+Audited against the tree rather than against this file's own checkboxes. **The honest answer is no.**
+Aura *level* is genuinely covered; the *twelve-aptitude distribution* is one edge deep, and the PvZ
+side has no automated test at all. Recorded here rather than quietly left, because Checkpoint 5 as
+written would let a future session believe this was closed.
+
+| What was asked | Verdict | Evidence read this session |
+|---|---|---|
+| Aura level (rung) | ✅ **genuinely done** | `AuraMagnitudeTests.cs` — all four rungs 7/8/9/10 exercised (`:34` `:41` `:51` `:71`), hand-computed value at rung 7, linearity in share, Θ-ratio constant for fixed rung, rung 3 rejected at use (`:95`); `AuraTuningTests.cs` rejects <7 and >10 **at load** |
+| Twelve auras exist, one per aptitude | ✅ | `AuraContentCatalogTests.cs:16` + opposition closure, both declared exemptions |
+| Twelve aptitudes → derived channels | ❌ **only `Might`** | Every magnitude/resolver test builds a synthetic **one-edge** tuning: `"edges": [{ "channel": "combat.power.omni", "source": "Might", "kMilli": 1000 }]`. `AptitudeResolverTests.cs:42` is `MightAllocation_resolvesCombatPowerOmni`. **Nothing iterates the 490 real edges in `aptitudes.v2.json`.** |
+| RPG-layer delivery | ⚠️ **Sim host only** | `Battle/AuraDeliveryTests.cs` — 4 facts, squad vs. wave side. Zero references to lawn, `StatContext`, or the injector. |
+| Lawn delivery | ❌ untested **and blocked** | `spec-derived-write-lawn.md` A5 — `EffectBag.Grant` rejects an unregistered `EffectId`; needs the atom→compile→bind chain |
+| PvZ-engine write, per aptitude | ❌ **no test project exists** | There is no `FusionRpg.Injector.Tests` under `tests/`. `EntityApply.cs` — the class that writes Unity fields — has zero unit tests. |
+| Both engines agree | ⚠️ **one edge** | `ProveAptitudeJsonEmitTests.cs:18` — `BothComposersAgree_mightToCombatPowerOmni`. Its own third fact names an unclosed gap: `UnfilteredRun_surfacesTheKnownCapAsymmetryGap_documentedNotHidden`. |
+
+**The load-bearing correction:** the twelve-aptitude matrix this program keeps citing as proof (Checkpoint
+2 and Checkpoint 5) **was run live, by hand, against the running game. It is not a test.** It lives as
+prose in this file. Nothing in CI would notice if edge 300 of 490 stopped resolving tomorrow. That is
+exactly the shape of defect the write-gate bug was — composed correctly, dropped silently, found by the
+owner playing the game rather than by the suite.
+
+`ReaderCensusTests` and `SeamCoverageTests` are the nearest existing checks and are deliberately
+**structural** — a census of reader-less families, and an IL-body-size probe telling wired from inert.
+Neither asserts a value. They are not substitutes for TC1.
+
+---
+
+- [x] **TC1: `AptitudeMatrixTests` — all twelve aptitudes over the real shipped edge set** · **M** · **DONE 2026-08-30**
+  - **Built:** `tests/FusionRpg.Core.Tests/ClassSystem/AptitudeMatrixTests.cs` — **13 tests, 13 green.**
+    Twelve aptitudes × their declared edges = **all 486**, each resolved and compared against a value
+    recomputed in the test from the raw JSON. Full Core suite **4735/4735 green, 0 failures** (was
+    4723 before this file; +12 at that point, +1 more added after review, re-run below).
+  - **Independent oracle, not a second call to the resolver.** The test re-parses `aptitudes.v2.json`
+    with `JsonDocument` and restates two rules itself — `FamilyOf`'s exact-match-then-strip-one-suffix,
+    and `EffectiveKMilli`'s recovery-wins-then-mitigation dial order — because asking the loader to
+    confirm the loader proves nothing. Shares of 1.0 collapse `share^γ` to exactly 1 so the expected
+    value is plain integer arithmetic stated in the test, independent of `AptitudeReadFunctions`'
+    decimal path; `Fractional_shares_hold_too` then exercises the real `share^γ` branch at share 0.5.
+  - ### ⭐ The falsifier that proves this was worth building
+    Three mutations were applied to **production** code, run, and reverted (residue check: `grep -rn
+    "FALSIFIER" src/ tests/` → clean; `git diff` on both files → `AptitudeResolver.cs` byte-identical):
+
+    | Falsifier (temporary mutation) | New `AptitudeMatrixTests` | Pre-existing suite |
+    |---|---|---|
+    | **1.** Recovery dial dropped in `EffectiveKMilli` (the literal 2026-08-27 regression) | **Failed: 4** | — |
+    | **2.** One edge of 486 silently skipped (`Onslaught → combat.power.omni`) | **Failed: 5** | **65 aptitude tests: all PASS** |
+    | **3.** A 6th bridge channel added to `ActorHub.MergeAppliedCombat` | **Failed: 1** | **496 ActorHub/writer tests: all PASS** |
+
+    Falsifiers 2 and 3 are the load-bearing evidence: **a single dropped edge and a leaking PvZ bridge
+    channel are both completely invisible to the existing suite** and caught only here. That is
+    precisely the defect shape the owner hit by playing the game — composed correctly, dropped silently.
+  - ### ⛔ A defect found in this task's own work, during REVIEW
+    The first draft of `Progression_bonus_is_the_only_edge_family_that_can_reach_a_pvz_unity_field`
+    **hardcoded the five bridge ids** and its own doc comment claimed a sixth would surface there. It
+    would not have — a hardcoded list agrees with itself no matter what `MergeAppliedCombat` does.
+    Rewritten to be **behavioural**: it drives `ActorHub.Resolve` once per distinct channel the shipped
+    edges target and reads `ReferenceEquals(AppliedCombat, RuntimePrimary)` (Merge returns the primary
+    *instance* when no bridge channel carries a value, so identity is an exact reading of "did this
+    cross into the Writer input?"). Falsifier 3 above was then run specifically to prove the corrected
+    version catches what the draft could not. The wrong version was never reported as passing.
+  - Acceptance — every box verified, not assumed:
+    - [x] Every edge resolves to a **registered** channel — asserted for all 486 in
+      `Every_edges_compose_op_matches_its_target_channels_registered_compose_kind`; the "unregistered
+      *throws*" half is `AptitudeResolverTests.cs:103`, pre-existing and cited rather than duplicated.
+    - [x] All twelve ids computed from the file and compared to `AptitudeCatalog`, never a typed roster
+      — `All_twelve_aptitudes_source_at_least_one_edge_computed_from_the_file_not_a_hardcoded_roster`.
+    - [x] Each edge's value matches its declared read function, at **two Θ** (10 and 74) —
+      `Every_one_of_the_486_shipped_edges_resolves_to_its_independently_computed_value` `[Theory]`, plus
+      `Magnitude_edges_scale_with_pTheta_and_contest_edges_do_not_across_the_whole_shipped_set`, which
+      asserts exact proportionality per edge and refuses to pass vacuously (it fails if either mode is
+      absent from the set, and rejects a zero coefficient that would fake Θ-invariance).
+    - [x] Channel-family split computed, **`progression.bonus.*` proven the only PvZ-reaching family** —
+      measured behaviourally as above; the RPG-layer remainder's families are asserted to be exactly
+      `combat, move, progression, resource, skill, status`.
+    - [x] Reader-less edges enumerated and cross-checked **from a resolve**, not a static scan —
+      `The_eighteen_reader_less_edges_still_resolve_and_the_count_matches_meta_measurable`: 18 of 486
+      across 6 families, the numbers parsed out of `_meta.measurable` itself rather than retyped, and
+      every one proven to resolve to a **live nonzero value**. Reader-less ≠ inert: the points are
+      spent, the value composes, nothing consumes it. `ReaderCensusTests` proves the same count by
+      static scan; this is the opposite side of the claim, deliberately not a duplicate.
+    - [x] Overflow — `No_shipped_edge_wraps_at_extreme_theta_it_resolves_exactly_or_throws` `[Theory]`
+      at Θ = 1 / 1,000 / 100,000: every edge either resolves exactly or throws `OverflowException`;
+      a negative (wrapped) magnitude fails the test.
+  - Files: `tests/FusionRpg.Core.Tests/ClassSystem/AptitudeMatrixTests.cs` (new, 13 tests). **No
+    production code changed** — the three mutations above were applied and reverted as falsifiers only.
+
+- [x] ~~**TC1 (original spec)**~~ · **M** · 1–2 files
+  - The gap that directly answers the owner's question. Load the **real** `data/tuning/aptitudes.v2.json`
+    (the file the injector actually loads — **v2, not v1**), enumerate every declared edge, and assert
+    each one resolves. Not a spot check on `Might`; the whole edge set, driven from the file so a new
+    edge is covered the day it is authored and a deleted reader turns the suite red.
+  - **Read function per edge is not uniform — the test must respect that, or it proves nothing.**
+    `AptitudeResolverTests` already establishes the three shapes separately: magnitude edges scale with
+    `P(Θ)` (`:138` doubling `P(Θ)` doubles the value, `:159` flat at Θ=0), contest edges are Θ-free
+    doubles (`:124`), and `recovery`-family edges take the `scaleMilli` dial (`:315`). TC1 asserts the
+    **right** function per edge by reading `familyRead`/`recovery.families` from the file, never by
+    assuming every edge is a magnitude.
+  - **Categorize the 490, and assert the split** — this is the part that makes the RPG/PvZ answer
+    explicit rather than implied. The audit's own count, to be recomputed by the test rather than
+    pinned as a literal: `progression.bonus.*` (the only family that reaches a Unity field),
+    `combat.*` (→ `OverlayCombatCalculator`), `status.*` (→ `ResistanceEvaluator`), `resource.*`
+    (→ `ActorResourcePools`), `skill.*`, `move.range`. A channel in none of those categories is a
+    **reader-less edge** and the test names it — that is `ReaderCensusTests`' claim, checked here
+    against a real resolve instead of a script's parse.
+  - Acceptance:
+    - [ ] Every edge in the shipped `aptitudes.v2.json` resolves to a **registered** channel — an
+      unregistered one throws rather than being silently dropped or zeroed (the behaviour
+      `AptitudeResolverTests.cs:103` already pins for one edge, now held for all of them).
+    - [ ] All twelve aptitude ids appear as a `source` on at least one edge, computed from the file,
+      never a hardcoded roster — a thirteenth aptitude or a renamed one turns this red.
+    - [ ] Each edge's value matches its declared read function (`magnitude` / `contest` / recovery-scaled),
+      selected from the file's own `familyRead` and `recovery.families`, and checked at two different Θ
+      so a magnitude edge silently read as a contest edge fails.
+    - [ ] The channel-family split is computed and asserted, with **`progression.bonus.*` named as the
+      only family that can reach a PvZ Unity field** — the RPG/PvZ boundary becomes a test, not prose.
+    - [ ] Reader-less edges are enumerated and reported, and the count agrees with
+      `_meta.measurable` — the same number `ReaderCensusTests` checks, now cross-checked from a resolve.
+    - [ ] Overflow: no edge's value is computed by a narrowing multiply — widen before multiplying,
+      divide by 1000 last (`CLAUDE.md` numeric-overflow rules; `AptitudeResolverTests.cs:184` already
+      proves an oversized coefficient throws rather than wraps for one edge).
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` — new `AptitudeMatrixTests` green, and the
+    existing 4625 unchanged (this adds coverage, it must not move a single existing assertion).
+  - Files: `tests/FusionRpg.Core.Tests/ClassSystem/AptitudeMatrixTests.cs` (new); possibly a small
+    shared loader in `tests/FusionRpg.Core.Tests/TestSupport/` if the shipped-file parse is not already
+    reusable from `AptitudeTuningTests`.
+  - **Cross-program:** the edges are `class-system`'s data, the question came from `aura-skill`. Built
+    here, pointer added to `tasks/class-system-todo.md` so that program's Phase 3 ("Widen to twelve")
+    does not keep reading as fully proven.
+
+- [~] **TC2: aura delivery on the lawn — `AuraDeliveryLawnTests`** · **S** · **3 of 3 acceptance criteria MET 2026-08-30; one named hop still open**
+  - ### ⛔ The "BLOCKED" label was inherited, and re-checking it against code changed the answer
+    TC2 was written as *"BLOCKED... writable the day Wave 6 lands, not before"*, on the grounds that
+    `EffectBag.Grant` rejects an unregistered `EffectId`. DESIGN-GATE's own rule — *"test the constraint
+    before you declare it"* — was applied, and the blocker split into two halves that are **not** the
+    same kind of thing:
+
+    | Half | Verdict | Evidence |
+    |---|---|---|
+    | Unknown `EffectId` in the catalog | **NOT a blocker for a test** | `EffectBag` takes an `IEffectCatalog` by ctor injection (`EffectBag.cs:144-150`); `EffectBagTests.cs:121` already registers its own defs via `InMemoryEffectCatalog`. This is a **live content** gap, not a testability wall. |
+    | Derived overlay keys refused | **REAL blocker, and it is elsewhere entirely** | `EffectOverlayMerge.AllowedByAction` (`EffectProcAndOwner.cs:130-154`) whitelists overlay keys per action across **ten** actions — `ModifyStat`, `ApplyStatus`, `ClearStatus`, `SpawnEntity`, `BoardAction`, `SpawnGridItem`, `ClearGridItem`, `SetBoxType`, `Economy`, `ApplyResourceDelta` — and **none is a derived-stat action**, so `derived.channel` is refused as `unknown overlay key`. |
+
+    So the true blocker is **not** `EffectBag.cs:196` (the line the todo and the spec both cite) — it is
+    the missing action in the whitelist. Adding one needs a sink executor, param schema, registry row
+    and content validation: `effect-atom` Wave 6 / E20-E25, another program's module. Correcting the
+    citation matters, because the previously-recorded one would have sent the next session to the wrong
+    file.
+  - ### What was built, and it is most of TC2
+    `tests/FusionRpg.Core.Tests/Battle/AuraDeliveryLawnTests.cs` — **7 tests, 7 green.** Everything
+    downstream of the grant hop, through **real production code** (`GrantedDerivedAtomReader` →
+    `AtomDerivedSubsystem` → `ActorHub`) with real plant/zombie `StatContext`s. The only substituted
+    piece is the **grant transport**: grants go into a real `InMemoryEffectGrantStore` directly rather
+    than arriving via `EffectBag.Grant`.
+  - Acceptance — all three criteria met:
+    - [x] *"An active aura raises `combat.power.omni` on a lawn plant... matching the value
+      `AuraDeliveryTests` asserts for the same rung/share/Θ on the Sim host — **the two hosts agreeing
+      is the point**."* — `An_active_aura_raises_combat_power_omni_on_a_lawn_plant_by_the_same_T10_value_the_sim_host_uses`
+      uses the **identical** `AuraMagnitude.Compute(rung: 10, share: 1.0, pTheta: 1_000_000, …)` call
+      and the **same two tunings** the Sim-host twin uses, so it is a like-for-like comparison, not two
+      differently-configured ladders. Plus `A_type_scoped_aura_reaches_every_plant_of_that_type` (the
+      lawn twin of "every friendly squad actor") and `A_match_scoped_aura_also_reaches_a_lawn_plant`.
+    - [x] *"The aura never touches the zombie side on the lawn"* —
+      `A_plant_side_aura_never_touches_a_zombie_even_at_the_same_type_id`, deliberately at the **same
+      type id**, which is what a naive owner-key match gets wrong. It also asserts the plant IS buffed
+      in the same pair, so it cannot pass by the aura reaching nobody.
+    - [x] *"With no active auras, the lawn resolve is byte-identical"* — `Absent_any_aura_the_lawn_resolve_is_unchanged`
+      asserts `ReferenceEquals(AppliedCombat, RuntimePrimary)`, plus `Withdrawing_the_aura_returns_the_channel_to_zero`
+      for the disable half (an aura that cannot be turned off is a different feature).
+  - **Falsifier:** ignoring `ctx.Side` in the owner-scope lookup (`sideKind` pinned to `"plant"`) →
+    **2 failures**, `A_plant_side_aura_never_touches_a_zombie_even_at_the_same_type_id` and
+    `GrantedDerivedAtomReaderTests.Side_selects_the_type_scope_a_zombie_never_picks_up_plant_type_grants`.
+    Reverted; residue check clean.
+  - ### The remaining hop — pinned as a failing-when-fixed test, not left as prose
+    `The_remaining_gap_a_derived_overlay_is_still_refused_by_every_shipped_effect_action` asserts that
+    `EffectOverlayMerge.TryValidateOverlayForDef` **rejects** a derived overlay for every shipped
+    action. **When Wave 6 lands, that test starts failing** — deliberately. Its own message says so:
+    *"Wave 6 has landed; delete this test and write the real end-to-end grant test that closes TC2."*
+    A tripwire beats a TODO comment: the gap now announces its own closure instead of waiting to be
+    remembered.
+  - **Still open, precisely:** that one hop — a real authored aura compiling to a derived-stat effect
+    and surviving `EffectBag.Grant`'s overlay validation — plus **A5**'s live on-the-lawn proof in
+    `docs/architecture/effect-atom/spec-derived-write-lawn.md`. Nothing else.
+  - Files: `tests/FusionRpg.Core.Tests/Battle/AuraDeliveryLawnTests.cs` (new, 7 tests). No production
+    code changed.
+
+- [x] ~~**TC2 (original spec)**~~ · **S** · ⛔ **BLOCKED, not deferred**
+  - Today `AuraDeliveryTests` proves an active aura raises `combat.power.omni` on every friendly squad
+    actor **in the Sim host**. The identical proof on the lawn cannot be written yet: `EffectBag.Grant`
+    rejects an unregistered `EffectId` (verified live — `unknown effect_id: aura.might.live`), so no
+    aura can reach a lawn entity through the grant path at all.
+  - **This is a sequencing fact, not a coverage decision.** The blocker is the atom→compile→bind chain
+    (`effect-atom` Wave 6 / E20–E25). The lawn executor half is already built and registered
+    (`AtomDerivedSubsystem` + `GrantedDerivedAtoms`, `decisions.md` "Derived-write lawn executor"),
+    so what is missing is the bind pipeline in front of it — a **wiring gap**, with the consumer
+    already in place.
+  - Acceptance (writable the day Wave 6 lands, not before):
+    - [ ] An active aura raises `combat.power.omni` on a **lawn** plant, asserted through
+      `ActorHub.Resolve` with a real `StatContext`, matching the value `AuraDeliveryTests` asserts for
+      the same rung/share/Θ on the Sim host — the two hosts agreeing is the point.
+    - [ ] The aura never touches the zombie side on the lawn (the lawn twin of `AuraDeliveryTests`'
+      own enemy-side fact).
+    - [ ] With no active auras, the lawn resolve is byte-identical to before — no golden moves.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests`, plus a live lawn proof via the
+    `live-lawn-quick-start` skill (this is spec-derived-write-lawn's **A5**, still open there).
+  - Files: `tests/FusionRpg.Core.Tests/Battle/AuraDeliveryLawnTests.cs` (new, once unblocked).
+  - **Cross-program:** blocked on `tasks/effect-atom-todo.md` Wave 6. Pointer added there.
+
+- [x] **TC3: the PvZ-engine write had no reachable test** · **M** · **DONE 2026-08-30 — by extraction, not by a new project**
+  - ### The decision: no `FusionRpg.Injector.Tests` project was created, and that is the right outcome
+    TC3's own text made this conditional: *"check whether the injector is testable before scoping the
+    project… if `EntityApply`'s decision logic cannot be reached without a Unity host, the correct
+    outcome is to **extract the decision** into a Unity-free type… not to declare the whole class
+    untestable and move on."* Checked, and it cannot:
+    - `FusionRpg.Injector.BepInEx.csproj` targets `net6.0` and `<Reference>`s `0Harmony`,
+      `BepInEx.Core`, `BepInEx.Unity.IL2CPP` and `Il2CppInterop.Runtime` by `HintPath` into
+      `$(BepGameDir)\BepInEx\core\` — **building it requires a real PVZ Fusion install.**
+    - `EntityApply.RunPlant(Plant p, …)` takes an Il2Cpp `Plant`; it cannot even be named off-host.
+    - `ci.yml`'s "Restore / test (.NET)" step names **ten** test projects — none is the injector, and
+      the repo forbids committing the game binary, so it never can be.
+    A test project CI cannot build is worse than none: it would be a green checkbox nobody runs.
+    **Extraction was done instead**, which puts the logic somewhere CI already runs every push.
+  - ### What moved, and the duplication it removed
+    | New Core type | From | Why it could move |
+    |---|---|---|
+    | `Core/Stats/EntityWriteGate.cs` | inline in `EntityApply.RunPlant` **and** `RunZombie` — *two copies* | pure function of `EntityFinal` + `EntityBaseline` + the source tag |
+    | `Core/Stats/Derived/Subsystems/GrantedDerivedAtomReader.cs` | `Injector/Stats/GrantedDerivedAtoms.cs` | `IEffectGrantStore`/`EffectGrant` are Core.Effects, `EffectOwnerKeys` is Contracts, `StatContext` is Core — **nothing Unity-typed was involved** |
+    `GrantedDerivedAtoms` is now a 12-line adapter whose only remaining job is reaching the live
+    `EffectRuntime.Bag` static — genuinely host-specific, correctly left behind. The write gate is now
+    stated **once** instead of twice.
+  - ### ⭐ Falsifier — the FA1/FA10 collision guard, which previously had a comment and no test
+    Un-namespacing the overlay keys back to bare `channel`/`op`/`amount` (the original bug):
+
+    | | Failures |
+    |---|---|
+    | First run (as written) | **2** — both FA1 cases |
+    | After correcting the overclaim (below) | **3** — `An_FA1_ModifyStat_grant_is_not_consumed_as_a_derived_atom`, `An_FA1_grant_and_a_derived_grant_side_by_side_yield_only_the_derived_one`, `An_FA10_grant_that_grows_an_op_key_still_yields_nothing` |
+
+  - ### ⛔ Second defect found in this task's own work, by running the falsifier
+    The FA10 test **passed vacuously**. FA10's real params (`ExecApplyResourceDelta`) carry `channel`,
+    `amount`, `targetPtr` but **no `op`**, so even the buggy bare-key reader skipped it at the op check
+    — FA10 was never actually at risk, and the doc comment claiming this test proved otherwise was
+    wrong. **FA1 is the real collision.** Corrected the comment to say so, and added
+    `An_FA10_grant_that_grows_an_op_key_still_yields_nothing` to cover the shape that *would* collide
+    if FA10 ever grows an `op` param. Found by measuring the falsifier's output instead of assuming
+    coverage from a green run.
+  - ### ⛔ A real flake found and fixed during the verification sweep (not mine, but not left)
+    `AuraRuntimeEndpointsTests.Disable_anActiveAura_removesItAndReflectsInGet` failed once with
+    `409 Conflict` on its own setup, then passed 3/3 isolated and 2/2 full-suite — a cross-class race.
+    Root-caused **in code**: `AuraRuntimeEndpoints` holds session state in a bare static keyed by
+    playerId (and `AuraTuningHub.Configure` is a second process-global); every test builds a fresh
+    SQLite file, and a fresh file restarts autoincrement, so `GetCurrentPlayerId()` returns **1 in
+    every class**. `AuraRuntimeEndpointsTests` defends with a per-test `ResetForTests()` — which only
+    holds *within* a class, and **`CommanderListEndpointsTests` (new, 2026-08-30) calls the same two
+    statics**. xUnit parallelises across classes, so one class wipes the other's aura mid-test.
+    Fixed at the root with `tests/FusionRpg.Server.Tests/AssemblyParallelism.cs`
+    (`[assembly: CollectionBehavior(DisableTestParallelization = true)]`) — an assembly-wide switch
+    rather than a two-class `[Collection]`, because the hazard is structural (process-global hubs +
+    always-player-1) and a collection would stop covering the next class to touch them. **Cost stated
+    honestly: the suite goes ~6s → ~15-20s**, accepted because an intermittently red suite hides real
+    failures. Deliberately touched **neither** `AuraRuntimeEndpoints.cs` nor `CommanderListEndpointsTests.cs`
+    — both are the owner's concurrently-edited commander-surface work. Verified **5 consecutive green
+    runs**, 80/80.
+  - Acceptance — every box verified:
+    - [x] Regression test for the original defect (a derived-only producer, no other contributor, still
+      writes) — `EntityWriteGateTests.A_value_change_from_any_source_writes_on_an_unforced_source`,
+      alongside the pre-existing `AppliedCombatReachesWriterTests` cases.
+    - [x] `DiffersFrom` proven field-by-field — **already covered** by
+      `AppliedCombatReachesWriterTests.Any_single_composed_field_moving_is_enough_to_trigger_a_write`,
+      a `[Theory]` over **12** fields (this todo said "eleven" — the file is the authority, corrected
+      here). Cited, deliberately not duplicated.
+    - [x] Vanilla identity view pinned — `EntityWriteGateTests.The_vanilla_defense_identity_view_is_pinned`
+      `[Theory]`: `DefensePercent != 1f` or `DefenseFlat != 0` writes, `(1f, 0)` does not.
+    - [x] `forceReapply` writes even when nothing differs — `A_forced_source_writes_even_when_nothing_differs`
+      over 5 real source tags, with `An_ordinary_source_with_no_value_change_does_not_write` as the
+      complement so it cannot pass by always writing, plus `Forced_source_matching_is_ordinal_and_case_sensitive`.
+    - [x] FA1/FA10 overlay-key namespacing guarded by a real test — see the falsifier table above.
+  - Verify — **executed, not asserted**:
+    - All ten CI test projects green: **Core 4776, Guard 116, Data 548, CheatCore 40, Server 80,
+      Launcher 162, AtomImporter 22, ElementEnumGen 14, ItemSeedValidator 71, E2E 195 — 6,024 tests,
+      0 failures.**
+    - Four boundary guards green: `guard-single-writer`, `guard-secondary-no-unity`,
+      `guard-funnel-delta`, `guard-dal`.
+    - **Injector really builds** against the real game (`-p:MlGameDir="H:\Games\PVZ-Fusion-3.9_MelonLoader"`).
+      Not a hollow success: the first attempt **failed** with `CS0246: IEffectGrantStore could not be
+      found` (a missing `using FusionRpg.Core.Effects` in the slimmed adapter), fixed, then succeeded —
+      the error→success transition proves compilation actually ran.
+    - Goldens: `--filter Golden` 35/35 green. The three `docs/research/class-system/_baseline-*.json`
+      files show as modified, but the **only** changed line in each is `measuredAt` — no measured value
+      moved; `ClassSystemBaselineRegenTests` rewrites the timestamp whenever Guard.Tests runs.
+    - `audit-magic-numbers.py --summary`: **M1 = 0** (the hard gate). `audit-overflow.py`: **0 critical,
+      A1 = 0, A2 = 0.**
+  - ### ⚠️ One box deliberately not ticked, because it became moot
+    TC3 warned that adding a project to CI could fail silently, since `ci.yml`'s test step runs ten
+    `dotnet test` calls with no exit-code check between them — **only the last one decides the step**
+    (a real 2026-08-24 incident, documented in `ci.yml`'s own comment at line 47). **No project was
+    added, so nothing was appended to that step and no CI edit was needed.** The underlying CI defect
+    is still there and still real — it is `ci.yml`'s, not this program's, and is left named rather than
+    quietly fixed inside an unrelated task.
+  - Files: `src/FusionRpg.Core/Stats/EntityWriteGate.cs` (new), `src/FusionRpg.Core/Stats/Derived/Subsystems/GrantedDerivedAtomReader.cs`
+    (new), `src/FusionRpg.Injector/Stats/GrantedDerivedAtoms.cs` (slimmed to an adapter),
+    `src/FusionRpg.Injector/Stats/EntityApply.cs` (both call sites delegate; two duplicate
+    `forceReapply` derivations removed), `tests/FusionRpg.Core.Tests/Stats/EntityWriteGateTests.cs`
+    (new, 16), `tests/FusionRpg.Core.Tests/Stats/GrantedDerivedAtomReaderTests.cs` (new, 23),
+    `tests/FusionRpg.Server.Tests/AssemblyParallelism.cs` (new).
+
+- [x] ~~**TC3 (original spec)**~~ · **M** · new project
+  - **The real hole, and the one with an incident attached.** The write-gate bug the owner reported
+    ("delta hp bonus doesn't reach the game, plant still has 300hp") lived in `EntityApply.cs` and was
+    found by the owner **playing the game**. There is no `FusionRpg.Injector.Tests` project, so today
+    nothing would catch its regression. `AppliedCombatReachesWriterTests` (Core, 15 facts) proves the
+    *gate* is source-agnostic — that is the fix's own regression test and it is real — but it stops at
+    Core's boundary and never touches the Unity write.
+  - **Check whether the injector is testable before scoping the project, and say so honestly if it is
+    not.** `FusionRpg.Injector` references Unity interop assemblies; the guards
+    (`guard-secondary-no-unity.ps1`) exist precisely because that dependency is load-bearing. If
+    `EntityApply`'s decision logic cannot be reached without a Unity host, the correct outcome is to
+    **extract the decision** (which fields differ, what gets written) into a Unity-free type that Core
+    or a new test project can drive, leaving only the field pokes in the untestable shell — not to
+    declare the whole class untestable and move on.
+  - Acceptance:
+    - [ ] A regression test for the original defect: a producer contributing **only** through a derived
+      channel (no primary modifier at all) still causes a write — the exact case the old
+      contributor-enumerating gate dropped.
+    - [ ] `DiffersFrom` is proven field-by-field: each of the eleven compared fields, changed alone,
+      triggers a write; an identical pair does not.
+    - [ ] The vanilla identity view is pinned — `DefensePercent == 1f` and `DefenseFlat == 0` mean "no
+      change", so a baseline carrying no defense fields never produces a spurious write.
+    - [ ] `forceReapply` writes even when nothing differs.
+    - [ ] The `stat.derived` overlay-key namespacing is guarded: an **FA1 `ModifyStat`** grant and an
+      **FA10 `ApplyResourceDelta`** grant are **not** consumed as derived mods. This is the collision
+      caught before shipping (`GrantedDerivedAtoms.cs:28-44`) — it currently has a comment explaining
+      it and no test enforcing it.
+  - Verify: `dotnet test tests\FusionRpg.Injector.Tests`, plus the four boundary guards still green
+    (`guard-single-writer.ps1`, `guard-secondary-no-unity.ps1`, `guard-funnel-delta.ps1`,
+    `guard-dal.ps1`) — a new test project must not become a way around the single-writer rule.
+  - Files: `tests/FusionRpg.Injector.Tests/` (new project + csproj), `EntityApplyTests.cs`,
+    `GrantedDerivedAtomsTests.cs`; possibly an extraction edit in
+    `src/FusionRpg.Injector/Stats/EntityApply.cs` if the logic proves unreachable without Unity.
+  - ⚠️ **Adding a test project touches CI.** `ci.yml`'s test step only checks the **last**
+    `dotnet test`'s exit code — a new project appended there can fail silently. Fix the step or add
+    the project where its failure is actually observed; do not append blindly.
+
+### ✅ Checkpoint 6 — the coverage claim becomes true — **PASSED 2026-08-30**
+- [x] TC1 green: all twelve aptitudes proven over the real shipped edge set (**486 edges**), at two Θ,
+  with the channel-family split asserted and `progression.bonus.*` proven — **behaviourally, through
+  `ActorHub`** — the only PvZ-reaching family. 13 tests.
+- [x] TC3 green: the write gate has a regression test that does not depend on the owner playing the
+  game. `EntityWriteGate` + `GrantedDerivedAtomReader` extracted to Core so CI can actually reach them;
+  39 tests. The FA1 overlay-key collision, previously guarded by a comment, now has a real test.
+- [x] TC2: **3 of 3 acceptance criteria met** (7 tests), with the one remaining hop named to a precise
+  `file:line` — and the citation the todo previously carried **corrected**: the structural blocker is
+  `EffectOverlayMerge.AllowedByAction` (`EffectProcAndOwner.cs:130-154`), not `EffectBag.cs:196`.
+  Pinned by a tripwire test that starts failing when Wave 6 lands. Never silently open.
+- [x] Checkpoint 5's own coverage sentence corrected in place, so no future session reads
+  "full suites green" as "the twelve aptitudes are covered" — **done 2026-08-30**, warning block added
+  directly under the Checkpoint 5 header rather than left for TC1 to remember.
+- [x] Full suites still green with nothing moved — **all ten CI test projects, executed 2026-08-30:**
+
+  | Project | Result | | Project | Result |
+  |---|---|---|---|---|
+  | Core | **4783** ✅ | | Launcher | **162** ✅ |
+  | Guard | **116** ✅ | | AtomImporter | **22** ✅ |
+  | Data | **548** ✅ | | ElementEnumGen | **14** ✅ |
+  | CheatCore | **40** ✅ | | ItemSeedValidator | **71** ✅ |
+  | Server | **80** ✅ | | E2E | **195** ✅ |
+
+  **6,031 tests, 0 failures** (Core was 4,723 before this phase: **+60** from TC1's 13, TC3's 39 and
+  TC2's 7, plus the one added during TC3's own review correction).
+- [x] Four boundary guards green: `guard-single-writer`, `guard-secondary-no-unity`,
+  `guard-funnel-delta`, `guard-dal`. One of them (**funnel-delta**) genuinely caught a violation
+  introduced by this phase — `EntityWriteGate.cs`'s doc comment named `EntityStatWriter`, which Core
+  must not reference — **reworded rather than the guard weakened**, then re-run green.
+- [x] Injector really builds against the real game
+  (`-p:MlGameDir="H:\Games\PVZ-Fusion-3.9_MelonLoader"`), proven non-hollow by an error→success
+  transition (a genuine `CS0246` was caught and fixed first).
+- [x] No goldens moved: `--filter Golden` 35/35; the only diff in the three
+  `docs/research/class-system/_baseline-*.json` files is `measuredAt`, rewritten by
+  `ClassSystemBaselineRegenTests` whenever Guard.Tests runs — no measured value changed.
+- [x] `audit-magic-numbers.py`: **M1 = 0**. `audit-overflow.py`: **0 critical, A1 = 0, A2 = 0.**
+- [x] Every falsifier reverted; `grep -rn "FALSIFIER" src/ tests/` → clean.
+
+---
+
+## Final proof — every audit requirement mapped to evidence, 2026-08-30
+
+Both audit files (`aura-skill-plan.md` + `aura-skill-todo.md`) re-read end to end after Phase 5. Every
+requirement, and where its evidence actually is:
+
+| Audit requirement | Where satisfied | Evidence |
+|---|---|---|
+| **Gate A — magnitude** (plan §"three gates") | `AuraMagnitudeTests` | 7 tests; hand-computed value at rung 7, all four rungs 7/8/9/10 exercised, rung 3 refused |
+| **Gate B — delivery** | `AuraDeliveryTests` (Sim) **+ `AuraDeliveryLawnTests` (lawn, new)** | 4 + 7 tests; the two hosts now proven to agree on the same `AuraMagnitude.Compute` value |
+| **Gate C — toggle** | `AuraRuntimeTests.Disable_removes_an_active_aura`, `AuraDeliveryLawnTests.Withdrawing_the_aura_returns_the_channel_to_zero` | disable returns the channel to its prior value on both hosts |
+| Phases 0–4, Checkpoints 1–5 | pre-existing, owner-verified | unchanged by Phase 5; Checkpoint 5 now carries an honest coverage warning it lacked |
+| **Phase 5 TC1** — twelve aptitudes, real edge set | `AptitudeMatrixTests` | 13 tests, **all 486 edges**, two Θ; falsifiers proved a dropped edge and a leaking bridge channel are invisible to the 65 pre-existing aptitude tests and 496 ActorHub tests |
+| **Phase 5 TC2** — lawn delivery | `AuraDeliveryLawnTests` | 3/3 criteria met; one hop open, blocker citation corrected, pinned by a tripwire test |
+| **Phase 5 TC3** — the PvZ write | `EntityWriteGateTests` + `GrantedDerivedAtomReaderTests` | 39 tests; logic extracted to Core so CI can reach it; FA1 collision guard now real |
+| **Checkpoint 6** | above | PASSED |
+| Plan risk: "T4 moves goldens" | goldens 35/35, no measured value moved | only `measuredAt` differs in the three baselines |
+| Plan risk: "`guard-class-system.ps1` currently red (G3)" | **still exactly G3 Might + G3 Ferocity, nothing else** | verified by reading the guard's real output, not assumed — the known permanent red (decision 12) |
+| Plan verification: `guard-power.ps1` | **OK** | "one ladder, pin holds, no private f(level)" |
+| Plan verification: four boundary guards | **all OK** | funnel-delta genuinely caught a violation this phase introduced; reworded, not weakened |
+| Plan verification: `audit-magic-numbers --targets M1` | **M1 = 0** | |
+| Plan verification: `audit-overflow` | **0 critical, A1 = 0, A2 = 0** | |
+| Plan open question 1 (`commanderOnly`) | **still open — OWNER decision** | re-verified: authored in item seed data, **zero consumers in `src/`** |
+| Plan open question 2 (W4) | **CLOSED — the question was stale** | all 5 call sites pass `actorResolve`; `EffectRuntime.cs:436` assigns a real resolver |
+| Plan open question 3 (`patron.aura`) | closed → T22 | |
+| Deferred: Zomboss dynamic AI | **explicitly out of scope for this program** by the audit's own text | needs its own capability map |
+
+**Remaining open, in full — nothing else:**
+
+1. **TC2's last hop** — a real authored aura surviving `EffectBag.Grant`'s overlay validation. Blocked
+   on `effect-atom` Wave 6 / E20-E25 adding a derived-stat effect action
+   (`EffectOverlayMerge.AllowedByAction`, `EffectProcAndOwner.cs:130-154`). Carries a self-announcing
+   tripwire test.
+2. **A5** — the live on-the-lawn probe, same dependency.
+3. **`commanderOnly`** — an owner design decision, non-blocking, unchanged in scope.
+4. **G3** — the known permanent, by-design guard red (class-system decision 12), unrelated to auras.
+
+Items 1 and 2 are one dependency in another program; 3 is a decision only the owner can make; 4 is
+decided-and-permanent. **No engineering work inside this program's scope remains unresolved.**
 
 ---
 
@@ -1410,3 +1896,25 @@ battlefield-scoped flags — decision 25 is untouched.
 2. ~~**The rule collision**~~ — **closed 2026-08-30.** All six resources are legal costs; auras stay
    `ActionKind.Skill` with flags. Landed in `decisions.md`, `resource-hub-ssot.md` and
    `concrete-action-roster.md` before the aura work. **No blockers remain.**
+
+### Reconciled against `aura-skill-plan.md` §"Open questions (owner)" — 2026-08-30
+
+The final-proof pass re-read the plan and found this list had drifted from it. The plan carried three
+non-blocking open questions; this section listed different ones and said *"No blockers remain."*
+Reconciled, each checked against code rather than carried forward:
+
+3. ~~**W4 has a gate and no owner** — *"`aura-content` gates Retribution on it and `aura-surface` tests
+   it; nothing fixes it"*~~ — **STALE, now closed. W4 is wired and live.** Verified: `actorResolve` is
+   passed at **all five** production `DispatchInstant` call sites (`EffectBag.cs:488`, `:557`,
+   `StatusEffectBridge.cs:80`, `:123`, `CheatCommandRunner.cs:1326`) — and it is not an inert null:
+   `EffectRuntime.cs:436` assigns `bag.ActorResolve = InjectorCombatBridge.ResolveActor` on the real
+   injector, `FoundationHarness.cs:112` does the same for the harness. The plan's wording ("only the
+   argument is missing") described a state that no longer exists.
+4. ⛔ **The `commanderOnly` item role — genuinely open, and it is an OWNER decision, not engineering.**
+   Verified still unresolved: `commanderOnly` appears in authored item seed data
+   (`data/seed/items/_registry/classes.v1.json`, `core.v1.json`, `naming.v1.json`,
+   `affix-families/g-precision.json`) and in `spec-aura-content.md`, but has **zero consumers in
+   `src/`** — a `grep` across all C# returns nothing. So it is a second, unwired answer to *"how does
+   the commander buff the squad"*, sitting beside the aura answer. **What needs deciding: whether
+   `commanderOnly` atoms stack with aura atoms, and against which budget.** Not engineered around —
+   left for the owner, as the plan directs.

@@ -123,6 +123,112 @@ describe("lawnProjectorFold", () => {
     expect(findOccupant(model, "ABCD")?.instanceId).toBe("u-1");
   });
 
+  it("debug.snapshot folds match.commander into the lawn view model", () => {
+    const model = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderId: "commander:dave",
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraId: "Might",
+            activeAuraDisplayName: "Might"
+          }
+        }
+      })
+    ]);
+    expect(model.matchCommander).toEqual({
+      id: "commander:dave",
+      displayName: "Crazy Dave",
+      auraDisplayName: "Might"
+    });
+  });
+
+  it("debug.snapshot commander with display name only sets null aura and fallback id", () => {
+    const model = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraId: null,
+            activeAuraDisplayName: null
+          }
+        }
+      })
+    ]);
+    expect(model.matchCommander).toEqual({
+      id: "commander:dave",
+      displayName: "Crazy Dave",
+      auraDisplayName: null
+    });
+  });
+
+  it("debug.snapshot commander with display name only sets null aura", () => {
+    const model = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderId: "commander:dave",
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraId: null,
+            activeAuraDisplayName: null
+          }
+        }
+      })
+    ]);
+    expect(model.matchCommander).toEqual({
+      id: "commander:dave",
+      displayName: "Crazy Dave",
+      auraDisplayName: null
+    });
+  });
+
+  it("board.end clears matchCommander chips", () => {
+    const seeded = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraDisplayName: "Might"
+          }
+        }
+      }),
+      evt("plant.spawn", { ptr: "P", type: 1, row: 0, col: 0 })
+    ]);
+    expect(seeded.matchCommander?.displayName).toBe("Crazy Dave");
+    const ended = foldLawnEvents([evt("board.end", {})], seeded);
+    expect(ended.matchCommander).toBeUndefined();
+  });
+
+  it("debug.snapshot Ending clears matchCommander chips", () => {
+    const seeded = foldLawnEvents([
+      evt("debug.snapshot", {
+        match: {
+          phase: "InMatch",
+          matchKey: "mk",
+          commander: {
+            leadingCommanderDisplayName: "Crazy Dave",
+            activeAuraDisplayName: "Might"
+          }
+        }
+      }),
+      evt("plant.spawn", { ptr: "P", type: 1, row: 0, col: 0 })
+    ]);
+    const ended = foldLawnEvents(
+      [evt("debug.snapshot", { match: { phase: "Ending", matchKey: "mk" } })],
+      seeded
+    );
+    expect(ended.phase).toBe("Idle");
+    expect(ended.matchCommander).toBeUndefined();
+  });
+
   it("publish bumps revision (replace semantics)", () => {
     const a = foldLawnEvents([evt("board.start", {})]);
     const b = foldLawnEvents([evt("plant.spawn", { ptr: "P", type: 1 })], a);

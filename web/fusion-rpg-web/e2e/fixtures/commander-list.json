@@ -1,0 +1,14 @@
+{
+  "defaultLawnCommanderId": "commander:dave",
+  "commanders": [
+    {
+      "id": "commander:dave",
+      "displayName": "Crazy Dave",
+      "isDefault": true,
+      "activeAuraId": null,
+      "activeAuraName": null,
+      "locationStub": null,
+      "legionStub": null
+    }
+  ]
+}

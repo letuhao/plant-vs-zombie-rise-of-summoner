@@ -126,6 +126,13 @@ export function HubProvider({ children }: { children: ReactNode }) {
       void qc.invalidateQueries({ queryKey: ["types"] });
     };
 
+    const onCommandersUpdated = (msg: { playerId?: number } | null) => {
+      if (msg?.playerId != null) {
+        void qc.invalidateQueries({ queryKey: queryKeys.commanders(msg.playerId) });
+      }
+      void qc.invalidateQueries({ queryKey: ["commanders"] });
+    };
+
     c.on("Event", onEvent);
     c.on("EventBatch", onBatch);
     c.on("Health", onHealth);
@@ -137,6 +144,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
     c.on("DemonsUpdated", onDemonsUpdated);
     c.on("SoulsUpdated", onSoulsUpdated);
     c.on("AlmanacTextUpdated", onAlmanacTextUpdated);
+    c.on("CommandersUpdated", onCommandersUpdated);
 
     c.onreconnecting(() => setStatus("off"));
     c.onreconnected(() => {
@@ -169,6 +177,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
       c.off("AlmanacTextUpdated", onAlmanacTextUpdated);
       c.off("DemonsUpdated", onDemonsUpdated);
       c.off("SoulsUpdated", onSoulsUpdated);
+      c.off("CommandersUpdated", onCommandersUpdated);
       void c.stop();
     };
   }, [qc]);

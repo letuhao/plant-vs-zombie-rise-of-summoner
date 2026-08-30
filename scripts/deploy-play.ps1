@@ -146,6 +146,32 @@ if (-not (Test-Path (Join-Path $PluginDir "FusionRpg.Core.dll"))) {
     throw "FusionRpg.Core.dll missing after build"
 }
 
+# FRESHNESS GUARD (2026-08-30). "Build succeeded" is not evidence the DLL was rebuilt:
+#   * the MelonLoader.39 project prints success and compiles NOTHING when MlGameDir is unset
+#     (its own WarnSkipMelon39 target) -- a real compile error hid behind that for an hour today;
+#   * a running game holds a lock on the DLL, and a failed copy can leave the old file in place.
+# Either way the deployed injector silently disagrees with FusionRpg.Core.dll beside it, which
+# surfaces as a runtime `MethodNotFound` mid-match rather than a build error. Compare against the
+# newest source we actually compiled, so both cases fail HERE, loudly.
+$newestSrc = Get-ChildItem -Path (Join-Path $Root "src") -Recurse -Filter *.cs -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' } |
+    Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+if ($newestSrc) {
+    foreach ($dll in @($InjectorDll, "FusionRpg.Core.dll")) {
+        $built = Get-Item (Join-Path $PluginDir $dll)
+        if ($built.LastWriteTimeUtc -lt $newestSrc.LastWriteTimeUtc) {
+            throw @"
+STALE DEPLOY: $dll is older than the newest source file.
+  $dll      $($built.LastWriteTimeUtc.ToString('u'))
+  newest .cs  $($newestSrc.LastWriteTimeUtc.ToString('u'))  ($($newestSrc.Name))
+The build did not actually produce this DLL. Usual causes: the game is still running and holds a
+lock on it, or the injector project skipped compiling. Close the game and re-run.
+"@
+        }
+    }
+    Write-Host "==> Freshness OK — injector and Core are newer than the newest source"
+}
+
 function Test-ServerUp {
     try {
         $r = Invoke-WebRequest -Uri $Health -UseBasicParsing -TimeoutSec 2
@@ -155,8 +181,13 @@ function Test-ServerUp {
     }
 }
 
-if (-not $NoServer) {
-    $serverWasUp = Test-ServerUp
+# NOTE (2026-08-30): `-NoServer` means "do not LAUNCH a server", never "do not BUILD one".
+# It used to wrap this whole block, so `-NoServer` silently skipped `dotnet publish` too and left
+# dist\FusionRpg.Server\ on whatever binary happened to be there. That cost a full hour of chasing a
+# "fix that did not work" -- the fix was correct and unit-tested; the deployed server was 80 minutes
+# stale and still carried the old code. A flag whose name describes one action must not quietly skip
+# a different one. Publishing is ~10s and keeps dist\ honest; only the Start-Process below is gated.
+$serverWasUp = Test-ServerUp
     if ($serverWasUp -and $RestartServer) {
         Write-Host "==> Stopping old RPG server on :5088"
         try {
@@ -188,7 +219,10 @@ if (-not $NoServer) {
     dotnet run --project $ImporterProj -c Release -- --db $DataDir
     if ($LASTEXITCODE -ne 0) { throw "AtomImporter refused the import — see output above" }
 
-    if ($serverWasUp) {
+    if ($NoServer) {
+        Write-Host "==> -NoServer: built and published, NOT started. Start it yourself with:"
+        Write-Host "    Start-Process -FilePath `"$ServerExe`" -WorkingDirectory `"$ServerOut`""
+    } elseif ($serverWasUp) {
         Write-Host "==> Server still running at $Health (unchanged -- pass -RestartServer to deploy the fresh build)"
     } else {
         Write-Host "==> Starting RPG server (data beside exe: $DataDir)"
@@ -205,7 +239,6 @@ if (-not $NoServer) {
             Write-Host "==> Server up: $Health"
         }
     }
-}
 
 if (-not $NoGame) {
     $ServerUrl = "http://127.0.0.1:5088"

@@ -18,13 +18,13 @@ describe("deriveRailEntries — GG-44, renders from state", () => {
     expect(entries.map((e) => e.id)).toEqual([
       "sanctum",
       "creatures",
+      "commanders",
       "relics",
       "fusion",
       "pacts",
       "expeditions",
       "almanac",
-      "chronicle",
-      "aptitudes"
+      "chronicle"
     ]);
   });
 
@@ -39,8 +39,8 @@ describe("deriveRailEntries — GG-44, renders from state", () => {
     expect(deriveRailEntries(allLocked).find((e) => e.id === "creatures")!.state).toBe("available");
   });
 
-  it("Aptitudes is unlocked from session start regardless of any other state", () => {
-    expect(deriveRailEntries(allLocked).find((e) => e.id === "aptitudes")!.state).toBe("available");
+  it("Commanders is unlocked from session start regardless of any other state", () => {
+    expect(deriveRailEntries(allLocked).find((e) => e.id === "commanders")!.state).toBe("available");
   });
 
   it("every locked entry carries a non-empty reason (GG-17)", () => {

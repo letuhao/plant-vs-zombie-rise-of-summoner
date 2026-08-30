@@ -240,6 +240,10 @@
                       Defend the lawn <span class="hotkey">↵</span>
                     </button>
                     <p style="margin:0;font-size:var(--text-xs);color:var(--muted)">
+                      Leading: <b>Crazy Dave</b> · Sun Blessing
+                      <a href="09-commander-list.html" style="margin-left:var(--sp-2);color:var(--faint)">Change commander</a>
+                    </p>
+                    <p style="margin:0;font-size:var(--text-xs);color:var(--muted)">
                       Plays through the game if it is running, and on its own if it is not.
                     </p>
                   </div>
@@ -261,6 +265,12 @@
       The focus card is the only element that changes what it is. It answers "what should I do now"
       from state — overdue tribute beats a returned expedition beats a fusable pair beats "start a
       run". When nothing is pending it becomes the run prompt, never an empty box.
+    </div>
+    <div class="note">
+      <strong>Defend the lawn does not gate on commander pick.</strong> The one-liner shows the saved
+      default (Crazy Dave · active aura). Change commander is optional — opens
+      <a href="09-commander-list.html">plate 09</a>. Web FE and the PvZ game menu are independent;
+      the match reads the default asynchronously. No pre-run dialog.
     </div>
   </div>
 </section>
@@ -371,7 +381,7 @@
       <tr><td>Where does the player picker live?</td><td>Save select, band −1</td><td>The HudBar loses it entirely</td></tr>
       <tr><td>What is in the top bar?</td><td>Identity, souls, XP, menu</td><td>No API address, no injector dot, no hub state — those are developer surfaces</td></tr>
       <tr><td>How does the map open?</td><td>Travel, from the map table or `M`</td><td>A stage change with a transition, not a panel</td></tr>
-      <tr><td>How does a run start?</td><td>An explicit button on the sanctum</td><td>Confirms loadout; the lawn stage mounts its canvas on entry</td></tr>
+      <tr><td>How does a run start?</td><td>Defend the lawn on the Sanctum — saved default commander, no web gate</td><td>Lawn stage mounts on entry; async handoff per <a href="09-commander-list.html#d">plate 09 §D</a></td></tr>
       <tr><td>What does a new save see?</td><td>An authored one-creature scene</td><td>Rail renders from unlock state, not a constant</td></tr>
     </tbody>
   </table>

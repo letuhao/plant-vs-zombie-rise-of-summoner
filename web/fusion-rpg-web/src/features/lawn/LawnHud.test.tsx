@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { LawnHud } from "./LawnHud";
 
 describe("LawnHud (T28)", () => {
@@ -45,5 +46,38 @@ describe("LawnHud (T28)", () => {
     for (const label of ["Pause", "Normal speed", "Double speed"]) {
       expect(screen.getByRole("button", { name: label })).toBeDisabled();
     }
+  });
+
+  it("renders commander and aura chips from the match snapshot fold", () => {
+    render(
+      <LawnHud
+        matchCommander={{ id: "commander:dave", displayName: "Crazy Dave", auraDisplayName: "Might" }}
+        deployed={[]}
+      />
+    );
+    expect(screen.getByTestId("lawn-hud-commander")).toHaveTextContent("Crazy Dave");
+    expect(screen.getByTestId("lawn-hud-aura")).toHaveTextContent("Might");
+  });
+
+  it("hides the aura chip when the snapshot has no active aura name", () => {
+    render(
+      <LawnHud matchCommander={{ id: "commander:dave", displayName: "Crazy Dave", auraDisplayName: null }} deployed={[]} />
+    );
+    expect(screen.getByTestId("lawn-hud-commander")).toBeInTheDocument();
+    expect(screen.queryByTestId("lawn-hud-aura")).not.toBeInTheDocument();
+  });
+
+  it("tap on the commander chip calls onOpenCommanderSheet", async () => {
+    const user = userEvent.setup();
+    const onOpenCommanderSheet = vi.fn();
+    render(
+      <LawnHud
+        matchCommander={{ id: "commander:dave", displayName: "Crazy Dave", auraDisplayName: "Might" }}
+        deployed={[]}
+        onOpenCommanderSheet={onOpenCommanderSheet}
+      />
+    );
+    await user.click(screen.getByTestId("lawn-hud-commander-open"));
+    expect(onOpenCommanderSheet).toHaveBeenCalledTimes(1);
   });
 });

@@ -54,7 +54,15 @@ public static class InjectorLoop
         catch (Exception ex) { RpgHost.Log.Error("CheatUiActions: " + ex); }
         try
         {
-            if (CheatState.Stats.ConsumeDirty(out _) && CheatState.ShouldPushScalesOnDirty())
+            // Dirty means dirty. The second, source-enumerating veto that used to sit here
+            // (`ShouldPushScalesOnDirty`: cheat doc revision / PvzStats revision / Tab A scales)
+            // silently discarded every OTHER contributor's change -- a commander reallocation set the
+            // dirty flag and was then vetoed, so living entities never re-resolved (owner-observed
+            // live 2026-08-30). Deciding whether a re-resolve is WORTH writing is EntityApply's job
+            // now, and it answers by comparing values (EntityFinal.DiffersFrom), so a reapply that
+            // changes nothing writes nothing. `Invalidate` is edge-triggered from 6 discrete state
+            // changes, never per-frame, so this is one board pass per real change.
+            if (CheatState.Stats.ConsumeDirty(out _))
             {
                 CheatActions.ReapplyLivingFromStats();
                 CheatState.MarkAppliedRevision();

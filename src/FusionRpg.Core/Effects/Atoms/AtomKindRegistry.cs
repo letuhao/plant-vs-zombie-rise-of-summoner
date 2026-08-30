@@ -144,9 +144,20 @@ public static class AtomKindRegistry
                 //
                 // BATTLE re-opened 2026-08-23 by E12, which ships the first consumer:
                 // `BattleStatComposer` reads bound stat.derived atoms at squad build, through
-                // `TraitAtomSource`. Lawn and sim stay None — they still have no consumer, and
-                // flipping them on the strength of battle's would re-create the quarantine's cause.
-                new RuntimeSupportMatrix(RuntimeState.None, RuntimeState.Full, RuntimeState.None),
+                // `TraitAtomSource`.
+                //
+                // LAWN re-opened 2026-08-30 (decisions.md, "Derived-write lawn executor" — owner
+                // approved) now that it, too, has a real consumer: `AtomDerivedSubsystem`, an
+                // `IActorStatSubsystem` registered on the injector's `ActorHub` at the reserved
+                // order-350 `foundation.effect` slot, contributing bound stat.derived atoms into the
+                // same `DerivedComposer` fold every other derived producer already uses. The flip is
+                // deliberately the LAST step of that change, not the first: flipping before the
+                // executor existed would have re-created D6's exact state (binds accepted, nothing
+                // applied) inside the change meant to end it.
+                //
+                // SIM stays None — `SimEffectHost` still has no consumer, and flipping it on the
+                // strength of the other two would re-create the quarantine's cause.
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.None),
                 AtomTriggers.None,
                 PowerCategory.Offense | PowerCategory.Survivability | PowerCategory.Control,
                 "No opcode — direct derived-channel mods. Derived ops are Flat|Increased|Replace|Flag; " +

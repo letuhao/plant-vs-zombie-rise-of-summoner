@@ -120,9 +120,18 @@ as real actors, D3 "both", tunable tier-mapped rungs. What remains is non-blocki
 
 1. **The `commanderOnly` item role** — a second, unacknowledged answer to "how does the commander buff
    the squad", never authored. Whether its atoms stack with aura atoms, and against which budget, is
-   undecided.
-2. **W4 has a gate and no owner** — `aura-content` gates Retribution on it and `aura-surface` tests it;
-   nothing fixes it.
+   undecided. **Re-verified still open 2026-08-30:** it exists in authored item seed data
+   (`data/seed/items/_registry/classes.v1.json`, `core.v1.json`, `naming.v1.json`,
+   `affix-families/g-precision.json`) and in `spec-aura-content.md`, with **zero consumers in `src/`**.
+   Still an owner decision.
+2. ~~**W4 has a gate and no owner** — `aura-content` gates Retribution on it and `aura-surface` tests it;
+   nothing fixes it.~~ — **CLOSED 2026-08-30, this question is stale.** `actorResolve` is passed at all
+   five production `DispatchInstant` call sites (`EffectBag.cs:488`/`:557`, `StatusEffectBridge.cs:80`/
+   `:123`, `CheatCommandRunner.cs:1326`), and it is not an inert null — `EffectRuntime.cs:436` assigns
+   `bag.ActorResolve = InjectorCombatBridge.ResolveActor` on the real injector and
+   `FoundationHarness.cs:112` does so for the harness. Found by re-reading this plan against code
+   during Phase 5's final-proof pass; the wording above ("only the argument is missing") described a
+   state that no longer exists.
 3. **`patron.aura` becomes irrelevant** past ~15 points of commander investment (it clamps at 150‰, an
    aura does not). Coherence, not a defect.
 

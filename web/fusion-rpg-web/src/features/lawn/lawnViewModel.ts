@@ -118,6 +118,12 @@ export type LawnViewModel = {
   lastAction?: LawnLastEvent;
   lastHit?: LawnLastHit;
   economy?: LawnEconomy;
+  /** Frozen at board.start via debug.snapshot match.commander (commander-surface P3). */
+  matchCommander?: {
+    id: string;
+    displayName: string;
+    auraDisplayName: string | null;
+  };
 };
 
 export const DEFAULT_ROWS = 5;

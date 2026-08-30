@@ -1,12 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   getLastHitEvent,
   getLawnMembershipRing,
   subscribeLastHit,
   subscribeLog,
+  useCommanders,
   useDeployUniqueActor,
   useLawnDebugPost,
+  usePlayers,
+  useSetDefaultCommander,
   useSpawnExtraIntent,
   useUniqueActor
 } from "@/lib/bus";
@@ -14,6 +17,7 @@ import type { LawnSelectPayload } from "@/game/EventBus";
 import { cn } from "@/lib/cn";
 import { claimStageEscape } from "@/shell/keymap";
 import { useDevModeLive } from "@/dev/useDevModeLive";
+import { adaptCommanderSheet } from "@/contract/adapt";
 import { Page } from "@/layouts/Page";
 import { Split } from "@/layouts/Split";
 import {
@@ -33,6 +37,7 @@ import { LawnGameHost } from "./LawnGameHost";
 import { LawnHud } from "./LawnHud";
 import { LawnOccupantList } from "./LawnOccupantList";
 import { LawnStatsModal } from "./LawnStatsModal";
+import { ActorPanel, type ActorRungState } from "@/ui/actor";
 import {
   canEnterSpawnTargeting,
   idleInteraction,
@@ -68,6 +73,12 @@ const VIEW_MODES: LawnViewMode[] = ["split", "large", "stack"];
  * PvzActivity rollups. Intent never writes Occupants (RT-12).
  */
 export function LawnPage() {
+  const navigate = useNavigate();
+  const players = usePlayers();
+  const playerId = players.data?.currentPlayerId ?? 1;
+  const commandersQuery = useCommanders(playerId);
+  const setDefaultCommander = useSetDefaultCommander(playerId);
+  const [commanderSheetOpen, setCommanderSheetOpen] = useState(false);
   const events = useSyncExternalStore(
     subscribeLog,
     getLawnMembershipRing,
@@ -208,6 +219,23 @@ export function LawnPage() {
   const targetRow = interaction.row;
   const targetCol = interaction.col;
   const hasCell = targetRow != null && targetCol != null;
+  const matchCommanderChip = model.matchCommander;
+  const commanderListRow = matchCommanderChip
+    ? commandersQuery.data?.commanders.find((row) => row.id === matchCommanderChip.id)
+    : undefined;
+  const commanderSheetState: ActorRungState | null =
+    commanderListRow && matchCommanderChip
+      ? { kind: "ready", data: adaptCommanderSheet(commanderListRow, playerId) }
+      : null;
+
+  async function handleCommanderSetDefault(commanderId: string) {
+    await setDefaultCommander.mutateAsync(commanderId);
+  }
+
+  useEffect(() => {
+    if (!matchCommanderChip) setCommanderSheetOpen(false);
+  }, [matchCommanderChip]);
+
   const cellTiles =
     hasCell &&
     (interaction.mode === "TileSelected" || interaction.mode === "SpawnTargeting")
@@ -996,6 +1024,7 @@ export function LawnPage() {
   );
 
   return (
+    <>
     <Page
       testId="page-lawn"
       title="Lawn"
@@ -1015,7 +1044,11 @@ export function LawnPage() {
         wave={model.economy?.wave}
         maxWave={model.economy?.maxWave}
         hugeWave={model.economy?.hugeWave}
+        matchCommander={matchCommanderChip}
         deployed={deployedChips}
+        onOpenCommanderSheet={
+          matchCommanderChip && commanderListRow ? () => setCommanderSheetOpen(true) : undefined
+        }
       />
 
       {actionError ? (
@@ -1062,5 +1095,32 @@ export function LawnPage() {
         </div>
       )}
     </Page>
+
+    {commanderSheetState && commanderListRow && matchCommanderChip ? (
+      <ActorPanel
+        state={commanderSheetState}
+        open={commanderSheetOpen}
+        onOpenChange={setCommanderSheetOpen}
+        role="commander"
+        matchBanner={{
+          displayName: matchCommanderChip.displayName,
+          auraDisplayName: matchCommanderChip.auraDisplayName
+        }}
+        commanderMeta={{
+          isDefault: commanderListRow.isDefault,
+          activeAuraName: commanderListRow.activeAuraName,
+          locationStub: commanderListRow.locationStub,
+          legionStub: commanderListRow.legionStub
+        }}
+        setDefaultPending={setDefaultCommander.isPending}
+        onSetDefault={() => void handleCommanderSetDefault(commanderListRow.id)}
+        onDefendLawn={() => setCommanderSheetOpen(false)}
+        onOpenCommandersList={() => {
+          setCommanderSheetOpen(false);
+          navigate(`/sanctum?panel=commanders&sel=${encodeURIComponent(commanderListRow.id)}`);
+        }}
+      />
+    ) : null}
+    </>
   );
 }

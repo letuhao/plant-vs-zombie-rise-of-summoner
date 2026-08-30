@@ -67,6 +67,22 @@ public static class ScopeCompatibility
             = new(ScopeSupportLevel.Full, ScopeDeliveryShape.PerEntityGrant),
         [new ScopeCompatibilityKey("resource.delta", WhereScope.Battlefield, WhoKind.Relation, ScopeHost.Live)]
             = new(ScopeSupportLevel.Full, ScopeDeliveryShape.PerEntityGrant),
+
+        // `stat.derived` — the aura kind (decisions.md "Derived-write lawn executor", 2026-08-30).
+        // Per-entity on BOTH hosts, and `Channel` stays null on purpose: G8's channel-level split
+        // exists because `stat.modify` on `defense` hits live PvZ's ONE side-wide TakeDamage-prefix
+        // cache. `stat.derived` never touches that path — it composes per actor through
+        // `ActorHub.ResolveDerived`, which is exactly why definitions.md §6 names
+        // `stat.derived` on `combat.defense.*` as the per-actor mitigation answer to G8's restriction.
+        // So there is no channel for which this kind's shape differs, and inventing a channel
+        // dimension it does not have would misrepresent it as precisely as collapsing G8's would.
+        [new ScopeCompatibilityKey("stat.derived", WhereScope.Battlefield, WhoKind.Relation, ScopeHost.Live)]
+            = new(ScopeSupportLevel.Full, ScopeDeliveryShape.PerEntityGrant),
+        // The Sim host (BattleEngine) already had a consumer from E12 (`TraitAtomSource` at squad
+        // build); this row records the shape that consumer already implements rather than granting a
+        // new capability.
+        [new ScopeCompatibilityKey("stat.derived", WhereScope.Battlefield, WhoKind.Relation, ScopeHost.Sim)]
+            = new(ScopeSupportLevel.Full, ScopeDeliveryShape.PerEntityGrant),
     };
 
     /// <summary>Throws <see cref="ScopeUnsupportedException"/> for any combination not in the table.</summary>

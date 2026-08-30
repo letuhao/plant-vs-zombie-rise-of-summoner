@@ -198,11 +198,14 @@ public class TraitMigrationParityTests
     [Fact]
     public void Stat_derived_stays_closed_where_it_still_has_no_consumer()
     {
-        // The half that matters more. Flipping lawn and sim on the strength of battle's consumer
-        // would re-create exactly the condition the quarantine existed for.
+        // The half that matters more, and the rule is unchanged: a runtime opens only where a
+        // consumer exists. LAWN opened 2026-08-30 (decisions.md "Derived-write lawn executor") on the
+        // strength of its OWN consumer -- `AtomDerivedSubsystem` on the injector's ActorHub -- never on
+        // the strength of battle's. SIM has no derived consumer, so it stays closed, which is what
+        // this test now guards.
         var kind = AtomKindRegistry.Get("stat.derived")!;
 
-        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Lawn));
+        Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
         Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Sim));
     }
 

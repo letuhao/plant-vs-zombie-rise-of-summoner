@@ -6,7 +6,8 @@ docs 2026-08-30.
 **Governed by:** [../architecture/game-gui-principles.md](../architecture/game-gui-principles.md) ·
 [../design/information-architecture.md](../design/information-architecture.md) ·
 [../architecture/aura-skill/spec-aura-surface.md](../architecture/aura-skill/spec-aura-surface.md) ·
-[../architecture/aura-skill-ideal.md](../architecture/aura-skill-ideal.md)
+[../architecture/aura-skill-ideal.md](../architecture/aura-skill-ideal.md) ·
+[../architecture/commander-surface-ideal.md](../architecture/commander-surface-ideal.md) (layout + async default — post-audit)
 
 **Why this file exists.** The aura-skill program shipped backend + partial FE (T18c) while commander
 concerns stayed scattered across layers. This audit answers: what menus exist today, whether default
@@ -50,14 +51,15 @@ this audit:
 
 | Gap | Status |
 |---|---|
-| **1. Commander list menu** | **Missing** — no list layer, no list API, no pick for run/deploy/default |
+| **1. Commander list menu** | **Missing** — no list layer, no list API, no Set default persistence |
 | **2. Actor sheet role extensions** | **Partial** — shared six-tab shell building; commander-only and creature-only behaviour not fully wired |
 
 Everything else in this doc is evidence for those two gaps (backend truth, genre comparison, deploy
 defaults). Aptitudes layer (`◎`) is a separate account-wide stat shortcut, not the commander list.
 
-There is **no commander list**, **no pick-commander-for-deploy**, and **no pre-run setup** — Sanctum
-goes straight to `#/lawn`.
+There is **no commander list**, **no persisted default field**, and **no pre-run setup** — Sanctum
+goes straight to `#/lawn`. See [commander-surface-ideal.md](../architecture/commander-surface-ideal.md)
+for the target async-default model.
 
 ---
 
@@ -94,7 +96,7 @@ systems. List → select → same sheet; **role** drives which tabs, footer, and
 
 | Concern | Commander role | Creature role |
 |---|---|---|
-| **Footer** | e.g. set active for run (TBD) — not Deploy/Release | `Release` / `Deploy to lawn` (`ActorPanel.tsx`) |
+| **Footer** | Set default · Defend the lawn (mirrors) — not Deploy/Release | `Release` / `Deploy to lawn` (`ActorPanel.tsx`) |
 | **Progression tab** | Aptitude allocation per commander scope (`ProgressionTab` — commander wired) | Level/XP readout; other scopes deferred |
 | **Actions tab** | Aura loadout + enable (`AuraSlot`, T18c); future command list | Locked until action system ships |
 | **Gear tab** | Commander banner (`commanderOnly` item role — backend only) | Specimen equip (`equipSlots` pending) |
@@ -143,7 +145,7 @@ No commander list step; no default commander. Pre-run squad excluded (game-gui T
 
 | Question | Answer |
 |---|---|
-| Default selected commander for lawn run? | **No** — implicit Dave; no picker, no persisted choice |
+| Default selected commander for lawn run? | **No persisted field** — implicit Dave; target is `defaultLawnCommanderId` (ideal §4) |
 | List commanders in FE? | **No** — `CommanderIds.All` exists in Core only |
 | Default equipped aura loadout (Dave)? | **No** — `GET /api/loadout/{playerId}` returns null until POST |
 | Default enabled aura on match start? | **No** — `AuraRuntime` starts empty; nothing auto-enables |
@@ -165,7 +167,7 @@ Primary prior art is already surveyed in [aura-skill-ideal.md §3](../architectu
 | Pattern | Typical UI | Rise of Summoner |
 |---|---|---|
 | **Centralized pre-battle hub** | HoMM3 army screen, gacha Formation, TFT lobby | **No** — IA deliberately splits across layers; Sanctum is home, not commander HQ |
-| **Commander identity picker** | CO/hero select before fight | **Backend:** `CommanderIds.All` (2). **FE list menu: missing** |
+| **Commander identity** | CO/hero select before fight | **Persisted default** — no pre-run gate; **FE list menu: missing** |
 | **Skill/aura loadout** | 3–10 saved presets, leader skill slot | Commander role on shared **Actor sheet**; need list to reach it |
 | **Pre-run squad confirm** | Pick 1–N units + review buffs | **Designed (plate 07 §A), excluded T21** — no API |
 | **In-battle command UI** | Hero ability bar, 1 spell/turn | **None on lawn** — observe + deploy intent only |
@@ -178,10 +180,25 @@ reasons — the pattern T21 wanted for lawn runs but lacks backend.
 
 | Peer lesson | RoS-aligned interpretation |
 |---|---|
-| HoMM3: review army + hero before fight | Future **T21 band-3 dialog** (when squad API exists) should show commander aura summary + creature berths — not a new permanent hub |
+| HoMM3: review army + hero before fight | Optional prep in **Commanders layer**; future **T21** dialog may show creature berths + aura summary — **not** a mandatory commander gate |
 | Gacha: saved team presets | Extend **`/api/loadout`** with named presets once action layer ships; surface in Aptitudes or a band-3 dialog, not a new stage |
-| TD: in-battle toggle | Lawn HUD chip → opens **commander list** or last-selected commander detail |
-| Gacha leader slot | Commander list picks leader; detail is Actor sheet — Dave implicit today |
+| TD: hero bar during fight | Lawn HUD chip shows **this match's** leader + aura — **read-only** (commander-surface-ideal §3); optional tap opens sheet with "next run" labeling |
+| Gacha leader slot | **Set default** in Commanders list; detail is Actor sheet — Dave implicit today |
+
+### 3.1 Post-ideal corrections (2026-08-30)
+
+After [commander-surface-ideal.md](../architecture/commander-surface-ideal.md) and IA sync, these audit
+rows are **superseded** for commander (creature/T21 concerns unchanged):
+
+| Prior audit wording | Corrected frame |
+|---|---|
+| "Commander identity picker" / "pick for run" | **Persisted `defaultLawnCommanderId`** — Set default anytime; never required before play |
+| HoMM3 pre-battle hub via T21 for commander | T21 **creature** dialog (07 §A) when squad API exists — **not** a commander gate |
+| Lawn HUD chip → opens commander list | **Read-only this match** by default; optional non-blocking sheet with next-run labeling |
+| "active for this run" / "default deploy selection" | **Set default** (persisted) + **match snapshot at board.start** |
+
+Gap 1 (Commanders list layer + list API) and Gap 2 (Actor sheet role extensions) **remain valid**;
+wording shifts from picker to async default + optional prep.
 
 ---
 
@@ -192,8 +209,8 @@ reasons — the pattern T21 wanted for lawn runs but lacks backend.
 ### Gap 1 — Commander list menu
 
 Copy **Creatures list** shape: `ActorRow` × N → select `CommanderId` → open shared **`ActorPanel`**.
-Needs list data (`CommanderIds.All` or `GET /api/commanders`) and optional "active for this run" /
-default deploy selection. Reusable from Sanctum, lawn HUD, world legion setup.
+Needs list data (`GET /api/commanders` filtered to player empire) and **Set default** persistence
+(`defaultLawnCommanderId`). Reusable from Sanctum, optional lawn HUD drill-in, world legion setup.
 
 ### Gap 2 — Actor sheet role extensions
 
@@ -220,7 +237,7 @@ programs — they are the same sheet with different extensions.
 | Commander list menu? | **No.** |
 | Creature / commander detail? | **Same Actor sheet** — partial (demo + actor-sheet program). |
 | What's missing? | **(1) Commander list** **(2) Role extensions** on the shared sheet. |
-| Default command for deploy? | **No** — needs list selection + backend; not creature deploy URL alone. |
+| Default lawn commander? | **No persisted field** — Dave implicit; needs `defaultLawnCommanderId` + Commanders layer |
 
 ---
 

@@ -312,3 +312,30 @@ export type RunView = {
   /** `RunItem.summary`/`.modifiers` are typed `unknown` server-side today — prime Pending candidates. */
   summary: Pending<unknown>;
 };
+
+// ===========================================================================
+// Commander list — GET /api/commanders/{playerId} (commander-surface P1)
+// ===========================================================================
+
+export type CommanderListRow = {
+  id: string;
+  displayName: string;
+  isDefault: boolean;
+  activeAuraId: string | null;
+  activeAuraName: string | null;
+  locationStub: string | null;
+  legionStub: string | null;
+};
+
+export type CommanderListView = {
+  defaultLawnCommanderId: string;
+  commanders: CommanderListRow[];
+};
+
+/** Commander drill-in context for ActorPanel — not part of ActorView (commander-sheet-role). */
+export type CommanderSheetMeta = {
+  isDefault: boolean;
+  activeAuraName: string | null;
+  locationStub: string | null;
+  legionStub: string | null;
+};

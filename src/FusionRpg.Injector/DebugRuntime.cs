@@ -2,6 +2,7 @@ using System.Text.Json;
 using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Lawn;
 using FusionRpg.Injector.Stats;
+using FusionRpg.Core.Commanders;
 using UnityEngine;
 
 namespace FusionRpg.Injector;
@@ -88,32 +89,7 @@ public static class DebugRuntime
     public static Dictionary<string, object> Snapshot()
     {
         var matchSnap = Match.MatchHost.Runtime.ToSnapshot();
-        var dump = new Dictionary<string, object>
-        {
-            ["sessionActive"] = SessionActive,
-            ["scenarioId"] = ScenarioId,
-            ["hitCapture"] = HitCapture,
-            ["spawnCol"] = CheatState.SpawnCol,
-            ["spawnRow"] = CheatState.SpawnRow,
-            ["selectedPtr"] = CheatState.SelectedPtr == IntPtr.Zero ? "" : CheatState.SelectedPtr.ToString("X"),
-            ["selectedSide"] = CheatState.SelectedSide ?? "",
-            ["armOnKillExtra"] = ArmOnKillExtra,
-            ["armOnKillStatus"] = ArmOnKillStatus,
-            ["armOnKillGrave"] = ArmOnKillGrave,
-            ["armOnKillClearGrave"] = ArmOnKillClearGrave,
-            ["armOnHitExtra"] = ArmOnHitExtra,
-            ["onHitExtraRemaining"] = OnHitExtraRemaining,
-            ["armOnHitStatus"] = ArmOnHitStatus,
-            ["onHitStatusRemaining"] = OnHitStatusRemaining,
-            ["probePlant"] = CheatState.On("D-PROBE-PLANT"),
-            ["probeBullet"] = CheatState.On("D-PROBE-BULLET"),
-            ["dmgSet"] = CheatState.IVal("D-DMG-SET"),
-            // Flat fields kept for back-compat; nested match is W3-B MatchSnapshot observe.
-            ["livingPlants"] = matchSnap.PlantCount,
-            ["livingZombies"] = matchSnap.ZombieCount,
-            ["matchPhase"] = matchSnap.Phase.ToString(),
-            ["matchRevision"] = matchSnap.Revision,
-            ["match"] = new Dictionary<string, object>
+        var matchDict = new Dictionary<string, object>
             {
                 ["contractVersion"] = matchSnap.ContractVersion,
                 ["phase"] = matchSnap.Phase.ToString(),
@@ -140,7 +116,37 @@ public static class DebugRuntime
                     ["phase"] = b.Phase.ToString(),
                     ["correlationId"] = b.CorrelationId ?? ""
                 }).ToList()
-            }
+            };
+        var commanderFold = MatchCommanderSnapshotHolder.ObserveCommanderFold();
+        if (commanderFold != null)
+            matchDict["commander"] = commanderFold;
+
+        var dump = new Dictionary<string, object>
+        {
+            ["sessionActive"] = SessionActive,
+            ["scenarioId"] = ScenarioId,
+            ["hitCapture"] = HitCapture,
+            ["spawnCol"] = CheatState.SpawnCol,
+            ["spawnRow"] = CheatState.SpawnRow,
+            ["selectedPtr"] = CheatState.SelectedPtr == IntPtr.Zero ? "" : CheatState.SelectedPtr.ToString("X"),
+            ["selectedSide"] = CheatState.SelectedSide ?? "",
+            ["armOnKillExtra"] = ArmOnKillExtra,
+            ["armOnKillStatus"] = ArmOnKillStatus,
+            ["armOnKillGrave"] = ArmOnKillGrave,
+            ["armOnKillClearGrave"] = ArmOnKillClearGrave,
+            ["armOnHitExtra"] = ArmOnHitExtra,
+            ["onHitExtraRemaining"] = OnHitExtraRemaining,
+            ["armOnHitStatus"] = ArmOnHitStatus,
+            ["onHitStatusRemaining"] = OnHitStatusRemaining,
+            ["probePlant"] = CheatState.On("D-PROBE-PLANT"),
+            ["probeBullet"] = CheatState.On("D-PROBE-BULLET"),
+            ["dmgSet"] = CheatState.IVal("D-DMG-SET"),
+            // Flat fields kept for back-compat; nested match is W3-B MatchSnapshot observe.
+            ["livingPlants"] = matchSnap.PlantCount,
+            ["livingZombies"] = matchSnap.ZombieCount,
+            ["matchPhase"] = matchSnap.Phase.ToString(),
+            ["matchRevision"] = matchSnap.Revision,
+            ["match"] = matchDict
         };
         try
         {

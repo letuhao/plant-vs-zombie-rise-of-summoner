@@ -18,7 +18,7 @@ const baseInputs: RailUnlockInputs = {
 describe("Rail", () => {
   it("renders all eight entries", () => {
     render(<Rail entries={deriveRailEntries(baseInputs)} onSelect={() => {}} />);
-    for (const id of ["sanctum", "creatures", "relics", "fusion", "pacts", "expeditions", "almanac", "chronicle"]) {
+    for (const id of ["sanctum", "creatures", "commanders", "relics", "fusion", "pacts", "expeditions", "almanac", "chronicle"]) {
       expect(screen.getByTestId(`rail-${id}`)).toBeInTheDocument();
     }
   });

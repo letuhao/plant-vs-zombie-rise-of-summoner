@@ -9,10 +9,19 @@
  * row (plate: "reserved... owned by the game launcher"), not something this module could assign.
  */
 
-export type BindableActionId = "creatures" | "relics" | "fusion" | "pacts" | "expeditions" | "almanac" | "chronicle";
+export type BindableActionId =
+  | "creatures"
+  | "commanders"
+  | "relics"
+  | "fusion"
+  | "pacts"
+  | "expeditions"
+  | "almanac"
+  | "chronicle";
 
 export const DEFAULT_BINDINGS: Record<BindableActionId, string> = {
   creatures: "c",
+  commanders: "k",
   relics: "r",
   fusion: "f",
   pacts: "p",
@@ -23,6 +32,7 @@ export const DEFAULT_BINDINGS: Record<BindableActionId, string> = {
 
 export const ACTION_LABELS: Record<BindableActionId, string> = {
   creatures: "Creatures",
+  commanders: "Commanders",
   relics: "Relics",
   fusion: "Fusion",
   pacts: "Pacts",

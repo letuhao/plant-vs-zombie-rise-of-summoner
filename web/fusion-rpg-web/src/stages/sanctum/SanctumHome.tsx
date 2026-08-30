@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import { useCommanders } from "@/lib/bus";
 import { ActorChip, type ActorRungState } from "@/ui/actor";
-import { Button, Panel } from "@/ui";
+import { Banner, Button, Panel } from "@/ui";
 
 const CREATURE_STRIP_MAX = 6;
 
@@ -13,17 +14,25 @@ const CREATURE_STRIP_MAX = 6;
  * until now.
  */
 export function SanctumHome({
+  playerId,
   actorStates,
   onOpenCreatures,
+  onOpenCommanders,
   returnedExpeditionCount,
   onOpenExpeditions
 }: {
+  playerId: number;
   actorStates: ActorRungState[];
   onOpenCreatures: () => void;
+  onOpenCommanders: () => void;
   returnedExpeditionCount: number;
   onOpenExpeditions: () => void;
 }) {
   const navigate = useNavigate();
+  const commandersQuery = useCommanders(playerId);
+  const defaultCommander =
+    commandersQuery.data?.commanders.find((c) => c.isDefault) ??
+    commandersQuery.data?.commanders.find((c) => c.id === commandersQuery.data?.defaultLawnCommanderId);
   const shown = actorStates.slice(0, CREATURE_STRIP_MAX);
   const overflow = actorStates.length - shown.length;
 
@@ -81,6 +90,31 @@ export function SanctumHome({
           <Button className="w-full justify-between" onClick={() => navigate("/lawn")} data-testid="sanctum-home-defend">
             Defend the lawn
           </Button>
+          {commandersQuery.isLoading ? (
+            <p className="mt-2 text-xs text-muted" data-testid="sanctum-home-leading-loading">
+              Loading commander…
+            </p>
+          ) : commandersQuery.isError ? (
+            <Banner tone="error" className="mt-2" data-testid="sanctum-home-leading-error">
+              Couldn&apos;t load who leads the next run.
+              <Button size="sm" variant="ghost" className="ml-2" onClick={() => void commandersQuery.refetch()}>
+                Retry
+              </Button>
+            </Banner>
+          ) : defaultCommander ? (
+            <div
+              className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-muted"
+              data-testid="sanctum-home-leading"
+            >
+              <span data-testid="sanctum-home-leading-line">
+                Leading: {defaultCommander.displayName}
+                {defaultCommander.activeAuraName ? ` · ${defaultCommander.activeAuraName}` : " · No aura"}
+              </span>
+              <Button size="sm" variant="ghost" onClick={onOpenCommanders} data-testid="sanctum-home-change-commander">
+                Change commander
+              </Button>
+            </div>
+          ) : null}
           <p className="mt-2 text-xs text-muted" data-testid="sanctum-home-run-note">
             Uses whatever is already on the lawn.
           </p>

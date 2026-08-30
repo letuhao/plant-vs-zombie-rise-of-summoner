@@ -11,6 +11,17 @@
 
 Prefix: `effect-atom`. Module specs at `docs/architecture/effect-atom/spec-<module-id>.md`; plan and tasks at `tasks/effect-atom-plan.md` / `tasks/effect-atom-todo.md` (AGENTS.md parallel-programs convention).
 
+> **New module proposed 2026-08-30: [`derived-write-lawn`](effect-atom/spec-derived-write-lawn.md) — needs a `decisions.md` row, not yet approved.**
+> `stat.derived` is `RuntimeSupportMatrix(None, Full, None)` (`AtomKindRegistry.cs:149`) — E12 gave
+> **battle** a consumer; the **lawn has none**, so no aura can reach a lawn entity through this layer.
+> That is why five features (patron, stars, injuries, contracts, and now commander aptitudes) each grew
+> a private derived-write path, exactly as [actor-hub-ssot.md §6.1](actor-hub-ssot.md) predicted. The
+> spec **extends the already-built buff/debuff scope primitive** (`ScopeCompatibility` +
+> `BattlefieldOwnSideReactor`, shipped 2026-08-29) rather than adding a sixth path — `decisions.md`'s
+> own Buff/debuff row already names this wiring as "a separate, later task". The delivery half is
+> **already fixed and live-proven** (`EntityFinal.DiffersFrom`, 2026-08-30): a lawn executor's output
+> reaches Unity the day it exists, with no edit to `EntityApply`.
+
 **Why this is being specced now:** the [action](action-map.md) program needs a real container contract, and the owner chose to spec atoms first rather than depend on a placeholder (decision D1, 2026-08-22). That makes this program the critical path for the action architecture, and through it for the battle-timeline gate.
 
 ---

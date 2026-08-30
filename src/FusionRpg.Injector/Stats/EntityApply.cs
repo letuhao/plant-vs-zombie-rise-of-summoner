@@ -56,17 +56,10 @@ public static class EntityApply
             var preserveRatio = StatSystem.PreserveLiveCurrentHp(source);
             var abs = includeAbsolute ? CheatState.BuildPlantAbsolute() : null;
             var applyScales = s.ApplyStats && !CheatState.On("D-PROBE-BULLET");
-            var hasAbsolute = abs != null && abs.Count > 0;
             var hasScaleMods = applyScales && CheatState.HasPlantScaleMods();
             var hasPvz = CheatState.HasPvzStatsMods();
             var hasEffectMods = CheatState.Stats.HasSessionModsBySourceKind("effect");
             var hasExtras = includeAbsolute && CheatState.HasPlantExtrasSet();
-            // Empty bag = no write on spawn; pushScales/reapply writes baseline after clear.
-            var forceReapply = source.Contains("pushScales", StringComparison.Ordinal)
-                               || source.Contains("reapply", StringComparison.Ordinal);
-            var shouldWrite = PvzStatsApplyGate.ShouldWrite(hasScaleMods, hasAbsolute, hasPvz)
-                              || hasEffectMods
-                              || forceReapply;
 
             var ctx = CheatState.Stats.Contexts.ForPlant(
                 key, baseline, (int)p.thePlantType, GameHooks.MatchKey,
@@ -82,6 +75,11 @@ public static class EntityApply
             var resolved = CheatState.ActorHub.Resolve(ctx);
             var final = resolved.AppliedCombat;
             EmitAptitudeTrace("plant", key, ctx, resolved);
+
+            // The write decision is a VALUE question, never a contributor question -- the whole rule,
+            // with its full trace, lives in EntityWriteGate (Core) so it is stated once, shared with
+            // RunZombie below, and reachable by a test CI actually runs.
+            var shouldWrite = EntityWriteGate.ShouldWrite(final, baseline, source);
 
             if (shouldWrite)
                 EntityStatWriter.WritePlant(p, final, prevHp, prevMax, preserveRatio, source);
@@ -179,16 +177,10 @@ public static class EntityApply
             var preserveRatio = StatSystem.PreserveLiveCurrentHp(source);
             var abs = includeAbsolute ? CheatState.BuildZombieAbsolute() : null;
             var applyScales = s.ApplyStats;
-            var hasAbsolute = abs != null && abs.Count > 0;
             var hasScaleMods = applyScales && CheatState.HasZombieScaleMods();
             var hasPvz = CheatState.HasPvzStatsMods();
             var hasEffectMods = CheatState.Stats.HasSessionModsBySourceKind("effect");
             var hasExtras = includeAbsolute && CheatState.HasZombieExtrasSet();
-            var forceReapply = source.Contains("pushScales", StringComparison.Ordinal)
-                               || source.Contains("reapply", StringComparison.Ordinal);
-            var shouldWrite = PvzStatsApplyGate.ShouldWrite(hasScaleMods, hasAbsolute, hasPvz)
-                              || hasEffectMods
-                              || forceReapply;
 
             var ctx = CheatState.Stats.Contexts.ForZombie(
                 key, baseline, (int)z.theZombieType, GameHooks.MatchKey,
@@ -201,7 +193,12 @@ public static class EntityApply
                 applyStats: PvzStatsApplyGate.ShouldComposeScales(hasScaleMods, hasPvz, hasEffectMods),
                 cheatAbsoluteReal: includeAbsolute ? CheatState.BuildZombieAbsoluteReal() : null,
                 pvzStatsMods: CheatState.PvzStatsMods);
-            var final = CheatState.ActorHub.Resolve(ctx).AppliedCombat;
+            var resolvedZ = CheatState.ActorHub.Resolve(ctx);
+            var final = resolvedZ.AppliedCombat;
+            EmitAptitudeTrace("zombie", key, ctx, resolvedZ);
+
+            // Same value-based rule as RunPlant -- the one shared EntityWriteGate, not a second copy.
+            var shouldWrite = EntityWriteGate.ShouldWrite(final, baseline, source);
 
             if (shouldWrite)
                 EntityStatWriter.WriteZombie(z, final, prevHp, prevMax, preserveRatio, source);
@@ -252,19 +249,25 @@ public static class EntityApply
         return payload;
     }
 
-    /// <summary>Temporary diagnostic (aura-skill Checkpoint 2/5 finding 3, 2026-08-30): a live probe
-    /// showed a spawned plant's written `attackDamage` stuck at 1 regardless of commander aptitude
-    /// allocation (0 vs 222 points in Might), even after fixing two independent real bugs in the
-    /// allocation-delivery path. This emits the exact values needed to tell whether `AptitudeSubsystem`
-    /// is registered in `CheatState.ActorHub` at all, and what `progression.bonus.atk`/
-    /// `combat.power.omni` actually resolve to for the SAME ctx `RunPlant`/`RunZombie` use — narrowing
-    /// the remaining candidate causes (a lazy-singleton registration race vs. a live Θ-hydration miss)
-    /// without another guess-and-redeploy cycle. Remove once finding 3 is closed.</summary>
+    /// <summary>Diagnostic kept permanently (aura-skill Checkpoint 2/5, 2026-08-30): this is what
+    /// actually closed the "does commander allocation reach a lawn entity's stat" question — earlier
+    /// spawn-and-read probes against a phantom/stale board (a `lawn/quick-start` "already live"
+    /// false-positive after a redeploy) showed `attackDamage` stuck at 1 regardless of allocation; this
+    /// trace, run against a genuinely fresh `debug.level.enter` board, proved the full chain real:
+    /// `subsystems="rpg.progression,rpg.aptitude"` (registered), `bonusAtkContribs=
+    /// "aptitude.Might:Flat:30990"` (funded and composing), `primaryAtk=20 -&gt; appliedAtk=31010`
+    /// (written). Left in (gated behind `SYS-EMIT-PROOF` like every other proof emit) because it is the
+    /// only fast way to tell "no live board yet" apart from "allocation genuinely not applying" without
+    /// another multi-minute redeploy-and-guess cycle — this exact ambiguity cost real time once
+    /// already.</summary>
     static void EmitAptitudeTrace(string side, string ptr, StatContext ctx, ActorResolveResult resolved)
     {
         if (!(CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))) return;
         try
         {
+            var (_, contributions) = CheatState.ActorHub.ResolveDerivedWithContributions(ctx);
+            string Contribs(string channel) => string.Join(";", contributions.ContributionsFor(channel)
+                .Select(c => $"{c.SourceId}:{c.Op}:{c.Value}"));
             GameHooks.Emit("debug.aptitude-trace", new Dictionary<string, object>
             {
                 ["side"] = side,
@@ -273,10 +276,30 @@ public static class EntityApply
                 ["currentPlayerId"] = CheatState.CurrentPlayerId,
                 ["theta"] = CheatState.PowerIndex.ActorIndex(ctx),
                 ["subsystems"] = string.Join(",", CheatState.ActorHub.Subsystems.Select(s => s.SubsystemId)),
+                ["primaryHp"] = resolved.RuntimePrimary.Hp,
+                ["primaryMaxHp"] = resolved.RuntimePrimary.MaxHp,
                 ["primaryAtk"] = resolved.RuntimePrimary.Atk,
+                ["primaryArm1"] = resolved.RuntimePrimary.Arm1,
+                ["primaryArm2"] = resolved.RuntimePrimary.Arm2,
+                ["primaryDefenseFlat"] = resolved.RuntimePrimary.DefenseFlat,
+                ["appliedHp"] = resolved.AppliedCombat.Hp,
+                ["appliedMaxHp"] = resolved.AppliedCombat.MaxHp,
                 ["appliedAtk"] = resolved.AppliedCombat.Atk,
-                ["progressionBonusAtk"] = resolved.Derived.Get(DerivedStatChannels.ProgressionBonusAtk, -999),
-                ["combatPowerOmni"] = resolved.Derived.Get(DerivedStatChannels.CombatPowerOmni, -999)
+                ["appliedArm1"] = resolved.AppliedCombat.Arm1,
+                ["appliedArm2"] = resolved.AppliedCombat.Arm2,
+                ["appliedDefenseFlat"] = resolved.AppliedCombat.DefenseFlat,
+                ["bonusMaxHp"] = resolved.Derived.Get(DerivedStatChannels.ProgressionBonusMaxHp, -999),
+                ["bonusAtk"] = resolved.Derived.Get(DerivedStatChannels.ProgressionBonusAtk, -999),
+                ["bonusDefense"] = resolved.Derived.Get(DerivedStatChannels.ProgressionBonusDefense, -999),
+                ["bonusArm1"] = resolved.Derived.Get(DerivedStatChannels.ProgressionBonusArm1, -999),
+                ["bonusArm2"] = resolved.Derived.Get(DerivedStatChannels.ProgressionBonusArm2, -999),
+                ["combatPowerOmni"] = resolved.Derived.Get(DerivedStatChannels.CombatPowerOmni, -999),
+                ["bonusMaxHpContribs"] = Contribs(DerivedStatChannels.ProgressionBonusMaxHp),
+                ["bonusAtkContribs"] = Contribs(DerivedStatChannels.ProgressionBonusAtk),
+                ["bonusDefenseContribs"] = Contribs(DerivedStatChannels.ProgressionBonusDefense),
+                ["bonusArm1Contribs"] = Contribs(DerivedStatChannels.ProgressionBonusArm1),
+                ["bonusArm2Contribs"] = Contribs(DerivedStatChannels.ProgressionBonusArm2),
+                ["powerOmniContribs"] = Contribs(DerivedStatChannels.CombatPowerOmni)
             });
         }
         catch (Exception ex) { CheatState.Error("aptitude-trace: " + ex.Message); }

@@ -29,6 +29,20 @@
   .xpchart { display: flex; align-items: flex-end; gap: 3px; height: 64px; }
   .xpchart i { flex: 1; background: var(--lawn-hot); border-radius: 2px 2px 0 0; opacity: .85; }
   .xpchart i.is-future { background: var(--panel-inset); opacity: .5; }
+  .auragroup { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+  .auraslot { position: relative; display: grid; place-items: center; gap: 2px; width: 72px; height: 72px;
+      border-radius: var(--r-md); border: 1px solid var(--border-control); background: var(--panel); }
+  .auraslot.is-active { border-color: var(--lawn-hot); box-shadow: 0 0 6px rgb(72 120 48 / .35); }
+  .auraslot.is-equipped { opacity: .55; }
+  .auraslot.is-empty { border-style: dashed; opacity: .4; }
+  .auraslot .g { font-size: var(--text-lg); }
+  .auraslot .n { font-size: 9px; font-weight: 800; text-align: center; max-width: 64px; }
+  .aurabanner { display: grid; grid-template-columns: var(--icon-row) minmax(0, 1fr) auto;
+      gap: var(--sp-3); align-items: center; padding: var(--sp-3); border: 1px solid var(--border);
+      border-radius: var(--r-md); background: var(--panel); }
+  .locstub.is-pending { border-bottom: 1px dashed var(--faint); color: var(--muted); font-size: var(--text-sm); }
+  .stubpanel { border: 1px dashed var(--border-control); border-radius: var(--r-md);
+      padding: var(--sp-3); background: var(--panel-inset); }
 </style>
 </head>
 <body>
@@ -42,7 +56,9 @@
     (or nowhere) — Primary Stats is its own rail layer, derived stats has a locked spec but zero
     render path, actions/passives have no menu at all outside live battle. This plate proposes the
     single door: open one specimen, see everything about them, some sections already playable, some
-    visibly locked with the real reason why (GG-17).
+    visibly locked with the real reason why (GG-17). Commanders use the same shell with role
+    extensions — aura loadout, banner, account-wide aptitudes — drawn in §I; see also
+    <a href="09-commander-list.html">plate 09</a> for the list that opens this panel.
   </p>
   <p>
     <span class="tag tag--warn">Draft — for review</span>
@@ -61,6 +77,8 @@
   <a href="#f">F · Passives</a>
   <a href="#g">G · Gear</a>
   <a href="#h">H · What this plate settles</a>
+  <a href="#i">I · Commander role</a>
+  <a href="#j">J · Commander settlements</a>
 </nav>
 
 <!-- ==================================================================== A -->
@@ -376,8 +394,161 @@
   </div>
 </section>
 
+<!-- ==================================================================== I -->
+<section class="sec" id="i">
+  <h2>I · Commander role — same sheet, different tabs and footer</h2>
+  <p class="lede">
+    Crazy Dave is an actor: the same <code>panel-shell actor-panel</code> as Emberling in §B, with
+    commander-specific header tags, Overview copy, Actions aura group above locked combat slots, a
+    real banner slot on Gear, and lawn-run actions in the footer instead of Deploy/Release. Dr. Zomboss
+    is the opposing empire's commander — he does not get a player sheet; intel and world-map surfaces
+    own him. See <a href="09-commander-list.html">plate 09</a> for list deploy strip and map/legion stubs.
+  </p>
+  <div class="spec">
+    <div class="viewport">
+      <div class="panel-shell actor-panel" style="width:min(760px,96%);margin:0 auto">
+        <header>
+          <span class="frame frame--panel" data-rarity="4">🧑‍🌾</span>
+          <div style="flex:1;min-width:0">
+            <h3>Crazy Dave</h3>
+            <div class="meta row-flex">
+              <span class="tag">Commander</span>
+              <span class="side" data-side="plant"><i class="pip"></i>Plants empire</span>
+              <span class="tag">Lv 30</span>
+              <span class="tag tag--warn">lawn run</span>
+            </div>
+          </div>
+          <span class="esc">Esc</span>
+          <button class="btn btn--icon btn--ghost" aria-label="Close">✕</button>
+        </header>
+        <div class="tabs" style="padding:var(--sp-3) var(--sp-4) 0;border-bottom:1px solid var(--border)">
+          <button class="tab is-active">Overview</button>
+          <button class="tab">Progression</button>
+          <button class="tab">Derived Stats</button>
+          <button class="tab">Actions</button>
+          <button class="tab">Passives <span class="tag" style="margin-left:4px">locked</span></button>
+          <button class="tab">Gear</button>
+        </div>
+        <div class="body" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5);padding:var(--sp-4)">
+          <div class="col-flex" style="gap:var(--sp-4)">
+            <div>
+              <p class="spec-label">Where they are — map stub</p>
+              <p class="locstub is-pending" style="margin:0">📍 Hearth capital · garrison</p>
+              <p class="statenote">Deep-link to sector inspector when world map ships (plate 03).</p>
+            </div>
+            <div>
+              <p class="spec-label">Army-wide aura — active this run</p>
+              <span class="chip"><span class="frame frame--chip" data-rarity="3">☀</span><span class="nm">Sun Blessing</span> <span class="val">+5<span class="unit">% plant power</span></span></span>
+              <p class="statenote" style="margin-top:var(--sp-2)">Reaches every plant on your side of the lawn. Toggle and loadout on Actions tab.</p>
+            </div>
+            <div>
+              <p class="spec-label">Commander standing</p>
+              <div class="pw">
+                <div class="bar" data-c="offense"><span>Offense</span><span class="t"><span class="f" style="width:58%"></span></span><b>70</b></div>
+                <div class="bar" data-c="survivability"><span>Survivability</span><span class="t"><span class="f" style="width:44%"></span></span><b>53</b></div>
+                <div class="bar" data-c="support"><span>Support</span><span class="t"><span class="f" style="width:72%"></span></span><b>86</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-flex" style="gap:var(--sp-4)">
+            <div>
+              <p class="spec-label">Primary stats — commander scope (same data as ◎ rail)</p>
+              <div class="setrow" style="padding:var(--sp-1) 0">
+                <div><div class="k">Might</div></div>
+                <span class="readout">12 pts</span>
+              </div>
+              <div class="setrow" style="padding:var(--sp-1) 0">
+                <div><div class="k">Fortitude</div></div>
+                <span class="readout">8 pts</span>
+              </div>
+              <p class="statenote">Full steppers on Progression tab — preview only here.</p>
+            </div>
+            <div>
+              <p class="spec-label">Legion — menu stub</p>
+              <div class="stubpanel">
+                <p style="margin:0 0 var(--sp-1)"><b>Legion 1</b> · 3 units</p>
+                <p class="statenote" style="margin:0">Emberling · Thornlet · Ashkell</p>
+                <button class="btn btn--sm btn--ghost" style="margin-top:var(--sp-2)" disabled>Open legion menu</button>
+                <span class="tag tag--info" style="margin-left:var(--sp-2);font-size:9px">pending</span>
+              </div>
+            </div>
+            <div>
+              <p class="spec-label">Equipped banner</p>
+              <div class="aurabanner">
+                <span class="frame" data-rarity="3">🚩</span>
+                <span><span class="nm">Garden Standard</span><p class="sub">+3<span class="unit">% aura magnitude</span></p></span>
+                <button class="btn btn--sm btn--ghost">Change</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer>
+          <span class="readout" style="margin-right:auto">Default lawn commander · <a href="09-commander-list.html">change in list</a></span>
+          <button class="btn btn--ghost">Close</button>
+          <button class="btn btn--ghost">Set default</button>
+          <button class="btn">Defend the lawn</button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="rule-line"></div>
+
+    <p class="spec-label">Actions tab — aura loadout above locked combat slots</p>
+    <div class="viewport short">
+      <div style="padding:var(--sp-4)">
+        <p class="spec-label" style="margin-top:0">Aura loadout — equip up to five · one active</p>
+        <div class="auragroup">
+          <div class="auraslot is-active"><span class="g">☀</span><span class="n">Sun Blessing</span></div>
+          <div class="auraslot is-equipped"><span class="g">🌿</span><span class="n">Verdant Ward</span></div>
+          <div class="auraslot is-empty"><span class="g">+</span><span class="n">Empty</span></div>
+          <div class="auraslot is-empty"><span class="g">+</span><span class="n">Empty</span></div>
+          <div class="auraslot is-empty"><span class="g">+</span><span class="n">Empty</span></div>
+        </div>
+        <p class="statenote">Active vs equipped-inactive must be unmistakable — enabling at the cap
+          names the aura that switched off. Upkeep pools visible before commit (aura-skill surface spec).</p>
+        <p class="spec-label">Combat actions — locked until action system ships</p>
+        <div class="actionbar" style="flex-wrap:wrap;opacity:.85">
+          <div class="actionslot is-locked"><span class="lockpin">🔒</span><span class="g">📣</span><span class="n">Rally</span></div>
+          <div class="actionslot is-locked"><span class="lockpin">🔒</span><span class="g">🌻</span><span class="n">Sun Drop</span></div>
+          <div class="actionslot is-locked"><span class="lockpin">🔒</span><span class="g">✦</span><span class="n">Focus</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Creature footer actions do not apply.</strong> Deploy and Release are specimen lifecycle
+      verbs on creatures. Commanders use Set default and Defend the lawn — mirrors of the list strip,
+      not gates. Default Crazy Dave until the player sets another default in the Commanders layer
+      (plate 09 §D · commander-surface-ideal §0).
+    </div>
+    <div class="note">
+      <strong>Banner stacks with aura; budgets stay separate.</strong> Gear is found/crafted progression;
+      aura is chosen/invested skill progression — owner decision in aura-skill program, drawn here as
+      one <code>standard</code> slot per equip spec.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== J -->
+<section class="sec" id="j">
+  <h2>J · Commander settlements — additions to §H</h2>
+  <table class="t">
+    <thead><tr><th>Question</th><th>Answer</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>Is commander detail a second panel?</td><td>No — same Actor sheet, §I</td><td>List on plate 09 opens this shell; GG-9 holds</td></tr>
+      <tr><td>Where do auras live on the sheet?</td><td>Actions tab — distinct group above locked combat slots</td><td>Not a seventh tab; aligns with aura-surface open question leaning Actions</td></tr>
+      <tr><td>Does Zomboss get this sheet in player UI?</td><td>No</td><td>Opposing empire — world map and intel only</td></tr>
+      <tr><td>Primary Stats rail vs Progression tab?</td><td>Same commander-scope data</td><td>◎ remains optional shortcut; sheet Progression tab is the full editor</td></tr>
+      <tr><td>Footer for commanders?</td><td>Set default · Defend the lawn</td><td>Never Deploy/Release specimen verbs; mirrors async default (09 §D)</td></tr>
+      <tr><td>Default lawn commander?</td><td>Crazy Dave until changed</td><td>Same persisted choice as list deploy strip (09 §D)</td></tr>
+      <tr><td>Location / legion on sheet?</td><td>Stubs on Overview</td><td>Reverse hooks for world map + future legion menu</td></tr>
+      <tr><td>Gear tab for commanders?</td><td>One banner slot when acquisition exists</td><td>Specimen empty-state in §G does not apply — commander slot is designed, acquisition pending</td></tr>
+    </tbody>
+  </table>
+</section>
+
 <footer style="margin-top:var(--sp-12);padding-top:var(--sp-5);border-top:1px solid var(--border);color:var(--faint);font-size:var(--text-xs)">
-  Plate 08 · Actor Sheet · draft 2026-08-29 · governed by architecture/game-gui-principles.md ·
+  Plate 08 · Actor Sheet · draft 2026-08-29 (§I–J 2026-08-30) · governed by architecture/game-gui-principles.md ·
   references Diablo IV, Path of Exile and Baldur's Gate 3 character-menu conventions (research only,
   no assets or text reused)
 </footer>

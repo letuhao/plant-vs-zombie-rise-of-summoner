@@ -1,8 +1,18 @@
 import type { ContractRowDto } from "@/lib/bus/contracts";
 import type { DemonProfileDto } from "@/lib/bus/demons";
 import type { RelicDto, RunItem, UniqueActorDto } from "@/lib/bus/types";
-import { absent, pendingWithReason, type Pending } from "./pending";
-import type { ActorPhase, ActorView, ContainerView, ContractView, Rarity, RunResult, RunView } from "./types";
+import { absent, known, pendingWithReason, type Pending } from "./pending";
+import type {
+  ActorPhase,
+  ActorView,
+  CommanderListRow,
+  CommanderListView,
+  ContainerView,
+  ContractView,
+  Rarity,
+  RunResult,
+  RunView
+} from "./types";
 
 /**
  * The DTO→view adapter (T4). Filling a field later touches one file: this
@@ -151,4 +161,56 @@ export function adaptContract(row: ContractRowDto, profile: DemonProfileDto): Co
 /** Every `pending` reason must be non-empty — the check T4's guard proves in tests. */
 export function pendingReason<T>(p: Pending<T>): string | null {
   return p.state === "pending" ? p.reason : null;
+}
+
+type CommanderListRowDto = {
+  id: string;
+  displayName: string;
+  isDefault: boolean;
+  activeAuraId: string | null;
+  activeAuraName: string | null;
+  locationStub: string | null;
+  legionStub: string | null;
+};
+
+type CommanderListResponseDto = {
+  defaultLawnCommanderId: string;
+  commanders: CommanderListRowDto[];
+};
+
+/** Maps a commander list row into ActorView for the shared ActorPanel commander role. */
+export function adaptCommanderSheet(row: CommanderListRow, playerId: number): ActorView {
+  return {
+    instanceId: row.id,
+    playerId,
+    side: "plant",
+    typeId: 0,
+    displayName: known(row.displayName),
+    phase: "Idle",
+    level: 1,
+    xp: 0,
+    xpToNext: pendingWithReason(PLAYER_PENDING.xpToNext),
+    revision: 0,
+    channelSummary: pendingWithReason(PLAYER_PENDING.channelSummary),
+    elementTyping: pendingWithReason(PLAYER_PENDING.elementTyping),
+    shieldStack: pendingWithReason(PLAYER_PENDING.shieldStack),
+    equipSlots: pendingWithReason(PLAYER_PENDING.equipSlots)
+  };
+}
+
+export function adaptCommanderList(dto: CommanderListResponseDto): CommanderListView {
+  return {
+    defaultLawnCommanderId: dto.defaultLawnCommanderId,
+    commanders: dto.commanders.map(
+      (row): CommanderListRow => ({
+        id: row.id,
+        displayName: row.displayName,
+        isDefault: row.isDefault,
+        activeAuraId: row.activeAuraId,
+        activeAuraName: row.activeAuraName,
+        locationStub: row.locationStub,
+        legionStub: row.legionStub
+      })
+    )
+  };
 }
