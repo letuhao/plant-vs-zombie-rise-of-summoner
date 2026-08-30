@@ -74,6 +74,10 @@ public sealed class CheatRegistry
             Get("SYS-EMIT-PROOF").Enabled = true;
             Get("SYS-DAMAGE-FX").Enabled = true;
             Get("SYS-ELEMENT-FX").Enabled = true;
+            // T8: C1-C13 proved green on a real MelonLoader 3.9 lawn 2026-08-30 (docs/research/
+            // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
+            // §7's own "only after the proof" rule.
+            Get("OVERLAY-COMBAT").Enabled = true;
         }
     }
 

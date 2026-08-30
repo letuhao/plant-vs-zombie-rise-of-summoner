@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { PLAYER_PENDING } from "@/contract/adapt";
 import { known, pendingWithReason } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
 import { GearTab } from "./GearTab";
@@ -14,26 +15,26 @@ function actorWith(equipSlots: ActorView["equipSlots"]): ActorView {
     phase: "ActiveBound",
     level: 14,
     xp: 2140,
-    xpToNext: pendingWithReason("no server endpoint yet"),
+    xpToNext: pendingWithReason(PLAYER_PENDING.xpToNext),
     revision: 1,
-    channelSummary: pendingWithReason("no server endpoint yet"),
-    elementTyping: pendingWithReason("no server endpoint yet"),
-    shieldStack: pendingWithReason("no server endpoint yet"),
+    channelSummary: pendingWithReason(PLAYER_PENDING.channelSummary),
+    elementTyping: pendingWithReason(PLAYER_PENDING.elementTyping),
+    shieldStack: pendingWithReason(PLAYER_PENDING.shieldStack),
     equipSlots
   };
 }
 
 describe("GearTab", () => {
   it("renders an honest empty state for today's real pending equipSlots", () => {
-    render(<GearTab data={actorWith(pendingWithReason("no server endpoint yet"))} />);
+    render(<GearTab data={actorWith(pendingWithReason(PLAYER_PENDING.equipSlots))} />);
     const empty = screen.getByTestId("gear-tab-empty");
     expect(empty).toBeInTheDocument();
-    expect(empty).toHaveTextContent("No gear slots wired yet");
-    expect(empty).toHaveTextContent("spec-equip-and-paperdoll.md");
+    expect(empty).toHaveTextContent("No gear slots yet");
+    expect(empty).toHaveTextContent("Equipment is coming in a later update.");
   });
 
   it("does not render a fabricated slot grid", () => {
-    render(<GearTab data={actorWith(pendingWithReason("no server endpoint yet"))} />);
+    render(<GearTab data={actorWith(pendingWithReason(PLAYER_PENDING.equipSlots))} />);
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 

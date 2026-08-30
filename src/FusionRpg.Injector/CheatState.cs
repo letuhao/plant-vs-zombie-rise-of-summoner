@@ -35,19 +35,71 @@ public static class CheatState
     /// <see cref="CheatState"/> was first touched. Lazy, same pattern as <see cref="PowerIndex"/>
     /// itself, so first evaluation happens on first actual stat resolve rather than at class-load.</summary>
     /// <summary>class-system-todo.md P2.4 (2026-08-27): now also passes AptitudeTuningHub.Tuning, so
-    /// the overlay's aptitude resolve is actually live — inert (allocation defaults to Empty, P6's
-    /// AllocationStore doesn't exist yet) but exercised through the real ActorHub.Register seam,
-    /// exactly as spec-aptitude-resolve.md §2 requires ("via ActorHub.Register", not merely capable
-    /// of it). Both hosts already call AptitudeTuningHub.Configure at startup (P2.3), so this read is
-    /// safe by the time anything touches ActorHub.</summary>
+    /// the overlay's aptitude resolve is actually live. aura-skill T5 (W1, 2026-08-30): the stale half
+    /// of this comment — "allocation defaults to Empty, P6's AllocationStore doesn't exist yet" — is
+    /// corrected here rather than left to rot: AllocationStore (`RpgStore.LoadAllocation`) has existed
+    /// and been tested since point-economy landed, it simply had zero production callers until
+    /// <see cref="CommanderAllocationSource"/> below became the first one. Exercised through the real
+    /// ActorHub.Register seam, exactly as spec-aptitude-resolve.md §2 requires ("via
+    /// ActorHub.Register", not merely capable of it). Both hosts already call
+    /// AptitudeTuningHub.Configure at startup (P2.3), so this read is safe by the time anything
+    /// touches ActorHub.</summary>
     public static ActorHub ActorHub => _actorHub ??= ActorHubBootstrap.CreateDefault(
-        Stats, powerIndex: PowerIndex, aptitudeTuning: FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
+        Stats, powerIndex: PowerIndex, aptitudeTuning: FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning,
+        aptitudeAllocation: CommanderAllocation.Resolve);
+
+    /// <summary>aura-skill T5 (W1): cached commander-scope allocation — <see cref="ActorHub"/>'s
+    /// hot-path <c>aptitudeAllocation</c> delegate reads only this cache, never the server
+    /// (`CommanderAllocationSource`'s own doc comment). Populated by
+    /// <see cref="ApplyCommanderAllocation"/>, called from <c>RpgClient.RefreshCommanderAllocationAsync</c>
+    /// at session start and on the server's <c>"AptitudesUpdated"</c> SignalR broadcast — never on a
+    /// per-hit poll.</summary>
+    public static readonly FusionRpg.Core.Stats.Aptitudes.CommanderAllocationSource CommanderAllocation =
+        new(() => _fetchedCommanderAllocation);
+    static FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation _fetchedCommanderAllocation =
+        FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+
+    /// <summary>Called from the transport (<c>RpgClient.RefreshCommanderAllocationAsync</c>) after a
+    /// successful fetch. Stores the value and immediately refreshes the cache on this same call —
+    /// never touched from a hot-path stat resolve.</summary>
+    public static void ApplyCommanderAllocation(FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation allocation)
+    {
+        _fetchedCommanderAllocation = allocation;
+        CommanderAllocation.Refresh();
+    }
     static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;
     /// <summary>Θ ladder index. Lazy: PowerTuningHub.Configure runs in RpgHost.Initialize, which this
     /// must not race — <c>PowerTuningHub.Tuning</c> throws (not a stale default) before Configure runs,
     /// so evaluating this eagerly at class-load would crash startup, not just read Theta=0.</summary>
     public static FusionRpg.Core.Power.IPowerIndexProvider PowerIndex =>
         _powerIndex ??= new InjectorPowerIndexProvider(FusionRpg.Core.Power.PowerTuningHub.Tuning);
+
+    /// <summary>aura-skill T6 (W2): the hydration source `InjectorPowerIndexProvider.Hydrate` never
+    /// had — called from `RpgClient.RefreshPowerIndexAsync` at session start / on demand, never per
+    /// hit. `PowerIndex` stays typed as the interface publicly (no existing consumer needs the
+    /// concrete type); this is the one place that needs `Hydrate`, so it casts locally instead of
+    /// widening the public property's type for a single internal caller.</summary>
+    public static void ApplyPowerSnapshot(long playerId, FusionRpg.Core.Power.ActorLadderSnapshot snapshot)
+    {
+        if (PowerIndex is InjectorPowerIndexProvider hydratable)
+            hydratable.Hydrate(new StatContext { PlayerId = playerId }, snapshot);
+        CurrentPlayerId = playerId;
+    }
+
+    /// <summary>Found 2026-08-30 verifying aura-skill's commander-lawn bridge against a real lawn:
+    /// `EntityApply.cs`'s per-plant/zombie `ctx` used `CheatState.PvzStatsPlayerId` for `StatContext.
+    /// PlayerId` — an unrelated field, only ever set when the optional PvzStats-scaling feature has
+    /// content for this player, which is a legitimately common state for a player who has never
+    /// touched it. `HydratedPowerIndexProvider.Key` (`IPowerIndexProvider.cs:60`) includes `PlayerId`,
+    /// so a mismatch here silently hydrates Θ under key `"1:Plant:0"` (this method, above) while every
+    /// spawn/apply resolve looks it up under `"0:Plant:0"` — `ActorIndex` returns Θ=0 for the miss, and
+    /// `AptitudeReadFunctions.Magnitude`'s `kMilli * sharePow * pTheta` formula collapses to 0
+    /// regardless of aptitude share once `pTheta` is 0. This field is set from the exact same call that
+    /// hydrates Θ, so the two can never disagree about which player's ctx a resolve is for — the actual
+    /// bug (a real, empirically observed live-lawn miss: 222 commander points in `Might` produced zero
+    /// change in a spawned plant's written `attackDamage`) traced to this exact mismatch via the
+    /// formula above, not fixed blind.</summary>
+    public static long CurrentPlayerId { get; private set; }
     public static IntPtr SelectedPtr;
     public static string SelectedSide = "";
     static int _spawnCol = 3;
@@ -83,6 +135,22 @@ public static class CheatState
     public static long PvzStatsRevision { get; private set; }
     public static long AppliedPvzStatsRevision { get; private set; } = -1;
     public static long PvzStatsPlayerId { get; private set; }
+
+    /// <summary>aura-skill T21b: ptr → owning-player-id, for `SpecimenOwnershipOracle` (Core). Set once
+    /// at spawn time from `pvz.spawn.extra`'s own `playerId` field (`UniqueActorService.DeployAsync`
+    /// already sends it, Server → Injector — this is the first place anything reads it back).
+    /// Never one-shot/consumed (unlike `SpawnSourceByPtr`) — ownership must answer repeatedly for the
+    /// entity's whole lifetime, not just its first read.</summary>
+    static readonly ConcurrentDictionary<string, long> SpecimenOwnerByPtr = new();
+
+    public static void RegisterSpecimenOwner(string ptr, long playerId)
+    {
+        if (string.IsNullOrWhiteSpace(ptr) || playerId <= 0) return;
+        SpecimenOwnerByPtr[ptr] = playerId;
+    }
+
+    public static long? TryGetSpecimenOwner(string ptr) =>
+        !string.IsNullOrWhiteSpace(ptr) && SpecimenOwnerByPtr.TryGetValue(ptr, out var pid) ? pid : null;
 
     /// <summary>One-shot dump source override for next plant/zombie spawn emit (PvzIntent).</summary>
     public static string? PendingSpawnSourceTag;
@@ -150,6 +218,10 @@ public static class CheatState
             Get("SYS-EMIT-PROOF").Enabled = true;
             Get("SYS-DAMAGE-FX").Enabled = true;
             Get("SYS-ELEMENT-FX").Enabled = true;
+            // T8: C1-C13 proved green on a real MelonLoader 3.9 lawn 2026-08-30 (docs/research/
+            // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
+            // §7's own "only after the proof" rule.
+            Get("OVERLAY-COMBAT").Enabled = true;
             // Schema defaults are not user-set; Effective* applies display defaults when IsSet=false.
         }
         SyncLocalStatsFromEntries();

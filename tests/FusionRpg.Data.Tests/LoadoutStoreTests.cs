@@ -184,4 +184,24 @@ public class LoadoutStoreTests : IDisposable
 
         Assert.Equal(new[] { "skill.chosen" }, result);
     }
+
+    [Fact]
+    public void ALoadoutSurvivesClosingAndReopeningTheStoreAgainstTheSameDirectory()
+    {
+        // aura-skill T15: "equipping persists and survives a restart" -- a NEW RpgStore instance on
+        // the SAME on-disk directory is exactly what a real process restart is. Every other test in
+        // this file uses one RpgStore instance for its whole lifetime, which never actually exercises
+        // this claim -- it was proven true by SQLite writing to a real file, never proven true by a
+        // second instance successfully reading it back.
+        SeedAction("skill.a", ActionKind.Skill, "skill.a-container");
+        var result = _store.SetLoadout(Actor, new[] { "skill.a" }, isHeld: _ => true, isMidRun: () => false);
+        Assert.True(result.Ok);
+
+        var reopened = new RpgStore(_dir);
+        reopened.Init();
+        var loaded = reopened.GetLoadout(Actor);
+
+        Assert.NotNull(loaded);
+        Assert.Equal(new[] { "skill.a" }, loaded);
+    }
 }

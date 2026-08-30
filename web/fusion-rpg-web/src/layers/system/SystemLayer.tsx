@@ -221,7 +221,7 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
           type="button"
           data-testid="system-tab-sound"
           disabled
-          title="No audio pipeline exists yet — out of scope for this refactor (gap G10)"
+          title="Sound settings aren't available yet."
           className="cursor-not-allowed rounded-sm border border-transparent px-2 py-1 text-xs text-faint opacity-60"
         >
           Sound
@@ -351,7 +351,7 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
               <p className="text-xs text-muted">
                 {import.meta.env.DEV
                   ? "English is the only shipped locale; Pseudo wraps every string for layout QA."
-                  : "English is the only shipped locale (web/spec.md §10) — a second one is enabled by this work, not delivered by it."}
+                  : "English is the only language available right now."}
               </p>
             </div>
             <Segmented

@@ -141,7 +141,7 @@ describe("SystemLayer (T20)", () => {
       renderWithProviders(<SystemLayer open onOpenChange={() => {}} />, { withGlobalKeys: true });
       const soundTab = screen.getByTestId("system-tab-sound");
       expect(soundTab).toBeDisabled();
-      expect(soundTab).toHaveAttribute("title", expect.stringContaining("audio pipeline"));
+      expect(soundTab).toHaveAttribute("title", "Sound settings aren't available yet.");
     });
 
     it("Advanced shows the real API base and resets preferences to defaults for real", async () => {

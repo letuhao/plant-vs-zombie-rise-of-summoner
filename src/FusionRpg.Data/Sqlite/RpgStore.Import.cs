@@ -188,7 +188,7 @@ public sealed partial class RpgStore
 
         foreach (var a in content.Atoms)
         {
-            var check = AtomRowValidator.Validate(a, CurveInputOfBatch);
+            var check = AtomRowValidator.Validate(a, CurveInputOfBatch, ComposeKindOf);
             if (!check.IsOk)
             {
                 errors.Add(Error(content, a.AtomId, check));

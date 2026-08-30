@@ -77,6 +77,9 @@ FusionRpg.Core.Battle.BattleTuningHub.Configure(
 FusionRpg.Core.Demons.SummoningTuningHub.Configure(
     FusionRpg.Core.Demons.SummoningTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "summoning.v1.json"))));
+FusionRpg.Core.Aura.AuraTuningHub.Configure(
+    FusionRpg.Core.Aura.AuraTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "aura.v1.json"))));
 FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
     FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "ai.v1.json"))));
@@ -174,6 +177,10 @@ app.MapPatron();
 app.MapContracts();
 app.MapWorld();
 app.MapAptitudes();
+app.MapLoadout();
+app.MapAuraDerived();
+app.MapAuraRuntime();
+app.MapAuraCatalog();
 PatronEndpoints.RefreshRuntimeState(app.Services.GetRequiredService<RpgStore>()); // SIM plugins read it
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));

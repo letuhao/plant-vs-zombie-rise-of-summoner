@@ -129,6 +129,117 @@ public static class DebugEndpoints
             }
         });
 
+        g.MapPost("/lawn/quick-start", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox, EffectGrantSession grants) =>
+        {
+            var b = BodyOrEmpty(body);
+            var levelNumber = IntProp(b, "levelNumber", 1);
+            var scenarioId = StrProp(b, "scenario") ?? "lab-overlay";
+            var timeoutSec = IntProp(b, "timeoutSec", 45);
+
+            if (!store.InjectorConnected)
+                return Results.Conflict(new { ok = false, error = "injector not connected — start the game with the FusionRpg injector loaded" });
+
+            var entered = false;
+            var boardStart = FindLatestLiveBoardStart(store);
+
+            if (boardStart is null)
+            {
+                store.MergeCheatField("DEBUG-LEVEL-ENTRY", true, null);
+                await Send(hub, inbox, "cheat.toggle", new { id = "DEBUG-LEVEL-ENTRY", enabled = true });
+
+                var beforeEnter = store.GetMaxEventId();
+                await Send(hub, inbox, "debug.enter-level", new { levelType = 0, levelNumber, id = 0, name = "" });
+
+                var ackTimeoutSec = Math.Min(timeoutSec, 20);
+                var enterAck = await PollForKind(store, beforeEnter, "debug.level.enter", TimeSpan.FromSeconds(ackTimeoutSec));
+                if (enterAck is null)
+                    return Results.Conflict(new { ok = false, error = $"debug.level.enter did not ack within {ackTimeoutSec}s" });
+
+                var ackOk = PayloadBool(enterAck.Payload, "ok");
+                if (!ackOk)
+                {
+                    var err = PayloadString(enterAck.Payload, "error") ?? "enter-level rejected";
+                    if (!err.Contains("board already live", StringComparison.OrdinalIgnoreCase))
+                        return Results.Conflict(new { ok = false, error = err });
+                    // "board already live" — fall through and use the board that's already there.
+                }
+                else
+                {
+                    boardStart = await PollForKind(store, beforeEnter, "board.start", TimeSpan.FromSeconds(timeoutSec));
+                    if (boardStart is null)
+                        return Results.Conflict(new { ok = false, error = $"enter-level ok but no board.start within {timeoutSec}s — check main menu state" });
+                    entered = true;
+                }
+
+                if (boardStart is null)
+                    boardStart = FindLatestLiveBoardStart(store);
+                if (boardStart is null)
+                    return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no live board.start was found" });
+            }
+
+            var levelType = PayloadString(boardStart.Payload, "levelType") ?? "";
+            if (BadLevelTypes.Contains(levelType))
+                return Results.Conflict(new { ok = false, error = $"refusing lab on levelType={levelType} — open Adventure/Challenge day lawn, not Explore/Travel" });
+
+            await Send(hub, inbox, "debug.wave-freeze", new { enabled = true });
+
+            var scenarioCorrelation = Guid.NewGuid().ToString("N")[..12];
+            IReadOnlyList<DebugScenarioStep> steps;
+            try { steps = DebugScenarios.Expand(scenarioId, scenarioCorrelation); }
+            catch (ArgumentException ex) { return Results.NotFound(new { ok = false, error = ex.Message }); }
+
+            var beforeScenario = store.GetMaxEventId();
+            DebugSessionState.Active = true;
+            DebugSessionState.ScenarioId = scenarioCorrelation;
+            EffectGrantSessionRecorder.ApplyDebugSteps(grants, steps.Select(st => (st.Name, (object?)st.Payload)));
+            await Send(hub, inbox, "debug.run-steps", new
+            {
+                scenarioId = scenarioCorrelation,
+                id = scenarioId,
+                steps = steps.Select(st => new { name = st.Name, payload = st.Payload }).ToList()
+            });
+
+            var runDone = await PollForKind(store, beforeScenario, "debug.run-steps.done", TimeSpan.FromSeconds(timeoutSec));
+            if (runDone is null)
+                return Results.Conflict(new { ok = false, error = $"scenario '{scenarioId}' steps did not complete within {timeoutSec}s" });
+
+            EventEnvelope? snapshot = null;
+            var beforeSnapshot = store.GetMaxEventId();
+            var snapshotDeadline = DateTime.UtcNow.AddSeconds(15);
+            while (DateTime.UtcNow < snapshotDeadline && snapshot is null)
+            {
+                await Send(hub, inbox, "debug.effect.board-snapshot", new { });
+                await Task.Delay(400);
+                snapshot = FindKindAfter(store, beforeSnapshot, "debug.effect.board-snapshot");
+            }
+
+            string? targetPtr = null;
+            string? plantPtr = null;
+            if (snapshot?.Payload is JsonElement snapEl && snapEl.ValueKind == JsonValueKind.Object
+                && snapEl.TryGetProperty("entities", out var entitiesEl) && entitiesEl.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var ent in entitiesEl.EnumerateArray())
+                {
+                    var living = ent.TryGetProperty("living", out var l) && l.ValueKind == JsonValueKind.True;
+                    if (!living || !ent.TryGetProperty("ptr", out var ptrEl) || ptrEl.ValueKind != JsonValueKind.String) continue;
+                    var side = ent.TryGetProperty("side", out var s) ? s.GetString() : null;
+                    if (side == "zombie" && targetPtr is null) targetPtr = ptrEl.GetString();
+                    if (side == "plant" && plantPtr is null) plantPtr = ptrEl.GetString();
+                }
+            }
+
+            return Results.Ok(new
+            {
+                ok = true,
+                entered,
+                levelType,
+                scenario = scenarioId,
+                targetPtr,
+                plantPtr,
+                note = snapshot is null ? "no board snapshot arrived — targetPtr/plantPtr unavailable" : null
+            });
+        });
+
         MapPost(g, "/reset-board", "debug.reset-board");
         MapPost(g, "/clear-plants", "debug.clear-plants");
         MapPost(g, "/clear-zombies", "debug.clear-zombies");
@@ -358,6 +469,68 @@ public static class DebugEndpoints
 
     static JsonElement BodyOrEmpty(JsonElement? body) =>
         body is { ValueKind: JsonValueKind.Object } b ? b : JsonSerializer.SerializeToElement(new { });
+
+    // ---- lawn/quick-start helpers (centralizes what setup-lab-run.ps1 + tools/live_test/lawn.py
+    // each separately hand-rolled — see .claude/skills/live-lawn-quick-start/SKILL.md) ----
+
+    static readonly HashSet<string> BadLevelTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Explore", "TravelAdvanture", "Travel", "IZ"
+    };
+
+    static int IntProp(JsonElement obj, string name, int fallback) =>
+        obj.ValueKind == JsonValueKind.Object && obj.TryGetProperty(name, out var el) && el.TryGetInt32(out var v)
+            ? v : fallback;
+
+    static string? StrProp(JsonElement obj, string name) =>
+        obj.ValueKind == JsonValueKind.Object && obj.TryGetProperty(name, out var el) && el.ValueKind == JsonValueKind.String
+            ? el.GetString() : null;
+
+    static bool PayloadBool(object? payload, string name) =>
+        payload is JsonElement el && el.ValueKind == JsonValueKind.Object
+        && el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.True;
+
+    static string? PayloadString(object? payload, string name) =>
+        payload is JsonElement el && el.ValueKind == JsonValueKind.Object
+        && el.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String
+            ? v.GetString() : null;
+
+    /// <summary>Newest `board.start` with no later `board.end` — in-process port of
+    /// `setup-lab-run.ps1`'s `Get-LatestBoardStart`/`Test-BoardStillLive` (external, HTTP-bound,
+    /// forced into a paging/binary-search shape) and `lawn.py`'s `latest_board_start`/
+    /// `board_still_live` (same idea, Python). One direct scan is sufficient here since the caller
+    /// already holds the store in-process — no HTTP round trip to approximate.</summary>
+    static EventEnvelope? FindLatestLiveBoardStart(RpgStore store)
+    {
+        var max = store.GetMaxEventId();
+        if (max <= 0) return null;
+        const int window = 2000;
+        var after = Math.Max(0, max - window);
+        var items = store.ListEvents(window, after);
+        var starts = items.Where(e => e.Kind == "board.start").ToList();
+        if (starts.Count == 0) return null;
+        var latestStart = starts[^1];
+        var endedAfter = items.Any(e => e.Kind == "board.end" && e.Id > latestStart.Id);
+        return endedAfter ? null : latestStart;
+    }
+
+    static EventEnvelope? FindKindAfter(RpgStore store, long afterId, string kind)
+    {
+        var items = store.ListEvents(500, afterId);
+        return items.LastOrDefault(e => e.Kind == kind);
+    }
+
+    static async Task<EventEnvelope?> PollForKind(RpgStore store, long afterId, string kind, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
+        {
+            var found = FindKindAfter(store, afterId, kind);
+            if (found is not null) return found;
+            await Task.Delay(300);
+        }
+        return null;
+    }
 
     static object MergeKind(JsonElement body, string kind)
     {

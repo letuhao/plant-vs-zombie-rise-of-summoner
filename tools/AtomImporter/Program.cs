@@ -82,6 +82,22 @@ if (!collected.IsOk)
     return 1;
 }
 
+// RpgStore's static ctor (RpgStore.Atoms.cs's ComposeKindRegistry, aura-skill T2) builds a
+// DerivedStatRegistry, which reads DerivedStatPolicy.Tuning -- this standalone tool never had a
+// reason to configure that hub before T2 shipped, and nothing since caught the gap because every
+// test project bootstraps every tuning hub globally. Found for real 2026-08-30 running this tool
+// as part of an actual deploy: `new RpgStore(...)` failed with a bare "type initializer threw",
+// its real cause hidden until InnerException was surfaced (see the catch below).
+var tuningDir = FindUp("data", "tuning");
+if (tuningDir is null)
+{
+    Console.Error.WriteLine("could not locate data/tuning; needed for DerivedStatPolicy before touching RpgStore");
+    return 2;
+}
+FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
+    FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+
 ImportOutcome outcome;
 RpgStore store;
 try
@@ -96,6 +112,8 @@ catch (Exception ex)
     // this catch buys is a message instead of a stack trace — the author still needs to be told
     // the catalog is untouched, which a crash does not say.
     Console.Error.WriteLine($"the import failed and was rolled back: {ex.Message}");
+    if (ex.InnerException != null)
+        Console.Error.WriteLine($"  inner: {ex.InnerException}");
     return 1;
 }
 

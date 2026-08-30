@@ -92,7 +92,7 @@ public sealed class CostLedger : IAffordabilityCheck
         foreach (var row in RowsFor(actionId, ActionCostTiming.OnCommit))
         {
             var bound = ScaledAmount(row.AmountSpec.Max, rung, derived);
-            if (pools.Resolve(row.ResourceId, nowTick, derived) < bound)
+            if (pools.Resolve(row.ResourceId, nowTick, derived) < HpFloorAdjustedBound(row, bound))
                 return UsabilityResult.Refuse(UsabilityReason.CannotAfford, row.ResourceId);
         }
 
@@ -120,7 +120,7 @@ public sealed class CostLedger : IAffordabilityCheck
         {
             var amount = ScaledAmount(rows[i].AmountSpec.Resolve(rng), rung, derived);
             amounts[i] = amount;
-            if (pools.Resolve(rows[i].ResourceId, nowTick, derived) < amount)
+            if (pools.Resolve(rows[i].ResourceId, nowTick, derived) < HpFloorAdjustedBound(rows[i], amount))
                 return CostPayResult.Shortfall(rows[i].ResourceId);
         }
 
@@ -136,6 +136,14 @@ public sealed class CostLedger : IAffordabilityCheck
 
         return CostPayResult.Success;
     }
+
+    /// <summary>aura-skill T14 (`resource-hub-ssot.md`): an `hp` cost floors at 1 by default — the
+    /// affordability bound is raised by exactly 1 so a payment that would leave the actor at 0 or
+    /// below reads as unaffordable (`CannotAfford("hp")`), the same typed refusal every other
+    /// shortfall already uses. A row that opted into lethality (<see cref="ActionCostRow.AllowLethal"/>)
+    /// is untouched — its bound is the raw amount, exactly like every non-hp resource.</summary>
+    static long HpFloorAdjustedBound(ActionCostRow row, long bound) =>
+        row.ResourceId == "hp" && !row.AllowLethal ? bound + 1 : bound;
 
     long ScaledAmount(int baseAmount, int rung, ActorDerivedSnapshot derived)
     {

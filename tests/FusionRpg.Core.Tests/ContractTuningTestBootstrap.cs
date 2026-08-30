@@ -164,6 +164,7 @@ internal static class ContractTuningTestBootstrap
         SwitchCostSouls: 100,
         AuraClampMilli: 150,
         PerStarMilli: 10,
+        PThetaKMilli: 220, // matches the real shipped patron.v1.json (aura-skill T22)
         RarityBaseMilli: new Dictionary<DemonRarity, int>
         {
             [DemonRarity.Common] = 20,
@@ -353,7 +354,8 @@ internal static class ContractTuningTestBootstrap
             ShieldBar: new VfxShieldBarTuning(
                 BarWorldWidth: 0.95, BarWorldHeight: 0.12, WorldYOffset: -0.35,
                 MaxSegments: 3, Cap: 32, MaxPips: 3),
-            TintReassertSeconds: 0.25));
+            TintReassertSeconds: 0.25),
+        Identity: new VfxIdentityTuning(SimilarRgbDistanceThreshold: 45, SimilarApplyRgbDistanceThreshold: 35));
 
     // bMilli=0 matches the shipped power-scale.v1.json exactly (plan.md "B=0 first, dial second") —
     // BattleRuleset.BaseHp/Atk/Defense must stay byte-identical to their pre-T2.1 literal formulas

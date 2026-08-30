@@ -100,37 +100,188 @@ public static class VfxSeedCatalog
 
     /// <summary>
     /// statusId → sustained composition — all 13 custom statuses (vfx-v3, SPEC §4).
-    /// Grammar: Drip = DoT, CrackleJitter = armor/electric, Orbit = passive/link,
-    /// RiseSparkle = buff, PulseRing = active mark; markers only on react-to states.
+    /// Grammar: Drip = generic DoT fallback; WispOut/BubbleRise/ChunkFall = batch-1 drip-cluster
+    /// identity (wither/blight/rot). SparkStrobe/ShardGlitter = batch-2 crackle-cluster identity
+    /// (spark/shatter). SporeDrift/CharmHeartbeat = batch-3 orbit-cluster identity (spore/charm_pulse).
+    /// PactFootPulse/CommandCrownPulse = batch-5 pulsering-cluster identity (pact_mark/command).
+    /// Orbit = generic passive/link fallback (bond). RiseSparkle = buff, PulseRing = active mark fallback;
     /// Engine-wrapped vanilla statuses never appear here — original visuals untouched.
     /// </summary>
     public static readonly StatusSustain[] StatusSustainFx =
     {
-        new("wither", Aura: VfxAuraStyle.Drip, AR: 150, AG: 120, AB: 95,
+        new("wither", Aura: VfxAuraStyle.WispOut, AR: 150, AG: 120, AB: 95,
             Tint: 0.25f, TR: 140, TG: 130, TB: 120),
-        new("blight", Aura: VfxAuraStyle.Drip, AR: 130, AG: 180, AB: 60,
+        new("blight", Aura: VfxAuraStyle.BubbleRise, AR: 130, AG: 180, AB: 60,
             Tint: 0.20f, TR: 110, TG: 170, TB: 80),
-        new("rot", Aura: VfxAuraStyle.Drip, AR: 120, AG: 90, AB: 50,
+        new("rot", Aura: VfxAuraStyle.ChunkFall, AR: 120, AG: 90, AB: 50,
             Tint: 0.20f, TR: 130, TG: 100, TB: 70),
-        new("spark", Aura: VfxAuraStyle.CrackleJitter, AR: 255, AG: 240, AB: 120),
-        new("spore", Aura: VfxAuraStyle.Orbit, AR: 150, AG: 220, AB: 90),
-        new("pact_mark", Aura: VfxAuraStyle.PulseRing, AR: 170, AG: 90, AB: 220,
+        new("spark", Aura: VfxAuraStyle.SparkStrobe, AR: 255, AG: 240, AB: 120),
+        new("spore", Aura: VfxAuraStyle.SporeDrift, AR: 150, AG: 220, AB: 90),
+        new("pact_mark", Aura: VfxAuraStyle.PactFootPulse, AR: 170, AG: 90, AB: 220,
             Marker: VfxMarkerShape.Diamond, MR: 170, MG: 90, MB: 220),
         new("leech", Aura: VfxAuraStyle.StreamOut, AR: 180, AG: 60, AB: 60,
             Tint: 0.15f, TR: 180, TG: 60, TB: 60),
         new("expose", Aura: VfxAuraStyle.CrackleJitter, AR: 250, AG: 210, AB: 90,
             Marker: VfxMarkerShape.TriangleDown, MR: 250, MG: 210, MB: 90),
-        new("shatter", Aura: VfxAuraStyle.CrackleJitter, AR: 200, AG: 235, AB: 255,
+        new("shatter", Aura: VfxAuraStyle.ShardGlitter, AR: 200, AG: 235, AB: 255,
             Tint: 0.15f, TR: 180, TG: 220, TB: 255),
         new("bond", Aura: VfxAuraStyle.Orbit, AR: 255, AG: 170, AB: 200,
             Marker: VfxMarkerShape.Ring, MR: 255, MG: 170, MB: 200),
         new("rally", Aura: VfxAuraStyle.RiseSparkle, AR: 255, AG: 200, AB: 90,
             Tint: 0.10f, TR: 255, TG: 215, TB: 150),
-        new("command", Aura: VfxAuraStyle.PulseRing, AR: 120, AG: 140, AB: 255,
+        new("command", Aura: VfxAuraStyle.CommandCrownPulse, AR: 120, AG: 140, AB: 255,
             Marker: VfxMarkerShape.Ring, MR: 120, MG: 140, MB: 255),
-        new("charm_pulse", Aura: VfxAuraStyle.Orbit, AR: 240, AG: 120, AB: 240,
+        new("charm_pulse", Aura: VfxAuraStyle.CharmHeartbeat, AR: 240, AG: 120, AB: 240,
             Tint: 0.15f, TR: 240, TG: 120, TB: 240)
     };
+
+    static float AuraSizeScale(string statusId) => statusId switch
+    {
+        "wither" => 0.9f,
+        "rot" => 1.25f,
+        "expose" => 0.85f,
+        "spore" => 1.15f,
+        "pact_mark" => 0.9f,
+        "command" => 1.05f,
+        _ => 1f
+    };
+
+    static VfxPrimitiveSpec StatusApplyBurst(string statusId, byte r, byte g, byte b) =>
+        statusId.ToLowerInvariant() switch
+        {
+            "wither" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.35f,
+                Count = 10,
+                Shape = VfxBurstShape.Radial
+            },
+            "blight" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.5f,
+                Count = 12,
+                Shape = VfxBurstShape.Rising
+            },
+            "rot" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.45f,
+                Count = 8,
+                Shape = VfxBurstShape.Radial,
+                SizeScale = 1.35f
+            },
+            "spark" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.30f,
+                Count = 16,
+                Shape = VfxBurstShape.Radial
+            },
+            "shatter" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.40f,
+                Count = 10,
+                Shape = VfxBurstShape.Directional,
+                SizeScale = 1.25f
+            },
+            "expose" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.40f,
+                Count = 10,
+                Shape = VfxBurstShape.Rising
+            },
+            "spore" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.45f,
+                Count = 12,
+                Shape = VfxBurstShape.Rising
+            },
+            "charm_pulse" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.35f,
+                Count = 14,
+                Shape = VfxBurstShape.Radial,
+                SizeScale = 0.9f
+            },
+            "bond" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.40f,
+                Count = 10,
+                Shape = VfxBurstShape.Radial
+            },
+            "leech" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.40f,
+                Count = 10,
+                Shape = VfxBurstShape.Directional
+            },
+            "rally" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.50f,
+                Count = 13,
+                Shape = VfxBurstShape.Rising,
+                SizeScale = 1.05f
+            },
+            "pact_mark" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.30f,
+                Count = 12,
+                Shape = VfxBurstShape.Radial,
+                SizeScale = 1.1f
+            },
+            "command" => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.35f,
+                Count = 10,
+                Shape = VfxBurstShape.Radial,
+                SizeScale = 0.95f
+            },
+            _ => new VfxPrimitiveSpec
+            {
+                Kind = VfxPrimitiveKind.Burst,
+                Color = VfxColorSourceKind.Fixed,
+                FixedRgb = (r, g, b),
+                LifeSeconds = 0.45f,
+                Count = 14,
+                Shape = VfxBurstShape.Radial
+            }
+        };
 
     public static List<VfxRecipe> CreateAll()
     {
@@ -139,14 +290,7 @@ public static class VfxSeedCatalog
         {
             var specs = new List<VfxPrimitiveSpec>
             {
-                new()
-                {
-                    Kind = VfxPrimitiveKind.Burst,
-                    Color = VfxColorSourceKind.Fixed,
-                    FixedRgb = (r, g, b),
-                    LifeSeconds = 0.45f,
-                    Count = 14
-                },
+                StatusApplyBurst(id, r, g, b),
                 new()
                 {
                     Kind = VfxPrimitiveKind.Flash,
@@ -165,7 +309,8 @@ public static class VfxSeedCatalog
                         Kind = VfxPrimitiveKind.Aura,
                         AuraStyle = s.Aura.Value,
                         Color = VfxColorSourceKind.Fixed,
-                        FixedRgb = (s.AR, s.AG, s.AB)
+                        FixedRgb = (s.AR, s.AG, s.AB),
+                        SizeScale = AuraSizeScale(id)
                     });
                 }
 

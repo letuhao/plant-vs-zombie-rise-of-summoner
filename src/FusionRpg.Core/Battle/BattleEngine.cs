@@ -28,6 +28,11 @@ public static partial class BattleEngine
             SideIndex = sideIndex;
             Hp = setup.MaxHp;
             Derived = BattleStatComposer.Compose(setup);
+            // aura-skill T4: a defensive copy, frozen the instant Derived is born — the one stable
+            // baseline BattleDerivedModifierLedger.Recompose adds dynamic contributions on top of.
+            // `Derived` itself is mutable (Set, used today by the A18e defense live-read path) so it
+            // cannot double as its own baseline once anything else starts writing to it.
+            BaseDerived = ActorDerivedSnapshot.FromValues(Derived.Channels);
             ElementTypes = ActorElementTypes.Create(
                 setup.ElementPrimary,
                 setup.ElementSecondary == setup.ElementPrimary ? null : setup.ElementSecondary);
@@ -44,6 +49,10 @@ public static partial class BattleEngine
         public BattleActorSetup Setup { get; }
         public int SideIndex { get; }               // position within its own side (adjacency)
         public ActorDerivedSnapshot Derived { get; }
+
+        /// <summary>aura-skill T4: the frozen compose-once result, never mutated. See the
+        /// constructor's own comment for why `Derived` cannot serve this role itself.</summary>
+        public ActorDerivedSnapshot BaseDerived { get; }
         public ActorElementTypes ElementTypes { get; }
         public ElementPayloadComponent[] AttackComponents { get; }
         public long Hp { get; set; }
@@ -365,6 +374,7 @@ public static partial class BattleEngine
             Outcome = outcome,
             Rounds = rounds,
             SoulLootMilli = 1000 + greedyDef.SoulLootBonusMilli * greedySurvivors,
+            Warnings = state.Warnings.Count > 0 ? state.Warnings : null,
             Events = state.Events,
             Actors = state.Actors.Select(a => new BattleActorResult(
                 a.Setup.Key, a.Setup.Side, a.Setup.SpeciesId, a.Setup.TypeId,

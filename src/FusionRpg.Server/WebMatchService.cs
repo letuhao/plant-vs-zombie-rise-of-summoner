@@ -66,7 +66,7 @@ public sealed class WebMatchService
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
             if (storedSetup == null || storedSetup.WaveId != waveId)
                 return (false, "correlation.mismatch", null);
-            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed);
+            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
             return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport));
         }
 
@@ -108,7 +108,7 @@ public sealed class WebMatchService
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
             if (storedSetup == null || entry.Seed != seed || entry.MatchKey != matchKey)
                 return (false, "correlation.mismatch", null);
-            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed);
+            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
             return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport));
         }
 
@@ -197,7 +197,7 @@ public sealed class WebMatchService
         // contentHash is a different number, so a recomputed stamp would describe a battle that did
         // not happen. Provenance only: it is excluded from the determinism hash, exactly as the
         // platform stamp is, or every added row would look like a determinism break.
-        var report = BattleEngine.Resolve(setup, seed) with
+        var report = BattleEngine.Resolve(setup, seed, actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)) with
         {
             ContentHash = _store.ComputeContentHash().ToCompact(),
         };

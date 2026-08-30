@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { PLAYER_PENDING } from "@/contract/adapt";
 import { known, pendingWithReason } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
 import { ProgressionTab } from "./ProgressionTab";
@@ -33,10 +34,10 @@ function actorWith(xpToNext: ActorView["xpToNext"]): ActorView {
     xp: 2140,
     xpToNext,
     revision: 1,
-    channelSummary: pendingWithReason("no server endpoint yet"),
-    elementTyping: pendingWithReason("no server endpoint yet"),
-    shieldStack: pendingWithReason("no server endpoint yet"),
-    equipSlots: pendingWithReason("no server endpoint yet")
+    channelSummary: pendingWithReason(PLAYER_PENDING.channelSummary),
+    elementTyping: pendingWithReason(PLAYER_PENDING.elementTyping),
+    shieldStack: pendingWithReason(PLAYER_PENDING.shieldStack),
+    equipSlots: pendingWithReason(PLAYER_PENDING.equipSlots)
   };
 }
 
@@ -49,7 +50,7 @@ describe("ProgressionTab", () => {
   it("always shows the real level and raw xp count", () => {
     render(
       <MemoryRouter>
-        <ProgressionTab data={actorWith(pendingWithReason("no server endpoint yet"))} />
+        <ProgressionTab data={actorWith(pendingWithReason(PLAYER_PENDING.xpToNext))} />
       </MemoryRouter>
     );
     expect(screen.getByText(/Level 14/)).toBeInTheDocument();
@@ -59,7 +60,7 @@ describe("ProgressionTab", () => {
   it("shows the honest pending note when xpToNext is pending (today's real state) instead of a fabricated bar", () => {
     render(
       <MemoryRouter>
-        <ProgressionTab data={actorWith(pendingWithReason("no server endpoint yet"))} />
+        <ProgressionTab data={actorWith(pendingWithReason(PLAYER_PENDING.xpToNext))} />
       </MemoryRouter>
     );
     expect(screen.getByTestId("progression-xp-pending")).toBeInTheDocument();

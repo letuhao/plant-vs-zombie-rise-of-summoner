@@ -9,9 +9,8 @@ export type GuardViolation = {
 };
 
 // ---------------------------------------------------------------------------
-// Guard 1: every `pending` state carries a non-empty, player-facing reason.
-// This is checked against real adapter *output*, not source text — `reason`
-// is a runtime string, not something a static scan can validate.
+// Guard 1: every `pending` state carries a non-empty reason at runtime.
+// Player-facing quality is enforced separately by pendingCopyGuard.ts (R1b).
 // ---------------------------------------------------------------------------
 
 export function findEmptyPendingReasons(value: unknown, path = "$"): GuardViolation[] {

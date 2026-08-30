@@ -105,6 +105,11 @@ public sealed class FoundationHarness
             ElementHub.Default,
             _bag.CombatRng,
             (breakdown, _, _) => _breakdowns.Add(breakdown));
+        // aura-skill T20: same resolve as combat/shields, wired into the bag itself (not just
+        // exposed via Resolve for a manual DispatchInstant call) -- so a test that drives reflect
+        // through EffectBag's own internal grant processing, not a hand-built DispatchInstant call,
+        // exercises the exact same production wiring EffectRuntime.WireCombatMath sets up.
+        _bag.ActorResolve = ResolveCombatActor;
         return this;
     }
 

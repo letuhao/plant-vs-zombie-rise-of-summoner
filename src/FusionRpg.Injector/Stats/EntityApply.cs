@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Injector.Bridges;
@@ -67,12 +70,18 @@ public static class EntityApply
 
             var ctx = CheatState.Stats.Contexts.ForPlant(
                 key, baseline, (int)p.thePlantType, GameHooks.MatchKey,
-                playerId: CheatState.PvzStatsPlayerId > 0 ? CheatState.PvzStatsPlayerId : null,
+                // CheatState.CurrentPlayerId, not PvzStatsPlayerId (an unrelated, often-unset field) --
+                // must match the key HydratedPowerIndexProvider.Hydrate uses, or every Θ-scaled
+                // aptitude contribution silently resolves to 0 regardless of allocation share
+                // (CheatState.CurrentPlayerId's own doc comment has the full trace).
+                playerId: CheatState.CurrentPlayerId > 0 ? CheatState.CurrentPlayerId : null,
                 cheatScale: s, cheatAbsolute: abs,
                 applyStats: PvzStatsApplyGate.ShouldComposeScales(hasScaleMods, hasPvz, hasEffectMods),
                 cheatAbsoluteReal: includeAbsolute ? CheatState.BuildPlantAbsoluteReal() : null,
                 pvzStatsMods: CheatState.PvzStatsMods);
-            var final = CheatState.ActorHub.Resolve(ctx).AppliedCombat;
+            var resolved = CheatState.ActorHub.Resolve(ctx);
+            var final = resolved.AppliedCombat;
+            EmitAptitudeTrace("plant", key, ctx, resolved);
 
             if (shouldWrite)
                 EntityStatWriter.WritePlant(p, final, prevHp, prevMax, preserveRatio, source);
@@ -183,7 +192,11 @@ public static class EntityApply
 
             var ctx = CheatState.Stats.Contexts.ForZombie(
                 key, baseline, (int)z.theZombieType, GameHooks.MatchKey,
-                playerId: CheatState.PvzStatsPlayerId > 0 ? CheatState.PvzStatsPlayerId : null,
+                // CheatState.CurrentPlayerId, not PvzStatsPlayerId (an unrelated, often-unset field) --
+                // must match the key HydratedPowerIndexProvider.Hydrate uses, or every Θ-scaled
+                // aptitude contribution silently resolves to 0 regardless of allocation share
+                // (CheatState.CurrentPlayerId's own doc comment has the full trace).
+                playerId: CheatState.CurrentPlayerId > 0 ? CheatState.CurrentPlayerId : null,
                 cheatScale: s, cheatAbsolute: abs,
                 applyStats: PvzStatsApplyGate.ShouldComposeScales(hasScaleMods, hasPvz, hasEffectMods),
                 cheatAbsoluteReal: includeAbsolute ? CheatState.BuildZombieAbsoluteReal() : null,
@@ -237,5 +250,35 @@ public static class EntityApply
     {
         CheatState.TagProbe(payload);
         return payload;
+    }
+
+    /// <summary>Temporary diagnostic (aura-skill Checkpoint 2/5 finding 3, 2026-08-30): a live probe
+    /// showed a spawned plant's written `attackDamage` stuck at 1 regardless of commander aptitude
+    /// allocation (0 vs 222 points in Might), even after fixing two independent real bugs in the
+    /// allocation-delivery path. This emits the exact values needed to tell whether `AptitudeSubsystem`
+    /// is registered in `CheatState.ActorHub` at all, and what `progression.bonus.atk`/
+    /// `combat.power.omni` actually resolve to for the SAME ctx `RunPlant`/`RunZombie` use — narrowing
+    /// the remaining candidate causes (a lazy-singleton registration race vs. a live Θ-hydration miss)
+    /// without another guess-and-redeploy cycle. Remove once finding 3 is closed.</summary>
+    static void EmitAptitudeTrace(string side, string ptr, StatContext ctx, ActorResolveResult resolved)
+    {
+        if (!(CheatState.EmitProof && CheatState.On("SYS-EMIT-PROOF"))) return;
+        try
+        {
+            GameHooks.Emit("debug.aptitude-trace", new Dictionary<string, object>
+            {
+                ["side"] = side,
+                ["ptr"] = ptr,
+                ["ctxPlayerId"] = ctx.PlayerId ?? -1,
+                ["currentPlayerId"] = CheatState.CurrentPlayerId,
+                ["theta"] = CheatState.PowerIndex.ActorIndex(ctx),
+                ["subsystems"] = string.Join(",", CheatState.ActorHub.Subsystems.Select(s => s.SubsystemId)),
+                ["primaryAtk"] = resolved.RuntimePrimary.Atk,
+                ["appliedAtk"] = resolved.AppliedCombat.Atk,
+                ["progressionBonusAtk"] = resolved.Derived.Get(DerivedStatChannels.ProgressionBonusAtk, -999),
+                ["combatPowerOmni"] = resolved.Derived.Get(DerivedStatChannels.CombatPowerOmni, -999)
+            });
+        }
+        catch (Exception ex) { CheatState.Error("aptitude-trace: " + ex.Message); }
     }
 }

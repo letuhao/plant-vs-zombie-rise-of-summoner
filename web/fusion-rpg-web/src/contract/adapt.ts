@@ -8,7 +8,22 @@ import type { ActorPhase, ActorView, ContainerView, ContractView, Rarity, RunRes
  * The DTO→view adapter (T4). Filling a field later touches one file: this
  * one. No component, test fixture shape, or layer changes when a `pending`
  * becomes `known` (game-gui-map.md's contract section).
+ *
+ * Player-facing pending copy lives in `PLAYER_PENDING` — the UI renders these
+ * strings verbatim (`pendingCopyGuard.ts` enforces player vocabulary).
  */
+export const PLAYER_PENDING = {
+  displayName: "Full name coming soon",
+  xpToNext: "Next level isn't shown yet",
+  channelSummary: "Stats aren't ready yet",
+  elementTyping: "Element typing isn't ready yet",
+  shieldStack: "Shield details aren't ready yet",
+  equipSlots: "Equipment slots aren't ready yet",
+  runSummary: "Run summary isn't ready yet",
+  relicImplicit: "Equipping works — the bonus size isn't shown yet",
+  contractDisplayName: "Species name isn't ready yet",
+  summonerLevel: "Summoner rank isn't tracked yet"
+} as const;
 
 function toActorPhase(phase: string): ActorPhase {
   switch (phase) {
@@ -28,16 +43,16 @@ export function adaptActor(dto: UniqueActorDto): ActorView {
     playerId: dto.playerId,
     side: dto.side === "zombie" ? "zombie" : "plant",
     typeId: dto.typeId,
-    displayName: pendingWithReason("Names resolve from the almanac catalog, not wired to this reader yet"),
+    displayName: pendingWithReason(PLAYER_PENDING.displayName),
     phase: toActorPhase(dto.phase),
     level: dto.level,
     xp: dto.xp,
-    xpToNext: pendingWithReason("The XP curve endpoint isn't joined to this reader yet"),
+    xpToNext: pendingWithReason(PLAYER_PENDING.xpToNext),
     revision: dto.revision,
-    channelSummary: pendingWithReason("The derived-stat snapshot has no server endpoint yet (spec-derived-stat-sheet.md)"),
-    elementTyping: pendingWithReason("Element typing isn't exposed on UniqueActorDto yet"),
-    shieldStack: pendingWithReason("Shield instances aren't exposed on UniqueActorDto yet"),
-    equipSlots: pendingWithReason("Equip-slot unlock state isn't exposed on UniqueActorDto yet")
+    channelSummary: pendingWithReason(PLAYER_PENDING.channelSummary),
+    elementTyping: pendingWithReason(PLAYER_PENDING.elementTyping),
+    shieldStack: pendingWithReason(PLAYER_PENDING.shieldStack),
+    equipSlots: pendingWithReason(PLAYER_PENDING.equipSlots)
   };
 }
 
@@ -63,7 +78,7 @@ export function adaptRun(dto: RunItem): RunView {
     plantsLost: dto.plantsDied === undefined ? absent() : { state: "known", value: dto.plantsDied },
     summary: dto.summary === undefined || dto.summary === null
       ? absent()
-      : pendingWithReason("Run summary is an opaque payload — its shape isn't specced yet (match-runtime.md)")
+      : pendingWithReason(PLAYER_PENDING.runSummary)
   };
 }
 
@@ -107,9 +122,7 @@ export function adaptRelic(dto: RelicDto): ContainerView {
     },
     requirements: absent(),
     baseStats: [],
-    implicit: pendingWithReason(
-      "This relic's granted effect isn't expressed as a numeric magnitude yet — equipping it is real, describing its size isn't"
-    ),
+    implicit: pendingWithReason(PLAYER_PENDING.relicImplicit),
     affixes: absent(),
     enhancement: absent(),
     sockets: absent(),
@@ -131,7 +144,7 @@ export function adaptContract(row: ContractRowDto, profile: DemonProfileDto): Co
     personality: row.personality,
     upkeepPerDay: row.upkeepPerDay,
     deployable: row.deployable,
-    displayName: pendingWithReason("Species display name is in the catalog endpoint, not joined here yet")
+    displayName: pendingWithReason(PLAYER_PENDING.contractDisplayName)
   };
 }
 

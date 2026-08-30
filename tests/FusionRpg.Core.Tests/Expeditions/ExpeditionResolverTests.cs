@@ -150,10 +150,18 @@ public class ExpeditionResolverTests
     // bMilli 0->400 — expected magnitude movement, the same triage as BattleGoldenTests.cs.
     // Same_inputs_resolve_identically and the recall pro-rating tests stayed green unchanged,
     // confirming the resolver's OWN per-tick RNG logic did not move, only the embedded magnitudes.
-    const string ScoutHash = "4AD27E8E940CCE8C85CA94DD2D7B3748FADA236F7A863A35371B6CE8114E25C6";
-    const string ForageHash = "EAE8E34360557638A93DF7D400AE416BA5C9003914D5A4292E7F9DF1B2DC6DBE";
-    const string HuntHash = "272223CB0085C7B19D1D6E0FE2710A97204F806B10D49BF187FD94E777A5FB31";
-    const string WarpathHash = "A1C7283BB8022A3720145C263331B89665DD2849E552E3FC5110510692E19078";
+    //
+    // Re-blessed 2026-08-30 (aura-skill T12, Gate B): named serialization-shape churn again, the
+    // SAME class of change as the 2026-08-21 InnateShield re-bless — BattleSetup gained
+    // ActiveAuras (default empty, no behavior change for every existing caller including this one),
+    // so every embedded plan's serialized JSON gained an "activeAuras":[] key and every hash moved.
+    // Verified NOT a determinism break before re-blessing, not assumed: every other test in this
+    // file (Same_inputs_resolve_identically, recall pro-rating) stayed green unchanged, confirming
+    // the resolver's own math and RNG streams did not move — only the embedded BattleSetup's shape.
+    const string ScoutHash = "742C45B94D26C03892CB70B7B48F9442259AC333A946D40993C80DF064C50979";
+    const string ForageHash = "B7EC755159E4D92592BC76EDDFF9B1E009ED4EF158C66E66A73C3A4F4474AC9E";
+    const string HuntHash = "8061FB3CA5CC67AFABD4E025962E41F6E36F3D80459C101485FAE6FF22C0FC85";
+    const string WarpathHash = "53F70A7C533F368BB9F52D32B343C616275E6FDBAB601094F1710DDE3FD331BA";
 
     [Fact]
     public void Tier_goldens_are_locked()

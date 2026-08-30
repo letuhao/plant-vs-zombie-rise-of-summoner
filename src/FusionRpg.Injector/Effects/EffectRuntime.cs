@@ -430,6 +430,10 @@ public static class EffectRuntime
         bag.ShieldGate = new FusionRpg.Core.Combat.Shield.ShieldGate(
             new FusionRpg.Core.Combat.Shield.ShieldRuntime(),
             InjectorCombatBridge.ResolveActor);
+        // aura-skill T20 (audit): the SAME resolve, threaded to DispatchInstant's actorResolve
+        // parameter so Retribution/reflect actually fires — it shipped with the math but no
+        // production caller ever passed this argument.
+        bag.ActorResolve = InjectorCombatBridge.ResolveActor;
     }
 
     // ---- Shield tick host — 100 ms grid, own guard (NOT TickDots' status guard) ----

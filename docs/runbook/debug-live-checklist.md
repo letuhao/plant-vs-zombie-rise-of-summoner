@@ -242,6 +242,12 @@ Spawn/clear graves & ice, paint `BoxType`, on-kill arms. Raw: [`../research/effe
 
 ## 10. Overlay combat prove (C1–C10)
 
+**T8 closed 2026-08-30 on the MelonLoader 3.9 host, not this one** — full C1–C13 results (this table
+plus the two heal cases T7 added) live on [`melon-live-checklist.md`](melon-live-checklist.md)'s own
+§8b. The rows below stay unfilled on purpose: they were never re-run against this BepInEx host, and
+that page's own rule against overwriting Bep Pass/Fail rows applies here too — don't backfill these
+from the Melon run.
+
 **Prerequisite:** lawn open + reusable lab fixtures + `OVERLAY-COMBAT` on.
 
 ```powershell

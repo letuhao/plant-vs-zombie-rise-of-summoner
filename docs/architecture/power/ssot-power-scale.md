@@ -619,10 +619,13 @@ nobody "unifies" them into `Θ` by mistake.
 | 13 | `PowerScalar.Of` — geomean over 5 categories | geometric mean | `PowerReads.cs:38` | **Display only, and it has no production caller.** Never a balance input |
 | 15 | `double` in stat composition (14 sites) | IEEE-754 | `CombatDerivedReader`, `ElementHub`, `StatModifier`, `CombatPolicies` | **Decided 2026-08-23: it stands** — §10.7 |
 | 14 | `maxTierAt(itemLevel)` — t3@8, t4@18, t5@32 | step function | `ssot-generation.md` §4.1 | Gates tier *access* by content level. A gate, not a magnitude |
-| 16 | `PatronPolicy.AuraMilli(rarity, star, level)` | `rarityBase + perStar·star + level`, clamped | `PatronPolicy.cs:37` | **A different axis, found and added by `power-guard`'s own G2 sweep (T4.1, 2026-08-24).** `level` here is the *patron demon's own* level, not the actor's `Θ` — a small, hard-clamped (`AuraClampMilli`) aura bonus, spec-locked 2026-08-21, unrelated to the power ladder. Never reads `PowerTuning`, never should |
+| 16 | `PatronPolicy.AuraMilli(rarity, star, level, pTheta)` | `flatPart(rarityBase + perStar·star + level, clamped at AuraClampMilli)` + `pThetaTermMilli(= PThetaKMilli/1000 · P(Θ))`, uncapped | `PatronPolicy.cs:37` | **Two axes now, on separate owners.** `flatPart` is unchanged since `power-guard`'s G2 sweep (T4.1, 2026-08-24) — `level` there is the *patron demon's own* level, hard-clamped, unrelated to the ladder. **`pThetaTermMilli` is a NEW, reviewed read of the actor's real `Θ` via `PowerLadder.Value`, added by aura-skill T22 (owner sign-off 2026-08-30)** so the patron aura stops being permanently capped at content depth — it calls the shared `PowerLadder`, not a private `f(level)`, so §10's anti-duplication clause is satisfied. `AuraClampMilli` still bounds `flatPart` only; the `Θ` term is intentionally uncapped, matching this repo's no-hard-ceiling rule |
 
-> **Rule PS-4. Rows 7–14, 16 are relative or bounded, and must never be multiplied by `contentScale`.**
-> Row 12 is the one people will get wrong: `PowerVector` prices magnitudes that are *already* scaled.
+> **Rule PS-4. Rows 7–14 and row 16's `flatPart` are relative or bounded, and must never be multiplied by
+> `contentScale`.** Row 12 is the one people will get wrong: `PowerVector` prices magnitudes that are
+> *already* scaled. **Row 16's `pThetaTermMilli` is the one exception inside row 16 itself** — it is a
+> legitimate `P(Θ)` read (T22) and correctly scales with `contentScale`; do not clamp it to match the
+> old flat-only ceiling.
 
 ### 10.3 Resolved — questions the sweep closed
 

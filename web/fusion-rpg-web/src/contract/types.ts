@@ -164,6 +164,16 @@ export type ActorChannelDetail = {
   contributions: Pending<{ source: string; magnitude: Magnitude }[]>;
 };
 
+/** aura-skill T18c: one source's own contribution to a derived channel, as
+ * `AuraDerivedEndpoints.cs` (T18b) reports it — flat and simple by design, unlike
+ * `ActorChannelDetail.contributions`'s richer (still unproduced) `Magnitude`-based shape above. A
+ * distinct type rather than forcing a field-name/shape fit onto that one. */
+export type DerivedContribution = {
+  sourceId: string;
+  op: string;
+  value: number;
+};
+
 export type ActorView = {
   instanceId: string;
   playerId: number;

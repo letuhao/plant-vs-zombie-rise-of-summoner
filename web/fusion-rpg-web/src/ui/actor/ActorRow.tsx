@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 import type { ActorRungState } from "./actorRungState";
 import { RungStateFallback } from "./RungStateFallback";
-import { ActorFrame, LevelTag, PendingNote, SideBadge, displayInitial } from "./shared";
+import { ActorFrame, formatActorPhase, LevelTag, SideBadge, displayInitial } from "./shared";
 
 /** Rung 3 — icon + name/side + level, one list row (roster, deploy pickers). */
 export function ActorRow({ state }: { state: ActorRungState }) {
@@ -22,9 +22,8 @@ export function ActorRow({ state }: { state: ActorRungState }) {
         </p>
         <p className="flex items-center gap-2 text-xs text-muted">
           <SideBadge side={data.side} />
-          <span>{data.phase}</span>
+          <span>{formatActorPhase(data.phase)}</span>
         </p>
-        <PendingNote pending={data.displayName} testId="actor-name-pending" />
       </div>
       <LevelTag level={data.level} />
     </div>

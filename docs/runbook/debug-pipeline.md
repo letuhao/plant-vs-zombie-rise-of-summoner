@@ -11,12 +11,15 @@ Controllable effect-test APIs. You stay in a level; curl or a PowerShell script 
 ## Deploy
 
 ```powershell
-# BepInEx (default)
+# MelonLoader 3.9 (default, 2026-08-30 — H:\Games\PVZ-Fusion-3.9_MelonLoader on this machine)
 .\scripts\deploy-play.ps1
 
-# MelonLoader (Blooms 3.8.1 Melon pack — not 3.9)
+# BepInEx (older FULL MOD TOOL install)
+.\scripts\deploy-play.ps1 -LoaderHost BepInEx
+
+# MelonLoader against a *different* pack than the default (Blooms 3.8.1 Melon pack — not 3.9)
 $env:FUSIONRPG_ML_GAMEDIR = "<Blooms Game Files>"
-.\scripts\deploy-play.ps1 -LoaderHost MelonLoader
+.\scripts\deploy-play.ps1
 # After lawn open: .\scripts\smoke-melon-live.ps1
 ```
 

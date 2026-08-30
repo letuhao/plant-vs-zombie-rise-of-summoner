@@ -369,19 +369,23 @@ public static class CheatActions
         SpawnExtra("zombie", typeId, col: null, row, reason, correlationId);
     }
 
-    /// <summary>PvzIntent: plant or zombie extra spawn; default side zombie for legacy callers.</summary>
+    /// <summary>PvzIntent: plant or zombie extra spawn; default side zombie for legacy callers.
+    /// <paramref name="playerId"/> (aura-skill T21b): the deploying player, threaded straight through
+    /// from `UniqueActorService.DeployAsync`'s own `pvz.spawn.extra` payload — 0 for spawns with no
+    /// real owner (manual/debug spawns), matching `CheatState.RegisterSpecimenOwner`'s own
+    /// `playerId &lt;= 0` no-op guard.</summary>
     public static void SpawnExtra(string? side, int typeId, int? col, int? row, string? reason, string? correlationId,
-        string? instanceId = null, string? loadoutJson = null)
+        string? instanceId = null, string? loadoutJson = null, long playerId = 0)
     {
         var s = (side ?? "zombie").Trim().ToLowerInvariant();
         if (s == "plant")
-            SpawnExtraPlant(typeId, col, row, reason, correlationId, instanceId, loadoutJson);
+            SpawnExtraPlant(typeId, col, row, reason, correlationId, instanceId, loadoutJson, playerId);
         else
-            SpawnExtraZombieCore(typeId, row, reason, correlationId, instanceId, loadoutJson);
+            SpawnExtraZombieCore(typeId, row, reason, correlationId, instanceId, loadoutJson, playerId);
     }
 
     static void SpawnExtraPlant(int typeId, int? col, int? row, string? reason, string? correlationId,
-        string? instanceId = null, string? loadoutJson = null)
+        string? instanceId = null, string? loadoutJson = null, long playerId = 0)
     {
         try
         {
@@ -425,6 +429,9 @@ public static class CheatActions
             }
             SpawnCatalog.MarkSpawn("plant", typeId, true);
             CheatState.Select(plant.Pointer, "plant");
+            var plantPtr = GameDumps.Ptr(plant);
+            if (playerId > 0)
+                CheatState.RegisterSpecimenOwner(plantPtr, playerId); // aura-skill T21b
             var ackPlant = new Dictionary<string, object>
             {
                 ["typeId"] = typeId,
@@ -432,7 +439,7 @@ public static class CheatActions
                 ["row"] = CheatState.SpawnRow,
                 ["reason"] = reason ?? "extra",
                 ["correlationId"] = correlationId ?? "",
-                ["ptr"] = GameDumps.Ptr(plant),
+                ["ptr"] = plantPtr,
                 ["side"] = "plant",
                 ["source"] = "extra"
             };
@@ -451,7 +458,7 @@ public static class CheatActions
     }
 
     static void SpawnExtraZombieCore(int typeId, int? row, string? reason, string? correlationId,
-        string? instanceId = null, string? loadoutJson = null)
+        string? instanceId = null, string? loadoutJson = null, long playerId = 0)
     {
         try
         {
@@ -491,13 +498,16 @@ public static class CheatActions
             }
             SpawnCatalog.MarkSpawn("zombie", typeId, true);
             CheatState.Select(z.Pointer, "zombie");
+            var zombiePtr = GameDumps.Ptr(z);
+            if (playerId > 0)
+                CheatState.RegisterSpecimenOwner(zombiePtr, playerId); // aura-skill T21b
             var ackZombie = new Dictionary<string, object>
             {
                 ["typeId"] = typeId,
                 ["row"] = CheatState.SpawnRow,
                 ["reason"] = reason ?? "extra",
                 ["correlationId"] = correlationId ?? "",
-                ["ptr"] = GameDumps.Ptr(z),
+                ["ptr"] = zombiePtr,
                 ["side"] = "zombie",
                 ["source"] = "extra"
             };

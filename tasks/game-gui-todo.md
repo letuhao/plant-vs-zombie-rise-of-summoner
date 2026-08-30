@@ -1681,3 +1681,13 @@ replacement is actually complete rather than a thin wrap. Per the owner's own in
 - [ ] Full test suite green with the deleted files' own tests removed, not skipped.
 - [ ] **Owner sign-off** — deleting shipped code is exactly the kind of irreversible-in-spirit action
   this program's own git-hands-off discipline defers to the owner for.
+
+---
+
+### Task: Player-copy hygiene (pending reasons + guard)
+**Description.** Replace dev/task-note strings in player-visible UI (especially `Pending<T>.reason`) with player vocabulary; add `pendingCopyGuard.ts` so AGENTS.md quotes, spec filenames, and task ids cannot ship again.
+
+**Acceptance:**
+- [x] `PLAYER_PENDING` constants in `adapt.ts`; sanctum, actor tabs, settings, relics copy rewritten
+- [x] `pendingCopyGuard.test.ts` real-tree scan green
+- [x] Full vitest suite green

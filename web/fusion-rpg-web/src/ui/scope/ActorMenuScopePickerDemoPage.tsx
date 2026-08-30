@@ -47,7 +47,7 @@ export function ActorMenuScopePickerDemoPage() {
   return (
     <Page
       title="Actor menu — scope picker"
-      description="fe-essentials T6 proof surface — one component, four WhoSelector modes."
+      description="Pick a target by side, type, or named creature."
       testId="page-actor-menu-scope-picker-demo"
     >
       <div className="flex flex-col gap-4">

@@ -3,11 +3,16 @@ using FusionRpg.Core.Power;
 namespace FusionRpg.Core.Demons.Patron;
 
 /// <summary>Computed patron aura — per-mille combat bonuses on the patron's element channels.
-/// Primary carries full power + half defense; a secondary element gets half of each.</summary>
+/// Primary carries full power + half defense; a secondary element gets half of each.
+///
+/// <para><b>`long`, not `int`</b> (aura-skill T22, CLAUDE.md's numeric-overflow rule): since the
+/// P(Θ) term (2026-08-30) makes this magnitude scale with the power ladder instead of staying
+/// clamped forever, an `int` per-mille value would stop being exact past Θ≈3213 — measured, not
+/// guessed (CLAUDE.md's own overflow table).</para></summary>
 public sealed record PatronAura(
     string ElementPrimary, string? ElementSecondary,
-    int PowerMilli, int DefenseMilli,
-    int SecondaryPowerMilli, int SecondaryDefenseMilli);
+    long PowerMilli, long DefenseMilli,
+    long SecondaryPowerMilli, long SecondaryDefenseMilli);
 
 /// <summary>
 /// Patron rules (spec-patron-demon.md, owner locks 2026-08-21). Numbers are spec-locked; tuning
@@ -34,13 +39,36 @@ public static class PatronPolicy
     public static int RarityBaseMilli(DemonRarity rarity) =>
         Tuning.RarityBaseMilli.TryGetValue(rarity, out var v) ? v : Tuning.RarityBaseMilli[DemonRarity.Legendary];
 
-    public static int AuraMilli(DemonRarity rarity, int star, long level) =>
-        (int)Math.Clamp(RarityBaseMilli(rarity) + (long)PerStarMilli * star + level, 0, AuraClampMilli);
+    /// <summary>
+    /// aura-skill T22 (owner sign-off 2026-08-30): `flatPart + pThetaTermMilli`. The flat part is the
+    /// ORIGINAL formula, byte-identical and still clamped at <see cref="AuraClampMilli"/> — a small
+    /// early-game floor from the demon's own rarity/star/level, unaffected by this change. The NEW
+    /// term reads Θ through the SAME shared <see cref="PowerLadder"/> every other magnitude in this
+    /// codebase reads (`ssot-power-scale.md` §10 row 16, one power ladder, no private curve) —
+    /// `pThetaKMilli/1000 · P(Θ)`, uncapped, which is what keeps patron relevant as a commander's own
+    /// P(Θ)-scaled aura grows past the old flat ceiling. <paramref name="powerTuning"/> is an explicit
+    /// parameter, matching <see cref="KillEarnWithPatron"/>'s own established shape in this same
+    /// class, never a hidden read of a global hub.
+    /// </summary>
+    public static long AuraMilli(DemonRarity rarity, int star, long level, int pTheta, PowerTuning powerTuning)
+    {
+        if (powerTuning is null) throw new ArgumentNullException(nameof(powerTuning));
+        var flatPart = Math.Clamp(RarityBaseMilli(rarity) + (long)PerStarMilli * star + level, 0, AuraClampMilli);
+
+        var ladder = new PowerLadder(powerTuning);
+        var pThetaValue = ladder.Value(pTheta);
+        checked
+        {
+            var pThetaTermMilli = Tuning.PThetaKMilli * pThetaValue / 1000;
+            return flatPart + pThetaTermMilli;
+        }
+    }
 
     public static PatronAura Aura(
-        DemonRarity rarity, int star, long level, string elementPrimary, string? elementSecondary)
+        DemonRarity rarity, int star, long level, int pTheta, PowerTuning powerTuning,
+        string elementPrimary, string? elementSecondary)
     {
-        var power = AuraMilli(rarity, star, level);
+        var power = AuraMilli(rarity, star, level, pTheta, powerTuning);
         var hasSecondary = !string.IsNullOrWhiteSpace(elementSecondary);
         return new PatronAura(
             elementPrimary,

@@ -437,6 +437,7 @@ public class EffectOfflineKitTests
     public void SimEffectHost_BeginMatch_grants_via_plugin_then_hit_plans()
     {
         var host = new SimEffectHost();
+        host.Plugins.Register(new MatchButterSecondaryPlugin());
         host.BeginMatch("m-sim");
         Assert.True(host.Bag.HasGrantForEffect("fx.butter_on_hit"));
         var plan = host.HitDealt(typeId: 0, targetTypeId: 0);
@@ -448,6 +449,7 @@ public class EffectOfflineKitTests
     public void SimEffectHost_EndMatch_withdraws_plugin_grants()
     {
         var host = new SimEffectHost();
+        host.Plugins.Register(new MatchButterSecondaryPlugin());
         host.BeginMatch("m-sim");
         Assert.True(host.Bag.HasGrantForEffect("fx.butter_on_hit"));
         host.EndMatch();
@@ -460,6 +462,7 @@ public class EffectOfflineKitTests
     public void SimEffectHost_ClearAll_skips_plugin_end_hook()
     {
         var host = new SimEffectHost();
+        host.Plugins.Register(new MatchButterSecondaryPlugin());
         host.BeginMatch("m-sim");
         Assert.True(host.Bag.HasGrantForEffect("fx.butter_on_hit"));
         host.ClearAll();

@@ -166,6 +166,15 @@ public sealed class EffectBag
 
     /// <summary>Shield layer above the Funnel — null keeps combat byte-identical (no shields).</summary>
     public FusionRpg.Core.Combat.Shield.ShieldGate? ShieldGate { get; set; }
+
+    /// <summary>aura-skill T20: the same actor-resolution function wired into `CombatMath`/
+    /// `ShieldGate` ("same resolve as combat" — `EffectRuntime.WireCombatMath`'s own comment) —
+    /// threaded through to <see cref="Combat.CombatDamageDispatcher.DispatchInstant"/>'s
+    /// `actorResolve` parameter so Retribution/reflect actually fires on a real damage packet. Every
+    /// production call site previously omitted this argument, so the shipped-looking reflect math
+    /// never ran outside the offline test harness. Null keeps combat byte-identical (no reflect),
+    /// matching every other optional collaborator on this class.</summary>
+    public FusionRpg.Core.Combat.CombatActorResolve? ActorResolve { get; set; }
     public StatusRuntime? Status { get; set; }
     public IStatusRng StatusRng { get; set; } = new FixedStatusRng(0.0);
     public Func<DateTimeOffset> UtcNow { get; set; } = () => DateTimeOffset.UtcNow;
@@ -485,7 +494,8 @@ public sealed class EffectBag
                     CombatRng,
                     CombatMath,
                     _lastSkipped,
-                    ShieldGate);
+                    ShieldGate,
+                    ActorResolve);
                 continue;
             }
 
@@ -553,7 +563,8 @@ public sealed class EffectBag
             CombatRng,
             CombatMath,
             _lastSkipped,
-            ShieldGate);
+            ShieldGate,
+            ActorResolve);
     }
 
     /// <summary>
@@ -639,7 +650,8 @@ public sealed class EffectBag
                 _lastSkipped,
                 effectId: null,
                 pluginId: null,
-                shieldGate: ShieldGate);
+                shieldGate: ShieldGate,
+                actorResolve: ActorResolve);
             n = Status.Tick(now, sink, BoardSnapshot, StatusRng);
         }
 

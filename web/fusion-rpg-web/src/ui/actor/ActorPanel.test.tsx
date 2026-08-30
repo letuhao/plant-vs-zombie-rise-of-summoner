@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { PLAYER_PENDING } from "@/contract/adapt";
 import { known, pendingWithReason } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
 import type { ActorRungState } from "./actorRungState";
@@ -18,12 +19,12 @@ function readyState(): ActorRungState {
     phase: "ActiveBound",
     level: 14,
     xp: 2140,
-    xpToNext: pendingWithReason("no server endpoint yet"),
+    xpToNext: pendingWithReason(PLAYER_PENDING.xpToNext),
     revision: 1,
-    channelSummary: pendingWithReason("no server endpoint yet"),
-    elementTyping: pendingWithReason("no server endpoint yet"),
-    shieldStack: pendingWithReason("no server endpoint yet"),
-    equipSlots: pendingWithReason("no server endpoint yet")
+    channelSummary: pendingWithReason(PLAYER_PENDING.channelSummary),
+    elementTyping: pendingWithReason(PLAYER_PENDING.elementTyping),
+    shieldStack: pendingWithReason(PLAYER_PENDING.shieldStack),
+    equipSlots: pendingWithReason(PLAYER_PENDING.equipSlots)
   };
   return { kind: "ready", data };
 }

@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Effects.Plugins;
 using FusionRpg.Core.Status;
 
 namespace FusionRpg.Core.Effects;
@@ -11,6 +12,7 @@ public sealed class EffectScenarioDto
     [JsonPropertyName("id")] public string Id { get; set; } = "";
     [JsonPropertyName("seed")] public int Seed { get; set; } = 42;
     [JsonPropertyName("matchKey")] public string MatchKey { get; set; } = "sim-match";
+    [JsonPropertyName("plugins")] public List<string>? Plugins { get; set; }
     [JsonPropertyName("board")] public List<BoardEntitySnapDto>? Board { get; set; }
     [JsonPropertyName("steps")] public List<EffectScenarioStepDto> Steps { get; set; } = new();
 }
@@ -103,6 +105,8 @@ public static class EffectScenarioRunner
         EffectScenarioDto scenario, string? goldenRoot = null, IEnumerable<EffectDef>? catalog = null)
     {
         var host = new SimEffectHost(scenario.Seed, scenario.MatchKey, catalog);
+        if (scenario.Plugins is { Count: > 0 })
+            SecondaryPluginRegistry.RegisterById(host.Plugins, scenario.Plugins);
         if (scenario.Board is { Count: > 0 })
         {
             host.SetBoard(scenario.Board.Select(b => new BoardEntitySnap

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Effects.Atoms;
 
@@ -36,11 +37,46 @@ public static class AtomRowValidator
     public static readonly string[] DerivedOps = { "flat", "increased", "replace", "flag" };
 
     /// <summary>
+    /// aura-skill T2 (audit D6): which <see cref="DerivedModifierOp"/> a
+    /// <see cref="DerivedComposeKind"/> actually reads, mirroring each kind's op filter in
+    /// <see cref="DerivedComposer.ComposeChannel"/> — the fold itself stays a pure switch, so this
+    /// table exists to reject the mismatch where the authoring error originates (here, at bind/author
+    /// time) rather than let <c>DerivedComposer</c> silently drop it.
+    ///
+    /// <para><b>Mirrors, does not replace.</b> `FlatSum` reads only <c>Flat</c>; `FlatReplace` reads
+    /// <c>Flat</c> (the baseline sum) and <c>Replace</c> (which wins if present); `SumIncreased` reads
+    /// only <c>Increased</c>; `MaxPriorityFlag` reads <c>Flag</c>/<c>Replace</c>/<c>Increased</c> —
+    /// deliberately NOT <c>Flat</c>, which is why <c>AptitudeResolver</c>'s own comment calls emitting
+    /// `Flat` there "the least-surprising fallback" for a case that cannot happen from authored content
+    /// today (no shipped edge targets a `MaxPriorityFlag` channel) but is a programmatic emission, not
+    /// an atom row — this table governs authored rows only and never touches that path.
+    /// `DerivedComposeKindOpsTests` cross-checks every one of these 16 cells against the real composer,
+    /// so the two cannot silently drift apart.</para>
+    /// </summary>
+    public static readonly IReadOnlyDictionary<DerivedComposeKind, string[]> DerivedComposeAcceptedOps =
+        new Dictionary<DerivedComposeKind, string[]>
+        {
+            [DerivedComposeKind.FlatSum] = new[] { "flat" },
+            [DerivedComposeKind.FlatReplace] = new[] { "flat", "replace" },
+            [DerivedComposeKind.SumIncreased] = new[] { "increased" },
+            [DerivedComposeKind.MaxPriorityFlag] = new[] { "flag", "replace", "increased" },
+        };
+
+    /// <summary>
     /// Validate one row. <paramref name="curveInput"/> resolves a curve id to the axis it reads;
     /// the store supplies one backed by <c>effect_curve</c>, which is how <b>D9</b> is enforced
     /// without Core ever touching SQL. Pass null to skip curve checks.
+    ///
+    /// <para><paramref name="composeKindOf"/> resolves a <c>stat.derived</c> row's <c>channel</c> param
+    /// to its registered <see cref="DerivedComposeKind"/>, so a `flat`/`increased`/`replace`/`flag`
+    /// mismatch against that channel's compose kind is rejected here rather than silently dropped at
+    /// compose time (D6, aura-skill T2). Pass null to skip this check — the row still gets the plain
+    /// "is `op` one of the four legal strings" check either way.</para>
     /// </summary>
-    public static AtomRejection Validate(AtomRow row, Func<string, CurveInput?>? curveInput = null)
+    public static AtomRejection Validate(
+        AtomRow row,
+        Func<string, CurveInput?>? curveInput = null,
+        Func<string, DerivedComposeKind?>? composeKindOf = null)
     {
         if (row is null) return AtomRejection.Fail(AtomRejectionReason.BadParamValue, "null row");
 
@@ -85,7 +121,7 @@ public static class AtomRowValidator
         var paramCheck = AtomKindRegistry.Validate(row.KindId, pars);
         if (!paramCheck.IsOk) return paramCheck;
 
-        var opCheck = ValidateOp(row, pars);
+        var opCheck = ValidateOp(row, pars, composeKindOf);
         if (!opCheck.IsOk) return opCheck;
 
         // E2 wiring: a param the kind declares as a Value carries a value spec, and a spec whose
@@ -223,7 +259,8 @@ public static class AtomRowValidator
     /// nothing else. With none of them present the executor applies a <b>flat zero</b>
     /// (InjectorEffectActionSink.cs:104). Not a no-op: a real modifier of no size.</para>
     /// </summary>
-    static AtomRejection ValidateOp(AtomRow row, IReadOnlyDictionary<string, object?> pars)
+    static AtomRejection ValidateOp(
+        AtomRow row, IReadOnlyDictionary<string, object?> pars, Func<string, DerivedComposeKind?>? composeKindOf)
     {
         var allowed = row.KindId switch
         {
@@ -239,10 +276,38 @@ public static class AtomRowValidator
         var op = (raw is JsonElement el && el.ValueKind == JsonValueKind.String ? el.GetString() : raw?.ToString())
                  ?.ToLowerInvariant();
 
-        return Array.Exists(allowed, o => string.Equals(o, op, StringComparison.Ordinal))
-            ? AtomRejection.Ok
-            : AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+        if (!Array.Exists(allowed, o => string.Equals(o, op, StringComparison.Ordinal)))
+            return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
                 $"{row.AtomId}: op '{op}' is not one of {string.Join(" | ", allowed)}");
+
+        // D6: `op` is one of the four legal strings, but for stat.derived that is necessary, not
+        // sufficient — the TARGET CHANNEL's registered compose kind may not read this op at all
+        // (e.g. `increased` on a FlatSum channel), in which case DerivedComposer would accept the row
+        // and silently produce zero effect forever. Checked only when the caller supplies a resolver;
+        // composeKindOf is null in every context that has no DerivedStatRegistry to ask (kept optional
+        // like curveInput, not required, so this method has no hard dependency on Stats.Derived wiring).
+        if (string.Equals(row.KindId, "stat.derived", StringComparison.Ordinal) && composeKindOf is not null)
+        {
+            if (!pars.TryGetValue("channel", out var channelRaw))
+                return AtomRejection.Ok; // schema already requires it; absence is that check's job
+
+            var channel = channelRaw is JsonElement channelEl && channelEl.ValueKind == JsonValueKind.String
+                ? channelEl.GetString()
+                : channelRaw?.ToString();
+            if (string.IsNullOrEmpty(channel)) return AtomRejection.Ok;
+
+            var kind = composeKindOf(channel);
+            if (kind is null) return AtomRejection.Ok; // unregistered channel is G6's job, not this check's
+
+            var acceptedOps = DerivedComposeAcceptedOps[kind.Value];
+            if (!Array.Exists(acceptedOps, o => string.Equals(o, op, StringComparison.Ordinal)))
+                return AtomRejection.Fail(AtomRejectionReason.ParamNotHonoured,
+                    $"{row.AtomId}: op '{op}' on channel '{channel}' ({kind.Value}) is never read — " +
+                    $"{kind.Value} composes only {string.Join(" | ", acceptedOps)}. This would bind and " +
+                    "then apply nothing, which is the exact silent no-op this layer refuses (D6).");
+        }
+
+        return AtomRejection.Ok;
     }
 
     static bool TryParseObject(

@@ -10,7 +10,13 @@ namespace FusionRpg.Core.Battle.Ai;
 /// real, Θ-scaled spend, going through `point-economy`'s own <see cref="PointBudget"/> rather than any
 /// private math (PS-3, ideal §4.1 rule 2: a pattern is a mechanism, never its own scale function).
 /// </summary>
-public sealed record ZombossPattern(string Id, IReadOnlyDictionary<string, long> SharePermille)
+/// <param name="AuraId">aura-skill T17: which of the twelve `AuraContentCatalog` auras this pattern
+/// runs — "authored data, tunable, no AI logic" (owner's own framing). Derived from each pattern's
+/// OWN already-authored `SharePermille` (the highest-weighted aptitude in that pattern, ties broken
+/// alphabetically) rather than a second, independent hand-pick — the aura a pattern runs matches the
+/// aptitude it already invests in most, which is what "the aggressive pattern runs Might" means in
+/// practice once a real weight table exists to check it against.</param>
+public sealed record ZombossPattern(string Id, IReadOnlyDictionary<string, long> SharePermille, string AuraId)
 {
     /// <summary>Converts this pattern's shares into a real <see cref="AptitudeAllocation"/> spending
     /// AT MOST <paramref name="budget"/> points total — never more (spec §2 point 4, "the anti-cheat":

@@ -90,13 +90,19 @@ dotnet test tests\FusionRpg.Launcher.Tests
 
 ## 6. Fast deploy (real game + injector)
 
-One command from the repo root: build injector into `BepInEx\plugins\FusionRpg\`, start the RPG server **without** the simulator, launch `PlantsVsZombiesRH.exe`.
+One command from the repo root: build the web UI, build the injector into the game's mod folder, start the RPG server **without** the simulator, launch `PlantsVsZombiesRH.exe`.
 
 ```powershell
 .\scripts\deploy-play.ps1
 ```
 
-Flags: `-NoGame`, `-NoServer`, `-RebuildUi`, `-RestartServer`.
+Default host is MelonLoader (2026-08-30, `H:\Games\PVZ-Fusion-3.9_MelonLoader` on this machine — faster
+startup than the older BepInEx install), building into that game's `Mods\` folder. Pass
+`-LoaderHost BepInEx` for the older `BepInEx\plugins\FusionRpg\` install instead.
+
+The web UI build runs by default (2026-08-30 — it used to be opt-in via `-RebuildUi` and got forgotten,
+leaving a stale FE served for a whole session). Flags: `-LoaderHost` (`MelonLoader`/`BepInEx`), `-NoGame`,
+`-NoServer`, `-NoRebuildUi` (skip the web UI build), `-RestartServer`.
 
 SQLite for this session: `dist/FusionRpg.Server/data/rpg-hot.sqlite` + `rpg-media.sqlite` (beside the published exe; gitignored). Icons/almanac are BLOBs in the media file.
 

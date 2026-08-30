@@ -161,7 +161,7 @@ How the numeric subsystems relate: **ActorHub** is the shared substrate (only pl
 
 ## 11. Build, release, contracts
 
-- **Dev loop:** `scripts/deploy-play.ps1` — guards → build injector into the game folder → publish server to `dist/FusionRpg.Server` → launch game. MelonLoader via `FUSIONRPG_ML_GAMEDIR` + `-LoaderHost MelonLoader`.
+- **Dev loop:** `scripts/deploy-play.ps1` — guards → build injector into the game folder → publish server to `dist/FusionRpg.Server` → launch game. Default `-LoaderHost` is `MelonLoader` (2026-08-30, `H:\Games\PVZ-Fusion-3.9_MelonLoader`); pass `-LoaderHost BepInEx` for the older FULL MOD TOOL install.
 - **Player release:** `scripts/publish-player.ps1` — Vite build into `wwwroot` → self-contained Server + Launcher publishes → injector drop fan-out into `DropIntoGame/{profile}/{loader}` → `dist/FusionRpg` zip. Players double-click `FusionRpg.Launcher.exe`; nobody installs Node or a .NET SDK.
 - **Contract versions (orthogonal):** `FoundationContractVersion = 2` (FA10 exists; surfaced at `GET /api/debug/effects/contract`) · `MatchRuntimeContractVersion = 1` (Snapshot/GateResult shape).
 - **Game profiles:** `pvzrh-3.8.1` (default, BepInEx + MelonLoader) and `pvzrh-3.9` (MelonLoader, auto-detected by `GameAssembly.dll` size). Build-level only — not a DB column. See [game-versioning.md](game-versioning.md).

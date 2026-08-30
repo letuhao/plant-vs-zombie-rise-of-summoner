@@ -40,7 +40,7 @@ export function ActorLadderDemoPage() {
           : { kind: "ready", data: adaptActor(query.data.items[0]!) };
 
   return (
-    <Page title="Actor ladder" description="T8 proof surface — five rungs, one contract type." testId="page-actor-ladder-demo">
+    <Page title="Actor ladder" description="Five presentation sizes, one creature contract." testId="page-actor-ladder-demo">
       <div className="flex flex-col gap-6">
         <section>
           <p className="mb-2 text-xs font-bold uppercase tracking-wide text-faint">Rung 1 — token</p>

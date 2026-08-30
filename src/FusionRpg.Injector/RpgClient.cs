@@ -62,6 +62,8 @@ public sealed class RpgClient
     {
         await RefreshStatsAsync().ConfigureAwait(false);
         await RefreshPvzStatsAsync().ConfigureAwait(false);
+        await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+        await RefreshPowerIndexAsync().ConfigureAwait(false);
         try
         {
             _hub = new HubConnectionBuilder()
@@ -88,6 +90,10 @@ public sealed class RpgClient
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "pvz.stats.reload" });
             });
+            _hub.On<object>("AptitudesUpdated", _ =>
+            {
+                CheatCommandRunner.Enqueue(new CommandDto { Name = "aptitudes.allocation.reload" });
+            });
             _hub.On<CommandDto>("Command", cmd =>
             {
                 try { RpgHost.Log.Info("[cheat-cmd] signalr " + (cmd?.Name ?? "?")); } catch { }
@@ -107,6 +113,13 @@ public sealed class RpgClient
                 {
                     await _hub.InvokeAsync("Join", RpgConstants.InjectorGroup).ConfigureAwait(false);
                     await _hub.InvokeAsync("Hello", new HelloDto { Game = RpgHost.GameProfileId, Version = "1.0.0" }).ConfigureAwait(false);
+                    // Found 2026-08-30 alongside the AptitudesUpdated group-mismatch fix
+                    // (AptitudeEndpoints.cs): a reconnect (e.g. a server restart) re-joins the group
+                    // but never re-syncs the two caches StartAsync populates at first connect, so any
+                    // allocation/Θ change made during the disconnected window was silently lost until
+                    // the next full injector process restart, not just the next reconnect.
+                    await RefreshCommanderAllocationAsync().ConfigureAwait(false);
+                    await RefreshPowerIndexAsync().ConfigureAwait(false);
                     RpgHost.Log.Info("SignalR reconnected + re-joined + Hello (grant rehydrate)");
                 }
                 catch (Exception ex)
@@ -316,6 +329,80 @@ public sealed class RpgClient
             var dto = JsonSerializer.Deserialize<PvzStatsModifiersDto>(json, Json);
             if (dto == null) return;
             CheatState.ApplyPvzStatsModifiers(dto.PlayerId, dto.Revision, dto.Modifiers);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>aura-skill T5 (W1): the transport half of the commander allocation delegate
+    /// <c>CheatState.ActorHub</c> needs. Mirrors <see cref="RefreshPvzStatsAsync"/>'s own shape exactly
+    /// (same current-player lookup, same try/catch-to-LastError) — this reads
+    /// <c>GET /api/aptitudes/{playerId}</c> (already shipped, <c>AptitudeEndpoints.ProjectState</c>'s
+    /// <c>shares</c> map) rather than adding a new server endpoint. Called at session start
+    /// (<see cref="StartAsync"/>) and on the same <c>"AptitudesUpdated"</c> SignalR broadcast
+    /// <c>AptitudeEndpoints.BroadcastBestEffort</c> already sends on every save — never on a per-hit
+    /// poll.</summary>
+    public async Task RefreshCommanderAllocationAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+            var json = await Http().GetStringAsync(_base + "/api/aptitudes/" + playerId).ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(json);
+            if (!doc.RootElement.TryGetProperty("shares", out var sharesEl) || sharesEl.ValueKind != JsonValueKind.Object)
+                return;
+
+            var allocation = FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+            foreach (var share in sharesEl.EnumerateObject())
+            {
+                if (!share.Value.TryGetInt64(out var points) || points == 0) continue;
+                allocation += FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Single(
+                    FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, share.Name, points);
+            }
+            CheatState.ApplyCommanderAllocation(allocation);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>aura-skill T6 (W2): the hydration source `InjectorPowerIndexProvider.Hydrate` never
+    /// had — Θ read as flat `P(0) = C` for every actor in production regardless of level
+    /// (`PowerIndexHydrationTests.Magnitude_isFlatWhenThetaIsZero` pins this as the pre-T6 symptom).
+    /// Reads the already-shipped `GET /api/rpg/progression/{playerId}/summary` (no new server
+    /// endpoint) for `player.level` — the one field `ServerPowerIndexProvider.ReadSnapshot` itself
+    /// hydrates from server-side (its own doc comment: `realmsAdvanced`/`pvzRuns` have no column
+    /// anywhere yet, so both stay 0, matching the server's own honest partial hydration exactly, not
+    /// a shortcut unique to this path). Called at session start and on demand — never per hit.</summary>
+    public async Task RefreshPowerIndexAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+            var json = await Http().GetStringAsync(_base + "/api/rpg/progression/" + playerId + "/summary").ConfigureAwait(false);
+            using var doc = JsonDocument.Parse(json);
+            var daveLevel = 0;
+            if (doc.RootElement.TryGetProperty("player", out var playerEl)
+                && playerEl.ValueKind == JsonValueKind.Object
+                && playerEl.TryGetProperty("level", out var levelEl)
+                && levelEl.TryGetInt64(out var lvl))
+                daveLevel = checked((int)lvl);
+
+            CheatState.ApplyPowerSnapshot(playerId,
+                new FusionRpg.Core.Power.ActorLadderSnapshot(daveLevel, RealmsAdvanced: 0, PvzRuns: 0));
         }
         catch (Exception ex)
         {

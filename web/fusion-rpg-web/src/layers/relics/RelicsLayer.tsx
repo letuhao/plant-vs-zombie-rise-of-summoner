@@ -91,7 +91,11 @@ export function RelicsLayer({
       open={open}
       onOpenChange={onOpenChange}
       title="Relics"
-      subtitle={selectedActor ? `Equipping to ${selectedActor.instanceId} · ${equippedSlots.length} of 3 slots used` : "Held"}
+      subtitle={
+        selectedActor
+          ? `Equipping to #${selectedActor.instanceId.slice(0, 6)} · ${equippedSlots.length} of 3 slots used`
+          : "Held"
+      }
       testId="relics-layer"
       footer={
         <div className="flex w-full flex-wrap items-center gap-2" data-testid="relics-tabs">
@@ -252,7 +256,7 @@ export function RelicsLayer({
           {tab === "storage" ? (
             <EmptyState
               title="Storage isn't tracked yet"
-              hint="Held items and storage aren't distinguished server-side yet — every relic you hold shows on the Held tab."
+              hint="Held and stored relics aren't split yet — everything you hold shows on the Held tab."
             />
           ) : null}
         </div>

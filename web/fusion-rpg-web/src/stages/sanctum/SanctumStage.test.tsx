@@ -271,10 +271,10 @@ describe("SanctumStage — with a bound creature", () => {
       await waitFor(() => expect(screen.getByTestId("creatures-layer")).toBeInTheDocument());
     });
 
-    it("the map table honestly states sectors held as Pending, and Travel opens the World route", () => {
+    it("the map table states sectors held aren't shown yet, and Travel opens the World route", () => {
       mockUseUniqueActors.mockReturnValue({ data: oneActor });
       renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
-      expect(screen.getByTestId("sanctum-home-sectors-held")).toHaveTextContent("Pending");
+      expect(screen.getByTestId("sanctum-home-sectors-held")).toHaveTextContent("not shown yet");
       expect(screen.getByTestId("sanctum-home-travel")).toBeInTheDocument();
     });
 
@@ -283,7 +283,7 @@ describe("SanctumStage — with a bound creature", () => {
       renderWithProviders(<SanctumStage />, { withGlobalKeys: true });
       expect(screen.getByTestId("sanctum-home-tonight-empty")).toBeInTheDocument();
       expect(screen.getByTestId("sanctum-home-defend")).toBeInTheDocument();
-      expect(screen.getByTestId("sanctum-home-run-note")).toHaveTextContent("T21");
+      expect(screen.getByTestId("sanctum-home-run-note")).toHaveTextContent("already on the lawn");
     });
   });
 });

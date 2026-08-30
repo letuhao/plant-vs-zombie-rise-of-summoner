@@ -1,6 +1,22 @@
-import type { ActorView } from "@/contract/types";
+import type { ActorPhase, ActorView } from "@/contract/types";
 import type { Pending } from "@/contract/pending";
 import { cn } from "@/lib/cn";
+
+/** Player-facing label for an actor lifecycle phase. */
+export function formatActorPhase(phase: ActorPhase): string {
+  switch (phase) {
+    case "ActiveBound":
+      return "Bound";
+    case "ActiveUnbound":
+      return "Unbound";
+    case "Retired":
+      return "Retired";
+    case "Idle":
+      return "Idle";
+    default:
+      return phase;
+  }
+}
 
 /** Art is a registry concern that hasn't shipped yet (web/spec.md §1) — an initial stands in honestly rather than faking an icon. */
 export function ActorFrame({

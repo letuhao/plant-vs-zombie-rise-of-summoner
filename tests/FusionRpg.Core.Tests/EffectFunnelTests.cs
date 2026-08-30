@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Effects.Plugins;
 using Xunit;
 
 namespace FusionRpg.Core.Tests;
@@ -104,9 +105,11 @@ public class EffectFunnelTests
     }
 
     [Fact]
-    public void BeginMatch_stubs_grant_via_funnel()
+    public void BeginMatch_prove_plugins_grant_via_funnel()
     {
         var host = new SimEffectHost();
+        SecondaryPluginRegistry.RegisterById(host.Plugins,
+            SecondaryPluginRegistry.CreateProve().Select(p => p.PluginId));
         host.BeginMatch("m-funnel");
         Assert.True(host.Bag.HasGrantForEffect("fx.butter_on_hit"));
         Assert.True(host.Bag.HasGrantForEffect("fx.passive_atk_flat"));

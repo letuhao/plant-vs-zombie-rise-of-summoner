@@ -28,18 +28,20 @@ public static class ZombossPatterns
         new Dictionary<string, ZombossPattern>(StringComparer.Ordinal)
         {
             // ── 3 pure — this posture's own kit, ported from tools/CombatSim's own measured archetypes ──
+            // AuraId (T17): each pattern's own highest-SharePermille aptitude, ties broken
+            // alphabetically -- derived from the weights already authored above, not a second pick.
             ["force-pure"] = new("force-pure", new Dictionary<string, long>
             {
                 ["Might"] = 396, ["Vigor"] = 150, ["Onslaught"] = 153, ["Retribution"] = 300,
-            }),
+            }, AuraId: "Might"),
             ["finesse-pure"] = new("finesse-pure", new Dictionary<string, long>
             {
                 ["Agility"] = 429, ["Composure"] = 391, ["Pierce"] = 150, ["Focus"] = 30,
-            }),
+            }, AuraId: "Agility"),
             ["bastion-pure"] = new("bastion-pure", new Dictionary<string, long>
             {
                 ["Bulwark"] = 180, ["Fortitude"] = 170, ["Precision"] = 248, ["Ferocity"] = 402,
-            }),
+            }, AuraId: "Ferocity"),
 
             // ── 6 mixed — the three NON-self-cancelling (defence, breaks) pairs, two variants each ──
             // "armoured counter-puncher": FORCE-defence + BASTION-breaks (Bastion's breaks counter
@@ -47,31 +49,31 @@ public static class ZombossPatterns
             ["force-defence-bastion-breaks-guard"] = new("force-defence-bastion-breaks-guard", new Dictionary<string, long>
             {
                 ["Fortitude"] = 300, ["Vigor"] = 300, ["Precision"] = 200, ["Ferocity"] = 200,
-            }),
+            }, AuraId: "Fortitude"), // tie with Vigor at 300, alphabetical
             ["force-defence-bastion-breaks-aggro"] = new("force-defence-bastion-breaks-aggro", new Dictionary<string, long>
             {
                 ["Fortitude"] = 200, ["Vigor"] = 200, ["Precision"] = 300, ["Ferocity"] = 300,
-            }),
+            }, AuraId: "Ferocity"), // tie with Precision at 300, alphabetical
             // "evasive guard-breaker": FINESSE-defence + FORCE-breaks (Force's breaks counter BASTION,
             // not FINESSE — §3's second row).
             ["finesse-defence-force-breaks-guard"] = new("finesse-defence-force-breaks-guard", new Dictionary<string, long>
             {
                 ["Agility"] = 300, ["Composure"] = 300, ["Onslaught"] = 400,
-            }),
+            }, AuraId: "Onslaught"),
             ["finesse-defence-force-breaks-aggro"] = new("finesse-defence-force-breaks-aggro", new Dictionary<string, long>
             {
                 ["Agility"] = 200, ["Composure"] = 200, ["Onslaught"] = 600,
-            }),
+            }, AuraId: "Onslaught"),
             // "parrying armour-piercer": BASTION-defence + FINESSE-breaks (Finesse's breaks counter
             // FORCE, not BASTION — §3's third row).
             ["bastion-defence-finesse-breaks-guard"] = new("bastion-defence-finesse-breaks-guard", new Dictionary<string, long>
             {
                 ["Bulwark"] = 300, ["Retribution"] = 300, ["Pierce"] = 400,
-            }),
+            }, AuraId: "Pierce"),
             ["bastion-defence-finesse-breaks-aggro"] = new("bastion-defence-finesse-breaks-aggro", new Dictionary<string, long>
             {
                 ["Bulwark"] = 200, ["Retribution"] = 200, ["Pierce"] = 600,
-            }),
+            }, AuraId: "Pierce"),
         };
 
     /// <summary>In ordinal id order, so anything that enumerates patterns is reproducible — copied

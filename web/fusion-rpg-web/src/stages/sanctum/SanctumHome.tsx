@@ -51,7 +51,7 @@ export function SanctumHome({
 
         <Panel title="The map table" testId="sanctum-home-map-table">
           <p className="text-sm text-muted" data-testid="sanctum-home-sectors-held">
-            Sectors held — Pending (the map is excluded this phase)
+            Sectors held — not shown yet
           </p>
           <Button size="sm" className="mt-2" onClick={() => navigate("/world")} data-testid="sanctum-home-travel">
             Travel to the map
@@ -82,7 +82,7 @@ export function SanctumHome({
             Defend the lawn
           </Button>
           <p className="mt-2 text-xs text-muted" data-testid="sanctum-home-run-note">
-            Plays with whatever is already deployed — loadout selection isn't built yet (T21).
+            Uses whatever is already on the lawn.
           </p>
         </Panel>
       </div>

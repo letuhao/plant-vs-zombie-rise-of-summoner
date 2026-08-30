@@ -91,8 +91,8 @@
       "cap": null,
       "unitClass": "GameUnits",
       "statClass": "Pool",
-      "consumer": "AppliedCombat",
-      "unitClassNote": "Inferred, not in the ledger's own table: these add into hp/maxHp/atk/defense/arm* at the AppliedCombat merge, and those primaries ARE GameUnits. Consumer is nameable (ActorHub.MergeAppliedCombat -> EntityStatWriter), so SS8's rejection rule is satisfied. Flagged for the ledger owner to confirm rather than silently adopted."
+      "consumer": "AppliedCombat (composed only -- NOT written to the game)",
+      "unitClassNote": "Corrected 2026-08-30: this family's consumer chain is NOT the same as its siblings'. ActorHub.MergeAppliedCombat composes it into EntityFinal.DefenseFlat, and there the chain STOPS -- neither EntityStatWriter.WritePlant nor WriteZombie reads DefenseFlat or DefensePercent, and plants have no defense-shaped Unity field at all. The live lawn defense path is a separate global per-side cache (GameHooks.EnsureDamageScaleCache resolves CheatState.Stats.Resolve, the primary StatSystem, never the hub), so it never sees this value either. DefenseFlat IS live in Core/sim (SimEngine.ScaleIncoming). Previously this note claimed 'ActorHub.MergeAppliedCombat -> EntityStatWriter', which is true for maxHp/atk/arm1/arm2 and false here. UnitClass GameUnits still stands."
     },
     {
       "family": "progression.bonus.arm1",

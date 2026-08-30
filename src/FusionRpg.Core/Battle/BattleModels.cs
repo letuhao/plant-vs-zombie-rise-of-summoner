@@ -163,7 +163,20 @@ public sealed record BattleSetup
     public IReadOnlyList<BattleActorSetup> Squad { get; init; } = Array.Empty<BattleActorSetup>();
     public IReadOnlyList<BattleActorSetup> Wave { get; init; } = Array.Empty<BattleActorSetup>();
     public string WaveId { get; init; } = "";
+
+    /// <summary>aura-skill T12 (Gate B): commander auras active for this battle. Empty for every
+    /// existing caller (no behavior change) — populated once a real caller (T13+) resolves an active
+    /// aura's magnitude via `AuraMagnitude.Compute` and hands the FINAL value here. This record owns
+    /// delivery only, never the magnitude math (T10's own job, already proven independently) — keeping
+    /// the two concerns composable rather than re-deriving Θ/tuning inside the battle resolver.</summary>
+    public IReadOnlyList<ActiveCommanderAura> ActiveAuras { get; init; } = Array.Empty<ActiveCommanderAura>();
 }
+
+/// <summary>aura-skill T12: one commander aura's already-resolved delivery — "an aura is on" made
+/// concrete as "this channel gets this value, for every actor on this side." <paramref name="Value"/>
+/// is the T10 magnitude (`AuraMagnitude.Compute`'s output), computed by the caller before the battle
+/// resolver ever sees it — this record's own job is delivery, not computation.</summary>
+public sealed record ActiveCommanderAura(string CommanderSide, string TargetChannel, long Value, string SourceId);
 
 public enum BattleOutcome
 {
@@ -287,4 +300,20 @@ public sealed record BattleReport
     public int SoulLootMilli { get; init; } = 1000;
     public IReadOnlyList<BattleEventRec> Events { get; init; } = Array.Empty<BattleEventRec>();
     public IReadOnlyList<BattleActorResult> Actors { get; init; } = Array.Empty<BattleActorResult>();
+
+    /// <summary>
+    /// aura-skill T3 (audit D3): named content dropped at resolve time rather than thrown — today,
+    /// an actor whose `EquippedActionIds` cannot be resolved (no `ActionCatalog` supplied, or an id
+    /// the catalog doesn't have) degrades to the single basic-attack fallback instead of failing the
+    /// whole battle, and the dropped ids are recorded here.
+    ///
+    /// <para><b>Provenance, not battle math</b> — same treatment as <see cref="ContentHash"/> and
+    /// <see cref="EnvironmentStamp"/>: null by default, omitted from JSON when empty, and blanked in
+    /// the golden hash (`BattleGoldenTests.Hash`). Every setup blessed by an existing golden has a
+    /// resolvable loadout (or none), so this is null for every one of them today — no golden moves by
+    /// this field existing.</para>
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore(
+        Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyList<string>? Warnings { get; init; }
 }

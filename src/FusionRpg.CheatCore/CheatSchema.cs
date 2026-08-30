@@ -93,12 +93,16 @@ public static class CheatSchema
                      "F-WAVE-FREEZE", "G-TIMEFREEZE", "G-AUTOCOLLECT", "G-FREE-SET",
                      "H-ANYWHERE", "H-NOCD-CARD", "H-NOCD-GLOVE", "H-NOCD-HAMMER", "H-NOCD-WHEEL", "H-MOWER-INF",
                      "SYS-LIMHEALTH-GATE", "SYS-LIMHEALTH-OBSERVE",
-                     "OVERLAY-COMBAT", "DEBUG-LEVEL-ENTRY"
+                     "DEBUG-LEVEL-ENTRY"
                  })
             T(id);
         T("SYS-EMIT-PROOF", true);
         T("SYS-DAMAGE-FX", true);
         T("SYS-ELEMENT-FX", true);
+        // T8: C1-C13 proved green on a real MelonLoader 3.9 lawn 2026-08-30 (docs/research/
+        // effect-runtime/_prove-overlay-combat.json); promoted per spec-overlay-combat-enable.md
+        // §7's own "only after the proof" rule.
+        T("OVERLAY-COMBAT", true);
 
         Cfg("D-DMG-%", 1, "slider");
         Extra("D-DMG-SET"); Extra("D-TYPE-SWAP");

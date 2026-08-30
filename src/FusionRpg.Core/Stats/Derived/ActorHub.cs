@@ -72,6 +72,20 @@ public sealed class ActorHub
         return snapshot;
     }
 
+    /// <summary>aura-skill T18 (GG-49): the SAME compose <see cref="ResolveDerived"/> runs, with the
+    /// per-source modifier list also retained via <see cref="DerivedContributionBag"/> instead of
+    /// being discarded the moment `Compose` returns — *"why did my attack drop"* is unanswerable
+    /// without this. Not a second resolve: the same `mods` list feeds both the snapshot and the bag,
+    /// so the two can never disagree about what contributed.</summary>
+    public (ActorDerivedSnapshot Snapshot, DerivedContributionBag Contributions) ResolveDerivedWithContributions(StatContext ctx)
+    {
+        if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+        var mods = new List<DerivedModifier>();
+        foreach (var subsystem in _subsystems)
+            subsystem.ContributeDerived(ctx, mods);
+        return (_composer.Compose(mods), DerivedContributionBag.From(mods));
+    }
+
     static EntityFinal MergeAppliedCombat(EntityFinal primary, ActorDerivedSnapshot derived)
     {
         var bonusMaxHp = (long)Math.Round(derived.Get(DerivedStatChannels.ProgressionBonusMaxHp, 0));

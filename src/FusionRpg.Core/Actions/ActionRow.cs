@@ -57,8 +57,13 @@ public sealed record ActionRow
 /// `(action_id, resource_id, amount_spec, when)` — spec-action-model.md §3. A table, not columns,
 /// because one action may cost several resources.
 /// </summary>
+/// <param name="AllowLethal">aura-skill T14 (`resource-hub-ssot.md`): an `hp` cost floors at 1 by
+/// default — `CostLedger` refuses (`CannotAfford("hp")`) rather than let payment bring an actor to 0
+/// or below — unless the action explicitly opts into lethality here. Ignored for every other resource
+/// id; those pools reaching 0 is an ordinary, legal state. Defaults to `false` so every existing
+/// 4-argument call site (positional or named) is unaffected.</param>
 public sealed record ActionCostRow(
-    string ActionId, string ResourceId, ValueSpec AmountSpec, ActionCostTiming When);
+    string ActionId, string ResourceId, ValueSpec AmountSpec, ActionCostTiming When, bool AllowLethal = false);
 
 /// <summary>
 /// `(action_id, atom_id, scope)` — spec-action-model.md §4. Rows are optional; an atom with no row

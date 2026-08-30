@@ -1,0 +1,435 @@
+{
+  "at": "2026-08-30T14:03:13.0212147+07:00",
+  "phase": "static+live",
+  "signatures": [
+    {
+      "statusId": "wither",
+      "applyRgb": "140,110,90",
+      "auraStyle": "WispOut",
+      "tintStrength": 0.25,
+      "markerShape": null,
+      "applyBurstKey": "Radial|count=10|life=0.35|scale=1.00",
+      "structuralKey": "WispOut|tint=0.25|marker="
+    },
+    {
+      "statusId": "blight",
+      "applyRgb": "130,160,60",
+      "auraStyle": "BubbleRise",
+      "tintStrength": 0.2,
+      "markerShape": null,
+      "applyBurstKey": "Rising|count=12|life=0.50|scale=1.00",
+      "structuralKey": "BubbleRise|tint=0.2|marker="
+    },
+    {
+      "statusId": "rot",
+      "applyRgb": "120,90,50",
+      "auraStyle": "ChunkFall",
+      "tintStrength": 0.2,
+      "markerShape": null,
+      "applyBurstKey": "Radial|count=8|life=0.45|scale=1.35",
+      "structuralKey": "ChunkFall|tint=0.2|marker="
+    },
+    {
+      "statusId": "spark",
+      "applyRgb": "255,240,120",
+      "auraStyle": "SparkStrobe",
+      "tintStrength": 0,
+      "markerShape": null,
+      "applyBurstKey": "Radial|count=16|life=0.30|scale=1.00",
+      "structuralKey": "SparkStrobe|tint=0|marker="
+    },
+    {
+      "statusId": "spore",
+      "applyRgb": "150,200,90",
+      "auraStyle": "SporeDrift",
+      "tintStrength": 0,
+      "markerShape": null,
+      "applyBurstKey": "Rising|count=12|life=0.45|scale=1.00",
+      "structuralKey": "SporeDrift|tint=0|marker="
+    },
+    {
+      "statusId": "pact_mark",
+      "applyRgb": "170,90,220",
+      "auraStyle": "PactFootPulse",
+      "tintStrength": 0,
+      "markerShape": "Diamond",
+      "applyBurstKey": "Radial|count=12|life=0.30|scale=1.10",
+      "structuralKey": "PactFootPulse|tint=0|marker=Diamond"
+    },
+    {
+      "statusId": "leech",
+      "applyRgb": "180,60,60",
+      "auraStyle": "StreamOut",
+      "tintStrength": 0.15,
+      "markerShape": null,
+      "applyBurstKey": "Directional|count=10|life=0.40|scale=1.00",
+      "structuralKey": "StreamOut|tint=0.15|marker="
+    },
+    {
+      "statusId": "expose",
+      "applyRgb": "250,250,140",
+      "auraStyle": "CrackleJitter",
+      "tintStrength": 0,
+      "markerShape": "TriangleDown",
+      "applyBurstKey": "Rising|count=10|life=0.40|scale=1.00",
+      "structuralKey": "CrackleJitter|tint=0|marker=TriangleDown"
+    },
+    {
+      "statusId": "shatter",
+      "applyRgb": "200,230,255",
+      "auraStyle": "ShardGlitter",
+      "tintStrength": 0.15,
+      "markerShape": null,
+      "applyBurstKey": "Directional|count=10|life=0.40|scale=1.25",
+      "structuralKey": "ShardGlitter|tint=0.15|marker="
+    },
+    {
+      "statusId": "bond",
+      "applyRgb": "255,170,200",
+      "auraStyle": "Orbit",
+      "tintStrength": 0,
+      "markerShape": "Ring",
+      "applyBurstKey": "Radial|count=10|life=0.40|scale=1.00",
+      "structuralKey": "Orbit|tint=0|marker=Ring"
+    },
+    {
+      "statusId": "rally",
+      "applyRgb": "255,200,90",
+      "auraStyle": "RiseSparkle",
+      "tintStrength": 0.1,
+      "markerShape": null,
+      "applyBurstKey": "Rising|count=13|life=0.50|scale=1.05",
+      "structuralKey": "RiseSparkle|tint=0.1|marker="
+    },
+    {
+      "statusId": "command",
+      "applyRgb": "120,140,255",
+      "auraStyle": "CommandCrownPulse",
+      "tintStrength": 0,
+      "markerShape": "Ring",
+      "applyBurstKey": "Radial|count=10|life=0.35|scale=0.95",
+      "structuralKey": "CommandCrownPulse|tint=0|marker=Ring"
+    },
+    {
+      "statusId": "charm_pulse",
+      "applyRgb": "240,120,240",
+      "auraStyle": "CharmHeartbeat",
+      "tintStrength": 0.15,
+      "markerShape": null,
+      "applyBurstKey": "Radial|count=14|life=0.35|scale=0.90",
+      "structuralKey": "CharmHeartbeat|tint=0.15|marker="
+    }
+  ],
+  "colorOnlyPairs": [],
+  "forcedChoiceMatrix": [
+    {
+      "a": "blight",
+      "b": "rot",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "wither",
+      "b": "blight",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "wither",
+      "b": "rot",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "spark",
+      "b": "shatter",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "spark",
+      "b": "expose",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "shatter",
+      "b": "expose",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "spore",
+      "b": "bond",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "spore",
+      "b": "charm_pulse",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "bond",
+      "b": "charm_pulse",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "pact_mark",
+      "b": "command",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "leech",
+      "b": "wither",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    },
+    {
+      "a": "rally",
+      "b": "spark",
+      "predictedRisk": "low",
+      "humanTrials": 5,
+      "humanCorrect": null,
+      "notes": "Run blind pairwise LIVE; override predictedRisk"
+    }
+  ],
+  "p0ForcedChoicePairs": [
+    {
+      "a": "blight",
+      "b": "rot"
+    },
+    {
+      "a": "wither",
+      "b": "blight"
+    },
+    {
+      "a": "wither",
+      "b": "rot"
+    },
+    {
+      "a": "spark",
+      "b": "shatter"
+    },
+    {
+      "a": "spark",
+      "b": "expose"
+    },
+    {
+      "a": "shatter",
+      "b": "expose"
+    },
+    {
+      "a": "spore",
+      "b": "bond"
+    },
+    {
+      "a": "spore",
+      "b": "charm_pulse"
+    },
+    {
+      "a": "bond",
+      "b": "charm_pulse"
+    },
+    {
+      "a": "pact_mark",
+      "b": "command"
+    },
+    {
+      "a": "leech",
+      "b": "wither"
+    },
+    {
+      "a": "rally",
+      "b": "spark"
+    }
+  ],
+  "staticTestPass": true,
+  "live": [
+    {
+      "statusId": "wither",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "blight",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "rot",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "spark",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "spore",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "pact_mark",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "leech",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "expose",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "shatter",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "bond",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "rally",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "command",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "statusId": "charm_pulse",
+      "sustainedStarted": false,
+      "fxState": {
+        "ok": true,
+        "queued": 1
+      }
+    },
+    {
+      "case": "two-status-cap",
+      "pact_mark_plus_wither": {
+        "ok": true,
+        "queued": 1
+      },
+      "after_third_apply": {
+        "ok": true,
+        "queued": 1
+      }
+    }
+  ],
+  "predictedSustainGlance": {
+    "pass": [
+      "leech",
+      "rally",
+      "pact_mark",
+      "expose",
+      "bond",
+      "command",
+      "wither",
+      "blight",
+      "rot",
+      "spark",
+      "shatter",
+      "spore",
+      "charm_pulse"
+    ],
+    "fail": [],
+    "conditional": []
+  },
+  "predictedApplyMoment": {
+    "fail": [],
+    "conditional": [
+      "wither",
+      "blight",
+      "rot",
+      "spark",
+      "spore",
+      "pact_mark",
+      "leech",
+      "expose",
+      "shatter",
+      "bond",
+      "rally",
+      "command",
+      "charm_pulse"
+    ]
+  },
+  "stressOffline": {
+    "twoStatusCap_markerPriority": "pass-unit-test",
+    "refreshNoFlicker": "pass-unit-test-historical-prove",
+    "horde": "skipped-no-live",
+    "vanillaCoexistence": "skipped-no-live",
+    "globalCap24": "pass-unit-test"
+  },
+  "note": "Forced-choice human trials and screenshots require in-game viewer; record humanCorrect in forcedChoiceMatrix after LIVE."
+}

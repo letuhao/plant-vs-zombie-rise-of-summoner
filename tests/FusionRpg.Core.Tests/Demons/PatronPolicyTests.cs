@@ -17,27 +17,61 @@ public class PatronPolicyTests
     public void Rarity_bases_are_locked(DemonRarity rarity, int baseMilli) =>
         Assert.Equal(baseMilli, PatronPolicy.RarityBaseMilli(rarity));
 
+    // aura-skill T22 (owner sign-off 2026-08-30): AuraMilli = flatPart (the ORIGINAL, still-clamped
+    // formula, unchanged) + pThetaTermMilli (NEW). At Θ=0, P(Θ)=C (the ladder's own floor, NOT zero
+    // — CLAUDE.md's own table), so even Θ=0 contributes a nonzero P(Θ) term; there is no Θ value that
+    // makes the new term vanish, so these tests assert the COMBINED value explicitly rather than
+    // pretending the old flat-only numbers still hold on their own.
+    static long PThetaTermAt(int pTheta, PowerTuning tuning) =>
+        FusionRpg.Core.Demons.Patron.PatronPolicy.AuraMilli(DemonRarity.Common, 0, 0, pTheta, tuning)
+        - FusionRpg.Core.Demons.Patron.PatronPolicy.RarityBaseMilli(DemonRarity.Common); // isolates the term: flatPart(Common,0,0) = RarityBaseMilli(Common) exactly
+
     [Fact]
-    public void Aura_formula_and_clamp()
+    public void Aura_formula_flat_part_plus_pTheta_term()
     {
-        Assert.Equal(20, PatronPolicy.AuraMilli(DemonRarity.Common, star: 0, level: 0));
-        Assert.Equal(75, PatronPolicy.AuraMilli(DemonRarity.Epic, star: 2, level: 10)); // 45+20+10
-        Assert.Equal(150, PatronPolicy.AuraMilli(DemonRarity.Legendary, star: 5, level: 90)); // clamped
-        Assert.Equal(PatronPolicy.AuraClampMilli, PatronPolicy.AuraMilli(DemonRarity.Legendary, 5, 999));
+        var tuning = TuningAt(400);
+        var term0 = PThetaTermAt(pTheta: 0, tuning);
+        Assert.True(term0 > 0, "P(0) = C, never zero -- the new term must contribute even at Θ=0");
+
+        Assert.Equal(20 + term0, PatronPolicy.AuraMilli(DemonRarity.Common, star: 0, level: 0, pTheta: 0, tuning));
+        Assert.Equal(75 + term0, PatronPolicy.AuraMilli(DemonRarity.Epic, star: 2, level: 10, pTheta: 0, tuning)); // 45+20+10 flat
+        // The OLD flat part is still clamped at 150 regardless of star/level -- the P(Θ) term is the
+        // ONLY thing that keeps growing past it.
+        Assert.Equal(150 + term0, PatronPolicy.AuraMilli(DemonRarity.Legendary, star: 5, level: 90, pTheta: 0, tuning));
+        Assert.Equal(PatronPolicy.AuraClampMilli + term0, PatronPolicy.AuraMilli(DemonRarity.Legendary, 5, 999, pTheta: 0, tuning));
+    }
+
+    [Fact]
+    public void The_pTheta_term_grows_with_Theta_this_is_the_whole_point_of_T22()
+    {
+        var tuning = TuningAt(400);
+        var low = PThetaTermAt(pTheta: 0, tuning);
+        var mid = PThetaTermAt(pTheta: 20, tuning);   // the shipped pin
+        var high = PThetaTermAt(pTheta: 1000, tuning);
+
+        Assert.True(mid > low, $"pTheta term must grow with Θ: Θ=0 -> {low}, Θ=20 -> {mid}");
+        Assert.True(high > mid, $"pTheta term must keep growing past the pin: Θ=20 -> {mid}, Θ=1000 -> {high}");
+
+        // The flat part clamps at 150 forever; the pTheta term must eventually exceed that ceiling --
+        // proving patron genuinely stays relevant instead of being permanently capped.
+        Assert.True(high > PatronPolicy.AuraClampMilli,
+            $"at Θ=1000 the pTheta term ({high}) must exceed the old flat ceiling ({PatronPolicy.AuraClampMilli})");
     }
 
     [Fact]
     public void Aura_shape_primary_full_secondary_half_defense_half()
     {
-        var aura = PatronPolicy.Aura(DemonRarity.Epic, star: 2, level: 10, "fire", "ice");
+        var tuning = TuningAt(400);
+        var flatPlusTerm = PatronPolicy.AuraMilli(DemonRarity.Epic, star: 2, level: 10, pTheta: 0, tuning);
+        var aura = PatronPolicy.Aura(DemonRarity.Epic, star: 2, level: 10, pTheta: 0, tuning, "fire", "ice");
         Assert.Equal("fire", aura.ElementPrimary);
-        Assert.Equal(75, aura.PowerMilli);
-        Assert.Equal(37, aura.DefenseMilli); // half, truncating
+        Assert.Equal(flatPlusTerm, aura.PowerMilli);
+        Assert.Equal(flatPlusTerm / 2, aura.DefenseMilli); // half, truncating
         Assert.Equal("ice", aura.ElementSecondary);
-        Assert.Equal(37, aura.SecondaryPowerMilli);
-        Assert.Equal(18, aura.SecondaryDefenseMilli);
+        Assert.Equal(flatPlusTerm / 2, aura.SecondaryPowerMilli);
+        Assert.Equal(flatPlusTerm / 4, aura.SecondaryDefenseMilli);
 
-        var mono = PatronPolicy.Aura(DemonRarity.Common, 0, 0, "dark", null);
+        var mono = PatronPolicy.Aura(DemonRarity.Common, 0, 0, pTheta: 0, tuning, "dark", null);
         Assert.Null(mono.ElementSecondary);
         Assert.Equal(0, mono.SecondaryPowerMilli);
     }

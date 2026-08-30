@@ -58,8 +58,17 @@ public static class AptitudeEndpoints
 
     static async Task BroadcastBestEffort(IHubContext<RpgHub> hub, long playerId)
     {
+        // Both groups, matching Program.cs/SimEndpoints.cs's own PvzStatsUpdated pattern: the web
+        // client refetches on this event, and the injector's RpgClient.cs:93 handler (enqueues
+        // "aptitudes.allocation.reload" -> RefreshCommanderAllocationAsync) needs it too -- an
+        // injector connection only ever joins InjectorGroup (RpgHub.cs:27-28), so a WebGroup-only
+        // send here left CheatState.CommanderAllocation stale until the next injector reconnect.
+        // Found 2026-08-30 verifying aura-skill T5/T6's own "wired end-to-end" claim against a real
+        // live game -- confirmed dead via a live probe, not assumed from reading code alone.
         try { await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("AptitudesUpdated", new { playerId }); }
         catch { /* best-effort; the allocation is durable and the next GET reflects it */ }
+        try { await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("AptitudesUpdated", new { playerId }); }
+        catch { /* best-effort; the injector re-syncs at its own next session start regardless */ }
     }
 
     /// <summary>The store is agnostic to key shape (`RpgStore.Aptitudes.cs`'s own contract) — matches

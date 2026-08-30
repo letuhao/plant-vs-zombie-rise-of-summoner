@@ -16,7 +16,7 @@ Plan: [vfx-v3-plan.md](vfx-v3-plan.md) · Spec: [../SPEC.md](../SPEC.md)
 - [x] Lifecycle core offline-green (1,064 core / 40 CheatCore / 40 Guard; Melon + Server builds clean). Note: paused mid-run for the parallel shield session's RED tests to turn green (their T1 landed; not our files).
 
 - [x] **V3: Aura primitive + wither pilot** (spec M3) — offline complete (envelope tests green; LIVE eyeball folded into the final gate)
-  - Pure `VfxAuraMath` (Drip/Orbit/RiseSparkle/CrackleJitter/PulseRing/StreamOut samplers, envelope-tested); `AuraPool` (24 systems, emission off, soft-disc, explicit colors, ≤6 particles/aura, ~0.3s pulses, per-tick position follow, host-gone reap); recipe kind `Aura`; seed wither (ash-brown Drip).
+  - Pure `VfxAuraMath` (Drip/Orbit/RiseSparkle/CrackleJitter/PulseRing/StreamOut samplers, envelope-tested; identity batches added WispOut/BubbleRise/ChunkFall and SparkStrobe/ShardGlitter); `AuraPool` (24 systems, emission off, soft-disc, explicit colors, ≤6 particles/aura, ~0.3s pulses, per-tick position follow, host-gone reap); recipe kind `Aura`; seed wither (WispOut, was Drip at pilot).
   - Accept: math tests green; LIVE pilot — `debug.status.apply wither` shows aura until expire, `state.started/ended` asserted; owner eyeball.
   - Scope: M.
 
@@ -41,10 +41,7 @@ Plan: [vfx-v3-plan.md](vfx-v3-plan.md) · Spec: [../SPEC.md](../SPEC.md)
   **Offline caveat:** `FusionRpg.Core.Tests` is still uncompilable from the parallel Battle round's stale RED (`BattleReportEmitter` missing since 05:59) — the V6 catalog assertions (13-sustained / 8-vanilla-none / marker set) have not run offline; LIVE played every recipe as partial substitution. Run the suite once Battle lands.
 
 ### Final gate
-- [x] Event-asserted LIVE gate PASSED (46/46, `_prove-vfx.json`). **Owner eyeball pending** — the 13-identity visual checklist printed by the prove run.
-  - Seed all 13 per SPEC §4 (grammar: Drip=DoT, Crackle=armor/electric, Orbit=passive, Rise=buff, PulseRing=mark; markers only pact_mark/expose/bond/command); catalog test pins 13 sustained sets + zero for engine-wrapped 8; prove-vfx lifecycle cases (started / expired / host-gone / refresh-no-end / master-off); SSOT + SPEC + docs sync.
-  - Accept: full prove PASS; 13-row eyeball checklist; owner verdict.
-  - Scope: M.
-
-### Final gate
+- [x] Event-asserted LIVE gate PASSED (46/46, `_prove-vfx.json`).
+- [x] **Static identity audit** (2026-08-30): [`docs/research/vfx/status-identity-audit-2026-08-30.md`](../docs/research/vfx/status-identity-audit-2026-08-30.md) + [`_status-identity-audit.json`](../docs/research/vfx/_status-identity-audit.json) + `scripts/audit-status-vfx-identity.ps1` + `StatusVfxIdentity*` tests (12 green). **Predicted sustain-glance: 6 Pass / 2 Conditional / 5 Fail** — not all identities unique at glance; remediation backlog in audit doc.
+- [ ] **Owner LIVE eyeball** — screenshots + blind pairwise trials (`-Live -Stress -TargetPtr`); human columns in JSON still null. Captures: `docs/research/vfx/status-audit-captures/`.
 - [ ] Full LIVE run + owner visual confirmation; verdict JSON appended; vfx.tick budget re-checked at next perf stress run.

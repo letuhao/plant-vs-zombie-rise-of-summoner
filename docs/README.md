@@ -45,6 +45,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [research/actor-core-chaos-mapping.md](research/actor-core-chaos-mapping.md) | Chaos level/realm/power_scale → Fusion progression.power (reference only) |
 | [research/architecture-stress/00-index.md](research/architecture-stress/00-index.md) | Red-team: situations + break matrix vs dual-authority locks (research only) |
 | [research/mod-loaders.md](research/mod-loaders.md) | BepInEx vs MelonLoader on this machine; host choice (not Effect depth) |
+| [research/commander-fe-audit-2026-08-30.md](research/commander-fe-audit-2026-08-30.md) | Commander/aura FE audit — command list, deploy defaults, genre comparison (audit only) |
 
 ## 2. Architecture (product design)
 
@@ -70,7 +71,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/effect-data.md](architecture/effect-data.md) | Effect / grant / overlay JSON shapes |
 | [architecture/effect-runtime.md](architecture/effect-runtime.md) | Injector apply path + capture → FT* |
 | [architecture/effect-funnel.md](architecture/effect-funnel.md) | Funnel + Guard: Secondary enqueue → merge → FA10 Writer Add (`guard-funnel-delta.ps1` shipped) |
-| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | RPG overlay damage layer: derived combat + element math → signed HP delta — **partially shipped** (resolver/Funnel); overlay CombatMath **deferred** |
+| [architecture/combat-damage-ssot.md](architecture/combat-damage-ssot.md) | RPG overlay damage layer: derived combat + element math → signed HP delta — **shipped and default-on** (resolver/Funnel + overlay CombatMath); C1–C13 proved on a real lawn 2026-08-30 (`docs/runbook/melon-live-checklist.md` §8b) |
 | [architecture/effect-testing.md](architecture/effect-testing.md) | Offline SimEffectHost / scenarios vs LIVE L1–L14 |
 | [architecture/effect-atom-ideal.md](architecture/effect-atom-ideal.md) | **Ideal capture (not a spec)** — atom effects as the smallest unit, skills/traits/items as containers, values + power in SQLite; roll policy (fixed / on-instantiate / on-apply) and power as a category vector |
 | [architecture/effect-adoption-audit-2026-08-22.md](architecture/effect-adoption-audit-2026-08-22.md) | **Adoption tracker** — the 11 sites that own effect-shaped logic, the runtime consumer matrix, what "follows the effect SSOT" means, and a per-stream status table |

@@ -1,4 +1,5 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Stats.Derived;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -24,6 +25,16 @@ public sealed record AtomLoadResult(
 /// </summary>
 public sealed partial class RpgStore
 {
+    // aura-skill T2 (audit D6): resolves a stat.derived row's channel to its registered compose kind,
+    // so AtomRowValidator can reject an op that channel never reads (e.g. `increased` on a FlatSum
+    // channel) rather than accept a row that binds and silently does nothing forever. Built once per
+    // call site, not per row — DerivedStatRegistry.CreateDefault() is a fresh dictionary construction
+    // (PvzStatsSheetComposer.cs's own words), cheap but pointless to repeat per atom in a batch.
+    static readonly DerivedStatRegistry ComposeKindRegistry = DerivedStatRegistry.CreateDefault();
+
+    internal static DerivedComposeKind? ComposeKindOf(string channel) =>
+        ComposeKindRegistry.TryResolveChannel(channel, out var def) ? def.Compose : null;
+
     /// <summary>Called from EnsureHotSchema so a fresh database has both tables.</summary>
     void EnsureAtomSchemaUnlocked(SqliteConnection db)
     {
@@ -101,7 +112,7 @@ public sealed partial class RpgStore
     /// </summary>
     public AtomRejection UpsertAtom(AtomRow row)
     {
-        var check = AtomRowValidator.Validate(row, CurveInputOf);
+        var check = AtomRowValidator.Validate(row, CurveInputOf, ComposeKindOf);
         if (!check.IsOk) return check;
 
         lock (_gate)
@@ -129,7 +140,7 @@ public sealed partial class RpgStore
 
             foreach (var row in rows)
             {
-                var check = AtomRowValidator.Validate(row, CurveInputOf);
+                var check = AtomRowValidator.Validate(row, CurveInputOf, ComposeKindOf);
                 if (!check.IsOk)
                 {
                     bad.Add(new AtomLoadRejection(row?.AtomId ?? "(null)", check.Reason, check.Detail));

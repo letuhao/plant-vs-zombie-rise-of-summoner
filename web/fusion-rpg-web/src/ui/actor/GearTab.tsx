@@ -20,8 +20,8 @@ export function GearTab({ data }: { data: ActorView }) {
   }
   return (
     <EmptyState
-      title="No gear slots wired yet"
-      hint="Equipment has its own design (spec-equip-and-paperdoll.md) — this tab becomes real once that system has a server endpoint."
+      title="No gear slots yet"
+      hint="Equipment is coming in a later update."
       testId="gear-tab-empty"
     />
   );

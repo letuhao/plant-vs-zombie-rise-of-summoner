@@ -90,8 +90,29 @@ public static partial class BattleEngine
         /// lifetime as Cooldowns/Shields above.</summary>
         public readonly BattleStatModifierLedger Ledger = new();
 
+        /// <summary>aura-skill T4: the recompose seam for `Derived` (`combat.*`) channels — one
+        /// instance per battle, same lifetime as <see cref="Ledger"/>. Nothing adds to this yet (no
+        /// aura wiring lands before T9); it exists so a later, real toggle event has a call to make
+        /// rather than a mechanism to invent under time pressure.</summary>
+        public readonly BattleDerivedModifierLedger DerivedLedger = new();
+
+        /// <summary>aura-skill T4: the explicit recompose entry point — deliberately not called
+        /// anywhere in `Resolve`'s own loop. "Explicit, never implicit per-tick" (the task's own
+        /// acceptance bar) means a real trigger (an aura toggling on/off, T13) calls this at the
+        /// moment it happens; nothing calls it on a schedule.</summary>
+        public void RecomposeDerived(string actorKey)
+        {
+            var actor = ByKey[actorKey];
+            DerivedLedger.Recompose(actorKey, actor.BaseDerived, actor.Derived);
+        }
+
         readonly List<ShieldEventRec> _shieldEventScratch = new();
         readonly Dictionary<string, IReadOnlyList<CompiledAction>> _heldActions = new(StringComparer.Ordinal);
+
+        /// <summary>aura-skill T3 (audit D3): equipped-action ids that could not be resolved against
+        /// the supplied <see cref="ActionCatalog"/> — the actor degrades to the basic-attack fallback
+        /// instead of failing the whole battle. Empty on every setup a golden has ever blessed.</summary>
+        public readonly List<string> Warnings = new();
 
         public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace,
             Action<BattleEffectHost>? onEffectHostReady, ActionCatalog? actionCatalog = null,
@@ -221,15 +242,37 @@ public static partial class BattleEngine
                 }
             }
 
+            // aura-skill T12 (Gate B): "an aura is on" becomes "a channel has a value," via the T4
+            // recompose seam. Delivered once, at construction — a live mid-match toggle is T13's own
+            // job, not this one's. Friendly = same Setup.Side as the aura's own CommanderSide; battle's
+            // squad/wave partition already IS the own-side/enemy-side split (no oracle needed here —
+            // T21a's MechanicalOwnSideOracle answers a different, live-lawn question).
+            foreach (var aura in setup.ActiveAuras)
+            {
+                foreach (var a in Actors)
+                {
+                    if (a.Setup.Side != aura.CommanderSide) continue;
+                    DerivedLedger.Add(a.Setup.Key, aura.TargetChannel, aura.SourceId, aura.Value);
+                    RecomposeDerived(a.Setup.Key);
+                }
+            }
+
             // A17 (spec-action-selection-adoption.md §2): compile each actor's loadout ONCE, here —
             // never per decision, matching HeldActionsOf's own documented contract that the AI relies
             // on for its "Reads scales with targets, not actions" acceptance bar. Null or empty
             // EquippedActionIds (BattleModels.cs's own doc: "null when the caller has no
             // action/loadout system to consult") falls back to the single hand-built basic attack —
             // "no loadout" must still be a legal, single-action decision, never ActionIntent.None by
-            // construction. A non-empty list MUST resolve against a real, supplied ActionCatalog —
-            // loud failure on a missing id, never a silent skip, matching this codebase's standing
-            // "loud validation over silent corruption" stance.
+            // construction.
+            //
+            // aura-skill T3 (audit D3): a non-empty list that CANNOT resolve — no ActionCatalog
+            // supplied, or an id the catalog doesn't have — used to throw and fail the whole battle,
+            // which meant the first authored Skill grant broke every web battle AND poisoned any
+            // already-stored BattleSetup log row (it re-threw on every replay, forever). There is no
+            // production action-authoring path yet (aura-equip-path, unspecced): degrading to "no
+            // equipped actions" + a named warning is the honest behavior for content that cannot
+            // exist in production today, not a masked bug — T19 wires the real ActionCatalog and this
+            // degrade path stops firing for any actor whose loadout it can actually resolve.
             foreach (var a in Actors)
             {
                 var ids = a.Setup.EquippedActionIds;
@@ -238,23 +281,36 @@ public static partial class BattleEngine
                 {
                     held = new[] { BasicAttackCompiled };
                 }
+                else if (actionCatalog is null)
+                {
+                    Warnings.Add(
+                        $"Actor '{a.Setup.Key}' has {ids.Count} equipped action id(s) but no ActionCatalog " +
+                        "was supplied to resolve them; falling back to the basic attack.");
+                    held = new[] { BasicAttackCompiled };
+                }
                 else
                 {
-                    if (actionCatalog is null)
-                        throw new ArgumentException(
-                            $"Actor '{a.Setup.Key}' has {ids.Count} equipped action id(s) but no ActionCatalog was supplied to resolve them.",
-                            nameof(actionCatalog));
-
                     var list = new List<CompiledAction>(ids.Count);
+                    var unresolved = new List<string>();
                     foreach (var id in ids)
                     {
-                        var compiled = actionCatalog.Get(id)
-                            ?? throw new ArgumentException($"Actor '{a.Setup.Key}' has equipped action id '{id}', which is not in the supplied ActionCatalog.", nameof(actionCatalog));
-                        list.Add(compiled);
+                        var compiled = actionCatalog.Get(id);
+                        if (compiled is null) unresolved.Add(id);
+                        else list.Add(compiled);
                     }
 
-                    list.Sort(ActionTagPreference.Compare);
-                    held = list;
+                    if (unresolved.Count > 0)
+                    {
+                        Warnings.Add(
+                            $"Actor '{a.Setup.Key}' has equipped action id(s) [{string.Join(", ", unresolved)}] " +
+                            "not in the supplied ActionCatalog; falling back to the basic attack.");
+                        held = new[] { BasicAttackCompiled };
+                    }
+                    else
+                    {
+                        list.Sort(ActionTagPreference.Compare);
+                        held = list;
+                    }
                 }
 
                 _heldActions[a.Setup.Key] = held;

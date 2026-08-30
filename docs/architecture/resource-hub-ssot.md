@@ -42,9 +42,28 @@ differs between them is a string chosen at the display layer.
 | `stamina` | **Physical actions** — move, basic attack, reposition | The actor can still act, but the body is failing: derived-stat debuff |
 | `qi` | **Skills and abilities** — anything with a trigger, an element, or a container of atoms behind it | No skills. The actor falls back to physical actions only |
 | `poise` | **Guarding** — a flat commit cost to raise a guard, drained further in proportion to what it absorbs (spec-guard-economy.md §3) | Guard breaks. The actor can still act, but cannot absorb: derived-stat debuff, never death |
-| `hunger` | Nothing directly. It is **sustain**: it gates regeneration and condition rather than being spent per action | Metabolic failure: derived-stat debuff |
-| `spirit` | **Nothing. `spirit` is never an action cost** — it is what the actor *is*, and what the summoner harvests as soul when it is extinguished | Identity failure: derived-stat debuff |
-| `hp` | Nothing | Death — owned by the turn FSM's `Downed` state, not by exhaustion |
+| `hunger` | **Metabolic cost** — and for plants this is **Sun**, so a sun-priced action is a `hunger` cost. Also still **sustain**: it gates regeneration and condition | Metabolic failure: derived-stat debuff |
+| `spirit` | **Essence cost** — spending what the actor *is*. Also what the summoner harvests as soul when it is extinguished | Identity failure: derived-stat debuff |
+| `hp` | **Sacrifice cost** — paying with the body itself | Death — owned by the turn FSM's `Downed` state, not by exhaustion |
+
+> ### ⚠️ Corrected 2026-08-30 — all six resources are legal action costs
+>
+> This table previously read *"`hp` — Nothing"*, *"`hunger` — Nothing directly"*, and **"`spirit` is
+> never an action cost"**. **That was a design defect, not a rule.** Owner, 2026-08-30: *"any resource
+> can be cost for actions, like hp sacrifice action — how can we make something like that if we can't
+> pay for hp?"*
+>
+> The rule made three legitimate designs unbuildable — an HP-sacrifice action, a sun-priced plant
+> action (`hunger` **is** Sun on the plant side, and spending sun is the core PvZ verb), and any sink
+> at all for `spirit`, which had **none**. A resource with no sink is not a resource.
+>
+> **Every resource must document what spending it *means*** — the "pays for" column above is now
+> normative, not descriptive. A new cost on a resource whose meaning is undecided is an authoring
+> error.
+>
+> **`hp` costs floor at 1 by default**, refusing with the existing `CannotAfford(hp)` typed reason —
+> *but an action may explicitly opt into being lethal*, because true sacrifice is a design the owner
+> wants available. A lethal cost is a **per-action opt-in**, never the default.
 
 **`stamina` no longer claims guard** (moved 2026-08-26): a guard is its own kind of effort, not a
 physical action, and it needed its own pool once `guard-economy` required one the resolver could

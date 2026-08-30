@@ -19,6 +19,12 @@ public sealed record VfxRenderTuning(
     int BurstParticles, int ParticleSortingOrder, int ParticleTextureSize, double MarkerEdgeSoftness,
     VfxShieldBarTuning ShieldBar, double TintReassertSeconds);
 
+/// <summary>`StatusVfxIdentity`'s own collision-detection thresholds (guard-magic-numbers.ps1 M2,
+/// 2026-08-30) — an offline dev-facing audit heuristic (how far apart two statuses' colors must be
+/// before they read as visually distinct), not a runtime/gameplay balance number, but still a number
+/// a VFX pass could legitimately want to retune without a rebuild.</summary>
+public sealed record VfxIdentityTuning(int SimilarRgbDistanceThreshold, int SimilarApplyRgbDistanceThreshold);
+
 /// <summary>Vfx balance surface (tunables-ssot.md T1) — vfx-ssot.md. VfxCatalog.cs and
 /// VfxAuraMath.cs are hand-authored content/shape math (CONTENT_FILE), not here. rules deliberately
 /// omits floaterCap/floaterLifeSeconds/risePixels — VfxRules aliases DamageFxFloaterRules
@@ -27,7 +33,8 @@ public sealed record VfxTuning(
     int SchemaVersion, int Version,
     double TintMaxStrength,
     double BurstConeHalfAngle, double BurstRisingSideFactor, double BurstDirectionalSideFactor,
-    VfxRulesTuning Rules, VfxSustainedTuning Sustained, VfxRenderTuning Render);
+    VfxRulesTuning Rules, VfxSustainedTuning Sustained, VfxRenderTuning Render,
+    VfxIdentityTuning Identity);
 
 public sealed class VfxTuningRejection : Exception
 {
@@ -55,6 +62,7 @@ public static class VfxTuningLoader
             var sustained = Obj(root, "sustained");
             var render = Obj(root, "render");
             var shieldBar = Obj(render, "shieldBar");
+            var identity = Obj(root, "identity");
 
             return new VfxTuning(
                 SchemaVersion: Int(root, "schemaVersion", "$"),
@@ -96,7 +104,10 @@ public static class VfxTuningLoader
                         MaxSegments: Int(shieldBar, "maxSegments", "render.shieldBar"),
                         Cap: Int(shieldBar, "cap", "render.shieldBar"),
                         MaxPips: Int(shieldBar, "maxPips", "render.shieldBar")),
-                    TintReassertSeconds: Double(render, "tintReassertSeconds", "render")));
+                    TintReassertSeconds: Double(render, "tintReassertSeconds", "render")),
+                Identity: new VfxIdentityTuning(
+                    SimilarRgbDistanceThreshold: Int(identity, "similarRgbDistanceThreshold", "identity"),
+                    SimilarApplyRgbDistanceThreshold: Int(identity, "similarApplyRgbDistanceThreshold", "identity")));
         }
     }
 

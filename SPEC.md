@@ -20,7 +20,7 @@ Done means: every custom status is identifiable on sight by its visual alone; va
 |---|---|---|
 | **M1 expire producer** | `StatusRuntime.OnExpired` (+ clear path) mirroring `OnApplied`; `status.{id}.expire` cues; `VfxCueDto.DurationMs` carried on apply cues (TTL safety) | — |
 | **M2 sustained state tracker** | Director-side registry keyed `(hostPtr, statusId)`: start on apply, refresh on re-apply, end on first of expire / clear / host-gone / TTL cap / match end / eviction; `debug.fx.state.*` events | M1 |
-| **M3 Aura primitive** | Pooled looping attached particles; motion styles from pure `VfxAuraMath` (Drip, Orbit, RiseSparkle, CrackleJitter, PulseRing, StreamOut) | M2 |
+| **M3 Aura primitive** | Pooled looping attached particles; motion styles from pure `VfxAuraMath` (Drip, Orbit, RiseSparkle, CrackleJitter, PulseRing, StreamOut, plus batch identity styles WispOut/BubbleRise/ChunkFall, SparkStrobe/ShardGlitter, SporeDrift/CharmHeartbeat, PactFootPulse/CommandCrownPulse) | M2 |
 | **M4 Tint primitive** | `TintCompositor`: per-renderer tint stack, multiplicative blend (≤35%), base capture/restore, 0.25s re-assert vs vanilla color writes | M2 |
 | **M5 Marker primitive** | Floating badge above unit; procedurally generated shape textures (Ring, Diamond, TriangleDown, Cross); gentle bob | M2, M3 (shares pool) |
 | **M6 designs + prove** | 13 seed compositions (§4), prove-vfx lifecycle cases, eyeball checklist per status | M3–M5 |
@@ -44,21 +44,21 @@ Composition per status mixes the three methods freely; no two share a motion × 
 
 | Status | Fantasy | Aura (style, color) | Tint | Marker | Read-at-a-glance |
 |---|---|---|---|---|---|
-| `wither` | life draining out | Drip, ash-brown motes falling slow | 25% desaturating grey-brown | — | unit visibly "graying out" |
-| `blight` | spreading disease | Drip, sickly-green bubbles | 20% green, slow pulse | — | dripping green ooze |
-| `rot` | earthy decay | Drip, dark umber chunks, heavy/slow | 20% umber | — | heavier, darker than blight |
-| `spark` | electrified | CrackleJitter, yellow-white sparks teleporting around body | — | — | electric crackle, no tint needed |
-| `spore` | fungal host | Orbit, lime spores drifting upward | — | — | circling spores |
-| `pact_mark` | marked for the pact | PulseRing at feet, violet | — | Diamond, violet | **must** be instantly readable — it's a target mark |
+| `wither` | life draining out | WispOut, ash wisps up/out | 25% desaturating grey-brown | — | unit visibly "graying out" |
+| `blight` | spreading disease | BubbleRise, sickly-green bubbles from feet | 20% green | — | rising green bubbles (lane sickness) |
+| `rot` | earthy decay | ChunkFall, dark umber chunks in narrow column | 20% umber | — | heavy downward decay |
+| `spark` | electrified | SparkStrobe, yellow-white sparks teleporting in tight box | — | — | electric strobe crackle |
+| `spore` | fungal host | SporeDrift, lime spores drifting upward | — | — | circling spores rising |
+| `pact_mark` | marked for the pact | PactFootPulse at feet, violet | — | Diamond, violet | **must** be instantly readable — it's a target mark |
 | `leech` | being drained | StreamOut, deep-red motes sinking inward | 15% red | — | red seep |
 | `expose` | armor opened | CrackleJitter, gold glints (sparser than spark) | — | TriangleDown, gold | "hit this one now" |
-| `shatter` | armor shattered | CrackleJitter, cyan-white shard glints | 15% cyan | — | icy glitter distinct from spark's yellow |
+| `shatter` | armor shattered | ShardGlitter, cyan-white horizontal shard glints | 15% cyan | — | icy shards distinct from spark strobe |
 | `bond` | linked | Orbit, pink motes, slow | — | Ring, pink | paired units share the ring |
 | `rally` | rallied buff | RiseSparkle, warm gold | 10% warm | — | buffs rise (heal-motes grammar) |
-| `command` | commanded | PulseRing above head, blue-violet halo | — | Ring, blue-violet | crown-like halo |
-| `charm_pulse` | charmed | Orbit, magenta motes + PulseRing beat | 15% magenta pulse | — | magenta heartbeat |
+| `command` | commanded | CommandCrownPulse above head, blue-violet halo | — | Ring, blue-violet | crown-like halo |
+| `charm_pulse` | charmed | CharmHeartbeat, magenta motes with heartbeat pulse | 15% magenta pulse | — | magenta heartbeat |
 
-Grammar rules that keep the battlefield legible: **Drip = DoT**, **CrackleJitter = armor/electric state**, **Orbit = passive affliction/link**, **Rise = buff**, **PulseRing = active mark/aura**, markers only on states the player must react to (pact_mark, expose, bond, command). Apply-moment bursts from v2 stay as-is on all 21.
+Grammar rules that keep the battlefield legible: **Drip = DoT**, **CrackleJitter = generic armor/electric fallback**, **SparkStrobe/ShardGlitter = batch-2 crackle identity**, **SporeDrift/CharmHeartbeat = batch-3 orbit identity**, **PactFootPulse/CommandCrownPulse = batch-5 pulsering identity**, **Orbit = passive affliction/link fallback**, **PulseRing = active mark fallback**, **Rise = buff**, markers only on states the player must react to (pact_mark, expose, bond, command). Apply-moment bursts diverge per batch-1/2/3/4 status overrides (all 13 custom statuses).
 
 ## 5. Commands
 

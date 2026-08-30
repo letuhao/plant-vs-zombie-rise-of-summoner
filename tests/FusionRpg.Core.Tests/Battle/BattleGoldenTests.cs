@@ -130,17 +130,21 @@ public class BattleGoldenTests
     /// "determinism break" alarm for a non-reason. Locked by Goldens_do_not_depend_on_the_platform.
     /// </summary>
     /// <summary>
-    /// The determinism hash. <b>Two provenance fields are blanked</b>: the platform stamp, because
-    /// `Math.Exp` is not bit-identical across architectures, and the content hash (E12), because it
-    /// records which content was consulted rather than what the engine computed.
+    /// The determinism hash. <b>Three provenance fields are blanked</b>: the platform stamp, because
+    /// `Math.Exp` is not bit-identical across architectures; the content hash (E12), because it
+    /// records which content was consulted rather than what the engine computed; and `Warnings`
+    /// (aura-skill T3, audit D3), because it names content the resolver could not find rather than
+    /// anything the battle math computed.
     ///
-    /// <para>Folding either in makes the goldens move for a reason that is not a determinism break —
-    /// the platform stamp made them green only on the machine that blessed them, and the content
-    /// hash would make every added row look like one.</para>
+    /// <para>Folding any of these in makes the goldens move for a reason that is not a determinism
+    /// break — the platform stamp made them green only on the machine that blessed them, the content
+    /// hash would make every added row look like one, and a warning would make an unrelated content
+    /// gap look like a battle-math regression.</para>
     /// </summary>
     static string Hash(BattleReport report)
     {
-        var json = JsonSerializer.Serialize(report with { EnvironmentStamp = "", ContentHash = null });
+        var json = JsonSerializer.Serialize(
+            report with { EnvironmentStamp = "", ContentHash = null, Warnings = null });
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(json)));
     }
 

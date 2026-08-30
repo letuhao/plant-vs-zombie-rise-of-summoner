@@ -66,6 +66,18 @@ public static class CheatCommandRunner
                 _ = RpgHost.Client.RefreshPvzStatsAsync();
             return;
         }
+        if (name is "aptitudes.allocation.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshCommanderAllocationAsync();
+            return;
+        }
+        if (name is "power.index.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshPowerIndexAsync();
+            return;
+        }
         if (name is "pvz.spawn.extra")
         {
             var p = PayloadJson(cmd.Payload);
@@ -81,7 +93,8 @@ public static class CheatCommandRunner
             var side = Str(p, "side") ?? "zombie";
             var instanceId = Str(p, "instanceId");
             var loadoutJson = LoadoutJsonFromPayload(p);
-            CheatActions.SpawnExtra(side, typeId, col, row, reason, corr, instanceId, loadoutJson);
+            var playerId = LongProp(p, "playerId", 0L);
+            CheatActions.SpawnExtra(side, typeId, col, row, reason, corr, instanceId, loadoutJson, playerId);
             return;
         }
         if (name is "unique.binding.clear")
@@ -475,7 +488,8 @@ public static class CheatCommandRunner
                     var side = Str(payload, "side") ?? "zombie";
                     var instanceId = Str(payload, "instanceId");
                     var loadoutJson = LoadoutJsonFromPayload(payload);
-                    CheatActions.SpawnExtra(side, typeId, col, row, reason, corr, instanceId, loadoutJson);
+                    var playerId = LongProp(payload, "playerId", 0L);
+                    CheatActions.SpawnExtra(side, typeId, col, row, reason, corr, instanceId, loadoutJson, playerId);
                 }
                 else if (name.StartsWith("debug.", StringComparison.Ordinal))
                     RunDebug(name, payload);
@@ -1309,7 +1323,8 @@ public static class CheatCommandRunner
                     Effects.EffectRuntime.Bag.CombatRng,
                     Effects.EffectRuntime.Bag.CombatMath,
                     skipped: null,
-                    shieldGate: Effects.EffectRuntime.Bag.ShieldGate);
+                    shieldGate: Effects.EffectRuntime.Bag.ShieldGate,
+                    actorResolve: Effects.EffectRuntime.Bag.ActorResolve);
             }
             else if (amount != 0)
             {

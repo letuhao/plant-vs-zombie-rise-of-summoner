@@ -120,7 +120,17 @@ public class StatusVfxCuesTests
 
         Assert.Contains(
             VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "wither").Aura,
-            new VfxAuraStyle?[] { VfxAuraStyle.Drip });
+            new VfxAuraStyle?[] { VfxAuraStyle.WispOut });
+        Assert.Equal(VfxAuraStyle.SporeDrift,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "spore").Aura);
+        Assert.Equal(VfxAuraStyle.CharmHeartbeat,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "charm_pulse").Aura);
+        Assert.Equal(VfxAuraStyle.Orbit,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "bond").Aura);
+        Assert.Equal(VfxAuraStyle.PactFootPulse,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "pact_mark").Aura);
+        Assert.Equal(VfxAuraStyle.CommandCrownPulse,
+            VfxSeedCatalog.StatusSustainFx.First(s => s.Id == "command").Aura);
 
         // 3 combat/debug cues + shield.broken + 21 status cues
         Assert.Equal(25, catalog.Ids.Count);

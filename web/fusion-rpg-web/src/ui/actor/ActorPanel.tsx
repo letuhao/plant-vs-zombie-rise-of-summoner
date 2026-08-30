@@ -4,7 +4,7 @@ import { Button } from "@/ui/Button";
 import { TabList, type TabItem } from "@/ui";
 import type { ActorRungState } from "./actorRungState";
 import { RungStateFallback } from "./RungStateFallback";
-import { ActorFrame, LevelTag, PendingNote, SideBadge, displayInitial } from "./shared";
+import { ActorFrame, formatActorPhase, LevelTag, PendingNote, SideBadge, displayInitial } from "./shared";
 import { GearTab } from "./GearTab";
 import { ActionsTab } from "./ActionsTab";
 import { PassivesTab } from "./PassivesTab";
@@ -75,7 +75,7 @@ export function ActorPanel({
             <SideBadge side={data.side} />
             <LevelTag level={data.level} />
             <span className="text-muted" data-testid="actor-phase">
-              {data.phase}
+              {formatActorPhase(data.phase)}
             </span>
           </div>
           <PendingNote pending={data.displayName} testId="actor-name-pending" />
@@ -105,7 +105,7 @@ export function ActorPanel({
         ) : null}
         {tab === "progression" ? <ProgressionTab data={data} /> : null}
         {tab === "derived-stats" ? <DerivedStatsTab data={data} /> : null}
-        {tab === "actions" ? <ActionsTab /> : null}
+        {tab === "actions" ? <ActionsTab data={data} /> : null}
         {tab === "passives" ? <PassivesTab /> : null}
         {tab === "gear" ? <GearTab data={data} /> : null}
       </div>

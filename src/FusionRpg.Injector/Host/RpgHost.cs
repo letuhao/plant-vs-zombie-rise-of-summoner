@@ -105,7 +105,9 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "net.v1.json"))));
         FusionRpg.Core.Vfx.VfxTuningHub.Configure(
             FusionRpg.Core.Vfx.VfxTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "vfx.v1.json"))));
+                // v1 -> v2 (2026-08-30, aura-skill session): added `identity` (StatusVfxIdentity.cs's
+                // two RGB-distance thresholds, previously bare consts, guard-magic-numbers.ps1 M2).
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "vfx.v2.json"))));
         FusionRpg.Core.Power.PowerTuningHub.Configure(
             FusionRpg.Core.Power.PowerTuningLoader.Parse(
                 // T4.2 (power-dial, 2026-08-24): v1 (bMilli=0) -> v2 (bMilli=400). v1 stays on disk --

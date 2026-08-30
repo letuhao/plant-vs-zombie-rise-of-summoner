@@ -4,7 +4,7 @@ import { useDemonRoster, usePlayers, useRelics, useRuns, useSoulBalance, useSpec
 import { useContracts } from "@/lib/bus/contracts";
 import { conditionOf } from "@/features/demons/contractView";
 import { displayName } from "@/features/demons/rosterSplit";
-import { adaptActor } from "@/contract/adapt";
+import { adaptActor, PLAYER_PENDING } from "@/contract/adapt";
 import { pendingWithReason } from "@/contract/pending";
 import { registerGlobalVerb } from "@/shell/keymap";
 import { ChunkFallback } from "@/shell/ChunkFallback";
@@ -175,9 +175,7 @@ export function SanctumStage() {
       <SanctumHud
         playerName={players.data?.items.find((p) => p.id === playerId)?.name ?? "Summoner"}
         soulsBalance={soulsQuery.data?.balance ?? 0}
-        summonerLevel={pendingWithReason(
-          "The summoner-led progression loop is the product direction, not what ships today (AGENTS.md)"
-        )}
+        summonerLevel={pendingWithReason(PLAYER_PENDING.summonerLevel)}
         unreadResultCount={railInputs.unreadResultCount}
         onOpenSystem={openSystem}
       />

@@ -2132,6 +2132,20 @@ public sealed partial class RpgStore : IRpgDb
         return Convert.ToInt64(cmd.ExecuteScalar() ?? 0L);
     }
 
+    /// <summary>The current tip of the event log — for an in-process caller (e.g. a debug-orchestration
+    /// endpoint) that needs to remember "everything after this point" before triggering new events, the
+    /// same role the live-test scripts' own binary-search-over-HTTP `Get-MaxEventId`/`max_event_id`
+    /// approximates externally. In-process, a direct query is simply correct instead of a workaround.
+    /// Returns 0 when the log is empty (matches `ListEvents(limit, afterId: 0)`'s own "from the start"
+    /// convention).</summary>
+    public long GetMaxEventId()
+    {
+        using var db = Open();
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT COALESCE(MAX(id), 0) FROM events;";
+        return Convert.ToInt64(cmd.ExecuteScalar() ?? 0L);
+    }
+
     public Dictionary<string, long> CountByKind()
     {
         using var db = Open();
