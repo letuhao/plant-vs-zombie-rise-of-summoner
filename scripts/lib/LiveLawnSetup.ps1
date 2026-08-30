@@ -151,7 +151,10 @@ function Ensure-LiveLabBoard {
     if ($Scenario -eq "lab-overlay" -and -not $targetPtr) {
         $errs = Get-RecentLiveDebugErrors -BaseUrl $BaseUrl -AfterId $cursor
         $detail = if ($errs.Count -gt 0) { "`nRecent errors:`n  " + ($errs -join "`n  ") } else { "" }
-        throw "lab board has no living zombie ptr — setup failed.$detail"
+        $skipHint = if ($SkipSetup) {
+            "`n-SkipSetup skips /lawn/quick-start — the game must already be on a lab board with living zombies.`nRemove -SkipSetup to auto-enter level 1 + lab-overlay (injector must be connected; game exe must already be running)."
+        } else { "" }
+        throw "lab board has no living zombie ptr — setup failed.$skipHint$detail"
     }
 
     if (-not $targetPtr) {

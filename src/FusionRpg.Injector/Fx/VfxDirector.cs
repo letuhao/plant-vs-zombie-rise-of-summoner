@@ -446,14 +446,19 @@ public static class VfxDirector
             var kind = VfxAnchorCatalog.AnchorKindFor(render.AuraSpec.AuraStyle);
             var world = frame.World(kind);
             var auraSpan = frame.Span(render.AuraSpec.SizeScale > 0f ? render.AuraSpec.SizeScale : 1f);
-            AuraPool.Pulse(render.Aura, world, render.AuraSpec.AuraStyle, render.AuraRgb, auraSpan, dt);
+            var sortOrder = frame.ParticleSortingOrder;
+            AuraPool.Pulse(render.Aura, world, render.AuraSpec.AuraStyle, render.AuraRgb, auraSpan, dt, sortOrder);
         }
 
         if (render.Marker != null)
         {
             var world = frame.World(VfxAnchorKind.Crown);
             var span = frame.Span();
-            AuraPool.PulseSingle(render.Marker, world, render.MarkerRgb, span * 0.3f, span * 0.85f, dt);
+            var sortOrder = frame.ParticleSortingOrder;
+            var renderTuning = VfxTuningHub.Tuning.Render;
+            var markerSize = span * (float)renderTuning.MarkerSizeScale;
+            var markerLift = span * (float)renderTuning.MarkerYOffsetScale;
+            AuraPool.PulseSingle(render.Marker, world, render.MarkerRgb, markerSize, markerLift, dt, sortOrder);
         }
     }
 

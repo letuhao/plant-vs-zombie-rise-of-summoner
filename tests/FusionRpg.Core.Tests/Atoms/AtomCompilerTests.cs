@@ -171,7 +171,15 @@ public class AtomCompilerTests
         // LAWN opened 2026-08-30 (decisions.md "Derived-write lawn executor") because it gained a real
         // consumer -- `AtomDerivedSubsystem`. The rule did not change: a runtime opens only where a
         // consumer exists, which is why the Sim assertion above still holds in the same test.
-        Assert.Equal(AtomPath.Runner, PathOf(atom));
+        //
+        // COMPILED, not Runner, as of the same day (aura-skill-todo.md Phase 5 / TC2). This assertion
+        // read `Runner` for a few hours, which was correct only while `stat.derived` had no opcode:
+        // Compilability.Classify sends any kind outside `OpcodeKinds` down the runner path with the
+        // reason "has no FA opcode". It now HAS one -- EffectActions.ModifyDerivedStat -- so it
+        // compiles to a real EffectDef, which is the whole point: the runner path produces no def, and
+        // with no def there is nothing for the lawn executor to read. The kind was reaching a runtime
+        // entry that no derived consumer looks at.
+        Assert.Equal(AtomPath.Compiled, PathOf(atom));
     }
 
     // ---- emission ---------------------------------------------------------------------------------

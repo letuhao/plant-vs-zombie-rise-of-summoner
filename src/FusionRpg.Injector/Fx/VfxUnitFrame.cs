@@ -24,8 +24,17 @@ public readonly struct VfxUnitFrame
     public Vector3 World(VfxAnchorKind kind)
     {
         var halfCell = CellSpan * 0.5f;
+        var boundsHalfH = BoundsHeight * 0.5f;
         var x = VfxUnitFrameMath.WorldX(PivotX, BoundsCenterX, HasBounds);
-        var y = VfxUnitFrameMath.WorldY(LaneY, BoundsCenterY, halfCell, HasBounds, kind);
+        var y = VfxUnitFrameMath.WorldY(LaneY, BoundsCenterY, halfCell, boundsHalfH, HasBounds, kind);
+        var lift = (float)VfxTuningHub.Tuning.Render.SustainedWorldYOffset;
+        // Crown already targets the upper sprite band — global lift is for body/feet auras only.
+        if (lift != 0f && kind is VfxAnchorKind.Feet or VfxAnchorKind.Body)
+        {
+            var factor = kind == VfxAnchorKind.Feet ? 0.5f : 1f;
+            y += lift * factor;
+        }
+
         return new Vector3(x, y, DepthZ);
     }
 
@@ -34,6 +43,15 @@ public readonly struct VfxUnitFrame
             CellSpan, BoundsWidth, BoundsHeight, HasBounds,
             (float)VfxTuningHub.Tuning.Sustained.SpanScale, recipeSizeScale);
 
-    public int ParticleSortingOrder =>
-        VfxTuningHub.Tuning.Render.ParticleSortingOrder + VfxTuningHub.Tuning.Render.SortOffsetAboveUnit;
+    public int ParticleSortingOrder
+    {
+        get
+        {
+            var baseOrder = VfxTuningHub.Tuning.Render.ParticleSortingOrder;
+            var offset = VfxTuningHub.Tuning.Render.SortOffsetAboveUnit;
+            if (SortingOrderHint != 0)
+                return Math.Max(baseOrder, SortingOrderHint + offset);
+            return baseOrder + offset;
+        }
+    }
 }

@@ -11,38 +11,42 @@ namespace FusionRpg.Core.Tests.Battle;
 
 /// <summary>
 /// aura-skill-todo.md Phase 5 / <b>TC2</b> — the <b>lawn</b> twin of <see cref="AuraDeliveryTests"/>,
-/// which proves the same thing on the Sim host.
+/// which proves the same thing on the Sim host. <b>TC2 is closed: all three acceptance criteria plus
+/// the grant-transport hop.</b>
 ///
-/// <para><b>What TC2 said, and what turned out to be true.</b> TC2 was recorded as ⛔ BLOCKED on the
-/// grounds that <c>EffectBag.Grant</c> rejects an unregistered <c>EffectId</c>. Re-checking that
-/// constraint against code rather than inheriting it (DESIGN-GATE: <i>"test the constraint before you
-/// declare it"</i>) split it into two very different halves:</para>
-/// <list type="bullet">
-///   <item><b>Not a blocker — the catalog.</b> <c>EffectBag</c> takes an <see cref="IEffectCatalog"/>
-///   by constructor injection and tests already register their own defs
-///   (<c>EffectBagTests</c> uses <c>InMemoryEffectCatalog</c>). An unknown effect id is a *content*
-///   gap on the live lawn, not a testability wall.</item>
-///   <item><b>A real blocker — the action whitelist.</b> <c>EffectOverlayMerge.AllowedByAction</c>
-///   (lines 130-154) enumerates ten actions — <c>ModifyStat</c>, <c>ApplyStatus</c>,
-///   <c>ApplyResourceDelta</c>, … — and <b>none of them is a derived-stat action</b>. So a grant
-///   carrying <c>derived.channel</c>/<c>derived.op</c>/<c>derived.amount</c> is refused with
-///   <c>unknown overlay key 'derived.channel' for effect actions</c>. Adding that action (sink
-///   executor + param schema + registry row + content validation) is squarely
-///   <c>effect-atom</c> Wave 6 / E20-E25, and building it inside this task would be scope creep into
-///   another program's module.</item>
+/// <para><b>"BLOCKED" did not survive contact with the code — twice.</b> TC2 was recorded as blocked on
+/// <c>EffectBag.Grant</c> rejecting an unregistered <c>EffectId</c>, and the whole hop was assigned to
+/// <c>effect-atom</c> Wave 6 / E20-E25 (*"a loader, an importer run, and a producer of bindings"*).
+/// Applying DESIGN-GATE's <i>"test the constraint before you declare it"</i> dismantled that in stages:</para>
+/// <list type="number">
+///   <item>The catalog rejection is a <b>content</b> gap on the live lawn, not a testability wall —
+///   <c>EffectBag</c> takes an <see cref="IEffectCatalog"/> by ctor injection and tests already register
+///   their own defs.</item>
+///   <item>The real blocker was <c>EffectOverlayMerge.AllowedByAction</c> having no derived-stat
+///   action... </item>
+///   <item>...and, one layer deeper, <c>AtomCompiler.OpcodeOf</c> returning <c>null</c> for
+///   <c>stat.derived</c>, plus <c>Compilability.OpcodeKinds</c> omitting it — which routed the kind
+///   down the <b>runner</b> path, so it never became an <c>EffectDef</c> at all.</item>
 /// </list>
 ///
-/// <para><b>So what this file proves, exactly.</b> Everything downstream of the grant hop, using real
-/// production code (<see cref="GrantedDerivedAtomReader"/> → <see cref="AtomDerivedSubsystem"/> →
-/// <c>ActorHub</c>), with a real plant/zombie <see cref="StatContext"/>. The only substituted piece is
-/// the <b>grant transport</b>: grants are placed in a real <see cref="InMemoryEffectGrantStore"/>
-/// directly instead of arriving through <c>EffectBag.Grant</c>.</para>
+/// <para><b>The fix was five small links, not a wave:</b> an <c>EffectActions.ModifyDerivedStat</c>
+/// constant, its <c>AllowedByAction</c> row, the <c>OpcodeOf</c> mapping, the <c>OpcodeKinds</c> entry,
+/// and making <see cref="GrantedDerivedAtomReader"/> catalog-aware. Measured before being kept:
+/// <b>no goldens and no content hashes moved.</b></para>
 ///
-/// <para><b>What it does NOT prove, stated plainly so nobody reads more into a green run:</b> that a
-/// real authored aura compiles to a derived-stat effect and survives <c>EffectBag.Grant</c>'s overlay
-/// validation. That single hop is the whole of the remaining TC2 gap, and it stays open against Wave 6
-/// — along with A5's live on-the-lawn proof in
-/// <c>docs/architecture/effect-atom/spec-derived-write-lawn.md</c>.</para>
+/// <para><b>Two real bugs were found on the way</b>, both invisible to every test written before them
+/// because those tests shared the code's own wrong assumptions:</para>
+/// <list type="bullet">
+///   <item>The reader used <b>bare</b> owner keys where production uses <c>plant:{typeId}</c> /
+///   <c>entity:{ptr}</c>. <c>StatApplyScope.Normalize</c> is not prefix-agnostic, so <b>two of three
+///   owner scopes matched nothing</b>; only <c>match</c> worked and hid it.</item>
+///   <item>The reader read <c>grant.Overlay</c>, but the production grant path
+///   (<c>BattlefieldOwnSideReactor.BuildGrant</c>) emits <b>no overlay at all</b> — the values live on
+///   the def's action row. The executor was <b>inert in production</b> while green offline.</item>
+/// </list>
+///
+/// <para><b>Still open:</b> only <b>A5</b>, the live on-the-lawn probe against a running game, in
+/// <c>docs/architecture/effect-atom/spec-derived-write-lawn.md</c>. Every offline link is now proven.</para>
 /// </summary>
 public class AuraDeliveryLawnTests
 {
@@ -258,27 +262,38 @@ public class AuraDeliveryLawnTests
     {
         var t10 = T10Value();
 
+        // Build the def from REAL AtomCompiler output rather than hand-writing its action params.
+        // Hand-writing them is how the first version of this test passed while the production shape was
+        // different: the compiler rewrites {op:"flat", amount:N} into the op-as-key form {flat:N}
+        // (ToOpcodeShape), and a hand-built {op, amount} def matches nothing real.
+        var atom = new FusionRpg.Core.Effects.Atoms.AtomRow
+        {
+            AtomId = FusionRpg.Core.Effects.Atoms.AtomRow.DeriveId("atom.aura-might", "", 1),
+            KindId = "stat.derived",
+            FamilyId = "atom.aura-might",
+            Variant = "",
+            Tier = 1,
+            Name = "Might (live aura)",
+            ParamsJson = $$"""{"channel":"{{DerivedStatChannels.CombatPowerOmni}}","op":"flat","amount":{{t10}}}""",
+            WhenJson = "{}",   // permanent modifier: no trigger
+            IcdKey = "aura.might.live",
+        };
+
+        var compiled = FusionRpg.Core.Effects.Atoms.AtomCompiler.Compile(
+            new[] { atom }, FusionRpg.Core.Effects.Atoms.RuntimeId.Lawn, catalogRevision: 1);
+
+        Assert.Empty(compiled.Rejected);
+        var compiledDef = Assert.Single(compiled.Defs);
+        var compiledAction = Assert.Single(compiledDef.Actions);
+        Assert.Equal(EffectActions.ModifyDerivedStat, compiledAction.Action);
+
         var catalog = new InMemoryEffectCatalog();
         catalog.Upsert(new EffectDef
         {
-            EffectId = "aura.might.live",
-            // A permanent modifier declares no trigger, so it must be Passive or the bag never
-            // completes its lifecycle (definitions.md §14.2, AtomCompiler's own rule).
-            EffectType = EffectTypes.Passive,
-            Name = "Might (live aura)",
-            Actions =
-            {
-                new EffectActionRow
-                {
-                    Action = EffectActions.ModifyDerivedStat,
-                    Params = new Dictionary<string, object?>
-                    {
-                        ["channel"] = DerivedStatChannels.CombatPowerOmni,
-                        ["op"] = "flat",
-                        ["amount"] = (double)t10,
-                    },
-                },
-            },
+            EffectId = compiledDef.EffectId,
+            EffectType = compiledDef.EffectType,
+            Name = compiledDef.Name,
+            Actions = { new EffectActionRow { Action = compiledAction.Action, Params = compiledAction.Params } },
         });
 
         var bag = new EffectBag(catalog, new InMemoryEffectGrantStore(),
@@ -287,8 +302,8 @@ public class AuraDeliveryLawnTests
         // The exact shape BattlefieldOwnSideReactor.BuildGrant emits: id + owner, no overlay.
         bag.Grant(new EffectGrantDto
         {
-            GrantId = "aura.might.live:0xPLANT",
-            EffectId = "aura.might.live",
+            GrantId = compiledDef.EffectId + ":0xPLANT",
+            EffectId = compiledDef.EffectId,
             OwnerKind = "entity",
             OwnerKey = EffectOwnerKeys.Entity("0xPLANT"),
         });

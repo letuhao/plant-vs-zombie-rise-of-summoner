@@ -45,6 +45,12 @@ public static class GrantedDerivedAtomReader
     /// for one no matter how its own keys evolve. <c>GrantedDerivedAtomReaderTests</c> is the
     /// regression test that claim previously lacked — before TC3 it was asserted by a comment alone.</para>
     /// </summary>
+    /// <summary>The four derived ops, as they appear as KEYS on a compiled action row
+    /// (<c>AtomCompiler.ToOpcodeShape</c>). Order is the search order; a row carries exactly one.
+    /// Mirrors <see cref="AtomDerivedSubsystem.TryParseOp"/>'s accepted set — there is deliberately no
+    /// <c>more</c> on the derived side.</summary>
+    static readonly string[] DerivedOpKeys = { "flat", "increased", "replace", "flag" };
+
     public const string ChannelKey = "derived.channel";
 
     /// <inheritdoc cref="ChannelKey"/>
@@ -171,23 +177,34 @@ public static class GrantedDerivedAtomReader
 
             sawDerivedRow = true;
 
-            if (!TryString(row.Params, "channel", out var channel) &&
-                !(g.Overlay is not null && TryString(g.Overlay, "channel", out channel))) continue;
+            // Channel: authored on the row, overridable by the grant overlay (overlay wins, exactly
+            // as EffectOverlayMerge treats every other action).
+            if (!TryString(row.Params, "channel", out var channel)
+                && !(g.Overlay is not null && TryString(g.Overlay, "channel", out channel))) continue;
             if (g.Overlay is not null && TryString(g.Overlay, "channel", out var chOverride)) channel = chOverride;
 
-            if (!TryString(row.Params, "op", out var op) &&
-                !(g.Overlay is not null && TryString(g.Overlay, "op", out op))) continue;
-            if (g.Overlay is not null && TryString(g.Overlay, "op", out var opOverride)) op = opOverride;
+            // Op-as-KEY, not an `op` param: AtomCompiler.ToOpcodeShape rewrites the authored
+            // {op:"flat", amount:150} into {flat:150} before it ever reaches a def -- the same shape
+            // stat.modify compiles to. Whichever of the four derived ops is present IS the op, and its
+            // value is the amount. Reading `op`/`amount` here would work only for hand-built defs and
+            // would silently miss every compiled one.
+            var matched = false;
+            foreach (var opName in DerivedOpKeys)
+            {
+                double amount;
+                if (g.Overlay is not null && TryDouble(g.Overlay, opName, out amount)) { }
+                else if (!TryDouble(row.Params, opName, out amount)) continue;
 
-            if (!AtomDerivedSubsystem.TryParseOp(op, out var parsed)) continue;
+                if (!AtomDerivedSubsystem.TryParseOp(opName, out var parsed)) continue;
 
-            if (!TryDouble(row.Params, "amount", out var amount) &&
-                !(g.Overlay is not null && TryDouble(g.Overlay, "amount", out amount))) continue;
-            if (g.Overlay is not null && TryDouble(g.Overlay, "amount", out var amtOverride)) amount = amtOverride;
+                (into ??= new List<BoundDerivedAtom>()).Add(
+                    new BoundDerivedAtom(channel, parsed, amount,
+                        SourceId: string.IsNullOrWhiteSpace(g.EffectId) ? g.GrantId : g.EffectId));
+                matched = true;
+                break;
+            }
 
-            (into ??= new List<BoundDerivedAtom>()).Add(
-                new BoundDerivedAtom(channel, parsed, amount,
-                    SourceId: string.IsNullOrWhiteSpace(g.EffectId) ? g.GrantId : g.EffectId));
+            if (!matched) continue;
         }
 
         return sawDerivedRow;

@@ -16,8 +16,10 @@ public sealed record VfxShieldBarTuning(
     double BarWorldWidth, double BarWorldHeight, double WorldYOffset, int MaxSegments, int Cap, int MaxPips);
 
 public sealed record VfxRenderTuning(
-    int BurstParticles, int ParticleSortingOrder, int SortOffsetAboveUnit, int ParticleTextureSize,
-    double MarkerEdgeSoftness, VfxShieldBarTuning ShieldBar, double TintReassertSeconds);
+    int BurstParticles, int ParticleSortingOrder, int SortOffsetAboveUnit, double SustainedWorldYOffset,
+    int ParticleTextureSize, double MarkerEdgeSoftness, double MarkerGlowStrength,
+    double MarkerSizeScale, double MarkerYOffsetScale,
+    VfxShieldBarTuning ShieldBar, double TintReassertSeconds);
 
 /// <summary>`StatusVfxIdentity`'s own collision-detection thresholds (guard-magic-numbers.ps1 M2,
 /// 2026-08-30) — an offline dev-facing audit heuristic (how far apart two statuses' colors must be
@@ -97,8 +99,12 @@ public static class VfxTuningLoader
                     BurstParticles: Int(render, "burstParticles", "render"),
                     ParticleSortingOrder: Int(render, "particleSortingOrder", "render"),
                     SortOffsetAboveUnit: Int(render, "sortOffsetAboveUnit", "render"),
+                    SustainedWorldYOffset: Double(render, "sustainedWorldYOffset", "render"),
                     ParticleTextureSize: Int(render, "particleTextureSize", "render"),
                     MarkerEdgeSoftness: Double(render, "markerEdgeSoftness", "render"),
+                    MarkerGlowStrength: Double(render, "markerGlowStrength", "render"),
+                    MarkerSizeScale: Double(render, "markerSizeScale", "render"),
+                    MarkerYOffsetScale: Double(render, "markerYOffsetScale", "render"),
                     ShieldBar: new VfxShieldBarTuning(
                         BarWorldWidth: Double(shieldBar, "barWorldWidth", "render.shieldBar"),
                         BarWorldHeight: Double(shieldBar, "barWorldHeight", "render.shieldBar"),

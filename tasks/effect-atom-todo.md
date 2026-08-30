@@ -566,36 +566,33 @@ boundary guards green + the full non-`World`/non-`Loam` regression sweep across 
 
 ## Unowned, tracked
 
-- ⛔ **Wave 6 is blocking a test in another program, 2026-08-30 — `aura-skill` TC2.** The lawn half of
-  the `stat.derived` path is built and registered (`AtomDerivedSubsystem` + `GrantedDerivedAtoms`,
-  `decisions.md` "Derived-write lawn executor", 2026-08-30), so an aura's derived write has a consumer
-  What it does **not** have is a way in. **The blocker was re-checked against code on 2026-08-30 and
-  the previously-recorded citation was WRONG** — corrected here, because the old one sends the next
-  session to the wrong file:
+- ✅ **~~Wave 6 is blocking a test in another program~~ — RESOLVED 2026-08-30, and Wave 6 owes the lawn
+  nothing.** This entry originally recorded `aura-skill` TC2 as blocked on E20-E25 (*"a loader, an
+  importer run, and a producer of bindings"*). Re-checked against code rather than inherited, the real
+  gap was **five small links**, all now built:
 
-  | Suspected blocker | Verdict |
-  |---|---|
-  | ~~`EffectBag.Grant` rejects an unregistered `EffectId` (`EffectBag.cs:196`)~~ | **Real on the live lawn, but NOT the blocker for a test.** `EffectBag` takes an `IEffectCatalog` by ctor injection (`EffectBag.cs:144-150`) and tests already register their own defs (`EffectBagTests.cs:121`, via `InMemoryEffectCatalog`). This is a **content** gap. |
-  | **`EffectOverlayMerge.AllowedByAction` (`EffectProcAndOwner.cs:130-154`)** | **The actual blocker.** It whitelists overlay keys per action across ten actions — `ModifyStat`, `ApplyStatus`, `ClearStatus`, `SpawnEntity`, `BoardAction`, `SpawnGridItem`, `ClearGridItem`, `SetBoxType`, `Economy`, `ApplyResourceDelta` — and **none is a derived-stat action**, so a grant carrying `derived.channel`/`derived.op`/`derived.amount` is refused with `unknown overlay key 'derived.channel' for effect actions`. |
+  1. `EffectActions.ModifyDerivedStat` — a **declarative** action: nothing executes it, because a
+     `stat.derived` atom declares no trigger and the bag never fires it. No sink arm was needed in
+     either runtime, which is why this did not touch `InjectorEffectActionSink` or `BattleEffectSink`.
+  2. its `EffectOverlayMerge.AllowedByAction` row — keyed to the **compiled** shape (`channel` plus
+     op-as-key `flat`/`increased`/`replace`/`flag`), since `AtomCompiler.ToOpcodeShape` rewrites the
+     authored `{op, amount}` exactly as it already does for `stat.modify`.
+  3. `AtomCompiler.OpcodeOf: "stat.derived" => ModifyDerivedStat`.
+  4. **`Compilability.OpcodeKinds += "stat.derived"`** — the one that mattered most and was invisible
+     from the outside: without it `Classify` returned `Runner("has no FA opcode")`, so the kind produced
+     a runtime entry that no derived consumer reads and **never became an `EffectDef` at all**.
+  5. `GrantedDerivedAtomReader` made catalog-aware, plus the injector adapter wired to pass
+     `bag.Catalog` — without that last step the change would have been test-only.
 
-  **So what E20-E25 owes the lawn is one new effect action** (sink executor + param schema + registry
-  row + content validation), not a catalog fix.
+  **Measured, not assumed: no goldens and no content hashes moved** (196 golden/hash/compiler/parity
+  tests green with the change in). `AtomCompilerTests.A_quarantined_kind_is_rejected_in_the_runtime_that_still_lacks_a_consumer`
+  was updated from `Runner` to `Compiled` for Lawn — Sim stays `Rejected`, so D6's quarantine rule is
+  intact and still carried by the same test.
 
-  Consequence, now much narrower than previously recorded: `AuraDeliveryLawnTests`
-  (`tests/FusionRpg.Core.Tests/Battle/`, added 2026-08-30, 7 green) already proves **everything
-  downstream of the grant hop** on the lawn — type-scoped and match-scoped delivery, side isolation at
-  the same type id, unchanged-when-absent, and withdraw — through real production code. Only the grant
-  transport itself is unproven.
-
-  ⚠️ **Wave 6 will trip a deliberate tripwire.** `AuraDeliveryLawnTests`'s
-  `The_remaining_gap_a_derived_overlay_is_still_refused_by_every_shipped_effect_action` asserts the
-  refusal above. **It is designed to start failing the moment this wave lands** — its own assertion
-  message says to delete it and write the real end-to-end grant test in its place. That is the intended
-  signal, not a regression.
-
-  Tracked as **TC2 in `tasks/aura-skill-todo.md` Phase 5** and as **A5** in
-  `docs/architecture/effect-atom/spec-derived-write-lawn.md`. This is a **wiring gap with the consumer
-  already in place**, not a missing capability.
+  Proof: `AuraDeliveryLawnTests.A_real_def_granted_through_the_real_EffectBag_reaches_a_lawn_plant`
+  (real `AtomCompiler` output → real `EffectBag.Grant` → real reader → `ActorHub`) and
+  `StatDerivedCompileGapTests` (4 tests, now asserting each link EXISTS rather than tripwiring its
+  absence). Only **A5**, the live probe against a running game, remains.
 
 - [x] **`effect_channel_policy` — OWNER ASSIGNED 2026-08-22: E16.** Resolved by **E1's own code-or-data rule** (*a thing can be data if adding a row changes behaviour without new code; if a new row needs a new consumer, it must be code*): changing a **cap or default on an existing channel** is a value change with a live consumer (`DerivedStatRegistry.cs:46-48`, `ActorDerivedProfiles`) — **that is data**. Adding a *channel* needs a new reader — **that stays code**. So the table ships with **E16** (the channel module, which already adds a composer and a Writer case per channel) holding values only, never channel identity, and registers with **E8** bumping `ContentHashRegistry.CurrentSchemaVersion` to **4** (E18=2, E9=3).
   - ⚠️ Until E16, the 0.95 resist cap stays a code constant: changing it moves every battle golden with an unchanged `contentHash`. Acceptable only because a constant edit is visible in a diff — which stops being true the moment it becomes a row, which is exactly why it must register with E8 in the same change.

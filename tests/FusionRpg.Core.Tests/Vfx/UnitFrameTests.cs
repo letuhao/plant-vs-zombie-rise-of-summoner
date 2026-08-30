@@ -24,19 +24,19 @@ public class UnitFrameTests
 
     [Fact]
     public void WorldY_feet_uses_lane() =>
-        Assert.Equal(2f, VfxUnitFrameMath.WorldY(2f, 9f, halfCell: 0.5f, hasBounds: true, VfxAnchorKind.Feet));
+        Assert.Equal(2f, VfxUnitFrameMath.WorldY(2f, 9f, halfCell: 0.5f, boundsHalfHeight: 2f, hasBounds: true, VfxAnchorKind.Feet));
 
     [Fact]
     public void WorldY_body_uses_bounds_center_when_present() =>
-        Assert.Equal(9f, VfxUnitFrameMath.WorldY(2f, 9f, halfCell: 0.5f, hasBounds: true, VfxAnchorKind.Body));
+        Assert.Equal(9f, VfxUnitFrameMath.WorldY(2f, 9f, halfCell: 0.5f, boundsHalfHeight: 2f, hasBounds: true, VfxAnchorKind.Body));
 
     [Fact]
     public void WorldY_body_falls_back_to_lane_plus_half_cell() =>
-        Assert.Equal(2.5f, VfxUnitFrameMath.WorldY(2f, 9f, halfCell: 0.5f, hasBounds: false, VfxAnchorKind.Body));
+        Assert.Equal(2.5f, VfxUnitFrameMath.WorldY(2f, 9f, halfCell: 0.5f, boundsHalfHeight: 2f, hasBounds: false, VfxAnchorKind.Body));
 
     [Fact]
-    public void WorldY_crown_keeps_lane_baseline() =>
-        Assert.Equal(2f, VfxUnitFrameMath.WorldY(2f, 9f, halfCell: 0.5f, hasBounds: true, VfxAnchorKind.Crown));
+    public void WorldY_crown_uses_upper_bounds_when_present() =>
+        Assert.Equal(10.3f, VfxUnitFrameMath.WorldY(2f, 9f, halfCell: 0.5f, boundsHalfHeight: 2f, hasBounds: true, VfxAnchorKind.Crown), 1);
 
     [Fact]
     public void Span_uses_sprite_bounds_when_larger_than_cell()
@@ -78,7 +78,9 @@ public class UnitFrameTests
               },
               "render": {
                 "burstParticles": 28, "particleSortingOrder": 80, "sortOffsetAboveUnit": 2,
-                "particleTextureSize": 64, "markerEdgeSoftness": 0.1,
+                "sustainedWorldYOffset": 0.25,
+                "particleTextureSize": 64, "markerEdgeSoftness": 0.14,
+                "markerGlowStrength": 0.45, "markerSizeScale": 0.24, "markerYOffsetScale": 0.12,
                 "shieldBar": {
                   "barWorldWidth": 0.95, "barWorldHeight": 0.12, "worldYOffset": -0.35,
                   "maxSegments": 3, "cap": 32, "maxPips": 3
@@ -94,11 +96,13 @@ public class UnitFrameTests
         Assert.Equal(3, tuning.Version);
         Assert.Equal(1.5, tuning.Sustained.SpanScale);
         Assert.Equal(2, tuning.Render.SortOffsetAboveUnit);
+        Assert.Equal(0.25, tuning.Render.SustainedWorldYOffset);
+        Assert.Equal(0.12, tuning.Render.MarkerYOffsetScale);
     }
 
     [Fact]
     public void WorldY_cell_uses_boundsCenterY() =>
-        Assert.Equal(4f, VfxUnitFrameMath.WorldY(2f, 4f, halfCell: 0.5f, hasBounds: false, VfxAnchorKind.Cell));
+        Assert.Equal(4f, VfxUnitFrameMath.WorldY(2f, 4f, halfCell: 0.5f, boundsHalfHeight: 1f, hasBounds: false, VfxAnchorKind.Cell));
 
     [Fact]
     public void Span_applies_recipe_scale()
@@ -143,7 +147,10 @@ public class UnitFrameTests
         var tuning = VfxTuningLoader.Parse(File.ReadAllText(path));
         Assert.Equal(3, tuning.Version);
         Assert.Equal(1.5, tuning.Sustained.SpanScale);
-        Assert.Equal(0, tuning.Render.SortOffsetAboveUnit);
+        Assert.Equal(1, tuning.Render.SortOffsetAboveUnit);
+        Assert.Equal(0.25, tuning.Render.SustainedWorldYOffset);
+        Assert.Equal(0.12, tuning.Render.MarkerYOffsetScale);
+        Assert.Equal(0.45, tuning.Render.MarkerGlowStrength);
     }
 
     [Fact]

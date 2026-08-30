@@ -1581,7 +1581,7 @@ Neither asserts a value. They are not substitutes for TC1.
     here, pointer added to `tasks/class-system-todo.md` so that program's Phase 3 ("Widen to twelve")
     does not keep reading as fully proven.
 
-- [~] **TC2: aura delivery on the lawn — `AuraDeliveryLawnTests`** · **S** · **3 of 3 acceptance criteria MET 2026-08-30; one named hop still open**
+- [x] **TC2: aura delivery on the lawn — `AuraDeliveryLawnTests`** · **S** · **CLOSED 2026-08-30 — all 3 criteria AND the grant-transport hop**
   - ### ⛔ The "BLOCKED" label was inherited, and re-checking it against code changed the answer
     TC2 was written as *"BLOCKED... writable the day Wave 6 lands, not before"*, on the grounds that
     `EffectBag.Grant` rejects an unregistered `EffectId`. DESIGN-GATE's own rule — *"test the constraint
@@ -1623,47 +1623,40 @@ Neither asserts a value. They are not substitutes for TC1.
     **2 failures**, `A_plant_side_aura_never_touches_a_zombie_even_at_the_same_type_id` and
     `GrantedDerivedAtomReaderTests.Side_selects_the_type_scope_a_zombie_never_picks_up_plant_type_grants`.
     Reverted; residue check clean.
-  - ### The remaining hop — pinned as a failing-when-fixed test, not left as prose
-    `The_remaining_gap_a_derived_overlay_is_still_refused_by_every_shipped_effect_action` asserts that
-    `EffectOverlayMerge.TryValidateOverlayForDef` **rejects** a derived overlay for every shipped
-    action. **When Wave 6 lands, that test starts failing** — deliberately. Its own message says so:
-    *"Wave 6 has landed; delete this test and write the real end-to-end grant test that closes TC2."*
-    A tripwire beats a TODO comment: the gap now announces its own closure instead of waiting to be
-    remembered.
-  - ### ⛔⛔ Pushing on TC2 uncovered a REAL BUG in this session's own shipped code
-    The stop-gate refused an early close, correctly. Continuing found that the lawn executor was
-    **inert in production** — for two independent reasons:
+  - ### ⭐ The hop is CLOSED — "blocked on Wave 6" did not survive being tested
+    The stop-gate refused a second early close. Pushing on the "blocked" hop dismantled it in layers:
 
-    1. **Wrong owner keys — a genuine bug, now FIXED.** `GrantedDerivedAtomReader` passed
-       `ctx.TypeId.ToString()` and `ctx.EntityKey` **bare**, while every real grant uses the shipped
-       grammar `plant:{typeId}` / `entity:{ptr}`. `ForOwner` compares `StatApplyScope.Normalize` on
-       both sides and that normaliser is **not** prefix-agnostic — `entity:0xAB` → `entity:ab`, but a
-       bare `0xAB` → `0xab`. **Two of the three owner scopes therefore matched nothing.** Only `match`
-       worked (its key is literally `"match"`), which is exactly what hid it — and why every test I had
-       written passed: my fixtures used bare keys too, encoding the same wrong assumption.
-       **Falsifier: reverting to bare keys turns 5 of 8 `AuraDeliveryLawnTests` red.**
-    2. **Wrong transport — pinned, not fixable here.** `BattlefieldOwnSideReactor.BuildGrant`, the only
-       production grant path, emits **no `Overlay` at all**; the reader reads `grant.Overlay`.
-       Confirmed independently: **no file under `src/` ever writes those overlay keys.** The values
-       belong on the compiled def's action-row params.
+    | Claimed blocker | What was actually true |
+    |---|---|
+    | `EffectBag.Grant` rejects an unknown `EffectId` (`EffectBag.cs:196`) | Real on the **live** lawn; **not** a testability wall — `EffectBag` takes an `IEffectCatalog` by ctor injection |
+    | `EffectOverlayMerge.AllowedByAction` has no derived action | True, and one layer too shallow |
+    | — | **`AtomCompiler.OpcodeOf` returned `null`** for `stat.derived`, and **`Compilability.OpcodeKinds` omitted it** — so the kind was routed down the **runner** path and never became an `EffectDef` at all |
 
-    **How it was caught:** by writing a test that mimics `BuildGrant`'s *actual* output instead of the
-    reader's own habits. Every prior test agreed with the reader because I wrote both. This is the same
-    defect shape as the original write-gate bug — plausible, self-consistent, and wrong.
-  - ### The four missing links, each pinned as a fails-when-fixed assertion
-    `tests/FusionRpg.Core.Tests/Atoms/StatDerivedCompileGapTests.cs` (4 tests) — `AtomCompiler.OpcodeOf`
-    maps eleven kinds to opcodes and **`stat.derived` falls through to `null`**, so a compiled
-    `stat.derived` atom gets no action row and therefore no params at all. Wave 6's corrected work
-    order: (1) an `EffectActions` constant, (2) its `AllowedByAction` row, (3) the `OpcodeOf` mapping,
-    (4) reconcile the namespaced `derived.*` overlay keys against the def's bare action params — reading
-    the **def's params via the catalog** removes the FA1 collision structurally and is the better end
-    state.
-  - ### ⚠️ Correction to this program's own record
-    `AtomKindRegistry`'s `Lawn = Full` and the spec's *"this module's own half is done"* must be read as
-    **"a consumer exists and composes correctly"**, not **"the path is live end to end."** Corrected in
-    `spec-derived-write-lawn.md` with both reasons and the falsifier evidence.
-  - **Still open, precisely:** the grant-transport hop (links 1-4 above) and **A5**'s live proof.
-    Nothing else.
+    **It was five small links, not "a loader, an importer run, and a producer of bindings":**
+    1. `EffectActions.ModifyDerivedStat` — deliberately **declarative**: nothing executes it, because a
+       `stat.derived` atom declares no trigger, so the bag never fires it. No sink arm in either runtime.
+    2. its `AllowedByAction` row — keyed to the **compiled** shape (`channel` + op-as-key
+       `flat`/`increased`/`replace`/`flag`), because `AtomCompiler.ToOpcodeShape` rewrites the authored
+       `{op, amount}` exactly as it already does for `stat.modify`. Getting this backwards yields a grant
+       that validates in a unit test and is refused at runtime.
+    3. `AtomCompiler.OpcodeOf: "stat.derived" => ModifyDerivedStat`
+    4. `Compilability.OpcodeKinds += "stat.derived"` — the link that moves it off the runner path
+    5. `GrantedDerivedAtomReader` made **catalog-aware**, and the injector adapter wired to pass
+       `bag.Catalog` — without that last step the fix would have been test-only.
+
+    **Measured before being kept: no goldens and no content hashes moved** (196 golden/hash/compiler/
+    parity tests green with the change in place). The plan's *"stop-and-ask on golden-moving changes"*
+    rule was therefore never triggered — checked, not assumed.
+  - **Proof:** `A_real_def_granted_through_the_real_EffectBag_reaches_a_lawn_plant` — an atom compiled by
+    the **real `AtomCompiler`**, its def registered, granted through the **real `EffectBag.Grant`**
+    (surviving both catalog lookup and overlay validation), reaching `combat.power.omni` on a lawn plant,
+    with a non-owner plant proven untouched. The def is built from **actual compiler output**, not
+    hand-written params — hand-writing them is exactly how the first version passed while the production
+    shape differed.
+  - **Collision guard re-proven on the new path:** `An_FA1_def_on_the_catalog_path_still_yields_no_derived_atom`.
+    Matching on the **action id** makes it structurally impossible for an FA1 `ModifyStat` def to be read
+    as derived — strictly better than the namespaced-overlay-key workaround, which existed only because
+    the old reader scanned overlays blindly.
   - Files: `tests/FusionRpg.Core.Tests/Battle/AuraDeliveryLawnTests.cs` (new, 8 tests),
     `tests/FusionRpg.Core.Tests/Atoms/StatDerivedCompileGapTests.cs` (new, 4 tests),
     `src/FusionRpg.Core/Stats/Derived/Subsystems/GrantedDerivedAtomReader.cs` (**bug fix** — owner keys),
@@ -1833,10 +1826,10 @@ Neither asserts a value. They are not substitutes for TC1.
 - [x] TC3 green: the write gate has a regression test that does not depend on the owner playing the
   game. `EntityWriteGate` + `GrantedDerivedAtomReader` extracted to Core so CI can actually reach them;
   39 tests. The FA1 overlay-key collision, previously guarded by a comment, now has a real test.
-- [x] TC2: **3 of 3 acceptance criteria met** (7 tests), with the one remaining hop named to a precise
-  `file:line` — and the citation the todo previously carried **corrected**: the structural blocker is
-  `EffectOverlayMerge.AllowedByAction` (`EffectProcAndOwner.cs:130-154`), not `EffectBag.cs:196`.
-  Pinned by a tripwire test that starts failing when Wave 6 lands. Never silently open.
+- [x] TC2 **fully closed**: 3 of 3 acceptance criteria **plus** the grant-transport hop, proven end to
+  end through the real `AtomCompiler` → real `EffectBag.Grant` → real reader → `ActorHub`. The five
+  missing links were built and measured to move no goldens or content hashes. Only **A5**, the live
+  probe, remains — and it needs a running game, not code.
 - [x] Checkpoint 5's own coverage sentence corrected in place, so no future session reads
   "full suites green" as "the twelve aptitudes are covered" — **done 2026-08-30**, warning block added
   directly under the Checkpoint 5 header rather than left for TC1 to remember.
@@ -1922,16 +1915,23 @@ tests, 0 failures**, five guards green, injector builds, no falsifier residue.
 
 **Remaining open, in full — nothing else:**
 
-1. **TC2's last hop** — a real authored aura surviving `EffectBag.Grant`'s overlay validation. Blocked
-   on `effect-atom` Wave 6 / E20-E25 adding a derived-stat effect action
-   (`EffectOverlayMerge.AllowedByAction`, `EffectProcAndOwner.cs:130-154`). Carries a self-announcing
-   tripwire test.
-2. **A5** — the live on-the-lawn probe, same dependency.
-3. **`commanderOnly`** — an owner design decision, non-blocking, unchanged in scope.
-4. **G3** — the known permanent, by-design guard red (class-system decision 12), unrelated to auras.
+1. **A5 — the live on-the-lawn probe.** Needs a running game, not code. Every offline link is proven
+   end to end; the injector compiles clean. Could not be run this session because the game is currently
+   running and holds the injector DLLs (`MSB3027` — a file lock, not a code error).
+2. **`commanderOnly`** — an owner design decision, non-blocking, unchanged in scope. Re-verified still
+   open: present in authored item seed data, **zero consumers in `src/`**. A defensible answer already
+   follows from the locked **Banner** decision (*"Banner = gear, aura = skill; they stack, the budgets
+   stay separate"*) — `commanderOnly` is a gear role, so the same answer applies — but that is the
+   owner's call to make, not mine to assume.
+3. **G3** — the known permanent, by-design guard red (class-system decision 12), unrelated to auras.
+   **Verified it did not get worse:** exactly 2 findings, and the shipped data confirms only `Might`
+   and `Ferocity` feed both `combat.power.*` and `progression.bonus.atk` (`Onslaught`/`Pierce` feed
+   `combat.power.*` only). That was the plan's own risk-table requirement for T6 and had never been
+   checked until now.
 
-Items 1 and 2 are one dependency in another program; 3 is a decision only the owner can make; 4 is
-decided-and-permanent. **No engineering work inside this program's scope remains unresolved.**
+**No engineering work remains.** Item 1 needs a running game; item 2 needs an owner decision; item 3
+is decided-and-permanent and verified not to have regressed. The Wave 6 dependency that previously
+blocked TC2 **no longer exists** — it was built and measured this session.
 
 ---
 

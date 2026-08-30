@@ -231,14 +231,20 @@ part of Wave 6, not re-litigated here.**
 > **So `AtomKindRegistry`'s `Lawn = Full` should be read as "a consumer exists and composes correctly",
 > NOT as "the path is live end to end."** It is not, yet.
 >
-> **What Wave 6 actually owes this module** — the corrected work order:
-> 1. an `EffectActions` constant for a derived-stat write;
-> 2. its `EffectOverlayMerge.AllowedByAction` row (`channel`/`op`/`amount`);
-> 3. `AtomCompiler.OpcodeOf: "stat.derived" => <that action>`;
-> 4. reconcile the two key namespaces — the reader uses namespaced `derived.*` overlay keys precisely
->    because bare `channel`/`op`/`amount` collide with FA1 `ModifyStat`; reading the **def's action
->    params** (via the catalog) instead of the grant overlay removes the collision structurally and is
->    the better end state.
+> #### ✅ Third and final correction, same day — **the work order above was COMPLETED, not handed off**
+>
+> All five links were built and verified in this session:
+> `EffectActions.ModifyDerivedStat` + its `AllowedByAction` row (keyed to the **compiled** op-as-key
+> shape, since `ToOpcodeShape` rewrites `{op, amount}` → `{flat: N}`) + `AtomCompiler.OpcodeOf` +
+> **`Compilability.OpcodeKinds`** (the decisive one — without it `Classify` returned `Runner`, so the
+> kind never became an `EffectDef`) + a catalog-aware `GrantedDerivedAtomReader` wired through the
+> injector adapter.
+>
+> **No goldens and no content hashes moved** — measured before keeping the change.
+>
+> `A5`'s offline half is therefore **proven end to end**: an atom compiled by the real `AtomCompiler`,
+> granted through the real `EffectBag.Grant`, reaching `combat.power.omni` on a lawn plant. **Only the
+> LIVE probe remains** — it needs a running game, not code.
 >
 > Consequence: the offline half of A5 is **no longer blocked and has been built** —
 > `tests/FusionRpg.Core.Tests/Battle/AuraDeliveryLawnTests.cs` (7 green) proves aura delivery on a real

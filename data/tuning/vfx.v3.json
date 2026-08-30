@@ -35,9 +35,13 @@
   "render": {
     "burstParticles": 28,
     "particleSortingOrder": 80,
-    "sortOffsetAboveUnit": 0,
+    "sortOffsetAboveUnit": 1,
+    "sustainedWorldYOffset": 0.25,
     "particleTextureSize": 64,
-    "markerEdgeSoftness": 0.1,
+    "markerEdgeSoftness": 0.14,
+    "markerGlowStrength": 0.45,
+    "markerSizeScale": 0.24,
+    "markerYOffsetScale": 0.12,
     "shieldBar": {
       "barWorldWidth": 0.95,
       "barWorldHeight": 0.12,

@@ -7,7 +7,7 @@ public enum VfxAnchorKind
     Feet = 0,
     /// <summary>Sprite bounds center — orbit, crackle, mid-body reads.</summary>
     Body = 1,
-    /// <summary>Lane baseline; upward bias lives in VfxAuraMath / marker offsets.</summary>
+    /// <summary>Upper sprite band; particle grammar adds further upward bias.</summary>
     Crown = 2,
     /// <summary>Cell center — non-unit cues (bursts at col/row).</summary>
     Cell = 3

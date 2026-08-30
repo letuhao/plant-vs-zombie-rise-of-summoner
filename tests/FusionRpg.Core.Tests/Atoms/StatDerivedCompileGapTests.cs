@@ -5,28 +5,27 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Atoms;
 
 /// <summary>
-/// aura-skill-todo.md Phase 5 / TC2 — <b>the four missing links between a `stat.derived` atom and a
-/// lawn entity, each pinned as an assertion instead of prose.</b>
+/// aura-skill-todo.md Phase 5 / TC2 — <b>the `stat.derived` atom → lawn entity chain, now complete.</b>
 ///
-/// <para><b>Why this file exists.</b> `spec-derived-write-lawn.md` recorded the lawn executor as
-/// <i>"this module's own half is done: the moment such a def is grantable, the executor consumes
-/// it"</i>, and the blocker as a single line (`EffectBag.cs:196`, unknown effect id). Probing the real
-/// code while building TC2 found that neither statement holds: the chain is broken in <b>four</b>
-/// places, and the executor would consume nothing even if a def were granted.</para>
+/// <para><b>History, kept because it is the point.</b> This file was written as four <i>tripwires</i>:
+/// each asserted a CURRENT ABSENCE and was designed to fail the day Wave 6 closed it. Probing had
+/// found the chain broken in four places, and `spec-derived-write-lawn.md` was claiming *"this module's
+/// own half is done"* while the executor would in fact have consumed nothing.</para>
 ///
-/// <para><b>Every test here asserts a CURRENT ABSENCE and is designed to fail when Wave 6 / E20-E25
-/// closes it.</b> That is the intended signal, not a regression — each assertion message says what to
-/// do. A tripwire beats a TODO comment: the gap announces its own closure rather than waiting to be
-/// remembered.</para>
+/// <para>The tripwires then fired — because the gap was closed the same day, once measuring (rather
+/// than assuming) showed the missing opcode moved <b>no goldens and no content hashes</b>. What was
+/// recorded as "a loader, an importer run, and a producer of bindings" turned out to be, for this
+/// path, <b>one opcode mapping and one overlay-whitelist row</b>. The assertions below are their
+/// inverted form: they now prove each link EXISTS, so the chain cannot silently regress.</para>
 /// </summary>
 public class StatDerivedCompileGapTests
 {
-    /// <summary><b>Link 1 — the compiler emits no action.</b> `AtomCompiler.OpcodeOf` maps eleven atom
-    /// kinds to opcodes; `stat.derived` falls through to `null`, so the emitted def gets no action row,
-    /// and therefore no `channel`/`op`/`amount` params anywhere. This is the root of the chain: without
-    /// an action there is nothing for a whitelist to allow or a reader to read.</summary>
+    /// <summary><b>Link 1 — the action constant exists.</b> Was: "no derived action constant exists".
+    /// <c>ModifyDerivedStat</c> is deliberately declarative: nothing executes it, because a
+    /// <c>stat.derived</c> atom is a permanent modifier that declares no trigger, so the bag never
+    /// fires it. That is why adding it needed no sink executor in either runtime.</summary>
     [Fact]
-    public void Link1_no_effect_action_constant_exists_for_a_derived_stat_write()
+    public void Link1_an_effect_action_exists_for_a_derived_stat_write()
     {
         var actionNames = typeof(EffectActions)
             .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
@@ -34,66 +33,96 @@ public class StatDerivedCompileGapTests
             .Select(f => (string)f.GetRawConstantValue()!)
             .ToList();
 
-        Assert.NotEmpty(actionNames);
-        Assert.DoesNotContain(actionNames, n => n.Contains("Derived", StringComparison.OrdinalIgnoreCase));
-
-        // When this fails: an action for derived-stat writes now exists. Map `stat.derived` to it in
-        // AtomCompiler.OpcodeOf, add its AllowedByAction row, and make GrantedDerivedAtomReader read
-        // the def's action params. Then delete this test.
+        Assert.Contains(EffectActions.ModifyDerivedStat, actionNames);
+        Assert.Equal("ModifyDerivedStat", EffectActions.ModifyDerivedStat);
     }
 
-    /// <summary><b>Link 2 — the atom kind still declares its params as bare `channel`/`op`/`amount`.</b>
-    /// Those are ACTION-ROW param names, which is a different transport from the grant overlay the
-    /// reader currently reads. Pinned so that if the schema changes, whoever changes it sees that a
-    /// reader depends on the answer.</summary>
+    /// <summary><b>Link 2 — the whitelist row matches the atom's own ParamSchema exactly.</b> The
+    /// schema is the SSOT for what a `stat.derived` atom carries; a second spelling in the overlay
+    /// whitelist would be a silent divergence that only shows up as a rejected grant at runtime. This
+    /// asserts the two agree, in both directions.</summary>
     [Fact]
-    public void Link2_the_stat_derived_param_schema_names_action_row_params_not_overlay_keys()
+    public void Link2_the_whitelist_matches_the_COMPILED_shape_not_the_authored_schema()
     {
+        // The authored atom carries {channel, op, amount}...
         var kind = AtomKindRegistry.Get("stat.derived");
         Assert.NotNull(kind);
+        Assert.Equal(new[] { "amount", "channel", "op" },
+            kind!.Params.Defs.Select(p => p.Name).OrderBy(n => n, StringComparer.Ordinal));
 
-        var names = kind!.Params.Defs.Select(p => p.Name).OrderBy(n => n, StringComparer.Ordinal).ToList();
+        // ...but AtomCompiler.ToOpcodeShape rewrites it to the op-as-KEY form {channel, flat} before it
+        // reaches a def, exactly as it already does for stat.modify. The overlay whitelist must match
+        // that COMPILED shape, not the authored one -- getting this backwards is a grant that validates
+        // in a unit test and is refused at runtime.
+        var actions = new[] { new FusionRpg.Core.Effects.EffectActionRow { Action = EffectActions.ModifyDerivedStat } };
 
-        Assert.Equal(new[] { "amount", "channel", "op" }, names);
+        foreach (var key in new[] { "channel", "flat", "increased", "replace", "flag" })
+            Assert.True(FusionRpg.Core.Effects.EffectOverlayMerge.TryValidateOverlayForDef(
+                actions, new Dictionary<string, object?> { [key] = 1 }, out var err),
+                $"compiled-shape key '{key}' must be accepted: {err}");
 
-        // The reader deliberately uses NAMESPACED overlay keys (`derived.channel`, ...) because bare
-        // `channel`/`op`/`amount` collide with FA1 ModifyStat's own overlay keys. Reconciling those two
-        // namespaces is part of Wave 6's job, and GrantedDerivedAtomReaderTests documents the collision
-        // that forced the namespace.
+        // `more` is deliberately absent: the derived side has no More op.
+        Assert.False(FusionRpg.Core.Effects.EffectOverlayMerge.TryValidateOverlayForDef(
+            actions, new Dictionary<string, object?> { ["more"] = 1 }, out _));
+
+        // ...and it is a whitelist, not a wildcard.
+        Assert.False(FusionRpg.Core.Effects.EffectOverlayMerge.TryValidateOverlayForDef(
+            actions, new Dictionary<string, object?> { ["notAParam"] = 1 }, out _));
     }
 
-    /// <summary><b>Link 3 — `stat.derived` has no opcode mapping.</b> Asserted through the compiler's
-    /// public behaviour rather than by reading the private switch: a `stat.derived` atom's kind is
-    /// registered and compilable-by-vocabulary, yet no shipped action corresponds to it.</summary>
+    /// <summary><b>Link 3 — the compiler maps the kind to that action.</b> Was: "`stat.derived` falls
+    /// through to null, so a compiled atom gets no action row and therefore no params for anyone to
+    /// read". Asserted through the compiler's real output on a real atom row rather than by reading a
+    /// private switch.</summary>
     [Fact]
-    public void Link3_stat_derived_is_a_registered_kind_with_no_shipped_opcode()
+    public void Link3_a_stat_derived_atom_compiles_to_a_ModifyDerivedStat_action_row()
     {
-        var kind = AtomKindRegistry.Get("stat.derived");
-        Assert.NotNull(kind);
+        // Same shape as the real shipped atom in data/seed/atoms/trait-critical-hunter.json, and the
+        // same construction idiom AtomCompilerTests uses.
+        var row = new AtomRow
+        {
+            AtomId = AtomRow.DeriveId("atom.test-derived", "", 1),
+            KindId = "stat.derived",
+            FamilyId = "atom.test-derived",
+            Variant = "",
+            Tier = 1,
+            Name = "Test Derived",
+            ParamsJson = """{"channel":"combat.crit.rate.omni","op":"flat","amount":150}""",
+            WhenJson = "{}",   // no trigger: a permanent modifier
+            IcdKey = "test.derived.compile",
+        };
 
-        // It is a real, registered kind -- not a typo or a removed one.
-        Assert.Equal(AttachPoint.Stat, kind!.Attach);
+        var compiled = AtomCompiler.Compile(new[] { row }, RuntimeId.Lawn, catalogRevision: 1);
 
-        // ...and every OTHER attach-point-Stat kind that ships does have an opcode. `stat.modify`
-        // maps to ModifyStat; `stat.derived` maps to nothing, which is the gap.
-        Assert.NotNull(AtomKindRegistry.Get("stat.modify"));
+        Assert.Empty(compiled.Rejected);
+
+        var def = Assert.Single(compiled.Defs);
+        var action = Assert.Single(def.Actions);
+
+        Assert.Equal(EffectActions.ModifyDerivedStat, action.Action);
+        Assert.Equal("combat.crit.rate.omni", action.Params["channel"]?.ToString());
+
+        // Op-as-KEY: ToOpcodeShape turned {op:"flat", amount:150} into {flat:150}. Asserting the
+        // transform here is what stops the reader and the whitelist from drifting back to {op, amount},
+        // which would validate in isolation and then match nothing real.
+        Assert.False(action.Params.ContainsKey("op"));
+        Assert.False(action.Params.ContainsKey("amount"));
+        Assert.Equal(150d, Convert.ToDouble(action.Params["flat"]));
+
+        // A permanent modifier declares no trigger, so the def must be Passive or the bag never
+        // completes its lifecycle (definitions.md §14.2).
+        Assert.Equal(EffectTypes.Passive, def.EffectType);
     }
 
-    /// <summary><b>Link 4 — the runtime matrix says Lawn is served, which is only half true.</b>
-    /// `AtomKindRegistry` was flipped to Lawn = Full when the executor landed (decisions.md
-    /// "Derived-write lawn executor", 2026-08-30). The executor is genuinely registered and genuinely
-    /// composes — proven by `AuraDeliveryLawnTests` — but nothing in production can currently hand it a
-    /// grant it can read, per links 1-3. Recorded here so "Lawn = Full" is read as *"a consumer exists"*
-    /// and not as *"the path is live end to end."*</summary>
+    /// <summary><b>Link 4 — `Lawn = Full` is now true end to end, not just "a consumer exists".</b>
+    /// Sim stays closed: no consumer there, and D6's quarantine still holds for it.</summary>
     [Fact]
-    public void Link4_lawn_is_marked_served_and_that_means_a_consumer_exists_not_a_live_path()
+    public void Link4_lawn_is_served_end_to_end_and_sim_remains_quarantined()
     {
         var kind = AtomKindRegistry.Get("stat.derived");
         Assert.NotNull(kind);
 
         Assert.Equal(RuntimeState.Full, kind!.Support.Lawn);
-
-        // Sim remains closed: no consumer there, and the quarantine (D6) still holds for it.
         Assert.Equal(RuntimeState.None, kind.Support.Sim);
     }
 }

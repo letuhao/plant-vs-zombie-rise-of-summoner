@@ -117,34 +117,85 @@ public static class FxResources
 
     static float ShapeAlpha(Core.Vfx.VfxMarkerShape shape, float nx, float ny)
     {
-        // Config-backed (tunables-ssot.md T1) — data/tuning/vfx.v1.json's render.markerEdgeSoftness.
         var edge = (float)VfxTuningHub.Tuning.Render.MarkerEdgeSoftness;
-        switch (shape)
+        var glow = (float)VfxTuningHub.Tuning.Render.MarkerGlowStrength;
+        var core = shape switch
         {
-            case Core.Vfx.VfxMarkerShape.Diamond:
-            {
-                var d = MathF.Abs(nx) + MathF.Abs(ny);
-                return Mathf.Clamp01((0.8f - d) / edge);
-            }
-            case Core.Vfx.VfxMarkerShape.TriangleDown:
-            {
-                // apex at (0, -0.8), base from (-0.7, 0.6) to (0.7, 0.6)
-                if (ny > 0.6f || ny < -0.8f) return 0f;
-                var halfWidth = 0.7f * ((ny + 0.8f) / 1.4f);
-                return Mathf.Clamp01((halfWidth - MathF.Abs(nx)) / edge);
-            }
-            case Core.Vfx.VfxMarkerShape.Cross:
-            {
-                if (MathF.Abs(nx) > 0.8f || MathF.Abs(ny) > 0.8f) return 0f;
-                var arm = MathF.Min(MathF.Abs(nx), MathF.Abs(ny));
-                return Mathf.Clamp01((0.18f - arm) / edge);
-            }
-            default: // Ring
-            {
-                var d = MathF.Sqrt(nx * nx + ny * ny);
-                return Mathf.Clamp01((0.12f - MathF.Abs(d - 0.66f)) / edge);
-            }
-        }
+            Core.Vfx.VfxMarkerShape.Diamond => DiamondAlpha(nx, ny, edge),
+            Core.Vfx.VfxMarkerShape.TriangleDown => ChevronAlpha(nx, ny, edge),
+            Core.Vfx.VfxMarkerShape.Cross => CrossAlpha(nx, ny, edge),
+            _ => RingAlpha(nx, ny, edge)
+        };
+        return Mathf.Clamp01(core + glow * OuterHalo(nx, ny, shape, edge));
+    }
+
+    static float OuterHalo(float nx, float ny, Core.Vfx.VfxMarkerShape shape, float edge)
+    {
+        var d = MathF.Sqrt(nx * nx + ny * ny);
+        return shape switch
+        {
+            Core.Vfx.VfxMarkerShape.Diamond => SoftDiamond(nx, ny, 0.92f, edge * 2.4f) * 0.55f,
+            Core.Vfx.VfxMarkerShape.TriangleDown => ChevronAlpha(nx, ny, edge * 2.2f) * 0.45f,
+            Core.Vfx.VfxMarkerShape.Cross => CrossAlpha(nx, ny, edge * 2f) * 0.4f,
+            _ => Mathf.Clamp01((0.92f - d) / (edge * 2.5f)) * 0.35f
+        };
+    }
+
+    static float SoftRing(float nx, float ny, float radius, float thickness, float edge) =>
+        RingStroke(MathF.Sqrt(nx * nx + ny * ny), radius, thickness, edge);
+
+    static float RingStroke(float d, float radius, float thickness, float edge) =>
+        Mathf.Clamp01((thickness * 0.5f - MathF.Abs(d - radius)) / edge);
+
+    static float SoftDiamond(float nx, float ny, float radius, float edge)
+    {
+        var d = MathF.Abs(nx) + MathF.Abs(ny);
+        return Mathf.Clamp01((radius - d) / edge);
+    }
+
+    static float RingAlpha(float nx, float ny, float edge)
+    {
+        var d = MathF.Sqrt(nx * nx + ny * ny);
+        var outer = RingStroke(d, 0.62f, 0.11f, edge);
+        var inner = RingStroke(d, 0.42f, 0.07f, edge) * 0.55f;
+        var center = Mathf.Clamp01((0.18f - d) / (edge * 1.8f)) * 0.35f;
+        var sparkle = RingStroke(d, 0.72f, 0.05f, edge * 1.4f) * 0.4f;
+        return Mathf.Clamp01(outer + inner + center + sparkle);
+    }
+
+    static float DiamondAlpha(float nx, float ny, float edge)
+    {
+        var outer = SoftDiamond(nx, ny, 0.78f, edge);
+        var main = SoftDiamond(nx, ny, 0.52f, edge * 0.85f);
+        var inner = SoftDiamond(nx * 1.08f, ny * 1.08f, 0.28f, edge * 0.7f) * 0.85f;
+        var spine = Mathf.Clamp01((0.07f - MathF.Abs(nx)) / (edge * 0.75f)) *
+                    SoftDiamond(nx, ny, 0.55f, edge * 1.2f) * 0.5f;
+        return Mathf.Clamp01(outer * 0.55f + main + inner + spine);
+    }
+
+    static float ChevronAlpha(float nx, float ny, float edge)
+    {
+        const float apexY = -0.72f;
+        const float topY = 0.48f;
+        const float topHalfW = 0.58f;
+        if (ny > topY + edge || ny < apexY - edge) return 0f;
+        var t = (ny - apexY) / (topY - apexY);
+        if (t is < 0f or > 1f) return 0f;
+        var halfW = topHalfW * t;
+        var body = Mathf.Clamp01((halfW - MathF.Abs(nx)) / edge);
+        var spine = Mathf.Clamp01((0.07f - MathF.Abs(nx)) / (edge * 0.8f)) *
+                    Mathf.Clamp01((halfW * 0.55f - MathF.Abs(nx)) / (edge * 1.1f)) * 0.65f;
+        var tip = Mathf.Clamp01((0.12f - MathF.Sqrt(nx * nx + (ny - apexY) * (ny - apexY))) / (edge * 0.9f)) * 0.75f;
+        return Mathf.Clamp01(body + spine + tip);
+    }
+
+    static float CrossAlpha(float nx, float ny, float edge)
+    {
+        if (MathF.Abs(nx) > 0.82f || MathF.Abs(ny) > 0.82f) return 0f;
+        var arm = MathF.Min(MathF.Abs(nx), MathF.Abs(ny));
+        var core = Mathf.Clamp01((0.16f - arm) / edge);
+        var diagonal = Mathf.Clamp01((0.11f - MathF.Abs(MathF.Abs(nx) - MathF.Abs(ny))) / (edge * 1.2f)) * 0.45f;
+        return Mathf.Clamp01(core + diagonal);
     }
 
     static Texture2D SoftDisc()

@@ -352,8 +352,9 @@ internal static class ContractTuningTestBootstrap
             GlobalCap: 24, PerHostCap: 2, TtlGraceSeconds: 2.0, InfiniteTtlSeconds: 60.0,
             AuraPulseSeconds: 0.3, AuraMaxParticles: 6, SpanScale: 1.5),
         Render: new VfxRenderTuning(
-            BurstParticles: 28, ParticleSortingOrder: 80, SortOffsetAboveUnit: 0,
-            ParticleTextureSize: 64, MarkerEdgeSoftness: 0.1,
+            BurstParticles: 28, ParticleSortingOrder: 80, SortOffsetAboveUnit: 1, SustainedWorldYOffset: 0.25,
+            ParticleTextureSize: 64, MarkerEdgeSoftness: 0.14, MarkerGlowStrength: 0.45,
+            MarkerSizeScale: 0.24, MarkerYOffsetScale: 0.12,
             ShieldBar: new VfxShieldBarTuning(
                 BarWorldWidth: 0.95, BarWorldHeight: 0.12, WorldYOffset: -0.35,
                 MaxSegments: 3, Cap: 32, MaxPips: 3),

@@ -6,7 +6,9 @@
 #   2. Deploy: .\scripts\deploy-play.ps1 -LoaderHost MelonLoader -NoServer
 #   3. Launch game (deploy without -NoGame, or MelonLoader pack exe)
 #   4. Run: .\scripts\audit-status-vfx-identity.ps1 -Live [-Stress]
-# Optional: -SkipSetup if board already labbed; -TargetPtr to override ptr.
+# Optional: -SkipSetup only when the game is ALREADY mid-match on a lab board (living zombie ptr).
+#   Does NOT launch PlantsVsZombiesRH.exe — run deploy-play.ps1 (without -NoGame) first if needed.
+#   Without -SkipSetup, Ensure-LiveLabBoard calls POST /lawn/quick-start (menu → level 1 → lab-overlay).
 param(
     [string]$BaseUrl = "http://127.0.0.1:5088",
     [string]$TargetPtr = "",

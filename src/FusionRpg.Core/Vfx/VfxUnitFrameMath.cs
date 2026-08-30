@@ -7,12 +7,15 @@ public static class VfxUnitFrameMath
         hasBounds ? boundsCenterX : pivotX;
 
     public static float WorldY(
-        float laneY, float boundsCenterY, float halfCell, bool hasBounds, VfxAnchorKind kind) =>
+        float laneY, float boundsCenterY, float halfCell, float boundsHalfHeight,
+        bool hasBounds, VfxAnchorKind kind) =>
         kind switch
         {
             VfxAnchorKind.Feet => laneY,
             VfxAnchorKind.Body => hasBounds ? boundsCenterY : laneY + halfCell,
-            VfxAnchorKind.Crown => laneY,
+            VfxAnchorKind.Crown => hasBounds
+                ? boundsCenterY + boundsHalfHeight * 0.65f
+                : laneY + halfCell * 1.2f,
             VfxAnchorKind.Cell => boundsCenterY,
             _ => laneY
         };

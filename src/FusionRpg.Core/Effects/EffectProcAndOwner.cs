@@ -131,12 +131,14 @@ public static class EffectOverlayMerge
     {
         [EffectActions.ModifyStat] = new(StringComparer.OrdinalIgnoreCase)
             { "channel", "flat", "increased", "more", "byChannel", "chance", "icd_ms", "max_stacks", "filters" },
-        // aura-skill-todo.md Phase 5 / TC2. Param names mirror the `stat.derived` ParamSchema in
-        // AtomKindRegistry EXACTLY (channel/op/amount) -- the schema is the SSOT for what the atom
-        // carries, and a second spelling here would be a silent divergence. No `more`: the derived
-        // side has no More op (AtomDerivedSubsystem.TryParseOp accepts flat|increased|replace|flag).
+        // aura-skill-todo.md Phase 5 / TC2. These are the keys of the COMPILED action row, which is
+        // NOT the atom's authored ParamSchema: AtomCompiler.ToOpcodeShape rewrites the authored
+        // {op:"flat", amount:150} into the op-as-key form {flat:150}, exactly as it already does for
+        // stat.modify. So the whitelist mirrors ModifyStat's shape, minus `more` and `byChannel` --
+        // the derived side has no More op (AtomDerivedSubsystem.TryParseOp accepts only
+        // flat|increased|replace|flag) and no by-channel scaling.
         [EffectActions.ModifyDerivedStat] = new(StringComparer.OrdinalIgnoreCase)
-            { "channel", "op", "amount", "chance", "icd_ms", "max_stacks", "filters" },
+            { "channel", "flat", "increased", "replace", "flag", "chance", "icd_ms", "max_stacks", "filters" },
         [EffectActions.ApplyStatus] = new(StringComparer.OrdinalIgnoreCase)
             { "status", "duration", "level", "chance", "icd_ms", "max_stacks", "filters" },
         [EffectActions.ClearStatus] = new(StringComparer.OrdinalIgnoreCase)

@@ -46,7 +46,7 @@ VfxUnitFrame → World(kind) + Span(recipeScale)
 |---|---|---|
 | `Feet` | Lane ground line | DoT drip, pact feet pulse |
 | `Body` | Bounds center (fallback lane + half cell) | Orbit, crackle, spore |
-| `Crown` | Lane line; upward bias in `VfxAuraMath` | Command halo, rise sparkle, markers |
+| `Crown` | Upper sprite band (+ aura grammar bias) | Command halo, rise sparkle, markers |
 | `Cell` | Cell center | Cell-anchored bursts |
 
 X is always `bounds.center.x` when bounds exist; else pivot X.
@@ -54,7 +54,10 @@ X is always `bounds.center.x` when bounds exist; else pivot X.
 ### Tunables (`data/tuning/vfx.v3.json`)
 
 - `sustained.spanScale` — global sustained aura scale multiplier (default 1.5)
-- `render.sortOffsetAboveUnit` — added to `particleSortingOrder` when layering over units
+- `render.sortOffsetAboveUnit` — layers particles at or above the host sprite's sorting order
+- `render.sustainedWorldYOffset` — global world-Y lift for body/feet sustained auras (Crown excluded)
+- `render.markerYOffsetScale` / `render.markerSizeScale` — badge lift and size as fractions of span
+- `render.markerGlowStrength` — outer halo weight on procedurally generated marker textures
 
 Per-recipe `SizeScale` in `VfxCatalog` still applies on top of span math.
 

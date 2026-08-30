@@ -42,6 +42,16 @@ public static class Compilability
     {
         "stat.modify", "resource.delta", "resource.economy", "status.apply", "status.clear",
         "shield.grant", "spawn.entity", "board.action", "grid.spawn", "grid.clear", "box.set",
+        // aura-skill-todo.md Phase 5 / TC2 (2026-08-30). `stat.derived` now has an action --
+        // EffectActions.ModifyDerivedStat -- so it belongs on the COMPILED path, not the runner path.
+        // Without this entry Classify routes it to Runner ("has no FA opcode"), it never becomes an
+        // EffectDef, and the lawn executor has nothing to read: the atom compiles to a runtime entry
+        // that no derived consumer looks at. That is the fifth and last link in the chain.
+        //
+        // Unlike the other eleven, this opcode is DECLARATIVE: nothing executes it. A stat.derived
+        // atom is a permanent modifier declaring no trigger, so the bag never fires it -- the grant's
+        // presence is the effect, folded at resolve time. Hence no sink arm in either runtime.
+        "stat.derived",
     };
 
     /// <summary>The only leaves a legacy grant overlay can express.</summary>
