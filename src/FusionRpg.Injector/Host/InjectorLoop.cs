@@ -77,9 +77,19 @@ public static class InjectorLoop
         // v2 drain before TickDots so DoT pulses share the drain's board freeze and
         // merge into the same funnel window (plan Task 10).
         try { EventDrainHost.Tick(unscaledDeltaTime); } catch { }
-        try { EffectRuntime.TickDots(unscaledDeltaTime); } catch { }
-        // Shield upkeep after dispatch+DoTs — spec frame order (shield-system-spec.md §2.6).
-        try { EffectRuntime.TickShields(unscaledDeltaTime); } catch { }
+        // battle-timeline T13 — the kernel drives DoT and shield upkeep as scheduled 100 ms events,
+        // in the same slot and the same order the two accumulator grids used to occupy
+        // (drain -> DoT -> shields; shield-system-spec.md §2.6). Same period, same work: only the
+        // scheduling moved, which is what makes this a substitution rather than a redesign.
+        try { KernelDriveHost.Tick(unscaledDeltaTime); } catch { }
+        if (!KernelDriveHost.DrivingGrids)
+        {
+            // Off-board, or FUSIONRPG_KERNEL_GRIDS=0. The legacy accumulators still own the grids
+            // then — the same revert shape FUSIONRPG_EVENT_V2=0 already gives the event pipeline.
+            try { EffectRuntime.TickDots(unscaledDeltaTime); } catch { }
+            try { EffectRuntime.TickShields(unscaledDeltaTime); } catch { }
+        }
+        try { Hud.ActorHudCache.ReconcileDirty(); } catch { }
         _hb += unscaledDeltaTime;
         if (_hb >= 2f)
         {

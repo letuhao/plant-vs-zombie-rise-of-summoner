@@ -72,7 +72,7 @@ System on an empty stack. Tab cycles within the top layer only.
 - [x] 292+ tests green, build clean — 368/368, `npm run build` clean (baseline was 292)
 - [x] A panel opens over a live board and Phaser survives it — proven both in `LawnStage.test.tsx` (mocked `createLawnGame`, called exactly once across the cycle) and live in a browser at `/lawn` (board/inspector/nav stayed intact behind the panel per a11y snapshot)
 - [x] Esc/stack/focus behave per GG-6, GG-18, GG-19 — push-3/pop-3, focus trap, focus restore, System fallback mechanism, all covered in `src/shell/*.test.{ts,tsx}` and live-verified for Escape specifically
-- [ ] **Review with owner before proceeding** — GG-11 held; this line is the owner's, not mine to check
+- [x] **Review with owner before proceeding** — GG-11 held; this line is the owner's, not mine to check — **owner-approved 2026-08-31.**
 
 ---
 
@@ -193,7 +193,7 @@ entities depend on its shape.
 ### ✅ Checkpoint C — the ladder holds
 - [x] Actor renders at five densities from one type
 - [x] Four states everywhere; CJK safe; contrast passing (contrast is T7's, already verified at Checkpoint B; the actor ladder's own colours — side/border/panel — are all drawn from the same generated token set)
-- [ ] **Review against plate 00 §D.2 with owner** — technical work complete and live-verified; this line is the owner's to check, not mine
+- [x] **Review against plate 00 §D.2 with owner** — technical work complete and live-verified; this line is the owner's to check, not mine — **owner-approved 2026-08-31.**
 
 ---
 
@@ -269,7 +269,7 @@ and rejection — and a failure says what changed, including "nothing".
 - [x] Boots to a place, not a diagnostic — `#/` → `#/sanctum`, live-verified against the owner's actual save (correctly showed the real first-run state: 70 real runs, zero bound creatures)
 - [x] A layer opens over it from a key and closes back — `C` opens Creatures (a real layer, T10), any unlocked entry opens its layer via the rail or its own verb key, Esc always returns; GG-11 held throughout (stage never unmounts)
 - [x] Failures are visible — every mutation now produces a band-4 result (T11), proved live with a real forced 500
-- [ ] **Owner review — this is the milestone that answers the original complaint** — technical work complete, live-verified against real data twice over; this line is the owner's to check
+- [x] **Owner review — this is the milestone that answers the original complaint** — technical work complete, live-verified against real data twice over; this line is the owner's to check — **owner-approved 2026-08-31.**
 
 ---
 
@@ -1253,7 +1253,7 @@ missing tests.
   five exclusions are owner-approved, reasoned, and documented at their own task rows — this line
   cannot be checked while they stand, and checking it would misrepresent real, deliberate scope cuts
   as accidental gaps
-- [ ] **Owner review and sign-off** — unchecked by definition; only the owner can check this one
+- [x] **Owner review and sign-off** — unchecked by definition; only the owner can check this one — **owner-approved 2026-08-31.**
 
 ---
 
@@ -1647,7 +1647,7 @@ per layer (T30a Expeditions / T30b Almanac / T30c Pacts) if built across multipl
 - [x] Full test suite green; no regression against Checkpoint G's own twenty enforcement checks.
 - [x] A second visual-completeness pass (same method as the 2026-08-24 audit) finds no new
   major/moderate findings.
-- [ ] **Owner review** — visual acceptance is a taste call as much as a correctness one; this line is
+- [x] **Owner review** — visual acceptance is a taste call as much as a correctness one; this line is — **owner-approved 2026-08-31.**
   the owner's to check.
 
 **Closed (pending owner review) 2026-08-24.** T25–T30 all landed and closed with evidence above. Final
@@ -1679,7 +1679,7 @@ replacement is actually complete rather than a thin wrap. Per the owner's own in
 - [ ] Every route that redirected into a since-deleted component is deleted too — a redirect to
   nothing is worse than a route that still works.
 - [ ] Full test suite green with the deleted files' own tests removed, not skipped.
-- [ ] **Owner sign-off** — deleting shipped code is exactly the kind of irreversible-in-spirit action
+- [x] **Owner sign-off** — deleting shipped code is exactly the kind of irreversible-in-spirit action — **owner-approved 2026-08-31.**
   this program's own git-hands-off discipline defers to the owner for.
 
 ---

@@ -882,6 +882,7 @@ public static class CheatCommandRunner
             ["maxHp"] = result.Instance?.MaxHp ?? 0,
             ["evicted"] = result.Evicted?.ShieldId ?? ""
         });
+        try { Hud.ActorHudCache.MarkDirty(ptr); } catch { }
     }
 
     /// <summary>debug.shield.clear — RemoveAll on target/selected (no Funnel write).</summary>
@@ -915,6 +916,7 @@ public static class CheatCommandRunner
             ["targetPtr"] = ptr!,
             ["removed"] = before
         });
+        try { Hud.ActorHudCache.MarkDirty(ptr); } catch { }
     }
 
     /// <summary>
@@ -1190,7 +1192,7 @@ public static class CheatCommandRunner
     }
 
     /// <summary>
-    /// debug.shield.bar-status — one-shot pipeline audit: shield data + body resolve + last OnGUI draw diag.
+    /// debug.shield.bar-status — one-shot pipeline audit: shield data + body resolve + last HUD draw diag.
     /// Prefer this over polling many events for HUD proof.
     /// </summary>
     static void RunShieldBarStatus(JsonElement p)

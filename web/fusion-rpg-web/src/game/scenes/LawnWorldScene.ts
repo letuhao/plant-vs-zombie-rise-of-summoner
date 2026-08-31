@@ -43,6 +43,27 @@ export type LawnWorldInit = {
   generation: number;
 };
 
+declare global {
+  interface Window {
+    /** Playwright e2e — probe named HUD children on the Phaser lawn canvas. */
+    __fusionRpgHasHudChild?: (ptr: string, name: string) => boolean;
+  }
+}
+
+function findNamedDescendant(
+  go: Phaser.GameObjects.GameObject,
+  name: string
+): Phaser.GameObjects.GameObject | null {
+  if (go.name === name) return go;
+  const container = go as Phaser.GameObjects.Container;
+  if (!container.list?.length) return null;
+  for (const child of container.list) {
+    const hit = findNamedDescendant(child as Phaser.GameObjects.GameObject, name);
+    if (hit) return hit;
+  }
+  return null;
+}
+
 /**
  * Persistent lawn world while #/lawn mounted.
  * Systems allow-list: Sync → Layout → StatusFx → Pick (RT-08).
@@ -136,6 +157,13 @@ export class LawnWorldScene extends Phaser.Scene {
     }));
 
     this.fitCamera();
+    if (typeof window !== "undefined") {
+      window.__fusionRpgHasHudChild = (ptr, name) => {
+        const rec = this.ptrRegistry.get(ptr);
+        if (!rec) return false;
+        return findNamedDescendant(rec.go, name) != null;
+      };
+    }
     lawnBusEmit("lawn:ready", { generation: this.generation });
   }
 
@@ -254,6 +282,9 @@ export class LawnWorldScene extends Phaser.Scene {
   }
 
   shutdown(): void {
+    if (typeof window !== "undefined") {
+      delete window.__fusionRpgHasHudChild;
+    }
     this.scale.off("resize", this.onScaleResize, this);
     this.pickUnsub?.();
     this.pickUnsub = undefined;

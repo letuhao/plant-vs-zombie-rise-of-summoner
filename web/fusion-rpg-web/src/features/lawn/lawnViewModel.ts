@@ -17,6 +17,33 @@ export type OccupantFlags = {
   crashed?: boolean;
 };
 
+export type ActorHudTier = "normal" | "elite" | "boss" | "unique";
+export type MagnitudeBand = "low" | "mid" | "high";
+
+export type ActorHudSnapshot = {
+  identity: {
+    tier: ActorHudTier;
+    role: string;
+    levelBand?: number;
+    flags: string[];
+  };
+  resources?: {
+    shield?: {
+      hp: number;
+      max: number;
+      stacks: { element: string; hp: number; max: number }[];
+    };
+    hpSliver?: { ratio: number };
+    meters?: { id: string; ratio: number }[];
+  };
+  statuses: {
+    id: string;
+    cc: boolean;
+    magnitudeBand: MagnitudeBand;
+  }[];
+  overflow: { statusCount: number };
+};
+
 export type Occupant = {
   ptr: string;
   side: LawnSide;
@@ -42,6 +69,8 @@ export type Occupant = {
   flags: OccupantFlags;
   /** Only from Snapshot Bindings observe — never invent. */
   instanceId?: string;
+  /** Band B per-unit HUD — folded from injector actorHud wire only. */
+  hud?: ActorHudSnapshot;
 };
 
 /** Grid item (crater, grave, ice, …) — not a living Occupant. */

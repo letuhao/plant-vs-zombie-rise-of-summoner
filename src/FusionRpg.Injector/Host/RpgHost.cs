@@ -116,6 +116,9 @@ public static class RpgHost
             FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
                 // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. v1 stays on disk -- reverting is pointing this back at aptitudes.v1.json.
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v2.json"))));
+        FusionRpg.Core.Hud.ActorHudTuningHub.Configure(
+            FusionRpg.Core.Hud.ActorHudTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "actor-hud.v1.json"))));
 
         IsInitialized = true;
     }

@@ -1,0 +1,179 @@
+using FusionRpg.Core.Battle.Timeline;
+using FusionRpg.Core.Diagnostics;
+
+namespace FusionRpg.Injector.Effects;
+
+/// <summary>
+/// Injector side of the battle-timeline kernel — T13 / B25. Spec:
+/// <c>docs/architecture/battle/spec-injector-kernel-drive.md</c>.
+///
+/// <para><b>This file is an adapter and deliberately nothing else.</b> All the logic worth testing
+/// lives in <see cref="TimelineDrive"/> in Core, because CI runs ten test projects and never builds
+/// <c>src/FusionRpg.Injector</c> — anything placed here is untested by CI forever. What is left is
+/// what only the injector can do: read Unity's frame delta, own the board lifecycle, and name a real
+/// clock.</para>
+///
+/// <para><b>One kernel per board</b> (owner decision, 2026-08-31): created at <c>board.start</c>, torn
+/// down at <c>board.end</c>. Nothing shipped needs a timeline that outlives a board, so this is the
+/// cheap default rather than a researched conclusion — and it means a stale queue can never survive
+/// into the next match.</para>
+///
+/// <para><b>The clock is unscaled</b> (owner decision, 2026-08-31) — it runs through the pause menu,
+/// which is byte-identical to the two 100 ms grids this replaces: both accumulate
+/// <c>unscaledDeltaTime</c> today, and DoTs deliberately use unscaled time so game speed does not
+/// accelerate them.</para>
+///
+/// <para>B25 builds the drive; <b>B26</b> moves the shield and DoT grids onto it. Until then the queue
+/// is empty and a tick costs a clock advance and a <c>PeekDueTick</c> — which is the point of landing
+/// it separately: the drive gets to be provably harmless before it carries anything.</para>
+/// </summary>
+public static class KernelDriveHost
+{
+    /// <summary>
+    /// Per-frame runtime cap — structural, not a balance number and not a progression ceiling
+    /// (<c>tunables-ssot.md</c> §1 lists per-frame caps as exempt, and requires saying so).
+    ///
+    /// <para>Shaped after <c>EventDrainHost</c>'s own budget (a fraction of measured frame time,
+    /// clamped) but sized against the kernel's <b>0.15 ms</b> share from
+    /// <c>spec-kernel-performance.md</c> §"Budgets", not the event drain's 2 ms. At a 16.6 ms frame,
+    /// 1 % is 0.166 ms and the clamp brings it to exactly the specced slice.</para>
+    /// </summary>
+    const double BudgetFrameFraction = 0.01;
+    const double BudgetMinSeconds = 0.00005;   // 0.05 ms — a floor so a fast frame still drains something
+    const double BudgetMaxSeconds = 0.00015;   // 0.15 ms — the kernel's own share of the injector budget
+
+    /// <summary>
+    /// The upkeep period, unchanged from the two grids this replaces — structural, not tunable.
+    ///
+    /// <para><b>It stays 100 ms deliberately.</b> B26 is a substitution, not a redesign: shield regen
+    /// accumulates in integer milli-HP, and driving it at 1 ms granularity truncates small regen
+    /// rates to zero. Only the <i>scheduling</i> moves onto the kernel; the granularity does not.</para>
+    /// </summary>
+    const long UpkeepPeriodTicks = 100;
+
+    /// <summary>Kinds this host schedules. Opaque ints to the queue by design — the scheduler never
+    /// interprets them, which is what keeps it testable with no game attached.</summary>
+    const int KindDotPulse = 1;
+    const int KindShieldUpkeep = 2;
+
+    /// <summary>Kill switch mirroring <c>FUSIONRPG_EVENT_V2</c>: <c>FUSIONRPG_KERNEL_GRIDS=0</c> keeps
+    /// the legacy accumulators driving the two grids, exactly as before T13.</summary>
+    public static bool GridsOnKernel { get; set; } =
+        !string.Equals(Environment.GetEnvironmentVariable("FUSIONRPG_KERNEL_GRIDS"), "0", StringComparison.Ordinal);
+
+    /// <summary>True when the kernel — not the legacy accumulators — is driving DoT and shield upkeep.</summary>
+    public static bool DrivingGrids { get { lock (Gate) return _drive != null && GridsOnKernel; } }
+
+    static readonly object Gate = new();
+    static SimulationClock? _clock;
+    static EventQueue? _queue;
+    static TimelineDrive? _drive;
+
+    /// <summary>True while a board is live and the kernel is ticking.</summary>
+    public static bool Active { get { lock (Gate) return _drive != null; } }
+
+    /// <summary>
+    /// The live queue, for whoever schedules onto it (B26's shield and DoT events). Null off-board —
+    /// callers must handle that rather than assume a kernel exists, because a scheduling call can
+    /// legitimately arrive from a hook that fired before <c>board.start</c> was processed.
+    /// </summary>
+    public static EventQueue? Queue { get { lock (Gate) return _queue; } }
+
+    /// <summary>Simulated milliseconds since this board began. 0 off-board.</summary>
+    public static long NowTicks { get { lock (Gate) return _clock?.Now ?? 0; } }
+
+    /// <summary>Start a fresh timeline. Called from <c>MatchHost.Apply</c> on <c>board.start</c>.</summary>
+    public static void BeginBoard()
+    {
+        lock (Gate)
+        {
+            _clock = new SimulationClock();
+            _queue = new EventQueue(expectedEvents: 256);
+            _drive = new TimelineDrive(_clock, _queue, Dispatch, System.Diagnostics.Stopwatch.GetTimestamp);
+
+            // Order matters and is set here, once. The queue sorts by (DueTick, Seq), so scheduling
+            // the DoT pulse FIRST makes it fire before shield upkeep at every shared tick — which is
+            // exactly the frame order the grids had (InjectorLoop: drain -> TickDots -> TickShields),
+            // and which shield-system-spec.md 2.6 requires so an expiring shield still absorbs its
+            // final frame's damage.
+            _queue.Schedule(UpkeepPeriodTicks, "match", KindDotPulse, 0);
+            _queue.Schedule(UpkeepPeriodTicks, "match", KindShieldUpkeep, 0);
+        }
+    }
+
+    /// <summary>Drop the timeline. Called from <c>MatchHost.Apply</c> on <c>board.end</c>/<c>match.result</c>.</summary>
+    public static void EndBoard()
+    {
+        lock (Gate)
+        {
+            _drive = null;
+            _queue = null;
+            _clock = null;
+        }
+    }
+
+    /// <summary>
+    /// One frame of kernel. Called from <c>InjectorLoop.Tick</c>.
+    ///
+    /// <para><b>The float→integer conversion happens here and only here.</b> Unity hands us a
+    /// <c>float</c>; Core's clock states that no floating-point value reaches it, and the kernel
+    /// purity scan enforces that with no file exempt. Rounding rather than truncating matters: a
+    /// truncation biases every frame downward, which is the exact drift class the carry exists to
+    /// remove.</para>
+    ///
+    /// <para><b>A huge delta is deliberately not clamped.</b> After a level load the frame delta can
+    /// be seconds; clamping it would silently lose simulated time. Offering it whole makes a large
+    /// backlog due at once, which the bounded drain then spreads across frames in unchanged order —
+    /// the designed behaviour, not an edge case to defend against.</para>
+    /// </summary>
+    public static void Tick(float unscaledDeltaTime)
+    {
+        TimelineDrive? drive;
+        lock (Gate) drive = _drive;
+        if (drive == null) return;                       // off-board: nothing to advance
+        if (!(unscaledDeltaTime > 0f)) return;            // also rejects NaN, which `<= 0` would not
+
+        using var _perf = PerfProbe.Measure(PerfSection.KernelTick);
+        var micros = (long)Math.Round((double)unscaledDeltaTime * 1_000_000.0);
+        drive.Tick(micros, BudgetTicks(unscaledDeltaTime));
+    }
+
+    static long BudgetTicks(float frameSeconds)
+    {
+        var seconds = Math.Clamp(frameSeconds * BudgetFrameFraction, BudgetMinSeconds, BudgetMaxSeconds);
+        return (long)(seconds * System.Diagnostics.Stopwatch.Frequency);
+    }
+
+    /// <summary>
+    /// Fires one due event. B26 fills this in with the shield and DoT handlers; until then a scheduled
+    /// event is a no-op, which is why B25 can land without changing any behaviour at all.
+    /// </summary>
+    static void Dispatch(ScheduledEvent e)
+    {
+        using var _perf = PerfProbe.Measure(PerfSection.KernelDrain);
+
+        // Re-arm FIRST, off the event's own due tick rather than "now". Re-arming off `now` would
+        // let every deferred drain push the next pulse further out, so a stuttering frame would
+        // permanently slow DoT cadence instead of merely delaying it -- the drift the whole
+        // carry-corrected clock exists to prevent.
+        var next = e.DueTick + UpkeepPeriodTicks;
+        lock (Gate) _queue?.Schedule(next, e.OwnerKey, e.Kind, e.Tag);
+
+        if (!GridsOnKernel) return;   // kill switch: legacy accumulators are driving instead
+
+        try
+        {
+            switch (e.Kind)
+            {
+                case KindDotPulse: EffectRuntime.PulseDotsNow(); break;
+                case KindShieldUpkeep: EffectRuntime.PulseShieldsNow(); break;
+            }
+        }
+        catch
+        {
+            // A throwing pulse must not kill the drive. The grids it replaces were each wrapped in
+            // their own try/catch at the InjectorLoop call site; keeping that behaviour is part of
+            // "identical to the grids they replace".
+        }
+    }
+}

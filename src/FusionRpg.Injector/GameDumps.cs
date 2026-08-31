@@ -62,6 +62,7 @@ internal static class GameDumps
         d["attackBase"] = attackBase;
         Try(d, "attack", () => p.attackDamage);
         AddRpgShield(d, Ptr(p));
+        Hud.ActorHudObserve.AttachRow(d, Ptr(p));
         return d;
     }
 
@@ -124,6 +125,7 @@ internal static class GameDumps
         d["armorMaxBase"] = armorMaxBase;
         Try(d, "armorMax", () => z.theFirstArmorMaxHealth);
         AddRpgShield(d, Ptr(z));
+        Hud.ActorHudObserve.AttachRow(d, Ptr(z));
         return d;
     }
 

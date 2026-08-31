@@ -1,6 +1,7 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Vfx;
 using FusionRpg.Injector.Host;
+using FusionRpg.Injector.Hud;
 using FusionRpg.Injector.Lawn;
 using UnityEngine;
 
@@ -79,7 +80,7 @@ public static class VfxDirector
         var shieldLive = false;
         try
         {
-            shieldLive = ShieldBarPool.WorldBars > 0
+            shieldLive = ActorHudPool.WorldBars > 0
                 || (Effects.EffectRuntime.Bag.ShieldGate?.Runtime?.HasAnyInstances() == true);
         }
         catch { }
@@ -92,7 +93,7 @@ public static class VfxDirector
         BurstPool.Tick(dt);
         TickFlashes(dt);
         TickSustained(dt);
-        try { ShieldBarPool.TickSync(); } catch { }
+        try { ActorHudDirector.TickSync(); } catch { }
     }
 
     /// <summary>Match end / scene teardown — vfx-ssot.md §8.1.</summary>
@@ -107,7 +108,7 @@ public static class VfxDirector
             EndSustainedRender(set, VfxStateEndReasons.MatchEnd, emit: false);
         AuraPool.StopAll();
         TintCompositor.Clear();
-        try { ShieldBarPool.StopAll(); } catch { }
+        try { ActorHudDirector.StopAll(); } catch { }
     }
 
     /// <summary>Live sustained sets snapshot for the debug board (cueId, ptr, statusId).</summary>

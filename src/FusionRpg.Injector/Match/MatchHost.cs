@@ -121,6 +121,7 @@ public static class MatchHost
                     var priorKey = _runtime.MatchKey;
                     ClearCommanderSnapshot();
                     _runtime.Apply("board.end");
+                    TryEffect("KernelEndBoard", Effects.KernelDriveHost.EndBoard);
                     TryEffect("NotifyMatchEnd", () => Effects.EffectRuntime.NotifyMatchEnd(priorKey));
                     TryEffect("ClearAll", () => Effects.EffectRuntime.ClearAll("match"));
                     GameHooks.MatchKey = null;
@@ -144,6 +145,9 @@ public static class MatchHost
                     TryEffect("NotifyMatchEnd", () => Effects.EffectRuntime.NotifyMatchEnd(endingKey));
                     TryEffect("ClearAll", () => Effects.EffectRuntime.ClearAll("match"));
                     ClearCommanderSnapshot();
+                    // T13: one kernel per board — drop it here so a stale queue can never survive
+                    // into the next match.
+                    TryEffect("KernelEndBoard", Effects.KernelDriveHost.EndBoard);
                 }
 
                 if (isStart)
@@ -163,6 +167,9 @@ public static class MatchHost
                     }
                     MatchCommanderSnapshotHolder.BeginMatch(snapshot);
                     CheatState.RefreshCommanderAllocationCache();
+                    // T13: a fresh timeline per board, alongside the commander snapshot that is
+                    // already frozen at exactly this moment.
+                    TryEffect("KernelBeginBoard", Effects.KernelDriveHost.BeginBoard);
                     TryEffect("NotifyMatchStart", () => Effects.EffectRuntime.NotifyMatchStart(_runtime.MatchKey ?? ""));
                 }
                 else if (isEnd)

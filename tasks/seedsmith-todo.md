@@ -691,6 +691,20 @@ than left to rot beside its replacement. **Reached (2026-08-23).**
 
 ## Part 2 — W2: planning (`planner` + `briefkit`)
 
+**Status: BUILT 2026-08-31 — P1–P6 all complete, CP-F1/F2/F3 reached.** Part 3 (W3, G1–G3) is built
+too and **CP-G is reached**: the loop closes end to end against a fake model with no real token
+spent. Per-task evidence, falsifiers and the defects each pass found are recorded in
+[backlog-clear-todo.md](backlog-clear-todo.md) Phase 10 rather than duplicated here — one account,
+not two that can disagree.
+
+Suite: **299 passing** (`tools/seedsmith`), plus `FusionRpg.ItemSeedValidator.Tests` **71/71**, which
+shares `KindCatalog.cs` with P2's `KindSpec.reference_fields` extension and is unaffected by it.
+
+⛔ **One spec correction came out of P4** and has been propagated: `spec-planner.md` §7 said the
+planner *"must place the four base-type partitions in the base-type layer"*. It is corrected — those
+four are **excluded** and reported, because S2 found their partition string wrong while their entries
+are intact, so they need a relabel rather than generation.
+
 Full rationale, dependency graph, and the P2 prerequisite gap: [seedsmith-plan.md](seedsmith-plan.md) Part 2.
 
 ### Phase 1 — Feasibility and ordering
@@ -879,9 +893,25 @@ Full rationale and dependency graph: [seedsmith-plan.md](seedsmith-plan.md) Part
 
 ---
 
-**⭐ CP-G — W2+W3 close the loop end-to-end, against a fake model, before any real token is spent.**
-`metrics` finds `gems/2` empty → `planner` schedules it (P4) → `briefkit` briefs it (P6) →
+**⭐ CP-G — REACHED 2026-08-31. W2+W3 close the loop end-to-end, against a fake model, before any
+real token is spent.**
+`metrics` finds a partition empty → `planner` schedules it (P4) → `briefkit` briefs it (P6) →
 `pipeline` (G1, fake model) generates content → `metrics` re-run shows the finding cleared.
+
+Built as `tools/seedsmith/tests/test_cp_g_end_to_end.py`. **Each stage consumes the previous stage's
+own output** — no stage is handed a stand-in fixture, which is the only way this proves the loop
+rather than five modules separately. Run against the **stub adapter** rather than the item corpus
+(spec-foundation §2's purpose), so it proves the machinery closes the loop, not that one corpus
+happens to.
+
+Falsified three ways, each reddening the closure assertion: never writing the generated entry;
+writing it into the **wrong partition** (the subtlest — the file exists, the corpus grows, and the
+finding correctly stays open); and a schema-violating value, which the gate stops before persist.
+Two honest failure paths are asserted too: a dependency cycle refuses the whole schedule rather than
+half-running it, and a **blocked** model leaves the finding open rather than faking a close.
+
+**Still out of scope, and unchanged:** the first real generation run against the live corpus is a
+deliberate, separate, ⛔ **owner-approved** act after CP-G.
 
 ---
 

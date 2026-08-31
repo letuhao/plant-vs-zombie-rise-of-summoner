@@ -29,9 +29,13 @@
          interop DLLs (FUSIONRPG_GAME_DIR) to build at all. Same pattern as FusionRpg.Launcher.Tests'
          link of FileRpgConfig.cs. -->
     <Compile Include="..\..\src\FusionRpg.Injector\Effects\PatronAuraOverlay.cs" Link="Injector\PatronAuraOverlay.cs" />
+    <Compile Include="..\..\src\FusionRpg.Injector\Stats\InjectorDerivedOverride.cs" Link="Injector\InjectorDerivedOverride.cs" />
+    <Compile Include="..\..\src\FusionRpg.Injector\Hud\ActorHudCache.cs" Link="Injector\ActorHudCache.cs" />
+    <Compile Include="..\..\src\FusionRpg.Injector\Hud\ActorHudUniqueFlags.cs" Link="Injector\ActorHudUniqueFlags.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\fixtures\effects\**\*" Link="fixtures\effects\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\fixtures\combat\**\*" Link="fixtures\combat\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Goldens\actor-hud\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

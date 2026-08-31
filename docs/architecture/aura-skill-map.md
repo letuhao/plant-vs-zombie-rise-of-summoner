@@ -82,6 +82,7 @@ The declared mapping must live inside that band.
 | `aura-magnitude` | `k(rung) · share^γ · P(Θ)` through the shared read function, the declared rung mapping, the anchor, `aura.v1.json`. | `derived-modifier-bucket`, `commander-lawn-bridge` |
 | `aura-content` | Eleven side-wide auras + Focus, as `world-buff.*` containers. Channels are **omni** (settled — see below). | `aura-delivery-path`, `aura-action-shape`, `aura-magnitude` |
 | `aura-surface` | Active-aura state, eviction messaging, and the GG-49 contributions readout. | `derived-modifier-bucket`, `aura-content` |
+| `aura-binding-producer` | **Added 2026-08-31** — [spec](aura-skill/spec-aura-binding-producer.md), ⛔ awaiting owner review. Writes the `effect_instance` + `effect_binding` rows on aura enable/disable so the shipped push chain has something to carry. Also closes two wiring gaps found while tracing it: the atom push fires **only on `Hello`** (`RpgHub.cs:43`), and active auras are **RAM-only** (`AuraRuntimeEndpoints.cs:31`) while bindings are durable. **This module was previously mis-recorded as `effect-atom` E20–E25** — those six shipped and are a different six things; see the spec's §1. | `aura-content`, `aura-action-shape` |
 
 **Build order:**
 `derived-modifier-bucket` · `commander-lawn-bridge` · `overlay-combat-enable` · `aura-equip-path`

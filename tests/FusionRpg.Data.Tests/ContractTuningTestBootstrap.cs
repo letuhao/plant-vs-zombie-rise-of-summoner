@@ -16,6 +16,7 @@ using FusionRpg.Core.Power;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Hud;
 using FusionRpg.Core.Vfx;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Ai;
@@ -62,6 +63,7 @@ internal static class ContractTuningTestBootstrap
         SummoningTuningHub.Configure(DefaultSummoning);
         WorldAiPolicy.Configure(DefaultAi);
         VfxTuningHub.Configure(DefaultVfx);
+        ActorHudTuningHub.Configure(DefaultActorHud);
         PowerTuningHub.Configure(DefaultPower);
         SealedCompactionPolicy.Configure(DefaultData);
     }
@@ -332,7 +334,7 @@ internal static class ContractTuningTestBootstrap
 
     public static readonly WorldAiTuning DefaultAi = new(
         SchemaVersion: 1, Version: 1,
-        FrontierRules: new FrontierRulesTuning(RecoverAtMilli: 400, ExploreTurns: 3, SeveranceThresholdCost: 10_000),
+        FrontierRules: new FrontierRulesTuning(RecoverAtMilli: 400, ExploreTurns: 3, SeveranceThresholdCost: 10_000, MomentumMarginMilli: 250),
         ThreatMap: new ThreatMapTuning(StaleDecayPerTurn: 150, MaxSpreadHops: 4, ProximityFalloffPerHop: 400),
         ValueMap: new ValueMapTuning(
             OptimismMilli: 700, OverextensionPenaltyMilli: 1400, HabitabilityPenaltyMilli: 1400,
@@ -360,6 +362,17 @@ internal static class ContractTuningTestBootstrap
                 MaxSegments: 3, Cap: 32, MaxPips: 3),
             TintReassertSeconds: 0.25),
         Identity: new VfxIdentityTuning(SimilarRgbDistanceThreshold: 45, SimilarApplyRgbDistanceThreshold: 35));
+
+    public static readonly ActorHudTuning DefaultActorHud = new(
+        SchemaVersion: 1,
+        Version: 1,
+        StatusStripMax: 3,
+        HpSliverEnabled: false,
+        BadgeMax: 99,
+        RowOffsetIdentity: 0.42,
+        RowOffsetResources: 0.28,
+        RowOffsetStatuses: 0.14,
+        EliteTierThreshold: null);
 
     public static readonly DataTuning DefaultData = new(
         SchemaVersion: 1, Version: 1,

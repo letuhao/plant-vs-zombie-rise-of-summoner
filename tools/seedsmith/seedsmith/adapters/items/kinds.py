@@ -31,11 +31,12 @@ COMMON_REQUIRED = frozenset({"id", "nameKey", "name"})
 
 
 def _defined(kind: str, directory: str, namespace: str, *, required: "set[str]",
-            extra: "set[str]") -> KindSpec:
+            extra: "set[str]", refs: "set[str] | None" = None) -> KindSpec:
     return KindSpec(
         kind=kind, directory=directory, namespace=namespace,
         required=COMMON_REQUIRED | required,
         optional=COMMON_FIELDS | extra,
+        reference_fields=frozenset(refs or ()),
     )
 
 
@@ -56,10 +57,12 @@ KINDS: "tuple[KindSpec, ...]" = (
             required={"frame", "baseType", "rarity", "fixedAtoms", "counterPressure", "tags",
                      "powerAxis"},
             extra={"frame", "baseType", "rarity", "fixedAtoms", "varianceSlot",
-                   "counterPressure", "theme", "themeKey", "acquisition", "powerAxis"}),
+                   "counterPressure", "theme", "themeKey", "acquisition", "powerAxis"},
+            refs={"baseType"}),
     _defined("set", "sets", "sets",
             required={"themeKey", "members", "thresholds"},
-            extra={"themeKey", "theme", "members", "thresholds"}),
+            extra={"themeKey", "theme", "members", "thresholds"},
+            refs={"members"}),
     _defined("gem", "gems", "gems",
             required={"family", "powerBand"},
             extra={"family", "element", "powerBand", "affinityElement"}),
@@ -80,7 +83,8 @@ KINDS: "tuple[KindSpec, ...]" = (
     _defined("recipe", "recipes", "recipes",
             required={"operation", "outputKind", "frame", "costLines"},
             extra={"operation", "outputKind", "outputRef", "outputQty", "frame", "costLines",
-                   "soulsCostBand"}),
+                   "soulsCostBand"},
+            refs={"outputRef"}),
     _defined("enhancement-milestone", "enhancement-milestones", "enhancementMilestones",
             required={"runtimeFamily", "kindId", "params", "powerBand"},
             extra={"runtimeFamily", "kindId", "params", "powerBand"}),
@@ -89,7 +93,8 @@ KINDS: "tuple[KindSpec, ...]" = (
             extra={"classId", "useContext", "family", "element", "powerBand", "manifestCost",
                    "grantsActionId", "cooldownKey"}),
     _defined("drop-table", "drop-tables", "dropTables",
-            required={"sourceAllow", "groups"}, extra={"sourceAllow", "groups"}),
+            required={"sourceAllow", "groups"}, extra={"sourceAllow", "groups"},
+            refs={"sourceAllow", "groups"}),
     _defined("display-template", "display-templates", "displayTemplates",
             required={"runtimeFamily", "groupId", "status"},
             extra={"runtimeFamily", "plantOverrideKey", "plantOverrideName", "groupId",

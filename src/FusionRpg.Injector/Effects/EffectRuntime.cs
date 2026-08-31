@@ -219,6 +219,7 @@ public static class EffectRuntime
         try { CheatActions.ReapplyAllLiving(); } catch { }
         InjectorDerivedOverride.Clear();
         InjectorElementOverride.Clear();
+        try { Hud.ActorHudCache.Clear(); } catch { }
 
         DebugRuntime.Emit("debug.effect.cleared", new Dictionary<string, object>
         {
@@ -359,7 +360,26 @@ public static class EffectRuntime
 
         _dotAccum += unscaledDeltaTime;
         if (_dotAccum < 0.1f) return;
-        _dotAccum = 0;
+        // Subtract rather than zero. Zeroing DISCARDS the overshoot, so this grid drifted slow and
+        // could never catch up after a long frame — while its shield sibling twenty lines down has
+        // always subtracted. Found by reading the two side by side during T13 (B24 spec §3.4).
+        // The kernel path is carry-correct by construction; this keeps the legacy path honest too.
+        _dotAccum -= 0.1f;
+        PulseDotsNow();
+    }
+
+    /// <summary>
+    /// The DoT/status pulse itself, with no accumulator — T13/B26's seam. The kernel schedules this on
+    /// a 100 ms event; the legacy grid above still calls it when the kernel is not driving.
+    ///
+    /// <para>The <b>period stays 100 ms</b>. This is a substitution, not a redesign: shield regen
+    /// carries in integer milli-HP and a 1 ms drive would truncate it toward zero, so only the
+    /// <i>scheduling</i> moves onto the kernel, never the granularity.</para>
+    /// </summary>
+    public static void PulseDotsNow()
+    {
+        Ensure();
+        if (!Status.HasAnyInstances()) return;
         FreezeBoard();
         var n = Bag.TickDots();
         if (n > 0)
@@ -472,14 +492,38 @@ public static class EffectRuntime
             ticked = true;
         }
 
-        // Flush the event window on the same 100 ms grid (absorbed aggregates included).
-        if (ticked && runtime.DrainEvents(_shieldEventScratch) > 0)
+        if (ticked) FlushShieldEvents(runtime);
+    }
+
+    /// <summary>
+    /// One 100 ms shield upkeep step, with no accumulator — T13/B26's seam. Same period as the grid it
+    /// replaces, for the reason given on <see cref="PulseDotsNow"/>: regen carries in integer milli-HP
+    /// and a finer drive would truncate it away.
+    ///
+    /// <para>This also retires a real per-frame spike. The legacy loop above is an <b>unbounded</b>
+    /// <c>while</c>: after a 2 s hitch it runs 20 upkeep steps inside one Unity frame on the main
+    /// thread. Driven by the kernel, catch-up is paced by the drain budget instead.</para>
+    /// </summary>
+    public static void PulseShieldsNow()
+    {
+        Ensure();
+        var runtime = Bag.ShieldGate?.Runtime;
+        if (runtime == null || !runtime.HasPendingWork) return;
+        runtime.Tick(_shieldTickNo++, 100, ShieldOwnerResolver);
+        FlushShieldEvents(runtime);
+    }
+
+    /// <summary>Flush the shield event window (absorbed aggregates included) — shared by both paths.</summary>
+    static void FlushShieldEvents(FusionRpg.Core.Combat.Shield.ShieldRuntime runtime)
+    {
+        if (runtime.DrainEvents(_shieldEventScratch) > 0)
         {
             foreach (var rec in _shieldEventScratch)
             {
                 var ptr = rec.OwnerKey.StartsWith("entity:", StringComparison.Ordinal)
                     ? rec.OwnerKey.Substring("entity:".Length)
                     : rec.OwnerKey;
+                try { Hud.ActorHudInvalidator.MarkDirtyFromOwnerKey(rec.OwnerKey); } catch { }
                 GameHooks.Emit(rec.Kind, new Dictionary<string, object>
                 {
                     ["targetPtr"] = ptr,

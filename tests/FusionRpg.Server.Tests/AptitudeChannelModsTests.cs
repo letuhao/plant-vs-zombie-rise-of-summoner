@@ -108,7 +108,7 @@ public class AptitudeChannelModsTests : IDisposable
         FusionRpg.Core.Demons.SummoningTuningHub.Configure(
             FusionRpg.Core.Demons.SummoningTuningLoader.Parse(Read("summoning.v1.json")));
         FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
-            FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v1.json")));
+            FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v2.json")));
         FusionRpg.Data.Policies.SealedCompactionPolicy.Configure(
             FusionRpg.Data.Policies.DataTuningLoader.Parse(Read("data.v1.json")));
         FusionRpg.Core.Combat.Shield.ShieldPolicy.Configure(

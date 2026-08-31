@@ -28,6 +28,7 @@ import {
   type LawnViewModel,
   type Occupant
 } from "./lawnViewModel";
+import { foldHudFromPayload, hudSnapshotsEqual } from "./foldActorHud";
 
 type Payload = Record<string, unknown>;
 
@@ -38,9 +39,18 @@ const OBSERVE_CHIPS = new Set([
   "poison",
   "hypno",
   "wither",
-  "bond",
   "blight",
-  "rot"
+  "rot",
+  "spark",
+  "spore",
+  "pact_mark",
+  "leech",
+  "expose",
+  "shatter",
+  "bond",
+  "rally",
+  "command",
+  "charm_pulse"
 ]);
 const CC_CHIPS = ["butter", "freeze", "cold", "poison"] as const;
 
@@ -133,7 +143,27 @@ function cloneOccupant(o: Occupant): Occupant {
   return {
     ...o,
     statusChips: [...o.statusChips],
-    flags: { ...o.flags }
+    flags: { ...o.flags },
+    hud: o.hud
+      ? {
+          ...o.hud,
+          identity: { ...o.hud.identity, flags: [...o.hud.identity.flags] },
+          resources: o.hud.resources
+            ? {
+                ...o.hud.resources,
+                shield: o.hud.resources.shield
+                  ? {
+                      ...o.hud.resources.shield,
+                      stacks: o.hud.resources.shield.stacks.map((s) => ({ ...s }))
+                    }
+                  : undefined,
+                meters: o.hud.resources.meters?.map((m) => ({ ...m }))
+              }
+            : undefined,
+          statuses: o.hud.statuses.map((s) => ({ ...s })),
+          overflow: { ...o.hud.overflow }
+        }
+      : undefined
   };
 }
 
@@ -277,7 +307,8 @@ function upsertLiving(
       hypnotized: extras?.flags?.hypnotized ?? existing?.flags.hypnotized,
       ...extras?.flags
     },
-    instanceId: extras?.instanceId ?? existing?.instanceId
+    instanceId: extras?.instanceId ?? existing?.instanceId,
+    hud: foldHudFromPayload(p, extras?.hud ?? existing?.hud)
   };
   return placeOccupant(m, occ);
 }
@@ -599,8 +630,17 @@ function rawPhaseName(raw: unknown): string | undefined {
   return typeof raw === "string" ? raw.trim() : undefined;
 }
 
+function applyDebugActorHud(m: LawnViewModel, p: Payload): LawnViewModel {
+  const ptr = str(p.ptr);
+  if (!ptr) return m;
+  const existing = findOccupant(m, ptr);
+  if (!existing) return m;
+  const hud = foldHudFromPayload(p, existing.hud);
+  if (hudSnapshotsEqual(hud, existing.hud)) return m;
+  return placeOccupant(m, { ...cloneOccupant(existing), hud });
+}
+
 /**
- * Snapshot membership from debug.board-stats plants/zombies arrays.
  * Replaces living set (RT-05 feed law when entity lists present).
  * Preserves grid tiles — board-stats is occupancy, not grid items.
  */
@@ -677,7 +717,8 @@ function applyBoardStatsMembership(m: LawnViewModel, p: Payload): LawnViewModel 
       interval: foldInterval(item, prev?.interval),
       statusChips: prev?.statusChips ?? [],
       flags: prev?.flags ?? {},
-      instanceId: prev?.instanceId
+      instanceId: prev?.instanceId,
+      hud: foldHudFromPayload(item, prev?.hud)
     });
   };
 
@@ -794,7 +835,8 @@ function applyDebugSnapshot(m: LawnViewModel, p: Payload): LawnViewModel {
         interval: foldInterval(e, prev?.interval),
         statusChips: prev?.statusChips ?? [],
         flags: prev?.flags ?? {},
-        instanceId: prev?.instanceId
+        instanceId: prev?.instanceId,
+        hud: foldHudFromPayload(e, prev?.hud) ?? prev?.hud
       });
     }
     next = rebuilt;
@@ -1134,6 +1176,8 @@ function applyOne(m: LawnViewModel, e: EventEnvelope): LawnViewModel {
       return maybeBump(m, applyEconomy(m, p));
     case "debug.board-stats":
       return maybeBump(m, applyBoardStatsMembership(m, p));
+    case "debug.actor-hud":
+      return maybeBump(m, applyDebugActorHud(m, p));
     case "debug.snapshot":
       return maybeBump(m, applyDebugSnapshot(m, p));
     default:

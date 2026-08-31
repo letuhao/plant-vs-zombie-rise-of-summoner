@@ -129,11 +129,30 @@ public sealed class EventQueue
     /// <c>(DueTick, Seq)</c> order. The buffer is appended to, never cleared — callers own their
     /// scratch (the same contract as <c>ShieldRuntime.DrainEvents</c>).
     /// </summary>
-    public int PopDue(long now, List<ScheduledEvent> into)
+    public int PopDue(long now, List<ScheduledEvent> into) => PopDue(now, into, int.MaxValue);
+
+    /// <summary>
+    /// Bounded form: drains at most <paramref name="max"/> due events, leaving the rest queued in
+    /// order. Everything the unbounded overload guarantees still holds for what it does drain.
+    ///
+    /// <para><b>Why a bound exists at all.</b> The unbounded loop is correct server-side, where a
+    /// battle resolves in one call and nobody is waiting on a frame. Driven per-frame in the injector
+    /// it is a spike waiting to happen: a backlog of any size runs to completion inside one Unity
+    /// frame on the main thread. Capping the pop keeps the scratch buffer bounded too, so a long
+    /// hitch cannot make the drive allocate — which is the property the whole allocation contract
+    /// rests on.</para>
+    ///
+    /// <para>Deferring is safe because simulated time is decoupled from wall-clock: the remaining
+    /// events keep their <c>(DueTick, Seq)</c> order and fire in exactly the sequence they would
+    /// have, just later. Nothing is dropped — a dropped shield expiry is a correctness bug, unlike a
+    /// dropped telemetry row.</para>
+    /// </summary>
+    public int PopDue(long now, List<ScheduledEvent> into, int max)
     {
         if (into == null) throw new ArgumentNullException(nameof(into));
+        if (max < 0) throw new ArgumentOutOfRangeException(nameof(max));
         var drained = 0;
-        while (_heap.Count > 0 && _heap[0].DueTick <= now)
+        while (drained < max && _heap.Count > 0 && _heap[0].DueTick <= now)
         {
             into.Add(_heap[0]);
             RemoveAt(0);

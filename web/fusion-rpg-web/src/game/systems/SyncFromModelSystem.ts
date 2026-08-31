@@ -6,6 +6,9 @@ import { noteIconLoadFailure } from "@/features/lawn/lawnSyncGate";
 import { lawnIconTextureKey, lawnIconUrl } from "../iconUrl";
 import { getIconEpoch } from "@/lib/bus/icon-epoch";
 import { CELL_H, CELL_W, ORIGIN_X, ORIGIN_Y, cellToWorld } from "../gridMath";
+import { setHudDisplay } from "./ActorHudDisplay";
+
+export { setHudDisplay } from "./ActorHudDisplay";
 
 export { CELL_H, CELL_W, ORIGIN_X, ORIGIN_Y, cellToWorld };
 
@@ -149,6 +152,20 @@ function setStatusChips(
   go.add(row);
 }
 
+/** Band B HUD + legacy chip suppression — shared by create and in-place occupant sync. */
+export function syncOccupantBandB(
+  scene: Phaser.Scene,
+  go: Phaser.GameObjects.Container,
+  occ: Pick<Occupant, "hud" | "statusChips">
+): void {
+  setHudDisplay(scene, go, occ.hud);
+  if (occ.hud) {
+    setStatusChips(scene, go, []);
+  } else {
+    setStatusChips(scene, go, occ.statusChips);
+  }
+}
+
 function setHpDisplay(
   scene: Phaser.Scene,
   go: Phaser.GameObjects.Container,
@@ -245,7 +262,7 @@ function makeOccupantGo(
   );
   setIconTexture(scene, container, occ.side, occ.typeId, onReady);
   setSelectRing(scene, container, selected);
-  setStatusChips(scene, container, occ.statusChips);
+  syncOccupantBandB(scene, container, occ);
   setHpDisplay(scene, container, occ);
   return container;
 }
@@ -323,7 +340,7 @@ function updateOccupantInPlace(
   label?.setText(`#${occ.typeId}`);
   setIconTexture(scene, rec.go, occ.side, occ.typeId, onReady);
   setSelectRing(scene, rec.go, selected);
-  setStatusChips(scene, rec.go, occ.statusChips);
+  syncOccupantBandB(scene, rec.go, occ);
   setHpDisplay(scene, rec.go, occ);
 }
 

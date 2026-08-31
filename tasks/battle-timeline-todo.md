@@ -549,14 +549,66 @@ overload to preserve since `Resolve` already carries two optional trailing param
 
 The kernel ticks **inside the Unity frame** and takes over the injector's ad-hoc timing grids. Sequenced last because it touches the hot path this repo has already had to rescue once, and because its failure mode is stutter that no unit test sees. **Gated by P2.**
 
-- [ ] **B24: T13 spec** *(spec first)*
+- [x] **B24: T13 spec** *(spec first)* — **WRITTEN and OWNER-APPROVED 2026-08-31.** Its acceptance
+  line is *"spec reviewed before any injector edit"*; the review happened, so B25's injector half,
+  B26 and B27 are unblocked. Owner also settled both §11 open questions: the kernel clock stays
+  **unscaled** (runs through pause — byte-identical to today's grids), and a kernel instance is
+  **per board**. Spec:
+  [spec-injector-kernel-drive.md](../docs/architecture/battle/spec-injector-kernel-drive.md).
   - Scope the takeover precisely: which existing grids move (the 100 ms shield tick, the 100 ms DoT grid), what stays, and the acceptance baseline — those grids' current *behaviour* is the contract, so this is a substitution, not a redesign.
   - Restate the boundary in the spec: the kernel schedules **our** timeline; Unity still owns when its own actors act.
+  - **What the spec settles**, each against code rather than against the plan's wording:
+    - **The drive follows measured `unscaledDeltaTime`, not a nominal 60 fps frame count.** Both grids
+      being replaced accumulate measured time (`EffectRuntime.cs:361`, `:467`), so a fixed-ratio drive
+      would run every DoT and shield tick fast or slow by exactly the frame-rate error — on precisely
+      the weak machines the frame budget exists for. `FixedIncrementAdvance` is therefore the right
+      mechanism and the wrong input; a sibling policy over integer microseconds is the answer.
+    - **Backpressure gates the clock, not the queue.** The event pipeline may drop droppable kinds; the
+      kernel may not — a dropped shield expiry is a correctness bug. So the clock is held while a
+      backlog exists: simulated time slows, order is untouched, nothing is discarded.
+    - **Two defects in today's grids, recorded so B26 does not rediscover them.** The DoT grid
+      *discards* its overshoot (`_dotAccum = 0`, `EffectRuntime.cs:363`) where the shield grid
+      subtracts (`_shieldAccum -= 0.1f`, `:471`) — so it drifts slow and can never catch up. And the
+      shield grid's catch-up `while` loop (`:469-474`) is unbounded: after a 2 s hitch it runs 20
+      ticks inside one frame on the main thread. Neither is *claimed* to move a golden — B26 must run
+      the suites and find out.
+  - **Two open questions carried to the owner** (§11 of the spec): whether the kernel clock pauses
+    with the game (unscaled is the byte-identical choice and what the spec assumes, but "the battle
+    clock runs through the pause menu" is a gameplay statement), and whether a kernel instance is per
+    board or per match (per board assumed — nothing shipped needs a longer-lived timeline).
   - Acceptance: spec reviewed before any injector edit. Scope: M.
 
-- [ ] **B25: per-frame drive + bounded drain** (delivers P1c)
+- [ ] **B25: per-frame drive + bounded drain** (delivers P1c) — **Core half built and green
+  2026-08-31; injector half blocked on B24's review.**
   - `InjectorLoop` advances the clock by the frame's ticks (carry-corrected — a truncating conversion loses 2.4 s/minute at 60 fps) and drains due events under a work budget, resuming next frame.
-  - Acceptance: a deliberately oversized backlog **never** blows the frame — it drains across frames and the tick order is unchanged, because simulated time is decoupled from wall-clock so deferral is pacing, not correctness. Zero allocation in the drive loop, asserted.
+  - **Built (Core only — not an injector edit, so not behind the B24 gate):**
+    - `Battle/Timeline/DeltaTickAdvance.cs` — `ITimeAdvance` over integer microseconds, remainder
+      carried. Ignores `frames` deliberately, exactly as `NextEventAdvance` already does.
+    - `Battle/Timeline/TimelineDrive.cs` — offer → drain carry → gate on backlog → advance → drain.
+    - `Battle/Timeline/EventQueue.cs` — bounded `PopDue(now, into, max)` overload; the unbounded one
+      stays for `BattleEngine`, where a battle resolves in one call and nobody waits on a frame.
+  - **The drive's Core placement is a tested constraint, not a preference:** `.github/workflows/ci.yml`
+    runs ten `dotnet test` calls and never builds `src/FusionRpg.Injector`, so logic placed there is
+    untested by CI forever. Same reason the aura program extracted `EntityWriteGate` to Core.
+  - **A real defect the guard caught, worth recording because the first green run hid it.** A batch
+    run filtered on `~KernelPurity` reported 17 green — but `KernelPurityScan` is a static *helper*,
+    not a test class, so **zero purity tests actually ran**. The real class is
+    `TimelinePurityGuardTests`, and against it `TimelineDrive.cs` was **red**: a convenience
+    `?? Stopwatch.GetTimestamp` default put a wall-clock reference inside the Timeline directory,
+    which the scan bans with no file exempt. The time source is now a required constructor argument —
+    the host names its clock, and no test can accidentally read a real one.
+  - **Falsifiers run, all three turning the intended test red** (a passing test proves nothing until
+    it can fail): deleting the backpressure gate reddens the clock-held test; deleting the
+    `Processed > 0` starvation guard reddens both the over-budget-event and the resume-across-frames
+    tests; moving `Offer` after the gate (dropping a held frame's time) reddens the accumulation half.
+  - **A pre-existing guard gap found and NOT fixed** (changing a guard's strictness unasked could
+    redden unrelated files): `KernelPurityScan` matches the `float ` / `double ` declaration tokens,
+    so `var x = 1.5f;` slips through undetected — verified by planting exactly that and watching the
+    scan stay silent about it while flagging the `Stopwatch` on the next line. Owner's call.
+  - Verified: `--filter ~TimelineDrive` 11/11, `--filter ~TimelinePurityGuard` included and green,
+    full **Core 4878/4878**, four boundary guards green, overflow **0 critical**, magic numbers
+    **M1 = 0**.
+  - Acceptance: a deliberately oversized backlog **never** blows the frame — it drains across frames and the tick order is unchanged, because simulated time is decoupled from wall-clock so deferral is pacing, not correctness. Zero allocation in the drive loop, asserted. — **met in Core** (`TimelineDriveTests`: bounded-pop and budget-exhausted cases both assert the full set fires in unchanged order; the allocation test asserts zero bytes over 1 000 warmed frames and carries a liveness assert so zero cannot be trivially true). **Not yet met end-to-end** — no injector drive exists until the review clears.
   - Verify: allocation tests + a backlog scenario. Scope: L.
 
 - [ ] **B26: shield + DoT grids onto the kernel**

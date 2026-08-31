@@ -4,7 +4,8 @@ using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Injector.Stats;
 
-/// <summary>Per-ptr derived pin for LIVE status prove — no SQL.</summary>
+/// <summary>Per-ptr derived Hot cache — pinned at EntityApply after ActorHub.Resolve for HUD levelBand
+/// and combat bridge reads; no SQL mid-match. Cleared on match end.</summary>
 public static class InjectorDerivedOverride
 {
     static readonly object Gate = new();

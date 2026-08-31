@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/actor-hud/spec-actor-hud-core.md",
+    "note": "Band B per-unit HUD layout tunables — status strip cap, row offsets, level badge width.",
+    "rebalance": "Never hand-edit this file. python tools/tuning/publish.py actor-hud <dotted.key>=<value> [...] writes actor-hud.v{n+1}.json; the old version stays on disk for revert."
+  },
+  "statusStripMax": 3,
+  "hpSliverEnabled": false,
+  "badgeMax": 99,
+  "rowOffsetIdentity": 0.42,
+  "rowOffsetResources": 0.28,
+  "rowOffsetStatuses": 0.14,
+  "eliteTierThreshold": null
+}

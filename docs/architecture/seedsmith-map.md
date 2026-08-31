@@ -74,6 +74,89 @@ frames, rung bands or drop tables. Everything item-shaped lives in `adapter-item
 | `pipeline` | LLM execution: structured output schemas, guardrails, validate-before-accept, bounded retry | `briefkit`, `metrics` |
 | `adapter-items` | All item-specific knowledge: kinds, registries, entry shapes, role/frame/band model | `corpus` |
 
+### 3b. Feature 2 — demons (proposed 2026-08-31)
+
+Ideal: [seedsmith-demons-ideal.md](seedsmith-demons-ideal.md), including its §6 adversarial audit —
+the `A#` references below are that audit's findings, and three of them changed this module set.
+
+**This is the feature §1 was built for:** *"Items are the first feature; the core is feature-agnostic
+by construction, because the second feature must not rewrite it."* Nothing below adds a planner, a
+briefkit or a pipeline. It adds an adapter, the pipelines that fill it, and two metric families.
+
+| id | Capability | Depends on |
+|---|---|---|
+| `demon-corpus-emit` | **C# dev-tool** — `DemonSpeciesCatalog` + `almanac_seed` + `recipes` → `data/seed/demons/*.json`, committed. C# because it reads SQLite and SQL belongs in `FusionRpg.Data` | — (outside seedsmith) |
+| `adapter-demons` | The `SeedAdapter`: kinds, registries, legality, **per-kind motif expression rules** (A1), and a deliberately empty `channels()` (A4) | `corpus`, `demon-corpus-emit` |
+| `family-extract` | LLM stage A — candidate family labels from name + description, each recording its `basis` | `adapter-demons`, `pipeline` |
+| `family-consolidate` | Candidate labels → the append-only family vocabulary. **Deterministic, or committed-and-deliberate** (A6) | `family-extract` |
+| `motif-derive` | Motifs + anti-motifs per demon. Pure derivation, carrying `basis` | `family-consolidate` |
+| `demon-metrics` | Per-demon coverage (A5) + motif-sharing that **excludes tautological both-`basis=name` pairs** (A2) | `metrics`, `motif-derive` |
+| `demon-themes` | Demons become **themes** the items and action corpora consume (A3) | `motif-derive` |
+
+**Spec audit:** [review/audit-demons-specs.md](seedsmith/review/audit-demons-specs.md) — 8 findings,
+3 blockers and 1 contradiction, all applied to the specs below.
+
+**Module specs** (all written 2026-08-31, all *proposed — awaiting owner review, not authorized to
+build*): [demon-corpus-emit](seedsmith/spec-demon-corpus-emit.md) ·
+[adapter-demons](seedsmith/spec-adapter-demons.md) ·
+[family-extract](seedsmith/spec-family-extract.md) ·
+[family-consolidate](seedsmith/spec-family-consolidate.md) ·
+[motif-derive](seedsmith/spec-motif-derive.md) ·
+[demon-metrics](seedsmith/spec-demon-metrics.md) ·
+[demon-themes](seedsmith/spec-demon-themes.md)
+
+**Why `family-extract` and `family-consolidate` are two modules and not one:** their determinism
+differs. Extraction is a model call — non-deterministic, therefore recorded and content-addressed.
+Consolidation decides the taxonomy every other module inherits, so it must be reproducible.
+Collapsing them hides a non-deterministic step inside a deterministic-looking artifact (A6).
+
+**Build order.** `D1` foundation: `demon-corpus-emit` → `adapter-demons`. `D2` taxonomy:
+`family-extract` → `family-consolidate` → `motif-derive`. `D3` measurement: `demon-metrics` —
+**gates D4**, because without A2/A5 there is no way to tell whether the taxonomy is real structure or
+a tautology. `D4` consumption: `demon-themes`.
+
+**D1 has standalone value:** it makes demons queryable by every metric seedsmith already has, with
+**zero model calls** — the same property that made W1 worth shipping alone.
+
+### ⛔ Cross-program dependency — `aspect-scope` (audit S2)
+
+D2's `aspect` kind depends on **`aspect-scope` being built**, not merely approved. It was approved
+2026-08-31, but the tier does not exist in code: `DemonSpeciesDef` still carries `ElementPrimary`,
+`ElementSecondary` and `TraitPool` on the *species*.
+
+**Owner: the demon program**, whose queue this feature does not control. Recorded here as a first-
+class dependency rather than a footnote in one module's open questions, because a dependency on
+another program's unscheduled work is the kind that surfaces late and at the worst moment.
+
+**Declaring the `aspect` kind in D1 is harmless; generating into it before the tier exists is not.**
+
+### Scope of the "no core change" claim (audit S8)
+
+`spec-adapter-demons` §1 sets the criterion *"not one line of core code changed"*. **That holds for
+D1 only.** `demon-metrics` (D3) adds two files under `metrics/`, and `demon-themes` (D4) edits
+`adapters/items/registries.py`. Both are justified in their own specs — the metrics are genuinely
+generic, and the items change adds a *vocabulary* rather than a concept — but the claim is a D1
+property and should not be carried across the feature by implication.
+
+**Scope decisions taken 2026-08-31:**
+
+- **`environment` ships as a `KindSpec` but nothing generates into it in v1.** With no world host,
+  `sector:` bindings are rejected, so generated environment content would be flavour nothing reads —
+  and coverage would report those partitions "covered", making the feature look more finished than it
+  is (A7). The kind costs nothing and keeps the adapter shape stable for when the world host arrives.
+- **`provenance-supersede` is core backlog, not this feature.** Re-derivation that supersedes rather
+  than duplicates (A8) is cross-cutting — items hit the same wall the first time anything regenerates
+  — and burying a general fix inside a demons module is how it becomes demon-shaped by accident.
+  Tracked below in §3c.
+- **`lore-enrich` is deferred**, named rather than scheduled: it is what turns `basis = name` into
+  `basis = text`, and it depends on `provenance-supersede`.
+
+### 3c. Core backlog surfaced by feature 2
+
+| id | Capability | Why it is core, not demons |
+|---|---|---|
+| `provenance-supersede` | A re-derivation path that supersedes a prior generation instead of duplicating it. `ProvenanceLedger.record` currently **raises** on a re-recorded row — deliberately, since a second write is how idempotence fails — but regeneration after better input is a legitimate second write | Any corpus that regenerates hits this. Items will hit it first in practice |
+
 **Dependency direction** is strictly downward in that table; nothing depends on `pipeline`.
 
 ```

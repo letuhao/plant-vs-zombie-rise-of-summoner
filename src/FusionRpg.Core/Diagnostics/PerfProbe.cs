@@ -28,7 +28,12 @@ public enum PerfSection
     CombatDispatch = 18,
     FunnelFlush = 19,
     // shield-system — absorb cascade inside the dispatch (only measured when shields exist)
-    ShieldAbsorb = 20
+    ShieldAbsorb = 20,
+    // battle-timeline T13 — the kernel's own share of the frame, reported beside loop.tick so it is
+    // visible next to everything else rather than in its own report (spec-kernel-performance.md §7).
+    KernelTick = 21,
+    KernelDrain = 22,
+    KernelSchedule = 23
 }
 
 /// <summary>
@@ -39,7 +44,7 @@ public enum PerfSection
 public static class PerfProbe
 {
     // Structural (tunables-ssot.md T2) — must match PerfSection's member count above, not balance.
-    const int SectionCount = 21;
+    const int SectionCount = 24;
 
     static readonly string[] SectionNames =
     {
@@ -63,7 +68,10 @@ public static class PerfProbe
         "pump.main",
         "combat.dispatch",
         "funnel.flush",
-        "shield.absorb"
+        "shield.absorb",
+        "kernel.tick",
+        "kernel.drain",
+        "kernel.schedule"
     };
 
     static readonly long[] Counts = new long[SectionCount];

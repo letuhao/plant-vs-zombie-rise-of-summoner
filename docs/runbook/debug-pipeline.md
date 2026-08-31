@@ -340,12 +340,14 @@ REST helpers: `POST /api/debug/economy`, `POST /api/debug/board-config`.
 
 ## RPG shield bar (live)
 
-**Pipeline:** grant path → `ShieldRuntime` → `VfxDirector.Tick` → `ShieldBarPool` (shader world meshes). Not IMGUI.
+**Pipeline:** grant path → `ShieldRuntime` → `VfxDirector.Tick` → `ActorHudPool` shield resource row. Not IMGUI.
 
 ```powershell
 .\scripts\probe-live-shield-bar.ps1          # demo-all + bar-status → worldBars/shaderOk
 .\scripts\probe-live-shield-bar.ps1 -Setup   # also runs setup-shield-bar-lab.ps1
 ```
+
+**Actor HUD program E2E (owner):** live Playwright against vite dev + real injector — `npm run test:e2e:live` in `web/fusion-rpg-web` (auto-enables live mode via `--project=live-chromium`) or `.\scripts\prove-actor-hud-live.ps1` (also sets `FUSIONRPG_API_BASE` and optional `ACTOR_HUD_LIVE_E2E=1`). Requires server at `:5088` and game with injector connected. CI runs mocked `e2e/actor-hud.spec.ts` only.
 
 Expect bars **under** pea/zombie. Fill length uses **10% visual steps** (`ShieldBarVisual.DisplayRatio` — 89% capacity → 80% bar). F9 / F7. No top-left chip.
 

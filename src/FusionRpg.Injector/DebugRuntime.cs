@@ -55,6 +55,7 @@ public static class DebugRuntime
         SessionActive = false;
         InjectorDerivedOverride.Clear();
         InjectorElementOverride.Clear();
+        try { Hud.ActorHudCache.Clear(); } catch { }
         Emit("debug.session.end", new Dictionary<string, object> { ["scenarioId"] = id });
         ScenarioId = "";
     }
@@ -168,6 +169,13 @@ public static class DebugRuntime
     /// Living plant/zombie combat fields + effect session mods for LIVE FA1 scope asserts.
     /// Emitted as <c>debug.board-stats</c>.
     /// </summary>
+    static void AddBoardStatsActorHud(Dictionary<string, object> row, string ptrHex) =>
+        Hud.ActorHudObserve.AttachRow(row, ptrHex);
+
+    /// <summary>
+    /// Living plant/zombie combat fields + effect session mods for LIVE FA1 scope asserts.
+    /// Emitted as <c>debug.board-stats</c>.
+    /// </summary>
     public static Dictionary<string, object> BoardEntityStats()
     {
         var plants = new List<Dictionary<string, object>>();
@@ -196,6 +204,7 @@ public static class DebugRuntime
                         ["armor"] = armor,
                         ["thePlantAttackInterval"] = interval
                     });
+                    AddBoardStatsActorHud(plants[^1], GameDumps.Ptr(p));
                 }
                 catch { }
             }
@@ -234,6 +243,7 @@ public static class DebugRuntime
                         ["theSpeed"] = speed
                     };
                     GameDumps.AddZombiePos(item, z);
+                    AddBoardStatsActorHud(item, GameDumps.Ptr(z));
                     zombies.Add(item);
                 }
                 catch { }

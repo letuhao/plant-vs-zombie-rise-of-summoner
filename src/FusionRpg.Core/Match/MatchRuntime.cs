@@ -211,6 +211,12 @@ public sealed class MatchRuntime
             return _state.UniqueBindings.TryGet(instanceId, out binding);
     }
 
+    public bool TryGetBindingByPtr(string? ptr, out UniqueBinding? binding)
+    {
+        lock (_gate)
+            return _state.UniqueBindings.TryGetByPtr(ptr, out binding);
+    }
+
     /// <summary>
     /// Gate our Intent / FA4 / debug Create before Unity spawn. No board mutate, no revision bump.
     /// Counts come from BoardProjection; phase must be InMatch.

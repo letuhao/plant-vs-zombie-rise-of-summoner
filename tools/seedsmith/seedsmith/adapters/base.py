@@ -30,6 +30,12 @@ class KindSpec:
     id_pattern: "re.Pattern[str] | None" = None
     runtime_id_fields: frozenset[str] = frozenset()   # fields holding a MINTED id
 
+    # Fields on THIS kind that hold a cross-kind reference (P2). Ordering is derived from these
+    # rather than from a hand-written stage label, because a label is a fact stated in two places
+    # and the copy nobody edits is the one that goes stale -- which is precisely the 274-error
+    # incident: a generation stage kept its old label after the graph beneath it changed.
+    reference_fields: frozenset[str] = frozenset()
+
 
 @dataclass(frozen=True)
 class Dimension:

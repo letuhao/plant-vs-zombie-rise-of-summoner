@@ -29,6 +29,19 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
                 EffectActions.SetBoxType => ExecSetBox(ctx, item),
                 EffectActions.Economy => ExecEconomy(ctx, item),
                 EffectActions.ApplyResourceDelta => ExecApplyResourceDelta(ctx, item, out skipped),
+                // aura-skill-todo.md Phase 5 / TC2 — DECLARATIVE, and deliberately a no-op here.
+                //
+                // A `stat.derived` atom is a permanent modifier: the GRANT's presence is the effect.
+                // `GrantedDerivedAtomReader` folds it into the actor's derived channels at resolve
+                // time, so there is nothing for a sink to do at execute time.
+                //
+                // It must still be HANDLED rather than fall through to "unknown action", because the
+                // compiler marks a triggerless atom `Passive` and `EffectBag.Grant` fires Passive defs
+                // on grant. Found live on 2026-08-30: the grant was accepted and overlay-validated,
+                // then died at `ERR effect exec ModifyDerivedStat: unknown action`. An earlier comment
+                // in this program claimed no sink arm was needed "because nothing executes it" — that
+                // was wrong, and only a real lawn run surfaced it.
+                EffectActions.ModifyDerivedStat => true,
                 _ => throw new InvalidOperationException("unknown action " + item.Action)
             };
 

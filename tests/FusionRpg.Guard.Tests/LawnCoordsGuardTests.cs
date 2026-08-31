@@ -47,9 +47,9 @@ public class LawnCoordsGuardTests
     }
 
     [Fact]
-    public void ShieldBarPool_uses_UnitFrameResolver()
+    public void ActorHudPool_uses_UnitFrameResolver()
     {
-        var text = ReadInjector(Path.Combine("Fx", "ShieldBarPool.cs"));
+        var text = ReadInjector(Path.Combine("Hud", "ActorHudPool.cs"));
         Assert.Contains("UnitFrameResolver.Resolve", text, StringComparison.Ordinal);
         Assert.DoesNotContain("LawnCoords.BodyWorld", text, StringComparison.Ordinal);
     }

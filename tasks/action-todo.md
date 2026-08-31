@@ -1702,7 +1702,12 @@ never left only in the global scratch file).
 
 - [ ] **A9 movement-actions** — waits on `A10`. One row, no new runtime.
 - [ ] **A10 battle-board** — owner deferral; built with the board map / battle area.
-- [ ] **A8's reaction lane** — waits on timeline **B6**. The *stance* half ships in Phase 7.
+- [x] **A8's reaction lane** — **CLOSED 2026-08-31 by its own evidence, not by new work.** It said
+  it waits on timeline **B6**; B6 shipped 2026-08-28, and B6's own entry records the answer:
+  *"`A8 defence-actions` (guard) ended up **not** needing this lane at all; it ships as a stance
+  with riposte-on-release, not a reaction"* (`battle-timeline-todo.md` B6, citing
+  `action-map.md:93`). The dependency was real when written and was dissolved by the design, not
+  satisfied by a build. The *stance* half shipped in Phase 7 as the line already said.
 - [ ] **seedsmith** — a **development tool**, built **after** this program.
 
 ---

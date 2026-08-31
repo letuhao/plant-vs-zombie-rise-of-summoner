@@ -34,6 +34,7 @@ import {
   TypeIcon
 } from "@/ui";
 import { LawnGameHost } from "./LawnGameHost";
+import { ActorHudInspector } from "./ActorHudInspector";
 import { LawnHud } from "./LawnHud";
 import { LawnOccupantList } from "./LawnOccupantList";
 import { LawnStatsModal } from "./LawnStatsModal";
@@ -663,6 +664,7 @@ export function LawnPage() {
               <p className="font-mono text-xs text-muted">{selected.ptr}</p>
             </div>
           </div>
+          {selected.hud ? <ActorHudInspector hud={selected.hud} /> : null}
           <KeyValue
             items={[
               {
@@ -697,13 +699,17 @@ export function LawnPage() {
                     ? `${selected.armor2}/${selected.armor2Max ?? "?"}`
                     : "—"
               },
-              {
-                label: "Shield",
-                value:
-                  selected.rpgShield != null
-                    ? `${selected.rpgShield}/${selected.rpgShieldMax ?? "?"}`
-                    : "—"
-              },
+              ...(selected.hud
+                ? []
+                : [
+                    {
+                      label: "Shield",
+                      value:
+                        selected.rpgShield != null
+                          ? `${selected.rpgShield}/${selected.rpgShieldMax ?? "?"}`
+                          : "—"
+                    }
+                  ]),
               {
                 label: "Speed",
                 value: selected.speed != null ? String(selected.speed) : "—"
@@ -712,12 +718,16 @@ export function LawnPage() {
                 label: "Interval",
                 value: selected.interval != null ? String(selected.interval) : "—"
               },
-              {
-                label: "Chips",
-                value: selected.statusChips.length
-                  ? selected.statusChips.join(", ")
-                  : "—"
-              },
+              ...(selected.hud
+                ? []
+                : [
+                    {
+                      label: "Chips",
+                      value: selected.statusChips.length
+                        ? selected.statusChips.join(", ")
+                        : "—"
+                    }
+                  ]),
               {
                 label: "instanceId",
                 value: selected.instanceId ?? "binding unknown/stale"

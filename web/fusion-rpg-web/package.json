@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:live": "playwright test --project=live-chromium",
     "test:e2e:install": "playwright install chromium",
     "test:all": "npm run test:coverage && npm run build && npm run test:e2e",
     "extract": "lingui extract --clean"

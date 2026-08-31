@@ -16,6 +16,7 @@ using FusionRpg.Core.Power;
 using FusionRpg.Core.Progression;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Hud;
 using FusionRpg.Core.Vfx;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Ai;
@@ -60,6 +61,7 @@ internal static class ContractTuningTestBootstrap
         SummoningTuningHub.Configure(DefaultSummoning);
         WorldAiPolicy.Configure(DefaultAi);
         VfxTuningHub.Configure(DefaultVfx);
+        ActorHudTuningHub.Configure(DefaultActorHud);
         PowerTuningHub.Configure(DefaultPower);
         RungPolicy.Configure(DefaultActionRungs);
     }
@@ -329,8 +331,11 @@ internal static class ContractTuningTestBootstrap
             RarePerMille: 200, ShinyOneIn: 64));
 
     public static readonly WorldAiTuning DefaultAi = new(
-        SchemaVersion: 1, Version: 1,
-        FrontierRules: new FrontierRulesTuning(RecoverAtMilli: 400, ExploreTurns: 3, SeveranceThresholdCost: 10_000),
+        SchemaVersion: 1, Version: 2,
+        // Momentum matches the SHIPPED value on purpose. A test default of 0 would quietly exercise a
+        // configuration nothing runs, and the whole point of this term is that it changes behaviour.
+        FrontierRules: new FrontierRulesTuning(
+            RecoverAtMilli: 400, ExploreTurns: 3, SeveranceThresholdCost: 10_000, MomentumMarginMilli: 250),
         ThreatMap: new ThreatMapTuning(StaleDecayPerTurn: 150, MaxSpreadHops: 4, ProximityFalloffPerHop: 400),
         ValueMap: new ValueMapTuning(
             OptimismMilli: 700, OverextensionPenaltyMilli: 1400, HabitabilityPenaltyMilli: 1400,
@@ -358,6 +363,17 @@ internal static class ContractTuningTestBootstrap
                 MaxSegments: 3, Cap: 32, MaxPips: 3),
             TintReassertSeconds: 0.25),
         Identity: new VfxIdentityTuning(SimilarRgbDistanceThreshold: 45, SimilarApplyRgbDistanceThreshold: 35));
+
+    public static readonly ActorHudTuning DefaultActorHud = new(
+        SchemaVersion: 1,
+        Version: 1,
+        StatusStripMax: 3,
+        HpSliverEnabled: false,
+        BadgeMax: 99,
+        RowOffsetIdentity: 0.42,
+        RowOffsetResources: 0.28,
+        RowOffsetStatuses: 0.14,
+        EliteTierThreshold: null);
 
     // bMilli=0 matches the shipped power-scale.v1.json exactly (plan.md "B=0 first, dial second") —
     // BattleRuleset.BaseHp/Atk/Defense must stay byte-identical to their pre-T2.1 literal formulas

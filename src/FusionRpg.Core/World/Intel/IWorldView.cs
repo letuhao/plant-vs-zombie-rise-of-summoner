@@ -50,6 +50,21 @@ public interface IWorldView
     /// never where stock lives — not even for the owner.
     /// </summary>
     long OwnLoamStock(string sectorId);
+
+    /// <summary>
+    /// Where this faction's own last order sent an entity, or null if it gave none.
+    ///
+    /// <para><b>Self-knowledge, not fog and not new state.</b> It sits beside
+    /// <see cref="OwnForces"/> ("you know what you brought") for the same reason: a commander knows
+    /// what it ordered. The answer is derived from <c>rpg_world_commands</c>, which <i>is</i> the save
+    /// — commands are never trimmed — so nothing is stored to support it.</para>
+    ///
+    /// <para><b>It cannot affect replay.</b> `IFactionPolicy`'s own contract is that replay reads the
+    /// command log and never re-runs a policy, so no policy input reaches a replayed hash by any
+    /// path. This is the same property that lets Zomboss's brain be rewritten without invalidating a
+    /// save (spec-ai-commander.md §Momentum, amended 2026-08-31).</para>
+    /// </summary>
+    string? LastOrderedDestination(string entityId);
 }
 
 /// <summary>
@@ -63,11 +78,22 @@ public sealed class BelievedWorldView : IWorldView
     readonly WorldState _world;
     readonly FactionIntel _intel;
     readonly IReadOnlyDictionary<string, SectorSight> _sight;
+    readonly IReadOnlyDictionary<string, string> _lastOrdered;
+    static readonly Dictionary<string, string> EmptyOrders = new(StringComparer.Ordinal);
 
-    public BelievedWorldView(WorldState world, string factionId)
+    /// <param name="lastOrderedDestinations">
+    /// Entity id → the sector this faction's previous-turn order sent it to. Supplied by the caller
+    /// that owns the command log; empty when unknown, which simply disables momentum rather than
+    /// changing any other answer.
+    /// </param>
+    public BelievedWorldView(
+        WorldState world,
+        string factionId,
+        IReadOnlyDictionary<string, string>? lastOrderedDestinations = null)
     {
         _world = world;
         FactionId = factionId;
+        _lastOrdered = lastOrderedDestinations ?? EmptyOrders;
         _intel = world.Intel.FirstOrDefault(i => string.Equals(i.FactionId, factionId, StringComparison.Ordinal))
                  ?? new FactionIntel { FactionId = factionId };
         _sight = Visibility.SeenBy(world, factionId);
@@ -87,6 +113,9 @@ public sealed class BelievedWorldView : IWorldView
                 : lane with { State = LaneState.Open })
             .ToList();
     }
+
+    public string? LastOrderedDestination(string entityId) =>
+        _lastOrdered.TryGetValue(entityId, out var dest) ? dest : null;
 
     public string FactionId { get; }
     public int CurrentTurn => _world.CurrentTurn;

@@ -209,7 +209,14 @@ public sealed partial class RpgStore
             // log and finding orders in it that nobody had written.
             if (HasCommandsUnlocked(db, tx, worldId, turn, faction.FactionId)) continue;
 
-            var view = new BelievedWorldView(world, faction.FactionId);
+            // Momentum's input (spec-ai-commander.md §Momentum). Derived from the command log, which
+            // IS the save -- commands are never trimmed -- so nothing new is stored to support it,
+            // and it cannot reach a replayed hash because replay never re-runs a policy. Turn 0 has
+            // no predecessor, which simply reads as "no standing choice" and disables hysteresis.
+            var lastOrders = turn > 0
+                ? LastOrderedDestinationsUnlocked(db, tx, worldId, turn - 1, faction.FactionId, world)
+                : null;
+            var view = new BelievedWorldView(world, faction.FactionId, lastOrders);
             var seed = SeededRng.DeriveStream(worldSeed, $"ai:{faction.FactionId}:{turn}").NextULong();
             var orders = resolve(policyId).Decide(view, seed);
 
@@ -291,6 +298,86 @@ public sealed partial class RpgStore
     /// A turn's orders with the reasoning behind them — what the turn report shows so a player can
     /// tell an AI's mistake from a bug. Commands are never trimmed, so neither is this.
     /// </summary>
+    /// <summary>
+    /// Entity id → the sector a faction's own orders sent it to on <paramref name="turn"/>.
+    ///
+    /// <para>Only <c>Move</c> carries a destination, and the destination is the <b>last</b> sector of
+    /// its lane path. Later orders for one entity win, matching the log's own ordering — a policy
+    /// files at most one order per entity, but the log does not enforce that and the read should not
+    /// assume what it can simply honour.</para>
+    /// </summary>
+    static Dictionary<string, string> LastOrderedDestinationsUnlocked(
+        SqliteConnection db, SqliteTransaction tx, string worldId, int turn, string factionId,
+        WorldState world)
+    {
+        var result = new Dictionary<string, string>(StringComparer.Ordinal);
+        using var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        // The entity id is NOT a column -- it lives inside payload_json, like every other
+        // command field except the five the table indexes on. Selecting `entity_id` threw
+        // "no such column" against every real world, which the Data suite caught on the first run.
+        cmd.CommandText = """
+            SELECT payload_json
+            FROM rpg_world_commands
+            WHERE world_id = $w AND turn = $t AND commander_id = $c
+            ORDER BY seq;
+            """;
+        cmd.Parameters.AddWithValue("$w", worldId);
+        cmd.Parameters.AddWithValue("$t", turn);
+        cmd.Parameters.AddWithValue("$c", factionId);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            if (r.IsDBNull(0)) continue;
+            var payloadJson = r.GetString(0);
+            if (string.IsNullOrWhiteSpace(payloadJson)) continue;
+
+            CommandPayload? payload;
+            try { payload = JsonSerializer.Deserialize<CommandPayload>(payloadJson); }
+            catch (JsonException) { continue; }
+            if (payload?.EntityId is not { } entityId) continue;
+
+            var dest = WalkToDestination(world, entityId, payload);
+            if (dest is not null) result[entityId] = dest;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Where a stored <c>Move</c> was actually headed.
+    ///
+    /// <para>The command records a <b>lane</b> path and a null <c>SectorId</c>, so the destination is
+    /// not stored and must be walked: start at the entity's origin — the same
+    /// <c>AtSectorId ?? OnLaneTowardSectorId</c> the policy's own <c>Route</c> uses as its origin —
+    /// and step across each lane to whichever end is not the one just left.</para>
+    ///
+    /// <para>Returns null for anything that cannot be resolved (not a move, empty path, a lane that
+    /// no longer exists, an entity that is gone). A null simply reads as "no standing choice" and
+    /// disables hysteresis for that entity, which is the right failure: momentum is a damping term,
+    /// and a damping term that guesses is worse than one that abstains.</para>
+    /// </summary>
+    static string? WalkToDestination(WorldState world, string entityId, CommandPayload payload)
+    {
+        var lanePath = payload.LanePath;
+        if (lanePath is null || lanePath.Count == 0) return null;
+
+        var entity = world.Entities.FirstOrDefault(e => string.Equals(e.EntityId, entityId, StringComparison.Ordinal));
+        var at = entity?.AtSectorId ?? entity?.OnLaneTowardSectorId;
+        if (at is null) return null;
+
+        foreach (var laneId in lanePath)
+        {
+            var lane = world.Lanes.FirstOrDefault(l => string.Equals(l.LaneId, laneId, StringComparison.Ordinal));
+            if (lane is null) return null;
+            if (string.Equals(lane.FromSectorId, at, StringComparison.Ordinal)) at = lane.ToSectorId;
+            else if (string.Equals(lane.ToSectorId, at, StringComparison.Ordinal)) at = lane.FromSectorId;
+            else return null;   // the path does not actually start where the entity stands
+        }
+
+        return at;
+    }
+
     public IReadOnlyList<LoggedWorldCommand> ListLoggedWorldCommands(string worldId, int turn)
     {
         lock (_gate)

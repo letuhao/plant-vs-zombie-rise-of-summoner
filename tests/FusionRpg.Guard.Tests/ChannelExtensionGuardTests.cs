@@ -99,6 +99,15 @@ public class ChannelExtensionGuardTests
         Assert.DoesNotContain("case \"charm_pulse\"", text, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void EntityApply_pins_derived_after_ActorHub_Resolve()
+    {
+        var text = ReadInjector(Path.Combine("Stats", "EntityApply.cs"));
+
+        Assert.Contains("InjectorDerivedOverride.Pin(key, resolved.Derived)", text, StringComparison.Ordinal);
+        Assert.Contains("InjectorDerivedOverride.Pin(key, resolvedZ.Derived)", text, StringComparison.Ordinal);
+    }
+
     static string ReadInjector(string relative)
     {
         var path = Path.Combine(FindRepoRoot(), "src", "FusionRpg.Injector", relative);

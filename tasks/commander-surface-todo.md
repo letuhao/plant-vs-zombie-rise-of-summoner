@@ -24,13 +24,13 @@
 
 
 
-- [ ] Owner review: [commander-surface-map.md](../docs/architecture/commander-surface-map.md) (strengthen pass)
+- [x] Owner review: [commander-surface-map.md](../docs/architecture/commander-surface-map.md) (strengthen pass) — **owner-approved 2026-08-31.**
 
-- [ ] Owner review: all specs in [commander-surface/](../docs/architecture/commander-surface/)
+- [x] Owner review: all specs in [commander-surface/](../docs/architecture/commander-surface/) — **owner-approved 2026-08-31.**
 
-- [ ] Cross-program sign-off: aura-skill + actor-sheet boundaries acknowledged
+- [x] Cross-program sign-off: aura-skill + actor-sheet boundaries acknowledged — **owner-approved 2026-08-31.**
 
-- [ ] **Strengthen pass complete** — SSOT table, E2E gate, Aptitudes demotion, per-module ⛔ shares
+- [x] **Strengthen pass complete** — SSOT table, E2E gate, Aptitudes demotion, per-module ⛔ shares — **owner-approved 2026-08-31.**
 
 
 
@@ -46,7 +46,7 @@ Spec: [spec-default-persistence.md](../docs/architecture/commander-surface/spec-
 
 
 
-- [ ] Spec approved
+- [x] Spec approved — **owner-approved 2026-08-31.**
 
 - [x] `CommanderIds.TryParseStableId` in Core
 
@@ -76,7 +76,7 @@ Spec: [spec-commander-list-api.md](../docs/architecture/commander-surface/spec-c
 
 
 
-- [ ] Spec approved
+- [x] Spec approved — **owner-approved 2026-08-31.**
 
 - [x] `CommanderDtos` + `PlayerEmpireCommanders` filter
 
@@ -102,7 +102,7 @@ Spec: [spec-match-snapshot.md](../docs/architecture/commander-surface/spec-match
 
 
 
-- [ ] Spec approved
+- [x] Spec approved — **owner-approved 2026-08-31.**
 
 - [x] `MatchCommanderSnapshot` + holder (allocation + revision)
 
@@ -132,7 +132,7 @@ Spec: [spec-commanders-layer.md](../docs/architecture/commander-surface/spec-com
 
 
 
-- [ ] Spec approved
+- [x] Spec approved — **owner-approved 2026-08-31.**
 
 - [x] **Aptitudes demoted off rail** — Commanders `K` after Creatures; remove aptitudes rail hotkey
 
@@ -158,7 +158,7 @@ Spec: [spec-commander-sheet-role.md](../docs/architecture/commander-surface/spec
 
 
 
-- [ ] Spec approved
+- [x] Spec approved — **owner-approved 2026-08-31.**
 
 - [x] `actor-sheet-shell` available in production path
 
@@ -188,7 +188,7 @@ Spec: [spec-sanctum-readout.md](../docs/architecture/commander-surface/spec-sanc
 
 
 
-- [ ] Spec approved
+- [x] Spec approved — **owner-approved 2026-08-31.**
 
 - [x] Leading line + Change commander in `SanctumHome.tsx`
 
@@ -212,7 +212,7 @@ Spec: [spec-lawn-hud-chip.md](../docs/architecture/commander-surface/spec-lawn-h
 
 
 
-- [ ] Spec approved
+- [x] Spec approved — **owner-approved 2026-08-31.**
 
 - [x] `match.commander` on lawn observe fold (`LawnHud.tsx` / `lawnProjectorFold.ts`)
 

@@ -171,8 +171,14 @@ public static class DebugEndpoints
                     entered = true;
                 }
 
+                // The INJECTOR has just said a board is live, and it holds the actual Board object —
+                // it outranks this server's event-log heuristic. So drop the session filter here:
+                // a SERVER restart makes the injector re-Hello from the SAME game process with the
+                // SAME live board, which would otherwise look "stale" to the session rule below and
+                // 409 a perfectly good lawn. Found live 2026-08-30, immediately after the session rule
+                // itself was added — the fix for one false positive created a false negative.
                 if (boardStart is null)
-                    boardStart = FindLatestLiveBoardStart(store);
+                    boardStart = FindLatestLiveBoardStart(store, trustInjectorLiveBoard: true);
                 if (boardStart is null)
                     return Results.Conflict(new { ok = false, error = "enter-level reported board already live, but no live board.start was found" });
             }
@@ -500,7 +506,14 @@ public static class DebugEndpoints
     /// forced into a paging/binary-search shape) and `lawn.py`'s `latest_board_start`/
     /// `board_still_live` (same idea, Python). One direct scan is sufficient here since the caller
     /// already holds the store in-process — no HTTP round trip to approximate.</summary>
-    static EventEnvelope? FindLatestLiveBoardStart(RpgStore store)
+    /// <summary>Internal for <c>FusionRpg.Server.Tests</c> — the stale-board rule below has cost two
+    /// sessions and now has a regression test.</summary>
+    /// <param name="trustInjectorLiveBoard">
+    /// Set only when the injector has just reported "board already live". It holds the real Board and
+    /// outranks this event-log heuristic, so the injector-session filter below is skipped — otherwise a
+    /// SERVER restart (same game, same board, fresh Hello) would read as stale.
+    /// </param>
+    internal static EventEnvelope? FindLatestLiveBoardStart(RpgStore store, bool trustInjectorLiveBoard = false)
     {
         var max = store.GetMaxEventId();
         if (max <= 0) return null;
@@ -511,7 +524,25 @@ public static class DebugEndpoints
         if (starts.Count == 0) return null;
         var latestStart = starts[^1];
         var endedAfter = items.Any(e => e.Kind == "board.end" && e.Id > latestStart.Id);
-        return endedAfter ? null : latestStart;
+        if (endedAfter) return null;
+
+        // A board.start is only "live" if it belongs to the CURRENT injector session.
+        //
+        // A `board.end` is written on a clean exit. Kill the game mid-match -- a crash, a redeploy, or
+        // an assistant tool call whose process tree is reaped -- and none is ever written, so that row
+        // stays "live" forever. `quick-start` then reports `entered:false` with null targetPtr/plantPtr
+        // and every probe afterwards runs against a board that does not exist.
+        //
+        // This false positive has now cost two separate sessions (2026-08-30, twice: once mistaken for
+        // an `attackDamage` regression, once blocking A5 entirely), which is why it is fixed here rather
+        // than documented again. `injector.hello` is emitted once per injector startup, so any
+        // board.start older than the newest one belongs to a game process that is gone.
+        if (trustInjectorLiveBoard) return latestStart;
+
+        var lastHello = items.LastOrDefault(e => e.Kind == "injector.hello");
+        if (lastHello is not null && latestStart.Id < lastHello.Id) return null;
+
+        return latestStart;
     }
 
     static EventEnvelope? FindKindAfter(RpgStore store, long afterId, string kind)

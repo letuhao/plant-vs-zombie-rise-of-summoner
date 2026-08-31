@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actor HUD — Rise of Summoner</title>
+<link rel="stylesheet" href="_kit/tokens.css">
+<link rel="stylesheet" href="_kit/kit.css">
+<link rel="stylesheet" href="_kit/screens.css">
+<style>
+  /* Plate 10 — unit HUD mockups. Promote shared rules into _kit if approved. */
+  .unitmock { position: relative; width: 120px; margin: 0 auto; text-align: center; }
+  .unitmock .sprite { font-size: 48px; line-height: 1; filter: drop-shadow(0 2px 4px rgb(0 0 0 / .45)); }
+  .hudstack { position: absolute; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    pointer-events: none; z-index: 2; }
+  .hudstack--above { bottom: calc(100% + 4px); }
+  .hudrow { display: inline-flex; align-items: center; gap: 3px; flex-wrap: nowrap; }
+  .tierframe { display: inline-grid; place-items: center; width: 18px; height: 18px;
+    border-radius: var(--r-sm); border: 2px solid var(--rarity-3); background: rgb(0 0 0 / .35);
+    font-size: 9px; font-weight: 800; font-family: var(--font-mono); color: var(--text); }
+  .tierframe[data-tier="elite"] { border-color: var(--rarity-4); box-shadow: 0 0 4px rgb(185 142 222 / .4); }
+  .tierframe[data-tier="boss"] { border-color: var(--bad-solid); border-width: 2px;
+    box-shadow: 0 0 6px rgb(163 60 60 / .5); }
+  .tierframe[data-tier="unique"] { border-color: var(--rarity-5);
+    background: linear-gradient(135deg, rgb(255 200 80 / .25), rgb(170 90 220 / .25)); }
+  .lvlbadge { min-width: 16px; height: 14px; padding: 0 3px; border-radius: var(--r-pill);
+    background: var(--panel-raised); border: 1px solid var(--border-control);
+    font-family: var(--font-mono); font-size: 8px; font-weight: 800; color: var(--text); }
+  .rolepip { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-control);
+    background: var(--panel); font-size: 8px; display: grid; place-items: center; }
+  .rolepip[data-role="demon"] { border-color: var(--rarity-4); }
+  .rolepip[data-role="commander"] { border-color: var(--lawn-hot); }
+  .shieldrow { display: flex; align-items: center; gap: 2px; height: 6px; min-width: 48px; }
+  .shieldrow .track { flex: 1; height: 100%; background: var(--panel-inset); border-radius: var(--r-pill);
+    overflow: hidden; display: flex; }
+  .shieldrow .seg { height: 100%; }
+  .shieldrow .seg[data-el="fire"] { background: #e07040; }
+  .shieldrow .seg[data-el="ice"] { background: #60a8e0; }
+  .shieldrow .seg[data-el="poison"] { background: #70c060; }
+  .shieldrow .pip { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+  .hudlabel { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--muted); white-space: nowrap; }
+  .dualpane { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
+  .dualpane .pane { border: 1px solid var(--border); border-radius: var(--r-md);
+    padding: var(--sp-3); background: var(--panel-inset); min-height: 200px; }
+  .dualpane .pane h4 { margin: 0 0 var(--sp-2); font-size: var(--text-sm); color: var(--muted); }
+  .phaser-mock { position: relative; height: 180px; background: linear-gradient(180deg, #3a6b28, #2d5520);
+    border-radius: var(--r-sm); overflow: hidden; }
+  .phaser-mock .lane { position: absolute; inset: 20% 8% 15%; display: grid;
+    grid-template-columns: repeat(5, 1fr); align-items: end; }
+  .phaser-mock .cell { text-align: center; font-size: 28px; opacity: .9; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); }
+  .compare .col { padding: var(--sp-3); border-radius: var(--r-md); border: 1px dashed var(--border); }
+  .compare .col.bad { opacity: .75; border-color: rgb(217 123 123 / .4); }
+  .compare .col.good { border-color: rgb(111 191 115 / .4); }
+  .legend td:first-child { white-space: nowrap; font-weight: 600; }
+  .legend .demo { display: inline-flex; align-items: center; gap: 4px; }
+  .overflowpip { min-width: 14px; height: 14px; padding: 0 2px; border-radius: var(--r-pill);
+    background: var(--panel-raised); border: 1px solid var(--border-control);
+    font-size: 7px; font-family: var(--font-mono); font-weight: 800; color: var(--muted); }
+  .callout-arrow { font-size: var(--text-2xs); color: var(--faint); display: block; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="plate">
+
+<header class="plate-head">
+  <h1>Actor HUD — per-unit readout on the lawn</h1>
+  <p>
+    A reusable, extensible HUD above each unit — icon, level, color, shape, and gradient — so the
+    player can read <em>what</em> a unit is and <em>what is happening to it</em> without opening a
+    sheet or parsing a wall of text. This plate is the visual guide and user-facing legend; the
+    architecture ideal lives in
+    <a href="../architecture/actor-hud-ideal.md">actor-hud-ideal.md</a>.
+  </p>
+  <p>
+    <span class="tag tag--warn">Draft — for review</span>
+    <span class="tag">Plate 10</span>
+    <span class="tag">GG-1 · GG-9 · GG-60</span>
+    <span class="tag">Dual render: Unity + Phaser</span>
+  </p>
+</header>
+
+<nav class="toc">
+  <a href="00-foundation.html">← Foundation</a>
+  <a href="04-run-stages.html">← Run stages</a>
+  <a href="#a">A · Anatomy</a>
+  <a href="#b">B · Legend</a>
+  <a href="#c">C · Dual render</a>
+  <a href="#d">D · Crowded / overflow</a>
+  <a href="#e">E · Today vs ideal</a>
+  <a href="#f">F · What this is not</a>
+  <a href="#g">G · What this plate settles</a>
+  <a href="#h">H · Player scenarios</a>
+</nav>
+
+<!-- ==================================================================== A -->
+<section class="sec" id="a">
+  <h2>A · Anatomy — three rows above the unit</h2>
+  <p class="lede">
+    Band B only. Match chrome (sun, wave, commander chip) stays on the stage HUD —
+    <a href="04-run-stages.html#a">plate 04 §A</a>. Each row uses a different visual channel so
+    facts do not compete.
+  </p>
+
+  <div class="spec">
+    <div class="viewport short" style="display:flex;justify-content:center;padding:var(--sp-6)">
+      <div class="unitmock">
+        <div class="hudstack hudstack--above">
+          <!-- Identity row -->
+          <div class="hudrow">
+            <span class="tierframe" data-tier="elite" title="Elite tier frame">★</span>
+            <span class="rolepip" data-role="demon" title="Bound demon specimen">👿</span>
+            <span class="lvlbadge" title="Level band (not raw Θ)">42</span>
+          </div>
+          <!-- Resource row -->
+          <div class="hudrow">
+            <div class="shieldrow" title="Shield — element-colored segments">
+              <div class="track">
+                <span class="seg" data-el="fire" style="width:45%"></span>
+                <span class="seg" data-el="ice" style="width:30%"></span>
+              </div>
+              <span class="pip"></span><span class="pip"></span>
+            </div>
+          </div>
+          <!-- Status strip -->
+          <div class="hudrow">
+            <span class="st" data-fn="working" title="spark">SP</span>
+            <span class="st" data-fn="working" title="wither">WI</span>
+            <span class="st" data-fn="partial" title="bond">BO</span>
+          </div>
+          <span class="hudlabel">identity → resources → statuses</span>
+        </div>
+        <div class="sprite">🧟</div>
+      </div>
+    </div>
+
+    <table class="statsheet" style="margin-top:var(--sp-4)">
+      <thead>
+        <tr><th class="fam">Row</th><th>Channel</th><th class="fam">Answers at a glance</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="fam">Identity</td><td>Shape · icon · badge</td><td class="fam">Is this a boss? A unique demon? How strong (band)?</td></tr>
+        <tr><td class="fam">Resources</td><td>Color · gradient fill</td><td class="fam">Does it have shield? Which element? How much left?</td></tr>
+        <tr><td class="fam">Statuses</td><td>Icon · tint</td><td class="fam">What effects are on it? Is it CC'd?</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Anchor:</strong> entire stack attaches at <code>UnitFrame</code> crown/body — same resolver
+      as status VFX. No per-primitive <code>BodyWorld</code> reads.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== B -->
+<section class="sec" id="b">
+  <h2>B · Legend — one slot type, one meaning</h2>
+  <p class="lede">
+    Use this table when implementing or tuning. If two slots answer the same question, remove one.
+  </p>
+
+  <div class="spec">
+    <table class="statsheet legend">
+      <thead>
+        <tr>
+          <th class="fam">Slot</th>
+          <th>Channel</th>
+          <th>Meaning</th>
+          <th class="fam">Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="fam">Tier frame</td>
+          <td>Shape / border</td>
+          <td>Threat or rarity class</td>
+          <td class="fam">
+            <span class="demo">
+              <span class="tierframe" data-tier="normal">·</span> normal
+              <span class="tierframe" data-tier="elite">★</span> elite
+              <span class="tierframe" data-tier="boss">☠</span> boss
+              <span class="tierframe" data-tier="unique">◆</span> unique
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td class="fam">Role pip</td>
+          <td>Icon</td>
+          <td>Specimen type or mark</td>
+          <td class="fam">
+            <span class="demo">
+              <span class="rolepip" data-role="demon">👿</span> bound demon
+              <span class="rolepip" data-role="commander">🧑‍🌾</span> commander mark
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td class="fam">Level badge</td>
+          <td>Number in pill</td>
+          <td>Power band (not full stat sheet)</td>
+          <td class="fam"><span class="lvlbadge">42</span> ≈ high band; exact Θ lives in ActorPanel</td>
+        </tr>
+        <tr>
+          <td class="fam">Shield segments</td>
+          <td>Element color · width</td>
+          <td>Stack HP by element</td>
+          <td class="fam">
+            <span class="shieldrow" style="width:64px">
+              <div class="track"><span class="seg" data-el="fire" style="width:60%"></span></div>
+            </span>
+            fire stack dominant
+          </td>
+        </tr>
+        <tr>
+          <td class="fam">Status token</td>
+          <td>Icon + border tint</td>
+          <td>Which status is active</td>
+          <td class="fam"><span class="st" data-fn="working">SP</span> spark · almanac token in production</td>
+        </tr>
+        <tr>
+          <td class="fam">CC glyph</td>
+          <td>Corner accent</td>
+          <td>Hard control (stun, freeze, …)</td>
+          <td class="fam">Red corner on status token when <code>cc: true</code></td>
+        </tr>
+        <tr>
+          <td class="fam">+N pip</td>
+          <td>Collapsed count</td>
+          <td>More statuses than fit</td>
+          <td class="fam"><span class="overflowpip">+2</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Motion is not duplicated.</strong> Sustained status VFX (auras, markers) stay in the
+      VFX layer. HUD tokens are static and readable at 16–24px.
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== C -->
+<section class="sec" id="c">
+  <h2>C · Dual render — same model, two surfaces</h2>
+  <p class="lede">
+    One <code>Occupant.hud</code> snapshot from the injector fold. Unity draws world sprites;
+    Phaser draws the same chips on the canvas. Web Inspector expands on selection.
+  </p>
+
+  <div class="spec dualpane">
+    <div class="pane">
+      <h4>Unity — world overlay (in-game)</h4>
+      <div class="unitmock" style="margin-top:var(--sp-4)">
+        <div class="hudstack hudstack--above">
+          <div class="hudrow">
+            <span class="tierframe" data-tier="unique">◆</span>
+            <span class="lvlbadge">17</span>
+          </div>
+          <div class="hudrow">
+            <div class="shieldrow"><div class="track"><span class="seg" data-el="poison" style="width:70%"></span></div></div>
+          </div>
+          <div class="hudrow">
+            <span class="st" data-fn="working">PM</span>
+          </div>
+        </div>
+        <div class="sprite">🧟</div>
+      </div>
+      <span class="callout-arrow">ActorHudPool @ UnitFrame</span>
+    </div>
+    <div class="pane">
+      <h4>Phaser — lawn canvas (web mirror)</h4>
+      <div class="phaser-mock">
+        <div class="lane">
+          <div></div><div></div>
+          <div class="cell">
+            <div class="hudstack hudstack--above" style="position:relative;transform:none;left:auto;bottom:auto;margin-bottom:2px">
+              <div class="hudrow"><span class="tierframe" data-tier="unique">◆</span><span class="lvlbadge">17</span></div>
+              <div class="hudrow"><div class="shieldrow" style="width:40px"><div class="track"><span class="seg" data-el="poison" style="width:70%"></span></div></div></div>
+              <div class="hudrow"><span class="st" data-fn="working" style="width:18px;height:18px;font-size:7px">PM</span></div>
+            </div>
+            🧟
+          </div>
+          <div></div><div></div>
+        </div>
+      </div>
+      <span class="callout-arrow">SyncFromModelSystem ← same fold</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Inspector (not drawn here)</strong> is the expanded readout when the player selects a unit —
+    same data, more rows, still no full derived sheet until ActorPanel opens.
+  </div>
+</section>
+
+<!-- ==================================================================== D -->
+<section class="sec" id="d">
+  <h2>D · Priority and overflow when crowded</h2>
+  <p class="lede">
+    When space is tight, drop low-priority slots and collapse statuses — never shrink text below
+    reading size (GG-60).
+  </p>
+
+  <div class="spec">
+    <div style="display:flex;gap:var(--sp-6);justify-content:center;flex-wrap:wrap;padding:var(--sp-4)">
+      <div class="unitmock">
+        <div class="hudstack hudstack--above">
+          <div class="hudrow">
+            <span class="st" data-fn="working" title="CC — highest priority">FR</span>
+            <span class="st" data-fn="working">SP</span>
+            <span class="st" data-fn="working">WI</span>
+            <span class="overflowpip">+2</span>
+          </div>
+        </div>
+        <div class="sprite">🧟</div>
+        <span class="hudlabel">5 statuses · show 3 + overflow</span>
+      </div>
+      <div class="unitmock">
+        <div class="hudstack hudstack--above">
+          <div class="hudrow">
+            <span class="tierframe" data-tier="boss">☠</span>
+            <div class="shieldrow"><div class="track"><span class="seg" data-el="ice" style="width:80%"></span></div></div>
+          </div>
+        </div>
+        <div class="sprite">🧟</div>
+        <span class="hudlabel">Boss · shield only · level hidden</span>
+      </div>
+    </div>
+
+    <table class="statsheet">
+      <thead><tr><th class="fam">Priority (high → low)</th><th class="fam">Slot</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="fam">CC glyph / frozen status</td></tr>
+        <tr><td>2</td><td class="fam">Commander mark · unique/demon pip</td></tr>
+        <tr><td>3</td><td class="fam">Shield segments</td></tr>
+        <tr><td>4</td><td class="fam">Top N status tokens</td></tr>
+        <tr><td>5</td><td class="fam">Level badge · tier frame</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================================================================== E -->
+<section class="sec" id="e">
+  <h2>E · Today vs ideal</h2>
+  <p class="lede">
+    The shield-only bar was a vertical slice that never grew into a unit readout.
+  </p>
+
+  <div class="spec compare">
+    <div class="col bad">
+      <h3 style="margin-top:0;font-size:var(--text-md)">Today</h3>
+      <ul style="font-size:var(--text-sm);color:var(--muted);padding-left:1.2em">
+        <li>Unity: shield bar only (<code>ShieldBarPool</code>)</li>
+        <li>Phaser: HP bar, no RPG shield</li>
+        <li>Web: text <code>Shield: N/M</code> + partial status chips</li>
+        <li>No boss/demon/level read on unit</li>
+        <li>Three code paths, no shared model</li>
+      </ul>
+      <div class="unitmock" style="margin-top:var(--sp-3)">
+        <div class="hudstack hudstack--above">
+          <div class="meter meter--sm" style="width:56px"><span class="track"><span class="fill" style="width:60%"></span></span></div>
+        </div>
+        <div class="sprite">🧟</div>
+      </div>
+    </div>
+    <div class="col good">
+      <h3 style="margin-top:0;font-size:var(--text-md)">Actor HUD (ideal)</h3>
+      <ul style="font-size:var(--text-sm);color:var(--muted);padding-left:1.2em">
+        <li>One <code>Occupant.hud</code> snapshot</li>
+        <li>Unity + Phaser + Inspector from same fold</li>
+        <li>Shield = one resource slot</li>
+        <li>Identity + status strips</li>
+        <li>UnitFrame anchor SSOT</li>
+      </ul>
+      <div class="unitmock" style="margin-top:var(--sp-3)">
+        <div class="hudstack hudstack--above">
+          <div class="hudrow"><span class="tierframe" data-tier="elite">★</span><span class="lvlbadge">12</span></div>
+          <div class="hudrow"><div class="shieldrow"><div class="track"><span class="seg" data-el="fire" style="width:50%"></span></div></div></div>
+          <div class="hudrow"><span class="st" data-fn="working">SP</span><span class="st" data-fn="working">WI</span></div>
+        </div>
+        <div class="sprite">🧟</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== F -->
+<section class="sec" id="f">
+  <h2>F · What this is not</h2>
+  <div class="spec">
+    <table class="statsheet">
+      <thead><tr><th class="fam">Not this</th><th class="fam">Instead</th></tr></thead>
+      <tbody>
+        <tr><td class="fam">ActorPanel / six-tab sheet</td><td class="fam">Band-2 layer — open with <kbd>C</kbd> / click; full numbers live there</td></tr>
+        <tr><td class="fam">Match commander chip</td><td class="fam">Band A stage HUD — <a href="04-run-stages.html#a">plate 04</a> · <a href="09-commander-list.html">plate 09</a></td></tr>
+        <tr><td class="fam">Damage floaters &amp; hit bursts</td><td class="fam">Combat feedback VFX — stays in VfxDirector</td></tr>
+        <tr><td class="fam">Status sustain auras</td><td class="fam">Motion grammar VFX — complementary, not replaced</td></tr>
+        <tr><td class="fam">Raw derived channel dump</td><td class="fam">261+ channels → DerivedStatsTab only</td></tr>
+        <tr><td class="fam">Mid-run commander picker</td><td class="fam">Commanders layer · next match only</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================================================================== G -->
+<section class="sec" id="g">
+  <h2>G · What this plate settles</h2>
+  <ul>
+    <li>Three-row anatomy and visual channel assignment (identity / resources / statuses).</li>
+    <li>Legend mapping slot types to player questions (boss? demon? shield? status?).</li>
+    <li>Dual-render expectation: Unity world + Phaser canvas from one fold model.</li>
+    <li>Overflow and priority rules when many effects compete for space.</li>
+    <li>Explicit boundary vs match HUD, ActorPanel, and status VFX.</li>
+    <li>Player scenarios under time pressure (§H) — strengthened 2026-08-30 audit pass.</li>
+  </ul>
+  <div class="note">
+    <strong>Next step after owner review:</strong> capability map <code>actor-hud-map.md</code> and
+    module specs — not built until ideal is approved. Architecture:
+    <a href="../architecture/actor-hud-ideal.md">actor-hud-ideal.md</a> · Audit:
+    <a href="../research/actor-hud-audit-2026-08-30.md">actor-hud-audit-2026-08-30.md</a>.
+  </div>
+</section>
+
+<!-- ==================================================================== H -->
+<section class="sec" id="h">
+  <h2>H · Player scenarios — under time pressure</h2>
+  <p class="lede">
+    GG-60: the lawn is acted on while waves move. These scenarios are the acceptance stories for Band B —
+    detail and built/wiring/gap tables live in
+    <a href="../research/actor-hud-audit-2026-08-30.md">actor-hud-audit-2026-08-30.md §1</a>.
+    Decisions closed in <a href="../architecture/actor-hud-ideal.md">ideal §0</a>.
+  </p>
+
+  <div class="spec">
+    <h3 style="margin-top:0;font-size:var(--text-md)">Horde — overflow without shrinking</h3>
+    <p style="font-size:var(--text-sm);color:var(--muted);margin:0 0 var(--sp-3)">
+      Eight zombies cross the row; three carry statuses. Player must read CC and top afflictions at a
+      glance — not open Inspector per tile.
+    </p>
+    <div style="display:flex;gap:var(--sp-4);justify-content:center;flex-wrap:wrap;padding:var(--sp-2)">
+      <div class="unitmock">
+        <div class="hudstack hudstack--above">
+          <div class="hudrow">
+            <span class="st" data-fn="working" title="freeze — CC priority">FR</span>
+            <span class="st" data-fn="working">SP</span>
+            <span class="st" data-fn="working">WI</span>
+            <span class="overflowpip">+2</span>
+          </div>
+        </div>
+        <div class="sprite">🧟</div>
+        <span class="hudlabel">3 shown + overflow</span>
+      </div>
+      <div class="unitmock">
+        <div class="hudstack hudstack--above">
+          <div class="hudrow">
+            <span class="tierframe" data-tier="elite">★</span>
+            <span class="lvlbadge">28</span>
+          </div>
+        </div>
+        <div class="sprite">🧟</div>
+        <span class="hudlabel">elite in the crowd</span>
+      </div>
+    </div>
+
+    <h3 style="font-size:var(--text-md);margin-top:var(--sp-5)">Elite — fire shield + dual status</h3>
+    <p style="font-size:var(--text-sm);color:var(--muted);margin:0 0 var(--sp-3)">
+      Resource row shows <em>which element</em> blocks damage; status strip shows <em>which effects</em>
+      apply. Sustain VFX (motion) complements icons — does not duplicate them.
+    </p>
+    <div class="unitmock" style="margin-bottom:var(--sp-3)">
+      <div class="hudstack hudstack--above">
+        <div class="hudrow">
+          <span class="tierframe" data-tier="boss">☠</span>
+          <span class="lvlbadge">51</span>
+        </div>
+        <div class="hudrow">
+          <div class="shieldrow" title="fire stack dominant">
+            <div class="track">
+              <span class="seg" data-el="fire" style="width:65%"></span>
+              <span class="seg" data-el="ice" style="width:20%"></span>
+            </div>
+          </div>
+        </div>
+        <div class="hudrow">
+          <span class="st" data-fn="working" title="expose">EX</span>
+          <span class="st" data-fn="working" title="command">CM</span>
+        </div>
+      </div>
+      <div class="sprite">🧟</div>
+      <span class="hudlabel">icon = meaning · VFX = motion</span>
+    </div>
+
+    <h3 style="font-size:var(--text-md);margin-top:var(--sp-5)">Dual render — same model</h3>
+    <p style="font-size:var(--text-sm);color:var(--muted);margin:0 0 var(--sp-3)">
+      Unity (in-game) and Phaser (browser canvas) must tell the same story from one
+      <code>Occupant.hud</code> fold — spectator is not a second-class readout.
+    </p>
+    <div class="dualpane">
+      <div class="pane">
+        <h4>Unity — player view</h4>
+        <div class="unitmock" style="margin-top:var(--sp-3)">
+          <div class="hudstack hudstack--above">
+            <div class="hudrow">
+              <span class="rolepip" data-role="demon">👿</span>
+              <span class="lvlbadge">17</span>
+            </div>
+            <div class="hudrow">
+              <div class="shieldrow"><div class="track"><span class="seg" data-el="poison" style="width:70%"></span></div></div>
+            </div>
+            <div class="hudrow"><span class="st" data-fn="working">PM</span></div>
+          </div>
+          <div class="sprite">🌱</div>
+        </div>
+        <span class="callout-arrow">bound specimen — no Inspector needed</span>
+      </div>
+      <div class="pane">
+        <h4>Phaser — same fold</h4>
+        <div class="unitmock" style="margin-top:var(--sp-3)">
+          <div class="hudstack hudstack--above">
+            <div class="hudrow">
+              <span class="rolepip" data-role="demon">👿</span>
+              <span class="lvlbadge">17</span>
+            </div>
+            <div class="hudrow">
+              <div class="shieldrow"><div class="track"><span class="seg" data-el="poison" style="width:70%"></span></div></div>
+            </div>
+            <div class="hudrow"><span class="st" data-fn="working">PM</span></div>
+          </div>
+          <div class="sprite">🌱</div>
+        </div>
+        <span class="callout-arrow">SyncFromModelSystem ← Occupant.hud</span>
+      </div>
+    </div>
+
+    <table class="statsheet" style="margin-top:var(--sp-4)">
+      <thead>
+        <tr><th class="fam">Scenario</th><th class="fam">Player must know</th><th class="fam">Today</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="fam">Horde</td><td class="fam">CC + top statuses without per-tile Inspector</td><td class="fam">Partial VFX; text chips if selected</td></tr>
+        <tr><td class="fam">Elite + shield</td><td class="fam">Element blocking damage + effect ids</td><td class="fam">Shield fill only; no element on bar</td></tr>
+        <tr><td class="fam">Bound demon</td><td class="fam">Role pip on unit sprite</td><td class="fam">Inspector only when clicked</td></tr>
+        <tr><td class="fam">Phaser spectator</td><td class="fam">Parity with Unity HUD</td><td class="fam">HP bar only — drift</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</div>
+</body>
+</html>

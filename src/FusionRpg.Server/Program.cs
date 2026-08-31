@@ -82,7 +82,7 @@ FusionRpg.Core.Aura.AuraTuningHub.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "aura.v1.json"))));
 FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
     FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "ai.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "ai.v2.json"))));
 FusionRpg.Data.Policies.SealedCompactionPolicy.Configure(
     FusionRpg.Data.Policies.DataTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "data.v1.json"))));

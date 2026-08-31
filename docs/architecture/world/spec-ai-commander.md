@@ -212,7 +212,48 @@ Per the [Infinite Axis Utility System](https://www.gameai.com/iaus.php): a consi
 - Curves `0..1000 → 0..1000`: `Linear`, `Inverse`, `Quadratic`, `InverseQuadratic`, `Smoothstep`, `Threshold(t)`. No logistic: it cannot be done in integers without an approximation nobody would trust.
 - **Compensation**, because multiplying N scores drags everything toward zero (0.8³ = 0.51):
   `modifier = 1000 − 1000/n` · `makeUp = (1000 − score) × modifier / 1000` · `final = score + makeUp × score / 1000`
-- **Momentum** — a bonus to the previous choice, which damps oscillation between near-ties — is specified but **not implemented**, because it needs memory across turns and assumption 2 says there is none. It is the concrete thing that would force stored intent.
+- **Momentum** — a bonus to the previous choice, which damps oscillation between near-ties — was specified here as **not implemented**, *"because it needs memory across turns and assumption 2 says there is none. It is the concrete thing that would force stored intent."*
+
+  **⛔ Amended 2026-08-31 (owner decision to build it). That reasoning does not survive reading this
+  spec's own §The decision layer, and the blocker dissolves entirely.**
+
+  **1. Momentum needs no new stored state.** A policy files its orders as `WorldCommand`s into
+  `rpg_world_commands`, which *is* the save — commands cannot be trimmed, and the table is indexed
+  `(world_id, turn, commander_id, seq)` with `ListWorldCommands(worldId, turn)` already public
+  (`RpgStore.WorldTurns.cs:324`). **Last turn's choice is therefore already durable, already
+  per-faction, and already part of the replay unit.** Reading it is derivation from existing save
+  data, not the "hashed, replayed state" assumption 2 feared.
+
+  **2. Replay cannot diverge, because replay never runs the policy.** This document already states it,
+  in `IFactionPolicy`'s own contract: *"Replay reads that log and never re-runs the policy — which is
+  what lets Zomboss's brain be rewritten in a later wave without invalidating a single existing
+  save."* A policy input can therefore never reach a replayed hash by any path. **This is the same
+  property that makes rewriting the brain safe; momentum is not a special case of it, it is an
+  ordinary one.**
+
+  So assumption 2's escape clause (*"the fix is stored intent — a decision to take deliberately rather
+  than discover"*) is satisfied without paying its stated price.
+
+  **3. The shape must be restated for the code that actually shipped.** `FrontierRulesPolicy` is a
+  **rule ladder** (`Abandon ?? Finish ?? Take ?? Sever ?? Recover ?? Explore ?? Expand ?? Hold`), not
+  a utility scorer, so "a bonus to the previous choice" has no score to add to. The observed
+  oscillation is a **feedback loop between two rules**: `Defend` pulls the legion home → the garrison
+  rises → threat no longer exceeds it → `Expand` sends it out → the garrison drops → `Defend` fires
+  again. A bonus term cannot damp that; **hysteresis on the destination can**, and that is the
+  faithful translation of momentum into a ladder:
+
+  > A rule that would send an entity somewhere **other than where its own last order sent it** must
+  > beat the standing choice by a margin, not merely tie it.
+
+  The margin is a **tunable** (`world-ai` domain), not a constant — it is exactly the number a balance
+  pass would move.
+
+  **4. What this does cost, stated rather than discovered.** Zomboss's orders change, so the command
+  log changes, so world state hashes for AI-driven scenarios change. There are **no pinned world
+  golden hash constants** to re-bless (verified: every world hash assertion in
+  `tests/FusionRpg.Core.Tests/World/` is relational — `forward == reversed`, `a == b`), but the
+  multi-turn campaign properties (`TwoHearthsCampaignTests`, `TwoHearthsTenTurnProbeTests`) observe
+  behaviour and may move. **They are run and reported, never assumed.**
 
 ### The commander loop
 

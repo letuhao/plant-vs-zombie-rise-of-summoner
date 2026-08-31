@@ -121,7 +121,7 @@ docs/design/
   _kit/tokens.css              the token layer: colour, type, space, radius, elevation, motion, bands
   _kit/kit.css                 foundation component styles
   _kit/screens.css             stage layouts and screen-level structures
-  00-foundation.html … 07-flows.html   the eight plates
+  00-foundation.html … 09-commander-list.html · 10-actor-hud.html   the eleven plates
 ```
 
 Plates are numbered by the order they are *designed*, not by navigation order.
@@ -130,8 +130,9 @@ Plates are numbered by the order they are *designed*, not by navigation order.
 
 ## 4. Plate index
 
-**The design is complete.** Every player-facing surface in the game is drawn across these ten
-plates, and [information-architecture.md](information-architecture.md) is the map that connects them.
+**The design is complete for player stages and layers; plate 10 adds the per-unit lawn HUD ideal.**
+Every player-facing surface in the game is drawn across these eleven plates, and
+[information-architecture.md](information-architecture.md) is the map that connects them.
 
 | Plate | Covers | Status |
 |---|---|---|
@@ -145,6 +146,7 @@ plates, and [information-architecture.md](information-architecture.md) is the ma
 | [07-flows.html](07-flows.html) | Loadout · deploy targeting · the pact offer · the four first-session beats · focus order · the last ladder rungs | **Draft — for review** |
 | [08-actor-sheet.html](08-actor-sheet.html) | One Actor panel · six tabs · specimen and commander role extensions | **Draft — for review** |
 | [09-commander-list.html](09-commander-list.html) | Player-empire commander list · persisted default (Dave) · Set default / Defend the lawn · location &amp; legion map stubs · list → Actor sheet | **Draft — for review** |
+| [10-actor-hud.html](10-actor-hud.html) | Per-unit lawn HUD — identity / resource / status rows · dual render (Unity + Phaser) · legend · overflow · §H player scenarios (strengthened 2026-08-30) · ideal: [actor-hud-ideal.md](../architecture/actor-hud-ideal.md) · audit: [actor-hud-audit-2026-08-30.md](../research/actor-hud-audit-2026-08-30.md) | **Draft — for review** |
 
 ### Coverage
 

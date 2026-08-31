@@ -1171,6 +1171,8 @@ public static class GameHooks
         Applied.Remove(ptr);
         EntityStatWriter.Forget(ptr);
         CheatState.Stats.ForgetEntity(ptr.ToString("X"));
+        try { Hud.ActorHudCache.Remove(ptr.ToString("X")); } catch { }
+        try { Hud.ActorHudPool.ReleaseOwner(ptr.ToString("X")); } catch { }
     }
 
     internal static void RecapturePlant(Plant p, string source)

@@ -33,4 +33,10 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <!-- aura-skill-todo.md Phase 5: DebugEndpoints.FindLatestLiveBoardStart carries the stale-board
+         rule that cost two sessions; it needs a regression test and is not part of the public API. -->
+    <InternalsVisibleTo Include="FusionRpg.Server.Tests" />
+  </ItemGroup>
+
 </Project>

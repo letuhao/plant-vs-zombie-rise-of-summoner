@@ -73,6 +73,8 @@ public static class EntityApply
                 cheatAbsoluteReal: includeAbsolute ? CheatState.BuildPlantAbsoluteReal() : null,
                 pvzStatsMods: CheatState.PvzStatsMods);
             var resolved = CheatState.ActorHub.Resolve(ctx);
+            InjectorDerivedOverride.Pin(key, resolved.Derived);
+            try { Hud.ActorHudCache.MarkDirty(key); } catch { }
             var final = resolved.AppliedCombat;
             EmitAptitudeTrace("plant", key, ctx, resolved);
 
@@ -194,6 +196,8 @@ public static class EntityApply
                 cheatAbsoluteReal: includeAbsolute ? CheatState.BuildZombieAbsoluteReal() : null,
                 pvzStatsMods: CheatState.PvzStatsMods);
             var resolvedZ = CheatState.ActorHub.Resolve(ctx);
+            InjectorDerivedOverride.Pin(key, resolvedZ.Derived);
+            try { Hud.ActorHudCache.MarkDirty(key); } catch { }
             var final = resolvedZ.AppliedCombat;
             EmitAptitudeTrace("zombie", key, ctx, resolvedZ);
 

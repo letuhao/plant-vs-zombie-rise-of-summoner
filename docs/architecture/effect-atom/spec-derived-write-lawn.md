@@ -5,9 +5,36 @@
 **Catalog SSOT:** [../actor-hub-ssot.md](../actor-hub-ssot.md) ·
 **Kind matrix:** [atom-catalog-ssot.md](atom-catalog-ssot.md)
 
-**Status: proposed 2026-08-30, not built. Needs a `decisions.md` row before any code** — it clears a
-deliberate quarantine (D6) and changes which runtimes may execute a kind, which is a behaviour lock
-under [AGENTS.md](../../../AGENTS.md).
+**Status: BUILT and PROVEN LIVE end to end, 2026-08-30 — `A5` included, as worded.**
+`decisions.md` carries the "Derived-write lawn executor" row that authorised clearing D6 for the lawn.
+
+**A5 evidence** — *"a bound **aura** raises **`combat.power.omni`** on a live lawn plant"*, with a
+falsifier cycle on a real running game:
+
+| State | plant `278F9CF7480` `combat.power.omni` |
+|---|---|
+| before grant | **803** |
+| **Might aura granted** | **13210** |
+| withdrawn | **803** |
+
+**Δ = 12407 = `AuraMagnitude.Compute(rung: 10, share: 1.0, pTheta: 1000)`** — the shipped formula's own
+output. The aura was authored as a real `world-buff` container (`ContainerKind.WorldBuff` already
+existed) holding one `stat.derived` atom on the exact channel `AuraContentCatalog`'s Might aura
+declares. A second, earlier cycle proved the same path with the shipped `trait.critical-hunter` atom on
+`combat.crit.rate.omni` (150 → absent → 150).
+
+**Probe fixtures were removed afterwards** — the DB is back to `effect_binding = 0` and its two
+original containers. What remains owed elsewhere: **E20-E25's production binding producer**, and (for
+shipped auras rather than a probe) **T16's aura-container authoring**, whose only remaining objection
+is the balance-coefficient one — its "nothing reads a container" ground is void, this executor reads it.
+
+> ⚠️ **Read the three dated corrections inside §"Build status" before trusting any older sentence in
+> this document.** Two claims that were written here as fact turned out to be false when tested against
+> code: *"this module's own half is done"* (the executor was **inert in production** — it read a
+> transport nothing populates, and used bare owner keys that matched nothing), and the single-line
+> blocker citation (`EffectBag.cs:196`), which was neither the whole blocker nor the one that mattered.
+> Both are corrected in place rather than quietly overwritten, because the way they were wrong is the
+> useful part.
 
 ---
 

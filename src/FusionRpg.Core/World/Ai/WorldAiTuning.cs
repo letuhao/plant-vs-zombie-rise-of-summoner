@@ -2,7 +2,20 @@ using System.Text.Json;
 
 namespace FusionRpg.Core.World.Ai;
 
-public sealed record FrontierRulesTuning(int RecoverAtMilli, int ExploreTurns, long SeveranceThresholdCost);
+public sealed record FrontierRulesTuning(
+    int RecoverAtMilli,
+    int ExploreTurns,
+    long SeveranceThresholdCost,
+    /// <summary>
+    /// Momentum, as hysteresis (spec-ai-commander.md §Momentum, amended 2026-08-31). A rule that
+    /// would send an entity somewhere other than where this faction's own last order sent it must
+    /// beat the standing choice by this margin, in per-mille of the standing score.
+    ///
+    /// <para>Hysteresis rather than a bonus because <c>FrontierRulesPolicy</c> is a rule ladder, not
+    /// a utility scorer: there is no single score to add a bonus to, and the observed oscillation is
+    /// a feedback loop between two rules rather than a near-tie inside one.</para>
+    /// </summary>
+    int MomentumMarginMilli);
 
 public sealed record ThreatMapTuning(int StaleDecayPerTurn, int MaxSpreadHops, int ProximityFalloffPerHop);
 
@@ -47,7 +60,11 @@ public static class WorldAiTuningLoader
                 FrontierRules: new FrontierRulesTuning(
                     RecoverAtMilli: Int(frontier, "recoverAtMilli", "frontierRules"),
                     ExploreTurns: Int(frontier, "exploreTurns", "frontierRules"),
-                    SeveranceThresholdCost: Long(frontier, "severanceThresholdCost", "frontierRules")),
+                    SeveranceThresholdCost: Long(frontier, "severanceThresholdCost", "frontierRules"),
+                    // A missing tunable is a load rejection naming it, never a default
+                    // (tunables-ssot.md): a silent default would make a mis-authored config
+                    // indistinguishable from a deliberate one.
+                    MomentumMarginMilli: Int(frontier, "momentumMarginMilli", "frontierRules")),
                 ThreatMap: new ThreatMapTuning(
                     StaleDecayPerTurn: Int(threat, "staleDecayPerTurn", "threatMap"),
                     MaxSpreadHops: Int(threat, "maxSpreadHops", "threatMap"),

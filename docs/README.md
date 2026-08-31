@@ -46,6 +46,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [research/architecture-stress/00-index.md](research/architecture-stress/00-index.md) | Red-team: situations + break matrix vs dual-authority locks (research only) |
 | [research/mod-loaders.md](research/mod-loaders.md) | BepInEx vs MelonLoader on this machine; host choice (not Effect depth) |
 | [research/commander-fe-audit-2026-08-30.md](research/commander-fe-audit-2026-08-30.md) | Commander/aura FE audit — command list, deploy defaults, genre comparison (audit only) |
+| [research/actor-hud-audit-2026-08-30.md](research/actor-hud-audit-2026-08-30.md) | Actor HUD audit — user perspective, built/wiring/gap, dual-render acceptance (audit only) |
+| [research/actor-hud-data-pipeline-audit-2026-08-30.md](research/actor-hud-data-pipeline-audit-2026-08-30.md) | Actor HUD pipeline audit — SSOT table, Hot read path, FSM alignment, duplicate retirement (audit only) |
 
 ## 2. Architecture (product design)
 
