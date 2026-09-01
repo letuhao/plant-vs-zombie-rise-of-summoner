@@ -1019,10 +1019,53 @@ test. `OverlaySwitchLayout.MinScale` 1 is a minimum, not a maximum. Listed becau
 
 | Cap | Value | Verdict |
 |---|---|---|
-| `DemonSpeciesGenerator.DefaultMaxSpecies` | 24 | **No conflict.** How many species the generator emits — an authoring quantity. More species is content work, not a progression ceiling |
+| `DemonSpeciesGenerator` species cap | ~~24~~ **removed 2026-08-31** | **Was a real ceiling; this row's original verdict was wrong.** See §11.10a |
 | `ShieldPolicy.MaxShieldsPerActor` | 3 | **Design, not progression.** A stacking rule — three layers, drained outer-to-core. Removing it changes shield strategy, not how far a player can get |
 | Affix tier ladder | 5 rungs | **No conflict** — §10.2 row 7. Bounded, level-free, relative |
 | Rarity ladder | 10 rungs | **No conflict.** The ladder's *length* is content; `contentScale` multiplies what a rung is worth |
+
+#### 11.10a The species cap — a sweep verdict that was wrong, and why
+
+The original row read *"an authoring quantity. More species is content work, not a progression
+ceiling."* **The reasoning was sound and the conclusion was wrong**, for two separate reasons found
+on 2026-08-31. Recorded in full because this is the shape of miss a cap sweep is most likely to
+repeat.
+
+**1. It bound, and it discarded content silently.** The sweep treated 24 as a budget nobody had
+reached. It was reached: 18 zombie and 66 plant rows carried HP data, so the pool took all 18 zombies
+and then only `24 − 18 = 6` of the 66 plants. **60 eligible species were dropped**, and the shipped
+catalog's 18/6 split is that arithmetic, visible the whole time. A cap that is *already* binding does
+not read differently from one that is not — which is why "is this reached?" must be computed, not
+judged.
+
+**2. "More species is content work" stopped being true.** That premise assumed per-species content is
+hand-authored, so a bigger roster meant proportionally more human effort — a scheduling limit, not a
+mechanical one. The seedsmith demons feature
+([`seedsmith-map.md`](../seedsmith-map.md) §3b) exists precisely to *generate* item, action, aspect
+and commander content per demon. Once content is derived, the cap stops bounding effort and bounds
+only **how much of the game the overlay can represent**.
+
+That second point is the general lesson: **a cap's verdict depends on a premise about how the
+surrounding system works, and it expires when that premise does.** A row marked "no conflict" is
+correct as of the reasoning beside it, not permanently.
+
+**Resolution.** `Generate(captured, maxSpecies)` now takes `int? maxSpecies = null` meaning *no
+limit* — every captured species becomes a demon, so a PVZ update that adds almanac entries adds
+demons with no code change. An explicit positive limit stays available for test fixtures and sampling
+runs; a non-positive one throws. There is no default ceiling to restore.
+
+**Second, smaller ceiling found in the same pass, and closed (owner, 2026-08-31).** `RarityForRank`
+granted Legendary to `rank < 2` — **absolute**, while Epic and Rare were proportional (`count / 6`,
+`count / 4`). Uncapping the roster exposed it: on a 900-demon roster that is two legendary demons in
+the world, while every other tier grows. It is now proportional too, `Math.Max(2, count / 12)`.
+
+**The divisor is not a new balance number.** `1/12` is the ratio the flat `2` already implied on the
+24-species roster it was written for (`2 / 24`), so the old roster reproduces exactly and only larger
+ones change. At 84 species the split is 7 / 14 / 21 / 42 — ~8% / 17% / 25% / 50%.
+
+This is the same lesson as the row above, one level down: **a constant that reads as a design choice
+at one scale can be an unscaled leftover at another**, and only removing the cap made the difference
+visible.
 
 ---
 

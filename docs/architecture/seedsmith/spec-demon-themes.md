@@ -5,7 +5,7 @@ Depends on `motif-derive`. **Gated by `demon-metrics` (D3).**
 
 Ideal: [seedsmith-demons-ideal.md](../seedsmith-demons-ideal.md); `A#` = its §6 audit.
 
-**Status: proposed 2026-08-31, awaiting owner review. Not authorized to build.**
+**Status: APPROVED by the owner 2026-08-31. Authorized to build.**
 
 ---
 
@@ -36,17 +36,18 @@ code.** `Corpus.load(root)` is single-root: one corpus, one directory. Items liv
 **The way out was already in the data.** The item corpus has a theme axis: `unique` carries optional
 `theme`/`themeKey`, and **`set` *requires* `themeKey`**
 ([`adapters/items/kinds.py:60,63`](../../tools/seedsmith/seedsmith/adapters/items/kinds.py)).
-Measured in the live corpus: **31 sets and 8 uniques already carry a theme.**
+Measured in the live corpus (re-measured 2026-08-31 while building D4 — the original **31**
+was off by one): **30 sets and 8 uniques already carry a theme, 38 entries total.**
 
 **So a demon is a theme.** Items stay in the items corpus and reference the demon. Strictly better
 than the original framing: no cross-corpus write, the single-root constraint respected rather than
 fought, and a demon's signature gear is naturally a **set** — already theme-required, already
-carrying members and thresholds, with 31 existing instances to pattern-match against.
+carrying members and thresholds, with 30 existing instances to pattern-match against.
 
 ### 2.2a ⛔ Two theme populations, split by prefix — audit S5
 
 **The live corpus already has an authored theme vocabulary**, and a first draft of this spec would
-have broken it. Measured: **5 distinct `themeKey` values across 31 sets** —
+have broken it. Measured: **5 distinct `themeKey` values across 30 sets** —
 `theme.frostbitten-vanguard`, `theme.rusted-legion`, `theme.sunwoven-almanac`,
 `theme.thorned-chassis`, `theme.verdant-graft`. None is a demon. They are deliberate, roughly six
 sets each.
@@ -111,18 +112,42 @@ not optional: an item generated from a name-only theme should be identifiable la
 
 ### 2.4a ⛔ Roster churn — a published theme is retired, never deleted (audit S6)
 
-`DemonSpeciesGenerator` selects the top **24 species by observed HP** and assigns rarity by rank. A
-future capture with better `spawn_stats` coverage — which `almanac-spawn-coverage` exists to produce
-— **can change which species are selected**. A demon can leave the roster.
+**Membership churn is now mild; rarity churn got worse.** The species cap was removed on 2026-08-31
+(`Generate(captured, int? maxSpecies = null)` — see
+[`ssot-power-scale.md`](../power/ssot-power-scale.md) §11.10a), which changes this finding in both
+directions and neither is obvious.
 
-This is the one failure in the feature that corrupts silently rather than failing loudly: items
-themed to a departed demon would resolve to nothing, and no test would notice, because the items are
-still valid items.
+**Membership — better.** Under the old top-24 selection, a better capture could *evict* a demon: a
+newly-seen species out-ranked one already published. With no cap, nothing is evicted by a rival.
+A demon leaves only if the game removes its type or the capture loses its HP row — much rarer.
 
-**The contract:** the theme registry is append-only **and a departed demon's theme is retired, not
-removed** — marked `retired: true`, still resolvable, no longer offered for new generation. Same
-discipline already applied to family and motif ids, extended to the one artifact that crosses a
-corpus boundary.
+**Rarity — worse, and this is the part the cap was hiding.** `RarityForRank(rank, count)` is
+proportional in `count` at **every** tier since 2026-08-31 (`count / 12` legendary, `count / 6` epic,
+`count / 4` rare). As the roster grows, **every demon's rarity is recomputed against a larger pool**,
+so a demon can change tier without moving rank at all:
+
+> rank 20 at `count = 24` → legendary cut `max(2, 2) = 2`, epic `2 + max(2, 4) = 6`,
+> rare `6 + max(3, 6) = 12`; `20 ≥ 12` → **Common**.
+> rank 20 at `count = 904` → legendary cut `max(2, 75) = 75`; `20 < 75` → **Legendary**.
+
+Same demon, same observed HP, same rank — Common becomes **Legendary** purely because capture
+coverage improved. Anything this feature derives from rarity must therefore treat it as **a property
+of a particular roster snapshot**, never as a stable attribute of a demon.
+
+A third source of movement lands here too: `power-estimate` (map §3b, D5) assigns **provisional**
+tiers to species with no observed HP, and those are superseded the moment the species is observed. A
+theme built on a provisional rarity must be identifiable as such for the same reason a `basis = name`
+theme is (§2.4).
+
+**Why this still corrupts silently rather than failing loudly:** items themed to a departed demon
+resolve to nothing, and items themed on a rarity assumption quietly stop matching it. No test
+notices, because the items remain valid items.
+
+**The contract, unchanged and now more load-bearing:** the theme registry is append-only **and a
+departed demon's theme is retired, not removed** — marked `retired: true`, still resolvable, no
+longer offered for new generation. Additionally, **a theme records the `rarity` it was published
+against**, so a later reader can see that the demon's tier has since moved rather than silently
+inheriting the new one.
 
 ### 2.5 Gated by D3, deliberately
 
@@ -179,15 +204,16 @@ one vocabulary registration, following the existing `RegistrySet` pattern exactl
 | The items adapter | **rejects** a `themeKey` in neither population — enforced, not decorative |
 | A legacy `theme.*` key | **validates** — the two populations coexist (§2.2a) |
 | A demon theme id | always `demon.*`-prefixed; a collision with `theme.*` is impossible by construction |
-| Existing themed content (31 sets, 8 uniques) | **still validates** — a test asserts no existing entry breaks |
+| Existing themed content (30 sets, 8 uniques, 38 total) | **still validates** — a test asserts no existing entry breaks |
 | Theme registry | append-only; a re-run with a new demon leaves existing keys untouched |
 | A demon that leaves the roster | its theme is **retired, still resolvable** — never deleted (§2.4a) |
 | An item themed to a retired demon | still validates |
+| The roster grows and a demon's rarity changes tier | the published theme keeps the `rarity` it was published against; the change is **visible, not silently inherited** (§2.4a) |
 | Direction | nothing in `adapters/demons/` reads the items corpus — asserted structurally |
 | Expression rules | present for every published theme; a theme without them fails validation |
 | A brief built from a theme | contains the motifs inline and no citation-shaped text |
 
-The "existing themed content still validates" row is the one that decides whether this ships: 39
+The "existing themed content still validates" row is the one that decides whether this ships: 38
 entries already carry themes that were free text, and turning a free-text field into a closed
 vocabulary is exactly how a migration breaks a corpus quietly.
 
@@ -207,7 +233,7 @@ vocabulary is exactly how a migration breaks a corpus quietly.
 ## 8. Success criteria
 
 1. Items can be authored themed to a demon, validated against the registry.
-2. All 39 existing themed entries still validate.
+2. All 38 existing themed entries still validate.
 3. `blocked` demons publish nothing; `name`-based themes are marked.
 4. Expression rules travel with every theme.
 5. Exactly one file outside `adapters/demons/` changes, and it adds a vocabulary rather than a

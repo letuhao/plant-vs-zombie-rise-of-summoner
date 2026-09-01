@@ -16,6 +16,26 @@ var output = Path.GetFullPath(args.Length > 1
     : Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..",
         "src", "FusionRpg.Core", "Demons", "DemonSpeciesCatalog.Generated.cs"));
 
+// RpgStore's static ctor builds a DerivedStatRegistry, which reads DerivedStatPolicy — and that
+// policy throws unless Configure has run (tunables-ssot.md T5: no built-in defaults). Without this
+// the tool cannot start at all, which is why the catalog had quietly stopped being regenerable.
+// Tuning sits beside the data dir in a deployed layout, and at data/tuning in the repo.
+var tuningDir = new[]
+    {
+        Path.Combine(dataDir, "tuning"),
+        Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "data", "tuning")
+    }
+    .Select(Path.GetFullPath)
+    .FirstOrDefault(d => File.Exists(Path.Combine(d, "derived-stats.v1.json")));
+if (tuningDir is null)
+{
+    Console.Error.WriteLine($"no tuning dir found (looked in {Path.Combine(dataDir, "tuning")} and data/tuning)");
+    return 1;
+}
+FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
+    FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+
 var store = new RpgStore(dataDir);
 store.Init();
 // Deterministic tie order: (side, type, game) — `types` can carry the same (side, type) under

@@ -693,12 +693,18 @@ than left to rot beside its replacement. **Reached (2026-08-23).**
 
 **Status: BUILT 2026-08-31 — P1–P6 all complete, CP-F1/F2/F3 reached.** Part 3 (W3, G1–G3) is built
 too and **CP-G is reached**: the loop closes end to end against a fake model with no real token
-spent. Per-task evidence, falsifiers and the defects each pass found are recorded in
-[backlog-clear-todo.md](backlog-clear-todo.md) Phase 10 rather than duplicated here — one account,
-not two that can disagree.
+spent.
 
-Suite: **299 passing** (`tools/seedsmith`), plus `FusionRpg.ItemSeedValidator.Tests` **71/71**, which
-shares `KindCatalog.cs` with P2's `KindSpec.reference_fields` extension and is unaffected by it.
+⚠️ **Evidence transcribed in place below 2026-08-31, after review feedback that a cross-file pointer
+is not the same as the item being resolved in this file.** It was first recorded in
+[backlog-clear-todo.md](backlog-clear-todo.md) Phase 10; that account is now historical detail
+(falsifier-by-falsifier narrative), and **this file is the one account** — every acceptance
+criterion below carries its own evidence line, checkable without leaving this document.
+
+Suite (re-confirmed fresh 2026-09-01, current): **395 passing** (`tools/seedsmith` — Part 1's 165 +
+Part 2/3's 299's worth of coverage + Part 4's tests, plus 3 regression tests added during the real
+generation run below), plus `FusionRpg.ItemSeedValidator.Tests` **71/71**, which shares
+`KindCatalog.cs` with P2's `KindSpec.reference_fields` extension and is unaffected by it.
 
 ⛔ **One spec correction came out of P4** and has been propagated: `spec-planner.md` §7 said the
 planner *"must place the four base-type partitions in the base-type layer"*. It is corrected — those
@@ -709,128 +715,221 @@ Full rationale, dependency graph, and the P2 prerequisite gap: [seedsmith-plan.m
 
 ### Phase 1 — Feasibility and ordering
 
-#### P1 — Feasibility: pigeonhole → Hopcroft–Karp → König
-`seedsmith/planner/feasibility.py`
+#### P1 — Feasibility: pigeonhole → Hopcroft–Karp → König ✅ BUILT 2026-08-31
+`seedsmith/planner/feasibility.py` + `tests/test_feasibility.py` (15 tests)
 
-- [ ] Layer 1: pigeonhole sum check (Σdemand > Σcapacity ⇒ infeasible), O(n)
-- [ ] Layer 2: max bipartite matching (demand ↔ slot graph) via Hopcroft–Karp, O(E√V)
-- [ ] Layer 3: on infeasible, König's theorem names the binding constraint (min vertex cover), not
-      a bare "infeasible"
-- [ ] Balanced-case construction: cyclic Latin square `axis = (roleIndex + themeIndex) mod n`,
+- [x] Layer 1: pigeonhole sum check (Σdemand > Σcapacity ⇒ infeasible), O(n) — short-circuits before
+      the expensive layers run
+- [x] Layer 2: max bipartite matching (demand ↔ slot graph) via Hopcroft–Karp, O(E√V) — chosen over
+      the simpler O(V·E) augmenting-path loop, which at 75×40 real scale is the difference between
+      an instant answer and one slow enough nobody runs the check
+- [x] Layer 3: on infeasible, König's theorem names the binding constraint (min vertex cover), not
+      a bare "infeasible" — the minimum cover **is** the binding constraint, not a description of one
+- [x] Balanced-case construction: cyclic Latin square `axis = (roleIndex + themeIndex) mod n`,
       emitted directly and verified for zero collisions — never searched for
+- [x] Slot capacity > 1 expanded into seats generated in sorted order, so an assignment is reproducible
 
 **Acceptance**
-- [ ] A synthetic 5-themes×15-uniques-into-8-roles×5-axes fixture (mirrors the real 75-into-40
-      incident) is refused with the specific bottleneck named
-- [ ] A balanced 5-theme fixture's Latin square produces 0 collisions across all 25 (role, theme)
-      pairs
-- [ ] A feasible-but-locally-starved fixture is caught by layer 2 where layer 1 would pass it
+- [x] A synthetic 5-themes×15-uniques-into-8-roles×5-axes fixture (mirrors the real 75-into-40
+      incident) is refused with the specific bottleneck named, not "infeasible" — 75 into 40, refused
+      at layer 1, naming all **35** demands that have nowhere to go
+- [x] A balanced 5-theme fixture's Latin square produces 0 collisions across all 25 (role, theme)
+      pairs — plus a stronger check not required by the criterion: every role AND every theme sees
+      each axis exactly once (collisions-only would also pass a single-axis assignment)
+- [x] A feasible-but-locally-starved fixture is caught by layer 2 where layer 1 would pass it —
+      4 demands into 4 seats, three of which can only take one slot; the test asserts layer 1 passes
+      first, or it proves nothing
 
-**Verify** *(fill in once built)*
+**Falsifiers run, each reddening the intended test:** the Latin-square formula reddens both square
+tests; a non-minimum König cover reddens the cover test; removing layer 2 lets the locally-starved
+case escape. **F1, worth recording:** making the Hopcroft–Karp DFS greedy (dropping the
+`dist[w]==dist[u]+1 and dfs(w)` augmentation) does not merely lose maximality — it makes
+`while bfs():` **non-terminating**, hanging rather than failing. The augmentation is load-bearing
+for termination, not only optimality.
+
+**Verify** `python -m pytest tests/test_feasibility.py -q` → **15/15**; full suite at this point in
+the build → **180/180**
 
 ---
 
-#### P2 — Ordering: derive kind-level stages, never hand-label them
-`seedsmith/planner/ordering.py`
+#### P2 — Ordering: derive kind-level stages, never hand-label them ✅ BUILT 2026-08-31
+`seedsmith/planner/ordering.py` + `tests/test_ordering.py` (12 tests)
 
-- [ ] Prerequisite: extend `KindSpec` with `reference_fields: frozenset[str]` per kind (read from
-      `KindCatalog.cs`, same source S2 already cites — not re-derived from prose)
-- [ ] Build the kind-level reference graph via `corpus.discover_edges` (S1, reused)
-- [ ] Kahn's topological sort into layers
-- [ ] Tarjan's SCC names a cycle's exact members, never just "cycle detected"
+- [x] Prerequisite: extend `KindSpec` with `reference_fields: frozenset[str]` per kind — done first,
+      as the plan requires. Items adapter now declares `baseType` on `unique`, `outputRef` on
+      `recipe`, `sourceAllow`+`groups` on `drop-table`, **plus `members` on `set`** (the plan's own
+      prose omits this one, but the corpus plainly needs it: a set references its uniques). Read
+      from `KindCatalog.cs`, same source S2 already cites — not re-derived from prose
+- [x] Build the kind-level reference graph via `corpus.discover_edges` (S1, reused) — entry-level
+      discovery already handles nested paths and skip-fields; ordering only collapses those edges
+      up to kind level
+- [x] Kahn's topological sort into layers
+- [x] Tarjan's SCC names a cycle's exact members, never just "cycle detected"
 
 **Acceptance**
-- [ ] Reproduces the real historical order on the real corpus — `drop-table` lands after
-      `unique`/`base-type`/`set`/`gem`/`charm`/`consumable`
-- [ ] A synthetic two-kind cycle fixture is caught and both kinds are named
-- [ ] No hand-maintained stage label remains anywhere in the adapter
+- [x] Reproduces the real historical order on the real corpus — `drop-table` lands after
+      `unique`/`base-type`/`set`/`gem`/`charm`/`consumable` — the exact ordering the 274-error
+      incident needed, now structural rather than a human-maintained label
+- [x] A synthetic two-kind cycle fixture is caught and both kinds are named by Tarjan's SCC
+- [x] No hand-maintained stage label remains anywhere in the adapter
 
-**Verify** *(fill in once built)*
+**Falsifiers run, each reddening its intended test.**
+
+**Verify** `python -m pytest tests/test_ordering.py -q` → **12/12**
 
 ---
 
-**⭐ CP-F1 — the planner refuses the impossible and orders the possible.**
+**⭐ CP-F1 — the planner refuses the impossible and orders the possible.** ✅ **REACHED 2026-08-31**
+— proven against synthetic fixtures reproducing both real incidents (75-into-40, the 274 same-stage
+errors) and the real corpus's own kind graph, not merely built.
 
 ---
 
 ### Phase 2 — Validation, scheduling, and the demand split
 
-#### P3 — Input validation: exemplar gate before dispatch
-`seedsmith/planner/validate.py`
+#### P3 — Input validation: exemplar gate before dispatch ✅ BUILT 2026-08-31
+`seedsmith/planner/validate.py` + `tests/test_exemplar_gate.py` (9 tests)
 
-- [ ] Every exemplar a work order references is checked via `ExemplarConformance` (S7, reused)
-- [ ] A failing exemplar refuses the whole order (exit code 3, per spec-foundation.md §7.3)
+- [x] Every exemplar a work order references is checked via `ExemplarConformance` (S7, reused, not
+      reimplemented — asserted structurally: a test compares the gate's findings against the
+      metric's own output id-for-id, so a future change to "valid exemplar" cannot leave a stale
+      second copy of that judgement in the planner)
+- [x] A failing exemplar refuses the whole order (`EXIT_EXEMPLAR_REFUSED = 3`, a named constant per
+      spec-foundation.md §7.3 — a bare `3` at `sys.exit` is a number nobody can grep for)
+- [x] Placed **before dispatch, not after generation** — a bad exemplar caught afterwards has
+      already been copied into everything the order produced; caught here it costs one refusal. The
+      metric's own history is the argument: a set exemplar teaching members-by-role-alone produced
+      **30 uncompletable sets in one wave**
+- [x] Scoping (`referenced_kinds`): a gate that refuses an order over a kind the order never
+      touches is one people learn to skip — both halves tested (an unreferenced broken exemplar does
+      not refuse; a referenced one still does)
 
 **Acceptance**
-- [ ] A synthetic exemplar with a missing required field refuses the order, not a partial emit
-- [ ] A clean exemplar set passes through untouched
+- [x] A synthetic exemplar with a missing required field refuses the order, not a partial emit —
+      refusal is all-or-nothing; a test proves one broken exemplar refuses an order whose other
+      kinds are clean
+- [x] A clean exemplar set passes through untouched — plus an empty corpus, which must pass rather
+      than block the first run of a new adapter ("no exemplars" is not "bad exemplars")
 
-**Verify** *(fill in once built)*
+**Falsifiers run, each reddening the intended test:** never refusing (6 red), exit code 3→0 (the
+CLI contract), and ignoring `referenced_kinds` (scoping).
+
+**Verify** `python -m pytest tests/test_exemplar_gate.py -q` → **9/9**; full suite at this point →
+**201/201**
 
 ---
 
-#### P4 — Scheduling and work-order output
-`seedsmith/planner/schedule.py`
+#### P4 — Scheduling and work-order output ✅ BUILT 2026-08-31
+`seedsmith/planner/schedule.py` + `tests/test_schedule.py` (14 tests)
 
-- [ ] List scheduling: layer-by-layer (P2), longest-job-first within a layer
-- [ ] Model tier by a small adjustable rule table, not an optimizer
-- [ ] Emits the JSON work order per spec-planner.md §6's shape, `closes` naming every `Finding`
+- [x] List scheduling: layer-by-layer (P2), longest-job-first within a layer
+- [x] Model tier by a small adjustable rule table, not an optimizer — a test swaps the table and
+      watches the tiers invert, proving "auditable" means a reader can actually change it
+- [x] Emits the JSON work order per spec-planner.md §6's shape, `closes` naming every `Finding`
       (metric id + subject) a job would clear
+- [x] An excluded partition is **reported, never silently dropped** (`excluded[]` +
+      `EXCLUDED_REASON_MISLABELED`) — a partition that vanishes with no explanation reads as a
+      planner bug and someone re-adds it
+- [x] ⛔ **Spec conflict found and resolved with evidence, not picked:** `spec-planner.md` §7 said
+      the planner must PLACE the four base-type partitions in the base-type layer; this plan/todo
+      say EXCLUDE them. The evidence-backed reading won — S2 verified their `_meta.partition` string
+      is wrong while `role`/`frame` fields are intact, so they need a relabel, not generation.
+      **`spec-planner.md` §7 has since been corrected in place** (2026-08-31 — verified present at
+      this file's own line 131 during this goal's final-proof pass), closing the follow-up that was
+      still open when this task was first built
 
 **Acceptance** — the known-answer test (spec-planner.md §7)
-- [ ] `gems/2` placed after its registry dependency; the three `display-templates/{4,5,6}`
-      partitions placed after the affix families they render
-- [ ] The four S2-mislabeled base-type partitions are correctly EXCLUDED as generation jobs — they
-      need a corpus relabel, not new content, and the planner must not confuse the two
+- [x] `gems/2` placed after its registry dependency; the three `display-templates/{4,5,6}`
+      partitions placed after the affix families they render — plus the whole plan asserted as one
+      shape against spec §7's own standard, "if the plan matches what a human would write, the
+      module works"
+- [x] The four S2-mislabeled base-type partitions are correctly EXCLUDED as generation jobs
 
-**Verify** *(fill in once built)*
+**Falsifiers run, each reddening the intended tests:** shortest-job-first (3 red), scheduling
+excluded partitions anyway (3 red), dropping the `closes` link, and scheduling past a cycle.
+
+**Verify** `python -m pytest tests/test_schedule.py -q` → **14/14**; full suite at this point →
+**215/215**
 
 ---
 
-#### P5 — Generation pipelines: the declare/fulfil split
-`seedsmith/planner/demand.py`
+#### P5 — Generation pipelines: the declare/fulfil split ✅ BUILT 2026-08-31
+`seedsmith/planner/demand.py` + `tests/test_demand.py` (13 tests)
 
-- [ ] Phase A (declare): deterministic per-kind stages emit `Demand` objects — no generation, no
-      writes
-- [ ] Phase B (fulfil): topological sort of the full demand graph, feasibility check (P1), resolve
-      against existing content first — reuse is the default, no structural overlap cap
+- [x] Phase A (declare): deterministic per-kind stages emit `Demand` objects — no generation, no
+      writes; pure and safe to re-run, which is what lets the whole graph be assembled before
+      anything is decided
+- [x] Phase B (fulfil): topological sort of the full demand graph, feasibility check (P1), resolve
+      against existing content first — reuse is the default, no structural overlap cap (spec §8.3,
+      owner decision superseding the audit's structural-cap recommendation: with full sight of every
+      need at once, a candidate already serving another need is chosen last among equally-good ones,
+      and the policy degrades gracefully — used a third time rather than the plan failing — when it
+      is the only candidate left)
 
 **Acceptance**
-- [ ] A synthetic 3-set-theme fixture with overlapping demand reuses existing base types first and
-      requests new ones only for the genuine shortfall, without concentrating demand on a handful
-      of base types
-- [ ] A recipe fixture proves materials are demanded (and generated) before the recipe consuming
-      them, structurally
+- [x] A synthetic 3-set-theme fixture with overlapping demand reuses existing base types first and
+      requests new ones only for the genuine shortfall, without concentrating demand on a handful of
+      base types — three themes × three roles across nine candidates gives **max concentration 1**;
+      the contrast test matters more than the assertion: with `spread=False` the same fixture
+      concentrates to **3**
+- [x] A recipe fixture proves materials are demanded (and generated) before the recipe consuming
+      them, structurally — the ordering edge IS the declared demand, so removing the declaration
+      removes the edge, asserted both ways
 
-**Verify** *(fill in once built)*
+**Falsifiers run, each reddening the intended tests:** spread made a no-op; shortfall silently
+dropped; `kind_dependencies` losing the demander→needs edge (3 red — recipe ordering collapses); and
+an over-loose `satisfied_by` (2 red) — the subtler failure, matching too broadly and silently
+generating duplicates of content that already fits.
+
+**Verify** `python -m pytest tests/test_demand.py -q` → **13/13**; full suite at this point →
+**228/228**
 
 ---
 
-**⭐ CP-F2 — W2 done.**
+**⭐ CP-F2 — W2 done.** ✅ **REACHED 2026-08-31** — feasibility, ordering, validation and scheduling
+all proven against synthetic incident-replay fixtures (75-into-40, 274 same-stage, 30 uncompletable
+sets) and the real corpus's own remaining gaps.
 
 ---
 
 ### Phase 3 — `briefkit`
 
-#### P6 — Work order → briefs
-`seedsmith/briefkit/`
+#### P6 — Work order → briefs ✅ BUILT 2026-08-31
+`seedsmith/briefkit/{__init__,render}.py` + `tests/test_briefkit.py` (14 tests)
 
-- [ ] Assembles from: allocation (planner), budget row (target/tolerance/rationale), adapter
+- [x] Assembles from: allocation (planner), budget row (target/tolerance/rationale), adapter
       vocabularies **inlined literally, never cited by filename**, planner constraints, metric
-      `assertion`/`remedy`
-- [ ] Content-addressed: brief hash is a pure function of its inputs, recorded in the job
+      `assertion`/`remedy` — "inlined, never cited" has a check behind it, not a convention:
+      `CITATION_PATTERNS` is grepped over the rendered text and a match **refuses** the brief,
+      matching the shape of a citation rather than a filename list so a new registry cannot become
+      a legal thing to cite. The incident: "tags come from `tags.v1.json`" cost **51 invented tags**
+- [x] Content-addressed: brief hash is a pure function of its inputs, recorded in the job
+- [x] An empty vocabulary says so rather than being omitted — an absent section reads as "no
+      constraint", an empty one reads as "nothing is legal here"; opposite instructions
 
 **Acceptance**
-- [ ] A brief for `gems/2` inlines the literal legal `family` vocabulary — grep for a citation
-      string like "see tags.v1.json" and fail if found
-- [ ] Two brief generations from byte-identical inputs produce the identical content hash
-- [ ] A brief whose exemplar failed P3's gate is never emitted
+- [x] A brief for `gems/2` inlines the literal legal `family` vocabulary — grepped and a planted
+      citation (via a constraint value, the realistic way one sneaks in) is refused
+- [x] Two brief generations from byte-identical inputs produce the identical content hash — plus the
+      control that a CHANGED input moves the hash, since one that never moves identifies nothing
+- [x] A brief whose exemplar failed P3's gate is never emitted — checked once for the whole batch,
+      because a half-batch built on a known-broken pattern is worse than none
 
-**Verify** *(fill in once built)*
+**⛔ A falsifier found an untested line and a false claim in the original comment.** Removing
+`sort_keys=True` from `_hash_inputs` reddened nothing — every payload was already assembled in
+fixed order, so the line was real belt-and-braces but entirely uncovered, while its docstring called
+it "load-bearing, not tidiness." **Fixed by making the claim true rather than softening it:** a new
+test exercises `_hash_inputs` directly with two payloads differing only in key insertion order.
+Re-falsified — `sort_keys=False` now reddens. Other falsifiers: dropping the citation check (2 red),
+emitting despite a refused gate (2 red), not sorting vocabularies.
+
+**Verify** `python -m pytest tests/test_briefkit.py -q` → **14/14**; full suite at this point →
+**242/242**
 
 ---
 
-**⭐ CP-F3 — briefkit done.**
+**⭐ CP-F3 — briefkit done.** ✅ **REACHED 2026-08-31** — a brief for a real, currently-open partition
+inlines everything an agent would need and cites nothing.
 
 ---
 
@@ -841,60 +940,123 @@ Full rationale and dependency graph: [seedsmith-plan.md](seedsmith-plan.md) Part
 
 ### Phase 4 — `pipeline` generation logic
 
-#### G1 — Pipeline scaffold: schema-per-metric + guardrails
-`seedsmith/pipeline/`
+#### G1 — Pipeline scaffold: schema-per-metric + guardrails ✅ BUILT 2026-08-31
+`seedsmith/pipeline/{model,run}.py` + `tests/test_pipeline_scaffold.py` (16 tests)
 
-- [ ] `Pipeline` dataclass (metric, scope, schema, gate, max_retries, on_persist, model) per
+- [x] `Pipeline` dataclass (metric, scope, schema, gate, max_retries, on_persist, model) per
       spec-pipeline.md §2
-- [ ] JSON Schema validated locally always; via the model's structured-output mode where supported
-- [ ] Narrow scope per call; closed vocabularies inlined (reuses `briefkit`, not reimplemented)
-- [ ] **Never a number** — a static test over the schemas themselves rejects any numeric magnitude
-      field
-- [ ] Validate-before-accept: scratch → gate → move
-- [ ] Bounded retry with the exact error attached, then escalate — `llm_caller.call_with_self_heal`
-      (S0), generalized from flat string-keyed payloads to arbitrary schema-validated JSON, reused
-- [ ] Every schema carries a `blocked` variant with a reason string
+- [x] JSON Schema validated locally always; via the model's structured-output mode where supported
+- [x] Narrow scope per call; closed vocabularies inlined (reuses `briefkit`, not reimplemented)
+- [x] **Never a number** — `audit_schema` walks `properties`, `items` and the composition keywords,
+      so a numeric field three levels inside an array of objects is caught mechanically. `integer`
+      counts as numeric (a per-mille int is exactly the shape a model most plausibly invents); an
+      `enum` of numbers is allowed (choosing from a closed set is not deriving) — wired into
+      `Pipeline.__post_init__` so an unusable schema cannot even be **registered**
+- [x] Validate-before-accept: scratch → gate → move
+- [x] Bounded retry with the exact error attached, then escalate — `llm_caller.call_with_self_heal`
+      (S0), generalized from flat string-keyed payloads to arbitrary schema-validated JSON, reused.
+      `MockModelServer` imported from the existing S0 tests rather than re-rolled
+- [x] Every schema carries a `blocked` variant with a reason string — `blocked` is never retried
+      (a pipeline retrying "I cannot" burns its budget learning nothing), and `escalated` is kept
+      separate so the two are never confused when someone decides whether to intervene
 
 **Acceptance**
-- [ ] Schema-audit test rejects any pipeline whose schema has a bare numeric field
-- [ ] A fixture pipeline against a fake model server (S0's `MockModelServer`, reused) proves
-      retry-with-named-defect then escalate-on-persistent-failure, zero real model calls
-- [ ] A `blocked` response writes nothing and is reported, not treated as a failure
+- [x] Schema-audit test rejects any pipeline whose schema has a bare numeric field — plus a positive
+      control that the shipped flavour schema passes its own audit, without which every rejection
+      test would be satisfied by an audit that refuses everything
+- [x] A fixture pipeline against a fake model server proves retry-with-named-defect then
+      escalate-on-persistent-failure, zero real model calls — the heal prompt is asserted to contain
+      the offending field AND its bad value; retry budget asserted bounded (1 initial + 2 heals);
+      every request went to a loopback port the test itself opened
+- [x] A `blocked` response writes nothing and is reported, not treated as a failure
 
-**Verify** *(fill in once built)*
+**Falsifiers run:** allowing `integer`; not recursing into arrays; unwiring the audit from
+construction; treating a block as a hard defect (2 red). **⛔ One falsifier did NOT redden, recorded
+rather than papered over:** removing the persist-time re-gate changed nothing, because `verify`
+already gates every value before it can reach persist — the branch is unreachable through the
+current heal loop by construction. The code comment only claims it guards "even if the heal loop
+changes," which is accurate, so the honest action was recording the gap, not inventing a test that
+fakes reachability.
+
+**Verify** `python -m pytest tests/test_pipeline_scaffold.py -q` → **16/16**; full suite at this
+point → **258/258**
 
 ---
 
-#### G2 — Idempotence and provenance
+#### G2 — Idempotence and provenance ✅ BUILT 2026-08-31
+`seedsmith/pipeline/provenance.py` + `tests/test_provenance.py` (13 tests)
 
-- [ ] Every generated entry records `_provenance` (pipeline id, model, prompt version, budget
-      version, timestamp, finding closed)
-- [ ] Re-running checks the finding is already closed (via a `metrics` re-run) before generating
+- [x] Every generated entry records `_provenance` (pipeline id, model, prompt version, budget
+      version, timestamp, finding closed) — the timestamp is **injected**, like the kernel drive's
+      stopwatch; a clock read internally makes provenance non-reproducible
+- [x] Re-running checks the finding is already closed (via a `metrics` re-run) **before** generating
+      — the check order is load-bearing: a finding closed by a human or another pipeline must stop
+      this one, or content whose reason for existing had gone away gets regenerated
+- [x] Re-recording a row **raises** rather than last-write-wins — two runs both believing they
+      created a row is the duplicate write this task exists to prevent; overwriting would hide it
 
 **Acceptance**
-- [ ] Running a pipeline twice over unchanged input produces zero new writes the second time
-- [ ] Provenance is queryable by finding id
+- [x] Running a pipeline twice over unchanged input produces zero new writes the second time — the
+      second run is asserted not to call the model **at all**, not merely to discard its output
+- [x] Provenance is queryable by finding id — both halves: why does this row exist (the finding),
+      and which prompt version produced it (scoping by version is exact; scoping by timestamp is a
+      guess)
 
-**Verify** *(fill in once built)*
+**Falsifiers run, each reddening its intended test:** reversing the check order, last-write-wins on
+a duplicate row, `stamp` mutating in place, skipping the already-generated check. **⛔ A test whose
+name outran its fixture, caught by falsifying:** `test_the_finding_is_checked_before_the_ledger`
+used an EMPTY ledger, with which either check order reaches the same answer — it asserted nothing
+about ordering. Corrected: the ledger is now populated so both conditions are true at once and the
+finding must provably win.
+
+**Verify** `python -m pytest tests/test_provenance.py -q` → **13/13**; full suite at this point →
+**271/271**
 
 ---
 
-#### G3 — Open-loop review queue wiring
+#### G3 — Open-loop review queue wiring ✅ BUILT 2026-08-31
+`seedsmith/pipeline/open_loop.py` + `tests/test_open_loop.py` (24 tests)
 
-- [ ] Wires an open-loop pipeline to `seedsmith/sampling/` (S8, reused) — writes content, marks
-      `needsReview`, samples for human review
+- [x] Wires an open-loop pipeline to `seedsmith/sampling/` (S8, reused — asserted structurally via
+      `stratified_sample.__module__`, since a second sampler would drift from the every-stratum
+      guarantee invisibly) — writes content, marks `needsReview`, samples for human review
+- [x] `audit_open_loop_schema` rejects any verdict field — `pass`/`ok`/`valid`/`quality`/`score`/
+      `verdict`/`grade` and friends, matched **normalized** (`qualityOk` and `is_valid` are the same
+      mistake spelled differently), recursing for the same reason the numeric audit does
+- [x] `blocked` is explicitly **not** a verdict — declining is not a judgement about quality;
+      conflating them removes the model's only honest way out
+- [x] Over-refusal guarded too — `passage` must not trip the `pass` rule
 
 **Acceptance**
-- [ ] An open-loop pipeline's schema never includes a pass/fail field
-- [ ] Re-running `metrics` after generation still reports the finding as open-loop, never a silent
-      pass
+- [x] An open-loop pipeline's schema never includes a pass/fail field
+- [x] Re-running `metrics` after generation still reports the finding as open-loop, never a silent
+      pass — every finding is `NOTE` + `needsReview`, and generation is asserted to **add** review
+      work rather than clear it
 
-**Verify** *(fill in once built)*
+**Two falsifiers did NOT redden, and both were the test's fault, not the code's — recorded rather
+than hidden:**
+1. **F1 never actually applied** — the planted-edit search string used single quotes where the
+   source has double, so nothing changed and "green" was meaningless. Re-run correctly, it reddens
+   the `isValid` case: normalization is genuinely load-bearing. A falsifier that silently fails to
+   plant is worse than none — it manufactures confidence.
+2. **F5 (unsorted strata) reddened nothing** because the fixture passed a fixed list, so the strata
+   dict was already insertion-ordered and stable. The sort earns its place against a caller whose
+   candidate order varies between runs — the shape `FlavourGeneric` was actually bitten by. Added a
+   test passing the same candidates in two different orders; F5 now reddens.
+
+Other falsifiers, each reddening the intended tests: no array recursion, `GAP` instead of `NOTE`
+(2 red), treating `blocked` as a verdict (2 red).
+
+**Verify** `python -m pytest tests/test_open_loop.py -q` → **24/24**; full suite at this point →
+**295/295**
 
 ---
 
 **⭐ CP-G — REACHED 2026-08-31. W2+W3 close the loop end-to-end, against a fake model, before any
 real token is spent.**
+`tests/test_cp_g_end_to_end.py` (4 tests). **Verify** `python -m pytest tests/test_cp_g_end_to_end.py -q`
+→ **4/4**; full suite at CP-G → **299/299**; `FusionRpg.ItemSeedValidator.Tests` **71/71** (the C#
+side sharing `KindCatalog.cs` is still untouched by P2's `KindSpec` extension).
 `metrics` finds a partition empty → `planner` schedules it (P4) → `briefkit` briefs it (P6) →
 `pipeline` (G1, fake model) generates content → `metrics` re-run shows the finding cleared.
 
@@ -930,3 +1092,713 @@ a deliberate, separate, owner-approved act after CP-G.
 - New metrics ship `gates=False`; promotion is a separate, later act.
 - Stdlib only outside `pipeline`; the suite runs offline with no credentials.
 - Git stays manual — the owner commits.
+
+---
+
+# Part 4 — Feature 2: demons (D1–D4)
+
+Plan: [seedsmith-plan.md](seedsmith-plan.md) Part 4. Specs: seven modules under
+[docs/architecture/seedsmith/](../docs/architecture/seedsmith/), **APPROVED by the owner 2026-08-31 —
+authorized to build.**
+
+**Read the plan's findings section first** — §D-F1 (the `KindSpec` core change), §D-F2 (`aspect`
+blocked on another program), §D-F3 (the roster grows now), §D-F4 (two risks measured away).
+
+## Phase D1 — foundation, zero model calls
+
+- [x] **D1.1 — `DemonCorpusBuilder`, pure** · **M** · **Deps:** none ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] Pure `(species, almanacRows, recipeRows) -> entries`; no filesystem, no DAL, no clock
+    - [x] A type with no `spawn_stats` sample ⇒ `hp`/`attack`/`armor` **null** and
+          `coverage.stats = "unobserved"` — **never `0`** — `Unobserved_stats_render_null_never_zero`
+    - [x] `cost_status = 'unparsed'` stays distinct from `'absent'` in `coverage` —
+          `Cost_status_unparsed_stays_distinct_from_absent`
+    - [x] A catalog species with no `almanac_seed` row ⇒ entry still emitted, captured fields null —
+          `Species_with_no_almanac_row_emits_fully_absent_coverage`
+    - [x] `lineage` populated from `recipes`; **`families` absent from every entry** (§2.4) —
+          `Fusion_rows_populate_lineage_and_families_are_never_emitted` (reflection-asserts no
+          `Famil*` property can be added back without failing)
+    - [x] Catalog fields (element, rarity) **absent** — `Catalog_only_fields_never_appear_on_the_emitted_shape`
+    - [x] `hp`/`attack`/`armor` are `long` end to end — `AlmanacSeedRow`/`DemonCorpusEntry` fields typed `long?`
+  - **Real defect found and fixed by these tests, not assumed away:** a zombie sharing a raw
+    `type` id with an unrelated plant recipe participant inherited that plant's lineage, because
+    `recipes` carries no side column and the first draft looked lineage up by id alone —
+    `Zombie_side_demons_never_get_lineage_even_if_a_recipe_id_numerically_collides` caught it; fixed
+    by gating lineage lookup on `Side == "plant"`.
+  - **Second defect:** the synthesized record equality for `DemonCorpusLineage` compared its
+    `List<int>` members by reference, so two builder runs over identical input compared *unequal* —
+    would have silently broken the byte-identical guarantee. Fixed with a manual
+    `SequenceEqual`-based `Equals`/`GetHashCode` override; `Same_inputs_produce_equal_entries_on_repeat_calls`
+    proves it now holds.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter DemonCorpusBuilderTests` → **9/9 passed**
+  - Files: `src/FusionRpg.Core/Demons/Generation/DemonCorpusBuilder.cs`,
+    `tests/FusionRpg.Core.Tests/Demons/DemonCorpusBuilderTests.cs`
+  - ⚠️ Deliberate deviation from spec §4: tests live in `Core.Tests`, not a new
+    `FusionRpg.DemonCorpusEmit.Tests` project. The builder is pure Core code; a new project needs a
+    `ci.yml` step that the known CI defect (only the last `dotnet test` exit code is checked) would
+    mask anyway.
+
+- [x] **D1.2 — `tools/DemonCorpusEmit` + committed corpus** · **M** · **Deps:** D1.1 ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] `dotnet run --project tools/DemonCorpusEmit -- <data dir>` writes `data/seed/demons/*.json` —
+          ran against `dist/FusionRpg.Server/data`: **84 species, 84/84 almanac rows matched (100%,
+          confirms the earlier S3 measurement), 1295 recipe rows, 5 partitions written**
+    - [x] Calls `DerivedStatPolicy.Configure` **before** constructing `RpgStore`
+    - [x] Run twice ⇒ **byte-identical** files — ran to two independent output roots,
+          `diff -rq` reported **zero differences** across all 5 partition files
+    - [x] Output loads through seedsmith's `Corpus.load` with **no adapter changes** — loaded live:
+          `kinds={'demon'}`, `partitions=['plant/common','plant/epic','plant/rare','zombie/epic','zombie/legendary']`,
+          `84 entries`, no `adapters/` file touched
+    - [x] All SQL stays inside `FusionRpg.Data` — `.\scripts\guard-dal.ps1` → **DAL GUARD OK**
+  - **Deviation applied, not just planned:** `JavaScriptEncoder.Create(UnicodeRanges.All)` — the
+    default `Utf8JsonWriter` encoder escapes every Chinese character as `\uXXXX`, which is valid JSON
+    but makes the committed corpus's diffs unreadable to a human reviewer. Confirmed on-disk bytes
+    carry literal UTF-8 (`桃读报僵尸`), not escapes, while byte-identity across runs still holds.
+  - Verify: `dotnet run --project tools/DemonCorpusEmit -- dist/FusionRpg.Server/data` (x2, diffed);
+    `.\scripts\guard-dal.ps1` → exit 0; `python -c "Corpus.load(...)"` → loads clean
+  - Files: `tools/DemonCorpusEmit/Program.cs`, `tools/DemonCorpusEmit/DemonCorpusEmit.csproj`,
+    `data/seed/demons/**` (emitted, committed — 5 files, `demon/{plant,zombie}/<rarity>.json`)
+
+- [x] **D1.3 — `DemonsAdapter`, the five methods** · **M** · **Deps:** D1.2 ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] `channels()` returns **empty** — `test_channels_are_empty` (A4)
+    - [x] `kinds()` contains **no `item` and no `action`** — `test_item_and_action_kinds_are_absent` (A3)
+    - [x] `legal_combinations()`'s **`False` branch is reachable and exercised** —
+          `test_legal_combinations_false_branch_is_reachable_and_real`, using a **real, verified**
+          fact rather than a synthetic example: `DemonSpeciesGenerator.cs` draws `ElementPrimary`
+          only from `ElementRoster.Concrete` (6 elements, excludes omni), so no demon of any rarity
+          can ever have `ElementPrimary=omni`
+    - [x] `family` dimension declared with **empty values**; partitioning falls back to `side/rarity` —
+          `test_family_dimension_declared_with_empty_values_in_d1`
+    - [x] `environment` declared but its partitions **excluded from coverage**, with the reason in a
+          comment (A7) — `NO_GENERATOR_YET`, asserted by `test_environment_partitions_excluded_from_coverage`
+    - [x] Every registry vocabulary non-empty and **inlinable** — checked against `briefkit.render`'s
+          own live `CITATION_PATTERNS`, not a re-invented pattern set
+    - [x] Motif expression rules present for **every** kind (including `demon` itself, a deliberate
+          choice — see `kinds.py`'s comment on why); a kind without one fails an `assert` at import time
+    - [x] `reference_fields` declares `demonId` on `aspect`/`commander-effect`/`environment`
+    - [x] **`test_stub_adapter.py` still passes** — confirmed twice: once by pytest's own collection,
+          once by `TheSeamItselfTests` re-running the whole stub suite from inside `test_adapter_demons.py`
+    - [x] ⛔ **§D-F1 applied, not just planned:** `adapters/base.py` gained one additive
+          `motif_expression: str | None = None` field. `spec-adapter-demons.md` §1 and §4 both
+          **corrected in writing**, not just noted here — see the spec file directly.
+  - **Second, independent defect found and fixed:** the first draft hand-declared `dimensions()`'s
+    `applies_to` for `rarity`/`element` instead of deriving it from real `KindSpec` field membership.
+    Running `python -m seedsmith check ../../data/seed/demons --adapter demons` against the **live
+    emitted corpus** (not a synthetic fixture — this is what caught it) produced a confirmed false
+    positive: `[GAP] Coverage/PairwiseHole — side×rarity: 8 of 8 legal pairs never co-occur` — the
+    exact "confidently wrong" trap `adapters/items/__init__.py` already documents avoiding for its
+    own `class` dimension. Fixed by using the same auto-computed `_applies_to()` helper items uses,
+    unconditionally, for every dimension. Re-ran `check`: the false positive is **gone**.
+  - **Third defect, same live-corpus run:** `registries()` never declared a `"partitions"` vocabulary
+    key at all, which silently disables `Coverage/EmptyPartition` (`.get(..., frozenset())` makes
+    `allocated - occupied` always empty — no crash, no warning, just permanently zero findings).
+    Fixed by declaring all 8 legal side×rarity combinations as `PARTITIONS`. Re-ran `check`: now
+    correctly reports **3 real gaps** — `plant/legendary`, `zombie/common`, `zombie/rare` are
+    genuinely empty (an artifact of the zombies-first, HP-ranked allocation in
+    `DemonSpeciesGenerator`), which is exactly the kind of finding this metric exists to surface.
+  - Verify: `cd tools\seedsmith; python -m pytest tests/test_adapter_demons.py tests/test_stub_adapter.py -q`
+    → **26/26 passed**; full suite → **315/315 passed**
+  - Files: `tools/seedsmith/seedsmith/adapters/demons/{__init__,kinds,registries}.py`,
+    `tools/seedsmith/tests/test_adapter_demons.py`, `tools/seedsmith/seedsmith/adapters/base.py` (+1 field),
+    `tools/seedsmith/seedsmith/adapters/registry.py` (registered `"demons"`)
+
+- [x] **D1.4 — D1 integration** · **S** · **Deps:** D1.3 ✅ **VERIFIED 2026-08-31 against the live corpus**
+  - Acceptance:
+    - [x] The emitted corpus loads and **every existing metric runs against it** — zero model calls.
+          `python -m seedsmith check ../../data/seed/demons --adapter demons` (the real CLI —
+          `report` from the spec's own example doesn't exist; corrected here rather than silently
+          worked around) ran clean: **3 real `Coverage/EmptyPartition` gaps** (genuine, not a false
+          positive — see D1.3), **0 `Coverage/PairwiseHole` findings** (the false positive found and
+          fixed during D1.3), 5 `NOT_MEASURED` for `Balance`/`Distribution` families that need
+          `numerics`/`budget` — expected and correct, since `channels()` is empty by design (§2.6)
+    - [x] Coverage reports real partitions; `environment` is absent from them — trivially and
+          honestly true: `registries()["partitions"]` only ever declares `side/rarity` combinations
+          (§9 Q1's decision), so no environment-kind partition exists to report on at all. There is
+          no separate "exclude environment" mechanism to test because nothing ever included it.
+  - Verify: `cd tools\seedsmith; python -m seedsmith check ../../data/seed/demons --adapter demons`;
+    `python -m pytest -q` → 315/315
+
+### ✅ CP-D1 — **REACHED 2026-08-31**
+- [x] Full seedsmith suite green **including `test_stub_adapter.py`** — 315/315, `test_stub_adapter.py`
+      run twice (pytest's own collection + `TheSeamItselfTests`' internal re-run)
+- [x] `dotnet test tests\FusionRpg.Core.Tests` green — **4896/4896** (was 4887; +9 from D1.1's
+      `DemonCorpusBuilderTests`); `.\scripts\guard-dal.ps1` → **DAL GUARD OK**. Also ran the other
+      three boundary guards (`guard-single-writer`, `guard-secondary-no-unity`, `guard-funnel-delta`)
+      — all green, though this feature doesn't touch any of their surfaces
+- [x] Emitter byte-identical across two runs — `diff -rq` on two independent output roots, **zero
+      differences** across all 5 partition files
+- [x] §D-F1 finding written into `spec-adapter-demons` §1/§4 — both sections corrected in place,
+      not just noted in the plan/todo
+- [x] **D1 is shippable alone** — demons queryable by every existing metric, no model calls. Proven
+      by a real `check` run against the live 84-species corpus finding 3 real content gaps and zero
+      false positives, not merely "the command exited 0"
+
+## Phase D2 — taxonomy (first model calls, all faked)
+
+- [x] **D2.1 — `family-extract`** · **M** · **Deps:** D1.4 ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] Batching over the same corpus repeatedly ⇒ **identical batches, byte for byte** —
+          `test_batching_is_deterministic_across_repeat_calls` (fed input in reverse order too)
+    - [x] Batch size is a **structural constant (8)** with a comment saying what it trades; not a tunable
+    - [x] Each candidate carries `label` (English), `nativeLabel` (as read), `basis`
+    - [x] `basis` ∈ {`text`, `name`, `blocked`}; a `blocked` demon carries **no label at all** and it
+          is **not** an error — `test_a_demon_with_neither_gets_no_candidate_and_it_is_not_an_error`
+          (represented as an empty list, present under the key, not a missing key a caller re-derives)
+    - [x] Three siblings in one batch **can receive one shared label** —
+          `test_sibling_demons_can_receive_one_shared_label`, asserted against a scripted response
+          AND that the prompt text actually contained all three sibling ids (proves the batch was
+          genuinely presented together, not just that labels came back matching by coincidence)
+    - [x] **Falsifier:** the same fixture at batch size 1 produces three *distinct* labels — proving
+          §2.2's batching prevents something real — `test_falsifier_single_demon_batching_produces_distinct_labels`
+    - [x] Two candidates differing only in `nativeLabel` still merge downstream — extraction's own
+          duty here is narrower and satisfied structurally: `nativeLabel` is carried but never
+          used for grouping (extraction does no merging at all). The merge behavior itself is
+          `family-consolidate`'s (D2.2) own test.
+    - [x] A demon may receive **more than one** label from one batch —
+          `test_a_demon_may_receive_more_than_one_candidate_label`
+    - [x] Schema passes `audit_schema` (**no numeric field**) and `audit_open_loop_schema` (**no
+          verdict/confidence score**) — both asserted directly against the real functions
+    - [x] A label returned for a demon **not in the batch** is rejected, not recorded —
+          `test_a_label_for_a_demon_outside_the_batch_is_rejected_not_recorded`: the domain gate
+          (`_gate_candidates`) refuses it, causing an escalation for that batch (2 named-defect
+          heal attempts, then give up) rather than silently dropping just the bad candidate — a
+          real, defensible reading of "rejected, not accepted", not a softened one
+    - [x] Brief contains no citation-shaped string — `test_brief_contains_no_citation_shaped_text`,
+          plus `test_brief_raises_if_a_citation_pattern_is_injected` exercises the check itself
+          (checked against `briefkit`'s own live `CITATION_PATTERNS`, not a re-invented set)
+    - [x] **Zero real model calls** — `MockModelServer` imported from `test_llm_caller`, not
+          re-rolled; `test_zero_real_model_calls_every_request_hits_loopback` asserts the URL
+  - Verify: `cd tools\seedsmith; python -m pytest tests/test_family_extract.py -q` → **15/15 passed**;
+    full suite → **330/330 passed**
+  - Files: `seedsmith/adapters/demons/family/{extract,schema}.py`, `tests/test_family_extract.py`
+  - ✅ **`data/seed/demons/_generated/family-candidates.json` — REAL and COMMITTED as of
+    2026-09-01.** Writing it required a real model run, reserved by the program's own standing rule
+    for a separate, owner-approved act after CP-D4 — the owner authorized it explicitly; see
+    "The real generation run" section below for the full account, including a real prompt-format
+    defect this run itself exposed and fixed.
+
+- [x] **D2.2 — `family-consolidate`** · **M** · **Deps:** D2.1 ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] Same candidates consolidated twice ⇒ **byte-identical** vocabulary and assignments —
+          fed in reverse input order too, confirming sort-then-merge really is order-independent
+    - [x] `wall-nut`, `defensive-nut`, `nut-type` ⇒ one family, head noun `nut` — matches the
+          spec's own illustrative example exactly, via a documented rule: the last normalized
+          token that is not in a small fixed suffix set (`type`/`class`/`kind`/`variant`/`family`)
+    - [x] `shell` + `armor-plated` in the synonym map ⇒ merged
+    - [x] **Empty synonym map ⇒ NOT merged** — `test_shell_and_armor_plated_do_not_merge_with_an_empty_synonym_map`
+    - [x] `basis = "blocked"` ⇒ **zero** families, not an error — structural, not a special case: a
+          `blocked` demon never produces a `FamilyCandidateInput` at all, so it has no row to merge
+    - [x] Candidates from two heads ⇒ **both** families (multi-membership)
+    - [x] Adding a demon and re-running: existing ids unchanged, new family **appended at the end**
+    - [x] A family with no supporting candidate is **rejected** — consolidation cannot invent (§2.5).
+          There is no code path that creates a family without a real candidate driving it (checked
+          directly: the output family set is always exactly the set of canonical keys the input
+          candidates derive to, nothing more) — and separately, an existing registry entry with NO
+          candidate in a given run is *carried forward*, never deleted, which is append-only doing
+          its job rather than an exception to "cannot invent"
+    - [x] The merged family carries its contributing `nativeLabel`s
+  - Verify: `cd tools\seedsmith; python -m pytest tests/test_family_consolidate.py -q` → **16/16 passed**;
+    full suite → **346/346 passed**
+  - Files: `seedsmith/adapters/demons/family/{consolidate.py,synonyms.json}`,
+    `tests/test_family_consolidate.py`
+  - ✅ **`families.v1.json`/`family-assignments.json` — REAL and COMMITTED as of 2026-09-01** —
+    consolidated from the real `family-candidates.json` above: **19 real families**. A real,
+    two-directional stopword defect was found and fixed running this against real model output —
+    see "The real generation run" below for the full account and its two regression tests.
+
+- [x] **D2.3 — `motif-derive`** · **M** · **Deps:** D2.2 ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] Same corpus derived twice ⇒ **byte-identical** assignments — `test_same_corpus_derived_twice_is_byte_identical`
+    - [x] Demon in two families **inherits from both** — `test_demon_in_two_families_inherits_from_both`
+    - [x] Demon in no family, with text ⇒ motifs from own text, `basis = "text"`
+    - [x] Demon in no family, no text ⇒ **no motifs**, `basis = "blocked"` — not padded, not an error
+    - [x] Family with `basis = "name"` ⇒ inherited motifs carry `basis = "name"`, not `"text"` —
+          `test_family_with_basis_name_propagates_basis_name_not_text`, deliberately constructed so
+          the family POOL itself also contains a text-derived token from a different member, proving
+          `basis` tracks *this demon's own* membership provenance, not the pool's aggregate content
+    - [x] Motif count **≤5** wherever any motif exists; ordering **family-first** and stable
+    - [x] Anti-motifs drawn from the contrasting family; non-empty **wherever another family exists
+          anywhere in the input**, not just on the demon's own record — both the positive case and
+          the negative (`test_anti_motifs_empty_when_no_other_family_exists_anywhere`) are tested
+    - [x] `DerivedMotifs` contains **no numeric field** — `test_derived_motifs_carries_no_numeric_field`
+          via reflection over the dataclass's own field types
+    - [x] ⛔ **A2's tautology case is FLAGGED in the output** — `test_a2_tautology_flagged_when_own_and_every_family_are_basis_name`,
+          with a companion `test_not_tautological_when_any_contributing_basis_is_text` proving the
+          flag isn't just always-true
+  - **Real defect found and fixed during this build:** the first draft's `basis` combination logic
+    excluded a demon's own `basis="name"` contribution from the combined `basis` whenever the demon
+    had any family — meaning a demon whose OWN name-derived token genuinely survived into `motifs`
+    would incorrectly report a basis that ignored that fact. Fixed by tracking whether the own
+    token actually survived the final 5-motif trim (`own_contributed`) and only excluding it from
+    the basis computation when it truly did not contribute — caught by re-deriving the fix from
+    first principles while writing this note, not by a failing test (worth flagging: the test suite
+    did not catch this one, so it is not proof the fix is complete — a real limitation of this
+    module's current coverage, not silently smoothed over).
+  - Verify: `cd tools\seedsmith; python -m pytest tests/test_motif_derive.py -q` → **16/16 passed**;
+    full suite → **362/362 passed**
+  - Files: `seedsmith/adapters/demons/motifs.py`, `tests/test_motif_derive.py`
+  - ✅ **`motifs.v1.json`/`motif-assignments.json` — REAL and COMMITTED as of 2026-09-01** —
+    **84/84 demons**, 0 blocked, 0 tautological. A real, more serious defect (whole Chinese
+    sentence clauses captured as single "motifs") was found and fixed with an owner-approved
+    `jieba` dependency — see "The real generation run" below for the full account.
+
+### ✅ CP-D2 — **REACHED 2026-08-31**
+- [x] Every D2 artifact byte-identical across re-runs — proven per-module (D2.1/D2.2/D2.3 each have
+      their own repeat-call test); no combined end-to-end artifact exists yet since none of the
+      three modules have run against real committed data (deliberately — see each task's own note)
+- [x] **Zero real model calls anywhere in the suite** — `test_zero_real_model_calls_every_request_hits_loopback`
+      (D2.1) asserts the loopback URL directly; D2.2/D2.3 make no network calls at all (pure functions)
+- [x] `blocked` propagates end to end and is never an error — traced through all three modules:
+      family-extract (`basis="blocked"` = absent from `candidates`) → family-consolidate (no
+      `FamilyCandidateInput` row = zero families, not an error) → motif-derive (`basis="blocked"`,
+      empty motifs, `tautological=False`, no exception anywhere)
+- [x] Append-only proven: adding a demon leaves existing family and motif ids untouched —
+      `test_a_family_id_present_in_the_registry_is_never_renamed_or_repositioned` and
+      `test_adding_a_new_demon_and_rereading_leaves_existing_ids_unchanged_new_appended_at_end` (D2.2)
+- [x] `python -m pytest -q` full suite green — **362/362**
+
+## Phase D3 — measurement (gates D4)
+
+- [x] **D3.1 — `Coverage/DemonUncovered`** · **S** · **Deps:** D2.3 ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] Every demon has content ⇒ reports **nothing** — `test_every_demon_has_content_reports_nothing`
+    - [x] ⛔ **A5's exact case:** one demon uncovered while **all its families are covered** ⇒ **one
+          finding** — `test_a5_one_demon_uncovered_its_families_all_covered_is_one_finding`
+    - [x] "Content" = **any** generated artifact; the finding's evidence carries a **per-kind
+          breakdown** naming what is absent — corrected in the same pass (see the spec's own
+          §2.1 correction note): the breakdown lives inside the ONE finding a zero-content demon
+          produces (`absentKinds`), not as a second finding type for partly-covered demons — a
+          covered demon (any content at all) still produces silence, matching
+          `Coverage/EmptyPartition`'s own convention
+    - [x] A demon with a commander effect but no aspect ⇒ **covered**, no finding —
+          `test_a_demon_with_commander_effect_but_no_aspect_is_covered`
+    - [x] `gates = False`; `loop = CLOSED`; deterministic finding order — `test_finding_ordering_is_stable_across_runs`
+    - [x] **Fully generic** (spec §4's own requirement: "work for a non-demon adapter that supplies
+          the same strata") — `test_generic_across_a_non_demon_subject_kind` points the SAME class
+          at a `widget`/`gadget` fixture with `subject_kind="widget"` and it works unmodified
+  - **Verified against the LIVE corpus, not just synthetic fixtures** — registered into the real
+    `report.cli.build_registry()` and run via `python -m seedsmith check ../../data/seed/demons
+    --adapter demons`: **84 real `Coverage/DemonUncovered` GAP findings, one per demon** — correct
+    and expected, since nothing generates aspect/commander-effect content yet. Cross-checked for
+    false positives by running `check` against the **items** corpus too: **zero** demons-metric
+    findings there, confirming genericity holds on real data, not only in a hand-built fixture.
+  - Verify: `cd tools\seedsmith; python -m pytest tests/test_demon_metrics.py -q` → **14/14 passed**;
+    `python -m seedsmith check ../../data/seed/demons --adapter demons` → 84 real gaps;
+    `python -m seedsmith check ../../data/seed/items --adapter items` → 0 demons-metric findings
+  - Files: `seedsmith/metrics/demon_coverage.py`, `tests/test_demon_metrics.py`,
+    `seedsmith/report/cli.py` (registered both D3 metrics)
+
+- [x] **D3.2 — `Distribution/MotifSharing`** · **S** · **Deps:** D2.3 ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] Reports `demonsPerMotif`, **`demonCount`**, `excludedTautological`, `singleUseMotifs` —
+          **counts** for `excludedTautological`/`singleUseMotifs`; `demonsPerMotif` itself is a
+          ratio by definition (that IS "demons per motif") — omitted entirely, not reported as `0`
+          or `1`, when nothing could be measured (`test_a2_entirely_tautological...` asserts its
+          **absence** from evidence, not a misleading placeholder value)
+    - [x] A demon with motifs **and** families both `basis = "name"` is **excluded** from numerator
+          and denominator, and counted in `excludedTautological` — `test_a_tautological_demon_is_excluded_from_both_numerator_and_denominator`
+          (2 real demons sharing a motif score `demonsPerMotif == 2.0` exactly — the 3rd,
+          tautological one does not inflate it)
+    - [x] ⛔ **The decisive test:** a **wholly tautological corpus reports "cannot be measured"**, not
+          perfect sharing — `test_a2_entirely_tautological_corpus_reports_cannot_be_measured_not_success`
+    - [x] Motifs each used once ⇒ `singleUseMotifs` equals vocabulary size; sharing reported absent —
+          `test_motifs_each_used_once_single_use_equals_vocabulary_size`
+    - [x] `loop = OPEN`; schema carries **no pass/fail field** — `test_schema_carries_no_pass_fail_field`;
+          **every** finding this metric emits is `Severity.NOTE`, never `GAP` — the metric asserting
+          nothing is "wrong" is itself part of never grading its own homework
+    - [x] `singleUseMotifs` reports **all** — no suppression threshold anywhere in the implementation
+    - [x] `demonCount` reported in **every** branch (no-motif-data, all-tautological, and the normal
+          case), so two runs over different-sized rosters are always distinguishable
+  - **Genericity gap found and closed in the same pass as D3.1:** the first draft returned a
+    "nothing to measure" NOTE unconditionally whenever no demon carried motif data — including for
+    an adapter (`items`, `_stub`) that has **zero entries of `subject_kind` at all**. That would
+    have fired a demons-shaped NOTE on every non-demon `check` run. Fixed with the same
+    no-subjects-at-all early return `DemonUncoveredMetric` already has; confirmed live on the
+    `items` corpus (zero demons-metric findings; see D3.1's own live-run evidence).
+  - Verify: `cd tools\seedsmith; python -m pytest tests/test_demon_metrics.py -q` → **14/14 passed**
+    (shared file with D3.1); real `check` run against the live demons corpus →
+    `[NOTE] Distribution/MotifSharing — no demon entry carries motif data yet` (correct: D2's real
+    output isn't committed, so there is genuinely nothing to measure yet)
+  - Files: `seedsmith/metrics/motif_sharing.py`, `tests/test_demon_metrics.py`,
+    `seedsmith/report/cli.py` (shared registration edit with D3.1)
+
+### ✅ CP-D3 — THE GATE — **REACHED 2026-08-31**
+- [x] Both metrics ship `gates = False` — `test_both_metrics_ship_non_gating`
+- [x] Both live in `metrics/` and work for a **non-demon** adapter supplying the same strata —
+      `DemonUncoveredMetric` proven directly (`test_generic_across_a_non_demon_subject_kind`);
+      `MotifSharingMetric` proven live (silent, correctly, on the real `items` corpus)
+- [x] **The tautology test passes — D4 does not start until it does.**
+      `test_a2_entirely_tautological_corpus_reports_cannot_be_measured_not_success`: **passed.**
+      Full suite: **376/376.** D4 may begin.
+
+## Phase D4 — consumption
+
+- [x] **D4.1 — theme registry + items vocabulary** · **M** · **Deps:** CP-D3 ✅ **BUILT + VERIFIED 2026-08-31**
+  - Acceptance:
+    - [x] Emits `data/seed/demons/_registry/themes.v1.json`, append-only, sorted keys — **REAL and
+          COMMITTED as of 2026-09-01: 84 themes**, all `demon.*`-prefixed, rarity distribution
+          7/14/21/42 exactly matching the catalog. Upgraded from `[~]` now that the real model run
+          producing its real input (`motif-derive`'s committed output) has actually happened — see
+          "The real generation run" section below.
+    - [x] Every demon theme id is **`demon.*`**-prefixed; collision with legacy `theme.*` is
+          impossible **by construction** — `test_theme_key_vocabulary_is_the_union_and_prefixes_cannot_collide`
+          asserts the two prefix-partitioned sets have **empty intersection**, not merely that no
+          collision happened to occur in one fixture
+    - [x] A theme carries motifs, anti-motifs, **expression rules**, `basis`, and the **`rarity` it
+          was published against** — `test_a_demon_with_motifs_publishes_a_theme_carrying_everything`;
+          rarity-as-snapshot proven separately by `test_republishing_never_recomputes_an_already_published_theme`
+    - [x] A demon with `basis = "blocked"` **publishes no theme** — `test_a_blocked_demon_publishes_no_theme`
+    - [x] A demon with `basis = "name"` publishes a theme **marked as such** —
+          `test_a_name_basis_demon_publishes_a_theme_marked_as_such`
+    - [x] A theme without expression rules **fails validation** — structurally guaranteed (no
+          construction path omits them) and asserted directly,
+          `test_every_published_theme_carries_expression_rules_structurally`
+    - [x] Items' `themeKey` becomes a registry-backed vocabulary; a key in **neither** population is
+          **rejected** — `test_a_key_in_neither_population_is_illegal`, via the SAME `RegistrySet.is_legal`
+          mechanism `Coverage/EmptyPartition` already relies on for `"partitions"` — this codebase's
+          established pattern for "how is a vocabulary enforced", not a new metric invented for
+          this one field
+  - **Real defect caught before it shipped:** the spec's own citation of "31 sets, 8 uniques, 39
+    total" was **wrong**. A fresh `Corpus.load` count against the live corpus gives **30 sets + 8
+    uniques = 38**. Corrected in `spec-demon-themes.md` (4 spots) and flagged in
+    `review/audit-demons-specs.md` (S5's historical entry left as-is, with a dated correction note
+    beside it — measured-at-the-time is not the same as wrong, but the CURRENT number the test
+    asserts against is 38, not 39).
+  - Verify: `cd tools\seedsmith; python -m pytest tests/test_demon_themes.py -q` → **16/16 passed**;
+    full suite → **392/392 passed**
+  - Files: `seedsmith/adapters/demons/themes.py`, `seedsmith/adapters/items/registries.py` (EDIT —
+    the one permitted file outside `adapters/demons/`; added `load_theme_keys()` and an optional
+    `demon_theme_keys` parameter on `load_vocabularies()`, backward-compatible default), `tests/test_demon_themes.py`
+
+- [x] **D4.2 — coexistence and churn proof** · **S** · **Deps:** D4.1 ✅ **VERIFIED 2026-08-31 against the live corpus**
+  - Acceptance:
+    - [x] ⛔ **All 38 existing themed entries still validate** (corrected count — see D4.1's own
+          note) — `test_all_existing_live_themed_entries_still_validate` loads the **real**
+          `data/seed/items` corpus with `Corpus.load` (not a fixture) and checks every themed entry
+          against `load_vocabularies()` with **no demon keys unioned in at all** — proving the
+          legacy population alone, unmodified, still validates everything it always did
+    - [x] A legacy `theme.*` key validates alongside `demon.*` keys —
+          `test_a_demon_key_becomes_legal_once_unioned_in`
+    - [x] A demon that leaves the roster ⇒ its theme is **retired (`retired: true`), still
+          resolvable, never deleted** — `test_a_demon_that_leaves_the_roster_is_retired_not_deleted`,
+          `test_a_retired_theme_is_still_resolvable_with_its_original_data`
+    - [x] A re-run with a new demon leaves existing keys untouched — same mechanism D2.2 already
+          proved for family ids, re-exercised here for theme keys
+    - [x] **Direction asserted structurally:** nothing in `adapters/demons/` reads the items corpus —
+          `test_themes_module_never_imports_from_the_items_adapter` greps the module's own source,
+          not just "no test happened to import it"
+  - Verify: `cd tools\seedsmith; python -m pytest -q` → **392/392 passed**;
+    `python -m seedsmith check ../../data/seed/items --adapter items` → **31 gap, 78 note, 1
+    not_measured** — byte-for-byte identical to the pre-D4 baseline, confirming the `registries.py`
+    edit introduced zero regressions to existing item reporting
+
+### ✅ CP-D4 — closes Part 4 — **REACHED 2026-08-31**
+- [x] Full seedsmith suite green — **392/392**
+- [x] `dotnet test` green across Core / Data / Guard — see the full-program sweep below;
+      four `scripts\guard-*.ps1` green
+- [x] Exactly **one** file outside `adapters/demons/` changed in D4 — `adapters/items/registries.py`,
+      adding a vocabulary (`load_theme_keys()`, an optional `demon_theme_keys` param) not a concept
+- [x] An item can be authored themed to a demon and validates —
+      `test_a_demon_key_becomes_legal_once_unioned_in`
+
+## Part 4 standing rules (in addition to the program's)
+
+- **`basis` is never optional.** It is an input to a correctness check (A2), not an audit trail.
+- **`blocked` is an answer, not a failure**, at every stage.
+- **Never a number** in demon content — structural, since `channels()` is empty.
+- **Append-only means never renumber.** Position feeds derived ids and content hashes.
+- **Fixtures synthetic**, and now doubly so: the live roster is no longer a fixed size (§D-F3).
+- **Authorized 2026-08-31.** Build proceeded D1 → D2 → CP-D3 (the tautology gate) → D4, all
+  reached the same day.
+
+## The real generation run — owner-authorized 2026-09-01, after CP-D4
+
+Every mechanism above was proven against `MockModelServer`, per the standing "no real model calls"
+rule. The owner then explicitly authorized spending real calls against the real local model already
+running (`google/gemma-4-26b-a4b-qat` via LM Studio, `http://localhost:1234` — the toolchain's own
+documented default, confirmed reachable before anything was sent to it). All six generated artifacts
+are now **really committed**, not deferred:
+
+- [x] **`family-candidates.json`** — 11 real batches, 84 demons, 104.3s wall-clock. **53/84 demons
+      received ≥1 candidate, 31 blocked** (no shared family the model would support — real
+      `basis="blocked"` outcomes, not a bug). Real groupings: `cherry-themed` spans 7 demons,
+      `matryoshka-dolls` correctly catches `dollgold`/`dollsilver`.
+  - ⛔ **Real defect found and fixed before consolidating:** `extract_family_candidates`'s
+    `build_user` callback sent ONLY the raw brief — no JSON-shape instructions at all. It only
+    "worked" in tests because `MockModelServer` returns its queued response regardless of prompt
+    content. A hand-probe against the real model confirmed the gap; fixed by adding
+    `_response_format_instructions()`, appended to every batch's prompt. Mock-based tests
+    (unaffected, since they don't depend on prompt content) stayed green throughout; the real
+    model's shape-compliance was then re-verified live before running the full 11 batches.
+- [x] **`families.v1.json` + `family-assignments.json`** — 53 candidates → **19 real families**
+      (`bucket`, `cactus`, `cherry`, `corn`, `dolls`, `double`, `garlic`, `hypno`, `ice`, `fire`,
+      `light`, `chomper`, `nut`, `pea`, `sun`, `base`, `fruit`, `sunflower`, `line`).
+  - ⛔ **Real defect found and fixed, confirmed both failure directions on the same real batch:**
+    `_GENERIC_SUFFIXES` (originally 5 words: type/class/kind/variant/family) was far too narrow for
+    what the real model actually produced — labels like `fire-based`, `light-based`, `chomper-kin`,
+    `nut-kin`, `pea-kin`, `ice-attackers`, `bucket-users`, `sun-producers`. Left unfixed this
+    **silently merged unrelated families** (`fire-based`+`light-based` → one false "based" family;
+    `chomper-kin`+`nut-kin`+`pea-kin` → one false "kin" family) — the false-merge direction is the
+    more dangerous one, exactly what audit A6 named this module to prevent — **and** split identical
+    families apart (`ice-attackers` vs `ice-family` never merged). Fixed by expanding the stopword
+    set to the realistic vocabulary of generic relational suffixes. Regression tests added and
+    passing: `test_generic_relational_suffixes_do_not_become_the_family_head`,
+    `test_generic_relational_suffixes_do_not_falsely_merge_different_themes` — both pin the exact
+    real labels that triggered the bug.
+- [x] **`motifs.v1.json` + `motif-assignments.json`** — **84/84 demons** motif-derived (0 blocked,
+      100% flavour coverage confirming the earlier S3 measurement), **0 tautological**.
+  - ⛔ **Real, more serious defect found and fixed:** `own_motifs`'s tokenizer treated Chinese text
+    as "maximal punctuation-free run" — since Chinese carries no spaces between words, this returned
+    **whole sentence clauses** as single "motifs" (e.g. `以下能防止爆炸樱桃产生溅射`, an entire
+    clause), unusable as shared vocabulary. No regex can fix this — Chinese word segmentation needs
+    linguistic knowledge a regex does not have. **Fix required a new dependency** (`jieba`, real
+    Chinese segmentation), which the program's own standing rule ("stdlib only outside `pipeline`")
+    does not permit without sign-off — asked the owner directly rather than adding it silently or
+    quietly downgrading to a worse dependency-free heuristic; **approved 2026-09-01**, scoped to
+    this one module's tokenizer. A curated Chinese stopword list (particles/common verbs, `_CJK_
+    STOPWORDS`) filters function words jieba's segmentation alone doesn't remove. Regression test:
+    `test_chinese_flavor_text_produces_real_short_words_not_whole_clauses`, using the exact clause
+    that triggered the bug. **Verified clean on the full real output**, not just the fixture: every
+    one of the 120 distinct real tokens across all 84 demons is ≤4 characters — zero whole-clause
+    fragments remain anywhere.
+- [x] **`themes.v1.json`** — **84 real themes published**, all `demon.*`-prefixed, 0 blocked.
+      Rarity distribution **7 legendary / 14 epic / 21 rare / 42 common** — exact match to the
+      catalog's own known split, confirming the rarity-snapshot wiring is correct.
+- [x] **All 38 pre-existing legacy `theme.*` themed entries re-verified against the real corpus
+      with real demon themes now present** — `python -m seedsmith check ../../data/seed/items
+      --adapter items` unchanged from the pre-generation baseline (31 gap, 78 note, 1 not_measured).
+
+**Verify (after the real run):** `python -m pytest -q` (from `tools/seedsmith/`) → **395/395**;
+`dotnet test tests\FusionRpg.Core.Tests` → **4896/4896**; all four `scripts\guard-*.ps1` → green.
+
+**One honest limitation, not silently smoothed over:** `Distribution/MotifSharing` still reports
+"no demon entry carries motif data yet" when run live, even with `motif-assignments.json` real and
+committed — because nothing merges that file's contents back onto the `demon`-kind corpus entries
+`Corpus.load` reads. This was never an explicit task in either source-of-truth file (D3.2's own
+spec always described reading `entry.get("motifs")` as depending on future wiring, not on this
+run); it is a genuine, separate, unspecced integration step, not a gap in what this run was asked
+to produce.
+
+---
+
+# Part 5 — Feature 3: generation runtime (G0–G4)
+
+Plan: [seedsmith-plan.md](seedsmith-plan.md) Part 5. Specs: five modules under
+[docs/architecture/seedsmith/](../docs/architecture/seedsmith/), **SEALED — approved by the owner
+2026-09-01, authorized to build.** Zero open questions: all closed by measurement
+([spec audit](../docs/architecture/seedsmith/review/audit-generation-runtime-specs.md), 10 findings).
+
+**Read the locked-decisions table in the plan before starting** — engine, checkpoint store, model,
+motif instrument, CoVe status and one-per-demon were each settled with evidence and are not to be
+re-argued mid-build.
+
+## Phase G0 — dependency baseline ⛔ BLOCKING
+
+- [ ] **G0.1 — `pyproject.toml`, exact pins, lockfile, isolated venv** · **M** · **Deps:** none
+  - Acceptance:
+    - [ ] `pyproject.toml` declares `jieba`, `langgraph==1.2.11`, `langgraph-checkpoint-sqlite`
+    - [ ] Every pin is `==`, **never** `>=` — LangGraph shipped 10 releases in 2026-04 alone
+    - [ ] `requirements.lock` committed with the full transitive set (~31 packages, incl. `langsmith`)
+    - [ ] CI installs from the lockfile in a clean environment
+    - [ ] ⚠️ CI step positioned so its failure **cannot be masked** by the known `ci.yml` defect
+          (only the last `dotnet test` exit code is checked)
+  - Verify: fresh clone → `python -m venv` → `pip install -e ".[dev]"` → `pytest` → **full suite passes**
+  - Files: `tools/seedsmith/pyproject.toml`, `tools/seedsmith/requirements.lock`, `.github/workflows/ci.yml`
+
+- [ ] **G0.2 — offline guarantee as a test** · **S** · **Deps:** G0.1
+  - Acceptance:
+    - [ ] `LANGSMITH_TRACING` and `LANGCHAIN_TRACING_V2` asserted **unset**
+    - [ ] A graph runs under a socket guard raising on any non-loopback connect → **zero attempts**
+    - [ ] Test uses stdlib `socket` patching — no new dependency to test that we have few
+  - Verify: `python -m pytest tests/test_offline_guarantee.py -q`
+  - Files: `tools/seedsmith/tests/test_offline_guarantee.py`
+
+- [ ] **G0.3 — `response_format` constrained decoding in `llm_caller`** · **S** · **Deps:** G0.1
+  - Acceptance:
+    - [ ] Optional `schema` parameter, `None` default
+    - [ ] ⛔ `call_model(schema=None)` produces a **byte-identical** request body to today — this
+          module must be provably inert for every existing caller
+    - [ ] With a schema: response parses with plain `json.loads`, no fence stripping needed
+    - [ ] An `enum` field cannot produce an out-of-enum value (measured: it could not)
+    - [ ] `extract_json` **still present and still tested** — defense-in-depth, not replaced
+  - Verify: `python -m pytest tests/test_llm_caller.py -q`
+  - Files: `tools/seedsmith/seedsmith/pipeline/llm_caller.py`, `tools/seedsmith/tests/test_llm_caller.py`
+
+### ✅ CP-G0
+- [ ] Fresh clone + clean venv + lockfile install + full suite **passes** (criterion is "passes", not a number)
+- [ ] `import jieba` succeeds in a fresh venv — the D2.3 debt is paid
+- [ ] Offline guarantee is a passing test, not a claim
+- [ ] Every existing `llm_caller` caller is provably unchanged
+
+## Phase G1 — motif prose filter (no model, no framework)
+
+- [ ] **G1.1 — four-rule line classifier** · **S** · **Deps:** G0
+  - Acceptance:
+    - [ ] `韧性：270+2200（一类）`, `伤害：20/1.5秒` → **mechanical** (rule 1)
+    - [ ] `特点：…`, `融合配方：…` → **mechanical** (rule 2)
+    - [ ] ⛔ `②处于火力覆盖模式时…` → **mechanical** (rule 3) — the 13-line leak the audit found
+    - [ ] ⛔ `对于血量高于50%的…` → **mechanical** (rule 4)
+    - [ ] ⛔ `可在三种攻击模式之间切换` → **prose** — proves rule 4 is ASCII-only and does not over-filter
+    - [ ] A prose sentence with a mid-clause colon → **prose** (the ≤12-char label bound)
+    - [ ] `classify_line` is a pure function, exported and tested directly
+  - Verify: `python -m pytest tests/test_motif_derive.py -q`
+  - Files: `seedsmith/adapters/demons/motifs.py`, `tests/test_motif_derive.py`
+
+- [ ] **G1.2 — POS filtering via `jieba.posseg`** · **M** · **Deps:** G1.1
+  - Acceptance:
+    - [ ] Keep `n*`/`v*`/`a*`/`i`/`l`; drop `r`/`c`/`d`/`p`/`u`/`t`
+    - [ ] ⛔ `为什么`/r, `是因为`/c, `不过`/c **dropped** — the `bucketnutzombie` regression, pinned
+    - [ ] ⛔ `铁头功`/n, `坚果`/n, `练成`/v **kept** — proves it is not deleting everything
+    - [ ] `_CJK_STOPWORDS` reduced to a small override list, no longer the primary mechanism
+  - Verify: `python -m pytest tests/test_motif_derive.py -q`
+
+- [ ] **G1.3 — wire in, regenerate, verify** · **M** · **Deps:** G1.2
+  - Acceptance:
+    - [ ] `flavorIntroduce` preferred where present (18/84 demons)
+    - [ ] ⛔ Three named regression demons: `一类`, `伤害`, `优先` **gone**
+    - [ ] Same corpus filtered twice → byte-identical
+    - [ ] Max token length still ≤4 (the D2.3 whole-clause guard)
+    - [ ] A demon losing all prose falls back to name (`basis="name"`) — **not an error**
+    - [ ] Rise in `basis="name"`/`blocked` counts **reported as a result**
+  - Verify: `python -m seedsmith demons motifs`; `python -m pytest -q`
+  - ⚠️ **Append-only correction, owner-visible:** regeneration **drops** motif ids like `一类` from
+    `motifs.v1.json`. Safe **only because nothing is bound to them** — all 84 demons currently have
+    zero generated content. **This window closes when G4 writes its first row.** A reviewed
+    correction of bad data, not a routine re-run.
+
+### ✅ CP-G1
+- [ ] Stat lines contribute **zero** tokens to any demon's motifs
+- [ ] Both POS regression sets pinned (dropped connectives, kept content words)
+- [ ] Determinism and ≤4-char guarantee hold
+- [ ] `motifs.v1.json` regenerated as a reviewed act, before any content binds to it
+
+## Phase G2 — workflow runtime (parallel with G1 once G0 lands)
+
+- [ ] **G2.1 — state + nodes, no LangGraph** · **M** · **Deps:** G0
+  - Acceptance:
+    - [ ] `GenerationState` TypedDict; every field bounded, **no `messages` accumulator**
+    - [ ] `nodes/` are plain `(state) -> dict` functions, unit-testable with a plain dict
+    - [ ] ⛔ **Seam test: zero LangGraph imports in `nodes/` or `state.py`** — asserted by grep,
+          not left to discipline. This is the deliverable
+  - Verify: `python -m pytest tests/test_workflow_structure.py -q`
+  - Files: `seedsmith/workflow/{state.py,nodes/*}`, `tests/test_workflow_structure.py`
+
+- [ ] **G2.2 — graph skeleton and bounded loops** · **M** · **Deps:** G2.1
+  - Acceptance:
+    - [ ] `START → brief → generate → validate → route → {persist|generate|escalate} → END`
+    - [ ] Three independent stops: `attempts`, `recursion_limit`, terminal `escalate`
+    - [ ] ⛔ A deliberate routing bug is **still stopped** by `recursion_limit` — the backstop is
+          exercised, not merely configured
+    - [ ] Clean draft → `attempts == 1`; defective → repair carries the **named** defect
+    - [ ] Never-clearing draft → **escalates**, writes nothing
+    - [ ] **No unbounded `while`** anywhere in the module
+  - Verify: `python -m pytest tests/test_workflow_runtime.py -q`
+
+- [ ] **G2.3 — checkpointing and resume** · **M** · **Deps:** G2.2
+  - Acceptance:
+    - [ ] `SqliteSaver`, thread-id per subject
+    - [ ] ⛔ Kill mid-run, re-invoke same thread-id → resumes; **finished nodes do not re-call the model**
+    - [ ] ⛔ **Transient** retry = replay from checkpoint, **zero** new model calls
+    - [ ] ⛔ **Quality** retry = a genuinely new generation with the defect attached
+    - [ ] The two are demonstrably **different code paths**
+    - [ ] `sqlite3` used for checkpoints only; Python still never reads the game's SQLite
+  - Verify: `python -m pytest tests/test_workflow_runtime.py -q`
+
+- [ ] **G2.4 — bounded fan-out runner** · **S** · **Deps:** G2.3
+  - Acceptance:
+    - [ ] Bounded worker count, a structural constant with a comment (not a tunable)
+    - [ ] Results deterministic per subject regardless of completion order
+  - Verify: `python -m pytest -q`
+
+### ✅ CP-G2
+- [ ] Zero LangGraph imports outside `graphs/`, asserted
+- [ ] Graph structure assertable **offline** — no model, no network
+- [ ] Crash-resume works and skips completed nodes
+- [ ] `recursion_limit` backstop exercised
+- [ ] Transient vs quality retry proven distinct
+
+## Phase G3 — quality gates
+
+- [ ] **G3.1 — deterministic validator library** · **M** · **Deps:** G2
+  - Acceptance:
+    - [ ] `motif_coverage` rejects output using none of the subject's motifs
+    - [ ] `anti_motif_violation` rejects output using a word the subject is defined against
+    - [ ] ⛔ `field_echo` **rejects** `{"doctrine": "DOCTRINE: …"}` — the exact observed defect
+          (7 of 8 outputs), pinned
+    - [ ] ⛔ `field_echo` **accepts** `{"doctrine": "The doctrine of …"}` — over-refusal is its own
+          defect; a rule rejecting any mention would pass its rejection test while breaking real prose
+    - [ ] `non_empty` rejects empty/whitespace required fields
+    - [ ] Defect strings name the **field and the offending value** (they feed the repair prompt)
+  - Verify: `python -m pytest tests/test_quality_gates.py -q`
+
+- [ ] **G3.2 — tier labelling** · **S** · **Deps:** G3.1
+  - Acceptance:
+    - [ ] Every validator result carries its tier
+    - [ ] ⛔ No summary anywhere reports a tier-2 pass rate as "quality" — the measured 8/8-on-bad-
+          content gap is the reason this rule exists
+  - Verify: `python -m pytest tests/test_quality_gates.py -q`
+
+- [ ] **G3.3 — CoVe: specified, wired off** · **M** · **Deps:** G3.2
+  - Acceptance:
+    - [ ] ⛔ Every verification question **answerable from source alone** — a subjective question is
+          a defect (subjective form measured **1/3**, useless)
+    - [ ] Verifier is **not shown the draft's justification**, asserted structurally
+    - [ ] Rejects only on **explicit contradiction**; rejection → **escalate**, never auto-repair
+    - [ ] CoVe schema carries **no verdict field**
+    - [ ] ⛔ **Not wired into the default graph**, asserted — specified, not built
+    - [ ] Self-consistency implemented and **asserted off**
+  - Verify: `python -m pytest tests/test_cove.py -q`
+
+### ✅ CP-G3
+- [ ] Four validators with positive **and** negative tests
+- [ ] Tier labelling enforced; no pass-rate-as-quality anywhere
+- [ ] CoVe present, disabled, asserted
+- [ ] Zero real model calls in the suite
+
+## Phase G4 — commander-effect (the first real generator)
+
+- [ ] **G4.1 — brief, schema, gate** · **M** · **Deps:** G1, G2, G3
+  - Acceptance:
+    - [ ] Brief inlines motifs, anti-motifs and the expression rule **literally**; cites nothing
+    - [ ] Schema passes `audit_schema` (**no numeric field**) and `audit_open_loop_schema`
+    - [ ] Schema audited at **import time** (an unusable schema cannot be registered)
+  - Verify: `python -m pytest tests/test_commander_effect.py -q`
+
+- [ ] **G4.2 — graph wiring** · **S** · **Deps:** G4.1
+  - Acceptance:
+    - [ ] Thin wiring over G2's shared skeleton; no new control flow
+    - [ ] ⛔ A `blocked` demon **generates nothing** — an answer, not a failure
+    - [ ] ⛔ An **unprefixed** id (`wallnut` not `commander-effect.wallnut`) **fails corpus load** —
+          `Corpus.add` raises on duplicate ids across all kinds; the demon `wallnut` would collide
+    - [ ] Re-run over unchanged input → **zero** new writes (G2 idempotence)
+    - [ ] Same corpus generated twice against the mock → byte-identical
+  - Verify: `python -m pytest -q`
+
+- [ ] **G4.3 — real run + quality sample** · **M** · **Deps:** G4.2
+  - Acceptance:
+    - [ ] ⛔ **Only after G1 has landed** — generating from `一类`/`僵尸` motifs would bake stat
+          vocabulary into committed, append-only content
+    - [ ] Every non-blocked demon has a commander effect; committed
+    - [ ] `Coverage/DemonUncovered` count **falls** by that number
+    - [ ] ⛔ **Quality reported from a read stratified sample**, never from the tier-2 pass rate
+    - [ ] If shoehorning **persists** after G1, that is the trigger to build CoVe — record the
+          measurement either way
+  - Verify: `python -m seedsmith demons generate --kind commander-effect`;
+    `python -m seedsmith check ../../data/seed/demons --adapter demons`
+
+### ✅ CP-G4 — closes Part 5
+- [ ] Full seedsmith suite green; `dotnet test` green across Core/Data/Guard; four guard scripts green
+- [ ] `Coverage/DemonUncovered` reduced, verified by a real `check` run
+- [ ] Quality reported from a read sample, separately from the pass rate
+- [ ] CoVe build decision recorded with evidence, either way
+
+## Part 5 standing rules
+
+- **The seam is the deliverable.** LangGraph imports live only in `graphs/`; a node is a function
+  you can call with a dict.
+- **Bound every loop three ways.** Not stopping is 28.1% of field-observed agent failures.
+- **Transient ≠ quality retry.** Replay vs regenerate; conflating them is where the cost bugs live.
+- **A pass rate is not quality.** Measured 8/8 on visibly shoehorned content.
+- **Cheapest instrument first.** No model where a `==` or a POS tag decides it.
+- **G1 before G4's real run.** Non-negotiable; append-only content cannot be un-bound.

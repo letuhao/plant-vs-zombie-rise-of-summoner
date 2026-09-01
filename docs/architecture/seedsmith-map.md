@@ -130,6 +130,81 @@ another program's unscheduled work is the kind that surfaces late and at the wor
 
 **Declaring the `aspect` kind in D1 is harmless; generating into it before the tier exists is not.**
 
+**Owner decision 2026-08-31: the demon program builds `aspect-scope` first, and D2's aspect
+generation waits for it.** D2's other kinds are not blocked — only aspect generation is. This makes
+the sequencing explicit rather than leaving D2 to discover the missing tier mid-build.
+
+### Roster decisions — the species cap is gone (owner, 2026-08-31)
+
+`DemonSpeciesGenerator` had a hard cap of **24** species. It is **removed**: `Generate` now takes
+`int? maxSpecies = null` meaning *no limit*, so every captured species becomes a demon and a PVZ
+update that adds almanac entries adds demons with no code change. Full reasoning, including why the
+caps register's original "no conflict" verdict was wrong, is in
+[`ssot-power-scale.md`](power/ssot-power-scale.md) §11.10a.
+
+Three consequences this feature must carry:
+
+| Consequence | Where it lands |
+|---|---|
+| `n` is a **measurement**, not a fixed design point — 84 eligible rows today, rising toward ~904 | `spec-demon-metrics` §2.2a; every sharing figure reports `demonCount` |
+| **Rarity is a snapshot, not an attribute.** `RarityForRank` is proportional in `count`, so a growing roster moves demons between tiers at unchanged rank (Common → Epic at rank 20 as `count` goes 24 → 904) | `spec-demon-themes` §2.4a; `spec-demon-corpus-emit` §9 Q1 |
+| **Membership churn is milder** — nothing is evicted by a better-ranked rival any more; a demon leaves only if the game drops its type | `spec-demon-themes` §2.4a |
+
+⚠️ **Open, owner's call, not a defect:** `RarityForRank` grants Legendary to `rank < 2` — absolute,
+while Epic and Rare are proportional. On a 900-demon roster that is two legendaries in the world.
+Whether that is the intent or an unscaled constant is a balance decision, and changing it moves the
+committed catalog.
+
+✅ **The catalog is regenerated: 24 → 84 species** (2026-08-31, from
+`dist/FusionRpg.Server/data`, 907 captured type rows → 84 usable). `Validate()` passes; the split is
+2 legendary / 14 epic / 21 rare / 47 common, 14 light / 14 dark, 2 hypno, 2 capture-only.
+
+Regenerating required fixing `tools/DemonCatalogGen`, which **could not run at all**: it never called
+`DerivedStatPolicy.Configure`, so `RpgStore`'s static ctor threw (tunables-ssot T5 — no built-in
+defaults). The catalog had quietly stopped being regenerable.
+
+It also moved one golden legitimately: `ExpeditionResolverTests.Tier_goldens_are_locked`, because
+`ExpeditionResolver.WildBand` picks wild enemies from `DemonSpeciesCatalog.All` and indexes by
+`rng.NextInt(band.Count)` — a bigger roster rolls a different enemy. Re-blessed with that reason
+recorded; the resolver's own determinism tests stayed green unchanged, proving it was selection and
+not a math break.
+
+Rarity itself also changed: `RarityForRank`'s legendary tier was a flat `rank < 2` and is now
+proportional like the others (**owner, 2026-08-31**) — see `ssot-power-scale.md` §11.10a. At 84
+species the split is 7 / 14 / 21 / 42.
+
+### D5 — `power-estimate`: the roster's missing power signal (owner decision 2026-08-31)
+
+**The constraint on seeding all ~900 species is not text — it is observed HP.** Measured
+2026-08-31: **100%** of the 84 eligible species have flavour text (889 of 904 almanac rows overall),
+but only **84 of 904** have `hp_base > 0`. `almanac_seed.hp` does not close the gap (82 rows — it
+mirrors observed stats), and sun cost is no fallback either (`cost_status` is `absent` for 815 of
+904). So the almanac gives names and flavour for ~900 species and **no power signal for 820 of them**,
+while `RarityForRank` ranks by observed HP.
+
+**Decision: an LLM estimates a power tier from the almanac text, recorded with `basis` and marked
+provisional.**
+
+| Property | Rule |
+|---|---|
+| Input | the species' own name and flavour text — the same corpus `family-extract` reads |
+| Output | a **tier**, never a number (`audit_schema` rejects a numeric field mechanically) |
+| Honesty | carries `basis` exactly as family labels do, and `blocked` is a legal answer |
+| Lifetime | **provisional** — superseded the moment that species is actually observed, never competing with a real measurement |
+
+**Why provisional is the load-bearing half.** An estimated tier that outlives its evidence becomes
+indistinguishable from a measured one, and rarity silently stops meaning "observed power". Marking it
+means capture coverage *improving* is what retires the estimate — the estimate degrades gracefully
+instead of hardening into fact.
+
+Rejected: ranking by `type_id`/almanac order (deterministic and model-free, but unlock order is not
+power, and nothing later corrects it), and shipping all 820 as Common (honest, but rarity would stop
+distinguishing anything for species that rarely spawn — possibly forever).
+
+⚠️ **Not yet specced.** This is a recorded decision and a module slot, not a spec. It also depends on
+a `provisional` marker existing on the species side, which is demon-program code — the same
+cross-program shape as `aspect-scope` above.
+
 ### Scope of the "no core change" claim (audit S8)
 
 `spec-adapter-demons` §1 sets the criterion *"not one line of core code changed"*. **That holds for
@@ -164,6 +239,58 @@ corpus ── adapter ─┬─ numerics ─┐
                    ├─ budget ───┼─ metrics ─┬─ report
                    └────────────┴───────────┴─ planner ── briefkit ── pipeline
 ```
+
+---
+
+### 3d. Feature 3 — generation runtime (capability map, 2026-09-01)
+
+Proposal: [seedsmith-agent-runtime-proposal.md](seedsmith-agent-runtime-proposal.md) ·
+Audit: [review/audit-agent-runtime-proposal.md](seedsmith/review/audit-agent-runtime-proposal.md)
+(`R#` below = that audit's findings). **All owner decisions closed 2026-09-01.**
+
+**Why this feature exists:** D1–D4 built a *classifier* — 84 species sorted into families. It
+generates no content. `aspect`, `commander-effect` and `environment` are declared kinds that nothing
+writes into, which is why `Coverage/DemonUncovered` reports 84 gaps. This feature is the generator.
+
+**The layer distinction that defines it:** `planner` answers *"which content, in what order"* (job
+orchestration — solved, kept). Nothing answers *"inside ONE generation: what steps, what state, when
+to branch/retry/resume"* (workflow definition). That is what `workflow-runtime` adds.
+
+| id | Capability | Model? | Depends on |
+|---|---|---|---|
+| `dependency-baseline` | `pyproject.toml`, exact pins, lockfile, isolated venv, CI install-from-lock, offline env-var assert, `response_format` constrained decoding in `llm_caller` | No | — |
+| `motif-prose-filter` | Restrict motif derivation to prose; drop stat/mechanic lines; prefer `flavorIntroduce` | **No** | `dependency-baseline` |
+| `workflow-runtime` | LangGraph seam: typed state, plain-function nodes, graph wiring, SQLite checkpoint/resume, bounded loops, dual-retry split, fan-out | No (infra) | `dependency-baseline` |
+| `quality-gates` | Deterministic validator library (tiers 1–2). **CoVe fully specified but NOT built** — audit S6: shoehorning is caused by bad motifs, which `motif-prose-filter` fixes for free; build CoVe only if it is *measured* to persist | No (tiers 1–2 are model-free) | `workflow-runtime` |
+| `commander-effect` | The first real per-demon content generator | Yes | `motif-prose-filter`, `workflow-runtime`, `quality-gates` |
+
+**Module specs** (written 2026-09-01, audited, **SEALED — approved by the owner 2026-09-01,
+authorized to build**; audit: [review/audit-generation-runtime-specs.md](seedsmith/review/audit-generation-runtime-specs.md),
+10 findings all applied, **zero open questions remain**):
+[dependency-baseline](seedsmith/spec-dependency-baseline.md) ·
+[motif-prose-filter](seedsmith/spec-motif-prose-filter.md) ·
+[workflow-runtime](seedsmith/spec-workflow-runtime.md) ·
+[quality-gates](seedsmith/spec-quality-gates.md) ·
+[commander-effect](seedsmith/spec-commander-effect.md)
+
+**Build order:** `dependency-baseline` → (`motif-prose-filter` ∥ `workflow-runtime`) →
+`quality-gates` → `commander-effect`.
+
+`motif-prose-filter` and `workflow-runtime` are independent once the baseline lands and may run in
+parallel. **`motif-prose-filter` is the highest value-per-cost item in the feature** (R1) — no model,
+no framework, and it fixes the input every later generator consumes.
+
+**Locked decisions (owner, 2026-09-01) — not re-litigated in the specs:**
+
+| Decision | Choice | Why |
+|---|---|---|
+| Workflow engine | **LangGraph**, pinned `==1.2.11` | 4 claims verified by execution; nodes stay plain functions |
+| Structured output | **LM Studio constrained decoding**, zero deps | Hostile-prompt A/B: unconstrained returned prose and failed `json.loads`; constrained produced valid schema-conforming JSON at no latency cost |
+| Checkpoint store | **`SqliteSaver`** | seedsmith is dev tooling and **never ships** — `guard-dal`'s invariant protects the shipped game's data layer, which this is not part of. **Scope: checkpoints only**; Python still never reads the game's SQLite |
+| Model | **Local Gemma-26B**, no hosted tier | Measured 8/8 first-attempt pass, 0/8 anti-motif violations |
+| `environment` generation | **Cancelled** | Deterministic mapping — `spec-pipeline.md:109`: a pipeline for work a script can do is a slow, expensive, non-reproducible script |
+| `lore-enrich` | **Deferred**, and blocked | Would record synthetic text as `basis="text"`, corrupting the honesty signal `MotifSharing` depends on (R4). Needs `basis="enriched"` first |
+| `aspect` generation | **Blocked** | `aspect-scope` approved but unbuilt in the demon program |
 
 ---
 

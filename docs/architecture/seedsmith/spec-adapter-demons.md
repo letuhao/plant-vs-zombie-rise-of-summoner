@@ -5,7 +5,7 @@ Depends on `corpus`, `demon-corpus-emit`.
 
 Ideal: [seedsmith-demons-ideal.md](../seedsmith-demons-ideal.md); `A#` = its §6 audit.
 
-**Status: proposed 2026-08-31, awaiting owner review. Not authorized to build.**
+**Status: APPROVED by the owner 2026-08-31. Authorized to build.**
 
 ---
 
@@ -23,6 +23,34 @@ is the first genuine test.
 **Done means:** `StubAdapter`-shaped, `ItemsAdapter`-sized, and **not one line of core code changed
 to accommodate it.** If the core needs an edit, that is the finding — record it rather than patch
 around it.
+
+### ⚠️ CORRECTED post-build (2026-08-31): the claim above is false, and here is exactly how
+
+§2.7's motif expression rules could not be represented without editing `adapters/base.py`:
+`KindSpec` (the core's own dataclass) had no field for them, and `planner/ordering.py` duck-types
+only on `.kind`/`.reference_fields`. Per this section's own instruction, the finding is recorded
+rather than patched around:
+
+**One core file changed, one field, additive:** `KindSpec` gained
+`motif_expression: str | None = None`. `items` and `_stub` are untouched — `test_stub_adapter.py`
+and the full `items` suite stayed green throughout, re-run as part of `test_adapter_demons.py`
+itself so a future regression here is attributed correctly. Full reasoning for why this option was
+chosen over a demons-local dict or abusing `registries()`:
+[seedsmith-plan.md](../../../tasks/seedsmith-plan.md) Part 4 §D-F1.
+
+**So the corrected claim is: `StubAdapter`-shaped, `ItemsAdapter`-sized, and exactly one core file
+changed — additively, with a default, leaving every existing adapter and test unaffected.** "Not one
+line" was the target; it was not what shipped, and that gap is the actual finding this module
+produced, not a footnote to hide.
+
+**A second, independent gap this build found and fixed, unrelated to §D-F1:** the first draft
+hand-declared `dimensions()`'s `applies_to` for `rarity`/`element` instead of deriving it from real
+`KindSpec` field membership the way `items` does. That produced a live, confirmed
+`Coverage/PairwiseHole` false positive ("side×rarity: 8 of 8 legal pairs never co-occur") on the
+very first `check` run against the emitted corpus — the identical "confidently wrong" trap
+`adapters/items/__init__.py` already documents avoiding for its own `class` dimension. Fixed by
+using the same `_applies_to()` helper unconditionally; see that file's own comment for the full
+account.
 
 ---
 
@@ -157,6 +185,11 @@ tools/seedsmith/tests/test_adapter_demons.py
 Mirrors `adapters/items/` exactly. **No file outside `adapters/demons/` should need to change** — if
 one does, §1's claim is false and that is the finding.
 
+**✅ The finding, as promised: one file changed.** `adapters/base.py` gained `KindSpec.motif_expression`
+(additive, defaulted) for §2.7's motif expression rules. See §1's corrected-claim note above for the
+full account and why the other two options (a demons-local dict, or abusing `registries()`) were
+rejected.
+
 ---
 
 ## 5. Testing strategy
@@ -201,11 +234,19 @@ That last row is the one this module exists to prove.
 
 ## 8. Open questions
 
-1. **Does `demon` need `id_pattern` / `runtime_id_fields`?** `adapters/items/kinds.py` leaves both
-   unset for all 15 kinds with a documented reason (encoding them needs `naming.v1.json`'s
-   `idTemplate` rules, which is real work with its own failure modes). Demons may be simpler —
-   `speciesId` is already stable kebab-case — but the same "no acceptance criterion exercises it yet"
-   argument applies.
-2. **Should `aspect` ship in D1 or wait for `aspect-scope` to be built?** The spec is approved
-   2026-08-31, but approved ≠ built. Declaring the kind early is harmless; generating into it before
-   the tier exists is not.
+**Both closed 2026-08-31.**
+
+1. ~~Does `demon` need `id_pattern` / `runtime_id_fields`?~~ **DECIDED: leave both unset**, matching
+   all 15 item kinds and their documented reason. `speciesId` is already stable kebab-case, so the
+   patterns would encode a rule nothing checks — and no acceptance criterion in this spec exercises
+   them. Adding them later is additive; a wrong pattern shipped now is not.
+2. ~~Should `aspect` ship in D1 or wait?~~ **DECIDED by the owner: the demon program builds
+   `aspect-scope` first, and D2's aspect generation waits for it.** The kind is still *declared* in
+   D1 — that is free and keeps the adapter's shape settled — but nothing generates into it until the
+   tier exists in code. `DemonSpeciesDef` still carries `ElementPrimary`/`ElementSecondary`/
+   `TraitPool` on the *species*, so generating aspects today would target a tier that is approved on
+   paper only.
+
+   ⛔ **This is a cross-program dependency, not a footnote.** It is recorded in
+   [`seedsmith-map.md`](../seedsmith-map.md) §3b with the demon program as its owner, because a
+   dependency on another program's unscheduled work is the kind that gets discovered late (audit S2).

@@ -1,0 +1,404 @@
+{
+  "allpeater": [],
+  "ashthreepeater": [],
+  "bucketnutzombie": [
+    {
+      "basis": "text",
+      "label": "bucket-users",
+      "nativeLabel": "铁桶坚果僵尸"
+    }
+  ],
+  "bucketzombie": [
+    {
+      "basis": "text",
+      "label": "bucket-users",
+      "nativeLabel": "铁桶僵尸"
+    }
+  ],
+  "cabbagepult": [],
+  "cactus": [
+    {
+      "basis": "name",
+      "label": "cactus-family",
+      "nativeLabel": "仙人掌"
+    }
+  ],
+  "cactusblover": [
+    {
+      "basis": "name",
+      "label": "cactus-family",
+      "nativeLabel": "浮空仙人球"
+    }
+  ],
+  "caltrop": [],
+  "caltropnut": [],
+  "cherrybomb": [
+    {
+      "basis": "name",
+      "label": "cherry-themed",
+      "nativeLabel": "樱桃炸弹"
+    }
+  ],
+  "cherrygatling": [
+    {
+      "basis": "name",
+      "label": "cherry-themed",
+      "nativeLabel": "樱桃机枪射手"
+    }
+  ],
+  "cherrynut": [
+    {
+      "basis": "name",
+      "label": "cherry-themed",
+      "nativeLabel": "樱桃坚果"
+    }
+  ],
+  "cherrynutzombie": [
+    {
+      "basis": "name",
+      "label": "cherry-themed",
+      "nativeLabel": "樱桃坚果僵尸"
+    }
+  ],
+  "cherrypaperzombie": [
+    {
+      "basis": "name",
+      "label": "cherry-themed",
+      "nativeLabel": "樱桃读报僵尸"
+    }
+  ],
+  "cherryshooter": [
+    {
+      "basis": "name",
+      "label": "cherry-themed",
+      "nativeLabel": "樱桃射手"
+    }
+  ],
+  "cherrysplit": [
+    {
+      "basis": "name",
+      "label": "cherry-themed",
+      "nativeLabel": "樱桃裂荚射手"
+    }
+  ],
+  "cherrythreepeater": [],
+  "chomper": [],
+  "conezombie": [],
+  "cornpot": [
+    {
+      "basis": "text",
+      "label": "corn-family",
+      "nativeLabel": "玉米花盆"
+    }
+  ],
+  "cornpult": [
+    {
+      "basis": "name",
+      "label": "corn-family",
+      "nativeLabel": "玉米投手"
+    }
+  ],
+  "dancepolzombie": [],
+  "darkthreepeater": [],
+  "dolldiamond": [],
+  "dollgold": [
+    {
+      "basis": "text",
+      "label": "matryoshka-dolls",
+      "nativeLabel": "套娃僵尸"
+    }
+  ],
+  "dollsilver": [
+    {
+      "basis": "text",
+      "label": "matryoshka-dolls",
+      "nativeLabel": "套娃僵尸"
+    }
+  ],
+  "doomcactus": [],
+  "doorzombie": [],
+  "doublecherry": [
+    {
+      "basis": "name",
+      "label": "double-shooters",
+      "nativeLabel": "双发射手"
+    }
+  ],
+  "doubleshooter": [
+    {
+      "basis": "name",
+      "label": "double-shooters",
+      "nativeLabel": "双发射手"
+    }
+  ],
+  "doublesnow": [
+    {
+      "basis": "name",
+      "label": "double-shooters",
+      "nativeLabel": "双发射手"
+    }
+  ],
+  "driverzombie": [],
+  "flagzombie": [],
+  "footballzombie": [],
+  "fumeshroom": [],
+  "garlic": [],
+  "garlicpea": [
+    {
+      "basis": "text",
+      "label": "garlic-family",
+      "nativeLabel": "蒜毒豌豆射手"
+    }
+  ],
+  "garlicthreepeater": [
+    {
+      "basis": "text",
+      "label": "garlic-family",
+      "nativeLabel": "蒜毒三线射手"
+    }
+  ],
+  "gatlingpea": [],
+  "hypnochomper": [],
+  "hypnojalapeno": [
+    {
+      "basis": "name",
+      "label": "hypno-family",
+      "nativeLabel": "魅惑"
+    }
+  ],
+  "hypnopeashooter": [
+    {
+      "basis": "name",
+      "label": "hypno-family",
+      "nativeLabel": "魅惑"
+    }
+  ],
+  "hypnoshroom": [
+    {
+      "basis": "name",
+      "label": "hypno-family",
+      "nativeLabel": "魅惑"
+    }
+  ],
+  "icecaltrop": [
+    {
+      "basis": "name",
+      "label": "ice-family",
+      "nativeLabel": "寒冰"
+    }
+  ],
+  "iceshroom": [
+    {
+      "basis": "name",
+      "label": "ice-family",
+      "nativeLabel": "寒冰"
+    }
+  ],
+  "ironpeazombie": [],
+  "jalacaltrop": [
+    {
+      "basis": "name",
+      "label": "fire-family",
+      "nativeLabel": "火焰"
+    }
+  ],
+  "jalagatling": [
+    {
+      "basis": "name",
+      "label": "fire-family",
+      "nativeLabel": "火辣"
+    }
+  ],
+  "jalapeashooter": [
+    {
+      "basis": "text",
+      "label": "fire-based",
+      "nativeLabel": "火辣豌豆射手"
+    }
+  ],
+  "jalapeno": [
+    {
+      "basis": "text",
+      "label": "fire-based",
+      "nativeLabel": "火爆辣椒"
+    }
+  ],
+  "jalastar": [
+    {
+      "basis": "text",
+      "label": "fire-based",
+      "nativeLabel": "火爆杨桃"
+    }
+  ],
+  "lanterncactus": [
+    {
+      "basis": "text",
+      "label": "light-based",
+      "nativeLabel": "流光仙人掌"
+    }
+  ],
+  "lanternchomper": [
+    {
+      "basis": "text",
+      "label": "light-based",
+      "nativeLabel": "灯笼大嘴花"
+    }
+  ],
+  "lanternpea": [
+    {
+      "basis": "text",
+      "label": "light-based",
+      "nativeLabel": "流光豌豆射手"
+    }
+  ],
+  "marigold": [],
+  "melonpult": [],
+  "normalzombie": [],
+  "nutchomper": [
+    {
+      "basis": "name",
+      "label": "chomper-kin",
+      "nativeLabel": "大嘴坚果"
+    }
+  ],
+  "paperzombie": [],
+  "peachomper": [
+    {
+      "basis": "name",
+      "label": "chomper-kin",
+      "nativeLabel": "豌豆大嘴花"
+    }
+  ],
+  "peanut": [
+    {
+      "basis": "name",
+      "label": "nut-kin",
+      "nativeLabel": "坚果射手"
+    }
+  ],
+  "peashooter": [
+    {
+      "basis": "name",
+      "label": "pea-kin",
+      "nativeLabel": "豌豆射手"
+    }
+  ],
+  "peashooterzombie": [
+    {
+      "basis": "name",
+      "label": "pea-kin",
+      "nativeLabel": "豌豆射手僵尸"
+    }
+  ],
+  "peasquash": [
+    {
+      "basis": "name",
+      "label": "pea-kin",
+      "nativeLabel": "豌豆窝瓜"
+    }
+  ],
+  "peasunflower": [
+    {
+      "basis": "text",
+      "label": "sun-producers",
+      "nativeLabel": "能生产阳光"
+    }
+  ],
+  "plantern": [
+    {
+      "basis": "text",
+      "label": "sun-producers",
+      "nativeLabel": "提供光照等级"
+    }
+  ],
+  "polevaulterzombie": [],
+  "pot": [
+    {
+      "basis": "text",
+      "label": "base-vessels",
+      "nativeLabel": "载体"
+    }
+  ],
+  "pumpkin": [
+    {
+      "basis": "text",
+      "label": "base-vessels",
+      "nativeLabel": "保护壳"
+    }
+  ],
+  "scaredyshroom": [],
+  "snowgatling": [
+    {
+      "basis": "text",
+      "label": "ice-attackers",
+      "nativeLabel": "发射寒冰豌豆"
+    }
+  ],
+  "snowpeashooter": [
+    {
+      "basis": "text",
+      "label": "ice-attackers",
+      "nativeLabel": "发射施加寒冷状态的寒冰豌豆"
+    }
+  ],
+  "snowsplit": [
+    {
+      "basis": "name",
+      "label": "split-pea",
+      "nativeLabel": "裂荚射手"
+    }
+  ],
+  "splitpea": [
+    {
+      "basis": "name",
+      "label": "split-pea",
+      "nativeLabel": "裂荚射手"
+    }
+  ],
+  "squash": [],
+  "starfruit": [
+    {
+      "basis": "name",
+      "label": "star-fruit",
+      "nativeLabel": "杨桃"
+    }
+  ],
+  "starpea": [
+    {
+      "basis": "name",
+      "label": "star-fruit",
+      "nativeLabel": "杨桃豌豆射手"
+    }
+  ],
+  "sunchomper": [
+    {
+      "basis": "text",
+      "label": "sunflower",
+      "nativeLabel": "向日葵"
+    }
+  ],
+  "sunflower": [
+    {
+      "basis": "name",
+      "label": "sunflower",
+      "nativeLabel": "向日葵"
+    }
+  ],
+  "threecabbage": [],
+  "threepeater": [
+    {
+      "basis": "text",
+      "label": "three-line-family",
+      "nativeLabel": "三线射手"
+    }
+  ],
+  "threeplantern": [
+    {
+      "basis": "text",
+      "label": "three-line-family",
+      "nativeLabel": "三线路灯花"
+    }
+  ],
+  "twinflower": [],
+  "wallnut": []
+}

@@ -5,7 +5,7 @@ Depends on `family-consolidate`.
 
 Ideal: [seedsmith-demons-ideal.md](../seedsmith-demons-ideal.md); `A#` = its §6 audit.
 
-**Status: proposed 2026-08-31, awaiting owner review. Not authorized to build.**
+**Status: APPROVED by the owner 2026-08-31. Authorized to build.**
 
 ---
 
@@ -177,9 +177,15 @@ to re-derive "were these the same string?" would be re-deriving the very thing t
 
 ## 9. Open questions
 
-1. **How many motifs does a family contribute versus own text?** Family-first is specified; the exact
-   split (2 inherited + 1 own? proportional?) wants measuring against the real roster, since it
-   directly controls how same-y a family reads.
-2. **Anti-motifs when a demon has only one family.** Contrast needs something to contrast with. The
-   nearest *other* family is the obvious fallback; whether that is meaningful or noise is an empirical
-   question on the first real corpus.
+**Both given a starting answer 2026-08-31 so the module can be built; both are empirical and get
+revisited against the first real corpus rather than re-argued on paper.**
+
+1. ~~How many motifs from the family versus own text?~~ **DEFAULT: 2 inherited + 1 own**, inside the
+   existing 3–5 bound. Family-first is already specified; this fixes the split so the module is
+   buildable. It is the first thing to measure once a real corpus exists, because it directly
+   controls how same-y a family reads — and `Distribution/MotifSharing` is the instrument that
+   answers it.
+2. ~~Anti-motifs when a demon has only one family.~~ **DEFAULT: contrast against the nearest *other*
+   family.** Contrast needs something to contrast with, and this is the only candidate that does not
+   invent one. Whether it produces meaning or noise is genuinely unknown until the first corpus —
+   recorded here as a known unknown, not resolved by assertion.

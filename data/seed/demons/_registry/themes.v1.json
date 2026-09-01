@@ -1,0 +1,1779 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "themes": {
+    "demon.allpeater": {
+      "speciesId": "allpeater",
+      "displayName": "特种三线射手",
+      "rarity": "common",
+      "motifs": [
+        "三种",
+        "三线",
+        "之间",
+        "会均",
+        "伤害"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.ashthreepeater": {
+      "speciesId": "ashthreepeater",
+      "displayName": "灰烬三线射手",
+      "rarity": "common",
+      "motifs": [
+        "攻击能力",
+        "三线",
+        "使用",
+        "失去",
+        "射手"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.bucketnutzombie": {
+      "speciesId": "bucketnutzombie",
+      "displayName": "铁桶坚果僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "一类",
+        "击杀"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.bucketzombie": {
+      "speciesId": "bucketzombie",
+      "displayName": "铁桶僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "一类",
+        "击杀"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.cabbagepult": {
+      "speciesId": "cabbagepult",
+      "displayName": "卷心菜投手",
+      "rarity": "rare",
+      "motifs": [
+        "卷心菜",
+        "二类",
+        "伤害",
+        "僵尸",
+        "子弹"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.cactus": {
+      "speciesId": "cactus",
+      "displayName": "仙人掌",
+      "rarity": "rare",
+      "motifs": [
+        "仙人掌",
+        "优先"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.cactusblover": {
+      "speciesId": "cactusblover",
+      "displayName": "浮空仙人球",
+      "rarity": "common",
+      "motifs": [
+        "仙人掌",
+        "优先",
+        "三叶草"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.caltrop": {
+      "speciesId": "caltrop",
+      "displayName": "地刺",
+      "rarity": "rare",
+      "motifs": [
+        "冰车类",
+        "上方",
+        "伤害",
+        "低矮",
+        "僵尸"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.caltropnut": {
+      "speciesId": "caltropnut",
+      "displayName": "地刺坚果",
+      "rarity": "rare",
+      "motifs": [
+        "免疫",
+        "击退",
+        "反伤",
+        "受伤",
+        "地刺"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.cherrybomb": {
+      "speciesId": "cherrybomb",
+      "displayName": "樱桃炸弹",
+      "rarity": "rare",
+      "motifs": [
+        "伤害",
+        "僵尸"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "低矮",
+        "作为",
+        "保护"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.cherrygatling": {
+      "speciesId": "cherrygatling",
+      "displayName": "樱桃机枪射手",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "僵尸"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "低矮",
+        "作为",
+        "保护"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.cherrynut": {
+      "speciesId": "cherrynut",
+      "displayName": "樱桃坚果",
+      "rarity": "epic",
+      "motifs": [
+        "伤害",
+        "僵尸"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "低矮",
+        "作为",
+        "保护"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.cherrynutzombie": {
+      "speciesId": "cherrynutzombie",
+      "displayName": "樱桃坚果僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "伤害",
+        "僵尸",
+        "一类"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "低矮",
+        "作为",
+        "保护"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.cherrypaperzombie": {
+      "speciesId": "cherrypaperzombie",
+      "displayName": "樱桃读报僵尸",
+      "rarity": "legendary",
+      "motifs": [
+        "伤害",
+        "僵尸",
+        "十字形"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "低矮",
+        "作为",
+        "保护"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.cherryshooter": {
+      "speciesId": "cherryshooter",
+      "displayName": "樱桃射手",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "僵尸"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "低矮",
+        "作为",
+        "保护"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.cherrysplit": {
+      "speciesId": "cherrysplit",
+      "displayName": "樱桃裂荚射手",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "僵尸"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "低矮",
+        "作为",
+        "保护"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.cherrythreepeater": {
+      "speciesId": "cherrythreepeater",
+      "displayName": "樱桃三线射手",
+      "rarity": "common",
+      "motifs": [
+        "一段时间",
+        "三线",
+        "三行",
+        "伤害",
+        "僵尸"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.chomper": {
+      "speciesId": "chomper",
+      "displayName": "大嘴花",
+      "rarity": "rare",
+      "motifs": [
+        "大嘴花",
+        "伤害",
+        "僵尸",
+        "吞食",
+        "咀嚼"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.conezombie": {
+      "speciesId": "conezombie",
+      "displayName": "路障僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "一类",
+        "僵尸",
+        "装备",
+        "路障",
+        "韧性"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.cornpot": {
+      "speciesId": "cornpot",
+      "displayName": "玉米花盆",
+      "rarity": "common",
+      "motifs": [
+        "上方",
+        "低矮"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.cornpult": {
+      "speciesId": "cornpult",
+      "displayName": "玉米投手",
+      "rarity": "rare",
+      "motifs": [
+        "上方",
+        "低矮",
+        "玉米粒"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.dancepolzombie": {
+      "speciesId": "dancepolzombie",
+      "displayName": "舞王撑杆僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "运动员",
+        "优秀",
+        "伴舞",
+        "僵尸",
+        "入场"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.darkthreepeater": {
+      "speciesId": "darkthreepeater",
+      "displayName": "焦黑三线射手",
+      "rarity": "common",
+      "motifs": [
+        "三线",
+        "伤害",
+        "倍增",
+        "出场",
+        "射手"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.dolldiamond": {
+      "speciesId": "dolldiamond",
+      "displayName": "钻石套娃僵尸",
+      "rarity": "legendary",
+      "motifs": [
+        "一类",
+        "什么",
+        "僵尸",
+        "制成",
+        "套娃"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.dollgold": {
+      "speciesId": "dollgold",
+      "displayName": "黄金套娃僵尸",
+      "rarity": "legendary",
+      "motifs": [
+        "一类",
+        "什么"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.dollsilver": {
+      "speciesId": "dollsilver",
+      "displayName": "白银套娃僵尸",
+      "rarity": "legendary",
+      "motifs": [
+        "一类",
+        "什么"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.doomcactus": {
+      "speciesId": "doomcactus",
+      "displayName": "毁灭仙人掌",
+      "rarity": "common",
+      "motifs": [
+        "仙人掌",
+        "空对地",
+        "一次",
+        "上下",
+        "伤害"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.doorzombie": {
+      "speciesId": "doorzombie",
+      "displayName": "铁门僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "二类",
+        "僵尸",
+        "吸取",
+        "弱点",
+        "手持"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.doublecherry": {
+      "speciesId": "doublecherry",
+      "displayName": "樱桃双发射手",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "出场"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.doubleshooter": {
+      "speciesId": "doubleshooter",
+      "displayName": "双发射手",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "出场",
+        "一次"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.doublesnow": {
+      "speciesId": "doublesnow",
+      "displayName": "寒冰双发射手",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "出场",
+        "寒冰菇"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.driverzombie": {
+      "speciesId": "driverzombie",
+      "displayName": "雪橇车僵尸",
+      "rarity": "legendary",
+      "motifs": [
+        "免疫",
+        "其实",
+        "冰车",
+        "冰道",
+        "冻结"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.flagzombie": {
+      "speciesId": "flagzombie",
+      "displayName": "旗帜僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "移速略",
+        "一大",
+        "僵尸",
+        "出场",
+        "快于"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.footballzombie": {
+      "speciesId": "footballzombie",
+      "displayName": "橄榄球僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "橄榄球",
+        "一类",
+        "中等",
+        "偏快",
+        "吸取"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.fumeshroom": {
+      "speciesId": "fumeshroom",
+      "displayName": "大喷菇",
+      "rarity": "rare",
+      "motifs": [
+        "大喷菇",
+        "二类",
+        "伤害",
+        "喷射",
+        "射程"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.garlic": {
+      "speciesId": "garlic",
+      "displayName": "大蒜",
+      "rarity": "common",
+      "motifs": [
+        "绕道而行",
+        "伤害",
+        "低矮",
+        "僵尸",
+        "单次"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.garlicpea": {
+      "speciesId": "garlicpea",
+      "displayName": "蒜毒豌豆射手",
+      "rarity": "common",
+      "motifs": [
+        "点蒜值",
+        "一片"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.garlicthreepeater": {
+      "speciesId": "garlicthreepeater",
+      "displayName": "蒜毒三线射手",
+      "rarity": "common",
+      "motifs": [
+        "点蒜值",
+        "一片"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.gatlingpea": {
+      "speciesId": "gatlingpea",
+      "displayName": "机枪射手",
+      "rarity": "common",
+      "motifs": [
+        "一次",
+        "伤害",
+        "发射",
+        "四颗",
+        "射手"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.hypnochomper": {
+      "speciesId": "hypnochomper",
+      "displayName": "魅惑大嘴花",
+      "rarity": "common",
+      "motifs": [
+        "大嘴花",
+        "伤害",
+        "僵尸",
+        "卡牌",
+        "即可"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.hypnojalapeno": {
+      "speciesId": "hypnojalapeno",
+      "displayName": "魅惑辣椒",
+      "rarity": "common",
+      "motifs": [
+        "仍旧",
+        "令其"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.hypnopeashooter": {
+      "speciesId": "hypnopeashooter",
+      "displayName": "魅惑豌豆射手",
+      "rarity": "common",
+      "motifs": [
+        "仍旧",
+        "令其",
+        "伤害"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.hypnoshroom": {
+      "speciesId": "hypnoshroom",
+      "displayName": "魅惑菇",
+      "rarity": "rare",
+      "motifs": [
+        "仍旧",
+        "令其",
+        "方而战"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.icecaltrop": {
+      "speciesId": "icecaltrop",
+      "displayName": "寒冰地刺",
+      "rarity": "common",
+      "motifs": [
+        "寒冰菇",
+        "伤害"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.iceshroom": {
+      "speciesId": "iceshroom",
+      "displayName": "寒冰菇",
+      "rarity": "rare",
+      "motifs": [
+        "寒冰菇",
+        "伤害"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.ironpeazombie": {
+      "speciesId": "ironpeazombie",
+      "displayName": "铁桶豌豆僵尸",
+      "rarity": "legendary",
+      "motifs": [
+        "一颗",
+        "伤害",
+        "僵尸",
+        "击杀",
+        "击退"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.jalacaltrop": {
+      "speciesId": "jalacaltrop",
+      "displayName": "火焰地刺",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "低矮"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.jalagatling": {
+      "speciesId": "jalagatling",
+      "displayName": "火辣机枪射手",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "低矮"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.jalapeashooter": {
+      "speciesId": "jalapeashooter",
+      "displayName": "火辣豌豆射手",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "低矮"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.jalapeno": {
+      "speciesId": "jalapeno",
+      "displayName": "火爆辣椒",
+      "rarity": "rare",
+      "motifs": [
+        "伤害",
+        "低矮"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.jalastar": {
+      "speciesId": "jalastar",
+      "displayName": "火爆杨桃",
+      "rarity": "common",
+      "motifs": [
+        "伤害",
+        "低矮",
+        "易燃易爆"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.lanterncactus": {
+      "speciesId": "lanterncactus",
+      "displayName": "流光仙人掌",
+      "rarity": "common",
+      "motifs": [
+        "仙人掌",
+        "优先"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.lanternchomper": {
+      "speciesId": "lanternchomper",
+      "displayName": "灯笼大嘴花",
+      "rarity": "common",
+      "motifs": [
+        "仙人掌",
+        "优先",
+        "大嘴花"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.lanternpea": {
+      "speciesId": "lanternpea",
+      "displayName": "流光豌豆射手",
+      "rarity": "common",
+      "motifs": [
+        "仙人掌",
+        "优先",
+        "锁定目标"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.marigold": {
+      "speciesId": "marigold",
+      "displayName": "金盏花",
+      "rarity": "common",
+      "motifs": [
+        "咖啡豆",
+        "金盏花",
+        "个金",
+        "为金",
+        "产量"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.melonpult": {
+      "speciesId": "melonpult",
+      "displayName": "西瓜投手",
+      "rarity": "common",
+      "motifs": [
+        "上限",
+        "伤害",
+        "僵尸",
+        "半径",
+        "子弹"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.normalzombie": {
+      "speciesId": "normalzombie",
+      "displayName": "僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "临界值",
+        "小贴士",
+        "一次",
+        "一般",
+        "伤害"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.nutchomper": {
+      "speciesId": "nutchomper",
+      "displayName": "大嘴坚果",
+      "rarity": "rare",
+      "motifs": [
+        "大嘴花",
+        "一定"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.paperzombie": {
+      "speciesId": "paperzombie",
+      "displayName": "读报僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "二类",
+        "别人",
+        "后移",
+        "失去",
+        "打断"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.peachomper": {
+      "speciesId": "peachomper",
+      "displayName": "豌豆大嘴花",
+      "rarity": "common",
+      "motifs": [
+        "大嘴花",
+        "一定"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.peanut": {
+      "speciesId": "peanut",
+      "displayName": "坚果射手",
+      "rarity": "rare",
+      "motifs": [
+        "上坡",
+        "伤害"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.peashooter": {
+      "speciesId": "peashooter",
+      "displayName": "豌豆射手",
+      "rarity": "rare",
+      "motifs": [
+        "第一道",
+        "伤害"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.peashooterzombie": {
+      "speciesId": "peashooterzombie",
+      "displayName": "豌豆射手僵尸",
+      "rarity": "epic",
+      "motifs": [
+        "第一道",
+        "伤害",
+        "一颗"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.peasquash": {
+      "speciesId": "peasquash",
+      "displayName": "豌豆窝瓜",
+      "rarity": "common",
+      "motifs": [
+        "第一道",
+        "伤害",
+        "砸击时"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.peasunflower": {
+      "speciesId": "peasunflower",
+      "displayName": "豌豆向日葵",
+      "rarity": "common",
+      "motifs": [
+        "向日葵",
+        "产量"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.plantern": {
+      "speciesId": "plantern",
+      "displayName": "路灯花",
+      "rarity": "rare",
+      "motifs": [
+        "向日葵",
+        "产量",
+        "大部分"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.polevaulterzombie": {
+      "speciesId": "polevaulterzombie",
+      "displayName": "撑杆僵尸",
+      "rarity": "legendary",
+      "motifs": [
+        "中等",
+        "借助",
+        "助跑",
+        "变为",
+        "失去"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.pot": {
+      "speciesId": "pot",
+      "displayName": "花盆",
+      "rarity": "rare",
+      "motifs": [
+        "优先级",
+        "上方"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.pumpkin": {
+      "speciesId": "pumpkin",
+      "displayName": "南瓜",
+      "rarity": "epic",
+      "motifs": [
+        "优先级",
+        "上方"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.scaredyshroom": {
+      "speciesId": "scaredyshroom",
+      "displayName": "胆小菇",
+      "rarity": "rare",
+      "motifs": [
+        "远距离",
+        "伤害",
+        "僵尸",
+        "内有",
+        "发射"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.snowgatling": {
+      "speciesId": "snowgatling",
+      "displayName": "寒冰机枪射手",
+      "rarity": "common",
+      "motifs": [
+        "寒冰菇",
+        "伤害"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.snowpeashooter": {
+      "speciesId": "snowpeashooter",
+      "displayName": "寒冰射手",
+      "rarity": "common",
+      "motifs": [
+        "寒冰菇",
+        "伤害"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.snowsplit": {
+      "speciesId": "snowsplit",
+      "displayName": "寒冰裂荚射手",
+      "rarity": "common",
+      "motifs": [
+        "第一道",
+        "伤害",
+        "寒冰菇"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.splitpea": {
+      "speciesId": "splitpea",
+      "displayName": "裂荚射手",
+      "rarity": "common",
+      "motifs": [
+        "第一道",
+        "伤害",
+        "一颗"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.squash": {
+      "speciesId": "squash",
+      "displayName": "窝瓜",
+      "rarity": "rare",
+      "motifs": [
+        "锁定目标",
+        "第一个",
+        "伤害",
+        "位置",
+        "低于"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.starfruit": {
+      "speciesId": "starfruit",
+      "displayName": "杨桃",
+      "rarity": "rare",
+      "motifs": [
+        "五个",
+        "伤害"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.starpea": {
+      "speciesId": "starpea",
+      "displayName": "杨桃豌豆射手",
+      "rarity": "common",
+      "motifs": [
+        "五个",
+        "伤害",
+        "一次"
+      ],
+      "antiMotifs": [
+        "一类",
+        "击杀",
+        "吸引",
+        "坚果",
+        "掉落"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.sunchomper": {
+      "speciesId": "sunchomper",
+      "displayName": "阳光大嘴花",
+      "rarity": "common",
+      "motifs": [
+        "向日葵",
+        "大嘴花"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.sunflower": {
+      "speciesId": "sunflower",
+      "displayName": "向日葵",
+      "rarity": "rare",
+      "motifs": [
+        "向日葵",
+        "大嘴花"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "name",
+      "retired": false
+    },
+    "demon.threecabbage": {
+      "speciesId": "threecabbage",
+      "displayName": "三线卷心菜炮手",
+      "rarity": "common",
+      "motifs": [
+        "卷心菜",
+        "本格及",
+        "一次",
+        "三线",
+        "三行"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.threepeater": {
+      "speciesId": "threepeater",
+      "displayName": "三线射手",
+      "rarity": "rare",
+      "motifs": [
+        "三线",
+        "三行"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.threeplantern": {
+      "speciesId": "threeplantern",
+      "displayName": "三线路灯花",
+      "rarity": "common",
+      "motifs": [
+        "三线",
+        "三行",
+        "仙人掌"
+      ],
+      "antiMotifs": [
+        "优先级",
+        "上方",
+        "伤害",
+        "低矮",
+        "作为"
+      ],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.twinflower": {
+      "speciesId": "twinflower",
+      "displayName": "双子向日葵",
+      "rarity": "common",
+      "motifs": [
+        "向日葵",
+        "两倍",
+        "产量",
+        "融合",
+        "配方"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    },
+    "demon.wallnut": {
+      "speciesId": "wallnut",
+      "displayName": "坚果",
+      "rarity": "epic",
+      "motifs": [
+        "保护",
+        "保留",
+        "其他",
+        "坚果",
+        "坚硬"
+      ],
+      "antiMotifs": [],
+      "expression": {
+        "item": "material and form — what it is made of, what shape it takes",
+        "action": "tempo and effect shape — how fast, how it lands"
+      },
+      "basis": "text",
+      "retired": false
+    }
+  }
+}

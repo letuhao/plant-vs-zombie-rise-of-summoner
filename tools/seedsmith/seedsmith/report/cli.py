@@ -32,6 +32,8 @@ from ..metrics.constraint import Constraint
 from ..metrics.exemplar import ExemplarConformance
 from ..metrics.dedup import SemanticDedup
 from ..metrics.quality import FlavourGeneric, FlavourMissing
+from ..metrics.demon_coverage import DemonUncoveredMetric
+from ..metrics.motif_sharing import MotifSharingMetric
 from ..numerics import BattleRulesetProgression, NumericsContext, TierBands
 from ..budget import derive_all
 
@@ -61,6 +63,8 @@ def build_registry() -> MetricRegistry:
     registry.register(SemanticDedup())
     registry.register(FlavourMissing())
     registry.register(FlavourGeneric())
+    registry.register(DemonUncoveredMetric())
+    registry.register(MotifSharingMetric())
     return registry
 
 

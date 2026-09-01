@@ -100,6 +100,13 @@ authored item vocabulary, ~6 sets each, and clearly deliberate.
 So if the registry is demon-published only, all five legacy themes fail validation and 39 entries
 break. The two criteria are not in tension; they are inconsistent.
 
+⚠️ **Count corrected 2026-08-31 while building D4:** the "31 sets" above was off by one — a fresh
+`Corpus.load` count against the live `data/seed/items` corpus gives **30 sets + 8 uniques = 38**
+themed entries, all still across the same 5 `theme.*` keys. The finding itself (the contradiction,
+and its fix) is unaffected; only the number was wrong. `spec-demon-themes.md` is corrected in
+place; this row is left as the historical record of what was measured at the time rather than
+silently rewritten.
+
 **The fix is better than the compromise I filed as an open question.** The id grammar already
 prefixes: legacy themes are `theme.*`. Give demon themes their own prefix (`demon.*`), and the
 `themeKey` vocabulary becomes a **union of two append-only populations** that cannot collide, each
@@ -187,16 +194,82 @@ than declaring it. No second planner, briefkit or pipeline.
 
 ## Disposition
 
-| # | Severity | Lands on | Action |
-|---|---|---|---|
-| S1 | dissolved | — | none |
-| S2 | blocker (D2) | map §3b | add `aspect-scope` as an explicit cross-program dependency with an owner |
-| S3 | risk, unquantified | scheduling | measure flavour coverage for the 24 species before scheduling D2 |
-| S4 | risk | `spec-demon-metrics` | note that n=24 bounds what the sharing metric can resolve |
-| S5 | **contradiction** | `spec-demon-themes` | prefix split (`theme.*` / `demon.*`); rewrite the two conflicting criteria |
-| S6 | **blocker** | all D2–D4 specs | roster-churn contract; retire, never delete, a published theme |
-| S7 | **blocker** | `spec-family-extract` + `spec-family-consolidate` | decide label language before D2 starts |
-| S8 | wording | map §3b | scope the "no core change" claim to D1 |
+| # | Severity | Lands on | Action | Status |
+|---|---|---|---|---|
+| S1 | dissolved | — | none | ✅ closed |
+| S2 | blocker (D2) | map §3b | add `aspect-scope` as an explicit cross-program dependency with an owner | ✅ **owner decided 2026-08-31**: demon program builds it first, D2's aspect generation waits |
+| S3 | risk, unquantified | scheduling | measure flavour coverage before scheduling D2 | ✅ **measured 2026-08-31 — 100%**, see below |
+| S4 | risk | `spec-demon-metrics` | note that n bounds what the sharing metric can resolve | ✅ **premise removed** — see below |
+| S5 | **contradiction** | `spec-demon-themes` | prefix split (`theme.*` / `demon.*`) | ✅ applied |
+| S6 | **blocker** | D2–D4 specs | roster-churn contract; retire, never delete | ✅ applied, and **sharpened** — see below |
+| S7 | **blocker** | `spec-family-extract` + `spec-family-consolidate` | decide label language before D2 starts | ✅ **owner decided**: both `label` (English, merges) and `nativeLabel` (rides along) |
+| S8 | wording | map §3b | scope the "no core change" claim to D1 | ✅ applied |
 
-**Three blockers, one contradiction.** None invalidates the design; all four are the kind that cost a
+**Three blockers, one contradiction.** None invalidated the design; all four were the kind that cost a
 rewrite if found during the build instead of before it.
+
+---
+
+## Post-audit: the roster cap, and what it did to S4 and S6
+
+**Owner decision 2026-08-31 — the species cap is removed entirely.** `DemonSpeciesGenerator.Generate`
+now takes `int? maxSpecies = null` meaning *no limit*. Rationale, in the owner's framing: PVZ ships
+600+ almanac entries and every update adds more, so a hard cap means the overlay silently stops
+representing the game it sits on.
+
+**This audit under-called it.** S4 recorded n=24 as a *risk to carry* and wrote *"raising
+`DefaultMaxSpecies` is a demon-program decision, not this feature's."* Two things were missed:
+
+1. **The cap was already binding and discarding content.** With 18 zombie and 66 plant rows carrying
+   HP data, the pool took all 18 zombies then only `24 − 18 = 6` of 66 plants — **60 eligible species
+   dropped**, and the shipped 18/6 catalog is exactly that arithmetic. S3 even *cited* the 18/6 split
+   as evidence the roster was text-rich, without noticing it was the cap's fingerprint.
+2. **The caps register had ruled on it and the ruling had expired.** `ssot-power-scale.md` §11
+   marked it *"no conflict — more species is content work."* True while content is hand-authored;
+   this very feature makes it generated. A cap verdict rests on a premise about the surrounding
+   system, and expires with it (now written up as §11.10a).
+
+**S4 dissolves.** `n` is no longer a fixed 24 to reason against — it is capture coverage, 84 today
+and rising. The metric now reports `demonCount` beside every figure, because `n` moves between runs.
+
+**S6 gets sharper, in the direction the audit did not look.** Uncapping makes *membership* churn
+milder — nothing is evicted by a better-ranked rival any more. But it makes **rarity churn worse**,
+because `RarityForRank` is proportional in `count`: rank 20 is Common at `count = 24`
+(`2 + max(2,4) = 6`, `6 + max(3,6) = 12`, `20 ≥ 12`) and Epic at `count = 904`
+(`2 + max(2,150) = 152`, `20 < 152`). Same demon, same rank, different tier — purely because capture
+coverage improved. Themes therefore record the rarity they were published against.
+
+**Closed the same day (owner):** `RarityForRank`'s `rank < 2 → Legendary` was absolute while the
+other tiers were proportional, so a 900-demon roster would still have had exactly two legendaries. It
+is now `Math.Max(2, count / 12)` — and `1/12` is the ratio the flat `2` already implied at 24
+species, so the old roster reproduces exactly rather than a fresh balance number being invented.
+
+---
+
+## S3 measured — flavour coverage is complete, and the bottleneck is elsewhere
+
+Measured read-only against `dist/FusionRpg.Server/data/rpg-hot.sqlite` (528 MB, captured
+2026-08-31), which S3 had assumed was unavailable:
+
+| Question | Answer |
+|---|---|
+| Rows the generator can use (`hp_base > 0`, named) | **84** — 66 plant + 18 zombie, exactly the arithmetic §S4 predicted |
+| Of those, how many carry flavour text | **84 — 100%.** Not one eligible species is text-blind |
+| `almanac_seed` total | **904** rows (677 plant, 227 zombie) |
+| `almanac_seed` with flavour | 663 plant (`info`; `introduce` is 0 for all plants, confirming the schema note) + 226 zombie = **889 of 904 (98%)** |
+
+**S3 dissolves, and it dissolves the good way.** The risk was that thin text would make D2 emit
+`basis = "name"` for most of the roster and the feature would ship having measured nothing. Every
+species the generator can currently emit has real text to classify. **`lore-enrich` does not need to
+precede D2**, which was the build-order inversion S3 warned about.
+
+**The real bottleneck is observed HP, not text.** Only 84 of 904 almanac species have `hp_base > 0`.
+`almanac_seed.hp` does not help — it is populated for just 82 rows because it mirrors observed stats
+rather than anything the almanac declares. So the almanac gives names and flavour for ~900 species
+but **no power signal for 820 of them**, and rarity is rank-by-HP. Seeding the full roster needs an
+answer to that; it is a live design question, recorded in [`seedsmith-map.md`](../../seedsmith-map.md) §3b.
+
+**Tooling defect found and fixed in passing:** `tools/DemonCatalogGen` never called
+`DerivedStatPolicy.Configure`, so `RpgStore`'s static ctor threw on startup and the tool could not
+run at all — the catalog had quietly stopped being regenerable. Fixed; the generator now resolves a
+tuning dir beside the data dir (or `data/tuning`) before opening the store.

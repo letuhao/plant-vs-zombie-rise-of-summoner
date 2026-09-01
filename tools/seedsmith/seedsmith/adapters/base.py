@@ -36,6 +36,20 @@ class KindSpec:
     # incident: a generation stage kept its old label after the graph beneath it changed.
     reference_fields: frozenset[str] = frozenset()
 
+    # How a SHARED motif is expressed for this kind (spec-adapter-demons.md §2.7, audit A1):
+    # the same word means "a material" to an item theme, "a doctrine" to a commander effect,
+    # "a tempo" to an action. Without this, five generators handed the same motifs produce a
+    # thesaurus, not coherence -- and every check still passes, because nothing else can see it.
+    #
+    # DELIBERATE core change, additive with a default so `items` and `_stub` are untouched --
+    # recorded per spec-adapter-demons.md's own instruction ("if the core needs an edit, that is
+    # the finding -- record it rather than patch around it"). This is why `spec-adapter-demons.md`
+    # §1/§4's "not one line of core code changed" / "no file outside adapters/demons/" claims are
+    # corrected to "true for D1's OWN kind additions, false for the feature as a whole" -- see
+    # seedsmith-plan.md Part 4 §D-F1 for the full account of the three options weighed and why
+    # this one (over a demons-local dict, or abusing `registries()`) was chosen.
+    motif_expression: "str | None" = None
+
 
 @dataclass(frozen=True)
 class Dimension:

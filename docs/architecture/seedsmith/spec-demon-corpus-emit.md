@@ -6,7 +6,7 @@ Wave **D1**. Depends on nothing inside seedsmith.
 Ideal: [seedsmith-demons-ideal.md](../seedsmith-demons-ideal.md). Audit findings referenced as `A#`
 are that document's §6.
 
-**Status: proposed 2026-08-31, awaiting owner review. Not authorized to build.**
+**Status: APPROVED by the owner 2026-08-31. Authorized to build.**
 
 ---
 
@@ -175,9 +175,17 @@ cheaper to reject a duplicated field than to reconcile two catalogs.
 
 ## 9. Open questions
 
-1. **Partition key for the emitted files.** `side/rarity` is the obvious first cut and needs no
-   classification. Families would be better strata but do not exist until D2 — and partitions are
-   how `Coverage/EmptyPartition` reports, so this choice shows up in metrics immediately.
-2. **Does `lineage` carry the full transitive closure or only direct parents?** Direct is cheaper and
-   sufficient for `demon-fusion`'s current use; transitive is what a "lineage" feature would
-   eventually want.
+**Both closed 2026-08-31.**
+
+1. ~~Partition key.~~ **DECIDED: `side/rarity` for D1; families are added as a *second* stratum in
+   D2, not as a replacement.** `side/rarity` needs no classification and is available immediately,
+   which is what D1 requires. Swapping it out later would move every `Coverage/EmptyPartition`
+   finding at once; adding a stratum beside it does not.
+   ⚠️ **Note for D2 onward:** rarity is not stable across captures — it is recomputed by rank over a
+   growing pool now that the species cap is removed (`spec-demon-themes` §2.4a shows a demon going
+   Common → Epic at unchanged rank). A rarity partition is a snapshot, and coverage findings should
+   be read as such.
+2. ~~`lineage` transitive or direct?~~ **DECIDED: direct parents only.** It is sufficient for
+   `demon-fusion`'s current use, and the transitive closure is derivable from direct edges whenever a
+   lineage feature wants it — the reverse is not. Emitting the closure now would also make the
+   payload grow non-linearly with an uncapped roster, for a consumer that does not exist.

@@ -1,0 +1,1187 @@
+{
+  "allpeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三种",
+      "三线",
+      "之间",
+      "会均",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "ashthreepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "攻击能力",
+      "三线",
+      "使用",
+      "失去",
+      "射手"
+    ],
+    "tautological": false
+  },
+  "bucketnutzombie": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "一类",
+      "击杀"
+    ],
+    "tautological": false
+  },
+  "bucketzombie": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "一类",
+      "击杀"
+    ],
+    "tautological": false
+  },
+  "cabbagepult": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "二类",
+      "伤害",
+      "僵尸",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "cactus": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "name",
+    "motifs": [
+      "仙人掌",
+      "优先"
+    ],
+    "tautological": false
+  },
+  "cactusblover": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "name",
+    "motifs": [
+      "仙人掌",
+      "优先",
+      "三叶草"
+    ],
+    "tautological": false
+  },
+  "caltrop": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "冰车类",
+      "上方",
+      "伤害",
+      "低矮",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "caltropnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "免疫",
+      "击退",
+      "反伤",
+      "受伤",
+      "地刺"
+    ],
+    "tautological": false
+  },
+  "cherrybomb": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "低矮",
+      "作为",
+      "保护"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "cherrygatling": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "低矮",
+      "作为",
+      "保护"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "cherrynut": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "低矮",
+      "作为",
+      "保护"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "cherrynutzombie": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "低矮",
+      "作为",
+      "保护"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "僵尸",
+      "一类"
+    ],
+    "tautological": false
+  },
+  "cherrypaperzombie": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "低矮",
+      "作为",
+      "保护"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "僵尸",
+      "十字形"
+    ],
+    "tautological": false
+  },
+  "cherryshooter": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "低矮",
+      "作为",
+      "保护"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "cherrysplit": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "低矮",
+      "作为",
+      "保护"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "cherrythreepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一段时间",
+      "三线",
+      "三行",
+      "伤害",
+      "僵尸"
+    ],
+    "tautological": false
+  },
+  "chomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "大嘴花",
+      "伤害",
+      "僵尸",
+      "吞食",
+      "咀嚼"
+    ],
+    "tautological": false
+  },
+  "conezombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一类",
+      "僵尸",
+      "装备",
+      "路障",
+      "韧性"
+    ],
+    "tautological": false
+  },
+  "cornpot": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "text",
+    "motifs": [
+      "上方",
+      "低矮"
+    ],
+    "tautological": false
+  },
+  "cornpult": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "上方",
+      "低矮",
+      "玉米粒"
+    ],
+    "tautological": false
+  },
+  "dancepolzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "运动员",
+      "优秀",
+      "伴舞",
+      "僵尸",
+      "入场"
+    ],
+    "tautological": false
+  },
+  "darkthreepeater": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "三线",
+      "伤害",
+      "倍增",
+      "出场",
+      "射手"
+    ],
+    "tautological": false
+  },
+  "dolldiamond": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一类",
+      "什么",
+      "僵尸",
+      "制成",
+      "套娃"
+    ],
+    "tautological": false
+  },
+  "dollgold": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "一类",
+      "什么"
+    ],
+    "tautological": false
+  },
+  "dollsilver": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "一类",
+      "什么"
+    ],
+    "tautological": false
+  },
+  "doomcactus": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "空对地",
+      "一次",
+      "上下",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "doorzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "二类",
+      "僵尸",
+      "吸取",
+      "弱点",
+      "手持"
+    ],
+    "tautological": false
+  },
+  "doublecherry": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "出场"
+    ],
+    "tautological": false
+  },
+  "doubleshooter": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "出场",
+      "一次"
+    ],
+    "tautological": false
+  },
+  "doublesnow": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "出场",
+      "寒冰菇"
+    ],
+    "tautological": false
+  },
+  "driverzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "免疫",
+      "其实",
+      "冰车",
+      "冰道",
+      "冻结"
+    ],
+    "tautological": false
+  },
+  "flagzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "移速略",
+      "一大",
+      "僵尸",
+      "出场",
+      "快于"
+    ],
+    "tautological": false
+  },
+  "footballzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "橄榄球",
+      "一类",
+      "中等",
+      "偏快",
+      "吸取"
+    ],
+    "tautological": false
+  },
+  "fumeshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "大喷菇",
+      "二类",
+      "伤害",
+      "喷射",
+      "射程"
+    ],
+    "tautological": false
+  },
+  "garlic": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "绕道而行",
+      "伤害",
+      "低矮",
+      "僵尸",
+      "单次"
+    ],
+    "tautological": false
+  },
+  "garlicpea": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "点蒜值",
+      "一片"
+    ],
+    "tautological": false
+  },
+  "garlicthreepeater": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "点蒜值",
+      "一片"
+    ],
+    "tautological": false
+  },
+  "gatlingpea": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一次",
+      "伤害",
+      "发射",
+      "四颗",
+      "射手"
+    ],
+    "tautological": false
+  },
+  "hypnochomper": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "大嘴花",
+      "伤害",
+      "僵尸",
+      "卡牌",
+      "即可"
+    ],
+    "tautological": false
+  },
+  "hypnojalapeno": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "name",
+    "motifs": [
+      "仍旧",
+      "令其"
+    ],
+    "tautological": false
+  },
+  "hypnopeashooter": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "仍旧",
+      "令其",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "hypnoshroom": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "name",
+    "motifs": [
+      "仍旧",
+      "令其",
+      "方而战"
+    ],
+    "tautological": false
+  },
+  "icecaltrop": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "寒冰菇",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "iceshroom": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "寒冰菇",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "ironpeazombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "一颗",
+      "伤害",
+      "僵尸",
+      "击杀",
+      "击退"
+    ],
+    "tautological": false
+  },
+  "jalacaltrop": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "低矮"
+    ],
+    "tautological": false
+  },
+  "jalagatling": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "伤害",
+      "低矮"
+    ],
+    "tautological": false
+  },
+  "jalapeashooter": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "低矮"
+    ],
+    "tautological": false
+  },
+  "jalapeno": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "低矮"
+    ],
+    "tautological": false
+  },
+  "jalastar": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "text",
+    "motifs": [
+      "伤害",
+      "低矮",
+      "易燃易爆"
+    ],
+    "tautological": false
+  },
+  "lanterncactus": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "优先"
+    ],
+    "tautological": false
+  },
+  "lanternchomper": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "优先",
+      "大嘴花"
+    ],
+    "tautological": false
+  },
+  "lanternpea": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "仙人掌",
+      "优先",
+      "锁定目标"
+    ],
+    "tautological": false
+  },
+  "marigold": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "咖啡豆",
+      "金盏花",
+      "个金",
+      "为金",
+      "产量"
+    ],
+    "tautological": false
+  },
+  "melonpult": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "上限",
+      "伤害",
+      "僵尸",
+      "半径",
+      "子弹"
+    ],
+    "tautological": false
+  },
+  "normalzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "临界值",
+      "小贴士",
+      "一次",
+      "一般",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "nutchomper": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "name",
+    "motifs": [
+      "大嘴花",
+      "一定"
+    ],
+    "tautological": false
+  },
+  "paperzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "二类",
+      "别人",
+      "后移",
+      "失去",
+      "打断"
+    ],
+    "tautological": false
+  },
+  "peachomper": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "name",
+    "motifs": [
+      "大嘴花",
+      "一定"
+    ],
+    "tautological": false
+  },
+  "peanut": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "上坡",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "peashooter": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "第一道",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "peashooterzombie": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "第一道",
+      "伤害",
+      "一颗"
+    ],
+    "tautological": false
+  },
+  "peasquash": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "第一道",
+      "伤害",
+      "砸击时"
+    ],
+    "tautological": false
+  },
+  "peasunflower": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "向日葵",
+      "产量"
+    ],
+    "tautological": false
+  },
+  "plantern": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "向日葵",
+      "产量",
+      "大部分"
+    ],
+    "tautological": false
+  },
+  "polevaulterzombie": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "中等",
+      "借助",
+      "助跑",
+      "变为",
+      "失去"
+    ],
+    "tautological": false
+  },
+  "pot": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "text",
+    "motifs": [
+      "优先级",
+      "上方"
+    ],
+    "tautological": false
+  },
+  "pumpkin": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "text",
+    "motifs": [
+      "优先级",
+      "上方"
+    ],
+    "tautological": false
+  },
+  "scaredyshroom": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "远距离",
+      "伤害",
+      "僵尸",
+      "内有",
+      "发射"
+    ],
+    "tautological": false
+  },
+  "snowgatling": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "text",
+    "motifs": [
+      "寒冰菇",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "snowpeashooter": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "text",
+    "motifs": [
+      "寒冰菇",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "snowsplit": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "第一道",
+      "伤害",
+      "寒冰菇"
+    ],
+    "tautological": false
+  },
+  "splitpea": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "第一道",
+      "伤害",
+      "一颗"
+    ],
+    "tautological": false
+  },
+  "squash": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "锁定目标",
+      "第一个",
+      "伤害",
+      "位置",
+      "低于"
+    ],
+    "tautological": false
+  },
+  "starfruit": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "五个",
+      "伤害"
+    ],
+    "tautological": false
+  },
+  "starpea": {
+    "antiMotifs": [
+      "一类",
+      "击杀",
+      "吸引",
+      "坚果",
+      "掉落"
+    ],
+    "basis": "name",
+    "motifs": [
+      "五个",
+      "伤害",
+      "一次"
+    ],
+    "tautological": false
+  },
+  "sunchomper": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "向日葵",
+      "大嘴花"
+    ],
+    "tautological": false
+  },
+  "sunflower": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "name",
+    "motifs": [
+      "向日葵",
+      "大嘴花"
+    ],
+    "tautological": false
+  },
+  "threecabbage": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "卷心菜",
+      "本格及",
+      "一次",
+      "三线",
+      "三行"
+    ],
+    "tautological": false
+  },
+  "threepeater": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "三线",
+      "三行"
+    ],
+    "tautological": false
+  },
+  "threeplantern": {
+    "antiMotifs": [
+      "优先级",
+      "上方",
+      "伤害",
+      "低矮",
+      "作为"
+    ],
+    "basis": "text",
+    "motifs": [
+      "三线",
+      "三行",
+      "仙人掌"
+    ],
+    "tautological": false
+  },
+  "twinflower": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "向日葵",
+      "两倍",
+      "产量",
+      "融合",
+      "配方"
+    ],
+    "tautological": false
+  },
+  "wallnut": {
+    "antiMotifs": [],
+    "basis": "text",
+    "motifs": [
+      "保护",
+      "保留",
+      "其他",
+      "坚果",
+      "坚硬"
+    ],
+    "tautological": false
+  }
+}

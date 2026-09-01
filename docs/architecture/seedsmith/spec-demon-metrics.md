@@ -5,7 +5,7 @@ Depends on `metrics`, `motif-derive`. **Gates D4.**
 
 Ideal: [seedsmith-demons-ideal.md](../seedsmith-demons-ideal.md); `A#` = its §6 audit.
 
-**Status: proposed 2026-08-31, awaiting owner review. Not authorized to build.**
+**Status: APPROVED by the owner 2026-08-31. Authorized to build.**
 
 ---
 
@@ -39,6 +39,22 @@ one from *"does every demon have content"* — which is the one a player notices
 So: a finding per demon that has no generated content, regardless of how well its families are
 covered. `Coverage/EmptyPartition` keeps doing its job unchanged; this sits beside it.
 
+**"Content" means any generated artifact** (owner, 2026-08-31) — an item, action, aspect, commander
+effect or theme. A demon is uncovered only when it has *nothing*, and coverage is otherwise binary:
+a demon with SOME content produces no finding at all, the same "silence is healthy" convention
+`Coverage/EmptyPartition` already uses.
+
+**⚠️ Corrected 2026-08-31, after building it:** an earlier draft of this section implied the finding
+also names which kinds ARE present for a partly-covered demon. That would need a second finding
+type (or a NOTE alongside every healthy demon), which is exactly the noise the "any artifact
+counts" decision was chosen to avoid. What actually ships is narrower and still answers the useful
+question: **the one GAP finding a zero-content demon produces carries `absentKinds` — every kind
+that was checked and found missing** — so a reader sees *what to generate*, not merely that
+something is wrong. There is no "present" side to report, because the only finding that exists is
+for demons with nothing present. Collapsing coverage to a bare pass/fail boolean (no kind list at
+all) would still have discarded this; carrying `absentKinds` is what "covered, and by what" reduces
+to once the stricter multi-kind reading was rejected.
+
 **Severity `GAP`, `loop = CLOSED`, `gates = False` on ship** — the program's standing rule is that
 new metrics ship non-gating and promotion is a separate, later act.
 
@@ -66,6 +82,7 @@ Reported, always, in the finding's evidence:
 | Field | Why it is reported rather than folded in |
 |---|---|
 | `demonsPerMotif` | the measured property |
+| `demonCount` | the `n` the figure was measured over — it varies between runs now (§2.2a) |
 | `excludedTautological` | how much of the corpus could not be measured |
 | `singleUseMotifs` | a motif used by exactly one demon is a private adjective, not a shared vocabulary |
 
@@ -78,19 +95,31 @@ and an under-differentiated one produce similar numbers. So this reports and sam
 never passes or fails. Giving it a verdict field would be the "mark its own homework" defect
 `audit_open_loop_schema` refuses.
 
-### 2.2a ⚠️ n=24 bounds what this metric can resolve — audit S4
+### 2.2a The roster is uncapped, so `n` is a measurement — audit S4, revised 2026-08-31
 
-seedsmith's distribution machinery was built against **1,438 item entries**. The demon roster is
-**24** (`DemonSpeciesGenerator.DefaultMaxSpecies`). With perhaps 5–8 families that is 3–5 demons
-each, and after §2.2's tautology exclusion it may be fewer.
+Audit S4 said this metric would run on **n=24** against machinery built for **1,438 item entries**,
+and that a sharing figure from 24 entities is closer to an anecdote than a measurement.
 
-**The metric still earns its place** — it catches the catastrophic case where every motif is private,
-which is the failure it exists for. But a sharing figure from a 24-entity corpus is closer to an
-anecdote than a measurement, and it must not be read as a balance signal. Raising the roster size is
-a demon-program decision, not this feature's.
+**The premise is gone.** The owner removed the species cap on 2026-08-31: `Generate` now takes
+`int? maxSpecies = null` meaning *no limit*, so every captured species becomes a demon and a PVZ
+update that adds almanac entries adds demons. `n` is now **whatever capture coverage yields** — 84
+eligible rows today (18 zombie + 66 plant), rising toward the game's ~904 types as spawn coverage
+improves. See [`ssot-power-scale.md`](../power/ssot-power-scale.md) §11.10a.
 
-This is why §2.2 reports `excludedTautological` and `singleUseMotifs` as raw counts rather than a
-ratio: on n=24 the counts are legible and a ratio is spurious precision.
+**What that changes here, and what it does not.**
+
+- **It does not change the design.** The metric was never threshold-based, so nothing needs
+  re-tuning for a larger `n`.
+- **It does change how the output must be read.** `n` is no longer a fixed design point to reason
+  against, so **the metric reports `demonCount` alongside every figure**. A sharing number without
+  its `n` is uninterpretable when `n` moves between runs — and it will move, every time capture
+  coverage improves.
+- **It removes the reason to distrust the figure.** At 84 and climbing, demons-per-motif is a real
+  measurement rather than an anecdote.
+
+§2.2 still reports `excludedTautological` and `singleUseMotifs` as **raw counts**, now for a
+different reason: with `n` varying between runs, a ratio silently conflates "sharing improved" with
+"the roster grew". Counts plus `demonCount` let a reader tell those apart; a ratio cannot.
 
 ### 2.3 What this module does not do
 
@@ -141,6 +170,8 @@ output across runs.
 |---|---|
 | Every demon has content | `Coverage/DemonUncovered` reports **nothing** |
 | One demon uncovered, its families all covered | **one finding** — this is A5's exact case, and the test states it as such |
+| A demon with a commander effect but no aspect | **covered**, and the evidence names `aspect` as absent (§2.1) |
+| Two runs over rosters of different size | each carries its own `demonCount`; the sharing figures are not comparable without it (§2.2a) |
 | Motifs each used by one demon | `singleUseMotifs` equals the vocabulary size; sharing reported as absent |
 | Motifs shared across a family | `demonsPerMotif` > 1 |
 | A demon with motifs and families both `basis = "name"` | **excluded** from the sharing calculation, and counted in `excludedTautological` |
@@ -179,8 +210,11 @@ be reassuring.
 
 ## 9. Open questions
 
-1. **What counts as "content" for per-demon coverage?** An aspect? Any generated artifact? A demon
-   with a commander effect but no aspect is partly covered, and whether that reads as covered or as a
-   gap depends on what the player sees.
-2. **Should `singleUseMotifs` have a reporting threshold?** Reporting every one is noisy on a small
-   roster; suppressing them hides the failure. Wants measuring rather than choosing.
+**Both closed 2026-08-31.**
+
+1. ~~What counts as "content"?~~ **DECIDED (owner): any generated artifact counts, and the finding
+   carries a per-kind breakdown** — see §2.1. The metric ships non-gating, so the breakdown is its
+   real output; a single boolean would throw away the part worth acting on.
+2. ~~Should `singleUseMotifs` have a reporting threshold?~~ **DECIDED: report all.** A threshold
+   would be a number invented to suppress output, and suppression hides precisely the failure the
+   field exists to expose (A2's private-adjective case). If the list is long, that *is* the finding.

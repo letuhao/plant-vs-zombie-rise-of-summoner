@@ -5,7 +5,7 @@ Depends on `family-extract`.
 
 Ideal: [seedsmith-demons-ideal.md](../seedsmith-demons-ideal.md); `A#` = its §6 audit.
 
-**Status: proposed 2026-08-31, awaiting owner review. Not authorized to build.**
+**Status: APPROVED by the owner 2026-08-31. Authorized to build.**
 
 ---
 
@@ -27,13 +27,22 @@ ids, and running consolidation again over the same candidates reproduces it exac
 
 ## 2. Design
 
-### 2.0 ⛔ This module's core rule is blocked on a decision in `family-extract` — audit S7
+### 2.0 ✅ Unblocked — the merge runs on `label`, the native text rides along
 
-§2.1's head-noun merge assumes **English labels**. The roster's names are Chinese
-(`钻石套娃僵尸`), so if extraction emits native labels this algorithm does not degrade — it is
-undefined, and the synonym map becomes the entire merge.
+Audit S7 held this module: §2.1's head-noun merge assumes **English labels**, and the roster's names
+are Chinese (`钻石套娃僵尸`), which would make the algorithm undefined rather than merely inaccurate.
 
-`spec-family-extract` §2.2a carries the decision. **Do not build this module before it is answered.**
+**Resolved by the owner 2026-08-31** (`spec-family-extract` §2.2a): every candidate carries **both**
+an English `label` and the `nativeLabel` it was read from.
+
+- **Merging reads `label` only.** §2.1 works exactly as written — no replacement rule, no synonym map
+  carrying the whole load.
+- **`nativeLabel` never participates in merging.** It is carried through to the vocabulary for
+  display and for `lore-enrich`, and it is what lets a later reader check whether a translation was
+  reasonable instead of taking it on trust.
+
+Two candidates that differ only in `nativeLabel` must merge into one family — the test that keeps
+this true is in §6.
 
 ### 2.1 Deterministic by construction — the default path
 
@@ -135,6 +144,8 @@ points at one rule rather than at "the merge". No I/O below the top-level entry 
 | `wall-nut`, `defensive-nut`, `nut-type` | one family, head noun `nut` |
 | `shell` with `armor-plated` in the synonym map | merged |
 | `shell` with an **empty** synonym map | **not** merged — proves the map is load-bearing rather than decorative |
+| Two candidates differing **only** in `nativeLabel` | **one** family — native text never affects merging (§2.0) |
+| A merged family | carries the `nativeLabel`s of its contributing candidates, for display and `lore-enrich` |
 | A demon with `basis = "blocked"` | **zero** families, and this is not an error |
 | A demon with candidates from two heads | **both** families — multi-membership works |
 | A family id present in `families.v1.json` | never renamed or re-positioned by a later run over new candidates |
@@ -171,7 +182,12 @@ add once content has been generated against the ids.
 
 ## 9. Open questions
 
-1. ⛔ **Promoted to a blocker (audit S7) — see §2.0.** Not an open question: the merge rule is
-   undefined until `family-extract`'s label language is decided.
-2. **Is the synonym map per-feature or shared?** Items may want one too. Shared risks coupling two
-   corpora through a file neither owns.
+**Both closed 2026-08-31.**
+
+1. ~~Label language (audit S7's blocker).~~ **RESOLVED by the owner — see §2.0.** Merging reads the
+   English `label`; `nativeLabel` rides along and never merges.
+2. ~~Is the synonym map per-feature or shared?~~ **DECIDED: per-feature**
+   (`adapters/demons/family/synonyms.json`, as §4 already lays out). A shared map would couple the
+   demon and item corpora through a file neither owns, so an edit made for one silently re-merges the
+   other's families — and the append-only rule (§2.3) means that damage is not reversible by editing
+   the map back. If items later want one, they get their own.

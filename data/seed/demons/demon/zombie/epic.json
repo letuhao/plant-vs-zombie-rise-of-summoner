@@ -1,0 +1,272 @@
+{
+  "kind": "demon",
+  "_meta": {
+    "partition": "zombie/epic"
+  },
+  "entries": [
+    {
+      "id": "bucketnutzombie",
+      "nameKey": "demon.bucketnutzombie",
+      "name": "铁桶坚果僵尸",
+      "gameTypeId": 106,
+      "side": "zombie",
+      "flavorInfo": "铁桶坚果也能动起来？\n\n韧性：270\u002B2200（一类）\n特点：防具被磁力菇吸引后死亡。被击杀时掉落铁桶",
+      "flavorIntroduce": "为什么铁桶坚果僵尸的头这么铁？其实是因为大家都说吃核桃补脑，但是他没注意到他吃的核桃含铁量太高。不过情况也许没那么糟，至少现在他练成了铁头功。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 2200,
+      "armorMax": 2200,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "bucketzombie",
+      "nameKey": "demon.bucketzombie",
+      "name": "铁桶僵尸",
+      "gameTypeId": 4,
+      "side": "zombie",
+      "flavorInfo": "装备着铁桶的僵尸。\n\n韧性：270\u002B1100（一类）\n弱点：铁桶可以被磁力菇吸取",
+      "flavorIntroduce": "几曾何时，本来只是个油漆工的铁桶僵尸因其创新的铁桶策略被誉为僵尸中的天才。几年过去了，僵尸们怀疑他还有什么秘密的杀手锏。江郎才尽还是暗藏绝技？谁知道呢？\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 1100,
+      "armorMax": 1100,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "cherrynutzombie",
+      "nameKey": "demon.cherrynutzombie",
+      "name": "樱桃坚果僵尸",
+      "gameTypeId": 107,
+      "side": "zombie",
+      "flavorInfo": "喜欢吃爆浆樱桃，已经吃习惯了。\n\n韧性：270\u002B1100（一类）\n特点：受到所有的樱桃爆炸伤害减半",
+      "flavorIntroduce": "真男人从不回头看爆炸，至少樱桃坚果僵尸就从不回头，因为它一般都是用脸接炸弹的。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 1100,
+      "armorMax": 1100,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "conezombie",
+      "nameKey": "demon.conezombie",
+      "name": "路障僵尸",
+      "gameTypeId": 2,
+      "side": "zombie",
+      "flavorInfo": "装备着路障的僵尸。\n\n韧性：270\u002B370（一类）",
+      "flavorIntroduce": "路障僵尸其实并不知道路障是什么东西，它只是觉得这玩意很像冰激凌筒，发现啃不动之后就顺手搁到了头上。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 370,
+      "armorMax": 370,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "dancepolzombie",
+      "nameKey": "demon.dancepolzombie",
+      "name": "舞王撑杆僵尸",
+      "gameTypeId": 6,
+      "side": "zombie",
+      "flavorInfo": "舞王身边的优秀舞者，也是个撑杆运动员。\n\n韧性：720\n特点：跑步入场，越过遇到的首个植物，然后在周围召唤4个伴舞撑杆僵尸。被阻挡时不会召唤",
+      "flavorIntroduce": "舞王撑杆僵尸的体育成绩在僵尸界平平无奇，在伴舞撑杆僵尸们的建议下走了偶像路线，现在与Michael Jackson合作的流行乐《Just Brains》正在爆火。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 720,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "doorzombie",
+      "nameKey": "demon.doorzombie",
+      "name": "铁门僵尸",
+      "gameTypeId": 8,
+      "side": "zombie",
+      "flavorInfo": "手持铁门的僵尸。\n\n韧性：270\u002B1100（二类）\n弱点：铁门可以被磁力菇吸取",
+      "flavorIntroduce": "铁门僵尸曾经是一个fbi特遣队员，他的脾气暴躁但有一颗正义的心，从不和劫匪商量，直接拆门进去拯救人质。他变成僵尸后善良的内心依然没变，他看到有一群僵尸绑架了一个小鬼僵尸焦急的想破门进去，但由于僵尸们知道他的性格所以提前在门上涂上了胶水，导致他不能把手从门上拿下来。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "flagzombie",
+      "nameKey": "demon.flagzombie",
+      "name": "旗帜僵尸",
+      "gameTypeId": 1,
+      "side": "zombie",
+      "flavorInfo": "手中的摇旗标志着一大波僵尸来袭。\n\n韧性：270\n特点：默认在旗帜波出场。移速略快于普通僵尸",
+      "flavorIntroduce": "毋庸置疑的是，旗帜僵尸喜爱脑子，但在私下里他也迷恋旗帜。或许是因为旗帜上也画着脑子吧，这很难说。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "footballzombie",
+      "nameKey": "demon.footballzombie",
+      "name": "橄榄球僵尸",
+      "gameTypeId": 9,
+      "side": "zombie",
+      "flavorInfo": "职业橄榄球员，装备着橄榄帽。\n\n韧性：270\u002B1400（一类）\n移速：中等偏快\n弱点：橄榄帽可以被磁力菇吸取",
+      "flavorIntroduce": "橄榄球僵尸是僵尸中的体育明星，他在球场上驰骋的英姿受到很多僵尸的崇拜，好多公司都想雇佣橄榄球僵尸。不过他对工资的要求也太高了吧，年薪一万个脑子？\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 1400,
+      "armorMax": 1400,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "normalzombie",
+      "nameKey": "demon.normalzombie",
+      "name": "僵尸",
+      "gameTypeId": 0,
+      "side": "zombie",
+      "flavorInfo": "平平无奇的僵尸。\n\n啃咬伤害：50\n韧性：270\n小贴士：僵尸默认每0.5秒啃咬一次。血量低于临界值时死亡。临界值一般为韧性的1/3，载具、巨人僵尸和雕像的临界值为0",
+      "flavorIntroduce": "普通僵尸讨厌他名字里的“普通”这个字眼。他不认为自己是什么不配拥有姓名的敌人抑或是随处可见的普通尸体。他是一个独立的个体，该死的，他打算做出点不普通的事，即使这会杀了你。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "paperzombie",
+      "nameKey": "demon.paperzombie",
+      "name": "读报僵尸",
+      "gameTypeId": 5,
+      "side": "zombie",
+      "flavorInfo": "最讨厌别人打断他读报。\n\n韧性：270\u002B200（二类）\n特点：失去报纸后移速x2.5，攻速x1.5",
+      "flavorIntroduce": "你真不能怪他这么暴躁，他就差这么一点就完成这个纵横字谜了（第23号纵向词是“Brains（大脑）”），这也是为什么他把报纸反过来拿。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "peashooterzombie",
+      "nameKey": "demon.peashooterzombie",
+      "name": "豌豆射手僵尸",
+      "gameTypeId": 100,
+      "side": "zombie",
+      "flavorInfo": "发射豌豆攻击你的植物。\n\n子弹伤害：20\n韧性：270\n特点：每1.5秒发射一颗豌豆",
+      "flavorIntroduce": "豌豆射手僵尸远处的作战能力经常让植物闻风丧胆，但僵尸那边却人心惶惶，仅仅是以为在他前面作战的僵尸总是会以为他会在后面打到自己。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 270,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    }
+  ]
+}

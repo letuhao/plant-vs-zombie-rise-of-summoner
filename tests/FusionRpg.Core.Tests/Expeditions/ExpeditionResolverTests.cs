@@ -158,10 +158,29 @@ public class ExpeditionResolverTests
     // Verified NOT a determinism break before re-blessing, not assumed: every other test in this
     // file (Same_inputs_resolve_identically, recall pro-rating) stayed green unchanged, confirming
     // the resolver's own math and RNG streams did not move — only the embedded BattleSetup's shape.
-    const string ScoutHash = "742C45B94D26C03892CB70B7B48F9442259AC333A946D40993C80DF064C50979";
-    const string ForageHash = "B7EC755159E4D92592BC76EDDFF9B1E009ED4EF158C66E66A73C3A4F4474AC9E";
-    const string HuntHash = "8061FB3CA5CC67AFABD4E025962E41F6E36F3D80459C101485FAE6FF22C0FC85";
-    const string WarpathHash = "53F70A7C533F368BB9F52D32B343C616275E6FDBAB601094F1710DDE3FD331BA";
+    //
+    // Re-blessed 2026-08-31 in ONE step covering two roster changes made together: the species cap
+    // removal (24 -> 84 species) and RarityForRank's legendary tier becoming proportional
+    // (7 legendary instead of 2 at 84 species). Both feed WildBand, so they are one re-bless.
+    //
+    // Why the roster touches this golden at all — a DIFFERENT class from every re-bless
+    // above — those were serialization shape or magnitude churn with the roster fixed. This one is
+    // a genuine content change. WildBand (ExpeditionResolver.cs:231) picks wild enemies from
+    // DemonSpeciesCatalog.All filtered by rarity and ordered by SpeciesId, then indexes with
+    // rng.NextInt(band.Count). Regenerating the catalog uncapped took it from 24 to 84 species, so
+    // both the band's contents and its size changed and a different enemy is legitimately rolled.
+    // Verified it is selection, not a determinism break: Same_inputs_resolve_identically and the
+    // recall pro-rating tests stayed green unchanged, and Squad() uses a fixed "test-species" that
+    // never touches the catalog — so the squad side of the resolution did not move at all.
+    //
+    // NOTE for the next capture: this golden is coupled to roster SIZE, so it moves every time
+    // species are added. That is now expected rather than alarming, but it makes the test a poor
+    // regression signal for the resolver itself — decoupling the wild-enemy pick from the live
+    // catalog (a fixture band) would be the fix if the churn becomes annoying.
+    const string ScoutHash = "D205A51C0D5376E49B93D0A807E45C5C701E06E14D92967944A1525E7243049B";
+    const string ForageHash = "C8E6C8FE5A75EE2DB6391BDEB8D811EC3CE18A5F3BA9502D55A69AA69E1D296D";
+    const string HuntHash = "40662D95ED23C07710258C149016A3360DAD31AA66078A9C0908AC53A3C1D204";
+    const string WarpathHash = "96EC24504681E16A792ED0E624810E668C94B6EBD276C7419BF69315706847B6";
 
     [Fact]
     public void Tier_goldens_are_locked()

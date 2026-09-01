@@ -1,0 +1,176 @@
+{
+  "kind": "demon",
+  "_meta": {
+    "partition": "zombie/legendary"
+  },
+  "entries": [
+    {
+      "id": "cherrypaperzombie",
+      "nameKey": "demon.cherrypaperzombie",
+      "name": "樱桃读报僵尸",
+      "gameTypeId": 104,
+      "side": "zombie",
+      "flavorInfo": "因为阅读被打断而十分愤怒，吐出大量爆炸樱桃。\n\n子弹伤害：1000\n韧性：1500\u002B200（二类）\n特点：拥有读报僵尸的特点。失去报纸后，每0.75秒发射1颗爆炸樱桃子弹\n僵尸爆炸樱桃子弹：对植物伤害1000，十字形无衰减溅射，坚果类（难度4及以下）和南瓜类可以防止产生溅射。对魅惑僵尸效果同植物的爆炸樱桃子弹",
+      "flavorIntroduce": "樱桃读报僵尸最喜欢的水果是樱桃，就连他的报纸都是樱桃口味的，而他手中的报纸也是唯一能抑制他的暴怒的东西。樱桃读报僵尸总是在读报纸时吃樱桃，而在读完报纸之后他会上演一场川剧变脸，随后把之前吃掉的樱桃都吐出去。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 1500,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "dolldiamond",
+      "nameKey": "demon.dolldiamond",
+      "name": "钻石套娃僵尸",
+      "gameTypeId": 21,
+      "side": "zombie",
+      "flavorInfo": "钻石制成的套娃，里面有什么呢？\n\n韧性：2000\u002B3000（一类）\n特点：防具损坏时退场，生成黄金套娃僵尸",
+      "flavorIntroduce": "钻石套娃僵尸，今晚将会开启它们那闪耀的银色世界。它们的眼睛是夜空中最明亮的星辰，金色的光辉仿佛流淌在时间的河流中，照亮了前方不确定的道路。每当我轻轻拆开盒盖，就像是打开了通往另一个世界的神秘门扉。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 2000,
+      "attack": 50,
+      "armor": 3000,
+      "armorMax": 3000,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "dollgold",
+      "nameKey": "demon.dollgold",
+      "name": "黄金套娃僵尸",
+      "gameTypeId": 22,
+      "side": "zombie",
+      "flavorInfo": "黄金制成的套娃，里面有什么呢？\n\n韧性：2000\u002B1350（一类）\n特点：防具损坏时退场，生成白银套娃僵尸",
+      "flavorIntroduce": "金色的盒子下面还有其他颜色的盒子，你猜猜更里面的盒子是什么材质的？\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 2000,
+      "attack": 50,
+      "armor": 1350,
+      "armorMax": 1350,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "dollsilver",
+      "nameKey": "demon.dollsilver",
+      "name": "白银套娃僵尸",
+      "gameTypeId": 23,
+      "side": "zombie",
+      "flavorInfo": "白银制成的套娃，里面有什么呢？\n\n韧性：2000\u002B720（一类）\n特点：防具损坏时退场，生成路障僵尸",
+      "flavorIntroduce": "白银套娃僵尸觉得自己头上套着的盒子是个锅，那他头上套着的盒子就是个锅，这个僵尸都这样了，那你为什么不去理解他的想法呢？你也知道他的盒子上面有一个感叹号吧？\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 2000,
+      "attack": 50,
+      "armor": 720,
+      "armorMax": 720,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "driverzombie",
+      "nameKey": "demon.driverzombie",
+      "name": "雪橇车僵尸",
+      "gameTypeId": 16,
+      "side": "zombie",
+      "flavorInfo": "其实是Zomboni牌造冰车。\n\n韧性：1350\n特性：碾压\n特点：免疫寒冷、冻结、定身。出场时速度较快，逐渐减速到正常速度。会持续留下冰道",
+      "flavorIntroduce": "雪橇车僵尸的车技很好，毕竟能从滑冰场开到草地的僵尸已经不多见了，他总是这么安慰着自己，然后去交罚款。他开的不是Zamboni牌浇冰机，而是Z公司出品的Zomboni牌浇冰机。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 1350,
+      "attack": 500,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "ironpeazombie",
+      "nameKey": "demon.ironpeazombie",
+      "name": "铁桶豌豆僵尸",
+      "gameTypeId": 108,
+      "side": "zombie",
+      "flavorInfo": "发射高伤害的铁豌豆子弹。\n\n子弹伤害：80\n韧性：1350\n特点：被击杀时掉落铁桶。每1.5秒发射一颗铁豌豆，会击退魅惑僵尸",
+      "flavorIntroduce": "铁桶豌豆僵尸去年抽了塔罗牌，他的塔罗牌的暗示是「The Emperor」，从那之后他就发现自己可以随随便便射出铁子弹了。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 1350,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    },
+    {
+      "id": "polevaulterzombie",
+      "nameKey": "demon.polevaulterzombie",
+      "name": "撑杆僵尸",
+      "gameTypeId": 3,
+      "side": "zombie",
+      "flavorInfo": "借助撑杆和助跑，越过遇到的首个植物。\n\n韧性：720\n移速：中等，跳跃后变为极慢\n特点：越过遇到的首个植物（会被高大植物阻挡），然后失去撑杆",
+      "flavorIntroduce": "一些僵尸渴望更进一步、追求更多，这促使着他们跨越普通、成就非凡。那边那个撑杆僵尸就是如此。\n",
+      "sunCost": null,
+      "cooldownSec": null,
+      "hp": 720,
+      "attack": 50,
+      "armor": 0,
+      "armorMax": 0,
+      "coverage": {
+        "cost": "absent",
+        "stats": "observed",
+        "flavor": "present"
+      },
+      "lineage": {
+        "parents": [],
+        "children": []
+      }
+    }
+  ]
+}

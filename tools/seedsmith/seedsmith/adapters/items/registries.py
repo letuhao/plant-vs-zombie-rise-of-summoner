@@ -30,7 +30,26 @@ def load_versions() -> dict[str, int]:
            for name in _REGISTRY_FILES}
 
 
-def load_vocabularies() -> dict[str, frozenset[str]]:
+def load_theme_keys() -> frozenset[str]:
+    """`themeKey`'s legal vocabulary — a UNION of two append-only populations that cannot collide
+    by construction (spec-demon-themes.md §2.2a, resolving audit S5): legacy `theme.*` ids, human-
+    authored and frozen in `themes.v1.json` (13 registered, 5 currently referenced by 38 real
+    entries — measured 2026-08-31), and `demon.*` ids the demons feature publishes at runtime.
+
+    This is the ONE file outside `adapters/demons/` the demons feature is allowed to touch
+    (spec-adapter-demons.md's own single exception) — it adds a VOCABULARY, not a concept: this
+    module still knows nothing about what a demon is, only that `demon.`-prefixed strings are now
+    legal `themeKey` values. Demon themes are not loaded from a committed file here (none is
+    committed yet — see the demons feature's own build notes); a caller with a live demon theme
+    registry unions its keys in via `demon_theme_keys`.
+    """
+    legacy = frozenset(f"theme.{t['id']}" for t in _load("themes.v1.json")["themes"])
+    return legacy
+
+
+def load_vocabularies(
+    *, demon_theme_keys: "frozenset[str] | None" = None,
+) -> dict[str, frozenset[str]]:
     core = _load("core.v1.json")
     tags = _load("tags.v1.json")
     classes = _load("classes.v1.json")
@@ -67,6 +86,7 @@ def load_vocabularies() -> dict[str, frozenset[str]]:
         "tags": tag_ids,
         "class": class_values,
         "partitions": partitions,
+        "themeKey": load_theme_keys() | (demon_theme_keys or frozenset()),
     }
 
 
