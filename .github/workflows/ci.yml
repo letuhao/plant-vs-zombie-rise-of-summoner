@@ -82,6 +82,22 @@ jobs:
           dotnet run --project tools/ItemSeedValidator -c Release
           if ($LASTEXITCODE -ne 0) { throw "item seed corpus failed validation" }
 
+      - name: Install seedsmith from the lockfile (reproducible env)
+        shell: pwsh
+        working-directory: tools/seedsmith
+        run: |
+          # G0.1 (spec-dependency-baseline.md): seedsmith declared ZERO dependencies until
+          # 2026-09-01, so this job ran against whatever the runner happened to have. `jieba` was
+          # imported by adapters/demons/motifs.py and declared nowhere — a fresh clone failed
+          # test_motif_derive.py with ModuleNotFoundError. Installing from the committed lockfile
+          # makes the environment reproducible instead of ambient.
+          python -m pip install --upgrade pip
+          if ($LASTEXITCODE -ne 0) { throw "pip upgrade failed" }
+          python -m pip install -r requirements.lock
+          if ($LASTEXITCODE -ne 0) { throw "seedsmith lockfile install failed" }
+          python -m pip install -e . --no-deps
+          if ($LASTEXITCODE -ne 0) { throw "seedsmith editable install failed" }
+
       - name: Item seed reachability (seedsmith)
         shell: pwsh
         run: |

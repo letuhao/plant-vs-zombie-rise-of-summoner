@@ -165,3 +165,44 @@ def test_live_theme_keys_used_are_a_subset_of_the_five_known_ones():
     used = {e.get("themeKey") for e in corpus.entries.values() if e.get("themeKey")}
     assert used == {"theme.frostbitten-vanguard", "theme.rusted-legion", "theme.sunwoven-almanac",
                     "theme.thorned-chassis", "theme.verdant-graft"}
+
+
+# ---- Cross-artifact consistency (added 2026-09-01 after a real, undetected staleness) -----------
+
+
+def test_published_themes_carry_the_current_motifs():
+    """⛔ Real defect this pins. `themes.v1.json` EMBEDS each demon's motifs. When G1
+    (`motif-prose-filter`) changed every demon's motifs, all 84 themes silently went stale — still
+    carrying the pre-filter stat vocabulary (`一类` = "armour-class one", `三线`, `伤害`) while
+    `motif-assignments.json` had moved on. **No metric compared the two**, so nothing noticed.
+
+    Consistency between a derived artifact and the artifact it was derived FROM is exactly the kind
+    of thing that rots without a test."""
+    import json
+
+    root = LIVE_ITEMS_ROOT.parent / "demons"
+    themes = json.loads((root / "_registry" / "themes.v1.json").read_text(encoding="utf-8"))["themes"]
+    motifs = json.loads(
+        (root / "_generated" / "motif-assignments.json").read_text(encoding="utf-8"))
+
+    stale = []
+    for key, rec in themes.items():
+        sid = rec["speciesId"]
+        if sid in motifs and rec["motifs"] != motifs[sid]["motifs"]:
+            stale.append(sid)
+    assert stale == [], (
+        f"{len(stale)} theme(s) carry motifs that no longer match motif-assignments.json — "
+        f"re-run `python -m seedsmith.adapters.demons.generate_themes --rebuild`: {stale[:5]}")
+
+
+def test_every_theme_carries_both_expression_rules_and_a_rarity_snapshot():
+    import json
+
+    root = LIVE_ITEMS_ROOT.parent / "demons"
+    themes = json.loads((root / "_registry" / "themes.v1.json").read_text(encoding="utf-8"))["themes"]
+    assert themes, "the theme registry is empty"
+    for key, rec in themes.items():
+        assert key.startswith("demon."), f"{key} is not demon-prefixed"
+        assert set(rec["expression"]) == {"item", "action"}, key
+        assert rec["rarity"], f"{key} has no rarity snapshot"
+        assert rec["basis"] in ("text", "name"), key

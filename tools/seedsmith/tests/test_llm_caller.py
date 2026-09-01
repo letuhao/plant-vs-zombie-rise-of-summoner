@@ -286,3 +286,54 @@ class DependencyIsolationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---- G0.3: constrained decoding (spec-dependency-baseline.md §2.4) -----------------------------
+
+
+class ConstrainedDecodingTests(unittest.TestCase):
+    """`schema` is optional and must be INERT when unused — the acceptance criterion that matters
+    most, because every existing caller relies on today's body shape."""
+
+    def setUp(self) -> None:
+        self.server = MockModelServer()
+        self.config = LlmCallerConfig(endpoint=self.server.url, attempts=1, retry_delay=0)
+
+    def tearDown(self) -> None:
+        self.server.close()
+
+    def test_schema_none_produces_a_body_with_no_response_format_key(self) -> None:
+        """Provably inert: omitting `schema` must not add anything to the request."""
+        self.server.queue('{"a": "1"}')
+        call_model("sys", "user", config=self.config)
+        self.assertNotIn("response_format", self.server.requests[0])
+
+    def test_schema_none_body_is_byte_identical_to_explicitly_passing_none(self) -> None:
+        self.server.queue('{"a": "1"}', '{"a": "2"}')
+        call_model("sys", "user", config=self.config)
+        call_model("sys", "user", config=self.config, schema=None)
+        self.assertEqual(self.server.requests[0], self.server.requests[1])
+
+    def test_a_schema_is_sent_as_openai_style_json_schema_response_format(self) -> None:
+        schema = {"type": "object", "properties": {"label": {"type": "string"}},
+                  "required": ["label"], "additionalProperties": False}
+        self.server.queue('{"label": "nut"}')
+        call_model("sys", "user", config=self.config, schema=schema)
+
+        rf = self.server.requests[0]["response_format"]
+        self.assertEqual(rf["type"], "json_schema")
+        self.assertTrue(rf["json_schema"]["strict"])
+        self.assertEqual(rf["json_schema"]["schema"], schema)
+
+    def test_reasoning_disable_fields_survive_alongside_a_schema(self) -> None:
+        """Constrained decoding must not silently drop the reasoning-disable contract."""
+        self.server.queue('{"label": "x"}')
+        call_model("sys", "u", config=self.config, schema={"type": "object"})
+        req = self.server.requests[0]
+        self.assertEqual(req["reasoning_effort"], "none")
+        self.assertEqual(req["chat_template_kwargs"], {"enable_thinking": False, "thinking": False})
+
+    def test_extract_json_is_still_available_as_defense_in_depth(self) -> None:
+        """Constrained decoding does not replace the fallback — schema behaviour is not guaranteed
+        portable across serving implementations (JSON Schema does not specify whitespace)."""
+        self.assertEqual(extract_json('```json\n{"a": "1"}\n```'), {"a": "1"})

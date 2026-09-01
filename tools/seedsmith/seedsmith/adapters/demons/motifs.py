@@ -27,8 +27,11 @@ from dataclasses import dataclass, field
 from typing import Mapping, Sequence
 
 import jieba
+import jieba.posseg as pseg
 
 __all__ = [
+    "classify_line",
+    "prose_of",
     "FamilyMembership",
     "DemonMotifInput",
     "DerivedMotifs",
@@ -62,9 +65,106 @@ _CJK_STOPWORDS = frozenset({
 })
 
 
+# ---- G1.1: prose vs mechanical line classification (spec-motif-prose-filter.md §2.1) ----------
+#
+# Measured over the real 84-demon corpus: 70% of `flavorInfo` is a STAT TABLE, only 29% prose. The
+# derivation was therefore reading `韧性：270+2200（一类）` and emitting `一类` ("armour-class one")
+# as a "motif". Four rules, all structural — a balance pass would never touch them.
+#
+# Rules 3 and 4 were added by audit S1: the first draft said "section headers and their continuation
+# lines" WITHOUT DEFINING a continuation line, and leaked 15 of 99 supposedly-prose lines.
+
+#: Rule 1 — `label：value`. The <=12-char bound separates a field label from a sentence that merely
+#: contains a colon; structural, not tunable.
+_STAT_LINE = re.compile(r"^\s*[^：:]{1,12}[：:]")
+
+#: Rule 2 — mechanical section headers.
+_MECHANICAL_HEADERS = ("特点", "特性", "弱点", "使用条件", "融合配方")
+
+#: Rule 3 — a circled numeral opens the CONTINUATION of a 特点 list. This is the definition the
+#: first draft hand-waved (13 real lines leaked through without it).
+_CIRCLED_NUMERALS = "①②③④⑤⑥⑦⑧⑨⑩⑪⑫"
+
+#: Rule 4 — an ASCII digit means threshold/stat text. DELIBERATELY ASCII-only: `可在三种攻击模式之间切换`
+#: uses the CJK numeral 三, is genuinely thematic, and must survive. A rule matching CJK numerals
+#: would delete real prose.
+_ASCII_DIGIT = re.compile(r"\d")
+
+
+def classify_line(line: str) -> str:
+    """`"mechanical"` or `"prose"` (spec-motif-prose-filter.md §2.1). Pure, and exported so each
+    rule is testable alone rather than only through `own_motifs`."""
+    s = line.strip()
+    if not s:
+        return "mechanical"
+    if _STAT_LINE.match(s):
+        return "mechanical"
+    if s.startswith(_MECHANICAL_HEADERS):
+        return "mechanical"
+    if s[0] in _CIRCLED_NUMERALS:
+        return "mechanical"
+    if _ASCII_DIGIT.search(s):
+        return "mechanical"
+    return "prose"
+
+
+def prose_of(*, flavor_info: "str | None", flavor_introduce: "str | None") -> str:
+    """The text motifs may be derived from. `flavorIntroduce` is preferred where present (18/84
+    demons carry it; it is pure lore with zero stat content), then the prose lines of `flavorInfo`.
+
+    ⚠️ Preferring `flavorIntroduce` is only safe BECAUSE of the POS filter below — measured, it is
+    often a joke narrative ("Why is the bucket-nut's head so iron? Actually it's because...") and
+    without POS filtering it imports `为什么`/`是因为`/`不过` as "motifs" (audit S2)."""
+    parts: "list[str]" = []
+    intro = (flavor_introduce or "").strip()
+    if intro:
+        parts.append(intro)
+    for line in (flavor_info or "").split("\n"):
+        if classify_line(line) == "prose":
+            parts.append(line.strip())
+    return "\n".join(p for p in parts if p)
+
+
+# ---- G1.2: part-of-speech filtering (spec-motif-prose-filter.md §2.2) -------------------------
+#
+# Audit S3 measured that a corpus-FREQUENCY floor is the wrong instrument and fails in BOTH
+# directions: `为什么` ("why") has document frequency 3/84 so a floor KEEPS it, while `樱桃`
+# ("cherry", 9/84) and `坚果` ("nut", 7/84) are real family motifs a floor would risk DROPPING.
+# Connectives are rare-but-meaningless; family words are common-but-meaningful.
+#
+# Part of speech separates them cleanly, verified on the exact failing narrative:
+#   KEEP  铁桶/n 坚果/n 核桃/n 补脑/n 含铁/n 练成/v 铁头功/n
+#   DROP  为什么/r 其实/d 是因为/c 但是/c 不过/c 也许/d 至少/d 现在/t
+# ⛔ `l` (习用语, colloquial set phrase) is DELIBERATELY ABSENT — measured 2026-09-01, it was the
+# single remaining hole in this filter. jieba tags multi-character narrative connectives as `l`, so
+# they survived POS filtering and became motifs: `从那之后` ("from then on"), `发现自己`
+# ("discovered oneself"), `一段时间` ("a period of time"), `随处可见` ("seen everywhere"),
+# `毋庸置疑` ("undoubtedly"), `更进一步`, `并不知道`, `很难说`, `不多见` — 9 of the 11
+# `l`-tagged motifs in the corpus were pure scaffolding.
+#
+# This is not cosmetic. `motif_coverage` REQUIRES a motif to appear in the generated text, so a junk
+# motif becomes MANDATORY junk in committed content: `normalzombie` shipped named 「随处可见的消耗」
+# ("Ubiquitous Attrition") and `flagzombie`'s doctrine forced in 「毋庸置疑的指令」. All 7 passed
+# every gate — the same "a pass rate is not quality" failure this program keeps re-learning.
+#
+# The cost is 2 real motifs (`无人机` "drone", `绕道而行` "detour around"), accepted because a motif is
+# a MANDATORY creative seed: a bad one corrupts output, a missing one costs nothing when the demon
+# still has others. `i` (成语) is kept — idioms like `人心惶惶` are evocative, not scaffolding.
+#: Content classes: nouns, verbs, adjectives, idioms. Everything else is scaffolding.
+_CONTENT_POS = frozenset({
+    "n", "nr", "ns", "nt", "nz", "ng", "nrt", "nrfg",
+    "v", "vn", "vd", "vg", "vi", "vq",
+    "a", "an", "ad", "ag",
+    "i", "j", "s",
+})
+
+
 def _tokenize(text: str) -> list[str]:
     if _HAS_CJK.search(text):
-        return [t for t in jieba.cut(text) if _HAS_CJK.search(t) and t not in _CJK_STOPWORDS and len(t) >= 1]
+        # POS-tagged segmentation (G1.2). `_CJK_STOPWORDS` survives as a small OVERRIDE for words
+        # jieba mis-tags as content — it is no longer the primary mechanism.
+        return [w for w, flag in pseg.cut(text)
+                if _HAS_CJK.search(w) and flag in _CONTENT_POS and w not in _CJK_STOPWORDS]
     return [t.lower() for t in _ASCII_TOKEN.findall(text)]
 
 

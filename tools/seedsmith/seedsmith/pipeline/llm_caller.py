@@ -79,7 +79,7 @@ def load_config(toml_path: Path | None = None) -> LlmCallerConfig:
 
 
 def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONFIG,
-               temperature: float = 0.2) -> str:
+               temperature: float = 0.2, schema: "dict | None" = None) -> str:
     """Call a local OpenAI-compatible chat endpoint with reasoning disabled.
 
     Two redundant fields are sent on every call because different servers/templates read
@@ -88,14 +88,33 @@ def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONF
     where a reasoning-capable model usually gates a <think> block on a variable named
     `enable_thinking`/`thinking`. Sending both is harmless — an OpenAI-compatible server or
     template ignores whichever key it doesn't recognize.
+
+    `schema` (optional, spec-dependency-baseline.md §2.4) turns on CONSTRAINED DECODING: LM Studio
+    enforces a JSON Schema at decode time via llama.cpp's GBNF grammar sampling for GGUF models, so
+    a token that would break the schema is never sampleable. Measured 2026-09-01 against
+    `google/gemma-4-26b-a4b-qat` with a hostile prompt (demanding prose, ```json fences, and an
+    out-of-enum value): unconstrained returned a prose paragraph and `json.loads` FAILED;
+    constrained returned clean conforming JSON with the illegal enum value unreachable — at no
+    latency cost (3.7s vs 3.9s; mean 3.2s over 8 further calls).
+
+    **Optional on purpose.** `schema=None` produces a byte-identical request body to before this
+    parameter existed, so every existing caller is unaffected — asserted by test. `extract_json`
+    stays as defense-in-depth: JSON Schema does not specify whitespace handling, so schema
+    behaviour is not guaranteed portable across serving implementations.
     """
-    body = json.dumps({
+    payload = {
         "model": config.model, "temperature": temperature,
         "reasoning_effort": "none",
         "chat_template_kwargs": {"enable_thinking": False, "thinking": False},
         "messages": [{"role": "system", "content": system},
                      {"role": "user", "content": user}],
-    }).encode("utf-8")
+    }
+    if schema is not None:
+        payload["response_format"] = {
+            "type": "json_schema",
+            "json_schema": {"name": "seedsmith_response", "strict": True, "schema": schema},
+        }
+    body = json.dumps(payload).encode("utf-8")
     last_err: Exception | None = None
     for attempt in range(config.attempts):
         try:

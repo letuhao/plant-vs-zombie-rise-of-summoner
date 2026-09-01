@@ -151,6 +151,58 @@ def cmd_metrics(args: argparse.Namespace) -> int:
     return EXIT_CLEAN
 
 
+
+def cmd_demons(args: argparse.Namespace) -> int:
+    """`seedsmith demons <motifs|generate>` — the demon generation entrypoints.
+
+    ⛔ Why this exists. Two of the audit's own `Verify` lines named commands that did not exist:
+    `python -m seedsmith demons motifs` (G1.3) and
+    `python -m seedsmith demons generate --kind commander-effect` (G4.3). The real entrypoints were
+    reachable only as `python -m seedsmith.adapters.demons.<module>`, so both Verify lines failed
+    when actually executed during the 2026-09-01 final-proof pass.
+
+    This is the same defect D1.4 already caught once ("the real CLI — `report` from the spec's own
+    example doesn't exist"). There it was fixed by correcting the command; here the claim is made
+    true instead, matching P6's own precedent of "making the claim true rather than softening it" —
+    a documented interface that only works if you know the private module path is not an interface.
+
+    Imports are deferred: `demons generate` pulls in the workflow package, and `langgraph` is an
+    optional extra. A top-level import would make `seedsmith check` fail on a base install.
+    """
+    if args.demon_command == "families":
+        from ..adapters.demons.generate_families import run as run_families
+        passthrough: "list[str]" = []
+        for flag in ("dry_run", "write", "ack"):
+            if getattr(args, flag, False):
+                passthrough.append(
+                    {"dry_run": "--dry-run", "write": "--write",
+                     "ack": "--i-have-read-the-append-only-note"}[flag])
+        return run_families(passthrough)
+
+    if args.demon_command == "motifs":
+        import json as _json
+
+        from ..adapters.demons.generate_motifs import regenerate
+        print(_json.dumps(regenerate(), ensure_ascii=False, indent=2))
+        return EXIT_CLEAN
+    from ..adapters.demons.generate_commander_effects import main as run
+
+    if args.kind != "commander-effect":
+        print(f"unknown kind {args.kind!r}; only 'commander-effect' has a generator today")
+        return EXIT_CANNOT_RUN
+    passthrough: "list[str]" = []
+    for flag in ("only", "endpoint", "model"):
+        value = getattr(args, flag, None)
+        if value:
+            passthrough += [f"--{flag}", str(value)]
+    for flag in ("dry_run", "stale", "force"):
+        if getattr(args, flag, False):
+            passthrough.append("--" + flag.replace("_", "-"))
+    if args.workers:
+        passthrough += ["--workers", str(args.workers)]
+    return run(passthrough)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="seedsmith")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -169,6 +221,25 @@ def build_parser() -> argparse.ArgumentParser:
     metrics.add_argument("--coverage", action="store_true",
                          help="print Appendix-A coverage: claimed / known gap / unclaimed")
     metrics.set_defaults(func=cmd_metrics)
+
+    demons = sub.add_parser("demons", help="demon corpus generation entrypoints")
+    demon_sub = demons.add_subparsers(dest="demon_command", required=True)
+    demon_sub.add_parser("motifs", help="re-derive motifs + the motif registry (no model calls)")
+    fam = demon_sub.add_parser("families", help="extract + consolidate demon families (model calls)")
+    fam.add_argument("--dry-run", dest="dry_run", action="store_true")
+    fam.add_argument("--write", action="store_true")
+    fam.add_argument("--i-have-read-the-append-only-note", dest="ack", action="store_true")
+    gen = demon_sub.add_parser("generate", help="generate content for a demon kind")
+    gen.add_argument("--kind", default="commander-effect")
+    gen.add_argument("--only", default="", help="comma-separated demon ids")
+    gen.add_argument("--stale", action="store_true",
+                     help="only entries whose recorded motifs no longer match")
+    gen.add_argument("--force", action="store_true", help="regenerate everything")
+    gen.add_argument("--dry-run", dest="dry_run", action="store_true")
+    gen.add_argument("--workers", type=int, default=0)
+    gen.add_argument("--endpoint", default="")
+    gen.add_argument("--model", default="")
+    demons.set_defaults(func=cmd_demons)
 
     return parser
 

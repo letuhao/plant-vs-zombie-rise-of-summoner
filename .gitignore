@@ -105,6 +105,11 @@ src/FusionRpg.CheatCore/artifacts/perf-build/
 skills-lock.json
 .claude/
 **/__pycache__/
+
+# Python build/venv artifacts — seedsmith became an installable package (pyproject.toml, 2026-09-01)
+**/*.egg-info/
+**/.venv/
+**/.venv-*/
 src/FusionRpg.Server/wwwroot/
 src/FusionRpg.Server/wwwroot/index.html
 .playwright-mcp/

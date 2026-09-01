@@ -35,6 +35,23 @@ Source vision: the demon gameplay design note (external; its **ideals** are adop
 
 **Hard constraints carried over:** in-run demon behavior is Unity-owned — personality influences *overlay* decisions (obedience checks, deploy gating, effect grants), never zombie pathing/AI. All combat mutation stays on the Funnel/Writer path. No server round-trip on the hit path: capture *resolution* is Cold, capture *conditions* are read Hot.
 
+
+> ### ⛔ Two rows below are stale as of 2026-09-01 — read before building either
+>
+> **`aspect-scope` is REVERTED, not authorized.** Its row still reads *"APPROVED 2026-08-31, authorized
+> to build."* The owner reverted it during the demon-seed idea phase: *"revert aspect feature, original
+> demon need original aspect, no element/status … the aspect depend on some feature we have not design
+> and build yet."* The two it depends on — hybrid element typing and the passive skill graph — are
+> unbuilt. **Do not start this module.** The formal amendment is listed as owed in
+> [demon-seed-map.md](demon-seed-map.md) §5.
+>
+> **`demon-summoning`'s "trait rolls" now means something different.** Per
+> [effect-pipeline-ideal.md](effect-pipeline-ideal.md) Q10, `traits_json` stays the source of truth for
+> *which* traits a demon has, and a `trait.{traitId}` container becomes *what that trait does*. This
+> module keeps writing ids exactly as it does now — **no change is required here** — but the ids it
+> writes will start carrying effects once `effect-pipeline` ships. Recorded so the change is not
+> mistaken for a regression.
+
 ## Modules
 
 | Module id | Responsibility | Depends on | Wave |

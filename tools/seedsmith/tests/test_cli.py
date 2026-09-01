@@ -84,3 +84,63 @@ class MetricFilterTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+# ---- `seedsmith demons` (added 2026-09-01) -------------------------------------------------------
+#
+# ⛔ Two of the audit's own `Verify` lines named commands that did not exist:
+# `python -m seedsmith demons motifs` (G1.3) and
+# `python -m seedsmith demons generate --kind commander-effect` (G4.3). Both FAILED when actually
+# executed during the final-proof pass — the real entrypoints were reachable only as
+# `python -m seedsmith.adapters.demons.<module>`. Same defect D1.4 already caught once ("the real
+# CLI — `report` from the spec's own example doesn't exist"). Fixed by making the documented claim
+# true, per P6's own precedent, rather than editing the Verify line down to match.
+
+
+def test_demons_subcommand_is_registered_with_both_verbs():
+    from seedsmith.report.cli import build_parser
+
+    parser = build_parser()
+    for argv in (["demons", "motifs"], ["demons", "generate", "--kind", "commander-effect"]):
+        args = parser.parse_args(argv)
+        assert args.command == "demons"
+        assert callable(args.func)
+
+
+def test_demons_requires_a_verb():
+    """`seedsmith demons` alone must be a usage error, not a silent no-op."""
+    import pytest
+
+    from seedsmith.report.cli import build_parser
+
+    with pytest.raises(SystemExit):
+        build_parser().parse_args(["demons"])
+
+
+def test_demons_generate_refuses_a_kind_with_no_generator():
+    from seedsmith.report.cli import EXIT_CANNOT_RUN, build_parser
+
+    args = build_parser().parse_args(["demons", "generate", "--kind", "aspect"])
+    assert args.func(args) == EXIT_CANNOT_RUN, (
+        "an unbuilt kind must refuse loudly — `aspect` is blocked on another program (plan §D-F2), "
+        "and silently generating nothing would read as success")
+
+
+def test_importing_the_cli_does_not_require_langgraph():
+    """⛔ Load-bearing. `demons generate` pulls in the workflow package, and `langgraph` is an
+    OPTIONAL extra — the measurement half of seedsmith must keep running on a base install
+    (verified live: 470 passed with the extra absent). A top-level import in `cli.py` would make
+    plain `seedsmith check` fail for every base-install user.
+
+    Asserted by reading the module source rather than by import success, because this test process
+    has langgraph installed and would pass either way."""
+    from pathlib import Path
+
+    import seedsmith.report.cli as mod
+
+    source = Path(mod.__file__).read_text(encoding="utf-8")
+    top_level = [ln for ln in source.splitlines()
+                 if ln.startswith(("import ", "from ")) and "langgraph" in ln]
+    assert top_level == [], f"cli.py imports langgraph at module level: {top_level}"
+    assert "generate_commander_effects" not in source.split("def cmd_demons")[0], (
+        "the generator must be imported inside cmd_demons, not at module scope")

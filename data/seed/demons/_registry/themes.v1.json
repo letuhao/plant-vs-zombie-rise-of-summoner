@@ -7,11 +7,11 @@
       "displayName": "特种三线射手",
       "rarity": "common",
       "motifs": [
-        "三种",
-        "三线",
-        "之间",
-        "会均",
-        "伤害"
+        "分配",
+        "切换",
+        "攻击",
+        "模式",
+        "火力"
       ],
       "antiMotifs": [],
       "expression": {
@@ -26,11 +26,11 @@
       "displayName": "灰烬三线射手",
       "rarity": "common",
       "motifs": [
-        "攻击能力",
-        "三线",
-        "使用",
-        "失去",
-        "射手"
+        "射手",
+        "彻底",
+        "攻击",
+        "无法",
+        "烧焦"
       ],
       "antiMotifs": [],
       "expression": {
@@ -45,15 +45,15 @@
       "displayName": "铁桶坚果僵尸",
       "rarity": "epic",
       "motifs": [
-        "一类",
-        "击杀"
+        "铁头功",
+        "僵尸"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -67,15 +67,16 @@
       "displayName": "铁桶僵尸",
       "rarity": "epic",
       "motifs": [
-        "一类",
-        "击杀"
+        "铁头功",
+        "僵尸",
+        "江郎才尽"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -90,10 +91,10 @@
       "rarity": "rare",
       "motifs": [
         "卷心菜",
-        "二类",
-        "伤害",
         "僵尸",
-        "子弹"
+        "投手",
+        "攻击",
+        "出"
       ],
       "antiMotifs": [],
       "expression": {
@@ -109,14 +110,14 @@
       "rarity": "rare",
       "motifs": [
         "仙人掌",
-        "优先"
+        "发射"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -131,15 +132,14 @@
       "rarity": "common",
       "motifs": [
         "仙人掌",
-        "优先",
-        "三叶草"
+        "发射"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -153,11 +153,11 @@
       "displayName": "地刺",
       "rarity": "rare",
       "motifs": [
-        "冰车类",
-        "上方",
         "伤害",
-        "低矮",
-        "僵尸"
+        "僵尸",
+        "刺能",
+        "扎破",
+        "轮胎"
       ],
       "antiMotifs": [],
       "expression": {
@@ -172,11 +172,11 @@
       "displayName": "地刺坚果",
       "rarity": "rare",
       "motifs": [
-        "免疫",
-        "击退",
         "反伤",
-        "受伤",
-        "地刺"
+        "坚果",
+        "尖刺",
+        "车辆",
+        "长满"
       ],
       "antiMotifs": [],
       "expression": {
@@ -191,14 +191,14 @@
       "displayName": "樱桃炸弹",
       "rarity": "rare",
       "motifs": [
-        "伤害",
-        "僵尸"
+        "僵尸",
+        "樱桃"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "低矮",
-        "作为",
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
         "保护"
       ],
       "expression": {
@@ -213,14 +213,15 @@
       "displayName": "樱桃机枪射手",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "僵尸"
+        "僵尸",
+        "樱桃",
+        "发射"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "低矮",
-        "作为",
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
         "保护"
       ],
       "expression": {
@@ -235,14 +236,15 @@
       "displayName": "樱桃坚果",
       "rarity": "epic",
       "motifs": [
-        "伤害",
-        "僵尸"
+        "僵尸",
+        "樱桃",
+        "喜爱"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "低矮",
-        "作为",
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
         "保护"
       ],
       "expression": {
@@ -257,15 +259,15 @@
       "displayName": "樱桃坚果僵尸",
       "rarity": "epic",
       "motifs": [
-        "伤害",
         "僵尸",
-        "一类"
+        "樱桃",
+        "一般"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "低矮",
-        "作为",
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
         "保护"
       ],
       "expression": {
@@ -280,15 +282,15 @@
       "displayName": "樱桃读报僵尸",
       "rarity": "legendary",
       "motifs": [
-        "伤害",
         "僵尸",
-        "十字形"
+        "樱桃",
+        "上演"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "低矮",
-        "作为",
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
         "保护"
       ],
       "expression": {
@@ -303,14 +305,15 @@
       "displayName": "樱桃射手",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "僵尸"
+        "僵尸",
+        "樱桃",
+        "发射"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "低矮",
-        "作为",
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
         "保护"
       ],
       "expression": {
@@ -325,14 +328,15 @@
       "displayName": "樱桃裂荚射手",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "僵尸"
+        "僵尸",
+        "樱桃",
+        "发射"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "低矮",
-        "作为",
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
         "保护"
       ],
       "expression": {
@@ -347,11 +351,11 @@
       "displayName": "樱桃三线射手",
       "rarity": "common",
       "motifs": [
-        "一段时间",
-        "三线",
         "三行",
-        "伤害",
-        "僵尸"
+        "僵尸",
+        "半熟",
+        "发射",
+        "成熟"
       ],
       "antiMotifs": [],
       "expression": {
@@ -366,11 +370,11 @@
       "displayName": "大嘴花",
       "rarity": "rare",
       "motifs": [
-        "大嘴花",
-        "伤害",
         "僵尸",
         "吞食",
-        "咀嚼"
+        "咀嚼",
+        "嘴花",
+        "脆弱"
       ],
       "antiMotifs": [],
       "expression": {
@@ -385,11 +389,11 @@
       "displayName": "路障僵尸",
       "rarity": "epic",
       "motifs": [
-        "一类",
+        "冰激凌",
+        "不动",
+        "东西",
         "僵尸",
-        "装备",
-        "路障",
-        "韧性"
+        "发现"
       ],
       "antiMotifs": [],
       "expression": {
@@ -404,15 +408,15 @@
       "displayName": "玉米花盆",
       "rarity": "common",
       "motifs": [
-        "上方",
-        "低矮"
+        "制成",
+        "子弹"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -426,16 +430,16 @@
       "displayName": "玉米投手",
       "rarity": "rare",
       "motifs": [
-        "上方",
-        "低矮",
+        "制成",
+        "子弹",
         "玉米粒"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -449,11 +453,11 @@
       "displayName": "舞王撑杆僵尸",
       "rarity": "epic",
       "motifs": [
+        "流行乐",
         "运动员",
+        "下走",
         "优秀",
-        "伴舞",
-        "僵尸",
-        "入场"
+        "伴舞"
       ],
       "antiMotifs": [],
       "expression": {
@@ -468,11 +472,11 @@
       "displayName": "焦黑三线射手",
       "rarity": "common",
       "motifs": [
-        "三线",
-        "伤害",
         "倍增",
-        "出场",
-        "射手"
+        "射手",
+        "火爆",
+        "烧焦",
+        "辣椒"
       ],
       "antiMotifs": [],
       "expression": {
@@ -487,11 +491,11 @@
       "displayName": "钻石套娃僵尸",
       "rarity": "legendary",
       "motifs": [
-        "一类",
-        "什么",
+        "世界",
+        "像是",
         "僵尸",
-        "制成",
-        "套娃"
+        "光辉",
+        "制成"
       ],
       "antiMotifs": [],
       "expression": {
@@ -506,15 +510,15 @@
       "displayName": "黄金套娃僵尸",
       "rarity": "legendary",
       "motifs": [
-        "一类",
-        "什么"
+        "制成",
+        "套娃"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -528,15 +532,16 @@
       "displayName": "白银套娃僵尸",
       "rarity": "legendary",
       "motifs": [
-        "一类",
-        "什么"
+        "制成",
+        "套娃",
+        "感叹号"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -551,10 +556,10 @@
       "rarity": "common",
       "motifs": [
         "仙人掌",
-        "空对地",
-        "一次",
-        "上下",
-        "伤害"
+        "发射",
+        "大量",
+        "尖刺",
+        "概率"
       ],
       "antiMotifs": [],
       "expression": {
@@ -569,11 +574,11 @@
       "displayName": "铁门僵尸",
       "rarity": "epic",
       "motifs": [
-        "二类",
+        "特遣队",
+        "人质",
         "僵尸",
-        "吸取",
-        "弱点",
-        "手持"
+        "内心",
+        "劫匪"
       ],
       "antiMotifs": [],
       "expression": {
@@ -588,15 +593,15 @@
       "displayName": "樱桃双发射手",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "出场"
+        "发射",
+        "子弹"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -610,16 +615,15 @@
       "displayName": "双发射手",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "出场",
-        "一次"
+        "发射",
+        "子弹"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -633,16 +637,15 @@
       "displayName": "寒冰双发射手",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "出场",
-        "寒冰菇"
+        "发射",
+        "子弹"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -656,11 +659,11 @@
       "displayName": "雪橇车僵尸",
       "rarity": "legendary",
       "motifs": [
-        "免疫",
-        "其实",
-        "冰车",
-        "冰道",
-        "冻结"
+        "公司出品",
+        "滑冰场",
+        "僵尸",
+        "冰机",
+        "冰车"
       ],
       "antiMotifs": [],
       "expression": {
@@ -675,11 +678,11 @@
       "displayName": "旗帜僵尸",
       "rarity": "epic",
       "motifs": [
-        "移速略",
+        "私下里",
         "一大",
         "僵尸",
-        "出场",
-        "快于"
+        "喜爱",
+        "手中"
       ],
       "antiMotifs": [],
       "expression": {
@@ -694,11 +697,11 @@
       "displayName": "橄榄球僵尸",
       "rarity": "epic",
       "motifs": [
+        "体育明星",
         "橄榄球",
-        "一类",
-        "中等",
-        "偏快",
-        "吸取"
+        "球场上",
+        "僵尸",
+        "公司"
       ],
       "antiMotifs": [],
       "expression": {
@@ -713,11 +716,11 @@
       "displayName": "大喷菇",
       "rarity": "rare",
       "motifs": [
-        "大喷菇",
-        "二类",
-        "伤害",
         "喷射",
-        "射程"
+        "喷菇",
+        "烟雾",
+        "穿透",
+        "铁门"
       ],
       "antiMotifs": [],
       "expression": {
@@ -732,11 +735,8 @@
       "displayName": "大蒜",
       "rarity": "common",
       "motifs": [
-        "绕道而行",
-        "伤害",
-        "低矮",
         "僵尸",
-        "单次"
+        "大蒜"
       ],
       "antiMotifs": [],
       "expression": {
@@ -751,15 +751,15 @@
       "displayName": "蒜毒豌豆射手",
       "rarity": "common",
       "motifs": [
-        "点蒜值",
-        "一片"
+        "中毒",
+        "体内"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -773,15 +773,16 @@
       "displayName": "蒜毒三线射手",
       "rarity": "common",
       "motifs": [
-        "点蒜值",
-        "一片"
+        "中毒",
+        "体内",
+        "三行"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -795,11 +796,8 @@
       "displayName": "机枪射手",
       "rarity": "common",
       "motifs": [
-        "一次",
-        "伤害",
         "发射",
-        "四颗",
-        "射手"
+        "豌豆"
       ],
       "antiMotifs": [],
       "expression": {
@@ -814,11 +812,11 @@
       "displayName": "魅惑大嘴花",
       "rarity": "common",
       "motifs": [
-        "大嘴花",
-        "伤害",
         "僵尸",
-        "卡牌",
-        "即可"
+        "吞食",
+        "成分",
+        "部分",
+        "魅惑"
       ],
       "antiMotifs": [],
       "expression": {
@@ -833,15 +831,15 @@
       "displayName": "魅惑辣椒",
       "rarity": "common",
       "motifs": [
-        "仍旧",
-        "令其"
+        "僵尸",
+        "变心"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -855,16 +853,16 @@
       "displayName": "魅惑豌豆射手",
       "rarity": "common",
       "motifs": [
-        "仍旧",
-        "令其",
-        "伤害"
+        "僵尸",
+        "变心",
+        "作战"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -878,16 +876,15 @@
       "displayName": "魅惑菇",
       "rarity": "rare",
       "motifs": [
-        "仍旧",
-        "令其",
-        "方而战"
+        "僵尸",
+        "变心"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -901,15 +898,15 @@
       "displayName": "寒冰地刺",
       "rarity": "common",
       "motifs": [
-        "寒冰菇",
-        "伤害"
+        "地刺",
+        "触感"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -923,15 +920,16 @@
       "displayName": "寒冰菇",
       "rarity": "rare",
       "motifs": [
-        "寒冰菇",
-        "伤害"
+        "地刺",
+        "触感",
+        "僵尸"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -945,11 +943,11 @@
       "displayName": "铁桶豌豆僵尸",
       "rarity": "legendary",
       "motifs": [
-        "一颗",
+        "塔罗牌",
         "伤害",
         "僵尸",
-        "击杀",
-        "击退"
+        "发射",
+        "子弹"
       ],
       "antiMotifs": [],
       "expression": {
@@ -964,15 +962,15 @@
       "displayName": "火焰地刺",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "低矮"
+        "地刺",
+        "触感"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -986,15 +984,16 @@
       "displayName": "火辣机枪射手",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "低矮"
+        "地刺",
+        "触感",
+        "发射"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1008,15 +1007,16 @@
       "displayName": "火辣豌豆射手",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "低矮"
+        "地刺",
+        "触感",
+        "发射"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1030,15 +1030,16 @@
       "displayName": "火爆辣椒",
       "rarity": "rare",
       "motifs": [
-        "伤害",
-        "低矮"
+        "地刺",
+        "触感",
+        "僵尸"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1052,16 +1053,16 @@
       "displayName": "火爆杨桃",
       "rarity": "common",
       "motifs": [
-        "伤害",
-        "低矮",
+        "地刺",
+        "触感",
         "易燃易爆"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1076,14 +1077,14 @@
       "rarity": "common",
       "motifs": [
         "仙人掌",
-        "优先"
+        "伤害"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1098,15 +1099,15 @@
       "rarity": "common",
       "motifs": [
         "仙人掌",
-        "优先",
-        "大嘴花"
+        "伤害",
+        "光照"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1121,15 +1122,15 @@
       "rarity": "common",
       "motifs": [
         "仙人掌",
-        "优先",
-        "锁定目标"
+        "伤害",
+        "光能"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1143,11 +1144,11 @@
       "displayName": "金盏花",
       "rarity": "common",
       "motifs": [
-        "咖啡豆",
         "金盏花",
-        "个金",
-        "为金",
-        "产量"
+        "生产",
+        "金币",
+        "钻石",
+        "银币"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1162,11 +1163,11 @@
       "displayName": "西瓜投手",
       "rarity": "common",
       "motifs": [
-        "上限",
         "伤害",
-        "僵尸",
-        "半径",
-        "子弹"
+        "带有",
+        "投手",
+        "溅射",
+        "西瓜"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1181,11 +1182,11 @@
       "displayName": "僵尸",
       "rarity": "epic",
       "motifs": [
-        "临界值",
-        "小贴士",
-        "一次",
-        "一般",
-        "伤害"
+        "不配",
+        "个体",
+        "做出",
+        "僵尸",
+        "名字"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1200,15 +1201,15 @@
       "displayName": "大嘴坚果",
       "rarity": "rare",
       "motifs": [
-        "大嘴花",
-        "一定"
+        "僵尸",
+        "吞食"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1222,11 +1223,11 @@
       "displayName": "读报僵尸",
       "rarity": "epic",
       "motifs": [
-        "二类",
-        "别人",
-        "后移",
-        "失去",
-        "打断"
+        "大脑",
+        "字谜",
+        "完成",
+        "打断",
+        "报纸"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1241,15 +1242,16 @@
       "displayName": "豌豆大嘴花",
       "rarity": "common",
       "motifs": [
-        "大嘴花",
-        "一定"
+        "僵尸",
+        "吞食",
+        "吐出"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1263,15 +1265,15 @@
       "displayName": "坚果射手",
       "rarity": "rare",
       "motifs": [
-        "上坡",
-        "伤害"
+        "坚果",
+        "穿透"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1285,15 +1287,15 @@
       "displayName": "豌豆射手",
       "rarity": "rare",
       "motifs": [
-        "第一道",
-        "伤害"
+        "僵尸",
+        "发射"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1307,16 +1309,16 @@
       "displayName": "豌豆射手僵尸",
       "rarity": "epic",
       "motifs": [
-        "第一道",
-        "伤害",
-        "一颗"
+        "僵尸",
+        "发射",
+        "人心惶惶"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1330,16 +1332,16 @@
       "displayName": "豌豆窝瓜",
       "rarity": "common",
       "motifs": [
-        "第一道",
-        "伤害",
-        "砸击时"
+        "僵尸",
+        "发射",
+        "大量"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1353,15 +1355,15 @@
       "displayName": "豌豆向日葵",
       "rarity": "common",
       "motifs": [
-        "向日葵",
-        "产量"
+        "发射",
+        "命中"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1375,16 +1377,16 @@
       "displayName": "路灯花",
       "rarity": "rare",
       "motifs": [
-        "向日葵",
-        "产量",
-        "大部分"
+        "发射",
+        "命中",
+        "光照"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1398,11 +1400,11 @@
       "displayName": "撑杆僵尸",
       "rarity": "legendary",
       "motifs": [
-        "中等",
+        "促使",
         "借助",
+        "僵尸",
         "助跑",
-        "变为",
-        "失去"
+        "成就"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1417,15 +1419,15 @@
       "displayName": "花盆",
       "rarity": "rare",
       "motifs": [
-        "优先级",
-        "上方"
+        "屋顶",
+        "植物"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
+        "铁头功",
+        "僵尸",
+        "含铁",
         "坚果",
-        "掉落"
+        "大家"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1439,15 +1441,16 @@
       "displayName": "南瓜",
       "rarity": "epic",
       "motifs": [
-        "优先级",
-        "上方"
+        "屋顶",
+        "植物",
+        "保护"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
+        "铁头功",
+        "僵尸",
+        "含铁",
         "坚果",
-        "掉落"
+        "大家"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1462,10 +1465,10 @@
       "rarity": "rare",
       "motifs": [
         "远距离",
-        "伤害",
         "僵尸",
-        "内有",
-        "发射"
+        "发射",
+        "孢子",
+        "害怕"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1480,15 +1483,16 @@
       "displayName": "寒冰机枪射手",
       "rarity": "common",
       "motifs": [
-        "寒冰菇",
-        "伤害"
+        "地刺",
+        "触感",
+        "发射"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1502,15 +1506,16 @@
       "displayName": "寒冰射手",
       "rarity": "common",
       "motifs": [
-        "寒冰菇",
-        "伤害"
+        "地刺",
+        "触感",
+        "发射"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1524,16 +1529,15 @@
       "displayName": "寒冰裂荚射手",
       "rarity": "common",
       "motifs": [
-        "第一道",
-        "伤害",
-        "寒冰菇"
+        "僵尸",
+        "发射"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1547,16 +1551,15 @@
       "displayName": "裂荚射手",
       "rarity": "common",
       "motifs": [
-        "第一道",
-        "伤害",
-        "一颗"
+        "僵尸",
+        "发射"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1570,11 +1573,10 @@
       "displayName": "窝瓜",
       "rarity": "rare",
       "motifs": [
-        "锁定目标",
-        "第一个",
-        "伤害",
-        "位置",
-        "低于"
+        "僵尸",
+        "压扁",
+        "接近",
+        "窝瓜"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1589,15 +1591,15 @@
       "displayName": "杨桃",
       "rarity": "rare",
       "motifs": [
-        "五个",
-        "伤害"
+        "发射",
+        "方向"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1611,16 +1613,15 @@
       "displayName": "杨桃豌豆射手",
       "rarity": "common",
       "motifs": [
-        "五个",
-        "伤害",
-        "一次"
+        "发射",
+        "方向"
       ],
       "antiMotifs": [
-        "一类",
-        "击杀",
-        "吸引",
-        "坚果",
-        "掉落"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1634,15 +1635,15 @@
       "displayName": "阳光大嘴花",
       "rarity": "common",
       "motifs": [
-        "向日葵",
-        "大嘴花"
+        "嘴花",
+        "完成"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1656,15 +1657,16 @@
       "displayName": "向日葵",
       "rarity": "rare",
       "motifs": [
-        "向日葵",
-        "大嘴花"
+        "嘴花",
+        "完成",
+        "向日葵"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1679,10 +1681,10 @@
       "rarity": "common",
       "motifs": [
         "卷心菜",
-        "本格及",
-        "一次",
-        "三线",
-        "三行"
+        "三行",
+        "弹射",
+        "能够",
+        "出"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1697,15 +1699,15 @@
       "displayName": "三线射手",
       "rarity": "rare",
       "motifs": [
-        "三线",
-        "三行"
+        "三行",
+        "发射"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1719,16 +1721,16 @@
       "displayName": "三线路灯花",
       "rarity": "common",
       "motifs": [
-        "三线",
         "三行",
-        "仙人掌"
+        "发射",
+        "光照"
       ],
       "antiMotifs": [
-        "优先级",
-        "上方",
-        "伤害",
-        "低矮",
-        "作为"
+        "屋顶",
+        "植物",
+        "种植",
+        "花盆",
+        "保护"
       ],
       "expression": {
         "item": "material and form — what it is made of, what shape it takes",
@@ -1743,10 +1745,8 @@
       "rarity": "common",
       "motifs": [
         "向日葵",
-        "两倍",
         "产量",
-        "融合",
-        "配方"
+        "阳光"
       ],
       "antiMotifs": [],
       "expression": {
@@ -1762,10 +1762,10 @@
       "rarity": "epic",
       "motifs": [
         "保护",
-        "保留",
-        "其他",
         "坚果",
-        "坚硬"
+        "坚硬",
+        "外壳",
+        "植物"
       ],
       "antiMotifs": [],
       "expression": {

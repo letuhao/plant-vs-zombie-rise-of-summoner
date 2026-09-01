@@ -1,6 +1,7 @@
 # Plan: Seedsmith — full program
 
 Map: [docs/architecture/seedsmith-map.md](../docs/architecture/seedsmith-map.md)
+Evidence map: [seedsmith-evidence-map.md](seedsmith-evidence-map.md) — every requirement line in this file, with the executed result of the `Verify` command covering it
 Specs: [seedsmith/](../docs/architecture/seedsmith/) — analytics · numerics · budget · metrics · planner · pipeline · foundation
 Audit: [seedsmith/review/](../docs/architecture/seedsmith/review/) — 66 findings, 11 blockers, all closed
 
@@ -720,10 +721,10 @@ every motif in the corpus. Neither needs LangGraph.
   Optional parameter, `None` default. **Must be provably inert for every existing caller.**
 
 #### ✅ CP-G0
-- [ ] Fresh clone + clean venv + install from lockfile + full suite **passes** (not a fixed number)
-- [ ] `import jieba` succeeds in a fresh venv
-- [ ] Offline guarantee is a passing test
-- [ ] `call_model(schema=None)` produces a byte-identical request body to today
+- [x] Fresh clone + clean venv + install from lockfile + full suite **passes** (not a fixed number) — clean tree copied to a scratch dir, `python -m venv`, `pip install -r requirements.lock`, `pip install -e . --no-deps`: **480 passed**
+- [x] `import jieba` succeeds in a fresh venv — `import jieba, langgraph` both OK in `.venv-fresh`
+- [x] Offline guarantee is a passing test — `test_offline_guarantee.py`, 4 tests, including `test_the_guard_itself_actually_fires`
+- [x] `call_model(schema=None)` produces a byte-identical request body to today — `test_schema_none_body_is_byte_identical_to_explicitly_passing_none`
 
 ### Phase G1 — motif prose filter (no model, no framework)
 
@@ -737,11 +738,11 @@ every motif in the corpus. Neither needs LangGraph.
   G4. A reviewed correction, not a routine re-run.
 
 #### ✅ CP-G1
-- [ ] `一类`, `伤害`, `优先` gone from the three named regression demons
-- [ ] `为什么`/`是因为`/`不过` dropped by POS; `铁头功`/`坚果` kept
-- [ ] `可在三种攻击模式之间切换` survives (CJK numeral is not an ASCII digit)
-- [ ] Determinism and the ≤4-char token guarantee hold
-- [ ] Rise in `basis="name"`/`blocked` reported as a **result**, not a failure
+- [x] `一类`, `伤害`, `优先` gone from the three named regression demons — `bucketnutzombie` `['铁头功','僵尸']`, `cherrynut` `['僵尸','樱桃','喜爱']`, `cactus` `['仙人掌','发射']`; none carries a banned token
+- [x] `为什么`/`是因为`/`不过` dropped by POS; `铁头功`/`坚果` kept — measured on the real narrative: all 5 connectives dropped, all 4 content words kept
+- [x] `可在三种攻击模式之间切换` survives (CJK numeral is not an ASCII digit) — `classify_line` → `prose`; the sibling `伤害：20/1秒` → `mechanical`
+- [x] Determinism and the ≤4-char token guarantee hold — 5 identical runs; 0 of 135 corpus motifs exceed 4 chars
+- [x] Rise in `basis="name"`/`blocked` reported as a **result**, not a failure — 53 `text` / 31 `name`, unchanged by the `l`-tag fix; 0 non-blocked demons left motif-less
 
 ### Phase G2 — workflow runtime (parallel with G1)
 
@@ -755,11 +756,11 @@ every motif in the corpus. Neither needs LangGraph.
 - **G2.4 — bounded fan-out runner** · **S** · 2 files
 
 #### ✅ CP-G2
-- [ ] **Zero** LangGraph imports in `nodes/`/`state.py`, asserted
-- [ ] Graph structure assertable **offline** — no model, no network
-- [ ] Kill mid-run then resume; finished nodes do not re-call the model
-- [ ] A deliberate routing bug is still stopped by `recursion_limit`
-- [ ] Transient vs quality retry are demonstrably different code paths
+- [x] **Zero** LangGraph imports in `nodes/`/`state.py`, asserted — grep over `seedsmith/workflow/` returns nothing outside `graphs/`; `test_nodes_and_state_never_import_langgraph`
+- [x] Graph structure assertable **offline** — no model, no network — `test_graph_structure_is_inspectable_without_a_model_or_network`
+- [x] Kill mid-run then resume; finished nodes do not re-call the model — `test_resume_replays_from_checkpoint_without_calling_the_model_again`
+- [x] A deliberate routing bug is still stopped by `recursion_limit` — `test_recursion_limit_still_stops_a_deliberately_broken_router`
+- [x] Transient vs quality retry are demonstrably different code paths — `llm_caller` attempts (transient) vs `route_after_validate` repair (quality); asserted separately
 
 ### Phase G3 — quality gates
 
@@ -772,10 +773,10 @@ every motif in the corpus. Neither needs LangGraph.
   Source-grounded questions only; rejection escalates, never auto-repairs; **asserted disabled**.
 
 #### ✅ CP-G3
-- [ ] All four validators exist with positive and negative tests
-- [ ] Tier labelling exists; nothing reports a pass rate as quality
-- [ ] CoVe present, **not wired into the default graph**, asserted
-- [ ] Zero real model calls in the suite
+- [x] All four validators exist with positive and negative tests — 6 validators, 18 tests in `test_quality_gates.py` (the 4 planned plus `language_consistency`, `subject_name_echo`)
+- [x] Tier labelling exists; nothing reports a pass rate as quality — `test_a_passing_result_says_mechanically_valid_never_good`
+- [x] CoVe present, **not wired into the default graph**, asserted — `test_cove_is_disabled_by_default`, `test_cove_is_not_wired_into_the_default_graph`
+- [x] Zero real model calls in the suite — 480 tests pass with LM Studio unreachable from the scratch venv; every graph test injects `call=`
 
 ### Phase G4 — commander-effect (the first real generator)
 
@@ -787,12 +788,12 @@ every motif in the corpus. Neither needs LangGraph.
   tier-2 pass rate.
 
 #### ✅ CP-G4 — closes the feature
-- [ ] Every non-blocked demon has a commander effect; `Coverage/DemonUncovered` falls by that count
-- [ ] `blocked` demons generate nothing, provably
-- [ ] An unprefixed id fails corpus load (the `wallnut` collision), asserted
-- [ ] Re-run produces zero new writes
-- [ ] Quality reported from a read sample, **separately** from the pass rate
-- [ ] Full suite green; four guard scripts green
+- [x] Every non-blocked demon has a commander effect; `Coverage/DemonUncovered` falls by that count — `seedsmith check ... --metric Coverage/DemonUncovered` → **no findings** (84 → 0)
+- [x] `blocked` demons generate nothing, provably — `test_a_blocked_demon_is_not_a_subject`
+- [x] An unprefixed id fails corpus load (the `wallnut` collision), asserted — `test_an_unprefixed_id_collides_with_the_demon_and_fails_corpus_load`
+- [x] Re-run produces zero new writes — ⛔ **was unmet, now built.** Generator had no skip logic and rewrote all 84 stochastically. Added `_provenance.motifs` + `stale_ids()` + skip-existing; a plain re-run leaves `all.json` **byte-identical** (md5 `00b74afd…` before and after)
+- [x] Quality reported from a read sample, **separately** from the pass rate — the 9 regenerated effects read individually; `normalzombie` 「随处可见的消耗」 → 「无名之辈」
+- [x] Full suite green; four guard scripts green — 480 passed (both venvs); all four `guard-*.ps1` PASS
 
 ## Task summary
 

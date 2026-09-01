@@ -1,0 +1,1715 @@
+{
+  "kind": "commander-effect",
+  "_meta": {
+    "partition": "all"
+  },
+  "entries": [
+    {
+      "id": "commander-effect.allpeater",
+      "nameKey": "commanderEffect.allpeater",
+      "name": "火力切换阵列",
+      "demonId": "allpeater",
+      "doctrine": "根据目标距离自动切换攻击模式，并在不同射程间动态分配火力。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "分配",
+          "切换",
+          "攻击",
+          "模式",
+          "火力"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.ashthreepeater",
+      "nameKey": "commanderEffect.ashthreepeater",
+      "name": "彻底的焦灼射击",
+      "demonId": "ashthreepeater",
+      "doctrine": "射手在攻击时会引发连环爆炸，使目标及其相邻单位被彻底烧焦，且无法在下一回合进行防御。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "射手",
+          "彻底",
+          "攻击",
+          "无法",
+          "烧焦"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.bucketnutzombie",
+      "nameKey": "commanderEffect.bucketnutzombie",
+      "name": "铁头僵尸冲锋",
+      "demonId": "bucketnutzombie",
+      "doctrine": "运用铁头功进行正面撞击，以极高的防御力为僵尸方阵开路。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "铁头功",
+          "僵尸"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.bucketzombie",
+      "nameKey": "commanderEffect.bucketzombie",
+      "name": "铁头冲锋",
+      "demonId": "bucketzombie",
+      "doctrine": "运用铁头功进行无畏冲撞，即便陷入江郎才尽的困境，僵尸仍会凭借坚硬的铁桶维持阵线。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "铁头功",
+          "僵尸",
+          "江郎才尽"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cabbagepult",
+      "nameKey": "commanderEffect.cabbagepult",
+      "name": "卷心菜连射",
+      "demonId": "cabbagepult",
+      "doctrine": "投手持续攻击，确保卷心菜能精准地出击并击退僵尸。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "卷心菜",
+          "僵尸",
+          "投手",
+          "攻击",
+          "出"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cactus",
+      "nameKey": "commanderEffect.cactus",
+      "name": "刺芒发射",
+      "demonId": "cactus",
+      "doctrine": "仙人掌會不斷進行遠程刺針發射，對敵方造成持續性的穿透傷害。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "仙人掌",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cactusblover",
+      "nameKey": "commanderEffect.cactusblover",
+      "name": "仙人掌连射",
+      "demonId": "cactusblover",
+      "doctrine": "以仙人掌为核心，持续进行远程发射，精准打击远端目标。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "仙人掌",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.caltrop",
+      "nameKey": "commanderEffect.caltrop",
+      "name": "刺能陷阱",
+      "demonId": "caltrop",
+      "doctrine": "在僵尸经过时触发扎破效果，对所有移动目标造成持续伤害。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "伤害",
+          "僵尸",
+          "刺能",
+          "扎破",
+          "轮胎"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.caltropnut",
+      "nameKey": "commanderEffect.caltropnut",
+      "name": "荆棘防御阵列",
+      "demonId": "caltropnut",
+      "doctrine": "坚果护盾：当单位受到攻击时，长满尖刺的防御层会触发反伤效果，对攻击者造成物理伤害。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "反伤",
+          "坚果",
+          "尖刺",
+          "车辆",
+          "长满"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cherrybomb",
+      "nameKey": "commanderEffect.cherrybomb",
+      "name": "樱桃爆裂",
+      "demonId": "cherrybomb",
+      "doctrine": "当樱桃靠近僵尸时，全队将引发连锁爆炸，摧毁目标区域内的所有单位。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "樱桃"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cherrygatling",
+      "nameKey": "commanderEffect.cherrygatling",
+      "name": "樱桃连射阵列",
+      "demonId": "cherrygatling",
+      "doctrine": "以樱桃为核心进行高频发射，对僵尸造成持续性的压制打击。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "樱桃",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cherrynut",
+      "nameKey": "commanderEffect.cherrynut",
+      "name": "樱桃之恋",
+      "demonId": "cherrynut",
+      "doctrine": "当僵尸靠近时，樱桃会释放出令人无比喜爱的甜美香气，使敌方陷入混乱。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "樱桃",
+          "喜爱"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cherrynutzombie",
+      "nameKey": "commanderEffect.cherrynutzombie",
+      "name": "樱桃爆裂阵列",
+      "demonId": "cherrynutzombie",
+      "doctrine": "当这群僵尸靠近目标时，会像樱桃一样在碰撞瞬间发生爆裂，对周围的敌人造成一般强度的冲击，并为后续的僵尸开路。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "樱桃",
+          "一般"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cherrypaperzombie",
+      "nameKey": "commanderEffect.cherrypaperzombie",
+      "name": "樱桃剧场",
+      "demonId": "cherrypaperzombie",
+      "doctrine": "当樱桃成熟时，僵尸会根据报纸上的剧情进行表演，在战场上上演一场混乱的戏码。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "樱桃",
+          "上演"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cherryshooter",
+      "nameKey": "commanderEffect.cherryshooter",
+      "name": "樱桃连射",
+      "demonId": "cherryshooter",
+      "doctrine": "樱桃发射，精准打击僵尸",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "樱桃",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cherrysplit",
+      "nameKey": "commanderEffect.cherrysplit",
+      "name": "樱桃连射指令",
+      "demonId": "cherrysplit",
+      "doctrine": "樱桃分裂发射，精准打击僵尸",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "樱桃",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cherrythreepeater",
+      "nameKey": "commanderEffect.cherrythreepeater",
+      "name": "三行连射阵列",
+      "demonId": "cherrythreepeater",
+      "doctrine": "在三行内持续发射，对僵尸造成半熟状态的持续打击。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "三行",
+          "僵尸",
+          "半熟",
+          "发射",
+          "成熟"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.chomper",
+      "nameKey": "commanderEffect.chomper",
+      "name": "贪婪吞食",
+      "demonId": "chomper",
+      "doctrine": "在战斗中优先锁定并吞食僵尸，通过咀嚼目标来为全队提供持续的能量增益。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "吞食",
+          "咀嚼",
+          "嘴花",
+          "脆弱"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.conezombie",
+      "nameKey": "commanderEffect.conezombie",
+      "name": "坚实屏障",
+      "demonId": "conezombie",
+      "doctrine": "在发现敌人之前保持不动，通过阻挡所有东西来保护后方僵尸。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "冰激凌",
+          "不动",
+          "东西",
+          "僵尸",
+          "发现"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cornpot",
+      "nameKey": "commanderEffect.cornpot",
+      "name": "弹幕制成",
+      "demonId": "cornpot",
+      "doctrine": "将所有收集到的能量制成密集的子弹，进行覆盖式打击。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "制成",
+          "子弹"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.cornpult",
+      "nameKey": "commanderEffect.cornpult",
+      "name": "连绵玉米粒",
+      "demonId": "cornpult",
+      "doctrine": "将所有子弹制成密集的玉米粒雨，持续对目标区域进行覆盖式打击。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "制成",
+          "子弹",
+          "玉米粒"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.dancepolzombie",
+      "nameKey": "commanderEffect.dancepolzombie",
+      "name": "流行乐节奏",
+      "demonId": "dancepolzombie",
+      "doctrine": "在流行乐的律动中，所有伴舞成员会随着节奏进行下走，为核心单位提供优秀的防御加成。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "流行乐",
+          "运动员",
+          "下走",
+          "优秀",
+          "伴舞"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.darkthreepeater",
+      "nameKey": "commanderEffect.darkthreepeater",
+      "name": "三线火爆射击",
+      "demonId": "darkthreepeater",
+      "doctrine": "三线射手通过倍增的火力进行覆盖，并在击中目标时引发烧焦效果。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "倍增",
+          "射手",
+          "火爆",
+          "烧焦",
+          "辣椒"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.dolldiamond",
+      "nameKey": "commanderEffect.dolldiamond",
+      "name": "光辉镜像",
+      "demonId": "dolldiamond",
+      "doctrine": "像是世界被切割的碎片，僵尸会不断分裂出制成钻石的幻影。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "世界",
+          "像是",
+          "僵尸",
+          "光辉",
+          "制成"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.dollgold",
+      "nameKey": "commanderEffect.dollgold",
+      "name": "层叠嵌套",
+      "demonId": "dollgold",
+      "doctrine": "当核心单位被摧毁时，会立即制成一个更小的套娃单位并重新部署，通过不断的套娃机制维持战线的持续性。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "制成",
+          "套娃"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.dollsilver",
+      "nameKey": "commanderEffect.dollsilver",
+      "name": "层叠嵌套指令",
+      "demonId": "dollsilver",
+      "doctrine": "每当一名成员被击败，其残骸会立即制成一个更小的套娃单位，并带有感叹号标记的强化属性，持续向敌阵推进。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:51:13+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "制成",
+          "套娃",
+          "感叹号"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.doomcactus",
+      "nameKey": "commanderEffect.doomcactus",
+      "name": "仙人掌阵列发射",
+      "demonId": "doomcactus",
+      "doctrine": "仙人掌会概率性地从阵列中发射大量尖刺，对敌方造成毁灭性打击。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "仙人掌",
+          "发射",
+          "大量",
+          "尖刺",
+          "概率"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.doorzombie",
+      "nameKey": "commanderEffect.doorzombie",
+      "name": "铁壁人质",
+      "demonId": "doorzombie",
+      "doctrine": "将僵尸视为移动的防御盾牌，在保护核心目标的同时，通过阻挡敌方进攻来维持阵线的稳定。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "特遣队",
+          "人质",
+          "僵尸",
+          "内心",
+          "劫匪"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.doublecherry",
+      "nameKey": "commanderEffect.doublecherry",
+      "name": "双重连射",
+      "demonId": "doublecherry",
+      "doctrine": "每次发射时，子弹会分裂为两枚，呈扇形向目标区域覆盖。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "发射",
+          "子弹"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.doubleshooter",
+      "nameKey": "commanderEffect.doubleshooter",
+      "name": "双重射击律动",
+      "demonId": "doubleshooter",
+      "doctrine": "每次发射时，子弹会分裂为两枚，呈扇形向前方区域扩散。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:51:13+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "发射",
+          "子弹"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.doublesnow",
+      "nameKey": "commanderEffect.doublesnow",
+      "name": "双重寒冰射击",
+      "demonId": "doublesnow",
+      "doctrine": "每次发射子弹时，有概率触发二次寒冰发射，使目标陷入冻结状态。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "发射",
+          "子弹"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.driverzombie",
+      "nameKey": "commanderEffect.driverzombie",
+      "name": "冰场冲刺",
+      "demonId": "driverzombie",
+      "doctrine": "公司出品的冰车在滑冰场上高速移动，僵尸会利用冰机产生的寒气进行直线冲刺。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "公司出品",
+          "滑冰场",
+          "僵尸",
+          "冰机",
+          "冰车"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.flagzombie",
+      "nameKey": "commanderEffect.flagzombie",
+      "name": "旗帜引领",
+      "demonId": "flagzombie",
+      "doctrine": "手中紧握旗帜，带领一大群僵尸向前冲锋。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "私下里",
+          "一大",
+          "僵尸",
+          "喜爱",
+          "手中"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.footballzombie",
+      "nameKey": "commanderEffect.footballzombie",
+      "name": "冲锋阵列",
+      "demonId": "footballzombie",
+      "doctrine": "作为球场上的体育明星，这群僵尸会组成紧密的橄榄球阵型，在冲刺时无视阻碍并强行撞开目标。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "体育明星",
+          "橄榄球",
+          "球场上",
+          "僵尸",
+          "公司"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.fumeshroom",
+      "nameKey": "commanderEffect.fumeshroom",
+      "name": "浓烟突袭",
+      "demonId": "fumeshroom",
+      "doctrine": "喷菇会释放大范围的烟雾，使敌方单位陷入混乱，随后发动强力的喷射攻击，并具备穿透铁门的效果。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "喷射",
+          "喷菇",
+          "烟雾",
+          "穿透",
+          "铁门"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.garlic",
+      "nameKey": "commanderEffect.garlic",
+      "name": "气味阻隔",
+      "demonId": "garlic",
+      "doctrine": "大蒜在战场前线释放强烈的气味，迫使所有试图靠近的僵尸改变行进路线，从而为后方单位争取防御时间。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "大蒜"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.garlicpea",
+      "nameKey": "commanderEffect.garlicpea",
+      "name": "体内毒素爆发",
+      "demonId": "garlicpea",
+      "doctrine": "通过释放体内积聚的毒素，使所有被击中的目标陷入持续中毒状态。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "中毒",
+          "体内"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.garlicthreepeater",
+      "nameKey": "commanderEffect.garlicthreepeater",
+      "name": "三行毒素渗透",
+      "demonId": "garlicthreepeater",
+      "doctrine": "通过体内积聚的剧毒，对三行内的所有目标造成持续性的中毒伤害。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "中毒",
+          "体内",
+          "三行"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.gatlingpea",
+      "nameKey": "commanderEffect.gatlingpea",
+      "name": "连射豌豆阵",
+      "demonId": "gatlingpea",
+      "doctrine": "持续发射高频豌豆，通过密集的弹幕覆盖目标。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "发射",
+          "豌豆"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.hypnochomper",
+      "nameKey": "commanderEffect.hypnochomper",
+      "name": "魅惑吞食",
+      "demonId": "hypnochomper",
+      "doctrine": "通过魅惑手段夺取僵尸的控制权，并将其作为吞食养分的成分进行消化。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "吞食",
+          "成分",
+          "部分",
+          "魅惑"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.hypnojalapeno",
+      "nameKey": "commanderEffect.hypnojalapeno",
+      "name": "变心之火",
+      "demonId": "hypnojalapeno",
+      "doctrine": "当僵尸靠近时，释放灼热气息使其产生变心，转而攻击原本的同伴。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "变心"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.hypnopeashooter",
+      "nameKey": "commanderEffect.hypnopeashooter",
+      "name": "心智篡夺",
+      "demonId": "hypnopeashooter",
+      "doctrine": "通过精神干扰使敌方僵尸发生变心，使其在作战中转而攻击同伴。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "变心",
+          "作战"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.hypnoshroom",
+      "nameKey": "commanderEffect.hypnoshroom",
+      "name": "心智颠覆",
+      "demonId": "hypnoshroom",
+      "doctrine": "通过释放迷幻孢子诱导僵尸产生变心，使其转而攻击同伴。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "变心"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.icecaltrop",
+      "nameKey": "commanderEffect.icecaltrop",
+      "name": "寒冰触感",
+      "demonId": "icecaltrop",
+      "doctrine": "地刺在被触感触发时，会瞬间释放寒冰冲击，冻结并减缓所有接触到的目标。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.iceshroom",
+      "nameKey": "commanderEffect.iceshroom",
+      "name": "寒霜地刺阵",
+      "demonId": "iceshroom",
+      "doctrine": "通过冰冻触感减缓僵尸移动，并在其路径上布下地刺进行持续打击。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感",
+          "僵尸"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.ironpeazombie",
+      "nameKey": "commanderEffect.ironpeazombie",
+      "name": "塔罗牌式弹幕",
+      "demonId": "ironpeazombie",
+      "doctrine": "通过发射带有塔罗牌预兆的子弹，对僵尸造成持续伤害。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "塔罗牌",
+          "伤害",
+          "僵尸",
+          "发射",
+          "子弹"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.jalacaltrop",
+      "nameKey": "commanderEffect.jalacaltrop",
+      "name": "地刺触感",
+      "demonId": "jalacaltrop",
+      "doctrine": "地刺在触感接触到敌方单位时，会引发连锁性的地底震荡，使周围的敌人陷入短暂的僵直状态。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.jalagatling",
+      "nameKey": "commanderEffect.jalagatling",
+      "name": "连绵发射",
+      "demonId": "jalagatling",
+      "doctrine": "通过持续的发射动作，在目标行径路径上留下带有地刺触感的弹道轨迹。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.jalapeashooter",
+      "nameKey": "commanderEffect.jalapeashooter",
+      "name": "烈焰发射阵列",
+      "demonId": "jalapeashooter",
+      "doctrine": "通过连续的发射动作引发地刺般的灼热冲击，对目标造成持续的触感灼伤。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.jalapeno",
+      "nameKey": "commanderEffect.jalapeno",
+      "name": "爆裂触感",
+      "demonId": "jalapeno",
+      "doctrine": "当僵尸靠近时，通过地刺引发连锁爆炸，以剧烈的触感摧毁前方所有目标。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感",
+          "僵尸"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.jalastar",
+      "nameKey": "commanderEffect.jalastar",
+      "name": "连环爆裂",
+      "demonId": "jalastar",
+      "doctrine": "通过地刺的触感引发连锁反应，使所有易燃易爆的单位在受击时产生剧烈爆炸。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:51:13+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感",
+          "易燃易爆"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.lanterncactus",
+      "nameKey": "commanderEffect.lanterncactus",
+      "name": "流光刺芒",
+      "demonId": "lanterncactus",
+      "doctrine": "仙人掌在释放光芒时会产生连锁反应，使所有刺造成的伤害随攻击次数增加而递增。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "仙人掌",
+          "伤害"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.lanternchomper",
+      "nameKey": "commanderEffect.lanternchomper",
+      "name": "光照吞噬",
+      "demonId": "lanternchomper",
+      "doctrine": "通过吸收光照来强化自身的伤害，并以此为代价对目标造成毁灭性的吞噬打击。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "仙人掌",
+          "伤害",
+          "光照"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.lanternpea",
+      "nameKey": "commanderEffect.lanternpea",
+      "name": "流光贯穿",
+      "demonId": "lanternpea",
+      "doctrine": "以光能汇聚成极高伤害的流光，穿透所有仙人掌般的尖锐障碍。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "仙人掌",
+          "伤害",
+          "光能"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.marigold",
+      "nameKey": "commanderEffect.marigold",
+      "name": "金币盛宴",
+      "demonId": "marigold",
+      "doctrine": "金盏花在战场上专注于生产，每当战斗回合结束时，会根据战场局势产出金币或银币。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "金盏花",
+          "生产",
+          "金币",
+          "钻石",
+          "银币"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.melonpult",
+      "nameKey": "commanderEffect.melonpult",
+      "name": "西瓜溅射阵列",
+      "demonId": "melonpult",
+      "doctrine": "投手投掷带有西瓜碎片的重型弹丸，造成大范围溅射伤害。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "伤害",
+          "带有",
+          "投手",
+          "溅射",
+          "西瓜"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.normalzombie",
+      "nameKey": "commanderEffect.normalzombie",
+      "name": "无名之辈",
+      "demonId": "normalzombie",
+      "doctrine": "每一个个体都不配拥有名字，仅需做出最原始的冲锋，以僵尸之躯填补战线。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "不配",
+          "个体",
+          "做出",
+          "僵尸",
+          "名字"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.nutchomper",
+      "nameKey": "commanderEffect.nutchomper",
+      "name": "饥饿吞食",
+      "demonId": "nutchomper",
+      "doctrine": "在战斗中，该小队会不断吞食路经的僵尸，通过进食来强化自身的防御力。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:51:13+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "吞食"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.paperzombie",
+      "nameKey": "commanderEffect.paperzombie",
+      "name": "报纸迷踪",
+      "demonId": "paperzombie",
+      "doctrine": "通过报纸遮蔽行踪，在完成对大脑的啃咬前，会不断打断敌人的进攻节奏。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "大脑",
+          "字谜",
+          "完成",
+          "打断",
+          "报纸"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.peachomper",
+      "nameKey": "commanderEffect.peachomper",
+      "name": "吞食之息",
+      "demonId": "peachomper",
+      "doctrine": "通过不断吞食僵尸来积蓄能量，随后向前方大范围吐出致命的弹丸。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "吞食",
+          "吐出"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.peanut",
+      "nameKey": "commanderEffect.peanut",
+      "name": "坚果屏障",
+      "demonId": "peanut",
+      "doctrine": "坚果层层叠加，形成具有穿透性的防御阵线。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "坚果",
+          "穿透"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.peashooter",
+      "nameKey": "commanderEffect.peashooter",
+      "name": "连射律动",
+      "demonId": "peashooter",
+      "doctrine": "持续发射豌豆，旨在通过密集的弹幕压制僵尸。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.peashooterzombie",
+      "nameKey": "commanderEffect.peashooterzombie",
+      "name": "连射恐慌",
+      "demonId": "peashooterzombie",
+      "doctrine": "僵尸通过连续发射弹丸制造人心惶惶的压制感。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "发射",
+          "人心惶惶"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.peasquash",
+      "nameKey": "commanderEffect.peasquash",
+      "name": "连射冲击",
+      "demonId": "peasquash",
+      "doctrine": "通过大量发射豌豆，对僵尸造成持续的冲击力。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "发射",
+          "大量"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.peasunflower",
+      "nameKey": "commanderEffect.peasunflower",
+      "name": "连环射击",
+      "demonId": "peasunflower",
+      "doctrine": "每次命中目标后，立即触发连续发射，增加后续弹幕的频率。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "发射",
+          "命中"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.plantern",
+      "nameKey": "commanderEffect.plantern",
+      "name": "光照引导",
+      "demonId": "plantern",
+      "doctrine": "通过持续的光照强化，使所有成员在命中目标时，会触发额外的能量发射。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "发射",
+          "命中",
+          "光照"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.polevaulterzombie",
+      "nameKey": "commanderEffect.polevaulterzombie",
+      "name": "长杆跃迁",
+      "demonId": "polevaulterzombie",
+      "doctrine": "借助长杆的支撑力，促使僵尸在冲锋时实现跨越障碍的位移。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:29:32+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "促使",
+          "借助",
+          "僵尸",
+          "助跑",
+          "成就"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.pot",
+      "nameKey": "commanderEffect.pot",
+      "name": "屋顶防线",
+      "demonId": "pot",
+      "doctrine": "在屋顶高度进行远程投掷，通过植物的生长来加固防御阵地。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "屋顶",
+          "植物"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.pumpkin",
+      "nameKey": "commanderEffect.pumpkin",
+      "name": "屋顶守望者",
+      "demonId": "pumpkin",
+      "doctrine": "在屋顶位置展开防御，为后方的植物提供保护。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:51:13+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "屋顶",
+          "植物",
+          "保护"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.scaredyshroom",
+      "nameKey": "commanderEffect.scaredyshroom",
+      "name": "恐惧孢子",
+      "demonId": "scaredyshroom",
+      "doctrine": "当面对僵尸时，会通过发射孢子来表达害怕，并以此进行远距离攻击。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "远距离",
+          "僵尸",
+          "发射",
+          "孢子",
+          "害怕"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.snowgatling",
+      "nameKey": "commanderEffect.snowgatling",
+      "name": "寒霜连射",
+      "demonId": "snowgatling",
+      "doctrine": "通过连续发射冰冻弹药，在目标路径上制造具有寒冷触感的地刺，持续减缓敌方移动速度。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.snowpeashooter",
+      "nameKey": "commanderEffect.snowpeashooter",
+      "name": "寒霜发射阵列",
+      "demonId": "snowpeashooter",
+      "doctrine": "通过连续发射冰冻弹丸，使敌方单位陷入迟缓状态，并诱导其触感地刺的陷阱。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "地刺",
+          "触感",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.snowsplit",
+      "nameKey": "commanderEffect.snowsplit",
+      "name": "寒冰碎裂射击",
+      "demonId": "snowsplit",
+      "doctrine": "通过连续发射冰冻弹药，使僵尸陷入迟缓状态，并使其在受损时产生裂变效果。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.splitpea",
+      "nameKey": "commanderEffect.splitpea",
+      "name": "分裂射击",
+      "demonId": "splitpea",
+      "doctrine": "发射出的弹丸在接触僵尸时会分裂，产生多重打击效果。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.squash",
+      "nameKey": "commanderEffect.squash",
+      "name": "压扁重击",
+      "demonId": "squash",
+      "doctrine": "当僵尸接近时，窝瓜会发动突袭，将目标彻底压扁。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "僵尸",
+          "压扁",
+          "接近",
+          "窝瓜"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.starfruit",
+      "nameKey": "commanderEffect.starfruit",
+      "name": "星芒轨迹",
+      "demonId": "starfruit",
+      "doctrine": "多向发射，随机改变飞行方向",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "发射",
+          "方向"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.starpea",
+      "nameKey": "commanderEffect.starpea",
+      "name": "星芒散射",
+      "demonId": "starpea",
+      "doctrine": "发射多向星芒，改变弹道方向。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T04:51:13+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "发射",
+          "方向"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.sunchomper",
+      "nameKey": "commanderEffect.sunchomper",
+      "name": "吞噬完成",
+      "demonId": "sunchomper",
+      "doctrine": "当嘴花吞噬目标后，立即触发连锁吞噬，确保进食流程完美完成。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "嘴花",
+          "完成"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.sunflower",
+      "nameKey": "commanderEffect.sunflower",
+      "name": "向日葵的盛放",
+      "demonId": "sunflower",
+      "doctrine": "每当战斗完成，向日葵会吐出大量能量，使所有友军的嘴花状态转化为持续性的增益。",
+      "basis": "name",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "嘴花",
+          "完成",
+          "向日葵"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.threecabbage",
+      "nameKey": "commanderEffect.threecabbage",
+      "name": "三行弹射阵列",
+      "demonId": "threecabbage",
+      "doctrine": "卷心菜能够从三行中随机选择目标，并产生弹射效果，使攻击能够出圈并打击相邻单位。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "卷心菜",
+          "三行",
+          "弹射",
+          "能够",
+          "出"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.threepeater",
+      "nameKey": "commanderEffect.threepeater",
+      "name": "三行齐射",
+      "demonId": "threepeater",
+      "doctrine": "在三行范围内进行多向发射，确保火力覆盖所有路径。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "三行",
+          "发射"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.threeplantern",
+      "nameKey": "commanderEffect.threeplantern",
+      "name": "三行光照阵列",
+      "demonId": "threeplantern",
+      "doctrine": "在三行范围内持续发射光照，增强友军的攻击频率。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "三行",
+          "发射",
+          "光照"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.twinflower",
+      "nameKey": "commanderEffect.twinflower",
+      "name": "双生光能律",
+      "demonId": "twinflower",
+      "doctrine": "双子向日葵会通过协同作用实现产量翻倍，在战斗中持续为全队提供充沛的阳光。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "向日葵",
+          "产量",
+          "阳光"
+        ]
+      }
+    },
+    {
+      "id": "commander-effect.wallnut",
+      "nameKey": "commanderEffect.wallnut",
+      "name": "坚硬外壳",
+      "demonId": "wallnut",
+      "doctrine": "全体成员进入保护状态，通过消耗坚果外壳来抵御伤害。",
+      "basis": "text",
+      "_provenance": {
+        "pipeline": "commander-effect",
+        "model": "google/gemma-4-26b-a4b-qat",
+        "promptVersion": "commander-effect/1",
+        "generatedUtc": "2026-09-01T03:57:08+00:00",
+        "closes": "Coverage/DemonUncovered",
+        "motifs": [
+          "保护",
+          "坚果",
+          "坚硬",
+          "外壳",
+          "植物"
+        ]
+      }
+    }
+  ]
+}

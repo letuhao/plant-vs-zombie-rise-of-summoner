@@ -1,6 +1,6 @@
 # Seedsmith — capability map
 
-**Status:** Map approved 2026-08-23; all module specs written (§8). Nothing is built yet.
+**Status (2026-09-01):** Map approved 2026-08-23. **Feature 1 (core, W1-W3) BUILT** — 395 tests green, `seed_graph` absorbed and deleted. **Feature 2 (demons, D1-D4) BUILT** — 84-species corpus emitted, families/motifs/themes generated from a real model run. **Feature 3 (generation runtime, G0-G4) SPECCED AND SEALED**, not built — see §3d.
 
 A Python application that owns the health of every seed corpus in the repo: it validates what is
 there, measures what is missing or lopsided, and emits a **deterministically-planned** work order
@@ -96,8 +96,8 @@ briefkit or a pipeline. It adds an adapter, the pipelines that fill it, and two 
 **Spec audit:** [review/audit-demons-specs.md](seedsmith/review/audit-demons-specs.md) — 8 findings,
 3 blockers and 1 contradiction, all applied to the specs below.
 
-**Module specs** (all written 2026-08-31, all *proposed — awaiting owner review, not authorized to
-build*): [demon-corpus-emit](seedsmith/spec-demon-corpus-emit.md) ·
+**Module specs** (written 2026-08-31, **approved by the owner 2026-08-31 and BUILT** — D1-D4 all
+complete, CP-D4 reached): [demon-corpus-emit](seedsmith/spec-demon-corpus-emit.md) ·
 [adapter-demons](seedsmith/spec-adapter-demons.md) ·
 [family-extract](seedsmith/spec-family-extract.md) ·
 [family-consolidate](seedsmith/spec-family-consolidate.md) ·
@@ -479,8 +479,16 @@ thing — **dependency-correct generation order** — and the set case showed th
 not only *between* kinds but *inside* one: a set is five ordered stages, three of them deterministic,
 and the agentic build asked a single agent to do all five at once.
 
-### Still open
+### ~~Still open~~ ✅ CLOSED 2026-09-01 — all four resolved by shipped work
 
-Buildability B1–B4 (undefined interface types, item vocabulary inside the feature-agnostic modules,
-no CLI specification, no CI cutover for absorbing `seed_graph`) and the grounding corrections — all
-spec work, no decisions needed.
+This section was written 2026-08-23, **before W1 was built**. Re-verified against the tree; every
+item is done, and none needed a decision:
+
+| # | Was open | Resolved by | Verified |
+|---|---|---|---|
+| B1 | undefined interface types | `adapters/base.py` | `KindSpec`, `Dimension`, `Channel`, `RegistrySet`, `SeedAdapter` all defined |
+| B2 | item vocabulary inside the feature-agnostic modules | the `_stub` adapter + its conformance suite | `_stub` present, **10 seam tests**; the demons adapter (feature 2) shipped without the core learning a demon concept |
+| B3 | no CLI specification | `seedsmith/report/cli.py` | `python -m seedsmith --help` → `{check, metrics}`, working |
+| B4 | no CI cutover for absorbing `seed_graph` | S10's cutover | `tools/seed_graph/` **deleted**; `ci.yml:85` runs *"Item seed reachability (seedsmith)"* with the cutover recorded in-line |
+
+The grounding corrections landed with the specs they belonged to.

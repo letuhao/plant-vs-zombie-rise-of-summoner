@@ -247,6 +247,21 @@ vocabulary is exactly how a migration breaks a corpus quietly.
 1. ~~Do the existing themes become demon themes, or coexist?~~ **ANSWERED by audit S5**: they
    coexist, split by prefix (§2.2a). The split is principled rather than deferred, because the id
    grammar was already carrying it.
-2. **Does the action corpus need the same bridge, or a different one?** Actions are specced but their
-   corpus shape is not settled here; this spec assumes the same registry serves both and does not
-   prove it.
+2. ~~Does the action corpus need the same bridge, or a different one?~~ ✅ **CLOSED 2026-09-01 —
+   the same bridge, and it is already built that way.** Two facts settle it:
+
+   - **There is no action corpus to bridge to.** `data/seed/actions/` holds exactly two files —
+     `name-templates.json` (`{base, modifiers}`) and `pairings.json` (a flat dict keyed by atom id).
+     **Neither carries `kind` + `entries`**, so neither is loadable by `Corpus.load` at all. They are
+     configuration, not a corpus. The question was premature, not unanswerable.
+   - **The bridge is corpus-agnostic by construction, and already anticipates actions.**
+     `PublishedTheme` carries no items-specific field — only `theme_key`, `species_id`, motifs,
+     `basis`, `rarity` and `expression`. And `EXPRESSION_RULES` **already has an `action` key**
+     alongside `item` (*"tempo and effect shape — how fast, how it lands"*), taken from §2.3's own
+     table. The registry is a standalone file published **one-way**; a consumer validates its
+     `themeKey` against it.
+
+   **So no second bridge is needed, and none should be built.** When an action corpus eventually
+   exists, its adapter mirrors the items side's `load_theme_keys()` — about five lines — and reads
+   the identical registry. Building a separate action bridge now would create a second mechanism for
+   one job, against a corpus that does not exist.

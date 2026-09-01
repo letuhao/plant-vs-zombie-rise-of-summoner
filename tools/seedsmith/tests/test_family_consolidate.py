@@ -205,3 +205,81 @@ def test_family_ids_and_native_labels_are_plain_inlinable_strings():
             assert pattern.search(family_id) is None
             for native in rec["nativeLabels"]:
                 assert pattern.search(native) is None
+
+
+# ---- The missing entrypoint (added 2026-09-01) ---------------------------------------------------
+
+
+def test_the_family_pipeline_has_a_committed_entrypoint():
+    """⛔ Until 2026-09-01 it did not. `extract.py` and `consolidate.py` were library modules whose
+    only callers were tests, so `family-candidates.json`, `families.v1.json` and
+    `family-assignments.json` were committed artifacts **nothing in the repo could reproduce** — the
+    2026-08-31 run used scratch scripts that live nowhere.
+
+    Third instance of one defect: G1.3 recorded it for motifs, G4.3 fixed it for commander effects."""
+    from seedsmith.adapters.demons import generate_families
+
+    assert callable(generate_families.run)
+
+
+def test_families_is_reachable_from_the_documented_cli():
+    from seedsmith.report.cli import build_parser
+
+    args = build_parser().parse_args(["demons", "families", "--dry-run"])
+    assert args.demon_command == "families" and args.dry_run is True
+
+
+def test_writing_is_refused_while_downstream_content_is_bound():
+    """⛔ G1.3's own note: regeneration was safe *"only because nothing is bound to them ... **This
+    window closes when G4 writes its first row.**"* G4 has since written 84 commander effects, so
+    re-deriving families can move an id and silently invalidate three layers of committed,
+    append-only content. The entrypoint must refuse by default, and say what is at stake."""
+    from seedsmith.adapters.demons.generate_families import bound_artifacts, run
+
+    bound = bound_artifacts()
+    assert bound, "no downstream artifacts found — the fixture moved; re-measure before trusting this"
+    assert run(["--write"]) == 2, "a --write with the window closed must refuse, not proceed"
+
+
+def test_the_refusal_names_every_bound_artifact_and_the_recovery_path(capsys):
+    """A refusal that does not say what to do next just gets worked around."""
+    from seedsmith.adapters.demons.generate_families import run
+
+    run(["--write"])
+    out = capsys.readouterr().out
+    for rel in ("motif-assignments.json", "themes.v1.json", "commander-effect/all.json"):
+        assert rel in out, f"the refusal does not name {rel}"
+    assert "--i-have-read-the-append-only-note" in out
+    assert "--stale" in out, "the refusal must name the regeneration chain, not just say no"
+
+
+def test_dry_run_makes_no_model_calls_and_still_reports_the_batching():
+    import socket
+
+    from seedsmith.adapters.demons.generate_families import run
+
+    real = socket.socket.connect
+
+    def refuse(self, addr):  # noqa: ANN001
+        raise AssertionError(f"--dry-run attempted a connection to {addr}")
+
+    socket.socket.connect = refuse
+    try:
+        assert run(["--dry-run"]) == 0
+    finally:
+        socket.socket.connect = real
+
+
+def test_writing_persists_all_three_family_artifacts_or_none():
+    """`motif-derive` reads `family-assignments.json` AND `family-candidates.json`, and
+    `families.v1.json` is the registry both are described by. Persisting only the candidates would
+    leave the other two describing a different run — the same cross-artifact staleness
+    `themes.v1.json` already taught this program once."""
+    import inspect
+
+    from seedsmith.adapters.demons import generate_families
+
+    src = inspect.getsource(generate_families.run)
+    body = src.split("if args.write:")[1]
+    for name in ("family-candidates.json", "families.v1.json", "family-assignments.json"):
+        assert name in body, f"--write does not persist {name}"
