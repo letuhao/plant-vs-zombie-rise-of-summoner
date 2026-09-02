@@ -44,11 +44,18 @@ public class ActionSeedingTests
     static AtomRow? Lookup(string id) => Catalog.TryGetValue(id, out var a) ? a : null;
     static string Id(string family, string variant = "") => AtomRow.DeriveId(family, variant, 1);
 
-    static ContainerRow Container(IEnumerable<ContainerPoolRow> pool, int poolRolls) => new()
+    // T3.1 (affix-schema): the pool now draws affix ids, not bare atom ids. `affix-library`
+    // (module 3, not yet built) will generate a single-ref affix 1:1 for every atom for real; this
+    // fixture simulates exactly that shape — one affix per atom, same id, so every existing
+    // ContainerPoolRow(Id(...), weight) fixture below keeps meaning "draw this one atom."
+    static AffixRow? LookupAffix(string id) =>
+        Catalog.TryGetValue(id, out var atom) ? new AffixRow(id, AffixClass.Prefix, new[] { new AffixRefRow(1, atom.AtomId) }) : null;
+
+    static ContainerRow Container(IEnumerable<ContainerPoolRow> pool, int prefixRolls) => new()
     {
         ContainerId = "item.generated-test",
         Kind = ContainerKind.Item,
-        PoolRolls = poolRolls,
+        PrefixRolls = prefixRolls,
         Pool = pool.ToList(),
     };
 
@@ -73,10 +80,10 @@ public class ActionSeedingTests
     [Fact]
     public void TheSameSeedProducesByteIdenticalGenerationsTwice()
     {
-        var container = Container(new[] { new ContainerPoolRow(Id("atom.strike"), 1000) }, poolRolls: 1);
+        var container = Container(new[] { new ContainerPoolRow(Id("atom.strike"), 1000) }, prefixRolls: 1);
 
-        var a = ActionSeeder.Generate(container, Lookup, rollSeed: 4242, ShapePool(), boardAvailable: true, NameTemplates());
-        var b = ActionSeeder.Generate(container, Lookup, rollSeed: 4242, ShapePool(), boardAvailable: true, NameTemplates());
+        var a = ActionSeeder.Generate(container, Lookup, LookupAffix, rollSeed: 4242, ShapePool(), boardAvailable: true, NameTemplates());
+        var b = ActionSeeder.Generate(container, Lookup, LookupAffix, rollSeed: 4242, ShapePool(), boardAvailable: true, NameTemplates());
 
         Assert.Equal(a.AtomIds, b.AtomIds);
         Assert.Equal(a.Targeting, b.Targeting);
@@ -86,11 +93,11 @@ public class ActionSeedingTests
     [Fact]
     public void DifferentSeedsCanProduceDifferentShapePicks()
     {
-        var container = Container(new[] { new ContainerPoolRow(Id("atom.strike"), 1000) }, poolRolls: 1);
+        var container = Container(new[] { new ContainerPoolRow(Id("atom.strike"), 1000) }, prefixRolls: 1);
         var modes = new HashSet<ActionTargetMode>();
 
         for (long seed = 1; seed <= 50; seed++)
-            modes.Add(ActionSeeder.Generate(container, Lookup, seed, ShapePool(), boardAvailable: true, NameTemplates()).Targeting.Mode);
+            modes.Add(ActionSeeder.Generate(container, Lookup, LookupAffix, seed, ShapePool(), boardAvailable: true, NameTemplates()).Targeting.Mode);
 
         Assert.Contains(ActionTargetMode.Single, modes);
         Assert.Contains(ActionTargetMode.Area, modes); // proves the pool is genuinely live, not stuck on one branch
@@ -107,7 +114,7 @@ public class ActionSeedingTests
             new ContainerPoolRow(Id("atom.elemental-power", "ice"), 500, Group: "elemental-power"),
             new ContainerPoolRow(Id("atom.strike"), 500, Group: "strike"),
         };
-        var container = Container(pool, poolRolls: 2); // enough rolls that, absent group exclusion, both elemental variants could land
+        var container = Container(pool, prefixRolls: 2); // enough rolls that, absent group exclusion, both elemental variants could land
         var namesEitherAsBaseOrRider = ActionNameTemplates.Parse("""
             {
               "base": { "atom.strike": "Strike", "atom.elemental-power": "Elemental Power" },
@@ -117,7 +124,7 @@ public class ActionSeedingTests
 
         for (long seed = 1; seed <= 200; seed++)
         {
-            var seeded = ActionSeeder.Generate(container, Lookup, seed, ShapePool(), boardAvailable: true, namesEitherAsBaseOrRider);
+            var seeded = ActionSeeder.Generate(container, Lookup, LookupAffix, seed, ShapePool(), boardAvailable: true, namesEitherAsBaseOrRider);
             var elementalCount = seeded.AtomIds.Count(id => id.StartsWith("atom.elemental-power", StringComparison.Ordinal));
             Assert.True(elementalCount <= 1, $"seed {seed} drew {elementalCount} elemental-power atoms — group exclusion did not survive the wrapper");
         }
@@ -128,7 +135,7 @@ public class ActionSeedingTests
     [Fact]
     public void AreaIsNeverRolledWithNoBoardEvenWhenHeavilyWeighted()
     {
-        var container = Container(new[] { new ContainerPoolRow(Id("atom.strike"), 1000) }, poolRolls: 1);
+        var container = Container(new[] { new ContainerPoolRow(Id("atom.strike"), 1000) }, prefixRolls: 1);
         var heavilyAreaWeighted = new[]
         {
             new WeightedOption<ActionTargetSpec>(SingleSpec, 1),
@@ -137,7 +144,7 @@ public class ActionSeedingTests
 
         for (long seed = 1; seed <= 100; seed++)
         {
-            var seeded = ActionSeeder.Generate(container, Lookup, seed, heavilyAreaWeighted, boardAvailable: false, NameTemplates());
+            var seeded = ActionSeeder.Generate(container, Lookup, LookupAffix, seed, heavilyAreaWeighted, boardAvailable: false, NameTemplates());
             Assert.NotEqual(ActionTargetMode.Area, seeded.Targeting.Mode);
         }
     }
@@ -145,11 +152,11 @@ public class ActionSeedingTests
     [Fact]
     public void AllCandidatesExcludedLeavesNothingDrawableAndThrowsRatherThanSilentlyPickingArea()
     {
-        var container = Container(new[] { new ContainerPoolRow(Id("atom.strike"), 1000) }, poolRolls: 1);
+        var container = Container(new[] { new ContainerPoolRow(Id("atom.strike"), 1000) }, prefixRolls: 1);
         var onlyArea = new[] { new WeightedOption<ActionTargetSpec>(AreaSpec, 1000) };
 
         Assert.Throws<NoDrawableWeightedOptionException>(() =>
-            ActionSeeder.Generate(container, Lookup, 1, onlyArea, boardAvailable: false, NameTemplates()));
+            ActionSeeder.Generate(container, Lookup, LookupAffix, 1, onlyArea, boardAvailable: false, NameTemplates()));
     }
 
     /// <summary>Closes the loop the spec's own acceptance line names: even if a caller bypassed the

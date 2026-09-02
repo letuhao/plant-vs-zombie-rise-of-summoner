@@ -195,7 +195,7 @@ attackerPower(E) = combat.power.omni + combat.power.E
 defenderDefense(E) = combat.defense.omni + combat.defense.E
 ```
 
-Omni is additive-only.
+Omni is additive-only. **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 
 ### 6.2 Matchup bonus (per-component)
 

@@ -43,6 +43,14 @@ the thing this produces.
 > rolls `+10 atk / +12 atk / +14 atk`. **"Rarity selects the `pool_rolls` count and the tier window… No
 > third mechanism."**
 
+**Amended 2026-09-01 (`seed-to-concrete` T0.7, found by the plan audit — this row was missing from
+`effect-pipeline-map.md`'s A13 cross-reference table).** `spec-container-schema.md` split the single
+`pool_rolls` count into `prefix_rolls`/`suffix_rolls` per affix class (T0.4/T3.2) — the quote above is
+now read with that split applied: an unlocked action's rarity selects **both** counts and the tier
+window, still no third mechanism. This module's own action containers gain `prefix_rolls`/
+`suffix_rolls` in place of the retired `pool_rolls`, and a mixed-class bundle within an action
+container consumes one of each, per `seed-contract.md` §2.1.
+
 **An unlocked action is a container roll, and its rung is its rarity.** Nothing to build; everything to
 author.
 

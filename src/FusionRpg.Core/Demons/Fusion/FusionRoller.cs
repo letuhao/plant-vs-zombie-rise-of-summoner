@@ -73,12 +73,10 @@ public static class FusionRoller
         return traits;
     }
 
-    /// <summary>Trait slot count by rarity — the same 1/2/2/3 the summon altar uses.</summary>
-    public static int SlotsFor(DemonRarity rarity) => rarity switch
-    {
-        DemonRarity.Common => 1,
-        DemonRarity.Rare => 2,
-        DemonRarity.Epic => 2,
-        _ => 3
-    };
+    /// <summary>Trait slot count by rarity — tuning-driven (`fusion.v1.json`'s `slotsByRarity`),
+    /// not a hardcoded switch (this repo's own magic-number rule: a balance pass would want to
+    /// change this per rung, especially now that ten rungs exist instead of four). Moved off the
+    /// old bare `Common=>1, Rare/Epic=>2, _=>3` switch during `seed-to-concrete` T4.1 — that
+    /// wildcard arm would have silently caught every one of the six new intermediate rungs.</summary>
+    public static int SlotsFor(DemonRarity rarity) => StarPolicy.Tuning.SlotsByRarity[rarity];
 }

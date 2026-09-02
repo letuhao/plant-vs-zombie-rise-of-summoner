@@ -32,7 +32,8 @@
       "fixedAtoms": [
         { "family": "atom.freezing", "powerBand": "trivial" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.frostbitten-husk",
       "flavorKey": "flavor.charm.frostbitten-husk",
@@ -50,7 +51,8 @@
       "fixedAtoms": [
         { "family": "atom.entangling", "powerBand": "trivial" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive", "rooted"],
       "iconKey": "icon.charm.verdant-tendril",
       "flavorKey": "flavor.charm.verdant-tendril",
@@ -68,7 +70,8 @@
       "fixedAtoms": [
         { "family": "atom.sporing", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.pod-of-the-seedfall",
       "flavorKey": "flavor.charm.pod-of-the-seedfall",
@@ -86,7 +89,8 @@
       "fixedAtoms": [
         { "family": "atom.withering", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.moldering-rind",
       "flavorKey": "flavor.charm.moldering-rind",
@@ -105,7 +109,8 @@
         { "family": "atom.venomous", "powerBand": "low" }
       ],
       "roleGroups": ["atom.entangling"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.seething-gall",
       "flavorKey": "flavor.charm.seething-gall",
@@ -124,7 +129,8 @@
         { "family": "atom.mesmerizing", "powerBand": "low" }
       ],
       "roleGroups": ["atom.entangling"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.husk-of-the-murmuration",
       "flavorKey": "flavor.charm.husk-of-the-murmuration",
@@ -143,7 +149,8 @@
         { "family": "atom.bloodletting", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.sporing"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["offensive", "undead"],
       "iconKey": "icon.charm.bramble-of-the-barrow",
       "flavorKey": "flavor.charm.bramble-of-the-barrow",
@@ -162,7 +169,8 @@
         { "family": "atom.withering", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.sporing"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive", "undead"],
       "iconKey": "icon.charm.charnel-bloat",
       "flavorKey": "flavor.charm.charnel-bloat",
@@ -181,7 +189,8 @@
         { "family": "atom.sporing", "powerBand": "low" }
       ],
       "roleGroups": ["atom.entangling"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.drifting-kernel",
       "flavorKey": "flavor.charm.drifting-kernel",
@@ -201,7 +210,8 @@
         { "family": "atom.freezing", "powerBand": "high" },
         { "family": "atom.vitality", "powerBand": "medium", "params": { "sign": "negative" } }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.permafrost-marrow",
       "flavorKey": "flavor.charm.permafrost-marrow",
@@ -219,7 +229,8 @@
       "fixedAtoms": [
         { "family": "atom.might", "powerBand": "trivial" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive", "mechanical"],
       "iconKey": "icon.charm.rusted-bulb",
       "flavorKey": "flavor.charm.rusted-bulb",
@@ -237,7 +248,8 @@
       "fixedAtoms": [
         { "family": "atom.might", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive", "mechanical"],
       "iconKey": "icon.charm.riveted-sprig",
       "flavorKey": "flavor.charm.riveted-sprig",
@@ -255,7 +267,8 @@
       "fixedAtoms": [
         { "family": "atom.hit-followthrough", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.earthen-cutting",
       "flavorKey": "flavor.charm.earthen-cutting",
@@ -274,7 +287,8 @@
         { "family": "atom.retribution", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.might"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive", "mechanical"],
       "iconKey": "icon.charm.scion-of-the-overhaul",
       "flavorKey": "flavor.charm.scion-of-the-overhaul",
@@ -293,7 +307,8 @@
         { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "fire" } }
       ],
       "roleGroups": ["atom.hit-followthrough"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.smoldering-bloom",
       "flavorKey": "flavor.charm.smoldering-bloom",
@@ -312,7 +327,8 @@
         { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "earth" } }
       ],
       "roleGroups": ["atom.might"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.root-of-the-rampart",
       "flavorKey": "flavor.charm.root-of-the-rampart",
@@ -331,7 +347,8 @@
         { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "air" } }
       ],
       "roleGroups": ["atom.retribution"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.scudding-vine",
       "flavorKey": "flavor.charm.scudding-vine",
@@ -350,7 +367,8 @@
         { "family": "atom.searing-strike", "powerBand": "high", "params": { "element": "dark" } }
       ],
       "roleGroups": ["atom.hit-followthrough"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["offensive", "undead"],
       "iconKey": "icon.charm.chitin-of-the-undertow",
       "flavorKey": "flavor.charm.chitin-of-the-undertow",
@@ -369,7 +387,8 @@
         { "family": "atom.searing-strike", "powerBand": "medium", "params": { "element": "light" } }
       ],
       "roleGroups": ["atom.retribution"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["offensive"],
       "iconKey": "icon.charm.bloom-of-the-equinox",
       "flavorKey": "flavor.charm.bloom-of-the-equinox",
@@ -389,7 +408,8 @@
         { "family": "atom.deathblast", "powerBand": "high", "params": { "element": "omni" } },
         { "family": "atom.vitality", "powerBand": "medium", "params": { "sign": "negative" } }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["offensive", "mechanical"],
       "iconKey": "icon.charm.clockwork-graft",
       "flavorKey": "flavor.charm.clockwork-graft",

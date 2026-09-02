@@ -1,13 +1,26 @@
 # Capability map: `effect-pipeline`
 
 **Status:** proposed 2026-09-01, from [effect-pipeline-ideal.md](effect-pipeline-ideal.md) — nine
-questions closed, seven attacks answered. **Ten modules** (`mods-absorption` and `patron-absorption` added 2026-09-01 per Q11 and Q13). **Awaiting approval before any
-module spec is written.**
+questions closed, seven attacks answered. **Ten modules** (`mods-absorption` and `patron-absorption` added 2026-09-01 per Q11 and Q13). **Approved by the owner 2026-09-02.** All ten module specs are
+written — `docs/architecture/effect-pipeline/spec-<module-id>.md`, one per row in §3's table below.
+
+**A real discrepancy found while writing them (2026-09-02, verified by direct code read, not
+assumed):** several amendments this map's §6 lists as "owed before building" — the `pool_rolls` →
+`prefix_rolls`/`suffix_rolls` split, the slot/affix-bundle model, the five-step resolution order, the
+four named RNG streams — were **already written into `spec-container-schema.md` and
+`definitions.md`** (dated 2026-09-01, `seed-to-concrete` T0.4/T0.5/T0.6) before this map's own
+approval. **None of it exists in the actual C# schema or resolver code yet** — `RpgStore.Containers.cs`
+still has one `pool_rolls` column, `Instantiator.Draw` still draws bare atoms on one shared stream.
+This is not a conflict: the docs were amended first (Phase 0 of `seed-to-concrete-todo.md`), the
+implementation is this program's own job (modules 1-2), and each module spec below states the gap
+explicitly rather than re-describing a design that already won.
 
 > **The program in one sentence.** Build the producer that turns a committed seed into a concrete,
 > per-player effect list — and in doing so, switch on four modules that are built, tested, and currently
 > unreachable.
 
+
+> **Plan:** [tasks/seed-to-concrete-plan.md](../../tasks/seed-to-concrete-plan.md) and [-todo.md](../../tasks/seed-to-concrete-todo.md) — **one plan spans both this map and its sibling**, because Phase 5 is a single vertical slice built from modules of each. Neither program can finish alone.
 ---
 
 ## 1. Why this program exists — in the effect-atom program's own words

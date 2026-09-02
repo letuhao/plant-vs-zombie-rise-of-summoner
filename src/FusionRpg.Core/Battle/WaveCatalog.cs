@@ -26,7 +26,11 @@ public sealed record WaveDef(string WaveId, string Name, int ContentIndex, IRead
 /// </summary>
 public static class WaveCatalog
 {
-    public static readonly IReadOnlyList<WaveDef> All = Build();
+    // Lazy, not `static readonly ... = Build()` (T4.7, catalog-runtime §3a): first touch must happen
+    // after DemonSpeciesCatalog.Configure runs, not at an unpredictable point tied to class-load
+    // order. Behaviour-preserving today — the source is still the compiled roster either way.
+    static IReadOnlyList<WaveDef>? _all;
+    public static IReadOnlyList<WaveDef> All => _all ??= Build();
 
     public static WaveDef Get(string waveId) =>
         All.FirstOrDefault(w => string.Equals(w.WaveId, waveId, StringComparison.Ordinal))
@@ -37,11 +41,16 @@ public static class WaveCatalog
 
     static IReadOnlyList<WaveDef> Build()
     {
-        // Ordered, stable species pools by rarity band.
-        var commons = Band(DemonRarity.Common);
-        var rares = Band(DemonRarity.Rare);
-        var epics = Band(DemonRarity.Epic);
-        var legendaries = Band(DemonRarity.Legendary);
+        // Ordered, stable species pools by rarity band. Renamed to the ten-rung ladder's own
+        // ids (seed-to-concrete T4.1) via the SAME band each old value migrated to
+        // (ssot-rarity.md §4.3's forward map) — behaviour-preserving: the 84-species generated
+        // catalog only populates these four rungs today, so the wave rosters are unchanged.
+        // Widening these four bands to cover the six new intermediate rungs is a wave-content
+        // authoring decision, out of scope for this migration.
+        var commons = Band(DemonRarity.Chaff);
+        var rares = Band(DemonRarity.Cultivated);
+        var epics = Band(DemonRarity.Heirloom);
+        var legendaries = Band(DemonRarity.Sunwoven);
 
         return new[]
         {

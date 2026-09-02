@@ -32,6 +32,7 @@ public static class ActionSeeder
     public static SeededAction Generate(
         ContainerRow container,
         Func<string, AtomRow?> lookupAtom,
+        Func<string, AffixRow?> lookupAffix,
         long rollSeed,
         IReadOnlyList<WeightedOption<ActionTargetSpec>> targetShapePool,
         bool boardAvailable,
@@ -39,10 +40,11 @@ public static class ActionSeeder
     {
         ArgumentNullException.ThrowIfNull(container);
         ArgumentNullException.ThrowIfNull(lookupAtom);
+        ArgumentNullException.ThrowIfNull(lookupAffix);
         ArgumentNullException.ThrowIfNull(targetShapePool);
         ArgumentNullException.ThrowIfNull(nameTemplates);
 
-        var atomIds = Instantiator.Draw(container, lookupAtom, rollSeed);
+        var atomIds = Instantiator.Draw(container, lookupAtom, lookupAffix, rollSeed);
         if (atomIds.Count == 0)
             throw new ActionSeedingRejection($"container '{container.ContainerId}' drew zero atoms — nothing to name or target");
 

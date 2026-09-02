@@ -7,9 +7,10 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// Judges one <see cref="ContainerRow"/> before it reaches the tables.
 ///
 /// <para>Same law as E4 — a bad container is rejected <b>whole</b>, with its id and reason. The rule
-/// carrying the most weight is <c>pool_rolls ≤ distinct <b>drawable</b> groups</c>: a pool that
-/// cannot satisfy the one-per-group rule under-fills the instance silently, which is exactly the
-/// failure mode this program exists to remove.</para>
+/// carrying the most weight is <c>prefix_rolls/suffix_rolls ≤ distinct <b>drawable</b> groups</c> in
+/// that same budget (T3.2 — the two budgets are counted separately, a Mixed-class affix's group
+/// counting toward both): a pool that cannot satisfy the one-per-group rule under-fills the instance
+/// silently, which is exactly the failure mode this program exists to remove.</para>
 /// </summary>
 public static class ContainerValidator
 {
@@ -18,9 +19,11 @@ public static class ContainerValidator
 
     /// <summary>
     /// Validate. <paramref name="lookupAtom"/> resolves an atom id against the loaded catalog —
-    /// supplied by the store, so this stays free of I/O.
+    /// supplied by the store, so this stays free of I/O. <paramref name="lookupAffix"/> resolves a
+    /// pool row's affix id (T3.1 — the pool references affixes, never bare atoms).
     /// </summary>
-    public static AtomRejection Validate(ContainerRow c, Func<string, AtomRow?> lookupAtom)
+    public static AtomRejection Validate(
+        ContainerRow c, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix)
     {
         if (c is null) return AtomRejection.Fail(AtomRejectionReason.BadParamValue, "null container");
 
@@ -57,54 +60,104 @@ public static class ContainerValidator
         }
 
         // ---- the pool ----------------------------------------------------------------------------
-        if (c.PoolRolls < 0)
-            return Fail(AtomRejectionReason.BadParamValue, $"pool_rolls {c.PoolRolls} is negative");
+        if (c.PrefixRolls < 0)
+            return Fail(AtomRejectionReason.BadParamValue, $"prefix_rolls {c.PrefixRolls} is negative");
+        if (c.SuffixRolls < 0)
+            return Fail(AtomRejectionReason.BadParamValue, $"suffix_rolls {c.SuffixRolls} is negative");
 
-        if (c.PoolRolls > 0 && c.Pool.Count == 0)
+        if ((c.PrefixRolls > 0 || c.SuffixRolls > 0) && c.Pool.Count == 0)
             return Fail(AtomRejectionReason.UnsatisfiablePool,
-                $"pool_rolls is {c.PoolRolls} but the pool is empty");
+                $"prefix_rolls/suffix_rolls is {c.PrefixRolls}/{c.SuffixRolls} but the pool is empty");
 
         // Group -> whether ANY row in it can actually be drawn. A group whose every row is weight 0
         // exists in the table and is unreachable in a draw; counting it is how a container passes
-        // validation and then hands back fewer atoms than it promised.
-        var drawable = new Dictionary<string, bool>(StringComparer.Ordinal);
+        // validation and then hands back fewer atoms than it promised. Tracked separately per budget
+        // (T3.2) because a Mixed-class affix's group counts toward BOTH the prefix and suffix budgets
+        // at once (A1) — a single combined count could not express that.
+        var drawablePrefix = new Dictionary<string, bool>(StringComparer.Ordinal);
+        var drawableSuffix = new Dictionary<string, bool>(StringComparer.Ordinal);
         var anyDrawable = false;
 
         foreach (var row in c.Pool)
         {
             if (row.Weight < 0)
                 return Fail(AtomRejectionReason.BadParamValue,
-                    $"{row.AtomId}: weight {row.Weight} is negative — rejected, never clamped");
+                    $"{row.AffixId}: weight {row.Weight} is negative — rejected, never clamped");
 
-            var atom = lookupAtom(row.AtomId);
-            if (atom is null)
-                return Fail(AtomRejectionReason.UnknownAtom, row.AtomId);
+            var affix = lookupAffix(row.AffixId);
+            if (affix is null)
+                return Fail(AtomRejectionReason.UnknownAtom, row.AffixId);
 
-            if (coreAtoms.Contains(row.AtomId))
-                return Fail(AtomRejectionReason.DuplicateAtomInContainer,
-                    $"{row.AtomId} is in both the fixed core and the pool");
+            // Every CONCRETE ref in the bundle is checked against the window and the fixed core; a
+            // slot ref's concrete atom is not known until module 2 resolves it, so it is exempt here
+            // — the same reason AffixValidator defers a slot's tier check.
+            string? soleConcreteAtomId = null;
+            AtomRow? soleConcreteAtom = null;
+            var concreteRefCount = 0;
+            foreach (var r in affix.Refs)
+            {
+                if (r.AtomId is null) continue;
+                concreteRefCount++;
+                var atom = lookupAtom(r.AtomId);
+                if (atom is null)
+                    return Fail(AtomRejectionReason.UnknownAtom, r.AtomId); // AffixValidator already
+                                                                              // proved this once, but a
+                                                                              // container may be
+                                                                              // validated against a
+                                                                              // catalog snapshot the
+                                                                              // affix was not
 
-            // The window governs what the POOL may offer; a fixed core says what the thing is.
-            if (c.MinTier is { } min && atom.Tier < min)
-                return Fail(AtomRejectionReason.TierOutOfWindow,
-                    $"{row.AtomId} is tier {atom.Tier}, below the window minimum {min}");
-            if (c.MaxTier is { } max && atom.Tier > max)
-                return Fail(AtomRejectionReason.TierOutOfWindow,
-                    $"{row.AtomId} is tier {atom.Tier}, above the window maximum {max}");
+                if (coreAtoms.Contains(r.AtomId))
+                    return Fail(AtomRejectionReason.DuplicateAtomInContainer,
+                        $"{r.AtomId} (via affix {row.AffixId}) is in both the fixed core and the pool");
 
-            var group = GroupOf(row, atom);
-            drawable[group] = drawable.TryGetValue(group, out var had) && had || row.Weight > 0;
-            anyDrawable |= row.Weight > 0;
+                if (c.MinTier is { } min && atom.Tier < min)
+                    return Fail(AtomRejectionReason.TierOutOfWindow,
+                        $"{r.AtomId} (via affix {row.AffixId}) is tier {atom.Tier}, below the window minimum {min}");
+                if (c.MaxTier is { } max && atom.Tier > max)
+                    return Fail(AtomRejectionReason.TierOutOfWindow,
+                        $"{r.AtomId} (via affix {row.AffixId}) is tier {atom.Tier}, above the window maximum {max}");
+
+                soleConcreteAtomId = r.AtomId;
+                soleConcreteAtom = atom;
+            }
+
+            // The default group is derived from a single concrete ref's own family+variant, exactly
+            // like a bare atom did before affixes existed. A multi-ref bundle or a slot-bearing affix
+            // cannot compute that default — it must declare `Group` explicitly, or the container is
+            // rejected rather than silently grouped with nothing.
+            string group;
+            if (!string.IsNullOrWhiteSpace(row.Group))
+                group = row.Group!;
+            else if (affix.Refs.Count == 1 && concreteRefCount == 1)
+                group = soleConcreteAtom!.FamilyId + "|" + soleConcreteAtom.Variant;
+            else
+                return Fail(AtomRejectionReason.BadParamValue,
+                    $"affix {row.AffixId} is a multi-ref or slot-bearing bundle and must declare an " +
+                    "explicit pool `Group` — it has no single atom to derive a default from");
+
+            var isDrawable = row.Weight > 0;
+            if (affix.Class is AffixClass.Prefix or AffixClass.Mixed)
+                drawablePrefix[group] = drawablePrefix.TryGetValue(group, out var hadP) && hadP || isDrawable;
+            if (affix.Class is AffixClass.Suffix or AffixClass.Mixed)
+                drawableSuffix[group] = drawableSuffix.TryGetValue(group, out var hadS) && hadS || isDrawable;
+            anyDrawable |= isDrawable;
         }
 
         if (c.Pool.Count > 0 && !anyDrawable)
             return Fail(AtomRejectionReason.UnsatisfiablePool,
                 "every pool row has weight 0 — the draw would return nothing");
 
-        var drawableGroups = drawable.Values.Count(v => v);
-        if (c.PoolRolls > drawableGroups)
+        var drawablePrefixGroups = drawablePrefix.Values.Count(v => v);
+        if (c.PrefixRolls > drawablePrefixGroups)
             return Fail(AtomRejectionReason.PoolRollsExceedGroups,
-                $"pool_rolls {c.PoolRolls} exceeds {drawableGroups} drawable group(s) — " +
+                $"prefix_rolls {c.PrefixRolls} exceeds {drawablePrefixGroups} drawable prefix group(s) — " +
+                "one atom per group per draw cannot be satisfied");
+
+        var drawableSuffixGroups = drawableSuffix.Values.Count(v => v);
+        if (c.SuffixRolls > drawableSuffixGroups)
+            return Fail(AtomRejectionReason.PoolRollsExceedGroups,
+                $"suffix_rolls {c.SuffixRolls} exceeds {drawableSuffixGroups} drawable suffix group(s) — " +
                 "one atom per group per draw cannot be satisfied");
 
         return AtomRejection.Ok;
@@ -112,19 +165,6 @@ public static class ContainerValidator
         AtomRejection Fail(AtomRejectionReason reason, string detail) =>
             AtomRejection.Fail(reason, $"{c.ContainerId}: {detail}");
     }
-
-    /// <summary>
-    /// Default group is <c>(family_id, variant)</c>, not <c>family_id</c>: a container may roll fire
-    /// power and ice power — two variants of one family, normal itemisation — while never rolling two
-    /// tiers of the same variant.
-    /// </summary>
-    static string GroupOf(ContainerPoolRow row, AtomRow atom) =>
-        string.IsNullOrWhiteSpace(row.Group)
-            // Separated, not concatenated: family "atom.a" + variant "bc" and family "atom.ab" + variant
-            // "c" would otherwise both key as "atom.abc", silently merging two families into one
-            // group. '|' cannot occur in either — both are kebab-case per definitions §1.
-            ? atom.FamilyId + "|" + atom.Variant
-            : row.Group!;
 
     /// <summary>
     /// An override replaces a value spec on the referenced atom, so it obeys the same schema and the

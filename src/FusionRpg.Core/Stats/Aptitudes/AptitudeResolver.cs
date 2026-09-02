@@ -124,10 +124,25 @@ public static class AptitudeResolver
     /// <c>recovery._scaleWhy</c> note says was solved against a measured r=1.33 (an unkillable pair).
     /// Both factors are per-mille; widen before multiplying, divide by their combined scale once.
     /// </summary>
+    /// <summary>Per-mille scale applied with round-half-away-from-zero, which is this repo's house
+    /// rule for per-mille arithmetic (`effect-atom/definitions.md` §2: "rounded half away from zero,
+    /// exactly once"). It was TRUNCATING, and truncation is not a neutral choice at small
+    /// coefficients: with `recovery.scaleMilli = 374`, any edge with `kMilli &lt;= 2` scaled to
+    /// **exactly zero** — a silently dead edge that the float POC still honoured, which is what
+    /// `ResolverMatchesSimulatorTests` was reporting as a 22% divergence on `resource.regen.poise`
+    /// (found 2026-09-02, Phase 0 six-resource coverage). Measured improvement against the POC's
+    /// float model: kMilli=5 46.5% -> 7.0%, kMilli=10 19.8% -> 7.0%, kMilli=21 10.9% -> 1.9%, and
+    /// unchanged at 0.1-2% for every coefficient above ~30, so large edges are untouched.</summary>
+    static long ScaleMilli(long kMilli, long scaleMilli)
+    {
+        var product = checked(kMilli * scaleMilli);
+        return (product + (product >= 0 ? 500 : -500)) / 1000;
+    }
+
     static long EffectiveKMilli(AptitudeTuning tuning, AptitudeEdge edge)
     {
         var isRecovery = tuning.Recovery.Families.Any(f => edge.Channel.StartsWith(f, StringComparison.Ordinal));
-        if (isRecovery) return checked(edge.KMilli * tuning.Recovery.ScaleMilli) / 1000;
+        if (isRecovery) return ScaleMilli(edge.KMilli, tuning.Recovery.ScaleMilli);
 
         // tuning.Mitigation.ScaleMilli — Recovery's own sibling dial (class-system-todo.md P8.3,
         // AptitudeMitigation's own doc comment): the SAME termination invariant also depends on
@@ -135,6 +150,6 @@ public static class AptitudeResolver
         // reached, so a build whose survival leans on those instead of hp-regen was invisible to the
         // one dial that existed before this task.
         var isMitigation = tuning.Mitigation.Families.Any(f => edge.Channel.StartsWith(f, StringComparison.Ordinal));
-        return isMitigation ? checked(edge.KMilli * tuning.Mitigation.ScaleMilli) / 1000 : edge.KMilli;
+        return isMitigation ? ScaleMilli(edge.KMilli, tuning.Mitigation.ScaleMilli) : edge.KMilli;
     }
 }

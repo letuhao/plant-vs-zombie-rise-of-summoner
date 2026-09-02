@@ -27,6 +27,14 @@ public sealed class AlmanacSeedDto
     public AlmanacSeedEnrichmentDto? Enrichment { get; set; }
 }
 
+public sealed class SpawnBaselineDto
+{
+    public string Side { get; set; } = "";
+    public int TypeId { get; set; }
+    public string StatsJson { get; set; } = "";
+    public string CapturedUtc { get; set; } = "";
+}
+
 public sealed class AlmanacSeedRebuildSummary
 {
     public int Built { get; set; }
@@ -200,7 +208,7 @@ public sealed partial class RpgStore
     /// spawn_stats table before this rewrite and the ix_spawn_stats_side_type_source index).
     /// </summary>
     static Dictionary<(string Side, int TypeId), (string StatsJson, string CapturedUtc)> LoadCombatBaselinesUnlocked(
-        SqliteConnection hot, SqliteTransaction tx)
+        SqliteConnection hot, SqliteTransaction? tx)
     {
         var result = new Dictionary<(string, int), (string, string)>();
 
@@ -290,6 +298,32 @@ public sealed partial class RpgStore
         {
             using var hot = OpenUnlocked();
             return ReadAlmanacSeedUnlocked(hot, side, typeId);
+        }
+    }
+
+    /// <summary>
+    /// Public, non-transactional twin of <see cref="LoadCombatBaselinesUnlocked"/> — same query
+    /// (earliest observed spawn_stats sample per side/type), exposed for `demon-seed`'s
+    /// `corpus-dump` module so the raw baseline can be dumped as its own file (spec-corpus-dump.md
+    /// §1/§4) without a raw <c>SqliteCommand</c> ever appearing under `tools/`.
+    /// </summary>
+    public List<SpawnBaselineDto> ListSpawnBaselines()
+    {
+        lock (_gate)
+        {
+            using var hot = OpenUnlocked();
+            var raw = LoadCombatBaselinesUnlocked(hot, null);
+            return raw
+                .Select(kv => new SpawnBaselineDto
+                {
+                    Side = kv.Key.Side,
+                    TypeId = kv.Key.TypeId,
+                    StatsJson = kv.Value.StatsJson,
+                    CapturedUtc = kv.Value.CapturedUtc
+                })
+                .OrderBy(d => d.Side, StringComparer.Ordinal)
+                .ThenBy(d => d.TypeId)
+                .ToList();
         }
     }
 

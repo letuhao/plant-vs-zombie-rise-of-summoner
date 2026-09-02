@@ -128,6 +128,29 @@ grades objects the way a nursery grades stock, not the way a dungeon grades swor
 **Rung 10 (`chaff`) is the only rung with no pool.** Base type plus implicit, `pool_rolls = 0` —
 item-ideal §6.2's "Normal". It exists because salvage, promotion, and crafting all need a bottom.
 
+**Added 2026-09-01 (T0.2, alongside T0.4's `pool_rolls` split):** the *Count band* column above is the
+combined total across both affix classes. Each rung's total splits into a **prefix band and a suffix
+band**, one-per-group within each class (`spec-container-schema.md`, `seed-contract.md` §2.1):
+
+| Ordinal | Prefix band | Suffix band |
+|---|---|---|
+| 10 `chaff` | 0 | 0 |
+| 20 `sprout` | 0–1 | 0–1 |
+| 30 `grafted` | 0–1 | 1–1 |
+| 40 `cultivated` | 1–2 | 1–1 |
+| 50 `fused` | 1–2 | 1–1 |
+| 60 `chimeric` | 1–2 | 2–2 |
+| 70 `heirloom` | 2–2 | 2–2 |
+| 80 `firstseed` | 2–3 | 2–2 |
+| 90 `sunwoven` | 2–3 | 2–2 |
+| 100 `almanac` | 3–3 | 2–3 |
+
+Each half sums to the same combined *Count band* the ladder already published, so no existing total
+changes — only which roll pool an affix comes from is now visible. A **mixed bundle** (`seed-contract.md`
+§2.1's `affixClass`) consumes one prefix roll and one suffix roll simultaneously, never doubling either
+band. Starting values, tunable per rung in `data/tuning/` — a balance pass moving the split costs a
+file save, not a re-derivation of this table.
+
 ### 3.4 Why exactly ten — the staircase, and why an eleventh breaks
 
 Take the count bands a six-affix maximum allows — `1-2`, `2-3`, `3-4`, `4-5`, `5-6` — and the tier
@@ -257,7 +280,7 @@ hard pity at 55, and a 10-pull rare floor (`SummonRoller.cs:8-30,63-80`).
 
 | Option | Shape | Verdict |
 |---|---|---|
-| **A — four rungs, shared with `DemonRarity`** | common / rare / epic / legendary | Rejected. One enum for everything and no new table, but it defies OD4's "long ladder", and growing `DemonRarity` to ten breaks summon rates, pity thresholds, `FusionRoller.SlotsFor`, `SoulEarnPolicy.DiscoveryDelta`, and the `shard.{rarity}` material ids — five consumers, for zero item-side gain |
+| **A — four rungs, shared with `DemonRarity`** | common / rare / epic / legendary | Rejected as *items shrinking to four*. It defies OD4's "long ladder" for zero item-side gain. **The mirror move — `DemonRarity` growing to this document's ten — was reversed into acceptance 2026-09-01** (§4.3, T0.2): the five consumers named here (summon rates, pity thresholds, `FusionRoller.SlotsFor`, `SoulEarnPolicy.DiscoveryDelta`, `shard.{rarity}`) are exactly `demon-seed` T4.1–T4.3's task list, done as a reviewed migration rather than avoided |
 | **B — five rungs, D2 shape** | normal / magic / rare / set / unique | Rejected. Familiar, but it mixes a *power* axis with two *authoring* axes (set, unique), which is exactly the confusion §3.6 exists to prevent |
 | **C — ten-rung staircase** ✅ | §3.3 | **Recommended.** Longest legible chain the machinery admits (§3.4), and the alternating steps give a one-sentence upgrade story |
 | **D — no rungs, a continuous quality score** | one 0–1000 number | Rejected. Maximum gradation, zero legibility: nothing to name in a tooltip, nothing for I12 to weight, nothing for I4/I6 to key a budget on. A score without rungs moves the whole registry problem into a formula |
@@ -300,18 +323,30 @@ read only `ordinal`, `color_hex`, `pip_count` and `display_key`, because those a
 consumer (the UI) always exists. Nothing forces every category to use all ten — materials will
 plausibly stop at 70.
 
-**Demons keep their own ladder.** `DemonRarity` stays a four-value code enum, and a one-way band map
-lets the two be compared without being fused:
+**Reversed 2026-09-01 (`seed-to-concrete` T0.2, owner Q24: *"Migrate `DemonRarity` to 10 values
+now"*).** Demons no longer keep a separate four-value ladder — they adopt this document's own
+ten-rung ladder directly, the same `rarity_id`/ordinal/colour/pip columns every other category reads
+(§4.3's "one ladder; every category free to use a subset of the rungs" already covers this; demons
+simply stop being the one holdout). The reason to reverse: `demon-seed` (T4.1 `rarity-migration`)
+needs demon rarity on the same closed inventory `power-scale` and `threat-band` already read from, and
+a second four-value ladder living beside it was exactly the "two ladders that can be confused" problem
+§3.3's design was built to avoid — it just took until the demon program actually needed magnitude
+parity with items to become visible.
 
-| `DemonRarity` | Item ordinal band |
-|---|---|
-| `Common` | 10 – 30 |
-| `Rare` | 40 – 60 |
-| `Epic` | 70 – 80 |
-| `Legendary` | 90 – 100 |
+The four-row band map below is **kept as a migration shim only** — the lookup `DemonMigration.LegacyRarityToRung`
+uses once, at data-migration time (T4.3), to place every existing `DemonRarity.{Common,Rare,Epic,Legendary}`
+value onto the new ten-rung ladder. It is not a permanent wall between two systems, and no new code
+may branch on it after the migration completes:
 
-Four rows, no table needed. The map exists so a legendary demon's drop table can be written in item
-rungs and so `shard.legendary` can be priced — **not** so the two ladders can be merged later.
+| Old `DemonRarity` | New rung (ordinal) | Migration rule |
+|---|---|---|
+| `Common` | 10–30 | maps to the band's **lowest** rung (`chaff`, ordinal 10) — nobody gains value on migration |
+| `Rare` | 40–60 | maps to `cultivated`, ordinal 40 |
+| `Epic` | 70–80 | maps to `heirloom`, ordinal 70 |
+| `Legendary` | 90–100 | maps to `sunwoven`, ordinal 90 |
+
+T4.1's guard test (forbidding bare int↔`DemonRarity` casts and relational comparisons against named
+members) is what keeps this shim from becoming a silent second ladder again.
 
 ### 4.4 THE REGISTRY — a table, not a widening row
 

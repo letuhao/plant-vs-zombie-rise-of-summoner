@@ -29,6 +29,10 @@ export type PlayerDto = {
   id: number;
   name: string;
   createdUtc: string;
+  /** "The whole save"'s own root (spec-world-seed.md, T5.1) — display only. The server's C# `long`
+   * can exceed Number.MAX_SAFE_INTEGER, so this may round; nothing client-side derives a roll from
+   * it — every real derivation (`WorldSeed.DeriveRollSeed`) stays server-side, exact. */
+  worldSeed: number;
 };
 
 export type PlayersListDto = {

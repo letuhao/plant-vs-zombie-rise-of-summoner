@@ -115,10 +115,10 @@ public class SoulEarnPolicyTests
     }
 
     [Theory]
-    [InlineData(DemonRarity.Common, 25)]
-    [InlineData(DemonRarity.Rare, 75)]
-    [InlineData(DemonRarity.Epic, 200)]
-    [InlineData(DemonRarity.Legendary, 500)]
+    [InlineData(DemonRarity.Chaff, 25)]
+    [InlineData(DemonRarity.Cultivated, 75)]
+    [InlineData(DemonRarity.Heirloom, 200)]
+    [InlineData(DemonRarity.Sunwoven, 500)]
     public void Discovery_faucet_by_rarity(DemonRarity rarity, int expected)
     {
         Assert.Equal(expected, SoulEarnPolicy.DiscoveryDelta(rarity));

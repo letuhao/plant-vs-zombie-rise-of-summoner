@@ -85,7 +85,7 @@ public class CompiledPushTests : IDisposable
         var atoms = _store.ListAtoms().ToDictionary(a => a.AtomId, StringComparer.Ordinal);
 
         Assert.True(Instantiator.TryInstantiate(container,
-            id => atoms.TryGetValue(id, out var a) ? a : null, 1, 20, Tuning, out var inst).IsOk);
+            id => atoms.TryGetValue(id, out var a) ? a : null, _store.GetAffix, 1, 20, Tuning, out var inst).IsOk);
 
         var instanceId = _store.SaveInstance(inst! with { CatalogRevision = _store.GetCatalogRevision() });
         var bindingId = Guid.NewGuid().ToString("N");

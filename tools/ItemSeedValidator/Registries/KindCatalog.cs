@@ -106,7 +106,9 @@ public static class KindCatalog
             extra: new[]
             {
                 "charmClass", "apCost", "axis", "frameHint", "uniqueCarry", "fixedAtoms",
-                "roleGroups", "poolRolls",
+                // prefixRolls/suffixRolls (effect-pipeline T3.2) replace the single poolRolls, same
+                // split as the real container schema's prefix_rolls/suffix_rolls columns.
+                "roleGroups", "prefixRolls", "suffixRolls",
             }),
         Defined("socket-word", "socket-words", "socketWords", "1c",
             required: new[] { "runtimeId", "minSockets", "ingredients", "fixedAtoms" },

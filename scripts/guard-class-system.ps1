@@ -3,9 +3,18 @@
 # Reads JSON directly (aptitude roster, derived-stats catalog, shipped aptitude tuning) rather than
 # the C# registry — same reasoning as guard-stat-pairs.ps1: standalone, pre-build tooling that cannot
 # reference FusionRpg.Core. Two rules (G2/G3) key off `data/tuning/aptitudes.v*.json`, the SHIPPED
-# config P2.1 lands — until then there is nothing to check and this guard says so rather than failing
-# on an absence. Planted-violation fixtures (Guard.Tests) point -Root at a synthetic tree carrying that
-# file, so every rule is provably enforceable even though the real tree does not exercise G2/G3 yet.
+# config. That file did not exist when this guard was written, so the note here used to say "the config
+# P2.1 lands... the real tree does not exercise G2/G3 yet" — stale since P2.1 landed, and five versions
+# have shipped since (v1..v5, corrected 2026-09-02). The absence branch below is kept anyway: it is what
+# makes a fresh checkout say "nothing to check" instead of failing on a missing file.
+# Planted-violation fixtures (Guard.Tests) point -Root at a synthetic tree carrying that file, so every
+# rule stays provable independently of what the real tree holds.
+#
+# ⛔ The real tree exits 1, BY DESIGN: G3 reports Might/Ferocity feeding both `combat.power.*` and
+# `progression.bonus.atk`. That is class-system-plan.md decision 12 — a deliberate, permanent
+# forward-looking safeguard for battle-adoption's transition, present in v1 through v5 alike and never
+# silenced by editing the shipped tuning. deploy-play.ps1 tolerates exactly this named exception and
+# hard-fails on any other finding; ClassSystemGuardTests pins it. Do not "fix" it here.
 # Live in deploy-play.ps1 and Guard.Tests.
 param(
     [string]$Root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -29,10 +38,13 @@ $catalogFamilies = @($catalog.entries | ForEach-Object { [string]$_.family })
 
 # The shipped aptitude tuning config, once P2.1 lands. Highest version wins — never hand-edited,
 # always published as v{n+1} (tunables-ssot.md T4), so the newest file is the live one.
+# Sorted NUMERICALLY on the version, not by name: a lexical sort puts v9 above v10, which would make
+# this guard silently check a superseded config the first time the tenth version ships.
 $shippedTuningFile = $null
 if (Test-Path $ShippedTuningDir) {
     $shippedTuningFile = Get-ChildItem -Path $ShippedTuningDir -Filter "aptitudes.v*.json" -ErrorAction SilentlyContinue |
-        Sort-Object Name -Descending | Select-Object -First 1
+        Sort-Object { [int]([regex]::Match($_.Name, "aptitudes\.v(\d+)\.json").Groups[1].Value) } -Descending |
+        Select-Object -First 1
 }
 
 # ---- G1: every aptitude id is collision-free ------------------------------------------------------

@@ -318,10 +318,13 @@ public class PowerStoreTests : IDisposable
     }
 
     [Fact]
-    public void The_content_hash_schema_version_is_seven_now_that_P0_3_has_landed()
+    public void The_content_hash_schema_version_is_nine_now_that_the_prefix_suffix_split_has_landed()
     {
+        // Drift canary, same discipline as ChannelPolicyStoreTests' own — bumped 7 -> 8 by
+        // effect-pipeline T3.1 (affix-schema, 2026-09-02), then 8 -> 9 by T3.2 (prefix/suffix split,
+        // same date) splitting effect_container's and rarity's pool_rolls column in two.
         _store.UpsertPowerTables(PowerTables.Authored());
 
-        Assert.Equal(7, _store.ComputeContentHash().SchemaVersion);
+        Assert.Equal(9, _store.ComputeContentHash().SchemaVersion);
     }
 }

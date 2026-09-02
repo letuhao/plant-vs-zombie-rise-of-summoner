@@ -130,7 +130,7 @@ public static class ContractEndpoints
         var rows = contracts.Select(c =>
         {
             DemonRarityIds.TryParse(
-                rarities.TryGetValue(c.InstanceId, out var r) ? r : "common", out var rarity);
+                rarities.TryGetValue(c.InstanceId, out var r) ? r : "chaff", out var rarity);
             return new
             {
                 instanceId = c.InstanceId,

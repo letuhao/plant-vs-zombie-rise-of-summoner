@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.Json;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -6,7 +7,7 @@ using Xunit;
 namespace FusionRpg.Core.Tests.ClassSystem;
 
 /// <summary>class-system-todo.md P2.1 — AptitudeTuning parser. Pure parser (tunables-ssot.md §7.2):
-/// no file I/O inside Core, so this test class owns reading `data/tuning/aptitudes.v2.json` itself,
+/// no file I/O inside Core, so this test class owns reading `data/tuning/aptitudes.v{n}.json` itself,
 /// the same way `FusionRpg.Guard.Tests`/`FusionRpg.ElementEnumGen.Tests` read `data/seed/*` directly
 /// rather than through the library under test.</summary>
 public class AptitudeTuningTests
@@ -24,7 +25,57 @@ public class AptitudeTuningTests
     }
 
     static string ShippedJson() =>
-        File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v2.json"));
+        File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v5.json"));
+
+    // ── six-resource coverage (resource-hub-ssot.md, Phase 0 2026-09-02) ─────────────────────────
+
+    /// <summary>The drift guard this defect existed for want of. `DerivedStatRegistry` loops
+    /// <see cref="DerivedStatChannels.ResourceIds"/> and so never drifted; the aptitude edges were
+    /// hand-maintained and did — `poise` had ZERO edges of any kind, which is why `guard-economy`
+    /// was blocked (class-system P7.2), and `resource.efficiency` had four edges total against three
+    /// families x six resources. Asserting COVERAGE, never a coefficient: what an edge is worth is a
+    /// balance question, but whether the cell exists at all is not.</summary>
+    [Theory]
+    [InlineData("resource.max")]
+    [InlineData("resource.regen")]
+    [InlineData("resource.efficiency")]
+    [InlineData("resource.restore")]
+    public void EveryResourceIsFedInEveryResourceFamily(string family)
+    {
+        using var doc = JsonDocument.Parse(ShippedJson());
+        var fed = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var edge in doc.RootElement.GetProperty("edges").EnumerateArray())
+        {
+            if (!edge.TryGetProperty("channel", out var ch)) continue;   // _group marker rows
+            var channel = ch.GetString()!;
+            if (channel.StartsWith(family + ".", StringComparison.Ordinal))
+                fed.Add(channel[(family.Length + 1)..]);
+        }
+
+        var missing = DerivedStatChannels.ResourceIds.Where(r => !fed.Contains(r)).ToList();
+        Assert.True(missing.Count == 0,
+            $"{family} feeds {fed.Count}/{DerivedStatChannels.ResourceIds.Count} resources — missing: " +
+            $"{string.Join(", ", missing)}. Every derived family that affects a resource must cover all " +
+            "six (resource-hub-ssot.md, six-coverage rule). Add the edge with " +
+            "`python tools/tuning/publish.py aptitudes --add-edge \"channel=...,source=...,kMilli=...\"`.");
+    }
+
+    /// <summary>The other half: a source named in an edge must be a real aptitude. Cheap, and it
+    /// catches a typo'd `--add-edge` before it reaches a resolve.</summary>
+    [Fact]
+    public void EveryEdgeSourceIsAKnownAptitude()
+    {
+        using var doc = JsonDocument.Parse(ShippedJson());
+        var known = AptitudeCatalog.All.Select(a => a.Id).ToHashSet(StringComparer.Ordinal);
+        var unknown = new SortedSet<string>(StringComparer.Ordinal);
+        foreach (var edge in doc.RootElement.GetProperty("edges").EnumerateArray())
+        {
+            if (!edge.TryGetProperty("source", out var src)) continue;
+            var s = src.GetString()!;
+            if (!known.Contains(s)) unknown.Add(s);
+        }
+        Assert.True(unknown.Count == 0, "edges name sources that are not aptitudes: " + string.Join(", ", unknown));
+    }
 
     // ── the real shipped file ───────────────────────────────────────────────────────────────────
 
@@ -34,7 +85,7 @@ public class AptitudeTuningTests
         var tuning = AptitudeTuningLoader.Parse(ShippedJson());
 
         Assert.Equal(1, tuning.SchemaVersion);
-        Assert.Equal(2, tuning.Version); // class-system-todo.md P8.2/P8.3, published aptitudes.v2.json 2026-08-27
+        Assert.Equal(5, tuning.Version); // Phase 0, all 2026-09-02: v3 six-resource coverage, v4 resource.restore generalisation, v5 rename + Fortitude anchor
         Assert.Equal(3, tuning.Grant.AptitudePointsPerThetaMilli);
         Assert.Equal(1, tuning.Grant.SkillPointsPerThetaMilli);
         Assert.Equal(100_000, tuning.Read.Contest.SpanPointsMilli); // 100.0 spanPoints * 1000
@@ -51,12 +102,15 @@ public class AptitudeTuningTests
     }
 
     [Fact]
-    public void GroupDividersAreSkipped_486RealEdgesNot490RawEntries()
+    public void GroupDividersAreSkipped_526RealEdgesNot530RawEntries()
     {
-        // The authored file has 490 array entries in `edges`; 4 are `_group` section dividers with
-        // no `channel` key. class-system P1.5/P1.6's reader census counted 486 real edges.
+        // The authored file has 530 array entries in `edges`; 4 are `_group` section dividers with
+        // no `channel` key. class-system P1.5/P1.6's reader census counted 486 real edges in v2;
+        // v3 added 32 for six-resource coverage (Phase 0, 2026-09-02 -- 12 max.poise + 12 regen.poise
+        // + 8 efficiency), so 518; v4 added 7 more for resource.restore's five non-hp members, so 525; v5 added Fortitude as hp's restoration anchor, so 526. The literal is deliberate: it is what makes an accidental edge
+        // addition visible, which is the same reason the census pinned it in the first place.
         var tuning = AptitudeTuningLoader.Parse(ShippedJson());
-        Assert.Equal(486, tuning.Edges.Count);
+        Assert.Equal(526, tuning.Edges.Count);
     }
 
     [Fact]

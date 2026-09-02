@@ -231,17 +231,27 @@ class SelfHealTests(unittest.TestCase):
 
 
 class LoadConfigTests(unittest.TestCase):
+    """`load_config`'s default `dotenv_path` (`Path(".env")`, CWD-relative) means a real `.env`
+    sitting in `tools/seedsmith/` — the one this project's own `.env.example` documents creating
+    — silently leaks into any test that doesn't isolate it (found live: a real `.env` copied from
+    the template broke `test_overrides_only_the_keys_present` by out-ranking its TOML value).
+    Every test here passes an explicit, guaranteed-absent `dotenv_path` for that reason — this is
+    NOT optional cleanup, it is what makes these tests hermetic regardless of the developer's
+    working tree.
+    """
+
     def setUp(self) -> None:
         self.tmp = Path(tempfile.mkdtemp())
+        self.no_dotenv = self.tmp / "no-such.env"  # never written by any test in this class
 
     def test_defaults_when_file_absent(self) -> None:
         missing = self.tmp / "does-not-exist.toml"
-        self.assertEqual(load_config(missing), DEFAULT_CONFIG)
+        self.assertEqual(load_config(missing, dotenv_path=self.no_dotenv), DEFAULT_CONFIG)
 
     def test_defaults_when_section_absent(self) -> None:
         path = self.tmp / "seedsmith.toml"
         path.write_text('[adapter]\nname = "items"\n', encoding="utf-8")
-        self.assertEqual(load_config(path), DEFAULT_CONFIG)
+        self.assertEqual(load_config(path, dotenv_path=self.no_dotenv), DEFAULT_CONFIG)
 
     def test_overrides_only_the_keys_present(self) -> None:
         path = self.tmp / "seedsmith.toml"
@@ -251,7 +261,7 @@ class LoadConfigTests(unittest.TestCase):
             'max_heal = 5\n',
             encoding="utf-8",
         )
-        cfg = load_config(path)
+        cfg = load_config(path, dotenv_path=self.no_dotenv)
         self.assertEqual(cfg.endpoint, "http://127.0.0.1:9999/v1/chat/completions")
         self.assertEqual(cfg.max_heal, 5)
         # everything NOT set in the file falls back to the default, not to zero/None
@@ -262,7 +272,40 @@ class LoadConfigTests(unittest.TestCase):
         path = self.tmp / "seedsmith.toml"
         path.write_text("this is not [valid toml", encoding="utf-8")
         with self.assertRaises(tomllib.TOMLDecodeError):
-            load_config(path)
+            load_config(path, dotenv_path=self.no_dotenv)
+
+    def test_dotenv_absent_falls_through_to_toml_and_defaults(self) -> None:
+        toml_path = self.tmp / "seedsmith.toml"
+        toml_path.write_text('[pipeline.llm_caller]\nmax_heal = 5\n', encoding="utf-8")
+        cfg = load_config(toml_path, dotenv_path=self.tmp / "no-such.env")
+        self.assertEqual(cfg.max_heal, 5)
+        self.assertEqual(cfg.endpoint, DEFAULT_CONFIG.endpoint)
+
+    def test_dotenv_overrides_toml_which_overrides_default(self) -> None:
+        toml_path = self.tmp / "seedsmith.toml"
+        toml_path.write_text(
+            '[pipeline.llm_caller]\n'
+            'endpoint = "http://toml-only:1234/v1/chat/completions"\n'
+            'max_heal = 5\n',
+            encoding="utf-8")
+        dotenv_path = self.tmp / ".env"
+        dotenv_path.write_text(
+            "# a comment, and a blank line above are both ignored\n"
+            "SEEDSMITH_LLM_ENDPOINT=http://dotenv-wins:9999/v1/chat/completions\n"
+            "SEEDSMITH_LLM_TIMEOUT=99\n",
+            encoding="utf-8")
+        cfg = load_config(toml_path, dotenv_path=dotenv_path)
+        self.assertEqual(cfg.endpoint, "http://dotenv-wins:9999/v1/chat/completions")  # .env wins
+        self.assertEqual(cfg.timeout, 99.0)                                            # .env-only key
+        self.assertEqual(cfg.max_heal, 5)                                              # toml-only key, untouched
+
+    def test_dotenv_blank_value_does_not_override(self) -> None:
+        """`KEY=` with nothing after it is not a real override — matching a real `.env.example`
+        left uncommented-but-unfilled by a user who copied the template."""
+        dotenv_path = self.tmp / ".env"
+        dotenv_path.write_text("SEEDSMITH_LLM_MODEL=\n", encoding="utf-8")
+        cfg = load_config(self.tmp / "no-such.toml", dotenv_path=dotenv_path)
+        self.assertEqual(cfg.model, DEFAULT_CONFIG.model)
 
 
 class DependencyIsolationTests(unittest.TestCase):

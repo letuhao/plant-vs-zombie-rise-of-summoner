@@ -65,9 +65,18 @@ public class AptitudeHostInjectionTests
         {
             var idx = text.IndexOf(WiringNeedle, StringComparison.Ordinal);
             Assert.True(idx >= 0);
-            var end = text.IndexOf("aptitudes.v2.json\")))", idx, StringComparison.Ordinal);
-            Assert.True(end >= 0);
-            var snippet = text[idx..(end + "aptitudes.v2.json\")))".Length)];
+            // Version-AGNOSTIC terminator (2026-09-02): this was pinned to the literal
+            // "aptitudes.v2.json" and so broke the moment Phase 0 published v3 -- the guard's job is
+            // that the two hosts wire IDENTICALLY, not that they sit on a particular version, and a
+            // version literal here just means every future bump edits a guard for no reason.
+            var m = System.Text.RegularExpressions.Regex.Match(
+                text[idx..], @"aptitudes\.v\d+\.json""\)\)\)");
+            Assert.True(m.Success);
+            var end = idx + m.Index;
+            var snippet = text[idx..(end + m.Length)];
+            // Normalise the version so v{n} vs v{n+1} on one host mid-bump is a LOUD mismatch on the
+            // shape comparison below rather than a silent pass.
+            snippet = System.Text.RegularExpressions.Regex.Replace(snippet, @"aptitudes\.v\d+\.json", "aptitudes.v{n}.json");
             // Strip the two hosts' own path-prefix differences (System.IO. qualification, _pluginDir
             // vs AppContext.BaseDirectory) -- what must match is the Configure/Parse/ReadAllText/file
             // chain shape, not incidental host-local spelling.

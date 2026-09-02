@@ -8,13 +8,48 @@ namespace FusionRpg.Core.Tests.Demons;
 /// band-below inputs, capture-only species appearing nowhere.</summary>
 public class DemonRecipeCatalogTests
 {
-    static DemonRarity BandBelow(DemonRarity r) => (DemonRarity)((int)r - 1);
+    /// <summary>Mirrors `DemonRecipeCatalog.InputPoolBelow`'s walk-down search: the nearest
+    /// POPULATED rung below `r`, not necessarily the rung exactly one below. Today's catalog only
+    /// populates Chaff/Cultivated/Heirloom/Sunwoven (seed-to-concrete T4.1's mechanical remap), so
+    /// e.g. Cultivated's own "one rung below" (Grafted) is empty and the real search continues
+    /// down to Chaff — a bare `(DemonRarity)((int)r - 1)` cast here would assert the wrong thing
+    /// and is exactly landmine class 1 this migration's own guard test forbids in `src/`.</summary>
+    static DemonRarity NearestPopulatedBandBelow(DemonRarity r)
+    {
+        var cursor = r;
+        while (!DemonRarityLadder.IsBottomRung(cursor))
+        {
+            cursor = DemonRarityLadder.OneRungBelow(cursor);
+            if (DemonSpeciesCatalog.All.Any(s => s.BaseRarity == cursor))
+                return cursor;
+        }
+        return DemonRarity.Chaff;
+    }
+
+    /// <summary>spec-rarity-migration.md §3: "Rare or better" meant three quarters of the old
+    /// four-rung ladder; naively widening the SAME comparison to ten rungs would silently grow the
+    /// fusion-output-eligible set from ~75% of the roster to ~90%, with no compiler error and no test
+    /// failure (both expressions are valid at both widths). This pins the floor to a NAMED rung
+    /// (Cultivated), not a ratio recomputed from <see cref="DemonRarityLadder.RungCount"/>, so a
+    /// future ladder widening cannot silently re-expand the eligible proportion again.</summary>
+    [Fact]
+    public void Fusion_output_set_is_pinned_by_rung_not_by_proportion()
+    {
+        Assert.Equal(DemonRarity.Cultivated, DemonRecipeCatalog.OutputEligibilityFloor);
+        // A fixed ordinal (3), not a proportion of RungCount — proves the floor is a pinned rung.
+        Assert.Equal(3, (int)DemonRecipeCatalog.OutputEligibilityFloor);
+
+        var eligible = DemonSpeciesCatalog.All.Count(s =>
+            DemonRarityLadder.AtLeast(s.BaseRarity, DemonRecipeCatalog.OutputEligibilityFloor) &&
+            s.Acquisition != DemonAcquisition.CaptureOnly);
+        Assert.Equal(eligible, DemonRecipeCatalog.All.Count);
+    }
 
     [Fact]
     public void Every_summonable_rare_plus_species_has_exactly_one_recipe()
     {
         var eligible = DemonSpeciesCatalog.All
-            .Where(s => s.BaseRarity >= DemonRarity.Rare && s.Acquisition != DemonAcquisition.CaptureOnly)
+            .Where(s => s.BaseRarity >= DemonRarity.Cultivated && s.Acquisition != DemonAcquisition.CaptureOnly)
             .Select(s => s.SpeciesId)
             .OrderBy(x => x, StringComparer.Ordinal)
             .ToList();
@@ -24,7 +59,7 @@ public class DemonRecipeCatalogTests
             .ToList();
         Assert.Equal(eligible, outputs);
         Assert.Contains(DemonRecipeCatalog.All, r =>
-            DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Legendary);
+            DemonSpeciesCatalog.Get(r.OutputSpeciesId).BaseRarity == DemonRarity.Sunwoven);
     }
 
     [Fact]
@@ -36,8 +71,8 @@ public class DemonRecipeCatalogTests
             var a = DemonSpeciesCatalog.Get(recipe.InputSpeciesIdA);
             var b = DemonSpeciesCatalog.Get(recipe.InputSpeciesIdB);
             Assert.NotEqual(recipe.InputSpeciesIdA, recipe.InputSpeciesIdB);
-            Assert.Equal(BandBelow(output.BaseRarity), a.BaseRarity);
-            Assert.Equal(BandBelow(output.BaseRarity), b.BaseRarity);
+            Assert.Equal(NearestPopulatedBandBelow(output.BaseRarity), a.BaseRarity);
+            Assert.Equal(NearestPopulatedBandBelow(output.BaseRarity), b.BaseRarity);
             Assert.NotEqual(DemonAcquisition.CaptureOnly, a.Acquisition);
             Assert.NotEqual(DemonAcquisition.CaptureOnly, b.Acquisition);
         }

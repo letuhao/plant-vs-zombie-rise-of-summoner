@@ -33,11 +33,19 @@ public static partial class DemonSpeciesCatalog
         "normal", "ancient", "mutated", "corrupted", "blessed", "cursed", "shiny"
     };
 
-    static IReadOnlyList<DemonSpeciesDef>? _all;
     static Dictionary<string, DemonSpeciesDef>? _byId;
 
-    /// <summary>Generated seed roster (DemonSpeciesCatalog.Generated.cs), validated on first touch.</summary>
-    public static IReadOnlyList<DemonSpeciesDef> All => _all ??= Validate(GeneratedSpecies);
+    /// <summary>
+    /// The store-backed roster (T4.8, `catalog-runtime`) — <see cref="SpeciesSnapshot.Configure"/>
+    /// must have run first, the same "no built-in default" discipline `DerivedStatPolicy.Tuning`
+    /// already established. `species-import`'s own committed output supersedes the compiled
+    /// <c>GeneratedSpecies</c> array, which stays in the tree only until T4.8's own diff-test-gated
+    /// deletion step.
+    /// </summary>
+    public static IReadOnlyList<DemonSpeciesDef> All => Scoped.Value ?? _configured ?? throw new InvalidOperationException(
+        "DemonSpeciesCatalog.Configure(...) has not run. Every host reads the roster " +
+        "species-import wrote via RpgStore.BuildDemonSpeciesSnapshot() and calls Configure at " +
+        "startup — there is no built-in default to fall back to.");
 
     public static bool IsKnown(string? speciesId) =>
         speciesId != null && ByIdMap().ContainsKey(speciesId);
@@ -49,6 +57,12 @@ public static partial class DemonSpeciesCatalog
 
     static Dictionary<string, DemonSpeciesDef> ByIdMap()
     {
+        // A scoped (test-only) roster is never cached in the process-global _byId — caching it would
+        // leak one test's roster into the next call from a DIFFERENT async context that happens to
+        // reuse the same thread. The real production path (no Scoped.Value) still caches normally.
+        if (Scoped.Value is { } scoped)
+            return scoped.ToDictionary(s => s.SpeciesId, StringComparer.Ordinal);
+
         if (_byId == null)
         {
             _ = All;

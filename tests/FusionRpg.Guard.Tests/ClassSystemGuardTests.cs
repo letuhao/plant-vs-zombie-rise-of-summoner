@@ -10,10 +10,14 @@ namespace FusionRpg.Guard.Tests;
 /// G7 Balance/Analytic's damage-computing files reference a shipped combat symbol (added P4.1).
 /// Mirrors StatTaxonomyGuardTests'/PowerGuardTests' fixture shape.
 ///
-/// <para>G2/G3 key off the SHIPPED <c>data/tuning/aptitudes.v*.json</c> (P2.1, not yet built) — on the
-/// real tree today the guard reports "nothing to check" for those two rules rather than failing on an
-/// absence, so their planted-violation tests supply that file inside the fixture to prove the rule
-/// itself works once the file exists.</para>
+/// <para>G2/G3 key off the SHIPPED <c>data/tuning/aptitudes.v*.json</c>. That file did not exist when
+/// this suite was written, so this note used to say "P2.1, not yet built" and "nothing to check" —
+/// stale since P2.1 landed, and five versions have shipped since (v1..v5, corrected 2026-09-02). The
+/// planted-violation tests still supply their own copy inside the fixture, which is what keeps each
+/// rule provable independently of whatever the real tree currently holds; the REAL tree is covered
+/// separately by <see cref="ClassSystemGuard_script_exitsOneOnTheRealTree_onlyG3_permanentlyByDesign"/>,
+/// which pins it to exit 1 with G3 alone (class-system-plan.md decision 12 — a deliberate, permanent
+/// forward-looking safeguard, never silenced by editing the shipped tuning).</para>
 /// </summary>
 public class ClassSystemGuardTests
 {

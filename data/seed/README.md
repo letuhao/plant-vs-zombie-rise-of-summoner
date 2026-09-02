@@ -80,7 +80,7 @@ policy; a fixed value with a range is refused.
   "slot": "ring",
   "rarity": "rare",
   "minTier": 1, "maxTier": 3, "levelReq": 5,
-  "poolRolls": 2,
+  "prefixRolls": 2, "suffixRolls": 1,
   "atoms": [ { "atom": "atom.vitality.t1", "overrides": { "amount": 60 } } ],
   "pool":  [ { "atom": "atom.ember.fire.t1", "weight": 100, "group": "atom.ember|fire" } ]
 }
@@ -103,7 +103,7 @@ an atom authored in the **same** import — a new item and its affixes normally 
 ### `rarity`
 
 ```json
-{ "id": "rare", "ordinal": 2, "poolRolls": 2, "minTier": 1, "maxTier": 3 }
+{ "id": "rare", "ordinal": 2, "prefixRolls": 2, "suffixRolls": 1, "minTier": 1, "maxTier": 3 }
 ```
 
 Ordinals are append-only: they are load-bearing for sorting and for the budget lookup, so an ordinal

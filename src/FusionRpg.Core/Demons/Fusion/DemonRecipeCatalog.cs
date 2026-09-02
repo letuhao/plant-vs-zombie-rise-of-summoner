@@ -16,13 +16,36 @@ public sealed record DemonRecipeDef(
 /// </summary>
 public static class DemonRecipeCatalog
 {
-    public static readonly IReadOnlyList<DemonRecipeDef> All = Build();
+    /// <summary>
+    /// Species eligible to be fusion OUTPUTS. Was `&gt;= DemonRarity.Rare` (three of the old four
+    /// rungs). Rare's own migration target is `Cultivated` (the rare band's lowest rung —
+    /// ssot-rarity.md §4.3's forward map), so this is the same translation: "recipes exist from the
+    /// old Rare band's target rung upward" (spec-rarity-migration.md §3's ordinal-arithmetic fix).
+    ///
+    /// ⛔ MUST be a `const`, not `static readonly`, and MUST be declared before `All` below. A
+    /// `static readonly` field here would run its initializer in DECLARATION ORDER — after `All`'s
+    /// own initializer already called `Build()` — so `Build()` would read the enum's default value
+    /// (`Chaff`, ordinal 0) instead of `Cultivated`, silently admitting every species as an output.
+    /// Found exactly this way: `DemonRecipeCatalogTests` failed with two Chaff-rarity species
+    /// (`allpeater`, `ashthreepeater`) appearing as recipe outputs.
+    /// </summary>
+    internal const DemonRarity OutputEligibilityFloor = DemonRarity.Cultivated;
 
-    static readonly Dictionary<string, DemonRecipeDef> ById =
-        All.ToDictionary(r => r.RecipeId, StringComparer.Ordinal);
+    // Lazy, not `static readonly ... = Build()` (T4.7, catalog-runtime §3a) — same reasoning as
+    // WaveCatalog's own conversion. `ById`/`ByPair` read the `All` PROPERTY (not the old field), so
+    // their own lazy initializers trigger `Build()` on first touch regardless of which of the three
+    // is accessed first — the exact field-declaration-order hazard `OutputEligibilityFloor`'s own doc
+    // comment already warned about for a different pair of fields, now impossible by construction
+    // since none of these are fields evaluated at class-load time any more.
+    static IReadOnlyList<DemonRecipeDef>? _all;
+    public static IReadOnlyList<DemonRecipeDef> All => _all ??= Build();
 
-    static readonly Dictionary<string, DemonRecipeDef> ByPair =
-        All.ToDictionary(r => PairKey(r.InputSpeciesIdA, r.InputSpeciesIdB), StringComparer.Ordinal);
+    static Dictionary<string, DemonRecipeDef>? _byId;
+    static Dictionary<string, DemonRecipeDef> ById => _byId ??= All.ToDictionary(r => r.RecipeId, StringComparer.Ordinal);
+
+    static Dictionary<string, DemonRecipeDef>? _byPair;
+    static Dictionary<string, DemonRecipeDef> ByPair =>
+        _byPair ??= All.ToDictionary(r => PairKey(r.InputSpeciesIdA, r.InputSpeciesIdB), StringComparer.Ordinal);
 
     public static bool IsKnown(string? recipeId) => recipeId != null && ById.ContainsKey(recipeId);
 
@@ -47,7 +70,8 @@ public static class DemonRecipeCatalog
     static IReadOnlyList<DemonRecipeDef> Build()
     {
         var outputs = DemonSpeciesCatalog.All
-            .Where(s => s.BaseRarity >= DemonRarity.Rare && s.Acquisition != DemonAcquisition.CaptureOnly)
+            .Where(s => DemonRarityLadder.AtLeast(s.BaseRarity, OutputEligibilityFloor)
+                        && s.Acquisition != DemonAcquisition.CaptureOnly)
             .OrderBy(s => s.BaseRarity)
             .ThenBy(s => s.SpeciesId, StringComparer.Ordinal)
             .ToList();
@@ -56,14 +80,11 @@ public static class DemonRecipeCatalog
         var usedPairs = new HashSet<string>(StringComparer.Ordinal);
         foreach (var output in outputs)
         {
-            var pool = DemonSpeciesCatalog.All
-                .Where(s => s.BaseRarity == (DemonRarity)((int)output.BaseRarity - 1)
-                            && s.Acquisition != DemonAcquisition.CaptureOnly)
-                .OrderBy(s => s.SpeciesId, StringComparer.Ordinal)
-                .ToList();
+            var pool = InputPoolBelow(output.BaseRarity);
             if (pool.Count < 2)
                 throw new InvalidOperationException(
-                    $"Recipe pool below {output.BaseRarity} has {pool.Count} species — catalog cannot support fusion.");
+                    $"Recipe pool below {output.BaseRarity} has {pool.Count} species (searched down to "
+                    + $"{DemonRarity.Chaff}) — catalog cannot support fusion.");
 
             var a = pool.FirstOrDefault(p => p.ElementPrimary == output.ElementPrimary) ?? pool[0];
 
@@ -82,6 +103,33 @@ public static class DemonRecipeCatalog
         }
 
         return recipes;
+    }
+
+    /// <summary>
+    /// Species one rung below <paramref name="outputRarity"/> — widening the search downward one
+    /// rung at a time until at least two candidates exist, or the bottom (Chaff) has been included.
+    /// A fixed "exactly one rung below" (the pre-migration shape) assumed every adjacent rung was
+    /// populated; the ten-rung ladder does not guarantee that (spec-rarity-migration.md's own risk:
+    /// widening an enum does not widen the roster that fills it). Walking down is the ladder-safe
+    /// replacement — never a bare `(DemonRarity)((int)r - 1)` cast.
+    /// </summary>
+    static List<DemonSpeciesDef> InputPoolBelow(DemonRarity outputRarity)
+    {
+        var pool = new List<DemonSpeciesDef>();
+        var cursor = outputRarity;
+        while (true)
+        {
+            var atBottom = DemonRarityLadder.IsBottomRung(cursor);
+            cursor = atBottom ? cursor : DemonRarityLadder.OneRungBelow(cursor);
+
+            pool = DemonSpeciesCatalog.All
+                .Where(s => s.BaseRarity == cursor && s.Acquisition != DemonAcquisition.CaptureOnly)
+                .OrderBy(s => s.SpeciesId, StringComparer.Ordinal)
+                .ToList();
+
+            if (pool.Count >= 2 || atBottom)
+                return pool;
+        }
     }
 
     static int BRank(DemonSpeciesDef candidate, DemonSpeciesDef output)

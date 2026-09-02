@@ -35,6 +35,11 @@ public class BuildSquadEquippedActionsTests : IDisposable
         FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
             FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         SoulEarnPolicy.Configure(SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
+        // RollTraits -> FusionRoller.SlotsFor now reads StarPolicy.Tuning.SlotsByRarity
+        // (seed-to-concrete T4.1 moved the old hardcoded switch into fusion.v1.json), so the mint
+        // path this test drives needs StarPolicy configured too, exactly like AptitudeChannelModsTests.
+        FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
+            FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v1.json")));
 
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-buildsquad-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);

@@ -283,6 +283,40 @@ public class ContentValidationTests
         Assert.Equal("atom.dead.t1", orphan.Subject);
     }
 
+    [Fact]
+    public void An_affix_no_container_pool_references_warns()
+    {
+        // T3.8 (affix-metrics): the container-reachability half of "unreachable affix" — the richer
+        // tag-eligibility check waits on module 8 (eligibility-tags), not yet built.
+        var used = new AffixRow("affix.used", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.used.t1") });
+        var dead = new AffixRow("affix.dead", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.dead.t1") });
+        var container = Container("item.ring") with
+        {
+            Pool = new[] { new ContainerPoolRow("affix.used", 100) },
+        };
+
+        var report = ContentValidation.Lint(
+            Array.Empty<AtomRow>(), new[] { container }, new[] { used, dead });
+
+        var orphan = Assert.Single(report.Warnings.Where(w => w.Rule == "orphan-affix"));
+        Assert.Equal("affix.dead", orphan.Subject);
+    }
+
+    [Fact]
+    public void No_affix_catalog_supplied_reports_no_orphan_affixes()
+    {
+        // Same "safe direction" OrphanAtoms already established: an omitted affix catalog must never
+        // manufacture false positives against data the caller never supplied.
+        var container = Container("item.ring") with
+        {
+            Pool = new[] { new ContainerPoolRow("affix.unknown", 100) },
+        };
+
+        var report = ContentValidation.Lint(Array.Empty<AtomRow>(), new[] { container });
+
+        Assert.DoesNotContain(report.Warnings, w => w.Rule == "orphan-affix");
+    }
+
     // ---- over the real shipped corpus ------------------------------------------------------------------
 
     static (IReadOnlyList<AtomRow> Atoms, IReadOnlyList<ContainerRow> Containers) ShippedSeed()

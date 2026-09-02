@@ -1,0 +1,494 @@
+[
+  {
+    "capturedUtc": "2026-08-15T17:46:19.9780978Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:0,\u0022typeName\u0022:\u0022Peashooter\u0022,\u0022displayName\u0022:\u0022\\u8C4C\\u8C46\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u002222F107D0000\u0022,\u0022col\u0022:2,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:20,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:20}",
+    "typeId": 0
+  },
+  {
+    "capturedUtc": "2026-08-15T17:45:27.0350103Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1,\u0022typeName\u0022:\u0022SunFlower\u0022,\u0022displayName\u0022:\u0022\\u5411\\u65E5\\u8475\u0022,\u0022ptr\u0022:\u002222EE6744900\u0022,\u0022col\u0022:0,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:0,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:0}",
+    "typeId": 1
+  },
+  {
+    "capturedUtc": "2026-08-15T17:50:20.4124062Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:2,\u0022typeName\u0022:\u0022CherryBomb\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u70B8\\u5F39\u0022,\u0022ptr\u0022:\u002222FDEC66480\u0022,\u0022col\u0022:1,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:1800,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:1800,\u0022attack\u0022:1800}",
+    "typeId": 2
+  },
+  {
+    "capturedUtc": "2026-08-15T17:50:08.9655373Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:3,\u0022typeName\u0022:\u0022WallNut\u0022,\u0022displayName\u0022:\u0022\\u575A\\u679C\u0022,\u0022ptr\u0022:\u002222FDEC66B40\u0022,\u0022col\u0022:1,\u0022row\u0022:2,\u0022thePlantHealth\u0022:4000,\u0022thePlantMaxHealth\u0022:4000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:0,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:4000,\u0022maxHpBase\u0022:4000,\u0022hp\u0022:4000,\u0022maxHp\u0022:4000,\u0022attackBase\u0022:0,\u0022attack\u0022:0}",
+    "typeId": 3
+  },
+  {
+    "capturedUtc": "2026-08-20T16:40:33.2210848Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:5,\u0022typeName\u0022:\u0022Chomper\u0022,\u0022displayName\u0022:\u0022\\u5927\\u5634\\u82B1\u0022,\u0022ptr\u0022:\u0022243907F6480\u0022,\u0022col\u0022:1,\u0022row\u0022:4,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:10,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:10,\u0022probeId\u0022:\u002288b355e1ec9a43cda7e289b2d738c211\u0022,\u0022correlationId\u0022:\u002292cf937b8e8d4a58a9e19d55963b9293\u0022,\u0022packId\u0022:\u0022pack.economy\u0022}",
+    "typeId": 5
+  },
+  {
+    "capturedUtc": "2026-08-17T16:07:22.6939694Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:7,\u0022typeName\u0022:\u0022FumeShroom\u0022,\u0022displayName\u0022:\u0022\\u5927\\u55B7\\u83C7\u0022,\u0022ptr\u0022:\u00221D17A0E4D80\u0022,\u0022col\u0022:0,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 7
+  },
+  {
+    "capturedUtc": "2026-08-20T20:42:14.5812505Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:8,\u0022typeName\u0022:\u0022HypnoShroom\u0022,\u0022displayName\u0022:\u0022\\u9B45\\u60D1\\u83C7\u0022,\u0022ptr\u0022:\u0022189DB0436C0\u0022,\u0022col\u0022:0,\u0022row\u0022:4,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:50,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:0,\u0022attack\u0022:50}",
+    "typeId": 8
+  },
+  {
+    "capturedUtc": "2026-08-17T16:11:33.3188638Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:9,\u0022typeName\u0022:\u0022ScaredyShroom\u0022,\u0022displayName\u0022:\u0022\\u80C6\\u5C0F\\u83C7\u0022,\u0022ptr\u0022:\u00221D17CF906C0\u0022,\u0022col\u0022:0,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 9
+  },
+  {
+    "capturedUtc": "2026-08-20T21:09:56.0933936Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:10,\u0022typeName\u0022:\u0022IceShroom\u0022,\u0022displayName\u0022:\u0022\\u5BD2\\u51B0\\u83C7\u0022,\u0022ptr\u0022:\u00221E4CB2E6B40\u0022,\u0022col\u0022:0,\u0022row\u0022:1,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:50,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:0,\u0022attack\u0022:50}",
+    "typeId": 10
+  },
+  {
+    "capturedUtc": "2026-08-20T20:42:38.8903052Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:13,\u0022typeName\u0022:\u0022Squash\u0022,\u0022displayName\u0022:\u0022\\u7A9D\\u74DC\u0022,\u0022ptr\u0022:\u0022189DE0A2C80\u0022,\u0022col\u0022:5,\u0022row\u0022:0,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:9050,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:1800,\u0022attack\u0022:9050}",
+    "typeId": 13
+  },
+  {
+    "capturedUtc": "2026-08-17T17:57:54.3693266Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:14,\u0022typeName\u0022:\u0022ThreePeater\u0022,\u0022displayName\u0022:\u0022\\u4E09\\u7EBF\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u002223675F88240\u0022,\u0022col\u0022:0,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 14
+  },
+  {
+    "capturedUtc": "2026-08-20T20:43:05.3710850Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:16,\u0022typeName\u0022:\u0022Jalapeno\u0022,\u0022displayName\u0022:\u0022\\u706B\\u7206\\u8FA3\\u6912\u0022,\u0022ptr\u0022:\u0022189D5B8DD80\u0022,\u0022col\u0022:0,\u0022row\u0022:2,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:9050,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:1800,\u0022attack\u0022:9050}",
+    "typeId": 16
+  },
+  {
+    "capturedUtc": "2026-08-20T20:42:59.6164402Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:17,\u0022typeName\u0022:\u0022Caltrop\u0022,\u0022displayName\u0022:\u0022\\u5730\\u523A\u0022,\u0022ptr\u0022:\u0022189DA7B06C0\u0022,\u0022col\u0022:6,\u0022row\u0022:2,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:150,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:20,\u0022attack\u0022:150}",
+    "typeId": 17
+  },
+  {
+    "capturedUtc": "2026-08-20T16:59:38.2274313Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:20,\u0022typeName\u0022:\u0022Plantern\u0022,\u0022displayName\u0022:\u0022\\u8DEF\\u706F\\u82B1\u0022,\u0022ptr\u0022:\u00221BD4E472D80\u0022,\u0022col\u0022:6,\u0022row\u0022:1,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:10,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:10}",
+    "typeId": 20
+  },
+  {
+    "capturedUtc": "2026-08-20T16:52:12.6838306Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:21,\u0022typeName\u0022:\u0022Cactus\u0022,\u0022displayName\u0022:\u0022\\u4ED9\\u4EBA\\u638C\u0022,\u0022ptr\u0022:\u00221BD50A28B40\u0022,\u0022col\u0022:0,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 21
+  },
+  {
+    "capturedUtc": "2026-08-17T17:58:01.2963214Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:23,\u0022typeName\u0022:\u0022StarFruit\u0022,\u0022displayName\u0022:\u0022\\u6768\\u6843\u0022,\u0022ptr\u0022:\u002223675F96D80\u0022,\u0022col\u0022:9,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 23
+  },
+  {
+    "capturedUtc": "2026-08-20T21:39:52.9423159Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:24,\u0022typeName\u0022:\u0022Pumpkin\u0022,\u0022displayName\u0022:\u0022\\u5357\\u74DC\u0022,\u0022ptr\u0022:\u002219DF62F8000\u0022,\u0022col\u0022:4,\u0022row\u0022:2,\u0022thePlantHealth\u0022:4000,\u0022thePlantMaxHealth\u0022:4000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:1,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:4000,\u0022maxHpBase\u0022:4000,\u0022hp\u0022:4000,\u0022maxHp\u0022:4000,\u0022attackBase\u0022:0,\u0022attack\u0022:1}",
+    "typeId": 24
+  },
+  {
+    "capturedUtc": "2026-08-20T16:53:44.2447656Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:27,\u0022typeName\u0022:\u0022Pot\u0022,\u0022displayName\u0022:\u0022\\u82B1\\u76C6\u0022,\u0022ptr\u0022:\u00221BC56BD1480\u0022,\u0022col\u0022:1,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:10,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:10}",
+    "typeId": 27
+  },
+  {
+    "capturedUtc": "2026-08-18T19:58:56.9989675Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:29,\u0022typeName\u0022:\u0022Garlic\u0022,\u0022displayName\u0022:\u0022\\u5927\\u849C\u0022,\u0022ptr\u0022:\u00221C06971E000\u0022,\u0022col\u0022:0,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:0,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:0}",
+    "typeId": 29
+  },
+  {
+    "capturedUtc": "2026-08-20T21:38:53.0750760Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:31,\u0022typeName\u0022:\u0022Marigold\u0022,\u0022displayName\u0022:\u0022\\u91D1\\u76CF\\u82B1\u0022,\u0022ptr\u0022:\u002219DF62F0240\u0022,\u0022col\u0022:2,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:1,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:1}",
+    "typeId": 31
+  },
+  {
+    "capturedUtc": "2026-08-20T21:38:51.5455759Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:32,\u0022typeName\u0022:\u0022Melonpult\u0022,\u0022displayName\u0022:\u0022\\u897F\\u74DC\\u6295\\u624B\u0022,\u0022ptr\u0022:\u002219DF62F0480\u0022,\u0022col\u0022:2,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:1,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:3,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:80,\u0022attack\u0022:1}",
+    "typeId": 32
+  },
+  {
+    "capturedUtc": "2026-08-20T17:27:07.3944018Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:918,\u0022typeName\u0022:\u0022AshThreePeater\u0022,\u0022displayName\u0022:\u0022\\u7070\\u70EC\\u4E09\\u7EBF\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022197187086C0\u0022,\u0022col\u0022:0,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:10,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:10}",
+    "typeId": 918
+  },
+  {
+    "capturedUtc": "2026-08-17T17:29:18.0153543Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1000,\u0022typeName\u0022:\u0022PeaSunFlower\u0022,\u0022displayName\u0022:\u0022\\u8C4C\\u8C46\\u5411\\u65E5\\u8475\u0022,\u0022ptr\u0022:\u002228A7BABB240\u0022,\u0022col\u0022:0,\u0022row\u0022:3,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:30,\u0022attack\u0022:40}",
+    "typeId": 1000
+  },
+  {
+    "capturedUtc": "2026-08-15T18:46:10.6968935Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1001,\u0022typeName\u0022:\u0022Cherryshooter\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022196F7A44900\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:40,\u0022attack\u0022:40}",
+    "typeId": 1001
+  },
+  {
+    "capturedUtc": "2026-08-15T17:45:34.2230076Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1003,\u0022typeName\u0022:\u0022CherryNut\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u575A\\u679C\u0022,\u0022ptr\u0022:\u002222EE0D6C6C0\u0022,\u0022col\u0022:5,\u0022row\u0022:2,\u0022thePlantHealth\u0022:4000,\u0022thePlantMaxHealth\u0022:4000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:0,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:4000,\u0022maxHpBase\u0022:4000,\u0022hp\u0022:4000,\u0022maxHp\u0022:4000,\u0022attackBase\u0022:0,\u0022attack\u0022:0}",
+    "typeId": 1003
+  },
+  {
+    "capturedUtc": "2026-08-20T19:02:23.0021899Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1004,\u0022typeName\u0022:\u0022PeaNut\u0022,\u0022displayName\u0022:\u0022\\u575A\\u679C\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u00221F55D311D80\u0022,\u0022col\u0022:4,\u0022row\u0022:0,\u0022thePlantHealth\u0022:4000,\u0022thePlantMaxHealth\u0022:4000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:4000,\u0022maxHpBase\u0022:4000,\u0022hp\u0022:4000,\u0022maxHp\u0022:4000,\u0022attackBase\u0022:20,\u0022attack\u0022:30,\u0022probeId\u0022:\u00229ef24eb84661436185f7ec982d7dbda0\u0022,\u0022correlationId\u0022:\u00222460c7e130e443379eb9288dc1162877\u0022,\u0022packId\u0022:\u0022pack.autocollect\u0022}",
+    "typeId": 1004
+  },
+  {
+    "capturedUtc": "2026-08-15T18:46:20.2401100Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1008,\u0022typeName\u0022:\u0022DoubleCherry\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u53CC\\u53D1\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022196F7A44480\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:40,\u0022attack\u0022:40}",
+    "typeId": 1008
+  },
+  {
+    "capturedUtc": "2026-08-20T16:41:46.9273637Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1011,\u0022typeName\u0022:\u0022PeaChomper\u0022,\u0022displayName\u0022:\u0022\\u8C4C\\u8C46\\u5927\\u5634\\u82B1\u0022,\u0022ptr\u0022:\u00222446CE75000\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:90,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:3,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:80,\u0022attack\u0022:90,\u0022probeId\u0022:\u002288b355e1ec9a43cda7e289b2d738c211\u0022,\u0022correlationId\u0022:\u002292cf937b8e8d4a58a9e19d55963b9293\u0022,\u0022packId\u0022:\u0022pack.economy\u0022}",
+    "typeId": 1011
+  },
+  {
+    "capturedUtc": "2026-08-20T18:57:49.5430034Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1012,\u0022typeName\u0022:\u0022NutChomper\u0022,\u0022displayName\u0022:\u0022\\u5927\\u5634\\u575A\\u679C\u0022,\u0022ptr\u0022:\u00221F4B3FF5960\u0022,\u0022col\u0022:4,\u0022row\u0022:0,\u0022thePlantHealth\u0022:4000,\u0022thePlantMaxHealth\u0022:4000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:10,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:4000,\u0022maxHpBase\u0022:4000,\u0022hp\u0022:4000,\u0022maxHp\u0022:4000,\u0022attackBase\u0022:0,\u0022attack\u0022:10,\u0022probeId\u0022:\u00229ef24eb84661436185f7ec982d7dbda0\u0022,\u0022correlationId\u0022:\u00222460c7e130e443379eb9288dc1162877\u0022,\u0022packId\u0022:\u0022pack.autocollect\u0022}",
+    "typeId": 1012
+  },
+  {
+    "capturedUtc": "2026-08-20T20:19:27.4153165Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1014,\u0022typeName\u0022:\u0022SunChomper\u0022,\u0022displayName\u0022:\u0022\\u9633\\u5149\\u5927\\u5634\\u82B1\u0022,\u0022ptr\u0022:\u0022289DF900B40\u0022,\u0022col\u0022:1,\u0022row\u0022:4,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:50,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:0,\u0022attack\u0022:50}",
+    "typeId": 1014
+  },
+  {
+    "capturedUtc": "2026-08-15T18:46:28.5754586Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1017,\u0022typeName\u0022:\u0022CherryGatling\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u673A\\u67AA\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022196F757C900\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:40,\u0022attack\u0022:40}",
+    "typeId": 1017
+  },
+  {
+    "capturedUtc": "2026-08-15T17:46:34.8878456Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1030,\u0022typeName\u0022:\u0022DoubleShooter\u0022,\u0022displayName\u0022:\u0022\\u53CC\\u53D1\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u002222EE6534D80\u0022,\u0022col\u0022:2,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:20,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:20}",
+    "typeId": 1030
+  },
+  {
+    "capturedUtc": "2026-08-15T20:10:41.0978866Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1032,\u0022typeName\u0022:\u0022GatlingPea\u0022,\u0022displayName\u0022:\u0022\\u673A\\u67AA\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u00221389B35BB40\u0022,\u0022col\u0022:2,\u0022row\u0022:1,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:20,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:20}",
+    "typeId": 1032
+  },
+  {
+    "capturedUtc": "2026-08-15T17:45:34.2225193Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1033,\u0022typeName\u0022:\u0022TwinFlower\u0022,\u0022displayName\u0022:\u0022\\u53CC\\u5B50\\u5411\\u65E5\\u8475\u0022,\u0022ptr\u0022:\u002222EE0D6CB40\u0022,\u0022col\u0022:9,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:0,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:0}",
+    "typeId": 1033
+  },
+  {
+    "capturedUtc": "2026-08-20T18:58:21.6019356Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1034,\u0022typeName\u0022:\u0022SnowPeaShooter\u0022,\u0022displayName\u0022:\u0022\\u5BD2\\u51B0\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u00221F4FA29C6C0\u0022,\u0022col\u0022:1,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30,\u0022probeId\u0022:\u00229ef24eb84661436185f7ec982d7dbda0\u0022,\u0022correlationId\u0022:\u00222460c7e130e443379eb9288dc1162877\u0022,\u0022packId\u0022:\u0022pack.autocollect\u0022}",
+    "typeId": 1034
+  },
+  {
+    "capturedUtc": "2026-08-20T20:44:27.0308063Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1048,\u0022typeName\u0022:\u0022CaltropNut\u0022,\u0022displayName\u0022:\u0022\\u5730\\u523A\\u575A\\u679C\u0022,\u0022ptr\u0022:\u0022189DDC5FD80\u0022,\u0022col\u0022:5,\u0022row\u0022:0,\u0022thePlantHealth\u0022:400000,\u0022thePlantMaxHealth\u0022:400000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:50,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:4000,\u0022maxHpBase\u0022:4000,\u0022hp\u0022:400000,\u0022maxHp\u0022:400000,\u0022attackBase\u0022:0,\u0022attack\u0022:50}",
+    "typeId": 1048
+  },
+  {
+    "capturedUtc": "2026-08-20T17:27:06.4962571Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1058,\u0022typeName\u0022:\u0022DarkThreePeater\u0022,\u0022displayName\u0022:\u0022\\u7126\\u9ED1\\u4E09\\u7EBF\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u002219718708900\u0022,\u0022col\u0022:0,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:50,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:40,\u0022attack\u0022:50}",
+    "typeId": 1058
+  },
+  {
+    "capturedUtc": "2026-08-20T20:47:35.3355977Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1062,\u0022typeName\u0022:\u0022JalaCaltrop\u0022,\u0022displayName\u0022:\u0022\\u706B\\u7130\\u5730\\u523A\u0022,\u0022ptr\u0022:\u0022189DC934000\u0022,\u0022col\u0022:6,\u0022row\u0022:3,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:250,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:40,\u0022attack\u0022:250}",
+    "typeId": 1062
+  },
+  {
+    "capturedUtc": "2026-08-20T16:53:38.9283419Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1079,\u0022typeName\u0022:\u0022LanternCactus\u0022,\u0022displayName\u0022:\u0022\\u6D41\\u5149\\u4ED9\\u4EBA\\u638C\u0022,\u0022ptr\u0022:\u00221BC56A0C000\u0022,\u0022col\u0022:1,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:30,\u0022attack\u0022:40}",
+    "typeId": 1079
+  },
+  {
+    "capturedUtc": "2026-08-20T14:40:38.1950203Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1082,\u0022typeName\u0022:\u0022CactusBlover\u0022,\u0022displayName\u0022:\u0022\\u6D6E\\u7A7A\\u4ED9\\u4EBA\\u7403\u0022,\u0022ptr\u0022:\u002221B15C6D240\u0022,\u0022col\u0022:0,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:30,\u0022attack\u0022:40}",
+    "typeId": 1082
+  },
+  {
+    "capturedUtc": "2026-08-15T20:10:32.0859179Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1090,\u0022typeName\u0022:\u0022SplitPea\u0022,\u0022displayName\u0022:\u0022\\u88C2\\u835A\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u00221389B55E480\u0022,\u0022col\u0022:2,\u0022row\u0022:1,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:20,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:20}",
+    "typeId": 1090
+  },
+  {
+    "capturedUtc": "2026-08-20T17:27:30.5046874Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1105,\u0022typeName\u0022:\u0022DoubleSnow\u0022,\u0022displayName\u0022:\u0022\\u5BD2\\u51B0\\u53CC\\u53D1\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022197187336C0\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 1105
+  },
+  {
+    "capturedUtc": "2026-08-17T17:36:44.7588337Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1106,\u0022typeName\u0022:\u0022SnowGatling\u0022,\u0022displayName\u0022:\u0022\\u5BD2\\u51B0\\u673A\\u67AA\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022247033E2480\u0022,\u0022col\u0022:3,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 1106
+  },
+  {
+    "capturedUtc": "2026-08-20T17:27:32.9368926Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1107,\u0022typeName\u0022:\u0022SnowSplit\u0022,\u0022displayName\u0022:\u0022\\u5BD2\\u51B0\\u88C2\\u835A\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u002219718733000\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 1107
+  },
+  {
+    "capturedUtc": "2026-08-15T18:46:21.5978608Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1108,\u0022typeName\u0022:\u0022CherrySplit\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u88C2\\u835A\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022196F7A44240\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:40,\u0022attack\u0022:40}",
+    "typeId": 1108
+  },
+  {
+    "capturedUtc": "2026-08-20T16:53:47.1770084Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1114,\u0022typeName\u0022:\u0022CornPot\u0022,\u0022displayName\u0022:\u0022\\u7389\\u7C73\\u82B1\\u76C6\u0022,\u0022ptr\u0022:\u00221BC56BD1240\u0022,\u0022col\u0022:1,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:10,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:10}",
+    "typeId": 1114
+  },
+  {
+    "capturedUtc": "2026-08-20T21:11:42.6365106Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1180,\u0022typeName\u0022:\u0022IceCaltrop\u0022,\u0022displayName\u0022:\u0022\\u5BD2\\u51B0\\u5730\\u523A\u0022,\u0022ptr\u0022:\u00221E4CB407000\u0022,\u0022col\u0022:6,\u0022row\u0022:1,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:250,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:40,\u0022attack\u0022:250}",
+    "typeId": 1180
+  },
+  {
+    "capturedUtc": "2026-08-20T16:53:10.2572090Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1191,\u0022typeName\u0022:\u0022DoomCactus\u0022,\u0022displayName\u0022:\u0022\\u6BC1\\u706D\\u4ED9\\u4EBA\\u638C\u0022,\u0022ptr\u0022:\u00221BD4F57CD80\u0022,\u0022col\u0022:0,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:50,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:200,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:40,\u0022attack\u0022:50}",
+    "typeId": 1191
+  },
+  {
+    "capturedUtc": "2026-08-20T20:50:35.9578643Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1198,\u0022typeName\u0022:\u0022JalaStar\u0022,\u0022displayName\u0022:\u0022\\u706B\\u7206\\u6768\\u6843\u0022,\u0022ptr\u0022:\u0022189D88A1240\u0022,\u0022col\u0022:2,\u0022row\u0022:3,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:9050,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:1800,\u0022attack\u0022:9050}",
+    "typeId": 1198
+  },
+  {
+    "capturedUtc": "2026-08-20T20:19:52.6473121Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1241,\u0022typeName\u0022:\u0022LanternChomper\u0022,\u0022displayName\u0022:\u0022\\u706F\\u7B3C\\u5927\\u5634\\u82B1\u0022,\u0022ptr\u0022:\u0022289DF3546C0\u0022,\u0022col\u0022:2,\u0022row\u0022:3,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:50,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:0,\u0022attack\u0022:50}",
+    "typeId": 1241
+  },
+  {
+    "capturedUtc": "2026-08-20T20:44:22.6385166Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1267,\u0022typeName\u0022:\u0022HypnoPeashooter\u0022,\u0022displayName\u0022:\u0022\\u9B45\\u60D1\\u8C4C\\u8C46\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022189DD8A0900\u0022,\u0022col\u0022:2,\u0022row\u0022:1,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:200,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:30,\u0022attack\u0022:200}",
+    "typeId": 1267
+  },
+  {
+    "capturedUtc": "2026-08-20T20:44:14.3987053Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1319,\u0022typeName\u0022:\u0022JalaPeashooter\u0022,\u0022displayName\u0022:\u0022\\u706B\\u8FA3\\u8C4C\\u8C46\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022189D7296000\u0022,\u0022col\u0022:0,\u0022row\u0022:0,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:200,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:30,\u0022attack\u0022:200}",
+    "typeId": 1319
+  },
+  {
+    "capturedUtc": "2026-08-20T16:41:39.0668394Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1322,\u0022typeName\u0022:\u0022JalaGatling\u0022,\u0022displayName\u0022:\u0022\\u706B\\u8FA3\\u673A\\u67AA\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u00222446CE756C0\u0022,\u0022col\u0022:0,\u0022row\u0022:2,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:30,\u0022attack\u0022:40,\u0022probeId\u0022:\u002288b355e1ec9a43cda7e289b2d738c211\u0022,\u0022correlationId\u0022:\u002292cf937b8e8d4a58a9e19d55963b9293\u0022,\u0022packId\u0022:\u0022pack.economy\u0022}",
+    "typeId": 1322
+  },
+  {
+    "capturedUtc": "2026-08-20T19:15:21.7849689Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1328,\u0022typeName\u0022:\u0022GarlicThreePeater\u0022,\u0022displayName\u0022:\u0022\\u849C\\u6BD2\\u4E09\\u7EBF\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u00221CB3DE5E000\u0022,\u0022col\u0022:0,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:40,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:30,\u0022attack\u0022:40}",
+    "typeId": 1328
+  },
+  {
+    "capturedUtc": "2026-08-20T17:27:11.4288217Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1330,\u0022typeName\u0022:\u0022CherryThreePeater\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u4E09\\u7EBF\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u002219718708480\u0022,\u0022col\u0022:0,\u0022row\u0022:1,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30}",
+    "typeId": 1330
+  },
+  {
+    "capturedUtc": "2026-08-20T16:41:42.2420036Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1335,\u0022typeName\u0022:\u0022HypnoChomper\u0022,\u0022displayName\u0022:\u0022\\u9B45\\u60D1\\u5927\\u5634\\u82B1\u0022,\u0022ptr\u0022:\u00222446CE75480\u0022,\u0022col\u0022:1,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:10,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:0,\u0022attack\u0022:10,\u0022probeId\u0022:\u002288b355e1ec9a43cda7e289b2d738c211\u0022,\u0022correlationId\u0022:\u002292cf937b8e8d4a58a9e19d55963b9293\u0022,\u0022packId\u0022:\u0022pack.economy\u0022}",
+    "typeId": 1335
+  },
+  {
+    "capturedUtc": "2026-08-20T20:50:54.0453796Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1336,\u0022typeName\u0022:\u0022HypnoJalapeno\u0022,\u0022displayName\u0022:\u0022\\u9B45\\u60D1\\u8FA3\\u6912\u0022,\u0022ptr\u0022:\u0022189DD2CDD80\u0022,\u0022col\u0022:9,\u0022row\u0022:4,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:9050,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:1800,\u0022attack\u0022:9050}",
+    "typeId": 1336
+  },
+  {
+    "capturedUtc": "2026-08-20T19:00:36.5795272Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1347,\u0022typeName\u0022:\u0022AllPeater\u0022,\u0022displayName\u0022:\u0022\\u7279\\u79CD\\u4E09\\u7EBF\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u00221F598427000\u0022,\u0022col\u0022:0,\u0022row\u0022:4,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:30,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:20,\u0022attack\u0022:30,\u0022probeId\u0022:\u00229ef24eb84661436185f7ec982d7dbda0\u0022,\u0022correlationId\u0022:\u00222460c7e130e443379eb9288dc1162877\u0022,\u0022packId\u0022:\u0022pack.autocollect\u0022}",
+    "typeId": 1347
+  },
+  {
+    "capturedUtc": "2026-08-20T20:44:24.1546746Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1366,\u0022typeName\u0022:\u0022PeaSquash\u0022,\u0022displayName\u0022:\u0022\\u8C4C\\u8C46\\u7A9D\\u74DC\u0022,\u0022ptr\u0022:\u0022189D9484C80\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:9050,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:1800,\u0022attack\u0022:9050}",
+    "typeId": 1366
+  },
+  {
+    "capturedUtc": "2026-08-20T20:19:37.1084025Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1373,\u0022typeName\u0022:\u0022LanternPea\u0022,\u0022displayName\u0022:\u0022\\u6D41\\u5149\\u8C4C\\u8C46\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022289E0344B40\u0022,\u0022col\u0022:2,\u0022row\u0022:2,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:100,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:10,\u0022attack\u0022:100}",
+    "typeId": 1373
+  },
+  {
+    "capturedUtc": "2026-08-20T20:19:30.9223415Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1379,\u0022typeName\u0022:\u0022ThreePlantern\u0022,\u0022displayName\u0022:\u0022\\u4E09\\u7EBF\\u8DEF\\u706F\\u82B1\u0022,\u0022ptr\u0022:\u0022289E0344D80\u0022,\u0022col\u0022:1,\u0022row\u0022:3,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:200,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:0,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:30,\u0022attack\u0022:200}",
+    "typeId": 1379
+  },
+  {
+    "capturedUtc": "2026-08-20T20:16:14.0434358Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1385,\u0022typeName\u0022:\u0022GarlicPea\u0022,\u0022displayName\u0022:\u0022\\u849C\\u6BD2\\u8C4C\\u8C46\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u0022289E0E45B40\u0022,\u0022col\u0022:0,\u0022row\u0022:2,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:200,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:30,\u0022attack\u0022:200}",
+    "typeId": 1385
+  },
+  {
+    "capturedUtc": "2026-08-20T20:44:20.4006043Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1412,\u0022typeName\u0022:\u0022StarPea\u0022,\u0022displayName\u0022:\u0022\\u6768\\u6843\\u8C4C\\u8C46\\u5C04\\u624B\u0022,\u0022ptr\u0022:\u00221896FD59480\u0022,\u0022col\u0022:2,\u0022row\u0022:2,\u0022thePlantHealth\u0022:30000,\u0022thePlantMaxHealth\u0022:30000,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:150,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:30000,\u0022maxHp\u0022:30000,\u0022attackBase\u0022:20,\u0022attack\u0022:150}",
+    "typeId": 1412
+  },
+  {
+    "capturedUtc": "2026-08-20T19:01:52.3165726Z",
+    "side": "plant",
+    "statsJson": "{\u0022source\u0022:\u0022start\u0022,\u0022type\u0022:1439,\u0022typeName\u0022:\u0022ThreeCabbage\u0022,\u0022displayName\u0022:\u0022\\u4E09\\u7EBF\\u5377\\u5FC3\\u83DC\\u70AE\\u624B\u0022,\u0022ptr\u0022:\u00221F5397FFB40\u0022,\u0022col\u0022:2,\u0022row\u0022:0,\u0022thePlantHealth\u0022:300,\u0022thePlantMaxHealth\u0022:300,\u0022theShieldHealth\u0022:0,\u0022attackDamage\u0022:50,\u0022theLevel\u0022:0,\u0022shootingLevel\u0022:0,\u0022limDamage\u0022:2147483647,\u0022thePlantAttackInterval\u0022:1.5,\u0022attackSpeedAdder\u0022:0,\u0022hpBase\u0022:300,\u0022maxHpBase\u0022:300,\u0022hp\u0022:300,\u0022maxHp\u0022:300,\u0022attackBase\u0022:40,\u0022attack\u0022:50,\u0022probeId\u0022:\u00229ef24eb84661436185f7ec982d7dbda0\u0022,\u0022correlationId\u0022:\u00222460c7e130e443379eb9288dc1162877\u0022,\u0022packId\u0022:\u0022pack.autocollect\u0022}",
+    "typeId": 1439
+  },
+  {
+    "capturedUtc": "2026-08-15T17:46:15.7919505Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:0,\u0022typeName\u0022:\u0022NormalZombie\u0022,\u0022displayName\u0022:\u0022\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u002222EE10D7640\u0022,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:50,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.3749704,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:270,\u0022totalAllHealth\u0022:270,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:50,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 0
+  },
+  {
+    "capturedUtc": "2026-08-17T16:14:58.4463829Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:1,\u0022typeName\u0022:\u0022FlagZombie\u0022,\u0022displayName\u0022:\u0022\\u65D7\\u5E1C\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00221D17D077960\u0022,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.0892371,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:270,\u0022totalAllHealth\u0022:270,\u0022currentFirstHealth\u0022:270,\u0022totalFirstHealth\u0022:270,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 1
+  },
+  {
+    "capturedUtc": "2026-08-15T17:46:35.2632302Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:2,\u0022typeName\u0022:\u0022ConeZombie\u0022,\u0022displayName\u0022:\u0022\\u8DEF\\u969C\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u002222EE10D7320\u0022,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:370,\u0022theFirstArmorMaxHealth\u0022:370,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:50,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.3448644,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:640,\u0022totalAllHealth\u0022:640,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:50,\u0022armorBase\u0022:370,\u0022armor\u0022:370,\u0022armorMaxBase\u0022:370,\u0022armorMax\u0022:370}",
+    "typeId": 2
+  },
+  {
+    "capturedUtc": "2026-08-15T18:46:49.8821679Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:3,\u0022typeName\u0022:\u0022PolevaulterZombie\u0022,\u0022displayName\u0022:\u0022\\u6491\\u6746\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u0022196F7A1AC80\u0022,\u0022theHealth\u0022:720,\u0022theMaxHealth\u0022:720,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:50,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.1730433,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:720,\u0022totalAllHealth\u0022:720,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:720,\u0022maxHpBase\u0022:720,\u0022hp\u0022:720,\u0022maxHp\u0022:720,\u0022attackBase\u0022:50,\u0022attack\u0022:50,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 3
+  },
+  {
+    "capturedUtc": "2026-08-17T17:29:16.6172985Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:4,\u0022typeName\u0022:\u0022BucketZombie\u0022,\u0022displayName\u0022:\u0022\\u94C1\\u6876\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u002228A7D5F6C80\u0022,\u0022row\u0022:0,\u0022column\u0022:11,\u0022x\u0022:9.479,\u0022y\u0022:0.9859998,\u0022col\u0022:9,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:1100,\u0022theFirstArmorMaxHealth\u0022:1100,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.0212575,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:1370,\u0022totalAllHealth\u0022:1370,\u0022currentFirstHealth\u0022:1370,\u0022totalFirstHealth\u0022:1370,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:1100,\u0022armor\u0022:1100,\u0022armorMaxBase\u0022:1100,\u0022armorMax\u0022:1100}",
+    "typeId": 4
+  },
+  {
+    "capturedUtc": "2026-08-20T19:15:33.0644360Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:5,\u0022typeName\u0022:\u0022PaperZombie\u0022,\u0022displayName\u0022:\u0022\\u8BFB\\u62A5\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00221CB3E24A960\u0022,\u0022row\u0022:1,\u0022column\u0022:11,\u0022x\u0022:9.684801,\u0022y\u0022:0.448,\u0022col\u0022:9,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:200,\u0022theSecondArmorMaxHealth\u0022:200,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.1861649,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:470,\u0022totalAllHealth\u0022:470,\u0022currentFirstHealth\u0022:270,\u0022totalFirstHealth\u0022:270,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 5
+  },
+  {
+    "capturedUtc": "2026-08-20T21:35:46.6167101Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:6,\u0022typeName\u0022:\u0022DancePolZombie\u0022,\u0022displayName\u0022:\u0022\\u821E\\u738B\\u6491\\u6746\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u002219DFCAC3960\u0022,\u0022row\u0022:1,\u0022column\u0022:11,\u0022x\u0022:9.262501,\u0022y\u0022:0.53375,\u0022col\u0022:9,\u0022theHealth\u0022:720,\u0022theMaxHealth\u0022:720,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.0157404,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:720,\u0022totalAllHealth\u0022:720,\u0022currentFirstHealth\u0022:720,\u0022totalFirstHealth\u0022:720,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:720,\u0022maxHpBase\u0022:720,\u0022hp\u0022:720,\u0022maxHp\u0022:720,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 6
+  },
+  {
+    "capturedUtc": "2026-08-20T16:52:38.6983918Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:8,\u0022typeName\u0022:\u0022DoorZombie\u0022,\u0022displayName\u0022:\u0022\\u94C1\\u95E8\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00221BC56758960\u0022,\u0022row\u0022:1,\u0022column\u0022:11,\u0022x\u0022:9.463301,\u0022y\u0022:-0.7278,\u0022col\u0022:9,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:1100,\u0022theSecondArmorMaxHealth\u0022:1100,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.1666682,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:1370,\u0022totalAllHealth\u0022:1370,\u0022currentFirstHealth\u0022:270,\u0022totalFirstHealth\u0022:270,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 8
+  },
+  {
+    "capturedUtc": "2026-08-20T19:15:46.5783046Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:9,\u0022typeName\u0022:\u0022FootballZombie\u0022,\u0022displayName\u0022:\u0022\\u6A44\\u6984\\u7403\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00221CBDA834960\u0022,\u0022row\u0022:1,\u0022column\u0022:11,\u0022x\u0022:9.842001,\u0022y\u0022:0.55079997,\u0022col\u0022:9,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:1400,\u0022theFirstArmorMaxHealth\u0022:1400,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.3423494,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:1670,\u0022totalAllHealth\u0022:1670,\u0022currentFirstHealth\u0022:1670,\u0022totalFirstHealth\u0022:1670,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:1400,\u0022armor\u0022:1400,\u0022armorMaxBase\u0022:1400,\u0022armorMax\u0022:1400}",
+    "typeId": 9
+  },
+  {
+    "capturedUtc": "2026-08-15T19:44:32.4076576Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:16,\u0022typeName\u0022:\u0022DriverZombie\u0022,\u0022displayName\u0022:\u0022\\u96EA\\u6A47\\u8F66\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00222085FDF9320\u0022,\u0022theHealth\u0022:1350,\u0022theMaxHealth\u0022:1350,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:500,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.0882887,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:1350,\u0022totalAllHealth\u0022:1350,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:1350,\u0022maxHpBase\u0022:1350,\u0022hp\u0022:1350,\u0022maxHp\u0022:1350,\u0022attackBase\u0022:500,\u0022attack\u0022:500,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 16
+  },
+  {
+    "capturedUtc": "2026-08-17T18:01:16.4729789Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:21,\u0022typeName\u0022:\u0022DollDiamond\u0022,\u0022displayName\u0022:\u0022\\u94BB\\u77F3\\u5957\\u5A03\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00222367AA04C80\u0022,\u0022row\u0022:4,\u0022column\u0022:11,\u0022x\u0022:9.463301,\u0022y\u0022:-5.7378,\u0022col\u0022:9,\u0022theHealth\u0022:2000,\u0022theMaxHealth\u0022:2000,\u0022theFirstArmorHealth\u0022:3000,\u0022theFirstArmorMaxHealth\u0022:3000,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.1040343,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:5000,\u0022totalAllHealth\u0022:5000,\u0022currentFirstHealth\u0022:5000,\u0022totalFirstHealth\u0022:5000,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:2000,\u0022maxHpBase\u0022:2000,\u0022hp\u0022:2000,\u0022maxHp\u0022:2000,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:3000,\u0022armor\u0022:3000,\u0022armorMaxBase\u0022:3000,\u0022armorMax\u0022:3000}",
+    "typeId": 21
+  },
+  {
+    "capturedUtc": "2026-08-17T18:02:56.5354265Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:22,\u0022typeName\u0022:\u0022DollGold\u0022,\u0022displayName\u0022:\u0022\\u9EC4\\u91D1\\u5957\\u5A03\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00221F323428640\u0022,\u0022row\u0022:4,\u0022column\u0022:8,\u0022x\u0022:5.403105,\u0022y\u0022:-5.7378,\u0022col\u0022:8,\u0022theHealth\u0022:2000,\u0022theMaxHealth\u0022:2000,\u0022theFirstArmorHealth\u0022:1350,\u0022theFirstArmorMaxHealth\u0022:1350,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.3342434,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:3350,\u0022totalAllHealth\u0022:3350,\u0022currentFirstHealth\u0022:3350,\u0022totalFirstHealth\u0022:3350,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:2000,\u0022maxHpBase\u0022:2000,\u0022hp\u0022:2000,\u0022maxHp\u0022:2000,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:1350,\u0022armor\u0022:1350,\u0022armorMaxBase\u0022:1350,\u0022armorMax\u0022:1350}",
+    "typeId": 22
+  },
+  {
+    "capturedUtc": "2026-08-17T18:03:58.6524028Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:23,\u0022typeName\u0022:\u0022DollSilver\u0022,\u0022displayName\u0022:\u0022\\u767D\\u94F6\\u5957\\u5A03\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00222367A69C000\u0022,\u0022row\u0022:4,\u0022column\u0022:5,\u0022x\u0022:2.0019531,\u0022y\u0022:-5.7378,\u0022col\u0022:5,\u0022theHealth\u0022:2000,\u0022theMaxHealth\u0022:2000,\u0022theFirstArmorHealth\u0022:720,\u0022theFirstArmorMaxHealth\u0022:720,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.3331228,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:2720,\u0022totalAllHealth\u0022:2720,\u0022currentFirstHealth\u0022:2720,\u0022totalFirstHealth\u0022:2720,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:2000,\u0022maxHpBase\u0022:2000,\u0022hp\u0022:2000,\u0022maxHp\u0022:2000,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:720,\u0022armor\u0022:720,\u0022armorMaxBase\u0022:720,\u0022armorMax\u0022:720}",
+    "typeId": 23
+  },
+  {
+    "capturedUtc": "2026-08-17T17:29:46.6177831Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:100,\u0022typeName\u0022:\u0022PeaShooterZombie\u0022,\u0022displayName\u0022:\u0022\\u8C4C\\u8C46\\u5C04\\u624B\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u002228A7D5F6960\u0022,\u0022row\u0022:4,\u0022column\u0022:11,\u0022x\u0022:9.463301,\u0022y\u0022:-5.7378,\u0022col\u0022:9,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.2800843,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:270,\u0022totalAllHealth\u0022:270,\u0022currentFirstHealth\u0022:270,\u0022totalFirstHealth\u0022:270,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 100
+  },
+  {
+    "capturedUtc": "2026-08-20T16:40:00.2675044Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:104,\u0022typeName\u0022:\u0022CherryPaperZombie\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u8BFB\\u62A5\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00222446D3E9C80\u0022,\u0022row\u0022:1,\u0022column\u0022:11,\u0022x\u0022:9.684801,\u0022y\u0022:0.448,\u0022col\u0022:9,\u0022theHealth\u0022:1500,\u0022theMaxHealth\u0022:1500,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:200,\u0022theSecondArmorMaxHealth\u0022:200,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.0161363,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:1700,\u0022totalAllHealth\u0022:1700,\u0022currentFirstHealth\u0022:1500,\u0022totalFirstHealth\u0022:1500,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:1500,\u0022maxHpBase\u0022:1500,\u0022hp\u0022:1500,\u0022maxHp\u0022:1500,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0,\u0022probeId\u0022:\u002288b355e1ec9a43cda7e289b2d738c211\u0022,\u0022correlationId\u0022:\u002292cf937b8e8d4a58a9e19d55963b9293\u0022,\u0022packId\u0022:\u0022pack.economy\u0022}",
+    "typeId": 104
+  },
+  {
+    "capturedUtc": "2026-08-20T16:54:08.1861243Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:106,\u0022typeName\u0022:\u0022BucketNutZombie\u0022,\u0022displayName\u0022:\u0022\\u94C1\\u6876\\u575A\\u679C\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00221BC89924960\u0022,\u0022row\u0022:4,\u0022column\u0022:11,\u0022x\u0022:9.463301,\u0022y\u0022:-5.7378,\u0022col\u0022:9,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:2200,\u0022theFirstArmorMaxHealth\u0022:2200,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.3791268,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:2470,\u0022totalAllHealth\u0022:2470,\u0022currentFirstHealth\u0022:2470,\u0022totalFirstHealth\u0022:2470,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:2200,\u0022armor\u0022:2200,\u0022armorMaxBase\u0022:2200,\u0022armorMax\u0022:2200}",
+    "typeId": 106
+  },
+  {
+    "capturedUtc": "2026-08-20T17:27:49.6580870Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:107,\u0022typeName\u0022:\u0022CherryNutZombie\u0022,\u0022displayName\u0022:\u0022\\u6A31\\u6843\\u575A\\u679C\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u0022197CF30E960\u0022,\u0022row\u0022:0,\u0022column\u0022:11,\u0022x\u0022:9.463301,\u0022y\u0022:0.94219995,\u0022col\u0022:9,\u0022theHealth\u0022:270,\u0022theMaxHealth\u0022:270,\u0022theFirstArmorHealth\u0022:1100,\u0022theFirstArmorMaxHealth\u0022:1100,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.1840231,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:1370,\u0022totalAllHealth\u0022:1370,\u0022currentFirstHealth\u0022:1370,\u0022totalFirstHealth\u0022:1370,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:270,\u0022maxHpBase\u0022:270,\u0022hp\u0022:270,\u0022maxHp\u0022:270,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:1100,\u0022armor\u0022:1100,\u0022armorMaxBase\u0022:1100,\u0022armorMax\u0022:1100}",
+    "typeId": 107
+  },
+  {
+    "capturedUtc": "2026-08-20T16:54:08.1509132Z",
+    "side": "zombie",
+    "statsJson": "{\u0022source\u0022:\u0022initHealth\u0022,\u0022type\u0022:108,\u0022typeName\u0022:\u0022IronPeaZombie\u0022,\u0022displayName\u0022:\u0022\\u94C1\\u6876\\u8C4C\\u8C46\\u50F5\\u5C38\u0022,\u0022ptr\u0022:\u00221BB1F117640\u0022,\u0022row\u0022:1,\u0022column\u0022:11,\u0022x\u0022:9.463301,\u0022y\u0022:-0.7278,\u0022col\u0022:9,\u0022theHealth\u0022:1350,\u0022theMaxHealth\u0022:1350,\u0022theFirstArmorHealth\u0022:0,\u0022theFirstArmorMaxHealth\u0022:0,\u0022theSecondArmorHealth\u0022:0,\u0022theSecondArmorMaxHealth\u0022:0,\u0022theAttackDamage\u0022:60,\u0022level\u0022:1,\u0022theArmor\u0022:0,\u0022takeDmgMultiplier\u0022:1,\u0022damageMultiplier\u0022:1,\u0022theSpeed\u0022:1,\u0022theOriginSpeed\u0022:1.244431,\u0022uniqueSpeed\u0022:1,\u0022currentAllHealth\u0022:1350,\u0022totalAllHealth\u0022:1350,\u0022currentFirstHealth\u0022:1350,\u0022totalFirstHealth\u0022:1350,\u0022isMindControlled\u0022:false,\u0022hpBase\u0022:1350,\u0022maxHpBase\u0022:1350,\u0022hp\u0022:1350,\u0022maxHp\u0022:1350,\u0022attackBase\u0022:50,\u0022attack\u0022:60,\u0022armorBase\u0022:0,\u0022armor\u0022:0,\u0022armorMaxBase\u0022:0,\u0022armorMax\u0022:0}",
+    "typeId": 108
+  }
+]

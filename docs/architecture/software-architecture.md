@@ -117,7 +117,7 @@ How the numeric subsystems relate: **ActorHub** is the shared substrate (only pl
 4. **Funnel guard** — rejects `mode=set` / absolute HP from overlay snapshots; dead ptr → skip, never throw; depth and `|amount|` caps; nested flush is a no-op (`guard-funnel-delta.ps1`).
 5. **Forward-only stats** — never `Xi = f(Y)`; persist Y0 + modifier state, never final `Y`. Y0 is immutable; progression flats ride `progression.bonus.*` only.
 6. **Modifier vs mutation never mix** — modifiers keep identity per `grantId` (exact withdraw); mutations sum.
-7. **Catalog discipline** — unknown derived channel / `statusId` / overlay key → reject, log, skip. Omni is additive-only (`omni × X` banned).
+7. **Catalog discipline** — unknown derived channel / `statusId` / overlay key → reject, log, skip. ~~Omni is additive-only (`omni × X` banned).~~ **Ban removed 2026-09-02 (owner)** — omni's combination rule is a **tunable**, not a prohibition; breadth is priced by magnitude in `numerics`. Default stays `omni + element`. See [element-hub-ssot.md](element-hub-ssot.md) §7.
 8. **Current HP is Unity-owned after spawn** — compose writes max/ATK; current HP is ratio-remapped only when max changes.
 9. **No Data in the hot plane** — `MatchRuntime`/`BoardProjection`/`CapPolicy` never reference `FusionRpg.Data`; injector is SQL-free; all SQL lives in Data (`guard-dal.ps1`).
 10. **No server round-trip on the hit path** — see §7.

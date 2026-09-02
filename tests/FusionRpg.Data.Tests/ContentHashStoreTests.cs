@@ -79,7 +79,7 @@ public class ContentHashStoreTests : IDisposable
         {
             Assert.True(s.UpsertAtom(Vitality()).IsOk);
             Assert.True(s.UpsertAtom(Searing()).IsOk);
-            Assert.True(s.UpsertRarity(new RarityRow("rare", 3, 2, 1, 3)).Ok);
+            Assert.True(s.UpsertRarity(new RarityRow("rare", 3, 2, 0, 1, 3)).Ok);
         }
 
         Assert.Equal(Hash(a), Hash(b));
@@ -199,7 +199,7 @@ public class ContentHashStoreTests : IDisposable
             s.UpsertAtom(Vitality());
             s.UpsertAtom(Searing());
             s.UpsertCurve("curve.x", CurveInput.Level, new[] { new CurvePoint(1, 1000) });
-            s.UpsertRarity(new RarityRow("rare", 3, 2, 1, 3));
+            s.UpsertRarity(new RarityRow("rare", 3, 2, 0, 1, 3));
             s.UpsertContainer(Blade());
         }
 
@@ -266,10 +266,10 @@ public class ContentHashStoreTests : IDisposable
     public void A_rarity_edit_moves_the_hash()
     {
         var s = NewStore();
-        s.UpsertRarity(new RarityRow("rare", 3, 2, 1, 3));
+        s.UpsertRarity(new RarityRow("rare", 3, 2, 0, 1, 3));
         var before = Hash(s);
 
-        s.UpsertRarity(new RarityRow("rare", 3, 3, 1, 3));
+        s.UpsertRarity(new RarityRow("rare", 3, 3, 0, 1, 3));
 
         Assert.NotEqual(before, Hash(s));
     }
@@ -283,7 +283,7 @@ public class ContentHashStoreTests : IDisposable
         s.UpsertAtom(Vitality());
         s.UpsertContainer(Blade());
         s.UpsertCurve("curve.x", CurveInput.Level, new[] { new CurvePoint(1, 1000) });
-        s.UpsertRarity(new RarityRow("rare", 3, 2, 1, 3));
+        s.UpsertRarity(new RarityRow("rare", 3, 2, 0, 1, 3));
 
         var stamp = s.ComputeContentHash();
 
@@ -306,7 +306,7 @@ public class ContentHashStoreTests : IDisposable
     {
         var s = NewStore();
         s.UpsertAtom(Vitality(amount: 45));
-        s.UpsertRarity(new RarityRow("rare", 3, 2, 1, 3));
+        s.UpsertRarity(new RarityRow("rare", 3, 2, 0, 1, 3));
         var before = s.ComputeContentHash();
 
         s.UpsertAtom(Vitality(amount: 46));

@@ -22,7 +22,7 @@ public static class StarPolicy
     public static int PerStarDefenseMilli => Tuning.PerStarDefenseMilli;
 
     public static int StarCap(DemonRarity rarity) =>
-        Tuning.StarCap.TryGetValue(rarity, out var v) ? v : Tuning.StarCap[DemonRarity.Legendary];
+        Tuning.StarCap.TryGetValue(rarity, out var v) ? v : Tuning.StarCap[DemonRarity.Almanac];
 
     /// <summary>Same-rarity sacrifices consumed to reach star n (n+1 curve).</summary>
     public static int SacrificesForStar(int targetStar)
@@ -32,9 +32,9 @@ public static class StarPolicy
         return targetStar + 1;
     }
 
-    /// <summary>Promotion: once per specimen, only at the star cap, never above legendary.</summary>
+    /// <summary>Promotion: once per specimen, only at the star cap, never above the top rung (Almanac).</summary>
     public static bool CanPromote(DemonRarity rarity, int star, bool promoted) =>
-        !promoted && rarity != DemonRarity.Legendary && star >= StarCap(rarity);
+        !promoted && !DemonRarityLadder.IsTopRung(rarity) && star >= StarCap(rarity);
 }
 
 /// <summary>One fusion's price: Souls fee + rarity-banded shards + result-element essences.</summary>

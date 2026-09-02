@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "kind": "container",
+  "entries": [
+    {
+      "id": "item.fx-passive-atk-flat",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-passive-atk-flat.t1" }
+      ],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.passive_atk_flat"
+      }
+    },
+    {
+      "id": "item.fx-butter-on-hit",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-butter-on-hit.t1" }
+      ],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.butter_on_hit"
+      }
+    },
+    {
+      "id": "item.fx-shield-grant",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-shield-grant.a.t1" },
+        { "atom": "atom.fx-shield-grant.b.t1" },
+        { "atom": "atom.fx-shield-grant.c.t1" }
+      ],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.shield_grant"
+      }
+    },
+    {
+      "id": "item.fx-cold-on-hit",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [
+        { "atom": "atom.fx-cold-on-hit.t1" }
+      ],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.cold_on_hit"
+      }
+    }
+  ]
+}

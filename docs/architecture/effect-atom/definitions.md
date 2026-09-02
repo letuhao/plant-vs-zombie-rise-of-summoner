@@ -161,6 +161,82 @@ An explicit `group` value overrides the default. **`pool_rolls ≤ count(distinc
 
 ---
 
+## 4a. Slot, affix bundle, resolution order, and RNG streams — normative (added 2026-09-01, `seed-to-concrete` T0.5)
+
+`effect-pipeline-ideal.md` §5 designed these against a real defect (`+15% all resistances` costing six
+of a rung-100 item's pool rolls because the element channel had no selection layer). This section
+promotes that design from ideal doc to **normative definition** — it wins over any spec, the same
+standing this document already has for everything above.
+
+### Slot
+
+A **slot** on a container pool row is a parameterised atom reference: it names a **domain** (e.g.
+`element`) and a **pick count**, rather than one concrete atom.
+
+```text
+slot E1 : domain = element, pick = 1
+atom ref: atom.elemental-power.$E1
+```
+
+The atom catalog, `atom_id` derivation, and its unique key are **unchanged** — only the container's
+*reference* becomes parameterised. A patterned ref must resolve for **every member of its domain** at
+load, so a missing element row is a load-time rejection, never a roll-time surprise.
+
+**This is a different `slot` from §6's `owner_key` value `slot` (a world-map construction slot).**
+Two different concepts share the word; §6 already warns not to share a type between them, and this
+section is the other half of that warning — a container pool's `slot` is a channel-selection
+parameter, never an `owner_key`.
+
+### Affix bundle
+
+The pool's roll unit is an **affix** — a named bundle of atom refs (which may include slots) that
+share the container's resolved slots and are drawn **together as one roll**. `effect_container_pool`
+rows reference affixes, not bare atoms.
+
+An affix is what makes *"master of fire and ice"* (four atoms, two families, two elements, the
+element correlated across both families) expressible as a single draw: today's one-atom-per-row pool
+cannot correlate two independent draws, and an affix bundle is the unit that carries the correlation.
+
+Validation follows the same law as every other entity in this document (§10): a bad affix — an
+unresolvable ref, a slot whose domain has no eligible member, a duplicate atom within the bundle — is
+rejected whole, with its id and reason, and does not enter the catalog.
+
+### Resolution order — normative, not the order the layers were designed in
+
+```text
+1. slots      pick concrete variants for every slot in the container/affix
+2. affixes    draw which affixes appear (the container's pool draw)
+3. atoms      expand each drawn affix's refs against the resolved slots
+4. tiers      pick tier within the container's min_tier/max_tier window
+5. values     roll each magnitude in its range (§2)
+```
+
+A slot must resolve before the concrete atom it names can be looked up, and a tier must resolve before
+the value range that atom's tier implies can be read — the dependency direction fixes the order. This
+is what makes a roll reproducible; leaving it implicit is how two runtimes disagree on the same seed.
+
+### RNG streams — one per layer, named
+
+Each layer of the resolution order draws from its **own** named stream, following the shipped pattern
+`SeededRng.DeriveStream(seed, "system:purpose")` (`FusionRoller.cs:27`, `fusion:traits` — already in
+production, not a new mechanism):
+
+| Layer | Stream name |
+|---|---|
+| slots | `affix.slot` |
+| affixes | `affix.draw` |
+| tiers | `affix.tier` |
+| values | `atom.value` |
+
+**Never one shared stream across layers.** If every layer drew from one stream, inserting a new layer
+later would shift every historical roll's consumption — `catalog_revision` (§5) detects a *content*
+change, not a change in how many numbers the resolver consumed, so it cannot protect against this.
+Separate streams make each layer's consumption independent of every other layer, which is what lets
+this program add a layer later without silently re-resolving every already-owned instance on replay —
+the reproducibility law two paragraphs above this one (§5's `roll_seed` contract) depends on it.
+
+---
+
 ## 5. Instances, ordering, determinism
 
 ### Instance identity and reproduction

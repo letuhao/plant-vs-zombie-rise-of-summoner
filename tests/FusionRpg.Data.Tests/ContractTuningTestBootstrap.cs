@@ -52,6 +52,9 @@ internal static class ContractTuningTestBootstrap
         StarPolicy.Configure(DefaultFusion);
         StatusPolicy.Configure(DefaultStatus);
         DerivedStatPolicy.Configure(DefaultDerivedStats);
+        // T4.7 step 2 / T4.8 (catalog-runtime) — behaviour-preserving; see the Core.Tests bootstrap's
+        // own identical comment.
+        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
         OverlayTuningHub.Configure(DefaultOverlay);
         StatsTuningHub.Configure(DefaultStats);
         ExpeditionTuningHub.Configure(DefaultExpeditions);
@@ -86,19 +89,21 @@ internal static class ContractTuningTestBootstrap
             [DemonPersonality.Calculating] = new(100, 90, 110),
             [DemonPersonality.Feral] = new(80, 150, 70),
         },
+        // Full 10-key coverage (seed-to-concrete T4.1) — ContractPolicy.BaseUpkeepPerDay/
+        // RitualPrice throw ArgumentOutOfRangeException on a missing key, no fallback.
         BaseUpkeepPerDay: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Common] = 2,
-            [DemonRarity.Rare] = 5,
-            [DemonRarity.Epic] = 12,
-            [DemonRarity.Legendary] = 25,
+            [DemonRarity.Chaff] = 2, [DemonRarity.Sprout] = 3, [DemonRarity.Grafted] = 4,
+            [DemonRarity.Cultivated] = 5, [DemonRarity.Fused] = 7, [DemonRarity.Chimeric] = 9,
+            [DemonRarity.Heirloom] = 12, [DemonRarity.Firstseed] = 16, [DemonRarity.Sunwoven] = 25,
+            [DemonRarity.Almanac] = 32,
         },
         RitualPriceSouls: new Dictionary<DemonRarity, long>
         {
-            [DemonRarity.Common] = 50,
-            [DemonRarity.Rare] = 100,
-            [DemonRarity.Epic] = 200,
-            [DemonRarity.Legendary] = 400,
+            [DemonRarity.Chaff] = 50, [DemonRarity.Sprout] = 65, [DemonRarity.Grafted] = 80,
+            [DemonRarity.Cultivated] = 100, [DemonRarity.Fused] = 130, [DemonRarity.Chimeric] = 160,
+            [DemonRarity.Heirloom] = 200, [DemonRarity.Firstseed] = 260, [DemonRarity.Sunwoven] = 400,
+            [DemonRarity.Almanac] = 500,
         });
 
     public static readonly LoamTuning DefaultLoam = new(
@@ -153,12 +158,14 @@ internal static class ContractTuningTestBootstrap
         Version: 1,
         Kill: new SoulKillTuning(KillDelta: 1),
         MatchEnd: new SoulMatchEndTuning(VictoryDelta: 100, DefeatDelta: 25),
+        // Full 10-key coverage (seed-to-concrete T4.1) — SoulEarnPolicy.DiscoveryDelta has
+        // no fallback for a missing key.
         DiscoveryDelta: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Common] = 25,
-            [DemonRarity.Rare] = 75,
-            [DemonRarity.Epic] = 200,
-            [DemonRarity.Legendary] = 500,
+            [DemonRarity.Chaff] = 25, [DemonRarity.Sprout] = 42, [DemonRarity.Grafted] = 58,
+            [DemonRarity.Cultivated] = 75, [DemonRarity.Fused] = 115, [DemonRarity.Chimeric] = 160,
+            [DemonRarity.Heirloom] = 200, [DemonRarity.Firstseed] = 350, [DemonRarity.Sunwoven] = 500,
+            [DemonRarity.Almanac] = 750,
         },
         Codex: new SoulCodexTuning(HalfMilestone: 500, FullMilestone: 1500));
 
@@ -169,12 +176,14 @@ internal static class ContractTuningTestBootstrap
         AuraClampMilli: 150,
         PerStarMilli: 10,
         PThetaKMilli: 220, // matches the real shipped patron.v1.json (aura-skill T22)
+        // Full 10-key coverage (seed-to-concrete T4.1) — PatronPolicy.RarityBaseMilli's
+        // fallback reads [DemonRarity.Almanac], which must itself be present.
         RarityBaseMilli: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Common] = 20,
-            [DemonRarity.Rare] = 30,
-            [DemonRarity.Epic] = 45,
-            [DemonRarity.Legendary] = 60,
+            [DemonRarity.Chaff] = 20, [DemonRarity.Sprout] = 24, [DemonRarity.Grafted] = 27,
+            [DemonRarity.Cultivated] = 30, [DemonRarity.Fused] = 34, [DemonRarity.Chimeric] = 38,
+            [DemonRarity.Heirloom] = 45, [DemonRarity.Firstseed] = 50, [DemonRarity.Sunwoven] = 60,
+            [DemonRarity.Almanac] = 70,
         });
 
     public static readonly ShieldTuning DefaultShield = new(
@@ -214,20 +223,31 @@ internal static class ContractTuningTestBootstrap
         Version: 1,
         PerStarPowerMilli: 30,
         PerStarDefenseMilli: 30,
+        // Full 10-key coverage (seed-to-concrete T4.1) — StarPolicy.StarCap's own fallback
+        // reads Tuning.StarCap[DemonRarity.Almanac] when a rarity is missing, so Almanac itself
+        // must always be present or that fallback throws too (found exactly this way: a post-
+        // promotion star-merge test hit Sprout, which fell back to Almanac, which wasn't here).
         StarCap: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Common] = 3,
-            [DemonRarity.Rare] = 4,
-            [DemonRarity.Epic] = 5,
-            [DemonRarity.Legendary] = 5,
+            [DemonRarity.Chaff] = 3, [DemonRarity.Sprout] = 3, [DemonRarity.Grafted] = 3,
+            [DemonRarity.Cultivated] = 4, [DemonRarity.Fused] = 4, [DemonRarity.Chimeric] = 4,
+            [DemonRarity.Heirloom] = 5, [DemonRarity.Firstseed] = 5, [DemonRarity.Sunwoven] = 5,
+            [DemonRarity.Almanac] = 5,
         },
         StarMergeCost: new FusionCostTuning(Souls: 50, ShardCount: 1, EssenceCount: 1),
         PromotionCost: new FusionCostTuning(Souls: 200, ShardCount: 3, EssenceCount: 3),
         RecipeCost: new Dictionary<DemonRarity, RecipeCostTuning>
         {
-            [DemonRarity.Rare] = new(Souls: 150, ShardRarity: DemonRarity.Common, ShardCount: 2, EssenceCount: 2),
-            [DemonRarity.Epic] = new(Souls: 400, ShardRarity: DemonRarity.Rare, ShardCount: 3, EssenceCount: 4),
-            [DemonRarity.Legendary] = new(Souls: 1000, ShardRarity: DemonRarity.Epic, ShardCount: 4, EssenceCount: 8),
+            [DemonRarity.Cultivated] = new(Souls: 150, ShardRarity: DemonRarity.Chaff, ShardCount: 2, EssenceCount: 2),
+            [DemonRarity.Heirloom] = new(Souls: 400, ShardRarity: DemonRarity.Cultivated, ShardCount: 3, EssenceCount: 4),
+            [DemonRarity.Sunwoven] = new(Souls: 1000, ShardRarity: DemonRarity.Heirloom, ShardCount: 4, EssenceCount: 8),
+        },
+        SlotsByRarity: new Dictionary<DemonRarity, int>
+        {
+            [DemonRarity.Chaff] = 1, [DemonRarity.Sprout] = 1, [DemonRarity.Grafted] = 1,
+            [DemonRarity.Cultivated] = 2, [DemonRarity.Fused] = 2, [DemonRarity.Chimeric] = 2,
+            [DemonRarity.Heirloom] = 2, [DemonRarity.Firstseed] = 3, [DemonRarity.Sunwoven] = 3,
+            [DemonRarity.Almanac] = 3,
         });
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(
@@ -328,9 +348,10 @@ internal static class ContractTuningTestBootstrap
             ["element-focus"] = new(CostPerPull: 120, CostPerTen: 1080, FocusWeightMultiplier: 3.0),
         },
         Roller: new RollerTuning(
-            EpicHardPity: 25, LegendarySoftStart: 41, LegendaryHardPity: 55,
-            LegendaryBasePerMille: 10, LegendaryRampPerMille: 60, EpicPerMille: 50,
-            RarePerMille: 200, ShinyOneIn: 64));
+            HeirloomHardPity: 25, SunwovenSoftStart: 41, SunwovenHardPity: 55,
+            SunwovenBasePerMille: 8, SunwovenRampPerMille: 60, AlmanacPerMille: 2,
+            HeirloomPerMille: 25, FirstseedPerMille: 15, ChimericPerMille: 40, FusedPerMille: 60,
+            CultivatedPerMille: 100, GraftedPerMille: 150, SproutPerMille: 250, ShinyOneIn: 64));
 
     public static readonly WorldAiTuning DefaultAi = new(
         SchemaVersion: 1, Version: 1,

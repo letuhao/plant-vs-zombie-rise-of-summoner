@@ -69,10 +69,10 @@ public static class DemonEndpoints
                 }),
                 pity = new
                 {
-                    pullsSinceEpic = pity.PullsSinceEpic,
-                    pullsSinceLegendary = pity.PullsSinceLegendary,
-                    epicGuaranteeAt = SummonRoller.EpicHardPity,
-                    legendaryGuaranteeAt = SummonRoller.LegendaryHardPity
+                    pullsSinceHeirloom = pity.PullsSinceHeirloom,
+                    pullsSinceSunwoven = pity.PullsSinceSunwoven,
+                    heirloomGuaranteeAt = SummonRoller.HeirloomHardPity,
+                    sunwovenGuaranteeAt = SummonRoller.SunwovenHardPity
                 },
                 balance = store.GetSoulBalance(playerId)
             });
@@ -105,7 +105,7 @@ public static class DemonEndpoints
             {
                 replayed = outcome!.Replayed,
                 specimens = outcome.Specimens,
-                pity = new { pullsSinceEpic = outcome.Pity.PullsSinceEpic, pullsSinceLegendary = outcome.Pity.PullsSinceLegendary },
+                pity = new { pullsSinceHeirloom = outcome.Pity.PullsSinceHeirloom, pullsSinceSunwoven = outcome.Pity.PullsSinceSunwoven },
                 balance = outcome.Balance,
                 discoverySouls = outcome.DiscoverySouls
             });

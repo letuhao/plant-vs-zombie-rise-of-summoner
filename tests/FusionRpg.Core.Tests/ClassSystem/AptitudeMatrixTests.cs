@@ -3,6 +3,7 @@ using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
+using System.Linq;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.ClassSystem;
@@ -15,7 +16,7 @@ namespace FusionRpg.Core.Tests.ClassSystem;
 /// <c>MinimalTuning</c>; <c>AptitudeSubsystemTests</c>' <c>MightOnlyTuning</c>). The twelve are covered
 /// elsewhere only by <i>balance</i> instruments — <c>DominanceGuardTests</c>' twelve-corner shape,
 /// <c>CombatSimJsonEmitTests</c>' twelve gradient rows — which measure win-share, never a channel value.
-/// Before this file, <b>nothing asserted that edge N of 486 resolves at all</b>, and the "twelve
+/// Before this file, <b>nothing asserted that edge N of 526 resolves at all</b>, and the "twelve
 /// aptitude matrix" this program cited as proof was a live manual probe recorded as prose. That is the
 /// same shape of defect as the write-gate bug: composed correctly, dropped silently, found by a human
 /// playing the game rather than by the suite.</para>
@@ -54,8 +55,31 @@ public class AptitudeMatrixTests
             "could not locate repo root (scripts/guard-class-system.ps1 not found above " + AppContext.BaseDirectory + ")");
     }
 
-    static string ShippedPath() => Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v2.json");
+
+    /// <summary>The LIVE shipped aptitude tuning — highest `data/tuning/aptitudes.v*.json`, never a
+    /// pinned literal. Pinning meant every version bump edited a test that only ever wanted "whatever
+    /// ships"; v3/v4 (2026-09-02) broke several at once that way. Tests that deliberately pin an OLD
+    /// version as a permanent regression check (TerminationGuardTests against v1) keep their literal —
+    /// those mean a specific file, not the current one.</summary>
+    static string LatestAptitudesPath(string repoRoot)
+    {
+        var dir = Path.Combine(repoRoot, "data", "tuning");
+        var best = Directory.GetFiles(dir, "aptitudes.v*.json")
+            .Select(f => (Path: f, V: int.TryParse(
+                Path.GetFileNameWithoutExtension(f).Split(".v").Last(), out var v) ? v : -1))
+            .Where(x => x.V >= 0).OrderByDescending(x => x.V).FirstOrDefault();
+        if (best.Path is null) throw new InvalidOperationException("no data/tuning/aptitudes.v*.json under " + dir);
+        return best.Path;
+    }
+
+    static string ShippedPath() => LatestAptitudesPath(FindRepoRoot());
     static string ShippedJson() => File.ReadAllText(ShippedPath());
+
+    static long RoundedScale(long kMilli, long scaleMilli)
+    {
+        var product = checked(kMilli * scaleMilli);
+        return (product + (product >= 0 ? 500 : -500)) / 1000;
+    }
 
     /// <summary>One edge as this test reads it — raw coefficient, plus the two selections
     /// (<paramref name="Mode"/>, <paramref name="EffectiveKMilli"/>) recomputed here rather than taken
@@ -122,12 +146,17 @@ public class AptitudeMatrixTests
             string dial;
             if (recoveryFamilies.Any(f => channel.StartsWith(f, StringComparison.Ordinal)))
             {
-                effective = checked(kMilli * recoveryScale) / 1000;
+                // Round-half-away-from-zero, mirroring AptitudeResolver.ScaleMilli (2026-09-02). It
+                // truncated, which zeroed any recovery edge with kMilli <= 2 at scale 374 and was the
+                // 22% Core-vs-POC divergence ResolverMatchesSimulatorTests reported on
+                // resource.regen.poise. This file computes the value INDEPENDENTLY, so the rule has to
+                // move with the implementation or it stops being an independent check of the same rule.
+                effective = RoundedScale(kMilli, recoveryScale);
                 dial = "recovery";
             }
             else if (mitigationFamilies.Any(f => channel.StartsWith(f, StringComparison.Ordinal)))
             {
-                effective = checked(kMilli * mitigationScale) / 1000;
+                effective = RoundedScale(kMilli, mitigationScale);
                 dial = "mitigation";
             }
             else
@@ -147,14 +176,14 @@ public class AptitudeMatrixTests
     static AptitudeTuning Shipped() => AptitudeTuningLoader.Parse(ShippedJson());
 
     /// <summary>Fund exactly one aptitude, so its share is 1.0 and every OTHER aptitude's edges are
-    /// correctly absent. Twelve of these cover all 486 edges with no share arithmetic in the way.</summary>
+    /// correctly absent. Twelve of these cover all 526 edges with no share arithmetic in the way.</summary>
     static AptitudeAllocation SoleAllocation(string aptitudeId) =>
         AptitudeAllocation.Single(AllocationScope.Commander, aptitudeId, 100);
 
     // ── 1. the matrix itself ─────────────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// <b>The test the owner asked for.</b> Twelve aptitudes × their declared edges = all 486, each
+    /// <b>The test the owner asked for.</b> Twelve aptitudes × their declared edges = all 518, each
     /// resolved and compared against a value computed here from the raw file, at two different Θ so a
     /// magnitude edge misread as a contest edge (or the reverse) cannot pass.
     ///
@@ -165,7 +194,7 @@ public class AptitudeMatrixTests
     [Theory]
     [InlineData(10)]
     [InlineData(74)]
-    public void Every_one_of_the_486_shipped_edges_resolves_to_its_independently_computed_value(int theta)
+    public void Every_one_of_the_526_shipped_edges_resolves_to_its_independently_computed_value(int theta)
     {
         var (raw, spanMilli, _, _) = ParseIndependently();
         var tuning = Shipped();
@@ -212,8 +241,8 @@ public class AptitudeMatrixTests
             string.Join(Environment.NewLine, failures.Take(25)));
 
         // The whole shipped set was actually exercised — not a subset that silently shrank.
-        Assert.Equal(486, raw.Count);
-        Assert.Equal(486, checkedEdges);
+        Assert.Equal(526, raw.Count);
+        Assert.Equal(526, checkedEdges);
     }
 
     /// <summary>All twelve aptitude ids are computed from the file and cross-checked against the
@@ -297,7 +326,7 @@ public class AptitudeMatrixTests
         // would otherwise pass this test vacuously.
         Assert.True(magnitudeSeen > 0 && contestSeen > 0,
             $"expected both read modes in the shipped set (magnitude={magnitudeSeen}, contest={contestSeen})");
-        Assert.Equal(486, magnitudeSeen + contestSeen);
+        Assert.Equal(526, magnitudeSeen + contestSeen);
     }
 
     /// <summary>The <c>share^γ</c> branch, which share = 1.0 deliberately bypasses everywhere else in
@@ -570,7 +599,7 @@ public class AptitudeMatrixTests
             total += battle.Count;
         }
 
-        Assert.Equal(486, total);
+        Assert.Equal(526, total);
     }
 
     // ── 8. the reader-less edges, cross-checked from a real resolve ──────────────────────────────
@@ -591,7 +620,7 @@ public class AptitudeMatrixTests
     /// gaining a reader, or an edge quietly being added to one that has none.</para>
     /// </summary>
     [Fact]
-    public void The_eighteen_reader_less_edges_still_resolve_and_the_count_matches_meta_measurable()
+    public void The_reader_less_edges_still_resolve_and_the_count_matches_meta_measurable()
     {
         var (raw, _, _, _) = ParseIndependently();
 
@@ -614,7 +643,7 @@ public class AptitudeMatrixTests
 
         Assert.Equal(int.Parse(m.Groups[1].Value), readerLess.Count);
         Assert.Equal(int.Parse(m.Groups[2].Value), raw.Count);
-        Assert.Equal(18, readerLess.Count);
+        Assert.Equal(26, readerLess.Count);
 
         // ...and every one of them genuinely resolves. Reader-less is NOT the same as inert: the points
         // are spent, the value is composed, and nothing downstream consumes it.

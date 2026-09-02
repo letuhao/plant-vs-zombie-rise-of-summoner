@@ -2,6 +2,7 @@ using System.Text.Json;
 using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Power;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
 
@@ -392,6 +393,56 @@ public static class DebugEndpoints
                 EffectActions.ApplyResourceDelta
             }
         }));
+
+        // T5.7 / `dev-reforge` (spec-dev-reforge.md, effect-pipeline module 10; also
+        // spec-player-materialise.md §6, A4): re-derive a player's whole species roster against the
+        // CURRENT catalog, same world seed — a debug-only shortcut for observing a retuned affix
+        // without a new profile. Pure DAL, no injector round trip. Gated the same way every other
+        // `/api/debug/*` route is: Program.cs only calls `app.MapDebug()` on a loopback bind (or
+        // FUSIONRPG_DEBUG_REMOTE=1) — this endpoint lives in the SAME route group, not a second gate.
+        g.MapPost("/reforge-world", (JsonElement? body, RpgStore store, EventIngest ingest) =>
+        {
+            var b = BodyOrEmpty(body);
+            var playerId = b.ValueKind == JsonValueKind.Object
+                && b.TryGetProperty("playerId", out var p) && p.TryGetInt64(out var pid)
+                ? pid : store.GetCurrentPlayerId();
+            var thetaContent = IntProp(b, "thetaContent", 0);
+
+            // "before" — the revision this player's roster was last rolled against, read BEFORE the
+            // reforge touches anything (0 for a player with no roster yet). spec-dev-reforge.md's own
+            // guardrail: log before/after so a dev can see what a retune actually changed.
+            var beforeRows = store.ListPlayerSpecies(playerId);
+            var catalogRevisionBefore = beforeRows.Count == 0 ? 0 : beforeRows.Max(r => r.CatalogRevision);
+
+            var outcome = store.ReforgePlayerSpecies(playerId, thetaContent, PowerTuningHub.Tuning);
+            if (!outcome.IsOk)
+                return Results.Conflict(new { ok = false, error = outcome.Rejection.ToString() });
+
+            ingest.Enqueue(new EventEnvelope
+            {
+                T = DateTime.UtcNow.ToString("o"),
+                Kind = "debug.reforge-world",
+                PlayerId = playerId,
+                Payload = new Dictionary<string, object>
+                {
+                    ["catalogRevisionBefore"] = catalogRevisionBefore,
+                    ["catalogRevisionAfter"] = outcome.CatalogRevision,
+                    ["reforged"] = outcome.Written,
+                    ["unchanged"] = outcome.AlreadyPresent,
+                }
+            });
+
+            return Results.Ok(new
+            {
+                ok = true,
+                playerId,
+                catalogRevisionBefore,
+                catalogRevisionAfter = outcome.CatalogRevision,
+                reforged = outcome.Written,
+                unchanged = outcome.AlreadyPresent,
+                elapsedMs = outcome.ElapsedMs
+            });
+        });
 
         g.MapPost("/spawn-extra", async (JsonElement? body, RpgStore store, IHubContext<RpgHub> hub, InjectorCommandInbox inbox) =>
         {

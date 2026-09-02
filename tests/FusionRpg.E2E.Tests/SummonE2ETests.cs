@@ -45,7 +45,7 @@ public class SummonE2ETests : IAsyncLifetime
         var balance = state.GetProperty("balance").GetProperty("balance").GetInt64();
         var discovery = outcome.GetProperty("discoverySouls").GetInt64();
         Assert.Equal(5000 - 900 + discovery, balance);
-        Assert.Equal(25, state.GetProperty("pity").GetProperty("epicGuaranteeAt").GetInt32());
+        Assert.Equal(25, state.GetProperty("pity").GetProperty("heirloomGuaranteeAt").GetInt32());
 
         // Replay: identical instance ids, no further spend.
         var replay = await _http.PostAsJsonAsync("/api/demons/summon",

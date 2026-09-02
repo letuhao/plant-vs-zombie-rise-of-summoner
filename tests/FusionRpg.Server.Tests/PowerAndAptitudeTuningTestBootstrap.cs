@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Aura;
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -28,6 +29,9 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         DerivedStatPolicy.Configure(DefaultDerivedStats);
         RungPolicy.Configure(DefaultRungs);
         AuraTuningHub.Configure(DefaultAura);
+        // T4.7 step 2 / T4.8 (catalog-runtime) — behaviour-preserving; see the Core.Tests bootstrap's
+        // own identical comment (tests/FusionRpg.Core.Tests/ContractTuningTestBootstrap.cs).
+        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
     }
 
     /// <summary>

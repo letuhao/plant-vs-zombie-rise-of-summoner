@@ -15,6 +15,18 @@ Usage (repo root):
     python tools/tuning/publish.py contracts personalityRates.loyal.gainPct=130 slots.maxSlots=64
     python tools/tuning/publish.py contracts --label "spring balance pass" loyalty.winGain=20
     python tools/tuning/publish.py aptitudes "edges[channel=resource.regen.hp,source=Vigor].kMilli=83"
+    python tools/tuning/publish.py aptitudes --add-edge "channel=resource.max.poise,source=Bulwark,kMilli=28000"
+
+`--add-edge` is the one path that ADDS rather than edits, and it exists because a coverage gap could
+not be closed otherwise: `set` refuses to invent a key by design, and the file forbids hand-editing, so
+a resource family that was never given a row had no legal way to gain one (resource-symmetry audit,
+2026-09-02). It is deliberately narrow — it appends one `{channel, source, kMilli}` object to `edges`
+and refuses anything that is not filling in a KNOWN family for a KNOWN source:
+
+  * the channel's family must already appear on some existing edge — a new MEMBER of `resource.max.*`
+    is allowed, a brand-new family is not (that is a schema change, not a balance one);
+  * the source must already be a source somewhere in `edges`;
+  * `(channel, source)` must not already exist — use the `set` path to change a value.
 
 Each `key=value` is a dotted path into the JSON document (matching its own nesting — see
 data/tuning/contracts.v1.json). The value is parsed as int, then float, then bool, then left as a
@@ -151,10 +163,77 @@ def set_path(doc, dotted_key, value):
     return old
 
 
+
+def add_edge(doc, spec_raw):
+    """Append one {channel, source, kMilli} edge. Refuses rather than guesses, matching set_path."""
+    spec = _parse_selector(spec_raw)
+    required = {"channel", "source", "kMilli"}
+    if set(spec) != required:
+        raise KeyError("--add-edge needs exactly channel=, source= and kMilli= (got: %s)"
+                       % ", ".join(sorted(spec)) or "nothing")
+    if not isinstance(spec["kMilli"], int):
+        raise KeyError("kMilli must be an integer (got %r)" % (spec["kMilli"],))
+
+    edges = doc.get("edges")
+    if not isinstance(edges, list):
+        raise KeyError("'edges' is not an array in this document — --add-edge is aptitudes-shaped")
+
+    real = [e for e in edges if isinstance(e, dict) and "channel" in e]
+    channel, source = spec["channel"], spec["source"]
+
+    if any(e.get("channel") == channel and e.get("source") == source for e in real):
+        raise KeyError("edge (channel=%s, source=%s) already exists — use the set path to change its "
+                       "value, this flag only fills gaps" % (channel, source))
+
+    known_sources = {e.get("source") for e in real}
+    if source not in known_sources:
+        raise KeyError("'%s' is not a source anywhere in edges — refusing to invent one" % source)
+
+    family = channel.rsplit(".", 1)[0]
+    known_families = {e["channel"].rsplit(".", 1)[0] for e in real}
+    if family not in known_families:
+        raise KeyError("'%s' is a NEW channel family, not a new member of an existing one — that is a "
+                       "schema change, not a balance one; refusing" % family)
+
+    edges.append({"channel": channel, "source": source, "kMilli": spec["kMilli"]})
+    return channel, source, spec["kMilli"]
+
+
+
+def rename_key(doc, spec_raw):
+    """Rename one dict key in place, preserving insertion order. Refuses rather than guesses."""
+    # `container.path:oldLeaf=newLeaf`. The COLON matters: a tuning key is very often itself dotted
+    # (`familyRead."combat.heal.power"`), so a plain dotted path cannot say where the container ends
+    # and the leaf begins. Everything after the colon is one literal key name, dots included.
+    if "=" not in spec_raw or ":" not in spec_raw.split("=", 1)[0]:
+        raise KeyError("--rename-key needs container.path:oldLeaf=newLeaf (got %r)" % spec_raw)
+    lhs, new_leaf = spec_raw.split("=", 1)
+    container_path, last = lhs.split(":", 1)
+    node = doc
+    for seg in split_path(container_path):
+        node, _ = _step(node, container_path, seg)
+    if not isinstance(node, dict) or last not in node:
+        raise KeyError("'%s' has no key '%s' — refusing to rename a key that is not there" % (container_path, last))
+    if new_leaf in node:
+        raise KeyError("'%s' already exists alongside '%s' — refusing to overwrite it" % (new_leaf, last))
+    rebuilt = {}
+    for k, v in node.items():
+        rebuilt[new_leaf if k == last else k] = v
+    node.clear()
+    node.update(rebuilt)
+    return last, new_leaf
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("domain")
-    ap.add_argument("sets", nargs="+", metavar="key=value")
+    ap.add_argument("sets", nargs="*", metavar="key=value")
+    ap.add_argument("--add-edge", action="append", default=[], dest="add_edges",
+                    metavar="channel=..,source=..,kMilli=..",
+                    help="append one edge to `edges` (fills a coverage gap; refuses duplicates and unknown families)")
+    ap.add_argument("--rename-key", action="append", default=[], dest="renames",
+                    metavar="container.path:oldLeaf=newLeaf",
+                    help="rename one dict key in place (order preserved); refuses if absent or if the new name is taken")
     ap.add_argument("--label", default="", help="short human note, stored in _meta.rebalanceLabel")
     a = ap.parse_args()
 
@@ -170,6 +249,15 @@ def main():
     doc = json.loads(io.open(src_path, encoding="utf-8").read())
 
     changes = []
+    for spec in a.renames:
+        try:
+            old_leaf, new_leaf = rename_key(doc, spec)
+        except KeyError as e:
+            print("refused: %s" % e, file=sys.stderr)
+            return 1
+        changes.append((spec, old_leaf, new_leaf))
+        print("  %-52s RENAMED -> %s" % (old_leaf, new_leaf))
+
     for kv in a.sets:
         split = split_kv(kv)
         if split is None:
@@ -187,6 +275,16 @@ def main():
         else:
             changes.append((key, old, value))
             print("  %-40s %r -> %r" % (key, old, value))
+
+    # AFTER sets/renames on purpose: a rename can create the family an --add-edge then extends.
+    for spec in a.add_edges:
+        try:
+            ch, src, k = add_edge(doc, spec)
+        except KeyError as e:
+            print("refused: %s" % e, file=sys.stderr)
+            return 1
+        changes.append((("edges[channel=%s,source=%s].kMilli" % (ch, src)), None, k))
+        print("  %-52s ADDED (%r)" % ("%s / %s" % (ch, src), k))
 
     if not changes:
         print("no changes — nothing published")

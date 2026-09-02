@@ -4,6 +4,7 @@ using FusionRpg.Contracts;
 using FusionRpg.Data.Abstractions;
 using FusionRpg.Data.Policies;
 using FusionRpg.Data.Sqlite;
+using FusionRpg.Data.Sqlite.Migrations;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -49,13 +50,17 @@ public sealed partial class RpgStore : IRpgDb
         LegacyMonoMigrator.HealOrphanMediaTables(_dataDir, Console.Out);
 
         using (var db = Open())
+        {
             EnsureHotSchema(db);
+            ShardRungs.Migrate(db, Console.Out);
+        }
         using (var media = OpenMedia())
             EnsureMediaSchema(media);
 
         using (var db = Open())
         {
             SeedPlayerIfEmpty(db);
+            BackfillWorldSeedsUnlocked(db);
             EnsurePvzStatsRevisionForAllPlayers(db);
             EnsurePvzActivityRevisionForAllPlayers(db);
             var pid = GetCurrentPlayerIdUnlocked(db);
@@ -85,7 +90,8 @@ public sealed partial class RpgStore : IRpgDb
             CREATE TABLE IF NOT EXISTS players (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               name TEXT NOT NULL,
-              created_utc TEXT NOT NULL
+              created_utc TEXT NOT NULL,
+              world_seed INTEGER NOT NULL DEFAULT 0
             );
             CREATE TABLE IF NOT EXISTS settings (
               key TEXT PRIMARY KEY,
@@ -223,6 +229,12 @@ public sealed partial class RpgStore : IRpgDb
             );
             PRAGMA journal_mode=WAL;
             """);
+        // world-seed (T5.1, spec-world-seed.md) — "the whole save"'s own per-player root. Created
+        // once at player creation, never regenerated; a legacy row (pre-dating this column, or
+        // SeedPlayerIfEmpty's own direct INSERT) defaults to 0, which BackfillWorldSeeds treats as
+        // the sentinel for "not yet assigned" and fixes in Init(), never left at 0 permanently — two
+        // players sharing 0 would derive identical rosters.
+        EnsureColumn(db, "players", "world_seed", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "almanac_seed_enrichment", "description_text", "TEXT");
         EnsureColumn(db, "events", "player_id", "INTEGER");
         EnsureColumn(db, "events", "run_id", "INTEGER");
@@ -613,6 +625,12 @@ public sealed partial class RpgStore : IRpgDb
         EnsureLoadoutSchemaUnlocked(db);
         // rpg_player_commander — default lawn commander (commander-surface default-persistence).
         EnsurePlayerCommanderSchemaUnlocked(db);
+        // demon_species + demon_species_magnitude — species-generator's committed output, imported
+        // (spec-species-generator.md, demon-seed module 12/13, T4.6).
+        EnsureSpeciesSchemaUnlocked(db);
+        // player_species — the rolled roster per player, append-only (spec-player-materialise.md,
+        // demon-seed module 16, T5.6).
+        EnsurePlayerSpeciesSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)
@@ -765,7 +783,7 @@ public sealed partial class RpgStore : IRpgDb
     {
         using var db = Open();
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT id, name, created_utc FROM players ORDER BY id;";
+        cmd.CommandText = "SELECT id, name, created_utc, world_seed FROM players ORDER BY id;";
         var list = new List<PlayerDto>();
         using var r = cmd.ExecuteReader();
         while (r.Read())
@@ -778,9 +796,14 @@ public sealed partial class RpgStore : IRpgDb
         var trimmed = string.IsNullOrWhiteSpace(name) ? "Player" : name.Trim();
         using var db = Open();
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "INSERT INTO players(name, created_utc) VALUES($n,$t); SELECT last_insert_rowid();";
+        cmd.CommandText =
+            "INSERT INTO players(name, created_utc, world_seed) VALUES($n,$t,$s); SELECT last_insert_rowid();";
         cmd.Parameters.AddWithValue("$n", trimmed);
         cmd.Parameters.AddWithValue("$t", DateTime.UtcNow.ToString("o"));
+        // world-seed (T5.1): rolled once, here, at player creation (spec-world-seed.md's own
+        // "created at player creation... never regenerated"). [1, long.MaxValue) excludes the 0
+        // sentinel BackfillWorldSeedsUnlocked treats as "not yet assigned."
+        cmd.Parameters.AddWithValue("$s", System.Random.Shared.NextInt64(1, long.MaxValue));
         var id = (long)(cmd.ExecuteScalar() ?? 0L);
         EnsurePvzStatsRevisionUnlocked(db, id);
         EnsurePvzActivityRevisionUnlocked(db, id);
@@ -3072,13 +3095,14 @@ public sealed partial class RpgStore : IRpgDb
     {
         Id = r.GetInt64(0),
         Name = r.GetString(1),
-        CreatedUtc = r.GetString(2)
+        CreatedUtc = r.GetString(2),
+        WorldSeed = r.GetInt64(3),
     };
 
     static PlayerDto? GetPlayerUnlocked(SqliteConnection db, long id)
     {
         using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT id, name, created_utc FROM players WHERE id=$id;";
+        cmd.CommandText = "SELECT id, name, created_utc, world_seed FROM players WHERE id=$id;";
         cmd.Parameters.AddWithValue("$id", id);
         using var r = cmd.ExecuteReader();
         return r.Read() ? ReadPlayer(r) : null;
@@ -3109,6 +3133,35 @@ public sealed partial class RpgStore : IRpgDb
         }
         if (GetSettingUnlocked(db, "current_player_id") is null)
             PutSettingUnlocked(db, "current_player_id", "1");
+    }
+
+    /// <summary>Assigns a real, distinct world seed to every player row still at the 0 sentinel — a
+    /// legacy row from before this column existed, or one <see cref="SeedPlayerIfEmpty"/> just
+    /// inserted directly (bypassing <see cref="CreatePlayer"/>'s own seed generation). Never touches
+    /// a player that already has one, matching Q5's "existing rolls frozen forever" rule one layer up
+    /// — a seed change here would silently re-roll everything downstream that already derived from it.</summary>
+    static void BackfillWorldSeedsUnlocked(SqliteConnection db)
+    {
+        var pending = new List<long>();
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = "SELECT id FROM players WHERE world_seed = 0;";
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) pending.Add(r.GetInt64(0));
+        }
+
+        foreach (var id in pending)
+        {
+            // 0 is excluded from the range (never re-produce the sentinel) and NextInt64's own upper
+            // bound is exclusive, so this draws from [1, long.MaxValue) — a real, never-repeating
+            // 63-bit-ish space, plenty for "the whole save"'s own identity.
+            var seed = System.Random.Shared.NextInt64(1, long.MaxValue);
+            using var upd = db.CreateCommand();
+            upd.CommandText = "UPDATE players SET world_seed = $s WHERE id = $id;";
+            upd.Parameters.AddWithValue("$s", seed);
+            upd.Parameters.AddWithValue("$id", id);
+            upd.ExecuteNonQuery();
+        }
     }
 
     static string? GetSettingUnlocked(SqliteConnection db, string key)

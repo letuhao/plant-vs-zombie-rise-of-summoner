@@ -78,7 +78,7 @@ public sealed class OverlayCombatMath : ICombatMath
     {
         var attackerLess = string.IsNullOrWhiteSpace(packet.ActorPtr);
         var healer = _resolve(packet.ActorPtr, attackerLess);
-        var healPower = healer.Derived.Get(Stats.Derived.DerivedStatChannels.CombatHealPower);
+        var healPower = healer.Derived.Get(Stats.Derived.DerivedStatChannels.ResourceRestore("hp"));
 
         // HealNeverNegative: an overlay heal can never become damage. heal.power is registered
         // uncapped (a magnitude, PS-8) but nothing forbids an authored negative modifier reaching it

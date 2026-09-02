@@ -13,7 +13,8 @@ public sealed record FusionTuning(
     int PerStarPowerMilli, int PerStarDefenseMilli,
     IReadOnlyDictionary<DemonRarity, int> StarCap,
     FusionCostTuning StarMergeCost, FusionCostTuning PromotionCost,
-    IReadOnlyDictionary<DemonRarity, RecipeCostTuning> RecipeCost);
+    IReadOnlyDictionary<DemonRarity, RecipeCostTuning> RecipeCost,
+    IReadOnlyDictionary<DemonRarity, int> SlotsByRarity);
 
 public sealed class FusionTuningRejection : Exception
 {
@@ -48,10 +49,14 @@ public static class FusionTuningLoader
             var starMergeCost = Cost(root, "starMergeCost");
             var promotionCost = Cost(root, "promotionCost");
 
+            // Eligible-for-recipes is DemonRecipeCatalog's own eligibility floor (Cultivated and
+            // up, spec-rarity-migration.md §3's translation of the old ">= Rare") — one source of
+            // truth, never a second hardcoded list here.
             var recipeEl = Obj(root, "recipeCost", "$");
             var recipeCost = new Dictionary<DemonRarity, RecipeCostTuning>();
-            foreach (var rarity in new[] { DemonRarity.Rare, DemonRarity.Epic, DemonRarity.Legendary })
+            foreach (var rarity in DemonRarityLadder.All)
             {
+                if (!DemonRarityLadder.AtLeast(rarity, DemonRecipeCatalog.OutputEligibilityFloor)) continue;
                 var key = rarity.ToString().ToLowerInvariant();
                 var el = Obj(recipeEl, key, "recipeCost");
                 recipeCost[rarity] = new RecipeCostTuning(
@@ -61,8 +66,13 @@ public static class FusionTuningLoader
                     EssenceCount: Int(el, "essenceCount", $"recipeCost.{key}"));
             }
 
+            var slotsEl = Obj(root, "slotsByRarity", "$");
+            var slotsByRarity = new Dictionary<DemonRarity, int>();
+            foreach (var rarity in DemonRarityLadder.All)
+                slotsByRarity[rarity] = Int(slotsEl, rarity.ToString().ToLowerInvariant(), "slotsByRarity");
+
             return new FusionTuning(schemaVersion, version, perStarPowerMilli, perStarDefenseMilli,
-                starCap, starMergeCost, promotionCost, recipeCost);
+                starCap, starMergeCost, promotionCost, recipeCost, slotsByRarity);
         }
     }
 

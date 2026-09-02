@@ -233,8 +233,13 @@ public sealed partial class RpgStore
 
         foreach (var c in content.Containers)
         {
+            // Affixes are not yet part of SeedContent's own import batch (T3.1 scope — that lands
+            // with the seed-file migration, T3.2); a container imported here can only reference an
+            // affix already committed to the store. Resolving against GetAffix rather than a batch
+            // dictionary is honest about that, not a silent gap: a container naming a not-yet-
+            // authored affix fails validation exactly as it should.
             var check = ContainerValidator.Validate(
-                c, id => atomsById.TryGetValue(id, out var a) ? a : null);
+                c, id => atomsById.TryGetValue(id, out var a) ? a : null, GetAffix);
             if (!check.IsOk)
             {
                 errors.Add(Error(content, c.ContainerId, check));

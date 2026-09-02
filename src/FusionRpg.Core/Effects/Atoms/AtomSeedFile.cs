@@ -262,7 +262,8 @@ public static class AtomSeedFile
             MinTier = IntOrNull(e, "minTier"),
             MaxTier = IntOrNull(e, "maxTier"),
             LevelReq = IntOrNull(e, "levelReq"),
-            PoolRolls = Int(e, "poolRolls", 0),
+            PrefixRolls = Int(e, "prefixRolls", 0),
+            SuffixRolls = Int(e, "suffixRolls", 0),
             TagsJson = Json(e, "tags", "{}"),
             Enabled = Bool(e, "enabled", true),
             Atoms = atoms,
@@ -301,7 +302,8 @@ public static class AtomSeedFile
         if (!Claim(path, id, into, errors)) return;
 
         into.Rarities.Add(new RarityRow(
-            id, Int(e, "ordinal", 0), Int(e, "poolRolls", 0), Int(e, "minTier", 1), Int(e, "maxTier", 1)));
+            id, Int(e, "ordinal", 0), Int(e, "prefixRolls", 0), Int(e, "suffixRolls", 0),
+            Int(e, "minTier", 1), Int(e, "maxTier", 1)));
     }
 
     static void ReadElement(string path, JsonElement e, SeedContent into, List<SeedError> errors)

@@ -5,7 +5,8 @@
     {
       "id": "trait.critical-hunter",
       "kind": "trait",
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "atoms": [
         {
           "atom": "atom.critical-hunter.t1"

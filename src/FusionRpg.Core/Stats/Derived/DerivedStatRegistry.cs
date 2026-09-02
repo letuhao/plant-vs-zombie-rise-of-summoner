@@ -186,8 +186,18 @@ public sealed class DerivedStatRegistry
         // reopening it: no defender-side term means no delta on the heal path at all). Unit: GameUnits
         // (class-system P1.5, 2026-08-26) -- OverlayCombatMath.cs:81,86 reads it as a flat additive
         // magnitude (effectiveHeal = max(0, signedAmount + healPower)), same shape as combat.power.
-        Register(new(DerivedStatChannels.CombatHealPower, DerivedComposeKind.FlatSum, 0,
-                     Class: StatClass.Pool, Unit: UnitClass.GameUnits));
+
+        // RETIRED 2026-09-02 -- `combat.heal.power` was generalised into `resource.restore.{resource}` (0.8).
+        // It stays REGISTERED, and only for this reason: `data/tuning/aptitudes.v1/v2/v3.json` stay on
+        // disk as revert points and still carry edges naming it, and `TerminationGuardTests` deliberately
+        // pins v1 to prove historical facts about it. An unregistered channel is a hard load rejection,
+        // so retiring the id outright would make every archived config unloadable and delete those
+        // regression checks. Migration-shim only, exactly like `DemonRarity`'s retired four-value ladder:
+        // **nothing reads it** (OverlayCombatMath moved to resource.restore.hp) and **no new edge may name
+        // it** -- the live config v4 has none, and AptitudeTuningTests' coverage test is over
+        // `resource.restore`, not this.
+        Register(new("combat.heal.power", DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
+                     UnitClassNote: "RETIRED 2026-09-02 -- superseded by resource.restore.hp. Registered only so archived aptitudes.v1/v2/v3.json remain loadable; no reader, no new edges."));
 
         // H.5 -- resource. Pool throughout (Q4): the counters are statuses, not stats. max/regen are
         // magnitudes and stay FlatSum/uncapped (spec-actor-channels.md §2.2). efficiency is a bounded
@@ -204,12 +214,21 @@ public sealed class DerivedStatRegistry
         foreach (var resourceId in DerivedStatChannels.ResourceIds)
         {
             Register(new(DerivedStatChannels.ResourceMax(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
-                         UnitClassNote: "No shipped reader for any resource id. tools/CombatSim's POC reads resource.max.hp only (AptitudeModel.cs) -- not a shipped consumer. Action/resource economy unbuilt (action-map.md)."));
+                         UnitClassNote: "Readers exist but are narrow (corrected 2026-09-02 -- this note previously read 'No shipped reader for any resource id', which was stale): ExhaustionPolicy.cs:59 reads ResourceRegen(resourceId) GENERICALLY over whatever resources it manages, and Predictor.cs reads the hp and poise members by name. No reader consumes max/regen for hunger/qi/spirit/stamina, and the action/resource economy that would is unbuilt (action-map.md)."));
             Register(new(DerivedStatChannels.ResourceRegen(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
-                         UnitClassNote: "No shipped reader for any resource id. tools/CombatSim's POC reads resource.regen.hp only (Analytic.cs) -- not a shipped consumer. Action/resource economy unbuilt (action-map.md)."));
+                         UnitClassNote: "Readers exist but are narrow (corrected 2026-09-02 -- this note previously read 'No shipped reader for any resource id', which was stale): ExhaustionPolicy.cs:59 reads ResourceRegen(resourceId) GENERICALLY over whatever resources it manages, and Predictor.cs reads the hp and poise members by name. No reader consumes max/regen for hunger/qi/spirit/stamina, and the action/resource economy that would is unbuilt (action-map.md)."));
             Register(new(DerivedStatChannels.ResourceEfficiency(resourceId), DerivedComposeKind.SumIncreased, 0,
                          DerivedStatPolicy.ResourceEfficiencyCap, Class: StatClass.Pool,
                          UnitClassNote: "No reader: action cost reduction has no consumer until the action layer exists (action-map.md). CombatSim's own tuning explicitly marks this family 'reserved'."));
+            // Active restoration power -- was the hp-only `combat.heal.power` until 2026-09-02. `hp` is
+            // the one member with a shipped reader (OverlayCombatMath.cs, flat additive magnitude), so
+            // it alone carries GameUnits; the other five are registered and unread, exactly like
+            // max/regen/efficiency, until the action layer grants a non-hp resource.
+            Register(resourceId == "hp"
+                ? new(DerivedStatChannels.ResourceRestore(resourceId), DerivedComposeKind.FlatSum, 0,
+                      Class: StatClass.Pool, Unit: UnitClass.GameUnits)
+                : new(DerivedStatChannels.ResourceRestore(resourceId), DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
+                      UnitClassNote: "No shipped reader for any non-hp resource id -- active restoration for stamina/hunger/spirit/qi/poise has no consumer until the action layer grants one (action-map.md)."));
         }
 
         // H.6 -- movement. Pool (Q4, same reasoning as resource). Unit stays null: no range-check

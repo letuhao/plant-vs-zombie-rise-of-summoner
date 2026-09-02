@@ -10,7 +10,7 @@ namespace FusionRpg.Core.Tests.ActorHub;
 public class SeedCatalogTests
 {
     [Fact]
-    public void CatalogResolves261()
+    public void CatalogResolves267()
     {
         // Derived, not literal: the two independent sources (the family-count formula and the
         // registered-def count) must agree, and whatever they agree ON is the assertion.
@@ -25,7 +25,7 @@ public class SeedCatalogTests
             Assert.True(registry.IsKnown(channelId), $"missing combat channel: {channelId}");
 
         Assert.Equal(combatExpected, DerivedStatChannels.AllCombatChannelIds.Count);
-        Assert.Equal(261, registry.AllRegistered.Count);
+        Assert.Equal(267, registry.AllRegistered.Count);
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class SeedCatalogTests
         // registration is arithmetically a no-op until a reader exists.
         Assert.Equal(0, attacker.Get(DerivedStatChannels.CombatPenetrationPrefix + ".fire"));
         Assert.Equal(0, defender.Get(DerivedStatChannels.CombatAbsorptionPrefix + ".fire"));
-        Assert.Equal(0, attacker.Get(DerivedStatChannels.CombatHealPower));
+        Assert.Equal(0, attacker.Get(DerivedStatChannels.ResourceRestore("hp")));
         Assert.Equal(0, attacker.Get(DerivedStatChannels.ResourceMax("hp")));
         Assert.Equal(0, attacker.Get(DerivedStatChannels.SkillCooldown("attack")));
         Assert.Equal(0, attacker.Get(DerivedStatChannels.MoveRange));

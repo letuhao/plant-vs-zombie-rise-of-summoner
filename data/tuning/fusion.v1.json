@@ -3,22 +3,44 @@
   "version": 1,
   "_meta": {
     "owner": "docs/architecture/demons/spec-demon-fusion.md",
-    "note": "Extracted byte-identical from StarPolicy.cs (tunables-ssot.md M.4, 2026-08-23). SacrificesForStar's 1..5 bound and StarCap's rarity->cap shape stay structural (the star system's own range), only the numbers a balance pass would tune moved.",
+    "note": "Extracted byte-identical from StarPolicy.cs (tunables-ssot.md M.4, 2026-08-23). SacrificesForStar's 1..5 bound and StarCap's rarity->cap shape stay structural (the star system's own range), only the numbers a balance pass would tune moved. Widened 2026-09-01 (seed-to-concrete T4.1, owner Q4/Q24) from the old four-value DemonRarity to the ten-rung ladder — starCap/recipeCost/slotsByRarity are starting values, staircase-interpolated from the old four points, not a validated balance decision (ssot-power-scale.md §5.3's own precedent for 'pick numbers now, tune from play'). recipeCost now covers Cultivated..Almanac (7 rungs) matching DemonRecipeCatalog.OutputEligibilityFloor, not the old rare/epic/legendary (3 rungs) — the eligibility floor is the one source of truth, read at load time. Corrected 2026-09-01 (same day, caught by FusionE2ETests.Legendary_chain_from_commons): the initial staircase-interpolation set every recipeCost.shardRarity to the LITERAL one-rung-below id (e.g. cultivated->grafted), but today's catalog only populates Chaff/Cultivated/Heirloom/Sunwoven — nobody ever holds a shard.grafted/fused/chimeric/firstseed. shardRarity now names the nearest POPULATED rung below, matching DemonRecipeCatalog.InputPoolBelow's own walk-down search exactly (cultivated/fused/chimeric/heirloom -> chaff or cultivated; firstseed/sunwoven -> heirloom; almanac -> sunwoven, still literal since Sunwoven is populated).",
     "rebalance": "Never hand-edit this file. python tools/tuning/publish.py fusion <dotted.key>=<value> [...] writes fusion.v{n+1}.json; the old version stays on disk for revert."
   },
   "perStarPowerMilli": 30,
   "perStarDefenseMilli": 30,
   "starCap": {
-    "common": 3,
-    "rare": 4,
-    "epic": 5,
-    "legendary": 5
+    "chaff": 3,
+    "sprout": 3,
+    "grafted": 3,
+    "cultivated": 4,
+    "fused": 4,
+    "chimeric": 4,
+    "heirloom": 5,
+    "firstseed": 5,
+    "sunwoven": 5,
+    "almanac": 5
   },
   "starMergeCost": { "souls": 50, "shardCount": 1, "essenceCount": 1 },
   "promotionCost": { "souls": 200, "shardCount": 3, "essenceCount": 3 },
   "recipeCost": {
-    "rare":      { "souls": 150,  "shardRarity": "common", "shardCount": 2, "essenceCount": 2 },
-    "epic":      { "souls": 400,  "shardRarity": "rare",   "shardCount": 3, "essenceCount": 4 },
-    "legendary": { "souls": 1000, "shardRarity": "epic",   "shardCount": 4, "essenceCount": 8 }
+    "cultivated": { "souls": 150,  "shardRarity": "chaff",      "shardCount": 2, "essenceCount": 2 },
+    "fused":      { "souls": 220,  "shardRarity": "cultivated", "shardCount": 2, "essenceCount": 3 },
+    "chimeric":   { "souls": 320,  "shardRarity": "cultivated", "shardCount": 3, "essenceCount": 4 },
+    "heirloom":   { "souls": 450,  "shardRarity": "cultivated", "shardCount": 3, "essenceCount": 5 },
+    "firstseed":  { "souls": 620,  "shardRarity": "heirloom",   "shardCount": 4, "essenceCount": 6 },
+    "sunwoven":   { "souls": 820,  "shardRarity": "heirloom",   "shardCount": 4, "essenceCount": 7 },
+    "almanac":    { "souls": 1000, "shardRarity": "sunwoven",   "shardCount": 5, "essenceCount": 8 }
+  },
+  "slotsByRarity": {
+    "chaff": 1,
+    "sprout": 1,
+    "grafted": 1,
+    "cultivated": 2,
+    "fused": 2,
+    "chimeric": 2,
+    "heirloom": 2,
+    "firstseed": 3,
+    "sunwoven": 3,
+    "almanac": 3
   }
 }

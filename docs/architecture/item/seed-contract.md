@@ -1,7 +1,11 @@
 # The item seed contract — what gets authored, and what gets computed
 
-**Status:** Proposed 2026-08-22, revised the same day after a fan-out safety audit. **Contract for a data
-build**, not a spec and not a plan. Nothing is authorized to be authored from it yet.
+**Status:** Proposed 2026-08-22, revised the same day after a fan-out safety audit. **Contract for a
+data build, authoring authorized as of 2026-09-01** (`seed-to-concrete` T0.6/Phase 1 — `demon-seed`
+and `effect-pipeline` author against this contract starting Phase 1). The prior wording — *"Nothing is
+authorized to be authored from it yet"* — was found by the `seed-to-concrete` plan audit to contradict
+its own dependents: Phases 1-2 of that plan author seeds against this contract, which the old line
+forbade outright. Everything else this document decided stands; only the authoring gate changes.
 
 **Purpose:** define the JSON that human and agent authors write, so that a large parallel authoring
 effort produces content that imports cleanly, hashes stably, and does not have to be re-authored when a
@@ -68,7 +72,7 @@ but does not get to invent roles. Naming a value and owning a value are differen
 | `powerBand`, `costBand`, `dropBand`, `variance` | AUTHORED | **bands, never numbers** — §3 |
 | structural counts (`socketMax`, `pieces`, `pool_rolls`) | AUTHORED | a count is structure, not balance |
 | every **magnitude**, **weight**, **probability**, **quantity** | DERIVED | §3. An author may never type one |
-| `affixClass` (prefix/suffix) | DERIVED from `kindId` | permanent-modifier kinds are prefixes; triggered kinds are suffixes. **Present in a seed file → reject** |
+| `affixClass` (prefix/suffix) | DERIVED from `kindId` | permanent-modifier kinds are prefixes; triggered kinds are suffixes. **Present in a seed file → reject.** **Added 2026-09-01 (T0.6):** a **mixed bundle** — an affix whose atom refs span both classes (e.g. `master of fire and ice`'s power+defense atoms) — derives `affixClass` **per atom**, never once for the whole bundle, and at roll time it **consumes one prefix roll and one suffix roll simultaneously** rather than doubling either count (`spec-container-schema.md`'s validation table). Still never authored — the rule only widens from "one kindId → one class" to "N atom refs → N per-atom classes, still all derived" |
 | role × family legality | DERIVED | from each family's declared role groups — worth ~1 100 cells |
 | `atom_id`, `container_id` | DERIVED | computed from columns and validated (`IdMismatch`) |
 | tier magnitudes, band min/max | GENERATED | from `powerBand` × the channel family's curve |

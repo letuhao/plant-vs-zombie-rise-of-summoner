@@ -1,6 +1,6 @@
 ﻿{
-    "model":  "D:\\Works\\source\\plant-vs-zombie-rise-of-summoner\\data\\tuning\\aptitudes.v2.json",
-    "modelDescription":  "aptitudes.v2 — 486 edges, contest span 100, gamma contest 1 / magnitude 1, recovery x0.37, mitigation x0.3",
+    "model":  "data/tuning/aptitudes.v5.json",
+    "modelDescription":  "aptitudes.v5 — 526 edges, contest span 100, gamma contest 1 / magnitude 1, recovery x0.37, mitigation x0.3",
     "thetas":  [
                    100
                ],
@@ -104,7 +104,7 @@
                  },
     "unendingCount":  0,
     "_meta":  {
-                  "measuredAt":  "2026-09-01T05:23:25.1027429Z",
-                  "conditions":  "data/tuning/aptitudes.v2.json (live shipped config -- P8.2 stamina bind + P8.3 mitigation dial, and this tool\u0027s own resolver was ported 2026-08-27 to apply that dial the same way Core\u0027s AptitudeResolver.EffectiveKMilli does). FORCE=fire/FINESSE=air/BASTION=earth (scratch copies of tools/CombatSim/builds/*.json with only element changed, never overwriting the tracked fire/fire/fire files). Theta=100, seed 8888, 3000 trials/arrow. Elements genuinely live: closed-form and simulated win shares both move with the matchup (P8.1\u0027s own headline finding, e.g. FORCE v FINESSE closed-form ~98% vs simulated ~68%), not the ~100%/~0% same-element result the tracked builds alone would have produced."
+                  "measuredAt":  "2026-09-02T15:47:43.4137207Z",
+                  "conditions":  "data/tuning/aptitudes.v5.json (live shipped config -- P8.2 stamina bind + P8.3 mitigation dial, and this tool\u0027s own resolver was ported 2026-08-27 to apply that dial the same way Core\u0027s AptitudeResolver.EffectiveKMilli does). FORCE=fire/FINESSE=air/BASTION=earth (scratch copies of tools/CombatSim/builds/*.json with only element changed, never overwriting the tracked fire/fire/fire files). Theta=100, seed 8888, 3000 trials/arrow. Elements genuinely live: closed-form and simulated win shares both move with the matchup (P8.1\u0027s own headline finding, e.g. FORCE v FINESSE closed-form ~98% vs simulated ~68%), not the ~100%/~0% same-element result the tracked builds alone would have produced."
               }
 }

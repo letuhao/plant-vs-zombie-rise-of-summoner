@@ -199,6 +199,129 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
+    /// Persist an instance AND bind it to an owner in <b>one</b> transaction (T3.6,
+    /// `instance-producer`) — the acceptance bar <see cref="SaveInstance"/> and <see cref="Bind"/>
+    /// cannot meet on their own, since each opens its own transaction: a crash between two separate
+    /// calls could leave a saved instance with no binding, which this module's own spec names as the
+    /// exact failure to prevent ("`partial_failure_never_leaves_an_orphaned_instance_with_no_binding`").
+    /// </summary>
+    public AtomRejection SaveInstanceAndBind(
+        InstanceRow instance, BindingRow binding,
+        out string instanceId, out string bindingId,
+        string? explicitInstanceId = null, string? explicitBindingId = null,
+        string? createdUtc = null, string? boundUtc = null)
+    {
+        instanceId = "";
+        bindingId = "";
+
+        var scope = OwnerScope.Validate(binding.OwnerKind, binding.OwnerKey, out _);
+        if (!scope.IsOk) return scope;
+
+        var iid = string.IsNullOrWhiteSpace(explicitInstanceId) ? Guid.NewGuid().ToString("N") : explicitInstanceId!;
+        var bid = string.IsNullOrWhiteSpace(explicitBindingId) ? Guid.NewGuid().ToString("N") : explicitBindingId!;
+        var iUtc = createdUtc ?? DateTime.UtcNow.ToString("O");
+        var bUtc = boundUtc ?? DateTime.UtcNow.ToString("O");
+
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+
+            ExecIn(db, tx, """
+                INSERT INTO effect_instance
+                  (instance_id, container_id, roll_seed, catalog_revision, created_utc, origin,
+                   theta_content, content_scale_milli)
+                VALUES ($id, $c, $seed, $rev, $utc, $origin, $theta, $scale)
+                ON CONFLICT(instance_id) DO UPDATE SET
+                  container_id = excluded.container_id, roll_seed = excluded.roll_seed,
+                  catalog_revision = excluded.catalog_revision, origin = excluded.origin,
+                  theta_content = excluded.theta_content, content_scale_milli = excluded.content_scale_milli;
+                """,
+                ("$id", iid), ("$c", instance.ContainerId), ("$seed", instance.RollSeed),
+                ("$rev", instance.CatalogRevision), ("$utc", iUtc),
+                ("$origin", instance.Origin.ToString().ToLowerInvariant()),
+                ("$theta", instance.ThetaContent), ("$scale", instance.ContentScaleMilli));
+
+            ExecIn(db, tx, "DELETE FROM effect_instance_atom WHERE instance_id = $id;", ("$id", iid));
+
+            foreach (var a in instance.Atoms)
+                ExecIn(db, tx,
+                    "INSERT INTO effect_instance_atom (instance_id, seq, atom_id, values_json, power_json) " +
+                    "VALUES ($id, $seq, $atom, $vals, $power);",
+                    ("$id", iid), ("$seq", a.Seq), ("$atom", a.AtomId), ("$vals", a.ValuesJson),
+                    ("$power", (object?)a.PowerJson ?? DBNull.Value));
+
+            ExecIn(db, tx, """
+                INSERT INTO effect_binding
+                  (binding_id, instance_id, owner_kind, owner_key, slot, priority, source, bound_utc, revision)
+                VALUES ($id, $inst, $kind, $key, $slot, $prio, $src, $utc, 1)
+                ON CONFLICT(binding_id) DO UPDATE SET
+                  instance_id = excluded.instance_id, owner_kind = excluded.owner_kind,
+                  owner_key = excluded.owner_key, slot = excluded.slot,
+                  priority = excluded.priority, source = excluded.source,
+                  revision = effect_binding.revision + 1;
+                """,
+                ("$id", bid), ("$inst", iid), ("$kind", OwnerScope.Name(binding.OwnerKind)),
+                ("$key", binding.OwnerKey ?? ""), ("$slot", (object?)binding.Slot ?? DBNull.Value),
+                ("$prio", binding.Priority), ("$src", binding.Source ?? ""), ("$utc", bUtc));
+
+            tx.Commit();
+        }
+
+        instanceId = iid;
+        bindingId = bid;
+        return AtomRejection.Ok;
+    }
+
+    /// <summary>
+    /// The full producer, `instance-producer`'s own entry point: <see cref="InstanceProducer.Compose"/>
+    /// (Core, no I/O) resolves the container into an <see cref="InstanceRow"/>; this wraps it in a
+    /// <see cref="BindingRow"/> (a `FusionRpg.Data` type <c>InstanceProducer.Compose</c> cannot itself
+    /// build — Core does not depend on Data) and persists both atomically via
+    /// <see cref="SaveInstanceAndBind"/>.
+    /// </summary>
+    public AtomRejection ProduceAndBind(
+        ContainerRow container,
+        Func<string, IReadOnlyList<string>> domainMembers,
+        long rollSeed,
+        int thetaContent,
+        FusionRpg.Core.Power.PowerTuning tuning,
+        OwnerScope owner,
+        string? slot,
+        int priority,
+        string source,
+        out string? instanceId,
+        out string? bindingId,
+        VariantShift? variant = null,
+        InstanceOrigin origin = InstanceOrigin.Drop,
+        long catalogRevision = 0)
+    {
+        instanceId = null;
+        bindingId = null;
+
+        var compose = InstanceProducer.Compose(
+            container, GetAtom, GetAffix, domainMembers, rollSeed, thetaContent, tuning,
+            out var instance, variant, origin, catalogRevision);
+        if (!compose.IsOk) return compose;
+
+        var binding = new BindingRow
+        {
+            OwnerKind = owner.Kind,
+            OwnerKey = owner.Key,
+            Slot = slot,
+            Priority = priority,
+            Source = source,
+        };
+
+        var save = SaveInstanceAndBind(instance!, binding, out var iid, out var bid);
+        if (!save.IsOk) return save;
+
+        instanceId = iid;
+        bindingId = bid;
+        return AtomRejection.Ok;
+    }
+
+    /// <summary>
     /// Bind an instance to an owner. The owner key is validated against its scope grammar first —
     /// two spellings of one pointer means two bindings the withdraw path cannot match.
     /// </summary>

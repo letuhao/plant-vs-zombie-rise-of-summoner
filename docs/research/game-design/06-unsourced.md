@@ -116,7 +116,7 @@ cited.
 
 | Blocked | Effect |
 |---|---|
-| **Fandom sitewide HTTP 402** | Forced fallback to primary sources for AoE2, DoW, several others |
+| **Fandom sitewide HTTP 402** | Forced fallback to primary sources for AoE2, DoW, several others. **⚠️ SUPERSEDED 2026-09-02 — this is bypassable, see §2a below.** |
 | **Liquipedia rate-limited; wiki.gg 401** | SC2 attribute count and additive-bonus mechanic could not be cited from there (recovered elsewhere) |
 | **GameSpot 403 (Cloudflare)** | Kusakihara's Three Houses quote verified only against Nintendo Everything |
 | **Jeuxvideo 403** | Yokota's quote likewise republisher-only |
@@ -138,6 +138,45 @@ cited.
   hunting.
 - **`https://r.jina.ai/<url>`** worked as a reader proxy for Cloudflare-blocked sites (this is how the
   Browder GameStar interview was retrieved).
+
+### 2a. Access map re-measured 2026-09-02 — this supersedes the table above
+
+Two further research rounds (**~14 passes, ~16,700 lines**, in [`../genre-mechanics/`](../genre-mechanics/)
+and [`../action-taxonomy/`](../action-taxonomy/)) re-tested every block. **The single most important
+change: Fandom's 402 is bypassable.**
+
+| Host | State as re-measured | Workaround |
+|---|---|---|
+| `fandom.com` | 402 direct, confirmed again across all 14 passes | **`r.jina.ai` reader proxy works** — this reopens the FF, DQ, FEH, Megaten and mod-scene wikis the table above treated as lost |
+| `poewiki.net` | proof-of-work / Anubis gate | **clears on a second navigation** |
+| `wowdev.wiki` | 403 direct, 403 on its MediaWiki API, **and blocked through `r.jina.ai`** | none found — use **TrinityCore source** (`SpellInfo.h` / `SpellInfo.cpp` / `SpellEffects.cpp`) instead, which is first-tier anyway |
+| `wiki.gg` | **inconsistent** — some subdomains 401, most serve fine | retry per-subdomain before concluding |
+| `liquipedia.net` | article pages 403; API returns stubs only | — |
+| `web.archive.org` | 429 / blocked in the later rounds | **the CDX index trick above still works** |
+| `scryfall.com` + API, `mtggoldfish`, `kotaku`, `pcgamesn`, `wiki.leagueoflegends.com`, `store.steampowered.com` (DNS) | blocked | — |
+| Caves of Qud wiki | — | serves `action=raw` |
+| Moegirl, Zhihu, Baidu Baike, Fandom-zh | 403 / 402 | the Chinese-language mod scene is covered second-hand only |
+
+**Endpoints confirmed working and worth reusing:**
+`overwatch.blizzard.com/en-us/news/patch-notes/live/<YYYY>/<M>/` ·
+`dota2.com/datafeed/patchnotes?version=<X.YZ>&language=english` (archive starts at **7.08**, Feb 2018) ·
+`warcraft.wiki.gg` · `hearthstone.wiki.gg` · `mtg.wiki` ·
+`magic.wizards.com/en/sitemap.xml` (live archive indexes back only to **~2020**) ·
+`yugipedia.com/api.php?action=parse&page=…&prop=wikitext&format=json` ·
+`raw.githubusercontent.com` for every datamine repo used.
+
+**Newly recorded genuine absences** (full detail in the two folders' own gap sections):
+
+- **No studio publishes a power-vs-cost ratio, or a cooldown-to-power formula.** Consistent with this
+  file's existing finding on counter-strength targets — **any such number here is derived, not
+  borrowed.**
+- **No published break-even mathematics for buffs in turn-based combat, from any developer.** The only
+  worked example found anywhere is a hobbyist forum post; the general form was derived in
+  [`../action-taxonomy/05-support-healing-actions.md`](../action-taxonomy/05-support-healing-actions.md) §4.1.
+- **Every pre-~2007 `magic.wizards.com/en/articles/archive/…` URL now 404s**, taking the whole *Latest
+  Developments* column with it — this is why Skullclamp's development story could not be sourced.
+- **PVZ Fusion's actual fusion-recipe count is not statically obtainable** — the table is built by native
+  IL2CPP code, so it needs a running game and a `PlantMixTreeManager.PrintAllStatistics()` call.
 
 ---
 

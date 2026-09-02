@@ -88,7 +88,7 @@ public class ExpeditionE2ETests : IAsyncLifetime
         // The battle tick always drops a shard.
         var materials = await _http.GetFromJsonAsync<JsonElement>("/api/expeditions/1/materials");
         Assert.Contains(materials.GetProperty("items").EnumerateArray(),
-            m => m.GetProperty("materialId").GetString() == "shard.common");
+            m => m.GetProperty("materialId").GetString() == "shard.chaff");
 
         // Squad released: the expedition list shows Collected and specimens are free again.
         var list = await _http.GetFromJsonAsync<JsonElement>("/api/expeditions/1");

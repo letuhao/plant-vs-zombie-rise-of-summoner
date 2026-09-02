@@ -120,6 +120,11 @@ public sealed class PlayerDto
     [JsonPropertyName("id")] public long Id { get; set; }
     [JsonPropertyName("name")] public string Name { get; set; } = "";
     [JsonPropertyName("createdUtc")] public string CreatedUtc { get; set; } = "";
+
+    /// <summary>"The whole save"'s own root (spec-world-seed.md, T5.1) — rolled once at creation,
+    /// surfaced here so the UI can show/share it (Q7). Every per-player roll this program and
+    /// demon-seed make derives from this value; it is never regenerated for an existing player.</summary>
+    [JsonPropertyName("worldSeed")] public long WorldSeed { get; set; }
 }
 
 public sealed class CreatePlayerRequest

@@ -508,7 +508,7 @@ instead of the catalog. Total is **157 new / 256 named** (Q5 dropped `heal.reduc
 | **Q6** | `block.strength ↔ block.shred` duplicates `shield.toughness ↔ shield.pen` | **One shared contest helper, two channel sets.** Modelling block *as* a 1-hit shield is attractive and reuses priorities/stacking/matrix/goldens — but [shield-system-spec.md](shield-system-spec.md) caps **3 shields per actor**, so a per-turn block shield permanently eats a third of every actor's budget and the admission rule would evict real shields. Revisit only if that cap moves. |
 | **Q6b** | What bounds a parry/block exchange | **Decided 2026-08-24: the _status_ precedent, not the shield's.** Shield's chip floor exists because a shield is a **pool** that must always spend; a proc has no pool, so **no floor** — a fully shredded block removing zero is a legitimate contest outcome. The ceiling follows `StatusPolicy.CategoryResistCap`: **`950‰`, a block removes at most 95% of a hit, never all of it.** Immunity stays impossible, expressed on the side that has something to protect. Own keys `blockCapPermille` / `parryCapPermille` in `data/tuning/combat.v1.json`, both `950` — they *agree with* the status constant, they do not share it. Neither stat is capped; only the fraction one exchange removes. |
 
-**Ban:** `totalPower = omni × category` or `totalResist = omni × category` — **forbidden** (Chaos Omni additive-only).
+**Ban:** `totalPower = omni × category` or `totalResist = omni × category` — **forbidden** **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]** (Chaos Omni additive-only).
 
 Category mapping: normative **StatusId → category** table in [status-ssot.md §9.5](status-ssot.md).
 
@@ -777,7 +777,7 @@ ActorHub may resolve primary stats for Writer on a different cadence than derive
 - Do not wire level→damage silently; `progression.power` is catalog derived only
 - Do not persist AppliedCombat or derived snapshot as SSOT
 - No derived channel outside **DerivedStatCatalog**
-- **Never multiply omni × category** for status power/resist totals
+- **Never multiply omni × category** for status power/resist totals **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 - Do not use fixed-only ApplyScale as Fusion product lock (Chaos fixed scale is reference only)
 - No runtime YAML derived loader v1
 - **StatusRuntime code must not ship** before Actor Hub derived resolve + `progression.power` stub channel exist
@@ -802,7 +802,7 @@ ActorHub may resolve primary stats for Writer on a different cadence than derive
 
 1. **Catalog SSOT** — unknown derived channel rejected like unknown `statusId`.
 2. **Stub unblock** — `tierPower = 1.0` hardcoded lets StatusRuntime code plan proceed before power ADR.
-3. **Chaos-aligned two-phase** — sigmoid apply vs linear potency; omni additive-only.
+3. **Chaos-aligned two-phase** — sigmoid apply vs linear potency; omni additive-only. **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 4. **Dynamic ApplyScale** — self-normalizes high-tier fights without copying fixed `trigger_scale`.
 
 ### Risks and mitigations

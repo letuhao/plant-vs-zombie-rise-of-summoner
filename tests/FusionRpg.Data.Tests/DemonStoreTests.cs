@@ -31,7 +31,7 @@ public class DemonStoreTests : IDisposable
         SpeciesId = species ?? CatalogSpecies.SpeciesId,
         Side = "zombie",
         GameTypeId = CatalogSpecies.GameTypeId,
-        Rarity = "common",
+        Rarity = "chaff",
         Variant = "normal",
         ElementPrimary = "fire",
         TraitIds = new List<string> { "swift" },

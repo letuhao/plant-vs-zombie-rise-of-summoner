@@ -17,7 +17,7 @@ public class DemonCorpusBuilderTests
         GameTypeId = gameTypeId,
         DemonTypeId = side == "zombie" ? 10_000 + gameTypeId : 60_000 + gameTypeId,
         ElementPrimary = ElementTypeId.Fire,
-        BaseRarity = DemonRarity.Common,
+        BaseRarity = DemonRarity.Chaff,
         DeployMode = DemonDeployMode.PlantAvatar,
         Acquisition = DemonAcquisition.Summonable,
         Variants = new[] { "normal" },

@@ -68,7 +68,7 @@ EffectEvent → EffectBag grant (L1)
 - Status HP pulses must not bypass **Funnel** → FA10 Writer Add.
 - No **Server RTT** on Apply/Tick/Spread.
 - No derived channel outside **DerivedStatCatalog** ([actor-hub-ssot.md §3](actor-hub-ssot.md)).
-- Never multiply **omni × category** for status power/resist totals.
+- Never multiply **omni × category** for status power/resist totals. **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 - Do not conflate **`RpgXpPowerScale`** with combat **`tierPower`**.
 - After **S6** seals: no **new** grants with `delivery.mode = OverTime|Counter`.
 

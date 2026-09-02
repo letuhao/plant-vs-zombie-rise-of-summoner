@@ -33,7 +33,7 @@ public class ContractStoreTests : IDisposable
         .First(s => s.BaseRarity == rarity && s.Acquisition != DemonAcquisition.CaptureOnly
                     && s.TraitPool.Count > 0);
 
-    string Mint(DemonRarity rarity = DemonRarity.Common)
+    string Mint(DemonRarity rarity = DemonRarity.Chaff)
     {
         var species = SpeciesOf(rarity);
         var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
@@ -88,9 +88,9 @@ public class ContractStoreTests : IDisposable
     public void Migration_binds_best_first_up_to_capacity_and_runs_once()
     {
         var commons = new List<string>();
-        for (var i = 0; i < 14; i++) commons.Add(Mint(DemonRarity.Common));
-        var epic = Mint(DemonRarity.Epic);
-        var legendary = Mint(DemonRarity.Legendary);
+        for (var i = 0; i < 14; i++) commons.Add(Mint(DemonRarity.Chaff));
+        var epic = Mint(DemonRarity.Heirloom);
+        var legendary = Mint(DemonRarity.Sunwoven);
 
         // Rewind to what a pre-contracts database looks like: specimens, no contracts.
         _store.ClearContractsForTest(1);

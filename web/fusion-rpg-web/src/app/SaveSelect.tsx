@@ -8,8 +8,10 @@ import { Button, TextInput } from "@/ui";
  * player picker goes — it is not a dropdown wedged into the top bar of every screen."
  *
  * The plate's own mockup shows level/creatures-bound/sectors-held/last-played per slot — `PlayerDto`
- * (contract/lib/bus/types.ts) only carries `id`/`name`/`createdUtc`. Shipping fabricated stats would
- * be worse than shipping the real, narrower ones: name and creation date, honestly.
+ * (contract/lib/bus/types.ts) only carries `id`/`name`/`createdUtc`/`worldSeed`. Shipping fabricated
+ * stats would be worse than shipping the real, narrower ones: name, creation date and world seed,
+ * honestly (the seed shown per spec-world-seed.md's own Q7 "the whole save" framing — a player can
+ * see, and per that spec's §3.5 note, potentially share, their save's own root).
  */
 export function SaveSelect() {
   const navigate = useNavigate();
@@ -55,6 +57,12 @@ export function SaveSelect() {
                 </span>
                 <span className="block text-xs text-muted">
                   Created {new Date(p.createdUtc).toLocaleDateString()}
+                </span>
+                <span
+                  className="block font-mono text-[10px] text-muted"
+                  data-testid={`save-slot-seed-${p.id}`}
+                >
+                  Seed {p.worldSeed}
                 </span>
               </span>
               <Button

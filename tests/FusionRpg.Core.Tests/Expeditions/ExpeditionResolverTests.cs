@@ -90,7 +90,7 @@ public class ExpeditionResolverTests
             {
                 var species = DemonSpeciesCatalog.Get(tick.WildSpeciesId!);
                 Assert.NotEqual(DemonAcquisition.CaptureOnly, species.Acquisition);
-                Assert.NotEqual(DemonRarity.Legendary, species.BaseRarity);
+                Assert.NotEqual(DemonRarity.Sunwoven, species.BaseRarity);
             }
 
             foreach (var join in r.Rewards.WildJoins)
@@ -140,6 +140,26 @@ public class ExpeditionResolverTests
             ExpeditionResolver.Resolve("scout-30m", new List<BattleActorSetup>(), 1, 1));
     }
 
+    /// <summary>spec-rarity-migration.md §4: `ShardCommon`/`ShardRare` are string LITERALS, invisible
+    /// to every grep for `DemonRarity` — they do not mention the enum and would survive a future
+    /// widening untouched, pointing at materials that no longer exist. This pins them against the
+    /// live catalog directly rather than trusting the rename was applied everywhere it needed to be.
+    /// Reflection over the private consts (not a text-file scan) so the check tracks the compiled
+    /// value even if the source formatting around the declaration changes.</summary>
+    [Fact]
+    public void Expedition_shard_constants_reference_live_ids()
+    {
+        var type = typeof(ExpeditionResolver);
+        foreach (var name in new[] { "ShardCommon", "ShardRare" })
+        {
+            var field = type.GetField(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            Assert.True(field is not null, $"{type.FullName} no longer declares a const named {name}");
+            var value = (string)field!.GetValue(null)!;
+            Assert.Contains(value, DemonMaterialCatalog.All);
+            Assert.DoesNotContain(value, LegacyDemonRarityIds.ForwardMap.Keys.Select(id => "shard." + id));
+        }
+    }
+
     // Re-blessed 2026-08-21 at battle RulesetVersion 2 (combat-unification): named
     // serialization-shape churn — BattleActorSetup gained InnateShield, so every embedded
     // plan changed bytes even though expedition MATH did not (per-tick streams unchanged;
@@ -177,10 +197,15 @@ public class ExpeditionResolverTests
     // species are added. That is now expected rather than alarming, but it makes the test a poor
     // regression signal for the resolver itself — decoupling the wild-enemy pick from the live
     // catalog (a fixture band) would be the fix if the churn becomes annoying.
-    const string ScoutHash = "D205A51C0D5376E49B93D0A807E45C5C701E06E14D92967944A1525E7243049B";
-    const string ForageHash = "C8E6C8FE5A75EE2DB6391BDEB8D811EC3CE18A5F3BA9502D55A69AA69E1D296D";
-    const string HuntHash = "40662D95ED23C07710258C149016A3360DAD31AA66078A9C0908AC53A3C1D204";
-    const string WarpathHash = "96EC24504681E16A792ED0E624810E668C94B6EBD276C7419BF69315706847B6";
+    // Re-blessed 2026-09-01 (seed-to-concrete T4.1) — the manifest now composes
+    // shard.chaff/shard.cultivated (ten-rung ladder ids) instead of shard.common/shard.rare, per
+    // this test's own comment above: coupled to roster/reward-id churn, expected to move, not a
+    // regression signal. Squad size/theta/species set are unchanged; verified by reading the
+    // resolver's own diff before re-blessing, not by inspection alone.
+    const string ScoutHash = "955C032F55AF1A5843474926D3029B0501EEE13DBD8AA1ADE9487466AD8A9F7E";
+    const string ForageHash = "E28247CE5E0D7BC248F655296164A41FF02E076826FDD6D01C4085EB054B52F9";
+    const string HuntHash = "A992A6BD17E2122DC64EC1FC7414DAE3F7990D6D45880E44073EBAD2B580C9F0";
+    const string WarpathHash = "D80F2ACEE97E22B1A91B8EBAB474B882559A964D69F414FD585BC728DC1AC0F1";
 
     [Fact]
     public void Tier_goldens_are_locked()

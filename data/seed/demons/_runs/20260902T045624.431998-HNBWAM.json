@@ -1,0 +1,45 @@
+{
+  "callsMade": 82,
+  "completed": [
+    "ArmedGargantuar",
+    "BalloonZombie",
+    "BigChomper",
+    "Peashooter",
+    "SunFlower"
+  ],
+  "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+  "failed": [],
+  "pid": 28704,
+  "preflight": {
+    "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+    "lockHash": "d07174cab54aa4daebb3c6ebbc8acbadc8f9c42707f48e1a0bbd5f6db5061b69",
+    "modelId": null,
+    "skipModel": false,
+    "writtenUtc": "2026-09-02T04:10:27Z"
+  },
+  "promptVersions": {
+    "aptitude-primary": 1,
+    "aptitude-secondary": 1,
+    "deployment": 1,
+    "element-primary": 1,
+    "element-secondary": 1,
+    "identity": 1,
+    "kit-shape": 1,
+    "threat-audit": 1
+  },
+  "runId": "20260902T045624.431998-HNBWAM",
+  "selector": {
+    "kind": "species",
+    "species": [
+      "Peashooter",
+      "SunFlower",
+      "BigChomper",
+      "ArmedGargantuar",
+      "BalloonZombie"
+    ]
+  },
+  "skipped": [],
+  "startedUtc": "2026-09-02T04:56:24Z",
+  "state": "completed",
+  "updatedUtc": "2026-09-02T05:00:56Z"
+}

@@ -5,7 +5,8 @@
     {
       "id": "patron.aura",
       "kind": "patron",
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "atoms": [],
       "tags": {
         "marker": "fx.patron_aura"

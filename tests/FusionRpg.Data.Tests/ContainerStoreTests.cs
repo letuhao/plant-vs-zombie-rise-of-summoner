@@ -57,6 +57,15 @@ public class ContainerStoreTests : IDisposable
         Atoms = atoms,
     };
 
+    /// <summary>T3.1 (affix-schema): a pool row now references an affix, so a pool-testing fixture
+    /// must seed one — a single-ref affix under the SAME id, matching what `affix-library` (module
+    /// 3, not yet built) will generate 1:1 for real.</summary>
+    void SeedSingleRefAffix(string atomId)
+    {
+        var r = _store.UpsertAffix(new AffixRow(atomId, AffixClass.Prefix, new[] { new AffixRefRow(1, atomId) }), _store.GetAtom);
+        Assert.True(r.IsOk, r.ToString());
+    }
+
     // ---- round trip ------------------------------------------------------------------------------
 
     [Fact]
@@ -91,11 +100,15 @@ public class ContainerStoreTests : IDisposable
     [Fact]
     public void A_pool_container_round_trips_with_weights_and_groups()
     {
+        SeedSingleRefAffix("atom.elemental-power.fire.t1");
+        SeedSingleRefAffix("atom.elemental-power.ice.t1");
+        SeedSingleRefAffix("atom.vitality.t1");
+
         var c = new ContainerRow
         {
             ContainerId = "item.ember-band",
             Kind = ContainerKind.Item,
-            PoolRolls = 2,
+            PrefixRolls = 2,
             Pool = new[]
             {
                 new ContainerPoolRow("atom.elemental-power.fire.t1", 10),
@@ -109,20 +122,23 @@ public class ContainerStoreTests : IDisposable
         var back = _store.GetContainer("item.ember-band")!;
 
         Assert.Equal(3, back.Pool.Count);
-        Assert.Equal(0, back.Pool.Single(p => p.AtomId == "atom.elemental-power.ice.t1").Weight);
-        Assert.Equal("defensive", back.Pool.Single(p => p.AtomId == "atom.vitality.t1").Group);
+        Assert.Equal(0, back.Pool.Single(p => p.AffixId == "atom.elemental-power.ice.t1").Weight);
+        Assert.Equal("defensive", back.Pool.Single(p => p.AffixId == "atom.vitality.t1").Group);
     }
 
     [Fact]
     public void A_zero_weight_row_is_kept_in_the_table_rather_than_dropped()
     {
+        SeedSingleRefAffix("atom.vitality.t1");
+        SeedSingleRefAffix("atom.might.t1");
+
         // "Excludes without deleting" — the row stays so an author can re-enable it by editing one
         // number, and so the content hash records that the candidate exists.
         var c = new ContainerRow
         {
             ContainerId = "item.ember-band",
             Kind = ContainerKind.Item,
-            PoolRolls = 1,
+            PrefixRolls = 1,
             Pool = new[]
             {
                 new ContainerPoolRow("atom.vitality.t1", 10),
@@ -187,9 +203,9 @@ public class ContainerStoreTests : IDisposable
     [Fact]
     public void Rarity_bands_round_trip_in_ordinal_order()
     {
-        _store.UpsertRarity(new RarityRow("epic", 3, PoolRolls: 3, MinTier: 2, MaxTier: 4));
-        _store.UpsertRarity(new RarityRow("common", 1, PoolRolls: 1, MinTier: 1, MaxTier: 2));
-        _store.UpsertRarity(new RarityRow("rare", 2, PoolRolls: 2, MinTier: 1, MaxTier: 3));
+        _store.UpsertRarity(new RarityRow("epic", 3, PrefixRolls: 3, SuffixRolls: 2, MinTier: 2, MaxTier: 4));
+        _store.UpsertRarity(new RarityRow("common", 1, PrefixRolls: 1, SuffixRolls: 0, MinTier: 1, MaxTier: 2));
+        _store.UpsertRarity(new RarityRow("rare", 2, PrefixRolls: 2, SuffixRolls: 1, MinTier: 1, MaxTier: 3));
 
         Assert.Equal(new[] { "common", "rare", "epic" }, _store.ListRarities().Select(r => r.RarityId));
     }
@@ -198,9 +214,9 @@ public class ContainerStoreTests : IDisposable
     public void An_ordinal_already_belonging_to_another_band_is_refused()
     {
         // Append-only: a band may be added, never renumbered underneath the content naming it.
-        _store.UpsertRarity(new RarityRow("common", 1, 1, 1, 2));
+        _store.UpsertRarity(new RarityRow("common", 1, 1, 0, 1, 2));
 
-        var (ok, reason) = _store.UpsertRarity(new RarityRow("uncommon", 1, 2, 1, 3));
+        var (ok, reason) = _store.UpsertRarity(new RarityRow("uncommon", 1, 2, 0, 1, 3));
 
         Assert.False(ok);
         Assert.Contains("append-only", reason);
@@ -209,16 +225,16 @@ public class ContainerStoreTests : IDisposable
     [Fact]
     public void A_band_may_still_be_retuned_in_place()
     {
-        _store.UpsertRarity(new RarityRow("common", 1, 1, 1, 2));
+        _store.UpsertRarity(new RarityRow("common", 1, 1, 0, 1, 2));
 
-        Assert.True(_store.UpsertRarity(new RarityRow("common", 1, PoolRolls: 2, MinTier: 1, MaxTier: 3)).Ok);
-        Assert.Equal(2, _store.ListRarities().Single().PoolRolls);
+        Assert.True(_store.UpsertRarity(new RarityRow("common", 1, PrefixRolls: 2, SuffixRolls: 1, MinTier: 1, MaxTier: 3)).Ok);
+        Assert.Equal(2, _store.ListRarities().Single().PrefixRolls);
     }
 
     [Fact]
     public void An_inverted_tier_window_on_a_band_is_refused()
     {
-        var (ok, _) = _store.UpsertRarity(new RarityRow("broken", 9, 1, MinTier: 5, MaxTier: 2));
+        var (ok, _) = _store.UpsertRarity(new RarityRow("broken", 9, 1, SuffixRolls: 0, MinTier: 5, MaxTier: 2));
 
         Assert.False(ok);
         Assert.Empty(_store.ListRarities());

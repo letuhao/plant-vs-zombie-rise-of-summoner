@@ -11,6 +11,8 @@ chain."
 > captured species into an **enum-only anchor**; deterministic code then expands that anchor into
 > every number the game uses, and no model ever picks a magnitude.
 
+
+> **Plan:** [tasks/seed-to-concrete-plan.md](../../tasks/seed-to-concrete-plan.md) and [-todo.md](../../tasks/seed-to-concrete-todo.md) — **one plan spans both this map and its sibling**, because Phase 5 is a single vertical slice built from modules of each. Neither program can finish alone.
 ---
 
 ## 1. The architecture the owner chose — `seed → concrete`, not codegen

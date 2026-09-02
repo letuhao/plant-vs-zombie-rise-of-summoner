@@ -1,5 +1,6 @@
 using FusionRpg.Core.Balance.Analytic;
 using FusionRpg.Core.Stats.Aptitudes;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Balance.Guards;
 
@@ -79,13 +80,46 @@ public static class DominanceGuard
     /// scope cannot exercise, rather than a shorter list guessed independently.</summary>
     public static CoverageReport StandardCoverage() => new(
         ElementAxis: "NEUTRALISED -- StrikeMixture is omni-only (P4.1); every corner here is a 1-D slice of a live element axis",
-        ReservedFamilies: new[]
+        ReservedFamilies: BuildReservedFamilies());
+
+    /// <summary>
+    /// DERIVED from <see cref="DerivedStatChannels.ResourceIds"/>, never hand-listed — Phase 0,
+    /// 2026-09-02. The previous version enumerated eleven resource channels by hand and so silently
+    /// omitted three (`resource.efficiency.hp/spirit`, and every `poise` channel once `poise` became
+    /// the sixth resource). That is not cosmetic: a channel missing from this list is treated as
+    /// EXERCISED by the guard, so the six-resource coverage pass moved six aptitudes to 0/11 wins
+    /// purely because their new points landed in channels the predictor cannot read and this list did
+    /// not excuse. Deriving it means a seventh resource is covered by construction.
+    ///
+    /// <para><b>The one exception, and why it is not drift:</b> <c>resource.max.hp</c> and
+    /// <c>resource.regen.hp</c> ARE read by the prediction path (<c>Predictor</c> reads hp regen,
+    /// <c>TerminationGuard</c> reads hp), so they are genuinely exercised and must NOT be reserved.
+    /// Every other resource channel has no prediction reader: `efficiency` has none at all until the
+    /// action-cost layer ships (`spec-action-costs.md` §1), and `max`/`regen` for the other five are
+    /// pools no closed-form duel spends.</para>
+    /// </summary>
+    static IReadOnlyList<string> BuildReservedFamilies()
+    {
+        var reserved = new List<string> { "move.range" };
+
+        foreach (var id in DerivedStatChannels.ResourceIds)
         {
-            "move.range",
-            "resource.efficiency.hunger", "resource.efficiency.qi", "resource.efficiency.stamina",
-            "resource.max.hunger", "resource.max.qi", "resource.max.spirit", "resource.max.stamina",
-            "resource.regen.hunger", "resource.regen.qi", "resource.regen.spirit", "resource.regen.stamina",
-            "skill.cooldown.attack", "skill.cooldown.defense", "skill.cooldown.movement", "skill.cooldown.status", "skill.cooldown.support",
-            "skill.effectiveness.attack", "skill.effectiveness.defense", "skill.effectiveness.movement", "skill.effectiveness.status", "skill.effectiveness.support",
-        });
+            reserved.Add(DerivedStatChannels.ResourceEfficiency(id));   // no reader for ANY id
+            if (id == "hp") continue;                                   // max/regen/gen for hp ARE read
+            reserved.Add(DerivedStatChannels.ResourceMax(id));
+            reserved.Add(DerivedStatChannels.ResourceRegen(id));
+            // resource.restore.hp is OverlayCombatMath's heal term and is exercised; the other five have no
+            // consumer until the action layer grants a non-hp resource (0.8, 2026-09-02).
+            reserved.Add(DerivedStatChannels.ResourceRestore(id));
+        }
+
+        foreach (var category in DerivedStatChannels.ActionCategories)
+        {
+            reserved.Add(DerivedStatChannels.SkillCooldown(category));
+            reserved.Add(DerivedStatChannels.SkillEffectiveness(category));
+        }
+
+        reserved.Sort(StringComparer.Ordinal);
+        return reserved;
+    }
 }

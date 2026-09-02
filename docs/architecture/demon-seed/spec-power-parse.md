@@ -38,6 +38,36 @@ HP gate, which is the gate Q6 removed. **They are a sample biased toward being o
 coverage over all ~904 is unknown until `corpus-dump` runs, and reporting it is one of this module's
 outputs, not one of its assumptions.
 
+### 1a. The real number, measured 2026-09-01 (T1.3/T1.4, `corpus-dump` module 1 having landed)
+
+`python -m seedsmith demons power-parse --dump data/seed/demons/_dump --report`, run against the real
+committed dump (904 species, 677 plant + 227 zombie):
+
+| `basis` | Count | Share |
+|---|---|---|
+| `observed` | 82 | 9.1% |
+| `stated` | 637 | 70.5% |
+| `inferred` | 170 | 18.8% |
+| `blocked` | 15 | 1.7% |
+
+**The 84-species sample's bias is now visible, exactly as predicted.** `observed` over the full roster
+is 82 — the *same absolute count* as the old sample's 82/84 — confirming the old generator's HP gate
+had already captured essentially every observed species in the game; the other 822 species were never
+looked at. The real story is `stated`: 70.5% of the whole roster carries a usable number in flavour
+text once the observed 9.1% is set aside, and `inferred` (18.8%) is exactly the population
+`classify-pipelines` (T2.3-2.5) exists to judge from lore.
+
+`attackTempo` receives a stated interval (a `N秒` reading directly on the damage line) for **270
+species (29.9%)** — smaller than the 65.5%-of-84 figure in §1 because that count included any `N秒` in
+the text (production intervals, status durations), not only ones riding the damage line; §3's design
+deliberately narrows to the damage line only, so 29.9% is the correctly-scoped number, not a
+regression from 65.5%.
+
+Five real disagreements exist between the structured capture and the flavour text (spec §2's
+"interesting data, not an error"): `plant:10` (寒冰菇), `plant:1198` (火爆杨桃), `zombie:100/104/108` —
+all recorded, none resolved by this module. `zombie:100`'s case shows the substring match working as
+designed: its text reads *"子弹伤害：20"*, and the damage pattern still matches the `伤害：20` tail.
+
 ### 2. The four bases, in strict precedence
 
 | `basis` | Condition | Value used |

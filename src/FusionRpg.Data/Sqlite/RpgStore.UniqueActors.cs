@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Effects.Atoms;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -660,6 +661,7 @@ public sealed partial class RpgStore
             }
 
             RebuildUniqueModsFromEquipmentUnlocked(db, id);
+            ReconcileUniqueEquipmentAtomBindingsUnlocked(db, id);
             var actor = ReadUniqueActorUnlocked(db, id)!;
             return new UniqueEquipmentListDto
             {
@@ -673,6 +675,90 @@ public sealed partial class RpgStore
 
     public UniqueEquipmentListDto ClearUniqueEquipmentSlot(string instanceId, string slot) =>
         UpsertUniqueEquipment(instanceId, slot, "");
+
+    /// <summary>Source tag on every binding this reconciliation owns — lets it find (and never touch)
+    /// bindings any other system placed on the same <see cref="OwnerKind.UniqueActor"/> owner.</summary>
+    const string UniqueEquipAtomSource = "unique-equip";
+
+    /// <summary>
+    /// contentScale's own pin (`ContentScale.cs`, `spec-content-scale.md` §2.1): Θc=20 is the anchor
+    /// where `contentScale == 1.000` exactly, the same pin `AtomEndToEndTests.cs`'s own production-
+    /// shape fixture uses. Stub equipment items are flat, unscaled effects — not loot that should get
+    /// a level-derived curve invented for it as a side effect of this owner-scope fix (AGENTS.md "one
+    /// power ladder": a private `f(level)` here is exactly the mistake that rule exists to prevent).
+    /// </summary>
+    const int UniqueEquipAtomPinTheta = 20;
+
+    /// <summary>
+    /// `mods-absorption` (T6.1, `tasks/seed-to-concrete-todo.md`, decision 1 —
+    /// `tasks/seed-to-concrete-open-decisions.md`): reconcile this actor's atom-backed equipment slots
+    /// against `effect_binding`, through <see cref="OwnerKind.UniqueActor"/> (owner-approved
+    /// 2026-09-02 specifically because <see cref="OwnerKind.Entity"/> is session-scoped and would
+    /// silently drop equipped-item bonuses on the next session boundary).
+    ///
+    /// <para><b>Idempotent by construction</b> — the "double-grant invariant": a slot whose existing
+    /// binding's instance already points at the wanted item's own container is left untouched, never
+    /// withdrawn and re-produced, so calling this twice with an unchanged loadout writes nothing new.
+    /// A slot that changed item (or was cleared) has its stale binding withdrawn first, then whatever
+    /// is now wanted is produced+bound.</para>
+    ///
+    /// <para>Only items <see cref="FusionRpg.Core.Match.UniqueEquipmentCatalog.TryGetAtomBackedContainerId"/>
+    /// maps take this path. Everything else (today, only `stub.hp_charm` — its `fx.entity_atk` effect
+    /// id has no real atom behind it) keeps flowing through the legacy `mods_json` grant
+    /// (<see cref="RebuildUniqueModsFromEquipmentUnlocked"/>, called just before this, unchanged) —
+    /// the two paths never grant the same slot twice because the catalog map is the single source of
+    /// which path an item takes.</para>
+    /// </summary>
+    void ReconcileUniqueEquipmentAtomBindingsUnlocked(SqliteConnection db, string instanceId)
+    {
+        var actor = ReadUniqueActorUnlocked(db, instanceId);
+        if (actor is null) return;
+        var player = GetPlayerUnlocked(db, actor.PlayerId);
+        if (player is null) return;
+
+        var owner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
+        var slots = ListUniqueEquipmentUnlocked(db, instanceId);
+
+        var wanted = new Dictionary<string, (string ContainerId, string ItemId)>(StringComparer.OrdinalIgnoreCase);
+        foreach (var s in slots)
+        {
+            if (string.IsNullOrWhiteSpace(s.ItemId)) continue;
+            if (FusionRpg.Core.Match.UniqueEquipmentCatalog.TryGetAtomBackedContainerId(s.ItemId, out var containerId))
+                wanted[s.Slot] = (containerId, s.ItemId);
+        }
+
+        var existing = ListBindings(owner)
+            .Where(b => string.Equals(b.Source, UniqueEquipAtomSource, StringComparison.Ordinal))
+            .ToDictionary(b => b.Slot ?? "", StringComparer.OrdinalIgnoreCase);
+
+        bool MatchesWanted(BindingRow binding, (string ContainerId, string ItemId) want) =>
+            GetInstance(binding.InstanceId) is { } inst &&
+            string.Equals(inst.ContainerId, want.ContainerId, StringComparison.Ordinal);
+
+        foreach (var (slot, binding) in existing)
+        {
+            var stillWanted = wanted.TryGetValue(slot, out var want) && MatchesWanted(binding, want);
+            if (!stillWanted)
+                Withdraw(binding.BindingId);
+        }
+
+        var catalogRevision = GetCatalogRevision();
+        foreach (var (slot, want) in wanted)
+        {
+            if (existing.TryGetValue(slot, out var current) && MatchesWanted(current, want))
+                continue; // already correctly bound — the double-grant invariant
+
+            var container = GetContainer(want.ContainerId);
+            if (container is null) continue; // seeded container missing; fail closed, nothing granted
+
+            var rollSeed = WorldSeed.DeriveRollSeed(
+                player.WorldSeed, UniqueEquipAtomSource, $"{instanceId}:{slot}:{want.ItemId}");
+            ProduceAndBind(container, DomainMembers, rollSeed, UniqueEquipAtomPinTheta,
+                FusionRpg.Core.Power.PowerTuningHub.Tuning, owner, slot, priority: 0,
+                source: UniqueEquipAtomSource, out _, out _,
+                origin: InstanceOrigin.Grant, catalogRevision: catalogRevision);
+        }
+    }
 
     public string RebuildUniqueModsFromEquipment(string instanceId)
     {

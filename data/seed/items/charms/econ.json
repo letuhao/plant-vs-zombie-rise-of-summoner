@@ -32,7 +32,8 @@
       "fixedAtoms": [
         { "family": "atom.sunbloom", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.hoarded-kernel",
       "flavorKey": "flavor.charm.hoarded-kernel",
@@ -50,7 +51,8 @@
       "fixedAtoms": [
         { "family": "atom.midas", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility", "mechanical"],
       "iconKey": "icon.charm.gilded-husk",
       "flavorKey": "flavor.charm.gilded-husk",
@@ -68,7 +70,8 @@
       "fixedAtoms": [
         { "family": "atom.sunbloom", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility", "mechanical"],
       "iconKey": "icon.charm.lacquerclip",
       "flavorKey": "flavor.charm.lacquerclip",
@@ -86,7 +89,8 @@
       "fixedAtoms": [
         { "family": "atom.midas", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "iconKey": "icon.charm.scavenged-purse",
       "flavorKey": "flavor.charm.scavenged-purse",
@@ -104,7 +108,8 @@
       "fixedAtoms": [
         { "family": "atom.sunbloom", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.bead-of-ash",
       "flavorKey": "flavor.charm.bead-of-ash",
@@ -122,7 +127,8 @@
       "fixedAtoms": [
         { "family": "atom.midas", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "iconKey": "icon.charm.rustloop",
       "flavorKey": "flavor.charm.rustloop",
@@ -141,7 +147,8 @@
         { "family": "atom.sunbloom", "powerBand": "low" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.burgeoning-silo",
       "flavorKey": "flavor.charm.burgeoning-silo",
@@ -160,7 +167,8 @@
         { "family": "atom.midas", "powerBand": "low" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.holding-coffer",
       "flavorKey": "flavor.charm.holding-coffer",
@@ -179,7 +187,8 @@
         { "family": "atom.sunbloom", "powerBand": "low" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.token-of-the-ledger",
       "flavorKey": "flavor.charm.token-of-the-ledger",
@@ -198,7 +207,8 @@
         { "family": "atom.midas", "powerBand": "low" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility", "mechanical"],
       "iconKey": "icon.charm.locket-of-appraisal",
       "flavorKey": "flavor.charm.locket-of-appraisal",
@@ -217,7 +227,8 @@
         { "family": "atom.sunbloom", "powerBand": "low" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.earthpod",
       "flavorKey": "flavor.charm.earthpod",
@@ -236,7 +247,8 @@
         { "family": "atom.midas", "powerBand": "low" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "iconKey": "icon.charm.pouch-of-requisition",
       "flavorKey": "flavor.charm.pouch-of-requisition",
@@ -255,7 +267,8 @@
         { "family": "atom.sunbloom", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.wandering-trinket",
       "flavorKey": "flavor.charm.wandering-trinket",
@@ -274,7 +287,8 @@
         { "family": "atom.midas", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.tended-bloom",
       "flavorKey": "flavor.charm.tended-bloom",
@@ -293,7 +307,8 @@
         { "family": "atom.sunbloom", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.root-of-the-foundation",
       "flavorKey": "flavor.charm.root-of-the-foundation",
@@ -312,7 +327,8 @@
         { "family": "atom.midas", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.seed-of-the-glut",
       "flavorKey": "flavor.charm.seed-of-the-glut",
@@ -331,7 +347,8 @@
         { "family": "atom.sunbloom", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "iconKey": "icon.charm.patched-satchel",
       "flavorKey": "flavor.charm.patched-satchel",
@@ -350,7 +367,8 @@
         { "family": "atom.midas", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.sunbloom", "atom.midas"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "iconKey": "icon.charm.twinbead",
       "flavorKey": "flavor.charm.twinbead",
@@ -370,7 +388,8 @@
         { "family": "atom.sunbloom", "powerBand": "high" },
         { "family": "atom.vitality", "powerBand": "medium", "params": { "sign": "negative" } }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "iconKey": "icon.charm.signet-of-the-coalbed",
       "flavorKey": "flavor.charm.signet-of-the-coalbed",
@@ -390,7 +409,8 @@
         { "family": "atom.midas", "powerBand": "high" },
         { "family": "atom.might", "powerBand": "medium", "params": { "sign": "negative" } }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "iconKey": "icon.charm.signet-of-annexation",
       "flavorKey": "flavor.charm.signet-of-annexation",

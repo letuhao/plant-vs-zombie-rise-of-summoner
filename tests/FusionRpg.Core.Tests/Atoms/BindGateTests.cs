@@ -39,9 +39,21 @@ public class BindGateTests
     [InlineData("player:1")]
     [InlineData("sector:north-ridge")]
     [InlineData("slot:forge-1")]
+    [InlineData("unique-actor:abc123")]
     public void Every_legal_owner_key_parses(string text)
     {
         Assert.True(OwnerScope.TryParse(text, out _).IsOk, text);
+    }
+
+    [Fact]
+    public void UniqueActor_round_trips_through_ToString_and_TryParse()
+    {
+        // decision 1 (tasks/seed-to-concrete-open-decisions.md): a persistent rpg_unique_actor's own
+        // instance_id, durable like Player — never session-scoped like Entity.
+        var scope = Parse("unique-actor:c0ffee00");
+        Assert.Equal(OwnerKind.UniqueActor, scope.Kind);
+        Assert.False(scope.IsSessionScoped);
+        Assert.Equal("unique-actor:c0ffee00", scope.ToString());
     }
 
     [Theory]

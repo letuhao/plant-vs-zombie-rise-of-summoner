@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 233,
+  "magnitudes": {
+    "combat.power.omni": 994,
+    "progression.bonus.atk": 4520,
+    "resource.max.hp": 6328,
+    "resource.max.hunger": 4068,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 8136,
+    "resource.regen.hp": 136,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 407
+  },
+  "pTheta": 452,
+  "rangeCells": 1,
+  "rarity": "Heirloom",
+  "side": "zombie",
+  "speciesId": "ArmedGargantuar",
+  "theta": 13,
+  "traitPool": [
+    "adaptive_eye_affinity",
+    "armored_giant",
+    "multi_hit_striker",
+    "summoner_aura"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "cursed",
+    "mutated"
+  ]
+}

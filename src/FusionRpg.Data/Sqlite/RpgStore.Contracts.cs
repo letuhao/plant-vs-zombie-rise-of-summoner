@@ -149,7 +149,7 @@ public sealed partial class RpgStore
         var decayed = new HashSet<string>(StringComparer.Ordinal);
         var firstDay = lastSettled.UtcDateTime.Date;
         var due = bound.Sum(c => (long)ContractPolicy.UpkeepPerDay(
-            rarities.TryGetValue(c.InstanceId, out var r) ? r : DemonRarity.Common, c.Personality));
+            rarities.TryGetValue(c.InstanceId, out var r) ? r : DemonRarity.Chaff, c.Personality));
         for (var d = 1; d <= elapsed && bound.Count > 0; d++)
         {
             var day = firstDay.AddDays(d).ToString("yyyy-MM-dd");
@@ -520,9 +520,9 @@ public sealed partial class RpgStore
         var actor = ReadUniqueActorUnlocked(db, instanceId);
         if (actor is null || actor.PlayerId != playerId
             || string.Equals(actor.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
-            return (false, DemonRarity.Common);
+            return (false, DemonRarity.Chaff);
         var profile = ReadDemonProfileUnlocked(db, instanceId);
-        if (profile is null) return (false, DemonRarity.Common);
+        if (profile is null) return (false, DemonRarity.Chaff);
         DemonRarityIds.TryParse(profile.Rarity, out var rarity);
         return (true, rarity);
     }

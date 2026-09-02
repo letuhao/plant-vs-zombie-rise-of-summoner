@@ -37,7 +37,7 @@ public static class PatronPolicy
     public static int PerStarMilli => Tuning.PerStarMilli;
 
     public static int RarityBaseMilli(DemonRarity rarity) =>
-        Tuning.RarityBaseMilli.TryGetValue(rarity, out var v) ? v : Tuning.RarityBaseMilli[DemonRarity.Legendary];
+        Tuning.RarityBaseMilli.TryGetValue(rarity, out var v) ? v : Tuning.RarityBaseMilli[DemonRarity.Almanac];
 
     /// <summary>
     /// aura-skill T22 (owner sign-off 2026-08-30): `flatPart + pThetaTermMilli`. The flat part is the

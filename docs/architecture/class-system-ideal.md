@@ -1105,8 +1105,8 @@ totalResist = TierPower×ratio + status.resist.omni + status.resist.{category}
               + status.resist.{statusId} + status.resist.{element}
 ```
 
-**Three tiers, all additive** — the same `omni + category` additive-only rule the element hub locks
-(never `omni × category`).
+**Three tiers, all additive** — the same `omni + category` **default** the element hub now treats as a tunable
+(never `omni × category`). **[Ban removed 2026-09-02 — see `element-hub-ssot.md` §7; the omni combination is a tunable, default still additive.]**
 
 | Tier | Element system | Status system | Sourced by |
 |---|---|---|---|

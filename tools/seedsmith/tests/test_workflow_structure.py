@@ -41,6 +41,23 @@ def test_nodes_and_state_never_import_langgraph():
     assert offenders == [], f"LangGraph imported outside graphs/: {offenders}"
 
 
+def test_no_second_authoring_pipeline_shape_exists():
+    """T5.0 (`shared-authoring-shape`) — `base.py` is the ONE place `StateGraph` is instantiated.
+    Every other module under `graphs/` must wire `build_generation_graph`, never construct its own
+    `StateGraph(...)` — a second construction call IS a forked pipeline shape, the exact defect this
+    task's own ⛔ audit finding names ("T7.1 forks or refactors" if extraction does not precede
+    first use). Parsed via AST, not grepped, so a `StateGraph` mentioned only in a docstring or a
+    comment is never a false positive."""
+    offenders = []
+    for path in _py_files("graphs"):
+        if path.name in ("base.py", "__init__.py"):
+            continue
+        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "StateGraph":
+                offenders.append(f"{path.name}:{node.lineno}")
+    assert offenders == [], f"a second pipeline shape constructs its own StateGraph: {offenders}"
+
+
 def test_graphs_package_is_the_only_langgraph_importer():
     found = False
     for path in _py_files("graphs"):

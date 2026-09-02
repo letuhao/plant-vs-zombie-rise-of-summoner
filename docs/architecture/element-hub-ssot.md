@@ -203,10 +203,15 @@ Status already owns timed-state apply math; those extra combat families would wi
 
 ---
 
-## 7. Omni rule (locked)
+## 7. Omni rule — the combination is TUNABLE, not banned
 
-Omni is additive-only — for **every** combat family, original and H.1 alike (element-families, T3.1,
-2026-08-24; spec-element-families.md §2.1).
+**Amended 2026-09-02 (owner).** The former *"omni is additive-only, `omni × X` banned"* prohibition is
+**removed.** Omni is a breadth stat — *"+100 resistance to all elements"* — and **breadth is priced by
+magnitude, not by forbidding an operation.** Its value range is `numerics`' job (Law 2: deterministic
+code writes magnitude) and its coefficients are tuning rows (Law 6). No derived stat carries a
+structural ban on an arithmetic operation, and omni no longer does either.
+
+**The shipped default stays additive**, because that is already what "+100 to all elements" means:
 
 ```text
 totalX = X.omni + X.{element}
@@ -218,15 +223,23 @@ the sixteen H.1 families (`penetration`, `absorption`, `amplification`, `reducti
 `reflect.{resist.}rate`, `reflect.{resist.}damage`, `parry.{break,rate,shred,strength}`,
 `block.{break,rate,shred,strength}`).
 
-Bans — extends unchanged to the new families:
+~~Bans~~ **Removed 2026-09-02.** The former ban list (`omni × element`, `omni × crit`, `omni × dodge`,
+`omni × penetration/parry/block/reflect`, "any multiplicative omni snowball rule") **no longer applies.**
 
-- `omni × element`
-- `omni × crit`
-- `omni × dodge`
-- `omni × penetration`, `omni × parry`, `omni × block`, `omni × reflect`
-- any multiplicative omni snowball rule
+**What replaces it — balance, not prohibition:**
 
-This matches the status design in [actor-hub-ssot.md](actor-hub-ssot.md): omni is the baseline, element is the typed slice.
+- omni's **coefficients live in `data/tuning/`** and are set lower than a single-element equivalent,
+  because omni applies to every element at once. That is the price of breadth, and it is a number.
+- a family that wants a multiplicative or synergy combination declares it in tuning; nothing forbids it.
+- **the default remains `omni + element`** for all 28 families, so no shipped behaviour changes and no
+  goldens move by this amendment alone.
+
+**Measured before removing it (2026-09-02):** 0 of 34 authored channel families set both `omni` and an
+element on the same family, so a bare product would evaluate to zero everywhere. **Any family that
+adopts a non-additive rule must define its identity for the absent side** — this is an arithmetic
+requirement, not a re-introduced ban.
+
+omni is the baseline, element is the typed slice — that framing survives; only the prohibition is gone.
 
 ---
 

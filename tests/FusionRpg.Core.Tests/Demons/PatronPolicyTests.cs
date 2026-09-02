@@ -10,10 +10,10 @@ namespace FusionRpg.Core.Tests.Demons;
 public class PatronPolicyTests
 {
     [Theory]
-    [InlineData(DemonRarity.Common, 20)]
-    [InlineData(DemonRarity.Rare, 30)]
-    [InlineData(DemonRarity.Epic, 45)]
-    [InlineData(DemonRarity.Legendary, 60)]
+    [InlineData(DemonRarity.Chaff, 20)]
+    [InlineData(DemonRarity.Cultivated, 30)]
+    [InlineData(DemonRarity.Heirloom, 45)]
+    [InlineData(DemonRarity.Sunwoven, 60)]
     public void Rarity_bases_are_locked(DemonRarity rarity, int baseMilli) =>
         Assert.Equal(baseMilli, PatronPolicy.RarityBaseMilli(rarity));
 
@@ -23,8 +23,8 @@ public class PatronPolicyTests
     // makes the new term vanish, so these tests assert the COMBINED value explicitly rather than
     // pretending the old flat-only numbers still hold on their own.
     static long PThetaTermAt(int pTheta, PowerTuning tuning) =>
-        FusionRpg.Core.Demons.Patron.PatronPolicy.AuraMilli(DemonRarity.Common, 0, 0, pTheta, tuning)
-        - FusionRpg.Core.Demons.Patron.PatronPolicy.RarityBaseMilli(DemonRarity.Common); // isolates the term: flatPart(Common,0,0) = RarityBaseMilli(Common) exactly
+        FusionRpg.Core.Demons.Patron.PatronPolicy.AuraMilli(DemonRarity.Chaff, 0, 0, pTheta, tuning)
+        - FusionRpg.Core.Demons.Patron.PatronPolicy.RarityBaseMilli(DemonRarity.Chaff); // isolates the term: flatPart(Common,0,0) = RarityBaseMilli(Common) exactly
 
     [Fact]
     public void Aura_formula_flat_part_plus_pTheta_term()
@@ -33,12 +33,12 @@ public class PatronPolicyTests
         var term0 = PThetaTermAt(pTheta: 0, tuning);
         Assert.True(term0 > 0, "P(0) = C, never zero -- the new term must contribute even at Θ=0");
 
-        Assert.Equal(20 + term0, PatronPolicy.AuraMilli(DemonRarity.Common, star: 0, level: 0, pTheta: 0, tuning));
-        Assert.Equal(75 + term0, PatronPolicy.AuraMilli(DemonRarity.Epic, star: 2, level: 10, pTheta: 0, tuning)); // 45+20+10 flat
+        Assert.Equal(20 + term0, PatronPolicy.AuraMilli(DemonRarity.Chaff, star: 0, level: 0, pTheta: 0, tuning));
+        Assert.Equal(75 + term0, PatronPolicy.AuraMilli(DemonRarity.Heirloom, star: 2, level: 10, pTheta: 0, tuning)); // 45+20+10 flat
         // The OLD flat part is still clamped at 150 regardless of star/level -- the P(Θ) term is the
         // ONLY thing that keeps growing past it.
-        Assert.Equal(150 + term0, PatronPolicy.AuraMilli(DemonRarity.Legendary, star: 5, level: 90, pTheta: 0, tuning));
-        Assert.Equal(PatronPolicy.AuraClampMilli + term0, PatronPolicy.AuraMilli(DemonRarity.Legendary, 5, 999, pTheta: 0, tuning));
+        Assert.Equal(150 + term0, PatronPolicy.AuraMilli(DemonRarity.Sunwoven, star: 5, level: 90, pTheta: 0, tuning));
+        Assert.Equal(PatronPolicy.AuraClampMilli + term0, PatronPolicy.AuraMilli(DemonRarity.Sunwoven, 5, 999, pTheta: 0, tuning));
     }
 
     [Fact]
@@ -62,8 +62,8 @@ public class PatronPolicyTests
     public void Aura_shape_primary_full_secondary_half_defense_half()
     {
         var tuning = TuningAt(400);
-        var flatPlusTerm = PatronPolicy.AuraMilli(DemonRarity.Epic, star: 2, level: 10, pTheta: 0, tuning);
-        var aura = PatronPolicy.Aura(DemonRarity.Epic, star: 2, level: 10, pTheta: 0, tuning, "fire", "ice");
+        var flatPlusTerm = PatronPolicy.AuraMilli(DemonRarity.Heirloom, star: 2, level: 10, pTheta: 0, tuning);
+        var aura = PatronPolicy.Aura(DemonRarity.Heirloom, star: 2, level: 10, pTheta: 0, tuning, "fire", "ice");
         Assert.Equal("fire", aura.ElementPrimary);
         Assert.Equal(flatPlusTerm, aura.PowerMilli);
         Assert.Equal(flatPlusTerm / 2, aura.DefenseMilli); // half, truncating
@@ -71,7 +71,7 @@ public class PatronPolicyTests
         Assert.Equal(flatPlusTerm / 2, aura.SecondaryPowerMilli);
         Assert.Equal(flatPlusTerm / 4, aura.SecondaryDefenseMilli);
 
-        var mono = PatronPolicy.Aura(DemonRarity.Common, 0, 0, pTheta: 0, tuning, "dark", null);
+        var mono = PatronPolicy.Aura(DemonRarity.Chaff, 0, 0, pTheta: 0, tuning, "dark", null);
         Assert.Null(mono.ElementSecondary);
         Assert.Equal(0, mono.SecondaryPowerMilli);
     }

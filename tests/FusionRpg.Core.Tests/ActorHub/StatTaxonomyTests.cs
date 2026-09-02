@@ -141,14 +141,14 @@ public class StatTaxonomyTests
         // 157 -> 160 (class-system `poise-resource`, 2026-08-26: poise's three resource channels) ->
         // 31 (class-system P1.5 reader census, 2026-08-26): 129 channels gained a real Unit once their
         // production reader was found and verified (16 combat H.1 families x 7 slots = 112, plus 16
-        // status duration/intensity fixed-category channels, plus combat.heal.power = 129). The
+        // status duration/intensity fixed-category channels, plus resource.restore.hp = 129). The
         // remaining 31 are exactly the 8 reader-less families' channel counts (skill.cooldown 5 +
         // skill.effectiveness 5 + resource.max 6 + resource.regen 6 + resource.efficiency 6 +
         // move.range 1 + progression.xpRate 1 + progression.breakthroughSuccess 1 = 31) — every one of
         // which now carries a UnitClassNote instead (asserted separately, NoNullUnitClassWithoutANote
         // below), so a null Unit is never unexplained.
         var newNullUnitCount = AllRegistered.Count(d => !original.Contains(d.ChannelId) && d.Unit is null);
-        Assert.Equal(31, newNullUnitCount);
+        Assert.Equal(37, newNullUnitCount);
     }
 
     [Fact]
@@ -170,9 +170,9 @@ public class StatTaxonomyTests
     {
         // 9 progression (7 + H.7's 2) + 24 status constants (8 + H.2's 16) + 196 combat (84 + H.1's 112)
         // + 1 healing + 18 resource (15 + `poise`'s 3, 2026-08-26) + 1 move.range + 10 action-category
-        // + 2 turn (speed/haste, P0.5, 2026-08-28) = 261 (99 -> 256 T2 -> 259 class-system
-        // `poise-resource` -> 261 P0.5/battle-timeline B9).
-        Assert.Equal(261, AllRegistered.Count);
+        // + 2 turn (speed/haste, P0.5, 2026-08-28) = 267 (99 -> 256 T2 -> 259 class-system
+        // `poise-resource` -> 267 P0.5/battle-timeline B9).
+        Assert.Equal(267, AllRegistered.Count);
 
         // Every def classifies except five non-combat channels the counterbalance rule does not apply
         // to: the two Theta/progression channels (actor-hub-ssot.md §H.0's "Non-combat" row), plus

@@ -151,7 +151,7 @@ public sealed partial class RpgStore
         if (!StarPolicy.CanPromote(baseRarity, baseProfile!.Star, baseProfile.Promoted))
             return (false, "promotion.not-ready", null);
 
-        var newRarity = (DemonRarity)((int)baseRarity + 1);
+        var newRarity = DemonRarityLadder.OneRungAbove(baseRarity);
         var cost = FusionCostTable.Promotion(newRarity);
         var spendReason = SpendFusionCostsUnlocked(db, playerId, corr, cost, baseProfile.ElementPrimary, now);
         if (spendReason != "") return (false, spendReason, null);

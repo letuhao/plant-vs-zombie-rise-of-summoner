@@ -25,6 +25,33 @@ public static class UniqueEquipmentCatalog
             ["stub.hp_charm"] = Grant("equip-stub-hp", "fx.entity_atk") // placeholder effect id for bag prove
         };
 
+    /// <summary>
+    /// `mods-absorption` (T6.1, `spec-mods-absorption.md`): which of the shipped `EffectId`s already
+    /// have a real, seeded atom (`data/seed/containers/unique-equip.json`, wrapping the SAME atoms
+    /// `EffectAtomCatalog.Generated.cs` already compiles from — found real, not invented, 2026-09-02).
+    /// `fx.entity_atk` is deliberately absent — its own doc comment on <see cref="Items"/> already
+    /// calls it a placeholder id with no real effect behind it, verified by grep across every seed
+    /// file: nothing produces it. An item/relic granting through `fx.entity_atk` stays on the legacy
+    /// `mods_json` grant path; every other one now produces through <c>InstanceProducer</c> instead.
+    /// </summary>
+    static readonly IReadOnlyDictionary<string, string> AtomBackedContainerByEffectId =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["fx.passive_atk_flat"] = "item.fx-passive-atk-flat",
+            ["fx.butter_on_hit"] = "item.fx-butter-on-hit",
+            ["fx.shield_grant"] = "item.fx-shield-grant",
+            ["fx.cold_on_hit"] = "item.fx-cold-on-hit",
+        };
+
+    /// <summary>The real container id for an equipped item/relic's own effect, or null when none
+    /// exists yet (the item stays on the legacy `mods_json` grant path for that case).</summary>
+    public static bool TryGetAtomBackedContainerId(string? itemId, out string containerId)
+    {
+        containerId = "";
+        if (!TryGetGrant(itemId, out var grant)) return false;
+        return AtomBackedContainerByEffectId.TryGetValue(grant.EffectId, out containerId!);
+    }
+
     public static bool IsAllowedSlot(string? slot)
     {
         if (string.IsNullOrWhiteSpace(slot)) return false;

@@ -63,7 +63,7 @@
     "combat.parry.shred": "magnitude",
     "combat.block.strength": "magnitude",
     "combat.block.shred": "magnitude",
-    "combat.heal.power": "magnitude",
+    "resource.restore": "magnitude",
     "_resourceNote": "resource.max/regen are POOL SIZES and RATES measured against damage, which is P(Theta)-scaled - so they are magnitudes, and a Theta-free read would make every pool vanish relative to the hit that empties it. resource.efficiency is a bounded 0..1 cost ratio (cap 1.0) and must stay Theta-free.",
     "resource.max": "magnitude",
     "resource.regen": "magnitude",
@@ -378,12 +378,12 @@
       "kMilli": 1200
     },
     {
-      "channel": "combat.heal.power",
+      "channel": "resource.restore.hp",
       "source": "Ferocity",
       "kMilli": 12000
     },
     {
-      "channel": "combat.heal.power",
+      "channel": "resource.restore.hp",
       "source": "Composure",
       "kMilli": 8000
     },

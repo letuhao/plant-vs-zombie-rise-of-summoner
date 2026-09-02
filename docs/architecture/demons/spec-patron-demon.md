@@ -32,6 +32,31 @@ The aura lands on the patron's **primary element** as `combat.power.{elem}` and 
 - Injector learns the patron via the existing server↔injector plumbing: the server includes the current patron aura in the match-start state the injector already fetches, and pushes `PatronUpdated` on change (applies from the NEXT match — decision 2's match boundary comes free).
 - SIM parity: the SIM effect host applies the same grant, so aura math is provable offline; only the Unity read path needs the LIVE gate.
 
+### Amendment 2026-09-01 (`seed-to-concrete` T0.7 / Q13, `effect-pipeline-map.md` module 6 `patron-absorption`)
+
+**The delivery mechanism above is being absorbed into the atom-effect path, not replaced.** Owner:
+absorb it — `patron.*` becomes a real `effect_container` kind rather than a Secondary plugin grant.
+`data/seed/containers/patron.json` is **already committed**, staking the move ahead of the build:
+`{ "id": "patron.aura", "kind": "patron", "poolRolls": 0, "atoms": [], "tags": { "marker":
+"fx.patron_aura" } }` — the exact `EffectId` `PatronSecondaryPlugin` emits today, so `patron-absorption`
+fills a container that already carries the right id and correlation marker rather than creating one
+from nothing.
+
+**This carries a risk the module's original design did not have to state, and it is stated here so a
+future implementer does not skip it.** `auraMilli` above scales **continuously** with `star` and
+`level`; a container's atoms carry **discrete tiers**. The mechanism that closes the gap is E2's
+`effect_curve` (integer-per-mille interpolated points) — the atom's value spec keys its curve on
+star/level rather than taking a flat tier, so nothing new is needed at the schema layer. What **is**
+new: this module's SIM results, gathered against the formula above, are a standing baseline, and
+absorption is not permitted to move a single number under it silently.
+
+**⛔ Acceptance gate for `patron-absorption`: a before/after equality test across the full
+(`rarity × star × level × Θ`) grid**, not a spot check — if the container's curve-read output differs
+from `PatronPolicy.AuraMilli`'s output anywhere in that grid, the absorption is not done. This
+supersedes nothing above (the aura magnitude formula, the delivery description, the LIVE gate) — it
+only changes *which mechanism* carries the grant, from a Secondary plugin to `AtomRunner`, the same
+Secondary-layer runner the plugin already occupies today.
+
 ### Data
 
 - `rpg_patron` (player_id PK, instance_id, set_utc, revision). Set/switch is one transaction: replay-check → validate specimen (owned, demon profile, not Retired) → first-set-free else `TrySpendSouls(100, "patron", correlation)` → upsert + revision.

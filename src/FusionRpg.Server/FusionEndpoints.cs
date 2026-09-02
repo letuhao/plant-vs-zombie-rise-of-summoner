@@ -144,7 +144,7 @@ public static class FusionEndpoints
 
                 if (!StarPolicy.CanPromote(rarity, baseSpec.Profile.Star, baseSpec.Profile.Promoted))
                     return new { ok = false, reason = "promotion.not-ready" };
-                var newRarity = (DemonRarity)((int)rarity + 1);
+                var newRarity = DemonRarityLadder.OneRungAbove(rarity);
                 return new
                 {
                     ok = true,

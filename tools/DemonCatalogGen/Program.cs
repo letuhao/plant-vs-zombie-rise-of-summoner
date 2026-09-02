@@ -53,10 +53,10 @@ DemonSpeciesCatalog.Validate(species);
 File.WriteAllText(output, DemonSpeciesGenerator.EmitCSharp(species));
 
 Console.WriteLine($"species: {species.Count} " +
-    $"(legendary {species.Count(s => s.BaseRarity == DemonRarity.Legendary)}, " +
-    $"epic {species.Count(s => s.BaseRarity == DemonRarity.Epic)}, " +
-    $"rare {species.Count(s => s.BaseRarity == DemonRarity.Rare)}, " +
-    $"common {species.Count(s => s.BaseRarity == DemonRarity.Common)}; " +
+    $"(sunwoven {species.Count(s => s.BaseRarity == DemonRarity.Sunwoven)}, " +
+    $"heirloom {species.Count(s => s.BaseRarity == DemonRarity.Heirloom)}, " +
+    $"cultivated {species.Count(s => s.BaseRarity == DemonRarity.Cultivated)}, " +
+    $"chaff {species.Count(s => s.BaseRarity == DemonRarity.Chaff)}; " +
     $"light {species.Count(s => s.ElementPrimary == FusionRpg.Core.Stats.Derived.ElementTypeId.Light)}, " +
     $"dark {species.Count(s => s.ElementPrimary == FusionRpg.Core.Stats.Derived.ElementTypeId.Dark)}, " +
     $"hypno {species.Count(s => s.DeployMode == DemonDeployMode.HypnoAlly)}, " +

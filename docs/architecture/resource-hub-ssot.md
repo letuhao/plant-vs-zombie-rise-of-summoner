@@ -186,7 +186,36 @@ resource.max.{id}      resource.regen.{id}
 ```
 
 `resource.efficiency.*` is a third, registered alongside them (`SumIncreased`, capped at 1.0 —
-`DerivedStatPolicy.ResourceEfficiencyCap`). All three form **their own family list and do not join
+`DerivedStatPolicy.ResourceEfficiencyCap`).
+
+> ### ⛔ Six-coverage rule (owner, 2026-09-02) — normative
+>
+> **Every derived-stat family that affects a resource MUST cover all six resources.**
+> `ResourceIds` is `{ hp, stamina, hunger, spirit, qi, poise }` and it is the only list. A family that
+> covers a subset is a **defect, never a feature** — actions can cost any of the six
+> (`ActorResourcePools.cs`: *"All six resource pools for one actor"*), so a family covering three means
+> **only three resources have a stat that governs them**, which is the design error this rule exists to
+> forbid.
+>
+> **This applies to the aptitude edges and to every hand-maintained list, not just to registration.**
+> `DerivedStatRegistry` already loops `ResourceIds` and is correct by construction. The drift is
+> everywhere a list was typed by hand.
+>
+> **Open defects as of 2026-09-02** — see
+> [`../research/resource-symmetry-audit-2026-09-02.md`](../research/resource-symmetry-audit-2026-09-02.md):
+>
+> | Layer | max | regen | efficiency |
+> |---|---|---|---|
+> | Registered channels (loops `ResourceIds`) | 6/6 ✅ | 6/6 ✅ | 6/6 ✅ |
+> | **Aptitude edges** (`aptitudes.v2.json`) | 5/6 — no `poise` | 5/6 — no `poise` | **3/6 — no `hp`, `spirit`, `poise`** |
+> | **`DominanceGuard.ReservedFamilies`** (hand-listed) | 4/6 | 4/6 | 3/6 |
+>
+> **`poise` has zero aptitude edges of any kind**, which is why `guard-economy` is blocked
+> (`class-system/spec-poise-resource.md` §1; tracked as P7.2). **`resource.efficiency` has only four
+> edges in the whole game** — Agility→stamina, Focus→{hunger, qi, stamina}.
+>
+> **Fix direction: derive, never hand-list.** Any code or data that enumerates resources should loop
+> `ResourceIds` so a seventh resource is covered by construction, the way registration already is. All three form **their own family list and do not join
 `CombatChannelFamilies`/`AllCombatChannelIds`**, which is exactly **28 families / 196 channels** today
 (reconcile pass, F6/F9, 2026-08-25 — was 12/84 when this doc was first drafted; see
 `src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs`'s `CombatChannelFamilies` for the canonical

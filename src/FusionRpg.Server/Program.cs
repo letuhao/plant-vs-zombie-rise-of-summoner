@@ -56,6 +56,10 @@ FusionRpg.Core.Status.StatusPolicy.Configure(
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+// T4.7 step 2 / T4.8 (catalog-runtime): behaviour-preserving today — the SAME compiled roster
+// DemonSpeciesCatalog.All always read, now routed through Configure. NOT the store-backed flip
+// (SpeciesSnapshot.cs's own doc comment says why).
+FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
 FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
     FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "overlay.v1.json"))));
@@ -94,8 +98,8 @@ FusionRpg.Core.Power.PowerTuningHub.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "power-scale.v2.json"))));
 FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
     FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
-        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. v1 stays on disk -- reverting is pointing this back at aptitudes.v1.json.
-        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v2.json"))));
+        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json.
+        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v5.json"))));
 // Server-side only (spec-action-catalog.md, T30): actions are battle-mode and the injector never
 // sees one, so the rung ladder has no reason to load there.
 FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(

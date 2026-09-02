@@ -20,7 +20,8 @@ namespace FusionRpg.Guard.Tests;
 /// here), and <c>effect_channel_policy</c>'s <c>direction</c> column (E22) — the one column of four
 /// with an existing consumer (<c>StatChannels.IsLowerBetter</c>); see <c>ChannelPolicyTable</c>'s doc
 /// comment for why <c>default_value</c>/<c>cap_milli</c>/<c>compose_kind</c> are not claimed here. The
-/// five container/atom/curve/rarity tables are deliberately <b>not</b> asserted — <c>AtomPushService</c>
+/// seven container/atom/curve/rarity/affix tables (<c>effect_affix</c>/<c>effect_affix_ref</c> joined
+/// at v8, T3.1) are deliberately <b>not</b> asserted — <c>AtomPushService</c>
 /// already reads them for a real compiled push, a different, already-closed gap (E19); the registry's
 /// remaining entry, <c>rarity</c>, is read only by its own import's validation, never by a gameplay
 /// consumer, which is the runtime-producer gap tracked as A4 and explicitly out of wave 6.</para>
@@ -55,11 +56,17 @@ public class ContentTableReaderGuardTests
     }
 
     [Fact]
-    public void The_registry_names_exactly_the_sixteen_tables_this_guard_accounts_for()
+    public void The_registry_names_exactly_the_eighteen_tables_this_guard_accounts_for()
     {
-        // A regression trip-wire for the registry itself: if a seventeenth table joins
+        // A regression trip-wire for the registry itself: if a nineteenth table joins
         // ContentHashRegistry.Current, this guard's scope claim above goes stale silently unless
         // something notices. It should fail loudly instead.
+        //
+        // effect_affix / effect_affix_ref joined at registry v8 (effect-pipeline T3.1,
+        // affix-schema, 2026-09-02) — same "deliberately not asserted" bucket as the other
+        // container/atom/curve/rarity tables the class doc names: AtomPushService's compiled push
+        // reads a container's pool through RpgStore.Containers.cs's own GetAffix, not a separate
+        // reader this guard would need to name.
         var registry = ReadCore("Effects", "Atoms", "ContentHashRegistry.cs");
 
         var names = new HashSet<string>(StringComparer.Ordinal);
@@ -70,7 +77,7 @@ public class ContentTableReaderGuardTests
         var expected = new[]
         {
             "effect_atom", "effect_container", "effect_container_atom", "effect_container_pool",
-            "effect_curve", "rarity",
+            "effect_curve", "rarity", "effect_affix", "effect_affix_ref",
             "effect_element", "effect_element_matrix_combat", "effect_element_matrix_shield",
             "power_coefficient", "power_trigger_frequency", "power_predicate_frequency",
             "effect_channel_policy",

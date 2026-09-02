@@ -92,6 +92,7 @@ public static class Instantiator
     public static AtomRejection TryInstantiate(
         ContainerRow container,
         Func<string, AtomRow?> lookupAtom,
+        Func<string, AffixRow?> lookupAffix,
         long rollSeed,
         int thetaContent,
         FusionRpg.Core.Power.PowerTuning tuning,
@@ -101,7 +102,7 @@ public static class Instantiator
     {
         instance = null;
 
-        var check = ContainerValidator.Validate(container, lookupAtom);
+        var check = ContainerValidator.Validate(container, lookupAtom, lookupAffix);
         if (!check.IsOk) return check;
 
         // Computed once (spec §2.2: "One call site") — never re-derived per atom, so every value in
@@ -121,7 +122,7 @@ public static class Instantiator
             rows.Add(new InstanceAtomRow(entry.Seq, entry.AtomId, valuesJson));
         }
 
-        var drawn = Draw(container, lookupAtom, rollSeed);
+        var drawn = Draw(container, lookupAtom, lookupAffix, rollSeed);
         var nextSeq = rows.Count == 0 ? 1 : rows.Max(r => r.Seq) + 1;
 
         foreach (var atomId in drawn)
@@ -149,29 +150,65 @@ public static class Instantiator
     }
 
     /// <summary>
-    /// Weighted draw, <b>at most one atom per group</b>, <c>pool_rolls</c> times. Zero-weight rows are
-    /// present in the pool and never drawn — validation has already proven enough groups are drawable.
+    /// Weighted draw, <b>at most one affix per group</b>, <c>prefix_rolls</c> + <c>suffix_rolls</c>
+    /// times across two separately-budgeted draws, then each drawn affix expands to its concrete
+    /// atom id(s) — returned flat, matching every existing caller's atom-id-list contract.
     ///
     /// <para><b>Public since T31 (action program, A13):</b> "the generator already exists" — a
     /// container's own weighted pool-plus-group-exclusion roll is exactly what the action-seeding
     /// runtime generator needs for "which atoms", and it must not be reinvented. Visibility widened,
-    /// no behavior changed — every existing caller and test is untouched.</para>
+    /// no behavior changed at the time.</para>
+    ///
+    /// <para><b>T3.1 (affix-schema):</b> the pool now draws affix ids, not bare atom ids
+    /// (`definitions.md` §4a). This method still returns atom ids — expansion happens inside it — so
+    /// <c>ActionSeeder</c> and every other existing caller are unaffected. <b>Only single-concrete-
+    /// ref affixes expand here.</b> A multi-ref or slot-bearing bundle needs the full five-step
+    /// resolver (`resolution-order`, module 2, not yet built) to correlate its refs and resolve its
+    /// slots — drawing one throws rather than silently returning a partial or wrong expansion.</para>
+    ///
+    /// <para><b>T3.2 (prefix/suffix split):</b> the single <c>pool_rolls</c> budget is now two —
+    /// <c>Prefix</c>-eligible rows (class <see cref="AffixClass.Prefix"/> or <see cref="AffixClass.Mixed"/>)
+    /// draw against <c>prefix_rolls</c>; <c>Suffix</c>-eligible rows (<see cref="AffixClass.Suffix"/> or
+    /// <see cref="AffixClass.Mixed"/>) draw against <c>suffix_rolls</c> — each its own independent
+    /// weighted draw with its own group-exclusion and its own named RNG stream, so one budget's rolls
+    /// never shift the other's. A <see cref="AffixClass.Mixed"/> affix is eligible in both draws, and
+    /// today's two-independent-draws model can therefore pick it in one, both, or neither — the exact
+    /// "one draw consumes both budgets simultaneously" semantics A1 describes belongs to the full
+    /// resolver (module 2, not yet built); this is an interim, honestly-documented simplification, not
+    /// the final resolution order.</para>
     /// </summary>
-    public static List<string> Draw(ContainerRow container, Func<string, AtomRow?> lookupAtom, long rollSeed)
+    public static List<string> Draw(
+        ContainerRow container, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix,
+        long rollSeed)
     {
         var picked = new List<string>();
-        if (container.PoolRolls <= 0 || container.Pool.Count == 0) return picked;
+        if (container.Pool.Count == 0) return picked;
 
-        // A stream named for the container so two containers rolled from one seed do not share a
-        // sequence, and the same container always replays identically.
-        var rng = new AtomRandom(unchecked((ulong)rollSeed), AtomStreams.Pool + "." + container.ContainerId);
+        if (container.PrefixRolls > 0)
+            DrawBudget(container, lookupAtom, lookupAffix, rollSeed, "prefix", container.PrefixRolls,
+                a => a.Class is AffixClass.Prefix or AffixClass.Mixed, picked);
+        if (container.SuffixRolls > 0)
+            DrawBudget(container, lookupAtom, lookupAffix, rollSeed, "suffix", container.SuffixRolls,
+                a => a.Class is AffixClass.Suffix or AffixClass.Mixed, picked);
+
+        return picked;
+    }
+
+    static void DrawBudget(
+        ContainerRow container, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix,
+        long rollSeed, string budgetName, int rolls, Func<AffixRow, bool> eligible, List<string> picked)
+    {
+        // A stream named for the container AND the budget so the prefix draw and the suffix draw
+        // never share a sequence, and the same container always replays identically.
+        var rng = new AtomRandom(unchecked((ulong)rollSeed),
+            AtomStreams.Pool + "." + budgetName + "." + container.ContainerId);
 
         var remaining = container.Pool
-            .Where(p => p.Weight > 0)
-            .Select(p => (Row: p, Group: GroupOf(p, lookupAtom(p.AtomId)!)))
+            .Where(p => p.Weight > 0 && eligible(lookupAffix(p.AffixId)!))
+            .Select(p => (Row: p, Group: GroupOf(p, lookupAffix(p.AffixId)!, lookupAtom)))
             .ToList();
 
-        for (var roll = 0; roll < container.PoolRolls && remaining.Count > 0; roll++)
+        for (var roll = 0; roll < rolls && remaining.Count > 0; roll++)
         {
             var total = remaining.Sum(c => c.Row.Weight);
             var target = rng.NextInclusive(1, total);
@@ -186,17 +223,37 @@ public static class Instantiator
                 break;
             }
 
-            picked.Add(chosen.Row.AtomId);
+            picked.AddRange(ExpandSingleRefAffix(chosen.Row.AffixId, lookupAffix));
             // One per group: drop the whole group, not just the row, or a second tier of the same
             // variant could still come up.
             remaining.RemoveAll(c => string.Equals(c.Group, chosen.Group, StringComparison.Ordinal));
         }
-
-        return picked;
     }
 
-    static string GroupOf(ContainerPoolRow row, AtomRow atom) =>
-        string.IsNullOrWhiteSpace(row.Group) ? atom.FamilyId + "|" + atom.Variant : row.Group!;
+    /// <summary>The T3.1-scoped expansion: a bundle of exactly one concrete ref resolves to that one
+    /// atom id. Anything else — a slot ref, or more than one ref — is not expressible without the
+    /// resolver `resolution-order` (module 2) is building, and this throws rather than guessing.</summary>
+    static IEnumerable<string> ExpandSingleRefAffix(string affixId, Func<string, AffixRow?> lookupAffix)
+    {
+        var affix = lookupAffix(affixId)
+            ?? throw new InvalidOperationException($"drawn affix '{affixId}' is not in the catalog — validation should have caught this");
+        if (affix.Refs.Count != 1 || affix.Refs[0].AtomId is null)
+            throw new NotSupportedException(
+                $"affix '{affixId}' is a multi-ref or slot-bearing bundle — expanding it needs the " +
+                "resolution-order resolver (module 2), not yet built. Draw() only expands single-ref affixes.");
+        yield return affix.Refs[0].AtomId!;
+    }
+
+    /// <summary>Group for a drawn affix: a single-ref affix defaults to that atom's own
+    /// <c>(family_id, variant)</c>, matching the pre-affix default exactly; anything else must have
+    /// declared an explicit <see cref="ContainerPoolRow.Group"/> — <see cref="ContainerValidator"/>
+    /// already refuses to load a container where one didn't.</summary>
+    static string GroupOf(ContainerPoolRow row, AffixRow affix, Func<string, AtomRow?> lookupAtom)
+    {
+        if (!string.IsNullOrWhiteSpace(row.Group)) return row.Group!;
+        var atom = lookupAtom(affix.Refs[0].AtomId!)!;
+        return atom.FamilyId + "|" + atom.Variant;
+    }
 
     /// <summary>
     /// Resolve every <c>OnInstantiate</c> value spec; copy <c>Fixed</c> ones; leave <c>OnApply</c>
@@ -206,8 +263,14 @@ public static class Instantiator
     /// both are magnitudes that end up on the item, so both are worth more when the item drops
     /// deeper. <c>OnApply</c> is exempt for an unrelated, pre-existing reason (it belongs to the hit,
     /// not the item) and stays exempt here too — content-scale never touches it.</para>
+    ///
+    /// <para><c>internal</c> (T3.6, `instance-producer`): <see cref="InstanceProducer"/> reuses this
+    /// to freeze a container's FIXED core the same way <see cref="TryInstantiate"/> already does —
+    /// <see cref="Resolver"/> owns the pool half (its own five-step order), this owns the core half,
+    /// and both must freeze identically or the same instance would carry two different rounding
+    /// rules depending on which half an atom came from.</para>
     /// </summary>
-    static AtomRejection Freeze(
+    internal static AtomRejection Freeze(
         AtomRow atom, string? overridesJson, long rollSeed, int seq, long contentScaleMilli, out string valuesJson)
     {
         valuesJson = "{}";

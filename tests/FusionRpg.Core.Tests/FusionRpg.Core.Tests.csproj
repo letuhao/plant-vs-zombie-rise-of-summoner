@@ -22,6 +22,12 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FusionRpg.Core\FusionRpg.Core.csproj" />
+    <!-- demon-seed module 1 (spec-corpus-dump.md) puts CorpusDumpTests.cs here, and its fixture
+         is a small in-memory RpgStore rather than the 520MB live database — so this test project
+         needs the DAL and the tool's own writer/reader, same shape FusionRpg.Data.Tests already
+         has for RpgStore, just scoped to this one module. -->
+    <ProjectReference Include="..\..\src\FusionRpg.Data\FusionRpg.Data.csproj" />
+    <ProjectReference Include="..\..\tools\DemonCorpusDump\DemonCorpusDump.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- PatronAuraOverlay has no Unity/Harmony/BepInEx deps (pure Core types only) — compile for

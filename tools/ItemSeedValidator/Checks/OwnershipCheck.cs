@@ -63,7 +63,8 @@ public static class OwnershipCheck
     /// </summary>
     public static readonly string[] StructuralCountFields =
     {
-        "socketMax", "pieces", "pool_rolls", "poolRolls", "rung", "ordinal", "seq", "sequence",
+        "socketMax", "pieces", "pool_rolls", "poolRolls", "prefixRolls", "suffixRolls",
+        "rung", "ordinal", "seq", "sequence",
         // Added after entry-shapes.md shaped the remaining ten kinds. Each is the same species of
         // field as socketMax — it counts a structural thing, it is not a balance magnitude.
         "minSockets", "maxSockets", "apCost", "apCapacity", "manifestCost", "outputQty", "inputQty",

@@ -129,6 +129,12 @@ moved to §3.3 — they have a reader, found on a second census pass.**
 two hits are in `DerivedStatTuning.cs`, which **configures its cap** rather than reading its value.
 A cap is not a consumer. Recommend treating it as reader-less until something reads it.
 
+> **⛔ Superseded in part, 2026-09-02 (owner).** Reader-less or not, `resource.efficiency` **must cover
+> all six resources** — it has edges for only three (`hp`, `spirit`, `poise` have none), and actions can
+> cost all six. **That is a defect to fix, not an ambiguity to park.** The reader-less verdict may still
+> stand for `UnitClass` purposes; the coverage gap does not. See the six-coverage rule in
+> [`../resource-hub-ssot.md`](../resource-hub-ssot.md).
+
 ### 3.2 ⛔ 28% of the aptitude distribution points at those 8 families
 
 **Corrected 2026-08-26 (same pass as §3's fix): the first count, 67% / 326, included the 192 edges

@@ -23,83 +23,113 @@ public class SummonRollerTests
     }
 
     [Fact]
-    public void Epic_hard_pity_fires_on_pull_25()
+    public void Heirloom_hard_pity_fires_on_pull_25()
     {
-        // 24 pulls without epic+ → the 25th must be epic-or-better regardless of the roll.
-        var pity = new PityState(PullsSinceEpic: 24, PullsSinceLegendary: 24);
+        // 24 pulls without heirloom+ (ordinal 70) → the 25th must be heirloom-or-better regardless of the roll.
+        var pity = new PityState(PullsSinceHeirloom: 24, PullsSinceSunwoven: 24);
         for (ulong seed = 0; seed < 20; seed++)
         {
             var (results, _) = SummonRoller.Roll(Standard, null, 1, pity, Rng(seed));
-            Assert.True(results[0].Rarity >= DemonRarity.Epic, $"seed {seed} gave {results[0].Rarity}");
+            Assert.True(DemonRarityLadder.AtLeast(results[0].Rarity, DemonRarity.Heirloom), $"seed {seed} gave {results[0].Rarity}");
         }
     }
 
     [Fact]
-    public void Legendary_hard_pity_fires_on_pull_55()
+    public void Sunwoven_hard_pity_fires_on_pull_55()
     {
-        var pity = new PityState(PullsSinceEpic: 0, PullsSinceLegendary: 54);
+        var pity = new PityState(PullsSinceHeirloom: 0, PullsSinceSunwoven: 54);
         for (ulong seed = 0; seed < 20; seed++)
         {
             var (results, newPity) = SummonRoller.Roll(Standard, null, 1, pity, Rng(seed));
-            Assert.Equal(DemonRarity.Legendary, results[0].Rarity);
-            Assert.Equal(0, newPity.PullsSinceLegendary);
-            Assert.Equal(0, newPity.PullsSinceEpic); // legendary resets the epic counter too
+            Assert.Equal(DemonRarity.Sunwoven, results[0].Rarity);
+            Assert.Equal(0, newPity.PullsSinceSunwoven);
+            Assert.Equal(0, newPity.PullsSinceHeirloom); // sunwoven (>= heirloom) resets both counters
         }
     }
 
     [Fact]
-    public void Legendary_soft_ramp_raises_odds_after_pull_40()
+    public void Sunwoven_soft_ramp_raises_odds_after_pull_40()
     {
-        // At counter 50 (pull 51): 10 + 11×60 = 670‰. Over many seeds most pulls are legendary.
+        // At counter 50 (pull 51): 8 + 11×60 = 668‰. Over many seeds most pulls are sunwoven.
         var ramped = new PityState(0, 50);
         var hits = 0;
         for (ulong seed = 0; seed < 200; seed++)
-            if (SummonRoller.Roll(Standard, null, 1, ramped, Rng(seed)).Results[0].Rarity == DemonRarity.Legendary)
+            if (SummonRoller.Roll(Standard, null, 1, ramped, Rng(seed)).Results[0].Rarity == DemonRarity.Sunwoven)
                 hits++;
-        Assert.InRange(hits, 110, 200); // ~67% expected; far above the 1% base
+        Assert.InRange(hits, 110, 200); // ~66.8% expected; far above the 0.8% base
 
         var fresh = PityState.Fresh;
         var freshHits = 0;
         for (ulong seed = 0; seed < 200; seed++)
-            if (SummonRoller.Roll(Standard, null, 1, fresh, Rng(seed)).Results[0].Rarity == DemonRarity.Legendary)
+            if (SummonRoller.Roll(Standard, null, 1, fresh, Rng(seed)).Results[0].Rarity == DemonRarity.Sunwoven)
                 freshHits++;
-        Assert.InRange(freshHits, 0, 15); // ~1%
+        Assert.InRange(freshHits, 0, 15); // ~0.8%
     }
 
     [Fact]
-    public void Ten_pull_guarantees_rare_or_better()
+    public void Ten_pull_guarantees_cultivated_or_better()
     {
+        // FloorTarget is Cultivated — Rare's own migration target (ssot-rarity.md §4.3),
+        // preserving the OLD floor's actual GUARANTEE LEVEL (seed-to-concrete T4.1). A floor
+        // targeting one of today's six EMPTY rungs (e.g. Sprout) would silently collapse to
+        // Chaff via BandWithFallback's own empty-band search — found by this test failing
+        // against the real (sparse) catalog before FloorTarget was corrected.
         for (ulong seed = 0; seed < 100; seed++)
         {
             var (results, _) = SummonRoller.Roll(Standard, null, 10, PityState.Fresh, Rng(seed));
             Assert.Equal(10, results.Count);
-            Assert.Contains(results, r => r.Rarity >= DemonRarity.Rare);
+            Assert.Contains(results, r => DemonRarityLadder.AtLeast(r.Rarity, DemonRarity.Cultivated));
         }
     }
 
     [Fact]
     public void Rarity_distribution_is_roughly_on_spec()
     {
-        var common = 0; var rare = 0; var epicPlus = 0; var total = 0;
-        var pity = PityState.Fresh;
+        // Redesigned for the ten-rung ladder (seed-to-concrete T4.1). This measures the
+        // EFFECTIVE, catalog-adjusted distribution, not the nominal probability table in
+        // summoning.v1.json directly — only four of the ten rungs are populated today (Chaff,
+        // Cultivated, Heirloom, Sunwoven, the four legacy-mapped ones), so BandWithFallback
+        // redirects every empty rung's probability mass down to the nearest populated rung
+        // below it. That is CORRECT behaviour (a species that doesn't exist cannot be handed
+        // out), not a bug — but it means Sprout+Grafted's 400‰ folds into Chaff, Fused+
+        // Chimeric's 100‰ folds into Cultivated, and Firstseed's 15‰ folds into Heirloom.
+        // This test will need updating once species-generator (T4.4+) populates the other six
+        // rungs — at that point it should assert against the nominal table directly instead.
+        var counts = new Dictionary<DemonRarity, int>();
+        foreach (var r in DemonRarityLadder.All) counts[r] = 0;
+        var total = 0;
         var rng = Rng(123);
         for (var batch = 0; batch < 300; batch++)
         {
-            // Reset pity each batch so hard pity doesn't skew the base-rate measurement.
+            // PityState.Fresh each batch so hard pity doesn't skew the base-rate measurement.
             var (results, _) = SummonRoller.Roll(Standard, null, 10, PityState.Fresh, rng);
             foreach (var r in results)
             {
                 total++;
-                if (r.Rarity == DemonRarity.Common) common++;
-                else if (r.Rarity == DemonRarity.Rare) rare++;
-                else epicPlus++;
+                counts[r.Rarity]++;
             }
         }
 
-        Assert.InRange(common / (double)total, 0.66, 0.80);   // 74% base minus the floor's nudge
-        Assert.InRange(rare / (double)total, 0.16, 0.28);
-        Assert.InRange(epicPlus / (double)total, 0.03, 0.10); // 6% combined epic+legendary
-        _ = pity;
+        // Effective per-mille AFTER the empty-rung fallback collapses onto today's four
+        // populated rungs: chaff = 350(own) + 250(sprout) + 150(grafted) = 750;
+        // cultivated = 100(own) + 60(fused) + 40(chimeric) = 200; heirloom = 25(own) + 15(firstseed) = 40;
+        // sunwoven = 8(own, unaffected — nothing below it before heirloom folds in); almanac = 2(own).
+        var expectedPerMille = new Dictionary<DemonRarity, int>
+        {
+            [DemonRarity.Chaff] = 750, [DemonRarity.Cultivated] = 200,
+            [DemonRarity.Heirloom] = 40, [DemonRarity.Sunwoven] = 8, [DemonRarity.Almanac] = 2,
+        };
+        foreach (var (rarity, expected) in expectedPerMille)
+        {
+            var observed = counts[rarity] / (double)total * 1000;
+            var tolerance = Math.Max(8, expected * 0.35);
+            Assert.InRange(observed, Math.Max(0, expected - tolerance), expected + tolerance + 60);
+        }
+        // The six currently-empty rungs must never appear as a DELIVERED result — confirms the
+        // fallback is doing its job, not silently handing out a species from an empty band.
+        foreach (var empty in new[] { DemonRarity.Sprout, DemonRarity.Grafted, DemonRarity.Fused,
+                                      DemonRarity.Chimeric, DemonRarity.Firstseed })
+            Assert.Equal(0, counts[empty]);
     }
 
     [Fact]
@@ -111,14 +141,14 @@ public class SummonRollerTests
         for (var i = 0; i < 400; i++)
         {
             var (results, _) = SummonRoller.Roll(Focus, focusElement, 1, PityState.Fresh, rng);
-            if (results[0].Rarity != DemonRarity.Common) continue; // measure within one band
+            if (results[0].Rarity != DemonRarity.Chaff) continue; // measure within one band
             total++;
             var species = DemonSpeciesCatalog.Get(results[0].SpeciesId);
             if (species.ElementPrimary == focusElement) focusCount++;
         }
 
-        var commons = DemonSpeciesCatalog.All.Count(s => s.BaseRarity == DemonRarity.Common && s.Acquisition.HasFlag(DemonAcquisition.Summonable));
-        var fireCommons = DemonSpeciesCatalog.All.Count(s => s.BaseRarity == DemonRarity.Common && s.Acquisition.HasFlag(DemonAcquisition.Summonable) && s.ElementPrimary == focusElement);
+        var commons = DemonSpeciesCatalog.All.Count(s => s.BaseRarity == DemonRarity.Chaff && s.Acquisition.HasFlag(DemonAcquisition.Summonable));
+        var fireCommons = DemonSpeciesCatalog.All.Count(s => s.BaseRarity == DemonRarity.Chaff && s.Acquisition.HasFlag(DemonAcquisition.Summonable) && s.ElementPrimary == focusElement);
         Assert.True(fireCommons >= 1, "test needs at least one fire common in the catalog");
         var expected = fireCommons * 3.0 / (fireCommons * 3.0 + (commons - fireCommons));
         Assert.InRange(focusCount / (double)total, expected - 0.12, expected + 0.12);
@@ -148,12 +178,10 @@ public class SummonRollerTests
             var (results, _) = SummonRoller.Roll(Standard, null, 10, PityState.Fresh, rng);
             foreach (var r in results)
             {
-                var expected = r.Rarity switch
-                {
-                    DemonRarity.Common => 1,
-                    DemonRarity.Rare or DemonRarity.Epic => 2,
-                    _ => 3
-                };
+                // Read the real tuning-driven function directly (seed-to-concrete T4.1 moved this
+                // off a hardcoded switch) rather than mirroring its values here a second time —
+                // a stale mirror is exactly the defect this migration's own audit exists to catch.
+                var expected = FusionRpg.Core.Demons.Fusion.FusionRoller.SlotsFor(r.Rarity);
                 var poolSize = DemonSpeciesCatalog.Get(r.SpeciesId).TraitPool.Count;
                 Assert.Equal(Math.Min(expected, poolSize), r.TraitIds.Count);
                 Assert.Equal(r.TraitIds.Count, r.TraitIds.Distinct().Count());

@@ -38,6 +38,10 @@ if (tuningDir is null)
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+// T4.7 step 2 / T4.8 (catalog-runtime) — this tool reads DemonSpeciesCatalog.All directly (line 45),
+// which now throws unless Configure has run. Behaviour-preserving: the same compiled roster it
+// always walked.
+FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
 
 var store = new RpgStore(dataDir);
 store.Init();

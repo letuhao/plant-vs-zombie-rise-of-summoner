@@ -147,17 +147,28 @@ public static class ContentValidation
     /// <summary>
     /// The cheap checks that catch real mistakes. Every one warns; none blocks.
     /// </summary>
+    /// <param name="affixes">
+    /// T3.1 (affix-schema): pool rows reference affixes, not bare atoms, so resolving "which atom
+    /// does this container's pool actually touch" needs the affix catalog. Optional and defaults to
+    /// empty so every pre-affix caller keeps compiling unchanged (same widening discipline as
+    /// <c>Instantiator.Draw</c>'s own "visibility widened, no behavior changed" precedent) — an
+    /// omitted affix list makes <see cref="OrphanAtoms"/> unable to see through a pool reference, so
+    /// it may over-report an atom as orphaned; it never under-reports, so it stays a safe lint.
+    /// </param>
     public static ContentReport Lint(
-        IReadOnlyList<AtomRow> atoms, IReadOnlyList<ContainerRow> containers)
+        IReadOnlyList<AtomRow> atoms, IReadOnlyList<ContainerRow> containers,
+        IReadOnlyList<AffixRow>? affixes = null)
     {
         var findings = new List<ContentFinding>();
+        var affixesById = (affixes ?? Array.Empty<AffixRow>()).ToDictionary(a => a.AffixId, StringComparer.Ordinal);
 
         TierGaps(atoms, findings);
         WeakerTiers(atoms, findings);
         DuplicateAffixes(atoms, findings);
         BackwardsIntervals(atoms, findings);
         LonelyPoolGroups(containers, findings);
-        OrphanAtoms(atoms, containers, findings);
+        OrphanAtoms(atoms, containers, affixesById, findings);
+        OrphanAffixes(affixes ?? Array.Empty<AffixRow>(), containers, findings);
 
         return new ContentReport(atoms.Count + containers.Count, findings);
     }
@@ -261,7 +272,7 @@ public static class ContentValidation
     {
         foreach (var container in containers)
         {
-            var groups = container.Pool.GroupBy(p => p.Group ?? p.AtomId);
+            var groups = container.Pool.GroupBy(p => p.Group ?? p.AffixId);
             foreach (var group in groups.Where(g => g.Count() == 1 && g.Key is not null))
                 into.Add(new ContentFinding(container.ContainerId, "lonely-group",
                     $"pool group '{group.Key}' has one member, so the one-per-group rule never applies",
@@ -271,15 +282,44 @@ public static class ContentValidation
 
     /// <summary>An atom no container references. Legal — and worth surfacing.</summary>
     static void OrphanAtoms(
-        IReadOnlyList<AtomRow> atoms, IReadOnlyList<ContainerRow> containers, List<ContentFinding> into)
+        IReadOnlyList<AtomRow> atoms, IReadOnlyList<ContainerRow> containers,
+        IReadOnlyDictionary<string, AffixRow> affixesById, List<ContentFinding> into)
     {
+        // A pool row references an affix now (T3.1); "referenced" means every CONCRETE ref inside
+        // that affix bundle. An affix not in the supplied catalog (or a slot-bearing ref, which has
+        // no single concrete atom by construction) contributes nothing — see Lint's own doc comment
+        // on why that is a safe direction for a non-blocking lint to fail in.
         var referenced = containers
-            .SelectMany(c => c.Atoms.Select(a => a.AtomId).Concat(c.Pool.Select(p => p.AtomId)))
+            .SelectMany(c => c.Atoms.Select(a => a.AtomId).Concat(
+                c.Pool.SelectMany(p => affixesById.TryGetValue(p.AffixId, out var affix)
+                    ? affix.Refs.Where(r => r.AtomId is not null).Select(r => r.AtomId!)
+                    : Enumerable.Empty<string>())))
             .ToHashSet(StringComparer.Ordinal);
 
         foreach (var atom in atoms.Where(a => !referenced.Contains(a.AtomId)))
             into.Add(new ContentFinding(atom.AtomId, "orphan",
                 "no container references it", Blocking: false));
+    }
+
+    /// <summary>
+    /// An affix no container's pool references — the T3.8 (`affix-metrics`) "unreachable affix"
+    /// finding, in its buildable-today form. The spec's own richer phrasing ("tag-eligible for
+    /// nothing") names a check against `eligibility-tags` (module 8, `docs/architecture/effect-
+    /// pipeline-map.md`) — not yet built, so not yet checkable; this is the container-reachability
+    /// half only, the same shape <see cref="OrphanAtoms"/> already proves for a bare atom.
+    /// </summary>
+    static void OrphanAffixes(
+        IReadOnlyList<AffixRow> affixes, IReadOnlyList<ContainerRow> containers, List<ContentFinding> into)
+    {
+        if (affixes.Count == 0) return; // no affix catalog supplied — same "safe direction" as OrphanAtoms
+
+        var referenced = containers
+            .SelectMany(c => c.Pool.Select(p => p.AffixId))
+            .ToHashSet(StringComparer.Ordinal);
+
+        foreach (var affix in affixes.Where(a => !referenced.Contains(a.AffixId)))
+            into.Add(new ContentFinding(affix.AffixId, "orphan-affix",
+                "no container pool references it", Blocking: false));
     }
 
     static string Key((string Family, string Variant) k) =>

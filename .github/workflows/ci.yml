@@ -40,6 +40,16 @@ jobs:
           python scripts/audit-magic-numbers.py
           if ($LASTEXITCODE -ne 0) { throw "magic-number audit found an M1/M2 finding — see output above" }
 
+      - name: species-generator staleness guard (seed-to-concrete T4.5/Checkpoint 4)
+        shell: pwsh
+        run: |
+          # species-generator (demon-seed module 12) commits its generated tree
+          # (data/generated/demons/**) to the repo — --check regenerates every real classified
+          # anchor and fails if any file on disk differs, catching a hand-edited generated file or a
+          # tuning change nobody re-ran the generator for (spec-species-generator.md §7).
+          dotnet run --project tools/DemonSpeciesGen -- --check
+          if ($LASTEXITCODE -ne 0) { throw "DemonSpeciesGen --check found the generated tree stale — run 'dotnet run --project tools/DemonSpeciesGen' and commit the result" }
+
       - name: Balance guard (class-system-todo.md P5.3 — termination HARD, dominance-mechanism HARD, dominance-verdict SOFT)
         shell: pwsh
         run: |
@@ -65,16 +75,60 @@ jobs:
       - name: Restore / test (.NET)
         shell: pwsh
         run: |
+          # Fixed 2026-09-01 (`seed-to-concrete` T0.8). This step used to run all ten `dotnet test`
+          # calls with no exit-code check between them, so only the LAST call determined the step's
+          # pass/fail — the exact defect the Balance-guard step's own comment above already documents
+          # from a real CI run (2026-08-24: Core.Tests and Guard.Tests both failed and were silently
+          # swallowed because E2E.Tests, the last call, also happened to fail that day). Every call
+          # below now checks its own exit code and throws immediately, matching every other step in
+          # this file — a failure in project #3 no longer waits to be masked by project #10.
           dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Core.Tests failed" }
           dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Data.Tests failed" }
           dotnet test tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.CheatCore.Tests failed" }
           dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Guard.Tests failed" }
           dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Launcher.Tests failed" }
           dotnet test tests/FusionRpg.ItemSeedValidator.Tests/FusionRpg.ItemSeedValidator.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.ItemSeedValidator.Tests failed" }
           dotnet test tests/FusionRpg.AtomImporter.Tests/FusionRpg.AtomImporter.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.AtomImporter.Tests failed" }
           dotnet test tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.ElementEnumGen.Tests failed" }
           dotnet test tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Server.Tests failed" }
           dotnet test tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj -c Release --verbosity minimal
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.E2E.Tests failed" }
+
+      - name: Boundary guards (AGENTS.md — combat writes, Secondary-Unity boundary, Funnel deltas, DAL)
+        shell: pwsh
+        run: |
+          # Added 2026-09-01 (`seed-to-concrete` T0.8). These four scripts existed but were never
+          # wired into CI — a violation only surfaced if someone ran them locally. Each runs as its
+          # own individually-checked call, same discipline as the fix above: one script's failure
+          # must not be masked by the next script still running.
+          .\scripts\guard-single-writer.ps1
+          if ($LASTEXITCODE -ne 0) { throw "guard-single-writer.ps1 failed — a combat write bypassed EntityStatWriter" }
+          .\scripts\guard-secondary-no-unity.ps1
+          if ($LASTEXITCODE -ne 0) { throw "guard-secondary-no-unity.ps1 failed — a Secondary plugin touched Unity" }
+          .\scripts\guard-funnel-delta.ps1
+          if ($LASTEXITCODE -ne 0) { throw "guard-funnel-delta.ps1 failed — an HP delta bypassed Funnel/FA10" }
+          .\scripts\guard-dal.ps1
+          if ($LASTEXITCODE -ne 0) { throw "guard-dal.ps1 failed — SQL appeared outside FusionRpg.Data" }
+
+      - name: Demon corpus dump is self-consistent (seed-to-concrete T1.2)
+        shell: pwsh
+        run: |
+          # `--verify` is DB-free by design (spec-corpus-dump.md) — decisions.md rules out a real
+          # game/Harmony in CI, so there is no populated hot.sqlite to regenerate the dump from
+          # here. This re-hashes the committed payload files on disk and checks them against
+          # _manifest.json's declared hash and counts — it catches a hand-edit or a bad merge, not
+          # drift against the live game (that is the owner-run `--check` against a real database).
+          dotnet run --project tools/DemonCorpusDump -c Release -- --verify data/seed/demons/_dump
+          if ($LASTEXITCODE -ne 0) { throw "demon corpus dump under data/seed/demons/_dump is not self-consistent with its own manifest — see output above" }
 
       - name: Validate item seed corpus
         shell: pwsh
@@ -120,6 +174,37 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "seedsmith's own test suite failed" }
           python -m seedsmith check --adapter items --gate ../../data/seed/items
           if ($LASTEXITCODE -ne 0) { throw "item seed corpus has reachability gaps" }
+        working-directory: tools/seedsmith
+
+      - name: Demon anchor contract audits clean (seed-to-concrete T1.7 / Checkpoint 1)
+        shell: pwsh
+        run: |
+          # Mechanical, per spec-anchor-contract.md §4: a numeric field anywhere in the resolved
+          # species-anchor schema poisons every downstream classification row, so this gates CI
+          # unconditionally rather than starting measure-only like a balance metric would.
+          python -m seedsmith demons contract --audit
+          if ($LASTEXITCODE -ne 0) { throw "demon anchor contract has a numeric-smuggling finding — see output above" }
+        working-directory: tools/seedsmith
+
+      - name: Demon corpus-coverage metrics (seed-to-concrete T1.10)
+        shell: pwsh
+        run: |
+          # --demon-dump only (no --corpus): isolates the two demon-dump metrics from the item
+          # corpus's own EmptyPartition/Balance/Distribution families, which need a real --corpus
+          # to mean anything and would otherwise report noise here.
+          python -m seedsmith report --gate --demon-dump ../../data/seed/demons/_dump
+          if ($LASTEXITCODE -ne 0) { throw "demon corpus-coverage metrics found a gated finding — see output above" }
+        working-directory: tools/seedsmith
+
+      - name: Demon preflight, CI mode (seed-to-concrete T1.8 — checks 1-4/7-9, no local model)
+        shell: pwsh
+        run: |
+          # --skip-model is CI's own escape hatch (spec-dump-preflight.md's own Commands section)
+          # and is never legal before a real generation run — run-control (module 9) refuses a
+          # preflight record written with skipModel=true. This step only proves checks 1-4/7-9
+          # stay green; it never authorizes a run.
+          python -m seedsmith demons preflight --skip-model
+          if ($LASTEXITCODE -ne 0) { throw "demon preflight (checks 1-4, 7-9) failed — see output above" }
         working-directory: tools/seedsmith
 
       - name: Web unit tests

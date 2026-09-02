@@ -98,13 +98,18 @@ public static class DemonSpeciesGenerator
         // The 1/12 divisor is not a new balance number: it is the ratio the flat 2 already implied
         // on the 24-species roster it was written for (2/24), so the old roster reproduces exactly.
         // The Math.Max floors keep small rosters (test fixtures) from collapsing a tier to zero.
+        // Renamed to the ten-rung ladder's own ids (seed-to-concrete T4.1) via the SAME band each
+        // old value migrated to (ssot-rarity.md §4.3) — behaviour-preserving, since this generator
+        // (and the whole DemonCatalogGen/Generated.cs path) is superseded and deleted once
+        // species-generator/species-import (T4.4-T4.8) land; it exists here only to keep the
+        // ASSEMBLY compiling in the meantime, not to be re-run.
         var legendary = Math.Max(2, count / 12);
         var epic = legendary + Math.Max(2, count / 6);
         var rare = epic + Math.Max(3, count / 4);
-        if (rank < legendary) return DemonRarity.Legendary;
-        if (rank < epic) return DemonRarity.Epic;
-        if (rank < rare) return DemonRarity.Rare;
-        return DemonRarity.Common;
+        if (rank < legendary) return DemonRarity.Sunwoven;
+        if (rank < epic) return DemonRarity.Heirloom;
+        if (rank < rare) return DemonRarity.Cultivated;
+        return DemonRarity.Chaff;
     }
 
     static void EnsureElementPresence(List<DemonSpeciesDef> species, ElementTypeId element)
@@ -116,7 +121,7 @@ public static class DemonSpeciesGenerator
             s.ElementSecondary != element &&
             s.ElementPrimary != ElementTypeId.Light &&
             s.ElementPrimary != ElementTypeId.Dark;
-        var idx = species.FindIndex(s => s.BaseRarity == DemonRarity.Common && Eligible(s));
+        var idx = species.FindIndex(s => s.BaseRarity == DemonRarity.Chaff && Eligible(s));
         if (idx < 0) idx = species.FindIndex(Eligible);
         if (idx < 0) return;
         species[idx] = species[idx] with { ElementPrimary = element };
@@ -130,7 +135,7 @@ public static class DemonSpeciesGenerator
         var marked = 0;
         for (var i = 0; i < species.Count && marked < 2; i++)
         {
-            if (species[i].BaseRarity != DemonRarity.Rare) continue;
+            if (species[i].BaseRarity != DemonRarity.Cultivated) continue;
             species[i] = species[i] with { Acquisition = DemonAcquisition.CaptureOnly };
             marked++;
         }
@@ -139,7 +144,7 @@ public static class DemonSpeciesGenerator
     static IReadOnlyList<string> VariantsFor(DemonRarity rarity, int typeId)
     {
         var list = new List<string> { "normal", "shiny" };
-        if (rarity >= DemonRarity.Epic)
+        if (DemonRarityLadder.AtLeast(rarity, DemonRarity.Heirloom))
         {
             var extras = new[] { "ancient", "mutated", "corrupted", "blessed", "cursed" };
             list.Add(extras[(int)(Hash(typeId, "variant") % (uint)extras.Length)]);
@@ -159,9 +164,9 @@ public static class DemonSpeciesGenerator
         };
         var third = combat[(int)(Hash(typeId, "t3") % (uint)combat.Length)];
         if (!pool.Contains(third)) pool.Add(third);
-        if (rarity >= DemonRarity.Epic)
+        if (DemonRarityLadder.AtLeast(rarity, DemonRarity.Heirloom))
             pool.Add(Hash(typeId, "essence") % 2 == 0 ? "void-touched" : "chaos-marked");
-        if (rarity == DemonRarity.Legendary)
+        if (DemonRarityLadder.IsTopRung(rarity))
             pool.Add("immortal");
         return pool;
     }

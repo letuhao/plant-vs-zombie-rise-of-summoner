@@ -1,0 +1,7 @@
+{
+  "ArmedGargantuar": "zombie/unclassified.json",
+  "BalloonZombie": "zombie/unclassified.json",
+  "BigChomper": "plant/unclassified.json",
+  "Peashooter": "plant/pea.json",
+  "SunFlower": "plant/sunflower.json"
+}

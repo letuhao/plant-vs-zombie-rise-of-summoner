@@ -103,14 +103,23 @@ public sealed partial class RpgStore
     // ---- rpg_action -------------------------------------------------------------------------------
 
     /// <summary>All atom ids a container holds — fixed core and pool alike, since a pool draw can
-    /// still need a scope row. Returns null when the container itself is unknown.</summary>
+    /// still need a scope row. Returns null when the container itself is unknown.
+    ///
+    /// <para>T3.1 (affix-schema): a pool row names an affix, not an atom directly — every CONCRETE
+    /// ref inside that affix's bundle counts (a slot-bearing ref has no single atom until
+    /// `resolution-order`, module 2, resolves it, so it contributes nothing here — the same
+    /// direction <c>ContentValidation.OrphanAtoms</c> already takes for the same reason).</para>
+    /// </summary>
     HashSet<string>? ContainerAtomIdsUnlocked(string containerId)
     {
         var container = GetContainer(containerId);
         if (container is null) return null;
         var ids = new HashSet<string>(StringComparer.Ordinal);
         foreach (var a in container.Atoms) ids.Add(a.AtomId);
-        foreach (var p in container.Pool) ids.Add(p.AtomId);
+        foreach (var p in container.Pool)
+            if (GetAffix(p.AffixId) is { } affix)
+                foreach (var r in affix.Refs)
+                    if (r.AtomId is not null) ids.Add(r.AtomId);
         return ids;
     }
 

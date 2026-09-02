@@ -48,34 +48,75 @@ class LlmCallerConfig:
 DEFAULT_CONFIG = LlmCallerConfig()
 
 
-def load_config(toml_path: Path | None = None) -> LlmCallerConfig:
-    """Read the `[pipeline.llm_caller]` table from `seedsmith.toml`, falling back to
-    `DEFAULT_CONFIG` for any key the file doesn't set — including every key, if the file
-    itself doesn't exist yet (spec-foundation §7.3: every seedsmith flag has a config
-    equivalent, but nothing in seedsmith requires a `seedsmith.toml` to exist today).
+#: `.env` key -> `LlmCallerConfig` field, and the type each value parses as. `.env` is the
+#: per-machine override layer (gitignored, spec below) — it wins over `seedsmith.toml`, which
+#: wins over `LlmCallerConfig`'s own built-in defaults.
+_ENV_KEYS: "dict[str, tuple[str, type]]" = {
+    "SEEDSMITH_LLM_ENDPOINT": ("endpoint", str),
+    "SEEDSMITH_LLM_MODEL": ("model", str),
+    "SEEDSMITH_LLM_TIMEOUT": ("timeout", float),
+    "SEEDSMITH_LLM_ATTEMPTS": ("attempts", int),
+    "SEEDSMITH_LLM_RETRY_DELAY": ("retry_delay", float),
+    "SEEDSMITH_LLM_MAX_HEAL": ("max_heal", int),
+}
 
-    A missing file or a missing table is a legitimate default. A *malformed* file is not — it
-    is not distinguished from a healthy default here on purpose, matching this program's
-    running rule that a wrong value silently treated as absent is the defect class this whole
-    audit exists to catch; `tomllib.TOMLDecodeError` propagates uncaught.
+
+def _parse_dotenv(path: Path) -> "dict[str, str]":
+    """`KEY=value` lines, `#` comments, blank lines skipped — deliberately not the full dotenv
+    spec (no quoting, no multi-line, no export). seedsmith's own values are all bare scalars
+    (a URL, a model id, small numbers), so the minimal parser is honest about what it supports
+    rather than depending on `python-dotenv` for six key names.
     """
-    path = toml_path or Path("seedsmith.toml")
+    out: "dict[str, str]" = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, _, value = stripped.partition("=")
+        out[key.strip()] = value.strip()
+    return out
+
+
+def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = None) -> LlmCallerConfig:
+    """Read `[pipeline.llm_caller]` from `seedsmith.toml`, then layer `.env` on top (`.env` is
+    per-machine and wins — a real endpoint/model override belongs there, never hand-edited into
+    the committed toml). Falls back to `DEFAULT_CONFIG` for any key neither file sets, including
+    every key when NEITHER file exists (spec-foundation §7.3: every seedsmith flag has a config
+    equivalent, but nothing in seedsmith requires either file to exist today).
+
+    A missing file or a missing table/key is a legitimate default. A *malformed* TOML file is
+    not — matching this program's running rule that a wrong value silently treated as absent is
+    the defect class this whole audit exists to catch; `tomllib.TOMLDecodeError` propagates
+    uncaught. A malformed `.env` line is silently skipped (`_parse_dotenv`'s own minimal-parser
+    contract) since a stray comment or blank line is normal, not a defect.
+    """
+    toml_path = toml_path or Path("seedsmith.toml")
     section: dict = {}
-    if path.exists():
-        with path.open("rb") as f:
+    if toml_path.exists():
+        with toml_path.open("rb") as f:
             data = tomllib.load(f)
         section = data.get("pipeline", {}).get("llm_caller", {})
         if not isinstance(section, dict):
             section = {}
+
     base = DEFAULT_CONFIG
-    return LlmCallerConfig(
-        endpoint=section.get("endpoint", base.endpoint),
-        model=section.get("model", base.model),
-        timeout=section.get("timeout", base.timeout),
-        attempts=section.get("attempts", base.attempts),
-        retry_delay=section.get("retry_delay", base.retry_delay),
-        max_heal=section.get("max_heal", base.max_heal),
-    )
+    resolved = {
+        "endpoint": section.get("endpoint", base.endpoint),
+        "model": section.get("model", base.model),
+        "timeout": section.get("timeout", base.timeout),
+        "attempts": section.get("attempts", base.attempts),
+        "retry_delay": section.get("retry_delay", base.retry_delay),
+        "max_heal": section.get("max_heal", base.max_heal),
+    }
+
+    dotenv_path = dotenv_path or Path(".env")
+    if dotenv_path.exists():
+        env_values = _parse_dotenv(dotenv_path)
+        for env_key, (field, caster) in _ENV_KEYS.items():
+            if env_key in env_values and env_values[env_key] != "":
+                resolved[field] = caster(env_values[env_key])
+
+    return LlmCallerConfig(**resolved)
 
 
 def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONFIG,

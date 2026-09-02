@@ -32,7 +32,8 @@
       "fixedAtoms": [
         { "family": "atom.vitality", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["defensive", "rooted"],
       "notes": "themeId: rot-bloom"
     },
@@ -47,7 +48,8 @@
       "fixedAtoms": [
         { "family": "atom.rallying", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "notes": "themeId: windswept-spore"
     },
@@ -62,7 +64,8 @@
       "fixedAtoms": [
         { "family": "atom.warding", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["defensive", "rooted"],
       "notes": "themeId: earthen-bastion"
     },
@@ -77,7 +80,8 @@
       "fixedAtoms": [
         { "family": "atom.cleansing", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "notes": "themeId: hollow-orchard"
     },
@@ -92,7 +96,8 @@
       "fixedAtoms": [
         { "family": "atom.mending", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["defensive"],
       "notes": "themeId: rusted-legion"
     },
@@ -107,7 +112,8 @@
       "fixedAtoms": [
         { "family": "atom.exposing", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "notes": "themeId: umbral-swarm"
     },
@@ -122,7 +128,8 @@
       "fixedAtoms": [
         { "family": "atom.lifesteal", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["defensive", "undead"],
       "notes": "themeId: charnel-bloom"
     },
@@ -137,7 +144,8 @@
       "fixedAtoms": [
         { "family": "atom.gardener", "powerBand": "low" }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "notes": "themeId: verdant-graft"
     },
@@ -153,7 +161,8 @@
         { "family": "atom.warding", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.mending"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["defensive"],
       "notes": "themeId: gilded-porcelain"
     },
@@ -169,7 +178,8 @@
         { "family": "atom.commanding", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.rallying", "atom.regeneration"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "notes": "themeId: rusted-legion"
     },
@@ -185,7 +195,8 @@
         { "family": "atom.vitality", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.mending"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["defensive", "rooted"],
       "notes": "themeId: frostbitten-vanguard"
     },
@@ -201,7 +212,8 @@
         { "family": "atom.terraforming", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.gravemaking", "atom.gravedigging"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "notes": "themeId: sunwoven-almanac"
     },
@@ -217,7 +229,8 @@
         { "family": "atom.regeneration", "powerBand": "high" }
       ],
       "roleGroups": ["atom.mending"],
-      "poolRolls": 2,
+      "prefixRolls": 2,
+      "suffixRolls": 0,
       "tags": ["defensive", "rooted"],
       "notes": "themeId: rot-bloom"
     },
@@ -233,7 +246,8 @@
         { "family": "atom.gravemaking", "powerBand": "high" }
       ],
       "roleGroups": ["atom.gravedigging", "atom.gravemaking"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "notes": "themeId: umbral-swarm"
     },
@@ -249,7 +263,8 @@
         { "family": "atom.martyrdom", "powerBand": "high" }
       ],
       "roleGroups": ["atom.regeneration", "atom.rallying"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["defensive", "rooted"],
       "notes": "themeId: rusted-legion"
     },
@@ -265,7 +280,8 @@
         { "family": "atom.gravedigging", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.terraforming", "atom.warding"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["utility", "rooted"],
       "notes": "themeId: earthen-bastion"
     },
@@ -281,7 +297,8 @@
         { "family": "atom.warded", "powerBand": "medium" }
       ],
       "roleGroups": ["atom.warding", "atom.terraforming"],
-      "poolRolls": 1,
+      "prefixRolls": 1,
+      "suffixRolls": 0,
       "tags": ["defensive", "rooted"],
       "notes": "themeId: verdant-graft"
     },
@@ -298,7 +315,8 @@
         { "family": "atom.vitality", "powerBand": "high" },
         { "family": "atom.warding", "powerBand": "medium", "params": { "sign": "negative" } }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["defensive"],
       "notes": "themeId: earthen-bastion"
     },
@@ -315,7 +333,8 @@
         { "family": "atom.terraforming", "powerBand": "high" },
         { "family": "atom.gravemaking", "powerBand": "medium", "params": { "sign": "negative" } }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "notes": "themeId: windswept-spore"
     },
@@ -332,7 +351,8 @@
         { "family": "atom.gardener", "powerBand": "high" },
         { "family": "atom.terraforming", "powerBand": "medium", "params": { "sign": "negative" } }
       ],
-      "poolRolls": 0,
+      "prefixRolls": 0,
+      "suffixRolls": 0,
       "tags": ["utility"],
       "notes": "themeId: sunwoven-almanac"
     }

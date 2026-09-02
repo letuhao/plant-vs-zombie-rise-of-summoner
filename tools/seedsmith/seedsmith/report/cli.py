@@ -32,7 +32,10 @@ from ..metrics.constraint import Constraint
 from ..metrics.exemplar import ExemplarConformance
 from ..metrics.dedup import SemanticDedup
 from ..metrics.quality import FlavourGeneric, FlavourMissing
+from ..metrics.corpus_coverage import BasisHistogramMetric, DumpCompletenessMetric
 from ..metrics.demon_coverage import DemonUncoveredMetric
+from ..metrics.demon_roster import ALL_DEMON_ROSTER_METRICS
+from ..metrics.pipeline_health import ALL_PIPELINE_HEALTH_METRICS
 from ..metrics.motif_sharing import MotifSharingMetric
 from ..numerics import BattleRulesetProgression, NumericsContext, TierBands
 from ..budget import derive_all
@@ -65,6 +68,12 @@ def build_registry() -> MetricRegistry:
     registry.register(FlavourGeneric())
     registry.register(DemonUncoveredMetric())
     registry.register(MotifSharingMetric())
+    registry.register(DumpCompletenessMetric())
+    registry.register(BasisHistogramMetric())
+    for metric_cls in ALL_DEMON_ROSTER_METRICS:
+        registry.register(metric_cls())
+    for metric_cls in ALL_PIPELINE_HEALTH_METRICS:
+        registry.register(metric_cls())
     return registry
 
 
@@ -127,6 +136,82 @@ def cmd_check(args: argparse.Namespace) -> int:
     return EXIT_GAP if any(f.severity is Severity.GAP for f in relevant) else EXIT_CLEAN
 
 
+def _load_demon_anchors(anchors_root: Path) -> "list[dict] | None":
+    """Reads the `_index.json` an `anchor-emit` tree publishes and loads every family file it
+    names, deduplicated by file — the same O(1)-lookup structure `run-control` resumes from."""
+    index_path = anchors_root / "_index.json"
+    if not index_path.exists():
+        return None
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    anchors: "list[dict]" = []
+    for rel_path in sorted(set(index.values())):
+        path = anchors_root / rel_path
+        if path.exists():
+            anchors.extend(json.loads(path.read_text(encoding="utf-8")))
+    return anchors
+
+
+def cmd_report(args: argparse.Namespace) -> int:
+    """`seedsmith report [--gate] [--corpus DIR --adapter NAME] [--demon-dump DIR]` — runs the
+    FULL registry (every metric family, item-corpus and demon-dump alike) in one pass. Each
+    metric's own `needs` decides whether it runs against what was actually supplied; a metric
+    whose need is absent reports NOT_MEASURED rather than being silently skipped (`run_all`'s own
+    contract) — this is the single command T1.10/T2.12/T3.8's own metrics are meant to appear in,
+    so a later phase adding a metric family never has to invent a second report command.
+
+    At least one of `--corpus`/`--demon-dump` should normally be given; running with neither is
+    legal (every metric reports NOT_MEASURED) but produces no real signal.
+    """
+    corpus = Corpus() if args.corpus is None else None
+    if args.corpus is not None:
+        try:
+            corpus = Corpus.load(Path(args.corpus))
+        except CorpusLoadError as e:
+            print(f"seedsmith: could not load corpus: {e}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+
+    try:
+        adapter = resolve_adapter(args.adapter)
+    except KeyError:
+        print(f"seedsmith: unknown adapter {args.adapter!r} "
+              f"(known: {', '.join(known_adapter_names())})", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    demon_dump = None
+    if args.demon_dump is not None:
+        from ..adapters.demons.dump_ctx import load_demon_dump_ctx
+        demon_dump = load_demon_dump_ctx(Path(args.demon_dump))
+        if demon_dump is None:
+            print(f"seedsmith: no readable corpus-dump tree at {args.demon_dump}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+
+    demon_anchors = None
+    if getattr(args, "demon_anchors", None) is not None:
+        demon_anchors = _load_demon_anchors(Path(args.demon_anchors))
+        if demon_anchors is None:
+            print(f"seedsmith: no readable anchor tree at {args.demon_anchors} "
+                  f"(expected an _index.json)", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+
+    numerics_ctx = _build_numerics_context(args.adapter, adapter) if args.corpus is not None else None
+    budget_rows = derive_all(corpus, adapter) if args.corpus is not None and args.adapter == "items" else None
+    ctx = Ctx(corpus=corpus, adapter=adapter, numerics=numerics_ctx, budget=budget_rows,
+             demon_dump=demon_dump, demon_anchors=demon_anchors)
+
+    registry = build_registry()
+    findings = run_all(registry, ctx, metric_ids=args.metric or None)
+
+    if args.json:
+        Path(args.json).write_text(json.dumps([f.to_dict() for f in findings], indent=2), encoding="utf-8")
+    _print_human(findings)
+
+    relevant = findings
+    if args.gate:
+        gating_ids = {m.id for m in registry.all() if m.gates}
+        relevant = [f for f in findings if f.metric in gating_ids]
+    return EXIT_GAP if any(f.severity is Severity.GAP for f in relevant) else EXIT_CLEAN
+
+
 def cmd_metrics(args: argparse.Namespace) -> int:
     registry = build_registry()
     if args.coverage:
@@ -150,6 +235,41 @@ def cmd_metrics(args: argparse.Namespace) -> int:
               f"gates={metric.gates})")
     return EXIT_CLEAN
 
+
+
+def cmd_effects(args: argparse.Namespace) -> int:
+    """`seedsmith effects generate --kind affix` (T7.1, `affix-authoring`, effect-pipeline module 9).
+
+    Same defect class `cmd_demons`'s own docstring already names (D1.4): a real entrypoint reachable
+    only as `python -m seedsmith.adapters.effects.affix.generate_affixes` is a documented interface
+    that only works if you know the private module path — not an interface. Import deferred for the
+    same reason `cmd_demons` defers its own: `effects generate` pulls in the workflow package, and
+    `langgraph` is an optional extra a base `seedsmith check` install must not require.
+    """
+    if args.effects_command == "generate":
+        if args.kind != "affix":
+            print(f"unknown kind {args.kind!r}; only 'affix' has a generator today")
+            return EXIT_CANNOT_RUN
+        from ..adapters.effects.affix.generate_affixes import main as run
+        passthrough: "list[str]" = []
+        if args.only:
+            passthrough += ["--only", args.only]
+        if args.theme:
+            passthrough += ["--theme", args.theme]
+        if args.endpoint:
+            passthrough += ["--endpoint", args.endpoint]
+        if args.model:
+            passthrough += ["--model", args.model]
+        if args.count:
+            passthrough += ["--count", str(args.count)]
+        if args.dry_run:
+            passthrough.append("--dry-run")
+        if args.workers:
+            passthrough += ["--workers", str(args.workers)]
+        return run(passthrough)
+
+    print(f"unknown effects command {args.effects_command!r}")
+    return EXIT_CANNOT_RUN
 
 
 def cmd_demons(args: argparse.Namespace) -> int:
@@ -185,6 +305,31 @@ def cmd_demons(args: argparse.Namespace) -> int:
         from ..adapters.demons.generate_motifs import regenerate
         print(_json.dumps(regenerate(), ensure_ascii=False, indent=2))
         return EXIT_CLEAN
+
+    if args.demon_command == "power-parse":
+        return _cmd_demons_power_parse(args)
+
+    if args.demon_command == "threat-band":
+        return _cmd_demons_threat_band(args)
+
+    if args.demon_command == "contract":
+        return _cmd_demons_contract(args)
+
+    if args.demon_command == "preflight":
+        return _cmd_demons_preflight(args)
+
+    if args.demon_command == "permute":
+        return _cmd_demons_permute(args)
+
+    if args.demon_command == "metrics":
+        return _cmd_demons_metrics(args)
+
+    if args.demon_command == "run":
+        return _cmd_demons_run(args)
+
+    if args.kind == "anchor":
+        return _cmd_demons_generate_anchor(args)
+
     from ..adapters.demons.generate_commander_effects import main as run
 
     if args.kind != "commander-effect":
@@ -203,6 +348,379 @@ def cmd_demons(args: argparse.Namespace) -> int:
     return run(passthrough)
 
 
+def _cmd_demons_power_parse(args: argparse.Namespace) -> int:
+    """`seedsmith demons power-parse --dump <dir> [--report]` (demon-seed module 3,
+    spec-power-parse.md). Zero model calls: reads the committed `corpus-dump` tree
+    (`almanac/plant.json` + `almanac/zombie.json`) and runs the deterministic parse over it.
+    """
+    from ..adapters.demons.power.parse import basis_histogram, disagreements, parse_power_seed
+
+    dump_dir = Path(args.dump)
+    plant_path = dump_dir / "almanac" / "plant.json"
+    zombie_path = dump_dir / "almanac" / "zombie.json"
+    if not plant_path.exists() or not zombie_path.exists():
+        print(f"seedsmith: no corpus-dump tree at {dump_dir} "
+              f"(expected almanac/plant.json and almanac/zombie.json)", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    rows = json.loads(plant_path.read_text(encoding="utf-8")) + json.loads(zombie_path.read_text(encoding="utf-8"))
+    seeds = [
+        parse_power_seed(
+            side=r["side"], type_id=r["typeId"], stats_observed=r["statsObserved"],
+            hp=r["hp"], attack=r["attack"], flavor_text=r["flavorInfo"])
+        for r in rows
+    ]
+
+    hist = basis_histogram(seeds)
+    total = len(seeds)
+    print(f"power-parse: {total} species — "
+          f"observed={hist['observed']} stated={hist['stated']} "
+          f"inferred={hist['inferred']} blocked={hist['blocked']}")
+
+    if args.report:
+        for basis, count in hist.items():
+            pct = 100 * count / total if total else 0.0
+            print(f"  {basis}: {count} ({pct:.1f}%)")
+        dis = disagreements(seeds)
+        tempo_stated = sum(1 for s in seeds if s.interval_ms is not None)
+        print(f"  attackTempo stated (interval on the damage line): {tempo_stated} "
+              f"({100 * tempo_stated / total:.1f}%)" if total else "  attackTempo stated: 0")
+        print(f"  disagreements: {len(dis)}")
+        for d in dis:
+            print(f"    {d.side}:{d.type_id} toughness={d.toughness} (text={d.text_toughness}) "
+                  f"damage={d.damage} (text={d.text_damage})")
+
+    return EXIT_CLEAN
+
+
+def _cmd_demons_threat_band(args: argparse.Namespace) -> int:
+    """`seedsmith demons threat-band --dump <dir> [--histogram]` (demon-seed module 4,
+    spec-threat-band.md). Zero model calls: power-parse's score, looked up in the tuning table.
+    """
+    from ..adapters.demons.power.bands import ThreatTuning, classify, histogram
+    from ..adapters.demons.power.parse import parse_power_seed
+
+    dump_dir = Path(args.dump)
+    plant_path = dump_dir / "almanac" / "plant.json"
+    zombie_path = dump_dir / "almanac" / "zombie.json"
+    if not plant_path.exists() or not zombie_path.exists():
+        print(f"seedsmith: no corpus-dump tree at {dump_dir} "
+              f"(expected almanac/plant.json and almanac/zombie.json)", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    rows = json.loads(plant_path.read_text(encoding="utf-8")) + json.loads(zombie_path.read_text(encoding="utf-8"))
+    seeds = [
+        parse_power_seed(
+            side=r["side"], type_id=r["typeId"], stats_observed=r["statsObserved"],
+            hp=r["hp"], attack=r["attack"], flavor_text=r["flavorInfo"])
+        for r in rows
+    ]
+
+    tuning = ThreatTuning.load(1)
+    rungs: "list[int]" = []
+    unscored = 0
+    for s in seeds:
+        result = classify(s, tuning)
+        if result is None:
+            unscored += 1
+            continue
+        rungs.append(result.rung)
+
+    print(f"threat-band: {len(seeds)} species — {len(rungs)} scored (observed/stated), "
+          f"{unscored} inferred/blocked (no score at this layer)")
+
+    if args.histogram:
+        h = histogram(rungs, tuning)
+        for t in tuning.thresholds:
+            marker = " ⚠️ EMPTY" if h[t.id] == 0 else ""
+            print(f"  rung {t.rung:2d} {t.id:<10s}: {h[t.id]:4d}{marker}")
+
+    return EXIT_CLEAN
+
+
+def _cmd_demons_contract(args: argparse.Namespace) -> int:
+    """`seedsmith demons contract --print|--audit` (demon-seed module 2, spec-anchor-contract.md).
+    No model calls: prints or numerically audits the resolved anchor schema.
+    """
+    from ..adapters.demons.anchor.audit import numeric_audit
+    from ..adapters.demons.anchor.schema import build_anchor_schema
+
+    schema = build_anchor_schema()
+
+    if args.print_schema:
+        print(json.dumps(schema, indent=2, ensure_ascii=False))
+        return EXIT_CLEAN
+
+    # --audit (also the default when neither flag is passed)
+    defects = numeric_audit(schema)
+    if not defects:
+        print(f"contract --audit: clean — {len(schema['properties'])} fields, "
+              f"0 numeric-smuggling findings")
+        return EXIT_CLEAN
+    for d in defects:
+        print(f"[FINDING] {d}")
+    print(f"\n{len(defects)} numeric-smuggling finding(s)")
+    return EXIT_GAP
+
+
+def _cmd_demons_preflight(args: argparse.Namespace) -> int:
+    """`seedsmith demons preflight [--json] [--skip-model]` (demon-seed module 5,
+    spec-dump-preflight.md). Refuses to start a run unless every prerequisite is present.
+    """
+    from ..adapters.demons.preflight import run_preflight, write_preflight_record
+
+    report = run_preflight(skip_model=args.skip_model)
+
+    if args.json:
+        print(json.dumps({
+            "fullPass": report.full_pass,
+            "dumpHash": report.dump_hash,
+            "checks": [
+                {"id": c.id, "name": c.name, "ok": c.ok, "observed": c.observed,
+                 "expected": c.expected, "action": c.action, "fixCommand": c.fix_command}
+                for c in report.checks
+            ],
+        }, indent=2))
+    else:
+        for c in report.checks:
+            status = "OK" if c.ok else c.action.upper()
+            print(f"[{status:6s}] check {c.id} {c.name}: observed={c.observed!r} expected={c.expected!r}")
+            if not c.ok:
+                print(f"           fix: {c.fix_command}")
+        print(f"\n{'PASS' if report.full_pass else 'NOT READY'} — "
+              f"{len(report.refusals)} refusal(s), {len(report.asks)} thing(s) to ask about")
+
+    if report.full_pass:
+        write_preflight_record(report, skip_model=args.skip_model)
+
+    return EXIT_CLEAN if report.full_pass else EXIT_GAP
+
+
+def _cmd_demons_permute(args: argparse.Namespace) -> int:
+    """`seedsmith demons permute --species <id> --field <name>` (demon-seed module 6,
+    spec-option-permutation.md) — shows the three deterministic orders a species/field pair would
+    see, so a reviewer can see the shuffle without instrumenting a real pipeline call."""
+    from ..adapters.demons.anchor.permute import order_for
+    from ..adapters.demons.anchor.schema import build_anchor_schema
+
+    schema = build_anchor_schema()
+    prop = schema["properties"].get(args.field)
+    if prop is None or "enum" not in prop:
+        print(f"seedsmith: {args.field!r} is not an enum field in the anchor schema "
+              f"(known enum fields: {sorted(k for k, v in schema['properties'].items() if 'enum' in v)})",
+              file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    options = [v for v in prop["enum"] if v != "none"]
+    print(f"permute: species={args.species!r} field={args.field!r} ({len(options)} options)")
+    for i in range(3):
+        print(f"  sample {i}: {order_for(args.species, args.field, i, options)}")
+    return EXIT_CLEAN
+
+
+def _cmd_demons_generate_anchor(args: argparse.Namespace) -> int:
+    """`seedsmith demons generate --kind anchor --pipeline <id> --species <id> [--dry-run]`
+    (demon-seed module 7, spec-classify-pipelines.md). `--dry-run` renders every prompt without
+    calling — the cheapest way to review a description change across the roster before spending
+    hours on a real run. `--all` here is refused on purpose: a real multi-hour run needs the
+    pause/resume/cancel state machine, which is `demons run start --all` (module 9, run-control),
+    not this single-shot command.
+    """
+    from ..adapters.demons.anchor.prompts import PIPELINES, SpeciesLore, threat_audit_spec_for_basis
+    from ..adapters.demons.dump_ctx import load_demon_dump_ctx
+
+    if args.all:
+        print("seedsmith: this command has no run-control (pause/resume/checkpoint) — "
+              "use `seedsmith demons run start --all` instead, or --species with --dry-run "
+              "to review one species at a time here", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    dump_dir = Path(args.dump) if args.dump else Path("../../data/seed/demons/_dump")
+    demon_dump = load_demon_dump_ctx(dump_dir)
+    if demon_dump is None:
+        print(f"seedsmith: no readable corpus-dump tree at {dump_dir}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    manifest_rows = json.loads((dump_dir / "almanac" / "plant.json").read_text(encoding="utf-8")) + \
+                    json.loads((dump_dir / "almanac" / "zombie.json").read_text(encoding="utf-8"))
+    by_species = {r["typeName"] or f"{r['side']}-{r['typeId']}": r for r in manifest_rows}
+
+    def lore_for(row: dict) -> SpeciesLore:
+        return SpeciesLore(
+            species_id=row["typeName"] or f"{row['side']}-{row['typeId']}", side=row["side"],
+            display_name=row["displayName"], flavor_info=row["flavorInfo"],
+            flavor_introduce=row["flavorIntroduce"], enrichment=row.get("enrichment"))
+
+    seed_by_species = {s.side + ":" + str(s.type_id): s for s in demon_dump.seeds}
+
+    def basis_for(row: dict) -> str:
+        s = seed_by_species.get(row["side"] + ":" + str(row["typeId"]))
+        return s.basis if s else "blocked"
+
+    if args.dry_run:
+        rows = [by_species[args.species]] if args.species else manifest_rows
+        rendered = 0
+        for row in rows:
+            lore = lore_for(row)
+            basis = basis_for(row)
+            for pid, spec in PIPELINES.items():
+                if pid == "threat-audit":
+                    spec = threat_audit_spec_for_basis(basis)
+                spec.build_brief(lore, {"order": [], "elementPrimary": "fire",
+                                        "aptitudePrimary": "Might", "rungId": "nuisance", "rungOrdinal": 1})
+                rendered += 1
+        print(f"generate --dry-run: rendered {rendered} prompts across {len(rows)} species x "
+              f"{len(PIPELINES)} pipelines — zero model calls made")
+        return EXIT_CLEAN
+
+    if not args.pipeline or not args.species:
+        print("seedsmith: --pipeline and --species are both required for a real (non-dry-run) call",
+              file=sys.stderr)
+        return EXIT_CANNOT_RUN
+    if args.species not in by_species:
+        print(f"seedsmith: species {args.species!r} not found in {dump_dir}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    from ..workflow.graphs.demon_anchor import build_pipeline_graph, state_for_pipeline
+
+    row = by_species[args.species]
+    lore = lore_for(row)
+    basis = basis_for(row)
+    graph = build_pipeline_graph(args.pipeline, basis=basis)
+    state = state_for_pipeline(args.pipeline, lore, basis=basis)
+    result = graph.invoke(state)
+    print(json.dumps({"species": args.species, "pipeline": args.pipeline,
+                      "outcome": result.get("outcome"), "draft": result.get("draft")},
+                     indent=2, ensure_ascii=False))
+    return EXIT_CLEAN if result.get("outcome") == "persisted" else EXIT_GAP
+
+
+def _selector_from_args(args: argparse.Namespace) -> "dict":
+    """One of the eight `run-control` selector shapes (spec-run-control.md §4), chosen by which
+    flag the caller actually passed. `--all` and the `start`/`rerun` defaults both resolve to
+    `{"kind": "all"}` when nothing more specific is given — `start` already skips
+    already-emitted species on its own, so "all" is the right default rather than a refusal.
+    """
+    if args.species:
+        return {"kind": "species", "species": [s.strip() for s in args.species.split(",") if s.strip()]}
+    if args.side:
+        return {"kind": "side", "side": args.side}
+    if args.family:
+        return {"kind": "family", "family": args.family}
+    if args.pipeline:
+        return {"kind": "pipeline", "pipeline": args.pipeline}
+    if args.basis:
+        return {"kind": "basis", "basis": args.basis}
+    if args.unresolved:
+        return {"kind": "unresolved"}
+    if args.stale:
+        return {"kind": "stale"}
+    return {"kind": "all"}
+
+
+def _cmd_demons_run(args: argparse.Namespace) -> int:
+    """`seedsmith demons run <start|pause|resume|cancel|rerun|status|overwrite-all> [selector]`
+    (demon-seed module 9, spec-run-control.md). Ties the pure `machine`/`record`/`selectors`
+    modules to the real classification loop via `adapters.demons.run.runner` — every refusal
+    (`RunRefused`) is printed and turned into a non-zero exit, never a silent no-op.
+    """
+    from ..adapters.demons.run import runner as run_module
+
+    paths = run_module.RunPaths(
+        dump_dir=Path(args.dump) if args.dump else run_module.DEFAULT_DUMP_DIR,
+        anchors_dir=Path(args.anchors) if args.anchors else run_module.DEFAULT_ANCHORS_DIR)
+
+    def progress(species_id: str, done: int, total: int) -> None:
+        print(f"  [{done}/{total}] {species_id}")
+
+    try:
+        if args.run_verb == "start":
+            record = run_module.start(_selector_from_args(args), paths=paths, progress=progress)
+        elif args.run_verb == "resume":
+            record = run_module.resume(paths=paths, progress=progress)
+        elif args.run_verb == "pause":
+            run_module.request_pause(paths=paths)
+            print("pause requested — the in-flight species finishes, then the run stops")
+            return EXIT_CLEAN
+        elif args.run_verb == "cancel":
+            record = run_module.cancel(paths=paths)
+        elif args.run_verb == "rerun":
+            record = run_module.rerun(_selector_from_args(args), paths=paths, progress=progress)
+        elif args.run_verb == "overwrite-all":
+            if not args.confirm:
+                dump_hash = run_module._compute_dump_hash(paths.dump_dir)
+                from ..adapters.demons.run.record import overwrite_all_token
+                print(f"seedsmith: overwrite-all needs --confirm <token>; "
+                      f"the token for the current dump is {overwrite_all_token(dump_hash)}", file=sys.stderr)
+                return EXIT_CANNOT_RUN
+            record = run_module.overwrite_all(args.confirm, paths=paths, progress=progress)
+        elif args.run_verb == "status":
+            s = run_module.status(paths=paths)
+            print(json.dumps(s, indent=2) if args.json else
+                  " ".join(f"{k}={v}" for k, v in s.items()))
+            return EXIT_CLEAN
+        else:  # unreachable — argparse `choices` already guards this
+            print(f"seedsmith: unknown run verb {args.run_verb!r}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+    except run_module.RunRefused as e:
+        print(f"seedsmith: run {args.run_verb} refused: {e}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    print(f"run {record.run_id}: state={record.state} completed={len(record.completed)} "
+          f"failed={len(record.failed)} callsMade={record.calls_made}")
+    return EXIT_CLEAN if record.state in ("completed", "paused", "cancelled") and not record.failed else EXIT_GAP
+
+
+def _cmd_demons_metrics(args: argparse.Namespace) -> int:
+    """`seedsmith demons metrics [--gate] [--grid] [--queue] [--anchors DIR]` (demon-seed module
+    14, spec-roster-metrics.md). A thin wrapper over `DemonRoster/*`'s own registry entries so the
+    spec's literal command line works, without a second metrics engine beside `report`.
+    """
+    from ..adapters.demons.anchor.review_queue import read_review_queue
+    from ..metrics.demon_roster import ALL_ELEMENT_PAIRS, GridFillMetric
+
+    anchors_root = Path(args.anchors) if args.anchors else Path("../../data/seed/demons/species")
+    anchors = _load_demon_anchors(anchors_root)
+    if anchors is None:
+        print(f"seedsmith: no readable anchor tree at {anchors_root} (expected an _index.json) — "
+              f"run `demons run start --all` first (the full corpus run is a real, hours-long "
+              f"commitment; run a small --species selector first to prove the mechanism)", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    if args.queue:
+        queue_path = anchors_root.parent / "_runs" / "threat-audit-queue.json"
+        entries = read_review_queue(queue_path)
+        if not entries:
+            print(f"metrics --queue: no review queue at {queue_path} (or it is empty)")
+            return EXIT_CLEAN
+        for e in entries:
+            print(f"  {e.side}:{e.species_id} computed={e.computed_rung_id} verdict={e.verdict} — {e.reason}")
+        return EXIT_CLEAN
+
+    ctx = Ctx(corpus=Corpus(), adapter=resolve_adapter("stub"), demon_anchors=anchors)
+    registry = build_registry()
+    demon_ids = [m.id for m in registry.all() if m.family == "DemonRoster"]
+    findings = run_all(registry, ctx, metric_ids=demon_ids)
+
+    if args.grid:
+        grid_findings = [f for f in findings if f.metric == GridFillMetric.id]
+        empty = set()
+        for f in grid_findings:
+            empty.update(f.evidence.get("emptyCells", []))
+        print(f"grid: {len(ALL_ELEMENT_PAIRS)} pairs x 12 aptitudes = {len(ALL_ELEMENT_PAIRS) * 12} cells; "
+              f"{len(empty)} empty (showing up to 20)")
+        for cell in sorted(empty):
+            print(f"  EMPTY: {cell}")
+        return EXIT_CLEAN
+
+    _print_human(findings)
+    if args.gate:
+        gating_ids = {m.id for m in registry.all() if m.gates}
+        relevant = [f for f in findings if f.metric in gating_ids]
+        return EXIT_GAP if any(f.severity is Severity.GAP for f in relevant) else EXIT_CLEAN
+    return EXIT_GAP if any(f.severity is Severity.GAP for f in findings) else EXIT_CLEAN
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="seedsmith")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -217,6 +735,21 @@ def build_parser() -> argparse.ArgumentParser:
                        help="run only this metric id (repeatable)")
     check.set_defaults(func=cmd_check)
 
+    report = sub.add_parser(
+        "report", help="run the FULL metric registry (item-corpus and demon-dump metrics alike)")
+    report.add_argument("--corpus", default=None, metavar="DIR", help="an item/seed corpus root")
+    report.add_argument("--adapter", default="stub")
+    report.add_argument("--demon-dump", dest="demon_dump", default=None, metavar="DIR",
+                        help="a corpus-dump tree root (data/seed/demons/_dump)")
+    report.add_argument("--demon-anchors", dest="demon_anchors", default=None, metavar="DIR",
+                        help="an emitted anchor tree root (data/seed/demons/species)")
+    report.add_argument("--gate", action="store_true",
+                        help="exit non-zero only for metrics promoted with gates=True")
+    report.add_argument("--json", default=None, metavar="PATH")
+    report.add_argument("--metric", action="append", default=None, metavar="ID",
+                        help="run only this metric id (repeatable)")
+    report.set_defaults(func=cmd_report)
+
     metrics = sub.add_parser("metrics", help="list registered metrics")
     metrics.add_argument("--coverage", action="store_true",
                          help="print Appendix-A coverage: claimed / known gap / unclaimed")
@@ -225,6 +758,37 @@ def build_parser() -> argparse.ArgumentParser:
     demons = sub.add_parser("demons", help="demon corpus generation entrypoints")
     demon_sub = demons.add_subparsers(dest="demon_command", required=True)
     demon_sub.add_parser("motifs", help="re-derive motifs + the motif registry (no model calls)")
+    power_parse = demon_sub.add_parser(
+        "power-parse", help="numeric power seed + basis per species (no model calls)")
+    power_parse.add_argument("--dump", required=True, help="corpus-dump tree root")
+    power_parse.add_argument("--report", action="store_true",
+                             help="print the basis histogram + disagreement list")
+    threat_band = demon_sub.add_parser(
+        "threat-band", help="score -> threat rung -> Theta offset per species (no model calls)")
+    threat_band.add_argument("--dump", required=True, help="corpus-dump tree root")
+    threat_band.add_argument("--histogram", action="store_true",
+                             help="print rung occupancy, including empty rungs")
+    contract = demon_sub.add_parser(
+        "contract", help="the species anchor JSON Schema — print or numerically audit it")
+    contract.add_argument("--print", dest="print_schema", action="store_true",
+                          help="print the resolved JSON Schema")
+    contract.add_argument("--audit", action="store_true",
+                          help="run the numeric-smuggling audit, exit 1 on a finding (default)")
+    preflight = demon_sub.add_parser(
+        "preflight", help="the nine run-readiness checks — refuses or asks, never guesses")
+    preflight.add_argument("--json", action="store_true", help="machine-readable output")
+    preflight.add_argument("--skip-model", dest="skip_model", action="store_true",
+                           help="checks 1-4, 7-9 only — CI's escape hatch, refused by run-control before a real run")
+    permute = demon_sub.add_parser(
+        "permute", help="show the three deterministic option orders for a species/field pair")
+    permute.add_argument("--species", required=True)
+    permute.add_argument("--field", required=True)
+    dmetrics = demon_sub.add_parser(
+        "metrics", help="roster-shape metrics over the emitted anchors (element grid, threat/rarity distribution, ...)")
+    dmetrics.add_argument("--anchors", default="", help="anchor tree root (default data/seed/demons/species)")
+    dmetrics.add_argument("--gate", action="store_true", help="exit non-zero only on gates=True findings")
+    dmetrics.add_argument("--grid", action="store_true", help="print the 21x12 occupancy matrix")
+    dmetrics.add_argument("--queue", action="store_true", help="print the threat-audit open-loop review queue")
     fam = demon_sub.add_parser("families", help="extract + consolidate demon families (model calls)")
     fam.add_argument("--dry-run", dest="dry_run", action="store_true")
     fam.add_argument("--write", action="store_true")
@@ -239,7 +803,40 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--workers", type=int, default=0)
     gen.add_argument("--endpoint", default="")
     gen.add_argument("--model", default="")
+    # --kind anchor (demon-seed module 7, classify-pipelines):
+    gen.add_argument("--pipeline", default="", help="one of the 8 classify-pipelines ids (--kind anchor)")
+    gen.add_argument("--species", default="", help="a speciesId (--kind anchor)")
+    gen.add_argument("--dump", default="", help="corpus-dump tree root (--kind anchor, default ../../data/seed/demons/_dump)")
+    gen.add_argument("--all", action="store_true", help="refused here — use `demons run start --all` (--kind anchor)")
+    run = demon_sub.add_parser(
+        "run", help="run-control: pause/resume/cancel/rerun/overwrite-all over the anchor classification run")
+    run.add_argument("run_verb", choices=("start", "pause", "resume", "cancel", "rerun", "status", "overwrite-all"))
+    run.add_argument("--all", action="store_true", help="selector: every species in the dump")
+    run.add_argument("--side", default="", help="selector: plant | zombie")
+    run.add_argument("--family", default="", help="selector: one family id")
+    run.add_argument("--species", default="", help="selector: comma-separated species ids")
+    run.add_argument("--pipeline", default="", help="selector: one of the 8 classify-pipelines ids")
+    run.add_argument("--basis", default="", help="selector: observed | stated | inferred | blocked")
+    run.add_argument("--unresolved", action="store_true", help="selector: only fields a vote could not settle")
+    run.add_argument("--stale", action="store_true", help="selector: only entries whose inputs moved")
+    run.add_argument("--confirm", default="", help="overwrite-all: the confirmation token")
+    run.add_argument("--dump", default="", help="corpus-dump tree root (default data/seed/demons/_dump)")
+    run.add_argument("--anchors", default="", help="anchor tree root (default data/seed/demons/species)")
+    run.add_argument("--json", action="store_true", help="machine-readable output (status)")
     demons.set_defaults(func=cmd_demons)
+
+    effects = sub.add_parser("effects", help="effect-pipeline generation entrypoints")
+    effects_sub = effects.add_subparsers(dest="effects_command", required=True)
+    gen = effects_sub.add_parser("generate", help="generate content for an effect-pipeline kind")
+    gen.add_argument("--kind", default="affix")
+    gen.add_argument("--only", default="", help="comma-separated atom ids narrowing the eligible pool (--kind affix)")
+    gen.add_argument("--theme", default="", help="optional theme hint in the brief (--kind affix)")
+    gen.add_argument("--count", type=int, default=0, help="how many independent bundles to draw (--kind affix)")
+    gen.add_argument("--dry-run", dest="dry_run", action="store_true")
+    gen.add_argument("--workers", type=int, default=0)
+    gen.add_argument("--endpoint", default="")
+    gen.add_argument("--model", default="")
+    effects.set_defaults(func=cmd_effects)
 
     return parser
 

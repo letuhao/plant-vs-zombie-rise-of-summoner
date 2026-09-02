@@ -63,7 +63,7 @@ public class AtomInstanceStoreTests : IDisposable
         var atoms = _store.ListAtoms().ToDictionary(a => a.AtomId, StringComparer.Ordinal);
 
         var r = Instantiator.TryInstantiate(container,
-            id => atoms.TryGetValue(id, out var a) ? a : null, seed, 20, Tuning, out var inst);
+            id => atoms.TryGetValue(id, out var a) ? a : null, _store.GetAffix, seed, 20, Tuning, out var inst);
         Assert.True(r.IsOk, r.ToString());
 
         return _store.SaveInstance(inst!);

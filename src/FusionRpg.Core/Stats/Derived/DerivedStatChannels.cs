@@ -485,9 +485,6 @@ public static class DerivedStatChannels
     public static string SkillCooldown(string category) => $"{SkillCooldownPrefix}.{category}";
     public static string SkillEffectiveness(string category) => $"{SkillEffectivenessPrefix}.{category}";
 
-    // H.4 -- healing, 1 channel. Pool class (owner decision 2026-08-24): the healer's own output
-    // capacity, like combat.shield.capacity — not a Contest with a missing half. No counterpart.
-    public const string CombatHealPower = "combat.heal.power";
 
     // H.5 -- resource, 3 families x 5 ids = 15 (supersedes §3G's 10). Pool class throughout (Q4): the
     // counters are statuses (root/qi-burn), never a paired channel. max/regen are magnitudes, FlatSum,
@@ -498,9 +495,23 @@ public static class DerivedStatChannels
     public const string ResourceRegenPrefix = "resource.regen";
     public const string ResourceEfficiencyPrefix = "resource.efficiency";
 
+    /// <summary>Active restoration power, per resource. **Was `combat.heal.power`, an hp-only channel**
+    /// — generalised 2026-09-02 (owner: "hp is a resource generating, so no need heal, we need resource
+    /// generating; don't make healing for only 1 resource and don't support other resources, it is wrong
+    /// design"). `hp` keeps its exact former coefficients, so the rename moves no balance.
+    ///
+    /// <para><b>Not to be confused with <see cref="ResourceRegenPrefix"/>.</b> `regen` is the PASSIVE
+    /// per-tick drip; `gen` scales an ACTIVE grant at resolution. They are different mechanisms and a
+    /// game wants both — the defect was that only hp had the active half. The two names are one letter
+    /// apart, which is a readability hazard and not a matching one: prefix tests are `StartsWith`, and
+    /// neither string is a prefix of the other, so `recovery.families = ["resource.regen"]` does not
+    /// capture `resource.restore.*` and never will.</para></summary>
+    public const string ResourceRestorePrefix = "resource.restore";
+
     public static string ResourceMax(string resourceId) => $"{ResourceMaxPrefix}.{resourceId}";
     public static string ResourceRegen(string resourceId) => $"{ResourceRegenPrefix}.{resourceId}";
     public static string ResourceEfficiency(string resourceId) => $"{ResourceEfficiencyPrefix}.{resourceId}";
+    public static string ResourceRestore(string resourceId) => $"{ResourceRestorePrefix}.{resourceId}";
 
     /// <summary>The six actor resource ids — data/seed/resources/roster.json is the authored mirror;
     /// this is the code-side list registration walks. Kept in ordinal order to match that file's
