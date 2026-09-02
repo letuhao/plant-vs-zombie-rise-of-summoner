@@ -16,14 +16,15 @@ public static class OverlaySettingsGui
     {
         try
         {
+            // Previously also skipped every event except Repaint/Layout/MouseDown/MouseUp — meant to
+            // cut per-frame cost, but this panel is only drawn while F7 is open, so that cost is
+            // already avoided by the SettingsOpen check above. Filtering event types before an
+            // interactive GUI.Toggle/GUI.Button is the classic Unity IMGUI footgun: a click that
+            // moves even one pixel between mouse-down and mouse-up fires a MouseDrag event, and
+            // dropping it desynced GUIUtility's hot-control tracking for whichever toggle had focus —
+            // an intermittent, unreliable click, reported as "Pause while away won't turn off."
             if (!OverlaySettings.SettingsOpen) return;
-            var e = Event.current;
-            if (e == null) return;
-            if (e.type != EventType.Repaint
-                && e.type != EventType.Layout
-                && e.type != EventType.MouseDown
-                && e.type != EventType.MouseUp)
-                return;
+            if (Event.current == null) return;
         }
         catch
         {

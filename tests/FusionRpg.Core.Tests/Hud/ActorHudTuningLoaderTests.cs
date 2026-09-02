@@ -52,6 +52,29 @@ public sealed class ActorHudTuningLoaderTests
         Assert.False(tuning.HpSliverEnabled);
         Assert.Equal(99, tuning.BadgeMax);
         Assert.Null(tuning.EliteTierThreshold);
+        Assert.Equal(10.0, tuning.MagnitudeMidThreshold);
+        Assert.Equal(30.0, tuning.MagnitudeHighThreshold);
+    }
+
+    [Fact]
+    public void Parse_missing_magnitudeMidThreshold_rejects()
+    {
+        var json = """
+            {
+              "schemaVersion": 1,
+              "version": 1,
+              "statusStripMax": 3,
+              "hpSliverEnabled": false,
+              "badgeMax": 99,
+              "rowOffsetIdentity": 0.42,
+              "rowOffsetResources": 0.28,
+              "rowOffsetStatuses": 0.14,
+              "magnitudeHighThreshold": 30.0
+            }
+            """;
+
+        var ex = Assert.Throws<ActorHudTuningRejection>(() => ActorHudTuningLoader.Parse(json));
+        Assert.Contains("magnitudeMidThreshold", ex.Message, StringComparison.Ordinal);
     }
 
     static string FindRepoRoot()

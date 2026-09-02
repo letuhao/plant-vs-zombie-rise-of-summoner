@@ -1,7 +1,25 @@
 # Action corpus — the idea phase
 
-**Status: proposed 2026-09-02, refocused the same day.** Idea phase only. No capability map, no module
-specs, no build authorized.
+**Status: idea SEALED 2026-09-02; corrected after adversarial review 2026-09-03.** Idea phase only. No
+capability map, no module specs, no build authorized.
+
+> ## ⛔ READ THIS BEFORE ANY SECTION — Parts I–II are SUPERSEDED where they disagree with Parts III–VIII
+>
+> This document was written in layers on one day, and **Part I's corpus sizing was later reversed by its
+> own §18 without Part I being updated.** An adversarial review on 2026-09-03 found a downstream reader
+> would build the wrong thing. Precedence, highest first:
+>
+> **Part VIII → Part VII → Part VI → Part V → Part IV → Part III → Part II → Part I.**
+>
+> The three that bite hardest:
+>
+> | Part I says | Current position |
+> |---|---|
+> | Corpus is **~1,000 rows** — 904 signature (1/species), 76 family, 20–40 general (§7) | **3,307** — 2,712 signature (**3**/species, B1), 95 family, **500** general (§17, §36.1) |
+> | *"The gap closes through the roll, not through authoring… that is why the corpus can be ~1,000 rows rather than ~3,000"* (§7) | **Directly refuted by §18 Q4:** *"a rolled instance is **not** a new named ability… seeds map one-to-one onto the thing the band measures, and **rolls do not inflate the count**… rolls add depth, not distinctness."* |
+> | The general tier is **model-free** and *"small enough to author well"* (§8 module 3) | **`P1 general-propose` is a model stage** (§23) sized at **500** (§17) |
+>
+> Part I is kept verbatim as the reasoning trail. **It is not the current design.**
 
 **Program prefix:** `action-corpus`. Map (when approved) → `docs/architecture/action-corpus-map.md`;
 module specs → `docs/architecture/action-corpus/spec-<module-id>.md`; plan →
@@ -635,7 +653,12 @@ This also satisfies the AI-native rule directly — *"Narrow pipelines. One judg
 budget is unchanged (the same 3,307 actions are produced either way), but the *review* surface triples —
 which is the honest price of three narrower, better-grounded judgements.
 
-## 21. The guardrail C1 requires
+## 21. The guardrail C1 requires — ⛔ REWRITTEN 2026-09-03, the original was unexecutable
+
+> **⛔ The three assertions this section originally called "required, non-negotiable" could not be
+> written against shipped code. Found by adversarial review 2026-09-03 and verified line by line.**
+> The section is rewritten below rather than deleted, because the *risk* it identified is real — only
+> the mechanism it named was imaginary. **Where the original and this block disagree, this block wins.**
 
 Family access is now gated by tier, which means a signature action may reach atom families a general one
 cannot. **That is a power difference that does not pass through the rung's `qPower`,** and it is exactly
@@ -644,17 +667,63 @@ the shape that broke all five documented composition systems:
 > **The priced thing and the powerful thing were not the same thing.**
 > ([`03-composable-skill-systems.md`](../research/action-taxonomy/03-composable-skill-systems.md) §11)
 
-So the decision is adopted **with a required, non-negotiable assertion**, which the rung table's own test
-list already has a slot for:
+### 21.1 What the original assertions asked for, and why each cannot run
 
-1. **Every tier's reachable atom-family set is priced through E9**, and the resulting power stays inside
-   its rung's budget.
-2. **Monotonicity across rungs still holds** with family access applied — `spec-rung-table.md`'s existing
-   assertion, re-run against the widened sets.
-3. **A planted violation fails the test.** A test that cannot fail is not a guardrail.
+| Original assertion | Why it cannot be written today |
+|---|---|
+| *"priced through E9, and the resulting power stays inside **its rung's budget**"* | **There is no per-rung power budget.** `data/tuning/action-rungs.v1.json` rows carry `rung, minTier, maxTier, poolRolls, qPowerMilli, costMulti, cdMulti, structureBudget` — measured. `qPowerMilli` is a **multiplier**, not a ceiling; `structureBudget` is a list of axis ids. No row carries a power budget and no code computes one. *"Its rung's budget"* names nothing |
+| *"priced through E9"* — at the level of an **atom family** | **E9 has no concept of a family.** Its pricing key is `(kindId, channel)` (`CoefficientTable.cs:14`), so two `status.apply` atoms at equal magnitude price identically regardless of family. You can price a concrete `AtomRow` — which needs a magnitude that does not exist until the runtime roll |
+| the budget check itself | `ContentValidation.Budget` is keyed on **rarity**, skips any container with no `Rarity`, and has **zero production callers** (only tests, passing literals). There is no rarity-budget table anywhere in `data/` |
+| *"Monotonicity across rungs still holds **with family access applied**"* | `RungMonotonicity.VerifyPowerClimbs` prices **one synthetic vector** — `PowerVector.FromCategory(Offense, 1000)` — scaled per rung. **It reads no atoms.** Re-running it "against widened family sets" is a no-op; the sets never enter the function. Its own docstring says so |
 
-Without (1)–(3) this decision reintroduces §4's defect through a side door. With them it is safe and it
-buys real differentiation.
+**And the coefficients do not discriminate.** All 20 rows in `PowerTables.Authored()`
+(`CoefficientTable.cs:125-147`) carry `CoeffMilli = 1000` — measured. The only variation is
+`ReferenceScale` (10 / 2 / 25 / 1). A fitted coefficient set is what E9's simulation sweep was always
+scheduled to produce; it has not run.
+
+**A correction to a correction, recorded because the reasoning is the reusable part.** An earlier pass in
+this session concluded the guardrail *"is executable as a ceiling but not as balance"*, on the strength
+of the defect log's *"`Σ atom.power` bounds an item, which is all a ceiling needs."* **That is true of an
+item and false here** — an item has a rarity, and a rarity is what `Budget` is keyed on. A *rung* has
+neither a budget row nor a checker. The quote was correct and applied to the wrong noun.
+
+### 21.2 What E9 genuinely does today
+
+Verified, so the rewrite is grounded in capability rather than pessimism:
+
+- `CostFunction.Price(AtomRow)` returns a 5-category `PowerVector` for one **concrete** atom, integer-exact.
+- The conditionality chain is real, including predicate pricing (`PredicatePricer`).
+- **D1, D3, D4 are closed in code, not just claimed** — `CostFunction.cs:189` floors `count` at 1
+  (*"Floored at 1 (D3)"*), `:171` floors target count, and every factor stays in per-mille so the integer
+  `chance/1000` zero is gone.
+- `ContentValidation.Drift` is production-shaped.
+- **D2 remains open**: `ActorPowerCache.Compose` is additive, and `CostFunction.cs:30-35` says it outright
+  — *"It is knowingly wrong on multiplicative pairs, by design."*
+
+**Which is the sharp edge for this corpus specifically:** the designed library generates `keen_edge`
+(crit rate) **and** `cruelty` (crit damage), 4 shield layers, and the 28-family element ring. **The
+generated corpus is disproportionately the exact shape D2 mis-prices.**
+
+### 21.3 The replacement guardrail — three assertions that CAN be written
+
+C1 (tier-gated atom-family access) **stays adopted**, but its enabling is now gated on a mechanism rather
+than on prose. Until all three hold, **the generator emits structure-gated tiers only** — the position
+Part II §12 originally recommended, kept as the safe default rather than as a rejected option.
+
+1. **A per-rung power budget exists as data.** A `powerBudget` column on `action-rungs.v{n+1}.json`,
+   published through `tools/tuning/publish.py`, with a stated derivation. Until this row exists there is
+   nothing for assertion 2 to compare against.
+2. **A family-aware, non-additive price.** Either E9's key widens past `(kindId, channel)` to include the
+   family, or the check operates on concrete rolled atoms rather than families. **D2 must close first for
+   the multiplicative pairs this corpus generates** — this is a real dependency on the E9 sweep, named
+   here rather than assumed away.
+3. **A check with a production caller and a planted-violation test.** `ContentValidation.Budget` is the
+   right shape and has none; a guardrail nothing calls is a comment. **A test that cannot fail is not a
+   guardrail** — that clause of the original survives intact and is the one thing here that was always right.
+
+**Owner note:** enabling C1's family-access widening is therefore a **plan-phase gate**, not an
+idea-phase decision. The decision stands; what changed is that it now names the three things that must
+be true before the generator may act on it.
 
 ## 22. Where LlamaIndex runs — the one constraint on C5
 
@@ -746,7 +815,7 @@ judgement itself. This is `motif-prose-filter`'s lesson applied to a bigger feat
 
 **P-general and P-family run in parallel. P-signature waits for P-family** (§20).
 
-## 25. What is still open — ✅ NOTHING, both former defers closed 2026-09-02
+## 25. What is still open — ✅ NOTHING; idea phase SEALED 2026-09-02 (see §38)
 
 This section previously deferred two items *"by design"*. **Both were re-examined and both were
 answerable from evidence that already existed** — see [Part VI](#part-vi--the-last-two-defers-closed-2026-09-02):
@@ -919,11 +988,33 @@ Ordered. **Every item is model-free.**
 | **0.1** | Add the six-coverage rule to `resource-hub-ssot.md` | doc | — **✅ done 2026-09-02** |
 | **0.2** | Correct `spec-distribution-reconcile.md` and `spec-unit-class-close.md`, which read the defect as acceptable | doc | — **✅ done 2026-09-02** |
 | **0.3** | Decide efficiency density and confirm ownership | owner decision | **✅ done 2026-09-02** — sparse efficiency, ownership as proposed |
-| **0.4** ✅ | Author `resource-ownership.v1.json` + the generator that emits edges from it | data + code | 0.5 |
-| **0.5** ✅ | Regenerate `aptitudes.v2.json` edges; re-bless `_baseline-residual` / `_baseline-dominance` / `_baseline-goldens`; re-run `prove-aptitude.ps1` | data | 0.6, and closes **P7.2** |
+| **0.4** ⛔ | Author `resource-ownership.v1.json` + the generator that emits edges from it | data + code | **NOT DONE — see 30.1** |
+| **0.5** ✅ | Regenerate the shipped aptitude edges (**`aptitudes.v5.json`**, not v2 — the version literal here was stale in the same way §37 fixes); re-bless `_baseline-residual` / `_baseline-dominance` / `_baseline-goldens`; re-run `prove-aptitude.ps1` | data | 0.6, and closes **P7.2** |
 | **0.6** ✅ | `DominanceGuard.ReservedFamilies` loops `ResourceIds`; re-bless the coverage block | code | — |
 | **0.7** ✅ | Fix the stale `UnitClassNote` in `DerivedStatRegistry.cs:207-209` (*"No shipped reader"* — `ExhaustionPolicy` and `Predictor` both read it) | code | — |
 | **0.8** | Generalise `combat.heal.power` → `resource.restore.{resource}` | owner decision | **✅ done 2026-09-02** — §33 |
+
+### 30.1 ⛔ Task 0.4 was marked done and is not — corrected 2026-09-03
+
+`resource-ownership.v1.json` **does not exist.** Verified: `find . -name "*resource-ownership*"` returns
+nothing, and a repo-wide grep for `resource-ownership` / `ResourceOwnership` across `*.cs`, `*.json`,
+`*.py` and `*.ps1` returns zero hits.
+
+**What actually happened:** the 92 missing edges were added **by hand**, through the `--add-edge` and
+`--rename-key` support that was built into `tools/tuning/publish.py` for exactly that purpose (§33.1).
+The symptom was fixed. **The root cause §29 named was not** — and §29 is emphatic about the difference:
+
+> *"The root cause is that 486 edges are hand-maintained… So the fix is not 'add 92 rows by hand' —
+> **that reproduces the defect at a larger size.**"*
+
+So §29's promised property — *"a seventh resource is covered by construction: add it to `ResourceIds`
+and the generator emits its 36 edges"* — **does not hold today.** Adding a seventh resource still means
+36 hand-published edges.
+
+**This is a real, open, unowned task**, and marking it ✅ is how it would have been lost. It is not a
+blocker for the action corpus (the coverage the corpus needs is present in `aptitudes.v5.json`, and the
+`EveryResourceIsFedInEveryResourceFamily` drift guard holds it there), but it is the difference between
+a fixed defect and a fixed instance of a defect.
 
 **0.8 is the one that touches this program directly.** Until it is answered, a generated support action
 that restores qi has no channel scaling it, while one that restores hp does — so the corpus would encode
@@ -1127,8 +1218,24 @@ The former defer said these *"need play data, which does not exist yet."* That c
 | At 1 each | 904 — **below the band**, so species collide on abilities: the 63%→93% distinctness finding in reverse |
 | At 5 each | 4,520 — **above the band**, and it pushes the run past 9 h for distinctness the band says is not bought |
 
-**3 is the only value in {1, 2, 3, 4, 5} that puts the corpus inside the band with headroom for the
-family and general tiers.** That is a derivation, not a preference.
+> **⛔ CORRECTED 2026-09-03.** This originally read *"3 is the only value in {1, 2, 3, 4, 5} that puts
+> the corpus inside the band… That is a derivation, not a preference."* **That is arithmetically false,
+> and it was exactly backwards.** Recomputed:
+>
+> | Per species | Signature | Corpus (+500 general, +95 family) | Inside 1,500-3,500? |
+> |---:|---:|---:|---|
+> | 1 | 904 | 1,499 | signature below band |
+> | **2** | **1,808** | **2,403** | **yes — on both readings, with more headroom than 3** |
+> | 3 | 2,712 | 3,307 | yes |
+> | 4 | 3,616 | 4,211 | total above band |
+>
+> **The arithmetic admits 2 and 3.** The original also switched units mid-argument, comparing a
+> signature-only count to the band and then calling 2,712 *"of the 3,307-row corpus"*.
+>
+> **Restated honestly: 2 or 3 both fit; 3 is chosen** because it leaves the per-family re-tune trigger
+> below room to move down as well as up, and because the count is a tunable whose default should sit
+> where a coverage failure is fixable without a schema change. **That is a preference with a reason —
+> which is a legitimate thing for a tunable's default to be, and pretending otherwise was the defect.**
 
 > **Re-tune trigger, stated so it is checkable:** S5's coverage report shows species colliding — two
 > species whose signature sets are t2-identical (§14). Raise the count for the colliding families only;
@@ -1150,10 +1257,24 @@ The ordering the owner set — *"stronger mean cost more… and rarier"* — is 
 rather than at three separately chosen multipliers. That is what makes §19's *"×2.3 / ×5.4"* a consequence
 of the window spacing instead of three more numbers to defend.
 
-And the tier gap is **already priced**, which is the part that matters for §21's guardrail: across rungs
-2→10 the shipped table gives power **×9.38** against cost **×13.15** — a **1.40× escalation tax**
-(`spec-rung-table.md` §2). A signature action does not merely cost more than a general one; it costs
-**disproportionately** more, by a ratio the table already ships.
+And the tier gap is **already priced**. Across rungs 2→10 the shipped table gives power **×9.38**
+against cost **×13.15** — a **1.40× escalation tax** (`spec-rung-table.md` §2, recomputed: 13.153/9.378
+= 1.4025 ✓).
+
+> **⛔ CORRECTED 2026-09-03.** This section originally concluded *"a signature action… costs
+> disproportionately more, **by a ratio the table already ships**"* — applying the 1.40× figure to the
+> tier gaps. **1.40× is the tax across an 8-rung span. The tier gaps are 3 and 6 rungs**, and the tax
+> over a shorter span is smaller:
+>
+> | Gap | cost ratio | power ratio | **actual tax** |
+> |---|---:|---:|---:|
+> | general ceiling 4 → family 7 | 2.628 | 2.315 | **1.135×** |
+> | general 4 → signature 10 | 6.907 | 5.359 | **1.289×** |
+> | rungs 2→10 (the figure quoted) | 13.153 | 9.378 | 1.402× |
+>
+> **The escalation is real and in the right direction — it is ~30% weaker than stated.** This matters
+> because that number carries the owner's *"stronger mean cost more"* requirement, and overstating it
+> by a third is the kind of error that only shows up when someone tunes against it.
 
 > **Re-tune trigger:** the E9 pricing pass of §21 shows a tier's *reachable* power (structure **plus**
 > family access, per C1) landing outside its rung's budget. Move the **window**, never the `1.75` —
@@ -1189,3 +1310,251 @@ balance-neutrality claim, this time against the residual and dominance baselines
 `model` field (`D:\Works\source\…`), which `AGENTS.md` forbids in committed files and which made the
 baselines diff noisily between contributors. The regen script now rewrites `model` repo-relative. Only
 the *presence* of that field is asserted anywhere (`CombatSimJsonEmitTests.cs:22,41,64`), never its value.
+
+---
+
+# Part VII — the atom pool, and where this program's idea phase ends
+
+## 38. ⭐ IDEA PHASE SEALED — 2026-09-02
+
+**This program's idea phase is closed and sealed.** Owner, 2026-09-02: *"this phase we clear and seal
+idea, so avoid to stop and ask in middle because not clear."* No open question, no defer, no pending
+owner decision anywhere in Parts I-VII.
+
+### 38.1 What the atom audit found, and why it does NOT reopen anything here
+
+Part I assumed actions are assembled from atoms. **That assumption is correct and the machinery is
+built** - `ActionSeeder.Generate` wraps `Instantiator.Draw`, both shipped. What the audit found is that
+the *pool* those draws sample from holds **21 rows**, and that five atom-layer defects would make some
+generated content inert.
+
+**None of that is this program's work.** Owner, 2026-09-02: *"all new effect-atom, and we wait nothing
+here."* It is [**Wave 7 of the effect-atom program**](effect-atom-ideal.md#wave-7--the-pool-idea-sealed-2026-09-02),
+modules **E26-E32**, whose idea is sealed in the same pass.
+
+| The finding | Owner |
+|---|---|
+| The Runner path throws for any rolled or capped atom | **E26** `runner-def-emit` |
+| Elements never reach the lawn - every lawn actor is `Neutral` | **E27** `lawn-element-bind` |
+| `resource.delta` hp-only - so **this program's own Phase 0 six-resource work is unreachable by an atom on the lawn** | **E28** `param-parity` |
+| `board.action` drops `damage`; `status.clear` reaches 4 of 21 | **E28** |
+| No value vocabulary enforced for any non-stat kind; `stat.derived` never checks its channel is registered | **E29** `kind-value-guard` |
+| The ~41,550-row pool itself | **E30** `atom-family-emit`, **E31**, **E32** |
+
+### 38.2 The ordering, stated once - and it is a PLAN-phase fact, not an idea-phase dependency
+
+> **Foundation first, then the action corpus. Nothing blocks.**
+
+Owner: *"complete foundation first then build action corpus, nothing need to wait… that will a part of
+plan phase."* This is a **sequencing** statement, not a gate: the action corpus does not negotiate a
+dependency, wait on a checkpoint, or hold spec work. The live check that proves the foundation is a
+**single gate at the end of the build**, after which a fix-bug phase runs - *"we will completely build
+then final phase will live check, so nothing block."*
+
+**So the idea phase closes here for both programs.** The build order, the checkpoints and the live-check
+gate belong to `tasks/<program>-plan.md`, and are deliberately not decided in this document.
+
+### 38.3 What is genuinely NOT covered, and is nobody's module yet
+
+Recorded so the next ideal starts from it rather than rediscovering it. These are **capability** gaps -
+no atom kind expresses them, so no amount of content generation reaches them:
+
+- **Match-wide board modifiers** (`Board.config`: zombie HP/damage/speed/count, starting armor,
+  `waveInterval`, `conveyInterval`) - the entire *"curse this level"* axis, proven live, no kind.
+- **Wave control** - summon, huge wave, set or freeze the wave timer.
+- **Projectile damage** - `spawn.entity` can create a bullet but cannot say how hard it hits.
+- **Second-tier entity fields** - `takeDmgMultiplier`, `theArmor`, `theSpeed`, `attackSpeedAdder`.
+- **Plant-side status** - the lawn status executor iterates zombies only.
+- **UI / HUD** - no attach point of any kind exists.
+- **The trigger half.** Only **five** host event families reach atoms (`EffectEventAdapterCore.TryMap`):
+  `combat.hit`, `{plant,zombie}.damage`, `{plant,zombie}.die`, `{plant,zombie}.place`+`bullet.init`,
+  `{effect,combat}.timer`. There is no `onWave`, `onSunCollect`, `onGridPlace`, `onMatchStart/End`, or
+  `onHitLand`, and `OnActivate` is an authorable atom trigger that the injector raises nowhere.
+  **An effect that cannot be triggered by a wave is as blocked as one that cannot act on a wave.**
+
+**This list is not Wave 7's scope and not this program's.** It is the input to a future ideal, and naming
+it here is what stops a later session absorbing it silently into a module that never sized for it.
+
+---
+
+# Part VIII — adversarial review, 2026-09-03
+
+Owner: *"now audit, debate, strenthen whole idea."* Four parallel audits plus a direct pass. **The seal
+held on architecture and failed on arithmetic and on citation** — which is the useful outcome, because
+the expensive errors are the ones that read as verified.
+
+**Everything below is corrected in place above.** This part records what was wrong and why, so the same
+class of error is visible rather than quietly overwritten.
+
+## 39. ⛔ The finding that gates the whole pipeline — 904 species do not exist
+
+Every corpus number in this document is built on **904 species**. Measured 2026-09-03:
+
+| Source | Count |
+|---|---:|
+| `DemonSpeciesCatalog.Generated.cs` — `SpeciesId = "…"` rows | **84** |
+| `_generated/motif-assignments.json` | **84** |
+| `_generated/family-assignments.json` | **53** |
+| `seedsmith-map.md:149` | *"84 eligible rows today, **rising toward ~904**"* |
+
+**904 is the almanac row count, not the roster.** The shipped roster is 84.
+
+**Why this is not merely a number to divide by 10.** §16's brief block is explicit that the anchor is
+*"group B — read from the demon seed, **never invented**"*: `family`, `element`, `rarity`, `themeKey`,
+`motifs`, `antiMotifs`. Both model pipelines depend on it:
+
+- **`P-signature`** asks *"what makes THIS ONE creature unlike its siblings"* — needs species motifs and
+  anti-motifs. Available for **84**.
+- **`P-family`** asks *"what expresses THIS family"* — needs a family assignment. Available for **53**.
+
+**For the other ~820 species there is nothing to read.** The pipeline cannot invent an anchor without
+breaking the one rule §16 states about it.
+
+### 39.1 §9's Q4 closed a narrower question than the one that blocks
+
+§9 Q4 examined *"the 820-species power gap"* and closed it **No** — on the ground that rarity and rung
+are progression-derived rather than HP-derived. **That reasoning is correct and it is not the blocker.**
+The blocker is **motifs, family and theme**, which the question never asked about. A closed question
+that closed the wrong question is worse than an open one, because the seal counts it.
+
+### 39.2 The knock-on nobody would notice
+
+§20 justifies `P-family` as a distinct pipeline partly because a family brief is *"shared across ~48
+species"* (904 / 19). **At the shipped 84 it is 4.4.** Whether a judgement shared by four species earns
+its own pipeline, prompt template and review surface is a genuine question that the 48 figure hid.
+
+### 39.3 What this changes, stated without drama
+
+**Not the architecture.** Three pipelines, the rung windows, the model-free stage ordering and the seed →
+concrete law are all unaffected. **The corpus sizing and the run cost are.** At 84 species with 3
+signature actions each the signature tier is **252**, not 2,712 — and the whole corpus is roughly
+**850**, which lands *below* the 1,500–3,500 research band rather than inside it.
+
+**So §36.1's derivation is correct in method and was applied to the wrong roster.** It should be re-run
+when the roster is known, and the per-species count is a tunable precisely so that re-run is a config
+change. **This is the single most important thing for the plan to absorb.**
+
+## 40. The corrections, with what each would have cost
+
+| # | Section | Was | Is |
+|---|---|---|---|
+| 1 | **§21** | *"required, non-negotiable"* guardrail on C1 | **Rewritten.** No per-rung power budget exists; E9 has no family concept; the only budget checker is rarity-keyed with zero production callers; the monotonicity test reads no atoms. See §21.1–21.3 |
+| 2 | **§36.1** | *"3 is the only value… a derivation, not a preference"* | **False.** 2 also lands in band, with more headroom. Restated as a reasoned preference |
+| 3 | **§36.2** | tier gaps cost *"disproportionately more, by a ratio the table already ships"* (1.40×) | **1.40× is an 8-rung span.** The tier gaps are **1.135×** and **1.289×** — right direction, ~30% weaker |
+| 4 | **§30 task 0.4** | ✅ done | **Not done.** `resource-ownership.v1.json` does not exist; the edges were hand-published. §29's declared root cause is still open — see §30.1 |
+| 5 | **Part I §7** | corpus ~1,000; *"the gap closes through the roll"* | **Superseded by §17/§18/§36.1.** Banner added at the top of the document |
+| 6 | **§34.1** | *"the innate **climbs** with earn history"*, filed under *"verified in code and spec"* | **Unbuilt.** `action-ideal.md:137` says *"Recommended, **not yet ratified**"*; the innate's rung is the authored `ActionRow.Rung` column, and `UnlockLadder.Rung` is reachable only through a held unlock, which an innate never is. **The S6 conclusion survives on the free-sixth-slot half alone** — which is independently verified — but the argument as written overclaimed |
+| 7 | **§7** | *"5 categories × 4 target shapes bounds it at 20"* | **Wrong enum.** `ActionTargetMode` has **6** members; the 4 area shapes apply only under `Area`. 5 × 6 = 30, and the *"~20–40"* range had no derivation |
+| 8 | **§17** | *"the demon-seed measured rate (~1,162 calls/h)"* | **Unsourced.** `1162` appears nowhere else in the repo — no run log, no measurement note. The arithmetic on top of it is correct; the input is not evidenced. **Every hour figure in this document inherits that** |
+| 9 | **§32** | *"every `transform.position =` is in `Fx/` pools"* | **Incomplete** — `Hud/ActorHudPool.cs:170,225,243` also writes positions. **The conclusion holds** (HUD objects are not `Plant`/`Zombie` transforms), but the same wrong sentence is committed in `decisions.md:105`, and if `guard-single-writer.ps1` is extended per that ADR, `Hud/` needs an exemption nobody has written down |
+| 10 | **§28** | efficiency rows still read *"Should be 12 ⛔"* | **Superseded** by §30 task 0.3, which decided **sparse**. Shipped reality: `resource.efficiency.{hp:2, stamina:3, hunger:2, spirit:2, qi:1, poise:2}` — sparse as decided. The poise rows got a ✅ callout; these did not |
+
+### 40.1 Two that are contradictions rather than errors
+
+**§4 authorizes a one-sided clamp; §5 uses a two-sided one.** §4's table is explicit: `min(earnCount,
+cap, scopeMax)` is *"one curve"*, while a shifted function *"stays rejected."* §5 then writes
+`clamp(min(earnCount, cap), scope.minRung, scope.maxRung)`, and B3 sets signature to 5–10 — expanding to
+`max(5, min(earnCount, 10))`, which is **constant at 5 across `earnCount ∈ [0,5)`**. That is a piecewise
+function differing from `rung(n)` over a whole interval for one content class — the shape §4 rejects.
+**And it is unpriced:** a first-ever unlock forced to rung 5 also carries `costMulti = 3627‰`, so a
+player with zero earn history pays **3.6×**. The `minRung` floor needs either dropping or pricing.
+
+**§5's *"a scope's rung ceiling already gates its structure ceiling as a side effect"* does not hold**,
+for two independent reasons. `StructureBudgetGuard.Check` reads `row.Rung` — the **authored** column —
+while `effectiveRung` is derived per holder from `earnCount`; clamping the derived rung never reaches the
+guard. And the two axes that are the signature tier's *only* structural advantage over family
+(`reaction`, `restriction`, first appearing at rung 9) are the two the guard's own docstring calls *"an
+honest, documented gap"* and cannot detect. **The structural differentiation between the family and
+signature tiers is currently unenforceable.**
+
+### 40.2 One citation error worth its own line, because the consequence is a balance change
+
+§4 cites *"the caps register lists this cap as tunable (`ssot-power-scale.md:132`)"*. **Line 132 is
+inside §4.1 "The index Θ" and has nothing to do with caps**, and §11 — the caps register — has **no row
+for the action-unlock cap** at all. (`:798` *is* the correct line for the separate *"the ladder extends"*
+quote.)
+
+The unexamined part is bigger than the citation. `data/tuning/action-unlock.v1.json`'s own `_meta`:
+
+> *"**cap 10 is both the max held count and the rung ceiling** — one number, two uses."*
+
+§4's argument is that the cap is tunable, so the ladder can extend to make room for §5's windows.
+**Raising it from 10 to 15 also gives every player 15 held unlocks instead of 5+10** — a balance change
+of an entirely different kind, never mentioned.
+
+## 41. ⭐ A consequence of W7-D4 that no section covers — the cell axis and the mod-family rule
+
+Found in this session's own pass, and it changes the effective corpus size by ~50×.
+
+`Instantiator.GroupOf` defaults a pool row's group to **`familyId + "|" + variant`**
+(`Instantiator.cs:251-255`), and `DrawBudget` removes the **entire group** once one member is drawn —
+PoE's mod-family rule, which exists so a rolled item cannot read *"+10 atk / +12 atk / +14 atk"*.
+
+The owner's decision to include **cells** as a per-row axis (W7-D4) collides with that rule, and there is
+no third option:
+
+| If the cell is… | Consequence |
+|---|---|
+| **not** part of `variant` | All 50 cell-rows of one effect share one group key. A container rolls **exactly one**, and **49 of every 50 generated rows are unreachable in any instance** — 37,160 spawn rows collapse to ~740 reachable |
+| part of `variant` | 37,160 distinct groups, and the mod-family rule stops doing its job: instead of *"+10 atk / +12 atk"* an item now reads *"cherry at A / cherry at B / cherry at C"* |
+
+> **✅ RESOLVED the same day, by the database.** `RpgStore.Atoms.cs:62-63` carries
+> `CREATE UNIQUE INDEX ux_effect_atom_family_tier_variant ON effect_atom(family_id, tier, variant)`, and
+> `AtomRow.DeriveId` builds the id from those same three columns. **37,160 spawn rows at tier 1 need
+> 37,160 distinct `(family_id, variant)` pairs**, so the cell *must* be distinguishable in one of them —
+> the first row of the table above is not a legal option at all. A naive "family per entity class, cell
+> in `variant`" scheme collides **696 ways on every cell** and `RefuseDuplicates` rejects the batch.
+>
+> **So the remaining call is only WHICH column carries the cell, and the mod-family consequence follows
+> from that.** `E30` must state the id scheme as a hard contract rather than leaving it to the emitter.
+> Measured detail in `effect-atom-ideal.md` §W7.8.1.
+
+## 42. What the seal actually means now
+
+§25 and §38 declare *"no open question, no defer, no pending owner decision."* **That was true of
+questions and false of tasks.** The distinction matters because a seal makes unowned work invisible.
+
+**Carried forward as tasks with no module — none of them re-opens a decision:**
+
+1. **§21's three replacement assertions** — a rung `powerBudget` row, a family-aware non-additive price
+   (needs D2), and a budget check with a production caller. **C1's family-access widening is gated on
+   these**; structure-gating is the safe default meanwhile.
+2. **The 904 → 84 roster reconciliation** (§39) — re-run §36.1's derivation against the real roster.
+3. **§30 task 0.4** — `resource-ownership.v1.json` and its generator (§30.1).
+4. **§5's `minRung` floor** — drop it or price it (§40.1).
+5. **`reaction` / `restriction` detection** in `StructureBudgetGuard`, without which the family/signature
+   structural split is unenforceable (§40.1).
+6. **The rung window's entry in the caps register** — §5 constraint 2 promised it; it is not there.
+7. **`Hud/` exemption** for the extended `guard-single-writer.ps1` (§40 row 9), plus the same sentence
+   corrected in `decisions.md:105`.
+8. **The `1,162 calls/h` rate** — measure it, or restate every hour figure as unverified (§40 row 8).
+9. **The cell/`variant` decision** for `E30` (§41).
+
+**The idea phase stays sealed.** Nothing above is a question for the owner; each item is work with a
+known shape, and naming them is what stops the seal from swallowing them.
+
+
+---
+
+## 43. ✅ IDEA PHASE CLOSED — 2026-09-03
+
+Sealed 2026-09-02, corrected by adversarial review 2026-09-03 (Part VIII), and closed here. **No open
+question, and the tasks that survive are listed in §42 with owners rather than hidden by the seal.**
+
+**Two late corrections from the effect-atom side change this program's inputs**, and both make its job
+smaller:
+
+1. **The atom pool is buckets, not a cartesian** ([`effect-atom-ideal.md`](effect-atom-ideal.md) §W7.9).
+   An atom seed names a **pool** of channels; element, tier and cell resolve at **layer 4**, per player,
+   at roll time — the owner's own four-layer model, recorded in `effect-pipeline-ideal.md` §5. So a
+   generated action's atoms are **pool references**, not pre-multiplied concrete channels, and §41's
+   cell/`variant` question dissolves: **a cell is a target, never an identity.**
+2. **Small-batch proof before any full run** (§W7.10). *"prove LLM pipeline work very well before big
+   batch run… i will decide when we fully run."* **§17's call-budget arithmetic is a ceiling, not a
+   plan**, and no module may assume the full run happens. Combined with §39 (84 species shipped, not
+   904), the first real run is a smoke batch against real anchors — which is the right size for one
+   anyway.
+
+**Next artifact: `docs/architecture/action-corpus-map.md`** — the capability map, which
+`seedsmith-design` requires be *"approved before any module spec"*. It does not exist yet, and it is the
+gate to the spec phase.

@@ -1,6 +1,9 @@
+using System.Text.Json;
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Demons.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
+using FusionRpg.Core.Stats.Derived;
 
 // species-generator's own CLI (T4.5, spec-species-generator.md §7-8). Reads every real classified
 // anchor under the seed root, expands each into a ConcreteSpecies, and writes the committed,
@@ -8,14 +11,25 @@ using FusionRpg.Core.Stats.Aptitudes;
 //
 // Usage: dotnet run --project tools/DemonSpeciesGen -- [--seed <dir>] [--out <dir>] [--check]
 //                                                       [--explain <speciesId>]
+//                                                       [--export-legacy <path>]
 //        --seed     default: data/seed/demons/species, found by walking up from the working directory
 //        --out      default: data/generated/demons
 //        --check    compare against what is on disk; write nothing; exit 1 if anything differs
 //        --explain  print the full derivation chain for one species; write nothing
+//        --export-legacy   write the SHIPPED, COMPILED 84-species catalog's own
+//                          elementPrimary/deployMode/acquisition/variants as plain JSON, in the
+//                          exact shape `legacy_diff.py`'s `diff_legacy(new_anchors, legacy_entries)`
+//                          expects — closes the "a small future export step" gap that module's own
+//                          docstring named (T2.7, spec-anchor-emit.md §6). Independent of every
+//                          other flag; writes nothing else and exits immediately after.
 //
 // Exit codes: 0 clean/written, 1 stale (--check) or species not found (--explain), 2 could not start.
 
 var args2 = args.ToList();
+string? exportLegacyPath = TakeOption("--export-legacy");
+if (exportLegacyPath is not null)
+    return ExportLegacy(exportLegacyPath);
+
 string? seedOverride = TakeOption("--seed");
 string? outOverride = TakeOption("--out");
 var check = args2.Remove("--check");
@@ -165,4 +179,42 @@ static string? FindUp(params string[] segments)
         dir = dir.Parent;
     }
     return null;
+}
+
+/// <summary>
+/// The shipped, compiled 84-species catalog's own comparable fields, in `legacy_diff.py`'s exact
+/// expected shape: a flat JSON array of `{id, elementPrimary, deployMode, acquisition, variants}`.
+/// `id` matches `diff_legacy`'s own default `legacy_id_key="id"`. Field VALUES match the real
+/// anchor's own literal conventions exactly — `elementPrimary` lowercase via the same
+/// `ToElementId()` extension the live `/api/demons/catalog` endpoint already uses, `deployMode` as
+/// the enum's own raw name (anchors write `"PlantAvatar"`, never a display-cased variant),
+/// `acquisition` as an array of the flag's own set member names (an anchor's own `acquisition` is
+/// always an array, even for one flag) — verified against a real anchor
+/// (`data/seed/demons/species/plant/cherry.json`) before writing this, not assumed from the enum
+/// alone.
+/// </summary>
+static int ExportLegacy(string path)
+{
+    DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+
+    var rows = DemonSpeciesCatalog.All
+        .OrderBy(s => s.SpeciesId, StringComparer.Ordinal)
+        .Select(s => new
+        {
+            id = s.SpeciesId,
+            elementPrimary = s.ElementPrimary.ToElementId(),
+            deployMode = s.DeployMode.ToString(),
+            acquisition = Enum.GetValues<DemonAcquisition>()
+                .Where(f => f != DemonAcquisition.None && s.Acquisition.HasFlag(f))
+                .Select(f => f.ToString())
+                .ToList(),
+            variants = s.Variants.ToList(),
+        })
+        .ToList();
+
+    var json = JsonSerializer.Serialize(rows, new JsonSerializerOptions { WriteIndented = true });
+    Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(path))!);
+    File.WriteAllText(path, json);
+    Console.WriteLine($"{rows.Count} legacy species exported to {path}");
+    return 0;
 }

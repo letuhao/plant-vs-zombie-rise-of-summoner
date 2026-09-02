@@ -1,0 +1,34 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 20,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 5424,
+    "resource.max.spirit": 3164,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 407,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Chaff",
+  "side": "zombie",
+  "speciesId": "DrownZombie",
+  "theta": 13,
+  "traitPool": [
+    "delayed-attack",
+    "percentage-based damage",
+    "trident-throwing"
+  ],
+  "variantCount": 0,
+  "variants": []
+}

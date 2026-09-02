@@ -132,7 +132,7 @@ public static class OverlaySettings
     {
         public bool ShieldBarEnabled { get; set; } = true;
         public bool OverlayButtonEnabled { get; set; } = true;
-        public bool PauseWhileAway { get; set; } = true;
+        public bool PauseWhileAway { get; set; } = false;
         public string ShieldBarHotKey { get; set; } = "F9";
         public string SettingsHotKey { get; set; } = "F7";
 

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Power;
 
 namespace FusionRpg.Core.Effects.Atoms;
 
@@ -31,7 +32,9 @@ public static class AtomCompiler
         Func<string, int>? statusBit = null,
         Func<string, int>? elementId = null,
         bool hostIsPlanner = false,
-        int ownerLevel = 1)
+        int ownerLevel = 1,
+        int? ownerTheta = null,
+        PowerTuning? powerTuning = null)
     {
         var defs = new List<EffectDefDto>();
         var compiled = new List<EffectGrantDto>();
@@ -66,7 +69,7 @@ public static class AtomCompiler
             if (allCompilable && live.Count > 0)
             {
                 var compilable = live.Select(v => v.Atom).ToList();
-                var (def, grant) = EmitDefAndGrant(group.Key, compilable, curves, ownerLevel);
+                var (def, grant) = EmitDefAndGrant(group.Key, compilable, curves, ownerLevel, ownerTheta, powerTuning);
                 defs.Add(def);
                 compiled.Add(grant);
                 compiledIds.AddRange(compilable.Select(m => m.AtomId));
@@ -89,7 +92,8 @@ public static class AtomCompiler
     /// (definitions §14.2).</para>
     /// </summary>
     static (EffectDefDto Def, EffectGrantDto Grant) EmitDefAndGrant(
-        string icdKey, IReadOnlyList<AtomRow> members, Func<string, CurveTable?>? curves, int ownerLevel)
+        string icdKey, IReadOnlyList<AtomRow> members, Func<string, CurveTable?>? curves, int ownerLevel,
+        int? ownerTheta, PowerTuning? powerTuning)
     {
         // The UNION of the group's triggers, on ONE def. This is what keeps a multi-trigger def's
         // single ICD clock after it was split into several atoms: EffectDef.Triggers has always been
@@ -118,7 +122,7 @@ public static class AtomCompiler
         {
             if (OpcodeOf(member.KindId) is not { } action) continue;
 
-            var pars = ResolvedParams(member, curves, ownerLevel);
+            var pars = ResolvedParams(member, curves, ownerLevel, ownerTheta, powerTuning);
             if (!seen.Add(action + "|" + Fingerprint(pars))) continue;
 
             actions.Add(new EffectDefActionDto { Seq = seq++, Action = action, Params = pars });
@@ -298,7 +302,8 @@ public static class AtomCompiler
     }
 
     static Dictionary<string, object?> ResolvedParams(
-        AtomRow atom, Func<string, CurveTable?>? curves, int ownerLevel)
+        AtomRow atom, Func<string, CurveTable?>? curves, int ownerLevel, int? ownerTheta = null,
+        PowerTuning? powerTuning = null)
     {
         var kind = AtomKindRegistry.Get(atom.KindId);
         var pars = Read(atom.ParamsJson);
@@ -330,6 +335,37 @@ public static class AtomCompiler
                     ["eventField"] = spec.EventField,
                     ["multiplierMilli"] = spec.MultiplierMilli,
                 };
+                continue;
+            }
+
+            // T6.2: unlike eventField, an owner's own Θ is known at COMPILE time (not something a
+            // hit produces), so this resolves to a plain number right here — no marker, no deferral,
+            // and `ToOpcodeShape` below needs no change. `PatronPolicy.AuraMilli`'s own exact
+            // arithmetic: kMilli · PowerLadder.Value(Θ) / 1000, widened before multiplying and
+            // divided once (CLAUDE.md's overflow discipline — Θ can be large, per-mille intermediates
+            // are 1000× closer to the ceiling). Rejects rather than guesses when the caller compiled
+            // with no owner Θ/tuning in scope — a powerLadder atom is unauthorable content until a
+            // real caller supplies both, never silently priced at zero.
+            if (spec.PowerLadder)
+            {
+                if (ownerTheta is not { } theta || powerTuning is null)
+                    throw new InvalidOperationException(
+                        $"{atom.AtomId}: a powerLadder value spec was compiled with no ownerTheta/powerTuning " +
+                        "supplied — AtomCompiler.Compile needs both to resolve it, never a silent default.");
+
+                var pThetaValue = new PowerLadder(powerTuning).Value(theta);
+                result[key] = checked((int)((long)spec.PowerLadderKMilli * pThetaValue / 1000));
+                continue;
+            }
+
+            // T6.2's second gap: `clamp(base + level, 0, cap)` — `ownerLevel` is the SAME
+            // pre-existing, non-nullable parameter every curve-scaled value already reads (defaults
+            // to 1, exactly like every other caller that never sets it), so this needs no "missing
+            // context" rejection the way `powerLadder`'s Θ does — there is no unset state to guard.
+            if (spec.ClampedLevelScale)
+            {
+                var unclamped = checked((long)spec.ClampedLevelScaleBaseMilli + ownerLevel);
+                result[key] = (int)Math.Clamp(unclamped, 0, spec.ClampedLevelScaleCapMilli);
                 continue;
             }
 

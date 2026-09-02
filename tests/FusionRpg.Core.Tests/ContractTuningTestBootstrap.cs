@@ -398,7 +398,9 @@ internal static class ContractTuningTestBootstrap
         RowOffsetIdentity: 0.42,
         RowOffsetResources: 0.28,
         RowOffsetStatuses: 0.14,
-        EliteTierThreshold: null);
+        EliteTierThreshold: null,
+        MagnitudeMidThreshold: 10.0,
+        MagnitudeHighThreshold: 30.0);
 
     // bMilli=0 matches the shipped power-scale.v1.json exactly (plan.md "B=0 first, dial second") —
     // BattleRuleset.BaseHp/Atk/Defense must stay byte-identical to their pre-T2.1 literal formulas

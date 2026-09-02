@@ -1,0 +1,34 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 3,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 3616,
+    "resource.max.stamina": 7232,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 447
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Chaff",
+  "side": "zombie",
+  "speciesId": "PolevaulterZombie",
+  "theta": 13,
+  "traitPool": [
+    "disposable-tooling",
+    "momentum-based",
+    "vaulting"
+  ],
+  "variantCount": 0,
+  "variants": []
+}

@@ -1,0 +1,25 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 14,
+  "magnitudes": {},
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Cultivated",
+  "side": "plant",
+  "speciesId": "ThreePeater",
+  "theta": 13,
+  "traitPool": [
+    "Lane-compensation ballistic mechanics",
+    "Multi-lane projectile discharge"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

@@ -327,6 +327,9 @@ def cmd_demons(args: argparse.Namespace) -> int:
     if args.demon_command == "run":
         return _cmd_demons_run(args)
 
+    if args.demon_command == "diff-legacy":
+        return _cmd_demons_diff_legacy(args)
+
     if args.kind == "anchor":
         return _cmd_demons_generate_anchor(args)
 
@@ -721,6 +724,50 @@ def _cmd_demons_metrics(args: argparse.Namespace) -> int:
     return EXIT_GAP if any(f.severity is Severity.GAP for f in findings) else EXIT_CLEAN
 
 
+def _cmd_demons_diff_legacy(args: argparse.Namespace) -> int:
+    """`seedsmith demons diff-legacy --legacy PATH [--anchors DIR]` (T2.7, spec-anchor-emit.md §6).
+
+    Closes the "no committed entrypoint" gap `legacy_diff.py`'s own function had — the same class of
+    defect `families`/`generate --kind commander-effect` each hit once before this
+    (`cmd_demons`'s own docstring). `--legacy` points at the plain-JSON export
+    `dotnet run --project tools/DemonSpeciesGen -- --export-legacy PATH` produces from the real,
+    compiled, shipped catalog; this module never reads C# source, matching `legacy_diff.py`'s own
+    stated boundary.
+    """
+    from ..adapters.demons.anchor.legacy_diff import diff_legacy, format_report
+
+    if not args.legacy:
+        print("seedsmith: diff-legacy needs --legacy <path> — produce it with "
+              "`dotnet run --project tools/DemonSpeciesGen -- --export-legacy <path>`", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    legacy_path = Path(args.legacy)
+    if not legacy_path.exists():
+        print(f"seedsmith: no file at {legacy_path}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    anchors_root = Path(args.anchors) if args.anchors else Path("../../data/seed/demons/species")
+    anchors = _load_demon_anchors(anchors_root)
+    if anchors is None:
+        print(f"seedsmith: no readable anchor tree at {anchors_root} (expected an _index.json)", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    import json as _json
+    legacy_raw = _json.loads(legacy_path.read_text(encoding="utf-8"))
+    # Case-sensitivity: the compiled catalog's own ids are lowercase (DemonSpeciesCatalog.Validate's
+    # own rule), the real anchor's speciesId is the captured TitleCase typeName -- the same mismatch
+    # class `_load_families` already found and fixed once this session (runner.py).
+    legacy = [{**e, "id": e["id"].lower()} for e in legacy_raw]
+    new_anchors = [{**a, "speciesId": a["speciesId"].lower()} for a in anchors]
+
+    report = diff_legacy(new_anchors, legacy, legacy_id_key="id", new_id_key="speciesId")
+    overlap = len({a["speciesId"] for a in new_anchors} & {e["id"] for e in legacy})
+    print(format_report(report))
+    print(f"\nlegacy species: {len(legacy)}, new anchors: {len(new_anchors)}, "
+          f"species present in both sets: {overlap}")
+    return EXIT_CLEAN
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="seedsmith")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -808,6 +855,12 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--species", default="", help="a speciesId (--kind anchor)")
     gen.add_argument("--dump", default="", help="corpus-dump tree root (--kind anchor, default ../../data/seed/demons/_dump)")
     gen.add_argument("--all", action="store_true", help="refused here — use `demons run start --all` (--kind anchor)")
+    difflegacy = demon_sub.add_parser(
+        "diff-legacy",
+        help="field agreement between the new classification and the shipped, compiled legacy catalog")
+    difflegacy.add_argument("--legacy", default="",
+                            help="path to the JSON `DemonSpeciesGen --export-legacy` produced (required)")
+    difflegacy.add_argument("--anchors", default="", help="anchor tree root (default data/seed/demons/species)")
     run = demon_sub.add_parser(
         "run", help="run-control: pause/resume/cancel/rerun/overwrite-all over the anchor classification run")
     run.add_argument("run_verb", choices=("start", "pause", "resume", "cancel", "rerun", "status", "overwrite-all"))

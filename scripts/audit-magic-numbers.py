@@ -59,6 +59,29 @@ STRUCTURAL_WORD = re.compile(
     r"namespace|floor_?id|offset|bytes?|width|precision|encoding|schema|"
     r"maxsegments|pool|dispose|timeout_?ms|port|epsilon)", re.I)
 
+# Named explicitly, not folded into a broader regex — same discipline CONTENT_FILE already uses:
+# a deliberate, reviewable exception rather than a silent broadening of BALANCE_WORD/STRUCTURAL_WORD
+# that could swallow a real future finding sharing the same substring.
+#
+# `KernelDriveHost.KindShieldUpkeep` (Injector/Effects) is an opaque scheduler-kind discriminator —
+# its own doc comment: "Opaque ints to the queue by design — the scheduler never interprets them."
+# It matches BALANCE_WORD only because "Shield" + "Upkeep" happen to be substrings of an id, the same
+# accidental-substring class audit-overflow.py's own "WithPatron"/"hP" note already warns about.
+#
+# `KernelDriveHost.UpkeepPeriodTicks` is a scheduling GRANULARITY, not a balance rate — its own doc
+# comment: "structural, not tunable... It stays 100 ms deliberately" (integer milli-HP regen would
+# truncate to zero at finer granularity). T2 already requires this exact justification in a comment;
+# this constant already carries it and was still flagged because "upkeep" is deliberately in
+# BALANCE_WORD (a real resource-upkeep RATE elsewhere is a genuine balance dial).
+#
+# `VariantShift.MaxTier`/`MinTier` (Core/Effects/Atoms) — "which tier ROWS exist" (a schema fact: t5
+# is the highest tier row authored, there is no t6), not a magnitude a balance pass scales. Its own
+# doc comment names this exact audit by function: "named here so a later overflow/magic-number sweep
+# does not flag ShiftTierWindow's clamp as an illegal cap." Matched via BALANCE_WORD's "tier", which
+# elsewhere (a tier-scaled bonus, say) is correctly a real balance dial — the exemption is these two
+# specific identifiers, not the word.
+EXEMPT_NAMES = {"KindShieldUpkeep", "UpkeepPeriodTicks", "MaxTier", "MinTier"}
+
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}
 SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$|Tests?\.cs$", re.I)
 
@@ -134,8 +157,8 @@ def scan(paths):
                     m = CONST_RE.search(line)
                     if m:
                         name, val = m.group(1), m.group(2)
-                        structural = bool(STRUCTURAL_WORD.search(name))
-                        balance = bool(BALANCE_WORD.search(name))
+                        structural = bool(STRUCTURAL_WORD.search(name)) or name in EXEMPT_NAMES
+                        balance = bool(BALANCE_WORD.search(name)) and name not in EXEMPT_NAMES
                         prev = lines[i - 2].strip() if i >= 2 else ""
                         documented = prev.startswith(("//", "///", "*", "/>"))
                         if balance and not structural:

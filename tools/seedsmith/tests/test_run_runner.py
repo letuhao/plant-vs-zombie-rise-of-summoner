@@ -246,3 +246,111 @@ def test_status_reports_state_and_progress(tmp_path):
     s = runner.status(paths=paths)
     assert s["state"] == "paused"
     assert s["completed"] == 1
+
+
+# ---- family-file bucketing (2026-09-02) ------------------------------------------------------
+#
+# Real bug found on T2.11's own 20-species run: `_family_for` only ever consulted
+# `family-assignments.json` (built for the unrelated fusion-product `demon` corpus) and ignored
+# the anchor's own just-classified `family` field entirely — every base species not coincidentally
+# sharing an id with that other corpus landed in the generic "unclassified" bucket despite the
+# `identity` pipeline (spec-classify-pipelines.md pipeline 8) already having proposed a real family
+# for it in the SAME run.
+
+
+def test_family_for_prefers_the_anchors_own_classified_family():
+    # No entry in the external lookup at all — the anchor's own LLM-proposed family still wins.
+    assert runner._family_for("chomper", {}, classified_family=["Apex Predator Flora"]) == "apex-predator-flora"
+
+
+def test_family_for_falls_back_to_the_external_lookup_when_unclassified():
+    families = {"cherrybomb": ["cherry"]}
+    assert runner._family_for("CherryBomb", families, classified_family=None) == "cherry"
+    assert runner._family_for("CherryBomb", families, classified_family=[]) == "cherry"
+
+
+def test_family_for_falls_back_to_unclassified_when_neither_source_has_anything():
+    assert runner._family_for("nobody", {}, classified_family=None) == "unclassified"
+    assert runner._family_for("nobody", {}, classified_family=[""]) == "unclassified"
+
+
+def test_family_for_ignores_blank_entries_in_the_classified_list():
+    # An open array can contain a blank string without being empty — skip to the next real value.
+    assert runner._family_for("x", {}, classified_family=["", "  ", "Voidkin"]) == "voidkin"
+
+
+def test_slugify_family_matches_the_repos_own_kebab_case_grammar():
+    assert runner._slugify_family("Apex Predator Flora") == "apex-predator-flora"
+    assert runner._slugify_family("Ice & Frost!!") == "ice-frost"
+    assert runner._slugify_family("  already-kebab  ") == "already-kebab"
+
+
+# ---- start/resume mutual exclusion (2026-09-02) ------------------------------------------------
+#
+# Real bug: two overlapping `resume`-driving loops (this session's own process management, not a
+# hypothetical) both read the SAME record between one species' completion and the next `resume`
+# call, both saw it as resumable (the pre-existing `state == "running" and is_process_alive(pid)`
+# check is a read-then-check, not an atomic claim), and both proceeded — producing two divergent
+# real anchor files for the same 2 species. These tests exercise the lock directly (deterministic)
+# rather than racing two real `resume()` calls via threads (timing-sensitive, and the pre-existing
+# `always_valid_call` stub is fast enough that a thread race would be flaky either way) — the lock
+# IS the mechanism under test, so holding it and asserting the second caller is refused proves
+# exactly the same thing a true race would, without the flake risk.
+
+
+def test_a_held_lock_refuses_a_concurrent_start(tmp_path):
+    paths = make_paths(tmp_path)
+    runner._acquire_run_lock(paths.runs_dir)
+    try:
+        with pytest.raises(runner.RunRefused, match="already in progress"):
+            runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    finally:
+        runner._release_run_lock(paths.runs_dir)
+
+    # Released, the SAME call now succeeds — the lock refuses while held, not permanently.
+    record = runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    assert record.state == "completed"
+
+
+def test_a_held_lock_refuses_a_concurrent_resume(tmp_path):
+    paths = make_paths(tmp_path)
+    seen: "list[str]" = []
+
+    def progress(species_id, done, total):
+        seen.append(species_id)
+        if len(seen) == 1:
+            runner.request_pause(paths=paths)
+
+    paused = runner.start({"kind": "all"}, paths=paths, call=always_valid_call, progress=progress)
+    assert paused.state == "paused"
+
+    runner._acquire_run_lock(paths.runs_dir)
+    try:
+        with pytest.raises(runner.RunRefused, match="already in progress"):
+            runner.resume(paths=paths, call=always_valid_call)
+    finally:
+        runner._release_run_lock(paths.runs_dir)
+
+    resumed = runner.resume(paths=paths, call=always_valid_call)
+    assert resumed.state == "completed"
+
+
+def test_a_stale_lock_from_a_dead_process_is_reclaimed_not_a_permanent_refusal(tmp_path):
+    paths = make_paths(tmp_path)
+    paths.runs_dir.mkdir(parents=True, exist_ok=True)
+    lock_path = paths.runs_dir / runner.RESUME_LOCK_NAME
+    # A pid nothing on this machine will ever hold -- 2**31-1, matching this repo's own
+    # `is_process_alive`-tests-a-dead-pid convention elsewhere.
+    lock_path.write_text("2147483647", encoding="utf-8")
+
+    record = runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+
+    assert record.state == "completed"
+    # The stale lock was reclaimed and released after the call, not left behind.
+    assert not lock_path.exists()
+
+
+def test_a_normal_call_leaves_no_lock_file_behind(tmp_path):
+    paths = make_paths(tmp_path)
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    assert not (paths.runs_dir / runner.RESUME_LOCK_NAME).exists()

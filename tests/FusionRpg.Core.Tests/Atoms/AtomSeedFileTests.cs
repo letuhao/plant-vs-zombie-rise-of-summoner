@@ -309,4 +309,172 @@ public class AtomSeedFileTests
         Assert.Equal(AtomRejectionReason.BadCurve, r.Errors[0].Reason);
         Assert.Empty(r.Content.Curves);
     }
+
+    // ---- affix (module 9, `affix-authoring`'s own consumer — no reader existed before this) ------
+
+    [Fact]
+    public void A_concrete_ref_affix_parses()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.master-of-fire-and-ice", "class": "prefix", "refs": [
+                    { "atom": "atom.fire-power.t1" }, { "atom": "atom.ice-power.t1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var affix = Assert.Single(r.Content.Affixes);
+        Assert.Equal("affix.master-of-fire-and-ice", affix.AffixId);
+        Assert.Equal(AffixClass.Prefix, affix.Class);
+        Assert.Equal(2, affix.Refs.Count);
+        Assert.Equal("atom.fire-power.t1", affix.Refs[0].AtomId);
+        Assert.False(affix.Refs[0].IsSlot);
+        Assert.Equal("x.json", r.Content.SourceOf["affix.master-of-fire-and-ice"]);
+    }
+
+    [Fact]
+    public void A_slot_ref_affix_parses()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.elemental-adept", "class": "prefix", "refs": [
+                    { "slotName": "E1", "slotDomain": "element", "slotPick": 1,
+                      "slotAtomPattern": "atom.elemental-power.$E1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var refRow = Assert.Single(r.Content.Affixes[0].Refs);
+        Assert.True(refRow.IsSlot);
+        Assert.Null(refRow.AtomId);
+        Assert.Equal("E1", refRow.SlotName);
+        Assert.Equal("element", refRow.SlotDomain);
+        Assert.Equal(1, refRow.SlotPick);
+        Assert.Equal("atom.elemental-power.$E1", refRow.SlotAtomPattern);
+    }
+
+    [Fact]
+    public void A_mixed_concrete_and_slot_bundle_parses_both_ref_shapes_in_authored_order()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.mixed", "class": "mixed", "refs": [
+                    { "atom": "atom.fire-power.t1" },
+                    { "slotName": "E1", "slotDomain": "element", "slotPick": 1,
+                      "slotAtomPattern": "atom.elemental-power.$E1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var refs = r.Content.Affixes[0].Refs;
+        Assert.Equal(new[] { 0, 1 }, refs.Select(x => x.Seq));
+        Assert.False(refs[0].IsSlot);
+        Assert.True(refs[1].IsSlot);
+    }
+
+    [Fact]
+    public void An_explicit_seq_wins_over_the_authored_position_for_affix_refs()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "prefix", "refs": [
+                    { "seq": 7, "atom": "a.t1" }, { "atom": "b.t1" } ] } ] }
+            """));
+
+        Assert.Equal(new[] { 7, 1 }, r.Content.Affixes[0].Refs.Select(x => x.Seq));
+    }
+
+    [Theory]
+    [InlineData("prefix", AffixClass.Prefix)]
+    [InlineData("suffix", AffixClass.Suffix)]
+    [InlineData("mixed", AffixClass.Mixed)]
+    [InlineData("PREFIX", AffixClass.Prefix)]
+    public void Every_affix_class_parses_case_insensitively(string authored, AffixClass expected)
+    {
+        var r = Collect(("x.json", $$"""
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "{{authored}}", "refs": [ { "atom": "a.t1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Equal(expected, r.Content.Affixes[0].Class);
+    }
+
+    [Fact]
+    public void An_unknown_affix_class_is_refused_rather_than_defaulted()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "legendary", "refs": [ { "atom": "a.t1" } ] } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Errors[0].Reason);
+        Assert.Empty(r.Content.Affixes);
+    }
+
+    [Fact]
+    public void A_missing_affix_class_is_refused_not_defaulted_to_prefix()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "refs": [ { "atom": "a.t1" } ] } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Errors[0].Reason);
+    }
+
+    [Fact]
+    public void An_affix_with_no_refs_array_parses_as_an_empty_bundle_not_an_error()
+    {
+        // Matches ReadContainer's own treatment of an absent "atoms"/"pool" array — the shape
+        // question ("does an empty bundle make sense") is AffixValidator.Validate's job, not the
+        // reader's; this method only parses what is there.
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "prefix" } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Empty(r.Content.Affixes[0].Refs);
+    }
+
+    [Fact]
+    public void An_affix_id_collides_with_an_atom_id_as_a_duplicate_across_kinds()
+    {
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "atom.vitality.t1", "class": "prefix", "refs": [ { "atom": "a.t1" } ] } ] }
+            """), ("a.json", AtomsFile(Vitality)));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.DuplicateKey, r.Errors[0].Reason);
+    }
+
+    [Fact]
+    public void All_five_kinds_parse_affix_included()
+    {
+        var r = Collect(
+            ("a.json", AtomsFile(Vitality)),
+            ("aff.json", """
+                { "schemaVersion": 1, "kind": "affix", "entries": [
+                    { "id": "affix.x", "class": "prefix", "refs": [ { "atom": "atom.vitality.t1" } ] } ] }
+                """),
+            ("c.json", """
+                { "schemaVersion": 1, "kind": "curve", "entries": [
+                    { "id": "curve.atk.level", "input": "level",
+                      "points": [ { "x": 1, "mult": 1000 } ] } ] }
+                """),
+            ("r.json", """
+                { "schemaVersion": 1, "kind": "rarity", "entries": [
+                    { "id": "rare", "ordinal": 2, "poolRolls": 2, "minTier": 1, "maxTier": 3 } ] }
+                """),
+            ("k.json", """
+                { "schemaVersion": 1, "kind": "container", "entries": [
+                    { "id": "item.ring", "kind": "item", "slot": "ring",
+                      "atoms": [ { "atom": "atom.vitality.t1" } ] } ] }
+                """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Single(r.Content.Affixes);
+        Assert.Equal(5, r.Content.Count);
+    }
 }

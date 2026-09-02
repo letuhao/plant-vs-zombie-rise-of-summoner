@@ -11,7 +11,9 @@ public sealed record ActorHudTuning(
     double RowOffsetIdentity,
     double RowOffsetResources,
     double RowOffsetStatuses,
-    int? EliteTierThreshold);
+    int? EliteTierThreshold,
+    double MagnitudeMidThreshold,
+    double MagnitudeHighThreshold);
 
 public sealed class ActorHudTuningRejection : Exception
 {
@@ -45,7 +47,9 @@ public static class ActorHudTuningLoader
                 RowOffsetIdentity: Double(root, "rowOffsetIdentity", "$"),
                 RowOffsetResources: Double(root, "rowOffsetResources", "$"),
                 RowOffsetStatuses: Double(root, "rowOffsetStatuses", "$"),
-                EliteTierThreshold: OptionalInt(root, "eliteTierThreshold", "$"));
+                EliteTierThreshold: OptionalInt(root, "eliteTierThreshold", "$"),
+                MagnitudeMidThreshold: Double(root, "magnitudeMidThreshold", "$"),
+                MagnitudeHighThreshold: Double(root, "magnitudeHighThreshold", "$"));
         }
     }
 

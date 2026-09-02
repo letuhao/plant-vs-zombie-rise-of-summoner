@@ -35,11 +35,14 @@ public class SpecChannelClaimTests
     /// `status.resistance` is English prose ("the status resistance axis"), not `status.resist`;
     /// `status.probability` is explicitly documented as having no channel equivalent (spec-unbuilt-
     /// reconcile.md F5); `combat.something` is spec-stat-taxonomy.md's own abstract placeholder example.
+    /// `combat.timer` is a host EVENT kind, verified in `EffectEventAdapterCore.TryMap` where it maps
+    /// (alongside `effect.timer`) to the `OnTimer` atom trigger — the same category as `combat.hit`
+    /// directly above, added 2026-09-03 when Wave 8's trigger-vocabulary audit named it in prose.
     /// `progression.tierPower` is a locked, shipped FORMULA name (`progression.power ×
     /// progression.realm`, actor-hub-ssot.md:121) computed where needed, not itself a stored channel.</summary>
     static readonly HashSet<string> KnownNonChannelTokens = new(StringComparer.Ordinal)
     {
-        "combat.hit", "combat.hitland", "combat.something",
+        "combat.hit", "combat.hitland", "combat.something", "combat.timer",
         "resource.delta", "resource.economy",
         "status.apply", "status.apply.duration", "status.apply.target", "status.clear", "status.spread",
         "status.v2.json", "status.WithdrawEntity", "status.resistance", "status.probability",

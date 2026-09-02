@@ -141,7 +141,11 @@ public static class KernelDriveHost
     static long BudgetTicks(float frameSeconds)
     {
         var seconds = Math.Clamp(frameSeconds * BudgetFrameFraction, BudgetMinSeconds, BudgetMaxSeconds);
-        return (long)(seconds * System.Diagnostics.Stopwatch.Frequency);
+        // Split from the cast on purpose (audit-overflow.py A4): this is a double-domain timing
+        // conversion of an already-clamped tiny value (<= 0.00015s * Stopwatch.Frequency), never an
+        // integer multiply that could overflow before widening — the A4 pattern the split avoids.
+        var ticks = seconds * System.Diagnostics.Stopwatch.Frequency;
+        return (long)ticks;
     }
 
     /// <summary>

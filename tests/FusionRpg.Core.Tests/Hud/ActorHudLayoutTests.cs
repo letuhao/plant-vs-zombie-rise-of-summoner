@@ -175,7 +175,9 @@ public sealed class ActorHudLayoutTests
               "rowOffsetIdentity": 0.42,
               "rowOffsetResources": 0.28,
               "rowOffsetStatuses": 0.14,
-              "eliteTierThreshold": null
+              "eliteTierThreshold": null,
+              "magnitudeMidThreshold": 10.0,
+              "magnitudeHighThreshold": 30.0
             }
             """;
 

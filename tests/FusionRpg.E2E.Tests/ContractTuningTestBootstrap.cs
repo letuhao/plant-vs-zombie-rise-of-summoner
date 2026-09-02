@@ -393,7 +393,9 @@ internal static class ContractTuningTestBootstrap
         RowOffsetIdentity: 0.42,
         RowOffsetResources: 0.28,
         RowOffsetStatuses: 0.14,
-        EliteTierThreshold: null);
+        EliteTierThreshold: null,
+        MagnitudeMidThreshold: 10.0,
+        MagnitudeHighThreshold: 30.0);
 
     public static readonly DataTuning DefaultData = new(
         SchemaVersion: 1, Version: 1,

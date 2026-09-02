@@ -44,6 +44,61 @@ DEFAULT_FAMILY_ASSIGNMENTS = REPO_ROOT / "data" / "seed" / "demons" / "_generate
 CURRENT_RECORD_NAME = "_current.json"
 PAUSE_SENTINEL_NAME = "_pause.request"
 
+#: `start`/`resume` concurrency lock (found live, 2026-09-02 — a real duplicate-classification bug,
+#: not a hypothetical: two overlapping `resume`-driving loops both read the SAME record between one
+#: species' completion and the next `resume` call, both saw it as resumable, both wrote their own
+#: `pid` and independently classified the same 2 species with divergent LLM output). The pre-existing
+#: `record.state == "running" and is_process_alive(record.pid)` check only catches a resume racing
+#: an ALREADY-recorded live process — it is a read-then-check, not a claim, so two processes that
+#: both read the record before either writes can both pass it. This is a real mutual-exclusion lock,
+#: acquired for the WHOLE call (through the actual classification loop, not just the record read),
+#: so the existing check stays meaningful for its own purpose (crash recovery across sessions) while
+#: this closes the same-session TOCTOU gap it was never meant to cover.
+RESUME_LOCK_NAME = "_resume.lock"
+
+
+def _acquire_run_lock(runs_dir: Path) -> None:
+    """Atomic claim (`os.O_CREAT | os.O_EXCL`, portable — a POSIX and NTFS guarantee, not a
+    best-effort check) on the run record before any read-check-write sequence. A lock file left by
+    a process that died mid-run is stale, not a permanent lock (spec §6's own "never refuses
+    forever" rule, extended to this lock the same way it already governs the record itself) —
+    reclaimed once, after confirming its own recorded holder is actually dead.
+    """
+    runs_dir.mkdir(parents=True, exist_ok=True)
+    lock_path = runs_dir / RESUME_LOCK_NAME
+    for attempt in range(2):
+        try:
+            fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            try:
+                os.write(fd, str(os.getpid()).encode("utf-8"))
+            finally:
+                os.close(fd)
+            return
+        except FileExistsError:
+            if attempt == 1:
+                break
+            try:
+                holder_pid = int(lock_path.read_text(encoding="utf-8").strip())
+            except (ValueError, OSError):
+                holder_pid = -1
+            if is_process_alive(holder_pid):
+                raise RunRefused(
+                    f"another start/resume is already in progress (pid {holder_pid}) — wait for it "
+                    "to finish, or confirm it is genuinely dead before removing "
+                    f"{lock_path}")
+            try:
+                lock_path.unlink()
+            except FileNotFoundError:
+                pass
+    raise RunRefused(f"could not acquire the run lock at {lock_path}")
+
+
+def _release_run_lock(runs_dir: Path) -> None:
+    try:
+        (runs_dir / RESUME_LOCK_NAME).unlink()
+    except FileNotFoundError:
+        pass
+
 Progress = Callable[[str, int, int], None]  # (species_id, done_count, total_count) -> None
 
 
@@ -91,7 +146,32 @@ def _load_families(path: Path) -> "dict[str, list[str]]":
     return {k.lower(): v for k, v in raw.items()}
 
 
-def _family_for(species_id: str, families: "dict[str, list[str]]") -> str:
+def _slugify_family(name: str) -> str:
+    """Lowercase kebab-case filename from an LLM-proposed family string ("Apex Predator Flora" ->
+    "apex-predator-flora"), matching the id grammar every other kebab-case id in this repo already
+    uses. Collapses whitespace/punctuation runs into single hyphens; empty after stripping falls
+    back to the caller's own "unclassified" default rather than writing a blank filename."""
+    import re
+    slug = re.sub(r"[^a-z0-9]+", "-", name.strip().lower()).strip("-")
+    return slug or "unclassified"
+
+
+def _family_for(
+    species_id: str, families: "dict[str, list[str]]", *, classified_family: "list[str] | None" = None,
+) -> str:
+    """The anchor's OWN `family` field — the `identity` pipeline's real, per-species LLM proposal
+    (spec-classify-pipelines.md pipeline 8) — is the primary source (fixed 2026-09-02: previously
+    this only ever consulted `family-assignments.json`, a lookup built for the unrelated
+    fusion-product `demon` corpus, so every base species not coincidentally sharing an id with a
+    fused demon landed in the generic "unclassified" bucket despite the identity pipeline already
+    having classified a real family for it — found live, 2026-09-02, T2.11's own 20-species run).
+    `family-assignments.json` stays a fallback for the handful of species it happens to cover with
+    a hand-tuned short name (`cherrybomb` -> `cherry`), and "unclassified" is the last resort only
+    when neither source has anything."""
+    if classified_family:
+        first = next((f for f in classified_family if f and f.strip()), None)
+        if first is not None:
+            return _slugify_family(first)
     return (families.get(species_id.lower()) or ["unclassified"])[0]
 
 
@@ -142,7 +222,7 @@ def _write_species_entry(
     `attempts: {}` / `confidence: {}`, silently discarding the exact data `pipeline-health`'s
     disagreement-rate/repair-rate metrics (T2.12) need to work at all)."""
     species_id = row["speciesId"]
-    family = _family_for(species_id, families)
+    family = _family_for(species_id, families, classified_family=merged_fields.get("family"))
     rel_path = f"{row['side']}/{family}.json"
 
     votes = votes or {}
@@ -185,35 +265,39 @@ def start(
     selected species not already present in the anchor tree (unless
     `force_selector_ignores_existing`, which is what `rerun`/`overwrite-all` pass), writing each
     species' family file and the run record after every single species."""
-    dump_hash = _compute_dump_hash(paths.dump_dir)
-    preflight = _read_preflight(paths.dump_dir)
-    existing_record = read_record(paths.current_record_path)
-    ok, reason = can_start(preflight, dump_hash=dump_hash, existing_record=existing_record)
-    if not ok:
-        raise RunRefused(reason)
+    _acquire_run_lock(paths.runs_dir)
+    try:
+        dump_hash = _compute_dump_hash(paths.dump_dir)
+        preflight = _read_preflight(paths.dump_dir)
+        existing_record = read_record(paths.current_record_path)
+        ok, reason = can_start(preflight, dump_hash=dump_hash, existing_record=existing_record)
+        if not ok:
+            raise RunRefused(reason)
 
-    rows = _species_rows(paths.dump_dir)
-    demon_dump = load_demon_dump_ctx(paths.dump_dir)
-    if demon_dump is None:
-        raise RunRefused(f"no readable corpus-dump tree at {paths.dump_dir}")
-    seed_by_species = {s.side + ":" + str(s.type_id): s for s in demon_dump.seeds}
-    threat_tuning = ThreatTuning.load()
+        rows = _species_rows(paths.dump_dir)
+        demon_dump = load_demon_dump_ctx(paths.dump_dir)
+        if demon_dump is None:
+            raise RunRefused(f"no readable corpus-dump tree at {paths.dump_dir}")
+        seed_by_species = {s.side + ":" + str(s.type_id): s for s in demon_dump.seeds}
+        threat_tuning = ThreatTuning.load()
 
-    existing_anchors = _load_existing_anchors(paths.anchors_dir)
-    already_done = {a["speciesId"] for a in existing_anchors} if not force_selector_ignores_existing else set()
+        existing_anchors = _load_existing_anchors(paths.anchors_dir)
+        already_done = {a["speciesId"] for a in existing_anchors} if not force_selector_ignores_existing else set()
 
-    ids = resolve_selector(
-        selector, dump_species=[{"speciesId": r["speciesId"], "side": r["side"]} for r in rows],
-        anchors=existing_anchors, current_dump_hash=dump_hash,
-        current_prompt_versions=PROMPT_VERSIONS)
-    ids = [i for i in ids if i not in already_done]
+        ids = resolve_selector(
+            selector, dump_species=[{"speciesId": r["speciesId"], "side": r["side"]} for r in rows],
+            anchors=existing_anchors, current_dump_hash=dump_hash,
+            current_prompt_versions=PROMPT_VERSIONS)
+        ids = [i for i in ids if i not in already_done]
 
-    record = RunRecord(
-        run_id=new_run_id(), state="idle", preflight=dict(preflight), dump_hash=dump_hash,
-        selector=dict(selector), prompt_versions=dict(PROMPT_VERSIONS), pid=os.getpid(),
-        started_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
-    return _run_loop(record, ids, rows, seed_by_species, threat_tuning, paths=paths, call=call,
-                     progress=progress, config=_resolve_config(config))
+        record = RunRecord(
+            run_id=new_run_id(), state="idle", preflight=dict(preflight), dump_hash=dump_hash,
+            selector=dict(selector), prompt_versions=dict(PROMPT_VERSIONS), pid=os.getpid(),
+            started_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+        return _run_loop(record, ids, rows, seed_by_species, threat_tuning, paths=paths, call=call,
+                         progress=progress, config=_resolve_config(config))
+    finally:
+        _release_run_lock(paths.runs_dir)
 
 
 def resume(*, paths: RunPaths = RunPaths(), call: "Callable[..., str] | None" = None,
@@ -221,47 +305,51 @@ def resume(*, paths: RunPaths = RunPaths(), call: "Callable[..., str] | None" = 
     """`run resume` (spec §2 `resume`, TRANSIENT semantics — no species already in `completed` is
     ever re-classified). Also the crash-recovery path (spec §6): a `running` record whose pid is
     dead is resumable, never a silent takeover and never a permanent refusal."""
-    record = read_record(paths.current_record_path)
-    if record is None:
-        raise RunRefused("no in-progress run to resume — use `start`")
-    dump_hash = _compute_dump_hash(paths.dump_dir)
-    ok, reason = can_resume(record, current_dump_hash=dump_hash)
-    if not ok:
-        raise RunRefused(reason)
-    if record.state == "running" and is_process_alive(record.pid):
-        raise RunRefused(f"run {record.run_id} is still running (pid {record.pid})")
+    _acquire_run_lock(paths.runs_dir)
+    try:
+        record = read_record(paths.current_record_path)
+        if record is None:
+            raise RunRefused("no in-progress run to resume — use `start`")
+        dump_hash = _compute_dump_hash(paths.dump_dir)
+        ok, reason = can_resume(record, current_dump_hash=dump_hash)
+        if not ok:
+            raise RunRefused(reason)
+        if record.state == "running" and is_process_alive(record.pid):
+            raise RunRefused(f"run {record.run_id} is still running (pid {record.pid})")
 
-    if record.state == "running":
-        # spec §6: "A killed process leaves the record in `running`... offers `resume`... it does
-        # not silently take over." We already proved above the recorded pid is dead — this IS the
-        # crash-recovery case, semantically identical to `failed`, so it takes the same path.
-        # `machine.transition` has no `("running", "resume")` edge on purpose (a LIVE "running"
-        # record must never be resumed out from under its own process) — bypassing it here is
-        # deliberate, not a shortcut around the state machine.
-        record.state = "running"
-    else:
-        verb = "resume" if record.state in ("paused", "failed") else None
-        if verb is None:
-            raise RunRefused(f"run {record.run_id} is in state {record.state!r}, not resumable")
-        record.state = transition(record.state, verb)
-    record.pid = os.getpid()
+        if record.state == "running":
+            # spec §6: "A killed process leaves the record in `running`... offers `resume`... it does
+            # not silently take over." We already proved above the recorded pid is dead — this IS the
+            # crash-recovery case, semantically identical to `failed`, so it takes the same path.
+            # `machine.transition` has no `("running", "resume")` edge on purpose (a LIVE "running"
+            # record must never be resumed out from under its own process) — bypassing it here is
+            # deliberate, not a shortcut around the state machine.
+            record.state = "running"
+        else:
+            verb = "resume" if record.state in ("paused", "failed") else None
+            if verb is None:
+                raise RunRefused(f"run {record.run_id} is in state {record.state!r}, not resumable")
+            record.state = transition(record.state, verb)
+        record.pid = os.getpid()
 
-    rows = _species_rows(paths.dump_dir)
-    demon_dump = load_demon_dump_ctx(paths.dump_dir)
-    if demon_dump is None:
-        raise RunRefused(f"no readable corpus-dump tree at {paths.dump_dir}")
-    seed_by_species = {s.side + ":" + str(s.type_id): s for s in demon_dump.seeds}
-    threat_tuning = ThreatTuning.load()
+        rows = _species_rows(paths.dump_dir)
+        demon_dump = load_demon_dump_ctx(paths.dump_dir)
+        if demon_dump is None:
+            raise RunRefused(f"no readable corpus-dump tree at {paths.dump_dir}")
+        seed_by_species = {s.side + ":" + str(s.type_id): s for s in demon_dump.seeds}
+        threat_tuning = ThreatTuning.load()
 
-    full_selection = resolve_selector(
-        record.selector, dump_species=[{"speciesId": r["speciesId"], "side": r["side"]} for r in rows],
-        anchors=_load_existing_anchors(paths.anchors_dir), current_dump_hash=dump_hash,
-        current_prompt_versions=PROMPT_VERSIONS)
-    remaining = [i for i in full_selection if i not in set(record.completed) and i not in set(record.failed)]
-    if paths.pause_sentinel_path.exists():
-        paths.pause_sentinel_path.unlink()
-    return _run_loop(record, remaining, rows, seed_by_species, threat_tuning, paths=paths, call=call,
-                     progress=progress, resuming=True, config=_resolve_config(config))
+        full_selection = resolve_selector(
+            record.selector, dump_species=[{"speciesId": r["speciesId"], "side": r["side"]} for r in rows],
+            anchors=_load_existing_anchors(paths.anchors_dir), current_dump_hash=dump_hash,
+            current_prompt_versions=PROMPT_VERSIONS)
+        remaining = [i for i in full_selection if i not in set(record.completed) and i not in set(record.failed)]
+        if paths.pause_sentinel_path.exists():
+            paths.pause_sentinel_path.unlink()
+        return _run_loop(record, remaining, rows, seed_by_species, threat_tuning, paths=paths, call=call,
+                         progress=progress, resuming=True, config=_resolve_config(config))
+    finally:
+        _release_run_lock(paths.runs_dir)
 
 
 def rerun(

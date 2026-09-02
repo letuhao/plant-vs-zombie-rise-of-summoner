@@ -141,6 +141,20 @@ public static class AtomRowValidator
                 return Fail(AtomRejectionReason.BadValueSpec,
                     $"{def.Name}: eventField is only authorable on resource.delta, not {row.KindId}");
 
+            // T6.2 (`patron-absorption`): scoped to the two derived-magnitude kinds the migration
+            // actually needs, same discipline as eventField's own resource.delta restriction — a
+            // powerLadder marker never reaches a sink (e.g. a triggered runner atom) that has no
+            // owner Θ in scope to resolve it against.
+            if (spec.PowerLadder && row.KindId is not ("stat.modify" or "stat.derived"))
+                return Fail(AtomRejectionReason.BadValueSpec,
+                    $"{def.Name}: powerLadder is only authorable on stat.modify/stat.derived, not {row.KindId}");
+
+            // T6.2's second gap: same scope as powerLadder, for the same reason — a compile-time
+            // marker only a compiled stat write can consume.
+            if (spec.ClampedLevelScale && row.KindId is not ("stat.modify" or "stat.derived"))
+                return Fail(AtomRejectionReason.BadValueSpec,
+                    $"{def.Name}: clampedLevelScale is only authorable on stat.modify/stat.derived, not {row.KindId}");
+
             var curveCheck = ValidateCurve(def.Name, spec, curveInput);
             if (!curveCheck.IsOk) return curveCheck;
         }

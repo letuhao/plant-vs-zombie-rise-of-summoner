@@ -13,6 +13,7 @@ public enum SeedEntryKind
     Element,
     ElementMatrix,
     ChannelPolicy,
+    Affix,
 }
 
 /// <summary>
@@ -53,6 +54,7 @@ public sealed class SeedContent
 {
     public List<AtomRow> Atoms { get; } = new();
     public List<ContainerRow> Containers { get; } = new();
+    public List<AffixRow> Affixes { get; } = new();
     public List<CurveSeed> Curves { get; } = new();
     public List<RarityRow> Rarities { get; } = new();
 
@@ -69,7 +71,7 @@ public sealed class SeedContent
     public Dictionary<string, string> SourceOf { get; } = new(StringComparer.Ordinal);
 
     public int Count =>
-        Atoms.Count + Containers.Count + Curves.Count + Rarities.Count
+        Atoms.Count + Containers.Count + Affixes.Count + Curves.Count + Rarities.Count
         + Elements.Count + ElementMatrix.Count + ChannelPolicies.Count;
 }
 
@@ -152,7 +154,7 @@ public static class AtomSeedFile
             {
                 errors.Add(new SeedError(path, "", AtomRejectionReason.UnknownKind,
                     $"kind '{Str(root, "kind")}' — one of "
-                + "atom | container | curve | rarity | element | element-matrix"));
+                + "atom | container | affix | curve | rarity | element | element-matrix"));
                 return;
             }
 
@@ -175,6 +177,7 @@ public static class AtomSeedFile
                 {
                     case SeedEntryKind.Atom: ReadAtom(path, entry, into, errors); break;
                     case SeedEntryKind.Container: ReadContainer(path, entry, into, errors); break;
+                    case SeedEntryKind.Affix: ReadAffix(path, entry, into, errors); break;
                     case SeedEntryKind.Curve: ReadCurve(path, entry, into, errors); break;
                     case SeedEntryKind.Element: ReadElement(path, entry, into, errors); break;
                     case SeedEntryKind.ElementMatrix: ReadMatrixCell(path, entry, into, errors); break;
@@ -269,6 +272,50 @@ public static class AtomSeedFile
             Atoms = atoms,
             Pool = pool,
         });
+    }
+
+    /// <summary>
+    /// A named, ordered bundle of atom refs (module 1, `affix-schema`). <c>class</c> is authored here
+    /// (not derived by this reader) because <see cref="AffixValidator.Validate"/> — the one place that
+    /// actually owns derivation — needs a value to check an all-concrete bundle against and to TRUST
+    /// outright for an all-slot bundle, where no concrete atom exists yet to derive from
+    /// (`AffixValidator.cs`'s own comment: "an all-slot bundle: class was authored ahead of
+    /// resolution; trusted here, re-derivable once module 2 resolves a slot"). This method only
+    /// parses; it never validates — same division of labor <see cref="ReadContainer"/> already has
+    /// with <c>ContainerValidator</c>.
+    /// </summary>
+    static void ReadAffix(string path, JsonElement e, SeedContent into, List<SeedError> errors)
+    {
+        var id = Str(e, "id");
+        if (!Claim(path, id, into, errors)) return;
+
+        var className = Str(e, "class");
+        if (!Enum.TryParse<AffixClass>(className, ignoreCase: true, out var affixClass)
+            || !Enum.IsDefined(typeof(AffixClass), affixClass))
+        {
+            errors.Add(new SeedError(path, id, AtomRejectionReason.BadParamValue,
+                $"affix class '{className}' — one of prefix | suffix | mixed"));
+            return;
+        }
+
+        var refs = new List<AffixRefRow>();
+        if (e.TryGetProperty("refs", out var refEls) && refEls.ValueKind == JsonValueKind.Array)
+        {
+            var seq = 0;
+            foreach (var r in refEls.EnumerateArray())
+            {
+                if (r.ValueKind != JsonValueKind.Object) continue;
+                var atomId = StrOrNull(r, "atom");
+                var slotName = StrOrNull(r, "slotName");
+                refs.Add(new AffixRefRow(
+                    Int(r, "seq", seq), atomId,
+                    slotName, StrOrNull(r, "slotDomain"),
+                    Int(r, "slotPick", 0), StrOrNull(r, "slotAtomPattern")));
+                seq++;
+            }
+        }
+
+        into.Affixes.Add(new AffixRow(id, affixClass, refs));
     }
 
     static void ReadCurve(string path, JsonElement e, SeedContent into, List<SeedError> errors)
@@ -413,6 +460,7 @@ public static class AtomSeedFile
         {
             case "atom": kind = SeedEntryKind.Atom; return true;
             case "container": kind = SeedEntryKind.Container; return true;
+            case "affix": kind = SeedEntryKind.Affix; return true;
             case "curve": kind = SeedEntryKind.Curve; return true;
             case "rarity": kind = SeedEntryKind.Rarity; return true;
             case "element": kind = SeedEntryKind.Element; return true;

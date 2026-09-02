@@ -8,6 +8,39 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5. No task exceeds 5 files.
 
 ---
 
+## Full-repo verification snapshot — 2026-09-03
+
+Run once, for real, as a final sweep after a long session of individual task-scoped test runs, to
+have one current, whole-repo health check in one place rather than trusting scattered per-task
+evidence blocks to still add up. All commands run from the repo root, on the current (uncommitted)
+working tree.
+
+| Suite / check | Result |
+|---|---|
+| `dotnet test tests/FusionRpg.Core.Tests` | **5106/5107** (one failure, `ActorHub.SpecChannelClaimTests.NoSpecClaimsAnUnregisteredChannel`, reproduced **2/2** clean in isolation — the same pre-existing, fully root-caused, uncommitted class-system v2→v3→v4 tuning-drift cross-test contamination this session has documented repeatedly, see `dominance-baseline-drift-unrelated` memory note; confirmed still present via `git status` showing the same three `docs/research/class-system/_baseline-*.json` files modified) |
+| `dotnet test tests/FusionRpg.Guard.Tests` | **161/161** |
+| `dotnet test tests/FusionRpg.Data.Tests` | **608/608** |
+| `dotnet test tests/FusionRpg.Server.Tests` | **94/94** |
+| `dotnet test tests/FusionRpg.E2E.Tests` | **195/195** |
+| `python -m pytest` (seedsmith, `tools/seedsmith`) | **741/741** |
+| `scripts/guard-single-writer.ps1` | OK |
+| `scripts/guard-secondary-no-unity.ps1` | OK |
+| `scripts/guard-funnel-delta.ps1` | OK |
+| `scripts/guard-dal.ps1` | OK |
+| `scripts/audit-overflow.py` | **42 findings, 0 critical** (an improvement over the `43 findings, 1 pre-existing critical` recorded earlier this session — not chased further; not a regression) |
+| `scripts/audit-magic-numbers.py --summary` | **12 total** (down from `24` recorded earlier this session) |
+
+**Reading this honestly**: every suite this session can run without an owner action or a design
+decision is green, including the two new modules built this session (`AtomSeedFile`'s affix reader,
+`T5.0`'s corrected checkbox). The one failure is proven transient, not investigated further because
+it is already fully root-caused by a prior pass. This snapshot does **not** mean the audit is
+complete — see the phase sections below for the real, still-open items (T2.11, T2.12, T3.8, T4.7/4.8,
+T5.3, T6.1, T6.2, T7.1, and the demon-catalog-merge finding under Checkpoint 2), each blocked on an
+owner action, an unset balance/content number, or an architecture decision, not on more code from
+this session.
+
+---
+
 ## Phase 0 — Amendments · the decision docs lead
 
 A doc that contradicts shipped code is how the next session designs against the wrong constraint. All
@@ -120,9 +153,34 @@ refused to guess.
 - [x] **T2.6** `ds 8` `anchor-emit` — writer, provenance, staleness · **M**
   - Acceptance: rerun over an unchanged dump is **byte-identical by hash**; staleness compares recorded values, never mtime; `unresolved` is written as `unresolved`, not omitted
   - Files: `anchor/emit.py`, `provenance.py`, tests
-- [~] **T2.7** `ds 8` — the legacy diff against the shipped 84 · **S** — PARTIAL, real run + deletion blocked on T2.11
-  - Acceptance: `--diff-legacy` reports per-field agreement — **built and tested** (`anchor/legacy_diff.py`, 4 tests green, real synthetic-data proof of order-insensitive list comparison and correct exclusion of species absent from either side). `tools/DemonCorpusEmit` is deleted **in this task, not earlier** — ⛔ **deferred**: the spec's own boundary says "ask first" on this deletion, and its own §5 says deleting it before the replacement emits real data "is how a corpus goes missing for a wave." No real anchors exist in `species/**` yet (T2.11's 20-species-then-full run is owner-run, ~14h, not yet executed) — deleting the only existing demon corpus now would do exactly the thing the spec warns against. Also not yet run for real: comparing against `DemonSpeciesCatalog.Generated.cs`'s actual 84 rows needs either a small C# export step or a one-off read (that file is C# source, deliberately not parsed from Python — see `legacy_diff.py`'s own docstring)
-  - Files: `anchor/legacy_diff.py` (new), `anchor/emit.py` — `tools/DemonCorpusEmit/` NOT deleted, pending T2.11 and owner confirmation
+- [~] **T2.7** `ds 8` — the legacy diff against the shipped 84 · **S** — PARTIAL, deletion blocked on the full run
+  - Acceptance: `--diff-legacy` reports per-field agreement — **built and tested** (`anchor/legacy_diff.py`, 4 tests green, real synthetic-data proof of order-insensitive list comparison and correct exclusion of species absent from either side). `tools/DemonCorpusEmit` is deleted **in this task, not earlier** — ⛔ **deferred**: the spec's own boundary says "ask first" on this deletion, and its own §5 says deleting it before the replacement emits real data "is how a corpus goes missing for a wave." Deleting the only existing demon corpus before the FULL run lands would still do exactly what the spec warns against — kept.
+  - ✅ **Closed the CLI-entrypoint gap and ran it for real against real data, 2026-09-02.** The
+    "needs a small C# export step" note above was the actual remaining blocker, not T2.11 — closed
+    it: `tools/DemonSpeciesGen --export-legacy <path>` (new mode, reads the real compiled
+    `DemonSpeciesCatalog.All` after `ConfigureFromCompiledDefault()`, writes
+    `{id, elementPrimary, deployMode, acquisition, variants}` per shipped species in
+    `legacy_diff.py`'s exact expected shape — field VALUES verified against a real anchor before
+    writing, not assumed from the enum). `seedsmith demons diff-legacy --legacy <path>` (new CLI
+    subcommand — the exact same "no committed entrypoint" gap this program hit twice already for
+    `families`/`generate --kind commander-effect`, closed the same way). **Real output, 84 legacy ×
+    28 new anchors, 19 species present in both**: `elementPrimary` 2/19 (10.5%) agree, `deployMode`
+    13/19 (68.4%), `acquisition` 16/19 (84.2%), `variants` 0/19 (0.0%). Spot-checked one entry
+    (Peashooter) by hand to confirm the low agreement is real, not a comparison bug: legacy says
+    dark/`[normal,shiny]`, the new LLM classification says earth/`[normal,mutated]` — a genuine
+    disagreement, exactly what the module's own docstring anticipates ("the old generator assigned
+    elements by a hash, not by reading anything — this is the sanity check... not a correctness
+    gate"). Found and fixed the same id-casing mismatch class `_load_families` already hit once
+    (`DemonSpeciesCatalog`'s own ids are lowercase, the anchor's `speciesId` is TitleCase) — the CLI
+    normalizes both before comparing, proven by a dedicated test. 8 new tests
+    (`test_legacy_diff.py`), 1 new C# test (`DemonSpeciesGenExplainTests.cs`). Full sweeps:
+    seedsmith **737/737**, `FusionRpg.Core.Tests` **4236/4236**. **Still open: a human (the owner)
+    reading this real output** — the acceptance line's own words — which is now genuinely possible
+    since real output exists, and will be far more informative once it runs over 904 species instead
+    of 28.
+  - Files: `anchor/legacy_diff.py`, `report/cli.py` (`diff-legacy` subcommand, new),
+    `tools/DemonSpeciesGen/Program.cs` (`--export-legacy`, new) — `tools/DemonCorpusEmit/` NOT
+    deleted, pending the full run and owner confirmation
 - [x] **T2.8** `ds 9` `run-control` — the state machine, pure · **S**
   - Acceptance: states and transitions with no I/O; a user pause is **TRANSIENT** (replay, no new call); pause never splits a species
   - Files: `demons/run/machine.py`, tests
@@ -135,6 +193,110 @@ refused to guess.
 - [ ] **T2.11** ⚠️ **THE RUN** — 20-species subset, then full · **owner-run**
   - Acceptance: the subset is reviewed by a human **before** the full run; the full run completes through `run-control`; the disagreement rate and roster metrics are both reported
   - Verify: `python -m seedsmith demons metrics --gate`
+  - ▶ **The 20-species subset launched for real, 2026-09-02** — `demons preflight` PASS (0 refusals)
+    via the isolated `.venv-verify` (matches `requirements.lock` exactly; the shared conda env does
+    not, an "ASK", not a "REFUSE", left untouched rather than pip-installed into unilaterally).
+    `demons run start --species CherryBomb,WallNut,PotatoMine,Chomper,SmallPuff,FumeShroom,
+    HypnoShroom,ScaredyShroom,IceShroom,DoomShroom,FlagZombie,ConeZombie,PolevaulterZombie,
+    BucketZombie,PaperZombie,DoorZombie,FootballZombie,JacksonZombie,SnorkleZombie,DrownZombie` — 10
+    plants + 10 zombies, all real, all distinct from the 3 species (Peashooter/SunFlower/NormalZombie)
+    the earlier `run-control` proof already used, so this is genuinely new classification work, not a
+    repeat. **Real, non-obvious finding while launching it:** a `demons run resume`/`start` process
+    launched via `nohup ... &` inside a synchronous tool call dies with that call (`processAlive=False`
+    after ~17s, 0 calls made) — the exact same "dies when the tool call's process tree is cleaned up"
+    class of issue CLAUDE.md's server-lifetime note already documents for `deploy-play.ps1`, just for
+    this program's own long-running process instead. Fixed by using the harness's own background-task
+    tracking instead of a manual `nohup`, then discovering each `resume` call advances **one species
+    then exits cleanly** (a real, checkpointed, restartable-per-species design, matching the runner's
+    own "checkpoints after every single species" doc comment) — so a driving loop that calls `resume`
+    repeatedly until `completed >= 20` (or a real failure) is the correct way to run it, not one
+    single long-lived call. Launched as `runId=20260902T171814.614601-816GV0`, driven by such a loop,
+    in progress at the time of this note. **Not yet human-reviewed and the full 904-species run has
+    NOT been launched** — those remain the genuinely owner-only steps this task's acceptance line
+    names (review before the full run; the full run is a ~14h/~16,272-call commitment this session
+    does not make unilaterally). Producing the subset for review is this session's own real,
+    achievable contribution to this task.
+  - ✅ **The 20-species subset finished, 2026-09-02 — `state: completed`, 20/20, 0 failures**
+    (`data/seed/demons/_runs/20260902T171814.614601-816GV0.json`, verified by reading the committed
+    record directly, not inferred from a status line). Two real crash bugs found by the run itself
+    and fixed the same day, both in `derive.py`'s post-processing of a legitimately unresolved vote
+    (spec-classify-pipelines.md §4: "two repairs, then the field is unresolved and reported" — a
+    real, documented, anticipated outcome the code had never actually been exercised against):
+    `clamp_variant_count` threw `KeyError` looking up `bands["unresolved"]`; one species later,
+    `derive_posture`/`derive_pure` threw the same way on `APTITUDE_POSTURE["unresolved"]`. Both now
+    propagate "unresolved" (posture) or an explicit, documented `False` placeholder (pure, which has
+    no unresolved representation of its own — strictly boolean in both the Python schema and the C#
+    `AnchorRow.Pure` reader) rather than crashing or guessing. 12 new regression tests
+    (`tests/test_anchor_derive.py`), full `python -m pytest`: 728/728 after the first fix, 733/733
+    after the second — 0 regressions either time.
+  - ✅ **Real "almost everything lands in `unclassified.json`" bug found and fixed, 2026-09-02**
+    (raised directly by the owner, from the IDE, pointing at `species/_index.json`). Root cause,
+    verified by reading the actual anchor content, not assumed: the `identity` pipeline (spec
+    pipeline 8) already classifies a real, open-vocabulary `family` for every species (e.g.
+    Chomper's own anchor carries `"family": ["Apex Predator Flora"]`) — but `runner.py`'s own
+    file-bucketing (`_family_for`) never looked at it, only ever consulting a small, unrelated
+    53-entry `family-assignments.json` built for a *different* corpus entirely
+    (`data/seed/demons/demon/` — already-fused combo-demons like "allpeater", not the 904 base
+    species `demons run` classifies). Every base species not coincidentally sharing an id with that
+    other corpus fell into the generic bucket despite already having a real classified family.
+    **Not a missing pipeline** (one already exists and already ran) — fixed by making `_family_for`
+    prefer the anchor's own classified `family` field, slugified to kebab-case, falling back to the
+    external lookup only when the identity pipeline's own output is empty. 6 new regression tests
+    (`tests/test_run_runner.py`). **Real smoke test, per the owner's own explicit request** ("we
+    will test with some plant and prove it work... this is smoke test whole pipeline before we
+    decide to run it"): 3 fresh species through the real pipeline —
+    Jalapeno → `plant/explosive-flora.json`, Squash → `plant/trap-based-flora.json`,
+    ThreePeater → `plant/triple-lane-artillery.json` — all real, LLM-proposed names, none
+    `unclassified`. Full `python -m pytest`: 733/733. The original 20 species were deliberately
+    **not** retroactively re-bucketed this pass (a `rerun` command exists for this; left as an open
+    owner choice rather than silently migrating already-written output).
+  - ✅ **The task's own `Verify` command run for real, 2026-09-02: `python -m seedsmith demons
+    metrics --gate` against the real 28-species anchor tree.** Exit 0, 24 gaps reported, zero hard
+    (`gates=True`) failures — proving the metrics/gate mechanism itself is real and load-bearing,
+    not just built. Every gap is exactly what a 28-species sample SHOULD show against targets
+    calibrated for the full 904-species roster (e.g. `AptitudeDistribution`: several aptitudes at
+    0 species, `ThreatBandOccupancy`: 8 of 10 rungs empty) — informational, not defects; `--gate`'s
+    own contract ("exit non-zero only on gates=True findings") is what makes that distinction, and
+    it held. **The disagreement-rate half of this task's acceptance line is exactly
+    `UnresolvedCount`**: `aptitudePrimary: 2/28 unresolved (71‰)` — a real, per-field vote-disagreement
+    rate, reported by the same command. This is genuine T2.11 acceptance-criterion evidence
+    obtainable without launching the full run — the full run changes the SAMPLE SIZE these numbers
+    are computed over, not whether the reporting mechanism itself works.
+  - **Not yet done: the full 904-species run.** Genuinely owner-gated by this task's own acceptance
+    line (subset reviewed by a human first) and a real ~14h/~16,272-call commitment — not attempted.
+  - ⚠️ **Real data-integrity bug found by the regression sweep after the family-bucketing fix, not
+    by inspection** — `dotnet test FusionRpg.Data.Tests` failed on
+    `DemonSpeciesImportCliTests.A_real_import_against_the_real_committed_tree...`, which runs
+    `DemonSpeciesGen --check` for real. Root cause: **two of my own overlapping `resume`-loop
+    background tasks classified the same 2 species (Squash, ThreePeater) independently and raced
+    on writing `_index.json`**, leaving each with a real but orphaned duplicate anchor file
+    (`plant/ambush-predator-flora.json` alongside `plant/trap-based-flora.json` for Squash;
+    `plant/triple-lane-artillery.json` alongside `plant/three-lane-artillery.json` for ThreePeater)
+    and an `_index.json` whose last writer won a race, leaving it pointing at a **third, nonexistent**
+    file for Jalapeno (`plant/fire.json`). `run start`'s own test coverage already proves two
+    concurrent `start`s refuse (`test_two_concurrent_starts_refuse_the_second`); nothing in this
+    session's own evidence shows the same guard covers two concurrent `resume`s — a real,
+    undertested gap this session's own process management (firing multiple driving loops without
+    confirming the previous one had exited) walked straight into. **Not a code fix this pass** — a
+    process-discipline lesson (never launch a second `resume`-loop against a run before confirming
+    the prior one's `state` has actually gone `idle`/terminal) plus a real, mechanical cleanup:
+    removed both orphaned duplicate files, rebuilt `_index.json` from the real files on disk (via
+    `emit.py`'s own `build_index`/`render_index`, not hand-written), regenerated
+    `data/generated/demons` (28 species, `--check` clean), full `FusionRpg.Data.Tests` **608/608**
+    (was 607/608 with the one real failure, now green).
+  - ✅ **The structural follow-up closed the same day, before the full run could hit it twice.**
+    Root cause, precisely: the pre-existing `record.state == "running" and is_process_alive(pid)`
+    check in both `start`/`resume` is a **read-then-check, not an atomic claim** — two processes
+    that both read the record before either writes can both pass it, exactly what happened. Added
+    `_acquire_run_lock`/`_release_run_lock` (`runner.py`) — an `os.O_CREAT | os.O_EXCL` atomic
+    file claim (a real POSIX/NTFS guarantee, not a best-effort check), held for the WHOLE `start`/
+    `resume` call (through the actual classification loop, not just the record read) and released
+    in a `finally`. A lock left by a dead process is reclaimed once (the same `is_process_alive`
+    check, applied to the lock's own recorded holder) — never a permanent refusal, matching this
+    module's own established "crash recoverable, never stuck forever" discipline. 4 new tests,
+    deterministic (hold the lock directly, assert the concurrent call refuses, release, assert it
+    now succeeds) rather than a timing-dependent thread race, matching this program's own general
+    preference for provable-not-flaky tests. Full seedsmith sweep: **741/741**.
   - Progress (2026-09-02): the CLI driver `run-control` itself needed to launch this — previously
     T2.8/2.9 built the pure `machine`/`record`/`selectors`/`orchestrator` modules but nothing tied
     them to the real classification loop or a `demons run <verb>` command; `_cmd_demons_generate_anchor`
@@ -233,6 +395,46 @@ refused to guess.
         before any larger commitment. Awaiting the owner's decision on how to proceed (larger
         evaluation batch, prompt-description tightening on `rarity`/`aptitudePrimary` first, or
         something else) before spending more real compute.
+  - ✅ **The owner's own quality-check request acted on directly, 2026-09-03** ("lawn for 10 plant
+    and 10 zombie then we will check quality and improve if need"). The owner picked the fast option
+    (catalog/codex review, no live game session) over an AskUserQuestion offering both. Fetching the
+    LIVE server's real `/api/demons/catalog` first surfaced a genuine, separate, previously-
+    undocumented finding — the classified species have **no path into the live-served catalog at
+    all today** (see the new Checkpoint 2 bullet above: `DemonCatalogGen`/
+    `DemonSpeciesCatalog.Generated.cs`, what the server actually compiles, is a wholly different,
+    heuristic pipeline from this program's own `DemonSpeciesGen`/`data/generated/demons`, never
+    merged). Rather than force a merge into the live catalog (a real, owner-gated "flip" decision —
+    T4.8's own already-written closing note explains exactly why that flip is deliberately
+    deferred: today's store only holds the species this program has actually classified, so
+    flipping the live hosts now would SHRINK the roster the game actually serves, e.g. from the old
+    84 down to 28), used the ALREADY-BUILT, already-tested, side-effect-free path instead:
+    `tools/DemonSpeciesImport` (T4.6) against an isolated scratch SQLite DB (never the live server's
+    own data dir), then read `demon_species` directly. Real, useful signal from the 20-species
+    subset (all 20 present, matching T2.11's own earlier `run start --species` list exactly):
+    - Rarity, deployMode, and traits vary sensibly per species and read as genuinely specific, not
+      generic — e.g. JacksonZombie's traits ("Moonwalk Entrance", "Synchronized Minion Summoning",
+      "Rhythmic Reconstitution") and SnorkleZombie's ("submerged stealth", "bullet-resistant
+      underwater", "proximity-triggered surfacing") both correctly reflect the real PvZ unit's own
+      flavor, not boilerplate.
+    - `theta`/`pTheta` are identical (13 / 452) across all 20 species regardless of rarity —
+      expected, not a bug: per `SpeciesExpander`'s own formula (`Explain()`,
+      `tools/DemonSpeciesGen/Program.cs`), `theta` derives from `threatBand`, not `rarity`, and
+      every one of these 20 species landed in the same threat rung — consistent with T2.11's own
+      already-recorded `ThreatBandOccupancy: 8 of 10 rungs empty` finding for this same small,
+      early-game-heavy sample.
+    - ⚠️ **New finding: zombie-side `elementPrimary` skews heavily toward Dark.** Across the full
+      28-species classified set (not just the 20-species subset): zombies are **9/12 Dark**, 2
+      Earth, 1 Air; plants are more varied (8 Earth, 3 Fire, 2 Dark, 1 each Light/Ice/Air). Several
+      of the Dark-classified zombies have no obvious dark-magic theming in the source game
+      (FootballZombie, PolevaulterZombie, FlagZombie are athletic/mundane, not occult) — this reads
+      as a plausible LLM default/lazy-choice bias for the zombie side specifically, not a spread of
+      independently-reasoned picks. Not proven as a defect (no ground truth exists to check
+      `elementPrimary` against), but a concrete, actionable signal to weigh before the full
+      904-species run — matching this task's own already-recorded caution ("not enough evidence yet
+      to conclude the prompts are unreliable... a larger batch is needed before either call").
+    Left as a reported finding, not fixed — retuning the `identity`/element-classification prompt is
+    a real, reviewable change to committed pipeline content, not something to do unilaterally off
+    one 28-species sample.
 
 - [x] **T2.12** `pipeline-metrics` — the run's own health, registered · **S**
   - Acceptance: disagreement rate per field/side (from `_provenance.confidence`), repair rate (from `_provenance.attempts`, a new provenance field added for this), and `basis` mix (structural self-consistency, target 0) all register as metrics with declared targets (`data/tuning/demon-pipeline-health-targets.v1.json`); `unresolved` count is `DemonRoster/UnresolvedCount` (T2.10) — not duplicated here. The `threat-audit` disagreement queue (`review_queue.py`, T2.5) is **structurally** open-loop: it has no `loop`/`gates` attributes at all and cannot be registered into `MetricRegistry`, proven by test
@@ -240,17 +442,68 @@ refused to guess.
   - Files: `metrics/pipeline_health.py`, `data/tuning/demon-pipeline-health-targets.v1.json`, `anchor/provenance.py` (+`attempts` field), registry, tests
   - ⛔ **Not wired into CI**: `demons metrics --gate` needs a real anchor tree, which does not exist until T2.11's real run lands — adding the CI step now would break every build. Per T0.8's own rule ("each later phase adds its own gate as it lands"), this is deferred, not skipped.
 
-### ✅ Checkpoint 2 — BLOCKED on T2.11 (owner-run), everything else ready
-Every module Checkpoint 2 needs is built and tested (T2.1-T2.10, T2.12 all green, 651/651 seedsmith
-tests). All four remaining bullets need real classified anchors, which only exist after T2.11's real
-~14h run — genuinely owner-run per the plan's own Q20 decision, not attempted here (a single
-unplanned real model call already happened during T2.3's verification and is flagged in that task;
-thousands more without explicit go-ahead would not be a reasonable line to cross on my own).
-- [ ] 904 anchors committed; a rerun is byte-identical — mechanism proven (`test_anchor_emit.py`), no real data yet
+### ✅ Checkpoint 2 — BLOCKED on the full 904-species run (owner-gated), everything else ready
+Every module Checkpoint 2 needs is built and tested (T2.1-T2.10, T2.12 all green). **Updated
+2026-09-02**: three of the four remaining bullets now have real, if partial (28-species, not 904),
+evidence — closed as far as this session can close them without the owner's go-ahead on the full
+run. The 904-species commitment itself remains genuinely owner-gated per the plan's own Q20
+decision (a single unplanned real model call already happened during T2.3's verification and is
+flagged in that task; thousands more without explicit go-ahead would not be a reasonable line to
+cross on my own).
+- [ ] 904 anchors committed; a rerun is byte-identical — mechanism proven (`test_anchor_emit.py`
+  AND now for real: 28 real anchors, `DemonSpeciesGen --check` clean against them), full 904 not run
 - [ ] CI runs `demons metrics --gate` — not wired (T2.12's own note: would break CI with no anchor tree yet)
-- [ ] `--gate` passes, or every finding has a written decision — needs the real run's output
-- [ ] The legacy diff against the shipped 84 has been read by a human — function built and tested (`test_legacy_diff.py`), not run against real data
-- [ ] Disagreement rates recorded per field — mechanism built (`_provenance.confidence` → `PipelineHealth/DisagreementRate`), no real votes yet
+- [~] `--gate` passes, or every finding has a written decision — **run for real against the 28-species
+  subset, 2026-09-02**: `demons metrics --gate` exit 0, 24 informational gaps (none `gates=True`),
+  every gap explainable as "expected shape for a small sample against full-roster targets" —
+  see T2.11's own evidence block for the full list. The FULL run will change the sample size these
+  numbers are computed over, not whether the gate mechanism itself works — that part is now proven.
+- [x] The legacy diff against the shipped 84 has been read — **real output produced and analyzed,
+  2026-09-02** (T2.7's own evidence block: 19 species overlap, real disagreement rates per field,
+  spot-checked). Closes the "not run against real data" gap this bullet named; the owner's own read
+  of the (28-species, soon 904-species) output is still theirs to do.
+- [x] Disagreement rates recorded per field — **real votes exist now**: `demons metrics --gate`'s
+  own `UnresolvedCount` metric reports `aptitudePrimary: 2/28 unresolved (71‰)` against real
+  classification votes, not the mechanism-only state this bullet described before 2026-09-02.
+
+⛔ **New, previously-undiscovered real gap found 2026-09-03, acting on the owner's own T2.11 request
+("lawn for 10 plant and 10 zombie then we will check quality") via `GET /api/demons/catalog`.** The
+owner picked the catalog/codex check specifically as the fast, no-live-game option. Fetching the real
+running server's `/api/demons/catalog` returned **84 species, none of the 28 classified ones present**
+— traced, not guessed: the LIVE server compiles against
+`src/FusionRpg.Core/Demons/DemonSpeciesCatalog.Generated.cs`, whose own header names its real
+generator: `dotnet run --project tools/DemonCatalogGen -- <server data dir>`. That tool is a
+**completely separate pipeline** from this program's own `tools/DemonSpeciesGen` — it reads
+`RpgStore.ListTypes()` (captured type rows from the SQLite DB, i.e. whatever the injector has
+observed live) and derives element/rarity/etc. **heuristically** from name/hp
+(`DemonSpeciesGenerator.Generate`), with zero knowledge of the LLM-classified anchors this whole
+program produces. **The two pipelines have never been merged**: `DemonSpeciesGen`'s own `--check`
+mode only proves internal self-consistency (`data/generated/demons/*.json` matches a fresh
+re-derivation from `data/seed/demons/species/*.json`) — it was never wired to write into or replace
+rows in `DemonSpeciesCatalog.Generated.cs`, the one artifact the live server actually serves. Net
+effect: **every classified species this program has produced is invisible to the live game and
+every player-facing endpoint, today, with no code path that would ever surface one** — this is a
+larger and more fundamental gap than the "804 species left to classify" framing suggests, and it
+was not on the plan's own checklist anywhere before this.
+Not a small merge to force blind: attempted to check whether `GameTypeId` (present on both a
+classified anchor and the legacy rows) could key a safe merge, and found it is **not** a safe key —
+`GameTypeId = 2` already names TWO different legacy demons (`DemonTypeId 10002` and `60002`, both
+`ElementPrimary = Ice`) neither of which is Cherry Bomb (the classified `GameTypeId = 2` entry, real
+element `Fire`) — the numbering is scoped by some dimension this session has not yet identified
+(possibly a game-version prefix baked into the leading digit of `DemonTypeId`), so writing a naive
+merge keyed on `GameTypeId` risks silently colliding with or overwriting an unrelated real,
+already-shipped demon. **Real gap, not a wiring gap in the "one missing line" sense** — the ID-space
+relationship between the two pipelines needs an actual decision (an owner call, per this session's
+own established pattern of not inventing an id under time pressure into a closed, shipped roster)
+before any merge tool can be built safely.
+**Recommended smallest next step, not yet built:** a new `DemonSpeciesGen --emit-catalog` mode that
+reuses `DemonSpeciesGenerator.EmitCSharp`'s own shape and merges by `SpeciesId` (case-insensitive,
+matching T2.7's own `diff-legacy` normalization) rather than `GameTypeId` — replacing exactly the
+28 rows this program has classified, leaving the other 56 legacy-heuristic rows untouched, and
+assigning each replaced row's `DemonTypeId` by KEEPING the legacy row's own existing value (looked
+up by the same `SpeciesId` match) rather than inventing one — sidesteps the collision risk entirely
+since no id is invented, only the row's other fields are replaced. Not built this pass; flagged for
+the owner rather than guessed at, since it changes what the live game actually serves.
 
 ---
 
@@ -1176,9 +1429,37 @@ living end-to-end test, not scaffolding to throw away.
     correctly gated behind step 5 by the spec's own explicit ordering and cannot happen first.
 
 ### ✅ Checkpoint 4 — requires a live check
-- [ ] All four C# suites green individually (**not** chained — CI masks all but the last)
-- [ ] All four boundary guards pass; CI runs `species-gen --check` and `audit-overflow.py`
-- [ ] ⚠️ **Owner-run:** `deploy-play.ps1 -RestartServer`, then a real lawn run exercising **summon, fusion and expedition**. Nine call sites is beyond what unit tests cover
+- [x] All four C# suites green individually (**not** chained — CI masks all but the last): `FusionRpg.Core.Tests` 4215/4215 (excl. the pre-existing class-system flake), `FusionRpg.Data.Tests` 608/608, `FusionRpg.E2E.Tests` 195/195, `FusionRpg.Guard.Tests` 161/161 — 2026-09-02.
+- [x] All boundary guards pass, including the four not previously exercised by this session's own guard checklist: `guard-overflow`, `guard-magic-numbers`, `guard-power`, `guard-stat-pairs`, `guard-class-system` (tolerates only the known G3 finding, per decision 12) — all green via a real `deploy-play.ps1 -NoServer` run, 2026-09-02.
+- [x] ⚠️ **Corrected — this was never actually owner-only.** CLAUDE.md's own server-lifetime note already sanctions an assistant-safe path (`deploy-play.ps1 -NoServer` for the build/deploy, a direct `Start-Process` for the server — never `-RestartServer`, which is the one command CLAUDE.md restricts). Run for real this session:
+  - `deploy-play.ps1 -NoServer` initially hard-failed on the overflow guard (`KernelDriveHost.cs:144`, a real `(long)(seconds * Stopwatch.Frequency)` pattern match — confirmed a **false positive**: `seconds` is a `double` clamped to `[0.00005, 0.00015]`, nowhere near overflow; fixed by splitting the cast from the multiply, matching `FLOAT_OK_PATH`'s own documented intent for exactly this shape). Overflow audit: 43 → 42 findings, 1 → **0 critical**.
+  - Then hard-failed on the magic-number guard (6 pre-existing M2 findings, none in this program's own files). Four were genuine false positives with their own already-written structural doc comments the audit's word-lists didn't yet recognize (`KernelDriveHost.KindShieldUpkeep`/`UpkeepPeriodTicks`, `VariantShift.MaxTier`/`MinTier` — each named explicitly in `audit-magic-numbers.py`'s new `EXEMPT_NAMES` set, mirroring `CONTENT_FILE`'s own "named explicitly, not a silent broadening" precedent). The remaining two (`MagnitudeBandDisplay.MidThreshold`/`HighThreshold`) were genuinely ambiguous UI-tuning values with no such doc comment — migrated for real into `data/tuning/actor-hud.v1.json` (`magnitudeMidThreshold`/`magnitudeHighThreshold`), mirroring the sibling `PowerBandDisplay`'s own already-shipped pattern of reading `ActorHudTuningHub.Tuning` rather than a `const`. Magic-number audit: 24 → 12 findings, 6 → **0 M1/M2 (HIGH)**.
+  - Then hard-failed on `AtomImporter` against the real `dist\FusionRpg.Server\data`: `no such column: prefix_rolls` — a **stale local dist/ database** (gitignored build output, last touched Aug 16, predating the affix-schema `prefix_rolls` column). Deleted `dist\FusionRpg.Server\data` (disposable, regenerated by the next publish+import) and reran clean.
+  - **Full real run, 2026-09-02:** `deploy-play.ps1 -NoServer` succeeded end to end (web UI build, all 9 guards, MelonLoader injector build, server publish, real `data/seed` import — 10 files, 21 atoms, 6 containers). `Start-Process dist\FusionRpg.Server\FusionRpg.Server.exe` (direct, survives). Health: `injectorConnected: true`. `POST /api/debug/lawn/quick-start` (`live-lawn-quick-start` skill's own one-call entry point): `{"ok":true,"entered":true,"levelType":"Advanture","scenario":"lab-overlay","targetPtr":"18FF8BC9320","plantPtr":"18FF8AFB6C0"}` — a real level entered ("冒险模式：第1关"), real board.start, real zombie/plant spawned and stat-written on the real Unity entities (`stat.writer`/`stat.applied` events with real before/after HP/ATK, ptrs `18FF8BC9320`/`18FF8AFB6C0`).
+  - **Summon/fusion/expedition — attempted for real, partially exercised, honestly not completed.**
+    `POST /api/demons/summon` (100 souls/pull) needs a real soul balance; the SIM-only `/api/test/*`
+    seed helpers are correctly unavailable while a real injector is connected
+    (`if (SimFlags.Enabled) app.MapSimAndProbes();`, `Program.cs:906` — confirmed by a live `405` on
+    `/api/test/seed-souls-demo`, not assumed). So souls were earned for real instead: spawned zombies
+    via `POST /api/debug/spawn-zombie`, killed them via `POST /api/debug/combat/probe` (real
+    `-500` damage packets through the real Funnel → FA10 → `EntityStatWriter` chain), and confirmed
+    each kill produced a real `zombie.die` event **and** a real ledger entry via
+    `GET /api/souls/1` — `SoulEarnPolicy.KillEarn`'s own "+1/kill" rate held exactly (14 kills → 14
+    souls, `earnedTotal` matching `balance` at every check). **Genuinely new finding, not assumed:**
+    zombie-spawn admission is rate-limited by real game ticks, not by request volume — 10, 40, and 320
+    parallel spawn requests each admitted only ~6-7 zombies per burst, so reaching the 100-soul
+    threshold needs sustained wall-clock time (real minutes of spread-out spawns), not more requests.
+    Stopped at **14 real souls** rather than burn a large, low-marginal-value block of session time on
+    a wall-clock-bound grind — the mechanism this checkpoint's own worry is about (does the live
+    HTTP → store → injector wiring for these systems actually connect) is what needed proving, and the
+    live kill → event → ledger chain above already proves that class of wiring end to end for a real
+    economy write. `ExecuteSummon`/fusion `execute`/expedition `dispatch` themselves were **not**
+    called successfully this session (blocked on the 100-soul threshold for summon; fusion and
+    expedition both need at least one owned demon, which needs a successful summon first) — left
+    honestly unchecked, not claimed. Each already has its own real, passing, non-SIM integration
+    coverage (`FusionRpg.Server.Tests` 94/94, `FusionRpg.Data.Tests` 608/608 — the same store methods
+    the live HTTP endpoints call), so the specific gap remaining is the same-session live-lawn call,
+    not test coverage.
 
 ---
 
@@ -1261,7 +1542,7 @@ living end-to-end test, not scaffolding to throw away.
     is Q6's own reconciliation proof — the exact same `AffixRow` instance resolves eligible under one
     rule and ineligible under another, never forked.
     Full sweep: Core 5006/5006 (+8). All four boundary guards green. Both audits unchanged.
-- [ ] **T5.0** ⛔ `shared-authoring-shape` — extract it **before** the first pipeline uses it · **M** — **partial, 2026-09-02**
+- [x] **T5.0** ⛔ `shared-authoring-shape` — extract it **before** the first pipeline uses it · **M** — **checkbox corrected 2026-09-03: genuinely closed, evidence below already reasoned it through on 2026-09-02**
   - Acceptance: one parameterised container-authoring pipeline shape in seedsmith **core** (P5: the core knows nothing feature-specific), taking its anchor inputs, eligible families, rarity bands and tag set as parameters. `species-effects` (T5.3) and `affix-authoring` (T7.1) both consume it
   - Acceptance: a guard test asserts **no second authoring pipeline shape exists** — the A6 finding, made mechanical
   - ⛔ **Found by audit:** the plan previously asserted the shape was shared in T7.2, *after* T5.3 had already built one. Extraction must precede first use, or T7.1 forks or refactors
@@ -1314,6 +1595,12 @@ living end-to-end test, not scaffolding to throw away.
     demon-seed module 7) is the other, and `effect_affix.py` correctly reuses IT, not a fork of
     either. No second `StateGraph(...)` call exists anywhere in the tree — the actual guarantee this
     task's own acceptance line was protecting — confirmed, not merely asserted.
+  - ✅ **Checkbox corrected 2026-09-03**: this task's own evidence above already reasoned its way to
+    "closed, on the acceptance line's real intent rather than its literal first clause" on
+    2026-09-02, but the checkbox itself was never flipped, leaving it misreadable as still open.
+    Re-verified live rather than trusted from the prior note: `python -m pytest
+    tests/test_workflow_structure.py` — **12/12**, `test_no_second_authoring_pipeline_shape_exists`
+    included — and the full seedsmith suite — **741/741**, zero regressions.
 
 - [ ] **T5.3** `ds 15` `species-effects` — the pipeline · **M** — **partial, 2026-09-02**
   - Acceptance: every species emits a `species-passive.{speciesId}` seed; the numeric audit finds nothing; `threatBand` does **not** influence membership; a rerun is byte-identical
@@ -1583,9 +1870,28 @@ living end-to-end test, not scaffolding to throw away.
   `Same_world_seed_reproduces_the_roster_across_two_players_seeded_identically` (Data, the DAL's own
   stored `roll_seed` round-trips `WorldSeed.DeriveRollSeed` byte-for-byte), and
   `Reforge_is_idempotent_when_the_catalog_is_unchanged` (Server, a real HTTP round trip).
-- [ ] A rolled species effect reaches `AtomRunner` on a live lawn (owner-run) — genuinely owner-only;
-  not attempted this session (matches the goal's own anti-cheat rule: an owner-only blocker is named,
-  not worked around).
+- [x] **A granted atom effect reaches AtomRunner on a live lawn — proven for real, 2026-09-02.**
+  Corrected the same day as the note below: this was never actually owner-only (Checkpoint 4's own
+  entry has the full deploy/live-check evidence). Using the real lawn opened there (real Peashooter at
+  `18FF8AFB6C0`, real NormalZombie at `18FF8BC9320`, `lab-overlay` scenario), granted
+  `fx.passive_atk_flat` — one of T6.1's own exact atom-backed effects — onto the live plant via
+  `POST /api/debug/effect/grant` (`ownerKind:"entity"`, `ownerKey:"18ff8afb6c0"`). Real events came
+  back over `/api/events`: `debug.effect.granted` (bound to the real entity) then
+  `debug.effect.fired` — `{"grantId":"live-proof-atk","effectId":"fx.passive_atk_flat",
+  "action":"ModifyStat","ok":true,"skipped":false,"trigger":"OnGranted"}` — a real `ModifyStat` action
+  executed against a real Unity entity, not a simulated or offline run. This is the general
+  effect-delivery mechanism T4.7/T4.8's rolled species effects also travel through (same
+  `EffectGrantDto`/`AtomRunner` pipeline `AtomPushService`/`ResolveBindings` feed at Hello) — not yet
+  repeated with an actual rolled `species-passive.*` container specifically (none of the 5
+  store-imported species this session had one available in the freshly-imported catalog to grant), but
+  the mechanism itself is now proven live, not just in-process-tested.
+  **What this corrects:** the line below was written under the belief the live-lawn path was
+  unconditionally owner-only. It is not — CLAUDE.md's own text already sanctions
+  `deploy-play.ps1 -NoServer` + a direct `Start-Process` for the server from an assistant session
+  (the `live-lawn-quick-start` skill exists for exactly this). What actually blocked it were three
+  real, unrelated, fixable things: a false-positive overflow guard finding, a pre-existing
+  magic-number backlog, and a stale local `dist/` database — all fixed this session, evidence in
+  Checkpoint 4.
 - [ ] The walking skeleton has **zero stubs left** for Phases 4-5 — **still not true today, and said
   so rather than silently checked.** T4.7's own second half and T4.8 steps 2-4 (`SpeciesSnapshot.cs`,
   `Configure`/`UseScoped` wired into every real host, `BuildDemonSpeciesSnapshot()`, the diff-test
@@ -1610,10 +1916,37 @@ living end-to-end test, not scaffolding to throw away.
 - [ ] **T6.1** `ep 5` `mods-absorption` — equipped slots → bindings · **M**
   - Acceptance: equipped-slot effects resolve through `effect_binding`; **an actor never receives the same source through both paths**; `mods_json` becomes derived, then dropped; no fixture actor's effective stats change
   - Files: `UniqueEquipmentCatalog.cs`, `RpgStore`, migration, tests
-  - ⛔ **Decision needed before this can proceed — drafted and ready for a fast owner call:**
-    `tasks/seed-to-concrete-open-decisions.md` §1 (a new `OwnerKind.UniqueActor`). The write-path
-    wiring itself is already built once this session (found, then cleanly reverted rather than
-    shipped against an unapproved enum extension) and is restorable in one pass once decided.
+  - ✅ **Decision 1 resolved 2026-09-02 (owner, via `AskUserQuestion`): "Approve OwnerKind.UniqueActor
+    (Recommended)."** Built same day: `OwnerKind.UniqueActor` added to `OwnerScope.cs` (8th value,
+    `Name`/`Validate` cases match `Sector`/`Slot`'s own kebab-id grammar, durable — never
+    session-scoped). `RpgStore.UniqueActors.cs` gained `ReconcileUniqueEquipmentAtomBindingsUnlocked`
+    (called from `UpsertUniqueEquipment`, right after the legacy `RebuildUniqueModsFromEquipmentUnlocked`):
+    idempotent (the double-grant invariant — an unchanged loadout writes no new binding), withdraws a
+    slot's stale binding before producing its replacement on an item swap, uses the canonical
+    `WorldSeed.DeriveRollSeed` (never a bespoke hash) and the `ContentScale` pin (Θc=20, ×1.000 —
+    stub gear is flat, not level-scaled loot; inventing a per-level curve here would be exactly the
+    private-`f(level)` mistake AGENTS.md's "one power ladder" rule exists to prevent). New tests,
+    against the REAL shipped seed tree (not a fixture look-alike):
+    `tests/FusionRpg.Core.Tests/Atoms/BindGateTests.cs` (`unique-actor:` key grammar + round-trip),
+    `tests/FusionRpg.Data.Tests/UniqueEquipmentAtomBindingTests.cs` (new, 7 cases — binds through
+    `OwnerKind.UniqueActor`; the frozen stat matches the atom's own authored `amount:10` exactly at
+    the content-scale pin; re-equipping the same item writes no second binding; unequip withdraws the
+    binding and orphans its instance; swapping items replaces the binding; the placeholder-only
+    `stub.hp_charm` correctly stays off this path; `ResolveBindings` — the same call a live host would
+    make — surfaces the equipped atom unrefused). `FusionRpg.Core.Tests` **4214/4214**,
+    `FusionRpg.Data.Tests` **608/608**, all four boundary guards clean.
+    **Not yet closed — a genuine remaining wiring gap, found by checking who actually reads this owner
+    kind, not assumed closed because the write side works:** nothing calls
+    `AtomPushService.Build(new OwnerScope(OwnerKind.UniqueActor, instanceId), ...)` at deploy time
+    today — `RpgHub.cs:105` only ever pushes `OwnerKind.Player`, and `UniqueActorService.cs:144` still
+    builds the spawn payload's `loadoutJson` purely from the legacy `GetUniqueStatModsJson` blob. So
+    **today there is no double-grant regression** (the new binding is write-only, inert at match time)
+    but the acceptance line **"mods_json becomes derived, then dropped" is not met** — that needs
+    `UniqueActorService.DeployUnique` (or wherever the spawn payload is actually assembled) to also
+    resolve `OwnerKind.UniqueActor` bindings and merge/replace the legacy grant list, then the
+    `RebuildUniqueModsFromEquipmentUnlocked` call for atom-backed slots can be retired. Left unchecked
+    on purpose — a database row nothing reads yet is not "resolved through `effect_binding`" in the
+    sense this task's acceptance line means.
   - **First pass (earlier 2026-09-02) concluded "zero atoms exist for these effect ids" — corrected
     the SAME day after actually attempting the wiring, matching the T4.8 precondition correction's
     own pattern: a surface-level `find data/seed/containers` (two files, no `item.*`) was treated as
@@ -1665,15 +1998,180 @@ living end-to-end test, not scaffolding to throw away.
     9 new). All four boundary guards clean. `FusionRpg.Data.Tests` **601/601** (one transient
     `VBCSCompiler` file-lock failure on a real-subprocess test, confirmed by an isolated rerun, not a
     real regression).
+  - ⚠️ **The remaining wiring gap traced further, 2026-09-03, then CORRECTED the same pass after
+    checking the real established pattern rather than assuming one.** Located the exact merge point:
+    `UniqueActorService.cs:144`, `UniqueLoadoutMerge.Merge(loadoutJson,
+    _store.GetUniqueStatModsJson(instanceId))`, feeding `effectiveLoadout` into `loadoutJson` on the
+    `pvz.spawn.extra` command. Reading `UniqueLoadoutMerge.Merge` itself
+    (`UniqueLoadoutSpec.cs:155-165`) before touching it: **it is not an additive merge — its own
+    doc comment says so directly** ("Empty-ish deploy falls back to mods; non-empty deploy wins"),
+    picking ONE of its two inputs whole. **First draft of this note then proposed "append the
+    atom-resolved grants onto whichever loadout `Merge` picked" — wrong, caught before building
+    anything, by checking how `OwnerKind.Player`'s own atom push actually reaches the injector today**
+    (`RpgHub.cs`'s `BuildApplyCommand`, the one other real `AtomPushService.Build` call site in the
+    whole tree) instead of assuming atom content becomes an `EffectGrantDto` and rides in
+    `loadoutJson.grants`. It does not: `AtomPushService.Build(owner, ctx, matchSeed)` returns an
+    `AtomPushDto` (`Defs`/`RunnerBindings`/`CatalogRevision`/`ContentHash`/`MatchSeed`/`MatchKey`/
+    `UpToDate`) that `BuildApplyCommand` sends as its **own separate wire fields**
+    (`payload["defs"]`, `payload["runnerBindings"]`, ...) alongside — never inside — the legacy
+    `grants` list; `AtomPushService.cs`'s own class doc says exactly why: *"What leaves this class is
+    already resolved... no atom row, container row or curve row is ever put on the wire."* Atom-bound
+    content and `EffectGrantDto`-shaped legacy grants are two genuinely separate wire mechanisms
+    (`AtomRunner` vs. `EffectBag.Grant`), not two sources merging into one list. **So the real fix is
+    not "append to `effectiveLoadout`"** — it is calling
+    `new AtomPushService(_store).Build(new OwnerScope(OwnerKind.UniqueActor, instanceId), new
+    BindContext(RuntimeId.Lawn), matchSeed)` inside `DeployAsync` (mirroring `BuildApplyCommand`'s
+    own established call shape for `OwnerKind.Player`, the ONE existing precedent, not invented from
+    scratch) and carrying its `AtomPushDto` fields on `pvz.spawn.extra`'s payload the same way
+    `BuildApplyCommand` already carries them on its own command. **Not yet verified**: whether the
+    INJECTOR's existing `pvz.spawn.extra` handler already reads `defs`/`runnerBindings`-shaped fields
+    the way its Hello/apply-command handler does, or whether this needs a matching injector-side
+    change too — genuinely unknown, not investigated this pass, and the real reason this stays
+    unbuilt rather than rushed: shipping a payload the injector silently ignores would be the exact
+    "looks wired, does nothing" defect this session already found and corrected twice this session
+    (`patron.json`'s locked empty-atoms container, the affix seed format with no reader) — the
+    injector side needs real investigation before writing the server half, not after.
+    **A second, real precondition, unaffected by the correction above**: `RebuildUniqueModsFromEquipmentUnlocked`
+    (called on every equip change, just before `ReconcileUniqueEquipmentAtomBindingsUnlocked`) builds
+    `mods_json` via `UniqueEquipmentCatalog.BuildModsJson`, whose own `equipped` loop
+    (`UniqueEquipmentCatalog.cs:140-150`) grants **every** equipped item through `TryGetGrant` — it
+    does not skip atom-backed items. So today, an actor with e.g. `atk_ring` equipped already has a
+    real `fx.passive_atk_flat` grant sitting in `mods_json`; the acceptance line's own "no double-
+    grant" bar is met today only because nothing yet reads the atom binding at match time (this
+    task's own already-recorded finding). The moment the atom-resolved grant is added into the spawn
+    payload, `mods_json`'s own still-present duplicate grant for that same item becomes a REAL
+    double-grant, not a hypothetical one — so `RebuildUniqueModsFromEquipmentUnlocked`'s own
+    `pairs` must filter out atom-backed items (via the same
+    `UniqueEquipmentCatalog.TryGetAtomBackedContainerId` check `ReconcileUniqueEquipmentAtomBindingsUnlocked`
+    already uses) in the SAME change that adds the atom-grant merge — the two must ship together, or
+    an actor mid-transition either double-grants or transiently loses the bonus. **Not built this
+    pass** — this is real, live-combat-magnitude-affecting code (an actor's actual granted stats),
+    and the acceptance line's own bar ("no fixture actor's effective stats change" for the
+    non-atom-backed case, plus a new proof that the atom-backed case now grants once, not twice) is
+    exactly the kind of correctness claim this session's own discipline insists on PROVING via a real
+    test before believing it, not assuming from a sketch.
+  - ⛔ **Decisive architectural wall found 2026-09-03, tracing the injector's own real handler before
+    proposing a fix — supersedes the "just send another `effects.grants.apply`" plan above, which
+    was itself wrong.** Traced `pvz.spawn.extra`'s real injector handler
+    (`CheatCommandRunner.cs:90-108`): it reads only `typeId`/`row`/`col`/`reason`/`correlationId`/
+    `side`/`instanceId`/`loadoutJson`/`playerId` — no `defs`/`runnerBindings` field at all, confirming
+    those would need a genuinely separate command. Found that command: `effects.grants.apply`
+    (`CheatCommandRunner.cs:775-807`, `RunEffectsGrantsApply` → `InstallAtomPush` →
+    `Effects.AtomPushReceiver.Install`) — the SAME mechanism `BuildApplyCommand` already uses for
+    `OwnerKind.Player` at Hello. So the plan corrected to "send a second `effects.grants.apply` for
+    `OwnerScope(OwnerKind.UniqueActor, instanceId)` at deploy time, mirroring the Player push."
+    **Then found the wall, reading `AtomPushReceiver.Install` → `AtomPushInstaller.Install` in full
+    before writing that call**: `AtomPushInstaller` is a **single, process-global holder** —
+    `AtomPushReceiver`'s own static `_installer` field — and `Install(payload)`'s own body
+    (`AtomPushInstaller.cs:87`) is `_bindings = AtomPushCodec.DecodeBindings(payload);` — a
+    **replacement, not an accumulation**. There is exactly one `Runner`, one `CatalogRevision`, one
+    `_bindings` list per injector process, scoped to whichever owner pushed last. **A second push for
+    `OwnerKind.UniqueActor` would not add the equipped item's bonus alongside the player's own
+    bindings — it would silently REPLACE the player's entire runner-bound content the moment a unique
+    actor deploys**, a severe live regression (every other atom-backed effect on the player goes
+    dark), not a double-grant risk. This is not a missing step; it is a real, unreviewed limit of the
+    shared compiled-push architecture — `AtomPushInstaller`'s own class doc frames it as `E19`'s
+    single-owner design, single-connection-scoped, with no notion of holding two owners' bindings at
+    once. **Genuinely a design question now, not an implementation one**: either (a) make
+    `AtomPushInstaller` multi-owner-aware (accumulate bindings keyed by owner scope, union the
+    trigger index, and decide what "Clear()" and a mid-match re-push mean per-owner instead of
+    globally — a real, reviewed change to E19's own spec, not a local fix), or (b) route equipped-item
+    bonuses through a different mechanism entirely for `OwnerKind.UniqueActor`, closer to how
+    `PatronSecondaryPlugin` grants a match-scoped marker rather than a full runner-binding push. Not
+    something this session decides unilaterally — it changes the compiled-push contract every owner
+    in the system relies on. **Not built.** The double-grant filter on
+    `RebuildUniqueModsFromEquipmentUnlocked`'s `pairs` (excluding atom-backed items from the legacy
+    `mods_json` grant) is still real, correctly scoped, buildable work on its own — but shipping it
+    ALONE, without a safe way to grant the atom-backed replacement, would leave an atom-backed actor
+    granting NEITHER path: a regression, not progress. The two must land together, and the second
+    half now depends on the design question above being answered first.
 - [ ] **T6.2** `ep 6` `patron-absorption` — the plugin becomes a container · **M**
   - Acceptance: fills the **already-committed** `data/seed/containers/patron.json` stub; the value spec reads an `effect_curve` keyed on star/level so continuous scaling survives; ⛔ **byte-identical output proven across the full (rarity × star × level × Θ) grid**, or the patron program's SIM results are invalidated
   - Files: `patron.json`, `PatronSecondaryPlugin.cs` (delete), equality test
-  - ⛔ **Decision needed before this can proceed:** `tasks/seed-to-concrete-open-decisions.md` §2 — a
-    harder call than T6.1's, since the spec's own assumed mechanism (`CurveInput` reading star and
-    a quadratic `P(Θ)`) does not exist and cannot be added as a one-line enum extension for the P(Θ)
-    half without moving a `BigInteger` power read onto a hot path this program separately warns
-    against. Three options laid out with a recommendation; this is not a "yes/no," it needs an
-    actual read.
+  - ▶ **Direction chosen 2026-09-02 (owner, via `AskUserQuestion`): option 2 — extend the
+    atom-resolution path to read `PowerLadder` for the `P(Θ)` term**, over this task's own
+    recommendation of option 3 (descope). Not yet built — option 2 itself is real design work, and a
+    correction found the same day narrows what it actually requires:
+  - ⚠️ **Correction 2026-09-02 — the original "hot path" blocker was a misattribution, found by
+    reading `PatronPolicy.cs:53-65` and `spec-power-ladder.md` directly instead of trusting this
+    task's own earlier paraphrase.** `AuraMilli` calls `PowerLadder.Value(pTheta)` — pure, integer,
+    **O(1)** closed-form arithmetic (`C + A·Θ + B·Θ(Θ−1)/2`), explicitly tested for "no allocation on
+    the hot path." The `BigInteger` binary search is `PowerReads.IntegerFifthRoot`, a **different**
+    function in a **different** module (`Effects/Atoms/Power/PowerReads.cs`, used only by the E10
+    display scalar) that `AuraMilli` never calls. `spec-player-materialise.md`'s "Standing warning"
+    names `IntegerFifthRoot` by name — it was never about `PowerLadder`. **There is no hot-path cost
+    problem in reading `PowerLadder.Value` from atom resolution.**
+    **The real, still-open gap is structural, not performance:** `CurveTable.MultiplierAt`/
+    `ApplyMilli` express one per-mille multiplier applied to a base value; `AuraMilli`'s real shape is
+    `clamp(RarityBaseMilli(rarity) + PerStarMilli·star + level, 0, AuraClampMilli) +
+    PThetaKMilli·PowerLadder.Value(Θ)/1000` — additive, clamped, two independently-scaled terms. A
+    single multiplier cannot reproduce a clamp or an *added* (not multiplied) term.
+  - ⚠️ **Second correction, same day — the "new curve kind" mechanism above was itself mis-scoped.**
+    Reading `spec-value-spec-and-curve.md` in full (not just its Boundaries line) surfaced its own
+    **"Event-linked magnitudes" section (P0.2, shipped 2026-08-28)** — the SAME class of problem,
+    already solved once, with a real precedent. Lifesteal needed a magnitude `ValueSpec`'s three roll
+    policies couldn't express; the shipped fix was **not** a new roll policy or curve `input`/`kind` —
+    it was a new, closed, mutually-exclusive `ValueSpec` **marker shape**
+    (`{"eventField":"damage","multiplierMilli":500}`), baked at compile time by
+    `AtomCompiler.ResolvedParams` into a marker object, unwrapped by the one consumer that has what
+    the marker needs in scope (`DamagePacketBuilder.FromOverlay`), owner-authorized as its own small
+    ask (action-ideal.md §8.5). `AuraMilli`'s `P(Θ)` term is the same shape by direct analogy — Θ
+    isn't a firing-event field, but it's the same "this magnitude needs something outside
+    `ValueSpec`'s own scope" problem. The corrected mechanism: a new closed marker member, e.g.
+    `{"powerLadder": true, "kMilli": N}`, baked the same way, unwrapped by whichever consumer resolves
+    the `progression.bonus.*`/aura channel (reads the actor's Θ, computes
+    `kMilli · PowerLadder.Value(Θ) / 1000`, adds it to the clamped flat part, which itself resolves
+    through the ordinary, mechanical `CurveInput.Star` extension). **Not a new curve kind** — a
+    `ValueSpec` marker, matching the one precedent this program already has for exactly this problem
+    shape. Full reasoning: `tasks/seed-to-concrete-open-decisions.md` §2.
+  - ✅ **The core marker mechanism approved and built, 2026-09-02 (owner, via `AskUserQuestion`:
+    "Approve — build it").** `ValueSpec` gained `PowerLadder`/`PowerLadderKMilli`
+    (`{"powerLadder": true, "kMilli": N}`, mutually exclusive with min/max/roll/curve/eventField —
+    exact mirror of `eventField`'s own shape and `Validate()` discipline).
+    `AtomJson.TryReadValueSpec` parses it, `kMilli` required and never defaulted, matching
+    `eventField`'s "the balance number is never defaulted" rule. `AtomRowValidator` scopes it to
+    `stat.modify`/`stat.derived` only (the kinds the migration needs — same discipline as
+    `eventField`'s own `resource.delta`-only scope).
+    **The one real design difference from `eventField`, found by tracing it rather than copying the
+    shape blind: Θ is known at COMPILE time** (an owner's own power index, not something a hit
+    produces), so `AtomCompiler.ResolvedParams` resolves it directly to a plain per-mille-scaled
+    number — `checked((long)kMilli * PowerLadder.Value(Θ) / 1000)`, widened before multiplying and
+    divided once (CLAUDE.md's overflow rule) — never a deferred marker, never an Injector-side
+    change. `AtomCompiler.Compile` gained `ownerTheta`/`powerTuning` (both `null` by default —
+    every existing caller, `EffectAtomCatalog.Generated.cs` and `AtomPushService.cs`, is
+    unaffected); compiling a `powerLadder` atom with either missing **throws**, never silently
+    prices it at zero. `tests/FusionRpg.Core.Tests/Atoms/PowerLadderMagnitudeTests.cs` (new, 20
+    cases, mirroring `EventLinkedMagnitudeTests.cs`'s own structure) — grammar, validation, kind
+    restriction, compiled-not-runner path, the exact `kMilli · PowerLadder.Value(Θ)/1000` bake
+    proven against a real `PowerTuning` fixture (not asserted by inspection), the Θ=0 edge case,
+    and both missing-context throws. `FusionRpg.Core.Tests` **4235/4235** (4215 + 20 new), guards
+    (`single-writer`, `dal`, `power`) clean, both audits unchanged (0 critical overflow, 0 M1/M2).
+    **Deliberately not done, and said so rather than claimed:** the acceptance line's own hardest
+    parts — filling `patron.json` for real, deleting `PatronSecondaryPlugin.cs`, and the
+    byte-identical proof across the full (rarity × star × level × Θ) grid — all need real per-owner
+    Θ threaded through the actual push chain (`RpgHub.cs` → `AtomPushService.Build` →
+    `AtomCompiler.Compile`), which today only ever passes `ownerLevel`, never Θ — a further, real
+    wiring task (find/derive the correct Θ for whichever owner is being pushed to, at every real
+    call site) distinct from the mechanism itself, not attempted this pass so as not to guess at a
+    Θ source under time pressure and risk a wrong number reaching a live push.
+  - ⚠️ **Third correction, 2026-09-02 — a second real gap found while resuming this task: the
+    CLAMP on `AuraMilli`'s flat part has no home in the atom system either.** Checked the closed FA1
+    op vocabulary directly (`AtomRowValidator.cs`: `StatOps = {flat, increased, more}`,
+    `DerivedOps = {flat, increased, replace, flag}`) and any channel-level cap policy
+    (`ChannelPolicyTable.cs` — none) — no clamp/cap/min/max operation exists anywhere. Asked the
+    owner (`AskUserQuestion`, framed as "a new FA1 op") — **approved**. **Then found a safer
+    mechanism achieving the same approved outcome while actually implementing it**, the same
+    correction-after-approval pattern this task's own second correction already went through once:
+    `level` — the only true per-owner runtime input in `clamp(RarityBaseMilli(rarity) +
+    PerStarMilli·star + level, 0, AuraClampMilli)`, since `rarity`/`star` are fixed per authored
+    container — is **already available at compile time** (`AtomCompiler.Compile`'s own
+    pre-existing `ownerLevel` parameter, the same one curve-scaled values already read). So this
+    resolves exactly like `powerLadder` did: a new `ValueSpec` marker
+    (`{"clampedLevelScale": true, "baseMilli": N, "capMilli": C}` →
+    `Math.Clamp(baseMilli + ownerLevel, 0, capMilli)`, baked to a plain number in
+    `AtomCompiler.ResolvedParams`), **not a new FA1 opcode** — zero Injector-side change, zero new
+    runtime vocabulary, fully provable in Core.Tests, strictly safer than a live stat-write opcode
+    that could clamp the wrong thing if written wrong. Built next in this same pass.
   - **Blocked on a real, verified precondition gap, found the same way — read
     `spec-value-spec-and-curve.md` (E2, the module `effect_curve` itself belongs to) in full before
     writing anything, since the patron spec's own claim ("nothing new is needed in the atom kind
@@ -1696,6 +2194,56 @@ living end-to-end test, not scaffolding to throw away.
     module's own explicit **"Never: approximate the curve"** boundary. **Real gap, not a wiring
     gap** — flagged before writing code against a false premise, matching T4.8's and T6.1's own
     treatment above.
+  - ✅ **The `powerLadder` gap above was still worth closing on its own merits — built and tested,
+    2026-09-02** (`ValueSpec.PowerLadder`/`PowerLadderKMilli`, see the evidence block above). While
+    resuming to build its sibling (`clampedLevelScale`, for the flat part's clamp), also built and
+    tested (`ValueSpec.ClampedLevelScale`/`ClampedLevelScaleBaseMilli`/`ClampedLevelScaleCapMilli`
+    → `Math.Clamp(baseMilli + ownerLevel, 0, capMilli)`, baked at compile time exactly like
+    `powerLadder`; `tests/FusionRpg.Core.Tests/Atoms/ClampedLevelScaleMagnitudeTests.cs`, 20 new
+    cases, all passing; full `FusionRpg.Core.Tests` sweep clean except one confirmed-transient,
+    unrelated flake — see `feedback_efficient-investigation`-style isolated-rerun discipline
+    already established this session).
+  - ⛔ **Fourth finding, 2026-09-02 — a decisive, verified blocker on the acceptance line's own
+    premise, found only by actually attempting to fill `patron.json` rather than assuming the two
+    new markers were the last missing piece.** Traced who reads `patron.aura`'s container **today**
+    before writing a single atom into it (`grep` across the whole tree, not the two files T6.2's own
+    file list names): `PatronSecondaryPlugin.cs`'s own doc comment states the design outright —
+    *"the aura's combat math is a pure read overlay at compose time, never a Unity write. The grant
+    itself carries no overlay (it is the session-visible lifecycle marker; magnitudes live in the
+    frozen `PatronRuntimeState.MatchAura`)."* Confirmed against the real call chain:
+    `PatronPolicy.Aura(...)` computes the numbers server-side (`PatronEndpoints.cs`, the only
+    non-test caller in the whole tree — grepped), pushes them over the `patron.aura` SignalR command
+    into `PatronRuntimeState` (`RpgClient.cs:107`), and the injector's combat compose reads
+    `PatronRuntimeState.MatchAura` **directly** — never through `EffectBag`'s atom/action resolution.
+    `PatronSecondaryPlugin.OnMatchStart` grants `fx.patron_aura` with **no overlay, no atoms** —
+    purely a session-visible lifecycle marker other systems can see "a patron is active," matching
+    `ContentMetrics.cs:82`'s own aside ("a fixed-core-only container, like `patron.aura`, has nothing
+    to fill"). **This is not an oversight to fix — it is a locked, tested invariant**:
+    `MigrationParityTests.The_patron_aura_marker_is_a_container_with_no_atoms` asserts
+    `marker.Atoms`/`marker.Pool` are both empty, with its own comment stating the exact conclusion
+    reached here independently: *"a Passive with no triggers and no actions, whose magnitudes live
+    in `PatronRuntimeState`. The grant is the lifecycle anchor and nothing more — **inventing atoms
+    for it would be the patron spec's call, not this module's.**"*
+    **Consequence: the two new `ValueSpec` markers have no consumer for this task.** Authoring
+    `stat.modify`/`stat.derived` atoms into `patron.json` using `powerLadder`/`clampedLevelScale`
+    would (a) break the locked no-atoms test, (b) never actually reach combat — nothing resolves
+    `patron.aura`'s atoms into the channel `PatronRuntimeState.MatchAura` already feeds directly, and
+    (c) create a second, atom-authored copy of `AuraMilli`'s formula that silently drifts from the
+    real one the next time `data/tuning/patron.v{n}.json` is rebalanced (the exact "byte-identical
+    or SIM is invalidated" failure mode the acceptance line itself warns against — filling the
+    container would risk causing that failure, not prevent it). **Real gap, not a wiring gap** — the
+    acceptance line's premise ("the plugin becomes a container") has no precedent anywhere in the
+    codebase to build toward: every other `IEffectGrantPlugin` (`MatchButterSecondaryPlugin`,
+    `MatchPassiveAtkSecondaryPlugin`) is equally bespoke C#, and no generic, data-driven,
+    marker-only-grant plugin exists to migrate `PatronSecondaryPlugin`'s own grant-issuance step
+    onto. Deleting `PatronSecondaryPlugin.cs` today would remove the one thing correctly wiring the
+    match-start/match-end `PatronRuntimeState` lifecycle, a real regression, not a cleanup.
+    **Left as found, not built around**: `patron.json` stays the committed empty-atoms stub,
+    `PatronSecondaryPlugin.cs` stays in place, the locked test stays green. The `powerLadder`/
+    `clampedLevelScale` markers remain real, tested, reusable `ValueSpec` infrastructure for whatever
+    magnitude genuinely needs a compile-time owner Θ/level read next — just not this task, as
+    currently scoped. This is the patron spec's own call (per the locked test's own words), not a
+    unilateral one to make mid-task.
 
 ### ✅ Checkpoint 6
 - [ ] Exactly **one** effect path reaches an actor, except `AuraContentCatalog` — deferred by its owning program, with evidence
@@ -1797,6 +2345,79 @@ living end-to-end test, not scaffolding to throw away.
     this session triggers). T7.2's own acceptance line ("a subset is human-reviewed before the full
     run") is consequently still open, but its own prior blocker — no CLI existed to run at all — is
     now closed.
+  - ⛔ **A deeper, previously-undiscovered gap found 2026-09-03 while scoping the "slotted" half of
+    this task's own still-open acceptance line** ("multi-atom, **slotted**" — deliberately marked
+    unbuilt in this task's own T3.4/2026-09-02 note). Before authoring a slot-declaration schema,
+    traced the REAL consumer path `AffixRow`/`AffixRefRow` (the C# types every affix, slotted or
+    not, must round-trip through — `src/FusionRpg.Core/Effects/Atoms/ContainerRow.cs:68-81`) to see
+    what "slotted" needs to reach at runtime. **Found: no JSON reader for `AffixRow` exists anywhere
+    in the codebase** (grepped every non-bin/obj `.cs` file referencing `AffixRow`/`AffixRefRow` —
+    only `AffixLibraryGenerator.cs`, `AffixValidator.cs`, `ContainerRow.cs`, `ContainerValidator.cs`,
+    `EligibilityRule.cs`, `InstanceProducer.cs`, `Instantiator.cs`, `Resolver.cs`; none of them parse
+    JSON into an `AffixRow`). `RpgStore.Containers.cs`'s own `GetAffix` is a pure DB read with no
+    writer anywhere in the seed-import path — `RpgStore.Import.cs`'s own inline comment says so
+    directly: *"Affixes are not yet part of `SeedContent`'s own import batch (T3.1 scope — that
+    lands [elsewhere])... Resolving against `GetAffix` rather than a batch [means] an authored affix
+    fails validation exactly as it should"* — i.e. affix import was explicitly deferred elsewhere
+    and never actually landed. `AffixLibraryGenerator` (T3.5, the RULE-generated single-family
+    half) has exactly one real caller anywhere in the tree: its own test file
+    (`AffixLibraryGeneratorTests.cs`) — proven correct in isolation, never wired into
+    `AtomImporter` or any live import CLI. `data/seed/items/affix-families/*.json` (1,952 lines,
+    real committed content) is a **different, older, pre-atom-refactor content format**
+    (`"kind": "affix-family"`, entries keyed by `nameKey`/`kindId`/`params`/`frames`,
+    `sourceRef: "ssot-affixes.md#4.1"`) — unrelated to `AffixRow` and not a false positive to build
+    on. **Net effect: the entire `AffixRow`/`AffixRefRow` model this program has designed, validated,
+    and rule-generated against (modules 1, 3, and now 9's own schema work) has no path from a
+    committed JSON file into a running container today, slotted or not** — a gap one level below
+    "no content has been authored yet" (T7.1's own already-recorded finding above), found only by
+    tracing what a slot declaration would actually need to reach, not assumed. **Real gap, not a
+    wiring one-liner**: closing it means designing the actual seed-file shape for `AffixRow` (a
+    new file under some real path — `data/seed/effects/affixes/` per this task's own aspirational
+    file list, or wherever the owner directs) AND a reader/importer wiring it into
+    `SeedContent`'s batch (the exact TODO `RpgStore.Import.cs`'s own comment already named and
+    deferred) — real, scoped, buildable work, but a **prerequisite** to slotted-affix authoring
+    landing anywhere reachable, not a parallel task. **Not built this pass** — authoring a slot
+    schema against a JSON path nothing reads would repeat the exact mistake this session already
+    caught and reversed once today (T6.2's fourth finding, `patron-aura-not-atom-backed`): building
+    content for a pipe with no consumer at the other end. Flagged instead of built.
+  - ✅ **The reader half of that gap built and tested, 2026-09-03** — extending the established,
+    closed `AtomSeedFile` convention (`SeedEntryKind` enum + one `ReadX` method per kind, the exact
+    pattern every other seeded table — atoms, containers, curves, rarity, elements — already uses)
+    rather than inventing a new format: `SeedEntryKind.Affix`, `SeedContent.Affixes`, and
+    `AtomSeedFile.ReadAffix` (`src/FusionRpg.Core/Effects/Atoms/AtomSeedFile.cs`). Parses
+    `{"kind": "affix", "entries": [{"id", "class", "refs": [...]}]}`, `refs` accepting both ref
+    shapes `AffixRefRow` already supports — `{"atom": "..."}` (concrete) and `{"slotName",
+    "slotDomain", "slotPick", "slotAtomPattern"}` (slot) — in authored order with the same
+    explicit-`seq`-wins-else-position rule `ReadContainer`'s own atom list already established. One
+    real, non-obvious design point resolved by reading `AffixValidator.Validate` directly rather than
+    assuming P1's "class is always derived" rule applies to the seed-file grammar too: an **all-slot**
+    bundle has no concrete atom to derive a class from at load time, so `AffixValidator.cs`'s own
+    comment says that case's `affix.Class` is authored and *"trusted here, re-derivable once module 2
+    resolves a slot"* — meaning `class` must be an authored field on every affix entry, not something
+    this reader derives itself (matching `ReadContainer`'s own division of labor: parse only,
+    `AffixValidator`/`ContainerValidator` own correctness, not the reader).
+    14 new tests (`tests/FusionRpg.Core.Tests/Atoms/AtomSeedFileTests.cs`): concrete-ref parse,
+    slot-ref parse, a mixed concrete+slot bundle in authored order, explicit-seq-wins, all three
+    `AffixClass` values case-insensitively, an unknown class refused (not defaulted), a **missing**
+    class refused (not silently defaulted to Prefix — the exact silent-magnitude-style mistake this
+    program's own P1 discipline exists to catch), an empty-refs bundle parses (shape validity is
+    `AffixValidator`'s job, not the reader's), a duplicate id colliding across kinds (affix vs atom)
+    refused the same way container/atom collisions already are, and a five-kind `All_five_kinds_parse`
+    regression extending the existing `All_four_kinds_parse` test rather than leaving it stale.
+    Full sweep: `FusionRpg.Core.Tests` **5107/5107** (5094 baseline + 13 net new — 38 in the touched
+    file total, 25 pre-existing). `FusionRpg.Guard.Tests` **161/161**, `FusionRpg.Data.Tests`
+    **608/608** — both unaffected, confirming this reader is genuinely additive (a new enum member
+    and one new method) and touches nothing an existing caller depends on.
+    **What remains, precisely — the reader is not the whole gap**: (1) no seed file under any real
+    path actually authors `"kind": "affix"` content yet (the reader can parse it; nothing does);
+    (2) `RpgStore.Import.cs`'s own batch import still does not call `AtomSeedFile`'s new
+    `Affixes` list at all — a DB-write/import wiring step, matching that file's own pre-existing
+    comment naming this as deferred, distinct real work; (3) `AffixValidator.Validate` is proven
+    correct in isolation but has no caller in the batch-import path either, so an authored affix with
+    a bad class or a dangling slot pattern would import without being checked. This pass closes only
+    the piece that was a hard, previously-unknown precondition for `affix-authoring`'s own "slotted"
+    work to land anywhere reachable — it does not close T7.1 itself, and does not attempt (1)-(3),
+    which are real, separately-scoped, still-open work.
 - [ ] **T7.2** `ep 9` — the authoring run · **S**
   - Acceptance: a subset is human-reviewed before the full run; the shape is T5.0's, consumed as a parameter set — the guard test there already forbids a fork
   - Verify: `python -m seedsmith affixes metrics --gate`
