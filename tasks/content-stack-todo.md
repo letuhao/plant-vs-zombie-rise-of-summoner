@@ -1373,8 +1373,71 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   - Acceptance against the spec's own §6: (1)-(4b), (6)-(8) — done as built, unaffected by the AC5
     fix; (5) — done, **now genuinely true against the real shipped file** rather than only true
     under a hypothetical future retune, per the owner's own resolution above.
-- [ ] **A-S1 `distribution-planner`** · **L** · Deps: A-S0, A-T1 · Engine 1. **Union-to-ceiling** for
-  structure axes; family motifs = intersection, anti-motifs = union.
+- [x] **A-S1 `distribution-planner`** · **L** · Deps: A-S0, A-T1 · Engine 1. **Union-to-ceiling** for
+  structure axes; family motifs = intersection, anti-motifs = union — done, all 9 algorithm steps
+  (+2b, +4a) built, `data/seed/actions/_briefs/round-1.json`, **108 briefs** (84 species + 19
+  family + 5 general).
+  - New package `tools/seedsmith/seedsmith/adapters/actions/distribution_planner/`
+    (`tuning.py`/`fingerprint.py`/`derive.py` — 655 lines, the largest single algorithm module this
+    program has built) + `generate_distribution_planner.py`. New tuning file
+    `data/tuning/action-corpus-run.v1.json` with the spec's exact stated smoke defaults
+    (`mode:"smoke"`, `generalCount:5`, `perFamilyCount:1`, `perSpeciesCount:1`,
+    `multiplicativePairs:[["atom.keen-edge","atom.cruelty"]]`, `familyMotifMax:6`,
+    `avoidNeighbourK:3`). **87 new tests**, `test_distribution_planner.py`.
+  - **`data/tuning/action-dedup.v1.json` (A-S3's own file, read never written per §3 step 8)
+    confirmed genuinely absent** — A-S3 is a later, unbuilt module. Resolved the same way every
+    other "ship neutral until the sibling module lands" case has been handled this session: reads
+    it if present, else falls back to the spec's own documented default (`k = 7 fingerprint
+    components + 1 = 8`), never blocking the build. `avoidNeighbours` is correctly `[]` for all 108
+    briefs — round 1 genuinely has no accepted corpus yet, matching spec §7's own stated cycle-break.
+  - **Deferred deliverable, scoped out deliberately, not a shortfall — flagged to the user before
+    the build started, not discovered after.** §3 step 6 names a sub-deliverable that would rewrite
+    `pairings.json` by **authoring new atom-family content** (new status-gated "punisher" payoff
+    families — none of the 98 currently plays that role). That is identity-authoring work, out of
+    place in a "model-free, zero tokens" phase per this repo's own Law 2 ("the LLM writes identity,
+    deterministic code writes magnitude") — so it was explicitly excluded from this build, matching
+    the spec's own sanctioned fallback in its own words: *"until it lands the pairing tier is empty
+    rather than wrong."* The full pairing-role **assignment mechanism** (payoff/enabler sibling
+    forcing, `EnablerPayoffCoverage`'s plan-side twin) is built and proven correct against a
+    synthetic fixture; against the real, untouched `pairings.json`, **all 108 real briefs correctly
+    carry `pairing.role: "none"`** — independently re-verified directly against the file, not
+    trusted from the report.
+  - **Two more genuine, undocumented algorithm gaps found and closed with flagged editorial
+    judgment calls** (same discipline as A-S0's `SIGNAL_CATEGORY`, and lower-stakes than it): the
+    spec's own 9 steps never actually assign `slot.relation` or `slot.kind`, despite both appearing
+    in §2's example and `relation` being required on the eventual action-seed schema. `slot.kind` is
+    left `null` on every brief — never invented, matching the repo's own "absent is a defect,
+    null is a value" discipline, deferred to a downstream module or the model itself. `slot.relation`
+    gets a small structural map (`CATEGORY_RELATION`: attack/status→enemy, support→ally,
+    defense/movement→self) — flagged as the single most owner-review-worthy call this module makes,
+    though considerably more mechanical/low-risk than `SIGNAL_CATEGORY` was (each mapping is close
+    to the only sensible reading for its category, not an arbitrary spread).
+  - **Independently re-verified by this session, extensively, not just the delegated agent's own
+    report**: `test_distribution_planner.py` in isolation — **87/87 clean**. Full suite — 985
+    passed, 1 failed (the same pre-existing `AttackTempoExclusionTests` environmental hazard
+    already flagged in A-S0's and A-T1's evidence, confirmed unrelated: `git status` shows only
+    demon-species/effect-pipeline/world-stage files outside this module's own scope changed).
+    **Direct inspection of the real `round-1.json`** (not trusted from the report): 108 briefs
+    exactly (84+19+5); every `pairing.role` is `"none"`; zero ids outside the real 98-family
+    namespace; `allowedAtomFamilies` is the **exact same 98-id set** across all three tiers
+    (constraint 4 — re-verified by set equality, not just per-tier uniformity); structure axis
+    literals confirmed exactly as specced (general 2, family 5, signature 6); every one of the 84
+    `restriction`-carrying briefs (all species-scope) correctly carries
+    `slot.structureEnforced: false`, and zero non-`restriction` briefs do; zero briefs name
+    `reaction`; every signature `rungBand` floor is genuinely `1` (not the dropped `5`); the
+    multiplicative-pair rule visibly excludes `atom.keen-edge`+`atom.cruelty` together in a real
+    brief's `forbiddenAtomFamilies`; **quota exactness re-derived independently** — with
+    `perSpeciesCount:1`, every one of the 84 species' single brief lands in that species' own
+    highest-`categoryMilli` category from the real `type-weights.json`, zero mismatches.
+  - Acceptance against the spec's own §6: (1) round file loads through A-C1's envelope — done,
+    re-verified (108 entries, 108 discovered edges); (2) schema audit refuses all four magnitude-
+    smuggling shapes — done; (3) quota exactness — done, independently re-derived above; (4)/(4b)
+    rung windows + `Rung=rungBand[1]` + authored target shape — done, re-verified; (5) pairing
+    coverage — done, vacuously true today (0 payoff briefs), mechanism proven on synthetic fixture;
+    (6)/(6b) uniform 98-family pool across tiers — done, re-verified by set equality; (6c) run-
+    tuning file with stated defaults — done; (7)/(7b)×2 restriction/reaction/family-anchor-keys/
+    dedup-k — done, re-verified; (8) `--dry-run` + full-run refusal — done; (9) determinism +
+    provenance — done.
 - [ ] **A-G1 `tier-access-gate`** · **M** · Deps: A-S1 · two of C1's three gates. **Criterion 7 asserts
   the widening stays disabled.**
 - [ ] **A-R1 `resource-ownership`** · **M** · Deps: — · **first emission must reproduce

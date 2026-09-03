@@ -378,11 +378,20 @@ cause of §4.3's defect.**
 |---|---|---|
 | **L0 — pool composition** | **which affixes are even candidates, and at what rate**, given the container's power/rarity class and the channel delivering it | ⭐ **ADDED 2026-09-03 — §5.6.** Real gap |
 | **L1 — container shape** | how many atoms, and the chance each appears | **BUILT** — `pool_rolls`, `weight`, `group` |
-| **L2 — the channel pool** | *which* derived stats, how many, chance each | **DOES NOT EXIST** |
+| **L2 — the channel pool** | *which* derived stats, how many, chance each | ✅ **BUILT — effect-atom E30**, `ChannelPool.cs`. ⚠ This row said *"DOES NOT EXIST"*; corrected 2026-09-03 by audit. **§5.2 below is void** — a wiring gap remains (no production call site supplies `lookupPool`), not a design gap |
 | **L3 — value range** | the min/max a magnitude may roll into | **BUILT** — the value spec `{min, max, roll, scale}` and `overrides_json` |
 | **L4 — resolve** | pick the atoms, pick the stats, freeze the numbers | **BUILT but inert** — `Instantiator.Draw` + `TryInstantiate` |
 
-### 5.2 Why L2 is missing, and why its absence is a real defect
+### 5.2 ~~Why L2 is missing~~ ⛔ VOID — L2 shipped as E30 (corrected 2026-09-03)
+
+> **This section's premise is false.** `ChannelPool.cs` defines `ChannelPoolMember`/`ChannelPoolRow`/
+> `ChannelPoolFile`, with a seed directory (`data/seed/channel-pools/`), a seed-file kind, validation
+> (`AtomRowValidator.ValidateChannelPoolRef`) and `lookupPool` threaded through `InstanceProducer.Compose`
+> and `RpgStore.ProduceAndBind`. What remains is a **wiring gap** — no production caller supplies
+> `lookupPool` yet. The reasoning below is kept because §5.3's affix-bundle argument still rests on it,
+> but *"L2 does not exist"* is not true.
+
+#### 5.2 (original) — why L2 was thought missing
 
 **The channel is baked into the atom's identity.** `atom-family-library.md` §2:
 
@@ -592,6 +601,12 @@ effect programs share:
 
 The floor lives in the tuning table as a named minimum, so a balance pass cannot silently write a zero.
 
+⭐ **The weights are RATIOS, and that is what makes L0 work at every power level** (clarified
+2026-09-03). An audit asked whether a fixed 0.01% survives unbounded encounter volume. It does not need
+to: the table sets the *relative* standing of the channels, so if `set` is ~1000× `drop` at the
+calibration point it is still ~1000× at any Θ. **Encounter volume is not this program's concern**
+(`item-ideal.md` D26) — the intended channel simply stays the best way to get an effect, at every depth.
+
 ⚠ **The other channels may be exclusive in either direction, and one of them must be.** A hand-authored
 unique's fixed affixes are not rollable at all — that is what `ssot-uniques.md` means by *"a unique may
 break every rule that lives in the generator."* A structural zero there is legitimate and, per
@@ -604,11 +619,11 @@ Stated plainly so nobody rebuilds a draw loop.
 
 | | Verdict |
 |---|---|
-| The weighted draw itself | **BUILT** — `Instantiator.Draw:130-155`, `AtomRandom.NextBelow:66`. L0 produces its input, it does not replace it |
+| The weighted draw itself | **BUILT** — `Instantiator.Draw` (declared `:180`; the weighted loop is in `DrawBudget` from `:198`), `AtomRandom.NextBelow:66`. L0 produces its input, it does not replace it |
 | Per-container affix weights | **BUILT** — `effect_container_pool.weight` |
 | Per-source drop tables, rarity floors and weight shifts | **BUILT** — `ssot-generation.md` §5.1 |
 | Tag-based eligibility | **BUILT but unwired** — `EligibilityResolver.DrawablePool` (`EligibilityRule.cs:60-95`) has **no production caller** and its `tagsOf` delegate is supplied by nothing |
-| An affix's **power class** | ⛔ **REAL GAP.** `AtomRow.TagsJson` carries *thematic* tags (`offensive`, `elemental`) — nothing says how strong an affix is relative to others |
+| An affix's **power class** | ⛔ **REAL GAP.** ⚠ Corrected 2026-09-03: `AtomRow.TagsJson` carries generator **provenance** (`generatedFrom`, `generator: E43`), not thematic tags — those live on affix-family seed entries and reach no atom row until **D28** has E43 stamp them through. Either way it carries no strength information |
 | A `(powerClass × channel) → weight` policy | ⛔ **REAL GAP** |
 | Composing per-container pools at scale | ⛔ **REAL GAP.** With ~1,844 generated sets (`item-ideal.md` D12), hand-authoring a pool per container is not available |
 

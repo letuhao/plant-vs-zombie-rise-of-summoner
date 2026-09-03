@@ -1,8 +1,14 @@
-# Spec: `channel-pools`
+# Spec: `affix-channel-weights`
 
-**Module id:** `channel-pools` · **Program:** [effect-pipeline](../effect-pipeline-map.md) · **Build order:** 12 of 12
+**Module id:** `affix-channel-weights` · **Program:** [effect-pipeline](../effect-pipeline-map.md) · **Build order:** 12 of 12
 **Depends on:** `eligibility-tags` (module 8), `affix-power-class` (module 11)
 **Added:** owner decision 2026-09-03 — the L0 layer, [effect-pipeline-ideal.md](../effect-pipeline-ideal.md) §5.6
+
+> ⚠ **Renamed 2026-09-03.** This module was `channel-pools`, which **collides with a shipped module**:
+> effect-atom **E30 `channel-pool`** is L2 — a pool of *derived-stat* channels, with its own artifact at
+> `data/seed/channel-pools/pools.v1.json`. Two meanings of "channel" in the two most-referenced files of
+> the week is `enrichment-contract.md` §1's named defect. E30 holds the name and the path; this module
+> takes `affix-channel-weights`.
 
 ## Objective
 
@@ -74,6 +80,13 @@ make it single-source and rebuild the problem one level down.
 
 **1. It consumes no RNG.** `poolFor` is a pure function of `(container, channel, rarity)`. It *composes*
 the candidate list; L1's existing `affix.draw` stream draws from it.
+
+> ⚠ **Corrected 2026-09-03.** An earlier draft argued this made L0 safe to add late because *historical
+> rolls do not shift*. **That is wrong** — `DrawBudget` maps a draw onto candidates by cumulative weight,
+> so any non-flat policy changes which affix a given `rollSeed` yields. **The correct argument is that
+> already-owned instances are safe because `effect_instance_atom` freezes the resolved atoms** (D9), not
+> because the roll is unchanged. Consuming no RNG is still required — it keeps stream *positions* stable
+> for everything else — but it is not what protects owned items.
 
 This is the whole reason a fifth layer can be added to a shipped resolver at all.
 `effect-pipeline-ideal.md` §5.4 warns that adding a layer **shifts every historical roll**, because
@@ -147,9 +160,11 @@ python scripts\audit-magic-numbers.py --targets M1   # the policy table must not
 
 ```text
 src/FusionRpg.Core/Effects/Atoms/AffixChannel.cs          new — the six-value closed enum
-src/FusionRpg.Core/Effects/Atoms/ChannelPoolPolicy.cs     new — (powerClass x channel) -> weight,
-                                                            loaded from data/tuning, no literals
-src/FusionRpg.Core/Effects/Atoms/ChannelPoolComposer.cs   new — poolFor(container, channel, rarity)
+src/FusionRpg.Core/Effects/Atoms/AffixChannelPolicy.cs     new — PURE parser over a loaded object.
+                                                            Core NEVER reads a file (tunables-ssot §7.2)
+src/FusionRpg.Core/Effects/Atoms/AffixChannelTuningHub.cs  new — the injected hub, mirroring
+                                                            PowerTuningHub; hosts load and inject
+src/FusionRpg.Core/Effects/Atoms/AffixChannelComposer.cs   new — poolFor(container, channel, rarity)
 src/FusionRpg.Core/Effects/Atoms/Instantiator.cs          ADD an overload; existing signature unchanged
 src/FusionRpg.Core/Effects/Atoms/EligibilityRule.cs       SHIPPED — consume, do not modify
 data/tuning/affix-channels.v1.json                        new — 30 cells + the drop floor
@@ -185,7 +200,9 @@ if (channel == AffixChannel.Drop)
 | `an_affix_denied_by_eligibility_is_never_weighted` | composition order, module 8 first |
 | `a_zero_weight_removes_from_the_draw_without_looking_like_a_denial` | the two mechanisms stay distinct |
 | `an_unclassified_family_is_weighted_as_notable_and_reported` | module 11's visible default, honoured here |
-| `an_all_zero_weighted_pool_rejects_as_UnsatisfiablePool` | reuses module 1's existing failure, at load |
+| `an_all_zero_weighted_pool_rejects_as_UnsatisfiablePool` | **scoped to the five ROLLABLE channels.** `unique` is all-zero by construction and never calls `poolFor`, so a load check sweeping all six would always reject |
+| `per_class_satisfiability_is_checked_per_channel` | ⛔ **The draw budgets prefix and suffix separately** (`Instantiator.DrawBudget`) and filters `Weight > 0` inside each. Zeroing a whole class for one channel is a silent under-fill that load validation on the *eligible* pool cannot see |
+| `the_weight_accumulator_is_long_and_an_out_of_range_cell_rejects_at_load` | `ContainerPoolRow.Weight` is `int` and `DrawBudget` sums it over ~980 affixes; a large tuning cell wraps. CLAUDE.md: overflow throws, never wraps |
 | `the_policy_table_has_a_cell_for_every_class_x_channel` | 30 cells, no silent default |
 
 ## Boundaries

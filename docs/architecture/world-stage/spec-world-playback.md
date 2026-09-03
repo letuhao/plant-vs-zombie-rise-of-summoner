@@ -186,6 +186,20 @@ The current default branch prints the token quietly. The replacement:
   value with its unit family attached — which is why `loam.handicap:150` cannot be rendered as `150`
   by accident.
 
+
+### GG-50 — this surface's volume declaration
+
+**Tier-1 gate, and it was missing from all fifteen specs until the 2026-09-03 audit.** `ui/volumeMatrix.test.ts`
+is an *exhaustive* registry — its last test is `expect(COLLECTION_SURFACES).toHaveLength(8)` — so a new
+collection surface that does not register **turns a shipped test red**. Registration is not optional
+paperwork; it is how this program lands without breaking CI.
+
+| Surface | `Turn playback keyframe rail` |
+|---|---|
+| Strategy | **`render-all`** |
+| Reason | One turn's transcript, not a save's. Entry count scales with legions × sectors × the nine phases, so at §8e.3's target a heavy turn is order-10² rows — large, bounded, and **discarded at the next turn**. This is the world-stage surface whose volume grows fastest with empire size, so the threshold is stated rather than assumed: **above ~300 entries in one turn, revisit** |
+| Proof | The generated `first-light-turn.json` golden, plus a synthetic heavy-turn fixture at the target legion count |
+
 ## Commands
 
 ```powershell

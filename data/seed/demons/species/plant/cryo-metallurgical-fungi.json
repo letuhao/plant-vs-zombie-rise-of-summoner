@@ -1,0 +1,84 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:40:57Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus",
+        "threatBand": "scourge"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Precision",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "Cryo-Metallurgical Fungi"
+    ],
+    "gameTypeId": 1368,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The ability to repeatedly apply freeze mechanics and deal massive multiplicative damage to slowed or frozen targets makes it a high-threat area-denial specialist.",
+    "resourceProfile": [
+      "hp",
+      "poise",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "GoldIceShroom",
+    "targetPreference": "swarm",
+    "threatBand": "tyrant",
+    "traits": [
+      "Gold-infused",
+      "Thermal-depleting",
+      "Wealth-scaling",
+      "Multi-stage burst"
+    ],
+    "variants": [
+      "shiny",
+      "normal"
+    ]
+  }
+]

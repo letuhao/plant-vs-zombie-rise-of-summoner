@@ -1,0 +1,79 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "unresolved"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T17:18:19Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "air",
+    "elementSecondary": "none",
+    "family": [
+      "Armored-Botanical Hybrid"
+    ],
+    "gameTypeId": 119,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "unresolved",
+    "reach": "short",
+    "reason": "The creature's stats and mechanics describe a specialized high-durability unit, but it lacks the world-altering scale required for a 'tyrant' rating.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "IronBalloonZombie2",
+    "targetPreference": "frontline",
+    "traits": [
+      "Aerial-Buoyancy",
+      "Iron-Pea Projection",
+      "Knockback-Inducing",
+      "Post-Mortem Loot-Drop"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  }
+]

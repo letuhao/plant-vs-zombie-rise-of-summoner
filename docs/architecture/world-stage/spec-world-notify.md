@@ -190,6 +190,20 @@ half.
   the world stage's** until a second stage asks for them, at which point they move to `shell/` — a
   move, not a rewrite, which is why the rail state is a pure store from the start.
 
+
+### GG-50 — this surface's volume declaration
+
+**Tier-1 gate, and it was missing from all fifteen specs until the 2026-09-03 audit.** `ui/volumeMatrix.test.ts`
+is an *exhaustive* registry — its last test is `expect(COLLECTION_SURFACES).toHaveLength(8)` — so a new
+collection surface that does not register **turns a shipped test red**. Registration is not optional
+paperwork; it is how this program lands without breaking CI.
+
+| Surface | `World notification rail` |
+|---|---|
+| Strategy | **`render-all`** |
+| Reason | Structurally bounded by two independent limits, not by hope: the rail **flushes on End Turn except blockers** (the ES2 rule this module adopts), so it cannot accumulate across turns; and the design caps the visible stack at three with the remainder behind a badge. A feed that empties every turn has no unbounded path |
+| Proof | The click-budget test's fixture at the busiest turn the §8e.3 target can produce, asserting the visible count stays at the cap |
+
 ## Commands
 
 ```powershell

@@ -20,7 +20,7 @@ authorized.** Twenty-four documents, no code, no schema, no task list yet.
 > ⭐ **The 144 lane open questions, in perspective.** Roughly 25 are closed — **D1 alone closed seven
 > lanes** (roster scale) and the namespaced reason code closed eight. **Most of the rest are
 > lane-internal *"I picked X, confirm or overrule"* and are decided unless disputed.** §2c lists the
-> **three** that genuinely remain. **Nothing blocks authoring.**
+> **§2g** lists what genuinely remains after the 2026-09-03 audit round. **Nothing blocks authoring.**
 >
 > **D16–D19 completed the round:** the ~110 lane picks are **ratified as a batch** (reversible, reopened
 > only when one bites); the **dead tail is accepted** — a species set exists because the species does;
@@ -75,7 +75,7 @@ other lanes"*.
 | I8 | [ssot-affixes.md](ssot-affixes.md) | The prefix/suffix system, tier bands, role×family legality |
 | I9 | [ssot-materials-crafting.md](ssot-materials-crafting.md) | Materials, crafting, salvage, **the cost vocabulary** |
 | I10 | [ssot-charms.md](ssot-charms.md) | Bonuses from unequipped inventory. ⚠ **D12: one charm per demon species, generated** |
-| I11 | [ssot-requirements.md](ssot-requirements.md) | The equip gate — **frame + level only** after D19. ⚠ **Its per-species attribute vectors move to the demon program**; the stale `5 attributes × 24 species` sizing leaves with them |
+| I11 | [ssot-requirements.md](ssot-requirements.md) | The equip gate — **frame + level only** after D19. ⚠ The gate itself has no module yet; folded into item module 4 `equip-assign`. ⚠ **Its per-species attribute vectors move to the demon program**; the stale `5 attributes × 24 species` sizing leaves with them |
 | I12 | [ssot-generation.md](ssot-generation.md) | The drop → instance pipeline and drop tables |
 | I13 | [ssot-inventory.md](ssot-inventory.md) | Storage, stacking, salvage, lifecycle, comparison |
 
@@ -142,6 +142,10 @@ Ordered by what blocks the most.
 
 ## Honest state of this folder
 
+- ⚠ **A seven-auditor review on 2026-09-03 found 62 issues and checked 81 code claims — 13 were false.**
+  Corrections and rulings D26–D29 are in [../item-ideal.md](../item-ideal.md) §2f; what remains is §2g.
+  **Most notably: `E9` was already built** (D13 void), **`E46` ships** (a player install does import
+  content), **L2 is built** (E30), and **`AtomRow.TagsJson` carries provenance, not thematic tags**.
 - **Round 2 (2026-09-03) verified the *platform*, not the lanes.** §2a of the ideal re-checked every
   cross-program constraint against code. The lanes' own internal numbers — the ~880-cell content cut,
   the reason-code count, tier bands, costs, drop rates — were **not** re-verified and remain exactly as

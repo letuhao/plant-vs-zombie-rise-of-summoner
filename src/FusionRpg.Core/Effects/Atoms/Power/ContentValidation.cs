@@ -83,6 +83,44 @@ public static class ContentValidation
         return new ContentReport(evaluated, findings);
     }
 
+    /// <summary>
+    /// Rung-keyed sibling of the rarity-keyed <see cref="Budget(IReadOnlyList{ContainerRow}, Func{string, IReadOnlyList{AtomRow}}, Func{string, int?})"/>
+    /// above (A-G1, spec-tier-access-gate.md §3.2): a generated action has a rung, not a rarity --
+    /// `effect_container.rarity` is free TEXT with no FK, so a container reached through an action's
+    /// own <c>Rung</c> needs its own ceiling lookup rather than borrowing the rarity path. Same rule:
+    /// an over-budget container is a finding naming the container id, never clamped, never a silent
+    /// pass; a container the caller cannot resolve a rung or a ceiling for is skipped, not zeroed --
+    /// the same "skip, do not guess" direction the rarity overload already takes for a missing ceiling.
+    /// </summary>
+    /// <param name="rungOf">The rung a container was reached through, or <c>null</c> if this container
+    /// is not addressed by any rung right now (the batch caller's business, never guessed here).</param>
+    /// <param name="ceilingForRung">The rung's own <c>powerBudgetMilli</c>, or <c>null</c> when no
+    /// rung table carrying that column is loaded (e.g. `action-rungs.v1.json`).</param>
+    public static ContentReport Budget(
+        IReadOnlyList<ContainerRow> containers,
+        Func<string, IReadOnlyList<AtomRow>> atomsOf,
+        Func<string, int?> rungOf,
+        Func<int, long?> ceilingForRung)
+    {
+        var findings = new List<ContentFinding>();
+        var evaluated = 0;
+
+        foreach (var container in containers)
+        {
+            if (rungOf(container.ContainerId) is not { } rung) continue;
+            if (ceilingForRung(rung) is not { } ceiling) continue;
+
+            evaluated++;
+            var spent = ActorPowerCache.Compose(atomsOf(container.ContainerId)).Total;
+            if (spent > ceiling)
+                findings.Add(new ContentFinding(container.ContainerId, "budget",
+                    $"spends {spent} against a ceiling of {ceiling} for rung {rung} "
+                    + $"— {spent - ceiling} over", Blocking: true));
+        }
+
+        return new ContentReport(evaluated, findings);
+    }
+
     // ---- 2. power drift ----------------------------------------------------------------------------
 
     /// <summary>

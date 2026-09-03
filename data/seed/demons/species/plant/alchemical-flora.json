@@ -1,0 +1,87 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:51:43Z",
+      "minorityValues": {
+        "aptitudePrimary": "Precision",
+        "rarity": "grafted"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "Alchemical Flora"
+    ],
+    "gameTypeId": 932,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions as a passive economic modifier that alters projectile properties rather than acting as an active combatant.",
+    "resourceProfile": [
+      "hp",
+      "hp",
+      "hp",
+      "hp",
+      "hp",
+      "hp"
+    ],
+    "side": "plant",
+    "speciesId": "GoldThreeTorch",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "Transmutative Projectiles",
+      "Currency Conversion",
+      "Multi-lane Trajectory",
+      "Wealth-Scaling"
+    ],
+    "variants": [
+      "blessed",
+      "mutated"
+    ]
+  }
+]

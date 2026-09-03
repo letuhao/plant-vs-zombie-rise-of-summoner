@@ -208,6 +208,20 @@ instead of throwing.
   own forces by design; anyone else's is fogged into `WorldSectorDto.Forces` at whatever detail it was
   seen, and putting a band into a list that otherwise reads as exact is how fog becomes cosmetic.
 
+
+### GG-50 — this surface's volume declaration
+
+**Tier-1 gate, and it was missing from all fifteen specs until the 2026-09-03 audit.** `ui/volumeMatrix.test.ts`
+is an *exhaustive* registry — its last test is `expect(COLLECTION_SURFACES).toHaveLength(8)` — so a new
+collection surface that does not register **turns a shipped test red**. Registration is not optional
+paperwork; it is how this program lands without breaking CI.
+
+| Surface | `Outliner (legion + sector rows)` |
+|---|---|
+| Strategy | **`render-all`** |
+| Reason | Bounded by the two map tiers `WorldSizeCatalog` marks available: at §8e.3's target that is **10 legions + 18 sectors ≈ 28 rows**. Grouping and filtering exist to make 28 rows *scannable*, not to page them — the list itself renders whole. **Trigger:** `world-generator` shipping a tier above `medium` (~32 / ~64 / ~128 nodes) reopens this and §4.2's camera model together |
+| Proof | The 28-row fixture this module already requires, asserted for rendered node count |
+
 ## Commands
 
 ```powershell

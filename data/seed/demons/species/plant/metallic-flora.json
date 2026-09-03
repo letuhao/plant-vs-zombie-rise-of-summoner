@@ -1,0 +1,166 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "deployMode": "split",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:39:57Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus",
+        "deployMode": "PlantAvatar",
+        "elementPrimary": "light"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "metallic-flora"
+    ],
+    "gameTypeId": 1146,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "melee",
+    "reason": "The creature's abilities are tactical and utility-based rather than destructive, making it a strategic support rather than a widespread scourge.",
+    "resourceProfile": [
+      "hp",
+      "poise",
+      "poise",
+      "poise",
+      "poise",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "GoldGarlic",
+    "targetPreference": "swarm",
+    "traits": [
+      "high-durability",
+      "low-profile",
+      "economic-catalyst"
+    ],
+    "variants": [
+      "shiny",
+      "normal"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:42:19Z",
+      "minorityValues": {
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "metallic-flora"
+    ],
+    "gameTypeId": 1285,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "melee",
+    "reason": "The creature is a defensive support unit with high survivability, but it lacks the offensive output or scale required to be classified as a cataclysm.",
+    "resourceProfile": [
+      "hp",
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "GoldNut",
+    "targetPreference": "backline",
+    "traits": [
+      "high-durability",
+      "kinetic-absorption",
+      "resource-conversion"
+    ],
+    "variants": [
+      "normal",
+      "blessed",
+      "shiny"
+    ],
+    "verdict": "too-high"
+  }
+]

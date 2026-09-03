@@ -8,6 +8,12 @@ they must not edit it — reconciliation back into the ideal happens in one pass
 
 ---
 
+> ⚠ **SC9 is STALE (2026-09-03).** It reads *"power is open, and you may not depend on it"*. **E9
+> `power-vector` shipped 2026-08-22** — `effect-atom-map.md:82`, `Core/Effects/Atoms/Power/`, with live
+> consumers. **D13 is VOID** ([../item-ideal.md](../item-ideal.md) §2f.2). Three lanes inherit SC9 and are
+> stale with it: `ssot-item-categories.md:803`, `ssot-granted-actions.md` §10 Q6, `ssot-presentation.md`
+> §10 Q7. What *is* open is **E44 `power-sweep`** — all 20 coefficients flat at `CoeffMilli = 1000`.
+
 ## 0. Why this file exists
 
 Eleven-plus lanes are being authored in parallel by separate sessions. Without a pre-agreed vocabulary

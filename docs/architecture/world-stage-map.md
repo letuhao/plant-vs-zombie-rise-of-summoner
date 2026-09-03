@@ -214,6 +214,45 @@ A full-viewport 50% black overlay at band-panel, over a band-hud HUD. So `world-
 correct and necessary — they stop the defect being re-authored — but on their own they would have
 left the regression exactly where it is.
 
+### E. GG-50 — a Tier-1 gate that was in none of the fifteen specs
+
+The test-efficacy audit found **GG-50 mentioned in zero of the fifteen specs** — no `virtualize`, no
+`windowed`, no 10/100/1000 declaration anywhere. That is not merely an omission, because the repo
+already enforces this gate **exhaustively**: `web/fusion-rpg-web/src/ui/volumeMatrix.test.ts` closes
+with
+
+```ts
+it("declares the full known set", () => {
+  expect(COLLECTION_SURFACES).toHaveLength(8);
+});
+```
+
+**So landing this program without registering its collection surfaces turns a shipped, green test
+red**, and no spec anticipated it.
+
+Five surfaces ship here. Each now carries its declaration in its own spec (strategy, reason, and the
+fixture that proves it), and the **registry edit is a single shared task**, because no one module owns
+a file all five must appear in:
+
+| Surface | Owning spec | Strategy |
+|---|---|---|
+| Outliner (legion + sector rows) | `world-outliner` | `render-all` — ~28 rows at §8e.3's target, bounded by the two available map tiers |
+| World notification rail | `world-notify` | `render-all` — flushes every End Turn except blockers, visible stack capped at three |
+| Turn playback keyframe rail | `world-playback` | `render-all` — one turn's transcript, discarded at the next; revisit above ~300 entries |
+| Sector inspector — slot rows | `world-inspector` | `render-all` — four slots max in shipped content (`SlotIndex` tops out at 3) |
+| Sector inspector — force rows | `world-inspector` | `render-all` — single-digit; enemies appear as bands, not per-unit rows |
+
+**The shared task:** add these five rows to `COLLECTION_SURFACES` and change `toHaveLength(8)` to
+`toHaveLength(13)`. It lands with whichever of the four modules ships last, and every one of them
+lists it so it cannot be dropped.
+
+**One thing worth noticing about these five.** Not one needs virtualizing, and that is a real result
+rather than a convenient one: every world-stage collection is bounded by something structural — a map
+tier, a per-turn flush, authored sector content, or the fact that enemy forces render as bands rather
+than per-unit rows. The existing registry has exactly one `virtualize` entry (Creatures, where a
+player binds indefinitely over a long save), and the world stage adds none. **If a later change makes
+one of these unbounded, its row is where that becomes visible** — which is what the gate is for.
+
 ## Open questions
 
 **None.** All sixteen decisions are recorded in the ideal doc's §8/§8b/§8d/§8e, and the four

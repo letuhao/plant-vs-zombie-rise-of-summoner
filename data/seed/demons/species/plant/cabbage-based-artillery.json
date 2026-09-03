@@ -19,16 +19,14 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T14:38:11Z",
-      "minorityValues": {
-        "aptitudePrimary": "Precision"
-      },
+      "emittedUtc": "2026-09-03T16:39:17Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -44,7 +42,7 @@
       "Summonable"
     ],
     "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "none",
+    "aptitudeSecondary": "Precision",
     "attackTempo": "steady",
     "basis": "stated",
     "deployMode": "PlantAvatar",
@@ -53,29 +51,30 @@
     "family": [
       "Cabbage-based Artillery"
     ],
-    "gameTypeId": 1359,
+    "gameTypeId": 1135,
     "posture": "Force",
-    "pure": true,
-    "rarity": "fused",
-    "reach": "short",
-    "reason": "The creature provides minor area-of-effect support through low-damage projectiles, which aligns with a low-level pest classification.",
+    "pure": false,
+    "rarity": "heirloom",
+    "reach": "long",
+    "reason": "The ability to deal 1,000,000 damage to any zombie under 300 HP effectively functions as an instant-kill mechanic that bypasses defenses, elevating it beyond a mere marauder.",
     "resourceProfile": [
       "hp",
-      "stamina"
+      "poise",
+      "poise"
     ],
     "side": "plant",
-    "speciesId": "CabbageBlover",
-    "targetPreference": "frontline",
+    "speciesId": "GoldCabbage",
+    "targetPreference": "swarm",
     "traits": [
-      "Aerial Support",
-      "Multi-target Projectile",
-      "Short-range Spread"
+      "Gold-infused projectiles",
+      "Economic scaling",
+      "Executioner's ultimate"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "blessed",
+      "shiny"
     ],
-    "verdict": "agree"
+    "verdict": "too-high"
   }
 ]

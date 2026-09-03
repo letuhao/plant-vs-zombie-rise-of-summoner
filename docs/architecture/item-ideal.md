@@ -5,7 +5,7 @@
 [item-map.md](item-map.md).** Discussion document, not a spec and not a plan. No build is
 authorized from it.
 
-> ✅ **See §2b and §2f.** **Twenty-nine owner rulings (D1–D29)** plus four resolved
+> ✅ **See §2b and §2f; §2g is what is open.** **Twenty-nine owner rulings (D1–D29)** plus four resolved
 > by recommendation, and **D16 ratifies the ~110 lane-internal picks as a batch.** All 144 open questions
 > across the seventeen lanes and four decision documents are accounted for, and **§2e verifies the three
 > defect claims that had stood unverified since 2026-08-22** (one was real and has since been fixed by
@@ -1075,7 +1075,7 @@ left open, because an answerable question is a task ([no-manufactured-uncertaint
 
 ---
 
-### 2c. What is still open after this round
+### 2c. What was open after round 2 — ⚠ superseded by §2g
 
 **Fifteen rulings (D1–D15) plus four resolved by recommendation.**
 
@@ -1104,18 +1104,16 @@ aptitudes (`requirements` §10.1–10.3 **entirely**). §2a.5 also *verified* `a
 
 #### What genuinely remains
 
-**Five items. None is a decision, and none blocks authoring.**
+> ⚠ **Superseded by §2g** — a seven-auditor review on 2026-09-03 reopened several of these and added
+> others. The list below is kept as the state before that review. **Read §2g.**
 
-| # | Open | Kind | Why |
-|---|---|---|---|
-| **1** | ⛔ **Cap the set generator to the 12 hybrid-core roles** (D12 §1) | generator input | **The next thing to get right.** D3 shrank the core by dropping `ward-array`, `head-guard`, `sense`; I5's `SetRoleNotUniversal` fires at load, so ~940 generated sets trip it unless the pool is capped *before* generation |
-| **2** | ⭐ **Set/charm atom effect distribution has no lane** (D19) | ownership gap | *Which atoms a generated set or charm grants.* I5 owns thresholds, I10 owns capacity, I8 owns affix distribution **for items**. Under D12 this is a generator input and nobody owns it |
-| **3** | ⛔ **C3 and S2 — two confirmed defects** (§2e) | fix | `effect_atom.name` is never validated (`AtomRowValidator` reads only param names), and `effect_binding` has **no FK at all** where `definitions.md:317` promises `ON DELETE CASCADE`. S2 is R1's mirror image and belongs in D5's change |
-| 4 | **`E42 units-correction` gates band → number resolution** (§2e, C1) | cross-program dep | Narrow, and it does **not** block authoring — `seed-contract.md` §3's band rule closes the units trap by construction. Owned by content-stack gate G3 |
-| 5 | **Mechanical follow-through** | tasks | Re-derive I12's drop weights and I6's caps against **ten** rungs · apply the D3 edit to I5 §3.7 · move I11's per-species vectors to the demon program (D19) · a light-theme palette (`rarity` §10.7 and `presentation` §10.6 ask it independently) · tune the frame-mix breakpoints from play |
-
-**Everything else is closed.** Nineteen rulings, four recommendations, D16's batch ratification, and
-§2e's five verifications account for all 144 lane questions and every standing unverified claim.
+| # | Open | Kind |
+|---|---|---|
+| 1 | Cap the set generator to the 12 hybrid-core roles | generator input |
+| 2 | Set/charm atom effect distribution has no lane | ✅ closed — item module 13 |
+| 3 | C3 and S2 — two confirmed defects | fix |
+| 4 | `E42` gates band → number | ✅ closed — E42 is DONE (§2f) |
+| 5 | Mechanical follow-through | tasks |
 
 ---
 
@@ -1219,8 +1217,8 @@ Six. Each was asserted in §2a or §2b without opening the file, and each change
 |---|---|---|---|
 | **F1** | **W1** — *"a player install never imports content; `ImportContent` has exactly one caller, a dev tool"* | **False. `E46 player-content-boot` is shipped.** `SeedImportRunner.cs:152` calls `ImportContent`, and `FusionRpg.Server/Program.cs:155` invokes it at **every server startup**, self-healing | **W1 is not a wiring gap and gates nothing.** `content-stack` gate G4 is stale for the same reason |
 | **F2** | **B6** — *"the atom runtime is **not inert** any more"* | **Half true.** `ProduceAndBind` does run in production (`RpgStore.UniqueActors.cs:756`) — but `RpgHub.cs:106` pushes only `OwnerKind.Player`, so **`UniqueActor` bindings are write-only**. `decisions.md:106` says exactly this | The produce half is live; the consume half never sees an item binding. **Item module 5 `equip-runtime` is what closes it** |
-| **F3** | **B4** — *"the rarity table, ten rungs, per-class bands"* | **The `rarity` table has zero rows.** `data/seed/rarity/` holds only a README saying so. The ten rungs that ship are the C# enum `DemonRarity`, **ordinals 0–9, consecutive** | `item-map.md`'s own caveat was right: module 7 **seeds data**, it does not build a table |
-| **F4** | *"append-only ordinals spaced by 10 — the house convention (`ElementRow`, `Aptitude`, `rarity`)"* (`spec-affix-power-class.md`) | **No roster does this.** `ElementRow` 0–5, `Aptitude` 0–11, `DemonRarity` 0–9 — all consecutive | **Precedent invented.** Power classes use consecutive ordinals like everything else |
+| **F3** | **B4** — *"the rarity table, ten rungs, per-class bands"* | **The `rarity` table has zero rows** — `data/seed/rarity/README.md` says so outright. ⚠ **But this correction over-reached, and is itself corrected 2026-09-04:** the item program's `rarity.ordinal` **is 10…100**, declared in the frozen `_registry/core.v1.json` (*"pre-spaced by 10 precisely so a future rung can be inserted at 15 or 85"*), and **D7's "ordinal 100" is written in that space**. `DemonRarity`'s 0–9 is a C# **member index**, not an ordinal — two spaces, not a conflict | Module 7 seeds the table, and must **name both spaces** so the confusion cannot recur |
+| **F4** | *"append-only ordinals spaced by 10 — the house convention (`ElementRow`, `Aptitude`, `rarity`)"* (`spec-affix-power-class.md`) | **No C# roster does this** — `ElementRow` 0–5, `Aptitude` 0–11, `DemonRarity` 0–9. ⚠ Narrowed 2026-09-04: the item **rarity registry** genuinely is spaced by 10 (see F3), so the practice exists — just not for a C# enum, which is what the power class is | Power classes use consecutive ordinals, like every other C# roster |
 | **F5** | *"`AtomRow.TagsJson` carries thematic tags (`offensive`, `elemental`)"* | **It carries generator provenance** — `{generatedFrom, generator: "E43"}` (`FamilyExpansion.cs:196-197`). **No `elemental` tag exists anywhere.** The thematic tags live on affix-family seed entries (`offensive` ×41, `defensive` ×40, `utility` ×17) | **Breaks module 8 `eligibility-tags`'s decided derivation.** Fixed by **D28** |
 | **F6** | §4 — *"18 zombie-side and 6 plant-side species"* | **18 zombie, 66 plant, 84 total** (`DemonSpeciesCatalog.Generated.cs`). The four named Fusion hybrids being zombie-side with plant bodies **is** true | §4's frame argument stands; its count did not |
 
@@ -1349,6 +1347,83 @@ how deep the ladder goes is the world map's.
 ⚠ **This closes d4's collision C3** (*"one table, two values, ~2× apart… nobody owns it"*) in I12's
 favour, and retires D4's ilvl-32 target as an *item* decision — it was always a request that content
 reach level 32, which is **X5**.
+
+---
+
+## 2g. What is open after the audit (2026-09-03)
+
+**Twenty-nine rulings, four recommendations, D16's batch ratification, §2e's five verifications and
+§2f's six corrections.** What remains, honestly.
+
+### Needs a decision — three
+
+| # | Open | Why |
+|---|---|---|
+| **0a** | ⛔ **D3's twelve-role core contradicts three shipped sources, one of which gates CI — and correcting them turns 18 of 30 shipped sets RED** | `_registry/core.v1.json` marks **`ward-array` + `jewel-minor-b`** `hybridEligible: false` (13 roles, 895‰); `adapters/items/registries.py:111` hardcodes the same pair; `metrics/linkage.py:28` `NON_HYBRID_ROLES` does too and feeds a **gating** metric. D3 drops **three** roles (12, 800‰). **Measured, not predicted:** the check is clean today and goes to **18 findings** when corrected to D3. Either re-author 18 sets, or revisit which roles D3 drops. `core.v1.json` is `"frozen": true`, so either path is a `registryVersion 2` |
+| **0b** | **Craft pity: scope `ssot-rarity` §3.8 to *drop* pity** | §3.8 forbids pity keying on tier because §3.5's overlap invariant was **measured on independent draws** (2×10⁵ rolls, seed 20260822); D7 requires tier pity. Resolution: craft pity is a counter that **places** the tier at threshold rather than rolling it — the weighted draw never runs, so the measurement stands. One-line scope edit, module 7's. **If declined, D7 is unimplementable on the tier axis** |
+| **1** | **Does a content patch retune items players already own?** | D9's fix leaves the runtime reading the **live catalog**, so a balance change moves owned items. Recorded as deliberate; reverse it by making `ValuesJson` authoritative at bind time. A product call, not a defect |
+
+### Needs another program — four
+
+| # | Open | Owner |
+|---|---|---|
+| 2 | A **13th atom kind or `aptitude.*` channel family**, and a **fifth `AllocationScope`**, for D8 | effect-atom + class-system |
+| 3 | **Four `container_kind` values** — `gem` `set` `charm` `combo` (D27) | effect-atom (`definitions.md` §1 + `ContainerRow.cs`) |
+| 4 | **X5** — the content ladder past level 10 | world map · wave catalog · event generator |
+| 5 | **X6** — `E44 power-sweep`, 20 coefficients flat at 1000 | effect-atom |
+
+### Item-internal work — five
+
+| # | Open | Note |
+|---|---|---|
+| 6 | **Cap the set generator to the 12 hybrid-core roles** before generating | ⚠ And **D3's prose names eleven** — it says *"both jewels"* where three jewel roles are kept. The twelve are `armament-primary` `core-guard` `armament-secondary` `jewel-major` `manipulator` `mantle` `girdle` `footing` `infusion` `retinue` `jewel-minor-a` `jewel-minor-b` = 800‰ exactly |
+| 7 | **Re-issue `socket_max` against I2's fifteen role ids** | The lane's table uses the **old twelve** (`core-protective`, `sense-utility`…) and assigns nothing to `ward-array`, `infusion`, `retinue` — two of which are in the hybrid core |
+| 8 | ~~**A per-actor Strain/Splice cap**~~ ⚠ **premise was stale — corrected 2026-09-04** | I claimed *"twelve Splices on one actor is legal"* against the **old** `socket_max` table. With D20's 4-ingredient fix and the re-issued 15-role table, **only `armament-primary` and `core-guard` reach 4 sockets — the real ceiling is 2 per actor.** A tunable ships at 3 as a non-binding backstop |
+| 9 | **Price `socket.imbue`** | I9 §7.4's table has nine operations and no row for it. Band-linear, like `bore` |
+| **9b** | ⛔ **A `player:`-scoped charm buffs the zombies** | `ssot-charms.md` §3.1 binds resonance at `player:{id}`; `StatApplyScope.cs:81-82` degrades that to match-wide and `:52-53` matches **both sides**. The charm-carry consumer is blocked on an owner decision about scope; module 12's evaluator ships scope-parametric so it is not blocked with it |
+| **9c** | **Two id defects that would ship broken** | `set` *requires* `themeKey` (`kinds.py:62-65`) but the 36 **build** sets belong to no species — they need a third `build.*` population. And `naming.v1.json`'s `set.{themeId}-{seq:03}` over a demon `themeKey` yields `set.demon.allpeater-001` — **two dots, ungrammatical**. Ids must key on `speciesId` (all 84 verified kebab-legal) |
+| **9d** | **31 of 84 published themes are `basis = "name"`** | `spec-demon-themes.md` §7 makes generating from a name-basis theme an **Ask first**. That is **37%** of the species population, not an edge case — module 13 needs a standing answer, not a per-run one |
+| 10 | **Two `ssot-rarity` §3.3 rows do not sum to their published band** | `sprout` 1–2 vs halves 0–2; `heirloom` 3–4 vs halves 4–4. Cheap now, a migration after module 7 seeds |
+| **11** | ⭐ **D27 renames every combination container id** | `definitions.md` §1 forces the `container_id` prefix to match the kind, so `gem.combo-pure-fire-3` → **`combo.pure-fire-3`**. Traced 2026-09-04 while speccing module 16 — a consequence of D27 nobody had followed through |
+| **12** | **`pool_rolls` does not exist anywhere in code** | Both `ContainerRow` and `RarityRow` carry `PrefixRolls`/`SuffixRolls`, and `Instantiator.Draw` runs `DrawBudget` **twice**. **I7's whole `T` / `K = pool_rolls − T` algebra is written against a field that is not there** — restated per budget in module 15. ⭐ It also *dissolves* the two-sources-of-truth hazard I7 handed to I1 |
+| **13** | **I9 §6.4 understates the `rpg_demon_materials` rename** | It claims *"four SQL sites — grep-verified, that is the complete list."* There are **nine**, across five files, including `Migrations/ShardRungs.cs`, which post-dates the lane. Still ask-first, still unscheduled |
+
+### ⛔ BLOCKING — found 2026-09-04 while speccing module 6
+
+**D11 is not expressible today, and the shipped corpus actively violates it.** D11 is the correctness
+condition D3's whole hybrid design rests on; measured against the 740-entry base-type corpus:
+
+| Finding | Evidence |
+|---|---|
+| **In 14 of 16 roles the humanoid and plant implicit-family sets are IDENTICAL** | measured across the corpus; the two exceptions differ by one family each |
+| **There is no field for a directional stat profile at all** | `seed-contract.md:324-343`, `adapters/items/kinds.py:49-51` |
+| **Root cause: a stale quarantine baked into a frozen registry.** `_registry/classes.v1.json` (`registryVersion: 3`, `frozen: true`) excludes **32 families** from every implicit slate, citing *"`stat.derived` — quarantined None/None/None (D6); no executor until E12"* | ✅ **The quarantine lifted** — `AtomKindRegistry.cs:255` ships `Full/Full/None` (§2a B1). Four roles (`ward-array`, `mantle`, `head-guard`, `sense`) sit on frame-blind *"stopgap slates"* as a direct consequence — which is precisely why their implicit sets match across frames |
+| `ssot-affixes.md` §4.9 and §9.14 are stale for the same reason | same lifted quarantine |
+| ⚠ **`_registry/core.v1.json` (frozen) contradicts D3 on the hybrid core** — it drops `ward-array` + `jewel-minor-b` (13 roles, 105‰); D3 drops three (12 roles, 200‰) | the ruling wins; the registry needs a v2 |
+| ⚠ **`socketMax` tops out at 2 in the corpus** while D20 fixes the Splice ingredient count at **4** | no existing base type can host a Splice |
+
+**So module 6 is not "author base types."** It is: unfreeze and re-derive `classes.v1.json` against the
+*lifted* quarantine, add the directional-profile field the entry shape lacks, issue `core.v1.json` v2
+against D3's twelve, then author. **That is the real shape of the program's blocking work**, and it was
+invisible until someone measured the corpus.
+
+⭐ **One piece of good news in the same measurement:** D3's relocation prose overstates its own work.
+Across all 98 families, **zero are orphaned** by dropping `ward-array`/`head-guard`/`sense` — every one
+is already legal on at least one hybrid-core role. I2 does not need to *choose hosts*; it needs to choose
+**reduced `max_tier`s** on hosts that already exist.
+
+### Watch — measured, not yet a defect
+
+**The chaff chassis may invert the rarity ladder.** With Splices on low-rarity bases (D21), craftable
+sockets (D23) and chosen affinities (D24), a `chaff` chassis captures **35–75%** of the body budget
+depending on the ingredient count — now fixed at **4**, which puts it at the low end (`armament-primary`
+and `core-guard` only). Whether a Splice clears an `almanac`'s ~770 hp-equivalent is a **module 9**
+question and cannot be answered until it runs.
+
+**And D3's mix bonus needs its predicate weighted by role budget.** The bonus counts *items*; concession
+is cheapest in the lightest roles, so 6/6 costs ~230‰ of a 800‰ body rather than half of it. Weighting
+the minority count by `budget_permille` makes D3's stated mechanism true. **D11's correlated-directionality
+amendment (§2f.2) is the other half of the same fix.**
 
 ---
 

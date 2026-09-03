@@ -8,7 +8,7 @@
 
 Assign every affix a **power class**: one value from a closed, append-only enum saying how strong the
 affix is *as an idea*, independent of its tier or its numbers. This is the classification half of L0;
-[`channel-pools`](spec-channel-pools.md) (module 12) is the deterministic half that turns the class into
+[`affix-channel-weights`](spec-affix-channel-weights.md) (module 12) is the deterministic half that turns the class into
 a rate.
 
 **The class is a judgement, so a model makes it. The class is never a number, and never a rate.** That
@@ -60,19 +60,22 @@ already covers slots (an unresolvable slot ref contributes nothing, so the deriv
 `power_class_floor` read as `MAX(derived, floor)`. It is one nullable column, it can only raise, and
 nothing sets it in v1. Recorded now because the alternative is discovering it after ~980 affixes exist.
 
-### The enum — five classes, append-only, ordinals spaced by 10
+### The enum — five classes, append-only, consecutive ordinals
 
-Following the house convention for every closed roster in this codebase (`ElementRow`, `Aptitude`,
-`rarity`): **append-only ordinals, spaced by 10**, so a class can be inserted at 25 without renumbering
-anything (`ssot-rarity.md` §3.3's own reasoning).
+**Append-only ordinals, consecutive — matching every closed roster in this codebase.**
+
+> ⚠ **Corrected 2026-09-03.** An earlier draft claimed *"spaced by 10 — the house convention
+> (`ElementRow`, `Aptitude`, `rarity`)"*. **No roster does this**: `ElementRow` is 0–5, `Aptitude` 0–11,
+> `DemonRarity` 0–9, and the `rarity` table has no rows at all. The precedent was invented. Spacing may
+> still be worth arguing on its own merits; it cannot be argued from precedent.
 
 | Ordinal | `power_class` | What it means | Rough share of the library |
 |---:|---|---|---:|
-| 10 | `filler` | pads a pool. Nobody builds around it | ~40% |
-| 20 | `notable` | a build takes it if offered | ~30% |
-| 30 | `potent` | shapes a build's direction | ~20% |
-| 40 | `defining` | a build is *about* this effect | ~8% |
-| 50 | `pinnacle` | top-shelf. **The thing channels exist to gate** | ~2% |
+| 0 | `filler` | pads a pool. Nobody builds around it | ~40% |
+| 1 | `notable` | a build takes it if offered | ~30% |
+| 2 | `potent` | shapes a build's direction | ~20% |
+| 3 | `defining` | a build is *about* this effect | ~8% |
+| 4 | `pinnacle` | top-shelf. **The thing channels exist to gate** | ~2% |
 
 > ⛔ **The names deliberately share no word with a rarity rung.** Rarity is `chaff · sprout · grafted ·
 > cultivated · fused · chimeric · heirloom · firstseed · sunwoven · almanac`. **Power class and rarity
@@ -91,7 +94,7 @@ The class carries a **`basis`**, exactly as family labels do in seedsmith's `fam
 into `filler`.
 
 **An unclassified family is not a zero.** It is excluded from L0's weighting until classified, and
-`channel-pools` treats it as `notable` with a recorded `unclassified` flag so a gap is *visible as a
+`affix-channel-weights` treats it as `notable` with a recorded `unclassified` flag so a gap is *visible as a
 default* rather than invisible as an absence. A silent `filler` default would be the worst outcome: the
 strongest unclassified effect would land in the cheapest pool.
 
@@ -124,7 +127,7 @@ python -m seedsmith check --adapter items --metric PowerClassDistribution
 tools/seedsmith/seedsmith/adapters/effects/power_class/      new — the classifier stage
   classify.py            one family -> (power_class, basis); closed-enum structured output
   derive.py              affix class := MAX over refs; the slot safe-direction rule
-  registry.py            the append-only enum, ordinals spaced by 10
+  registry.py            the append-only enum, consecutive ordinals
 tools/seedsmith/seedsmith/metrics/power_class.py             new — distribution vs declared shares
 data/seed/items/_registry/power-classes.v1.json              new — the enum, checked in
 data/tuning/affix-power-class.v1.json                        new — target shares, not code
@@ -172,9 +175,9 @@ default an unclassified family to `notable` **with a flag**.
 and 8 triggers are); setting `power_class_floor` on any affix.
 
 **Never:** let the model emit a weight, a rate, a probability or any number — `audit_schema` rejects a
-numeric field mechanically, and that check is the enforcement, not review. Never derive power class from
-`AtomRow.TagsJson` (those are *thematic* tags — `offensive`, `elemental` — and carry no strength
-information). Never let a power-class id equal a rarity rung id.
+numeric field mechanically, and that check is the enforcement, not review. Never derive power class from `AtomRow.TagsJson`. ⚠ **Corrected 2026-09-03:** that field carries generator
+*provenance*, not thematic tags; **D28** has E43 stamp the family's `offensive`/`defensive`/`utility` tags
+through. Either way they carry no strength information — the prohibition stands, its stated reason did not. Never let a power-class id equal a rarity rung id.
 
 ## Success criteria
 

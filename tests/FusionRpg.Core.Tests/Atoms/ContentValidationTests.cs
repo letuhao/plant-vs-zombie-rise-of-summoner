@@ -94,6 +94,63 @@ public class ContentValidationTests
         Assert.Equal(0, report.Evaluated);
     }
 
+    // ---- the budget, rung-keyed (A-G1, spec-tier-access-gate.md §3.2) --------------------------------
+
+    [Fact]
+    public void A_container_over_its_rung_ceiling_fails_and_is_named()
+    {
+        var atoms = new[] { Atom("atom.huge", 1, 100_000) };
+        var container = Container("skill.overspent", atoms[0].AtomId);
+
+        var report = ContentValidation.Budget(
+            new[] { container }, _ => atoms, _ => 1, _ => 10L);
+
+        Assert.False(report.Ok);
+        var failure = Assert.Single(report.Failures);
+        Assert.Equal("skill.overspent", failure.Subject);
+        Assert.Contains("rung 1", failure.Detail, StringComparison.Ordinal);
+        Assert.Contains("over", failure.Detail, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_container_inside_its_rung_ceiling_passes()
+    {
+        var atoms = new[] { Atom("atom.small", 1, 10) };
+        var container = Container("skill.thrifty", atoms[0].AtomId);
+
+        var report = ContentValidation.Budget(new[] { container }, _ => atoms, _ => 1, _ => 100_000L);
+
+        Assert.True(report.Ok);
+        Assert.Equal(1, report.Evaluated);
+    }
+
+    [Fact]
+    public void A_container_with_no_rung_is_skipped_rather_than_treated_as_zero()
+    {
+        var container = Container("skill.unrunged"); // rungOf returns null for it below
+
+        var report = ContentValidation.Budget(
+            new[] { container }, _ => Array.Empty<AtomRow>(), _ => null, _ => 100L);
+
+        Assert.True(report.Ok);
+        Assert.Equal(0, report.Evaluated);
+    }
+
+    [Fact]
+    public void A_rung_with_no_ceiling_loaded_is_skipped_rather_than_treated_as_zero()
+    {
+        // A rung table with no powerBudgetMilli column (v1) resolves every rung to null -- read as
+        // "no ceiling data source", never as "budgets nothing" (the same direction the rarity-keyed
+        // overload already takes for a missing ceiling).
+        var atoms = new[] { Atom("atom.any", 1, 50) };
+        var container = Container("skill.x", atoms[0].AtomId);
+
+        var report = ContentValidation.Budget(new[] { container }, _ => atoms, _ => 5, _ => null);
+
+        Assert.True(report.Ok);
+        Assert.Equal(0, report.Evaluated);
+    }
+
     // ---- power drift ---------------------------------------------------------------------------------
 
     [Fact]

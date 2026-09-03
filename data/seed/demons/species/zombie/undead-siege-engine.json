@@ -230,5 +230,84 @@
       "corrupted"
     ],
     "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T17:33:20Z",
+      "minorityValues": {
+        "deployMode": "PlantAvatar",
+        "rarity": "chaff"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "undead-siege-engine"
+    ],
+    "gameTypeId": 116,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "melee",
+    "reason": "While capable of massive area damage, the creature's threat is localized to its immediate path and death, making it a high-tier nuisance rather than a world-altering tyrant.",
+    "resourceProfile": [
+      "hp",
+      "spirit"
+    ],
+    "side": "zombie",
+    "speciesId": "JalaSquashZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "crushing-impact",
+      "explosive-detonation",
+      "impulsive-momentum"
+    ],
+    "variants": [
+      "mutated",
+      "cursed"
+    ],
+    "verdict": "too-high"
   }
 ]

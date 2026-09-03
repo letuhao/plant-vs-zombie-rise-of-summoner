@@ -2,8 +2,13 @@
 
 **Status:** **Approved by the owner 2026-09-03** — Phase 0 of `/spec` complete. **Nineteen modules**
 (granularity confirmed: `durable-ownership`/`armoury` and `threshold-grants`/`set-charm-gen` stay split).
+✅ **Phase 1 complete 2026-09-04 — all 21 module specs written**, `docs/architecture/item/spec-*.md`, linked below.
 **X1 resolved — seedsmith classifies `frame` (§3.1).** Build sequencing is **deliberately not here** — it
-is the plan's, per §5. Next: module specs in dependency order. Program prefix `item`; module specs go in `docs/architecture/item/spec-<module-id>.md`,
+is the plan's, per §5.
+
+> ⚠ **Revised 2026-09-03 after a seven-auditor review** ([item-ideal.md](item-ideal.md) §2f). **Twenty-one
+> modules** — two were added for capabilities nothing owned. Built against **D1–D29**, not D1–D19.
+> **Model calls in two modules, not one.** Program prefix `item`; module specs go in `docs/architecture/item/spec-<module-id>.md`,
 tasks in `tasks/item-plan.md` / `tasks/item-todo.md`, per the parallel-programs convention in AGENTS.md.
 
 > **The program graduates here.** [item-ideal.md](item-ideal.md) held the intent and, since 2026-09-03,
@@ -40,7 +45,7 @@ than the lane documents describe**, and three modules below exist only to *consu
 | `ProduceAndBind` **called in production** | `RpgStore.UniqueActors.cs:756` | The atom runtime is not inert |
 | `stat.derived` executing on battle **and** lawn | `AtomKindRegistry.cs:253` | Any affix the catalogue can express is bindable |
 | `OwnerKind.UniqueActor` — the durable per-actor scope | `Effects/Atoms/OwnerScope.cs` | Equipment has an owner to name |
-| The `rarity` table, ten rungs, per-class bands | `RpgStore.Containers.cs:54-61` | `rarity-bands` seeds data, it does not build a table |
+| The `rarity` **table and its per-class columns** — ⚠ **and it has ZERO rows** | `RpgStore.Containers.cs:54-61`; `data/seed/rarity/README.md` (*"Empty on purpose"*) | The ten rungs that *ship* are the `DemonRarity` enum, ordinals **0–9 consecutive** (§2f.1 F3). Module 7 **seeds the table**; it does not build one |
 | The demon **theme registry** — demons publish, items consume, one-way | `data/seed/demons/_registry/themes.v1.json`, seedsmith D4 | `set-charm-gen`'s upstream exists |
 | Twelve aptitudes | `Stats/Aptitudes/Aptitude.cs:40-51` | D8's target vocabulary |
 
@@ -48,14 +53,16 @@ than the lane documents describe**, and three modules below exist only to *consu
 
 ## 3. ⛔ Cross-program dependencies
 
-Three. **X1 was resolved by owner decision 2026-09-03** and is no longer the open-ended wait it was
+**Six.** X1 was resolved by owner decision 2026-09-03 and is no longer the open-ended wait it was
 when this map was drafted.
 
 | # | Dependency | Owner | Status |
 |---|---|---|---|
 | **X1** | **`frame` (humanoid / plant / hybrid) exists on no species type**, and `slot-roles` and `base-types` both key on it. By D19's reasoning it is not ours to declare — a frame describes a *body*, exactly as an aptitude vector describes a species | **seedsmith's demon pipeline** | ✅ **Resolved 2026-09-03: seedsmith classifies it**, as a new `frame-classify` stage beside `family-extract` and `motif-derive`, published through the theme registry items already consume. See §3.1 |
-| X2 | **`E42 units-correction`** gates band → number resolution | content-stack, gate G3 | Scheduled. **Does not block authoring** — `seed-contract.md` §3's band rule closes the units trap by construction |
-| X3 | **`ActionSeeder.Generate` has zero callers** | action corpus | Gates `granted-actions` (module 19) only |
+| X2 | **`E42 units-correction`** gates band → number resolution | content-stack, gate G3 | ✅ **DONE / gate CLOSED 2026-09-03** (`content-stack-todo.md:15,24`). ⚠ But `ssot-affixes.md` was **explicitly out of E42's scope**, so the item-side residue is unresolved. Was: **Does not block authoring** — `seed-contract.md` §3's band rule closes the units trap by construction |
+| X3 | **`ActionSeeder.Generate` has zero callers** | action corpus | Gates `granted-actions` (19) only. ⚠ **Not acknowledged by `action-corpus-map.md`**, which puts the action runtime out of scope — it must accept or formally decline |
+| **X5** | ⭐ **The content ladder must keep growing.** Item level *is* content level (`ssot-generation.md` §4.1); content stops at level 10 today. **D29: the ladder is unbounded** — tier saturates at t5 and `contentScale` carries growth past it | **world map · wave catalog · event generator** | Added 2026-09-03. This is the loop D26 says is not ours: gear → harder realm → gear. We supply the middle arrow only |
+| **X6** | **`E44 power-sweep`** — the 20 power coefficients are flat at `CoeffMilli = 1000` | effect-atom / content-stack | Gates module 9's reads from meaning anything. **The owner already ruled on it 2026-09-03** |
 | **X4** | ⭐ **L0 — pool composition by power class × channel.** Without it, a trash drop and a boss drop roll the same affixes, and sets/sockets/uniques/crafting are redundant paths (`effect-pipeline-ideal.md` §5.6) | **effect-pipeline**, modules 11–12 | Added by owner decision 2026-09-03. **Unspecced, unbuilt.** Gates `drop-volume` (11) and `set-charm-gen` (13) — both of which *supply channels to it* rather than merely consuming it |
 
 **X1 is stated as a dependency and not a task on purpose.** Declaring `frame` in this program would put
@@ -77,7 +84,7 @@ with `blocked` a legal answer.
 | Input | the species' own name and flavour text — the corpus `family-extract` already reads |
 | Output | one of **three enum values**, never a number (`audit_schema` rejects numerics mechanically) |
 | Honesty | carries `basis`, exactly as family labels do |
-| Publication | `data/seed/demons/_registry/themes.v1.json`, the one-way registry items already consume (`spec-demon-themes.md` §2.2) |
+| Publication | the demon pipeline's one-way registry items already consume. ⚠ **Frame must publish independently of theme status** — `spec-demon-themes.md` makes publishing a theme for a `basis=blocked` demon a **Never**, and a species can lack a *flavour* judgement while still having a *body*. Frame is a body fact; it is not gated on theme confidence |
 | Scale | ~904 species with no hand-authoring — the property that made the classifier worth building |
 
 ⭐ **It also solves the conflation item-ideal §4 warns about, rather than inheriting it.**
@@ -100,51 +107,53 @@ lives only in the consumer's document is how a dependency surfaces late.
 
 ## 4. The modules
 
-Nineteen. Model calls in exactly one.
+Twenty-one. Model calls in **two** (13 and 21).
 
 ### Foundation — model-free, no content, and it closes both live defects
 
 | # | id | Capability | Depends on |
 |---|---|---|---|
-| 1 | `durable-ownership` | `rpg_item` (thin row, PK `instance_id`, carrying `player_id`) as a **second reachability root**, so unequip stops deleting gear. Per-atom bind compatibility replacing `catalog_revision` equality. The missing `effect_binding` FK. **Closes R1 (D5), R2 (D9), S2 and C3 (§2e)** | — |
-| 2 | `armoury` | One **player-scoped** store — no per-specimen bags. Two storage grades (stock counters + rolled rows), category + list surface, unlimited capacity. **D5** | 1 |
-| 3 | `slot-roles` | `item_role` (15, + `standard` declared and ungenerated per D14), `item_role_frame`, the **12-role hybrid core**, and the unlock predicate **defaulting to always-open**. **D2, D3, D14** | X1 |
-| 4 | `equip-assign` | `rpg_item_assignment` — durable assign; binding rebuilt as a projection at deploy. Retires `rpg_unique_equipment` and the 3-item `UniqueEquipmentCatalog` stub | 1, 3 |
-| 5 | ⭐ `equip-runtime` | Battle and lawn **read equipment**. Closes wiring gap W2 — `ChannelMods` is the reader, `TraitAtomSource` is the working producer to copy | 4 |
+| 1 | [`durable-ownership`](item/spec-durable-ownership.md) | `rpg_item` (thin row, PK `instance_id`, carrying `player_id`) as a **second reachability root**, so unequip stops deleting gear. Per-atom bind compatibility replacing `catalog_revision` equality. The missing `effect_binding` FK. **Closes R1 (D5), R2 (D9), S2 and C3 (§2e)** | — |
+| 2 | [`armoury`](item/spec-armoury.md) | One **player-scoped** store — no per-specimen bags. Two storage grades (stock counters + rolled rows), category + list surface, unlimited capacity. **D5** | 1 |
+| 3 | [`slot-roles`](item/spec-slot-roles.md) | `item_role` (15, + `standard` declared and ungenerated per D14), `item_role_frame`, the **12-role hybrid core**, and the unlock predicate **defaulting to always-open**. **D2, D3, D14** | X1 |
+| 4 | [`equip-assign`](item/spec-equip-assign.md) | `rpg_item_assignment` — durable assign; binding rebuilt as a projection at deploy. Retires `rpg_unique_equipment` and the 3-item `UniqueEquipmentCatalog` stub | 1, 3 |
+| 5 | ⭐ [`equip-runtime`](item/spec-equip-runtime.md) | Battle and lawn **read equipment**. Closes wiring gap W2 — `ChannelMods` is the reader, `TraitAtomSource` is the working producer to copy | 4 |
 
 ### Content model — model-free
 
 | # | id | Capability | Depends on |
 |---|---|---|---|
-| 6 | ⛔ `base-types` | I3's base-type identities, each frame's pair differing by **directional stat profile *and* distinct implicit**, plus the **dominance lint**: for every role a build must exist where each frame's base is correct. **D11 — the correctness condition D3 depends on** | 3 |
-| 7 | `rarity-bands` | Seed the ten rungs, per-class prefix/suffix bands and `rarity_budget`; **re-derive I12's drop weights (authored against 7) and I6's caps (against 5)** | — |
-| 8 | `affix-legality` | I8's role × affix-group matrix, tier bands, frame filtering. `item_role_family` **derived**, not authored (§2b.1) — ~1,100 cells saved | 3, 7 |
-| 9 | `power-model` | **E9.** *"How strong is this thing?"* — evaluation, distinct from `P(Θ)`'s derivation. **D13: authored as a general model with no item-specific concepts in its interface.** Items are its first consumer, not its subject | 7, 8 |
-| 10 | `item-card` | Atoms → readable text, units, the card. G3. Unblocks three lanes that stall on presentation | 8, 9 |
+| 6 | ⛔ [`base-types`](item/spec-base-types.md) | I3's base-type identities, each frame's pair differing by **directional stat profile *and* distinct implicit**, plus the **dominance lint**: for every role a build must exist where each frame's base is correct. **D11 — the correctness condition D3 depends on** | 3 |
+| 7 | [`rarity-bands`](item/spec-rarity-bands.md) | Seed the ten rungs, per-class prefix/suffix bands and `rarity_budget`; **re-derive I12's drop weights (authored against 7) and I6's caps (against 5)** | — |
+| 8 | [`affix-legality`](item/spec-affix-legality.md) | I8's role × affix-group matrix, tier bands, frame filtering. `item_role_family` **derived**, not authored (§2b.1) — ~1,100 cells saved | 3, 7 |
+| 9 | [`power-reads`](item/spec-power-reads.md) | ⚠ **Rescoped — D13 was VOID (§2f.2). E9 `power-vector` shipped 2026-08-22** with 33 tests and live consumers. This module **consumes** it and owns the three item reads it was created for: I3's ≤15% implicit budget cap, G4's granted-action budget, G3's power display — plus D8's aptitude pricing. Upstream: **E44 `power-sweep`** (all 20 coefficients flat at 1000), owned by effect-atom | 7, 8, **X6** |
+| 10 | [`item-card`](item/spec-item-card.md) | Atoms → readable text, units, the card. G3. Unblocks three lanes that stall on presentation | 8, 9 |
 
 ### Generation
 
 | # | id | Capability | Model? | Depends on |
 |---|---|---|---|---|
-| 11 | `drop-volume` | I12's drop tables. **Volume reads `Θ` linearly; quality keeps reading `P(Θ)` through rarity/tier. No private loot curve. D18.** ⭐ Supplies the `drop` / `boss` **channel** to effect-pipeline's L0 (**X4**) | — | 6, 7, 8, **X4** |
-| 12 | `threshold-grants` | One mechanism: *count equipped things matching a predicate → grant a container at breakpoints, at `UniqueActor` scope*. **Serves sets, charms, and D3's frame-mix bonus** — three consumers, one machine | — | 4, 9 |
-| 13 | ⭐ `set-charm-gen` | The seedsmith pipeline: 36 build set families + 1 set and 1 charm per species, consuming the demon theme registry. **Owns set/charm atom effect distribution** — §2c #2's ownerless capability, now **answered in part by L0**: the `set` and `socket` channels are what make a set bonus worth collecting. **Capped to the 12 hybrid-core roles before generation, not validated after** (§2c #1) | **yes** | 8, 12, **X4** |
+| 11 | [`drop-volume`](item/spec-drop-volume.md) | I12's drop tables. **Volume reads `Θ` linearly; quality keeps reading `P(Θ)` through rarity/tier. No private loot curve. D18.** ⭐ Supplies the `drop` / `boss` **channel** to effect-pipeline's L0 (**X4**) | — | 6, 7, 8, **X4** |
+| 12 | [`threshold-grants`](item/spec-threshold-grants.md) | One mechanism: *count equipped things matching a predicate → grant a container at breakpoints, at `UniqueActor` scope*. **Serves sets, charms, and D3's frame-mix bonus** — three consumers, one machine | — | 4, 9 |
+| 13 | ⭐ [`set-charm-gen`](item/spec-set-charm-gen.md) | The seedsmith pipeline: 36 build set families + 1 set and 1 charm per species, consuming the demon theme registry. **Owns set/charm atom effect distribution** — §2c #2's ownerless capability, now **answered in part by L0**: the `set` and `socket` channels are what make a set bonus worth collecting. **Capped to the 12 hybrid-core roles before generation, not validated after** (§2c #1) | **yes** | 8, 12, **X4** |
 
 ### Sinks — the half that stops the museum
 
 | # | id | Capability | Depends on |
 |---|---|---|---|
-| 14 | `salvage-craft` | I9 — materials, salvage, the cost vocabulary. The first sink, and the cheapest | 2, 7 |
-| 15 | `enhance-reroll` | I6 + I7 under one mutation contract. **D7: cost, never luck** — steep tier-keyed cost, a success chance, and **mandatory bad-luck protection** (`rpg_summon_pity` is the precedent). The cost curve is a **configurable soft cap** in `data/tuning/`, never a hard stop | 9, 14 |
-| 16 | `sockets` | I4 — inserts as their own instance binding on the same owner; no atom-table change | 4, 14 |
+| 14 | [`salvage-craft`](item/spec-salvage-craft.md) | I9 — materials, salvage, the cost vocabulary. The first sink, and the cheapest | 2, 7 |
+| 15 | [`enhance-reroll`](item/spec-enhance-reroll.md) | I6 + I7 under one mutation contract. **D7: cost, never luck** — steep tier-keyed cost, a success chance, and **mandatory bad-luck protection** (`rpg_summon_pity` is the precedent). The cost curve is a **configurable soft cap** in `data/tuning/`, never a hard stop | 9, 14 |
+| 16 | [`sockets`](item/spec-sockets.md) | I4 — inserts as instance bindings on the same owner; **the combination evaluator** (25 resonances + Strains/Splices); D22's affinity **bonus**; D21's set-piece exclusivity validator. ⚠ *"No atom-table change"* was wrong — the lane requests `bind_ordinal` on `effect_binding` (§5.4) | 4, **15**, 14 |
 
 ### Late and gated
 
 | # | id | Capability | Depends on |
 |---|---|---|---|
-| 17 | `uniques` | G1 — hand-authored items that break generator rules and no machine rules | 8, 9 |
-| 18 | `consumables` | G2 — the use path degenerates, never the effect. Names **`OnActivate`** | 4 |
-| 19 | `granted-actions` | G4 — the `action_id` seam | 4, **X3** |
+| 17 | [`uniques`](item/spec-uniques.md) | G1 — hand-authored items that break generator rules and no machine rules | 8, 9 |
+| 18 | [`consumables`](item/spec-consumables.md) | G2 — the use path degenerates, never the effect. Names **`OnActivate`** | 4 |
+| 19 | [`granted-actions`](item/spec-granted-actions.md) | G4 — the `action_id` seam | 4, **X3** |
+| **20** | ⭐ [`item-surfaces`](item/spec-item-surfaces.md) | **Added 2026-09-03 — nothing owned any player-facing surface.** Armoury list + filter, the equip screen, item-card render, comparison, the socket preview and the **combination compendium** (D20 promotes these from nicety to requirement at 127 combos). `docs/web/spec.md` records the same seam as unclaimed from its side — both maps pointed at each other | 2, 10, 16 |
+| **21** | ⭐ [`strain-splice-gen`](item/spec-strain-splice-gen.md) | **Added 2026-09-03.** The 102 generated combinations — 36 Strains (12 aptitudes × 3 archetypes) + 66 Splices (C(12,2)), seedsmith-configured. **The program's second model call.** Also owns retiring the existing element-keyed `socket-word` corpus | **yes** → 8, 16 |
 
 ### Dependency graph
 
@@ -157,13 +166,13 @@ durable-ownership ─► armoury               │
         │                │                 │
         └─► equip-assign ─► equip-runtime  │   ⭐ payoff
                  │                          │
-                 ├─► threshold-grants ◄── power-model ◄─┘
+                 ├─► threshold-grants ◄── power-reads ◄─┘
                  │        └─► set-charm-gen
                  ├─► sockets ◄── salvage-craft ─► enhance-reroll
                  ├─► consumables
                  └─► granted-actions ◄── X3
                                    drop-volume ◄── base-types + rarity-bands + affix-legality
-                                   item-card   ◄── affix-legality + power-model
+                                   item-card   ◄── affix-legality + power-reads
 ```
 
 No cycles.
@@ -186,10 +195,10 @@ A topological order consistent with §4's graph:
 
 ```text
 durable-ownership → armoury → slot-roles → equip-assign → ⭐ equip-runtime
-  → base-types → rarity-bands → affix-legality → power-model → item-card
+  → base-types → rarity-bands → affix-legality → power-reads → item-card
   → drop-volume → threshold-grants → set-charm-gen
-  → salvage-craft → enhance-reroll → sockets
-  → uniques → consumables → granted-actions
+  → salvage-craft → enhance-reroll → sockets → strain-splice-gen
+  → uniques → consumables → granted-actions → item-surfaces
 ```
 
 **Module 1 has standalone value**, which is a property of the module and therefore belongs here. It
@@ -197,7 +206,11 @@ closes both live defects — unequip destroying gear, and a content import disab
 that is *already running in production*. **Whether it ships alone is the plan's call**; that it *could*
 is a fact about the dependency graph.
 
-**⭐ The payoff is module 5, not module 19.** After `equip-runtime`, one hand-made item on one actor
+**⭐ Module 5 is also where item balance becomes testable.** D29 validates item channel bands against the
+class-system's existing termination (HARD) and dominance (SOFT) guards, extended to geared corners — and
+that can only run once gear reaches battle. **Module 5 is the gate for the first geared corner run.**
+
+**⭐ The payoff is module 5, not module 21.** After `equip-runtime`, one hand-made item on one actor
 changes a number in a real battle and on a real lawn. Everything before it is plumbing with no
 observable effect; everything after it is content and depth. **Getting an end-to-end proof at module 5
 of 19 is the same discipline `effect-pipeline` used** when it put its producer at module 4 of 10.
@@ -207,7 +220,7 @@ module 13, the base types, the rarity bands, the affix legality and the power mo
 against real data.
 
 **The sinks (14–16) come after generation on purpose.** A salvage system with nothing to salvage is
-untestable, and `enhance-reroll` needs `power-model` to know what a "better" roll is worth.
+untestable, and `enhance-reroll` needs `power-reads` to know what a "better" roll is worth.
 
 ---
 
@@ -223,6 +236,8 @@ untestable, and `enhance-reroll` needs `power-model` to know what a "better" rol
 | Trading, durability, transmog, item-level squishes | item-ideal §10 |
 | Inventory-management minigame | D5 — *"we will add inventory management mini game in future"* |
 | A private loot curve | D18 — drop volume reads `Θ` |
+| **Metering the player — drop caps, inventory ceilings, cost curves that rise with player power** | ⭐ **D26.** The item system balances items against each other; it does not balance the game. Content pacing, encounter volume and difficulty belong to the world map, battle engine and event generator |
+| **How deep the content ladder goes** | **X5.** Item level *is* content level; we consume it, we do not set it |
 
 ---
 

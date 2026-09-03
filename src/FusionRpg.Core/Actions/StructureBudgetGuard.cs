@@ -76,6 +76,30 @@ public static class StructureBudgetGuard
         return spent;
     }
 
+    /// <summary>
+    /// A-G1 (spec-tier-access-gate.md §3.3, §5 test 5): axes this guard can never detect, distinct
+    /// from an axis <see cref="SpentAxes"/> checked and found not spent. Reporting <c>0</c>/absent for
+    /// one would be indistinguishable from the other — <c>undetectable</c> is its own state.
+    ///
+    /// <para>Today that is <see cref="StructureAxes.Restriction"/> alone. Its own docstring above
+    /// says why: it needs the effect-atom program's own per-atom payload/target data, which is
+    /// OUTSIDE the three tables this module reads (`rpg_action` + `rpg_action_cost` +
+    /// `rpg_action_effect_scope`) — a real cross-program dependency, not a gap this method can close
+    /// by itself.</para>
+    ///
+    /// <para><b><see cref="StructureAxes.Reaction"/> is deliberately NOT here.</b> It is
+    /// UNSPENDABLE, not undetectable: <see cref="ActionKind"/> has exactly three
+    /// members, none reaction-shaped, so nothing authored today can spend it and <see cref="Check"/>
+    /// is already correct to never flag it. Folding it into this list would claim a detection gap
+    /// that does not exist — a brief naming <c>reaction</c> is refused at authoring instead (A-S1's
+    /// distribution planner), never something this guard needs to detect.</para>
+    ///
+    /// <para>This method takes no arguments and never will for the same reason
+    /// <see cref="SpentAxes"/> takes a row: which axes CAN be checked is a fixed property of what
+    /// this guard reads, not of any one action.</para>
+    /// </summary>
+    public static IReadOnlyList<string> UndetectableAxes() => new[] { StructureAxes.Restriction };
+
     static ActionRejection Fail(string actionId, ActionRejectionReason reason, string detail) =>
         ActionRejection.Fail(reason, $"{actionId}: {detail}");
 }

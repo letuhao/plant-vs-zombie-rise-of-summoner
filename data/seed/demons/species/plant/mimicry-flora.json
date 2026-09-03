@@ -1,0 +1,161 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "unresolved",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "unresolved",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T17:16:50Z",
+      "minorityValues": {
+        "threatBand": "scourge"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "unresolved",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "Mimicry-Flora"
+    ],
+    "gameTypeId": 303,
+    "posture": "unresolved",
+    "pure": false,
+    "rarity": "unresolved",
+    "reach": "short",
+    "reason": "Its ability to infinitely scale its attack and resilience through repeated transformations allows it to eventually overwhelm most combatants.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "ImitateWheat",
+    "targetPreference": "elite",
+    "threatBand": "tyrant",
+    "traits": [
+      "Adaptive Metamorphosis",
+      "Cumulative Stat Scaling",
+      "Reactive Camouflage"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "unresolved",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T17:16:51Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "Mimicry-Flora"
+    ],
+    "gameTypeId": 245,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "unresolved",
+    "reach": "melee",
+    "reason": "The creature functions purely as a utility tool for resource duplication rather than a combatant with offensive capabilities.",
+    "resourceProfile": [
+      "hp",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "Imitater",
+    "targetPreference": "frontline",
+    "threatBand": "nuisance",
+    "traits": [
+      "Adaptive Camouflage",
+      "Seed-Packet Synthesis",
+      "Identity Transmutation"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed",
+      "cursed"
+    ]
+  }
+]

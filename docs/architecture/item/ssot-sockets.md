@@ -24,6 +24,14 @@ An **equip slot** is lane I2's word and never appears here for either concept.
 > (**D21**), which is also D2's verified rule and which closes §8.6's double-dipping structurally.
 > **PoE-style links are out of scope** and belong to the action layer (**D25**).
 >
+> **Amended again 2026-09-03 by the audit round (§2f):** **D22 reverts to a BONUS** — matching affinity
+> grants an enhanced tier rather than gating, because on a crafted low-rarity chassis the hard requirement
+> could never fail. A **Strain/Splice takes 4 ingredients**. A **per-actor cap** (start 3) is owed — only
+> one-per-*item* is capped today. ⚠ **§4.1's `socket_max` table uses I2's OLD twelve role ids** and assigns
+> nothing to `ward-array`, `infusion` or `retinue`. ⚠ **D23 is a pricing ruling, not the resolution of a
+> blocking contradiction** — §4.1 already layered crafting top-up. Combination containers get
+> `container_kind = 'combo'`; inserts get `'gem'` (**D27**).
+>
 > ✅ **The lane's four *"recalled, not verified"* D2/PoE claims are now verified** — all confirmed; see
 > §2b's D20–D25 closing table. §10.5's roster-scale question is closed by **D1**.
 

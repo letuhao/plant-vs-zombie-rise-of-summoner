@@ -1,7 +1,7 @@
 # Capability map: `effect-pipeline`
 
 **Status:** proposed 2026-09-01, from [effect-pipeline-ideal.md](effect-pipeline-ideal.md) — nine
-questions closed, seven attacks answered. **Twelve modules.** Ten approved 2026-09-02; **`affix-power-class` and `channel-pools` added 2026-09-03**
+questions closed, seven attacks answered. **Twelve modules.** Ten approved 2026-09-02; **`affix-power-class` and `affix-channel-weights` added 2026-09-03**
 by owner decision — the **L0 pool-composition layer** (`effect-pipeline-ideal.md` §5.6). **All twelve module specs are written** at
 `docs/architecture/effect-pipeline/spec-<module-id>.md`, one per row in §3's table below.
 
@@ -91,7 +91,7 @@ L2's absence is not cosmetic. Without it, `+15% to all resistances` must become 
 | 9 | `affix-authoring` | The seedsmith pipeline for **named, multi-atom, slotted** affixes — *"Master of Fire and Ice"*. Identity is a judgement; magnitude never is | **yes** | 1, 6 |
 | 10 | `dev-reforge` | `POST /api/debug/reforge-world` — re-derive a roster from the current catalog against the same world seed. Debug surface only | — | 4, 6 |
 | **11** | ⭐ [`affix-power-class`](effect-pipeline/spec-affix-power-class.md) | **Added 2026-09-03 (L0).** The LLM stage: one **closed-enum power class** per affix — how strong it is *as an idea* — carrying `basis`. **Never a number, never a rate** | **yes** | 1, 3 |
-| **12** | ⭐ [`channel-pools`](effect-pipeline/spec-channel-pools.md) | **Added 2026-09-03 (L0).** The deterministic half: a `(powerClass × channel) → weight` policy in `data/tuning/`, and `poolFor(container, channel, rarity)` composing the candidate list L1 draws from. **Six channels: `drop` · `boss` · `set` · `socket` · `unique` · `craft`.** Consumes no RNG | — | 8, 11 |
+| **12** | ⭐ [`affix-channel-weights`](effect-pipeline/spec-affix-channel-weights.md) | **Added 2026-09-03 (L0).** The deterministic half: a `(powerClass × channel) → weight` policy in `data/tuning/`, and `poolFor(container, channel, rarity)` composing the candidate list L1 draws from. **Six channels: `drop` · `boss` · `set` · `socket` · `unique` · `craft`.** Consumes no RNG | — | 8, 11 |
 
 ### ⭐ Modules 11–12 — L0, added by owner decision 2026-09-03
 
@@ -123,7 +123,7 @@ content-addressed. The weight policy decides what every container draws, so it m
 ### Dependency graph
 
 ```text
-affix-power-class ──► channel-pools ──► (feeds L1's draw)
+affix-power-class ──► affix-channel-weights ──► (feeds L1's draw)
         ▲                   ▲
         └── affix-library ───┴── eligibility-tags
 
@@ -145,10 +145,11 @@ No cycles.
 affix-schema → resolution-order → affix-library → instance-producer
   → mods-absorption → patron-absorption → world-seed → eligibility-tags
   → affix-authoring → dev-reforge
-  → affix-power-class → channel-pools
+  → affix-power-class → affix-channel-weights
 ```
 
-**Modules 11–12 come last in dependency order and are not last in importance.** `channel-pools` needs
+**Modules 11–12 come last in BUILD order** — the module table permits 11 immediately after 3, so "last"
+is a sequencing choice, not a dependency fact. `affix-channel-weights` needs
 `eligibility-tags` (8) for the drawable set and `affix-library` (3) for something to classify, and
 `affix-power-class` is the program's **second** model stage after `affix-authoring` (9) — so it lands
 where the model work already is. Nothing before them changes.

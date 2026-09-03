@@ -1,0 +1,252 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:40:52Z",
+      "minorityValues": {
+        "rarity": "heirloom",
+        "threatBand": "cataclysm"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "Fungal-Summoner",
+      "Parasitic-Spore"
+    ],
+    "gameTypeId": 938,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The ability to summon high-tier, boss-level entities like the Ultimate Bowling Ball or Empress of the Snow across various environments makes it a world-altering threat to the player's defense.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "GoldHypnoDoom",
+    "targetPreference": "structure",
+    "threatBand": "calamity",
+    "traits": [
+      "Leader-Manifestation",
+      "Resource-Yielding",
+      "Environmental-Adaptive",
+      "High-Stakes-Catalyst"
+    ],
+    "variants": [
+      "corrupted",
+      "mutated"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:56:11Z",
+      "minorityValues": {
+        "rarity": "fused",
+        "threatBand": "cataclysm"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Retribution",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "Fungal-Summoner",
+      "Parasitic Mycelium"
+    ],
+    "gameTypeId": 900,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "melee",
+    "reason": "The ability to summon high-tier elite units like Gargantuars and Ultimate Zombies, combined with defensive immunity and area-of-effect death triggers, places it as a dominant battlefield commander.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "HypnoEmperor",
+    "targetPreference": "backline",
+    "threatBand": "tyrant",
+    "traits": [
+      "Damage-Reflecting Charm",
+      "Cyclical Necromancy",
+      "Environmental Adaptation",
+      "Chain-Reaction Spore"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split",
+        "threatBand": "unresolved"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T17:02:23Z",
+      "minorityValues": {
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "Fungal-Summoner",
+      "Parasitic Spore-Host"
+    ],
+    "gameTypeId": 917,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "melee",
+    "reason": "The creature acts as a force multiplier by summoning powerful, specialized zombies and triggering additional waves upon death, making it a strategic threat rather than a direct combatant.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "HypnoQueen",
+    "targetPreference": "backline",
+    "threatBand": "unresolved",
+    "traits": [
+      "Reactive Charm-Reflex",
+      "Periodic Reanimation",
+      "Environmental Adaptation",
+      "Post-Mortem Spore-Burst"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted",
+      "blessed"
+    ]
+  }
+]

@@ -77,5 +77,84 @@
       "blessed"
     ],
     "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:24:56Z",
+      "minorityValues": {
+        "aptitudePrimary": "Precision",
+        "rarity": "sunwoven"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "Pyrophytic Artillery"
+    ],
+    "gameTypeId": 962,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The creature's ability to pierce targets, inflict status effects, and trigger explosive area-of-effect damage upon death makes it a significant combat threat rather than a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "FlyingThreePeater",
+    "targetPreference": "swarm",
+    "traits": [
+      "Piercing Projectiles",
+      "Thermal Infliction",
+      "Post-Mortem Combustion"
+    ],
+    "variants": [
+      "blessed",
+      "mutated"
+    ],
+    "verdict": "too-high"
   }
 ]

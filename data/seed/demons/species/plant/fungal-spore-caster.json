@@ -25,7 +25,7 @@
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T14:11:43Z",
+      "emittedUtc": "2026-09-03T16:56:30Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -41,7 +41,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
+    "aptitudePrimary": "Focus",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "stated",
@@ -51,23 +51,23 @@
     "family": [
       "Fungal Spore-Caster"
     ],
-    "gameTypeId": 1300,
-    "posture": "Force",
+    "gameTypeId": 1023,
+    "posture": "Finesse",
     "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "The creature's ability to perform wide-area AOE attacks with both smoke and multi-directional spores justifies its status as a significant threat.",
+    "reason": "The creature's ability to convert enemies into allies through charm effects is a significant tactical disruption, but its low damage and conditional mechanics keep it at a manageable pest level.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "BigGloom",
-    "targetPreference": "swarm",
+    "speciesId": "HypnoFume",
+    "targetPreference": "frontline",
     "traits": [
-      "Aerosolized Smoke",
-      "Multi-directional Spore Volley",
-      "Colossal Stature"
+      "Charm-inducing smoke",
+      "Symbiotic transformation",
+      "Conditional crowd control"
     ],
     "variants": [
       "normal",

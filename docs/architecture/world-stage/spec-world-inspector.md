@@ -218,6 +218,26 @@ static-vs-dynamic line, and a remembered army is a lie waiting to happen.
   early.
 - **The band-1 scrim fix.** §8d.3 is a kit-wide band-model change.
 
+
+### GG-50 — this surface's volume declaration
+
+**Tier-1 gate, and it was missing from all fifteen specs until the 2026-09-03 audit.** `ui/volumeMatrix.test.ts`
+is an *exhaustive* registry — its last test is `expect(COLLECTION_SURFACES).toHaveLength(8)` — so a new
+collection surface that does not register **turns a shipped test red**. Registration is not optional
+paperwork; it is how this program lands without breaking CI.
+
+| Surface | `Sector inspector — slot rows` |
+|---|---|
+| Strategy | **`render-all`** |
+| Reason | Bounded by authored sector content: the highest `SlotIndex` across both shipped templates is **3**, i.e. four slots. `SectorTypeCatalog.AllowedSlotTypes` constrains which *kinds* a sector may hold, not how many — so this bound is content, not structure, and moves only when `world-generator` authors wider sectors |
+| Proof | A maximal-sector fixture, which this module's GG-61 test already requires |
+
+| Surface | `Sector inspector — force rows` |
+|---|---|
+| Strategy | **`render-all`** |
+| Reason | Bounded by how many entities can co-locate in one sector — at most one per faction in practice, and `first-light` peaks at 1. Even at §8e.3's target the list is single-digit. Enemy entries are **bands**, not per-unit rows, so an opposing army does not lengthen it |
+| Proof | The contested-sector fixture in this module's force-row tests |
+
 ## Commands
 
 ```powershell

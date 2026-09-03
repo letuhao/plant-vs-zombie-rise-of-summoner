@@ -461,3 +461,204 @@ Neither of these came from a test. Both came from playing twenty turns and readi
 - [x] Fog is now a persistent condition rather than an opening move — the property the module was tuned against but the shipped map could not produce.
 - [ ] **Owner decision — the oscillation.** On the reshaped map Zomboss alternates `defend black-gate` (threat 899) / `expand to verdant-shelf` (value 436) from T8 onward. That is the missing **momentum** term: a bonus to last turn's choice, specified in W34 and deliberately unbuilt because it needs cross-turn memory, which becomes hashed replayed state. Now backed by evidence rather than a hunch, so it is a real decision rather than a tuning nit.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
+
+## Phase 12 — sector development (wave 3)
+
+Spec: [sector-development](../docs/architecture/world/spec-sector-development.md) · Program:
+[world-map-program.md](../docs/architecture/world-map-program.md) · Constraint:
+[empire-economy-ssot.md](../docs/architecture/empire-economy-ssot.md) A8.
+
+**This is wave 3 of `world-map-program`, not of `world-stage`.** The two programs meet at exactly two
+places, both already settled: `RulesetVersion` (world-stage's `world-commands` takes 5 → 6 first,
+this phase takes 6 → 7), and the legion count (§8e.3 fixed it at **6–10, tunable**; this phase
+authors the tuning row, `world-stage` consumes the number). Neither waits on the other beyond that.
+
+**Numbering.** The file's existing tasks run **W1–W41** — not W90ish; Phase 11 closes at W41, and
+W39 sits out of order inside Phase 9. Phase 12 therefore starts at **W42** and runs to **W60**.
+
+**Three facts that size this phase**, all verified in the tree today:
+
+- **`Growth` is a no-op.** `TurnEngine.cs:196-200` is `report.BeginPhase(Phases.Growth); return world;`
+  in full. The phase exists, is in the locked order, and does nothing.
+- **The player commands exactly one legion and cannot gain another.** Every `WorldEntityKind.Legion`
+  in `src/` is `e-dave-legion-1`, one per template.
+- **`DevelopmentLevel` is a cost with no producer.** It is stored (`WorldState.cs:135`), hashed
+  (`WorldCanonical.cs:35`), projected (`WorldDtos.cs:74`), believed (`FactionIntel.cs:96`) **and
+  charged for** (`LoamUpkeep.cs:44`) — and nothing in `src/` ever raises it; every assignment is a
+  copy. `SectorPhase.Developed` (`WorldState.cs:12`) is referenced nowhere. Both are this module's
+  to resolve.
+
+**The build order below is identity-first, and that is deliberate.** Every hashed-behaviour change
+lands with its tuning at the identity value, so it moves no golden; the single `RulesetVersion` bump
+(W58) is what turns the numbers on. The arithmetic makes this exact rather than approximate:
+`sum * intensity * handicap / 1_000_000` becomes `sum * intensity * handicap * season / 1_000_000_000`,
+and at `seasonMilli = 1000` numerator and denominator both scale by 1000, so the integer quotient is
+bit-identical. Two golden re-blesses total, both budgeted here rather than discovered per task.
+
+- [ ] **Owner decision: the recruit rate's *shape*.** The 6–10-by-turn-40 target pins the endpoint, not the shape — a steady seat drip and a lair-heavy burst both land there and play completely differently. The method for settling the *numbers* already exists (the L9 harness pattern), so those are a scheduled measurement rather than a question. Which shape the game wants is a design call. Blocks W58's tuning values, not W43's mechanism.
+- [ ] **Owner decision: what a season actually changes.** Three seams are available and all three are a one-line per-mille multiplier: yield (`LoamProduction.For`), upkeep (`LoamUpkeep.For`), movement (`MovementPolicy.BudgetFor`, `LaneCost.cs:38-43`). Endless Legend's winter changes movement *and* yields, which is the maximal reading; the minimal one is yield alone. **Movement is the riskiest of the three** — it interacts with zone of control and with the arithmetic lane-crossing solution, and a seasonal budget change makes a forecast the player already saw go stale. W47 and W48 build the upkeep seam because it is the one the spec prices; a movement seam is additional scope this decision would open.
+- [ ] **Owner decision: whether a project is genuinely a second concept.** A project and a structure are both *"a cost, some turns, then a persistent effect"*, which argues for one catalog with a scope field. Against that: `RequiredSlotKind` and `YieldMultiplierMilli` are meaningless on a sector-wide project, and a catalog with columns null for half its rows is the shape that later grows a `switch`. Two catalogs is the safer default and the more verbose one. **Blocks W52**; W42–W51 are unaffected either way.
+
+- [ ] **Task W42: The `growth` and `seasons` tuning blocks, published at identity**
+  - Description: add `growth` (seat pulse per week, lair multiplier per-mille, special-week multiplier, raise cost, recruit soft cap if one is needed) and `seasons` (`count`, `monthsPerSeason`, and per-season yield / upkeep / movement multipliers, per-mille) to the world tuning file, plus `growth.legionTarget` (`min: 6`, `max: 10`, `byTurn: 40`) — **read by the harness, never by the engine**, because a legion count the engine enforced would be a hard progression ceiling. Seasons live beside `calendar` because a season *is* the calendar. Every multiplier ships at **1000‰ (identity)** and every pulse at **0**, so nothing downstream moves a hash until W58. The file is not hand-edited: `python tools/tuning/publish.py world <dotted.key>=<value>` writes `world.v2.json` and leaves `world.v1.json` on disk as the revert; both hosts pin the filename explicitly (`Program.cs:38`, `RpgHost.cs:66`), so a version bump is two host edits.
+  - Acceptance: `world.v2.json` exists with both blocks and `_meta.owner` naming this spec; both host pins read `world.v2.json` and the server and injector still boot; a policy test reads every new key through a named accessor (no bare literal reaches a call site); `growth.legionTarget` is referenced by no file under `src/`.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.E2E.Tests`
+  - Files: `data/tuning/world.v2.json`, `src/FusionRpg.Server/Program.cs`, `src/FusionRpg.Injector/Host/RpgHost.cs`, `src/FusionRpg.Core/World/Growth/RecruitPolicy.cs`, tests.
+  - Dependencies: None.
+  - Scope: S.
+
+- [ ] **Task W43: `RecruitPolicy` — the seated weekly pulse, pure**
+  - Description: **recruitment is seated, not lair-gated**, and the reason is arithmetic rather than taste: the obvious design (lairs release recruits weekly) cannot reach 6–10 legions by turn 40 on either shipped map. `first-light` has **one** lair slot and it is guarded (`WorldTemplateCatalog.cs:119`, `GuardState.Intact`); `two-hearths` also has exactly one. A single source behind a fight is not a rate. So every held sector with a Seat contributes a base pulse and a **cleared lair multiplies** its sector's pulse — reusing the exact shape `loam-structures` already ships (a rootbed seeps, a well multiplies it, `StructureDef.YieldMultiplierMilli`) rather than inventing a second economy idiom. Seats are dense enough to bite: 5 in `first-light`, 9 in `two-hearths`. Pure over `(turn, seed)`, no world mutation.
+  - Acceptance: a pulse fires **on week boundaries and only on week boundaries** (`TurnCalendar.Roll(turn, seed).WeekBoundary`); a cleared lair multiplies its sector's pulse and an intact one does not; a special week scales the pulse and a plague month suppresses it — **and the plague beats the special week**, matching the rule `TurnCalendar.cs:52-54` already applies to growth; every number comes from W42's accessors.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Growth`
+  - Files: `src/FusionRpg.Core/World/Growth/RecruitPolicy.cs`, `tests/FusionRpg.Core.Tests/World/RecruitPolicyTests.cs`.
+  - Dependencies: W42.
+  - Scope: M.
+
+- [ ] **Task W44: The three hashed sector fields, and the one batched re-bless**
+  - Description: add `WorldSector.RecruitStock` (`long`), `ProjectId` (`string?`) and `ProjectTurnsRemaining` (`int?`) to the model and to `WorldCanonical.Write`, which hashes sector rows field by field (`WorldCanonical.cs:34-37`) — so each one moves every world golden. **All three land together in one batched re-bless with `RulesetVersion` unchanged**, the L25 precedent recorded in `decisions.md`; discovering them one at a time is how a budget closed once gets reopened five times. Recruit stock is a **stock, not a rate** — a plain `long` count — for the same reason `WorldSector.LoamStock`'s own comment gives (`WorldState.cs:137-144`): per-mille means rate or fraction, and a stockpile is neither. It carries **no hard cap**; if accrual needs throttling it gets a configurable soft cap in tuning, declared in `ssot-power-scale.md` §11's register.
+  - Acceptance: the three fields exist, hash, and default to zero/null on every existing template; exactly one re-bless, and its triage note proves the goldens moved for the field batch **and nothing else** (`RulesetVersion` is untouched by this task); `WorldValidation` rejects a negative `RecruitStock` and a `ProjectTurnsRemaining` without a `ProjectId`.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Guard.Tests`
+  - Files: `src/FusionRpg.Core/World/WorldState.cs`, `WorldCanonical.cs`, `WorldValidation.cs`, the golden constant, tests.
+  - Dependencies: W42.
+  - Scope: M.
+
+- [ ] **Task W45: Persist the three fields, and remember them under the existing fog rule**
+  - Description: store and read back the three new fields, and give `RememberedSector` the same fields under the rule already in force — full detail at `SectorSight.Full` only (`IntelRecorder.cs:100`, `IntelSeed.cs:81`), and **never fogged for your own ground** (`world-map-program.md:46`). No new tables; the existing sector row grows three columns via the `EnsureColumn` pattern the loam program already used.
+  - Acceptance: a world with a stocked, mid-project sector round-trips through create → save → load byte-identically; an existing database opens without migration error and reads the new columns as zero/null; a faction that glimpsed a sector remembers no recruit stock, and a faction that owns it remembers all three.
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests` · `.\scripts\guard-dal.ps1`
+  - Files: `src/FusionRpg.Data/Sqlite/RpgStore.World.cs`, `src/FusionRpg.Core/World/Intel/FactionIntel.cs`, `IntelRecorder.cs`, tests.
+  - Dependencies: W44.
+  - Scope: M.
+
+- [ ] **Task W46: Project the new state owner-only**
+  - Description: recruit stock and project progress follow `WorldSectorDto`'s existing owner-only convention for economy numbers (`WorldDtos.cs:88-102`). A sector's `DevelopmentLevel` already is **not** owner-only and stays as it is — this task does not change what is already on the wire, only what it adds.
+  - Acceptance: a viewer who does not own a sector receives no recruit stock and no project progress for it, asserted by the existing fog property test (no payload names a fact its viewer may not know); the owner receives all three; the world FE fixture is regenerated and the drift test (`WorldFixtureTests`) is green.
+  - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`
+  - Files: `src/FusionRpg.Contracts/WorldDtos.cs`, `src/FusionRpg.Server/WorldEndpoints.cs`, `web/fusion-rpg-web/src/features/world/fixtures/first-light.json`, tests.
+  - Dependencies: W45.
+  - Scope: S.
+
+- [ ] **Task W47: `CalendarRoll.Season` — derived, drawing nothing**
+  - Description: **the calendar clock is already built and deterministic** (`TurnCalendar.Roll(turn, seed)`, `TurnCalendar.cs:31-58`, per-boundary derived streams at `:41` and `:48`, every rate tunable at `:27-29`). This task adds only the season, and it adds **no RNG and no state**: `season(turn) = (turn / (DaysPerWeek * WeeksPerMonth * MonthsPerSeason)) % SeasonCount`, a pure function of the turn. A season is **never fogged** — nobody is uncertain about what month it is — so belief computes it from the turn the same way `LoamUpkeep.cs:33-39` already argues for its terrain-or-self-knowledge terms.
+  - Acceptance: `season(turn)` is a table test across a full cycle plus the boundaries either side; the `calendar:week:<turn>` and `calendar:month:<turn>` streams produce **byte-identical sequences before and after** the season member exists — that is the assertion that proves it draws nothing; the same `(turn, seed)` gives the same roll with and without the member.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Calendar` · `dotnet test tests\FusionRpg.Guard.Tests`
+  - Files: `src/FusionRpg.Core/World/Turn/TurnCalendar.cs`, `tests/FusionRpg.Core.Tests/World/TurnCalendarSeasonTests.cs`.
+  - Dependencies: W42.
+  - Scope: S.
+
+- [ ] **Task W48: The season factor inside `LoamUpkeep`, and its three truth-side callers**
+  - Description: `LoamUpkeep.For` has **no calendar term today** (`LoamUpkeep.cs:40-47`). Add one to the five-argument overload and thread it through the `(world, sector)` overload and its truth-side callers — `LoamBalance.cs:13` and `LoamPhases.cs:124`. **The product gains a fourth per-mille factor and crosses `1_000_000_000`**, so: `sum` is already `long` and the chain promotes, **widen before multiplying**, the divide happens **exactly once and last**, and the whole expression sits in a `checked` block — an overflow here must **throw**, never wrap into negative upkeep, which is the defect `WorldState.cs:137-144` records having already happened once with `int`. Season and plague compose **multiplicatively on the pre-clamp input**, matching `LoamPolicy.SurgeDecayMultiplierMilli`'s own audit-resolved rule (`LoamPolicy.cs:143-148`). Ships at `seasonMilli = 1000`, so no golden moves.
+  - Acceptance: at identity the upkeep for every sector of both templates is **bit-identical** to today's, proven by running the existing goldens unchanged; division happens once; a four-factor product at the top of its legal range does not overflow and a forced overflow **throws** rather than wrapping; no `float` or `double` appears anywhere on the path.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `python scripts\audit-overflow.py`
+  - Files: `src/FusionRpg.Core/World/Loam/LoamUpkeep.cs`, `LoamBalance.cs`, `LoamPhases.cs`, `tests/FusionRpg.Core.Tests/World/LoamUpkeepSeasonTests.cs`.
+  - Dependencies: W47.
+  - Scope: M.
+
+- [ ] **Task W49: The same term on the belief and forecast sides — all call sites move together**
+  - Description: **this is the task the spec singles out as the one that fails silently.** `LoamUpkeep.For`'s other call sites are the AI's belief path (`FrontierRulesPolicy.cs:189`), the player-facing forecast (`LoamForecast.cs:60`) and the server's own forecast projection (`WorldEndpoints.cs:438` — a **fifth** site the spec's "four callers" count does not include; verified by grep). Omit the season from any of them and the AI plans against an upkeep it does not pay, or the forecast disagrees with the act — the precise failure §8c.6 lists as load-bearing about `Weakest`. Adding it to the truth side only is worse than not adding it at all, because it looks correct.
+  - Acceptance: **one test walks every call site of `LoamUpkeep.For` and asserts a single answer** for the same sector in the same season — `LoamPhases`, `LoamBalance`, `LoamForecast`, `FrontierRulesPolicy` and `WorldEndpoints`; a grep-shaped assertion fails if a new call site appears that does not pass a season; the forecast the player sees and the upkeep the turn charges agree at a non-identity season multiplier.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`
+  - Files: `src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs`, `src/FusionRpg.Core/World/Loam/LoamForecast.cs`, `src/FusionRpg.Server/WorldEndpoints.cs`, tests.
+  - Dependencies: W48.
+  - Scope: M.
+
+- [ ] **Task W50: Fill the `Growth` phase — `GrowthPhases`, wired and accruing**
+  - Description: replace `TurnEngine.cs:196-200`'s no-op with a call into a new `GrowthPhases.Growth`, which accrues `RecruitPolicy`'s pulse into each held sector's `RecruitStock` on week boundaries. `GrowthPhases` is its own file for the reason `LoamPhases.cs:8-10` gives for being one: `TurnEngine.cs` is already the busiest file in the module. **This task does not move the phase**; it fills it. Ships with W42's pulse at 0, so it accrues nothing and no golden moves.
+  - Acceptance: with the pulse at 0 every existing golden is byte-identical and the locked-phase-order test is untouched; with a non-zero pulse in a test-local tuning, stock accrues on week boundaries only, in stable sector-id order, with no dictionary enumeration; the report gains one entry per accruing sector, naming the sector structurally (`TurnReportEntry.SectorId`, W39's field) rather than in prose.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Guard.Tests`
+  - Files: `src/FusionRpg.Core/World/Growth/GrowthPhases.cs`, `src/FusionRpg.Core/World/Turn/TurnEngine.cs`, tests.
+  - Dependencies: W43, W44.
+  - Scope: M.
+
+- [ ] **Task W51: The `raise` command, resolving in `Snapshot`**
+  - Description: a pulse never spawns a legion by itself. `raise` spends a sector's recruit stock and founds a legion at that sector's Seat. It resolves in `Snapshot`, immediately after `BuildResolver` (`TurnEngine.cs:280`) and **for the identical reason that resolver states** (`BuildResolver.cs:14-17`): ownership is only decided once the rest of the turn has run, so the order re-validates at resolution rather than trusting Reveal-time admission. The new entity follows `SpawnTheUnmade` exactly (`LoamPhases.cs:246-257`) — a pure constructor, no RNG, and an id **derived from its cause**: `e-{factionId}-legion-{turn}-{sectorId}`, unique by construction because a raise consumes the sector's stock so at most one can succeed per sector per turn. A monotonic counter would be hidden state a replay has to reproduce. Which species a sector recruits is **the sector's climate**; no new selection mechanism. **A new command kind must be plumbed through all five sites in this same change** or it is silently lost — the defect that made `stance` a dead letter and that `world-stage`'s `world-commands` repaired for `sustain` and `build`.
+  - Acceptance: `raise` is rejected with its own reason for each illegal case — not yours at Snapshot, no Seat slot, a hostile entity standing in it, `RecruitStock < RaiseCostPoints`; a raised legion's id is derived and stable across replay; the round-trip property test over **every kind in `WorldCommandKinds.All`** covers `raise` with its payload intact; **no hard cap on legion count exists anywhere in `src/`**.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Data.Tests`
+  - Files: `src/FusionRpg.Core/World/WorldCommand.cs`, `src/FusionRpg.Core/World/Growth/RaiseResolver.cs`, `src/FusionRpg.Data/Sqlite/RpgStore.WorldTurns.cs`, `src/FusionRpg.Contracts/WorldDtos.cs`, `src/FusionRpg.Server/WorldEndpoints.cs`.
+  - Dependencies: W50, and `world-stage` Phase 0's `world-commands` (which owns the `Amount` / `StructureId` plumbing fix and the every-kind round-trip property test this task rides on).
+  - Scope: L.
+
+- [ ] **Task W52: `ProjectCatalog`, the `develop` command, and projects advancing in `Growth`**
+  - Description: **blocked on the third owner decision above.** Slot buildings raise the slot; sector **projects** raise the sector — development level, defense, capacity — and a project is *"this sector is doing this for the next three turns"*, costing turns and materials, never a hidden industry stat. `ProjectCatalog` mirrors `StructureCatalog`'s shape exactly (dictionary-backed, eager `Validate()`, `IsKnown`/`Get` — `StructureCatalog.cs:48-140` is the template), and `develop` resolves in `Snapshot` beside `raise` and `build` for the same ownership-race reason. **Projects advance in `Growth`; structures keep advancing in `Production`** (`LoamPhases.DecrementConstruction`) — the split is deliberate, because reusing that loop would make one phase serve two modules and put a second module's fingerprints on a shipped ruleset.
+  - Acceptance: the catalog validates at static init and rejects unknown ids at the write gate; `develop` is plumbed through all five command sites and covered by the every-kind round-trip test; **`Growth` runs after `Production`, so a project completing this turn affects next turn's yield and never this turn's** — asserted as its own test, because it is the stated consequence of the split; no `switch (id)` over project ids anywhere.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Data.Tests`
+  - Files: `src/FusionRpg.Core/World/Growth/ProjectCatalog.cs`, `DevelopResolver.cs`, `GrowthPhases.cs`, `src/FusionRpg.Core/World/WorldCommand.cs`, `src/FusionRpg.Data/Sqlite/RpgStore.WorldTurns.cs`.
+  - Dependencies: W51, and the projects-as-a-second-concept decision.
+  - Scope: L.
+
+- [ ] **Task W53: Give `DevelopmentLevel` a producer**
+  - Description: close the trap `empire-economy-ssot.md` A8 named — development priced as pure cost quietly kills the builder layer. Today `DevelopmentLevel` is stored, hashed, projected, believed and charged for, and **every assignment in `src/` is a copy**; a completed project is what raises it. This task is the one line that makes the number mean something, plus the belief and report consequences of a level actually changing.
+  - Acceptance: a completed development project raises the sector's `DevelopmentLevel` by its authored amount, once, in `Growth`; the raise appears in the turn report naming its sector; a faction watching that sector at `SectorSight.Full` sees the new level and one that glimpsed it does not; no code path lowers the level (there is no de-development, and a silent decrement would be a hidden cap).
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Growth`
+  - Files: `src/FusionRpg.Core/World/Growth/GrowthPhases.cs`, `src/FusionRpg.Core/World/Intel/IntelRecorder.cs`, tests.
+  - Dependencies: W52.
+  - Scope: S.
+
+- [ ] **Task W54: Delete `SectorPhase.Developed`**
+  - Description: declared at `WorldState.cs:12` and referenced **nowhere** in `src/`. This module deliberately does not make it real: development level is the number, and a phase mirroring it is derived state that rots, which `spec-world-movement.md` already forbids. Removing it is verifiably safe here, and the proof is the same property `SlotTypeCatalog.cs:25-28` relies on for `SlotKind`: `SectorPhase` is persisted and read back **by name, never by ordinal** (`RpgStore.World.cs:230` writes `s.Phase.ToString()`, `:429` reads `Enum.Parse<SectorPhase>`), and `WorldCanonical.Row` hashes the same string form (`WorldCanonical.cs:95-104`). A separate change from W53 on purpose — a deletion and a feature in one diff is a deletion nobody reviews.
+  - Acceptance: the enum member is gone and the solution builds; every world golden is **byte-identical** (no ordinal was ever hashed); an existing saved world with no `Developed` row loads unchanged; a grep for `Developed` over `src/` and `tests/` returns nothing.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Data.Tests`
+  - Files: `src/FusionRpg.Core/World/WorldState.cs`, tests.
+  - Dependencies: W53.
+  - Scope: XS.
+
+- [ ] **Task W55: The A8 invariant — development must pay**
+  - Description: `empire-economy-ssot.md:318` is binding: **development must raise yield faster than it raises upkeep, or nobody will ever develop.** Today only the upkeep half exists (`LoamPolicy.cs:52-53`). Add `DevelopmentYield` reading a new `development` block **in the same file** as `upkeep.developmentUpkeepPerLevel` — `data/tuning/loam.v{n}.json` — because the invariant is a comparison between two numbers and splitting them across files makes it unverifiable by reading. The file's `_meta.owner` gains this spec as a second owner. Ships at level 0 for every shipped sector, so it moves nothing until W53's producer runs.
+  - Acceptance: **the invariant is asserted across the whole authored level range, not at one sample point** — for every level, marginal yield exceeds marginal upkeep; the test fails if either tuning row is edited to break it, and its message names A8; every magnitude on the path is `long` and divides by 1000 exactly once, last.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `python scripts\audit-magic-numbers.py --summary`
+  - Files: `data/tuning/loam.v2.json`, `src/FusionRpg.Core/World/Growth/DevelopmentYield.cs`, `src/FusionRpg.Core/World/Loam/LoamProduction.cs`, `tests/FusionRpg.Core.Tests/World/DevelopmentYieldTests.cs`.
+  - Dependencies: W53.
+  - Scope: M.
+
+- [ ] **Task W56: The yield structure kinds the reward layer needs**
+  - Description: the structure **mechanism** is done and wired — `StructureCatalog`, `WorldSlot.StructureId` + `ConstructionTurnsRemaining`, `BuildResolver.Run` called at `TurnEngine.cs:280`, and `Rule14StructureSlotKindMatches` validating it. What is missing is rows and kinds. Add a new `StructureKind` for yield structures (a soul conduit, extractors, a hatchery on a lair) as catalog rows, plus the **flat structure-only yield field** `spec-structure-substrate.md` explicitly deferred to *"a new field added when there is a real row to test it against"* — this is that row. **Note the audit correction:** `StructureCatalog.cs` defers to `loam-structures`, not to this module; the deferral to `sector-development` is the substrate spec's. This module's structures produce **loam and recruits only** — the reward layer (souls, essence, materials) is unassigned and stays out (see the spec's fourth open question, which is not this phase's to answer).
+  - Acceptance: every new row validates against `Rule14StructureSlotKindMatches` and its `RequiredSlotKind`; the flat yield field is read by `LoamProduction` and defaults to 0 so no existing structure changes; a hatchery on a lair multiplies that sector's recruit pulse through W43's policy rather than through a second code path; content is data — no `switch` over structure ids.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Structure`
+  - Files: `src/FusionRpg.Core/World/Loam/StructureCatalog.cs`, `src/FusionRpg.Core/World/Loam/LoamProduction.cs`, `data/tuning/loam.v2.json`, tests.
+  - Dependencies: W55.
+  - Scope: M.
+
+- [ ] **Task W57: Rename the `*CostMilli` tuning keys that are not per-mille (ask-first)**
+  - Description: every `*CostMilli` in `data/tuning/loam.v1.json`'s `structures` block — `wellCostMilli` 200, `waystationCostMilli` 300, `granaryCostMilli` 150 — is a **whole loam unit, not a per-mille**: `StructureDef.CostMilli` is compared directly against `WorldEntity.CarriedLoam` at `BuildResolver.cs:101`, and that is a plain count. The maths is right and the name lies, which is exactly the kind of name that later grows a spurious `/ 1000`. This is a `publish.py` migration plus a loader edit, not a redesign. **The spec files this under ask-first**, so it does not land without the owner saying go.
+  - Acceptance: the keys read `*Cost` and the field reads `Cost`; every structure cost comparison is unchanged in value, proven by the existing build goldens staying byte-identical; the old key names appear nowhere in `src/`, `data/tuning/` or the docs that cite them.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `python scripts\audit-magic-numbers.py --summary`
+  - Files: `data/tuning/loam.v2.json`, `src/FusionRpg.Core/World/Loam/StructureCatalog.cs`, `src/FusionRpg.Core/World/Loam/LoamPolicy.cs`, `docs/architecture/loam/spec-structure-substrate.md`.
+  - Dependencies: W56, and owner sign-off.
+  - Scope: S.
+
+- [ ] **Task W58: Turn the numbers on — `RulesetVersion` advances exactly once**
+  - Description: the single behaviour bump, and the second and last re-bless. Everything above landed at identity; this task sets the real growth pulse (from the recruit-rate shape decision), the real season multipliers (from the what-a-season-changes decision) and takes the version bump with them. **Read the current value; do not hard-code.** `world-stage`'s `world-commands` takes 5 → 6 first, so the value in `TurnEngine.cs:42` at the moment this task runs is what gets incremented — it is **5 today** and must be re-read, not assumed. The row goes in `decisions.md` because hashed behaviour is locked behaviour, following `Intel`'s move (2→3), `loam-turn` waking two phases (3→4) and `LegionSupply` replacing attrition (4→5).
+  - Acceptance: `RulesetVersion` is exactly one greater than whatever it read, and a test asserts the stored-versus-engine replay refuses across the bump rather than fabricating a report; the re-bless is **triaged in advance** with a predicted-delta writeup naming which goldens move and why, and the prediction is checked against the actual diff rather than assumed; `decisions.md` carries the row; this is the **second and final** re-bless of the phase.
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Data.Tests` · `dotnet test tests\FusionRpg.E2E.Tests`
+  - Files: `src/FusionRpg.Core/World/Turn/TurnEngine.cs`, `data/tuning/world.v3.json`, `docs/architecture/decisions.md`, the golden constants.
+  - Dependencies: W50, W49, W55, and the first two owner decisions.
+  - Scope: M.
+
+- [ ] **Task W59: Forty turns, and a legion count that is measured rather than enforced**
+  - Description: the acceptance run, living with the other world checkpoints. A forty-turn `first-light` run ends with the player commanding several legions **they chose to raise** rather than one the template handed them. The assertion is a **calibration assertion over tuning, not an engine limit**: if the count lands outside `growth.legionTarget`, the tuning moves — not the test's meaning. That distinction is the whole reason the target lives in `data/tuning/` and is read by the harness only.
+  - Acceptance: the run reports the player's legion count and asserts it lands inside `growth.legionTarget` (6–10 by turn 40); the run **replays byte-identically** from its command log with no policy involved; reversing input entity order changes nothing; the season is visible in the turn report and a season boundary is observable inside the forty turns.
+  - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`
+  - Files: `tests/FusionRpg.E2E.Tests/WorldSectorDevelopmentAcceptanceTests.cs`, `data/tuning/world.v3.json`.
+  - Dependencies: W58.
+  - Scope: M.
+
+- [ ] **Task W60: Determinism sweep and the phase's guard close**
+  - Description: confirm the guards caught everything the phase added. `WorldDeterminismGuardTests` scans `Core/World/**` for banned symbols and **picks up new files automatically** (`tests/FusionRpg.Guard.Tests/WorldDeterminismGuardTests.cs:16-47`, plus the no-floats-in-world-state rule at `:51`), so `Growth/` is already in scope — this task proves it rather than assumes it, and closes the overflow and magic-number audits over the new arithmetic.
+  - Acceptance: no wall clock, no `System.Random` and no floating point anywhere under `Core/World/Growth/`; any RNG that exists draws from a derived stream named `growth:recruit:<turn>`, one stream per concern, following `TurnCalendar.cs:41`'s convention so an extra draw in one never shifts another; `python scripts\audit-overflow.py` reports zero critical; `python scripts\audit-magic-numbers.py` adds no new entries for this phase's Policy/Catalog files.
+  - Verify: `dotnet test tests\FusionRpg.Guard.Tests` · `.\scripts\guard-dal.ps1` · `python scripts\audit-overflow.py` · `python scripts\audit-magic-numbers.py --summary`
+  - Files: `tests/FusionRpg.Guard.Tests/WorldDeterminismGuardTests.cs`, `src/FusionRpg.Core/World/Growth/*.cs`.
+  - Dependencies: W59.
+  - Scope: S.
+
+### Checkpoint 12 — an army that grows, a year that changes, ground worth improving
+
+- [ ] A forty-turn `first-light` run ends with the player commanding a legion count inside `growth.legionTarget`, raised by their own orders.
+- [ ] The season is derived, hashed, replayed and visible in the turn report, and the HUD's season slot has a real field behind it.
+- [ ] The A8 invariant passes across the **full authored level range** — development raises yield faster than upkeep, or nobody develops.
+- [ ] Every kind in `WorldCommandKinds.All` survives the store round trip with every payload field intact — `sustain`, `build`, `raise` and `develop` included.
+- [ ] **Exactly two golden re-blesses**, both triaged in advance, and `RulesetVersion` advanced **exactly once**.
+- [ ] `DevelopmentLevel` has a producer; `SectorPhase.Developed` is gone.
+- [ ] All suites and the four boundary guards green: `dotnet test tests\FusionRpg.Core.Tests`, `...\FusionRpg.Data.Tests`, `...\FusionRpg.Guard.Tests`, `...\FusionRpg.E2E.Tests`; `cd web\fusion-rpg-web; npm test`.
+- [ ] **Owner playtest** — the only thing tests cannot sign: play forty turns and say whether raising a legion feels like a decision or a formality, and whether a season change is legible without reading the report.
+- [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).

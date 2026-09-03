@@ -16,6 +16,7 @@ Usage (repo root):
     python tools/tuning/publish.py contracts --label "spring balance pass" loyalty.winGain=20
     python tools/tuning/publish.py aptitudes "edges[channel=resource.regen.hp,source=Vigor].kMilli=83"
     python tools/tuning/publish.py aptitudes --add-edge "channel=resource.max.poise,source=Bulwark,kMilli=28000"
+    python tools/tuning/publish.py action-rungs --add-rung-power-budget 1000
 
 `--add-edge` is the one path that ADDS rather than edits, and it exists because a coverage gap could
 not be closed otherwise: `set` refuses to invent a key by design, and the file forbids hand-editing, so
@@ -200,6 +201,57 @@ def add_edge(doc, spec_raw):
 
 
 
+def add_rung_power_budget(doc, reference_power):
+    """A-G1 (spec-tier-access-gate.md SS3.1): add `powerBudgetMilli` to every row of `rows`, derived
+    from the row's OWN already-shipped columns rather than a new curve --
+
+        powerBudgetMilli(r) = poolRolls(r) * referencePower * qPowerMilli(r) / 1000
+
+    long arithmetic (Python ints are unbounded, so this never wraps the way the C# reader must guard
+    against), widened before multiplying, divided by 1000 last and exactly once. Refuses rather than
+    guesses, matching --add-edge: any row already carrying the column is refused (use `set` to change
+    a value), and a row missing `poolRolls`/`qPowerMilli` is refused by name. Also records the
+    derivation and the scalar's untuned status in `_meta`, the same direct-write `--label` already
+    uses for `_meta.rebalanceLabel` -- `set_path` cannot fill either because both are new keys.
+    """
+    rows = doc.get("rows")
+    if not isinstance(rows, list) or not rows:
+        raise KeyError("'rows' is not a non-empty array -- --add-rung-power-budget is action-rungs-shaped")
+
+    if any(isinstance(r, dict) and "powerBudgetMilli" in r for r in rows):
+        raise KeyError("some row already has 'powerBudgetMilli' -- use the set path to change a "
+                       "value, this flag only fills a first-time gap")
+
+    added = []
+    for r in rows:
+        if not isinstance(r, dict) or "poolRolls" not in r or "qPowerMilli" not in r:
+            raise KeyError("a row is missing 'poolRolls' or 'qPowerMilli' -- cannot derive its power budget")
+        pool_rolls, q_power_milli = r["poolRolls"], r["qPowerMilli"]
+        if not isinstance(pool_rolls, int) or not isinstance(q_power_milli, int):
+            raise KeyError("'poolRolls'/'qPowerMilli' must be integers")
+
+        budget = pool_rolls * reference_power * q_power_milli // 1000
+        r["powerBudgetMilli"] = budget
+        added.append((r.get("rung"), budget))
+
+    meta = doc.setdefault("_meta", {})
+    meta["referencePower"] = reference_power
+    meta["referencePowerUntuned"] = True
+    meta["powerBudgetDerivation"] = (
+        "powerBudgetMilli(r) = poolRolls(r) * referencePower * qPowerMilli(r) / 1000 -- long "
+        "arithmetic, widened before multiplying, divided by 1000 last and exactly once (A-G1, "
+        "spec-tier-access-gate.md SS3.1). referencePower = PowerMath.One (PowerVector.cs:135, inside "
+        "the PowerMath class -- one reference action is worth one unit of power. At "
+        "referencePower=1000 the /1000 cancels the *1000 exactly, so the budget IS qPowerMilli's own "
+        "curve, unscaled -- rung 1 lands on exactly 1000 for this reason, never by coincidence. "
+        "referencePower is untuned: what it tunes against is the smoke batch's accepted-container "
+        "cost distribution (a later module's output), not yet produced. It is a single scalar that "
+        "moves the whole ladder together and can never introduce a second curve shape."
+    )
+
+    return added
+
+
 def rename_key(doc, spec_raw):
     """Rename one dict key in place, preserving insertion order. Refuses rather than guesses."""
     # `container.path:oldLeaf=newLeaf`. The COLON matters: a tuning key is very often itself dotted
@@ -234,6 +286,11 @@ def main():
     ap.add_argument("--rename-key", action="append", default=[], dest="renames",
                     metavar="container.path:oldLeaf=newLeaf",
                     help="rename one dict key in place (order preserved); refuses if absent or if the new name is taken")
+    ap.add_argument("--add-rung-power-budget", type=int, default=None, dest="add_rung_power_budget",
+                    metavar="REFERENCE_POWER",
+                    help="derive and add `powerBudgetMilli` to every row of `rows` "
+                         "(powerBudgetMilli = poolRolls * REFERENCE_POWER * qPowerMilli / 1000); "
+                         "refuses if any row already has the column (action-rungs-shaped only)")
     ap.add_argument("--label", default="", help="short human note, stored in _meta.rebalanceLabel")
     a = ap.parse_args()
 
@@ -285,6 +342,16 @@ def main():
             return 1
         changes.append((("edges[channel=%s,source=%s].kMilli" % (ch, src)), None, k))
         print("  %-52s ADDED (%r)" % ("%s / %s" % (ch, src), k))
+
+    if a.add_rung_power_budget is not None:
+        try:
+            added = add_rung_power_budget(doc, a.add_rung_power_budget)
+        except KeyError as e:
+            print("refused: %s" % e, file=sys.stderr)
+            return 1
+        for rung, budget in added:
+            changes.append(("rows[rung=%s].powerBudgetMilli" % rung, None, budget))
+            print("  %-52s ADDED (%r)" % ("rung %s powerBudgetMilli" % rung, budget))
 
     if not changes:
         print("no changes — nothing published")

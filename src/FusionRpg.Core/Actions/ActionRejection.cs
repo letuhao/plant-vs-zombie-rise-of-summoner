@@ -80,6 +80,13 @@ public enum ActionRejectionReason
     /// inventory (T10, spec-usability-conditions.md's mode matrix). "An unsupported mode named is
     /// fine; an unstated one is the `resource.delta` defect again."</summary>
     ConsumableUnsupportedInMode,
+
+    /// <summary>A-G1 (spec-tier-access-gate.md §3.2): the container an action's rung reaches spends
+    /// more power than that rung's `powerBudgetMilli` allows (`ContentValidation.Budget`'s rung-keyed
+    /// overload). A finding, never a clamp — the action is refused whole, naming the container and
+    /// the overage, the same "reject, never coerce" law every other reason on this list already
+    /// follows.</summary>
+    PowerBudgetExceeded,
 }
 
 /// <summary>One refusal: the rule that fired, plus enough detail to fix the row.</summary>

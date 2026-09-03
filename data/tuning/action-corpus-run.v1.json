@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/action-corpus/spec-distribution-planner.md (A-S1) §3 step 1",
+    "default": "neutral-untuned",
+    "smokeSubjects": "four-way-join-8",
+    "note": "NEUTRAL, not tuned. The smallest batch that exercises every stage end to end and still produces evidence a quality gate can read. Every count is a placeholder the FIRST smoke batch replaces; re-tuning is a config change, never a rebuild. `mode: \"smoke\"` is the default and it is not a preference -- constraint 2 (map SS3) makes a full run an owner decision on the smoke batch's evidence, and a config file defaulting to `full` would make that decision by omission."
+  },
+  "mode": "smoke",
+  "generalCount": 5,
+  "perFamilyCount": 1,
+  "perSpeciesCount": 1,
+  "multiplicativePairs": [["atom.keen-edge", "atom.cruelty"]],
+  "familyMotifMax": 6,
+  "avoidNeighbourK": 3
+}
