@@ -13,7 +13,7 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 1,
+        "kit-shape": 2,
         "threat-audit": 1
       },
       "auditVerdict": null,
@@ -22,13 +22,12 @@
         "aptitudePrimary": "split",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:13:11Z",
+      "emittedUtc": "2026-09-03T16:09:44Z",
       "minorityValues": {
-        "aptitudePrimary": "Might",
-        "rarity": "heirloom"
+        "aptitudePrimary": "Might"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -44,9 +43,9 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
+    "aptitudePrimary": "Bulwark",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
@@ -54,26 +53,29 @@
     "family": [
       "Undead Colossus"
     ],
-    "gameTypeId": 35,
-    "posture": "Force",
+    "gameTypeId": 88,
+    "posture": "Bastion",
     "pure": true,
-    "rarity": "chaff",
+    "rarity": "chimeric",
     "reach": "melee",
-    "reason": "Its massive health pool, ability to spawn additional units, and high damage output against specific plant types justify the tyrant classification.",
+    "reason": "The description depicts a large, slow-moving tank that crushes plants and pushes zombies, which lacks the world-altering scale required for a cataclysm rating.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "zombie",
-    "speciesId": "Gargantuar",
+    "speciesId": "ElephantZombie",
     "targetPreference": "frontline",
     "traits": [
-      "Colossal",
-      "Splatter-Crush",
-      "Imp-Spawning",
-      "Low-Intelligence"
+      "Siege-Breaker",
+      "Crushing Trample",
+      "Knockback Immunity",
+      "Mass Displacement"
     ],
-    "variants": [],
-    "verdict": "agree"
+    "variants": [
+      "corrupted",
+      "mutated"
+    ],
+    "verdict": "too-high"
   }
 ]

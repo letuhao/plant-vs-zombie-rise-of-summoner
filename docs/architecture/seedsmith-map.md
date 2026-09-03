@@ -234,6 +234,32 @@ property and should not be carried across the feature by implication.
 
 **Dependency direction** is strictly downward in that table; nothing depends on `pipeline`.
 
+### 3c-bis. `frame-classify` — requested by the item program (owner decision 2026-09-03)
+
+**Proposed, not built.** Recorded here rather than only in the consumer's map, because a cross-program
+ask that lives in one document surfaces late — the same reason `aspect-scope` is a first-class row in
+§3b instead of a footnote.
+
+| id | Capability | Model? | Depends on |
+|---|---|---|---|
+| `frame-classify` | LLM stage — each species' **body frame**: `humanoid` \| `plant` \| `hybrid`, from name + flavour text, carrying `basis`. Published through the theme registry | **yes** | `adapter-demons`, `pipeline` |
+
+**Why it belongs to this feature and not to items.** A frame describes a *body*, so it is species data
+— the same reasoning that sent per-species aptitude vectors to the demon program
+([item-ideal.md](item-ideal.md) D19). And it is **the shape this pipeline already produces**:
+`family-extract` and `motif-derive` both read a species' own text and return a judgement about what it
+is. Frame is one more such judgement, with the same honesty contract — a `basis` field, `blocked` a
+legal answer, and **an enum output that `audit_schema` can mechanically confirm carries no number**.
+
+⭐ **It fixes a conflation rather than inheriting one.** `DemonSpeciesDef.Side` carries faction *and*
+body in one field, and the shipped roster already breaks it: `peashooterzombie`, `ironpeazombie`,
+`cherrynutzombie` and `bucketnutzombie` are zombie-**side** with plant **bodies**. A classifier reading
+flavour text can see that; anything derived from `Side` cannot. **`hybrid` becomes a classification
+outcome instead of a special case.**
+
+**Consumer:** [item-map.md](item-map.md) §3.1 — its modules `slot-roles` (3) and `base-types` (6) both
+key on frame, and its plan opens by resolving this dependency.
+
 ```
 corpus ── adapter ─┬─ numerics ─┐
                    ├─ budget ───┼─ metrics ─┬─ report

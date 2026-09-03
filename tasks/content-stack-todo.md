@@ -1132,11 +1132,71 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   - One correction to the spec's own acceptance #9 text: the real shipped-atom corpus measures **20**
     fx-* atoms today, not 21 as the spec's prose states — the test asserts the measured value, not
     the doc's stated one; flagged here rather than silently reconciled.
-- [ ] **E46 `player-content-boot`** · **M** · Deps: — (but **before E43's output ships**) ·
+- [x] **E46 `player-content-boot`** · **M** · Deps: — (but **before E43's output ships**) ·
   `spec-player-content-boot.md`
-  - ⛔ **Gate G4.** Pick install-time vs first-run vs bundled (§3.1). **Keep the fallback; make it
-    report.** Test 6: cover `SeedContent` by reflection, not a maintained list.
-  - ⚠️ Touches the launcher — a cross-program change.
+  - **Gate G4 resolved: install-time and first-run repair collapse into one mechanism**, not three.
+    This launcher has no install step distinct from first launch (`PlaySession.PlayAsync` is the
+    only path to a running server — verified against `ModLoaderInstaller.cs`/`FusionRpgUpdater.cs`,
+    neither runs an import), so the server's own startup self-heals: gated on `catalog_revision`
+    (`RpgStore.GetCatalogRevision()`), revision 0 imports once (functionally "at install" AND the
+    "first-run repair" the spec's §3.1 asks for — same code, same moment), non-zero is a true no-op.
+    Bundled-database was never on the table (spec's own §4: no migration path exists).
+  - **Extracted, not duplicated**: `tools/AtomImporter/Program.cs`'s scan→collect→import sequence
+    moved to `src/FusionRpg.Data/Seed/SeedImportRunner.cs` (+ `SeedScanner.cs`, relocated from
+    `tools/AtomImporter/` — a server referencing a `tools/` project would be backwards). The CLI now
+    calls the same members (`Roots`/`Files`/`Collect`) for its own reporting; `RunSelfHealing` is the
+    new never-throwing entry point the server calls — every failure (missing seed tree, corrupt file,
+    import refusal) folds into a `SeedImportRunResult` instead of an exception, so a broken install
+    cannot take server startup down with it (§3.2, §4).
+  - `FusionRpg.Server/Program.cs` wires `SeedImportRunner.RunSelfHealing` between `store.Init()` and
+    `store.LoadContentIntoRuntime()`, logs the outcome loudly to console either way, and records it
+    via `RpgStore.RecordContentBootOutcome`. `/health` (`RpgStore.ToHealth`) and `HealthDto` gained
+    `ContentSource` (`"imported"`/`"codeFallback"`), `CatalogRevision`, `ContentImportError` — the
+    surface both player and owner can read (§3.2, acceptance #2). Launcher's `HealthMonitor.
+    HealthSnapshot` carries the same fields; `MainWindow.xaml.cs`'s status text appends `content:
+    imported` / `content: fallback (see server log)`.
+  - **11 new tests**: `Data.Tests/SeedImportRunnerTests.cs` (7 — spec tests 1/2/4/5 + CLI-parity),
+    `Data.Tests/SeedContentCoverageTests.cs` (1 — spec test 6, reflection over `SeedContent`'s own
+    fields, not a maintained list), `Server.Tests/ContentBootStartupWiringTests.cs` (3 — real
+    `data/seed` end-to-end through actual server startup wiring).
+  - **Real, separate gap surfaced, not fixed here (out of scope, named)**: `scripts/publish-player.ps1`
+    never bundles `data/seed` into the player zip — verified, no `Copy-Item`/content reference to it
+    anywhere in that script. On a real distributed install `RunSelfHealing`'s `FindUp` will report
+    `SeedTreeNotFound` forever, correctly (loudly, non-fatally) rather than silently — but the actual
+    packaging fix is a separate, un-scoped decision (what ships in the zip), not this module's wiring
+    question. **A second, independent gap the reflection test itself caught**: `RpgStore.ImportContent`
+    never references `content.ChannelPools` at all — no table, no writer, no reader — despite real
+    authored content at `data/seed/channel-pools/pools.v1.json` (E30). Same defect shape as the
+    historical `Affixes` gap E32 closed. Recorded as a named, dated `knownGaps` exception in
+    `SeedContentCoverageTests.cs` (so the test still trips on any *other* uncovered kind), not fixed
+    here — it is E30/import-path scope, not player-content-boot's.
+  - **Independently re-run and confirmed by this session** (build + full suite + guards + audits, not
+    just the delegated agent's own report): `dotnet build` clean on all four touched projects
+    (Server, Data, Launcher, tools/AtomImporter). **Full 9-project sweep, all green except two
+    pre-existing, unrelated failures confirmed not caused by this module**: `Data.Tests` 627/629 (2
+    failures both in `DemonSpeciesImportCliTests`, which references neither `SeedScanner` nor
+    `SeedImportRunner` nor any file this module touched — matches pre-existing uncommitted demon-
+    corpus drift already visible in `git status` from before this module's work, not a regression).
+    `Server.Tests` 97/97 (was 94 — 3 net new). `Guard.Tests` 162/162. `AtomImporter.Tests` 27/27 (one
+    isolated-run transient failure on the real-cold-process test, reproduced clean on immediate
+    rerun — the same concurrent-build-lock pattern already seen and documented multiple times this
+    session, not a regression). `Launcher.Tests` 162/162, `CheatCore.Tests` 40/40,
+    `ElementEnumGen.Tests` 14/14, `ItemSeedValidator.Tests` 71/71, `E2E.Tests` 195/195, **Core.Tests
+    5255/5255** (unchanged — this module never touches Core). **All four boundary guards green** —
+    the DAL guard in particular confirms the `SeedScanner`/`SeedImportRunner` relocation into
+    `FusionRpg.Data` leaked no SQL elsewhere. Magic-number audit: 12 total, 0 critical, identical to
+    the pre-E46 baseline — no new findings. Overflow audit: 44 total, 0 critical, identical baseline.
+  - Acceptance against the spec's own §6: (1) a clean install imports, `catalog_revision` non-zero,
+    content queryable — done, live-proved (server run against a scratch dir: first boot `contentSource:
+    "imported"`, `catalogRevision: 1`); (2) import mode reported on a readable surface — done,
+    `/health` + launcher status line; (3) failed import visible and non-fatal, fallback still boots —
+    done, `RunSelfHealing` never throws, test 3; (4) re-launch does not re-import or bump the revision
+    — done, live-proved (same scratch dir restarted, same revision, "no import needed" logged), test
+    4; (5) a zero-revision database repairs itself once on first run — done, same mechanism as (1) by
+    construction; (6) `SeedContent` coverage by reflection, not a maintained list — done, with the
+    `ChannelPools` gap honestly named rather than silently passed; (7) `deploy-play.ps1`'s existing
+    import unchanged — done, re-verified CLI parity (`--check`/`--validate` identical output/exit
+    codes before and after the refactor).
 
 ### ✅ Checkpoint C3 — one row, many outcomes · **and C4 — content reaches a player**
 
@@ -1146,12 +1206,173 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
 
 > **⚠️ This list is BUILD order, which is not the data-flow graph.** A-S3's spec says it *depends on* A-S4 and *feeds* A-S5; it is built earlier so the metrics and dedup are inspectable before a token is spent. Where a row's `Deps:` and its spec's §7 disagree, **the spec states the data flow and this list states the order** — the map's §5 draws both. Rows below say which they mean.
 
-- [ ] **A-C1 `corpus-loader`** · **S** · Deps: — · an envelope-less file becomes a **finding**, not a
-  silent skip. ⚠️ The two shipped files **cannot be wrapped** — their parsers read the root.
-- [ ] **A-S0 `characteristic-pool`** · **M** · Deps: A-C1 · the role lean runs for **all 84**, not just
-  the 53 with families.
-- [ ] **A-T1 `type-weights`** · **M** · Deps: A-S0 · authors the file `spec-action-seeding.md` names and
-  which does not exist.
+- [x] **A-C1 `corpus-loader`** · **S** · Deps: — · an envelope-less file becomes a **finding**, not a
+  silent skip. The two shipped files **were never wrapped** — their parsers still read the root,
+  unchanged.
+  - New `tools/seedsmith/seedsmith/adapters/actions/` package (`__init__.py`'s `ActionsAdapter`,
+    `kinds.py`'s 10 per-kind `KindSpec`s each with its **own** `id_pattern` — not one shared pattern
+    — `vocab.py`'s C#-transcribed closed vocabularies, `load.py`'s §3 algorithm), registered as
+    `"actions"` in `adapters/registry.py` and nowhere else. New `data/seed/actions/_manifest.json`
+    declares the two shipped config files plus the four underscore-prefix dispositions (`_rounds/`
+    exclude; `_generated/`/`_briefs/`/`_reports/` load, §3 step 2c).
+  - **`load_committed`'s algorithm is "total", not "raise on first defect"**: a lost envelope, an
+    undeclared prefix, an unknown enum, wrong casing, an unknown atom family, an unknown family
+    `scopeKey` all become `Finding`s and the entry stays in the corpus (discovery-over-declaration,
+    matching `discover_edges`'s own philosophy) — only what `Corpus.load`/`Corpus.add` already raise
+    on (unparseable JSON, a real duplicate id) still raises `CorpusLoadError`. `_rounds/` exclusion
+    is done via a read-only scratch-directory copy (`tempfile`), not per-subdirectory `Corpus.load`
+    calls or post-hoc filtering — both of the obvious simpler shapes were checked first and rejected
+    with the reason recorded in `load.py`'s own docstring (`Corpus.load`'s `_exemplars/` handling is
+    root-relative to whichever call it's in; `Corpus.add`'s duplicate-id raise fires mid-walk, before
+    a caller could ever filter the result).
+  - **Genuine correction to this module's own build task**: `data/seed/actions/_generated/
+    family-map.json` (A-S0's species→family projection) **already exists in the live tree** — 53
+    species over 19 family ids, matching this spec's own measured numbers exactly — contrary to the
+    working assumption that A-S0 (a later module in this same phase) hadn't produced it yet. Declared
+    as a third config-file row in `_manifest.json` (a flat map, not a `kind`+`entries` envelope, same
+    reasoning as the two original shipped files) and the family-scoped `scopeKey` cross-check
+    (acceptance #6e) runs against this real data today, not a synthetic fixture — verified directly.
+  - **Independently re-verified by this session, not just the delegated agent's own report**: read
+    `load.py`/`vocab.py` in full; independently re-derived three of the seven C#-transcribed
+    vocabularies straight from the live source rather than trusting the transcription — `ActionKinds.
+    Name` (`ActionEnums.cs:96-102`: `basic`/`innate`/`skill`), `ActionTags.Name` (`:152-163`, 8
+    values), and `ActionCategories.Name` (`:120-128`, which indirects through `DerivedStatChannels.
+    ActionCategory*` constants — traced those to `DerivedStatChannels.cs:471-475` and confirmed
+    `attack`/`defense`/`support`/`movement`/`status` exactly) — all three matched `vocab.py` byte for
+    byte. Independently counted all 21 `Register`/`RegisterWithOptions` calls in
+    `StatusCatalogBootstrap.cs` and confirmed the exact 21-member set matches. **Full seedsmith pytest
+    suite independently re-run: 786/786** (741 baseline + 45 new), matching the report exactly. **`dotnet
+    test tests\FusionRpg.Core.Tests --filter ActionSeeding`: 28/28**, matching exactly. `git status`
+    confirms `pairings.json`/`name-templates.json` carry **zero diff** — byte-identical, never touched.
+  - A real, separately-flagged spec-citation staleness (not this module's defect, the spec's own):
+    `ActionEnums.cs`'s line ranges for `ActionKinds`/`ActionCategories`/`ActionTags`.`Name` are all
+    off by a consistent +24 lines (A-E1 inserted `EligibilityScope`/`PairingRole` earlier this
+    session, growing the file) — wire strings themselves unaffected, confirmed above.
+    `RelationKind.cs` is cited under `Actions/` but the type lives in `FusionRpg.Contracts`, aliased
+    in via a `global using`. `EnablerPayoffPairings.cs`/`ActionNameTemplates.cs`/`ActionSeeder.cs`
+    are cited without their real `Actions/Seeding/` subpath. None of these affect what was built —
+    the actual line contents at the corrected paths matched the spec's cited signatures exactly.
+  - Acceptance against the spec's own §6: (1) `Corpus.load` returns non-empty `action-seed` entries
+    — done; (2) the two config files byte-identical, `ActionSeeding` tests pass — done, re-verified;
+    (3)-(6e), (7), (8) — done, each mapped to a named test in the module's own report and spot-
+    checked above.
+- [x] **A-S0 `characteristic-pool`** · **M** · Deps: A-C1 · the role lean runs for **all 84**, not just
+  the 53 with families — done, F12-corrected: 31 family-less species carry a real derivation
+  (`leanSource: "derived-nofloor"`), never a discarded uniform tie.
+  - New package `tools/seedsmith/seedsmith/adapters/actions/characteristic_pool/` (`catalog.py`
+    parses the 84-species roster straight from `DemonSpeciesCatalog.Generated.cs`, never hand-copied;
+    `anchors.py`, `derive.py` — steps 2-5 of spec §3; `pool.py` — the six A-F groups) plus
+    `generate_characteristic_pool.py` (writes both outputs through A-C1's envelope, `--dry-run`
+    supported). New tuning file `data/tuning/action-role-lean.v1.json` — every weight cell `1000`
+    (`elementSecondaryScaleMilli: 500` the sole non-flat default), `_meta` stating in the required
+    words that the values are untuned pending the first smoke batch. **42 new tests**,
+    `test_characteristic_pool.py`.
+  - **⛔ Owner-review-worthy, flagged prominently rather than folded into "done" silently: `derive.py`'s
+    `SIGNAL_CATEGORY` map (which trait/element/posture/anchor-axis structurally leans toward which of
+    the 5 categories) is a genuine editorial invention, not a citation.** The spec describes every
+    weight cell in the tuning file as flat (`1000`) and states this reproduces "the plain count of
+    signals per category" — but taken literally that identity produces a permanent 5-way tie for
+    every species, since nothing in any shipped C# or spec text says which category a given trait
+    (e.g. `soul-eater`) structurally belongs to before the weight scales it. No such mapping exists
+    anywhere in the corpus this module reads. The build filled the gap rather than stall on it:
+    trait→category is grounded in `DemonTraitCatalog.cs`'s own blurb text (an attacking blurb reads
+    `attack`, a shielding one `defense`); posture→category reuses the demons adapter's own shipped
+    `APTITUDE_POSTURE` semantics (`Bastion`→defense is that module's own validator rule, not invented
+    here); **element→category has no textual grounding at all** — assigned only to spread the 6
+    elements across the 5 categories rather than leave that block silently flat too. This is real,
+    reviewable content a rebalance pass would want to revisit — everything downstream of it (the
+    per-mille weight) is the genuinely tunable surface the `.v1.json` file owns, but the map itself
+    is not. **Recorded here for the owner, not resolved by further guessing.**
+  - **Real, ongoing environmental hazard, correctly handled defensively rather than papered over**: the
+    species anchor tree (`data/seed/demons/species/**`) is being **actively regenerated by a
+    concurrent, unrelated process** while this module was built and while this evidence was verified
+    — `git status` shows 63 changed/new files there, several modified within the last 30 minutes, and
+    three measurements taken minutes apart during the build returned three different anchor-row
+    totals (28 → 68 → 87). This module's own tests assert only the **stable** facts (84 catalog / 84
+    motif / 53 family / 19 family ids — unchanged across every check this session) and treat the
+    anchor-tree-dependent counts (28 anchors / 9 unjoined / 8 four-way join, all cited in the spec as
+    a same-day snapshot) as structural-invariant checks rather than pinned literals, specifically so a
+    concurrent write elsewhere in the repo cannot silently break this module's own test suite. The
+    generator itself reads live data, never a hardcoded snapshot, so its actual output already
+    reflects whichever anchor state existed when it last ran — re-running it later will pick up
+    whatever the concurrent process eventually settles on.
+  - **The `family-map.json` "contradiction" the build flagged is resolved, not open**: it was
+    generated deliberately during **A-E1**'s own build (already closed, evidence at this file's line
+    ~560-568) as a flat placeholder projection so A-E1's C# eligibility tests would have real data —
+    its own evidence block says in these words *"the projection is A-S0's eventual home per the
+    spec; committing it now unblocks A-E1's own tests."* A-S0's real, spec'd outputs remain
+    `role-lean.json`/`characteristic-pool.json`; `family-map.json` stays A-E1's own dependency,
+    untouched here, matching the explicit "never rebuild or touch it" instruction this build was
+    given.
+  - **Independently re-verified by this session, not just the delegated agent's own report**: `python
+    -m pytest tools/seedsmith/tests/test_characteristic_pool.py` in isolation — **42/42 clean**. Full
+    suite `python -m pytest tools/seedsmith/tests` — 836 passed (up from the expected 828; the extra
+    8 traced directly to `test_run_runner.py`, modified by the same concurrent unrelated process
+    above, not to this module — confirmed by diffing which test files `git status` shows touched).
+    Direct inspection of the real generated `role-lean.json`: **84 entries exactly**, `derived-nofloor`
+    count **31**, `derived` count **53** (sums to 84), zero `derived-nofloor` entries with an empty
+    `signals` list (the F12 fix holds), zero invalid `leanOrder` permutations, zero legacy-rarity-band
+    leaks — all four checked directly against the live file, not trusted from the report.
+  - Acceptance against the spec's own §6: (1) exactly 84 entries, none for unjoined anchors — done,
+    re-verified; (2) rarity always a ladder id — done, re-verified, zero leaks; (3) 31 `family:null`
+    entries, all `derived-nofloor`/`separation:null`, all non-empty `signals` — done, re-verified;
+    (4) `leanOrder` a valid permutation for every entry — done, re-verified; (4b) tie serializes as
+    declared order — done, test-proven; (5) residue/histogram printed and written — done; (6) all
+    weights in the tuning file, no bare literal — done, direct grep confirms only the documented
+    per-mille divisor; (6b) flat default ships with the required `_meta` wording — done; (7)
+    byte-identical hash, provenance recorded — done; (8) zero model calls — done, offline-guarantee
+    test.
+- [x] **A-T1 `type-weights`** · **M** · Deps: A-S0 · authors the file `spec-action-seeding.md` names and
+  which does not exist — done, `data/seed/actions/type-weights.json`, 84 species + 19 family rows.
+  - New package `tools/seedsmith/seedsmith/adapters/actions/type_weights/` (`tuning.py` — strict
+    loader/validator, refuses float/bool/numeric-string at load naming the row; `derive.py` — §3's
+    seven steps) plus `generate_type_weights.py`. New tuning file
+    `data/tuning/action-type-weights.v1.json` shipping the spec's own DECIDED neutral defaults
+    (`base:1000`, `step:250`, `separationMilli:[0,250,500,750,1000]`, uniform `targetModeMilli`/
+    `areaShapeMilli`, `primaryMilli:400`/`secondaryMilli:200`, `familySecondaryScaleMilli:500`).
+    **63 tests**, `test_type_weights.py`.
+  - **⛔ AC5 defect found, a genuine spec self-contradiction, resolved by owner decision (not
+    silently picked) — record kept in full since it changed shipped behavior after the module's
+    first pass.** The build's own first pass implemented spec §3 step 2 literally
+    ("`separation: null` takes the same row as `0`"). Verified directly against the real generated
+    file: because the shipped default for row 0 is exactly `0` ("collapses the spread to flat" —
+    §2's own stated reasoning for a genuine tie), sharing that row made **every one of the 31
+    family-less (`derived-nofloor`) species print a flat 200/200/200/200/200 vector** — directly
+    and literally contradicting acceptance #5's own words ("a family-less species still gets a
+    vector shaped by its own leanOrder rather than a flat 200/200/200/200/200"). Two DECIDED
+    provisions of the same spec, dated the same day, could not both hold under a shared row —
+    confirmed by direct inspection of the real output (64 of 84 species measured flat), not
+    inferred. **Put to the owner via AskUserQuestion rather than resolved unilaterally**; the
+    owner chose: give `separation: null` its own tuning row (`nullSeparationMilli`, shipped `500`
+    — real signal, distinct from both row 0's exact-zero and a measured `separation:4`'s full
+    `1000`), leaving `separationMilli[0]` and its true-tie meaning untouched. Implemented in
+    `tuning.py`/`derive.py`, the tuning file, and the `_meta.note`'s own account of the fix.
+    **Re-measured after the fix: 0 of 84 family-less species print flat (was 31); 33 genuine
+    `separation==0` ties correctly remain flat** — both counts pinned by
+    `ShippedDefaultFlatnessIsExpectedTests`, so either direction of regression is caught.
+  - A second, smaller documentation defect found and fixed in the same pass: the tuning file's own
+    `_meta.note` repeated spec §2's worked-example arithmetic verbatim ("ranks 2000/1750/1500/1250/
+    1000 → 400/350/300/250/200 per-mille") — the build's own test
+    (`test_spec_own_400_350_300_250_200_per_mille_claim_does_not_hold`) proved that sum is 1500, not
+    1000, and cannot be the formula's real output; the actual output is `267/233/200/167/133`. The
+    shipped `_meta.note` text is corrected to state the real arithmetic the code runs, not the
+    spec's own uncorrected illustration.
+  - **Confirmed environmental hazard, not a regression in this module**: the full seedsmith suite
+    shows one failure outside this module's own tests —
+    `test_characteristic_pool.py::AttackTempoExclusionTests::test_live_anchor_tree_attack_tempo_is_constant`
+    — traced directly to the concurrent, unrelated demon-classification pipeline (flagged in A-S0's
+    own evidence above) having since written an anchor row with `attackTempo: "slow"`, where A-S0's
+    own test measured a constant `"steady"` at build time. Confirmed by reading the failure directly
+    (`observed = {'slow'}`, expected `{'steady'}`) — a real, live change to shared data this module
+    did not touch and does not own; not fixed here, matching A-S0's own evidence's identical caveat.
+  - **Independently re-verified by this session**: `tools/seedsmith/tests/test_type_weights.py` in
+    isolation — **63/63 clean**, including the new AC5-fix test. Full suite — 898 passed, 1 failed
+    (the environmental failure above, confirmed unrelated). Direct inspection of the real generated
+    `type-weights.json` post-fix: 103 entries exactly (84+19), every vector sums to 1000, zero
+    family-less species flat, 33 genuine ties correctly flat.
+  - Acceptance against the spec's own §6: (1)-(4b), (6)-(8) — done as built, unaffected by the AC5
+    fix; (5) — done, **now genuinely true against the real shipped file** rather than only true
+    under a hypothetical future retune, per the owner's own resolution above.
 - [ ] **A-S1 `distribution-planner`** · **L** · Deps: A-S0, A-T1 · Engine 1. **Union-to-ceiling** for
   structure axes; family motifs = intersection, anti-motifs = union.
 - [ ] **A-G1 `tier-access-gate`** · **M** · Deps: A-S1 · two of C1's three gates. **Criterion 7 asserts

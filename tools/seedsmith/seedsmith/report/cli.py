@@ -636,11 +636,14 @@ def _cmd_demons_run(args: argparse.Namespace) -> int:
     def progress(species_id: str, done: int, total: int) -> None:
         print(f"  [{done}/{total}] {species_id}")
 
+    workers = max(1, args.workers)
+
     try:
         if args.run_verb == "start":
-            record = run_module.start(_selector_from_args(args), paths=paths, progress=progress)
+            record = run_module.start(_selector_from_args(args), paths=paths, progress=progress,
+                                      workers=workers)
         elif args.run_verb == "resume":
-            record = run_module.resume(paths=paths, progress=progress)
+            record = run_module.resume(paths=paths, progress=progress, workers=workers)
         elif args.run_verb == "pause":
             run_module.request_pause(paths=paths)
             print("pause requested — the in-flight species finishes, then the run stops")
@@ -648,7 +651,8 @@ def _cmd_demons_run(args: argparse.Namespace) -> int:
         elif args.run_verb == "cancel":
             record = run_module.cancel(paths=paths)
         elif args.run_verb == "rerun":
-            record = run_module.rerun(_selector_from_args(args), paths=paths, progress=progress)
+            record = run_module.rerun(_selector_from_args(args), paths=paths, progress=progress,
+                                      workers=workers)
         elif args.run_verb == "overwrite-all":
             if not args.confirm:
                 dump_hash = run_module._compute_dump_hash(paths.dump_dir)
@@ -656,7 +660,8 @@ def _cmd_demons_run(args: argparse.Namespace) -> int:
                 print(f"seedsmith: overwrite-all needs --confirm <token>; "
                       f"the token for the current dump is {overwrite_all_token(dump_hash)}", file=sys.stderr)
                 return EXIT_CANNOT_RUN
-            record = run_module.overwrite_all(args.confirm, paths=paths, progress=progress)
+            record = run_module.overwrite_all(args.confirm, paths=paths, progress=progress,
+                                              workers=workers)
         elif args.run_verb == "status":
             s = run_module.status(paths=paths)
             print(json.dumps(s, indent=2) if args.json else
@@ -876,6 +881,9 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--dump", default="", help="corpus-dump tree root (default data/seed/demons/_dump)")
     run.add_argument("--anchors", default="", help="anchor tree root (default data/seed/demons/species)")
     run.add_argument("--json", action="store_true", help="machine-readable output (status)")
+    run.add_argument("--workers", type=int, default=4,
+                     help="parallel model-call workers for start/resume/rerun/overwrite-all "
+                          "(default 4; 1 = sequential, today's original behaviour)")
     demons.set_defaults(func=cmd_demons)
 
     effects = sub.add_parser("effects", help="effect-pipeline generation entrypoints")

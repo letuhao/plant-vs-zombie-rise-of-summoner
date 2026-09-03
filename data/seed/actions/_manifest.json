@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "kind": "action-config",
+  "entries": [
+    {
+      "id": "pairings.json",
+      "type": "config-file",
+      "reason": "EnablerPayoffPairings.Parse requires the root object itself to be the payoff -> [enablers] map (src/FusionRpg.Core/Actions/Seeding/EnablerPayoffPairings.cs:47-48); wrapping it in a kind+entries envelope would make the parser throw. Never rewritten by this loader — read-only."
+    },
+    {
+      "id": "name-templates.json",
+      "type": "config-file",
+      "reason": "ActionNameTemplates.Parse reads base/modifiers directly off the root object and rejects a missing or non-object key (src/FusionRpg.Core/Actions/Seeding/ActionNameTemplates.cs:68-70,83-84); wrapping it in an envelope would make the parser throw. Never rewritten by this loader — read-only."
+    },
+    {
+      "id": "_generated/family-map.json",
+      "type": "config-file",
+      "reason": "A-S0's species -> family-id projection (53 species over 19 family ids). A flat map, not a kind+entries envelope, so it is declared config rather than corpus content — same as the two files above, just under a LOADED prefix rather than the root. Read fresh by this adapter's vocab.load_family_map_keys() for the family-scoped scopeKey cross-check; never rewritten."
+    },
+    {
+      "id": "_rounds/",
+      "type": "prefix",
+      "disposition": "exclude",
+      "reason": "A-S3's survivors and A-S6's promotions mint the SAME action.*/reject.*/review.* grammar under one root as the committed corpus, so a duplicate id is structurally guaranteed the moment A-S6 promotes (spec-corpus-loader.md §3 step 2b, review F14). The only prefix where that is true."
+    },
+    {
+      "id": "_generated/",
+      "type": "prefix",
+      "disposition": "load",
+      "reason": "pool.*/lean.*/weights.* -- none of them action.* -- and a re-derivation overwrites its own file in place, so it cannot collide with a promoted seed."
+    },
+    {
+      "id": "_briefs/",
+      "type": "prefix",
+      "disposition": "load",
+      "reason": "brief.* only, and a brief's avoidNeighbours.actionId edge only resolves if both ends load into one graph."
+    },
+    {
+      "id": "_reports/",
+      "type": "prefix",
+      "disposition": "load",
+      "reason": "cell.*/target.* only, and a coverage cell naming its subject is the other cross-kind edge the per-kind id_pattern table exists for."
+    }
+  ]
+}

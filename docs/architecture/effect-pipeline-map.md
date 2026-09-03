@@ -1,8 +1,9 @@
 # Capability map: `effect-pipeline`
 
 **Status:** proposed 2026-09-01, from [effect-pipeline-ideal.md](effect-pipeline-ideal.md) — nine
-questions closed, seven attacks answered. **Ten modules** (`mods-absorption` and `patron-absorption` added 2026-09-01 per Q11 and Q13). **Approved by the owner 2026-09-02.** All ten module specs are
-written — `docs/architecture/effect-pipeline/spec-<module-id>.md`, one per row in §3's table below.
+questions closed, seven attacks answered. **Twelve modules.** Ten approved 2026-09-02; **`affix-power-class` and `channel-pools` added 2026-09-03**
+by owner decision — the **L0 pool-composition layer** (`effect-pipeline-ideal.md` §5.6). **All twelve module specs are written** at
+`docs/architecture/effect-pipeline/spec-<module-id>.md`, one per row in §3's table below.
 
 **A real discrepancy found while writing them (2026-09-02, verified by direct code read, not
 assumed):** several amendments this map's §6 lists as "owed before building" — the `pool_rolls` →
@@ -18,6 +19,10 @@ explicitly rather than re-describing a design that already won.
 > **The program in one sentence.** Build the producer that turns a committed seed into a concrete,
 > per-player effect list — and in doing so, switch on four modules that are built, tested, and currently
 > unreachable.
+>
+> ⭐ **And, as of 2026-09-03, make sure the list a container draws from depends on *how you got there*.**
+> L0 (modules 11–12) partitions one affix pool into many, weighted by an LLM-assigned power class against
+> a deterministic channel policy — so a boss, a set, a socket and a trash mob stop being the same faucet.
 
 
 > **Plan:** [tasks/seed-to-concrete-plan.md](../../tasks/seed-to-concrete-plan.md) and [-todo.md](../../tasks/seed-to-concrete-todo.md) — **one plan spans both this map and its sibling**, because Phase 5 is a single vertical slice built from modules of each. Neither program can finish alone.
@@ -85,10 +90,43 @@ L2's absence is not cosmetic. Without it, `+15% to all resistances` must become 
 | 8 | `eligibility-tags` | Tag-based affix eligibility plus a per-container allow/deny override — what PoE does | — | 1, 3 |
 | 9 | `affix-authoring` | The seedsmith pipeline for **named, multi-atom, slotted** affixes — *"Master of Fire and Ice"*. Identity is a judgement; magnitude never is | **yes** | 1, 6 |
 | 10 | `dev-reforge` | `POST /api/debug/reforge-world` — re-derive a roster from the current catalog against the same world seed. Debug surface only | — | 4, 6 |
+| **11** | ⭐ [`affix-power-class`](effect-pipeline/spec-affix-power-class.md) | **Added 2026-09-03 (L0).** The LLM stage: one **closed-enum power class** per affix — how strong it is *as an idea* — carrying `basis`. **Never a number, never a rate** | **yes** | 1, 3 |
+| **12** | ⭐ [`channel-pools`](effect-pipeline/spec-channel-pools.md) | **Added 2026-09-03 (L0).** The deterministic half: a `(powerClass × channel) → weight` policy in `data/tuning/`, and `poolFor(container, channel, rarity)` composing the candidate list L1 draws from. **Six channels: `drop` · `boss` · `set` · `socket` · `unique` · `craft`.** Consumes no RNG | — | 8, 11 |
+
+### ⭐ Modules 11–12 — L0, added by owner decision 2026-09-03
+
+**Why the program needed them.** Every acquisition channel differentiates by *volume* today, never by
+*kind*: `loot_source` gives each source its own drop table, `rarity_floor` and `rarity_weight_shift_json`
+skew the rungs — but once a container is chosen, **its affix pool is a property of the container, not the
+source.** With `AGENTS.md`'s no-hard-ceilings rule, every volume gate eventually opens, so sets, sockets,
+uniques, crafting and the world map all become redundant paths to something trash would have produced
+anyway. Full reasoning: [effect-pipeline-ideal.md](effect-pipeline-ideal.md) §5.6.
+
+**Why two modules and not one — the same argument seedsmith makes for `family-extract` / `family-consolidate`:**
+*their determinism differs.* Classification is a model call — non-deterministic, therefore recorded and
+content-addressed. The weight policy decides what every container draws, so it must be reproducible.
+**Collapsing them hides a non-deterministic step inside a deterministic-looking artifact** (`seedsmith-map.md` §3b, A6).
+
+**Three properties that are requirements, not observations:**
+
+1. **L0 runs *before* L1 and consumes no RNG.** It composes the candidate list; L1's existing
+   `affix.draw` stream draws from it. This is what lets a layer be added late without shifting a single
+   historical roll — the failure `effect-pipeline-ideal.md` §5.4 warns of. **If L0 ever rolls anything
+   itself it acquires that fragility.**
+2. **It extends `eligibility-tags` (module 8), never replaces it.** Module 8 answers *may this affix
+   appear here* (binary); module 12 answers *at what rate*. Binary allow/deny cannot express 0.01%.
+3. **A `drop`-channel weight may be vanishingly small and may never be zero** — the 0.01% floor, a named
+   minimum in the tuning file. Owner, 2026-09-03; it is `item-ideal.md` D7's *"don't make it impossible
+   by chance"* stated from the other direction. Structural zeros elsewhere (a unique's fixed affixes are
+   not rollable) are legitimate and **must carry a comment saying why they are exempt**, per AGENTS.md.
 
 ### Dependency graph
 
 ```text
+affix-power-class ──► channel-pools ──► (feeds L1's draw)
+        ▲                   ▲
+        └── affix-library ───┴── eligibility-tags
+
                           ┌──► mods-absorption      (independent migration)
                           ├──► patron-absorption    (independent migration)
 affix-schema ──┬──► resolution-order ──► instance-producer ──┐
@@ -107,7 +145,13 @@ No cycles.
 affix-schema → resolution-order → affix-library → instance-producer
   → mods-absorption → patron-absorption → world-seed → eligibility-tags
   → affix-authoring → dev-reforge
+  → affix-power-class → channel-pools
 ```
+
+**Modules 11–12 come last in dependency order and are not last in importance.** `channel-pools` needs
+`eligibility-tags` (8) for the drawable set and `affix-library` (3) for something to classify, and
+`affix-power-class` is the program's **second** model stage after `affix-authoring` (9) — so it lands
+where the model work already is. Nothing before them changes.
 
 **Rationale.** Modules 1-3 make no model calls and touch no player data. Module 4 is the payoff and
 comes as early as it can: with a schema, a resolver and a rule-generated library, **one fixture

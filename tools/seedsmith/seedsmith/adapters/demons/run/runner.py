@@ -259,12 +259,17 @@ def start(
     selector: Mapping[str, Any], *, paths: RunPaths = RunPaths(),
     call: "Callable[..., str] | None" = None, progress: "Progress | None" = None,
     force_selector_ignores_existing: bool = False, config: "LlmCallerConfig | None" = None,
+    workers: int = 1,
 ) -> RunRecord:
     """`run start <selector>` (spec §2 `start`, §4 selectors). Refuses without a matching, real
     (non-`--skip-model`) preflight record for the CURRENT dump. On success, classifies every
     selected species not already present in the anchor tree (unless
     `force_selector_ignores_existing`, which is what `rerun`/`overwrite-all` pass), writing each
-    species' family file and the run record after every single species."""
+    species' family file and the run record after every single species.
+
+    `workers` (default 1, sequential — unchanged behaviour) fans the model-call phase out across
+    N threads; see `_run_loop`'s own docstring for why that phase specifically is safe to
+    parallelise and the write phase deliberately is not."""
     _acquire_run_lock(paths.runs_dir)
     try:
         dump_hash = _compute_dump_hash(paths.dump_dir)
@@ -295,16 +300,20 @@ def start(
             selector=dict(selector), prompt_versions=dict(PROMPT_VERSIONS), pid=os.getpid(),
             started_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
         return _run_loop(record, ids, rows, seed_by_species, threat_tuning, paths=paths, call=call,
-                         progress=progress, config=_resolve_config(config))
+                         progress=progress, config=_resolve_config(config), workers=workers)
     finally:
         _release_run_lock(paths.runs_dir)
 
 
 def resume(*, paths: RunPaths = RunPaths(), call: "Callable[..., str] | None" = None,
-          progress: "Progress | None" = None, config: "LlmCallerConfig | None" = None) -> RunRecord:
+          progress: "Progress | None" = None, config: "LlmCallerConfig | None" = None,
+          workers: int = 1) -> RunRecord:
     """`run resume` (spec §2 `resume`, TRANSIENT semantics — no species already in `completed` is
     ever re-classified). Also the crash-recovery path (spec §6): a `running` record whose pid is
-    dead is resumable, never a silent takeover and never a permanent refusal."""
+    dead is resumable, never a silent takeover and never a permanent refusal.
+
+    `workers` need not match the original `start`'s value — it is a resource knob for THIS process,
+    not a property of the run itself, and nothing in `RunRecord` depends on it."""
     _acquire_run_lock(paths.runs_dir)
     try:
         record = read_record(paths.current_record_path)
@@ -347,7 +356,7 @@ def resume(*, paths: RunPaths = RunPaths(), call: "Callable[..., str] | None" = 
         if paths.pause_sentinel_path.exists():
             paths.pause_sentinel_path.unlink()
         return _run_loop(record, remaining, rows, seed_by_species, threat_tuning, paths=paths, call=call,
-                         progress=progress, resuming=True, config=_resolve_config(config))
+                         progress=progress, resuming=True, config=_resolve_config(config), workers=workers)
     finally:
         _release_run_lock(paths.runs_dir)
 
@@ -355,20 +364,20 @@ def resume(*, paths: RunPaths = RunPaths(), call: "Callable[..., str] | None" = 
 def rerun(
     selector: Mapping[str, Any], *, paths: RunPaths = RunPaths(),
     call: "Callable[..., str] | None" = None, progress: "Progress | None" = None,
-    config: "LlmCallerConfig | None" = None,
+    config: "LlmCallerConfig | None" = None, workers: int = 1,
 ) -> RunRecord:
     """`run rerun <selector>` (spec §2 `rerun`) — re-generates a named subset, ignoring "already
     emitted." Unlike `start`, a species the selector names is classified again even if an anchor
     entry already exists for it (still refuses on a missing/mismatched preflight, same as `start`
     — a rerun is still a real run and needs the same gate)."""
     return start(selector, paths=paths, call=call, progress=progress, config=config,
-                force_selector_ignores_existing=True)
+                force_selector_ignores_existing=True, workers=workers)
 
 
 def overwrite_all(
     confirm_token: str, *, paths: RunPaths = RunPaths(),
     call: "Callable[..., str] | None" = None, progress: "Progress | None" = None,
-    config: "LlmCallerConfig | None" = None,
+    config: "LlmCallerConfig | None" = None, workers: int = 1,
 ) -> RunRecord:
     """`run overwrite-all --confirm <token>` (spec §2 `overwrite-all`, §5: "discards work that cost
     14 hours... gets a typed token"). The token is derived from the CURRENT dump hash
@@ -379,7 +388,7 @@ def overwrite_all(
     if not ok:
         raise RunRefused(reason)
     return start({"kind": "all"}, paths=paths, call=call, progress=progress, config=config,
-                force_selector_ignores_existing=True)
+                force_selector_ignores_existing=True, workers=workers)
 
 
 def request_pause(*, paths: RunPaths = RunPaths()) -> None:
@@ -446,7 +455,29 @@ def _run_loop(
     record: RunRecord, ids: "list[str]", rows: "list[dict]", seed_by_species: "dict[str, Any]",
     threat_tuning: ThreatTuning, *, paths: RunPaths, call: "Callable[..., str] | None",
     progress: "Progress | None", resuming: bool = False, config: "LlmCallerConfig | None" = None,
+    workers: int = 1,
 ) -> RunRecord:
+    """`workers` (2026-09-03, real throughput finding: the model-call phase is the entire cost of
+    a run and was fully serial) splits each species into two phases that run on different sides of
+    one boundary:
+
+    - `_classify_one` — the SLOW phase (all eight pipelines' model calls for one species). Reads
+      only per-call-local state (`row`, `seed`, `lore`) plus read-only closures (`by_species`,
+      `seed_by_species`, `threat_tuning`, `call`, `config`) and touches no shared mutable state —
+      confirmed by tracing `run_one_species` → `orchestrator._invoke` → `llm_caller`'s own request
+      construction (a fresh `urllib.request.Request` per call, no session/cache/counter) and
+      `permute.order_for` (seeds a fresh `random.Random` per call). Safe to run on N threads at
+      once — this is genuinely the only part worth parallelising.
+    - `_finalize` — the FAST phase (derive posture/pure/variants, write the family file, rewrite
+      the index, update and persist `record`). Still called from exactly ONE thread for every
+      species, in the SAME order and with the SAME per-species-checkpoint guarantee the sequential
+      path always had (spec §2: "the run record's `completed` list is rewritten to disk after
+      every species") — no lock is needed around it because nothing else ever touches it
+      concurrently, and no two species' writes can interleave.
+
+    `workers=1` keeps today's exact sequential path (same call order, same checkpoint timing) —
+    the branch below is not exercised and nothing about single-worker behaviour changes.
+    """
     config = _resolve_config(config)
     by_species = {r["speciesId"]: r for r in rows}
     families = _load_families(paths.family_assignments)
@@ -462,72 +493,90 @@ def _run_loop(
     write_record(record, paths.current_record_path)
 
     total = len(ids) + len(record.completed)
-    try:
-        for species_id in ids:
-            if paths.pause_sentinel_path.exists():
-                paths.pause_sentinel_path.unlink()
-                record.state = transition(record.state, "pause")
-                write_record(record, paths.current_record_path)
-                return record
 
-            row = by_species.get(species_id)
-            if row is None:
-                record.failed.append(species_id)
-                write_record(record, paths.current_record_path)
-                continue
+    def _classify_one(species_id: str):
+        row = by_species.get(species_id)
+        if row is None:
+            return species_id, None, None, None, None
 
-            seed = seed_by_species.get(row["side"] + ":" + str(row["typeId"]))
-            basis = seed.basis if seed else "blocked"
-            threat_rung = None
-            if basis in ("observed", "stated") and seed is not None:
-                rung = classify_threat(seed, threat_tuning)
-                if rung is not None:
-                    threat_rung = (rung.id, rung.rung)
-            if threat_rung is None and basis in ("observed", "stated"):
-                basis = "blocked"  # no computable score — the audited-rung pipeline needs one
+        seed = seed_by_species.get(row["side"] + ":" + str(row["typeId"]))
+        basis = seed.basis if seed else "blocked"
+        threat_rung = None
+        if basis in ("observed", "stated") and seed is not None:
+            rung = classify_threat(seed, threat_tuning)
+            if rung is not None:
+                threat_rung = (rung.id, rung.rung)
+        if threat_rung is None and basis in ("observed", "stated"):
+            basis = "blocked"  # no computable score — the audited-rung pipeline needs one
 
-            lore = _lore_for(row)
-            try:
-                merged = run_one_species(species_id, lore, basis=basis, threat_rung=threat_rung,
-                                         call=call, config=config)
-            except Exception as e:  # noqa: BLE001 — a dead species falls into `failed`, never aborts the run
-                record.failed.append(species_id)
-                record.calls_made += 1
-                write_record(record, paths.current_record_path)
-                if progress:
-                    progress(species_id, len(record.completed) + len(record.failed), total)
-                continue
+        lore = _lore_for(row)
+        try:
+            merged = run_one_species(species_id, lore, basis=basis, threat_rung=threat_rung,
+                                     call=call, config=config)
+            return species_id, row, basis, merged, None
+        except Exception as e:  # noqa: BLE001 — a dead species falls into `failed`, never aborts the run
+            return species_id, row, basis, None, e
 
-            merged["speciesId"] = species_id
-            merged["side"] = row["side"]
-            merged["gameTypeId"] = row.get("typeId")
-            merged["basis"] = basis
-            merged.pop("_pipelineOutcomes", None)
-            species_votes = merged.pop("_votes", None)
-            species_attempts = merged.pop("_pipelineAttempts", None)
-            species_calls_made = merged.pop("_callsMade", len(PIPELINES))
-
-            # DERIVED fields (spec-classify-pipelines.md §4) — never authored by a model, computed
-            # here from what the pipelines DID decide. Nothing else in the codebase calls these
-            # (confirmed by grep before wiring this in) — this loop is their one real caller.
-            if "aptitudePrimary" in merged:
-                merged["posture"] = derive_posture(merged["aptitudePrimary"])
-                merged["pure"] = derive_pure(merged["aptitudePrimary"], merged.get("aptitudeSecondary", "none"))
-            if "variants" in merged and "rarity" in merged:
-                merged["variants"] = clamp_variant_count(merged["variants"], merged["rarity"])
-
-            _write_species_entry(
-                row, merged, dump_hash=record.dump_hash, families=families,
-                anchors_dir=paths.anchors_dir, existing_by_file=existing_by_file,
-                votes=species_votes, pipeline_attempts=species_attempts)
-            _rewrite_index(paths.anchors_dir, existing_by_file)
-
-            record.completed.append(species_id)
-            record.calls_made += species_calls_made
-            record.updated_utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    def _finalize(species_id: str, row, basis, merged, err) -> None:
+        if row is None:
+            record.failed.append(species_id)
+            write_record(record, paths.current_record_path)
+            return
+        if err is not None:
+            record.failed.append(species_id)
+            record.calls_made += 1
             write_record(record, paths.current_record_path)
             if progress:
                 progress(species_id, len(record.completed) + len(record.failed), total)
+            return
+
+        merged["speciesId"] = species_id
+        merged["side"] = row["side"]
+        merged["gameTypeId"] = row.get("typeId")
+        merged["basis"] = basis
+        merged.pop("_pipelineOutcomes", None)
+        species_votes = merged.pop("_votes", None)
+        species_attempts = merged.pop("_pipelineAttempts", None)
+        species_calls_made = merged.pop("_callsMade", len(PIPELINES))
+
+        # DERIVED fields (spec-classify-pipelines.md §4) — never authored by a model, computed
+        # here from what the pipelines DID decide. Nothing else in the codebase calls these
+        # (confirmed by grep before wiring this in) — this loop is their one real caller.
+        if "aptitudePrimary" in merged:
+            merged["posture"] = derive_posture(merged["aptitudePrimary"])
+            merged["pure"] = derive_pure(merged["aptitudePrimary"], merged.get("aptitudeSecondary", "none"))
+        if "variants" in merged and "rarity" in merged:
+            merged["variants"] = clamp_variant_count(merged["variants"], merged["rarity"])
+
+        _write_species_entry(
+            row, merged, dump_hash=record.dump_hash, families=families,
+            anchors_dir=paths.anchors_dir, existing_by_file=existing_by_file,
+            votes=species_votes, pipeline_attempts=species_attempts)
+        _rewrite_index(paths.anchors_dir, existing_by_file)
+
+        record.completed.append(species_id)
+        record.calls_made += species_calls_made
+        record.updated_utc = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        write_record(record, paths.current_record_path)
+        if progress:
+            progress(species_id, len(record.completed) + len(record.failed), total)
+
+    try:
+        if workers <= 1:
+            paused = False
+            for species_id in ids:
+                if paths.pause_sentinel_path.exists():
+                    paths.pause_sentinel_path.unlink()
+                    paused = True
+                    break
+                _finalize(*_classify_one(species_id))
+        else:
+            paused = _run_parallel(ids, workers, _classify_one, _finalize, paths)
+
+        if paused:
+            record.state = transition(record.state, "pause")
+            write_record(record, paths.current_record_path)
+            return record
     except BaseException:
         record.state = "failed"
         write_record(record, paths.current_record_path)
@@ -537,3 +586,80 @@ def _run_loop(
     write_record(record, paths.current_record_path)
     _commit_completed_record(record, paths)
     return record
+
+
+def _run_parallel(
+    ids: "list[str]", workers: int,
+    classify_one: "Callable[[str], tuple]", finalize: "Callable[..., None]",
+    paths: RunPaths,
+) -> bool:
+    """Runs `classify_one` for every id across `workers` daemon threads (the slow, independent
+    model-call phase) and calls `finalize` for each result ONE AT A TIME from THIS thread only (the
+    fast write phase — `_run_loop`'s own docstring covers why no lock is needed for either side).
+
+    Pause semantics match the sequential loop's own rule (spec §2: "a species half-classified... is
+    not a resumable unit") extended to N workers: once the pause sentinel is seen, workers stop
+    PULLING new work, but anything already in flight finishes and still gets finalized — so a pause
+    with `workers=4` may complete up to 3 more species than the exact moment `pause` was requested,
+    never a partial one. Every worker puts exactly one `None` sentinel on `result_q` as its last
+    action (whether it stopped because the queue emptied or because `stop` was set), so the count of
+    sentinels received — not a fixed total — is what proves every worker has truly exited; relying
+    on a fixed result count instead would hang forever on a pause, since some queued species then
+    never produce a result at all.
+    """
+    import queue
+    import threading
+
+    work_q: "queue.Queue[str]" = queue.Queue()
+    for species_id in ids:
+        work_q.put(species_id)
+
+    result_q: "queue.Queue[tuple | None]" = queue.Queue()
+    stop = threading.Event()
+
+    def worker() -> None:
+        while not stop.is_set():
+            try:
+                species_id = work_q.get_nowait()
+            except queue.Empty:
+                break
+            # `classify_one` (the real one, wired from `_run_loop`) already catches everything it
+            # can predict and returns the error as data. This second net is for what it CANNOT
+            # predict — a genuine bug — because an uncaught exception in a worker thread does not
+            # propagate to the main thread; it would kill this worker silently, its final `None`
+            # sentinel would never be sent, and `_run_parallel`'s exit loop would then wait forever
+            # for a sentinel that is never coming. A hang on a run meant to take hours is far worse
+            # than one more species landing in `failed`.
+            try:
+                result_q.put(classify_one(species_id))
+            except Exception as e:  # noqa: BLE001 — see above: this is the backstop, not the path
+                import sys
+                print(f"seedsmith: {species_id}: unexpected error in classify_one worker: {e}",
+                      file=sys.stderr)
+                result_q.put((species_id, None, None, None, e))
+        result_q.put(None)  # this worker is done, permanently — never another result from it
+
+    threads = [threading.Thread(target=worker, daemon=True, name=f"seedsmith-classify-{i}")
+               for i in range(workers)]
+    for t in threads:
+        t.start()
+
+    paused = False
+    finished_workers = 0
+    try:
+        while finished_workers < workers:
+            if not paused and paths.pause_sentinel_path.exists():
+                paths.pause_sentinel_path.unlink()
+                stop.set()
+                paused = True
+            item = result_q.get()
+            if item is None:
+                finished_workers += 1
+                continue
+            finalize(*item)
+    finally:
+        stop.set()
+        for t in threads:
+            t.join()
+
+    return paused

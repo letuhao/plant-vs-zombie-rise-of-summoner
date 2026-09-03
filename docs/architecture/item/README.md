@@ -28,6 +28,14 @@ authorized.** Twenty-four documents, no code, no schema, no task list yet.
 > equip gate stays, per-species aptitude vectors go to the demon program. That last one exposed a real
 > ownership gap: **which atoms a generated set or charm grants has no lane.**
 >
+> **D20–D25 (socket combinations, 2026-09-03):** the mechanism already existed in I4 §4.4 — what changed
+> is that it is **generated at 102** (36 **Strains** · 66 **Splices**) on the twelve-aptitude grid, needs a
+> **low-rarity, non-set** base, treats socket **affinity as a hard requirement**, and gets its sockets from
+> **crafting at any rarity with rarity setting the price**. That last one resolved a **blocking
+> contradiction**: §4.1 grants sockets in proportion to rarity, so a Strain on a low-rarity base was
+> otherwise unbuildable. PoE-style **links are out of scope** (action layer). **All four of I4's
+> *"recalled, not verified"* D2/PoE claims are now verified — every one confirmed.**
+>
 > ⚠ **Two of the seven open decisions below are closed and one is superseded** — most importantly the
 > `stat.derived` quarantine (#7), which lifted on 2026-08-30 and which five lanes terminated at. Lane
 > documents written before that date state it as a live constraint; they are stale on that point and
@@ -60,7 +68,7 @@ other lanes"*.
 | I1 | [ssot-rarity.md](ssot-rarity.md) | The ladder, the overlap mechanism, and the registry of what rarity governs |
 | I2 | [ssot-equip-slots.md](ssot-equip-slots.md) | 15 roles per pure frame, two frame vocabularies, hybrid pricing, budget weighting |
 | I3 | [ssot-item-categories.md](ssot-item-categories.md) | Categories, base types, implicits, base stats |
-| I4 | [ssot-sockets.md](ssot-sockets.md) | Sockets, inserts, and combinations within one item |
+| I4 | [ssot-sockets.md](ssot-sockets.md) | Sockets, inserts, and combinations within one item. ⚠ **AMENDED by D20–D25** — combinations are **Strains (36) + Splices (66)**, generated; low-rarity non-set base required; affinity is a **hard** requirement; sockets extend by crafting at any rarity with rarity setting the price; new `socket.imbue`. See the banner at the top of the lane |
 | I5 | [ssot-sets.md](ssot-sets.md) | Combinations across equipped items. ⚠ **D12: sets are generated (~2,168), not hand-authored; §3.7 needs the D3 edit; the generator must be capped to the 12 hybrid-core roles** |
 | I6 | [ssot-enhancement.md](ssot-enhancement.md) | +X, **and the instance-mutation model other lanes inherit** |
 | I7 | [ssot-reroll.md](ssot-reroll.md) | Temper / Reforge / Imprint |

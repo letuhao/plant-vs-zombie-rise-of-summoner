@@ -1,0 +1,242 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:36:38Z",
+      "minorityValues": {
+        "rarity": "almanac"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "Undead Scholar",
+      "Cerebral Revenant"
+    ],
+    "gameTypeId": 203,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "long",
+    "reason": "The combination of massive damage output, high durability, immunity to status effects, and the ability to ignore plant obstacles justifies a tyrant-level threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "CherryPaperZ95",
+    "targetPreference": "frontline",
+    "traits": [
+      "Newspaper-Shielded",
+      "Cherry-Burst Volley",
+      "Unstoppable Momentum",
+      "Status Immunity"
+    ],
+    "variants": [
+      "ancient",
+      "corrupted"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:57:28Z",
+      "minorityValues": {
+        "deployMode": "PlantAvatar",
+        "rarity": "almanac"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Vigor",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "Undead Scholar",
+      "Cursed Academic"
+    ],
+    "gameTypeId": 242,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "long",
+    "reason": "The combination of high-damage multi-hit projectiles, life-steal mechanics, and a massive speed burst upon losing its newspaper makes it a high-tier threat capable of overwhelming defenses.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "DoomPaper",
+    "targetPreference": "frontline",
+    "traits": [
+      "Life-Sapping Regeneration",
+      "Ember-Bullet Volley",
+      "Post-Newspaper Frenzy",
+      "Kinetic Decay"
+    ],
+    "variants": [
+      "corrupted",
+      "cursed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:11:10Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Composure",
+    "aptitudeSecondary": "Agility",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead_scholar"
+    ],
+    "gameTypeId": 15,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "almanac",
+    "reach": "melee",
+    "reason": "The creature's mechanics focus on a single conditional state (losing a book) rather than widespread devastation or existential threat characteristic of a scourge.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "ElitePaperZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "book_bound_invulnerability",
+      "thermal_stability",
+      "frenzy_state_on_interruption"
+    ],
+    "variants": [
+      "ancient",
+      "cursed",
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  }
+]

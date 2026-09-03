@@ -122,3 +122,5 @@ src/FusionRpg.Server/data/rpg-hot.sqlite
 src/FusionRpg.Server/data/rpg-hot.sqlite-shm
 src/FusionRpg.Server/data/rpg-hot.sqlite-wal
 src/FusionRpg.Server/data/rpg-media.sqlite
+
+/data/seed/demons/_runs/

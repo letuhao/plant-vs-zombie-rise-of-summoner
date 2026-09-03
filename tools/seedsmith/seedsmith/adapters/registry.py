@@ -4,6 +4,7 @@ feature adapters exist. S2 adds `"items"` here and nowhere else in `report`.
 from __future__ import annotations
 
 from ._stub import StubAdapter
+from .actions import ActionsAdapter
 from .demons import DemonsAdapter
 from .items import ItemsAdapter
 
@@ -11,6 +12,7 @@ ADAPTERS: "dict[str, type]" = {
     "stub": StubAdapter,
     "items": ItemsAdapter,
     "demons": DemonsAdapter,
+    "actions": ActionsAdapter,
 }
 
 

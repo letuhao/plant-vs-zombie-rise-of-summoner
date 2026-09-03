@@ -21,12 +21,14 @@
       "confidence": {
         "aptitudePrimary": "high",
         "deployMode": "high",
-        "elementPrimary": "high",
+        "elementPrimary": "split",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:08:21Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-03T15:51:30Z",
+      "minorityValues": {
+        "elementPrimary": "light"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -56,23 +58,23 @@
     "pure": true,
     "rarity": "heirloom",
     "reach": "melee",
-    "reason": "The creature functions as a multi-layered defensive entity that spawns weaker versions of itself rather than exhibiting the world-altering destructive capacity required for a tyrant rating.",
+    "reason": "The creature's high resilience and ability to spawn new entities upon armor destruction suggest a persistent, escalating threat that exceeds a mere tyrant.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "zombie",
     "speciesId": "DollGold",
-    "targetPreference": "backline",
+    "targetPreference": "frontline",
     "traits": [
       "Layered Composition",
       "Material Regression",
-      "Reactive Rebirth"
+      "Successive Rebirth"
     ],
     "variants": [
       "shiny",
       "normal"
     ],
-    "verdict": "too-high"
+    "verdict": "too-low"
   }
 ]

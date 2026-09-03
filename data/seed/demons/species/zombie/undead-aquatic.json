@@ -20,17 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
-        "deployMode": "split",
-        "elementPrimary": "split",
-        "rarity": "split"
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:10:31Z",
-      "minorityValues": {
-        "deployMode": "HypnoAlly",
-        "elementPrimary": "earth",
-        "rarity": "cultivated"
-      },
+      "emittedUtc": "2026-09-03T16:07:23Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,36 +41,37 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Agility",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "dark",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
       "undead-aquatic"
     ],
-    "gameTypeId": 19,
-    "posture": "Finesse",
+    "gameTypeId": 316,
+    "posture": "Force",
     "pure": true,
     "rarity": "heirloom",
-    "reach": "short",
-    "reason": "The creature's mechanics are limited to a single movement leap and a loss of mobility, making it a minor obstacle rather than a warden-level threat.",
+    "reach": "long",
+    "reason": "The creature is a standard Level 2 zombie with projectile attacks and moderate health, which does not justify a world-ending cataclysm rating.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "zombie",
-    "speciesId": "Dolphinrider",
-    "targetPreference": "frontline",
+    "speciesId": "Drown_b",
+    "targetPreference": "backline",
     "traits": [
-      "mounted-mobility",
-      "plant-leaping",
-      "symbiotic-decay"
+      "trident-projectile",
+      "delayed-deployment",
+      "high-durability",
+      "anti-umbrella"
     ],
     "variants": [
-      "normal",
+      "ancient",
       "corrupted"
     ],
     "verdict": "too-high"

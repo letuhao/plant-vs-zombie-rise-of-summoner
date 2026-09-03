@@ -354,7 +354,11 @@ state their unit.** Recorded as open question Q3.
 
 ---
 
-## 5. The four-layer resolution model (owner, 2026-09-01)
+## 5. The resolution model — four layers (2026-09-01), **five as of 2026-09-03**
+
+> ⭐ **A fifth layer was added by the owner on 2026-09-03 — see §5.6.** It is the fifth layer *added*
+> and the **first to run**: it composes the pool the others draw from. §§5.1–5.5 below are unchanged and
+> still correct; read §5.6 before treating the four-layer table as complete.
 
 > *"we have something like modify stat, like +10 hp — this is concrete atom effect. but when game
 > runtime read the json it shouldn't read +x hp, **that wrong**. it should read +x derived stats in this
@@ -372,6 +376,7 @@ cause of §4.3's defect.**
 
 | Layer | What it decides | Status |
 |---|---|---|
+| **L0 — pool composition** | **which affixes are even candidates, and at what rate**, given the container's power/rarity class and the channel delivering it | ⭐ **ADDED 2026-09-03 — §5.6.** Real gap |
 | **L1 — container shape** | how many atoms, and the chance each appears | **BUILT** — `pool_rolls`, `weight`, `group` |
 | **L2 — the channel pool** | *which* derived stats, how many, chance each | **DOES NOT EXIST** |
 | **L3 — value range** | the min/max a magnitude may roll into | **BUILT** — the value spec `{min, max, roll, scale}` and `overrides_json` |
@@ -479,6 +484,138 @@ An honest statement, because it is not free:
 
 The timing argument is straightforward: containers do not exist yet. Adding a layer now costs a schema
 edit; adding it after content exists costs a migration of every container ever authored.
+
+---
+
+### 5.6 ⭐ L0 — pool composition: power and rarity awareness (owner, 2026-09-03)
+
+> *"we need add new layer on effect pipeline to 5 layer instead of 4 — that is power and rarity
+> awareness layer. the LLM will resolve by closed enum. our deterministic engine will distribute and
+> resolve atom effect rate by the enum."*
+>
+> *"because if we allow drop table drop any thing, some very strong options can found on a weak item.
+> the set bonus, socket bonus, unique affixes bonus will become useless, craft system will become
+> useless, and later new mechanism like world map will become useless. no one want to farm, boss fight
+> or craft because they can loot anything from kill normal zombie in the run."*
+>
+> *"so we need make our atom effect pool become a lot of pool not only one."*
+
+#### 5.6.1 The problem, stated against shipped code
+
+Every lever that differentiates an acquisition channel today is a **volume** lever, never a **kind**
+lever:
+
+- `loot_source(source_kind, source_id) → table_id` points each source at its own drop table
+  (`ssot-generation.md` §5.1);
+- `drop_table_entry` carries `rarity_floor` and `rarity_weight_shift_json`, so a boss rolls higher rungs
+  more often;
+- rarity then buys affix **count** and **tier window** (`ssot-rarity.md` §3.3).
+
+**But once a container is selected, the affix pool it draws from is a property of the container, not of
+the source.** A `plate-helm` dropped by a trash zombie and one dropped by a boss draw from the same
+affixes. Only probability differs.
+
+**In most games rarity-as-volume-gate would be enough. Here it is not, and the reason is our own SSOT.**
+[AGENTS.md](../../AGENTS.md) makes *no hard progression ceilings* a hard boundary — endless grind is the
+thing other systems reconcile to. With a level cap, an ilvl gate holds forever. **With endless grind,
+every volume gate eventually opens**: enough trash kills reach the same outcome as the boss. So the
+absence of a kind-gate is not a balance preference here; it is a structural hole that the no-ceilings
+rule guarantees will be found.
+
+The consequence the owner names follows directly: if the strongest affixes are reachable from trash,
+then sets, sockets, uniques, crafting and the world map are all **redundant paths to something you were
+going to get anyway.**
+
+#### 5.6.2 What L0 is
+
+**One deterministic function, run before L1:**
+
+```text
+poolFor(container, channel, rarity)  ->  [ (affixId, weight) ]
+```
+
+Two closed enums are its inputs, and **the split between them is the whole design**:
+
+| Axis | Who decides | Values |
+|---|---|---|
+| **powerClass** — how strong this affix is *as an idea* | ⭐ **the LLM**, by closed enum | authored per affix, carried with a `basis` |
+| **channel** — how the effect is being delivered | the call site | `drop` · `boss` · `set` · `socket` · `unique` · `craft` (owner, 2026-09-03) |
+
+The **rate** is never authored and never chosen by a model. A deterministic policy table maps
+`(powerClass × channel) → weight`, and it lives in `data/tuning/` because it is the balance surface
+([tunables-ssot.md](tunables-ssot.md)):
+
+```text
+                 drop    boss     set    socket  unique   craft
+ common          high    high     —      med     —        high
+ …
+ top-shelf       0.01%   low      HIGH   low     fixed    med
+```
+
+**Why the LLM decides the class and not the rate.** This is `seedsmith-map.md` P1 applied without
+amendment: *the LLM writes identity; deterministic code writes magnitude.* A model has no calibrated
+sense of scale, so a weight it picks is a plausible-looking guess — but *"is `Master of Fire and Ice` a
+top-shelf effect or an ordinary one?"* is a judgement about what the thing **is**, which is exactly what
+a model is for.
+
+⭐ **And the classification does not go stale, because the enum is an input to balance rather than an
+output of it.** A balance pass moves the *rates* in the tuning table; it never moves the classifications.
+That is the property that makes an authored class safe here, where seedsmith's `power-estimate` had to
+mark its tiers **provisional** — that one estimates a *measurable* quantity that a real observation later
+contradicts, and this one does not.
+
+#### 5.6.3 ⭐ L0 consumes no RNG, and that is what makes it safe to add late
+
+§5.4 warns, correctly, that adding a layer shifts every historical roll — `CatalogRevision` detects a
+*content* change, not a change in how many numbers the resolver consumed, so every owned item would
+silently re-resolve differently on replay.
+
+**L0 escapes that warning by construction.** It is a pure function of `(container, channel, rarity)`
+and draws no random numbers: it *composes the candidate list* that L1's existing `affix.draw` stream
+then draws from. No new stream, no extra consumption, no shifted history.
+
+**This is a design requirement, not an observation.** If L0 ever rolls anything itself, it acquires the
+exact fragility §5.4 describes. Whatever varies per drop belongs in L1's draw, never in L0's
+composition.
+
+#### 5.6.4 Never zero on a drop — the 0.01% floor (owner, 2026-09-03)
+
+**A `drop`-channel cell may be vanishingly small. It may not be zero.**
+
+This is **D7 stated from the other direction**, and the two together are now one principle the item and
+effect programs share:
+
+> **There is always a path, and the path costs the right thing.**
+> D7: crafting is gated by *cost*, never by luck — *"don't make it impossible by chance, that is not
+> fun."* L0: the strongest affixes are near-zero from trash and reliable through the channel that is
+> *for* them.
+
+The floor lives in the tuning table as a named minimum, so a balance pass cannot silently write a zero.
+
+⚠ **The other channels may be exclusive in either direction, and one of them must be.** A hand-authored
+unique's fixed affixes are not rollable at all — that is what `ssot-uniques.md` means by *"a unique may
+break every rule that lives in the generator."* A structural zero there is legitimate and, per
+AGENTS.md, **must carry a comment saying why it is exempt**: it is a content-availability rule, not a
+cap on a magnitude.
+
+#### 5.6.5 What this is, and is not, in terms of existing machinery
+
+Stated plainly so nobody rebuilds a draw loop.
+
+| | Verdict |
+|---|---|
+| The weighted draw itself | **BUILT** — `Instantiator.Draw:130-155`, `AtomRandom.NextBelow:66`. L0 produces its input, it does not replace it |
+| Per-container affix weights | **BUILT** — `effect_container_pool.weight` |
+| Per-source drop tables, rarity floors and weight shifts | **BUILT** — `ssot-generation.md` §5.1 |
+| Tag-based eligibility | **BUILT but unwired** — `EligibilityResolver.DrawablePool` (`EligibilityRule.cs:60-95`) has **no production caller** and its `tagsOf` delegate is supplied by nothing |
+| An affix's **power class** | ⛔ **REAL GAP.** `AtomRow.TagsJson` carries *thematic* tags (`offensive`, `elemental`) — nothing says how strong an affix is relative to others |
+| A `(powerClass × channel) → weight` policy | ⛔ **REAL GAP** |
+| Composing per-container pools at scale | ⛔ **REAL GAP.** With ~1,844 generated sets (`item-ideal.md` D12), hand-authoring a pool per container is not available |
+
+**So L0 is a classification and a distribution policy on top of machinery that already exists** — not a
+new draw, and not a replacement for `eligibility-tags`. It **extends** that module rather than
+superseding it: eligibility answers *may this affix appear here* (binary); L0 answers *at what rate*
+(weighted). Binary allow/deny cannot express 0.01%, which is the whole point.
 
 ---
 

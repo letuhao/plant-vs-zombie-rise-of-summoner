@@ -1,0 +1,3616 @@
+{
+  "_meta": {
+    "leanHash": "39cd63b4f4510fabff6ef1142522a8e097753bc919797600505a1c2d1942065a",
+    "partition": "type-weights",
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 211,
+        "defense": 200,
+        "movement": 178,
+        "status": 222,
+        "support": 189
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 100,
+        "ice": 400,
+        "light": 200
+      },
+      "id": "weights.family.base",
+      "scope": "family",
+      "scopeKey": "base",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "floor",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 200,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.family.bucket",
+      "scope": "family",
+      "scopeKey": "bucket",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 212,
+        "defense": 206,
+        "movement": 200,
+        "status": 194,
+        "support": 188
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 100,
+        "earth": 200,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.family.cactus",
+      "scope": "family",
+      "scopeKey": "cactus",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 202,
+        "defense": 203,
+        "movement": 195,
+        "status": 190,
+        "support": 210
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 200,
+        "fire": 400,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.family.cherry",
+      "scope": "family",
+      "scopeKey": "cherry",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "floor",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 400,
+        "ice": 200,
+        "light": 100
+      },
+      "id": "weights.family.chomper",
+      "scope": "family",
+      "scopeKey": "chomper",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 212,
+        "defense": 206,
+        "movement": 188,
+        "status": 194,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 400,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.family.corn",
+      "scope": "family",
+      "scopeKey": "corn",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 194,
+        "defense": 206,
+        "movement": 188,
+        "status": 200,
+        "support": 212
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 200
+      },
+      "id": "weights.family.dolls",
+      "scope": "family",
+      "scopeKey": "dolls",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "floor",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 400,
+        "fire": 200,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.family.double",
+      "scope": "family",
+      "scopeKey": "double",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 195,
+        "defense": 211,
+        "movement": 216,
+        "status": 178,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 400,
+        "earth": 200,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.family.fire",
+      "scope": "family",
+      "scopeKey": "fire",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 206,
+        "defense": 212,
+        "movement": 188,
+        "status": 200,
+        "support": 194
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 200,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 400
+      },
+      "id": "weights.family.fruit",
+      "scope": "family",
+      "scopeKey": "fruit",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 216,
+        "defense": 200,
+        "movement": 189,
+        "status": 179,
+        "support": 216
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 200,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 400
+      },
+      "id": "weights.family.garlic",
+      "scope": "family",
+      "scopeKey": "garlic",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 204,
+        "defense": 208,
+        "movement": 196,
+        "status": 192,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 200
+      },
+      "id": "weights.family.hypno",
+      "scope": "family",
+      "scopeKey": "hypno",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 208,
+        "defense": 206,
+        "movement": 186,
+        "status": 206,
+        "support": 194
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 400,
+        "earth": 100,
+        "fire": 100,
+        "ice": 200,
+        "light": 100
+      },
+      "id": "weights.family.ice",
+      "scope": "family",
+      "scopeKey": "ice",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "floor",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 200,
+        "ice": 100,
+        "light": 400
+      },
+      "id": "weights.family.light",
+      "scope": "family",
+      "scopeKey": "light",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 194,
+        "movement": 206,
+        "status": 188,
+        "support": 212
+      },
+      "elementBiasMilli": {
+        "air": 200,
+        "dark": 100,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.family.line",
+      "scope": "family",
+      "scopeKey": "line",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "floor",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.family.nut",
+      "scope": "family",
+      "scopeKey": "nut",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 207,
+        "defense": 196,
+        "movement": 213,
+        "status": 182,
+        "support": 202
+      },
+      "elementBiasMilli": {
+        "air": 200,
+        "dark": 100,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.family.pea",
+      "scope": "family",
+      "scopeKey": "pea",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 206,
+        "defense": 212,
+        "movement": 194,
+        "status": 188,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 200,
+        "fire": 100,
+        "ice": 400,
+        "light": 100
+      },
+      "id": "weights.family.sun",
+      "scope": "family",
+      "scopeKey": "sun",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 206,
+        "defense": 212,
+        "movement": 194,
+        "status": 188,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 200,
+        "fire": 400,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.family.sunflower",
+      "scope": "family",
+      "scopeKey": "sunflower",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 220,
+        "movement": 160,
+        "status": 200,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 400,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.allpeater",
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 200,
+        "movement": 160,
+        "status": 220,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 400,
+        "earth": 100,
+        "fire": 200,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.ashthreepeater",
+      "scope": "species",
+      "scopeKey": "ashthreepeater",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 400,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.bucketnutzombie",
+      "scope": "species",
+      "scopeKey": "bucketnutzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.bucketzombie",
+      "scope": "species",
+      "scopeKey": "bucketzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 240,
+        "movement": 160,
+        "status": 180,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.cabbagepult",
+      "scope": "species",
+      "scopeKey": "cabbagepult",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 222,
+        "defense": 211,
+        "movement": 200,
+        "status": 189,
+        "support": 178
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.cactus",
+      "scope": "species",
+      "scopeKey": "cactus",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.cactusblover",
+      "scope": "species",
+      "scopeKey": "cactusblover",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 160,
+        "movement": 200,
+        "status": 180,
+        "support": 220
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 200,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 400
+      },
+      "id": "weights.species.caltrop",
+      "scope": "species",
+      "scopeKey": "caltrop",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 220,
+        "movement": 160,
+        "status": 180,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 400,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.caltropnut",
+      "scope": "species",
+      "scopeKey": "caltropnut",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.cherrybomb",
+      "scope": "species",
+      "scopeKey": "cherrybomb",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 200,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.cherrygatling",
+      "scope": "species",
+      "scopeKey": "cherrygatling",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 400,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.cherrynut",
+      "scope": "species",
+      "scopeKey": "cherrynut",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 200,
+        "earth": 100,
+        "fire": 400,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.cherrynutzombie",
+      "scope": "species",
+      "scopeKey": "cherrynutzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 240,
+        "movement": 160,
+        "status": 180,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.cherrypaperzombie",
+      "scope": "species",
+      "scopeKey": "cherrypaperzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 173,
+        "defense": 146,
+        "movement": 227,
+        "status": 200,
+        "support": 254
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 400
+      },
+      "id": "weights.species.cherryshooter",
+      "scope": "species",
+      "scopeKey": "cherryshooter",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 240,
+        "movement": 180,
+        "status": 160,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.cherrysplit",
+      "scope": "species",
+      "scopeKey": "cherrysplit",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 180,
+        "movement": 160,
+        "status": 200,
+        "support": 220
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 100,
+        "ice": 400,
+        "light": 200
+      },
+      "id": "weights.species.cherrythreepeater",
+      "scope": "species",
+      "scopeKey": "cherrythreepeater",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 160,
+        "movement": 180,
+        "status": 200,
+        "support": 220
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 400
+      },
+      "id": "weights.species.chomper",
+      "scope": "species",
+      "scopeKey": "chomper",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 200,
+        "movement": 160,
+        "status": 240,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.conezombie",
+      "scope": "species",
+      "scopeKey": "conezombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 222,
+        "defense": 211,
+        "movement": 178,
+        "status": 189,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 400,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.cornpot",
+      "scope": "species",
+      "scopeKey": "cornpot",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 400,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.cornpult",
+      "scope": "species",
+      "scopeKey": "cornpult",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 180,
+        "defense": 220,
+        "movement": 160,
+        "status": 240,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 400,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.dancepolzombie",
+      "scope": "species",
+      "scopeKey": "dancepolzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 200,
+        "movement": 160,
+        "status": 220,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 100,
+        "ice": 400,
+        "light": 200
+      },
+      "id": "weights.species.darkthreepeater",
+      "scope": "species",
+      "scopeKey": "darkthreepeater",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 240,
+        "movement": 220,
+        "status": 180,
+        "support": 160
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.dolldiamond",
+      "scope": "species",
+      "scopeKey": "dolldiamond",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.dollgold",
+      "scope": "species",
+      "scopeKey": "dollgold",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 189,
+        "defense": 211,
+        "movement": 178,
+        "status": 200,
+        "support": 222
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 400
+      },
+      "id": "weights.species.dollsilver",
+      "scope": "species",
+      "scopeKey": "dollsilver",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 200,
+        "movement": 220,
+        "status": 160,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.doomcactus",
+      "scope": "species",
+      "scopeKey": "doomcactus",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 200,
+        "movement": 160,
+        "status": 240,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.doorzombie",
+      "scope": "species",
+      "scopeKey": "doorzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 200,
+        "dark": 100,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.doublecherry",
+      "scope": "species",
+      "scopeKey": "doublecherry",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 200,
+        "dark": 100,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.doubleshooter",
+      "scope": "species",
+      "scopeKey": "doubleshooter",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 400,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.doublesnow",
+      "scope": "species",
+      "scopeKey": "doublesnow",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 240,
+        "movement": 160,
+        "status": 180,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.driverzombie",
+      "scope": "species",
+      "scopeKey": "driverzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 200,
+        "movement": 160,
+        "status": 220,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 400,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.flagzombie",
+      "scope": "species",
+      "scopeKey": "flagzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 180,
+        "movement": 160,
+        "status": 200,
+        "support": 240
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 100,
+        "ice": 200,
+        "light": 400
+      },
+      "id": "weights.species.footballzombie",
+      "scope": "species",
+      "scopeKey": "footballzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 180,
+        "movement": 160,
+        "status": 200,
+        "support": 220
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 200,
+        "fire": 400,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.fumeshroom",
+      "scope": "species",
+      "scopeKey": "fumeshroom",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 200,
+        "movement": 180,
+        "status": 160,
+        "support": 220
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 200,
+        "earth": 100,
+        "fire": 400,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.garlic",
+      "scope": "species",
+      "scopeKey": "garlic",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 180,
+        "movement": 200,
+        "status": 160,
+        "support": 240
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 400
+      },
+      "id": "weights.species.garlicpea",
+      "scope": "species",
+      "scopeKey": "garlicpea",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 211,
+        "defense": 222,
+        "movement": 178,
+        "status": 200,
+        "support": 189
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 400,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.garlicthreepeater",
+      "scope": "species",
+      "scopeKey": "garlicthreepeater",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 220,
+        "movement": 160,
+        "status": 180,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 200,
+        "ice": 400,
+        "light": 100
+      },
+      "id": "weights.species.gatlingpea",
+      "scope": "species",
+      "scopeKey": "gatlingpea",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 200,
+        "movement": 220,
+        "status": 160,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 400,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.hypnochomper",
+      "scope": "species",
+      "scopeKey": "hypnochomper",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 211,
+        "defense": 222,
+        "movement": 189,
+        "status": 178,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.hypnojalapeno",
+      "scope": "species",
+      "scopeKey": "hypnojalapeno",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 400
+      },
+      "id": "weights.species.hypnopeashooter",
+      "scope": "species",
+      "scopeKey": "hypnopeashooter",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.hypnoshroom",
+      "scope": "species",
+      "scopeKey": "hypnoshroom",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 400,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 200
+      },
+      "id": "weights.species.icecaltrop",
+      "scope": "species",
+      "scopeKey": "icecaltrop",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 400,
+        "earth": 100,
+        "fire": 200,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.iceshroom",
+      "scope": "species",
+      "scopeKey": "iceshroom",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 200,
+        "movement": 160,
+        "status": 220,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.ironpeazombie",
+      "scope": "species",
+      "scopeKey": "ironpeazombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 400,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.jalacaltrop",
+      "scope": "species",
+      "scopeKey": "jalacaltrop",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 200,
+        "ice": 400,
+        "light": 100
+      },
+      "id": "weights.species.jalagatling",
+      "scope": "species",
+      "scopeKey": "jalagatling",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 167,
+        "defense": 233,
+        "movement": 267,
+        "status": 133,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 100,
+        "earth": 200,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.jalapeashooter",
+      "scope": "species",
+      "scopeKey": "jalapeashooter",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 222,
+        "defense": 211,
+        "movement": 189,
+        "status": 178,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.jalapeno",
+      "scope": "species",
+      "scopeKey": "jalapeno",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 400,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 200
+      },
+      "id": "weights.species.jalastar",
+      "scope": "species",
+      "scopeKey": "jalastar",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 400
+      },
+      "id": "weights.species.lanterncactus",
+      "scope": "species",
+      "scopeKey": "lanterncactus",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 400,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.lanternchomper",
+      "scope": "species",
+      "scopeKey": "lanternchomper",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 200,
+        "fire": 100,
+        "ice": 100,
+        "light": 400
+      },
+      "id": "weights.species.lanternpea",
+      "scope": "species",
+      "scopeKey": "lanternpea",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 200,
+        "movement": 240,
+        "status": 160,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.marigold",
+      "scope": "species",
+      "scopeKey": "marigold",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 180,
+        "movement": 160,
+        "status": 200,
+        "support": 220
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.melonpult",
+      "scope": "species",
+      "scopeKey": "melonpult",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 200,
+        "movement": 160,
+        "status": 240,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 400,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 200
+      },
+      "id": "weights.species.normalzombie",
+      "scope": "species",
+      "scopeKey": "normalzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.nutchomper",
+      "scope": "species",
+      "scopeKey": "nutchomper",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 180,
+        "defense": 160,
+        "movement": 200,
+        "status": 240,
+        "support": 220
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 400
+      },
+      "id": "weights.species.paperzombie",
+      "scope": "species",
+      "scopeKey": "paperzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 400,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.peachomper",
+      "scope": "species",
+      "scopeKey": "peachomper",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.peanut",
+      "scope": "species",
+      "scopeKey": "peanut",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 400,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 200
+      },
+      "id": "weights.species.peashooter",
+      "scope": "species",
+      "scopeKey": "peashooter",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 189,
+        "defense": 222,
+        "movement": 178,
+        "status": 200,
+        "support": 211
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 400,
+        "fire": 200,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.peashooterzombie",
+      "scope": "species",
+      "scopeKey": "peashooterzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.peasquash",
+      "scope": "species",
+      "scopeKey": "peasquash",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 211,
+        "defense": 222,
+        "movement": 189,
+        "status": 178,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 200
+      },
+      "id": "weights.species.peasunflower",
+      "scope": "species",
+      "scopeKey": "peasunflower",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 200,
+        "dark": 100,
+        "earth": 100,
+        "fire": 100,
+        "ice": 400,
+        "light": 100
+      },
+      "id": "weights.species.plantern",
+      "scope": "species",
+      "scopeKey": "plantern",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 180,
+        "defense": 160,
+        "movement": 240,
+        "status": 200,
+        "support": 220
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.polevaulterzombie",
+      "scope": "species",
+      "scopeKey": "polevaulterzombie",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 100,
+        "ice": 200,
+        "light": 400
+      },
+      "id": "weights.species.pot",
+      "scope": "species",
+      "scopeKey": "pot",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 200,
+        "movement": 160,
+        "status": 240,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.pumpkin",
+      "scope": "species",
+      "scopeKey": "pumpkin",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 200,
+        "movement": 160,
+        "status": 180,
+        "support": 240
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 100,
+        "earth": 100,
+        "fire": 100,
+        "ice": 200,
+        "light": 400
+      },
+      "id": "weights.species.scaredyshroom",
+      "scope": "species",
+      "scopeKey": "scaredyshroom",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 200,
+        "movement": 160,
+        "status": 240,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 400,
+        "light": 120
+      },
+      "id": "weights.species.snowgatling",
+      "scope": "species",
+      "scopeKey": "snowgatling",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 211,
+        "defense": 222,
+        "movement": 189,
+        "status": 178,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.snowpeashooter",
+      "scope": "species",
+      "scopeKey": "snowpeashooter",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 233,
+        "defense": 167,
+        "movement": 267,
+        "status": 133,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 100,
+        "earth": 200,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.snowsplit",
+      "scope": "species",
+      "scopeKey": "snowsplit",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 200,
+        "dark": 100,
+        "earth": 400,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.splitpea",
+      "scope": "species",
+      "scopeKey": "splitpea",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 180,
+        "movement": 240,
+        "status": 160,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.squash",
+      "scope": "species",
+      "scopeKey": "squash",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 400
+      },
+      "id": "weights.species.starfruit",
+      "scope": "species",
+      "scopeKey": "starfruit",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 211,
+        "defense": 222,
+        "movement": 178,
+        "status": 200,
+        "support": 189
+      },
+      "elementBiasMilli": {
+        "air": 200,
+        "dark": 400,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.starpea",
+      "scope": "species",
+      "scopeKey": "starpea",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 211,
+        "defense": 222,
+        "movement": 189,
+        "status": 178,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.sunchomper",
+      "scope": "species",
+      "scopeKey": "sunchomper",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 120,
+        "fire": 400,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.sunflower",
+      "scope": "species",
+      "scopeKey": "sunflower",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 220,
+        "defense": 200,
+        "movement": 180,
+        "status": 160,
+        "support": 240
+      },
+      "elementBiasMilli": {
+        "air": 100,
+        "dark": 200,
+        "earth": 100,
+        "fire": 100,
+        "ice": 100,
+        "light": 400
+      },
+      "id": "weights.species.threecabbage",
+      "scope": "species",
+      "scopeKey": "threecabbage",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 200,
+        "movement": 200,
+        "status": 200,
+        "support": 200
+      },
+      "elementBiasMilli": {
+        "air": 120,
+        "dark": 120,
+        "earth": 400,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.threepeater",
+      "scope": "species",
+      "scopeKey": "threepeater",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 200,
+        "defense": 189,
+        "movement": 211,
+        "status": 178,
+        "support": 222
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 100,
+        "earth": 200,
+        "fire": 100,
+        "ice": 100,
+        "light": 100
+      },
+      "id": "weights.species.threeplantern",
+      "scope": "species",
+      "scopeKey": "threeplantern",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 240,
+        "defense": 200,
+        "movement": 220,
+        "status": 160,
+        "support": 180
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.twinflower",
+      "scope": "species",
+      "scopeKey": "twinflower",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    },
+    {
+      "areaShapeMilli": {
+        "column": 250,
+        "rectangle": 250,
+        "row": 250,
+        "square": 250
+      },
+      "basis": "derived",
+      "categoryMilli": {
+        "attack": 180,
+        "defense": 160,
+        "movement": 220,
+        "status": 200,
+        "support": 240
+      },
+      "elementBiasMilli": {
+        "air": 400,
+        "dark": 120,
+        "earth": 120,
+        "fire": 120,
+        "ice": 120,
+        "light": 120
+      },
+      "id": "weights.species.wallnut",
+      "scope": "species",
+      "scopeKey": "wallnut",
+      "targetModeMilli": {
+        "all": 166,
+        "area": 166,
+        "multi": 167,
+        "rolledTarget": 167,
+        "self": 167,
+        "single": 167
+      }
+    }
+  ],
+  "kind": "action-type-weights",
+  "schemaVersion": 1
+}

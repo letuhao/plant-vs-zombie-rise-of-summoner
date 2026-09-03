@@ -19,14 +19,16 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:03:50Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-03T15:29:38Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -56,7 +58,7 @@
     "pure": true,
     "rarity": "chaff",
     "reach": "short",
-    "reason": "With a total resilience exceeding 1300, this creature possesses significantly more durability than a standard raider-level threat.",
+    "reason": "With a total durability of 1370, this creature possesses significantly more survivability than a standard raider-level threat.",
     "resourceProfile": [
       "hp",
       "poise"
@@ -67,10 +69,89 @@
     "traits": [
       "amphibious",
       "buoyant",
-      "corroded",
-      "iron-clad"
+      "rust-prone",
+      "mechanical-integration"
     ],
     "variants": [],
     "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "unresolved"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:05:09Z",
+      "minorityValues": {
+        "deployMode": "PlantAvatar"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "undead-automaton"
+    ],
+    "gameTypeId": 322,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "unresolved",
+    "reach": "short",
+    "reason": "The creature is a 2nd-level zombie with basic armor and a simple duplication mechanic, which does not align with the world-ending threat of a calamity.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "Driver_b",
+    "targetPreference": "frontline",
+    "traits": [
+      "armored-plating",
+      "crushing-momentum",
+      "layered-defense",
+      "post-mortem-reproduction"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-high"
   }
 ]

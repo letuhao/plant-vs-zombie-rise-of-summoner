@@ -25,7 +25,7 @@
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:06:34Z",
+      "emittedUtc": "2026-09-03T15:48:03Z",
       "minorityValues": {
         "elementPrimary": "air"
       },
@@ -44,21 +44,21 @@
       "Summonable"
     ],
     "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Agility",
+    "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "observed",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "undead performer"
+      "undead-performer"
     ],
     "gameTypeId": 6,
     "posture": "Force",
-    "pure": false,
+    "pure": true,
     "rarity": "cultivated",
     "reach": "long",
-    "reason": "The creature's mechanics describe a standard crowd-summoning unit with no inherent high-threat or area-denial capabilities that justify a 'scourge' rating.",
+    "reason": "The creature's mechanics focus on simple movement and summoning rather than widespread destruction, making it a significant threat but not a scourge.",
     "resourceProfile": [
       "hp",
       "stamina"
@@ -68,8 +68,8 @@
     "targetPreference": "frontline",
     "traits": [
       "pole-vaulting",
-      "rhythmic summoning",
-      "momentum-based entry"
+      "rhythmic-summoning",
+      "obstacle-leaping"
     ],
     "variants": [
       "normal",
@@ -97,17 +97,15 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "split",
-        "deployMode": "split",
+        "aptitudePrimary": "high",
+        "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:15:02Z",
+      "emittedUtc": "2026-09-03T15:48:40Z",
       "minorityValues": {
-        "aptitudePrimary": "Retribution",
-        "deployMode": "HypnoAlly",
-        "rarity": "heirloom"
+        "rarity": "cultivated"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -123,35 +121,35 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
+    "aptitudePrimary": "Agility",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "undead-performer"
+      "Undead Performer"
     ],
-    "gameTypeId": 24,
-    "posture": "Force",
+    "gameTypeId": 7,
+    "posture": "Finesse",
     "pure": true,
     "rarity": "chaff",
-    "reach": "melee",
-    "reason": "A single-target explosion capable of instant-killing plants is a high-tier threat, but the lack of crowd-control or overwhelming numbers prevents it from reaching the 'scourge' level.",
+    "reach": "long",
+    "reason": "The description identifies them as bullies who actively terrorize others in a school setting, suggesting a level of organized aggression higher than a mere raider.",
     "resourceProfile": [
       "hp",
-      "hp"
+      "stamina"
     ],
     "side": "zombie",
-    "speciesId": "JackboxZombie",
-    "targetPreference": "swarm",
+    "speciesId": "DancePolZombie2",
+    "targetPreference": "backline",
     "traits": [
-      "musical-trigger",
-      "explosive-detonation",
-      "psychological-instability"
+      "Pole-vaulting",
+      "Rhythmic movement",
+      "Cooperative choreography"
     ],
     "variants": [],
-    "verdict": "too-high"
+    "verdict": "too-low"
   }
 ]

@@ -105,9 +105,9 @@
   .ws-cap { font-size: var(--text-2xs); color: var(--muted); text-align: center; line-height: 1.35;
         max-width: 200px; }
   .ws-cap b { display: block; color: var(--text); font-size: var(--text-xs); margin-bottom: 1px; }
-  .ws-cap code { color: var(--faint); font-size: 0.95em; }
-  .ws-band { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
-        color: var(--faint); border-bottom: 1px solid var(--border); padding-bottom: 3px;
+  .ws-cap code { color: var(--muted); font-size: 0.95em; }
+  .ws-band { font-size: var(--text-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+        color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 3px;
         margin: var(--sp-5) 0 var(--sp-3); }
   .ws-band:first-child { margin-top: 0; }
   .ws-two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
@@ -142,19 +142,19 @@
 
   .ws-hd { display: flex; align-items: center; gap: 5px; margin-top: 4px; }
   .ws-crest { flex: none; width: 17px; height: 17px; display: grid; place-items: center;
-        font-size: 10px; line-height: 1; border-radius: 3px; border: 1px solid var(--border-control);
+        font-size: var(--text-2xs); line-height: 1; border-radius: 3px; border: 1px solid var(--border-control);
         background: var(--panel-inset); }
   .ws-node[data-own="mine"]      .ws-crest { border-color: var(--side-plant); }
   .ws-node[data-own="enemy"]     .ws-crest { border-color: var(--side-zombie); }
   .ws-node[data-own="contested"] .ws-crest { border-color: var(--sun); }
   .ws-node[data-own="neutral"]   .ws-crest { border-style: dashed; }
-  .ws-nm { flex: 1; min-width: 0; font-family: var(--font-display); font-size: var(--text-sm);
+  .ws-nm { flex: 1; min-width: 0; font-family: var(--font-ui); font-size: var(--text-sm);
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ws-ownlb { flex: none; font-size: 8px; font-weight: 800; text-transform: uppercase;
+  .ws-ownlb { flex: none; font-size: var(--text-sm); font-weight: 800; text-transform: uppercase;
         letter-spacing: 0.06em; color: var(--muted); }
 
   .ws-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; font-size: var(--text-2xs); }
-  .ws-danger { font-family: var(--font-mono); font-size: 9px; font-weight: 800; color: var(--warn);
+  .ws-danger { font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 800; color: var(--warn);
         border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent);
         border-radius: var(--r-pill); padding: 0 5px; white-space: nowrap; }
   .ws-danger[data-band="0"] { color: var(--muted); border-color: var(--border-control); }
@@ -172,15 +172,15 @@
   .ws-node.ws-is-release { box-shadow: inset 5px 0 0 var(--bad-solid); }
   .ws-node.ws-is-warded  { outline: 2px solid var(--info); outline-offset: 2px; }
 
-  .ws-state { display: flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 800;
+  .ws-state { display: flex; align-items: center; gap: 4px; font-size: var(--text-2xs); font-weight: 800;
         text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
   .ws-state[data-t="ok"]   { color: var(--ok); }
   .ws-state[data-t="warn"] { color: var(--warn); }
   .ws-state[data-t="bad"]  { color: var(--bad); }
-  .ws-state[data-t="dead"] { color: var(--faint); text-decoration: line-through; }
+  .ws-state[data-t="dead"] { color: var(--muted); text-decoration: line-through; }
 
   .ws-flags { display: flex; flex-wrap: wrap; gap: 3px; }
-  .ws-flag { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 800;
+  .ws-flag { display: inline-flex; align-items: center; gap: 3px; font-size: var(--text-2xs); font-weight: 800;
         border: 1px solid var(--border-control); border-radius: var(--r-sm); padding: 1px 5px;
         background: var(--panel-inset); color: var(--muted); white-space: nowrap; }
   .ws-flag--release { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 60%, transparent);
@@ -194,8 +194,8 @@
   .ws-yield { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
         background: var(--panel-inset); border-radius: var(--r-sm); padding: 3px 4px; }
   .ws-yield > div { text-align: center; }
-  .ws-yield .ws-k { display: block; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em;
-        color: var(--faint); }
+  .ws-yield .ws-k { display: block; font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.05em;
+        color: var(--muted); }
   .ws-yield .ws-v { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 800; color: var(--text); }
   .ws-yield .ws-v[data-sign="pos"] { color: var(--ok); }
   .ws-yield .ws-v[data-sign="neg"] { color: var(--bad); }
@@ -203,7 +203,7 @@
   /* slot pips — a sector is a small board of slots. Shape + glyph + border style. */
   .ws-slots { display: flex; flex-wrap: wrap; gap: 4px; }
   .ws-slot { position: relative; width: 21px; height: 21px; display: grid; place-items: center;
-        font-size: 10px; line-height: 1; border: 1px solid var(--border-control);
+        font-size: var(--text-2xs); line-height: 1; border: 1px solid var(--border-control);
         background: var(--panel-inset); color: var(--text); }
   .ws-slot[data-shape="circle"]  { border-radius: 50%; }
   .ws-slot[data-shape="square"]  { border-radius: 2px; }
@@ -215,10 +215,10 @@
         clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
   .ws-slot[data-st="claimed"]  { border-color: var(--side-plant);
         background: color-mix(in srgb, var(--side-plant) 20%, var(--panel-inset)); }
-  .ws-slot[data-st="depleted"] { border-style: dotted; color: var(--faint); }
+  .ws-slot[data-st="depleted"] { border-style: dotted; color: var(--muted); }
   .ws-slot[data-st="ruined"]   { border-color: var(--bad); color: var(--bad); border-style: double;
         border-width: 3px; }
-  .ws-slot .ws-mk { position: absolute; right: -4px; top: -6px; font-size: 8px; line-height: 1;
+  .ws-slot .ws-mk { position: absolute; right: -4px; top: -6px; font-size: var(--text-2xs); line-height: 1;
         font-family: var(--font-mono); font-weight: 800; }
   .ws-slot .ws-mk[data-m="guard"] { color: var(--bad); }
   .ws-slot .ws-mk[data-m="built"] { color: var(--sun); }
@@ -226,7 +226,7 @@
 
   /* forces */
   .ws-forces { display: flex; flex-wrap: wrap; gap: 3px; }
-  .ws-force { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 700;
+  .ws-force { display: inline-flex; align-items: center; gap: 3px; font-size: var(--text-2xs); font-weight: 700;
         border: 1px solid var(--border-control); border-radius: var(--r-pill); padding: 0 6px;
         background: var(--panel-inset); white-space: nowrap; }
   .ws-force[data-own="mine"]  { border-color: var(--side-plant); }
@@ -237,7 +237,7 @@
   /* --- fog treatments ----------------------------------------------------- */
   /* Watched adds a live marker; the three stale/absent states each change the
      SILHOUETTE or the border geometry, so they separate without hue. */
-  .ws-live { display: inline-flex; align-items: center; gap: 3px; font-size: 8px; font-weight: 800;
+  .ws-live { display: inline-flex; align-items: center; gap: 3px; font-size: var(--text-2xs); font-weight: 800;
         text-transform: uppercase; letter-spacing: 0.06em; color: var(--ok);
         border: 1px solid color-mix(in srgb, var(--ok) 55%, transparent); border-radius: var(--r-pill);
         padding: 0 5px; }
@@ -251,10 +251,10 @@
             color-mix(in srgb, var(--soil) 55%, transparent) 5px 8px),
           color-mix(in srgb, var(--almanac) 18%, transparent); }
   .ws-stamp { position: absolute; right: 5px; bottom: 5px; z-index: 2; transform: rotate(-5deg);
-        font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
+        font-size: var(--text-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em;
         color: var(--almanac); border: 1px solid var(--almanac); border-radius: 2px; padding: 0 4px;
         background: color-mix(in srgb, var(--soil) 70%, transparent); }
-  .ws-hidden { display: flex; align-items: center; gap: 4px; font-size: 9px; font-style: italic;
+  .ws-hidden { display: flex; align-items: center; gap: 4px; font-size: var(--text-2xs); font-style: italic;
         color: var(--muted); border-radius: var(--r-sm); padding: 2px 5px;
         background: repeating-linear-gradient(-45deg,
           color-mix(in srgb, var(--muted) 16%, transparent) 0 3px, transparent 3px 8px); }
@@ -262,17 +262,17 @@
      misread as a zeroed known sector. */
   .ws-unknown { width: 124px; height: 124px; border-radius: 50%; display: grid; place-items: center;
         gap: 2px; text-align: center; border: 2px dashed var(--border); background: var(--soil);
-        color: var(--faint); }
+        color: var(--muted); }
   .ws-unknown .ws-q { font-size: var(--text-2xl); font-family: var(--font-display); color: var(--muted); }
-  .ws-unknown .ws-t { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+  .ws-unknown .ws-t { font-size: var(--text-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
 
   /* --- lanes -------------------------------------------------------------- */
   .ws-svg { width: 100%; height: auto; display: block; border: 1px solid var(--border);
         border-radius: var(--r-md); background: var(--panel-inset); }
-  .ws-svg .ws-n-l { font-family: var(--font-display); font-size: 11px; fill: var(--text); }
-  .ws-svg .ws-n-s { font-family: var(--font-ui); font-size: 9px; font-weight: 700; fill: var(--muted); }
-  .ws-svg .ws-l-l { font-family: var(--font-mono); font-size: 9px; font-weight: 700; fill: var(--muted); }
-  .ws-svg .ws-l-w { font-family: var(--font-ui); font-size: 9px; font-weight: 800; fill: var(--warn); }
+  .ws-svg .ws-n-l { font-family: var(--font-ui); font-size: var(--text-xs); fill: var(--text); }
+  .ws-svg .ws-n-s { font-family: var(--font-ui); font-size: var(--text-2xs); font-weight: 700; fill: var(--muted); }
+  .ws-svg .ws-l-l { font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 700; fill: var(--muted); }
+  .ws-svg .ws-l-w { font-family: var(--font-ui); font-size: var(--text-2xs); font-weight: 800; fill: var(--warn); }
   .ws-lanekey { display: grid; gap: var(--sp-2);
         grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
   .ws-lanerow { display: grid; grid-template-columns: 116px minmax(0, 1fr); gap: var(--sp-3);
@@ -280,7 +280,7 @@
         background: var(--soil-raised); padding: var(--sp-2); }
   .ws-lanerow b { display: block; font-size: var(--text-xs); }
   .ws-lanerow span { display: block; font-size: var(--text-2xs); color: var(--muted); line-height: 1.35; }
-  .ws-supply { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 800;
+  .ws-supply { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-2xs); font-weight: 800;
         text-transform: uppercase; letter-spacing: 0.05em; border-radius: var(--r-pill);
         border: 1px solid var(--border-control); padding: 0 6px; }
   .ws-supply[data-s="in"]  { color: var(--ok);  border-color: color-mix(in srgb, var(--ok) 55%, transparent); }
@@ -641,7 +641,7 @@
       <text class="ws-l-l" x="596" y="86">one-way ▶ · no supply</text>
       <text class="ws-l-l" x="576" y="332">🛡 warded · ward 3</text>
       <text class="ws-l-l" x="694" y="316" fill="var(--bad)">✕ severed</text>
-      <text class="ws-l-l" x="704" y="352" fill="var(--bad)" font-size="16">✕</text>
+      <text class="ws-l-l" x="704" y="352" fill="var(--bad)" font-size="0.8em">✕</text>
 
       <!-- lifeline halo on The Divide -->
       <rect x="230" y="230" width="112" height="68" rx="12" fill="none" stroke="var(--sun)"
@@ -726,7 +726,7 @@
         <div><b>Temporal current — one-way</b><span>Passable in the drawn direction only, and carries no supply. Arrowheads, always. <code>one-way</code></span></div>
       </div>
       <div class="ws-lanerow">
-        <svg viewBox="0 0 110 22" width="110" height="22" aria-hidden="true"><path d="M4,11 H106" stroke="var(--el-dark)" stroke-width="4" stroke-dasharray="14 8" fill="none"/><circle cx="55" cy="11" r="8" fill="var(--panel-inset)" stroke="var(--el-dark)" stroke-width="1.5"/><text x="55" y="15" text-anchor="middle" font-size="9">🔒</text></svg>
+        <svg viewBox="0 0 110 22" width="110" height="22" aria-hidden="true"><path d="M4,11 H106" stroke="var(--el-dark)" stroke-width="4" stroke-dasharray="14 8" fill="none"/><circle cx="55" cy="11" r="8" fill="var(--panel-inset)" stroke="var(--el-dark)" stroke-width="1.5"/><text x="55" y="15" text-anchor="middle" font-size="0.72em">🔒</text></svg>
         <div><b>Gated rift</b><span>Shut until its key or its boss is cleared. Long dashes + a lock at the midpoint. <code>gated</code> + <code>GateKeyId</code></span></div>
       </div>
     </div>
@@ -738,15 +738,15 @@
         <div><b>Open</b><span>Passable. The absence of every treatment below. <code>State</code> = Open</span></div>
       </div>
       <div class="ws-lanerow">
-        <svg viewBox="0 0 110 22" width="110" height="22" aria-hidden="true"><path d="M4,11 H36" stroke="var(--faint)" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M74,11 H106" stroke="var(--faint)" stroke-width="5" stroke-linecap="round" fill="none"/><text x="55" y="16" text-anchor="middle" font-size="13" fill="var(--bad)">✕</text></svg>
+        <svg viewBox="0 0 110 22" width="110" height="22" aria-hidden="true"><path d="M4,11 H36" stroke="var(--faint)" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M74,11 H106" stroke="var(--faint)" stroke-width="5" stroke-linecap="round" fill="none"/><text x="55" y="16" text-anchor="middle" font-size="0.8em" fill="var(--bad)">✕</text></svg>
         <div><b>Severed</b><span>A real gap in the line plus a cross — never a faded line, which reads as "far away". <code>State</code> = Severed</span></div>
       </div>
       <div class="ws-lanerow">
-        <svg viewBox="0 0 110 22" width="110" height="22" aria-hidden="true"><path d="M4,8 H106" stroke="var(--info)" stroke-width="2" fill="none"/><path d="M4,14 H106" stroke="var(--info)" stroke-width="2" fill="none"/><text x="55" y="15" text-anchor="middle" font-size="9">🛡</text></svg>
+        <svg viewBox="0 0 110 22" width="110" height="22" aria-hidden="true"><path d="M4,8 H106" stroke="var(--info)" stroke-width="2" fill="none"/><path d="M4,14 H106" stroke="var(--info)" stroke-width="2" fill="none"/><text x="55" y="15" text-anchor="middle" font-size="0.72em">🛡</text></svg>
         <div><b>Warded</b><span>Twin rails + shield + the level as a number. <code>WardLevel</code> — an index, print it as "ward 3", never a %</span></div>
       </div>
       <div class="ws-lanerow">
-        <svg viewBox="0 0 110 22" width="110" height="22" aria-hidden="true"><path d="M4,11 H106" stroke="var(--bad)" stroke-width="3" stroke-dasharray="2 6" fill="none"/><text x="55" y="9" text-anchor="middle" font-size="8" fill="var(--warn)">☠ 40%</text></svg>
+        <svg viewBox="0 0 110 22" width="110" height="22" aria-hidden="true"><path d="M4,11 H106" stroke="var(--bad)" stroke-width="3" stroke-dasharray="2 6" fill="none"/><text x="55" y="9" text-anchor="middle" font-size="0.8em" fill="var(--warn)">☠ 40%</text></svg>
         <div><b>Hazardous</b><span>Fine dots + a skull + the printed chance. <code>HazardMilli</code> is per-mille — 400 renders as 40%</span></div>
       </div>
       <div class="ws-lanerow">
@@ -1032,14 +1032,14 @@
   border: 1px solid var(--border-control);
   border-radius: var(--r-sm);
   background: var(--panel);
-  font-size: 9px;
+  font-size: var(--text-2xs);
   line-height: 1.1;
   overflow: hidden;
 }
 .wsb-cell .wsb-nm {
   font-family: var(--font-content);
   font-weight: 800;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   color: var(--text);
   letter-spacing: .01em;
 }
@@ -1047,7 +1047,7 @@
 .wsb-cell .wsb-v {
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   color: var(--muted);
 }
 .wsb-cell .wsb-g { font-size: var(--text-sm); line-height: 1; }
@@ -1073,13 +1073,13 @@
 }
 .wsb-cell[data-own="unknown"] {
   border-style: dotted;
-  border-color: var(--faint);
+  border-color: var(--muted);
   background:
     radial-gradient(circle at 3px 3px, rgb(125 112 96 / .40) 1px, transparent 1px) 0 0 / 7px 7px,
     var(--panel-inset);
-  color: var(--faint);
+  color: var(--muted);
 }
-.wsb-cell[data-own="unknown"] .wsb-nm { color: var(--faint); }
+.wsb-cell[data-own="unknown"] .wsb-nm { color: var(--muted); }
 
 /* Remembered-but-not-live ground: parchment hatch + a clock glyph + the age
    in words. §4.9 decided "err toward distinctness" — memory must never read
@@ -1124,7 +1124,7 @@
 .wsb-lane .wsb-lanemark {
   position: relative;
   z-index: 1;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   line-height: 1;
   background: var(--panel-inset);
@@ -1148,7 +1148,7 @@
   position: absolute;
   top: 1px; left: 1px;
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   padding: 0 2px;
   border-radius: 2px;
@@ -1159,7 +1159,7 @@
 }
 .wsb-reachpip[data-when="now"]   { color: var(--almanac); border-color: var(--almanac); }
 .wsb-reachpip[data-when="next"]  { color: var(--warn); border-color: rgb(216 169 79 / .6); }
-.wsb-reachpip[data-when="later"] { color: var(--faint); }
+.wsb-reachpip[data-when="later"] { color: var(--muted); }
 
 /* A refused target: hatch + a ✕ + a reason. Never merely dimmed. */
 .wsb-cell.is-blocked {
@@ -1187,7 +1187,7 @@
   position: absolute;
   right: 1px; bottom: 1px;
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   color: var(--info);
   background: var(--panel-inset);
@@ -1201,7 +1201,7 @@
 .wsb-qflag {
   position: absolute;
   top: 1px; right: 1px;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   line-height: 1;
   padding: 1px 2px;
   border-radius: 2px;
@@ -1253,7 +1253,7 @@
 .wsb-tok.is-routed { opacity: .55; border-style: dotted; }
 
 .wsb-ownword {
-  font-size: 8px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   letter-spacing: .07em;
   text-transform: uppercase;
@@ -1290,8 +1290,8 @@
   font-size: var(--text-xs);
 }
 .wsb-factline > .wsb-k {
-  color: var(--faint);
-  font-size: 9px;
+  color: var(--muted);
+  font-size: var(--text-2xs);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .05em;
@@ -1318,7 +1318,7 @@
 .wsb-stance[data-stance="scout"] { color: var(--info); border-color: rgb(127 168 201 / .55); }
 .wsb-stance[data-stance="hold"]  { color: var(--sun);  border-color: rgb(224 180 75 / .55); }
 .wsb-stance[data-stance="dowse"] {
-  color: var(--faint);
+  color: var(--muted);
   border-style: dashed;
   background: repeating-linear-gradient(45deg,
     rgb(125 112 96 / .16) 0 3px, transparent 3px 7px);
@@ -1363,7 +1363,7 @@
 .wsb-mv .wsb-mvcap {
   display: flex;
   justify-content: space-between;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   color: var(--muted);
   font-family: var(--font-mono);
 }
@@ -1408,7 +1408,7 @@
   place-items: center;
   height: 100%;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   color: var(--text);
 }
@@ -1461,7 +1461,7 @@
   display: inline-grid;
   place-items: center;
   width: 18px; height: 18px;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   border: 1px solid var(--border-control);
   background: var(--panel);
@@ -1480,7 +1480,7 @@
 .wsb-split > span {
   display: grid;
   place-items: center;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   color: var(--text);
 }
@@ -1510,7 +1510,7 @@
   display: grid;
   place-items: center;
   width: 58px; height: 30px;
-  font-size: 9px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   border: 1px solid var(--border-control);
   border-radius: var(--r-sm);
@@ -1529,7 +1529,7 @@
 }
 .wsb-laneline .wsb-proglb {
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   color: var(--sun);
   background: var(--panel-inset);
@@ -1558,14 +1558,14 @@
   place-items: center;
   gap: 1px;
   padding: 3px 1px;
-  font-size: 8px;
+  font-size: var(--text-sm);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .03em;
   border: 1px solid var(--border);
   border-radius: 2px;
   background: var(--panel-inset);
-  color: var(--faint);
+  color: var(--muted);
   text-align: center;
 }
 .wsb-bandrow > span.is-here {
@@ -1648,13 +1648,13 @@
   border-left: 3px solid var(--sun);
   border-radius: 2px;
 }
-.wsb-qrow .wsb-qn { font-family: var(--font-mono); font-size: 9px; color: var(--faint); }
+.wsb-qrow .wsb-qn { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--muted); }
 .wsb-qrow .wsb-unq {
   background: transparent;
   border: 1px solid var(--border-control);
   border-radius: var(--r-sm);
   color: var(--muted);
-  font-size: 9px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   padding: 0 var(--sp-2);
   height: 18px;
@@ -1705,7 +1705,7 @@
   background: transparent;
   color: var(--muted);
   font-family: var(--font-ui);
-  font-size: 8px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -1720,7 +1720,7 @@
 }
 .wsb-picker button[aria-checked="true"]::after {
   content: "●";
-  font-size: 7px;
+  font-size: var(--text-2xs);
   color: var(--text);
   line-height: 1;
 }
@@ -1755,7 +1755,7 @@
   .wsb-flow { grid-template-columns: minmax(0, 1fr); }
   .wsb-flow .wsb-arrow { transform: rotate(90deg); }
 }
-.wsb-flow .wsb-arrow { display: grid; place-items: center; color: var(--faint); font-size: var(--text-lg); }
+.wsb-flow .wsb-arrow { display: grid; place-items: center; color: var(--muted); font-size: var(--text-lg); }
 .wsb-step {
   display: grid;
   gap: var(--sp-2);
@@ -1769,11 +1769,11 @@
 
 /* Shared small helpers. */
 .wsb-cap {
-  font-size: 9px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .06em;
-  color: var(--faint);
+  color: var(--muted);
 }
 .wsb-two   { display: grid; gap: var(--sp-4); grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 .wsb-three { display: grid; gap: var(--sp-3); grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; }
@@ -1785,7 +1785,7 @@
 .wsb-sentence { font-size: var(--text-sm); color: var(--text); }
 .wsb-token { font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--muted); }
 .wsb-ship {
-  font-size: 9px;
+  font-size: var(--text-2xs);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .05em;
@@ -2329,7 +2329,7 @@
               <span class="wsb-mnum">—</span>
             </div>
           </div>
-          <div class="wsb-inline" style="font-size:var(--text-2xs);color:var(--faint)">
+          <div class="wsb-inline" style="font-size:var(--text-2xs);color: var(--muted)">
             <span>columns: role · species · level · health · wounds</span>
           </div>
         </div>
@@ -2567,7 +2567,7 @@
             <td><span class="wsb-ship" data-s="gap">derived, never projected</span></td>
           </tr>
           <tr>
-            <td class="fam"><span class="wsb-runway" data-state="tight" style="font-size:9px"><span class="wsb-rwg" style="font-size:10px">⏳</span>runway</span></td>
+            <td class="fam"><span class="wsb-runway" data-state="tight" style="font-size: var(--text-2xs)"><span class="wsb-rwg" style="font-size: var(--text-2xs)">⏳</span>runway</span></td>
             <td class="fam"><b>The turn it runs dry.</b> The loudest thing on the marker.</td>
             <td class="fam"><code>legion.runway:&lt;turn&gt;</code> <span class="wsb-token">absolute turn</span></td>
             <td><span class="wsb-ship" data-s="inert">emitted, but filtered out for everyone</span></td>
@@ -3487,7 +3487,7 @@
         </div>
         <div class="wsb-arrow">›</div>
         <div class="wsb-step">
-          <b>3 · Placement lens, unasked</b>
+          <b>3 · Placement overlay, unasked</b>
           <span style="color:var(--muted)">Hop rings, valid slots, and every refusal already drawn. Escape or picking a target puts the old lens back.</span>
           <div class="wsb-inline">
             <span class="wsb-picker" style="transform:scale(.85);transform-origin:left">
@@ -3504,13 +3504,13 @@
         <tbody>
           <tr>
             <td>Choose <b>Raise</b></td>
-            <td>Placement — hop rings and slot validity</td>
+            <td>Placement <b>overlay</b> &mdash; hop rings and slot validity. <em>Not a lens:</em> transient, alive only while the verb is, with no picker slot and no hotkey &mdash; the same class as section E&rsquo;s range overlays. That is what keeps the six honest.</td>
             <td>The verb has no meaning without it. Nothing else the player could want to see is hidden.</td>
           </tr>
           <tr>
-            <td>Choose <b>Ward</b></td>
+            <td>Choose <b>Ward a road</b></td>
             <td>Supply &amp; lifelines — roads become the click target</td>
-            <td>A ward is about roads, and this is the only lens that draws roads as first-class.</td>
+            <td>A <em>ward</em> is about roads, and this is the only lens that draws roads as first-class. Distinct from <b>binding a warden</b> to a sector (section K) &mdash; the engine separates them too (<code>WardLevel</code> on a lane, <code>WardenBindingId</code> on a sector). An earlier draft called both &ldquo;Ward&rdquo;, so choosing the irreversible one got you this overlay.</td>
           </tr>
           <tr>
             <td>Select a legion <b>outside supply</b></td>
@@ -3592,7 +3592,7 @@
      ========================================================================= */
 
   /* --- unit-family badge (GG-46) ---------------------------------------- */
-  .wsc-uf { display: inline-block; font-family: var(--font-mono); font-size: 8px;
+  .wsc-uf { display: inline-block; font-family: var(--font-mono); font-size: var(--text-sm);
     font-weight: 800; line-height: 1; padding: 2px 3px; margin-left: 3px;
     border: 1px solid var(--border-control); border-radius: 2px;
     color: var(--muted); vertical-align: super; }
@@ -3634,11 +3634,11 @@
   .wsc-strip { gap: var(--sp-4); align-items: stretch;
     background: linear-gradient(rgb(11 9 7 / .92), rgb(11 9 7 / 0)); }
   .wsc-read { display: grid; gap: 1px; padding: 0 var(--sp-2); align-content: center; }
-  .wsc-read .k { font-size: 9px; font-weight: 800; text-transform: uppercase;
+  .wsc-read .k { font-size: var(--text-2xs); font-weight: 800; text-transform: uppercase;
     letter-spacing: .08em; color: var(--muted); }
   .wsc-read .v { font-family: var(--font-mono); font-weight: 800;
     font-size: var(--text-md); color: var(--text); line-height: 1.1; }
-  .wsc-read .u { font-size: 9px; color: var(--faint); }
+  .wsc-read .u { font-size: var(--text-sm); color: var(--muted); }
   .wsc-read.is-net .v { color: var(--ok); }
   .wsc-read.is-net.is-down .v { color: var(--bad); }
   .wsc-read.is-missing .v { color: var(--warn); }
@@ -3704,7 +3704,7 @@
   .wsc-endturn[data-state="waiting"] { background: var(--panel);
     border-color: var(--border-control); color: var(--muted); cursor: progress; }
   .wsc-turncount { font-family: var(--font-mono); font-size: var(--text-2xs);
-    color: var(--faint); text-align: right; }
+    color: var(--muted); text-align: right; }
   .wsc-blockwhy { display: grid; grid-template-columns: 16px minmax(0,1fr); gap: var(--sp-2);
     font-size: var(--text-2xs); color: var(--bad); align-items: start;
     border-left: 3px solid var(--bad); padding-left: var(--sp-2); line-height: 1.4; }
@@ -3713,7 +3713,7 @@
   /* --- notification rail ------------------------------------------------------ */
   .wsc-nrail { display: grid; gap: var(--sp-1); align-content: start; }
   .wsc-nrail > .cap { display: flex; align-items: baseline; justify-content: space-between;
-    font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+    font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
   .wsc-nitem { display: grid; grid-template-columns: 20px minmax(0,1fr) auto;
     gap: var(--sp-2); align-items: start; padding: var(--sp-2);
     border: 1px solid var(--border); border-left-width: 3px;
@@ -3723,10 +3723,10 @@
   .wsc-nitem .msg b { display: block; font-weight: 800; color: var(--text); }
   .wsc-nitem .msg span { color: var(--muted); font-size: var(--text-2xs); }
   .wsc-nitem .x { font-family: var(--font-mono); font-size: var(--text-2xs);
-    color: var(--faint); }
+    color: var(--muted); }
   .wsc-nitem[data-state="unread"] { border-left-color: var(--sun); }
   .wsc-nitem[data-state="unread"] .g::after { content: "\25CF"; display: block;
-    font-size: 7px; color: var(--sun); line-height: 1; }
+    font-size: var(--text-2xs); color: var(--sun); line-height: 1; }
   .wsc-nitem[data-state="opened"] { border-left-color: var(--border-control);
     background: var(--panel); }
   .wsc-nitem[data-state="opened"] .msg b { font-weight: 600; }
@@ -3743,7 +3743,7 @@
   .wsc-chan { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: var(--sp-2);
     align-items: center; font-size: var(--text-2xs); color: var(--muted); }
   .wsc-blockpill { display: inline-flex; align-items: center; gap: 3px;
-    font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
+    font-size: var(--text-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
     color: var(--bad); border: 1px solid rgb(217 123 123 / .55);
     border-radius: var(--r-pill); padding: 0 5px; }
 
@@ -3753,7 +3753,7 @@
     min-height: 0; overflow: hidden; }
   .wsc-out > header { display: flex; align-items: center; gap: var(--sp-2);
     padding: var(--sp-1) var(--sp-2); border-bottom: 1px solid var(--border);
-    font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+    font-size: var(--text-2xs); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
   .wsc-out > header .n { margin-left: auto; font-family: var(--font-mono);
     color: var(--muted); letter-spacing: 0; }
   .wsc-out > .list { overflow-y: auto; display: grid; gap: 1px; padding: 2px;
@@ -3768,10 +3768,10 @@
   .wsc-orow .g { text-align: center; }
   .wsc-orow .nm { font-family: var(--font-content); font-weight: 700;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .wsc-orow .wsc-sub { display: block; margin: 0; font-size: 9px; color: var(--muted);
+  .wsc-orow .wsc-sub { display: block; margin: 0; font-size: var(--text-2xs); color: var(--muted);
     font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .wsc-orow .right { display: flex; align-items: center; gap: 4px; }
-  .wsc-flag { display: inline-flex; align-items: center; gap: 2px; font-size: 9px;
+  .wsc-flag { display: inline-flex; align-items: center; gap: 2px; font-size: var(--text-2xs);
     font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
     border: 1px solid var(--border-control); border-radius: var(--r-pill);
     padding: 0 4px; color: var(--muted); white-space: nowrap; }
@@ -3977,8 +3977,8 @@
                   <span class="v">37<span class="wsc-uf">#</span></span>
                 </div>
                 <div class="wsc-read">
-                  <span class="k">Season</span>
-                  <span class="v" style="font-size:var(--text-sm)">Long Wither</span>
+                  <span class="k">Calendar</span>
+                  <span class="v" style="font-size:var(--text-sm)">Week 6 &middot; Month 2</span>
                 </div>
                 <span class="wsc-sep"></span>
                 <div class="wsc-read">
@@ -3999,7 +3999,7 @@
                 </div>
                 <span class="spacer"></span>
                 <div class="cluster">
-                  <button class="btn btn--sm btn--ghost">Menu <span class="hotkey">Esc</span></button>
+                  <button class="btn btn--sm btn--ghost" title="Esc reaches this only on an empty layer stack — see section J.5">Menu</button>
                 </div>
               </div>
 
@@ -4010,7 +4010,7 @@
                   <div class="wsc-nitem" data-state="blocking">
                     <span class="g">&#128721;</span>
                     <span class="msg"><b>Ashfall pocket can&rsquo;t pay its keep</b>
-                      <span>Choose what to release.</span></span>
+                      <span>Here is what will be released, and what would stop it.</span></span>
                     <span class="x">&#9906;</span>
                   </div>
                   <div class="wsc-nitem" data-state="unread">
@@ -4119,7 +4119,7 @@
     <div class="spec">
       <div class="hud wsc-strip" style="position:relative;border:1px solid var(--border);border-radius:var(--r-md);background:var(--soil-raised)">
         <div class="wsc-read"><span class="k">Turn</span><span class="v">37<span class="wsc-uf">#</span></span></div>
-        <div class="wsc-read"><span class="k">Season</span><span class="v" style="font-size:var(--text-sm)">Long Wither</span></div>
+        <div class="wsc-read"><span class="k">Calendar</span><span class="v" style="font-size:var(--text-sm)">Week 6 &middot; Month 2</span></div>
         <span class="wsc-sep"></span>
         <div class="wsc-read"><span class="k"><span class="wsc-glyph">&#9650;</span>Income</span>
           <span class="v">412<span class="wsc-uf">U</span> <span class="u">loam/turn</span></span></div>
@@ -4164,8 +4164,14 @@
           <tr><td class="fam">Turn</td><td class="unitcol">count &middot; <code>int</code></td>
             <td class="fam"><code>WorldHeaderDto.CurrentTurn</code></td>
             <td><span class="bucket" data-b="built">built</span></td></tr>
-          <tr><td class="fam">Season</td><td class="unitcol">label</td>
-            <td class="fam">no field on any DTO, and no season concept in the turn engine</td>
+          <tr><td class="fam">Calendar &mdash; week &middot; month</td><td class="unitcol">count</td>
+            <td class="fam"><b>Corrected 2026-09-03 (&sect;8b.7).</b> This slot drew a <em>Season</em>
+            (&ldquo;Long Wither&rdquo;) until the owner decided seasons become real but belong to
+            <code>sector-development</code>, not here. The clock underneath is real and deterministic
+            &mdash; <code>TurnCalendar.Roll(turn, seed)</code>, a day per turn, and week/month
+            boundaries already emitted as <code>calendar</code> report entries. It is <b>not on
+            <code>WorldStateDto</code> or <code>WorldHeaderDto</code></b> yet, and the client cannot
+            derive it because <code>DaysPerWeek</code>/<code>WeeksPerMonth</code> are server tunables</td>
             <td><span class="bucket" data-b="real">real gap</span></td></tr>
         </tbody>
       </table>
@@ -4221,7 +4227,7 @@
           <span class="v">1&#8239;140<span class="wsc-uf">U</span> <span class="u">/ ? loam</span></span></div>
         <span class="wsc-sep"></span>
         <div style="flex:1;min-width:300px;padding:var(--sp-1) 0">
-          <div style="font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--warn);margin-bottom:3px">
+          <div style="font-size: var(--text-2xs);text-transform:uppercase;letter-spacing:.08em;color:var(--warn);margin-bottom:3px">
             &#9888; Your supply is split into 2 parts
           </div>
           <div class="wsc-split">
@@ -4468,7 +4474,7 @@
               </div>
               <div class="wsc-blockwhy">
                 <span>&#128721;</span>
-                <span><b>Ashfall pocket can&rsquo;t pay its keep.</b> Choose what to release.
+                <span><b>Ashfall pocket can&rsquo;t pay its keep.</b> Here is what will be released, and what would stop it.
                   <br><a href="#h">Take me there</a> &middot;
                   <a href="#h">end anyway</a> <span class="hotkey">&#8679;&#9166;</span></span>
               </div>
@@ -4736,7 +4742,7 @@
             <div class="wsc-nitem" data-state="blocking" style="width:100%">
               <span class="g">&#128721;</span>
               <span class="msg"><b>Ashfall pocket can&rsquo;t pay its keep</b>
-                <span>Choose what to release.</span></span>
+                <span>Here is what will be released, and what would stop it.</span></span>
               <span class="x">&#9906;</span>
               <span class="body">
                 <span class="acts">
@@ -4768,7 +4774,7 @@
                 <span class="msg"><b>Ashfall pocket can&rsquo;t pay its keep</b>
                   <span>Survived the flush &mdash; blockers always do.</span></span>
                 <span class="x">&#9906;</span></div>
-              <span style="font-size:var(--text-2xs);color:var(--faint);padding:0 var(--sp-2)">
+              <span style="font-size:var(--text-2xs);color: var(--muted);padding:0 var(--sp-2)">
                 3 others flushed with the turn.</span>
             </div>
           </div>
@@ -5035,11 +5041,18 @@
         focus, the solid one is selected. Conflating them is how a keyboard user loses their place.
       </div>
       <div class="note">
-        <strong>Why the list is short by construction, and why that matters.</strong> 6 to ~18
-        sectors and a handful of legions. Stellaris&rsquo; outliner is the genre&rsquo;s answer to
-        this problem and it groups, filters and paginates because it has to; ours does not, so it
-        does not. If it ever does need a scrollbar, it scrolls <b>inside its own shell</b> and the
-        stage behind it does not move to compensate. <span class="ref">GG-61</span>
+        <strong>Why this list needs grouping and filtering after all &mdash; corrected 2026-09-03.</strong>
+        An earlier draft argued the opposite: that at 6&ndash;18 sectors and &ldquo;a handful of
+        legions&rdquo; the list was short by construction, so unlike Stellaris&rsquo; outliner it needed
+        neither. <b>&sect;8e.3 retired that.</b> The owner set the legion target at <b>6&ndash;10, tunable</b>,
+        so this indexes roughly <b>28 rows</b> &mdash; past the point where a human scans rather than
+        searches, which is exactly why Stellaris groups and filters. It scrolls <b>inside its own
+        shell</b> and the stage behind it does not move to compensate. <span class="ref">GG-61</span>
+        <br><br>
+        <em>Worth recording: this component&rsquo;s justification has now moved twice under review &mdash;
+        first when the borrowed &ldquo;empire overview&rdquo; argument was withdrawn for not surviving
+        our scale, then again here. It is the least stable part of the design, and a reader should
+        treat its rationale as the thing to check first.</em>
       </div>
       <div class="note">
         <strong>The outliner is also the answer to &ldquo;where is my legion&rdquo; without a
@@ -5204,7 +5217,7 @@
         <span class="kr"><span><span class="hotkey">1</span>&hellip;<span class="hotkey">6</span></span><b>Pick a lens, exclusively</b></span>
         <span class="kr"><span class="hotkey">F</span><b>Fit to extent</b></span>
         <span class="kr"><span class="hotkey">+ &minus;</span><b>Zoom, the same steps as the buttons</b></span>
-        <span class="kr"><span class="hotkey">WASD</span><b>Pan &mdash; alongside drag, edge-scroll and arrows</b></span>
+        <span class="kr"><span class="hotkey">&larr;&uarr;&darr;&rarr;</span><b>Pan &mdash; alongside drag and edge-scroll. <em>Not</em> WASD: <span class="hotkey">W</span> is the cycle key above, and one key cannot mean two things (GG-20)</b></span>
         <span class="kr"><span class="hotkey">V</span><b>Toggle the fog treatment</b></span>
       </div>
       <div class="note">
@@ -5242,7 +5255,7 @@
   border: 1px solid var(--border); background: var(--soil); }
 .wsd-stage--tall { height: 560px; }
 .wsd-vpnote { position: absolute; left: var(--sp-2); top: var(--sp-2); z-index: var(--band-hud);
-  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--faint);
+  font-family: var(--font-mono); font-size: var(--text-2xs); color: var(--muted);
   background: rgb(11 9 7 / 0.7); border: 1px solid var(--border); border-radius: var(--r-sm);
   padding: 2px 6px; }
 
@@ -5258,14 +5271,23 @@
 .wsd-node { position: absolute; display: grid; place-items: center; gap: 1px;
   width: 74px; height: 58px; border-radius: var(--r-md); border: 2px solid var(--border-control);
   background: var(--panel); text-align: center; z-index: 1; }
-.wsd-node b { font-family: var(--font-display); font-size: var(--text-sm); font-weight: 400; }
+.wsd-node b { font-family: var(--font-ui); font-size: var(--text-sm); font-weight: 400; }
 .wsd-node span { font-size: var(--text-2xs); color: var(--muted); }
 .wsd-node[data-own="mine"] { border-color: var(--side-plant); }
 .wsd-node[data-own="enemy"] { border-color: var(--side-zombie); }
 .wsd-node[data-own="none"] { border-color: var(--border-control); }
-.wsd-node[data-intel="Scouted"] { border-style: dashed; }
-.wsd-node[data-intel="Rumored"] { border-style: dotted; opacity: 0.8; }
-.wsd-node[data-intel="Unknown"] { border-style: dotted; opacity: 0.55; background: var(--panel-inset); }
+/* Fog treatments, corrected 2026-09-03. These four previously separated Rumored from
+   Unknown by opacity alone (0.8 vs 0.55, both dotted) — which contradicted section C's
+   four-treatment design and this plate's own headline rule, 5,000 lines apart in one file.
+   Section C is the design; these now match it. Each state carries border GEOMETRY plus a
+   pattern plus, for Unknown, a different silhouette — never opacity, and never colour alone. */
+.wsd-node[data-intel="Watched"]  { border-style: solid; border-width: 2px; }
+.wsd-node[data-intel="Scouted"]  { border-style: dashed; border-width: 2px; }
+.wsd-node[data-intel="Rumored"]  { border-style: dashed; border-width: 3px;
+      background-image: repeating-linear-gradient(45deg,
+        color-mix(in srgb, var(--muted) 12%, transparent) 0 1px, transparent 1px 5px); }
+.wsd-node[data-intel="Unknown"]  { border-style: dotted; border-width: 2px;
+      border-radius: 50%; background: var(--panel-inset); }
 .wsd-node.is-selected { border-color: var(--sun); box-shadow: var(--sh-glow); }
 .wsd-edge { position: absolute; height: 3px; background: var(--border-control); border-radius: var(--r-pill);
   transform-origin: 0 50%; }
@@ -5291,11 +5313,11 @@
 /* --- inspector blocks ---------------------------------------------------- */
 .wsd-blk { padding: var(--sp-3) var(--sp-4); border-bottom: 1px solid var(--border); }
 .wsd-blk:last-child { border-bottom: 0; }
-.wsd-blk-lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--faint); margin-bottom: var(--sp-2); display: flex; justify-content: space-between;
+.wsd-blk-lbl { font-size: var(--text-sm); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--muted); margin-bottom: var(--sp-2); display: flex; justify-content: space-between;
   align-items: baseline; gap: var(--sp-2); }
 .wsd-blk-lbl .wsd-src { font-family: var(--font-mono); font-weight: 400; text-transform: none;
-  letter-spacing: 0; color: var(--faint); opacity: 0.8; }
+  letter-spacing: 0; color: var(--muted); opacity: 0.8; }
 .wsd-standalone { border: 1px solid var(--border-control); border-radius: var(--r-md);
   background: var(--panel); max-width: 400px; }
 .wsd-standalone .wsd-blk:last-child { border-bottom: 0; }
@@ -5349,7 +5371,7 @@
 .wsd-slot .nm { font-weight: 700; }
 .wsd-slot .sub { font-size: var(--text-xs); color: var(--muted); }
 .wsd-slot[data-state="empty"] { border-style: dashed; }
-.wsd-slot[data-state="empty"] .g { border-style: dashed; color: var(--faint); }
+.wsd-slot[data-state="empty"] .g { border-style: dashed; color: var(--muted); }
 .wsd-slot[data-state="building"] .g { border-color: rgb(216 169 79 / 0.7); }
 .wsd-slot[data-state="guarded"] { border-color: rgb(217 123 123 / 0.5); }
 .wsd-slot[data-state="guarded"] .g { border-color: rgb(217 123 123 / 0.7); }
@@ -5383,7 +5405,7 @@
 .wsd-dismiss { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap;
   font-size: var(--text-xs); color: var(--muted); }
 .wsd-mousehint { display: inline-grid; place-items: center; width: 20px; height: 26px;
-  border: 1px solid var(--border-control); border-radius: 7px 7px 9px 9px; font-size: 9px;
+  border: 1px solid var(--border-control); border-radius: 7px 7px 9px 9px; font-size: var(--text-2xs);
   color: var(--text); background: var(--panel-inset); }
 
 /* --- confirms ------------------------------------------------------------ */
@@ -5398,12 +5420,12 @@
   background: rgb(216 169 79 / 0.08); padding: var(--sp-2) var(--sp-3); font-size: var(--text-sm); }
 .wsd-permanent b { color: var(--text); }
 .wsd-steps { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--text-2xs);
-  font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--faint); }
+  font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
 .wsd-steps .on { color: var(--sun); }
 .wsd-typecheck { display: flex; align-items: center; gap: var(--sp-2); margin-top: var(--sp-2); }
 .wsd-typecheck .box { flex: 1; height: var(--control-h); border: 1px solid var(--border-control);
   border-radius: var(--r-sm); background: var(--panel-inset); display: flex; align-items: center;
-  padding: 0 var(--sp-3); font-family: var(--font-mono); font-size: var(--text-sm); color: var(--faint); }
+  padding: 0 var(--sp-3); font-family: var(--font-mono); font-size: var(--text-sm); color: var(--muted); }
 .wsd-dialoggrid { display: grid; gap: var(--sp-4); grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
   align-items: start; }
 
@@ -5413,7 +5435,7 @@
 .wsd-railhd, .wsd-kf { display: grid; grid-template-columns: 26px minmax(0, 1.5fr) minmax(0, 1fr);
   gap: var(--sp-3); padding: var(--sp-2) var(--sp-3); align-items: baseline; }
 .wsd-railhd { background: var(--panel-inset); border-bottom: 1px solid var(--border);
-  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); }
+  font-size: var(--text-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .wsd-kf { border-bottom: 1px solid var(--border); font-size: var(--text-sm); }
 .wsd-kf:last-child { border-bottom: 0; }
 .wsd-kf .g { text-align: center; font-size: var(--text-md); }
@@ -5425,13 +5447,13 @@
 .wsd-kf.is-dead .say { text-decoration: line-through; }
 .wsd-phasebar { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-1) var(--sp-3);
   background: var(--panel-inset); border-bottom: 1px solid var(--border);
-  font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--almanac); }
-.wsd-phasebar .n { font-family: var(--font-mono); color: var(--faint); font-weight: 400; letter-spacing: 0; }
+  font-size: var(--text-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--almanac); }
+.wsd-phasebar .n { font-family: var(--font-mono); color: var(--muted); font-weight: 400; letter-spacing: 0; }
 .wsd-tok { display: block; font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted);
   word-break: break-all; }
 .wsd-tok b { color: var(--almanac); font-weight: 700; }
-.wsd-tok em { font-style: normal; color: var(--faint); }
-.wsd-newtag { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: 0.04em;
+.wsd-tok em { font-style: normal; color: var(--muted); }
+.wsd-newtag { display: inline-block; font-size: var(--text-2xs); font-weight: 800; letter-spacing: 0.04em;
   color: var(--sun); border: 1px solid var(--sun); border-radius: var(--r-pill); padding: 0 5px;
   margin-left: 5px; vertical-align: 1px; }
 .wsd-transport { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3);
@@ -5462,7 +5484,7 @@
 .wsd-pair .render { font-family: var(--font-mono); font-weight: 700; }
 .wsd-pair .why { display: block; font-family: var(--font-ui); font-weight: 400;
   font-size: var(--text-xs); color: var(--muted); text-decoration: none; margin-top: 2px; }
-.wsd-raw { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--faint); }
+.wsd-raw { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--muted); }
 
 /* --- the ...Milli trap --------------------------------------------------- */
 .wsd-trap { border: 1px solid var(--bad); border-radius: var(--r-md); background: rgb(217 123 123 / 0.06);
@@ -5479,7 +5501,7 @@
 .wsd-ledger.is-locked { border-color: var(--sun); box-shadow: var(--sh-glow), var(--sh-layer); }
 .wsd-lrow { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: var(--sp-2);
   align-items: baseline; padding: 3px var(--sp-3); font-size: var(--text-sm); }
-.wsd-lrow .tw { color: var(--faint); font-family: var(--font-mono); font-size: var(--text-2xs); }
+.wsd-lrow .tw { color: var(--muted); font-family: var(--font-mono); font-size: var(--text-2xs); }
 .wsd-lrow .amt { font-family: var(--font-mono); font-weight: 700; }
 .wsd-lrow[data-lvl="2"] { padding-left: calc(var(--sp-3) + 14px); }
 .wsd-lrow[data-lvl="3"] { padding-left: calc(var(--sp-3) + 28px); }
@@ -5504,6 +5526,36 @@
   padding: var(--sp-2) var(--sp-3); border-radius: 0 var(--r-sm) var(--r-sm) 0;
   font-size: var(--text-sm); }
 .wsd-gap strong { color: var(--text); }
+
+/* ===========================================================================
+   Remediation block — added 2026-09-03 after the accessibility audit.
+   Scoped to this plate; deliberately NOT edited into _kit/kit.css, because the
+   kit is shared with ten other plates and this is a plate-level assertion of
+   what the world stage requires.
+   =========================================================================== */
+
+/* GG-57: pointer targets are >=32x32 CSS px. kit's .btn--sm is 24px tall and the
+   plate uses it on ~14 real controls (Build, Clear, Claim, Pour in loam, the
+   transport, every confirm). 44x44 is not claimed — this is a WebView2 desktop
+   overlay, not a touch surface — but 32 is the floor and it was not being met. */
+.plate .btn--sm { min-height: 32px; }
+.plate .btn--icon { min-width: 32px; min-height: 32px; }
+.wsb-unq { min-width: 32px; min-height: 32px; }          /* was 18px — the take-back control */
+.wsc-nitem .x { min-width: 32px; min-height: 32px;
+      display: inline-grid; place-items: center; }        /* was a bare ~10px glyph */
+.wsd-transport .btn { min-height: 32px; }
+
+/* GG-56: a name that truncates must stay reachable. These four sites clip with
+   `text-overflow: ellipsis` and no fallback, so a long or CJK name became
+   unavailable rather than merely shortened. Every element carrying one of these
+   classes MUST also carry a `title` with the full string — asserted here so the
+   requirement travels with the component rather than living in a review comment. */
+.ws-nm[title], .wsc-comp .nm[title],
+.wsc-orow .nm[title], .wsc-orow .wsc-sub[title] { cursor: help; }
+.ws-nm:not([title]), .wsc-comp .nm:not([title]),
+.wsc-orow .nm:not([title]), .wsc-orow .wsc-sub:not([title]) {
+      /* A visible defect marker: if this outline shows in the plate, the title is missing. */
+      outline: 1px dashed var(--bad); outline-offset: 1px; }
 </style>
 
 <!-- ==================================================================== J -->
@@ -5602,6 +5654,15 @@
                   <div class="wsd-pinrow">
                     <button class="wsd-pin"><span>&#128204;</span> Keep this ground</button>
                     <button class="wsd-pin is-on"><span>&#9873;</span> Give this up first</button>
+                    <p class="ctx" style="margin-top:var(--sp-2)"><b>Designed, not yet reachable &mdash;
+                    annotated 2026-09-03.</b> <code>WorldCommandKinds</code> declares seven kinds and
+                    none of them cedes ground: <code>LoamPhases.Pressure</code> picks the release
+                    target itself via <code>LoamForecast.Weakest</code>, every turn. The owner has
+                    authorised a <b>cede order</b> (&sect;8d.2) which makes the engine&rsquo;s choice a
+                    <em>default the player may override</em> &mdash; and until it lands, <b>no surface
+                    may promise a choice the player does not have</b>. That is why the warning above
+                    now reads <em>&ldquo;here is what will be released, and what would stop it&rdquo;</em>
+                    rather than <em>&ldquo;choose what to release&rdquo;</em>.</p>
                   </div>
                 </div>
               </div>
@@ -5692,7 +5753,7 @@
                   from fading and can never be the one released.
                 </p>
                 <div class="wsd-act is-off">
-                  <button class="btn btn--sm is-disabled" disabled>Ward this ground</button>
+                  <button class="btn btn--sm is-disabled" disabled>Bind a warden here</button>
                   <span class="why">binding is permanent, and it costs a binding slot</span>
                 </div>
               </div>
@@ -5938,7 +5999,7 @@
               <div class="wsd-act is-off"><button class="btn btn--sm btn--ghost is-disabled" disabled>Pour in loam</button><span class="why">no legion of yours is standing here <span class="wsd-raw">sustain.not-standing</span></span></div>
               <div class="wsd-act is-off"><button class="btn btn--sm btn--ghost is-disabled" disabled>March here</button><span class="why">that route does not join up <span class="wsd-raw">path.not-contiguous</span></span></div>
               <div class="wsd-act is-off"><button class="btn btn--sm btn--ghost is-disabled" disabled>March here</button><span class="why">the road is cut <span class="wsd-raw">lane.severed</span></span></div>
-              <div class="wsd-act is-off"><button class="btn btn--sm btn--ghost is-disabled" disabled>Ward this ground</button><span class="why">every binding slot is taken <span class="wsd-raw">capacity.full</span></span></div>
+              <div class="wsd-act is-off"><button class="btn btn--sm btn--ghost is-disabled" disabled>Bind a warden here</button><span class="why">every binding slot is taken <span class="wsd-raw">capacity.full</span></span></div>
               <div class="wsd-act is-off"><button class="btn btn--sm btn--ghost is-disabled" disabled>March here</button><span class="why">Legion I broke last night and owes this turn's orders <span class="wsd-raw">entity.routed</span></span></div>
             </div>
           </div>
@@ -6595,8 +6656,8 @@
               <span class="hotkey">Shift</span>
             </header>
             <div class="wsd-lrow"><span class="tw">+</span><span class="src">Earns</span><span class="amt" data-sign="up">50</span></div>
-            <div class="wsd-lrow"><span class="tw">&minus;</span><span class="src">Costs &#9656;</span><span class="amt" data-sign="down">60</span></div>
-            <div class="wsd-lrow is-total"><span class="tw"></span><span class="src">Net</span><span class="amt" data-sign="down">&minus;10 loam</span></div>
+            <div class="wsd-lrow"><span class="tw">&minus;</span><span class="src">Costs &#9656;</span><span class="amt" data-sign="down">59</span></div>
+            <div class="wsd-lrow is-total"><span class="tw"></span><span class="src">Net</span><span class="amt" data-sign="down">&minus;9 loam</span></div>
             <div class="wsd-leaf">Hold <b>Shift</b> to lock this open, then expand a row.</div>
           </div>
         </div>
@@ -6613,7 +6674,7 @@
             <div class="wsd-lrow" data-lvl="2"><span class="tw"></span><span class="src">The ground seeps</span><span class="amt">50</span></div>
             <div class="wsd-lrow" data-lvl="2"><span class="tw">&times;</span><span class="src">Well &mdash; not finished yet</span><span class="amt">&times;1.00</span></div>
 
-            <div class="wsd-lrow"><span class="tw">&minus;</span><span class="src">Costs &#9662;</span><span class="amt" data-sign="down">60</span></div>
+            <div class="wsd-lrow"><span class="tw">&minus;</span><span class="src">Costs &#9662;</span><span class="amt" data-sign="down">59</span></div>
             <div class="wsd-lrow" data-lvl="2"><span class="tw"></span><span class="src">Holding the ground at all</span><span class="amt">10</span></div>
             <div class="wsd-lrow" data-lvl="2"><span class="tw"></span><span class="src">Garrison &#9662;</span><span class="amt">8</span></div>
             <div class="wsd-lrow" data-lvl="3"><span class="tw"></span><span class="src">4 bound &times; 2 each</span><span class="amt">8</span></div>
@@ -6622,9 +6683,10 @@
             <div class="wsd-lrow" data-lvl="2"><span class="tw"></span><span class="src">Danger &#9662;</span><span class="amt">9</span></div>
             <div class="wsd-lrow" data-lvl="3"><span class="tw"></span><span class="src">band 3 &times; 3 each</span><span class="amt">9</span></div>
             <div class="wsd-lrow" data-lvl="2"><span class="tw">&times;</span><span class="src">The Fracture runs strong here</span><span class="amt">&times;1.40</span></div>
-            <div class="wsd-lrow" data-lvl="2"><span class="tw">&times;</span><span class="src">This month is heavier</span><span class="amt">&times;1.15</span></div>
+            <div class="wsd-lrow" data-lvl="2"><span class="tw">&times;</span><span class="src">Your legion&rsquo;s upkeep burden</span><span class="amt">&times;1.15</span></div>
+            <div class="wsd-lrow" data-lvl="3"><span class="tw"></span><span class="src">a declared balance lever, reported each turn</span><span class="amt">1150&#8240;</span></div>
 
-            <div class="wsd-lrow is-total"><span class="tw"></span><span class="src">Net</span><span class="amt" data-sign="down">&minus;10 loam</span></div>
+            <div class="wsd-lrow is-total"><span class="tw"></span><span class="src">Net</span><span class="amt" data-sign="down">&minus;9 loam</span></div>
             <div class="wsd-leaf">
               Three levels is the floor of the ledger. A fourth would be the tuning file, and the
               answer to <em>"why is a garrison 2 loam a head"</em> is a balance question, not a
@@ -6636,10 +6698,29 @@
 
       <div class="note" style="margin-top:var(--sp-4)">
         <strong>The arithmetic is the design.</strong> Every row is an operand, and reading down the
-        column reproduces the number exactly: 10 + 8 + 10 + 9 = 37, &times;1.40 = 52, &times;1.15 =
-        60, and 50 &minus; 60 = &minus;10. A ledger whose rows do not add up to its total is worse
+        column reproduces the number exactly: 10 + 8 + 10 + 9 = 37, then <b>one</b> combined step
+        &mdash; 37 &times; 1400 &times; 1150 &divide; 1&#8239;000&#8239;000 = <b>59</b> &mdash; and
+        50 &minus; 59 = &minus;9.
+        <br><br>
+        <strong>The single division is the point, and an earlier draft got it wrong.</strong> It
+        rounded twice (&times;1.40 &rarr; 52, then &times;1.15 &rarr; 60) and printed <b>60</b> where
+        the engine computes <b>59</b> &mdash; off by one, by construction, in the section whose whole
+        subject is not lying about numbers. <code>LoamUpkeep.For</code> multiplies both per-mille
+        factors and divides by 1&#8239;000&#8239;000 <em>once</em>, which is this repo's own rule:
+        <em>widen before multiplying, divide by 1000 last, exactly once</em>. A ledger that rounds per
+        row cannot reproduce it. A ledger whose rows do not add up to its total is worse
         than no ledger, because the player will trust it. <b>Rounding happens once, at the display
         boundary, away from zero</b> — the same direction the engine rounds.
+        <br><br>
+        <strong>And every operand is a real one &mdash; corrected 2026-09-03.</strong> The five rows
+        are exactly the five arguments of <code>LoamUpkeep.For(garrisonMembers, developmentLevel,
+        dangerBand, intensityMilli, handicapMilli)</code>, in that order. An earlier draft drew a sixth
+        row, <em>&ldquo;this month is heavier &times;1.15&rdquo;</em>, which has <b>no field behind
+        it</b>: there is no calendar term in that signature, and the calendar&rsquo;s economic half is
+        deferred to another module. Drawing it broke this very section&rsquo;s rule in the section whose
+        subject is not lying about numbers. It is now the faction upkeep handicap, which is real, is a
+        declared balance lever, and which the engine already narrates as
+        <code>loam.handicap:1150</code>.
       </div>
 
       <p class="spec-label" style="margin-top:var(--sp-4)">WCAG 2.1 SC 1.4.13 — the three obligations, and how each is met</p>

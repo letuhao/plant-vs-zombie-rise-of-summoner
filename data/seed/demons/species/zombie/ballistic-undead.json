@@ -20,13 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
-        "deployMode": "high",
+        "deployMode": "split",
         "elementPrimary": "high",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:04:47Z",
+      "emittedUtc": "2026-09-03T15:31:08Z",
       "minorityValues": {
+        "deployMode": "HypnoAlly",
         "rarity": "cultivated"
       },
       "promptVersions": {
@@ -58,7 +59,7 @@
     "pure": true,
     "rarity": "chaff",
     "reach": "long",
-    "reason": "With high durability (850 toughness), the ability to crush plants, and a continuous projectile attack that forces immediate defensive reaction, this creature functions as a high-priority threat rather than a mere scourge.",
+    "reason": "With high durability (850 toughness) and the ability to both deal consistent damage and crush plants upon approach, this unit functions as a high-priority threat rather than a mere scourge.",
     "resourceProfile": [
       "hp",
       "poise"
@@ -69,7 +70,7 @@
     "traits": [
       "Ranged Projectile",
       "Crushing Advance",
-      "Precision Accuracy"
+      "Precision Aiming"
     ],
     "variants": [],
     "verdict": "too-low"

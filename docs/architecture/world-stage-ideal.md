@@ -1,6 +1,6 @@
 # World stage — the ideal
 
-**Status:** idea phase, 2026-09-03. **Twelve owner decisions recorded — §8 (4), §8b (4), §8d (4) —
+**Status:** idea phase, 2026-09-03. **Sixteen owner decisions recorded — §8 (4), §8b (4), §8d (4), §8e (4) —
 across two rounds and a four-perspective adversarial design review (§8c). No open questions. Not a
 spec. No build authorized.** The deliverable of this phase is this document plus
 [plate 11](../design/11-world-stage.html), the component catalog drawn from it.
@@ -110,7 +110,7 @@ machinery that exists and is inert — never a wall.
 | Release forecast: `WillReleaseNextTurn`, sharing `Weakest` with the engine so the warning cannot disagree with the act | `WorldDtos.cs:125`, `Loam/LoamForecast.cs:58` |
 | Lifeline / articulation overlay (opt-in via `?lifelines=true`) | `WorldEndpoints.cs:51, 382-396` |
 | Five command kinds reachable end to end: `stand-fast`, `move`, `clear`, `claim`, `stance` | `WorldCommand.cs:10-34` |
-| Turn report vocabulary: 21 event prefixes, 3 battle kinds, 2 calendar subjects, ~30 drop reasons | enumerated across `src/FusionRpg.Core/World/` |
+| Turn report vocabulary: **21** event prefixes, 3 battle kinds, 2 calendar subjects, **37** drop reasons (33 bare + 4 carrying an argument) | counted 2026-09-03 across `src/FusionRpg.Core/World/`, not estimated — an earlier "~30" understated it |
 | AI order-and-reason narration on the wire | `WorldEndpoints.cs:185-196` |
 | The world fixture is **generated and byte-pinned**, not hand-written | `tests/FusionRpg.E2E.Tests/WorldFixtureTests.cs:28-50` |
 | The FE's pure layer is genuinely good and fully tested: `worldViewModel.ts`, `worldSelection.ts`, `turnPlayback.ts`, `commanderIntent.ts` | 4 modules, 9 test files, all pure |
@@ -177,6 +177,8 @@ This is exactly the ambiguity GG-46 exists to catch, and it is in the model, not
 | Missing | Note |
 |---|---|
 | **Recruitment — any way to gain a second legion** | `Growth` is a no-op (`TurnEngine.cs:196-200`); `TurnCalendar.cs:14`'s *"recruits arrive in pulses"* is a comment describing an unbuilt module, not behaviour |
+| **Growth of any kind — the whole concept is declared and unbuilt.** Found while speccing `sector-development`, 2026-09-03, and verified: **every assignment to `DevelopmentLevel` in `src/` is a copy**, never an increase — two intel-recording sites (`Intel/IntelRecorder.cs:86, 100`), a DB read (`RpgStore.World.cs:434`) and the DTO projection (`WorldEndpoints.cs:297`). It is stored, hashed, believed, projected **and charged for** (it is an input to `LoamUpkeep.For`), and nothing can raise it. Likewise `SectorPhase.Developed` (`WorldState.cs:12`) is referenced nowhere else in `src/` | This is *why* `Growth` is empty, and it is `sector-development`'s to build. Worth stating plainly: today a sector's development level is a stat that only ever costs the player |
+| **Any event telling the player they are back in supply.** Found while speccing `world-playback`, 2026-09-03, and verified: `supply.cut:` exists (`Movement/SupplyGraph.cs:58`) and **nothing reports the reverse**. `recovery:` (`:111`) is not it — it heals `Wounds` on legion members and reports a *garrison mending*, which is a different event that happens to sit nearby. So the player is told when a component is severed and never when it reconnects | **Correction to my own first reading:** plate 11 §L does *not* draw this dishonestly — it draws the sentence a player should see and annotates it *"no token exists… it must not be inferred silently, and today it is not shown at all."* That is the right behaviour for a design catalog. Adding the event is `world-wire`'s, and it is small |
 | **A player verb for giving up ground.** `WorldCommandKinds.All` is `stand-fast, move, clear, claim, stance, sustain, build` (`WorldCommand.cs:36-37`) — there is no `abandon`/`cede`/`release`. The engine picks the sector to drop itself, every turn, via `LoamForecast.Weakest` (`LoamPhases.cs:133-146`) | **This is the economy's core tension, and it is currently a notification rather than a decision.** See §8c.2 |
 | **A stage.** `#/world` is the only route in the app that does not redirect into the new shell | `tasks/game-gui-todo.md:1014-1018`; there is no `src/stages/world/` |
 | **A HUD.** Nothing is persistent. The turn number is interpolated into the page's *description string* (`WorldPage.tsx:183`) and scrolls away with the header; `LoamGauge`'s own comment claims *"always visible, the way a city-builder shows power"* while it sits in a scrolling column with no `sticky` anywhere in the feature | |
@@ -334,7 +336,8 @@ Workshop. **That absence is evidence about moddability, not about demand.**
   the shortest possible eye movement"*, citing Hick's Law ([kevinhustler.me/aoe4](https://kevinhustler.me/aoe4)).
 - **The end-turn button is a state machine.** Civ VI's icon becomes the next unresolved blocker;
   clicking it **navigates to the blocker** rather than ending the turn; `W` cycles units needing
-  orders; **Shift+Enter force-ends anyway**. Its documented failure is equally instructive —
+  orders (**the `W` binding is unverified — see §8c.7**); **Shift+Enter force-ends**, though its
+  reliability in Civ VI specifically is contested. Its documented failure is equally instructive —
   auto-cycle selects units *late*, after the player has already picked another one, so the wrong unit
   moves; and units can become un-cycleable blockers. The most-installed Civ VI mod adds a
   one-gesture "end turn regardless".
@@ -417,9 +420,17 @@ makes the wheel do two different things depending on where the pointer sits.
 ### 4.2 The camera is the navigation, and no minimap
 
 Click-drag pan, wheel zoom, arrow/WASD pan, and a fit-to-extent control — the four-methods-at-once
-model both Amplitude manuals describe. **No minimap**, matching all three Amplitude games: our maps
-run 6 to ~18 sectors on an authored grid (`worldViewModel.ts:9-11`, `first-light` spans 7×3), which is
-inside the range a single zoom-out shows whole.
+model both Amplitude manuals describe. **No minimap**, matching all three Amplitude games: the two
+**available** map tiers run 6 to ~18 sectors on an authored grid (`first-light` is 6 sectors spanning
+a 7×3 grid; `two-hearths` is 16), which is inside the range a single zoom-out shows whole. Positions
+come from the world, not a layout algorithm, and are scaled by the grid constants at
+`worldViewModel.ts:9-11`.
+
+**This decision is scoped to those tiers, and the scope is not decoration.** `WorldSizeCatalog`
+declares **five** tiers — the three above `medium` (~32, ~64, ~128 nodes) are marked unavailable and
+gated on `world-generator`, wave 4. Their node counts were *measured*, not guessed. **The first tier
+above `medium` becoming available reopens this decision and §4.3's outliner argument together** — a
+camera model sized for ≲20 nodes is a rebuild at 64, and saying so costs a sentence now.
 
 **The zoom tiers must be strict supersets of legibility, never trades.** This is Endless Legend's
 documented failure and the trap most worth avoiding: if zooming out hides tile yields while revealing
@@ -438,14 +449,32 @@ praise; splitting one decision across corners is the "Divided UI" they are remov
 | Top-left | The layer rail (identical on every stage, per `information-architecture.md` §3) |
 | Right edge | The notification rail (§4.7), and beneath it the **outliner** — a live list of your legions and held sectors, each row selecting and centring its subject |
 | Bottom-right | The **turn cluster** (§4.6) |
+| Left edge | **The sector inspector** when one is open (§8e.1) — selection detail left, persistent empire state right, so the two never fight for the same 1280px. It docks *beside* the layer rail, not over it: the rail is a ~92px icon column and keeps its corner role |
 | Bottom-left | Map controls: zoom, fit, lens picker, fog toggle — `information-architecture.md` §2.2's *"map controls cluster (zoom / fit / layers / fog)"* |
 
-**The outliner is not optional, and it is the direct consequence of having no minimap.** Amplitude's
-own worst-documented friction is the absence of an empire overview — ES2 *"lacks an overview of any
-kinds"*, and the community's accepted workflow is a manual *"grand circuit of your empire once every
-20 turns"*. Stellaris' right-edge outliner is the genre's answer, and it costs little: our maps hold 6
-to ~18 sectors and a handful of legions, so the list is short by construction. It doubles as the
-keyboard entry point into the map, which today has none.
+**The outliner — justification rewritten 2026-09-03, because its first one did not survive review.**
+It originally rested on Amplitude's absence-of-an-overview friction (ES2 *"lacks an overview of any
+kinds"*, and the community's manual *"grand circuit of your empire once every 20 turns"*). §8c.1
+withdrew that: those are complaints about **40 systems and 25 fleets**, and six sectors all fit on
+screen at once, so the inference did not transfer — and using it violated §3's own *"do not fill
+absences by inference"* rule.
+
+**What justifies it now, on two narrower grounds that do hold at our scale:**
+
+1. **It is the keyboard entry point**, and the map has *zero* keyboard affordances today (§2.3). A
+   spatial canvas needs a linear, focusable list to be reachable at all; that is true at six nodes and
+   at sixty. This is the load-bearing reason.
+2. **§8d.1 gives it a population, and §8e.3 gives it a size.** The target is **6–10 legions,
+   tunable**. That is past the point where a flat list works: **the outliner needs grouping and
+   filtering after all**, which the first version of this section explicitly denied ("the list is
+   short by construction"). At 6–10 legions and up to 18 sectors it is indexing ~28 rows, and
+   Stellaris' outliner groups and filters because that is the scale at which a human stops scanning
+   and starts searching.
+
+**And it carries a size trigger rather than a flat claim:** the no-grouping / no-filter / no-pagination
+argument holds at `small` and `medium` — the only tiers `WorldSizeCatalog` marks available. The first
+tier above `medium` shipping (`world-generator`, wave 4) reopens both this and §4.2's no-minimap
+decision.
 
 **The component-split case is a first-class HUD state, not a detail.** After the settlement rule, *"my
 empire is fine"* can be false while half of it starves; `LoamGauge` already computes per-component
@@ -504,6 +533,19 @@ next click, and that promise is usually false.
 
 **And a force-end escape hatch exists**, because Civ VI, Humankind and the most-installed Civ VI mod
 all converge on one: a player who knows what they are leaving undone gets to leave it undone.
+
+> **⚠️ The keyboard half of it is not expressible today — found while speccing `world-turn`,
+> 2026-09-03, and verified.** `useGlobalKeys.ts:25` calls `dispatchGlobalVerb(event.key)` and passes
+> **no modifier state**, so `Shift+Enter` arrives as `"Enter"` and is indistinguishable from it in the
+> verb registry. The `⇧⏎` binding plate 11 draws cannot be registered as drawn. Two resolutions, both
+> costed in `spec-world-turn.md`: extend the keymap to carry modifiers (a shell change touching every
+> stage), or bind force-end to an unmodified key. **The pointer path ships either way**, so this
+> constrains the shortcut, not the feature.
+>
+> Second-order, same area: `registerGlobalVerb` **throws** on a duplicate (`keymap.ts:45-50`) while
+> `conflictFor` (`layers/system/keybindings.ts:86-93` — *not* `shell/`, a path this document had wrong)
+> only checks the eight bindable actions against *each other* —
+> so a player rebind that collides with a stage-registered verb takes the stage down on mount.
 
 **A warning we are taking from Humankind rather than discovering ourselves:** their blocking end-turn
 produced a soft-lock family that their own bug forum called *"multiple different bugs that have the
@@ -648,6 +690,13 @@ If a later balance pass wants to change how much loam a well yields, that number
 - **The world generator**, deliberately last of its own program's four waves.
 - **Standing / multi-turn orders as a mechanic.** The UI can make re-issuing cheap; whether the server
   stores a standing order is a turn-engine decision with hashing and replay consequences.
+- **Recruitment itself** — added 2026-09-03. §8d.1 makes it a *prerequisite* of this stage, which is
+  the opposite of unimportant, but the mechanic belongs to `sector-development`: how legions are
+  gained, at what rate, against which pulse. This program consumes the unit count; it does not design
+  it. Same module as §8b.7's seasons, which is why those two should be specced together.
+- **What an opponent is allowed to leak.** §8c.3 found that fixing the fog defect and moving the
+  AI-reasons panel to the dev tree together silence Zomboss, since today his economy is legible only
+  *through* that defect. The spec must choose deliberately; this document only names the choice.
 - **~~Whether the AI-reasons panel survives.~~** *Decided §8.3 — it moves to the developer tree.* What
   is still open is the consequence: with the reasons list gone from the player surface, opponent
   legibility rests entirely on the map and the turn report, and how much of an opponent's intent those
@@ -917,6 +966,150 @@ Recorded because a review that lists only faults leaves nobody able to tell what
   four production files. Every component built against `NodeProps`/`Handle` is a component written
   twice.
 
+### 8c.7 — Consistency and counting pass, 2026-09-03
+
+A fifth review pass was planned as three agents (verify §3's prior art, audit the plate's facts,
+cross-check §4's internal consistency). **All three died on an API error and produced nothing**, so
+what follows was done by hand and covers less. Recorded honestly, including what is still unchecked.
+
+**Counts verified by counting, not estimating** (the evidence rule this document is meant to obey):
+
+| Claim | Verdict |
+|---|---|
+| 14 slot kinds | **Correct** — `anomaly, essence-deposit, hazard, lair, market, material-seam, rootbed, seat, shard-vein, shrine, spire, tear, vault, wildland` |
+| 6 lane types | **Correct** — `corridor, deep, gated, ley, one-way, rift` (`warded`/`severed` are lane *state*, not types) |
+| 21 event prefixes | **Correct.** `arrival:` and `halt:` do not appear as literals because they are built by concatenating `TurnEventKinds`; `"calendar:"` is an RNG stream name and `"https:"` a comment URL, both correctly excluded |
+| "~30 drop reasons" | **Understated. Actually 37** — 33 bare plus 4 carrying an argument. §2.1 corrected |
+| Five map size tiers, three unavailable | **Correct**, and stronger than stated: the 128-node tier is measured at 0.6–0.7s and needs a Tarjan-first optimisation before it could ship at all |
+| The plate's "real" numbers (`carryPerBearer` 200, `burnPerMember` 10, `waystationCostMilli` 300, `wellCostMilli` 200, range 3 hops) | **All correct** against `data/tuning/loam.v1.json`, and the `…Milli` trap is handled right — the waystation renders as `300`, not `0.3` |
+
+**Internal contradictions found and fixed:**
+
+1. **§4.3's outliner justification contradicted §8c.1.** §8c.1 withdrew the ES2-derived argument; §4.3
+   still asserted it verbatim. Rewritten to rest on the two grounds that survive at our scale — it is
+   the keyboard entry point for a canvas with no keyboard affordances, and §8d.1 gives it a population
+   — plus an explicit size trigger.
+2. **§4.2 cited `worldViewModel.ts:9-11` for a sector-count claim**; those lines are pixel-grid
+   constants and do not support it. Citation corrected and the no-minimap decision explicitly scoped to
+   the two available tiers.
+3. **§6 was missing two entries** that §8c/§8d created: recruitment (a prerequisite this program does
+   not design) and what an opponent may leak.
+
+**Cross-checked against `information-architecture.md` and found consistent:** §4.8's number-row lens
+hotkeys are exactly what IA §5 sanctions (*"`1`–`9` · Stage-specific hotbar · owned by the current
+stage"*), and §4.3's band-1 assignment matches IA §4.
+
+**One further IA divergence to reconcile at spec time:** IA §2.2 lists the world HUD as *"Turn or tick
+readout · selected legion · map controls cluster (zoom / fit / layers / fog)"*. §4.3 adds the loam
+strip, the notification rail, the outliner and the turn cluster. That is an **extension, not a
+conflict**, but it is the second IA row this program supersedes (the first was §8.4's unlock) and both
+should be corrected in the change that registers `world-stage`.
+
+**§3's two standards claims — verified against primary sources, 2026-09-03.** These are the most
+load-bearing citations in the document (§4.10's whole argument, and the accessibility findings in
+§8c.5 rest on them), so they were checked first.
+
+- **XAG 101 — CONFIRMED, and verbatim in several places.** Every figure §3.2 attributes to it is
+  correct: **PC/VR 18 px at 1080p, 36 px at 4K** (console 26/52); sizes **measured as body height** —
+  *"the sum of the number of pixels in the descender space, the x-height space, and the ascender
+  space"*; the 2:1 anti-aliasing rule for which edge pixels count; **line width ≤80 characters** (40
+  CJK), *"measured when text is resized to 100 percent"* and excluding spaces; **line spacing ≥1.5**;
+  paragraph spacing ≥2× line spacing; letter spacing ≥0.12× and word spacing ≥0.16× the font size; a
+  sans-serif option and a non-stylised alternative to any stylistic face. Two quotes are exact:
+  *"Players should be able to resize text up to 200 percent of the minimum font sizes… without the
+  loss of content, functionality, or meaning"* and *"Platform-provided screen magnification tools
+  aren't an appropriate mitigation for small text size."* And the scroll rule reads, verbatim:
+  *"When text is scaled, the player isn't required to scroll both horizontally and vertically to read
+  text within a single UI. (Scrolling in one direction is OK.)"*
+  **One requirement this document had missed, and it sharpens §8c.5:** *"The text contained inside
+  icons and glyphs should also meet the minimum default text size"* and *"Icons/glyphs should also
+  scale with text scaling up to 200 percent."* Plate 11 encodes a great deal in glyphs — the slot-kind
+  letters, `"◆".repeat(n)` for danger, the role pips, the strength-ladder rungs — so the 18px floor
+  applies to those too, not only to prose. Source:
+  [XAG 101](https://learn.microsoft.com/en-us/gaming/accessibility/xbox-accessibility-guidelines/101).
+- **The Endless Space 2 manual quotes — CONFIRMED, verbatim, from the primary PDF.** The manual was
+  downloaded and its text extracted, so these are the actual sentences and not a search-index
+  reconstruction. §4.4, §4.6 and §4.7 all rest on them and all three hold:
+  - *"Like all other game screens, to leave the System Management screen and return to the previous
+    screen (in this case the Galaxy Map) you can either right-click on the screen or hit the Esc key
+    on your keyboard."* — and **"Like all other game screens" is in the source**, which is what makes
+    it a general rule rather than one screen's behaviour. §4.4's one-dismissal-gesture decision is
+    correctly grounded.
+  - *"When you press the End Turn button all notifications will be flushed, except those which prevent
+    you from ending the turn."* — §4.7's flush rule, exact.
+  - *"Important notifications will automatically pop up and open a panel. Lesser notifications will
+    remain as icons on the right side of the screen until you open them. In the Options menu of the
+    game, you can select which notifications automatically pop up and which ones stay minimized."* —
+    §4.7's two classes **and** their player-configurability, exact.
+  - *"This icon indicates the number of ships or fleets that have remaining movement points but no
+    orders to move."* — §4.6's live unresolved count, exact. This is the borrowing §8c.6 called the
+    cheapest good idea in the document.
+  - The blocking two-tier rule, exact: *"Some notifications will appear when you attempt to end your
+    turn… Others will prevent you from completing your turn until you have resolved them. **For
+    example, a battle notification will prevent you from completing the turn until the battle is
+    resolved.**"*
+    **This last sentence corroborates §4.6's warning better than the document claimed.** The manual
+    documents a *battle notification* as a hard blocker — and that is precisely the blocker ES2 later
+    patched back out (*"Battle Result Notifications no longer block the turn"*). So the shipped-then-
+    retracted example is not an anecdote about some notification; it is the one the manual itself held
+    up as the canonical hard block. §4.6's *"default the hard-block list to empty and argue every
+    addition"* is the right lesson, and the evidence for it is stronger than stated.
+  - Camera (PageUp/PageDown) and the Spacebar Scan View toggle both confirmed in the same document.
+- **Civ VI's end-turn state machine — PARTIALLY CONFIRMED, and the failure is mine.**
+  **Confirmed:** the button's icon changes to represent what still needs attention (unit orders,
+  research, production), and when it shows `!` clicking it *navigates to the blocker* — zooming to the
+  next unit needing orders — rather than ending the turn. That is the mechanism §4.6 borrows and it is
+  real. **Not confirmed:** that **`W`** is the cycle key. Sources describe mashing the **space bar** to
+  skip units instead, and no source I found binds `W` to it. **Contested:** Shift+Enter force-ends
+  reliably in Civ V, and multiple threads report it behaving inconsistently in *Civ VI* specifically.
+  §4.6's design point does not depend on the exact keystroke — a cycle control and a force-end escape
+  both exist — but the document should stop asserting `W`, and the force-end precedent is weaker than
+  written.
+
+- **WCAG 2.1 SC 1.4.13 — CONFIRMED as to substance; primary source blocked.** Level **AA**, three
+  requirements: **dismissible** (without moving pointer or keyboard focus), **hoverable** (the pointer
+  can move onto the content), **persistent** (visible until dismissed, until the trigger is removed, or
+  until the information is no longer valid). `w3.org` returns 403 to automated fetch, so this rests on
+  several independent secondary sources agreeing rather than on the normative text —
+  [W3C WAI understanding page](https://www.w3.org/WAI/WCAG22/Understanding/content-on-hover-or-focus.html)
+  (blocked), corroborated by [WCAG.com](https://www.wcag.com/authors/1-4-13-content-on-hover-or-focus/)
+  and [Deque University](https://dequeuniversity.com/resources/wcag2.1/1.4.13-content-on-hover-or-focus).
+  Good enough to design against; worth one manual read before it is quoted in a spec.
+
+**Plate 11 repairs applied, 2026-09-03.** Seven of the ten defect classes from §8c.5 are fixed in
+`docs/design/11-world-stage.html`, by hand after six agent attempts died on API errors. Verified after
+each edit: tags balanced, five style blocks intact, **zero** colour-hex outside them, and the plate
+re-rendered in Chrome.
+
+| # | Defect | Fix |
+|---|---|---|
+| 1 | 58 raw-`px` font sizes, 52 at 8–9px | **All 58 → `rem` tokens**, the 5 SVG `font-size` attributes → `em`, and the six meaning-bearing selectors promoted to the 12px floor. Raw-px count is now **0**, so a 200% scale no longer inverts the hierarchy |
+| 2 | `--faint` as fact-bearing text (below AA) | **28 declarations promoted to `--muted`** (3.22 → 5.51 on panel). The 10 remaining uses are borders, a background gradient and two ornaments — deliberately left |
+| 3 | §J encoded fog by opacity, contradicting §C | §J's four states now carry border **geometry** + pattern + a distinct silhouette for Unknown, matching §C. The correction is commented in place |
+| 4 | Two key conflicts | `WASD`-pan removed (it collided with `W`-cycle, which is bound in six places); the arrows already pan. The HUD's `Menu [Esc]` chip removed — Esc pops the topmost layer first and only reaches System on an empty stack |
+| 5 | §M.1's ledger drew a modifier with no field | The phantom *"this month is heavier ×1.15"* row is now the **faction upkeep handicap** (`1150‰`), which is real, is a declared balance lever, and which the engine already narrates as `loam.handicap:1150`. The five rows are now exactly `LoamUpkeep.For`'s five arguments, in order, and the arithmetic is unchanged |
+| 6 | "Ward" named two mechanics | The sector action is now **"Bind a warden here"**; the road action stays "Ward a road". The engine already separates them (`WardLevel` on a lane, `WardenBindingId` on a sector) and the lens auto-activation now names the right verb |
+| 9 (part) | Generated names in the Latin-only display face | `.ws-nm`, `.ws-svg .ws-n-l` and `.wsd-node b` moved to `--font-ui`, which carries `var(--cjk)`. Pointer targets raised to ≥32px and the four ellipsis sites given a visible defect marker when a `title` fallback is absent — both in a scoped remediation block, deliberately *not* edited into the shared kit |
+| 10 | The "closed set of six" lenses had a seventh | **Placement is now declared a transient targeting overlay**, not a lens — no picker slot, no hotkey, alive only while the verb is. Same class as §E's range overlays, which keeps the six honest |
+
+**Three defect classes remain unfixed**, and they need markup work rather than CSS: §8c.5's missing
+HUD-plus-inspector figure (the composition whose absence hid three findings), the ~30 native `title`
+attributes that are the sole carrier of a name, and the fixed-px grid columns that clip at 200%.
+
+**Still unchecked, and it should not be claimed otherwise:**
+
+- **§3's prior art, minus the two standards above.** The Amplitude manual quotes and their page
+  numbers, the "Divided UI" post-mortem, Civ VI's end-turn state machine, the Jørgensen study, the
+  screen-budget figure, the mod subscriber counts. Still the largest remaining hole, and §4 cites it
+  more than anything else. **Three agent attempts died on API errors**; the standards claims were
+  done by hand instead because they were the most load-bearing.
+- **The plate's DTO and `file:line` citations**, section by section. The counts above check out, which
+  is mildly reassuring, but the ideal doc's own citations ran a 15% error rate from the same
+  production method.
+- **Vocabulary drift across plate sections** — four agents drew it independently, and the plate is
+  player-facing, so `sector`/`node`/`ground` and `legion`/`force`/`entity` inconsistency is a real
+  defect rather than a nit.
+
 ---
 
 ## 8d. Decided after the review — 2026-09-03
@@ -957,9 +1150,15 @@ and §H.1 currently draw.
 - A **new command kind** — the first since `sustain` and `build`, and it must be plumbed through all
   five sites §8c.4 names, `CommandPayload` included, or it is lost in the reveal round-trip exactly as
   `stance` once was.
-- **`LoamPhases.Pressure` changes behaviour**, so this is a `RulesetVersion` decision with a golden
-  re-bless, not a pure addition. `decisions.md` records that every prior hashed-behaviour change went
-  through a version bump and a batched re-bless; this follows that path.
+- **`LoamPhases.Pressure` changes behaviour, so a `RulesetVersion` bump is required — but the golden
+  re-bless this bullet originally asserted probably is not.** Corrected 2026-09-03 while speccing
+  `world-commands`, by testing the constraint rather than inheriting it (design-gate evidence rule 4:
+  *"'this would move the goldens' is a claim — run the suite first"*). `StateHasher.Hash` reads
+  `WorldCanonical.Write(world)` and nothing else (`Turn/StateHasher.cs:17`), and `RulesetVersion` is
+  not in the canonical form — so with no cede order filed, `Weakest(…, ceded: null)` is byte-identical
+  to today's behaviour and no golden should move. **The spec budgets for a re-bless but rules that a
+  moved hash with no cede order filed is a defect, not a golden to bless**, following `decisions.md:103`
+  where exactly that call was made and zero goldens moved.
 - **The forecast and the act must still agree.** Today they cannot disagree because both read
   `Weakest` (`LoamForecast.cs:19` ← `LoamPhases.cs:138`) — §8c.6 lists that as load-bearing. An
   override must preserve it: the player's choice becomes an *input* to the shared function, never a
@@ -972,9 +1171,14 @@ A band-2 layer scrims the **stage**, not the HUD. This fixes the 2.12:1 finding 
 
 **Consequences:**
 
-- **This is a kit-wide change, not a world-stage one.** `.scrim` is `z-index: var(--band-panel)` = 200
-  against `--band-hud` = 100 in the shipped `_kit/kit.css:401`, so today *every* stage's HUD goes dark
-  under *every* panel. The fix belongs in the band model and affects the Sanctum and Lawn stages too.
+- **This is a kit-wide change, not a world-stage one — and it is latent, not live.** Corrected
+  2026-09-03: `.scrim` is `z-index: var(--band-panel)` = 200 against `--band-hud` = 100 in
+  `_kit/kit.css:401`, but **the shipped web has no `.scrim` class at all** (grep of
+  `web/fusion-rpg-web/src/` returns nothing; the Lawn records deliberately having none). So the
+  2.12:1 regression lives in the **design kit and the plates**, and would be faithfully reproduced by
+  the first web panel that scrims. **That is why the GG-5 band-table amendment has to land in
+  `game-gui-principles.md` before that panel is built, not after** — this is the rare case where
+  fixing the rule costs nothing because nothing has implemented it yet.
 - **It touches a Tier-1 rule's mechanics.** GG-5's band table is what makes stacking and input
   "mechanical rather than per-screen judgement calls" — adding "band 1 is not scrimmed by band 2"
   is an amendment to that table and should be recorded in `game-gui-principles.md`, not only here.
@@ -1000,10 +1204,84 @@ The trigger conditions in §8c.1 were an attempt to have it both ways; §8d.1 ma
 
 ---
 
+## 8e. Decided after the audit-completion pass — 2026-09-03
+
+Four decisions, all owner-made. Two of them change §4 text, and one changes a claim §4.3 had only just
+been rewritten to make.
+
+### 8e.1 — The sector inspector docks **left**
+
+Selection detail on the left, persistent empire state on the right. This resolves the collision §8c.5
+found and never priced: the inspector (380px) and the outliner (224px) were both right-anchored,
+claiming ~620px of a 1280px floor.
+
+- It docks **beside the layer rail, not over it** — the rail is a ~92px icon column and keeps its
+  corner role, so §4.3's fixed-role rule survives intact.
+- It matches the genre convention the prior art already documents: the selected-entity panel and the
+  outliner sit on **opposite** edges (Stellaris, Civ VI, Total War all do this).
+- **Cost, stated honestly:** it introduces one asymmetry into the corner-role table — the left edge now
+  has a conditional occupant. That is a smaller price than either alternative, both of which made a
+  band-1 surface react to a band-2 layer, which is exactly the coupling §8d.3 just ruled out.
+- **It unblocks the figure the plate still owes** — §8c.5's missing HUD-plus-inspector composition
+  could not be drawn until this was decided.
+
+### 8e.2 — Move the world DTOs to `lib/bus/world.ts` **and** widen the guard
+
+Both fixes, not one. `contractGuard.ts:55` scans `stages/`, `layers/`, `ui/` and `:78` matches only
+`from "@/lib/bus`, so a rebuilt `stages/world/` importing `features/world/worldTypes` would pass the
+guard while violating the rule it exists to enforce.
+
+- **Moving them** makes the existing guard bite with no guard change, and puts the world where every
+  other domain's DTOs already live. The world stops being the exception — which is the same root cause
+  as its hex-guard exemption and its GG-7 reachability exemption.
+- **Widening the guard** closes the *class* of defect rather than this instance: any future
+  feature-local DTO file is caught, not just this one.
+- This lands in the FE contract module, which §9 already makes spec module 1.
+
+### 8e.3 — The legion target is **6–10, and it is tunable**
+
+Not just a number — a **tunable**, which puts it in `data/tuning/` per this document's own §0.12
+(*"the balance surface is data"*). A recruitment rate that a balance pass would touch does not belong
+in a `const`.
+
+**This retires §8c.1's central finding and invalidates a claim §4.3 had only just been rewritten to
+make.** Consequences, in order of how much they change:
+
+1. **The outliner needs grouping and filtering after all.** §4.3's rewritten justification said the
+   list was "short by construction" and needed neither. At 6–10 legions plus up to 18 sectors it
+   indexes ~28 rows, which is past the point where a human scans rather than searches. Corrected in
+   place. *This is the second time this section's justification has moved — worth noting, because it
+   is the part of §4 that has been least stable under scrutiny.*
+2. **The volume-dependent controls are now fully justified**, not merely "early": the unresolved count
+   has a real maximum, cycle-to-next-unresolved walks a real set, the notification tiers sort a real
+   feed, and the force-end hatch escapes a list that will genuinely fill.
+3. **Recruitment's tuning row is `sector-development`'s to author**, not this program's — but the
+   *target* is recorded here because §4's controls are sized against it.
+
+### 8e.4 — Spec everything; order is the implementer's call
+
+The owner: *"spec every thing, do as any order you want."* So both `world-stage` and
+`sector-development` get specced, and the sequencing question §9 raised is answered by being dissolved
+rather than decided.
+
+**What that means in practice, and why it is a reasonable answer rather than a dodge:** the two
+programs' dependency runs through *content*, not *contracts*. `world-stage`'s FE contract module, the
+`typeId` ADR, the translation table and the SVG camera depend on nothing recruitment produces.
+Recruitment's rate, cost and pulse depend on nothing the stage draws. Only the outliner's shape and
+the turn cluster's counts sit on the seam, and §8e.3 has now fixed that seam with a number. So the two
+can be specced in either order, or at once, without either waiting.
+
+---
+
 ## 9. Next step
 
-`/spec` — a capability map for `world-stage` and its module specs, **sliced** per §8d.4. Nothing in
-this document authorizes a build.
+`/spec` — capability maps and module specs for **both** `world-stage` and `sector-development`
+(§8e.4: spec everything, order is the implementer's call), **sliced** per §8d.4. Nothing in this
+document authorizes a build.
+
+**The two programs can be specced in any order or at once**, because their dependency runs through
+content rather than contracts — see §8e.4. `sector-development` owns recruitment (§8d.1) and seasons
+(§8b.7); `world-stage` owns everything in §4.
 
 **Two things the spec must settle before any rendering work**, both from §8c.4 and both of the kind
 that get harder every day they wait:
@@ -1017,9 +1295,10 @@ that get harder every day they wait:
    them. Today a rebuilt `stages/world/` importing `features/world/worldTypes` passes the guard while
    violating the rule it exists to enforce.
 
-**The dependency §8d.1 created:** `sector-development`'s recruitment half is now upstream of this
-program. Its spec — which also owns §8b.7's seasons — should be written first, or at least in
-parallel, because the unit count it produces is what several of §4's controls are sized against.
+**The dependency §8d.1 created, and how §8e.3 defused it:** `sector-development`'s recruitment half
+produces the unit count several of §4's controls are sized against, which is why §9 originally said it
+should be specced first. §8e.3 fixed that number at **6–10, tunable**, so the seam is now a recorded
+constant rather than an unknown — and both programs can proceed independently (§8e.4).
 
 Work now queued by §8b's decisions, none of it blocking the spec:
 

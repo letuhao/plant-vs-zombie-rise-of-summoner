@@ -1,0 +1,82 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:40:18Z",
+      "minorityValues": {
+        "elementPrimary": "air"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "Retribution",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "Magneto-Mechanical Flora"
+    ],
+    "gameTypeId": 922,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The creature functions as a self-sustaining factory that deploys autonomous, homing, explosive drones and possesses massive durability alongside specialized defensive immunities.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "CherryUltimatePumpkin",
+    "targetPreference": "frontline",
+    "traits": [
+      "Magnetic Drone Deployment",
+      "Cherry Bomb Immunity",
+      "Bite-Back Reflex",
+      "Magnetic Synergy"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "agree"
+  }
+]

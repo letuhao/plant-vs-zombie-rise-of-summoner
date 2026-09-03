@@ -7,6 +7,7 @@ graphs run end to end, only the network call is replaced, so these tests exercis
 from __future__ import annotations
 
 import json
+import threading
 import time
 from pathlib import Path
 
@@ -354,3 +355,160 @@ def test_a_normal_call_leaves_no_lock_file_behind(tmp_path):
     paths = make_paths(tmp_path)
     runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
     assert not (paths.runs_dir / runner.RESUME_LOCK_NAME).exists()
+
+
+# ---- workers (2026-09-03): the model-call phase fanned out across N threads ------------------
+#
+# `_run_parallel` is tested directly first (fast, deterministic where the design allows it, and
+# able to prove invariants — like "finalize never runs off the calling thread" — that an
+# end-to-end run through `start()` could never demonstrate). The integration tests after it prove
+# the real entrypoint (`start(..., workers=N)`) produces the SAME committed result the sequential
+# path always has, through the real `run_one_species`/anchor-emit wiring, not a stub of it.
+
+def _fake_classify(species_id, *, delay=0.0, thread_names=None):
+    if thread_names is not None:
+        thread_names.append(threading.current_thread().name)
+    if delay:
+        time.sleep(delay)
+    return (species_id, {"row": True}, "observed", {"speciesId": species_id}, None)
+
+
+def test_run_parallel_classifies_every_id_exactly_once_and_returns_not_paused(tmp_path):
+    paths = runner.RunPaths(runs_dir=tmp_path)
+    ids = [f"s{i}" for i in range(11)]  # deliberately not a multiple of `workers`
+    finalized = []
+
+    paused = runner._run_parallel(
+        ids, 4, lambda sid: _fake_classify(sid), lambda *args: finalized.append(args[0]), paths)
+
+    assert paused is False
+    assert sorted(finalized) == sorted(ids)  # every id exactly once, order not guaranteed
+
+
+def test_run_parallel_finalize_only_ever_runs_on_the_calling_thread(tmp_path):
+    paths = runner.RunPaths(runs_dir=tmp_path)
+    calling_thread = threading.current_thread()
+    violations = []
+
+    def finalize(species_id, row, basis, merged, err):
+        if threading.current_thread() is not calling_thread:
+            violations.append(species_id)
+
+    runner._run_parallel(
+        [f"s{i}" for i in range(10)], 4, lambda sid: _fake_classify(sid, delay=0.005),
+        finalize, paths)
+
+    assert violations == []
+
+
+def test_run_parallel_actually_uses_more_than_one_thread(tmp_path):
+    # Proves real parallelism happens, not a workers=4 flag that silently serializes anyway. A
+    # short sleep forces genuine overlap between workers — standard, not flaky at this margin.
+    paths = runner.RunPaths(runs_dir=tmp_path)
+    thread_names: "list[str]" = []
+
+    runner._run_parallel(
+        [f"s{i}" for i in range(12)], 4,
+        lambda sid: _fake_classify(sid, delay=0.02, thread_names=thread_names),
+        lambda *args: None, paths)
+
+    assert len(set(thread_names)) > 1, f"only one thread ever ran classify_one: {thread_names!r}"
+
+
+def test_run_parallel_a_missing_row_is_finalized_not_silently_dropped(tmp_path):
+    paths = runner.RunPaths(runs_dir=tmp_path)
+    finalized = []
+
+    def classify(species_id):
+        if species_id == "ghost":
+            return (species_id, None, None, None, None)  # matches _classify_one's "not found" shape
+        return _fake_classify(species_id)
+
+    runner._run_parallel(["a", "ghost", "b"], 2, classify, lambda *args: finalized.append(args), paths)
+
+    ghost_call = next(c for c in finalized if c[0] == "ghost")
+    assert ghost_call[1] is None  # row is None — _finalize's own "species not found" branch
+
+
+def test_run_parallel_an_unexpected_exception_in_classify_one_does_not_hang_the_run(tmp_path):
+    # The defensive backstop: classify_one is contractually never supposed to raise (the real one,
+    # `_run_loop`'s own `_classify_one`, catches everything predictable) — but if a future bug
+    # broke that contract, an uncaught exception in a worker thread would otherwise kill that
+    # thread silently, its final `None` sentinel would never be sent, and the exit loop below would
+    # wait forever for a sentinel that never comes. Proves that does NOT happen: the call returns.
+    paths = runner.RunPaths(runs_dir=tmp_path)
+    finalized = []
+
+    def classify(species_id):
+        if species_id == "buggy":
+            raise RuntimeError("a bug, not a caught species-level failure")
+        return _fake_classify(species_id)
+
+    paused = runner._run_parallel(
+        ["a", "buggy", "b"], 2, classify, lambda *args: finalized.append(args), paths)
+
+    assert paused is False
+    assert sorted(f[0] for f in finalized) == ["a", "b", "buggy"]
+    buggy_call = next(c for c in finalized if c[0] == "buggy")
+    assert isinstance(buggy_call[4], RuntimeError)  # the real exception, not swallowed
+
+
+def test_run_parallel_pausing_leaves_some_ids_unfinalized_for_the_next_resume(tmp_path):
+    paths = runner.RunPaths(runs_dir=tmp_path)
+    paths.runs_dir.mkdir(parents=True, exist_ok=True)
+    paths.pause_sentinel_path.write_text("now", encoding="utf-8")
+    finalized = []
+    ids = [f"s{i}" for i in range(30)]
+
+    paused = runner._run_parallel(
+        ids, 2, lambda sid: _fake_classify(sid, delay=0.02), lambda *args: finalized.append(args[0]),
+        paths)
+
+    assert paused is True
+    assert not paths.pause_sentinel_path.exists()  # consumed, same as the sequential path
+    assert 0 < len(finalized) < len(ids)  # some in-flight work finished; the rest deferred
+    assert len(set(finalized)) == len(finalized)  # no id finalized twice
+
+
+def test_start_with_workers_produces_the_same_result_as_sequential(tmp_path):
+    species = [species_row(f"s{i}", "plant", i) for i in range(6)]
+    paths = make_paths(tmp_path, species=species)
+
+    record = runner.start({"kind": "all"}, paths=paths, call=always_valid_call, workers=4)
+
+    assert record.state == "completed"
+    assert sorted(record.completed) == sorted(s["typeName"] for s in species)
+    assert record.calls_made == len(species) * CALLS_PER_OBSERVED_SPECIES
+    assert record.failed == []
+
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    assert set(index) == {s["typeName"] for s in species}
+    for species_id, rel in index.items():
+        entries = json.loads((paths.anchors_dir / rel).read_text(encoding="utf-8"))
+        entry = next(e for e in entries if e["speciesId"] == species_id)
+        assert entry["_provenance"]["dumpHash"] == record.dump_hash
+
+
+def test_resume_with_more_workers_than_the_original_start_only_finishes_what_remains(tmp_path):
+    species = [species_row(f"s{i}", "plant", i) for i in range(4)]
+    paths = make_paths(tmp_path, species=species)
+
+    seen: "list[str]" = []
+
+    def pause_after_first(species_id, done, total):
+        seen.append(species_id)
+        if len(seen) == 1:
+            runner.request_pause(paths=paths)
+
+    started = runner.start({"kind": "all"}, paths=paths, call=always_valid_call, workers=1,
+                           progress=pause_after_first)
+    assert started.state == "paused"
+    assert len(started.completed) == 1  # one full species finished before the pause landed
+
+    # A different `workers` than the original start — matches resume()'s own doc: workers is a
+    # resource knob for THIS process, not a property recorded on the run.
+    resumed = runner.resume(paths=paths, call=always_valid_call, workers=4)
+
+    assert resumed.state == "completed"
+    assert sorted(resumed.completed) == sorted(s["typeName"] for s in species)
+    assert resumed.calls_made == len(species) * CALLS_PER_OBSERVED_SPECIES

@@ -17,6 +17,84 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:32:36Z",
+      "minorityValues": {
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora"
+    ],
+    "gameTypeId": 1244,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "A flying creature capable of dealing 300 damage via area-of-effect explosions is a significant combat threat rather than a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "CherryBlover",
+    "targetPreference": "swarm",
+    "traits": [
+      "aerial-collision",
+      "cherry-burst",
+      "clover-hybrid"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
       "basis": "observed",
       "confidence": {
         "aptitudePrimary": "high",
@@ -25,7 +103,7 @@
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-02T18:08:46Z",
+      "emittedUtc": "2026-09-03T15:32:51Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -51,28 +129,187 @@
     "family": [
       "Explosive Flora"
     ],
-    "gameTypeId": 16,
+    "gameTypeId": 2,
     "posture": "Force",
     "pure": true,
     "rarity": "cultivated",
-    "reach": "long",
-    "reason": "While powerful, the plant's ability is limited to a single lane and functions as a basic utility rather than a world-altering threat.",
+    "reach": "short",
+    "reason": "A 3x3 area-of-effect explosion dealing 1800 damage is a high-tier tactical threat that exceeds the capabilities of a standard 'tyrant' classification.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "Jalapeno",
-    "targetPreference": "backline",
+    "speciesId": "CherryBomb",
+    "targetPreference": "swarm",
     "traits": [
-      "Combustive",
-      "Linear-Area-of-Effect",
-      "Thermal-Impact"
+      "High-yield combustion",
+      "Area-of-effect detonation",
+      "Ash-damage conversion"
     ],
     "variants": [
       "normal",
       "mutated"
     ],
-    "verdict": "too-high"
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:35:44Z",
+      "minorityValues": {
+        "rarity": "fused"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "Explosive Flora"
+    ],
+    "gameTypeId": 1162,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The ability to chain explosions and spawn multiple timed mines in a 3x3 area creates significant area denial and high burst potential.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "CherryMine",
+    "targetPreference": "swarm",
+    "traits": [
+      "Post-mortem detonation",
+      "Rapid-growth seeding",
+      "Low-profile"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:56:13Z",
+      "minorityValues": {
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora"
+    ],
+    "gameTypeId": 1317,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to trigger chain explosions that consume all plants in a row and transform them into cards makes it a high-threat tactical threat consistent with a scourge.",
+    "resourceProfile": [
+      "hp",
+      "poise",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "DoomJalapeno",
+    "targetPreference": "swarm",
+    "traits": [
+      "dormant-detonation",
+      "chain-reaction",
+      "ash-conversion",
+      "resource-recycling"
+    ],
+    "variants": [
+      "mutated",
+      "cursed"
+    ],
+    "verdict": "agree"
   }
 ]

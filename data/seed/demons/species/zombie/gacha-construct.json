@@ -1,0 +1,82 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:50:50Z",
+      "minorityValues": {
+        "elementPrimary": "dark",
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "Gacha-Construct"
+    ],
+    "gameTypeId": 215,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "melee",
+    "reason": "The creature functions as a high-health summoner with RNG mechanics rather than a world-ending threat capable of a calamity rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "DiamondRandomZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "Loot-Drop",
+      "Armor-Triggered",
+      "Summoner",
+      "Variable-Scaling"
+    ],
+    "variants": [
+      "shiny",
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  }
+]

@@ -8,6 +8,25 @@ An **equip slot** is lane I2's word and never appears here for either concept.
 
 ---
 
+> ⚠ **AMENDED 2026-09-03 by owner rulings D20–D25** — [../item-ideal.md](../item-ideal.md) §2b.
+> **Where this lane and those rulings disagree, the rulings win.** Six statements below are superseded:
+>
+> | § | Superseded | Now |
+> |---|---|---|
+> | §4.4 | "words", ≤ 20, hand-authored | **Strains (36) and Splices (66)** — **102, generated** on the twelve-aptitude grid, configured in seedsmith (**D20**) |
+> | §4.4 | catalog of ~45 is learnable | 127 is past that bar. **The compendium reveal and the socket-UI preview become requirements, not niceties** (§8.2) |
+> | §4.2 | affinity is *always* a soft +1 | **Soft for resonance, HARD for Strains/Splices** — every ingredient must sit in a matching socket (**D22**) |
+> | §4.1, §8.7 | *"low rarities grant zero sockets"* | Still true **at drop**. **Crafting extends sockets at any rarity, and rarity sets the price** (**D23**) — this resolves a blocking contradiction: under D21 a Strain was otherwise unbuildable |
+> | §4.2 | affinity is base-type-declared and unchanging | A **crafted** socket's affinity is **chosen by the crafter**, via a new priced `socket.imbue` operation (**D24**). `attune` was already taken by §4.2's own term |
+> | §10.3 | *"does the commander get more sockets?"* | **Closed by D14** — the commander is another unique demon |
+>
+> **New, with no prior text here:** a Strain or Splice requires a **low-rarity, non-set** base
+> (**D21**), which is also D2's verified rule and which closes §8.6's double-dipping structurally.
+> **PoE-style links are out of scope** and belong to the action layer (**D25**).
+>
+> ✅ **The lane's four *"recalled, not verified"* D2/PoE claims are now verified** — all confirmed; see
+> §2b's D20–D25 closing table. §10.5's roster-scale question is closed by **D1**.
+
 ## 2. Scope
 
 ### This lane owns

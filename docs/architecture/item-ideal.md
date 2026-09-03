@@ -5,7 +5,7 @@
 [item-map.md](item-map.md).** Discussion document, not a spec and not a plan. No build is
 authorized from it.
 
-> ✅ **The decision round is complete — see §2b.** **Nineteen owner rulings (D1–D19)** plus four resolved
+> ✅ **See §2b and §2f.** **Twenty-nine owner rulings (D1–D29)** plus four resolved
 > by recommendation, and **D16 ratifies the ~110 lane-internal picks as a batch.** All 144 open questions
 > across the seventeen lanes and four decision documents are accounted for, and **§2e verifies the three
 > defect claims that had stood unverified since 2026-08-22** (one was real and has since been fixed by
@@ -105,9 +105,9 @@ Diablo/PoE inspiration stands. What changed is the substrate, and therefore what
 | B1 | **`stat.derived` executes on both real runtimes.** `RuntimeSupportMatrix(Full, Full, None)` — battle via `TraitAtomSource` (E12), lawn via `AtomDerivedSubsystem` at ActorHub order-350 | `AtomKindRegistry.cs:253` · `Stats/Derived/Subsystems/AtomDerivedSubsystem.cs` | **§9's D6 row and G8 row are dead.** First-wave items are no longer restricted to five kinds. `combat.defense.*`, `crit.*`, resistances — all bindable and all executing |
 | B2 | **The affix entity.** `effect_affix(affix_id, affix_class)` + `effect_affix_ref` carrying *either* a concrete `atom_id` *or* a `(slot_name, slot_domain)` slot ref | `RpgStore.Containers.cs:66-84` | *"Master of Fire and Ice"* is expressible today. §6.2's affix model is schema, not proposal |
 | B3 | **`prefix_rolls` / `suffix_rolls`**, replacing one `pool_rolls` | `RpgStore.Containers.cs:28-29` | A mixed bundle consumes **one of each**, never doubling either. Derived from `kind_id`, never authored |
-| B4 | **The rarity table with per-class bands** — `rarity(rarity_id, ordinal, prefix_rolls, suffix_rolls, min_tier, max_tier)` | `RpgStore.Containers.cs:54-61` | Ten rungs, ordinals spaced by 10, [ssot-rarity.md §3.3](item/ssot-rarity.md). The tier window is now a **column the resolver reads**, closing §6.2's *"needs a draw-time parameter that does not exist yet"* |
+| B4 ⚠ **the table is EMPTY — §2f.1 F3; ten rungs ship as `DemonRarity`, ordinals 0–9** | **The rarity table with per-class bands** — `rarity(rarity_id, ordinal, prefix_rolls, suffix_rolls, min_tier, max_tier)` | `RpgStore.Containers.cs:54-61` | Ten rungs, ordinals spaced by 10, [ssot-rarity.md §3.3](item/ssot-rarity.md). The tier window is now a **column the resolver reads**, closing §6.2's *"needs a draw-time parameter that does not exist yet"* |
 | B5 | **The resolver and the producer.** `Resolver.cs`, `InstanceProducer.cs`, `WorldSeed.cs`, `VariantShift.cs`, `ChannelPool.cs`, `AffixLibraryGenerator.cs`, `EligibilityRule.cs` | `src/FusionRpg.Core/Effects/Atoms/` | L2 — *which* derived stat an affix targets — was the missing layer. It exists |
-| B6 | **`ProduceAndBind` is called in production** | `RpgStore.UniqueActors.cs:756` | The atom runtime is **not inert any more.** §3's substrate table is now understated, not overstated |
+| B6 ⚠ **half true — §2f.1 F2** | **`ProduceAndBind` is called in production** | `RpgStore.UniqueActors.cs:756` | The *produce* half runs; **`UniqueActor` bindings are write-only** (`RpgHub` pushes only `OwnerKind.Player`). §3's substrate table is now understated, not overstated |
 | B7 | **`OnActivate` trigger exists** — `TriggerCount = 8` | `AtomKindRegistry.cs:22,31` | The lane index's open decision #6 (the `OnUse` request gating consumables) has a legal trigger to name |
 | B8 | **Twelve aptitudes, shipped in code with a seed mirror** — Might · Fortitude · Vigor · Onslaught · Agility · Composure · Pierce · Focus · Bulwark · Retribution · Precision · Ferocity | `Stats/Aptitudes/Aptitude.cs:40-51` | Open decision #5 answered by another program. **An aptitude is a *source*, not a registered channel** — so an item grants derived channels, and only a deliberate design choice would let it grant aptitude points |
 | B9 | **A player commander exists** — `rpg_player_commander` | `RpgStore.PlayerCommander.cs:17` | §3's *"There is no player/commander actor"* is false. §5.6's commander slots have a row to hang on |
@@ -125,7 +125,7 @@ design decision. Each is a missing call.
 
 | # | Gap | Evidence | Why it is wiring, not architecture |
 |---|---|---|---|
-| W1 | **A player install never imports content.** `ImportContent` has exactly one caller in the tree, a dev tool | `tools/AtomImporter/Program.cs:107` — sole caller of `RpgStore.Import.cs:56` | The importer works and is CI-tested. **Every authored item seed today reaches a developer's SQLite and no player's.** Tracked as `E46 player-content-boot`, [content-stack-plan.md](../../tasks/content-stack-plan.md) gate G4 |
+| ~~W1~~ ⛔ **FALSE — §2f.1 F1. `E46` is shipped; the server imports at every startup.** Original: *a player install never imports content; `ImportContent` has exactly one caller, a dev tool* | `tools/AtomImporter/Program.cs:107` — sole caller of `RpgStore.Import.cs:56` | The importer works and is CI-tested. **Every authored item seed today reaches a developer's SQLite and no player's.** Tracked as `E46 player-content-boot`, [content-stack-plan.md](../../tasks/content-stack-plan.md) gate G4 |
 | W2 | **Battle reads no equipment** — `ChannelMods` is still documented *"trait stat mods, equipment later"* | `Battle/BattleModels.cs:33` · `Battle/BattleStatComposer.cs:9` | The reader exists and folds at compose time; `TraitAtomSource` is a **working producer on that exact seam**. An equipment producer is the same shape, not a new path |
 | W3 | **`ActionSeeder.Generate` has zero callers** | grep, whole tree | Gates G4 [ssot-granted-actions.md](item/ssot-granted-actions.md) — an item that grants an action. The corpus is the missing input, not the mechanism |
 | W4 | **`stat.derived` Sim runtime stays `None`** | `AtomKindRegistry.cs:253` | Deliberate, and correctly so — `SimEffectHost` has no consumer, and flipping it would recreate D6's cause. Only matters if item balance wants to run through CombatSim |
@@ -896,6 +896,169 @@ and it now leaves the item program entirely rather than being re-sized here.
 > charms are generated, so their effect distribution is a **generator input**, and nobody owns it.
 > Added to §2c.
 
+### D20 — Socket combinations: **Strains** and **Splices**, generated at 102
+
+> *"LLM generate vocabulary, 36 set, 3 each primary stat (offense, defense, balance) and 66 hybrid
+> combination for 2 primary stat combination, configable in seedsmith. also don't use runeword, suggest
+> me other vocabulary."*
+
+**The mechanism already existed.** [`ssot-sockets.md`](item/ssot-sockets.md) §4.4 chose *"B as the floor
+and A as the ceiling"* — generated **resonances** (25: Pure ×18, Ring ×4, Eclipse ×1, Diversity ×2) as
+the baseline, and hand-authored **exact ordered recipes** as the ceiling. That ceiling is what the owner
+described. What changes is its **name, its size, and how it is produced.**
+
+| | ssot-sockets.md §4.4 | **D20** |
+|---|---|---|
+| Name | "words" (runeword-style) | **Strain** and **Splice** |
+| Count | ≤ 20, hand-authored | **102, generated** |
+| Structure | a flat list | a **grid** on the twelve aptitudes |
+
+**Two names, because there are two shapes:**
+
+| | Count | Shape | Fiction |
+|---|---:|---|---|
+| **Strain** | **36** = 12 aptitudes × 3 archetypes (offense · defense · balance) | one aptitude | a single cultivated line |
+| **Splice** | **66** = C(12,2), every unordered pair of aptitudes | two aptitudes joined | two lines fused — the base game's own verb |
+| | **102** | | |
+
+`Strain` reads two ways in a plant-versus-zombie world — a cultivar and an infection — and neither word
+collides with a rarity rung, a slot role, a plant slot name, or a power class (D-series L0). **Checked,
+because "one word, four meanings" is a named defect in `enrichment-contract.md` §1.**
+
+⚠ **This supersedes §4.4's ≤20 and its learnability argument.** That argument was: *"twenty-five
+generated containers plus ≤20 words is a combination catalog of ~45… a size a player can learn. Four
+hundred would not be."* At 102 + 25 = 127 the catalog is past that bar, and §8.2's wiki-dependency
+failure is live again. **The mitigation §4.4 already names is what has to carry it**: the compendium
+reveals a recipe once the player has held every ingredient, and the socket UI previews what the current
+fill produces and what is one insert away. **That mitigation moves from a nicety to a requirement.**
+
+⭐ **The grid is what makes 102 affordable.** 12 + 3 authored values produce 36; 12 produce 66. That is
+the *"orthogonal axes beat a long flat list"* finding again (`research/game-design/03-roster-scale.md`
+§1). Seedsmith configures the axes; nobody authors 102 rows.
+
+### D21 — A Strain or Splice requires a low-rarity, non-set base
+
+> *"one for set item need collect full set, word combination cannot work with set item, a set item
+> consider high rarity, word can apply on low rarity item only if item have enough socket slot… socket
+> combination is item individual, set item is item combination, different mechanism."*
+
+**Two layers, two axes, and they do not overlap:**
+
+| | Set | Strain / Splice |
+|---|---|---|
+| Axis | **across items** — collect the pieces | **within one item** — fill its sockets |
+| Base rarity | high | **low** |
+| Exclusivity | a set piece **may not** carry a Strain or Splice | |
+
+**This closes §8.6's double-dipping worry structurally**, not by tuning. It is also, independently, D2's
+own rule — verified 2026-09-03: *runewords work only in socketed non-magical items, which rules out set,
+unique, rare and magic items.* The owner arrived at it from mechanism separation rather than from
+copying, which is the better derivation.
+
+⭐ **And it makes low-rarity items permanently valuable.** A `chaff` breastplate is not merely cheap; it
+is the only chassis a Splice can live in. That is a genuine second progression route rather than a
+consolation prize — and L0 (effect-pipeline modules 11–12) can weight a channel toward it.
+
+### D22 — Affinity is a **requirement** for a Strain or Splice, not a bonus
+
+Every ingredient must sit in a socket whose affinity matches. This **overrules the recommendation** made
+during this round, and the owner's own framing is what dissolves the objection:
+
+> The objection was that affinity-matching recreates the D2 base-hunt §8.1 deliberately removed. **D21
+> is why it does not.** In D2 the hunt hurt because good bases were themselves scarce. Here the chassis
+> is *low rarity by rule* — abundant, cheap, and constantly dropping — so requiring specific affinities
+> filters a plentiful pool rather than running a second lottery on a scarce one. **And under D24 the
+> player can simply build the chassis.**
+
+⚠ Resonance keeps its own, softer rule unchanged: affinity there is a **+1 to effective count** (§4.2),
+never a gate. **The two layers now treat affinity differently on purpose** — soft for the generated
+floor, hard for the authored ceiling — and that difference must be stated wherever either is documented,
+or it reads as an inconsistency.
+
+### D23 — ⛔ Sockets are extended by crafting, at any rarity, and rarity sets the price
+
+> *"add socket slot extension in craft feature, use material to increase socket slot. any rarity can
+> extend socket slot but higher rarity cost more."*
+
+**This resolves a blocking contradiction found 2026-09-03.** §4.1's table grants sockets **in proportion
+to rarity** — bottom 20% of the ladder gets `0..0`, the next band `0..1` — and §8.7 states it plainly:
+*"Low rarities grant zero sockets."* Against D21's low-rarity requirement, **a Strain or Splice was
+structurally unbuildable**: a 4-ingredient recipe needed a rung-90+ item, which D21 forbids.
+
+**The resolution:**
+
+```text
+socketsAtDrop = min( base_type.socket_max, roll(rarity.socket_min .. rarity.socket_max) )
+socketsNow    = socketsAtDrop + socket.add operations,  capped at base_type.socket_max
+                                ^^^^^^^^^^^^^^^^^^^^^
+                                available at EVERY rarity; the MATERIAL COST scales with rarity
+```
+
+Three properties, each load-bearing:
+
+1. **Rarity now gates the *price*, not the *possibility*.** That is a **soft cap**, which is what
+   AGENTS.md's no-hard-ceilings rule requires of exactly this shape — and it is D7's *"cost, never
+   luck"* applied to a third mechanism.
+2. **`base_type.socket_max` remains a hard structural cap** (max 4, fixed per role). It is §8.1's
+   anti-lottery defence and it is **not** a progression ceiling — it is a legibility limit, and it must
+   say so in a comment.
+3. **The cost curve runs the right way.** Extending a `chaff` base is cheap; extending an `almanac` one
+   is expensive. So the word chassis is *economically* low-rarity even though the operation is
+   universal — reinforcing D21 without a second rule.
+
+**I9 gains a real material sink**, which §8 said the item economy needs and which crafting did not yet
+have at this scale.
+
+### D24 — A crafted socket's affinity is chosen by the crafter, at a cost — `socket.imbue`
+
+§4.2 declares affinity *"by the base type and unchanging"*, so a **crafted** socket has none. Under D22
+that would make the affinity requirement unsatisfiable on the very chassis D21/D23 designate — every
+socket past the drop roll permanently unmatched.
+
+**Two priced operations, not one:**
+
+| Operation | Does | Priced by |
+|---|---|---|
+| `socket.add` | opens a socket, affinity `''` | I9, scaling with rarity (D23) |
+| **`socket.imbue`** | sets an empty socket's affinity to one concrete element | I9 |
+
+⚠ **The name matters and `attune` was taken.** `ssot-sockets.md` already uses *attuned* for "an insert
+whose element matches its socket's affinity" (§4.2, §7.1, §7.2). Naming the operation `socket.attune`
+would give one word two meanings in one lane — the defect `enrichment-contract.md` §1 exists to cut.
+**`imbue` is free** across the socket, item, rarity and slot vocabularies.
+
+⭐ **This is what makes D22 fair.** A Strain becomes *a plan* — find a cheap base of the right role, open
+its sockets, imbue them, fill them — which is precisely §8.7.3's claim that *"words are plans, not
+pickups"*, now true by construction rather than by hope. Every step costs materials and none of them is
+a lottery.
+
+### D25 — PoE-style socket **links** are out of scope, and reserved
+
+Verified 2026-09-03: PoE's socket mechanic is **not** a combination-unlocks-a-bonus system. Sockets carry
+colours and **links**; a support gem modifies only an active skill in a *linked* socket, and a 6-link is
+one skill plus five supports. **That is skill modification, and it belongs with `granted-actions` (G4)
+and the action layer — not with the socket layer.**
+
+**Recorded so a later session does not conflate them.** Treating links and combinations as one mechanism
+would put an action-modification system inside a lane that already has the most moving parts of any in
+the program.
+
+### D20–D25 — what the prior-art check actually established
+
+`ssot-sockets.md` flags its D2 claims *"recalled, **not verified**"* in four separate places. Now
+checked ([diablo2.io](https://diablo2.io/runewords/) ·
+[Wowhead](https://www.wowhead.com/diablo-2/guide/runewords-types-bonuses-sockets) ·
+[PoE wiki](https://pathofexile.fandom.com/wiki/Item_socket)):
+
+| Lane's claim | Verdict |
+|---|---|
+| Runewords are exact, ordered, left-to-right recipes | ✅ **Confirmed** |
+| The base item type is restricted | ✅ **Confirmed** — Spirit needs a sword or shield |
+| The list was in practice an out-of-game resource | ✅ **Confirmed** — and there are **99** of them |
+| §4.1: D2's socket count was an independent rolled axis and the chase collapsed into it | ✅ **Confirmed** — and D2 requires an **exact** count: a 5-socket weapon cannot take a 4-rune word |
+| §4.1: "PoE went to 6 links and made socket colour a currency treadmill" | ✅ **Confirmed** in shape — 6 sockets / 6 links on body armour and two-handers, colours bound to the three attributes |
+| — | ⭐ **Not in the lane at all:** runewords work **only in non-magical bases**. **D21 adopts it**, derived independently |
+
 ---
 
 ### 2b.1 Resolved by recommendation — reversible, say so if wrong
@@ -1036,6 +1199,159 @@ should be settled once, in that change, rather than three times.
 
 ---
 
+## 2f. Audit round — corrections and rulings D26–D29 (2026-09-03)
+
+Seven adversarial auditors were run against §§2a–2e, `item-map.md` and the two L0 specs: internal
+contradiction, code-claim verification, repo-invariant compliance, cross-program coherence, degenerate
+strategy, completeness, and a devil's advocate. **62 findings. 81 code claims were checked and 13 were
+false.**
+
+**Where this section and an earlier one disagree, this section wins.** Every correction below was
+verified against code in the audit session, not against the document that made the claim.
+
+---
+
+### 2f.1 ⛔ Platform facts that were wrong
+
+Six. Each was asserted in §2a or §2b without opening the file, and each changed a downstream decision.
+
+| # | Claimed | Actually | Consequence |
+|---|---|---|---|
+| **F1** | **W1** — *"a player install never imports content; `ImportContent` has exactly one caller, a dev tool"* | **False. `E46 player-content-boot` is shipped.** `SeedImportRunner.cs:152` calls `ImportContent`, and `FusionRpg.Server/Program.cs:155` invokes it at **every server startup**, self-healing | **W1 is not a wiring gap and gates nothing.** `content-stack` gate G4 is stale for the same reason |
+| **F2** | **B6** — *"the atom runtime is **not inert** any more"* | **Half true.** `ProduceAndBind` does run in production (`RpgStore.UniqueActors.cs:756`) — but `RpgHub.cs:106` pushes only `OwnerKind.Player`, so **`UniqueActor` bindings are write-only**. `decisions.md:106` says exactly this | The produce half is live; the consume half never sees an item binding. **Item module 5 `equip-runtime` is what closes it** |
+| **F3** | **B4** — *"the rarity table, ten rungs, per-class bands"* | **The `rarity` table has zero rows.** `data/seed/rarity/` holds only a README saying so. The ten rungs that ship are the C# enum `DemonRarity`, **ordinals 0–9, consecutive** | `item-map.md`'s own caveat was right: module 7 **seeds data**, it does not build a table |
+| **F4** | *"append-only ordinals spaced by 10 — the house convention (`ElementRow`, `Aptitude`, `rarity`)"* (`spec-affix-power-class.md`) | **No roster does this.** `ElementRow` 0–5, `Aptitude` 0–11, `DemonRarity` 0–9 — all consecutive | **Precedent invented.** Power classes use consecutive ordinals like everything else |
+| **F5** | *"`AtomRow.TagsJson` carries thematic tags (`offensive`, `elemental`)"* | **It carries generator provenance** — `{generatedFrom, generator: "E43"}` (`FamilyExpansion.cs:196-197`). **No `elemental` tag exists anywhere.** The thematic tags live on affix-family seed entries (`offensive` ×41, `defensive` ×40, `utility` ×17) | **Breaks module 8 `eligibility-tags`'s decided derivation.** Fixed by **D28** |
+| **F6** | §4 — *"18 zombie-side and 6 plant-side species"* | **18 zombie, 66 plant, 84 total** (`DemonSpeciesCatalog.Generated.cs`). The four named Fusion hybrids being zombie-side with plant bodies **is** true | §4's frame argument stands; its count did not |
+
+⭐ **And one the other direction — a gap that does not exist.** `effect-pipeline-ideal.md` §5.1/§5.2 still
+call **L2 a real gap**. It is **BUILT** as effect-atom **E30** (`ChannelPool.cs`, seed files, validation,
+`lookupPool` threaded through `ProduceAndBind`). §2a's B5 says so correctly — **two documents written the
+same day contradict each other**, and §5.2's *"why L2 is missing"* premise is void.
+
+### 2f.2 Rulings amended
+
+| Ruling | Amendment |
+|---|---|
+| **D6 / D10** | ⛔ **Restated entirely — see D29.** The "~3:1 growth ratio" was unreachable by its own lever (`EHP = k_d·P(Θ)`, `DMG = k_o·P(Θ)` → growth ratio **1.0 for all k**; a band multiplier moves the level, never the slope) **and it was the wrong invariant.** There is no bespoke `bands.v1.json`; **D10 is withdrawn into D29** |
+| **D7** | ✅ **Owner, 2026-09-03: lift `ssot-rarity` rule 7.** Promotion reaches ordinal 100, so **no drop-only band exists on any axis** and D7's principle holds absolutely. The audit found rule 7 made `sunwoven`/`almanac` drop-only — which, with D8 gating aptitude affixes by rung, put the strongest affix family behind luck. That is now gone |
+| **D8** | ✅ **Owner: an aptitude affix grants a *share delta*, not points.** Aptitudes are **share-normalised** (`Share = Total / GrandTotal`, γ=1.0 shipped), so granting points silently drains the other eleven and decays as `P(Θ)/T²` — **~8× from Θ=20 to Θ=200**. A share delta adds to numerator *and* denominator: no hidden dilution, no decay. ⛔ **Still needs, and D8 wrongly said it did not:** a 13th atom kind or an `aptitude.*` channel family, **and** a fifth `AllocationScope` — both reviewed vocabulary changes owned by other programs |
+| **D9** | ⚠ **Premise false, sequencing corrected.** D9 argued the frozen values make the revision check redundant. The bind path **never reads them**: `ResolveBindings` uses `instance.Atoms` as an id list and populates rows from the **live catalog** (`AtomInstances.cs:446-449`); `ValuesJson` is read only by `Instantiator.cs:65`'s fingerprint. **So: make frozen values authoritative at bind time first, then drop the revision check.** ⚠ **Deliberate consequence, recorded:** until then a content patch **retunes items players already own**. Accepted |
+| **D11** | ⚠ **Widened: directionality must be *correlated across roles*, not merely present per role.** If each role's frame preference were an independent coin flip, `min(k,12−k)` for `k~Bin(12,½)` concentrates near 6 — a hybrid conceding **nothing** averages **958‰**, the 800‰ floor binds on **0.63%** of builds, and D3 collapses at δ>4.4%. If preference correlates (humanoid leans offence, plant leans sustain — I2 §2.6's own `footing` example), the floor binds and D3 works. **D11 never said which, and it is the whole difference** |
+| **D13** | ⛔ **VOID. E9 is built** — `power-vector`, **2026-08-22**, 33 tests, three tables, live consumers (`AutoEquip`, `RungMonotonicity`). The question that produced D13 was malformed. **Module 9 *consumes* E9** and owns the three item reads (I3's ≤15% implicit cap, G4's granted-action budget, G3's power display) plus D8's pricing. The genuinely open piece is **E44 `power-sweep`** — all 20 coefficients flat at `CoeffMilli = 1000` — which belongs to effect-atom and **the owner already ruled on it the same day** |
+| **D18** | **Stands.** Drop volume reads `Θ`. ⚠ Its *calibration* is not this program's (**D26**) — and I12's `20–30 items/day` imports a wall-clock axis the game does not have. Restate per **content event**, not per day. The `40/day` line is I12 asking for **a loot filter** — an interface requirement, not a cap |
+| **D20** | **Splice/Strain ingredient count = 4**, matching `socket_max`'s cap. Unstated before, and it decides how much of the body a chaff chassis can capture |
+| **D21** | ⚠ **Strike the *"base rarity: high"* row** — **D15** rules the same day that a set has no rarity and is completed from pieces of any rung. The exclusivity rule (a set piece may not carry a Strain/Splice) **stands on its own**. ⚠ Its §8.6 citation is wrong: §8.6 is *inserts counting toward set completion*, already settled by §3.10. **The real open item — socket-combo budget vs set budget on one item — survives and is in §2g** |
+| **D22** | ✅ **Owner: revert to bonus.** The hard requirement **could never fail** — on a low-rarity chassis every socket is crafted, and D24 lets the crafter choose the affinity, so it was a fee wearing a gate's name. Matching affinity now grants an **enhanced tier**, reusing §4.2's `+1` pattern. Also sidesteps the fact that **nothing maps 12 aptitudes to 6 elements** |
+| **D23** | ⚠ **Overstated.** §4.1 *already* layered crafting top-up to `base_type.socket_max` — only the per-rarity **table** grants zero at the bottom. D23 is a **pricing** ruling that confirms and prices an existing layer, not the resolution of a blocking contradiction. Same correction owed in `item/README.md` |
+| **D24** | **`socket.imbue` prices on the same band-linear curve as `bore`** (I9 §7.4's table, which currently has no row for it) |
+
+### 2f.3 New rulings
+
+#### D26 — ⭐ The item system balances items, not the game
+
+> **Owner, 2026-09-03:** *"keep item system purely item generate, drop and apply to actor. we need
+> balance item, not balance the whole game… if user have stronger gear, so they can take advance to
+> higher world realm with stronger enemy and can get stronger gear too — that is correct design and item
+> system cannot handle it, that is world map need to handle, battle engine need to handle, event
+> generator need to handle."*
+
+**Scope: generate → drop → apply to actor.** The item system balances items **against each other**. It
+does not meter the player, and it does not close the gear → content → gear loop; it supplies one arrow
+of it.
+
+| In scope | Out of scope, and whose |
+|---|---|
+| item vs item — rarity, frame, channel, tier, socket | player power vs content difficulty → **world map, battle engine** |
+| whether a defence build can survive (**D29**) | how often content is run → **content pacing** |
+| whether the ladder inverts | interface coping with drop volume → **UI** |
+
+**This is D1's principle, restated because it was not applied.** An audit round produced economy findings
+— faucet/sink growth mismatch, a `40/day` tripwire, "how many actors get geared" — and every one was
+answered by metering the player. **That is the live-service reflex, and it is wrong here:** this game has
+no paywall, `AGENTS.md` makes *endless grind the SSOT other systems reconcile to*, and a player earns for
+effort spent. **An item system that throttles is an item system compensating for content it cannot see.**
+
+**Withdrawn under this ruling:** the faucet/sink finding, the drop-volume ceiling, the actor-count
+calibration, and L0's "floor dissolves at volume" concern — L0's weight table is **relative by
+construction**, so encounter volume never enters it.
+
+#### D27 — Four container kinds: `gem` · `set` · `charm` · `combo`
+
+`ContainerKind` is a closed six-value enum (`item · trait · skill · species-passive · patron ·
+world-buff`) and `definitions.md` requires the `container_id` prefix to match it. **Nothing this program
+generates had a legal home.** Owner: one kind per mechanism.
+
+| Kind | Carries |
+|---|---|
+| `gem` | socket inserts — what `ssot-sockets` §4.5 asked for |
+| `set` | set bonuses — **and D3's frame-mix bonus**, which D3 already calls *"structurally a set bonus"* |
+| `charm` | charm resonances |
+| `combo` | socket combinations — the 25 generated resonances **and** the 102 Strains/Splices |
+
+Four enum values, four `PrefixOf` arms, four regex arms — a reviewed amendment to `definitions.md` §1 and
+`ContainerRow.cs`. **Checked for collision** against rarity rungs, the 15 slot roles, plant slot names and
+the power classes: none.
+
+#### D28 — E43 stamps affix-family tags into `AtomRow.TagsJson`
+
+**F5 broke module 8.** The thematic tags exist — on affix-family seed entries — but never reach
+`AtomRow`, which carries only provenance. Rather than redesign module 8's derivation, **fix the data**:
+`FamilyExpansion` carries the family's `tags` through alongside `generatedFrom`/`generator`.
+
+Module 8's decided rule then becomes true as written — *"an affix's tags are DERIVED from its refs'
+atoms"* — and L0's power class keeps its clean separation, since thematic tags still carry no strength
+information.
+
+#### D29 — Item balance is validated by the class-system's existing guards, and the content ladder is unbounded
+
+> **Owner:** *"equipment affect directly the battle mechanism… if we make our item too strong in attack
+> but weak in defense will cause the battle end so fast and boring. so it is item balance also, that can
+> kill defense build… the original primary stats design principles already resolve this."*
+
+**They do.** `class-system/spec-balance-guard.md` §2 already carries the right invariant, and it is not a
+growth ratio:
+
+| | **Termination** | **Dominance** |
+|---|---|---|
+| Asserts | no pairing of builds that both hold offence has `netAttrition ≤ 0` **on both sides** | no corner beats every other on win rate, **with no clock** |
+| Repairable by a later layer? | **No** — *"an economy identity: a pool refilling faster than it drains never empties, and content added on top inherits the defect"* | **Yes** — a reflect build, an anti-turtle status, a counter-action |
+| Standing | **HARD — fails the build** | **SOFT — reports with coverage** |
+| Measured | ✅ green, `+3,937 … +14,107` | ⛔ red — `Bulwark` beats all 11, **stated as an upper bound** |
+
+**Those are exactly the owner's two concerns, already separated correctly**: *"battles end too fast"* and
+*"a defence build that cannot survive is useless"* are one question from both ends, answered as
+termination (hard, non-repairable) and dominance (soft, repairable by content).
+
+> **So the ruling is: item channel bands are validated against these two guards, extended to include
+> geared corners.** No item-specific ratio, no growth-shape target, no new mechanism. Gear feeds the same
+> derived channels aptitudes do, so it moves the same 144-evaluation corner matrix — milliseconds, no
+> rebuild. **It can only run once item module 5 `equip-runtime` lands**, which makes module 5 the gate
+> for the first geared corner run.
+
+⚠ Note the measured state runs **opposite** to the intuition: today the *defensive* corner dominates.
+
+**And the content ladder is unbounded (owner, 2026-09-03).** Content level keeps rising with each realm;
+there is no top. Two consequences, and the second is why this works:
+
+1. **Tier saturates and that is correct.** `t5` arrives at ilvl 32 (**I12's table ships**; I8's t5@60 is
+   strictly worse — it delays the last band without adding growth). **Tier is a band selector, never the
+   ceiling.**
+2. **Growth past t5 is carried by `contentScale`, which is already built.**
+   `InstanceProducer.cs:47` computes `ContentScale.Milli(thetaContent)` and multiplies every rolled
+   magnitude by it — ×1.0 at Θ=20, ×6.9 at 100, ×92.8 at 500, ×7,544 at 5,000. An ilvl-500 `t5` affix is
+   the same tier as an ilvl-32 one and a far bigger number.
+
+**That is the owner's loop, and it is shipped:** deeper realm → higher `Θ_content` → bigger
+`contentScale` → stronger gear → deeper realm. Per **D26** the item system owns only the middle arrow;
+how deep the ladder goes is the world map's.
+
+⚠ **This closes d4's collision C3** (*"one table, two values, ~2× apart… nobody owns it"*) in I12's
+favour, and retires D4's ilvl-32 target as an *item* decision — it was always a request that content
+reach level 32, which is **X5**.
+
+---
+
 ## 3. What already exists — the substrate this inherits
 
 The effect-atom program built the machine an item system needs. **E1–E6 are built and green**
@@ -1091,7 +1407,7 @@ it now extends a row that exists rather than inventing one.
 
 `DemonSpeciesDef.Side` is documented as *"linked capture side (plant | zombie) — portrait/body source"*
 (`src/FusionRpg.Core/Demons/DemonSpeciesCatalog.cs:11`) — one field carrying faction **and** body. The
-generated roster is 18 zombie-side and 6 plant-side species, and several zombie-side entries are Fusion
+generated roster is 18 zombie-side and ⚠ **66** plant-side species — 84 total (§2f.1 F6 corrected this from "6"), and several zombie-side entries are Fusion
 hybrids: `peashooterzombie`, `ironpeazombie`, `cherrynutzombie`, `bucketnutzombie`
 (`DemonSpeciesCatalog.Generated.cs`). A peashooter-zombie is faction-zombie with a plant body.
 

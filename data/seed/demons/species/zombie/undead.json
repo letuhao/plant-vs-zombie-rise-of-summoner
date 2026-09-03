@@ -25,7 +25,7 @@
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:12:17Z",
+      "emittedUtc": "2026-09-03T15:27:59Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -41,35 +41,426 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Composure",
-    "aptitudeSecondary": "Agility",
+    "aptitudePrimary": "Agility",
+    "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "stated",
-    "deployMode": "HypnoAlly",
-    "elementPrimary": "dark",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "air",
+    "elementSecondary": "none",
+    "family": [
+      "Undead",
+      "Aerostatic"
+    ],
+    "gameTypeId": 25,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "chaff",
+    "reach": "short",
+    "reason": "Its ability to bypass ground defenses and ignore most standard attacks makes it a significant tactical threat capable of disrupting established lines.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "BalloonZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "Buoyant",
+      "Aerial-Infiltration",
+      "Invulnerable-while-flying"
+    ],
+    "variants": [],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:37:09Z",
+      "minorityValues": {
+        "deployMode": "HypnoAlly",
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
       "undead",
-      "scholarly-reanimated"
+      "intellectual-relic"
     ],
-    "gameTypeId": 15,
-    "posture": "Finesse",
+    "gameTypeId": 104,
+    "posture": "Force",
     "pure": true,
     "rarity": "almanac",
-    "reach": "melee",
-    "reason": "The creature's threat is primarily situational and relies on a specific item dependency, making it a high-tier nuisance rather than a widespread scourge.",
+    "reach": "short",
+    "reason": "While highly destructive with high damage and splash, its vulnerability to losing its newspaper and the specific protection of nuts/pumpkins prevents it from reaching the 'tyrant' tier.",
     "resourceProfile": [
       "hp",
-      "stamina",
       "stamina"
     ],
     "side": "zombie",
-    "speciesId": "ElitePaperZombie",
+    "speciesId": "CherryPaperZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "newspaper-shielded",
+      "cherry-projectile-spitter",
+      "rage-induced-transformation"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "cursed",
+      "ancient"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T15:44:11Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "observed",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "undead",
+      "reanimated"
+    ],
+    "gameTypeId": 2,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "chaff",
+    "reach": "short",
+    "reason": "The zombie's high durability (640 total) and use of a physical barrier to mitigate damage justify a mid-tier threat level like a raider.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "ConeZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "improvised-armor",
+      "oblivious",
+      "food-mimicry"
+    ],
+    "variants": [],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:06:19Z",
+      "minorityValues": {
+        "deployMode": "HypnoAlly"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "undead",
+      "reanimated"
+    ],
+    "gameTypeId": 20,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "chaff",
+    "reach": "long",
+    "reason": "The ability to deal percentage-based damage (20% of current HP) makes it a significant threat to high-health targets, justifying a higher danger rating than a mere warden.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "DrownZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "trident-throwing",
+      "percentage-based damage",
+      "delayed-attack"
+    ],
+    "variants": [],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:06:36Z",
+      "minorityValues": {
+        "aptitudePrimary": "Precision",
+        "deployMode": "HypnoAlly",
+        "rarity": "chaff"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Pierce",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "undead",
+      "aquatic-relic"
+    ],
+    "gameTypeId": 315,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "long",
+    "reason": "The creature is a basic level 1 zombie with a predictable projectile attack that lacks the scale or destructive capacity required for a 'tyrant' rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "Drown_a",
     "targetPreference": "backline",
     "traits": [
-      "book-bound invulnerability",
-      "interruption-triggered frenzy",
-      "knowledge-driven velocity"
+      "projectile-specialist",
+      "delayed-entry",
+      "percentage-based-damage",
+      "waterproof-gear"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-03T16:16:48Z",
+      "minorityValues": {
+        "aptitudePrimary": "Pierce",
+        "deployMode": "HypnoAlly",
+        "rarity": "heirloom"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "Undead",
+      "Jiangshi"
+    ],
+    "gameTypeId": 331,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "almanac",
+    "reach": "short",
+    "reason": "The creature's ability to bypass plants and kill two strong plants quickly does not scale to a cataclysmic level, as it lacks the area-of-effect or structural destruction required for such a high rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "EternalZombie_b",
+    "targetPreference": "structure",
+    "traits": [
+      "Phase-shifting",
+      "High-impact momentum",
+      "Post-mortem burst"
     ],
     "variants": [
       "ancient",
@@ -93,22 +484,20 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 2,
+        "kit-shape": 1,
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "stated",
+      "basis": "observed",
       "confidence": {
         "aptitudePrimary": "high",
         "deployMode": "high",
-        "elementPrimary": "split",
+        "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T13:24:09Z",
-      "minorityValues": {
-        "elementPrimary": "dark"
-      },
+      "emittedUtc": "2026-09-03T16:24:39Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -123,40 +512,36 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Retribution",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
-    "basis": "stated",
+    "basis": "observed",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
+    "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
-      "undead",
-      "performer"
+      "Undead",
+      "Herald"
     ],
-    "gameTypeId": 30,
-    "posture": "Bastion",
+    "gameTypeId": 1,
+    "posture": "Force",
     "pure": true,
-    "rarity": "heirloom",
+    "rarity": "chaff",
     "reach": "melee",
-    "reason": "The creature's ability to self-detonate, increase movement speed upon survival, and trigger secondary explosions upon death makes it a significant tactical threat consistent with a warden-level danger.",
+    "reason": "The creature acts as a signal for incoming waves, making it a tactical force multiplier rather than a direct combat threat.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "zombie",
-    "speciesId": "SuperJackboxZombie",
-    "targetPreference": "backline",
+    "speciesId": "FlagZombie",
+    "targetPreference": "swarm",
     "traits": [
-      "explosive_detonation",
-      "doll_box_manipulation",
-      "post_mortem_resurrection",
-      "velocity_surge"
+      "Flag-bearer",
+      "Wave-signaler",
+      "Enhanced mobility"
     ],
-    "variants": [
-      "corrupted",
-      "cursed"
-    ],
+    "variants": [],
     "verdict": "agree"
   }
 ]
