@@ -46,6 +46,13 @@ public static class ContentValidation
     /// <summary>Below this, a category is too small for a percentage to mean anything.</summary>
     public const int DriftFloor = 1;
 
+    /// <summary>E30 (spec-channel-pool.md §3.4, decided 2026-09-03): a pool whose priciest member is
+    /// more than 25% away from the pool's own weighted mean. Deliberately == <see cref="DriftTolerancePercent"/>
+    /// restated in per-mille — a pool's members are priced by the same cost function with the same
+    /// known ~12.5%-on-multiplicative-pairs error <see cref="Drift"/>'s own tolerance already answers,
+    /// so a second, differently-chosen band would be a second answer to a question already answered.</summary>
+    public const int PoolSpreadTolerancePerMille = 250;
+
     // ---- 1. the budget ----------------------------------------------------------------------------
 
     /// <summary>
@@ -140,6 +147,51 @@ public static class ContentValidation
         // bigger figure and comes out at 21%, so the band is wider going up than coming down.
         var basis = Math.Abs(stored) == 0 ? Math.Abs(computed) : Math.Abs(stored);
         return basis == 0 || delta * 100 > basis * DriftTolerancePercent;
+    }
+
+    // ---- pool spread (E30) -----------------------------------------------------------------------
+
+    /// <summary>
+    /// E30 (spec-channel-pool.md §3.4): where a pool's members disagree on coefficient, the weighted
+    /// mean is the honest price and the spread is reportable — never blocking, a pool of wildly
+    /// unequal channels is a content defect, not a pricing one. <b>Neutral today, by construction</b>:
+    /// every shipped <c>stat.derived</c> coefficient row is channel-less (`CoefficientTable.cs`), so
+    /// every declared pool's spread is exactly 0 until per-channel coefficients exist (E44).
+    /// </summary>
+    public static ContentReport PoolSpread(
+        IReadOnlyList<ChannelPoolRow> pools, PowerTables? tables = null, string kindId = "stat.derived")
+    {
+        var t = tables ?? PowerTables.Current;
+        var findings = new List<ContentFinding>();
+        var evaluated = 0;
+
+        foreach (var pool in pools)
+        {
+            var priced = pool.Members
+                .Select(m => (m.Channel, m.WeightMilli, Coeff: t.Find(kindId, m.Channel)))
+                .Where(x => x.Coeff is not null)
+                .Select(x => (x.Channel, x.WeightMilli, CoeffMilli: (long)x.Coeff!.CoeffMilli))
+                .ToList();
+            if (priced.Count == 0) continue;
+
+            evaluated++;
+            long totalWeight = priced.Sum(p => (long)p.WeightMilli);
+            if (totalWeight <= 0) continue;
+            long weightedSum = priced.Sum(p => p.CoeffMilli * p.WeightMilli);
+            var mean = PowerMath.DivRound(weightedSum, totalWeight);
+            if (mean == 0) continue;
+
+            foreach (var (channel, _, coeffMilli) in priced)
+            {
+                var deltaPerMille = PowerMath.DivRound(Math.Abs(coeffMilli - mean) * 1000, Math.Abs(mean));
+                if (deltaPerMille > PoolSpreadTolerancePerMille)
+                    findings.Add(new ContentFinding(pool.PoolId, "pool-spread",
+                        $"member '{channel}' coeff {coeffMilli}‰ is {deltaPerMille}‰ from the pool's " +
+                        $"weighted mean {mean}‰ (tolerance {PoolSpreadTolerancePerMille}‰)", Blocking: false));
+            }
+        }
+
+        return new ContentReport(evaluated, findings);
     }
 
     // ---- 3. the lints -------------------------------------------------------------------------------

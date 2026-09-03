@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>FusionRpg.Tools.FamilyExpandGen</RootNamespace>
+    <AssemblyName>FamilyExpandGen</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Core only — FamilyExpansion is a pure function over already-parsed input (the affix-family
+         corpus and tier-bands.v1.json) plus BattleRuleset's own shipped curves
+         (spec-family-expand.md §2: "call the shipped arithmetic, not reimplement it", the same
+         DemonSpeciesGen precedent this tool's check mode follows). Opens no database and issues no
+         SQL: reads data/seed/items/affix-families/** + data/seed/items/_tuning/tier-bands.v1.json,
+         writes data/seed/atoms/generated/**, all plain files. -->
+    <ProjectReference Include="..\..\src\FusionRpg.Core\FusionRpg.Core.csproj" />
+  </ItemGroup>
+</Project>

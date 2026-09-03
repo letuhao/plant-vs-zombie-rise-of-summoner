@@ -1,3 +1,4 @@
+using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Atoms;
 using Xunit;
@@ -69,6 +70,43 @@ public class EffectCatalogExecutionParityTests
         var compiled = CompiledCatalog().Select(d => d.EffectId).OrderBy(x => x, StringComparer.Ordinal);
 
         Assert.Equal(seeded, compiled);
+    }
+
+    /// <summary>
+    /// E26 acceptance criterion 4 (spec-runner-def-emit.md §5, §6): <c>Assert.Empty(compiled.Runtime)</c>
+    /// above never fires because all 21 shipped <c>fx-*.json</c> atoms classify Compiled today, and §4
+    /// forbids widening <see cref="Compilability.Classify"/> to change that. A repaired runner-def path
+    /// with nothing exercising it is D6's exact failure mode — accepted, then nothing forever — so this
+    /// is a runner-shaped FIXTURE atom, test-scoped and never under <c>data/seed/atoms/</c> (a shipped
+    /// <c>fx-*.json</c> would be swept by <c>ElementEnumGen</c>'s glob and break
+    /// <see cref="EffectAtomCatalogGeneratedTests"/>'s frozen-id-set assertion — that gate stays E43's,
+    /// per the spec's own decision). This is the assertion that would have caught the missing-def defect
+    /// in the first place.
+    /// </summary>
+    [Fact]
+    public void A_runner_shaped_fixture_atom_gets_a_runner_def_from_EmitRunnerDefs()
+    {
+        var atom = new AtomRow
+        {
+            AtomId = AtomRow.DeriveId("atom.e26-fixture", "", 1),
+            KindId = "resource.delta",
+            FamilyId = "atom.e26-fixture",
+            Tier = 1,
+            Name = "E26 runner-def fixture",
+            WhenJson = "{\"trigger\":\"OnDamageDealt\"}",
+            ParamsJson = "{\"amount\":{\"min\":-120,\"max\":-80,\"roll\":\"onApply\"}}",
+        };
+
+        var compiled = AtomCompiler.Compile(new[] { atom }, RuntimeId.Lawn, catalogRevision: 1);
+        Assert.Empty(compiled.Rejected);
+        Assert.NotEmpty(compiled.Runtime); // unlike the shipped corpus above — this fixture IS runner-shaped
+
+        var (defs, rejected) = AtomCompiler.EmitRunnerDefs(compiled.Runtime);
+
+        Assert.Empty(rejected);
+        var def = Assert.Single(defs);
+        Assert.Equal(atom.AtomId, def.EffectId);
+        Assert.Equal(EffectActions.ApplyResourceDelta, Assert.Single(def.Actions).Action);
     }
 
     static string RepoRoot()

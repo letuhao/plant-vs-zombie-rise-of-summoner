@@ -184,9 +184,18 @@ def test_every_metric_has_a_declared_target_in_tuning():
 def test_open_loop_metric_never_contributes_to_pass():
     # Every DemonRoster metric declares CLOSED (spec §4's own table) — this is the mechanical
     # proof the registry itself enforces (Loop.OPEN + gates=True raises at registration).
+    #
+    # UnresolvedCountMetric was promoted to gates=True 2026-09-03 — a real, deliberate promotion
+    # (this program's own registered design: "starts False for every new metric; promotion is a
+    # deliberate, later, separate act"), not an accident this test should mask. Found by audit: an
+    # unresolved aptitudePrimary silently produced a zero-stat species (SpeciesExpander had no edge
+    # to derive a magnitude from) — gating the aggregate rate stops a full run early rather than
+    # discovering it species-by-species after the fact. Every other DemonRoster metric is still
+    # measure-only.
     for cls in ALL_DEMON_ROSTER_METRICS:
         assert cls.loop is Loop.CLOSED
-        assert cls.gates is False  # W1 discipline: measure-only until calibrated
+        expected_gates = cls is UnresolvedCountMetric
+        assert cls.gates is expected_gates, f"{cls.__name__}.gates should be {expected_gates}"
 
 
 def test_gate_exits_1_on_a_closed_loop_finding():

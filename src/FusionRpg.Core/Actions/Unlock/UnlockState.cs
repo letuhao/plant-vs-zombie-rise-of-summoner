@@ -2,7 +2,7 @@ namespace FusionRpg.Core.Actions.Unlock;
 
 public enum UnlockRefusalReason
 {
-    /// <summary>Holding already equals <see cref="UnlockTuning.Cap"/> — a discard must free a slot first.</summary>
+    /// <summary>Holding already equals <see cref="UnlockTuning.HeldCap"/> — a discard must free a slot first.</summary>
     AtCapacity,
     /// <summary>The chance roll missed. Costs nothing: <see cref="UnlockState.EarnCount"/> is untouched.</summary>
     RollMissed,
@@ -39,7 +39,7 @@ public readonly record struct DiscardOutcome(bool Discarded, DiscardRefusalReaso
 /// <summary>
 /// One held unlock. <see cref="EarnCountAtAcceptance"/> is the ONLY thing recorded about strength —
 /// never a resolved rung (spec's testing strategy: "no column stores a resolved rung value"). The
-/// rung this unlock holds today is always <c>UnlockLadder.Rung(EarnCountAtAcceptance, tuning)</c>,
+/// rung this unlock holds today is always <c>UnlockLadder.EffectiveRung(EarnCountAtAcceptance, tuning)</c>,
 /// recomputed on every read, so a future change to <c>cap</c> reclassifies every held unlock
 /// consistently instead of leaving old ones frozen at a stale stored value.
 /// </summary>
@@ -83,7 +83,7 @@ public sealed class UnlockState
         if (string.IsNullOrWhiteSpace(unlockId)) throw new ArgumentException("unlockId required", nameof(unlockId));
         if (tuning is null) throw new ArgumentNullException(nameof(tuning));
 
-        if (_held.Count >= tuning.Cap)
+        if (_held.Count >= tuning.HeldCap)
             return UnlockOutcome.Refuse(UnlockRefusalReason.AtCapacity);
 
         var chance = UnlockLadder.ChanceMilli(EarnCount, tuning);

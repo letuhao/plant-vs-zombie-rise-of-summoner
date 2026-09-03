@@ -158,6 +158,12 @@ public static class EffectRuntime
 
     public static bool HasOnDeathGrant() => Bag.HasGrantWithTrigger(EffectTriggers.OnDeath);
 
+    /// <summary>E33 (spec-activation-edge.md §2.4): the fast gate a producer calls before building an
+    /// `actor.activate` payload — the same shape as the four gates above, so an ungated activation
+    /// emit does not repeat the per-hit-allocation/uncached-resolve shape the 2026-08 perf audit
+    /// blamed. E33 ships no producer of its own; `A9 movement-actions` is the first caller.</summary>
+    public static bool HasOnActivateGrant() => Bag.HasGrantWithTrigger(EffectTriggers.OnActivate);
+
     public static EffectGrant Grant(EffectGrantDto dto)
     {
         Ensure();

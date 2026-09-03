@@ -33,10 +33,10 @@ claimed — no round declares success against a metric it did not evaluate.
 | Thing | Evidence |
 |---|---|
 | `Metric` / `Finding` / `Loop` / `Severity` / `Ctx`, with `loop`, `gates`, `needs` and `covers` as first-class fields | `seedsmith/metrics/model.py:26-49`, `:64-99` |
-| **`gates` starts `False` for every new metric**; promotion is a deliberate, later, separate act | `metrics/model.py:87` and its comment at `:8-9` |
+| **`gates` starts `False` for every new metric**; promotion is a deliberate, later, separate act | `metrics/model.py:85` and its comment at `:8-9` |
 | A metric whose `needs` are unmet reports `NOT_MEASURED`, never a pass — silence and success stay distinguishable | `metrics/model.py:10-11`, `Severity.NOT_MEASURED` at `:34` |
 | An existing coverage/dedup/distribution metric family to model on | `metrics/coverage.py`, `metrics/dedup.py`, `metrics/distribution.py`, `metrics/corpus_coverage.py` |
-| The runner and its `--gate` / `--json` surface | `report/cli.py:728-741` |
+| The runner and its `--gate` / `--json` surface | `report/cli.py:154` (`cmd_report`), flags at `:778-780` and `:793-795` ⛔ **corrected 2026-09-03: `:728-741` is `_cmd_demons_diff_legacy`, not the runner** |
 | The in-game closed-loop pairing assertion this report mirrors | `EnablerPayoffCoverage.cs:21-34` |
 | The rung table the rung-band axis is indexed against | `data/tuning/action-rungs.v1.json` |
 
@@ -50,6 +50,19 @@ No action-corpus metrics exist, and no next-round target derivation exists.
 `role-lean.json` and `type-weights.json` (the plan's intent, so "thin" can mean "thin against quota"
 rather than "thin against nothing") · the round's briefs · `data/tuning/action-corpus-run.v1.json`.
 
+**⛔ DECIDED 2026-09-03 — `action-corpus-run.v1.json` ships with stated neutral defaults, and the
+default is `mode: "smoke"`.** The file is authored in `spec-distribution-planner.md` §3 step 1, which
+carries the full shape and the reasoning in its `_meta`; this module reads `mode`, the three counts
+and nothing else. Two consequences belong here rather than there:
+
+- **The smoke batch is this report's first real input.** The default is `mode: "smoke"`,
+  `perSpeciesCount: 1` over the **8** species in the four-way catalog/motif/family/anchor join
+  (`spec-characteristic-pool.md:192`) — the natural smoke size, because those 8 are the only species
+  carrying every signal A-S0 derives, so a thin result is the pipeline's fault and not the data's.
+- **Every finding this report produces over that batch is the evidence the counts are re-tuned on**,
+  and re-tuning is a config change. §5's *"small batch honesty"* case already refuses to call a
+  12-row batch a corpus-level pass; that refusal is what makes the neutral default safe to ship.
+
 **Writes** `data/seed/actions/_reports/coverage-round-<n>.json`, `kind: "action-coverage"`:
 
 ```jsonc
@@ -58,7 +71,7 @@ rather than "thin against nothing") · the round's briefs · `data/tuning/action
   "_meta": { "partition": "round-1", "corpusHash": "...", "roster": { "species": 84, "families": 19, "familyAssigned": 53 } },
   "entries": [
     { "id": "cell.species.attack.5-10.enabler",
-      "scope": "species", "category": "attack", "rungBand": [5,10], "pairingRole": "enabler",
+      "scope": "species", "category": "attack", "rungBand": [1,10], "pairingRole": "enabler",
       "count": 3, "quota": 7, "thin": true },
     { "id": "target.round-2.species.cherrybomb",
       "kindOfEntry": "next-target", "scope": "species", "scopeKey": "cherrybomb",
@@ -75,13 +88,32 @@ rather than "thin against nothing") · the round's briefs · `data/tuning/action
 | `action.corpus.thinCell` | **CLOSED** | no | a cell's count is below its quota; names the shortfall |
 | `action.corpus.quotaDrift` | **CLOSED** | no | accepted per-category counts match A-T1's weights within the largest-remainder tolerance |
 | `action.corpus.enablerPayoffCoverage` | **CLOSED** | no | every accepted **payoff atom family** has an accepted enabler **atom family** in the same anchor — the corpus-side twin of `EnablerPayoffCoverage.cs:21-34` |
-| `action.corpus.pairingReach` | **CLOSED** | no | how many accepted rows carry `pairingRole: "none"`, and what share of the corpus's atom families could reach a payoff key at all — the honest denominator behind the metric above |
+| `action.corpus.pairingReach` | **CLOSED** | no | how many accepted rows carry `pairingRole: "none"`, and what share of the corpus's atom families could reach a payoff key at all — the honest denominator behind the metric above. ⛔ **The denominator is 98** (2026-09-03), the authored affix families; see the namespace note under this table |
+| `action.corpus.atomFamilyNamespace` | **CLOSED** | no | every accepted row's `atomFamilies` and `pairedPayoffFamily` id is an `entries[].id` of `data/seed/items/affix-families/*.json`; an id from the 17 fixture families under `data/seed/atoms/`, or one that resolves nowhere, is a finding that names the row and the id |
 | `action.corpus.speciesCollision` | **CLOSED** | no | two species whose signature sets are tier-2 identical — the named re-tune trigger for the per-species count |
 | `action.corpus.singletonShare` | **CLOSED** | no | median rows per mechanical cell and the singleton share, against the research target of median 1 and ~68% singletons |
 | `action.corpus.structureEnforceability` | **CLOSED** | no | how many accepted rows spend **`restriction`**, which `StructureBudgetGuard.cs:30-34` cannot detect, and (separately) that **zero** rows spend `reaction`, which is unspendable rather than undetectable |
 | `action.corpus.rosterReconciliation` | **CLOSED** | no | the corpus size against the **shipped 84**, and it refuses to quote a band derived for 904 |
 | `action.corpus.flavourQuality` | **OPEN** | **never** | prose reads generic — a review queue |
 | `action.corpus.semanticNeighbour` | **OPEN** | **never** | A-S3's tier-3 flags — a review queue |
+
+**⛔ DECIDED 2026-09-03 — the atom-family namespace both pairing metrics count against.** Until now
+no spec said which set `atomFamilies` names, and the tree holds three **completely disjoint**
+candidates (zero overlap between any pair, measured 2026-09-03): **17** demo families under
+`data/seed/atoms/`, **98** authored families under `data/seed/items/affix-families/`, and the **5**
+ids in `data/seed/actions/pairings.json`. **The 98 are the namespace** — the decision and its
+evidence table live in `spec-distribution-planner.md` §2.
+
+That fixes both metrics above, and it makes one of them worse before it makes it better:
+
+- **`enablerPayoffCoverage`** keys on ids drawn from the 98.
+- **`pairingReach`'s denominator is 98**, and its numerator today is **zero**: none of
+  `pairings.json`'s five ids is in the namespace, so `IsPayoff` is false for every family a row can
+  carry and **100%** of accepted rows are `pairingRole: "none"` — not "most", which is what the
+  earlier note assumed. Rewriting `pairings.json` into the namespace is a named deliverable of A-S1
+  (`spec-distribution-planner.md` §3 step 6), and **this metric is how the rewrite is observed**: the
+  reach number moves off zero only when real payoff families exist. Reporting zero honestly is the
+  metric working, not the corpus failing.
 
 ## 3. The algorithm
 
@@ -111,7 +143,7 @@ rather than "thin against nothing") · the round's briefs · `data/tuning/action
 - **Never let an open-loop metric contribute to a pass.** `flavourQuality` and `semanticNeighbour`
   produce review queues and nothing else.
 - **Never register a new metric with `gates=True`.** Promotion is a separate, later, deliberate act
-  (`metrics/model.py:8-9`, `:87`).
+  (`metrics/model.py:8-9`, `:85`).
 - **Never report a pass for a metric it did not run.** `NOT_MEASURED` is a distinct severity and must
   stay visible in the output.
 - **Never quote the 1,500-3,500 band against the shipped roster without re-deriving it.** That band was
@@ -131,7 +163,8 @@ rather than "thin against nothing") · the round's briefs · `data/tuning/action
 | **Planted violation — open metric gates** | constructing an `OPEN` metric with `gates=True` **raises** at registration; the test asserts the raise, not a log line |
 | **Planted violation — unevaluated pass** | a corpus missing the inputs one CLOSED metric needs yields `NOT_MEASURED` for it and a verdict that is **not** `pass` |
 | **Planted violation — thin cell hidden** | a corpus with one empty planned cell produces a `thinCell` finding naming the cell and the shortfall; the test fails if the verdict is green |
-| **Planted violation — unpaired payoff** | an accepted row carrying `atom.rot-punisher` with no accepted row carrying `atom.rot-applier` or `atom.blight-applier` in its anchor fails `enablerPayoffCoverage`, mirroring the Core-side planted-pool test. The planted pair uses the **real** keys, so the test moves when `pairings.json` grows |
+| **Planted violation — unpaired payoff** | an accepted row carrying a payoff family with no accepted row carrying one of its enablers in the same anchor fails `enablerPayoffCoverage`, mirroring the Core-side planted-pool test. ⛔ **CORRECTED 2026-09-03:** the planted pair was `atom.rot-punisher` / `atom.rot-applier`, called "the **real** keys" — neither is in the 98-family namespace. The test reads its pair **from the rewritten `pairings.json` at test time** (first key, first enabler), never hard-coded, so it runs against the rewritten file and moves with it |
+| **Planted violation — a family outside the namespace** | an accepted row whose `atomFamilies` names a fixture id from `data/seed/atoms/` (e.g. `atom.fx-cold-on-hit`) fails `atomFamilyNamespace`, naming the row, the id and the file it came from |
 | **Planted violation — a status where a family belongs** | a report row whose pairing key is a status id (`"rot"`) rather than an atom family (`"atom.rot-punisher"`) fails, naming the field |
 | **Planted violation — `reaction` accepted** | an accepted row spending `reaction` fails `structureEnforceability`; it is unspendable, so a non-zero count is a real defect upstream, not a reporting nuance |
 | **Planted violation — roster inflation** | a report quoting a 904-based denominator or the raw research band fails `rosterReconciliation` |
@@ -159,13 +192,18 @@ rather than "thin against nothing") · the round's briefs · `data/tuning/action
    **zero** possible instances; **union-to-ceiling**
    (`spec-distribution-planner.md` §3 step 5) makes `restriction` the signature tier's one exclusive
    axis and the count real.
-7b. `enablerPayoffCoverage` keys on **atom families**, never statuses — `pairings.json` maps
-   `atom.chill-punisher`/`atom.rot-punisher` to enabler atom families and
+7b. `enablerPayoffCoverage` keys on **atom families**, never statuses — `pairings.json` maps payoff
+   families to enabler atom families and
    `EnablerPayoffCoverage.Check(IReadOnlyList<string> poolAtomFamilies, …)`
    (`EnablerPayoffCoverage.cs:21-23`) takes families. `pairingReach` states the denominator alongside
-   it: **two** payoff keys and **three** enabler families exist today, so most accepted rows carry
-   `pairingRole: "none"` and a coverage number without that context reads as a success it has not
-   earned (`spec-distribution-planner.md` §3 step 6). ⛔ **CORRECTED 2026-09-03 (review F7).**
+   it, and a coverage number without that context reads as a success it has not earned
+   (`spec-distribution-planner.md` §3 step 6). ⛔ **CORRECTED 2026-09-03 (review F7).**
+7c. Both pairing metrics count against the **98** authored affix families
+   (`data/seed/items/affix-families/*.json`), and `atomFamilyNamespace` asserts every accepted id is
+   one of them. `pairingReach` reports **zero reach** while `pairings.json` still carries its five
+   out-of-namespace ids, and the report says so in those words rather than showing an empty pairing
+   section. ⛔ **DECIDED 2026-09-03** — the namespace was never stated and the three candidates are
+   disjoint (`spec-distribution-planner.md` §2).
 8. A rerun over unchanged inputs is byte-identical by hash, with provenance recording the corpus hash
    and the tuning version.
 9. Zero model calls, proven by a stub that raises.

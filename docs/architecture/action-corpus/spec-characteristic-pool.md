@@ -34,7 +34,7 @@ theme, that absence is recorded as an absence.
 | Motif anchors (`motifs`, `antiMotifs`, `basis`, `tautological`) | **84 keys**, `data/seed/demons/_generated/motif-assignments.json`. Joins the catalog **100%** (0 keys outside it) |
 | Family assignments | **53 keys** over **19 distinct families**, `family-assignments.json`. All 53 are catalog species; no species carries two families |
 | Theme registry with `themeKey` = `demon.<speciesId>` | **84 themes**, `data/seed/demons/_registry/themes.v1.json`; `expression.action` = *"tempo and effect shape — how fast, how it lands"* |
-| Closed vocabularies | 5 categories `ActionEnums.cs:26-33` · 8 tags `:39-49` · 3 kinds `:10-15` · 6 target modes `ActionTargetSpec.cs:16-32` · 4 area shapes `:41-47` · 6 elements `ActorElementTypes.cs:3-11` · 21 statuses `StatusCatalogBootstrap.cs:15-56` · 10 rungs with `structureBudget` `data/tuning/action-rungs.v1.json` |
+| Closed vocabularies | 5 categories `ActionEnums.cs:26-33` · 8 tags `:39-49` · 3 kinds `:10-15` · 6 target modes `ActionTargetSpec.cs:16-32` · 4 area shapes `:41-47` · 6 elements `ActorElementTypes.cs:3-11` · 21 statuses `StatusCatalogBootstrap.cs:16-58` · 10 rungs with `structureBudget` `data/tuning/action-rungs.v1.json` |
 | Rarity ladder, 10 rungs, ordinal is rank | `DemonRarity.cs:16-27` |
 | Legacy band to ladder map (`common→Chaff`, `rare→Cultivated`, `epic→Heirloom`, `legendary→Sunwoven`) | `DemonRarity.cs:95-100` |
 
@@ -70,7 +70,54 @@ There is no characteristic pool and no role lean. `type-weights.json` is named i
 **Writes** (envelope per [A-C1](spec-corpus-loader.md)):
 
 - `data/seed/actions/_generated/characteristic-pool.json` — `kind: "action-characteristic-pool"`,
-  one entry per closed group A–F of `action-corpus-ideal.md` §12.
+  one entry per closed group **A–F of the table below**.
+
+**⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the group list is inlined here, and
+this table is the live one.** This output pointed at `action-corpus-ideal.md` §12, which is **stale in
+two places** and would have had this module emit a pool the rest of the program refuses:
+
+- **Group E** still reads `pairingRole = enabler / payoff / **neutral**`, plus `pairsWithStatus`
+  sourced from `StatusCatalog` — the status-keyed vocabulary review finding **F7 struck**. The pairing
+  surface has no status in it: `pairings.json` maps payoff **atom families** to enabler atom families,
+  and `EnablerPayoffPairings.IsPayoff(string atomFamily)` / `EnablersOf(string payoffFamily)`
+  (`EnablerPayoffPairings.cs:26,30-31`) take families throughout.
+- **Group B** carries `threatBand`, which is not a field of anything this module reads.
+
+**Why inline rather than edit the ideal.** `action-corpus-ideal.md` is **SEALED** (its §38, 2026-09-02)
+and its open-question sections are recorded closed on dated evidence. Editing a sealed idea document to
+track spec-phase corrections erases the record of what was decided when, and the repo's rule is that
+the later, status-carrying document wins (`CLAUDE.md`: *"per-doc status headers win when they disagree
+with older decision rows"*). The pool's **emitter** is here, so the closed list belongs here.
+**Any spec citing `action-corpus-ideal.md` §12 for the group list must read this table instead**; the
+ideal keeps its dated record and is no longer the source.
+
+| Group | Fields | Source vocabulary | Who picks |
+|---|---|---|---|
+| **A · Scope + anchor** | `scope` (`general`/`family`/`species`), `scopeKey` | `spec-eligibility-axis.md` §3.1 | planner |
+| **B · Identity context** | `family`, `motifs[]`, `antiMotifs[]`, `element`, `themeKey`, `rarity` | catalog + `motif-assignments.json` + `family-assignments.json` + `themes.v1.json`; 6 elements `ActorElementTypes.cs:3-11`; 10 rarity rungs `DemonRarity.cs:16-27` | read from the seed |
+| **C · Mechanical slot** | `category` (5), `targetMode` (6), `areaShape` (4), `relation` (4), `kind` (3), `rungBand` | `ActionEnums.cs`, `ActionTargetSpec.cs`, `data/tuning/action-rungs.v1.json` | **planner** |
+| **D · Pool constraints** | `allowedAtomFamilies[]`, `forbiddenAtomFamilies[]`, `structureAxes[]` | the **98** authored affix families (`data/seed/items/affix-families/*.json`); `RungRow.StructureBudget` | planner |
+| **E · Pairing role** | `pairingRole` = `enabler` \| `payoff` \| **`none`**, plus **`pairedPayoffFamily`** when `payoff` — **an ATOM FAMILY, never a status** | `data/seed/actions/pairings.json` via `EnablerPayoffPairings` | **planner** |
+| **F · Negative constraints** | `antiMotifs[]`, `avoidNeighbours[]` — the mechanical fingerprints of the nearest already-accepted actions | derived (`spec-dedup-select.md` §2's fingerprint; `spec-distribution-planner.md` §3 step 8) | planner |
+
+**Two corrections, with the reason each is a correction and not a preference:**
+
+1. **`neutral` → `none`.** Review F7 decided the role is optional with **`none` as a value and a missing
+   key as a defect** (`spec-review-2026-09-03.md:28`), and A-C1's envelope, A-S1 §3 step 6, A-S3's
+   fingerprint and A-S5's metrics all already say `enabler | payoff | none`. `neutral` exists nowhere
+   in the program but this table.
+2. **`threatBand` removed from group B.** It is real, but it belongs to the **demon-seed** program
+   (`spec-anchor-contract.md:51`, `spec-threat-band.md:33`) and it fails three separate tests for
+   membership here. It is **not on the catalog** this module reads — `DemonSpeciesCatalog.Generated.cs`
+   has no such field — so it reaches only the 28-entry anchor tree, of which **19** join the catalog:
+   this module could supply it for 19 of 84 species and would have to record `null` for the other 65.
+   Its own spec says it *"sets the `Theta` offset, so it scales every magnitude the species ever has"*
+   (`spec-option-permutation.md:44`) and that it influences **nothing** about membership
+   (`spec-species-effects.md:42,143`). A characteristic is *"a closed-vocabulary constraint that the
+   planner chooses and the model obeys"* — putting a `Θ` offset in a brief the model reads hands a
+   **magnitude** signal to the identity writer, which is Law 2 the wrong way round.
+   **What would overturn it:** `threatBand` landing on all 84 catalog rows **and** a stated
+   identity-side meaning for it. Until both, a `null` for 65 species is not a characteristic.
 - `data/seed/actions/_generated/role-lean.json` — `kind: "action-role-lean"`, one entry per species:
 
 ```jsonc
@@ -133,7 +180,38 @@ There is no characteristic pool and no role lean. `type-weights.json` is named i
    A uniform floor is a declared absence, not a guess — but declaring an absence that is not there
    is its own kind of guess.
 4. **Deterministic derivation.** Each species accumulates an integer score per category from closed
-   signals, using per-mille weights read from `data/tuning/action-role-lean.v1.json`:
+   signals, using per-mille weights read from `data/tuning/action-role-lean.v1.json`.
+
+   **⛔ DECIDED 2026-09-03 — the file ships with a stated NEUTRAL default, tuned from the smoke
+   batch.** The precedent is `spec-innate-picker.md` §3.3's: *"per-mille multipliers … **defaulting
+   to 1000**, at which the score reproduces the lexicographic tuple exactly"*
+   (`spec-innate-picker.md:124-125`) — a neutral value with its reasoning written down, so the module
+   is buildable now and the numbers move on evidence.
+
+   **Neutral here means: every trait contributes equally to every category until the smoke batch says
+   otherwise.** The shape, not 110 hand-picked numbers:
+
+   | Block | Shape | Default |
+   |---|---|---|
+   | `traitCategoryMilli` | **14 trait rows × 5 categories** — one row per member of the closed trait pool measured on the catalog (`soul-eater` … `immortal`, below) | **every cell `1000`** |
+   | `elementCategoryMilli` | 6 elements × 5 categories, applied to `ElementPrimary`; `elementSecondaryScaleMilli` scales the same row for a secondary | every cell `1000`; `elementSecondaryScaleMilli: 500` — a secondary is half a primary, the only non-flat default and the only one derived from a stated meaning rather than from data |
+   | `rarityCategoryMilli` | 10 rarity rungs × 5 categories, **a tie-shaping term only** (step 4's own words) | every cell `1000` |
+   | `anchorCategoryMilli` | `posture`, `reach`, `targetPreference` × 5 categories, present for the 19 anchored species | every cell `1000` |
+
+   **Why flat is the right default and not an evasion.** At every weight `1000` the score is the
+   plain count of signals a species carries for a category, and the ranking is that count's order —
+   the same property the innate picker's default has: **the neutral value reproduces the simplest
+   defensible behaviour exactly**, so a tuned run can be diffed against it. A flat file also makes
+   step 5's residue measurement the honest one: whatever separation survives at flat weights is
+   separation the *signals* produce, not separation a weight was chosen to manufacture.
+
+   **What the smoke batch produces, and what it re-tunes.** The batch's `role-lean.json` plus A-S5's
+   round report give the residue count, the per-family histogram and the five-way-tie count. A high
+   residue at flat weights names which block needs to stop being flat first — and **re-tuning is a
+   config change**, no rebuild, which is the whole reason these are rows rather than constants
+   (`tunables-ssot.md`).
+
+   The signals, unchanged:
    - **traits** — the 14-member closed pool measured on the catalog (`soul-eater` 28, `guardian` 27,
      `coward` 21, `berserker` 21, `critical-hunter` 20, `regenerator` 20, `loyal` 20, `swift` 17,
      `greedy` 15, `genius` 14, `bloodthirsty` 14, `chaos-marked` 12, `void-touched` 9, `immortal` 7).
@@ -177,7 +255,10 @@ There is no characteristic pool and no role lean. `type-weights.json` is named i
   of that line in both directions.
 - Never treat the 904-row almanac dump as the roster. Constraint 3.
 - Never carry the legacy rarity band (`common`/`rare`/`epic`/`legendary`) past step 2 — that would be a
-  second rarity vocabulary, which is the exact defect `spec-action-seeding.md:98` names.
+  second rarity vocabulary, which is the exact defect `spec-action-seeding.md:101` names.
+  ⛔ **WRONG as written (citation pass 2026-09-03):** the rule at `:101` is about **action
+  categories** — *"inventing a third vocabulary"* over the five shipped action-categories — not about
+  rarity. The rarity case is an analogy to it, not the same instance.
 - Never narrow `allowedAtomFamilies` per tier. Constraint 4.
 - Never rename or drop an unjoined anchor to make a join succeed.
 
@@ -219,6 +300,14 @@ There is no characteristic pool and no role lean. `type-weights.json` is named i
    Checkpoint 2 asks for: *"the role lean is reported with its separation."*
 6. All derivation weights live in `data/tuning/action-role-lean.v1.json`; a grep over the module's
    source finds no bare numeric literal other than indices and `0`/`1`.
+6b. That file **exists and ships with the stated neutral default** (§3 step 4): every
+   `traitCategoryMilli`, `elementCategoryMilli`, `rarityCategoryMilli` and `anchorCategoryMilli` cell
+   is `1000`, `elementSecondaryScaleMilli` is `500`, and `_meta` says in those words that the values
+   are untuned and that the first smoke batch is the evidence they move on. A test asserts the flat
+   default reproduces the plain signal-count ranking exactly, the same way
+   `spec-innate-picker.md`'s *"Weight default"* case asserts its own
+   (`spec-innate-picker.md:188`). ⛔ **DECIDED 2026-09-03** — the file had no stated values, so the
+   module was not buildable.
 7. A second run over unchanged inputs is byte-identical by hash, and provenance records the corpus
    hash and the tuning file version each entry was derived from.
 8. The whole run makes zero model calls, proven by a stub that raises.

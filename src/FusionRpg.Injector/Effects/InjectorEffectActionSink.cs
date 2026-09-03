@@ -268,9 +268,36 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
         return true;
     }
 
+    /// <summary>
+    /// E28 fix #3 (spec-param-parity.md §3 row 3): the statuses <c>ApplyStatusToZombie</c> can apply
+    /// (<c>method: true</c> switch, <c>DebugActions.cs:867-913</c>) that this sink still cannot clear.
+    /// Ember and jala were the E17-documented case — <c>SetEmbered</c>/<c>SetJalaed</c> trigger a
+    /// one-shot explosion (<c>EmberExplode</c>/<c>JalaedExplode</c>), not a timed state with a wear-off,
+    /// so there is no Unity-side expiry to withdraw at all. Hypno and kelp reflect the same way against
+    /// the shipped <c>Assembly-CSharp.dll</c>: no <c>UnMindControl</c>/<c>ClearMindControl</c> or
+    /// <c>Unkelp</c>-shaped method exists — only raw settable properties
+    /// (<c>isMindControlled</c>, <c>kelpTimes</c>/<c>kelpLayer</c>/<c>kelpSpeed</c>) with no evidence
+    /// a bare property flip fully reverses what <c>SetMindControl</c>/<c>SetKelped</c> actually did
+    /// (mind control in particular is documented elsewhere as a side-swap, not a flag). Guessing at
+    /// that without a live check is exactly the class of defect this module exists to stop shipping —
+    /// so these four refuse by name instead, matching ember/jala's own already-established reasoning
+    /// rather than inventing a fifth and sixth unverified "fix".
+    /// </summary>
+    static readonly HashSet<string> UnclearableStatuses = new(StringComparer.Ordinal)
+        { "ember", "jala", "hypno", "kelp" };
+
     static bool ExecClearStatus(EffectExecuteContext ctx, EffectActionPlanItem item)
     {
         var status = (JsonOverlay.GetString(item.Params, "status") ?? "").ToLowerInvariant();
+
+        if (UnclearableStatuses.Contains(status))
+        {
+            CheatState.Error(
+                $"debug.clear-status: '{status}' has no Unity-side expiry to withdraw " +
+                "(DebugActions.cs:886-913) — refusing rather than silently doing nothing");
+            return false;
+        }
+
         var targetParam = JsonOverlay.GetString(item.Params, "target");
         var targetPtr = ResolveStatusTargetPtr(ctx);
         var n = 0;
@@ -338,52 +365,75 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
         var typeId = JsonOverlay.GetInt(item.Params, "typeId", 0);
         var row = JsonOverlay.GetInt(item.Params, "row", CheatState.SpawnRow);
         var col = JsonOverlay.GetInt(item.Params, "col", CheatState.SpawnCol);
+        var atk = JsonOverlay.GetInt(item.Params, "atk", 0);
 
-        switch (kind)
+        // E28 fix #5 (spec-param-parity.md §3 row 5): count is structural-floored at 1 — zero spawns
+        // is not a legal "less of the effect", it is the effect never happening, so an omitted or
+        // authored-zero count still spawns once. The sink previously spawned exactly one entity per
+        // plan item regardless of what was authored; this loops it. "Stop seq on first failure" (this
+        // file's own class doc) applies here too — a failed spawn in the middle of a count stops the
+        // rest rather than silently under-delivering without saying so.
+        var count = Math.Max(1, JsonOverlay.GetInt(item.Params, "count", 1));
+        for (var i = 0; i < count; i++)
         {
-            case "zombie":
+            var ok = kind switch
             {
-                var hp = JsonOverlay.GetInt(item.Params, "hp", 0);
-                var maxHp = JsonOverlay.GetInt(item.Params, "maxHp", hp);
-                var x = (float)JsonOverlay.GetDouble(item.Params, "x", 9.9);
-                var mc = JsonOverlay.GetBool(item.Params, "mindControlled");
-                var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
-                {
-                    ["typeId"] = typeId,
-                    ["row"] = row,
-                    ["x"] = x,
-                    ["mindControl"] = mc,
-                    ["hp"] = hp > 0 ? hp : null,
-                    ["maxHp"] = maxHp > 0 ? maxHp : null,
-                    ["source"] = "effect"
-                });
-                return DebugActions.SpawnZombie(payload);
-            }
-            case "plant":
-            {
-                var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
-                {
-                    ["typeId"] = typeId,
-                    ["row"] = row,
-                    ["col"] = col
-                });
-                return DebugActions.SpawnPlant(payload);
-            }
-            case "bullet":
-            {
-                var x = (float)JsonOverlay.GetDouble(item.Params, "x", 400);
-                var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
-                {
-                    ["typeId"] = typeId,
-                    ["bulletType"] = typeId,
-                    ["row"] = row,
-                    ["x"] = x
-                });
-                return DebugActions.SpawnBullet(payload);
-            }
-            default:
-                throw new InvalidOperationException("SpawnEntity kind " + kind);
+                "zombie" => SpawnZombieOnce(item, typeId, row, atk),
+                "plant" => SpawnPlantOnce(item, typeId, row, col, atk),
+                "bullet" => SpawnBulletOnce(item, typeId, row),
+                _ => throw new InvalidOperationException("SpawnEntity kind " + kind),
+            };
+            if (!ok) return false;
         }
+        return true;
+    }
+
+    static bool SpawnZombieOnce(EffectActionPlanItem item, int typeId, int row, int atk)
+    {
+        var hp = JsonOverlay.GetInt(item.Params, "hp", 0);
+        var maxHp = JsonOverlay.GetInt(item.Params, "maxHp", hp);
+        var x = (float)JsonOverlay.GetDouble(item.Params, "x", 9.9);
+        var mc = JsonOverlay.GetBool(item.Params, "mindControlled");
+        var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+        {
+            ["typeId"] = typeId,
+            ["row"] = row,
+            ["x"] = x,
+            ["mindControl"] = mc,
+            ["hp"] = hp > 0 ? hp : null,
+            ["maxHp"] = maxHp > 0 ? maxHp : null,
+            // E28 fix #5: DebugActions.ApplyAbsoluteProps now reads this for zombies too (Z-ATK).
+            ["atk"] = atk > 0 ? atk : null,
+            ["source"] = "effect"
+        });
+        return DebugActions.SpawnZombie(payload);
+    }
+
+    static bool SpawnPlantOnce(EffectActionPlanItem item, int typeId, int row, int col, int atk)
+    {
+        var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+        {
+            ["typeId"] = typeId,
+            ["row"] = row,
+            ["col"] = col,
+            // E28 fix #5: DebugActions.ApplyAbsoluteProps already read this for plants (P-ATK) — it
+            // was simply never in the payload the sink built.
+            ["atk"] = atk > 0 ? atk : null,
+        });
+        return DebugActions.SpawnPlant(payload);
+    }
+
+    static bool SpawnBulletOnce(EffectActionPlanItem item, int typeId, int row)
+    {
+        var x = (float)JsonOverlay.GetDouble(item.Params, "x", 400);
+        var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+        {
+            ["typeId"] = typeId,
+            ["bulletType"] = typeId,
+            ["row"] = row,
+            ["x"] = x
+        });
+        return DebugActions.SpawnBullet(payload);
     }
 
     static bool ExecBoardAction(EffectExecuteContext ctx, EffectActionPlanItem item)
@@ -395,13 +445,20 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
         else if (op.Contains("doom", StringComparison.OrdinalIgnoreCase)) op = "doom";
         else if (op.Contains("fire", StringComparison.OrdinalIgnoreCase)) op = "fireline";
 
+        // E28 fix #2 (spec-param-parity.md §3): `damage` is declared on the kind (AtomKindRegistry.cs)
+        // and validated at bind, but never reached this payload — every board.action fired
+        // DebugActions.BoardAction's own hardcoded 1800 default regardless of what was authored.
+        // `x`/`y` are the mirror defect: DebugActions.BoardAction derives its own `pos` from col/row
+        // and never reads an author-supplied x/y (only pos.x/pos.y appear, in its telemetry dicts) —
+        // decided 2026-09-03 to delete the two dead keys here rather than declare them on the schema,
+        // since declaring params that reach no executor is the exact defect class this module exists
+        // to remove.
         var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
         {
             ["op"] = op,
             ["row"] = JsonOverlay.GetInt(item.Params, "row", CheatState.SpawnRow),
             ["col"] = JsonOverlay.GetInt(item.Params, "col", CheatState.SpawnCol),
-            ["x"] = JsonOverlay.GetDouble(item.Params, "x", 0),
-            ["y"] = JsonOverlay.GetDouble(item.Params, "y", 0)
+            ["damage"] = JsonOverlay.GetInt(item.Params, "damage", 1800),
         });
         DebugActions.BoardAction(payload);
         return true;
@@ -409,11 +466,14 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
 
     static bool ExecSpawnGrid(EffectExecuteContext ctx, EffectActionPlanItem item)
     {
+        // E28 fix #6 (spec-param-parity.md §3 row 6): graveType was declared, validated, and
+        // never forwarded — DebugActions.SpawnGrid already reads and honours it (DebugActions.cs:382).
         var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
         {
             ["typeId"] = JsonOverlay.GetInt(item.Params, "gridItemType", 7),
             ["row"] = JsonOverlay.GetInt(item.Params, "row", CheatState.SpawnRow),
-            ["col"] = JsonOverlay.GetInt(item.Params, "col", CheatState.SpawnCol)
+            ["col"] = JsonOverlay.GetInt(item.Params, "col", CheatState.SpawnCol),
+            ["graveType"] = JsonOverlay.GetInt(item.Params, "graveType", 0),
         });
         DebugActions.SpawnGrid(payload);
         return true;
@@ -421,12 +481,19 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
 
     static bool ExecClearGrid(EffectExecuteContext ctx, EffectActionPlanItem item)
     {
-        var selector = JsonOverlay.GetString(item.Params, "selector") ?? "last";
+        // E28 fix #4 (spec-param-parity.md §3 row 4): row/col now forward through to
+        // DebugActions.ClearGridItem, which already accepts them (DebugActions.cs:639-668) — an atom
+        // can target a specific cell instead of only ever colliding on an ambiguous multi-match
+        // refusal or an explicit random pick. `selector`'s meaning is otherwise unchanged: "random"
+        // still means random; anything else (including an absent selector) leaves the choice to
+        // col/row or the single-match fallback the executor already had.
+        var selector = JsonOverlay.GetString(item.Params, "selector");
         var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
         {
             ["typeId"] = JsonOverlay.GetInt(item.Params, "gridItemType", 7),
-            ["random"] = string.Equals(selector, "random", StringComparison.OrdinalIgnoreCase) ||
-                         string.Equals(selector, "last", StringComparison.OrdinalIgnoreCase)
+            ["random"] = string.Equals(selector, "random", StringComparison.OrdinalIgnoreCase),
+            ["row"] = JsonOverlay.GetIntOrNull(item.Params, "row"),
+            ["col"] = JsonOverlay.GetIntOrNull(item.Params, "col"),
         });
         DebugActions.ClearGrid(payload);
         return true;
@@ -435,6 +502,29 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
     static bool ExecSetBox(EffectExecuteContext ctx, EffectActionPlanItem item)
     {
         var boxType = JsonOverlay.GetInt(item.Params, "boxType", 1);
+
+        // E28 fix #7 (spec-param-parity.md §3 row 7): cells[] paints every listed cell instead of
+        // just one. Each entry is {row, col} — the same shape row/col already carry on this kind,
+        // just plural. Only reachable now that AtomCompiler.Plain() preserves array/object structure
+        // (was stringifying it) and AtomPushCodec.ToDef unwraps the wire's JsonElement boxing
+        // recursively (both fixed this session) — without either, `cells` would arrive as either a
+        // literal JSON-text string or a JsonElement that JsonOverlay.GetInt cannot read.
+        if (item.Params.TryGetValue("cells", out var cellsRaw) && cellsRaw is List<object?> cells)
+        {
+            foreach (var cellObj in cells)
+            {
+                if (cellObj is not Dictionary<string, object?> cell) continue;
+                var cellPayload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
+                {
+                    ["boxType"] = boxType,
+                    ["row"] = JsonOverlay.GetInt(cell, "row", CheatState.SpawnRow),
+                    ["col"] = JsonOverlay.GetInt(cell, "col", CheatState.SpawnCol),
+                });
+                DebugActions.SetBox(cellPayload);
+            }
+            return true;
+        }
+
         var payload = JsonSerializer.SerializeToElement(new Dictionary<string, object?>
         {
             ["boxType"] = boxType,

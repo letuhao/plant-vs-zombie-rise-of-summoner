@@ -50,6 +50,16 @@ jobs:
           dotnet run --project tools/DemonSpeciesGen -- --check
           if ($LASTEXITCODE -ne 0) { throw "DemonSpeciesGen --check found the generated tree stale — run 'dotnet run --project tools/DemonSpeciesGen' and commit the result" }
 
+      - name: family-expand staleness guard (E43, spec-family-expand.md §3.1/§5 test 2)
+        shell: pwsh
+        run: |
+          # FamilyExpandGen commits its generated tree (data/seed/atoms/generated/**) to the repo,
+          # same DemonSpeciesGen --check pattern above — --check regenerates every atom row from the
+          # 98 authored affix families + tier-bands.v1.json and fails if any generated file on disk
+          # differs, or if a generated file's source family no longer exists.
+          dotnet run --project tools/FamilyExpandGen -- --check
+          if ($LASTEXITCODE -ne 0) { throw "FamilyExpandGen --check found the generated tree stale — run 'dotnet run --project tools/FamilyExpandGen' and commit the result" }
+
       - name: Balance guard (class-system-todo.md P5.3 — termination HARD, dominance-mechanism HARD, dominance-verdict SOFT)
         shell: pwsh
         run: |
@@ -118,6 +128,32 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "guard-funnel-delta.ps1 failed — an HP delta bypassed Funnel/FA10" }
           .\scripts\guard-dal.ps1
           if ($LASTEXITCODE -ne 0) { throw "guard-dal.ps1 failed — SQL appeared outside FusionRpg.Data" }
+
+      - name: Content validation gate (E47)
+        shell: pwsh
+        run: |
+          # Closes E24's B4 half (spec-validate-gate-ci.md) — AtomImporter --validate existed with
+          # no CI caller, so ContentValidation.Lint/.Drift ran over the real shipped atom corpus in
+          # nobody's pipeline. Runs against the REAL data/seed/ tree, never a fixture (§3.1) — a
+          # gate over a fixture proves the gate works and nothing about the content.
+          #
+          # --db <scratch>: without it the tool resolves $FUSIONRPG_DATA, then walks up for
+          # dist/FusionRpg.Server/data; a fresh CI checkout has neither, so the tool would exit 2
+          # before reading a single seed file (Program.cs) — a gate that always exits 2 is a gate
+          # nobody reads. --check: dry-run import (rolled back in one transaction) so the gate reads
+          # the real corpus and writes nothing to a throwaway database.
+          #
+          # Finding policy (§3.2, decided 2026-09-03 — verified against ContentValidation's own
+          # Blocking flags, not restated as new policy): a structural defect (unparseable file,
+          # unknown kind, bad param, duplicate id) fails the import itself, upstream of --validate,
+          # so it already fails this step with no gate logic needed. `drift` without a `powerNote`
+          # is Blocking:true and fails. All seven lints (tier-gap, flat-tier, duplicate-affix,
+          # backwards-interval, lonely-group, orphan, orphan-affix) and a noted `drift` are
+          # Blocking:false by construction and only report. Budget checking stays out — no ceiling
+          # data exists in the schema yet (rarity table has no budget column); A-G1 is what
+          # introduces the first such data.
+          dotnet run --project tools/AtomImporter -c Release -- --check --validate --db "$env:RUNNER_TEMP/atom-validate-db"
+          if ($LASTEXITCODE -ne 0) { throw "content validation gate failed - see the lint / power drift lines above" }
 
       - name: Demon corpus dump is self-consistent (seed-to-concrete T1.2)
         shell: pwsh

@@ -162,6 +162,23 @@ public class ActorPowerTests
     }
 
     [Fact]
+    public void A_plant_spawn_with_atk_prices_non_zero()
+    {
+        // E28 fix #5 (spec-param-parity.md §3 row 5): before, atk carried a NotImplementedNote for
+        // every kind and plant spawns have no hp/maxHp param at all (HonouredOnlyWhen: kind=zombie),
+        // so a plant spawn atom could supply neither field and CostFunction.SpawnBody's
+        // `hp == 0 && atk == 0` guard priced every one of them at exactly zero — silently, since
+        // Every_shipped_atom_can_be_priced only asserts Ok. Now that atk is honoured for plant too,
+        // this is the atom that used to be free.
+        var priced = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"plant","typeId":0,"atk":80}""", "atom.plant-spawn",
+            """{"trigger":"OnDeath"}"""));
+
+        Assert.True(priced.Ok, priced.Verdict.Reason);
+        Assert.True(priced.Power.Total > 0, "a plant spawn with atk must not price at zero");
+    }
+
+    [Fact]
     public void Two_bodies_are_worth_twice_one()
     {
         var one = CostFunction.Price(Atom("spawn.entity",

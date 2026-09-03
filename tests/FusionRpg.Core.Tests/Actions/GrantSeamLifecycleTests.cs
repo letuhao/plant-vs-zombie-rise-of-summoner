@@ -41,7 +41,7 @@ public class GrantSeamLifecycleTests
     [Fact]
     public void HeldCapIsUnlockTuningsOwnCapNeverAPrivateNumber()
     {
-        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, Cap: 10, DiscardTaxCoeffMilli: 100);
+        var tuning = new UnlockTuning(P1Milli: 500, DeltaMilli: 880, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100);
         Assert.Equal(10, CapPolicy.HeldCap(tuning));
     }
 

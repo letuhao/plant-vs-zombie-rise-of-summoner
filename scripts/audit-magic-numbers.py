@@ -80,7 +80,19 @@ STRUCTURAL_WORD = re.compile(
 # does not flag ShiftTierWindow's clamp as an illegal cap." Matched via BALANCE_WORD's "tier", which
 # elsewhere (a tier-scaled bonus, say) is correctly a real balance dial — the exemption is these two
 # specific identifiers, not the word.
-EXEMPT_NAMES = {"KindShieldUpkeep", "UpkeepPeriodTicks", "MaxTier", "MinTier"}
+#
+# `FamilyExpansion.TierCount`/`ReferenceLevel`/`BandFloorPermille`/`BandCeilingPermille` (E43,
+# Core/Effects/Atoms/Generation) mirror `bands.v1.json`'s FROZEN `powerBand.tierScaling` values
+# verbatim — the same "5, one per tier the atom layer already has" fact `MaxTier`/`MinTier` above are
+# exempt for, and the same reasoning: a balance pass that wants to move these mints a v2 of that
+# frozen, versioned registry file (its own `frozenNote`: "No in-place edit... registryVersion 2 plus
+# an explicit decision"), it never edits this constant directly. Matched via BALANCE_WORD's
+# "tier"/"level"/"band" — real per-family balance data (`sharePermille`) lives in
+# `tier-bands.v1.json`, read at runtime by the same module, not as a `const` here.
+EXEMPT_NAMES = {
+    "KindShieldUpkeep", "UpkeepPeriodTicks", "MaxTier", "MinTier",
+    "TierCount", "ReferenceLevel", "BandFloorPermille", "BandCeilingPermille",
+}
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}
 SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$|Tests?\.cs$", re.I)

@@ -210,12 +210,21 @@ public static class JsonOverlay
         _ => v
     };
 
+    // E28 session finding (2026-09-03): the Number arm's ternary — `TryGetInt64(out var l) ? l :
+    // el.GetDouble()` — always produced a boxed `double`, never `long`, regardless of which branch
+    // ran. The `?:` operator resolves ONE static type for both branches before boxing, and `long`
+    // widens implicitly to `double` but not the reverse, so the compiler silently converted `l` to
+    // `double` every time. `(object)l` on the true branch breaks that unification. Matters more here
+    // than in the sibling defect (AtomCompiler.Plain, fixed the same session): this is the grant
+    // overlay's own magnitude path, and CLAUDE.md's own overflow table is explicit that `double` loses
+    // exact-integer precision above 2^53 and is non-deterministic across runtimes in a hashed/persisted
+    // path — `long` was always the intended type here, not an accident of formatting.
     static object? Unwrap(JsonElement el) => el.ValueKind switch
     {
         JsonValueKind.Null => null,
         JsonValueKind.True => true,
         JsonValueKind.False => false,
-        JsonValueKind.Number => el.TryGetInt64(out var l) ? l : el.GetDouble(),
+        JsonValueKind.Number => el.TryGetInt64(out var l) ? (object)l : el.GetDouble(),
         JsonValueKind.String => el.GetString(),
         JsonValueKind.Object => FromObject(JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(el.GetRawText())),
         JsonValueKind.Array => el.EnumerateArray().Select(Unwrap).ToList(),
@@ -231,6 +240,15 @@ public static class JsonOverlay
     public static int GetInt(Dictionary<string, object?> map, string key, int fallback = 0)
     {
         if (!map.TryGetValue(key, out var v) || v == null) return fallback;
+        return Convert.ToInt32(v, CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>Null, not a fallback value, when absent — for a param whose absence is itself
+    /// meaningful (E28: an unset grid.clear row/col must stay "no constraint", never collide with a
+    /// real 0).</summary>
+    public static int? GetIntOrNull(Dictionary<string, object?> map, string key)
+    {
+        if (!map.TryGetValue(key, out var v) || v == null) return null;
         return Convert.ToInt32(v, CultureInfo.InvariantCulture);
     }
 

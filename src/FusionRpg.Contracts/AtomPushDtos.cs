@@ -127,6 +127,18 @@ public sealed class AtomPushDto
 
     /// <summary>True when the receiver is already current and should keep what it holds.</summary>
     [JsonPropertyName("upToDate")] public bool UpToDate { get; set; }
+
+    /// <summary>
+    /// E26: the codec/emitter's own version, distinct from <see cref="ContentHash"/> and
+    /// <see cref="CatalogRevision"/> on purpose. <c>ContentHash</c> covers seed DATA; a compiler-code
+    /// change (like E26 emitting runner defs for the first time) moves nothing the content hash can
+    /// see, which is exactly why `AtomImporter` reports "nothing changed" for a pure code edit. This
+    /// field is what lets <c>AtomPushCodec.BuildPayload</c>'s short-circuit notice a code change even
+    /// when the receiver's <c>catalogRevision</c> still matches. Always present, on every payload —
+    /// including the <c>UpToDate</c> branch — so a receiver can learn and echo it back on its next
+    /// Hello.
+    /// </summary>
+    [JsonPropertyName("emitterVersion")] public int EmitterVersion { get; set; }
 }
 
 /// <summary>What the injector says it already holds. Empty on cold start.</summary>
@@ -134,4 +146,11 @@ public sealed class AtomPushHelloDto
 {
     [JsonPropertyName("catalogRevision")] public long CatalogRevision { get; set; }
     [JsonPropertyName("contentHash")] public string? ContentHash { get; set; }
+
+    /// <summary>
+    /// E26: what <see cref="AtomPushDto.EmitterVersion"/> the receiver last learned. Null (not 0) on a
+    /// cold connect or a pre-E26 receiver that has never seen the field — <c>0</c> would collide with
+    /// a real, if implausible, version 0 and silently skip the first re-push after an emitter change.
+    /// </summary>
+    [JsonPropertyName("emitterVersion")] public int? EmitterVersion { get; set; }
 }

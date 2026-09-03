@@ -121,7 +121,7 @@ docs/design/
   _kit/tokens.css              the token layer: colour, type, space, radius, elevation, motion, bands
   _kit/kit.css                 foundation component styles
   _kit/screens.css             stage layouts and screen-level structures
-  00-foundation.html … 09-commander-list.html · 10-actor-hud.html   the eleven plates
+  00-foundation.html … 10-actor-hud.html · 11-world-stage.html   the twelve plates
 ```
 
 Plates are numbered by the order they are *designed*, not by navigation order.
@@ -147,6 +147,7 @@ Every player-facing surface in the game is drawn across these eleven plates, and
 | [08-actor-sheet.html](08-actor-sheet.html) | One Actor panel · six tabs · specimen and commander role extensions | **Draft — for review** |
 | [09-commander-list.html](09-commander-list.html) | Player-empire commander list · persisted default (Dave) · Set default / Defend the lawn · location &amp; legion map stubs · list → Actor sheet | **Draft — for review** |
 | [10-actor-hud.html](10-actor-hud.html) | Per-unit lawn HUD — identity / resource / status rows · dual render (Unity + Phaser) · legend · overflow · §H player scenarios (strengthened 2026-08-30) · ideal: [actor-hud-ideal.md](../architecture/actor-hud-ideal.md) · audit: [actor-hud-audit-2026-08-30.md](../research/actor-hud-audit-2026-08-30.md) | **Draft — for review** |
+| [11-world-stage.html](11-world-stage.html) | **The world map component catalog** — sector node in every state · lanes · the four fog states · legions and supply · orders and targeting on the map · lenses · the anchored HUD · turn cluster and notifications · outliner · the bounded sector inspector · confirms · turn playback translating all 21 engine event prefixes · unit families and the modifier ledger. **Supersedes plate 03's world sections**, which predate the loam economy. Ideal: [world-stage-ideal.md](../architecture/world-stage-ideal.md) | **Draft — for review** |
 
 ### Coverage
 

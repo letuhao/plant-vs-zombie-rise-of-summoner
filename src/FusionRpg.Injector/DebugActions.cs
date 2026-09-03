@@ -1390,6 +1390,9 @@ public static class DebugActions
             if (HasInt(p, "maxHp", out var maxHp)) CheatState.SetFloat("Z-MAXHP", maxHp, "debug");
             if (HasInt(p, "armor1", out var a1)) CheatState.SetFloat("Z-ARM1", a1, "debug");
             if (HasInt(p, "armor2", out var a2)) CheatState.SetFloat("Z-ARM2", a2, "debug");
+            // E28 fix #5: Z-ATK already exists as an absolute cheat id (CheatState.cs:234,605) — this
+            // branch just never read atk from the payload, mirroring the plant branch's P-ATK above.
+            if (HasInt(p, "atk", out var atk)) CheatState.SetFloat("Z-ATK", atk, "debug");
         }
     }
 

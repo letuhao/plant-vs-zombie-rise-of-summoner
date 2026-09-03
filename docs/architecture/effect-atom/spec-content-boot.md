@@ -90,11 +90,28 @@ the import step fails no test.
 
 ## Known residuals
 
-- **Nothing outside `deploy-play.ps1` runs the importer.** A repo-wide sweep for `AtomImporter` across
+**⛔ EVERY RESIDUAL BELOW CARRIES A DISPOSITION — DECIDED 2026-09-03 (owner removed themselves as a
+gate).** Each is *claimed* by a named module, a *named follow-up*, or *accepted as-is with the reason
+it does not need fixing*. A residual with no disposition is a defect nobody is refusing and nobody is
+owning, which is how a retrospective spec becomes a list of excuses.
+
+- **[CLAIMED — E46 `player-content-boot`] Nothing outside `deploy-play.ps1` runs the importer.** A repo-wide sweep for `AtomImporter` across
   `src/` and `scripts/` returns only `scripts/deploy-play.ps1:218`. The launcher and the player zip have
   no import step, so a player install boots on the shipped code fallback and the whole content layer is
   inert there. Not a defect of the loader; a gap in the delivery path nobody has claimed.
-- **The reader guard does not do what the todo says it does.** The todo describes
+- **[FOLLOW-UP — `E48 reader-map-derive`] The reader guard does not do what the todo says it does.**
+  ⛔ **DECIDED 2026-09-03.** *Scope, one line:* derive the reader assertion from
+  `ContentHashRegistry.Current` instead of a hand-typed list, so a newly registered table fails for the
+  reason the todo claims — *"this table has no reader"* — rather than for *"the list was edited."*
+  **Why a follow-up and not accepted:** the shipped guard checks a **different property** from the one
+  it is documented as checking, and that divergence is what lets it rot; the fix is cheap because the
+  registry is already enumerable (`ContentHashRegistry.Current` is an
+  `IReadOnlyList<ContentHashTable>`, `ContentHashRegistry.cs:369`, over
+  `CurrentSchemaVersion = 9` at `:37`). **This follow-up also claims
+  [spec-channel-policy-reader.md](spec-channel-policy-reader.md)'s third residual**, which is the same
+  trip-wire seen from the other side. **What would overturn it:** a derived check that cannot tell a
+  reader from a mention — at which point the hand list is the honest instrument and the todo's wording
+  is what changes. The todo describes
   `ContentTableReaderGuardTests` as asserting "every table name in `ContentHashRegistry.Current` has an
   entry" in a maintained reader map. The shipped test
   (`ContentTableReaderGuardTests.cs:39-97`) instead makes six text assertions against
@@ -102,9 +119,21 @@ the import step fails no test.
   (`:77-85`, grown from 12 as later programs registered more). The effect is close — a nineteenth table
   fails the trip-wire and forces a human to look — but the guard cannot tell whether a table has a
   reader, only whether the list was edited.
-- **A4 — no production binding producer**, tracked in the todo's "Unowned" section and reconfirmed on a
+- **[CLAIMED — effect-pipeline module 4 `instance-producer`] A4 — no production binding producer**,
+  tracked in the todo's "Unowned" section and reconfirmed on a
   live lawn 2026-08-30 (`select count(*) from effect_binding` → `0`). The loader and importer both exist
   and both ran; the binding producer does not. Out of this module's scope, recorded here because "the
   layer is live" is only true up to the point where something binds a container to an owner.
-- **The importer reports "nothing changed" when only compiler code changed**, because the content hash
-  covers seed data. Harmless while `effect_binding` is empty; a silent-staleness trap once it is not.
+- **[CLAIMED — E26 `runner-def-emit`] The importer reports "nothing changed" when only compiler code
+  changed**, because the content hash covers seed data. Harmless while `effect_binding` is empty; a
+  silent-staleness trap once it is not.
+  ⛔ **DECIDED 2026-09-03.** [effect-atom-map.md](../effect-atom-map.md) §16 already carries this as a
+  cross-program hazard and already names its first victim: *"`AtomImporter` staleness trap — reports
+  'nothing changed' when only compiler **code** changed, because the hash covers seed data — and
+  **E26 is exactly a compiler-code change**."* So the owner is E26, and the deliverable is a forced
+  re-import in **its** rollout step, proven by its own acceptance. **Why not widen the hash to cover
+  compiler code:** every build would then bump `catalog_revision`, and the same §16 records what that
+  costs — *"any `catalog_revision` bump makes every previously rolled `effect_instance` unbindable
+  (`StaleInstance`)"*. Trading a stale read for an unbindable world state is strictly worse. **What
+  would overturn it:** a revision scheme that separates "the compiler changed" from "the content
+  changed", which is a design, not a fix, and would be its own module.

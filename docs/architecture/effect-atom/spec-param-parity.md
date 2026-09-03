@@ -64,13 +64,37 @@ note.** A third state — declared, accepted, ignored — is what this module ex
 | # | Change |
 |---|---|
 | **1** | `ExecApplyResourceDelta` honours all six `ResourceIds`. A channel outside the set is a **refusal**, not a skip |
-| **2** | `ExecBoardAction`'s payload carries `damage`. **Also fix the mirror defect:** the payload forwards `x`/`y`, which the schema does **not** declare, so authoring them is refused while the sink reads them — the contract is wrong in both directions |
+| **2** | `ExecBoardAction`'s payload carries `damage`. **Also fix the mirror defect** — see the decision immediately below |
 | **3** | `ExecClearStatus` reaches every status `status.apply` can apply on that runtime. Where no withdraw path exists — `ember`/`jala` have **no Unity-side expiry** (`DebugActions.cs:893-899`) — the refusal is **explicit and named**, never a silent miss |
 | **4** | `grid.clear` declares `row`/`col`; the sink forwards them; `selector` keeps its `random`/targeted meaning. **Fix the shipped naming lie:** `fx.grid_item_cycle` variant b authors `selector: "last"`, which selects **randomly** |
 | **5** | `count` loops the executor; `atk` reaches the spawned body. `count` is **floored at 1** — structural, and the comment must say so |
 | **6** | `graveType` is honoured and forwarded |
 | **7** | `cells[]` paints multiple cells in one apply |
 | **content** | `fx.set_dirt_box` → `boxType: 2` |
+
+#### ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — `x`/`y` are removed from the sink, not added to the schema
+
+**They are dead keys.** `ExecBoardAction` writes `["x"]` and `["y"]` into the payload
+(`InjectorEffectActionSink.cs:403-404`) and **`DebugActions.BoardAction` never reads them.** It derives
+the position itself — `var pos = CellPos(col, row);` (`DebugActions.cs:305`) — and every `op` arm uses
+that `pos`. The only `"x"`/`"y"` inside `BoardAction` are in the **telemetry** dictionaries
+(`DebugActions.cs:316`, `:329`, and the arms below), where they report `pos.x`/`pos.y` — the derived
+value, not an input. Read against the whole method, **there is no read of an author-supplied `x` or
+`y` anywhere in it.**
+
+So the two directions are not symmetric after all, and the choice is easy:
+
+| Option | Verdict |
+|---|---|
+| **Declare `x`/`y` in the schema** | **Rejected.** It would add two params that reach no executor — *"declared, accepted, ignored"*, the exact third state §3's opening sentence exists to remove. It would also make this module the one that introduced a new instance of its own defect class |
+| **Delete the two lines from the sink** | **Chosen.** Removes two payload keys nothing reads. Zero behaviour change by construction, so it needs no live proof |
+
+**The schema stays `op` / `row` / `col` / `damage`** (`AtomKindRegistry.cs:304-308`), which is exactly
+what `BoardAction` consumes once `damage` is forwarded.
+
+**What would overturn it:** a `BoardAction` op that takes a free position rather than a cell — a
+non-grid board effect. That is `E40 spawn-non-grid`'s axis, and if it ever needs one, `x`/`y` get
+declared **and** read in the same change, which is the only shape this module permits.
 
 ---
 
@@ -97,7 +121,7 @@ That distinction is the whole point: every defect here passed validation already
 |---|---|---|
 | 1 | A `resource.delta` on **each of the six resources** changes that pool | #1, and the six-resource layer is reachable |
 | 2 | A `board.action` with `damage: 400` deals **400, not 1800** | #2 — a hardcoded default was masking it |
-| 3 | `x`/`y` are either declared **and** forwarded, or neither | #2's mirror defect |
+| 3 | `x`/`y` appear in **neither** the schema nor the sink payload, and a test greps the sink for them | #2's mirror defect, resolved by deletion |
 | 4 | Apply then clear, for **every** status the runtime can withdraw | #3 |
 | 5 | `ember` clear is a **named refusal** citing the missing expiry | An honest gap stays visible |
 | 6 | `grid.clear` at an explicit cell clears **that** cell with two matches present | #4 |
@@ -118,7 +142,8 @@ kind's declared params and asserts each reaches its executor is what stops the c
 ## 6. Acceptance criteria
 
 1. All six resources reachable by `resource.delta`; a seventh is refused.
-2. `board.action` honours `damage`; the `x`/`y` asymmetry is resolved in one direction.
+2. `board.action` honours `damage`; `x`/`y` are **deleted from the sink payload** and stay undeclared
+   (decided 2026-09-03).
 3. `status.clear` reaches every withdrawable status; the rest refuse by name.
 4. `grid.clear` targets a cell; the `selector: "last"` naming lie is corrected.
 5. `count` and `atk` are honoured; a plant spawn prices non-zero; `count` floors at 1 with a structural

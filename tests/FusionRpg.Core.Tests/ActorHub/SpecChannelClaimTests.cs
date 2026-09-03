@@ -35,6 +35,11 @@ public class SpecChannelClaimTests
     /// `status.resistance` is English prose ("the status resistance axis"), not `status.resist`;
     /// `status.probability` is explicitly documented as having no channel equivalent (spec-unbuilt-
     /// reconcile.md F5); `combat.something` is spec-stat-taxonomy.md's own abstract placeholder example.
+    /// `combat.power.pierce` and `combat.power.overflow` are channel-SHAPED ids that authored item
+    /// families name and the registry does NOT contain — `spec-kind-value-guard.md` §5.1 tables them as
+    /// a defect, with the decision to scope E29's acceptance rather than mint 14 channels. Same category
+    /// as `combat.hitland` above: named in a doc precisely BECAUSE it is not shipped. Added 2026-09-03;
+    /// **remove these two if the families are ever registered**, so the guard resumes covering them.
     /// `combat.timer` is a host EVENT kind, verified in `EffectEventAdapterCore.TryMap` where it maps
     /// (alongside `effect.timer`) to the `OnTimer` atom trigger — the same category as `combat.hit`
     /// directly above, added 2026-09-03 when Wave 8's trigger-vocabulary audit named it in prose.
@@ -43,6 +48,7 @@ public class SpecChannelClaimTests
     static readonly HashSet<string> KnownNonChannelTokens = new(StringComparer.Ordinal)
     {
         "combat.hit", "combat.hitland", "combat.something", "combat.timer",
+        "combat.power.pierce", "combat.power.overflow",
         "resource.delta", "resource.economy",
         "status.apply", "status.apply.duration", "status.apply.target", "status.clear", "status.spread",
         "status.v2.json", "status.WithdrawEntity", "status.resistance", "status.probability",

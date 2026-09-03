@@ -43,15 +43,57 @@ unchanged inputs is byte-identical"* stops being definable.
 
 ### Real gap
 
-There is no dedup for actions, no fingerprint definition, and no review queue. Tier 3's index is a
-genuine dependency decision — seedsmith's baseline is exact pins, a lockfile, an isolated venv and an
-offline assert, so adding an embedding model is taken on its own merits.
+There is no dedup for actions, no fingerprint definition, and no review queue.
+
+**⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — tier 3 ships as an in-repo token-overlap
+heuristic. No embedding index, no new dependency.** This was left as *"a genuine dependency
+decision"* with options and no choice, which is a module that cannot be built.
+
+**Why the cheap option is the right one, not merely the cheap one:**
+
+- **Tier 3 never gates.** It is advisory by contract (§2, §3 step 4, AC5), and `--no-semantic` must
+  produce **byte-identical** survivors (AC6). So the index's quality changes exactly one thing: how
+  many rows land in a review queue a human reads. It cannot change a single acceptance decision.
+- **The cost is asymmetric.** seedsmith's baseline is exact pins, a lockfile, an isolated venv and an
+  offline assert; adding LlamaIndex plus an embedding model puts a model dependency inside the one
+  module whose headline claim is *"no model calls on the acceptance path"*, in exchange for a better
+  ordering of an advisory list.
+- **This spec already said so.** §7 records that tier 3 *"can be built last or replaced by a cheaper
+  token-overlap heuristic without changing anything above."* Deciding it that way is following a
+  conclusion already reached, not making a new trade.
+- **It stays reversible for one line.** The heuristic ships behind the **same seam** an index would
+  use — a `similarity(a, b) -> int` in per-mille, injected into the tier-3 pass, which is already how
+  the tests drive it (*"tier-3 tests inject a fixed vector function"*, §5). Swapping in an embedding
+  index later is a constructor argument, not a rewrite, and nothing above tier 3 notices.
+
+**The heuristic, stated so it is not left as "some heuristic".** Similarity is **Jaccard over the token
+bag of the candidate's `name` and `rationale`, in per-mille integer arithmetic**:
+`similarityMilli = 1000 * |A ∩ B| / |A ∪ B|`, with tokens produced by lowercasing, splitting Latin runs
+on non-alphanumerics, and splitting CJK **per character** — the corpus is bilingual and motifs are CJK
+(`motifsUsed: ["铁头功"]`), so a whitespace split would make every CJK field one token and every pair
+of them distance 1. No float anywhere: per-mille integers, divided once, per the repo's numeric rule.
+
+**Threshold: 700‰, the default in `data/tuning/action-dedup.v1.json`.** At 700‰ two candidates share
+more than two thirds of their prose vocabulary — the point at which a reader would call them
+restatements. It is a **review-queue trigger, not a bound**, which is why a round value with a stated
+meaning is the honest default rather than a fitted one. **Re-tune trigger:** the smoke batch's queue
+size — an empty queue means the threshold is too high to be worth running; a queue over roughly a tenth
+of the round means it is too low to be worth reading.
+
+**Provenance follows.** With no embedding model there is no model id to record; §3 step 5's clause is
+satisfied by the **similarity function id and its version**, a constant, so a rerun can still prove it
+saw the same neighbours.
+
+**What would overturn it:** a smoke batch whose review queue is all noise or all miss **and** an owner
+decision that a model dependency is worth buying for an advisory list. The seam is already there for it.
 
 ## 2. Inputs and outputs
 
 **Reads:** the complete candidate set for one round (A-S4's accepted output, in the A-C1 `action-seed`
 envelope) · the already-accepted corpus under `data/seed/actions/` · `data/tuning/action-dedup.v1.json`
-(**new** — the t3 threshold, k, and the t2 field-distance rule).
+(**new** — the t3 threshold, `k`, and the t2 field-distance rule; **A-S1 reads `k` and the
+field-distance rule from this file and does not restate them** — `spec-distribution-planner.md`
+§3 step 8).
 
 **Writes**, all through A-C1's envelope:
 
@@ -99,6 +141,19 @@ it were a field. It is not: `atomFamilies` is the seed's canonical field (A-S1 �
 `allowedAtomFamilies` are, respectively, the old name for the same field and the *brief's permitted
 set*, which is a different thing.
 
+**⛔ DECIDED 2026-09-03 — what `sorted(atomFamilies)` sorts.** Naming the field settled which *field*
+the fingerprint renders; it did not settle which *ids* it can contain, and the tree holds three
+disjoint candidate namespaces — **17** demo families under `data/seed/atoms/`, **98** authored
+families under `data/seed/items/affix-families/`, **5** ids in `data/seed/actions/pairings.json`,
+with **zero overlap between any pair** (measured 2026-09-03; the evidence table is in
+`spec-distribution-planner.md` §2). **The 98 are the namespace**, so every member of
+`sorted(atomFamilies)` is an `entries[].id` of `data/seed/items/affix-families/*.json`, e.g.
+`atom.keen-edge`, `atom.searing-strike`.
+
+This matters to tier-1 collision rates, not just to hygiene: **98 ids is the real alphabet** of the
+fingerprint's first and widest component, and it is what any collision estimate must be computed
+against. An estimate made against the 17 fixture families would be wrong by more than five times.
+
 **⛔ Why `targetMode`/`areaShape` may be hashed at all — decided 2026-09-03 (review F5).** Hashing
 them as mechanical identity only holds if they are part of the **seed**. They are: A-S1 §3 step 4a
 authors them, and `ActionRow.Targeting` (`ActionRow.cs:40`) is the shipped authored field they bind
@@ -129,8 +184,10 @@ here rather than discovered when tier-1 collision rates come back high (A-S1 §3
    accepted one **modulo exactly one field** is rejected. **Across different anchors it is allowed** —
    a fire species and an ice species may both have "burst damage down a row", and should.
    Implementation is a hash set per field-masked projection, not an O(n²) pairwise scan.
-4. **Tier 3 — semantic. Advisory only.** If an index is configured, build it **from this round's own
-   candidates**, query it as a pure function of that set, and **discard it**. Similarity above the
+4. **Tier 3 — semantic. Advisory only.** Compute similarity **over this round's own candidates**
+   with the token-overlap function decided in §1, as a pure function of that set, and keep nothing.
+   (If an embedding index is ever configured instead, it is built from the round's own candidates,
+   queried, and **discarded** — the same rule, through the same seam.) Similarity above the
    tuning threshold writes a `review-queue.json` row and **never changes the survivor set**. Prose
    similarity is a weak proxy in both directions — two actions can read alike and play differently, or
    read differently and be identical — so making it a hard gate would both reject genuine content and
@@ -189,7 +246,12 @@ advisory.
 5. Tier 3 never changes the survivor set, asserted with an index stubbed to maximum similarity.
 6. `--no-semantic` and the full run produce byte-identical survivors.
 7. Provenance records the corpus hash, candidate-set hash, tuning version and, when tier 3 ran, the
-   embedding model id and version.
+   **similarity function id and version** (the embedding model id and version instead, if one is ever
+   configured through the seam) — ⛔ **DECIDED 2026-09-03**, §1.
+7b. **Tier 3 adds no third-party dependency.** A test asserts the module imports nothing outside
+   seedsmith's locked baseline, and the similarity function is pure integer per-mille arithmetic over a
+   deterministic tokenisation (CJK split per character), asserted on a bilingual pair. ⛔ **DECIDED
+   2026-09-03 (owner removed themselves as a gate)** — §1's Real gap.
 8. A rerun over unchanged inputs is byte-identical by hash.
 9. Zero model calls on the acceptance path, proven by a stub that raises.
 

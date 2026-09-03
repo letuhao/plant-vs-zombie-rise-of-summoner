@@ -56,11 +56,44 @@ A `powerBudgetMilli` column on `action-rungs.v{n+1}.json`, **published through
 **Its derivation must be stated in the file's `_meta`, not left implicit.** The obvious derivation, and
 the one to start from because it introduces no new curve:
 
-> `powerBudgetMilli(r) = poolRolls(r) × referencePower × qPowerMilli(r)`
+> `powerBudgetMilli(r) = poolRolls(r) × referencePower × qPowerMilli(r) / 1000`
 
 — the rung's own roll count times its own power multiplier. **This is not a new `f(level)`.** It reads
 `qPowerMilli` from the shipped table, so it stays inside the one power ladder; writing an independent
 budget curve would be exactly the private-curve defect `ssot-power-scale.md` exists to prevent.
+
+**⛔ DECIDED 2026-09-03 — `referencePower` ships at `1000`, derived from something shipped.** The term
+was named and never given a value, which left the derivation unevaluable and the module unbuildable.
+
+**`referencePower = 1000` is `PowerVector.One`** — the repo's own unit of power in per-mille
+(`PowerVector.cs:135`, `public const long One = 1000;`), the same unit `CostFunction` and
+`ActorPowerCache` normalise magnitudes into (`CostFunction.cs:65`, `ActorPowerCache.cs:94`). So the
+value is not chosen, it is **read**: one reference action is worth one unit of power.
+
+What that yields against the shipped table, with `long` arithmetic, widening before the multiply and
+**dividing by 1000 last, exactly once** (the divisor is `PowerVector.One`, so the formula stays in
+per-mille rather than gaining a factor of 1000):
+
+| Rung | `poolRolls` | `qPowerMilli` | `powerBudgetMilli` |
+|---|---|---|---|
+| 1 | 1 | 1000 | **1000** — exactly one unit of power |
+| 5 | 2 | 3062 | 6124 |
+| 10 | 3 | 12407 | 37221 |
+
+**Rung 1 landing on exactly `1000` is the property that makes this the neutral default**, in the same
+sense as `spec-innate-picker.md` §3.3's *"multipliers … defaulting to 1000, at which the score
+reproduces the lexicographic tuple exactly"* (`spec-innate-picker.md:124-125`): at the default, the
+budget *is* the shipped power curve, unscaled. The curve is `qPowerMilli`'s and stays `qPowerMilli`'s
+— `referencePower` is a single scalar that moves the whole ladder up or down together, so tuning it
+can never introduce a second curve shape.
+
+**What the smoke batch tunes it against.** The batch's accepted containers are priced through
+`ContentValidation.Budget` (§3.2) and the report gives the distribution of container cost against
+`powerBudgetMilli(r)` per rung. If most accepted content sits far under budget the scalar comes down;
+if the check fires on ordinary content it goes up. That is a **config change** — the value lives in
+`action-rungs.v{n+1}.json`'s `_meta`-documented column, published through `tools/tuning/publish.py`,
+never hand-edited. Until that evidence exists the value is stated as **untuned**, in the file's
+`_meta`, in those words.
 
 **And the register entry is part of this module, not a follow-up.** §5 constraint 2 promised the window
 *"belongs in the §11 register with that justification written down."* A budget that is not in the caps
@@ -137,7 +170,8 @@ sentence in five boundaries sections.
 | 2 | The budget is **monotonic across rungs** | A higher rung is never a smaller budget |
 | 3 | A container priced above its rung's budget produces a **finding naming the container id** | §3.2 |
 | 4 | **Planted violation:** an over-budget container that is **not** reported fails the test | A check with no caller is a comment |
-| 5 | `SpentAxes` returns **`undetectable`** for `reaction`/`restriction`, and a test asserts it is not `0` | §3.3's ambiguity is closed |
+| 5 | `SpentAxes` returns **`undetectable`** for **`restriction` only**, and a test asserts it is not `0` | §3.3's ambiguity is closed |
+| 5b | A brief naming **`reaction`** is **refused at authoring**, and `SpentAxes` is left **unchanged** for it | ⛔ **CORRECTED 2026-09-03.** Test 5 originally covered `reaction` too, contradicting §3.3 and AC5 — which say the guard is *already correct* about it. A builder implementing the old test 5 would have changed a guard this spec says not to touch |
 | 6 | The rung window appears in `ssot-power-scale.md` §11 with its justification, asserted by a doc-drift test | §5 constraint 2, mechanically |
 | 7 | **The generator refuses to widen family access** while assertion 2 is open — asserted, so C1 cannot be switched on by accident | §3.4 |
 | 8 | Budget arithmetic **throws** rather than wrapping at `long` boundaries | Numeric rule |
@@ -150,11 +184,23 @@ reading "two of three" as "done".
 ## 6. Acceptance criteria
 
 1. `action-rungs.v{n+1}.json` carries `powerBudgetMilli`, published, derivation in `_meta`.
-2. The derivation reads `qPowerMilli` and `poolRolls` — no new curve.
+1b. `referencePower` has a **stated value — `1000`** — derived from `PowerVector.One`
+   (`PowerVector.cs:135`), with `_meta` recording that it is untuned and what the smoke batch tunes it
+   against (§3.1). A test asserts `powerBudgetMilli(1) == 1000`, the property that makes it the
+   neutral default: at the default the budget is the shipped `qPowerMilli` curve, unscaled.
+   ⛔ **DECIDED 2026-09-03** — the term was named with no value, which left the derivation
+   unevaluable and this module unbuildable.
+2. The derivation reads `qPowerMilli` and `poolRolls` — no new curve, and `referencePower` is a
+   single scalar that moves the whole ladder together, so tuning it cannot introduce a second shape.
 3. `ContentValidation.Budget` has a rung-keyed overload **and a production caller**.
 4. An over-budget container is a finding with its id; nothing is clamped.
 5. `restriction` reports `undetectable`, never `0`. **`reaction` is refused at authoring** — it is
    unspendable, not undetectable, and the guard is already correct about it.
+   ✅ **VERIFIED CONSISTENT 2026-09-03 (second pass).** The review's F4 correction was checked end to
+   end: §3.3's `reaction` bullet, testing-table row 5 (`restriction` **only**), the new row 5b
+   (`reaction` refused at authoring, `SpentAxes` left unchanged) and this criterion now say the same
+   thing, and no row asks a builder to touch `StructureBudgetGuard` for `reaction`. Nothing further is
+   owed here.
 6. The rung window is in the caps register with its justification, held by a test.
 7. **C1's family-access widening remains disabled**, asserted by test 7, until D2 closes.
 8. `restriction`'s cross-program dependency on effect-atom's per-atom payload/target data is recorded in

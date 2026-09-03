@@ -105,7 +105,31 @@ public class MigrationParityTests
             migrated.Actions.Select(a => a.Action));
 
         foreach (var (want, got) in seeded.Actions.Zip(migrated.Actions))
-            Assert.Equal(Canonical(want.Params), Canonical(got.Params));
+        {
+            var wantCanon = Canonical(want.Params);
+            var gotCanon = Canonical(got.Params);
+
+            // E28 (spec-param-parity.md, content fix + fix #4): two genuine, deliberate content
+            // corrections in the live seed data, NOT mirrored into the frozen EffectSeedCatalog
+            // oracle — its own class doc comment is explicit that it stays "byte-identical to what
+            // it always was" and "do not add new defs here". Pinned exactly on both sides, so a
+            // THIRD, unintended drift on top of these two known ones still fails loudly instead of
+            // hiding behind a broad exclusion.
+            if (effectId == "fx.set_dirt_box")
+            {
+                Assert.Equal("boxType=1,col=3,row=2", wantCanon); // frozen: pre-fix boxType (Water)
+                Assert.Equal("boxType=2,col=3,row=2", gotCanon);  // live: corrected to Dirt
+                continue;
+            }
+            if (effectId == "fx.grid_item_cycle" && want.Action == EffectActions.ClearGridItem)
+            {
+                Assert.Equal("gridItemType=7,selector=\"last\"", wantCanon); // frozen: the naming lie
+                Assert.Equal("col=3,gridItemType=7,row=2", gotCanon);       // live: targets the cell
+                continue;
+            }
+
+            Assert.Equal(wantCanon, gotCanon);
+        }
     }
 
     public static TheoryData<string> SeededDefIds()

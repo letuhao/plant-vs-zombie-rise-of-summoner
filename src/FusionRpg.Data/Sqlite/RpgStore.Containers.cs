@@ -369,27 +369,39 @@ public sealed partial class RpgStore
         var check = AffixValidator.Validate(affix, lookupAtom, DomainMembers, FamilyVariantHasAnyTierUnlocked);
         if (!check.IsOk) return check;
 
-        if (SameAffixContent(GetAffix(affix.AffixId), affix)) return AtomRejection.Ok;
+        // E32 (spec-affix-import-path.md §3.2): an absent class is resolved to its derived value
+        // before storage — Class is written as a concrete value always, never null in the tables.
+        var resolved = affix.Class is null
+            ? affix with { Class = AffixValidator.ResolveClass(affix, lookupAtom) }
+            : affix;
+
+        if (SameAffixContent(GetAffix(resolved.AffixId), resolved)) return AtomRejection.Ok;
 
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-            WriteAffixUnlocked(db, tx, affix);
+            WriteAffixUnlocked(db, tx, resolved);
             tx.Commit();
             return AtomRejection.Ok;
         }
     }
 
+    /// <summary>Writes one affix row. <paramref name="affix"/>.Class must already be resolved
+    /// (non-null) — every caller runs it through <see cref="AffixValidator.ResolveClass"/> first
+    /// (E32, §3.2); the tables never carry a null class.</summary>
     void WriteAffixUnlocked(SqliteConnection db, SqliteTransaction tx, AffixRow affix)
     {
+        var affixClass = affix.Class
+            ?? throw new InvalidOperationException($"{affix.AffixId}: class must be resolved before writing — caller skipped ResolveClass");
+
         ExecIn(db, tx, """
             INSERT INTO effect_affix (affix_id, affix_class, revision)
             VALUES ($id, $class, 1)
             ON CONFLICT(affix_id) DO UPDATE SET
               affix_class = excluded.affix_class, revision = effect_affix.revision + 1;
             """,
-            ("$id", affix.AffixId), ("$class", AffixClassName(affix.Class)));
+            ("$id", affix.AffixId), ("$class", AffixClassName(affixClass)));
 
         ExecIn(db, tx, "DELETE FROM effect_affix_ref WHERE affix_id = $id;", ("$id", affix.AffixId));
 

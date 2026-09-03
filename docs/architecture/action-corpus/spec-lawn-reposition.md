@@ -1,16 +1,18 @@
 # Spec: `lawn-reposition` (A-M2)
 
 **Module id:** `lawn-reposition` · **Status:** proposed 2026-09-03 · **Program:** [action-corpus](../action-corpus-map.md) · **Model calls: no**
-**Depends on:** `A-M1 movement-payload` · **⛔ BLOCKED on effect-atom `E33` (the activation edge) AND on
-action `A9 movement-actions` (the producer)** — ⛔ **CORRECTED 2026-09-03 (review):** this spec named
+**Depends on:** `A-M1 movement-payload` · **⛔ BLOCKED on effect-atom `E33` (the activation edge) AND on a
+lawn-side production producer** — ⛔ **CORRECTED 2026-09-03 (second pass):** that producer is **not**
+`A9 movement-actions`, which is **battle-grid only** (`action-map.md:294`); see §7 hazard 4's
+⛔ DECIDED note, which also records that this module **ships knowingly inert** rather than waiting — ⛔ **CORRECTED 2026-09-03 (review):** this spec named
 E33 as the whole block, because it was written without reading
 [`spec-activation-edge.md`](../effect-atom/spec-activation-edge.md). That spec says in its own words
 that E33 *"does **not** own a game-facing producer — that is `A9 movement-actions`"*
 (`spec-activation-edge.md:13-14`) and lists `A9` under **Unblocks**, *"which supplies the production
-producer"* (`:168-169`). So E33 ships a **seam with no production caller of its own**, and its own
+producer"* (`:277-278`). So E33 ships a **seam with no production caller of its own**, and its own
 hazard table names that as the D6 recurrence — *"a path with no consumer is accepted and then does
 nothing forever"* — with the mitigation that if A9 does not follow in the same window the map row
-must say **inert**, in that word (`spec-activation-edge.md:173`). **A-M2 is downstream of both**, and
+must say **inert**, in that word (`spec-activation-edge.md:282`). **A-M2 is downstream of both**, and
 recording only E33 would have had this module waiting on a seam that still could not fire it.
 ⚠️ The capability map's gate still stands — *"Not approved. No module spec may be written until it is"*
 (`action-corpus-map.md:3-5`). Written ahead of approval on the owner's instruction.
@@ -58,9 +60,9 @@ the narrowest one in the repo — **ONE guarded entry point, *move actor to cell
 
 | Thing | Evidence |
 |---|---|
-| **`OnActivate` is authorable but raised nowhere in the injector** — so no lawn action can fire at all | `decisions.md:97` (amended 2026-09-03); `effect-atom-map.md:317` (E33) |
-| **E33 supplies the seam, not a producer** — `A9 movement-actions` supplies the production producer, and E33 ships with no production caller of its own | `spec-activation-edge.md:13-14`, `:168-169`, `:173` |
-| **There is no `HasOnActivateGrant()` fast gate** — the injector has four `HasOn*Grant()` helpers and no `OnActivate` one, so a producer written today would have to fire unconditionally | `EffectRuntime.cs:145-159`, via `spec-activation-edge.md:38`; E33 AC5 requires the helper and requires every later producer to call it first (`:159`) |
+| **`OnActivate` is authorable but raised nowhere in the injector** — so no lawn action can fire at all | `decisions.md:97` (amended 2026-09-03); `effect-atom-map.md:337` (E33) |
+| **E33 supplies the seam, not a producer** — `A9 movement-actions` supplies the production producer, and E33 ships with no production caller of its own | `spec-activation-edge.md:13-14`, `:277-278`, `:282` |
+| **There is no `HasOnActivateGrant()` fast gate** — the injector has four `HasOn*Grant()` helpers and no `OnActivate` one, so a producer written today would have to fire unconditionally | `EffectRuntime.cs:145-159`, via `spec-activation-edge.md:38`; E33's acceptance criterion **6** requires the helper and requires every later producer to call it first (`:263`; ⛔ corrected 2026-09-03 — was cited as AC5 at `:159`) |
 | `OnActivate` **can** already be fired by hand on a live lawn via `debug.effect.fire-synthetic` — a debug-only entry point, evidence the plumbing works, **not** a producer | `CheatCommandRunner.cs:364-368`, `:2052`; `EffectRuntime.cs:330-338`, via `spec-activation-edge.md:39` |
 | `Instantiator.TryInstantiate` — doc-comment references only, no production caller | `Instantiator.cs:92`; `InstanceProducer.cs:22`, `Resolver.cs:28`, `RpgStore.AtomInstances.cs:104` |
 | `move.range` is registered and has **no production reader** | `DerivedStatRegistry.cs:237`; `DominanceGuard.cs:103` is its only other mention |
@@ -164,7 +166,7 @@ that cell", which the writer checks and skips.
 
 - **new patterns**: `thePlantRow\s*=`, `thePlantColumn\s*=`, `theZombieRow\s*=`, `transform\.position\s*=`,
   `\.localPosition\s*=`;
-- **allow-list**: `EntityPositionWriter.cs` added to `$allowed` (`guard-single-writer.ps1:24-29`);
+- **allow-list**: `EntityPositionWriter.cs` added to `$allowed` (`guard-single-writer.ps1:24-28`);
 - **path exemptions**, alongside the existing `Bridges/` one (`:34`): **`Fx/`** — `AuraPool.cs:80,117`,
   `BurstPool.cs:57` are VFX GameObjects — and **`Hud/`** — `ActorHudPool.cs:170,225,243` are HUD objects,
   **not `Plant`/`Zombie` transforms**. Each exemption carries a one-line comment saying which files it
@@ -245,13 +247,13 @@ correct guard gets weakened in a hurry instead of scoped in advance.
 
 | Needs | From | State |
 |---|---|---|
-| **`OnActivate` raised on the lawn** | **effect-atom E33** | ⛔ **hard block** — absent from `EffectDtos.EffectTriggers`, raised nowhere (`effect-atom-map.md:317`; `action-corpus-map.md:128`) |
+| **`OnActivate` raised on the lawn** | **effect-atom E33** | ⛔ **hard block** — absent from `EffectDtos.EffectTriggers`, raised nowhere (`effect-atom-map.md:337`; `action-corpus-map.md:136`) |
 | The payload half | **A-M1** `movement-payload` | specced, unbuilt |
 | `move.range` as a reader-backed channel | **A-M1 / effect-atom** | registered, **no production reader** (`DerivedStatRegistry.cs:237`) |
 | Cell → world conversion | `LawnCoords` | built (`LawnCoords.cs:59-71`) — but its **null-`Mouse` fallback returns `new Vector2(col, row)`** (`:71`), a near-origin teleport if an actor write trusts it. §2 states the drop-and-count rule |
-| **The production producer** | **action `A9 movement-actions`** | does not exist — E33 explicitly does not own it (`spec-activation-edge.md:13-14`, `:168-169`) |
+| **The production producer** | **a lawn-side `OnActivate` caller — NOT `A9`** | ⛔ **CORRECTED 2026-09-03.** This row said `A9 movement-actions`. `A9` is **battle-grid only** and cannot be this module's producer — see hazard 4 |
 | `HasOnActivateGrant()` fast gate | **effect-atom E33** | does not exist; four `HasOn*Grant()` helpers, none for `OnActivate` (`EffectRuntime.cs:145-159`) |
-| Record-then-drain host pattern | `EventDrainHost` | built (`EventDrainHost.cs:7-29`, `InjectorLoop.cs:77`) |
+| Record-then-drain host pattern | `EventDrainHost` | built (`EventDrainHost.cs:7-29`, `InjectorLoop.cs:79`) |
 
 **Hazards.**
 
@@ -265,11 +267,42 @@ correct guard gets weakened in a hurry instead of scoped in advance.
    reference `DamageFxOverlay.cs`/`OverlayWorldFx.cs` while the VFX migration deletes them — a pre-existing
    failure owned by the VFX stream. Do not read a red guard suite as evidence about this module.
 4. **`A9` `movement-actions` and `A10` `battle-board` both depend on this row** (`decisions.md:105`), so a
-   shortcut taken here propagates into two named-deferred modules. **And the dependency runs both
-   ways:** `A9` is also this module's *producer* — E33 supplies the activation seam and explicitly
-   not the producer (`spec-activation-edge.md:13-14`, `:168-169`). Shipping A-M2 with E33 alone
-   ships a write path nothing calls, which is the D6 recurrence E33's own hazard table names
-   (`spec-activation-edge.md:173`) — and the map row must then read **inert**, in that word.
+   shortcut taken here propagates into two named-deferred modules.
+
+   **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — A-M2 SHIPS KNOWINGLY INERT, and the
+   map row reads `inert`, in that word. `A9` is NOT pulled in, because pulling it in would not help.**
+
+   The choice was framed as *"ship inert, or pull `A9` in"*. Reading the action program settles it,
+   and it settles it the other way from how this spec's own header read:
+
+   - **`A9` is battle-grid only.** `action-map.md:294`: *"This map contradicted that in two places:
+     `A8 defence-actions` and `A9 movement-actions` both referenced lawn geometry. **Corrected
+     2026-08-22** — `A9` is battle-grid only, and the grid is owned by the new `A10 battle-board`."*
+     A-M2 is the **lawn** half. So `A9` landing produces a producer for a different board, and this
+     module would still have none. ⛔ This corrects the header block's *"A-M2 is downstream of
+     both"* — it is downstream of E33, and of a lawn-side producer that `A9` is not.
+   - **`A9` is not "in no plan".** It is `tasks/action-todo.md:1703`, under *Deferred — specced, not
+     scheduled*: *"waits on `A10`. One row, no new runtime."* And `A10` is an **owner deferral**
+     (`:1704`, *"built with the board map / battle area"*). Pulling `A9` in means pulling `A10` in,
+     which is a battle-area decision far outside this module's scope.
+   - **Shipping inert is the prescribed outcome, not an improvised one.** E33's own hazard table
+     already says that if the producer does not follow in the same window, the map row must read
+     **inert**, in that word (`spec-activation-edge.md:282`). Doing that is following a rule already
+     written.
+   - **This module was designed for exactly this state.** The reposition ships behind a **default-off
+     toggle** *"so 'unbuilt' and 'shipped but inert' cannot be confused in a report"* (§4's own
+     words). Inert is the state the toggle exists to name.
+
+   **The producer is therefore a named, criteria-stated task that blocks no other module:** a
+   lawn-side caller that raises `OnActivate` for an actor's movement action, so E33's seam has a
+   production caller. **What a pass looks like:** on a live lawn, a movement action activated by a
+   real actor produces one `OnActivate` grant, the reposition entry point receives one *move actor to
+   cell* request, and the drain applies it inside the frame budget with `guard-single-writer.ps1`
+   green. Until that exists, this module is **shipped, toggled off, and reported inert** — never
+   *"built"*.
+
+   **What would overturn it:** `A9`'s scope widening back to lawn geometry (which `action-map.md:294`
+   corrected away on purpose), or a lawn-side producer landing in E33's own window.
 5. **`LawnCoords.CellCenter`'s null-`Mouse` fallback is the quiet one.** It is not a crash, not a log
    line and not a clamp — it is a correct-looking `Vector2` that puts an actor near the origin, and
    the only place it becomes dangerous is the one write path this module adds (§2).

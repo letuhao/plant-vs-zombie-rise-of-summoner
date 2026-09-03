@@ -1,7 +1,8 @@
 # Spec: `signature-propose` (A-P3)
 
 **Module id:** `signature-propose` · **Status:** proposed 2026-09-03 · **Program:** [action-corpus](../action-corpus-map.md) · **Model calls: yes**
-**Depends on:** `A-S1 distribution-planner` **and `A-P2 family-propose`** — a dependency, not a flag
+**Depends on:** `A-S1 distribution-planner` **and `A-S2 brief-assembly`** — a dependency, not a flag
+(⛔ **DECIDED 2026-09-03:** it read `A-P2 family-propose`; A-S2 now owns assembling this stage's brief — §6)
 ⚠️ The capability map's gate still stands — *"Not approved. No module spec may be written until it is"*
 (`action-corpus-map.md:3-5`). Written ahead of approval on the owner's instruction.
 
@@ -40,8 +41,8 @@ It forces the ordering **P1 ∥ P2 → P3**.
 | Species motif anchors — **84 species**, each with `motifs`, `antiMotifs`, `basis`, `tautological` | `data/seed/demons/_generated/motif-assignments.json` (84 keys, measured 2026-09-03) |
 | Family assignments — 53 species, 19 families | `data/seed/demons/_generated/family-assignments.json` |
 | `SpeciesBasics.InnateActionId` — per species, nullable, validated, assembled, persisted | `Actions/ActionRow.cs:87` · `Actions/ActionValidator.cs:107-115` · `Actions/Grants/ActionSetAssembler.cs:60-61` · `FusionRpg.Data/Sqlite/RpgStore.Actions.cs:546-549` |
-| Closed action vocabularies | `ActionEnums.cs:26-47`, `ActionTargetSpec.cs:14-33`, `:42-48` |
-| Rung table with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:12-21` |
+| Closed action vocabularies | `ActionEnums.cs:26-49`, `ActionTargetSpec.cs:14-33`, `:42-48` |
+| Rung table with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:11-20` |
 | Schema audit, permutation, vote, bounded self-heal | `pipeline/model.py:53-99`, `anchor/permute.py:16-30`, `anchor/vote.py:23-40`, `llm_caller.py:207-236` |
 | The stage shape to copy exactly | `adapters/effects/affix/prompts.py:26-112`, `generate_affixes.py:74-96` |
 
@@ -51,7 +52,7 @@ It forces the ordering **P1 ∥ P2 → P3**.
 |---|---|
 | `Instantiator.TryInstantiate` — doc-comment references only, no production caller | `Instantiator.cs:92`; `InstanceProducer.cs:22`, `Resolver.cs:28`, `RpgStore.AtomInstances.cs:104` |
 | `data/seed/actions/` unreadable — no `kind`/`entries` envelope | `corpus/model.py:159-185` |
-| `StructureBudgetGuard` cannot detect `reaction` / `restriction`, the two axes that are the signature tier's only structural advantage over family | `action-corpus-ideal.md:1462-1468`; the axes appear only at rungs 9-10 in `data/tuning/action-rungs.v1.json:20-21` |
+| `StructureBudgetGuard` cannot detect `reaction` / `restriction`, the two axes that are the signature tier's only structural advantage over family | `action-corpus-ideal.md:1462-1468`; the axes appear only at rungs 9-10 in `data/tuning/action-rungs.v1.json:19-20` |
 
 ### Real gap
 
@@ -157,6 +158,20 @@ SIGNATURE_ACTION_SCHEMA = {
 
 - **No `number`/`integer`, no numeric-string enum member, no `pattern` admitting digits.** All three enums
   are filled at call time from closed lists.
+
+**⛔ DECIDED 2026-09-03 — where the `atomFamilies` enum's members come from.** `allowedAtomFamilies`
+now has a stated source: the **98 authored affix families** in
+`data/seed/items/affix-families/*.json` (`entries[].id`). Until this decision no spec said which set
+`atomFamilies` names, and the tree holds three **completely disjoint** candidates — 17 demo families
+under `data/seed/atoms/`, the 98 authored ones, and the 5 ids in `data/seed/actions/pairings.json`,
+with **zero overlap between any pair** (measured 2026-09-03; the evidence table is in
+`spec-distribution-planner.md` §2).
+
+It matters most at this stage. `atomFamilies` is one of the two **voted** fields here, and the
+"differ from every family action" validator compares atom-family **sets**: two sets drawn from a
+namespace that resolves nowhere would still compare equal or unequal perfectly well, so the defect
+would have survived every gate this spec has and surfaced at bind time. Every member of the enum is
+now an id that exists and carries a `kindId`, a `params.channel` and a `powerBand`.
 - **`differentiator` admits `none`**, and its negative clause is the load-bearing sentence — now
   written into the schema above rather than only quoted here. A `none` answer is a real, useful
   signal: it tells A-S3 the candidate is a near-duplicate before the hash sets do.
@@ -183,7 +198,7 @@ negative clauses:
 
 ### What the brief inlines
 
-Literal values, no file citation (`affix/prompts.py:66-80` states the reason). In order:
+Literal values, no file citation (`affix/prompts.py:60-61` states the reason). In order:
 
 - the species key and its **element** and rarity as labels;
 - the species' motifs in permuted order, then its anti-motifs each carrying *"an action expressing this is
@@ -294,12 +309,31 @@ taken by default.
 
 | Needs | From | State |
 |---|---|---|
-| The brief, with species anchor and slot | **A-S1** `distribution-planner` | does not exist |
-| **The accepted family round** | **A-P2** `family-propose` | does not exist — this is the hard in-program ordering |
+| **The assembled P3 brief**, carrying `familyActions` | **A-S2** `brief-assembly` | does not exist — this is the hard in-program ordering |
+| The plan behind it — species anchor and slot | **A-S1** `distribution-planner` (via A-S2) | does not exist |
+| The accepted family round A-S2 reads | **A-P2** `family-propose` | does not exist |
 | Species motifs / anti-motifs / element / rarity | **seedsmith D2/D5** | 84 species on disk; rarity for the unrostered remainder is unspecced |
 | Quality gates, bounded repair | **A-S4** `validate-heal` | does not exist |
 | Innate promotion | **A-S6** `innate-picker` | model-free, downstream, not this stage's business |
 | Channel pools · binding production | **effect-atom E30** · **effect-pipeline module 4** | outside this program; `effect_binding` has zero rows |
+
+**⛔ DECIDED 2026-09-03 — a new module assembles this stage's brief, and it is A-S2.** This spec
+depended on **A-P2** for a brief field, which is not a thing a model stage can produce: `familyActions`
+does not exist until A-P2's round has been generated, validated, deduped and **id-assigned**, and
+A-S1 builds briefs in a static, token-free phase before any of that. Nobody owned the step in
+between, and this stage raises on a brief whose `familyActions` key is absent (§3), so **100% of its
+input would have raised.**
+
+**A-S2 `brief-assembly` owns it.** It reads A-S1's plan and A-P2's **accepted, deduped, id-assigned**
+round — never A-P2's raw output — and emits this stage's brief. The distinction is the whole point: a
+candidate A-S4 rejected or A-S3 deduped away must not appear in the list this stage is told to differ
+from, or the pipeline differentiates against content that was never accepted.
+
+**This closes F15 recurring.** Family *motifs* had the identical defect one field over in the same
+brief — A-P2 said *"A-S1 owns it"*, A-S1 never mentioned it, and A-P2's AC5 rejected 100% of A-S1's
+output; the review's words were *"ownership passed in a circle."* That one was closed by writing the
+derivation into A-S1 (§3 step 2b). `familyActions` was the same defect, unnoticed, and it closes the
+same way: a named owner.
 
 **Hazards.**
 
@@ -322,12 +356,17 @@ taken by default.
    signature action is actually distinct, which is why `differentiator` is voted. **Under the old
    intersection rule this hazard had zero instances** — `restriction` was unreachable in every tier —
    so the note described a case that could not occur; it can now.
-2. **A `minRung` floor at 5 for the signature tier is unpriced.** `max(5, min(earnCount, 10))` is constant
-   at 5 across `earnCount ∈ [0,5)`, and rung 5 already carries `costMulti: 3627` — a player with zero earn
-   history pays 3.6× (`data/tuning/action-rungs.v1.json:16`; `action-corpus-ideal.md:1452-1461`). Drop the
-   floor or price it; this stage must not compensate for it in prose.
+2. ~~**A `minRung` floor at 5 for the signature tier is unpriced.**~~ ⛔ **RESOLVED 2026-09-03 — the
+   floor is dropped.** The signature window is `[1,10]`, not `[5,10]`
+   (`spec-distribution-planner.md` §3 step 4; `spec-rung-semantics.md` §3.2). The floor at issue was
+   **A-S1's authored `rungBand` floor** — `minRung` never existed in code or data (grepped
+   2026-09-03: zero hits across `src/` and `data/`; the only `MinRung` is `AuraTuning.cs:20`, the
+   aura ladder's unrelated rung-7 floor). With no floor a first-ever signature unlock arrives at
+   rung 1 and pays `costMulti: 1000`, so **the `costMulti: 3627` argument is moot** — it priced a
+   case that no longer occurs. The **ceiling stays 10**, so this stage's structural context is
+   unchanged: signature still draws from 6 assignable axes.
 3. **C1's family-access widening is gated** on a per-rung `powerBudget` row, a family-aware non-additive
    price (needs D2), and a budget check with a production caller (`action-corpus-ideal.md:707-728`). Until
    then, briefs are structure-gated. This stage never branches on tier.
-4. **Sizing rests on an unsourced rate** (`~1,162 calls/h`, `action-corpus-ideal.md:1447`) and on the
+4. **Sizing rests on an unsourced rate** (`~1,162 calls/h`, `action-corpus-ideal.md:1448`; the figure itself is at `:561`) and on the
    corrected 84-species roster. Both belong in the plan's own arithmetic, not in this stage's assumptions.

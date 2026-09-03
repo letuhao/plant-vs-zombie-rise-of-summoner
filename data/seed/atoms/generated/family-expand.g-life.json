@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.bulwark",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Bulwark T1",
+      "params": {
+        "channel": "maxHp",
+        "op": "more",
+        "amount": {
+          "min": 13,
+          "max": 25,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.bulwark",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Bulwark T2",
+      "params": {
+        "channel": "maxHp",
+        "op": "more",
+        "amount": {
+          "min": 22,
+          "max": 44,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.bulwark",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Bulwark T3",
+      "params": {
+        "channel": "maxHp",
+        "op": "more",
+        "amount": {
+          "min": 39,
+          "max": 77,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.bulwark",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Bulwark T4",
+      "params": {
+        "channel": "maxHp",
+        "op": "more",
+        "amount": {
+          "min": 68,
+          "max": 136,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.bulwark",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Bulwark T5",
+      "params": {
+        "channel": "maxHp",
+        "op": "more",
+        "amount": {
+          "min": 120,
+          "max": 238,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.fortitude",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Fortitude T1",
+      "params": {
+        "channel": "maxHp",
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.fortitude",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Fortitude T2",
+      "params": {
+        "channel": "maxHp",
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.fortitude",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Fortitude T3",
+      "params": {
+        "channel": "maxHp",
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.fortitude",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Fortitude T4",
+      "params": {
+        "channel": "maxHp",
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.fortitude",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Fortitude T5",
+      "params": {
+        "channel": "maxHp",
+        "op": "increased",
+        "amount": {
+          "min": 219,
+          "max": 435,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.mending",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Mending T1",
+      "params": {
+        "channel": "hp",
+        "op": "flat",
+        "amount": {
+          "min": 16,
+          "max": 32,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.mending",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Mending T2",
+      "params": {
+        "channel": "hp",
+        "op": "flat",
+        "amount": {
+          "min": 28,
+          "max": 56,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.mending",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Mending T3",
+      "params": {
+        "channel": "hp",
+        "op": "flat",
+        "amount": {
+          "min": 50,
+          "max": 98,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.mending",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Mending T4",
+      "params": {
+        "channel": "hp",
+        "op": "flat",
+        "amount": {
+          "min": 87,
+          "max": 173,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.mending",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Mending T5",
+      "params": {
+        "channel": "hp",
+        "op": "flat",
+        "amount": {
+          "min": 153,
+          "max": 303,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.vitality",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Vitality T1",
+      "params": {
+        "channel": "maxHp",
+        "op": "flat",
+        "amount": {
+          "min": 16,
+          "max": 32,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.vitality",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Vitality T2",
+      "params": {
+        "channel": "maxHp",
+        "op": "flat",
+        "amount": {
+          "min": 28,
+          "max": 56,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.vitality",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Vitality T3",
+      "params": {
+        "channel": "maxHp",
+        "op": "flat",
+        "amount": {
+          "min": 50,
+          "max": 98,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.vitality",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Vitality T4",
+      "params": {
+        "channel": "maxHp",
+        "op": "flat",
+        "amount": {
+          "min": 87,
+          "max": 173,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.vitality",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Vitality T5",
+      "params": {
+        "channel": "maxHp",
+        "op": "flat",
+        "amount": {
+          "min": 153,
+          "max": 303,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-life.json",
+        "generator": "E43"
+      }
+    }
+  ]
+}

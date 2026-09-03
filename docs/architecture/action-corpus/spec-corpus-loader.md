@@ -44,7 +44,7 @@ easy to get wrong — leaves the two shipped runtime-config files exactly as the
 | Thing | Evidence |
 |---|---|
 | `data/seed/actions/` holds exactly two files and **neither is loadable** — no `kind`, no `entries` | `data/seed/actions/name-templates.json`, `data/seed/actions/pairings.json` |
-| `name-templates.json` **cannot be wrapped**: `ActionNameTemplates.Parse` reads `base` and `modifiers` off the root object and rejects a missing or non-object key | `ActionNameTemplates.cs:68-69`, `:79-82` |
+| `name-templates.json` **cannot be wrapped**: `ActionNameTemplates.Parse` reads `base` and `modifiers` off the root object and rejects a missing or non-object key | `ActionNameTemplates.cs:68-70`, `:83-84` |
 | `pairings.json` **cannot be wrapped**: `EnablerPayoffPairings.Parse` requires the root itself to be the payoff to `[enablers]` map | `EnablerPayoffPairings.cs:47-48` |
 | Neither file has a production loader; only a test reads `pairings.json` | `tests/FusionRpg.Core.Tests/Actions/ActionSeedingEnablerPayoffTests.cs:89` |
 
@@ -78,12 +78,12 @@ round-trip test is expressible.
       "category": "attack",                  // ActionEnums.cs:26-33
       "tags": ["offensive"],                 // ActionEnums.cs:39-49
       "kindHint": "skill",                   // basic | innate | skill — A-S6 may promote to innate
-      "rungBand": [5, 10],                   // Rung = rungBand[1], the ceiling — A-S1 §3 step 4
+      "rungBand": [1, 10],                   // Rung = rungBand[1], the ceiling — A-S1 §3 step 4
       "targetMode": "area",                  // ActionTargetModes.Name — ActionTargetSpec.cs:103-112
       "areaShape": "row",                    // only under `area` — ActionTargetSpec.cs:134-141
       "relation": "enemy",                   // RelationKinds.Name — RelationKind.cs:23-26
       "structureAxes": ["riderStatus"],
-      "atomFamilies": ["atom.burn", "atom.spread"],  // family = POOL reference — constraint 1
+      "atomFamilies": ["atom.searing-strike", "atom.volley"],  // family = POOL reference — constraint 1
       "pairingRole": "enabler",              // enabler | payoff | none
       "pairedPayoffFamily": "atom.rot-punisher",     // an ATOM FAMILY, never a status
       "motifsUsed": ["铁头功"],
@@ -111,6 +111,28 @@ this module's own §3 step 5 cross-check:
 - **`atomPools` → `atomFamilies`**, the one canonical name (A-S1 §3 step 8's table). The code of
   record calls it a family (`AtomRow.FamilyId`, `ActionSeeder.cs:61`); constraint 1's *"an atom names
   a pool"* is held by the constraint, not by the field name.
+
+**⛔ DECIDED 2026-09-03 — which ids `atomFamilies` may hold.** The field had a canonical *name* but no
+stated *namespace*, and the tree holds three disjoint candidates: **17** demo families under
+`data/seed/atoms/`, **98** authored families under `data/seed/items/affix-families/`, and **5** ids in
+`data/seed/actions/pairings.json` — measured 2026-09-03 with **zero overlap between any pair**.
+
+**`atomFamilies` names ids from the 98** (`data/seed/items/affix-families/*.json`, `entries[].id`;
+the decision and its evidence table are in `spec-distribution-planner.md` §2). So this envelope's
+`atomFamilies` and `pairedPayoffFamily` both draw from that set, and §3 step 5's cross-check has a
+list to check against for the first time. The two ids in the example above were `atom.burn` and
+`atom.spread`, which exist in none of the three — they are now real families from
+`data/seed/items/affix-families/g-on-hit.json`.
+
+`pairedPayoffFamily` is the one field still shown pre-rewrite: `pairings.json`'s five ids are outside
+the namespace, and rewriting them into it is a named deliverable of A-S1 (§3 step 6). **That rewrite
+changes the ids, never the file's shape** — the "never rewrite `pairings.json`" rule in §4 below is
+about the *envelope*, which `EnablerPayoffPairings.Parse` cannot accept
+(`EnablerPayoffPairings.cs:47-48`), and it still stands.
+
+The signature `rungBand` in the example was `[5, 10]`; the floor is dropped and the window is
+`[1, 10]` (`spec-rung-semantics.md` §3.2, `spec-distribution-planner.md` §3 step 4). The ceiling is
+unchanged, so the `Rung = rungBand[1]` collapse rule resolves the same row as before.
 
 **A second, declared kind:** `action-config`, for the two shipped files — see §3 step 2. It is a
 *manifest entry*, not an envelope: those files' bytes do not change.
@@ -184,6 +206,40 @@ Deterministic, total, and pure — no network, no database, no mutation outside 
      graph.
    - **A duplicate id is still a raise**, and that is correct — this step removes the *guaranteed*
      collision so the raise stays a signal about real content rather than a scheduling artefact.
+
+2c. **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the policy for all four underscore
+   prefixes, stated as a rule rather than a list.** Step 2b decided `_rounds/` and left
+   `_generated/`, `_briefs/` and `_reports/` unaddressed, which is how a fifth prefix appears
+   silently.
+
+   **The rule: a prefix is EXCLUDED from the committed-corpus load if and only if it can mint an id
+   in a grammar the committed corpus also mints. Every other declared prefix is LOADED. Every
+   prefix, either way, is listed in `_manifest.json` with a `disposition` and a reason, and an
+   undeclared one is a finding (step 2's third case).**
+
+   | Prefix | Written by | Grammar | Disposition | Why |
+   |---|---|---|---|---|
+   | `_rounds/` | A-S3 | `action.*`, `reject.*`, `review.*` | **exclude** | A-S3's survivors and A-S6's promotions are **the same `action.*` grammar under one root**, so a duplicate is structurally guaranteed the moment A-S6 promotes (§3 step 2b, review F14). This is the only prefix where that is true |
+   | `_generated/` | A-S0, A-T1 | `pool.*`, `lean.*`, `weights.*` | **load** | Three grammars, none of them `action.*` (§2's table). A re-derivation overwrites its own file in place and cannot collide with a promoted seed |
+   | `_briefs/` | A-S1 | `brief.*` | **load** | Same argument; and a brief's `avoidNeighbours.actionId` edge only resolves if both ends are in one graph |
+   | `_reports/` | A-S5 | `cell.*`, `target.*` | **load** | Same argument; a coverage cell naming its subject is the other cross-kind edge §2's table exists for |
+
+   **Why "load" is the right default for the other three, and not just the cheap one.** The raise is
+   on a duplicate **real id** (`corpus/model.py:92-101`), and §2's per-kind `id_pattern` table
+   declares **ten disjoint grammars** — so three of the four prefixes cannot produce the collision
+   the exclusion exists to prevent. Excluding them anyway would cost something real: `discover_edges`
+   records an edge only where the **target's** pattern matches (`corpus/model.py:154`), so a brief
+   pointing at `lean.cherrybomb`, or a coverage cell pointing at `action.species.cherrybomb.001`,
+   silently records nothing if the two ends never land in the same graph. That is the exact defect
+   §2's per-kind table was written to close, and a blanket underscore exclusion would reopen it.
+
+   **`_exemplars/` is not in this table and is not this module's** — `Corpus.add` already routes it to
+   its own ledger by a top-level path part (`corpus/model.py:188`), which is where the leading-underscore
+   convention comes from.
+
+   **What would overturn it:** any stage writing an `action.*` id under `_generated/`, `_briefs/` or
+   `_reports/`. That flips one `disposition` value in `_manifest.json` — a data row, not a code branch,
+   which is why this decision is cheap to reverse.
 3. **Build the graph** through the existing `Corpus.add` — duplicate ids raise, exemplars route to their
    own ledger (`corpus/model.py:84-104`).
 4. **Validate each entry** against the `KindSpec` for `action-seed`: `required = {id, scope, category,
@@ -199,24 +255,37 @@ Deterministic, total, and pure — no network, no database, no mutation outside 
    `ActionTags.Name` (`:128-139`), kinds `ActionKinds.Name` (`:72-78`), target modes
    `ActionTargetModes.Name` (`ActionTargetSpec.cs:103-112`), area shapes `ActionAreaShapes.Name`
    (`:134-141`), relations `RelationKinds.Name` (`RelationKind.cs:23-26`), statuses
-   `StatusCatalogBootstrap.cs:15-56`. An unknown member is refused, never skipped. ⛔ **CORRECTED
+   `StatusCatalogBootstrap.cs:16-58`. An unknown member is refused, never skipped. ⛔ **CORRECTED
    2026-09-03 (review F10):** citing the enum declarations rather than their `Name` functions is what
    let this spec's own example emit `"Area"`.
+
+   ⛔ **DECIDED 2026-09-03 (owner removed themselves as a gate) — an eleventh checked vocabulary:
+   the family key set.** A `family`-scoped entry whose `scopeKey` names no known family is **refused
+   here**, against the key set of `data/seed/actions/_generated/family-map.json` (A-S0's projection of
+   `family-assignments.json` — 53 species over **19** family ids, measured 2026-09-03). This closes
+   `spec-eligibility-axis.md`'s own contradiction: its §3.1 and §4 forbid the action layer joining the
+   demon catalog, while its test 6 wanted a load-time refusal that needs the family list. The refusal
+   belongs where every other closed-vocabulary refusal already lives — here — and the C# side keeps
+   `scopeKey` opaque, so a stray row is inert (it joins no candidate set) rather than wrong. See
+   `spec-eligibility-axis.md` §6 AC5b for the same decision from the other side.
 6. **Register the adapter** as `"actions"` in `ADAPTERS` (`adapters/registry.py:10-14`) and nowhere else.
 
 ## 4. What it must NOT do
 
 - **Never rewrite `name-templates.json` or `pairings.json`.** Both C# parsers read the root object
-  directly (`ActionNameTemplates.cs:68-69`, `EnablerPayoffPairings.cs:47-48`); an envelope makes both throw.
+  directly (`ActionNameTemplates.cs:68-70`, `EnablerPayoffPairings.cs:47-48`); an envelope makes both throw.
 - Never call a model. Never import the LLM transport at all — *tests never call a model, and the stub
   raises.*
 - Never write into `data/seed/actions/` during a load.
 - Never add a fifth folder to the atom importer sweep — it deliberately reads four
   (`data/seed/README.md:9-10`), and `actions/` is not one of them.
 - Never invent the C# eligibility surface. `ActionRow` has no field naming who may hold an action
-  (`ActionRow.cs:18-53`), and whether `scope`/`scopeKey` becomes a column or a table is explicitly a
-  later decision (`action-corpus-ideal.md` §6). **No module in map §4 owns it** — recorded here so the
-  gap stays visible rather than being absorbed by this one.
+  (`ActionRow.cs:18-53`). ⛔ **CORRECTED 2026-09-03:** this bullet then said the column-vs-table
+  question was *"a later decision"* and that **no module in map §4 owns it**. Both are now false, and
+  a stale "nobody owns this" is worse than no note at all: **A-E1 `eligibility-axis` owns the whole
+  schema surface** (`action-corpus-map.md:80`; `spec-eligibility-axis.md` §3.0), and §3.1 of that spec
+  **decided column, not table**, with the reason stated. The boundary this bullet actually holds is
+  unchanged: this module parses files and never adds a C# field.
 - Never resolve a pool reference into a concrete atom. Constraint 1.
 
 ## 5. Testing strategy
@@ -229,6 +298,8 @@ Deterministic, total, and pure — no network, no database, no mutation outside 
 | **Planted violation — duplicate id** | two entries sharing an id in different files raise `CorpusLoadError` naming both paths (`corpus/model.py:96-101`) |
 | **Planted violation — unknown enum** | `category: "economy"` is refused, naming the field and the value |
 | **Planted violation — wrong casing** | an entry carrying `targetMode: "Area"`, `areaShape: "Row"` or `relation: "Enemy"` is **refused**, naming the field — the exact shape this spec's own example carried before the F10 correction |
+| **Planted violation — unknown family** | a `family`-scoped entry with `scopeKey: "marigold"` is **refused**, naming the field and the value — the eleventh vocabulary of §3 step 5, and the home of A-E1's test 6 |
+| **Prefix disposition** | a fifth underscore prefix appearing under `actions/` with no `_manifest.json` row is an **undeclared** finding; a `_briefs/` entry and a committed `action-seed` entry load into **one** graph and `discover_edges` records the brief→seed edge (§3 step 2c) |
 | **Planted violation — a status in a pairing field** | `pairedPayoffFamily: "rot"` is refused; only a key of `pairings.json` is legal (`EnablerPayoffPairings.cs:26`) |
 | **Round isolation (F14)** | a survivor under `_rounds/round-1/` and its promoted twin in the committed corpus do **not** both load: the committed load excludes the `_rounds/` prefix, and a test asserts no `CorpusLoadError` is raised over a tree containing both |
 | **Per-kind id patterns** | `discover_edges` run once per kind records an edge for a brief's `avoidNeighbours.actionId`, an innate pick's `innateActionId` and a weights row's `scopeKey`; a test fails if any of the ten kinds has no pattern |
@@ -254,6 +325,12 @@ Deterministic, total, and pure — no network, no database, no mutation outside 
    than silently dropped by an `action.`-only pattern.
 6c. A committed-corpus load **excludes** the `_rounds/` prefix, and a tree holding both a round
    survivor and its promoted twin loads without a duplicate-id raise (§3 step 2b).
+6d. **All four underscore prefixes carry a `disposition` row in `_manifest.json`** — `_rounds/`
+   `exclude`, `_generated/` · `_briefs/` · `_reports/` `load` — and an undeclared prefix is a finding
+   (§3 step 2c). A test asserts a cross-prefix edge (`_briefs/` → committed `action-seed`) is recorded
+   by `discover_edges`, which is the property the exclusion would have destroyed.
+6e. A `family`-scoped entry naming an unknown family is refused, against the family-map key set
+   (§3 step 5).
 7. A second load over unchanged inputs is byte-identical by hash.
 8. `python -m pytest tools/seedsmith/tests` passes with the LLM transport stubbed to raise.
 

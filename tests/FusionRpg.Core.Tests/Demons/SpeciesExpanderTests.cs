@@ -118,6 +118,79 @@ public class SpeciesExpanderTests
         Assert.Throws<InvalidOperationException>(() => Expand(anchor));
     }
 
+    // ---- an unresolved or unknown aptitude family refuses generation, never a silent zero-stat species ----
+    //
+    // Audited 2026-09-03 against the real 28-species committed tree: SnorkleZombie/ThreePeater both
+    // carry `aptitudePrimary: "unresolved"` (a genuine 3-way classification vote that never
+    // converged, spec-option-permutation.md §4) and both had `Magnitudes: {}` — the ONE field in
+    // this whole function that fell through silently instead of throwing like every sibling field
+    // already does.
+
+    [Fact]
+    public void An_unresolved_aptitudePrimary_refuses_generation_rather_than_producing_zero_stats()
+    {
+        var anchor = TestAnchor(
+            "test.unresolved", "chaff", null, "unresolved", null, false, "steady", "melee",
+            Array.Empty<string>());
+
+        var ex = Assert.Throws<InvalidOperationException>(() => Expand(anchor));
+        Assert.Contains("aptitudePrimary", ex.Message);
+        Assert.Contains("unresolved", ex.Message);
+    }
+
+    [Fact]
+    public void An_unknown_aptitudePrimary_family_refuses_generation_too()
+    {
+        // Not just the literal "unresolved" sentinel — any family with no edge at all in
+        // aptitudes.v2.json (a typo, a retired family) must refuse the same way.
+        var anchor = TestAnchor(
+            "test.badaptitude", "chaff", null, "NotARealAptitudeFamily", null, false, "steady", "melee",
+            Array.Empty<string>());
+
+        Assert.Throws<InvalidOperationException>(() => Expand(anchor));
+    }
+
+    [Fact]
+    public void An_unresolved_aptitudeSecondary_refuses_generation_even_when_primary_is_fine()
+    {
+        var anchor = TestAnchor(
+            "test.badsecondary", "cultivated", "raider", "Onslaught", "unresolved", false, "steady", "melee",
+            Array.Empty<string>());
+
+        var ex = Assert.Throws<InvalidOperationException>(() => Expand(anchor));
+        Assert.Contains("aptitudeSecondary", ex.Message);
+    }
+
+    [Fact]
+    public void A_pure_species_never_evaluates_aptitudeSecondary_even_when_it_is_garbage()
+    {
+        // Pure means zero secondary share — TestAnchor's own `pure: true` already makes
+        // AptitudeSecondary irrelevant to the expansion math; confirms the secondary check does not
+        // fire spuriously just because the field is present but unused.
+        var anchor = TestAnchor(
+                "test.puregarbagesecondary", "cultivated", "raider", "Onslaught", null, true, "steady",
+                "melee", Array.Empty<string>())
+            with
+            { AptitudeSecondary = "unresolved" };
+
+        // Pure => hasSecondary is false in Expand's own logic, so AptitudeSecondary is never read —
+        // this must expand cleanly, not throw.
+        var species = Expand(anchor);
+        Assert.NotEmpty(species.Magnitudes);
+    }
+
+    [Fact]
+    public void A_known_aptitude_still_expands_normally_after_the_new_check()
+    {
+        // Regression guard: the new IsKnownAptitude check must not reject legitimate families.
+        var anchor = TestAnchor(
+            "test.knowngood", "cultivated", "raider", "Onslaught", null, true, "steady", "melee",
+            Array.Empty<string>());
+
+        var species = Expand(anchor);
+        Assert.NotEmpty(species.Magnitudes);
+    }
+
     [Fact]
     public void Sunflower_is_pure_focus_and_every_magnitude_traces_to_that_one_family()
     {

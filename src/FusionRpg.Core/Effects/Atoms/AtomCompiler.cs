@@ -176,6 +176,103 @@ public static class AtomCompiler
         return (def, grant);
     }
 
+    /// <summary>
+    /// E26: one <see cref="EffectDefDto"/> per translatable <see cref="RunnerEntry"/>, so
+    /// <c>AtomRunner.Dispatch</c>'s grant resolves against a real def instead of throwing "unknown
+    /// effect_id" (<see cref="AtomRunner"/>, whose own comment names this exact gap at the call site
+    /// this method closes). Deduped by <see cref="RunnerEntry.AtomId"/> — several bindings can
+    /// reference the same atom; a def is per-atom, not per-binding, exactly like the compiled path's
+    /// per-ICD-group def.
+    ///
+    /// <para><b>Untranslatable, not silently dropped.</b> <c>stat.modify</c> / <c>stat.derived</c>
+    /// rewrite an authored magnitude into an op-as-key overlay slot (<c>flat</c>/<c>increased</c>/…
+    /// — see <see cref="ToOpcodeShape"/>), and <c>board.action</c>'s <c>damage</c> is not in
+    /// <c>EffectOverlayMerge</c>'s allowed set at all. <c>AtomRunner.RollValues</c> only ever writes
+    /// the AUTHORED param name onto the overlay ("amount" / "damage"), so a runner-routed atom of one
+    /// of these three kinds would either throw at <c>EffectOverlayMerge.TryValidateOverlayForDef</c>
+    /// ("amount" is not an allowed key for `stat.modify`/`stat.derived`) or silently apply a
+    /// hardcoded default (`board.action`'s dropped `damage`, E28's own finding) — the exact "accepted,
+    /// then nothing forever" shape this whole layer exists to refuse. Refusing here, by id, converts
+    /// that into an authoring-time refusal instead. This is <see cref="AtomRejectionReason.ParamNotHonoured"/>
+    /// exactly — "the key is declared but the executor drops it for this configuration." <b>The fix
+    /// for the mismatch itself belongs to `AtomRunner`/`EffectOverlayMerge`, not to this module</b> —
+    /// spec-runner-def-emit.md's own boundary is not to resolve a rolled value or touch the runner.</para>
+    /// </summary>
+    public static (IReadOnlyList<EffectDefDto> Defs, IReadOnlyList<CompileRejection> Rejected) EmitRunnerDefs(
+        IEnumerable<RunnerEntry> entries)
+    {
+        if (entries is null) throw new ArgumentNullException(nameof(entries));
+
+        var defs = new List<EffectDefDto>();
+        var rejected = new List<CompileRejection>();
+
+        var distinct = entries
+            .GroupBy(e => e.AtomId, StringComparer.Ordinal)
+            .Select(g => g.First())
+            .OrderBy(e => e.AtomId, StringComparer.Ordinal);
+
+        foreach (var entry in distinct)
+        {
+            if (string.IsNullOrEmpty(entry.Trigger))
+            {
+                rejected.Add(new CompileRejection(entry.AtomId, AtomRejectionReason.UnknownTrigger,
+                    "a runner entry with no trigger can never be dispatched by AtomRunner.OnEvent " +
+                    "(TriggerIndex indexes bindings by trigger ordinal)"));
+                continue;
+            }
+
+            var opcode = OpcodeOf(entry.KindId);
+            if (opcode is null)
+            {
+                rejected.Add(new CompileRejection(entry.AtomId, AtomRejectionReason.UnknownKind,
+                    $"'{entry.KindId}' has no FA opcode"));
+                continue;
+            }
+
+            // The three kinds whose overlay key does not match the raw param name AtomRunner writes.
+            // Only a problem when the entry actually carries a per-hit value — a stat.modify/derived
+            // or board.action atom that reached the runner purely for a stateful key or a predicate,
+            // with no Value-kind param at all, has nothing that would hit the mismatch.
+            var isKeyMismatchKind = entry.KindId is "stat.modify" or "stat.derived" or "board.action";
+            if (isKeyMismatchKind && entry.Values.Count > 0)
+            {
+                rejected.Add(new CompileRejection(entry.AtomId, AtomRejectionReason.ParamNotHonoured,
+                    $"'{entry.KindId}' rolls its magnitude under the authored param name, which " +
+                    "EffectOverlayMerge does not accept for this action on the runner path " +
+                    "(stat.modify/stat.derived need the op-as-key form flat/increased/more/replace/" +
+                    "flag; board.action's damage is not allowlisted at all) — the fix belongs to " +
+                    "AtomRunner/EffectOverlayMerge, not runner-def-emit"));
+                continue;
+            }
+
+            defs.Add(new EffectDefDto
+            {
+                EffectId = entry.AtomId,
+                EffectType = EffectTypes.Triggered,
+                Name = entry.AtomId,
+                Enabled = true,
+                SourceTag = "atom-runner",
+                Triggers = new List<string> { entry.Trigger! },
+                Actions = new List<EffectDefActionDto>
+                {
+                    new()
+                    {
+                        Seq = 1,
+                        Action = opcode,
+                        // Static params only (channel, element, currency, status — whatever the kind's
+                        // non-Value params carry). The rolled magnitude is deliberately absent: it
+                        // arrives on the grant overlay per proc, resolved by AtomRunner.RollValues at
+                        // dispatch time, never baked here (spec-runner-def-emit.md §4 — "resolving a
+                        // rolled value at emit time would be a second roll and would break replay").
+                        Params = new Dictionary<string, object?>(entry.Params, StringComparer.Ordinal),
+                    },
+                },
+            });
+        }
+
+        return (defs, rejected);
+    }
+
     /// <summary>Kind to the FA opcode its sink implements. Null for kinds with no opcode.</summary>
     static string? OpcodeOf(string kindId) => kindId switch
     {
@@ -446,12 +543,37 @@ public static class AtomCompiler
             : null;
     }
 
+    // E28 fix #7 (spec-param-parity.md §3 row 7, box.set.cells[]): Array/Object used to fall through
+    // to `el.ToString()` — the raw JSON text as an opaque string, structurally useless to a reader
+    // expecting a list of cells. `cells` is ParamKind.Array's only declared use today; nothing else
+    // in the shipped corpus goes through this arm, so widening it here changes no existing content.
+    // E28 fix #7 (spec-param-parity.md §3 row 7, box.set.cells[]): Array/Object used to fall through
+    // to `el.ToString()` — the raw JSON text as an opaque string, structurally useless to a reader
+    // expecting a list of cells. `cells` is ParamKind.Array's only declared use today; nothing else
+    // in the shipped corpus goes through this arm, so widening it here changes no existing content.
+    // E28 fix #7 (spec-param-parity.md §3 row 7, box.set.cells[]): Array/Object used to fall through
+    // to `el.ToString()` — the raw JSON text as an opaque string, structurally useless to a reader
+    // expecting a list of cells. `cells` is ParamKind.Array's only declared use today; nothing else
+    // in the shipped corpus goes through this arm, so widening it here changes no existing content.
+    //
+    // Found while adding it: the Number arm's ternary — `TryGetInt32(out var i) ? i : el.GetDouble()`
+    // — has ALWAYS produced a boxed `double`, never `int`, regardless of which branch runs. The `?:`
+    // operator picks ONE static type for both branches before boxing to `object?`, and since `int`
+    // widens to `double` but not the reverse, the compiler silently converts `i` to `double` in every
+    // case. `(object)i` on the true branch breaks that unification — both arms are then `object`, and
+    // boxing preserves whichever CLR type actually applies. Pre-existing since this method was
+    // written; harmless downstream today because `JsonOverlay.GetInt`'s `Convert.ToInt32` tolerates a
+    // boxed `double`, but a real type defect worth closing rather than leaving for the next reader who
+    // trusts the ternary's apparent intent.
     static object? Plain(JsonElement el) => el.ValueKind switch
     {
         JsonValueKind.String => el.GetString(),
-        JsonValueKind.Number => el.TryGetInt32(out var i) ? i : el.GetDouble(),
+        JsonValueKind.Number => el.TryGetInt32(out var i) ? (object)i : el.GetDouble(),
         JsonValueKind.True => true,
         JsonValueKind.False => false,
+        JsonValueKind.Array => el.EnumerateArray().Select(Plain).ToList(),
+        JsonValueKind.Object => el.EnumerateObject()
+            .ToDictionary(p => p.Name, p => Plain(p.Value), StringComparer.Ordinal),
         _ => el.ToString(),
     };
 

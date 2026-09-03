@@ -111,15 +111,53 @@ concern — drift between two **live** sources — since a frozen fixture cannot
 
 ## Known residuals
 
-- **There is no `--effect-check`.** The catalog has an emitter and no verifier, unlike the other two
-  subjects. A value-only edit to an existing `fx-*.json` atom leaves `EffectAtomCatalog.Generated.cs`
-  stale and fails nothing unless a scenario golden happens to cover the changed number. Adding or
-  removing an atom **is** caught, by the two sixteen-id assertions.
-- **`--effect-emit` is undocumented in the tool's own usage header** (`Program.cs:7-11` lists four
-  modes; `:25` implements a fifth).
-- **Two of the three subjects are checked but not generated** (see "What it does NOT do"), so the
-  hand-written mirrors are still hand-maintained — the tool makes drift loud rather than impossible.
-- **Two CI gates here are shaped to today's content and will trip on the first new row**, as
+**⛔ EVERY RESIDUAL BELOW CARRIES A DISPOSITION — DECIDED 2026-09-03 (owner removed themselves as a
+gate):** *claimed* by a named module, a *named follow-up*, or *accepted as-is with the reason*.
+
+- **[FOLLOW-UP — `E50 effect-check`] There is no `--effect-check`.** The catalog has an emitter and no
+  verifier, unlike the other two subjects. A value-only edit to an existing `fx-*.json` atom leaves
+  `EffectAtomCatalog.Generated.cs` stale and fails nothing unless a scenario golden happens to cover
+  the changed number. Adding or removing an atom **is** caught, by the two sixteen-id assertions.
+  ⛔ **DECIDED 2026-09-03.** *Scope, one line:* add the `--effect-check` mode that re-emits the catalog
+  in memory from `data/seed/atoms/fx-*.json` and diffs it against the committed
+  `EffectAtomCatalog.Generated.cs`, exit 1 on any difference, wired into CI beside
+  `DemonSpeciesGen --check`.
+  **Why this one is a follow-up and not accepted, when three of its neighbours are:** it is the only
+  residual in these six specs that is a live correctness hole with an already-built fix. The emitter
+  exists (`tools/ElementEnumGen/Program.cs:36`+, `EffectCatalogGen.cs`), so the check is *emit to a
+  string and compare*; the asymmetry against the other two subjects is the argument on its own; and
+  the repo already treats silent staleness in generated code as a first-class defect —
+  `.github/workflows/ci.yml:50` runs `DemonSpeciesGen --check` for exactly this failure, with a
+  message telling the reader to regenerate and commit. **It must be a check, never an emit in CI**, and
+  it lands **after** the two gates below are re-shaped, or it will fail for their reason instead of its
+  own.
+
+- **[CLAIMED — `E50 effect-check`] `--effect-emit` is undocumented in the tool's own usage header**
+  (`Program.cs:7-11` lists four modes; `:25` implements a fifth — verified 2026-09-03).
+  ⛔ **DECIDED 2026-09-03:** the mode that adds `--effect-check` updates the usage header to list every
+  mode it then has. A one-line fix carried by the change that touches the same block; there is no
+  reason for it to be a residual of its own.
+
+- **[ACCEPTED AS-IS] Two of the three subjects are checked but not generated** (see "What it does NOT
+  do"), so the hand-written mirrors are still hand-maintained — the tool makes drift loud rather than
+  impossible.
+  ⛔ **DECIDED 2026-09-03 — this is the stated design, not an unfinished part of it.** The check
+  already fails on drift, so the mirrors cannot silently diverge; generating them would mean emitting
+  into files that carry hand-written prose and comments, trading a loud failure for a generator that
+  owns a file humans also write in.
+  **What would overturn it:** the same mirror failing the check repeatedly, which is the measurable
+  sign that a human keeping it in sync has become the bottleneck. That is an observation from CI
+  history, not a judgement call.
+
+- **[CLAIMED — `E43 family-expand` and `E26 runner-def-emit`, one gate each] Two CI gates here are
+  shaped to today's content and will trip on the first new row**, as
   [effect-atom-map.md](../effect-atom-map.md) §16 records: the sixteen-id assertions, and
   `Assert.Empty(compiled.Runtime)`, which Wave 7's E26 deliberately violates. Each needs a named change
   rather than a rename to dodge it.
+  ⛔ **DECIDED 2026-09-03 — both owners are already written down, and this residual just never named
+  them.** The **sixteen-id assertions** (and `ElementEnumGen`'s `fx-*.json` `AllDirectories` glob) are
+  **E43**'s: its map row says it *"Owns getting the folder swept and **fixing the two CI gates its
+  output would otherwise trip**"* (`effect-atom-map.md:323`). `Assert.Empty(compiled.Runtime)` is
+  **E26**'s: §16 says E26 *"deliberately violates"* it, so the module that breaks a gate on purpose
+  re-shapes it. Neither needs a new follow-up. **`E50 effect-check` sequences after both**, since a
+  verifier landing first would go red for their reasons.

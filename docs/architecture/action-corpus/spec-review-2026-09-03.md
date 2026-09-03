@@ -7,8 +7,8 @@ to `data/tuning/`. **The damage is structural**, and it clusters.
 **Fixed the same day** are marked ✅. Everything else is a **required correction before build**, recorded
 here rather than in a spec because it spans several.
 
-**Status 2026-09-03, second pass:** every finding in §2 has been applied to the specs it named.
-**One remains open** — F17's citation-drift cluster, which is mechanical and is listed at the bottom.
+**Status 2026-09-03, third pass:** every finding is applied to the specs it named. **§2 is empty** —
+F17's citation-drift cluster was swept and closed; see its row in §1.
 
 ---
 
@@ -37,6 +37,52 @@ here rather than in a spec because it spans several.
 | **F19** | Three model schemas carry no `description` keys though each AC2 asserts every property has one with a negative clause, asserted mechanically | ✅ **The strings are written**, into the schemas themselves rather than the prose beside them, in A-P1, A-P2 and A-P3 — each property, each with an explicit negative clause, each modelled on the hardened `blocked` description (`adapters/demons/anchor/prompts.py:74-82`, rewritten after a real local model filled that field with `"plant"` on 2026-09-01): normal case first, then the exception, then what must **not** go in the field. Each AC2 now records that it previously asserted over nothing |
 | **F2, F11, F16, F18, F20-F25** | The smaller cluster | ✅ All applied — see the table below |
 
+### F17 · the citation-drift cluster — closed 2026-09-03 (third pass)
+
+Every `file:line` citation in the 17 non-review specs was opened and read against the cited file:
+**481 `file:line` references plus ~50 bare `:line` and comma-list continuations, ~530 in all.**
+**52 were corrected; the rest verified as already right.** Eleven specs changed; six
+(`spec-resource-ownership`, `spec-eligibility-axis`, `spec-innate-picker`, `spec-tier-access-gate`,
+`spec-type-weights`, `spec-dedup-select`) carried no drift at all.
+
+The recurring families, each fixed everywhere it appeared:
+
+| Drifted citation | Correct | Where |
+|---|---|---|
+| `action-rungs.v1.json:12-21` (drops rung 1) | `:11-20` | A-P1, A-P2, A-P3, A-M1, A-S4 |
+| `:20-21` for rungs 9-10 · `:16` for rung 5's `costMulti: 3627` | `:19-20` · `:15` | A-P3 |
+| `ActionEnums.cs:37-47` / `:26-47` for the **eight** tags (drops `Utility`) | `:39-49` / `:26-49` | A-P1, A-P2, A-P3, A-M1 |
+| `StatusCatalogBootstrap.cs:15-56` for the **21** statuses (covers 19) | `:16-58` | A-S0, A-C1, A-S1 |
+| `effect-atom-map.md:317` for the **E33** row | `:337` | A-M1, A-M2 |
+| `affix/prompts.py:66-80` for the *"cites no file"* discipline · `:59-65` for `build_context` | `:60-61` · `:49-56` | A-P1, A-P2, A-P3 |
+| `action-corpus-ideal.md:1447` for the unsourced `~1,162 calls/h` | `:1448` (figure itself at `:561`) | A-P1, A-P2, A-P3 |
+| `anchor/vote.py:43-70` — **the file ends at `:68`** | `:43-67` | A-S4 |
+| `metrics/model.py:87` for `gates` defaulting `False` (`:87` is `covers`) | `:85` | A-S5 |
+| `InjectorLoop.cs:77` for the drain tick (right in §1, wrong in §6 of the same spec) | `:79` | A-M2 |
+| `guard-single-writer.ps1:24-29` for the allow-list | `:24-28` | A-M2 |
+| `spec-activation-edge.md:173` for the *"inert"* rule · `:168-169` for **Unblocks** | `:282` · `:277-278` | A-M2 |
+| `ActionNameTemplates.cs:68-69` for the root read (`modifiers` is `:70`) · `:79-82` for the reject | `:68-70` · `:83-84` | A-C1 |
+| `StructureBudgetGuard.cs:38` for the over-budget rejection (`:38` is the `Check` signature) | `:47-49` | A-S1 |
+| `spec-action-seeding.md:98` for the *"second vocabulary"* rule | `:101` | A-S0 |
+| `spec-signature-propose.md:156-158` for absent-vs-empty `familyActions` · `:96-100` for the `none` signal | `:229-231` · `:160-162` | A-P2, A-S1, A-S4 |
+| `spec-family-propose.md:107` for the *"whole family recognisable"* quote | `:179-180` | A-S1 |
+| `action-corpus-map.md:128` / `:132` for cross-program rows | `:136` / `:140` | A-M1, A-M2 |
+| `UnlockState.cs:44` for *"reachable only via `EarnCountAtAcceptance`"* | `:40-46` | A-U1 |
+
+**Three were wrong claims, not just wrong lines**, and are marked ⛔ inline where they appear:
+
+1. **A-S0** cited `spec-action-seeding.md:98` for *"a second **rarity** vocabulary"*. The rule at `:101`
+   is about **action categories** — *"inventing a third vocabulary"* over the five shipped
+   action-categories. The rarity case is an analogy to it, not the same instance.
+2. **A-S5** cited `report/cli.py:728-741` as *"the runner and its `--gate`/`--json` surface"*. That
+   range is `_cmd_demons_diff_legacy`. The runner is `cmd_report` at `:154`; the flags are at
+   `:778-780` and `:793-795`.
+3. **A-M2** cited *"E33 **AC5** requires the helper"* at `:159`. It is acceptance criterion **6**, at
+   `:263`; `:159` is prose about the unnarrowed zombie-branch return.
+
+**One correction to this review's own F17 note:** it recorded the E33 row as
+`effect-atom-map.md:318`. `:318` is E29; the E33 row is `:337`.
+
 ### The smaller cluster, item by item
 
 | Finding | Fix |
@@ -54,16 +100,7 @@ here rather than in a spec because it spans several.
 
 ## 2. Required before build — still open
 
-### F17 · the citation-drift cluster
-
-~13 off-by-one line references across the specs — a `:12-21` for a table that starts at `:13`, a
-`:16-32` for an enum that ends at `:33`, and similar. **Mechanical, low-risk, and not yet swept.** It
-is the only §2 item this pass did not close: every correction above cites re-verified lines, but the
-citations the corrections did not touch have not been re-walked one by one.
-
-Not a build blocker on its own — a drifted line number costs a reader thirty seconds, where every
-finding above cost a wrong decision — but it should be swept before the specs are read as reference
-rather than as a review artefact.
+**Nothing.** F17 was the last item and closed on the third pass (2026-09-03) — its row is in §1.
 
 ---
 

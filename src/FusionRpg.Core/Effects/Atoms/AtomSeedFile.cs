@@ -14,6 +14,7 @@ public enum SeedEntryKind
     ElementMatrix,
     ChannelPolicy,
     Affix,
+    ChannelPool,
 }
 
 /// <summary>
@@ -67,12 +68,16 @@ public sealed class SeedContent
     /// <summary>Channel policy rows (E22) — direction is the one column with a live consumer.</summary>
     public List<ChannelPolicySeedRow> ChannelPolicies { get; } = new();
 
+    /// <summary>E30 (spec-channel-pool.md §3.1): named, weighted channel pools an atom's
+    /// <c>params.channel</c> may reference instead of one concrete channel.</summary>
+    public List<ChannelPoolRow> ChannelPools { get; } = new();
+
     /// <summary>Entry id to the file that authored it — the other half of a duplicate report.</summary>
     public Dictionary<string, string> SourceOf { get; } = new(StringComparer.Ordinal);
 
     public int Count =>
         Atoms.Count + Containers.Count + Affixes.Count + Curves.Count + Rarities.Count
-        + Elements.Count + ElementMatrix.Count + ChannelPolicies.Count;
+        + Elements.Count + ElementMatrix.Count + ChannelPolicies.Count + ChannelPools.Count;
 }
 
 /// <summary>What a collection pass produced, and everything wrong with it.</summary>
@@ -182,6 +187,7 @@ public static class AtomSeedFile
                     case SeedEntryKind.Element: ReadElement(path, entry, into, errors); break;
                     case SeedEntryKind.ElementMatrix: ReadMatrixCell(path, entry, into, errors); break;
                     case SeedEntryKind.ChannelPolicy: ReadChannelPolicy(path, entry, into, errors); break;
+                    case SeedEntryKind.ChannelPool: ReadChannelPool(path, entry, into, errors); break;
                     default: ReadRarity(path, entry, into, errors); break;
                 }
             }
@@ -253,7 +259,21 @@ public static class AtomSeedFile
             foreach (var p in poolEls.EnumerateArray())
             {
                 if (p.ValueKind != JsonValueKind.Object) continue;
-                pool.Add(new ContainerPoolRow(Str(p, "atom"), Int(p, "weight", 0), StrOrNull(p, "group")));
+
+                // E32 (spec-affix-import-path.md §2, decided 2026-09-03): the pool row key is
+                // "affix" — ContainerPoolRow.AffixId references an AffixRow, never a bare atom
+                // (definitions.md §4a). The old "atom" key is refused, naming the rename, so the
+                // latent defect this module closes cannot silently return once any container gains a
+                // real pool.
+                if (p.TryGetProperty("atom", out _) && !p.TryGetProperty("affix", out _))
+                {
+                    errors.Add(new SeedError(path, id, AtomRejectionReason.BadParamValue,
+                        "a pool row uses 'atom' — pool rows reference an AFFIX, not a bare atom; " +
+                        "rename the key to 'affix' (spec-affix-import-path.md §2)"));
+                    return;
+                }
+
+                pool.Add(new ContainerPoolRow(Str(p, "affix"), Int(p, "weight", 0), StrOrNull(p, "group")));
             }
 
         into.Containers.Add(new ContainerRow
@@ -276,27 +296,42 @@ public static class AtomSeedFile
 
     /// <summary>
     /// A named, ordered bundle of atom refs (module 1, `affix-schema`). <c>class</c> is authored here
-    /// (not derived by this reader) because <see cref="AffixValidator.Validate"/> — the one place that
-    /// actually owns derivation — needs a value to check an all-concrete bundle against and to TRUST
-    /// outright for an all-slot bundle, where no concrete atom exists yet to derive from
-    /// (`AffixValidator.cs`'s own comment: "an all-slot bundle: class was authored ahead of
-    /// resolution; trusted here, re-derivable once module 2 resolves a slot"). This method only
-    /// parses; it never validates — same division of labor <see cref="ReadContainer"/> already has
-    /// with <c>ContainerValidator</c>.
+    /// only when the file supplies one — <see cref="AffixValidator.Validate"/> and
+    /// <see cref="AffixValidator.ResolveClass"/> are the one place that actually owns derivation.
+    ///
+    /// <para><b>E32 (spec-affix-import-path.md §3.2, decided 2026-09-03): an authored <c>class</c> is
+    /// now OPTIONAL.</b> Absent is legal — the shape a real generator emits, since a model that names
+    /// its own class can contradict the bundle it just picked (seedsmith's own `derive.py` reasoning).
+    /// Present-but-unparseable is still a refusal (an authored value must be one of the three legal
+    /// strings if it is there at all); present-and-checked-against-the-derived-value happens later, in
+    /// <c>AffixValidator.Validate</c>, which is the one place with an atom lookup to derive against.
+    /// This method only parses; it never validates — same division of labor <see cref="ReadContainer"/>
+    /// already has with <c>ContainerValidator</c>.</para>
     /// </summary>
     static void ReadAffix(string path, JsonElement e, SeedContent into, List<SeedError> errors)
     {
         var id = Str(e, "id");
         if (!Claim(path, id, into, errors)) return;
 
-        var className = Str(e, "class");
-        if (!Enum.TryParse<AffixClass>(className, ignoreCase: true, out var affixClass)
-            || !Enum.IsDefined(typeof(AffixClass), affixClass))
+        AffixClass? affixClass = null;
+        if (e.TryGetProperty("class", out var classEl) && classEl.ValueKind == JsonValueKind.String)
+        {
+            if (!Enum.TryParse<AffixClass>(classEl.GetString(), ignoreCase: true, out var parsed)
+                || !Enum.IsDefined(typeof(AffixClass), parsed))
+            {
+                errors.Add(new SeedError(path, id, AtomRejectionReason.BadParamValue,
+                    $"affix class '{classEl.GetString()}' — one of prefix | suffix | mixed"));
+                return;
+            }
+            affixClass = parsed;
+        }
+        else if (e.TryGetProperty("class", out var badClassEl) && badClassEl.ValueKind != JsonValueKind.String)
         {
             errors.Add(new SeedError(path, id, AtomRejectionReason.BadParamValue,
-                $"affix class '{className}' — one of prefix | suffix | mixed"));
+                $"affix class must be a string, got {badClassEl.ValueKind} — one of prefix | suffix | mixed"));
             return;
         }
+        // else: 'class' key absent entirely — legal, derived later (§3.2).
 
         var refs = new List<AffixRefRow>();
         if (e.TryGetProperty("refs", out var refEls) && refEls.ValueKind == JsonValueKind.Array)
@@ -389,6 +424,24 @@ public static class AtomSeedFile
         into.ChannelPolicies.Add(new ChannelPolicySeedRow(channel, direction));
     }
 
+    /// <summary>E30 (spec-channel-pool.md §3.1): one named, weighted channel pool. Member parsing is
+    /// shared with <see cref="ChannelPoolFile.TryParse"/> (the whole-document form) via
+    /// <see cref="ChannelPoolFile.TryParseEntry"/>, so the two never validate a pool entry
+    /// differently.</summary>
+    static void ReadChannelPool(string path, JsonElement e, SeedContent into, List<SeedError> errors)
+    {
+        var read = ChannelPoolFile.TryParseEntry(e, out var row);
+        if (!read.IsOk)
+        {
+            errors.Add(new SeedError(path, Str(e, "id"), read.Reason, read.Detail));
+            return;
+        }
+
+        if (!Claim(path, row.PoolId, into, errors)) return;
+
+        into.ChannelPools.Add(row);
+    }
+
     /// <summary>
     /// One matchup cell. <c>matrix</c> chooses <c>combat</c> or <c>shield</c> — required, because a
     /// cell that guessed its matrix would silently rebalance the other one.
@@ -466,6 +519,7 @@ public static class AtomSeedFile
             case "element": kind = SeedEntryKind.Element; return true;
             case "element-matrix": kind = SeedEntryKind.ElementMatrix; return true;
             case "channel-policy": kind = SeedEntryKind.ChannelPolicy; return true;
+            case "channel-pool": kind = SeedEntryKind.ChannelPool; return true;
             default: kind = SeedEntryKind.Atom; return false;
         }
     }

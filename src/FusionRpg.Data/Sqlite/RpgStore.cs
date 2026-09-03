@@ -754,7 +754,13 @@ public sealed partial class RpgStore : IRpgDb
         LastHeartbeatUtc = LastHeartbeatUtc?.ToString("o"),
         SimEnabled = simEnabled,
         Source = InjectorConnected ? Source : RpgConstants.SourceNone,
-        CurrentPlayerId = GetCurrentPlayerId()
+        CurrentPlayerId = GetCurrentPlayerId(),
+        // E46 (player-content-boot): imported vs. shipped code fallback, on the one surface both the
+        // player and the owner already read. ContentSource/ContentImportError are set once at startup
+        // by RecordContentBootOutcome; CatalogRevision is read live since it can only ever move up.
+        ContentSource = ContentSource,
+        CatalogRevision = GetCatalogRevision(),
+        ContentImportError = ContentImportError,
     };
 
     static string NormalizeSource(string? source)

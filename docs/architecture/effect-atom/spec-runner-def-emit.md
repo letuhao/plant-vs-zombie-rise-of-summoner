@@ -87,6 +87,37 @@ codec/emitter version stamped into the payload alongside `CatalogRevision`, so
 `receiverRevision == catalog.CatalogRevision` (`AtomPushCodec.cs:164-168`) cannot short-circuit past new
 code. **State the chosen mechanism in the implementation; do not leave it to the deploy script.**
 
+#### ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — one `const` on the codec, added to the short-circuit test
+
+`AtomPushCodec` gains a single emitter version constant, `AtomPushDto` gains an `emitterVersion` field
+beside `catalogRevision` (`src/FusionRpg.Contracts/AtomPushDtos.cs:99`), and the short-circuit at
+`AtomPushCodec.cs:164` becomes a **two-term** comparison:
+
+```csharp
+/// Bumped by hand whenever THIS FILE's emit changes shape — the content hash covers seed DATA, so a
+/// compiler-code change moves nothing the receiver can see (E26 is exactly such a change).
+public const int EmitterVersion = 2;   // 1 = pre-E26 (compiled defs only)
+
+if (receiverRevision == catalog.CatalogRevision && receiverEmitterVersion == EmitterVersion)
+```
+
+**Why this shape and not the two alternatives:**
+
+- **Not "fold the emitter version into `ContentHash`."** `ContentHash` is E8's stamp over content
+  *tables* (`ContentHashRegistry`), it is persisted, and it is explicitly *"carried so a mismatch is
+  visible in telemetry… it never blocks delivery"* (`AtomPushDtos.cs:101-105`). Making it also mean
+  "the emitter changed" would move a persisted hash for a code edit and give one field two jobs.
+- **Not "bump `catalog_revision` from the deploy script."** That is a data-layer write standing in for
+  a code fact, it is invisible to anyone reading the codec, and §3.3's own rule forbids leaving it to
+  the deploy script.
+
+**It is reversible and cheap:** the mechanism is one `const` and one `&&`. A wrong bump costs one
+redundant full push; a missed bump is caught by test 7, which is the test that exists for it.
+
+**What would overturn it:** a receiver that cannot be taught a second field — at which point the same
+guarantee is available by making the emitter version the high digits of `CatalogRevision` on the wire,
+with the same `const` doing the same job.
+
 ---
 
 ## 4. What this module must NOT do
@@ -124,11 +155,28 @@ code. **State the chosen mechanism in the implementation; do not leave it to the
   > **Compiled** today, and §4 forbids widening `Compilability.Classify`. So `compiled.Runtime` stays
   > empty and the assertion never fires.
   >
-  > **This module owes one of two things and must pick:** ship a **runner-shaped fixture atom** so the
-  > repaired path is exercised by real content, or **withdraw the claim** and leave the assertion to
-  > E43, whose generated output first trips it. **Shipping the fixture is the better answer** — a
-  > repaired path with nothing exercising it is D6's exact failure mode: accepted, then nothing
-  > forever. **Renaming a file to slip past the gate remains unacceptable either way.**
+  > **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate): ship the runner-shaped fixture
+  > atom.** The spec already argued it and left it as a choice; it is now the decision.
+  >
+  > **Why the fixture over handing the assertion to E43:** a repaired path with nothing exercising it
+  > is D6's exact failure mode — accepted, then nothing forever — and E43 is two modules and two
+  > dependencies away (it needs E30 and E42). Deferring the proof to E43 means E26 ships green with
+  > no evidence the runner path executes, and the first thing to find out otherwise is 490 generated
+  > rows at once. **The fixture also makes the parity test say something true**: `Assert.Empty(compiled.Runtime)`
+  > (`EffectCatalogExecutionParityTests.cs:49`) becomes `Assert.NotEmpty` for the fixture's own
+  > catalog, which is the assertion that would have caught this gap in the first place.
+  >
+  > **Where the fixture lives:** a test fixture, **not** `data/seed/atoms/`. A shipped `fx-*.json`
+  > would be swept by `ElementEnumGen`'s `AllDirectories` glob (`tools/ElementEnumGen/Program.cs:39`)
+  > and would break `EffectAtomCatalogGeneratedTests`, which asserts the generated id set **equals
+  > `EffectSeedCatalog.CreateAll()`** — a frozen hand-written catalog, so *any* new shipped atom fails
+  > it. Those two gates are **E43's** to change (its §3.3); E26 must not need them changed, and a
+  > fixture-scoped atom does not.
+  >
+  > **Renaming a file to slip past a gate remains unacceptable either way.**
+  >
+  > **What would overturn it:** E43 landing first. If it does, its generated corpus exercises the
+  > runner path with real content and the fixture becomes redundant — delete it then, not before.
 - **The injector is not built by CI.** Anything landing in `src/FusionRpg.Injector` needs a local build
   and an owner-run live check; say so in the task rather than assuming green CI means shipped.
 
@@ -139,9 +187,13 @@ code. **State the chosen mechanism in the implementation; do not leave it to the
 1. An atom carrying a per-hit roll range is granted **without throwing** and its effect applies.
 2. Each of the five runner routes in §5 test 2 has a passing end-to-end test.
 3. An untranslatable entry is refused **by id**, and a test plants one.
-4. Either a runner-shaped fixture atom ships and `EffectCatalogExecutionParityTests` asserts runner defs
-   **exist**, or the claim is withdrawn in favour of E43 — **stated explicitly, never left ambiguous**.
-5. A compiler-code change triggers a re-push on a host already at the current revision.
+4. A runner-shaped **fixture** atom ships (test-scoped, never under `data/seed/atoms/`) and
+   `EffectCatalogExecutionParityTests` asserts runner defs **exist** for it. Decided 2026-09-03; the
+   E43 alternative is closed.
+4b. `EffectAtomCatalogGeneratedTests` and `ElementEnumGen` are **untouched** by this module — a test
+   asserts the shipped atom count did not move.
+5. A compiler-code change triggers a re-push on a host already at the current revision, via the
+   `EmitterVersion` const in §3.3 — and a test bumps it and asserts the payload is no longer `UpToDate`.
 6. No compiled-path atom's def, id or content hash moves.
 
 ---

@@ -68,6 +68,68 @@ neither attempt introduced non-linearity.** A third attempt that does not is alr
 inputs and date recorded so any coefficient traces to the run that set it. The proposal side table and
 the drift test already exist for exactly this.
 
+#### ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the coefficient data path is a **seed kind**, `data/seed/power/coefficients.v1.json`
+
+**This is the canonical statement.** `spec-projectile-control.md` (E37), `spec-entity-fields-12plus.md`
+(E38), `spec-spawn-non-grid.md` (E40) and `spec-ui-attach-point.md` (E41) all require a new coefficient
+row, and **every path they offered was one this repo forbids.** Four modules were blocked on a question
+none of them owned. It is answered here, once.
+
+**What was wrong with the options on the table:**
+
+| Option the specs named | Why it fails |
+|---|---|
+| *"Coefficients live in `data/tuning/effects.v1.json`"* (E37 §5, E38 §2c/§3, E40 §5) | **That file has no coefficient section** — its keys are `matchupRead` and `damageFxFloater`, nothing else. And **`CoefficientTable` never reads `data/tuning/` at all**: the only reader is `RpgStore.GetPowerTables` over the `power_coefficient` table (`RpgStore.Power.cs:61-72`; the empty-table fallback is `:68`) |
+| *Edit `CoefficientTable.Authored()`* | Forbidden by the table's own design note, and for a reason that is not stylistic: *"Data rather than a constant, deliberately… as a code constant it would move every golden with **no content-hash change** — the one outcome E8 exists to prevent"* (`CoefficientTable.cs:17-20`) |
+| *Call `RpgStore.UpsertPowerTables`* | It has **zero production callers**, and its own comment says so (`RpgStore.Power.cs:105-107`). A whole-table replace with no caller is not a data path |
+
+**And `data/tuning/` could never have been the answer**, which is the part worth stating plainly:
+`power_coefficient` has been a **content-hashed table since registry V3**
+(`ContentHashRegistry.cs:148-160`, four hashed columns). `data/tuning/*.json` is not hashed by anything.
+Putting coefficients there would reproduce the exact defect `CoefficientTable.cs:17-20` names — a
+number that moves every golden while the content stamp stands still.
+
+**The decision:**
+
+```jsonc
+// data/seed/power/coefficients.v1.json
+{ "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+  { "kindId": "stat.derived", "channel": "combat.dodge.fire", "coeffMilli": 1000, "referenceScale": 1 }
+]}
+```
+
+Four connections, each mirroring one that already exists for atoms:
+
+1. `SeedContent` gains `Coefficients` — beside `Atoms`, `Containers`, `Affixes` (`AtomSeedFile.cs:53-74`).
+2. `AtomSeedFile.TryKind` gains `"power-coefficient"` (`:457-471`) and a `ReadCoefficient` mirroring
+   `ReadChannelPolicy` — the closest existing sibling, also a flat row type.
+3. `SeedScanner.OwnedFolders` gains `power` (`SeedScanner.cs:14-15`).
+4. `ImportContent` writes them through the **already-built** `WritePowerTablesUnlocked`
+   (`RpgStore.Power.cs:114`), inside its existing single transaction and single revision bump —
+   reusing the writer that `UpsertPowerTables` calls, which is why this needs no new SQL.
+
+**Every property that made the other options wrong is satisfied by construction:**
+
+- **Content-hashed.** It lands in `power_coefficient`, already in the hash registry — a coefficient
+  edit moves the stamp, which is what E8 exists for.
+- **Not a code constant.** `CoefficientTable.Authored()` is untouched and stays what it already
+  documents itself as: the **no-database fallback**. `GetPowerTables` returns it when the table is
+  empty (`RpgStore.Power.cs:68`), so deleting the seed file restores today's behaviour exactly.
+  **That is what makes this reversible.**
+- **Not a new mechanism.** Every piece is shipped: the table, the writer, the reader, the fallback, the
+  hash entry, the drift test. **The only missing link was the seed reader**, which is the same link
+  E32 is closing for affixes and E30 for channel pools — one more row type through a path that already
+  carries seven.
+- **A sweep still cannot touch it.** §4.1's *"a sweep writes proposals and never touches what ships"*
+  is unchanged: the sweep writes `power_coefficient_proposal`, a human copies an adopted proposal into
+  the seed file, and the import writes it. That is *"hand-authored now, fitted later"* with a file to
+  hand-author in.
+
+**What would overturn it:** a decision that coefficients should not be player-visible content at all —
+that they belong to the build rather than the catalog. Then the answer is a generated C# table with a
+`--check` gate, the `DemonSpeciesGen` shape, and `power_coefficient` leaves the content hash. Nothing
+in the repo argues for that today, and `ContentHashRegistry` V3 argues against it.
+
 ### 4.2 A non-additive composition for the pairs that need it
 
 **Not a general nonlinear price** — the narrow thing D2 actually needs. The known multiplicative pairs:
@@ -120,6 +182,9 @@ bulk of the corpus and one that does not.
 
 ## 7. Acceptance criteria
 
+0. The coefficient data path exists — `data/seed/power/coefficients.v1.json` imports into
+   `power_coefficient` (§4.1, decided 2026-09-03). **Without it there is nowhere to put a fitted
+   number**, and this was the unstated prerequisite of every earlier attempt.
 1. Coefficients are fitted from a recorded, reproducible sweep, replacing the flat 1000s.
 2. `marginal` differs by context for crit rate × crit damage, the element ring and shield layers.
 3. Each coefficient traces to its sweep run.

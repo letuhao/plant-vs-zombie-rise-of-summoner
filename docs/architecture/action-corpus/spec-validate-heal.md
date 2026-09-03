@@ -50,10 +50,10 @@ A-S3's. The map should be corrected to say so; until it is, this paragraph is th
 | `call_with_self_heal(items, system, build_user, verify_fn, ..., max_heal, build_heal_user, default_for)` — hard failures re-prompt **naming the defect per key**, soft failures are reported and never auto-retried | `pipeline/llm_caller.py:207-236` |
 | Heal budget is configurable; **default 3** | `pipeline/llm_caller.py:45,236` |
 | Vote resolution: 3-0 `high`, 2-1 `split` + minority, 1-1-1 `unresolved` with `value is None` | `adapters/demons/anchor/vote.py:16-40` |
-| Disagreement rate per field, reported as a deliverable | `anchor/vote.py:43-70`; `metrics/pipeline_health.py:37-39` |
+| Disagreement rate per field, reported as a deliverable | `anchor/vote.py:43-67`; `metrics/pipeline_health.py:37-39` |
 | TRANSIENT vs QUALITY split, stated in the runner's own docstring; `resume()` replays from checkpoint with `None` input | `workflow/runner.py:11-13,46-51` |
 | Offline guarantee as a test, not a claim | `tools/seedsmith/tests/test_classify_pipelines.py:36 (NOT test_offline_guarantee.py — that file PERMITS 127.*/localhost/::1/0.0.0.0, which is exactly where the model runs: llm_caller.py:40 endpoint http://localhost:1234):1-8` |
-| Rung table with per-row `structureBudget` (what g2 checks a candidate's axes against) | `data/tuning/action-rungs.v1.json:12-21` |
+| Rung table with per-row `structureBudget` (what g2 checks a candidate's axes against) | `data/tuning/action-rungs.v1.json:11-20` |
 
 ### Wiring gap
 
@@ -103,7 +103,9 @@ number is rejected at zero cost.
 
 **⛔ g2's rung-band resolution, stated — added 2026-09-03 (review F13).** `ActionRow.Rung` is one
 `int` (`ActionRow.cs:23`) and `StructureBudgetGuard.Check` resolves exactly one row from it
-(`StructureBudgetGuard.cs:41`), while a band like `[5,10]` spans budgets of 3 and 7 axes. g2 does not
+(`StructureBudgetGuard.cs:41`), while a signature band spans budgets of 0 and 7 axes — ⛔ **CORRECTED
+2026-09-03:** this read `[5,10]` and *"3 and 7"*; the floor is dropped, the band is `[1,10]`, and rung
+1 carries `structureBudget: []` (`spec-rung-semantics.md` §3.2). g2 does not
 invent its own resolution: it applies **A-S1's collapse rule** — `Rung = rungBand[1]`, the band's
 ceiling (`spec-distribution-planner.md` §3 step 4) — and checks the claimed axes against **that**
 row's `structureBudget`. Checking any other row checks a budget the brief was never planned against.
@@ -127,7 +129,7 @@ Two consequences g2 must carry rather than discover:
 `differentiator != "none"` treated A-P3's most useful honest answer as a quality defect. A-P3's own
 schema note is explicit: *"`none` means it does not meaningfully differ, and saying `none` honestly is
 better than inventing a difference"*, and *"a `none` answer is a real, useful signal: it tells A-S3
-the candidate is a near-duplicate before the hash sets do"* (`spec-signature-propose.md:96-100`).
+the candidate is a near-duplicate before the hash sets do"* (`spec-signature-propose.md:160-162`).
 Penalising it teaches the pipeline to invent a differentiator, which is the exact failure P3 was split
 out to prevent. So: `differentiator == "none"` is **recorded** on the candidate and forwarded to A-S3
 as a near-duplicate hint and to the review queue as a count; it contributes **nothing** to a verdict,
@@ -178,7 +180,11 @@ A-P3. Adding a field to this set is an "ask first" boundary — it moves the cal
 `call_with_self_heal(..., max_heal=2)` — **passed explicitly**, because the config default is 3
 (`llm_caller.py:45`). The loop runs `range(heal_budget + 1)` (`llm_caller.py:242`), so `max_heal=2` is
 **three attempts**: one generation and two repairs. The `build_heal_user` callback names the exact
-defect per key: *"`atom.crit-damage` is not in this brief's eligible atom families"*, never a bare
+defect per key: *"`atom.cruelty` is not in this brief's eligible atom families"* — ⛔ **CORRECTED
+2026-09-03:** the example named `atom.crit-damage`, which exists in none of the three atom-family
+namespaces; `atom.cruelty` is the real crit-damage family
+(`data/seed/items/affix-families/g-precision.json`, `combat.crit.damage.{variant}`), and every id a
+brief can open comes from the 98 authored there (`spec-distribution-planner.md` §2). Never a bare
 retry. An unbounded repair loop is how a run silently costs ten times its estimate.
 
 ### ⛔ The exhaustion contract, adapted for a GENERATION stage — added 2026-09-03 (review F9)
@@ -221,7 +227,7 @@ transient failure must never consume heal budget, and a pause must never change 
 
 Per candidate: `accepted` | `blocked` | `unresolved` | `escalated`, the gate results, the vote records, and
 `_provenance` carrying model id, prompt version, brief hash, schema hash, and the heal count. Per round: the
-**disagreement rate per field** (`anchor/vote.py:43-70`) — a deliverable, not diagnostics: a high rate means
+**disagreement rate per field** (`anchor/vote.py:43-67`) — a deliverable, not diagnostics: a high rate means
 a weak description and the fix is known; a near-zero rate means the field is a candidate to drop from the
 vote set, halving its cost.
 
@@ -322,6 +328,16 @@ vote set, halving its cost.
 8. A transient failure consumes **zero** heal budget and makes **zero** new calls, proven against the
    raising stub.
 9. `--dry-run` gates a recorded candidate set with zero model calls.
+9b. **`AFFIX_SCHEMA` passes the extended audit.** The `blocked` property is added at
+   `affix/prompts.py:26-38` with a negative-clause description, nothing else in that pipeline changes,
+   and `python -m pytest tools/seedsmith/tests` is green. ⛔ **DECIDED 2026-09-03 (owner removed
+   themselves as a gate)** — §6 hazard 1 names the owner and the revert condition.
+9c. **Constrained decoding is proven, or the run does not start.** `--preflight` makes one real call
+   with `response_format` set and a single-member-enum probe schema; a reply that does not match aborts
+   the run naming the endpoint and model id. In `--dry-run` and under the raising stub it is
+   **skipped**, and provenance records `preflight: "skipped"` — a test asserts the skip, never the
+   call, because tests never call a model. ⛔ **DECIDED 2026-09-03 (owner removed themselves as a
+   gate)** — §6 hazard 4. **It blocks a real generation round, never a module's build.**
 10. The per-field disagreement rate is emitted every round as a first-class report artifact.
 11. The full test module passes with the transport stubbed to raise.
 12. A second run over unchanged inputs produces a byte-identical report by hash.
@@ -341,6 +357,32 @@ vote set, halving its cost.
    (`affix/prompts.py:26-38`) and will fail the moment the audit is applied to it. That is a real, correct
    finding about shipped content — it must be fixed there, not worked around here, and it should be raised
    with the effect-pipeline program rather than silently exempted.
+
+   **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — A-S4 owns the extension AND the
+   one-property `AFFIX_SCHEMA` fix.** The hazard named the problem and no owner, which leaves AC1
+   (*"the extensions live in `pipeline/model.py` so every seedsmith pipeline inherits them"*)
+   unpassable behind a cross-program handoff — and a gate that cannot go green is a gate that gets
+   commented out.
+
+   **Why A-S4 and not effect-pipeline:**
+
+   - **It is not a design change to the affix pipeline; it is that pipeline's own unmet contract.**
+     `BLOCKED_FIELD = "blocked"` already ships (`pipeline/model.py:36-41`) and the audit already
+     requires the property at the schema root (`pipeline/model.py:92-97`), whose own defect message is
+     *"a model with no way to decline invents instead."*
+   - **The affix schema is strictly worse than "missing a property".** It carries
+     `"additionalProperties": false` with `"required": ["name", "refs"]`
+     (`affix/prompts.py:26-38`), so the affix model **cannot emit `blocked` at all** — it has no way
+     to decline, by construction. Adding the property is a fix for a live defect, not paperwork.
+   - **It is additive and therefore reversible.** A new *optional* property on a schema whose runner
+     reads `name` and `refs` changes no existing parse; the revert is deleting one property.
+
+   **Scope, held tight:** A-S4 adds the `blocked` property and its description (a negative clause,
+   modelled on the hardened one at `affix/prompts.py:74-82`) and changes **nothing else** about the
+   affix pipeline. **Acceptance is that `python -m pytest tools/seedsmith/tests` stays green.** If it
+   does not — i.e. the affix runner turns out to depend on the closed property set — the change
+   reverts and becomes a named effect-pipeline follow-up, `affix-schema-blocked`, with this paragraph
+   as its statement of work. **What would overturn the ownership:** exactly that test result.
 2. **g2 is incomplete on `restriction` only — ⛔ CORRECTED 2026-09-03 (review F3/F4).** The earlier
    wording lumped `reaction` in with it and cited the ideal rather than the guard. Read against
    `StructureBudgetGuard.cs:27-34` the two axes are in **different** states, and the difference
@@ -364,3 +406,27 @@ vote set, halving its cost.
 4. **Constrained decoding must be proven on**, with one real call at the start of a run checking the reply
    shape. If the server quietly ignores `response_format`, every schema guarantee above becomes decorative
    with no error anywhere. Proving it costs one call; discovering it absent costs the whole run.
+
+   **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — A-S4 owns it, as `--preflight`, and
+   it is acceptance criterion 10.** It appeared in no acceptance criterion and had no owner, which is
+   how a one-call check that saves a whole run goes unwritten.
+
+   **Where it belongs:** A-S4 already owns **Stage 0**, the once-per-run, pre-call schema audit. The
+   preflight is Stage 0's second half — the audit proves the schema forbids a number, the preflight
+   proves the server is reading the schema at all. Splitting them would put the only two run-start
+   gates in two modules.
+
+   **What it is, exactly.** One call through `llm_caller` with `response_format` set to a two-property
+   probe schema, one of them a required single-member enum. **Pass:** the reply is valid JSON, carries
+   exactly the declared properties, and the enum property's value is the declared member. **Fail:**
+   the run **aborts before any generation call**, naming the endpoint and the model id. Cost: one call.
+
+   **It is a run gate, never a test.** Tests never call a model — the binding law — so the suite
+   exercises the preflight against the raising stub and asserts it is **skipped**, not satisfied. In
+   `--dry-run` it is skipped too, and **`preflight: "skipped"` is written into provenance**, so a run
+   that never proved constrained decoding can never report that it did.
+
+   **This is the one item in this module that needs something outside the repo** (a live model
+   server). It therefore blocks **no module's build** — only a real generation round. **What would
+   overturn it:** a transport that guarantees constrained decoding structurally (a local grammar-based
+   decoder in-process), at which point the preflight is a constant and can be deleted.

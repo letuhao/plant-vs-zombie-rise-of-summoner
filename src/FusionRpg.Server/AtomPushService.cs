@@ -27,13 +27,19 @@ public sealed class AtomPushService
     /// catalog revision.
     /// </summary>
     /// <param name="receiverRevision">What the injector says it holds; null on cold start.</param>
+    /// <param name="receiverEmitterVersion">
+    /// E26: what <see cref="AtomPushCodec.EmitterVersion"/> the injector last learned (from its Hello).
+    /// Null on cold start or against a pre-E26 injector that has never reported the field — distinct
+    /// from a real version, so neither is mistaken for the other in the short-circuit below.
+    /// </param>
     public AtomPushDto Build(
         OwnerScope owner,
         BindContext ctx,
         ulong matchSeed,
         string? matchKey = null,
         long? receiverRevision = null,
-        int? ownerLevel = null)
+        int? ownerLevel = null,
+        int? receiverEmitterVersion = null)
     {
         var revision = _store.GetCatalogRevision();
 
@@ -41,7 +47,11 @@ public sealed class AtomPushService
         // a reconnect that delivers no content.
         var contentHash = _store.ComputeContentHash().ToCompact();
 
-        if (receiverRevision == revision)
+        // Two-term short-circuit (E26), mirroring AtomPushCodec.BuildPayload's own: CatalogRevision is
+        // a stamp over seed DATA, so a receiver at the right revision but the wrong (or unknown)
+        // emitter version still needs the full rebuild — the compiler-code path below is what makes
+        // that decision, this early return must not shortcut around it on revision alone.
+        if (receiverRevision == revision && receiverEmitterVersion == AtomPushCodec.EmitterVersion)
             return new AtomPushDto
             {
                 CatalogRevision = revision,
@@ -49,6 +59,7 @@ public sealed class AtomPushService
                 MatchSeed = matchSeed,
                 MatchKey = matchKey,
                 UpToDate = true,
+                EmitterVersion = AtomPushCodec.EmitterVersion,
             };
 
         var resolution = _store.ResolveBindings(owner, ctx, ownerLevel);
@@ -94,7 +105,7 @@ public sealed class AtomPushService
         }
 
         return AtomPushCodec.BuildPayload(
-            catalog, bindings, matchSeed, matchKey, contentHash, receiverRevision);
+            catalog, bindings, matchSeed, matchKey, contentHash, receiverRevision, receiverEmitterVersion);
     }
 
 }

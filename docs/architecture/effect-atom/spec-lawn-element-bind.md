@@ -71,6 +71,59 @@ and it must:
 - return `Neutral` on a miss, never throw and never guess;
 - be readable by both bridges without duplicating the resolution.
 
+#### ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the algorithm
+
+The three properties above were stated and no algorithm was. Here it is, in five steps, each one a call
+that already exists:
+
+```text
+ElementOf(ptrKey) :=
+  1. cache hit?                    -> return it.        cache key = (MatchKey, ptrKey)
+  2. board lookup                  -> (side, gameTypeId)
+  3. (side, gameTypeId) -> species -> DemonSpeciesDef
+  4. def                           -> ActorElementTypes.Create(primary, secondary == primary ? null : secondary)
+  5. miss at 2 or 3                -> ActorElementTypes.Neutral, reported once per (MatchKey, typeId)
+  cache and return.
+```
+
+**Step 2 is a reuse, not a new scan.** `ResolveElementTypesFromHub` already captures a board snapshot
+and loops `board.Entities` to find `side` and `typeId`
+(`src/FusionRpg.Injector/Effects/InjectorCombatBridge.cs:51-59`) — on **every resolve**. This module
+takes that existing loop and puts the cache in front of it, which is why §2.4 calls it a repair: the
+per-hit board scan the 2026-08 perf audit blamed is the very line the element lookup needs, and caching
+it removes the scan from the hit path for **both** the element resolve and the `side` the patron aura
+rides on (`:33-34`).
+
+**Step 3's key is `(Side, GameTypeId)`, and that pair is unique.** `DemonSpeciesDef` carries `Side` and
+`GameTypeId` (`src/FusionRpg.Core/Demons/DemonSpeciesCatalog.cs:11-14`), and across the 84 shipped
+species **no `(side, gameTypeId)` pair repeats** — checked mechanically against
+`DemonSpeciesCatalog.Generated.cs`, 84 rows, 84 distinct pairs. `GameTypeId` alone is **not** unique
+(`polevaulterzombie` and `wallnut` are both `3`), so a `typeId`-only key would silently give plants
+zombie elements.
+
+> **The roster is store-backed and can change.** `DemonSpeciesCatalog.All` reads what `species-import`
+> wrote (`DemonSpeciesCatalog.cs:44-47`) and `Validate` enforces unique `SpeciesId` and unique
+> `DemonTypeId` — **not** unique `(Side, GameTypeId)`. So the index this module builds must state its
+> tie-break rather than assume one: **on a duplicate pair, take the lowest `SpeciesId` by ordinal and
+> report the collision once at index build.** Deterministic beats arbitrary, and a reported collision
+> is a roster defect someone can fix.
+
+**Step 4 mirrors `BattleEngine.cs:36-38` verbatim**, and the collapse rule is belt-and-braces on this
+path: `DemonSpeciesCatalog.Validate` already refuses `secondary == primary`
+(`DemonSpeciesCatalog.cs:95-96`), so a species-sourced element can never hit it. **Write it anyway** —
+§2.2's rule is that the two runtimes construct identically, and a corner case one side handles and the
+other does not is how they drift.
+
+**Where the cache lives and when it clears:** one `Dictionary<string, ActorElementTypes>` beside the
+existing resolve, keyed on the normalised pointer, **cleared on `MatchKey` change**. A pointer is
+match-scoped and can be reused by a different entity in a later match, so a process-lifetime cache
+would hand a new zombie a dead plant's element. Test 5's counter asserts one resolve per actor per
+match against exactly this.
+
+**What would overturn it:** a shipped roster with a duplicate `(Side, GameTypeId)` that is legitimate
+rather than a defect — at which point the key needs a third term (the board entity would have to carry
+something more specific than `typeId`, which is a Unity-side question, not this one).
+
 ---
 
 ## 3. What this module must NOT do
@@ -118,7 +171,10 @@ and it must:
 1. A lawn plant and a lawn zombie both carry their species' element in `CombatActorSnapshot`.
 2. Absent element → `Neutral`; unknown element → `Neutral` **plus a report**.
 3. Construction matches `BattleEngine.cs:36` including the secondary-collapse rule.
-4. Element resolution is cached per actor per match, asserted by a counter.
+4. Element resolution is cached per actor per match, asserted by a counter, and the cache clears on
+   `MatchKey` change (§2.4).
+4b. The `(Side, GameTypeId)` index is built once, and a duplicate pair is **reported** with a stated
+   ordinal tie-break rather than resolved arbitrarily (§2.4).
 5. An elemental defense channel measurably changes lawn overlay damage.
 6. `InjectorElementOverride` still wins, and its precedence is stated where it is read.
 7. No change to the element roster, either matchup matrix, or any channel id.

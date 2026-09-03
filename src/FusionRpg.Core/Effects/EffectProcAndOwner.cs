@@ -24,12 +24,32 @@ public static class EffectOwnerKey
 
             if (string.Equals(ev.Trigger, EffectTriggers.OnDamageDealt, StringComparison.OrdinalIgnoreCase))
                 return string.Equals(ev.Side, "plant", StringComparison.OrdinalIgnoreCase) && ev.TypeId == tid;
+
+            // E33 (spec-activation-edge.md §2.3, point 1 — a wiring fix): nothing matched OnActivate
+            // before this clause. Same shape as OnDamageDealt above — the actor's own type, never the
+            // target's. No shipped behaviour changes: nothing raises OnActivate on the plant side yet.
+            if (string.Equals(ev.Trigger, EffectTriggers.OnActivate, StringComparison.OrdinalIgnoreCase))
+                return string.Equals(ev.Side, "plant", StringComparison.OrdinalIgnoreCase) && ev.TypeId == tid;
+
             return false;
         }
 
         if (key.StartsWith("zombie:", StringComparison.OrdinalIgnoreCase))
         {
             if (!int.TryParse(key.AsSpan(7), out var tid)) return false;
+
+            // E33 (spec-activation-edge.md §2.3, point 2 — a NARROWING BEHAVIOUR CHANGE on a branch
+            // Battle's live path flows through: BasicAttack.cs raises OnActivate once per resolved
+            // intent). Before this clause, the unnarrowed fall-through below also matched on
+            // TargetTypeId when TypeId was null (the target's type standing in for the actor's — the
+            // exact thing an owner-key match must never do) and matched when ev.Side was null (only a
+            // PRESENT wrong side was ever refused). An activation must be gated on the actor's own
+            // side and own type, nothing else — no shipped behaviour changes today only because
+            // Battle's own OnActivate emit carries neither Side nor TypeId yet, not because the old
+            // path was narrow enough on its own.
+            if (string.Equals(ev.Trigger, EffectTriggers.OnActivate, StringComparison.OrdinalIgnoreCase))
+                return string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase) && ev.TypeId == tid;
+
             if (!string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase) &&
                 !(string.Equals(ev.Trigger, EffectTriggers.OnDamageDealt, StringComparison.OrdinalIgnoreCase) &&
                   string.Equals(ev.Side, "zombie", StringComparison.OrdinalIgnoreCase)))

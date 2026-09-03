@@ -51,9 +51,21 @@ The same table serves the power cost function's **reference scale** (E9), so a v
 
 ### Units are not interchangeable — the trap this module must document
 
-`+10 hp` is **ten hit points**. `+10 fire power` is **ten resolver points** — sigmoid scale, where `AccuracyScale` and `CritRateScale` are `100.0`, so ten points is 0.1 sigmoid units. Calibration: `critical-hunter` grants **+150** crit-rate points and moves crit from ~7.6% to ~26.9%; the patron aura divides per-mille by ten, so its 150‰ clamp is **+15 points**, not +15%.
+> **⛔ CORRECTED 2026-09-03 (E42 `units-correction`).** This used `+10 fire power` as its sigmoid
+> example, repeating `definitions.md`'s former error. `combat.power.*` is **flat game units** — summed
+> directly into `weightedDelta` with no sigmoid anywhere in the path
+> (`OverlayCombatCalculator.cs:84-89`; `CombatProbabilityPolicy` declares no `PowerScale`). Replaced with
+> `crit rate`, which genuinely is sigmoid-scaled.
 
-Therefore: **tier bands are authored per channel family and never copied across**, and E9's `normalize(magnitude, referenceScale)` is not optional polish — without it a coefficient table prices `+10 hp` and `+10 fire power` alike and is wrong by an order of magnitude.
+`+10 hp` is **ten hit points**. `+10 fire power` is **ten damage** — additive, the peer of hp, no
+sigmoid. `+10 crit rate` is different: **ten resolver points** — sigmoid scale, where `CritRateScale` is
+`100.0`, so ten points is 0.1 sigmoid units. Calibration: `critical-hunter` grants **+150** crit-rate
+points and moves crit from ~7.6% to ~26.9%; the patron aura divides per-mille by ten, so its 150‰ clamp
+is **+15 points**, not +15%.
+
+Therefore: **tier bands are authored per channel family and never copied across**, and E9's
+`normalize(magnitude, referenceScale)` is not optional polish — without it a coefficient table prices
+`+10 hp` and `+10 crit rate` alike and is wrong by an order of magnitude.
 
 ### Determinism
 

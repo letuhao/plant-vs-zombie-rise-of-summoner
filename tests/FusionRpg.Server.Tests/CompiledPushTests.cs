@@ -125,7 +125,11 @@ public class CompiledPushTests : IDisposable
         Bind("item.blade", "1");
         var revision = _store.GetCatalogRevision();
 
-        var payload = _push.Build(Owner(), Lawn(), matchSeed: 7, receiverRevision: revision);
+        // E26: the short-circuit is two-term now (spec-runner-def-emit.md §3.3) — the receiver must
+        // also echo the current EmitterVersion, or a compiler-code change with no revision bump would
+        // never re-push.
+        var payload = _push.Build(Owner(), Lawn(), matchSeed: 7,
+            receiverRevision: revision, receiverEmitterVersion: AtomPushCodec.EmitterVersion);
 
         Assert.True(payload.UpToDate);
         Assert.Empty(payload.RunnerBindings);
@@ -142,7 +146,7 @@ public class CompiledPushTests : IDisposable
 
         var payload = _push.Build(
             Owner(), Lawn(), matchSeed: 99, matchKey: "m1",
-            receiverRevision: _store.GetCatalogRevision());
+            receiverRevision: _store.GetCatalogRevision(), receiverEmitterVersion: AtomPushCodec.EmitterVersion);
 
         Assert.True(payload.UpToDate);
         Assert.False(string.IsNullOrEmpty(payload.ContentHash));

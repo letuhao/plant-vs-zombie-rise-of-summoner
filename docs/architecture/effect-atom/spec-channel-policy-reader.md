@@ -107,11 +107,40 @@ gap upside down:
 
 ## Known residuals
 
-- **Three of the table's four columns remain unread**, exactly as before this module. Making them live
-  is a design question (what a primary-channel cap or default would even mean), not wiring.
-- **`ChannelPolicyTable.Use` accepts any channel string.** Unknown-channel refusal lives in the import
-  transaction, so a caller constructing a table directly in code can register a direction for a channel
-  that does not exist. Harmless — nothing reads a direction for a channel it never composes — but the
-  refusal is not on the type.
-- **The reader guard's registry trip-wire is a hand-maintained list**, not a derived check; see
-  [spec-content-boot.md](spec-content-boot.md) "Known residuals".
+**⛔ EVERY RESIDUAL BELOW CARRIES A DISPOSITION — DECIDED 2026-09-03 (owner removed themselves as a
+gate):** *claimed* by a named module, a *named follow-up*, or *accepted as-is with the reason*.
+
+- **[ACCEPTED AS-IS] Three of the table's four columns remain unread**, exactly as before this module.
+  Making them live is a design question (what a primary-channel cap or default would even mean), not
+  wiring.
+  ⛔ **DECIDED 2026-09-03 — they stay unread, and that is the correct state, not a deferral.** The
+  three are `default_value`, `cap_milli` and `compose_kind` (`ChannelPolicyTable.cs:10-19`). Two of
+  them already have a **live, consumed mechanism** elsewhere: `DerivedComposer` applies
+  `DerivedStatDef.Cap` from the code-registered derived catalog, which this type's own doc-comment
+  records as *"a different and already-consumed mechanism"*. And `effect_channel_policy` is scoped to
+  `StatChannels.All` — the **primary** channels — so *"it cannot even name a derived resist channel"*.
+  Wiring readers for them would therefore create a **second** cap/compose mechanism, on a different
+  channel set, competing with a shipped one — the exact second-vocabulary defect this program exists to
+  refuse. `default_value` has no consumer anywhere and no stated meaning.
+  **The trigger, so this is a decision and not an omission:** if a primary-channel cap is ever wanted,
+  the correct move is a **reviewed decision to drop the three columns or to fold their intent into the
+  derived catalog** — not a reader on this type. Whoever wants one opens that decision; nobody has.
+
+- **[ACCEPTED AS-IS] `ChannelPolicyTable.Use` accepts any channel string.** Unknown-channel refusal
+  lives in the import transaction, so a caller constructing a table directly in code can register a
+  direction for a channel that does not exist. Harmless — nothing reads a direction for a channel it
+  never composes — but the refusal is not on the type.
+  ⛔ **DECIDED 2026-09-03 — the refusal stays where the data enters.** `effect_channel_policy` refuses
+  an unknown channel at **write** time (`ChannelPolicyTable.cs:6-8`), which is where a bad row can
+  actually arrive from; and the read side is a query, not an enumeration —
+  `TryGetDirection(channel, out …)` is only ever asked about a channel already being composed, so a
+  stray key produces **no output at all**, not a wrong one. Putting the refusal on the constructor
+  would couple a pure lookup type to `StatChannels.All` at construction time, to prevent a failure
+  that cannot produce a wrong answer.
+  **What would overturn it:** a consumer that **enumerates** the table rather than querying it — a
+  diagnostic dump, a UI listing, a policy report. At that moment a stray key becomes visible output,
+  and the constructor must refuse. Until one exists, the type stays a lookup.
+
+- **[CLAIMED — `E48 reader-map-derive`] The reader guard's registry trip-wire is a hand-maintained
+  list**, not a derived check; see [spec-content-boot.md](spec-content-boot.md) "Known residuals",
+  whose second residual states the follow-up's scope and its evidence. Same trip-wire, one owner.

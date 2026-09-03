@@ -17,16 +17,20 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "unresolved",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "high"
+        "aptitudePrimary": "high",
+        "deployMode": "split",
+        "elementPrimary": "split",
+        "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-02T18:10:58Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-03T13:10:31Z",
+      "minorityValues": {
+        "deployMode": "HypnoAlly",
+        "elementPrimary": "earth",
+        "rarity": "cultivated"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -41,37 +45,38 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Agility",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
-    "basis": "observed",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
+    "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
-      "Three-Lane Artillery"
+      "undead-aquatic"
     ],
-    "gameTypeId": 14,
-    "posture": "unresolved",
-    "pure": false,
-    "rarity": "cultivated",
-    "reach": "long",
-    "reason": "As a basic plant that compensates for missed shots, its consistent three-lane coverage makes it a significant tactical asset rather than a mere raider.",
+    "gameTypeId": 19,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The creature's mechanics are limited to a single movement leap and a loss of mobility, making it a minor obstacle rather than a warden-level threat.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
-    "side": "plant",
-    "speciesId": "ThreePeater",
+    "side": "zombie",
+    "speciesId": "Dolphinrider",
     "targetPreference": "frontline",
     "traits": [
-      "Multi-lane projectile discharge",
-      "Lane-compensation ballistic mechanics"
+      "mounted-mobility",
+      "plant-leaping",
+      "symbiotic-decay"
     ],
     "variants": [
       "normal",
-      "mutated"
+      "corrupted"
     ],
-    "verdict": "too-low"
+    "verdict": "too-high"
   }
 ]

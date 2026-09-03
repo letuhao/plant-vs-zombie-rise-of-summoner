@@ -77,8 +77,17 @@ public sealed record AffixRefRow(
 /// actual unit (`definitions.md` §4a). What makes *"master of fire and ice"* (two families, one
 /// correlated element choice) expressible: today's one-ref-per-row pool could not correlate two
 /// independent draws.
+///
+/// <para><b><see cref="Class"/> is nullable</b> (E32, spec-affix-import-path.md §3.2, decided
+/// 2026-09-03): <c>null</c> means "not authored, derive it" — the shape a real generator/authoring
+/// pipeline emits. Every consumer OUTSIDE the validate/import path (<c>Resolver</c>,
+/// <c>Instantiator</c>, <c>EligibilityRule</c>, <c>ContainerValidator</c>) only ever sees an
+/// <see cref="AffixRow"/> already resolved — read back from storage or built by
+/// <c>AffixLibraryGenerator</c> — where <see cref="Class"/> is always concrete;
+/// <see cref="AffixValidator.ResolveClass"/> is the one place that fills a <c>null</c> in, and it runs
+/// before anything is written.</para>
 /// </summary>
-public sealed record AffixRow(string AffixId, AffixClass Class, IReadOnlyList<AffixRefRow> Refs);
+public sealed record AffixRow(string AffixId, AffixClass? Class, IReadOnlyList<AffixRefRow> Refs);
 
 /// <summary>
 /// A named, ordered bundle of atom references, optionally with a weighted pool it rolls from.

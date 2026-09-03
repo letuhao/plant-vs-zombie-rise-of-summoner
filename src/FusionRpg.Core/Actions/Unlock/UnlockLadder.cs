@@ -53,16 +53,26 @@ public static class UnlockLadder
         return Math.Max(rounded, tuning.FloorMilli);
     }
 
-    /// <summary><c>rung(n) = min(earnCount, cap)</c> — the ONLY input is <paramref name="earnCount"/>.
-    /// No slot, no held-set position, nothing else: two callers passing the same <c>earnCount</c>
-    /// always get the same rung, which is what makes a held unlock's rung derivable forever from the
-    /// single number recorded at the moment it was accepted, rather than a value that must itself be
-    /// stored (spec's testing strategy: "no column stores a resolved rung value").</summary>
-    public static int Rung(long earnCount, UnlockTuning tuning)
+    /// <summary><c>effectiveRung(n) = min(earnCount, rungCap)</c> — the ONLY input is
+    /// <paramref name="earnCount"/>. No slot, no held-set position, nothing else: two callers passing
+    /// the same <c>earnCount</c> always get the same rung, which is what makes a held unlock's rung
+    /// derivable forever from the single number recorded at the moment it was accepted, rather than a
+    /// value that must itself be stored (spec's testing strategy: "no column stores a resolved rung
+    /// value").
+    ///
+    /// <para><b>A-U1 (spec-rung-semantics.md §3.1, 2026-09-03):</b> this is the HOLDER-derived rung,
+    /// distinctly named and distinctly typed (<see cref="EffectiveRung"/>) from
+    /// <see cref="ActionRow.Rung"/>, the AUTHORED value <see cref="StructureBudgetGuard"/> reads.
+    /// Clamping this value never reaches that guard — it fixes magnitude and cost for THIS holder,
+    /// never structure, which is a property of the content, not of who holds it. Renamed from
+    /// <c>Rung</c> so the two cannot silently re-merge into "the rung" the way the specs' own
+    /// pre-correction prose did.</para>
+    /// </summary>
+    public static EffectiveRung EffectiveRung(long earnCount, UnlockTuning tuning)
     {
         if (earnCount < 0) throw new ArgumentOutOfRangeException(nameof(earnCount), earnCount, "earnCount is never negative");
         if (tuning is null) throw new ArgumentNullException(nameof(tuning));
 
-        return (int)Math.Min(earnCount, tuning.Cap);
+        return new EffectiveRung((int)Math.Min(earnCount, tuning.RungCap));
     }
 }

@@ -21,7 +21,12 @@ public sealed class HealthMonitor
         bool Ok,
         bool InjectorConnected,
         string? Source,
-        string? RawError);
+        string? RawError,
+        // E46 (player-content-boot): whether the server's own catalog tables are populated ("imported")
+        // or it is still on the shipped code fallback ("codeFallback"), plus why, so the launcher can
+        // show it on the one status surface the player already looks at — never only in a server log.
+        string? ContentSource = null,
+        string? ContentImportError = null);
 
     public async Task<HealthSnapshot> CheckAsync(string baseUrl, CancellationToken ct = default)
     {
@@ -38,7 +43,9 @@ public sealed class HealthMonitor
             var ok = root.TryGetProperty("ok", out var okEl) && okEl.ValueKind == JsonValueKind.True;
             var inj = root.TryGetProperty("injectorConnected", out var injEl) && injEl.ValueKind == JsonValueKind.True;
             var source = root.TryGetProperty("source", out var srcEl) ? srcEl.GetString() : null;
-            return new HealthSnapshot(true, ok, inj, source, null);
+            var contentSource = root.TryGetProperty("contentSource", out var csEl) ? csEl.GetString() : null;
+            var contentError = root.TryGetProperty("contentImportError", out var cieEl) ? cieEl.GetString() : null;
+            return new HealthSnapshot(true, ok, inj, source, null, contentSource, contentError);
         }
         catch (Exception ex)
         {

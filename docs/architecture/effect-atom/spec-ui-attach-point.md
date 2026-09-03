@@ -6,6 +6,17 @@ dependencies (map §14). Ideal: [effect-atom-ideal.md](../effect-atom-ideal.md) 
 > **Reads [definitions.md](definitions.md)** — the shared vocabulary pinned after the 2026-08-22 audit.
 > Where this spec and the definitions disagree, **the definitions win**.
 
+> **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the coefficient data path.**
+> Coefficients do **not** live in `data/tuning/effects.v1.json`: that file has no coefficient section
+> (its keys are `matchupRead` and `damageFxFloater`), and `CoefficientTable` never reads `data/tuning/`
+> at all — the only reader is `RpgStore.GetPowerTables` over the **content-hashed** `power_coefficient`
+> table (`RpgStore.Power.cs:61-72`; hash registry V3 at `ContentHashRegistry.cs:148-160`). **The path is
+> a seed kind, `data/seed/power/coefficients.v1.json`**, decided in full at
+> [`spec-power-sweep.md`](spec-power-sweep.md) §4.1. `CoefficientTable.Authored()` stays the
+> no-database fallback and this module does not edit it. **This spec's coefficient row lands in that
+> seed file.**
+
+
 ## Objective
 
 Every other Wave 8 row changes what happens; this one changes what the player *knows* happened. There
@@ -113,8 +124,53 @@ This is a deliberate edit to a guard, in the same commit as the kind, said out l
 message.
 
 **`bannerId`, never free text.** A content-authored string on screen is unlocalisable, unreviewable and
-a place for text nobody approved to appear in a screenshot. Banner ids resolve against a table in
-`data/tuning/actor-hud.v1.json`; an unknown id is refused at load by E29's value guard.
+a place for text nobody approved to appear in a screenshot. An unknown id is refused at load by E29's
+value guard.
+
+#### ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the two vocabularies, and neither is a tuning table
+
+**`data/tuning/actor-hud.v1.json` is the wrong home and would not have worked.** It holds nine scalar
+layout tunables (`statusStripMax`, three row offsets, two magnitude thresholds…) and **zero banner or
+meter keys**, and its own `_meta.rebalance` says *"Never hand-edit this file.
+`python tools/tuning/publish.py actor-hud <dotted.key>=<value>`"* — a publisher whose interface is
+`key=scalar`. **An id list is not a scalar, and a vocabulary is not a balance number.** Nothing about a
+banner id is something a balance pass would change.
+
+**Both vocabularies read an SSOT that already exists**, which is `spec-kind-value-guard.md` §3 rule 2
+applied here rather than a new mechanism:
+
+| Param | Vocabulary | SSOT | Why this one |
+|---|---|---|---|
+| **`meterId`** | the **six actor resources** — `hp`, `stamina`, `hunger`, `spirit`, `qi`, `poise` | `DerivedStatChannels.ResourceIds` (`DerivedStatChannels.cs:521`) | A meter is a 0–1000‰ ratio **of a pool**, and these are the pools. `ActorHudMeter(string Id, double Ratio)` (`ActorHudSnapshot.cs:33`) has **no producer today** — `Meters` is always null in `ActorHudComposer.Compose` — so E41 is what first fills it, and it should fill it with the ids the rest of the stack already uses. The list widens by itself when a seventh resource lands, which is the property rule 2 exists for |
+| **`bannerId`** | a key in the shipped **i18n catalog** under the reserved `banner.` prefix | `web/fusion-rpg-web/src/i18n/locales/en` | The stated requirement is that no unlocalisable, unreviewed string reaches the screen. **The property that delivers that is "the id resolves to a localised string"** — which a tuning-file list does not check and a catalog lookup does by construction. The catalog is already CI-gated: `ci.yml`'s *"Web i18n catalog is current"* step runs `npm run extract` and fails on a diff, so a banner id with no message is a red build, not a blank banner |
+
+**Neither needs a new file, a new table or a new publish step**, which is the whole reason to prefer
+them over a `data/tuning/` list: a vocabulary with one home cannot drift from itself.
+
+**What would overturn `meterId`:** a meter that is not an actor resource — a cooldown bar, a channel
+progress bar. Then the vocabulary is a union of `ResourceIds` and a declared meter list, and the
+declared half is a **seed** kind (`data/seed/hud-meters/`), the same shape E30 uses for channel pools —
+content, hashed, importable. Not a tuning file.
+
+**What would overturn `bannerId`:** the injector-side HUD not having access to the web catalog. That is
+a real possibility and it is a **check, not a blocker** — see §2b.1.
+
+#### 2b.1 Criteria-stated task (needs the injector build; blocks nothing in this module)
+
+**What to check:** whether the in-game HUD renderer that draws a banner can resolve a localisation key,
+or whether it can only draw a literal string handed to it.
+
+**Pass:** it can resolve a key. `bannerId` is a catalog key, as decided, and the load-time guard checks
+membership against the extracted catalog.
+
+**Fail:** it can only draw a literal. Then `bannerId` still stays out of the atom as free text — it
+becomes an id in a **seed** file (`data/seed/hud-banners/`) carrying an id **plus** its catalog key, so
+the injector gets a string and the id stays reviewable and hashed. The refusal rule is unchanged either
+way.
+
+**Why it blocks nothing:** `op: number` and `op: meter` are unaffected, `meterId` is decided outright,
+and the pricing, the attach point, the guard and every test but the banner one proceed. Only the
+banner's *lookup* depends on the answer, and both branches end at "an id, refused at load if unknown."
 
 `tag` reuses `DamageFxTag` rather than inventing a palette — the colours already exist
 (`DamageFxPalette.Rgb`, `src/FusionRpg.Core/Effects/DamageFx.cs:23-35`).
@@ -144,7 +200,9 @@ apparent budget, and it must not tax one either.
   A guard test asserts no `Ui`-attached kind produces a plan item any state executor handles.
 - **Never read state back into content.** A HUD is an output. A predicate that reads what the HUD shows
   would make presentation load-bearing, and the first frame it lags the game desyncs the content.
-- **No free text on screen.** `bannerId` only (§2b).
+- **No free text on screen.** `bannerId` only, resolved against the i18n catalog (§2b).
+- **Do not put either vocabulary in `data/tuning/actor-hud.v1.json`.** It is a scalar-publisher file
+  with no id keys; a vocabulary there would have two homes and one publisher that cannot write it.
 - **Do not make it a second HUD.** `ActorHudBuilder` / `ActorHudCache` own composition; E41 contributes a
   meter and marks dirty. Building a parallel overlay is how two HUDs disagree.
 - **Do not put a present on the per-hit path uncached.** The 2026-08 perf audit blamed uncached per-hit
@@ -169,7 +227,9 @@ apparent budget, and it must not tax one either.
 | **Planted violation:** remove `ui.present`'s coefficient row | the pricing test fails with `unpriced`, never quietly falling back to the channel-less row |
 | `ui.present` prices | exactly zero, verdict `Priced` |
 | `op:meter` | `ActorHudResources.Meters` is non-null for that ptr, and the wire serializer emits it (`ActorHudWireSerializer.cs:48`) — the first producer that path has ever had |
-| `bannerId: "not-a-banner"` | `BadParamValue` at load |
+| `bannerId: "not-a-banner"` | `BadParamValue` at load, naming the id (§2b) |
+| `meterId: "mana"` | `BadParamValue` at load — not one of `DerivedStatChannels.ResourceIds`' six |
+| a seventh resource added to `ResourceIds` | becomes a legal `meterId` with **no E41 edit** — the rule-2 property, tested |
 | `op:number` without `amount`, or `op:meter` without `ratio` | `MissingParam` |
 | `ratio: 1500` | `BadParamValue` — bounded 0–1000 |
 | `ui.present` bound in Battle | `RuntimeUnsupported` at bind |
@@ -194,7 +254,9 @@ because a present is a thing you verify with your eyes — the VFX program's own
 4. `op:number` shows a floater on the lawn with the authored amount and tag.
 5. `op:meter` fills `ActorHudResources.Meters` and reaches the wire — the first producer for a field that
    is declared and serialized and has never been written.
-6. `op:banner` resolves through `data/tuning/actor-hud.v1.json`; no free text ever reaches the screen.
+6. `op:banner` resolves through the i18n catalog's `banner.` prefix and `op:meter` through
+   `DerivedStatChannels.ResourceIds` (§2b, decided 2026-09-03); no free text ever reaches the screen,
+   and neither vocabulary is copied into this module.
 7. `ui.present` prices at exactly zero with verdict `Priced`, never `unpriced`.
 8. Nothing in the module reads HUD state back into content, and no cap truncates a displayed number.
 

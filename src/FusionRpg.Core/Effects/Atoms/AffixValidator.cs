@@ -94,19 +94,51 @@ public static class AffixValidator
             }
         }
 
-        var expectedClass = derivedKinds.Count switch
+        // E32 (spec-affix-import-path.md §3.2, decided 2026-09-03): an authored `class` is now
+        // OPTIONAL — absent means "derive it," present means "check it," never "trust it silently."
+        if (derivedKinds.Count == 0)
         {
-            0 => affix.Class,          // an all-slot bundle: class was authored ahead of resolution;
-                                        // trusted here, re-derivable once module 2 resolves a slot.
-            1 => derivedKinds.Single(),
-            _ => AffixClass.Mixed,     // A1: a bundle spanning both kinds consumes one of each roll.
-        };
-        if (derivedKinds.Count > 0 && affix.Class != expectedClass)
-            return Fail(affix, AtomRejectionReason.BadParamValue,
-                $"affix_class '{affix.Class}' does not match its refs' derived class '{expectedClass}' — " +
-                "affixClass is derived, never authored (seed-contract.md §2.1)");
+            // An all-slot bundle has no concrete ref to derive a class FROM — nothing here can invent
+            // one, so an absent class is unresolvable, not merely undecided.
+            if (affix.Class is null)
+                return Fail(affix, AtomRejectionReason.MissingParam,
+                    "an all-slot bundle has no concrete ref to derive its class from — class must be authored");
+            // else: authored ahead of resolution, trusted here, re-derivable once module 2 resolves a
+            // slot — unchanged from before this decision.
+        }
+        else
+        {
+            var expectedClass = derivedKinds.Count == 1 ? derivedKinds.Single() : AffixClass.Mixed; // A1
+            if (affix.Class is { } authored && authored != expectedClass)
+                return Fail(affix, AtomRejectionReason.BadParamValue,
+                    $"affix_class '{authored}' does not match its refs' derived class '{expectedClass}' — " +
+                    "affixClass is derived, never authored (seed-contract.md §2.1)");
+            // affix.Class is null (absent, to be derived by ResolveClass below) or matches exactly
+            // (redundant, accepted).
+        }
 
         return AtomRejection.Ok;
+    }
+
+    /// <summary>
+    /// E32 (§3.2): the effective class for an affix whose own <see cref="AffixRow.Class"/> may be
+    /// <c>null</c>. Call ONLY after <see cref="Validate"/> has returned <c>Ok</c> — for an all-slot
+    /// bundle, <see cref="Validate"/> already refused a <c>null</c> class, so this never has to invent
+    /// one from nothing. An authored, already-checked class is returned as-is; an absent one is
+    /// derived from the concrete refs, mirroring <see cref="Validate"/>'s own derivation exactly (A1:
+    /// more than one derived kind present is <see cref="AffixClass.Mixed"/>).
+    /// </summary>
+    public static AffixClass ResolveClass(AffixRow affix, Func<string, AtomRow?> lookupAtom)
+    {
+        if (affix.Class is { } authored) return authored;
+
+        var derivedKinds = affix.Refs
+            .Where(r => r.AtomId is not null)
+            .Select(r => AffixClassOfAtom(lookupAtom(r.AtomId!)!))
+            .Distinct()
+            .ToList();
+
+        return derivedKinds.Count == 1 ? derivedKinds[0] : AffixClass.Mixed;
     }
 
     /// <summary>Splits <c>"atom.elemental-power.$E1"</c> + member <c>"fire"</c> into

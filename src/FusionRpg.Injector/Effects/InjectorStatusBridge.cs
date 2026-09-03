@@ -1,4 +1,3 @@
-using FusionRpg.Core.Combat;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Derived;
@@ -30,22 +29,11 @@ public static class InjectorStatusBridge
             && !hub.Stats.TryGetBaseline(key.ToUpperInvariant(), out baseline))
             baseline = new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 };
 
-        var board = InjectorBoardSnapshot.Capture();
-        var side = "plant";
-        var typeId = 0;
-        foreach (var e in board.Entities)
-        {
-            if (!CombatPtr.EqualsPtr(e.Ptr, key)) continue;
-            side = e.Side ?? "plant";
-            typeId = e.TypeId;
-            break;
-        }
-
-        if (typeId == 0
-            && CheatState.SelectedPtr != IntPtr.Zero
-            && CombatPtr.EqualsPtr(CheatState.SelectedPtr.ToString("X"), key)
-            && !string.IsNullOrWhiteSpace(CheatState.SelectedSide))
-            side = CheatState.SelectedSide;
+        // E27 (spec-lawn-element-bind.md §2.4): the shared LawnElementResolverHost replaces this
+        // bridge's own board scan — a cache hit here is free when InjectorCombatBridge already
+        // resolved the same ptr for the same match, and either bridge's first call for a ptr warms it
+        // for the other.
+        var (side, typeId, elementTypes) = LawnElementResolverHost.Resolve(key);
 
         var ctx = string.Equals(side, "zombie", StringComparison.OrdinalIgnoreCase)
             ? hub.Stats.Contexts.ForZombie(
@@ -55,7 +43,8 @@ public static class InjectorStatusBridge
                 matchKey: GameHooks.MatchKey,
                 playerId: CheatState.PvzStatsPlayerId > 0 ? CheatState.PvzStatsPlayerId : null,
                 cheatScale: CheatState.EffectiveStats(),
-                pvzStatsMods: CheatState.PvzStatsMods)
+                pvzStatsMods: CheatState.PvzStatsMods,
+                elementTypes: elementTypes)
             : hub.Stats.Contexts.ForPlant(
                 key,
                 baseline,
@@ -63,7 +52,8 @@ public static class InjectorStatusBridge
                 matchKey: GameHooks.MatchKey,
                 playerId: CheatState.PvzStatsPlayerId > 0 ? CheatState.PvzStatsPlayerId : null,
                 cheatScale: CheatState.EffectiveStats(),
-                pvzStatsMods: CheatState.PvzStatsMods);
+                pvzStatsMods: CheatState.PvzStatsMods,
+                elementTypes: elementTypes);
 
         return hub.ResolveDerived(ctx);
     }

@@ -84,14 +84,48 @@ tests assert it that way.
 
 ## Known residuals
 
-- **The set is no longer 84.** The derived-stats program's H.1 (2026-08-24) took the families to 28, so
-  the generation is `28 × 7 = 196` today (`DerivedStatChannels.cs:348`). Every "84" in the map, the todo
-  and the audit is the pre-2026-08-24 figure; the cache is unaffected, and the saving is larger than it
-  was measured to be.
-- **The allocation guard is a heuristic, not a budget.** It measures bytes per call on the current
-  thread over a warm loop; a runtime or GC change could move it without any regression in this module.
-  It is a tripwire for cache removal, and it is the only performance evidence this module has — no
-  probe, no before/after timing, was captured.
-- **The same-instance guarantee is per async scope**, so a nested `UseScoped` restore rebuilds. Recorded
-  in the code (`:385-389`) and asserted that way in `ChannelCacheTests`; a reader expecting
-  process-wide memoisation would be wrong.
+**⛔ EVERY RESIDUAL BELOW CARRIES A DISPOSITION — DECIDED 2026-09-03 (owner removed themselves as a
+gate):** *claimed* by a named module, a *named follow-up*, or *accepted as-is with the reason*.
+
+- **[FOLLOW-UP — `E51 channel-count-drift`] The set is no longer 84.** The derived-stats program's H.1
+  (2026-08-24) took the families to 28, so the generation is `28 × 7 = 196` today
+  (`DerivedStatChannels.cs:348`). Every "84" in the map, the todo and the audit is the pre-2026-08-24
+  figure; the cache is unaffected, and the saving is larger than it was measured to be.
+  ⛔ **DECIDED 2026-09-03.** *Scope, one line:* replace the hard-coded `84` generated-channel figure in
+  `effect-atom-map.md`, `tasks/effect-atom-todo.md` and `completeness-audit.md` with the current figure
+  and a pointer to `DerivedStatChannels.cs:348`, and add the doc-drift assertion that keeps it honest.
+  **Why a follow-up and not accepted:** a stale count in three documents is exactly the citation drift
+  that cost the action-corpus program a whole review pass (its F17 swept ~530 references and corrected
+  52). It is documentation work, not a module — the id is a tracking handle, and the cache itself needs
+  no change.
+
+- **[ACCEPTED AS-IS; the probe CONVERTED TO A CRITERIA-STATED TASK — `T-probe-E25`] The allocation
+  guard is a heuristic, not a budget.** It measures bytes per call on the current thread over a warm
+  loop; a runtime or GC change could move it without any regression in this module. It is a tripwire
+  for cache removal, and it is the only performance evidence this module has — no probe, no
+  before/after timing, was captured.
+  ⛔ **DECIDED 2026-09-03 — the guard is accepted as what it is, because a tripwire is what this module
+  needs.** Its job is to fail loudly if the cache is deleted and the code falls back to a rebuild per
+  call, and it does that: 64 and 16 bytes per call over 10,000 warm reads
+  (`ChannelCacheBudgetGuardTests.cs:45,68`), *"generous headroom over 'should be roughly zero', chosen
+  so the guard fails loudly if the cache is removed … without going yellow on ordinary GC noise."*
+  Turning it into a real budget would mean pinning a number to a runtime and a GC that nothing in this
+  repo controls.
+  **The probe is a separate, non-blocking task, and it needs a running game — so it cannot be decided
+  from the repo.** *What to check:* run `.\scripts\probe-perf.ps1` over a compose-heavy scenario from
+  [perf-probe-plan.md](../../runbook/perf-probe-plan.md)'s B1–B9 matrix, once with the cache live and
+  once with `AllCombatChannelIds` forced to rebuild per call, and land the result in
+  `docs/research/perf/`. *What a pass looks like:* a recorded before/after for the compose section,
+  **whatever direction it points** — this is evidence about the saving, not a gate on the module, and
+  a null result is a publishable result. It blocks nothing.
+
+- **[ACCEPTED AS-IS] The same-instance guarantee is per async scope**, so a nested `UseScoped` restore
+  rebuilds. Recorded in the code (`:385-389`) and asserted that way in `ChannelCacheTests`; a reader
+  expecting process-wide memoisation would be wrong.
+  ⛔ **DECIDED 2026-09-03 — this is the contract, and widening it would break the thing `UseScoped`
+  exists for.** Process-wide memoisation across a scope restore would let one test's roster leak into a
+  test running beside it, which is the isolation `UseScoped` was added to provide. The residual is a
+  **reader hazard**, not a defect, and it is already documented where a reader meets it — in the code,
+  and asserted in the tests.
+  **What would overturn it:** a production host that swaps scoped tables on a hot path and pays for the
+  rebuild. No such caller exists; `UseScoped` is a test affordance.

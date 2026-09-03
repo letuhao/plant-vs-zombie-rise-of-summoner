@@ -411,11 +411,29 @@ public class AtomSeedFileTests
     }
 
     [Fact]
-    public void A_missing_affix_class_is_refused_not_defaulted_to_prefix()
+    public void A_missing_affix_class_parses_as_null_not_defaulted_to_prefix()
     {
+        // E32 (spec-affix-import-path.md §3.2, decided 2026-09-03): an absent class is now LEGAL at
+        // parse time — "derive it" — the shape a real generator emits. It parses to `null`, never a
+        // silent default of Prefix; AffixValidator.Validate/ResolveClass is what fills it in, and
+        // only once an atom lookup exists to derive FROM.
         var r = Collect(("x.json", """
             { "schemaVersion": 1, "kind": "affix", "entries": [
                 { "id": "affix.x", "refs": [ { "atom": "a.t1" } ] } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var affix = Assert.Single(r.Content.Affixes);
+        Assert.Null(affix.Class);
+    }
+
+    [Fact]
+    public void An_unparseable_affix_class_is_still_refused()
+    {
+        // Present-but-garbage is still a refusal — only ABSENCE became legal, not "any string goes."
+        var r = Collect(("x.json", """
+            { "schemaVersion": 1, "kind": "affix", "entries": [
+                { "id": "affix.x", "class": "nonsense", "refs": [ { "atom": "a.t1" } ] } ] }
             """));
 
         Assert.False(r.IsOk);

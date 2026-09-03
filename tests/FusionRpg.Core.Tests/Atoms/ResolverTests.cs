@@ -52,6 +52,12 @@ public class ResolverTests
     static ResolvedDraw Resolve(ContainerRow c, long seed, VariantShift? variant = null) =>
         Resolver.Resolve(c, LookupAtom, LookupAffix, DomainMembers, seed, variant);
 
+    static readonly Dictionary<string, ChannelPoolRow> Pools = new(StringComparer.Ordinal);
+    static ChannelPoolRow? LookupPool(string id) => Pools.TryGetValue(id, out var p) ? p : null;
+
+    static ResolvedDraw ResolveWithPools(ContainerRow c, long seed, VariantShift? variant = null) =>
+        Resolver.Resolve(c, LookupAtom, LookupAffix, DomainMembers, seed, variant, lookupPool: LookupPool);
+
     // ---- the five-step order, end to end ------------------------------------------------------------
 
     [Fact]
@@ -121,11 +127,13 @@ public class ResolverTests
         }
     }
 
+    /// <summary>A1 (spec-affix-schema.md, decided 2026-09-03): a `Mixed`-class affix consumes ONE
+    /// prefix roll AND one suffix roll simultaneously, never twice — replaces the earlier
+    /// "under today's two-independent-draws interim model" test, which only asserted `NotEmpty` and
+    /// would have passed even with the double-draw defect this fix closes.</summary>
     [Fact]
-    public void A_mixed_class_bundle_can_be_drawn_from_both_budgets()
+    public void Mixed_class_affix_consumes_one_prefix_and_one_suffix_roll_never_twice()
     {
-        // A1: a Mixed-class affix consumes a prefix roll and a suffix roll independently under
-        // today's two-independent-draws interim model (Resolver's own doc comment names this).
         Seed(
             new AffixRow("affix.mixed", AffixClass.Mixed, new[]
             {
@@ -143,11 +151,91 @@ public class ResolverTests
             },
         };
 
-        var draw = Resolve(c, 3);
+        for (long seed = 0; seed < 40; seed++)
+        {
+            var draw = Resolve(c, seed);
+            var rollCount = draw.Atoms.Count(a => a.AtomId == "atom.roll.t1"); // unique to the mixed bundle
+            Assert.True(rollCount <= 1, $"seed {seed}: the mixed bundle appeared {rollCount} times");
+            // Whenever the mixed bundle was drawn at all, BOTH its refs are present together (one
+            // correlated roll, never one ref without the other).
+            var vitalityCount = draw.Atoms.Count(a => a.AtomId == "atom.vitality.t1");
+            Assert.Equal(vitalityCount, rollCount);
+        }
+    }
 
-        // The mixed affix's two atoms both show up (drawn on at least one of the two budgets), and
-        // resolution does not throw — the acceptance bar for this interim model.
-        Assert.NotEmpty(draw.Atoms);
+    /// <summary>A1's over-draw guard: once the suffix budget is fully spent (zero to begin with, and
+    /// nothing else in the pool is prefix-eligible), a `Mixed` affix must never be picked — picking it
+    /// would spend a suffix roll the container never had.</summary>
+    [Fact]
+    public void Mixed_affix_is_not_drawable_when_the_suffix_budget_is_exhausted()
+    {
+        Seed(new AffixRow("affix.mixed", AffixClass.Mixed, new[]
+        {
+            new AffixRefRow(1, "atom.vitality.t1"),
+            new AffixRefRow(2, "atom.roll.t1"),
+        }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.no-suffix-budget", Kind = ContainerKind.Item,
+            PrefixRolls = 1, SuffixRolls = 0, // nothing to spend on a Mixed pick
+            Pool = new[] { new ContainerPoolRow("affix.mixed", 100, "g.mixed") },
+        };
+
+        for (long seed = 0; seed < 20; seed++)
+            Assert.Empty(Resolve(c, seed).Atoms);
+    }
+
+    /// <summary>The double-draw defect this fix closes: with only ONE eligible affix (a `Mixed` one)
+    /// and both budgets nonzero, the old two-independent-passes code drew it twice — once per pass,
+    /// with no memory between them. It must now resolve exactly once.</summary>
+    [Fact]
+    public void A_mixed_affix_is_never_drawn_twice_in_one_resolve()
+    {
+        Seed(new AffixRow("affix.mixed", AffixClass.Mixed, new[]
+        {
+            new AffixRefRow(1, "atom.vitality.t1"),
+            new AffixRefRow(2, "atom.roll.t1"),
+        }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.only-mixed", Kind = ContainerKind.Item, PrefixRolls = 1, SuffixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.mixed", 100, "g.mixed") },
+        };
+
+        for (long seed = 0; seed < 20; seed++)
+        {
+            var draw = Resolve(c, seed);
+            // The only pool row is Mixed-eligible for BOTH passes; the pre-fix code drew it in each,
+            // yielding 4 atoms (the bundle's 2 refs, twice). The fix draws it once: 2 atoms.
+            Assert.Equal(2, draw.Atoms.Count);
+            Assert.Equal(new[] { "atom.vitality.t1", "atom.roll.t1" }, draw.Atoms.Select(a => a.AtomId));
+        }
+    }
+
+    /// <summary>A pool with no `Mixed` affix at all rolls exactly as many affixes as its two budgets
+    /// name — nothing in the two-pass rewrite changes behaviour when there is no `Mixed` bundle to
+    /// carry state for, which is what makes every OTHER (non-`Mixed`) test in this file a byte-for-
+    /// byte regression guard on its own.</summary>
+    [Fact]
+    public void A_pool_with_no_mixed_affix_rolls_exactly_the_two_budgets_worth()
+    {
+        Seed(
+            new AffixRow("affix.p1", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.vitality.t1") }),
+            new AffixRow("affix.p2", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.might.t1") }),
+            new AffixRow("affix.s1", AffixClass.Suffix, new[] { new AffixRefRow(1, "atom.roll.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.no-mixed", Kind = ContainerKind.Item, PrefixRolls = 1, SuffixRolls = 1,
+            Pool = new[]
+            {
+                new ContainerPoolRow("affix.p1", 50, "g.p1"),
+                new ContainerPoolRow("affix.p2", 50, "g.p2"),
+                new ContainerPoolRow("affix.s1", 100, "g.s1"),
+            },
+        };
+
+        for (long seed = 0; seed < 20; seed++)
+            Assert.Equal(2, Resolve(c, seed).Atoms.Count); // exactly PrefixRolls + SuffixRolls, always
     }
 
     // ---- variant shifts -------------------------------------------------------------------------
@@ -381,5 +469,161 @@ public class ResolverTests
         var json = Resolve(c, 1).Atoms[0].ValuesJson;
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         Assert.Equal(45, doc.RootElement.GetProperty("amount").GetInt32());
+    }
+
+    // ---- E30 §3.2a: the channel.pool resolve step (effect-pipeline module 2's own responsibility,
+    // decided 2026-09-03) — a pooled `channel` reference expands into `count` separate ResolvedAtoms,
+    // same atom_id, one shared rolled magnitude, a different concrete channel each. -----------------
+
+    [Fact]
+    public void A_pooled_channel_atom_resolves_to_different_concrete_channels_across_two_roll_seeds()
+    {
+        // Test 1 (spec-channel-pool.md §5).
+        Pools["pool.test.three"] = new ChannelPoolRow("pool.test.three", null, new[]
+        {
+            new ChannelPoolMember("chan.a", 1000),
+            new ChannelPoolMember("chan.b", 1000),
+            new ChannelPoolMember("chan.c", 1000),
+        });
+        Catalog["atom.pooled-single.t1"] = new AtomRow
+        {
+            AtomId = "atom.pooled-single.t1", KindId = "stat.derived", FamilyId = "atom.pooled-single", Variant = "", Tier = 1,
+            ParamsJson = """{"channel":{"pool":"pool.test.three","count":1},"op":"flat","amount":100}""",
+        };
+        Seed(new AffixRow("affix.pooled-single", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.pooled-single.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.pooled-single", Kind = ContainerKind.Item, PrefixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.pooled-single", 100) },
+        };
+
+        var seenChannels = new HashSet<string>(StringComparer.Ordinal);
+        for (long seed = 0; seed < 30; seed++)
+        {
+            var atom = Assert.Single(ResolveWithPools(c, seed).Atoms);
+            using var doc = System.Text.Json.JsonDocument.Parse(atom.ValuesJson);
+            seenChannels.Add(doc.RootElement.GetProperty("channel").GetString()!);
+        }
+
+        Assert.True(seenChannels.Count > 1, "every seed drew the same channel — the pool is decorative, not live");
+        Assert.Subset(new HashSet<string>(new[] { "chan.a", "chan.b", "chan.c" }), seenChannels);
+    }
+
+    [Fact]
+    public void A_pooled_channel_atom_replays_byte_identically_for_the_same_seed()
+    {
+        // Test 2 — Law 1's reproducibility contract, extended through the channel.pool stream.
+        Pools["pool.test.three"] = new ChannelPoolRow("pool.test.three", null, new[]
+        {
+            new ChannelPoolMember("chan.a", 1000),
+            new ChannelPoolMember("chan.b", 1000),
+            new ChannelPoolMember("chan.c", 1000),
+        });
+        Catalog["atom.pooled-repro.t1"] = new AtomRow
+        {
+            AtomId = "atom.pooled-repro.t1", KindId = "stat.derived", FamilyId = "atom.pooled-repro", Variant = "", Tier = 1,
+            ParamsJson = """{"channel":{"pool":"pool.test.three","count":1},"op":"flat","amount":{"min":10,"max":200,"roll":"onInstantiate"}}""",
+        };
+        Seed(new AffixRow("affix.pooled-repro", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.pooled-repro.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.pooled-repro", Kind = ContainerKind.Item, PrefixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.pooled-repro", 100) },
+        };
+
+        var a = ResolveWithPools(c, 123);
+        var b = ResolveWithPools(c, 123);
+
+        Assert.Equal(a.Atoms.Select(x => (x.AtomId, x.ValuesJson)), b.Atoms.Select(x => (x.AtomId, x.ValuesJson)));
+    }
+
+    [Fact]
+    public void Count_six_over_a_six_member_pool_without_allowRepeat_draws_each_member_exactly_once_sharing_one_rolled_magnitude()
+    {
+        // Test 3 — draw-without-replacement, AND the §3.2a decision that the magnitude is rolled
+        // once and shared across every expanded copy, never independently re-rolled per channel.
+        Pools["pool.test.six"] = new ChannelPoolRow("pool.test.six", null, new[]
+        {
+            new ChannelPoolMember("chan.a", 1000), new ChannelPoolMember("chan.b", 1000),
+            new ChannelPoolMember("chan.c", 1000), new ChannelPoolMember("chan.d", 1000),
+            new ChannelPoolMember("chan.e", 1000), new ChannelPoolMember("chan.f", 1000),
+        });
+        Catalog["atom.pooled-six.t1"] = new AtomRow
+        {
+            AtomId = "atom.pooled-six.t1", KindId = "stat.derived", FamilyId = "atom.pooled-six", Variant = "", Tier = 1,
+            ParamsJson = """{"channel":{"pool":"pool.test.six","count":6,"allowRepeat":false},"op":"flat","amount":{"min":10,"max":200,"roll":"onInstantiate"}}""",
+        };
+        Seed(new AffixRow("affix.pooled-six", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.pooled-six.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.pooled-six", Kind = ContainerKind.Item, PrefixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.pooled-six", 100) },
+        };
+
+        var draw = ResolveWithPools(c, 7);
+
+        Assert.Equal(6, draw.Atoms.Count); // each member exactly once — not 6 independent atoms with duplicates
+        Assert.All(draw.Atoms, a => Assert.Equal("atom.pooled-six.t1", a.AtomId)); // same authored atom, every copy
+
+        var channels = draw.Atoms.Select(a =>
+            System.Text.Json.JsonDocument.Parse(a.ValuesJson).RootElement.GetProperty("channel").GetString())
+            .ToList();
+        Assert.Equal(new[] { "chan.a", "chan.b", "chan.c", "chan.d", "chan.e", "chan.f" },
+            channels.OrderBy(x => x, StringComparer.Ordinal));
+
+        var amounts = draw.Atoms.Select(a =>
+            System.Text.Json.JsonDocument.Parse(a.ValuesJson).RootElement.GetProperty("amount").GetInt32())
+            .Distinct()
+            .ToList();
+        Assert.Single(amounts); // ONE rolled magnitude, shared across all six — never six independent rolls
+    }
+
+    [Fact]
+    public void A_pooled_channel_atom_compiles_to_the_same_shape_as_a_concrete_one_downstream()
+    {
+        // Criterion 2's "both compile to the same opcode" — a resolved pooled atom is indistinguishable
+        // from an ordinary concrete-channel atom to anything downstream of the resolver.
+        Pools["pool.test.one"] = new ChannelPoolRow("pool.test.one", null, new[] { new ChannelPoolMember("chan.only", 1000) });
+        Catalog["atom.pooled-shape.t1"] = new AtomRow
+        {
+            AtomId = "atom.pooled-shape.t1", KindId = "stat.derived", FamilyId = "atom.pooled-shape", Variant = "", Tier = 1,
+            ParamsJson = """{"channel":{"pool":"pool.test.one","count":1},"op":"flat","amount":100}""",
+        };
+        Seed(new AffixRow("affix.pooled-shape", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.pooled-shape.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.pooled-shape", Kind = ContainerKind.Item, PrefixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.pooled-shape", 100) },
+        };
+
+        var resolved = Assert.Single(ResolveWithPools(c, 1).Atoms);
+        using var doc = System.Text.Json.JsonDocument.Parse(resolved.ValuesJson);
+
+        // A concrete-channel string, not an object — exactly what InjectorEffectActionSink.cs:93's
+        // JsonOverlay.GetString(p, "channel") already reads for every other stat.derived atom.
+        Assert.Equal(System.Text.Json.JsonValueKind.String, doc.RootElement.GetProperty("channel").ValueKind);
+        Assert.Equal("chan.only", doc.RootElement.GetProperty("channel").GetString());
+        Assert.Equal(100, doc.RootElement.GetProperty("amount").GetInt32());
+    }
+
+    [Fact]
+    public void A_pooled_channel_atom_with_no_lookupPool_supplied_throws_rather_than_freezing_the_raw_pool_object()
+    {
+        // §3.2a's "should never happen" guard: validation is expected to refuse a pooled reference
+        // reaching a caller with no pool catalog, so this proves the resolver does not silently freeze
+        // the unread pool-object JSON (the pre-E30 behaviour) if that guard is ever bypassed.
+        Catalog["atom.pooled-noguard.t1"] = new AtomRow
+        {
+            AtomId = "atom.pooled-noguard.t1", KindId = "stat.derived", FamilyId = "atom.pooled-noguard", Variant = "", Tier = 1,
+            ParamsJson = """{"channel":{"pool":"pool.test.whatever","count":1},"op":"flat","amount":100}""",
+        };
+        Seed(new AffixRow("affix.pooled-noguard", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.pooled-noguard.t1") }));
+        var c = new ContainerRow
+        {
+            ContainerId = "item.pooled-noguard", Kind = ContainerKind.Item, PrefixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.pooled-noguard", 100) },
+        };
+
+        Assert.Throws<InvalidOperationException>(() => Resolve(c, 1)); // Resolve(), not ResolveWithPools() — no lookupPool
     }
 }

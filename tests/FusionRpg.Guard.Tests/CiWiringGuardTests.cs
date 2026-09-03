@@ -49,6 +49,26 @@ public class CiWiringGuardTests
             "test project(s) not referenced anywhere in .github/workflows/ci.yml: " + string.Join(", ", missing));
     }
 
+    /// <summary>
+    /// E47 (spec-validate-gate-ci.md, test 6): "the point" of the whole module — E24 built this very
+    /// guard for "the next unwired suite" and was itself the next unwired suite (its own `--validate`
+    /// flag shipped with no CI caller). This is that guard pointed at the fix: if the step naming
+    /// `tools/AtomImporter` and `--validate` together ever disappears from <c>ci.yml</c>, the content
+    /// validation gate goes silent again exactly the way it did the first time — an unrelated ci.yml
+    /// edit that deletes or rewords the step is now caught here rather than surfacing months later as
+    /// "why did nobody notice this content was broken."
+    /// </summary>
+    [Fact]
+    public void AtomImporter_validate_gate_is_wired_into_ci()
+    {
+        var ci = ReadCi();
+
+        Assert.Contains("tools/AtomImporter", ci, StringComparison.Ordinal);
+        Assert.Contains("--validate", ci, StringComparison.Ordinal);
+        Assert.Contains("--check", ci, StringComparison.Ordinal);
+        Assert.Contains("--db", ci, StringComparison.Ordinal);
+    }
+
     static string ReadCi()
     {
         var path = Path.Combine(FindRepoRoot(), ".github", "workflows", "ci.yml");

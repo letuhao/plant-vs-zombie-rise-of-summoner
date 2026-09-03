@@ -36,13 +36,13 @@ standalone payload.
 | Thing | Evidence |
 |---|---|
 | `ActionCategory.Movement` — one of the five closed categories | `src/FusionRpg.Core/Actions/ActionEnums.cs:26-33` |
-| `ActionTag.Movement` — one of the eight closed tags `A7` selects on | `src/FusionRpg.Core/Actions/ActionEnums.cs:37-47` |
+| `ActionTag.Movement` — one of the eight closed tags `A7` selects on | `src/FusionRpg.Core/Actions/ActionEnums.cs:39-49` |
 | `DerivedStatChannels.ActionCategoryMovement = "movement"`, and the closed 5-member `ActionCategories` list | `src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs:474,477-480` |
 | `skill.cooldown.{category}` / `skill.effectiveness.{category}` builders, registered for all five categories | `DerivedStatChannels.cs:482-486`; `DerivedStatRegistry.cs:177-180` |
 | `move.range` — a registered derived channel, `FlatSum`, `StatClass.Pool` | `DerivedStatChannels.cs:525`; `DerivedStatRegistry.cs:237` |
 | 21 statuses in the shipped catalog, including CC (`freeze`, `cold`, `kelp`/slow, `hypno`) and buff/debuff (`rally`, `expose`) | `src/FusionRpg.Core/Status/StatusCatalogBootstrap.cs:16-58` |
 | `ActionSeeder.Generate` gates `Area` shapes on `boardAvailable` — a board-free action is already a first-class case | `src/FusionRpg.Core/Actions/Seeding/ActionSeeder.cs:50-53` |
-| The rung table, with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:12-21` |
+| The rung table, with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:11-20` |
 | Tunables live in `data/tuning/<domain>.v{n}.json`, published through `tools/tuning/publish.py` | repo standard, `docs/architecture/tunables-ssot.md` |
 
 ### Wiring gap
@@ -52,7 +52,7 @@ standalone payload.
 | **`move.range` has no production reader.** It is registered and reserved, and nothing consumes it | `DerivedStatRegistry.cs:237` (registration) and `Balance/Guards/DominanceGuard.cs:103` (reserved list) are its only two mentions outside the constant itself |
 | **`skill.cooldown.*` / `skill.effectiveness.*` have no production reader either** — registration plus the same reserved list | `DerivedStatRegistry.cs:177-180`; `DominanceGuard.cs:118-119`; no cooldown resolver reads them (`src/FusionRpg.Core/Actions/Duration/` contains no reference) |
 | `Instantiator.TryInstantiate` — doc-comment references only, no production caller | `Instantiator.cs:92`; `InstanceProducer.cs:22`, `Resolver.cs:28`, `RpgStore.AtomInstances.cs:104` |
-| `OnActivate` is authorable but raised nowhere in the injector | `decisions.md:97` (amended 2026-09-03); `effect-atom-map.md:317` (E33) |
+| `OnActivate` is authorable but raised nowhere in the injector | `decisions.md:97` (amended 2026-09-03); `effect-atom-map.md:337` (E33) |
 
 **These are wiring gaps, not architectural walls, and the distinction is the whole point of this module.**
 The RPG layer already expresses movement — a category, a tag, a range channel, two tempo channels and a
@@ -86,6 +86,33 @@ carry. Three closed lists, each entry carrying a `description` with a **negative
   is how far an actor may reposition; it is not attack reach and not movement speed"*).
 - **`statuses`** — the status ids a movement payload may apply, drawn from the shipped catalog
   (`StatusCatalogBootstrap.cs:16-58`), never a new vocabulary.
+
+  **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — which of the 21.** *"Drawn from the
+  shipped catalog"* named none of them, and a validator cannot refuse against an unstated set.
+
+  **The rule: a movement payload may apply any status whose payload kinds do NOT include
+  `StatusPayloadKind.UnityCc`. That is 13 of the 21**, read from `StatusCatalogBootstrap.cs:16-58`:
+
+  | Admitted (13) | Refused (8) |
+  |---|---|
+  | overlay-authored — `wither`, `bond`, `rally`, `leech`, `expose`, `command`, `shatter`, `charm_pulse` (`:26-49`) · contagion — `blight`, `rot`, `spark`, `pact_mark`, `spore` (`:52-56`) | the `UnityCc` engine wraps — `butter`, `freeze`, `cold`, `poison`, `hypno`, `ember`, `jala`, `kelp` (`:16-23`) |
+
+  **This is derived from this module's own load-bearing rule, not chosen by taste.**
+  `HasStandalonePayload` is true only for a payload that resolves **with no board** (§2's API), and a
+  `UnityCc` status is delivered by the Unity CC executor (§2's *"Where the payload actually
+  resolves"*), which needs the lawn. The catalog says so in its own comment on `charm_pulse`: *"FA2 is
+  emitted only for `UnityCc` statuses (`StatusEffectBridge.cs:315`)"* (`StatusCatalogBootstrap.cs:40-44`).
+  So admitting one would let a movement action pass `HasStandalonePayload` while being inert with the
+  game closed — the precise failure this module exists to prevent, shipped through its own allow-list.
+
+  **The rule is what ships; the 13 ids are the file's seeded default.** A balance pass narrows by
+  deleting rows. The load-time check is therefore **stronger than AC5's** *"resolves in the catalog"*:
+  a tuning row naming a status whose catalog entry carries `UnityCc` is a **load-time failure**, so
+  the file cannot drift back into admitting one.
+
+  **What would overturn it:** a battle-side or standalone executor for the eight `UnityCc` ids. The
+  rule's own predicate then flips them in with **no spec edit** — which is why it is stated as a
+  predicate over the shipped catalog rather than as a list of eight exclusions.
 - **`payloadKinds`** — the closed set `buff | status | tempo | none`, where `none` exists so a planner can
   state "no payload" explicitly rather than by omission, and where the validator then rejects it for a
   movement action.
@@ -195,6 +222,15 @@ the Unity CC executor for status, FA10 Add for HP. A movement payload needs **no
    beside it — not the unchanged guard.
 5. Every status id in the tuning file resolves in the shipped status catalog, and every channel resolves in
    the derived-stat registry — both checked at load, both failing loudly.
+5b. **No admitted status carries `StatusPayloadKind.UnityCc`.** The load-time check is the predicate,
+   not the list: a tuning row naming a `UnityCc` status is a load-time failure, asserted by a planted
+   `freeze` row, and the seeded default is exactly the **13** non-`UnityCc` ids of
+   `StatusCatalogBootstrap.cs:16-58`. ⛔ **DECIDED 2026-09-03 (owner removed themselves as a gate)** —
+   §2's `statuses` note derives it from `HasStandalonePayload`'s no-board rule.
+5c. **This module ships no channel reader.** `move.range`, `skill.cooldown.*` and
+   `skill.effectiveness.*` stay declared-and-inert, and the payload paths that carry real effect today
+   are the status paths. ⛔ **DECIDED 2026-09-03 (owner removed themselves as a gate)** — §6 hazard 1.
+   AC10's report is what keeps that honest, and §4's inertness test is what makes it expire.
 6. `ActionValidator` rejects a `category = Movement` action for which `HasStandalonePayload` is false, and
    the rejection names the action id and the reason.
 7. A movement action with a legal payload validates and compiles with `boardAvailable = false`.
@@ -211,20 +247,48 @@ the Unity CC executor for status, FA10 Add for HP. A movement payload needs **no
 | The movement pool a brief may draw from | **A-S1** `distribution-planner` | does not exist |
 | Per-species movement weighting | **A-T1** `type-weights` | `type-weights.json` **does not exist** (`action-corpus-map.md:33`) |
 | The reposition half | **A-M2** `lawn-reposition` | drafted, not built, **blocked on effect-atom E33** |
-| `OnActivate` raised on the lawn | **effect-atom E33** | absent from `EffectDtos.EffectTriggers`, raised nowhere (`effect-atom-map.md:317`) |
+| `OnActivate` raised on the lawn | **effect-atom E33** | absent from `EffectDtos.EffectTriggers`, raised nowhere (`effect-atom-map.md:337`) |
 | Channel pools · binding production | **effect-atom E30** · **effect-pipeline module 4** | outside this program; `effect_binding` has zero rows |
 
 **Hazards.**
 
 1. **Three registered channels with no reader.** A movement payload written entirely in `move.range` is
-   inert today. The honest framing is a **wiring gap with three named lines**, and the plan should decide
-   whether A-M1 ships a reader for at least one of them or ships payloads over channels that already have
-   consumers (statuses do).
+   inert today. The honest framing is a **wiring gap with three named lines**.
+
+   **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — A-M1 ships payloads over paths that
+   already have consumers, and ships NO reader.** The hazard said *"the plan should decide"*; nothing
+   downstream of it did, and an undecided hazard is an unbuildable module.
+
+   **Verified 2026-09-03, the state that forces the choice:** `move.range`, `skill.cooldown.*` and
+   `skill.effectiveness.*` are registered and have **zero production readers** — their only mentions
+   outside the constants are the registrations (`DerivedStatRegistry.cs:237`, `:177-180`) and
+   `DominanceGuard`'s reserved list (`:103`, `:118-119`).
+
+   **Why not ship a reader here:**
+
+   - **Wrong module.** A reader is a **runtime** change. This module publishes a vocabulary and a pure
+     policy; §2 states in its own words that a movement payload *"needs **none** of those to be
+     widened"*, and the program declares itself content-only (`action-corpus-map.md:20-22`).
+   - **Statuses are already live end to end.** A status-shaped payload resolves the day it lands:
+     `StatusRuntime` → `StatusStatPayload.ToModifiers` → the session bag → the reapply, all wired and
+     seam-tested (`docs/architecture/effect-atom/spec-status-stat-applier.md`, E21). Nothing has to be
+     built for a movement payload to *do* something.
+   - **Nothing is lost, and the loss is measured rather than hidden.** The three channels stay in the
+     `channels` list as **declared and inert**; AC10 makes the module's own report say so, and §4's
+     inertness test goes red the day a reader lands, which forces this spec to be updated instead of
+     quietly rotting.
+   - **Reversible in the right direction.** Adding a reader later makes an already-published channel
+     row live and changes **no** tuning file, no policy signature and no seed. Shipping a reader now
+     to justify the row is the change that would be hard to unwind.
+
+   **What would overturn it:** a movement design that genuinely needs **range** rather than tempo or a
+   buff before a reader exists. That is a named module in the derived-stats or action program, not a
+   widening of this one.
 2. **A movement action without `A-M2` may read as pointless in play.** That is a design risk, not an
    architectural one — standalone-first says it must *work*, not that it must feel complete. The smoke batch
    is where that gets judged, by the owner, on evidence.
 3. **The rung window has no entry in the caps register.** `ssot-power-scale.md` §11 has no row for it and
-   §5 constraint 2 promised one (`action-corpus-map.md:132`). A movement payload's rung band inherits that
+   §5 constraint 2 promised one (`action-corpus-map.md:140`). A movement payload's rung band inherits that
    gap.
 4. **`AFFIX_SCHEMA`-style vocabularies must not be forked.** If a movement payload needs a new status, it is
    a reviewed change to the status catalog, not a second list in this file — inventing a third vocabulary is

@@ -1358,6 +1358,15 @@ fixtures) with `FUSIONRPG_SIM=1`, a fresh player and world so Player 1's real sa
 
 ## Phase 12 — `loam-fe-2` (wave 6): make everything since the gate actually playable
 
+> **⛔ CLOSED — SUPERSEDED, 2026-09-03. Do not start L44–L50; this phase is not coming back.** The
+> owner reopened the map front end as its own program (`docs/architecture/world-stage-ideal.md`) after
+> judging the current `#/world` unusable as a game interface, and decided (§8.1 of that doc) that
+> **`world-stage` owns the write-surface work too**. So the UI tasks (L45, L46, L49, L50) are
+> superseded outright — they would have added controls to the page the Game GUI refactor deliberately
+> froze (`tasks/game-gui-todo.md:599-611`) — and the server tasks (L44's fields, L47 Ward Core, L48
+> Ward endpoint) are **re-homed to `world-stage`, not cancelled**. The loam program itself remains
+> complete through Checkpoint 10; nothing here is unfinished loam work.
+
 Plan: [tasks/loam-plan.md](loam-plan.md)'s `loam-fe-2` section. Spec:
 [spec-loam-fe-2.md](../docs/architecture/loam/spec-loam-fe-2.md). Seven tasks, one phase — see that
 plan's dependency graph for which of L44–L50 are independent versus chained (only L47→L48→L49 is a

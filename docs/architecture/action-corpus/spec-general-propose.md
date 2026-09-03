@@ -40,8 +40,8 @@ whole identity, and it is why this cannot be `A-P2` with a `scope` flag.
 |---|---|
 | The five closed action categories | `src/FusionRpg.Core/Actions/ActionEnums.cs:26-33` |
 | Six target modes · four area shapes | `src/FusionRpg.Core/Actions/ActionTargetSpec.cs:14-33`, `:42-48` |
-| Eight action tags | `src/FusionRpg.Core/Actions/ActionEnums.cs:37-47` |
-| Rung table, 10 rows, `structureBudget` per row | `data/tuning/action-rungs.v1.json:12-21` |
+| Eight action tags | `src/FusionRpg.Core/Actions/ActionEnums.cs:39-49` |
+| Rung table, 10 rows, `structureBudget` per row | `data/tuning/action-rungs.v1.json:11-20` |
 | `ActionSeeder.Generate` → `Instantiator.Draw` (the one roll, Law 1) | `src/FusionRpg.Core/Actions/Seeding/ActionSeeder.cs:32-66` |
 | Schema audit rejecting numeric fields **and** a missing `blocked` escape | `tools/seedsmith/seedsmith/pipeline/model.py:53-99` |
 | Option permutation seeded on `(id, field, sample_index)` | `tools/seedsmith/seedsmith/adapters/demons/anchor/permute.py:16-30` |
@@ -141,6 +141,19 @@ Four properties that make it survive `audit_schema`, each for a stated reason:
 - **No `string` whose `pattern` admits a bare number**, and no enum member that is a numeric string. The
   `atomFamilies` enum is filled at call time from the brief's own `allowedAtomFamilies` — family ids, never
   digits — so a model cannot name a family the planner did not open.
+
+**⛔ DECIDED 2026-09-03 — where that enum's members come from.** `allowedAtomFamilies` now has a
+stated source: the **98 authored affix families** in `data/seed/items/affix-families/*.json`
+(`entries[].id`). Until this decision no spec said which set `atomFamilies` names, and the tree holds
+three **completely disjoint** candidates — 17 demo families under `data/seed/atoms/`, the 98 authored
+ones, and the 5 ids in `data/seed/actions/pairings.json`, with **zero overlap between any pair**
+(measured 2026-09-03; the evidence table is in `spec-distribution-planner.md` §2).
+
+It matters to this stage specifically, because the enum is what the model is allowed to say: with no
+namespace the planner could have opened a brief onto ids that resolve nowhere, and the model would
+have chosen correctly from a list of fictions. Every member of this enum is now an id that exists,
+carries a `kindId`, a `params.channel` and a `powerBand`, and the "do not invent a family" rule has
+something real to be measured against.
 - **`blocked` is required**, because `audit_schema` rejects a top-level schema without it
   (`pipeline/model.py:92-97`) and because a model with no way to decline invents instead. Its description
   states the empty-string convention explicitly, with a worked example of each case — the exact defect a real
@@ -163,13 +176,19 @@ because a description without one is half-written:
 ### What the brief inlines
 
 `build_brief(context)` renders literal values and **cites no file** — the same discipline
-`affix/prompts.py:66-80` states a reason for. Inlined, in this order: the mechanical slot the planner fixed
+`affix/prompts.py:60-61` states a reason for. Inlined, in this order: the mechanical slot the planner fixed
 (`category`, `targetMode`, `areaShape`, `relation`, `kind`) and the rung **band** as a plain label rather
 than numbers the model could copy; the eligible atom families in permuted order; the forbidden families with
-the sentence saying why they are forbidden; the pairing role and, when the role is `payoff`, the status it
-must pay off; and the `avoidNeighbours` fingerprints as *"do not produce anything like these."* Nothing else
-— no anchor, no motifs, no element, no species key. `build_context` returns those inputs read-only, exactly
-as `affix/prompts.py:59-65` does, so the validators read the same object the brief was rendered from.
+the sentence saying why they are forbidden; the pairing role and, when the role is `payoff`, the **payoff
+atom family** and the enabler families that would satisfy it; and the `avoidNeighbours` fingerprints as *"do not produce anything like these."* Nothing else
+— no anchor, no motifs, no element, no species key.
+
+> **⛔ CORRECTED 2026-09-03.** The brief above read *"the **status** it must pay off"* — the status-keyed
+> vocabulary F7 struck. `EnablerPayoffPairings` is keyed on **atom families** throughout
+> (`IsPayoff(string atomFamily)`, `EnablersOf(string payoffFamily)`), and the role is **optional**
+> (`enabler | payoff | none`). **F7's fix list named A-C1, A-S1, A-S3 and A-S5; A-P1 was the fifth site
+> and was missed** — found by the plan-coverage audit. `build_context` returns those inputs read-only, exactly
+as `affix/prompts.py:49-56` does, so the validators read the same object the brief was rendered from.
 
 ### Which fields are voted, and why those
 
@@ -267,7 +286,7 @@ queue. It never silently takes sample 0.
   a family-aware non-additive price (needs D2), and a budget check with a production caller
   (`action-corpus-ideal.md:707-728`). Until all three hold this stage receives **structure-gated** pools
   only. It must not special-case its behaviour on a tier — it reads whatever pool the brief hands it.
-- **The `~1,162 calls/h` rate every cost figure rests on is unsourced** (`action-corpus-ideal.md:1447`).
+- **The `~1,162 calls/h` rate every cost figure rests on is unsourced** (`action-corpus-ideal.md:1448`; the figure itself is at `:561`).
   Any schedule this stage's budget implies is unverified until it is measured.
 - **`AFFIX_SCHEMA` has no `blocked` property.** Copying that file's schema shape verbatim would inherit a
   defect the audit already catches. Copy the *structure*, add `blocked`.

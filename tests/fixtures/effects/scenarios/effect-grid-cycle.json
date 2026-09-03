@@ -31,7 +31,7 @@
             "action": "ClearGridItem",
             "effectId": "fx.grid_item_cycle",
             "grantId": "g-grid",
-            "params": { "selector": "last", "gridItemType": 7 }
+            "params": { "row": 2, "col": 3, "gridItemType": 7 }
           }
         ]
       }

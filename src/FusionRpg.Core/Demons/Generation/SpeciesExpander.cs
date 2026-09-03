@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -52,6 +53,20 @@ public static class SpeciesExpander
         var shareExponentMilli = aptitudeTuning.Read.Magnitude.ShareExponentMilli;
         var magnitudes = new Dictionary<string, long>(StringComparer.Ordinal);
 
+        // A family with zero edges of ANY mode is not a known aptitude — most commonly the
+        // classification pipeline's own "unresolved" sentinel (a genuine 3-way vote disagreement
+        // that never converged, spec-option-permutation.md §4). Unlike every other field this
+        // function reads (rarity, elementPrimary, deployMode, acquisition, attackTempo, reach — all
+        // throw on an unrecognised value), an unresolved aptitude used to fall through silently:
+        // the loop below simply matched nothing, and the species was written to disk with an empty
+        // `magnitudes` dict and no error anywhere — a real, found defect (audited 2026-09-03; see
+        // SnorkleZombie/ThreePeater in the committed 28-species tree, both `aptitudePrimary:
+        // "unresolved"`, both zero magnitude channels). Failing loud here is strictly safer: a
+        // species that cannot be generated correctly must refuse generation, not ship silently
+        // stat-less.
+        bool IsKnownAptitude(string family) =>
+            aptitudeTuning.Edges.Any(e => string.Equals(e.Source, family, StringComparison.Ordinal));
+
         void ApplyAptitude(string family, long shareMilli)
         {
             if (shareMilli <= 0) return;
@@ -69,8 +84,24 @@ public static class SpeciesExpander
             }
         }
 
+        if (!IsKnownAptitude(anchor.AptitudePrimary))
+            throw new InvalidOperationException(
+                $"'{anchor.SpeciesId}': aptitudePrimary '{anchor.AptitudePrimary}' has no edge in " +
+                "aptitudes.v2.json — either an unresolved classification vote or an unknown family");
         ApplyAptitude(anchor.AptitudePrimary, primaryShareMilli);
-        if (anchor.AptitudeSecondary is { } secondary) ApplyAptitude(secondary, secondaryShareMilli);
+
+        // Gated on hasSecondary (secondaryShareMilli > 0), not merely "is the field non-null" — a
+        // pure species carries zero secondary share by construction, so a garbage/unresolved
+        // AptitudeSecondary on a pure anchor is inert (ApplyAptitude would no-op on it anyway) and
+        // must not refuse generation for a value the math never reads.
+        if (hasSecondary && anchor.AptitudeSecondary is { } secondary)
+        {
+            if (!IsKnownAptitude(secondary))
+                throw new InvalidOperationException(
+                    $"'{anchor.SpeciesId}': aptitudeSecondary '{secondary}' has no edge in " +
+                    "aptitudes.v2.json — either an unresolved classification vote or an unknown family");
+            ApplyAptitude(secondary, secondaryShareMilli);
+        }
 
         // ---- tempo: a stated interval always wins (spec §4) -----------------------------------------
         var (intervalMs, intervalSource) = statedIntervalMs is { } stated

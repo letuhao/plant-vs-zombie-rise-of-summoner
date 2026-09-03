@@ -10,26 +10,37 @@ four plus a latent key defect whose fix window closes the moment any container g
 
 ---
 
-## 1. The four breaks, each verified
+## 1. The breaks — **two of the original four have since closed**
 
-| # | Break | Evidence |
-|---|---|---|
-| **1** | `SeedContent` has **no `Affixes` list** — only Atoms, Containers, Curves, Rarities, Elements, ElementMatrix, ChannelPolicies | `AtomSeedFile.cs:52-74` |
-| **2** | `AtomSeedFile.TryKind` has **no `"affix"` case**, so a file with `"kind": "affix"` is refused as `UnknownKind` | `AtomSeedFile.cs:410-423` |
-| **3** | `SeedScanner.OwnedFolders` = `atoms, containers, curves, rarity, elements, channel-policy` — **no `effects`** | `SeedScanner.cs:14-15` |
-| **4** | `RpgStore.UpsertAffix` has **zero production callers**; `RpgStore.Import.cs:236-242` says so outright — *"Affixes are not yet part of `SeedContent`'s own import batch"* | — |
+> **⛔ CORRECTED 2026-09-03 (owner removed themselves as a gate).** Breaks 1 and 2 were **read against
+> a stale file**. Both are closed in the tree today. The module is smaller than it was written to be,
+> and shrinking it is the correction — not restating four when two survive.
+
+| # | Break | State | Evidence |
+|---|---|---|---|
+| ~~1~~ | ~~`SeedContent` has no `Affixes` list~~ | ✅ **CLOSED** | `public List<AffixRow> Affixes { get; } = new();` — `AtomSeedFile.cs:57` |
+| ~~2~~ | ~~`TryKind` has no `"affix"` case~~ | ✅ **CLOSED** | `case "affix": kind = SeedEntryKind.Affix; return true;` — `AtomSeedFile.cs:463`. The dispatch is `:180` and `ReadAffix` is a full reader at `:287-320` |
+| **3** | `SeedScanner.OwnedFolders` = `atoms, containers, curves, rarity, elements, channel-policy` — **no folder holding affixes** | ⛔ **open** | `SeedScanner.cs:14-15` |
+| **4** | `SeedContent.Affixes` is **populated and then never written**. `ImportContent` upserts atoms, containers, curves, rarities, elements and channel policies; `RpgStore.Import.cs:236-241` still says *"Affixes are not yet part of `SeedContent`'s own import batch… a container imported here can only reference an affix already committed to the store"*, and `UpsertAffix` still has **zero production callers** | ⛔ **open** | `RpgStore.Import.cs:236-241` |
+
+**Break 4 is now sharper than when it was written, and worse.** A `"kind": "affix"` file is no longer
+*refused* — it is **parsed, validated, collected into `SeedContent.Affixes`, and silently dropped on
+the floor** at import. That is not a missing feature; it is the *"declared, accepted, ignored"* state
+E28 exists to remove, one layer up. **The reader half shipped without the writer half**, and nothing
+caught it because no file with that kind exists to notice.
 
 **And the destination does not exist.** seedsmith's affix stage writes to
 `data/seed/effects/affixes/all.json` — a directory absent from the tree. **The affix authoring pipeline
 has never been run for real.**
 
-Sorted: **all four are wiring gaps.** Every component works; nothing connects them.
+Sorted: **both surviving breaks are wiring gaps.** Every component works; two are not connected.
 
 ---
 
 ## 2. ⛔ The latent key defect, and why its window is closing
 
-`AtomSeedFile.cs:253`:
+`AtomSeedFile.cs:256` (**corrected 2026-09-03** — this spec cited `:253`, which is inside the
+enclosing `foreach`; the line itself is `:256`):
 
 ```csharp
 pool.Add(new ContainerPoolRow(Str(p, "atom"), Int(p, "weight", 0), StrOrNull(p, "group")));
@@ -63,15 +74,19 @@ after that the rename is a migration instead of a one-line fix.
 
 ### 3.1 The four connections
 
-1. **`SeedContent.Affixes`** — a list beside `Atoms` and `Containers`, populated by the reader.
-2. **`AtomSeedFile.TryKind`** gains `"affix"`, and a `ReadAffix` mirroring `ReadAtom`/`ReadContainer`:
-   the same envelope (`schemaVersion: 1` / `kind` / `entries`), the same canonicalisation on read so
-   **re-indenting a seed file cannot move the content hash**.
+### 3.1 The two connections (was four — see §1)
+
+1. ~~**`SeedContent.Affixes`**~~ — ✅ shipped, `AtomSeedFile.cs:57`. **Verify only**, do not rebuild.
+2. ~~**`AtomSeedFile.TryKind` gains `"affix"`**~~ — ✅ shipped, `:463` / `:180` / `ReadAffix` at `:287`.
+   **Verify** that re-indenting a seed file cannot move the content hash; that property was never
+   tested because no file of this kind exists.
 3. **`SeedScanner.OwnedFolders`** gains the folder holding affixes. **It must match where seedsmith
    writes** — today `data/seed/effects/affixes/`. Two halves of one path disagreeing is how the pipeline
    came to have never run.
-4. **`RpgStore.ImportContent`** upserts affixes inside its existing single transaction, with the same
-   read-everything-then-write discipline and the same single `catalog_revision` bump.
+4. **`RpgStore.ImportContent`** upserts `content.Affixes` inside its existing single transaction, with
+   the same read-everything-then-write discipline and the same single `catalog_revision` bump — and
+   `RpgStore.Import.cs:236-241`'s comment is **deleted**, not amended, because the sentence it states
+   stops being true.
 
 ### 3.2 The affix row shape
 
@@ -93,6 +108,32 @@ From `AffixRow` as shipped — a bundle of refs, each **either** a concrete atom
 `mixed` — mirroring `AffixValidator.AffixClassOfAtom`, and seedsmith's own `derive.py` gives the reason:
 *"a model that names its own class can contradict the bundle it just picked."*
 
+#### ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — an authored `class` is **optional, checked, and refused on mismatch**
+
+**The shipped reader disagrees with the paragraph above and must be changed either way.** `ReadAffix`
+today **requires** `class`: it reads `Str(e, "class")`, and an absent or unparseable value is a
+`BadParamValue` refusal (`AtomSeedFile.cs:291-299`). §5 test 4 offered *"ignored or refused"* and never
+picked. The pick:
+
+| | Rule |
+|---|---|
+| **absent** | **legal.** Derive it. This is the shape seedsmith emits and the shape §3.2's example above shows |
+| **present and equal to the derived value** | **accepted.** Redundant, and a `duplicate` lint says so — a hand-written file that states the obvious is not an error |
+| **present and different** | **`BadParamValue` refusal, naming both values** — `"class 'suffix' but the bundle's refs derive 'mixed'"` |
+
+**Why not "ignored".** Ignoring is silent, and this repo's own rule about wrong values is that a
+refusal names the value while *"silent correction is the same class of defect as a silent no-op"*
+(`spec-kind-value-guard.md` §4). The failure `derive.py` warns about is a **contradiction**; a
+contradiction that is refused is visible, and one that is ignored is not. **Refusing also costs nothing
+on the path that matters** — the generator never authors `class`, so the branch only ever fires on a
+hand-edit, which is exactly when someone wants to be told.
+
+**It is a widening, so no shipped file breaks:** today's reader refuses an absent `class`; after this
+it accepts one. There is nothing to migrate — no `"kind": "affix"` file exists in the tree.
+
+**What would overturn it:** a producer that legitimately needs to override the derived class. There
+isn't one, and if there were, the override would need its own field with its own reason rather than a
+silently-trusted `class`.
 ### 3.3 Generated affixes are derived at import, not committed
 
 `AffixLibraryGenerator.Generate(content.Atoms)` produces one affix per atom, 1:1, and is called **inside
@@ -122,7 +163,7 @@ generate."* Only **hand-authored, multi-ref, slotted** affixes are files.
 | 1 | A `"kind": "affix"` file under the swept folder **imports**, and its rows are queryable | The four breaks are closed |
 | 2 | The same file re-imported is **idempotent** — `changed = 0`, no revision bump | Matches the atom/container contract |
 | 3 | Re-indenting the file **does not move the content hash** | Canonicalisation on read, as `ReadAtom` does |
-| 4 | `class` is **derived**, and an authored `class` field is **ignored or refused** — never trusted | The `derive.py` rule holds on the C# side |
+| 4 | An **absent** `class` is derived; a **matching** one is accepted; a **contradicting** one is refused naming both values | §3.2's decision, all three branches |
 | 5 | A container `pool` referencing an imported affix **rolls it** through `Instantiator.Draw` | The end-to-end reason this module exists |
 | 6 | **Planted violation:** a pool row keyed `"atom"` is **refused with a message naming the rename** | §2's defect cannot silently return |
 | 7 | **Planted violation:** an affix ref naming an unknown atom is refused **by id** | No silent skip |
@@ -137,7 +178,10 @@ and nobody noticed, because no test compared the two.
 ## 6. Acceptance criteria
 
 1. An authored affix file imports, is idempotent, and survives re-indentation without a hash change.
-2. `class` is derived on the C# side, matching `AffixValidator.AffixClassOfAtom`.
+1b. `SeedContent.Affixes` is **written** by `ImportContent`, and `RpgStore.Import.cs:236-241`'s
+   *"not yet part of the import batch"* comment is gone (§1 break 4).
+2. `class` is derived on the C# side, matching `AffixValidator.AffixClassOfAtom`; an authored `class`
+   is optional and a contradicting one is refused (§3.2, decided 2026-09-03).
 3. A container pool referencing an affix rolls it.
 4. The pool JSON key is `"affix"`; `"atom"` is refused with a message naming the rename; a test pins it.
 5. Generated 1:1 affixes are derived at import and **not committed as rows**.

@@ -39,7 +39,13 @@ public static class CostFunction
     /// <summary>How deep a spawn may price the actor it makes. See <see cref="ActorPowerCache"/>.</summary>
     public const int MaxSpawnDepth = 1;
 
-    public static PricedAtom Price(AtomRow atom, PowerTables? tables = null, int depth = 0)
+    /// <param name="lookupPool">E30 (spec-channel-pool.md §3.4): resolves a pool id to its row, so a
+    /// <c>channel: {"pool": ..., "count": ...}</c> reference can be priced as
+    /// <c>count × weighted_mean(price(member))</c>. <c>null</c> in every context with no pool catalog
+    /// to ask (the default), in which case a pooled atom prices exactly as it did before this module —
+    /// unpriced, naming the channel form as the reason, never a crash or a silent zero.</param>
+    public static PricedAtom Price(
+        AtomRow atom, PowerTables? tables = null, int depth = 0, Func<string, ChannelPoolRow?>? lookupPool = null)
     {
         if (atom is null) return new PricedAtom(PowerVector.Zero, PriceVerdict.No("null row"));
 
@@ -51,11 +57,37 @@ public static class CostFunction
         var pars = Read(atom.ParamsJson);
         var when = Read(atom.WhenJson);
 
+        if (pars.TryGetValue("channel", out var channelEl) && channelEl.ValueKind == JsonValueKind.Object)
+        {
+            var read = ChannelRefJson.TryRead(channelEl, out var channelRef);
+            if (read.IsOk && channelRef.IsPool)
+            {
+                if (lookupPool is null)
+                    return new PricedAtom(PowerVector.Zero,
+                        PriceVerdict.No($"{atom.KindId}: channel is a pool reference and no pool catalog was supplied to price it"));
+                return PricePooled(atom, kind, pars, when, channelRef, t, lookupPool, depth);
+            }
+        }
+
         var coeff = t.Find(atom.KindId, StringOf(pars, "channel"));
         if (coeff is null)
             return new PricedAtom(PowerVector.Zero,
                 PriceVerdict.No($"no coefficient for {atom.KindId}"
                                 + (StringOf(pars, "channel") is { } c ? $" channel '{c}'" : "")));
+
+        return PriceForChannel(atom, kind, pars, when, coeff, t, depth);
+    }
+
+    /// <summary>The single-channel pricing core, extracted so <see cref="PricePooled"/> can run it
+    /// once per pool member and combine the results — every rule (magnitude, direction flip,
+    /// conditionality, spawn body) applies identically whether the channel arrived concrete or as one
+    /// draw of a pool.</summary>
+    static PricedAtom PriceForChannel(
+        AtomRow atom, AtomKind kind, IReadOnlyDictionary<string, JsonElement> pars,
+        IReadOnlyDictionary<string, JsonElement> when, PowerCoefficientRow coeff, PowerTables t, int depth,
+        string? channelOverride = null)
+    {
+        var channel = channelOverride ?? StringOf(pars, "channel");
 
         // The MAGNITUDE, not the delta. `-100 hp` on a hit is 100 points of offense, not −100 of it:
         // the sign says which way the resource moves, and which kind of worth that is, is what the
@@ -71,7 +103,7 @@ public static class CostFunction
         // E16: on a lower-is-better channel, going DOWN is the buff. `quickening` reduces an attack
         // interval, and pricing the raw magnitude would file the game's most wanted affix as a
         // penalty — negative power, failing no budget, sorting last in every UI.
-        if (StatChannels.IsLowerBetter(StringOf(pars, "channel")) && SignOf(atom, kind, pars) > 0)
+        if (StatChannels.IsLowerBetter(channel) && SignOf(atom, kind, pars) > 0)
             points = -points;
 
         var vector = PowerVector.FromCategory(kind.Categories, points);
@@ -82,6 +114,59 @@ public static class CostFunction
             vector += SpawnBody(pars, conditionalityMilli, t, depth);
 
         return new PricedAtom(vector, PriceVerdict.Priced);
+    }
+
+    /// <summary>
+    /// E30 §3.4: <c>price(pooled) = count × weighted_mean(price(member) for member in pool)</c>,
+    /// weights being the pool's own per-mille weights — the EXPECTED value of the roll, so a pooled
+    /// atom and the concrete atoms it can resolve to price consistently (an author cannot dodge a
+    /// budget by pooling). Exact under the existing integer contract: every intermediate stays `long`
+    /// per-mille, widened before multiplying, divided by 1000 last and exactly once, and overflow
+    /// throws (checked arithmetic, per `AGENTS.md`'s numeric rule — never a silent wrap).
+    /// </summary>
+    static PricedAtom PricePooled(
+        AtomRow atom, AtomKind kind, IReadOnlyDictionary<string, JsonElement> pars,
+        IReadOnlyDictionary<string, JsonElement> when, ChannelRef channelRef, PowerTables t,
+        Func<string, ChannelPoolRow?> lookupPool, int depth)
+    {
+        var pool = lookupPool(channelRef.PoolId!);
+        if (pool is null)
+            return new PricedAtom(PowerVector.Zero, PriceVerdict.No($"{atom.KindId}: unknown pool '{channelRef.PoolId}'"));
+
+        checked
+        {
+            long totalWeight = 0;
+            var weightedSum = new long[5]; // Offense, Survivability, Control, Utility, Economy — PowerVector's own index order
+            var anyPriced = false;
+
+            foreach (var member in pool.Members)
+            {
+                var coeff = t.Find(atom.KindId, member.Channel);
+                if (coeff is null) continue; // an unpriceable member contributes nothing to the mean, not a crash
+
+                var priced = PriceForChannel(atom, kind, pars, when, coeff, t, depth, channelOverride: member.Channel);
+                if (!priced.Ok) continue;
+
+                anyPriced = true;
+                totalWeight += member.WeightMilli;
+                for (var i = 0; i < 5; i++)
+                    weightedSum[i] += (long)priced.Power[i] * member.WeightMilli; // widened before multiplying
+            }
+
+            if (!anyPriced || totalWeight <= 0)
+                return new PricedAtom(PowerVector.Zero,
+                    PriceVerdict.No($"{atom.KindId}: pool '{pool.PoolId}' has no priceable member"));
+
+            // weighted_mean × count = (weightedSum × count) / totalWeight — one division, combining
+            // the mean and the count-scale into a single rounding point (PS's "divide last, exactly
+            // once"), rather than rounding the mean first and then rounding the scale a second time.
+            var result = new int[5];
+            for (var i = 0; i < 5; i++)
+                result[i] = (int)PowerMath.DivRound(weightedSum[i] * channelRef.Count, totalWeight);
+
+            var vector = new PowerVector(result[0], result[1], result[2], result[3], result[4]);
+            return new PricedAtom(vector, PriceVerdict.Priced);
+        }
     }
 
     /// <summary>

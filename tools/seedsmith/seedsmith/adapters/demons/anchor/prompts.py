@@ -110,7 +110,15 @@ ELEMENT_PRIMARY = PipelineSpec(
     system_prompt=(
         "You classify a creature's dominant combat element from its captured lore. Read the "
         "description and pick the element its own identity and attacks lean on — NOT the element "
-        "that would be strong against it, and NOT a resistance. Answer with exactly one element id."
+        "that would be strong against it, and NOT a resistance. Answer with exactly one element id.\n\n"
+        "Being 'undead' or a 'zombie' is a CATEGORY, not an element — do not default to 'dark' just "
+        "because a creature is undead. Judge its own concrete traits instead: an undead creature "
+        "whose lore is genuinely about decay, shadow, necromancy, or death magic is dark; an undead "
+        "creature who is otherwise mundane — an athlete, a worker, someone using an ordinary tool or "
+        "vehicle, with no occult theming of its own — is not, and should be judged the same way a "
+        "living creature with those same traits would be (e.g. 'earth' for a physical, grounded "
+        "combatant). Audited 2026-09-03: a 28-species sample classified 9 of 12 zombies as dark — a "
+        "real, checkable pattern worth resisting, not a rule to reverse into some other default."
     ),
     schema=_blocked_variant({
         "type": "object",

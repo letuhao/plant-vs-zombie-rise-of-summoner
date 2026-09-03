@@ -192,13 +192,23 @@ public class AtomKindRegistryTests
         Assert.Contains("channel", r.Detail);
     }
 
-    // G1: the overlay allowlist accepts atk on spawn; the injector sink drops it for every kind.
-    [Fact]
-    public void Spawn_atk_rejects_because_the_sink_drops_it()
+    // E28 fix #5 (spec-param-parity.md §3 row 5): atk now reaches the spawned body for plant/zombie
+    // — DebugActions.ApplyAbsoluteProps already had the plant hook (P-ATK) and the zombie cheat id
+    // (Z-ATK) already existed, both just never read from the payload. Bullets carry damage on the
+    // projectile itself, a different mechanism with no absolute-atk hook, so atk stays unhonoured
+    // there — declaring it anyway would be the exact "declared, accepted, ignored" defect this
+    // module exists to remove.
+    [Theory]
+    [InlineData("zombie", true)]
+    [InlineData("plant", true)]
+    [InlineData("bullet", false)]
+    public void Spawn_atk_is_honoured_for_plant_and_zombie_not_bullet(string kind, bool shouldPass)
     {
         var r = AtomKindRegistry.Validate("spawn.entity",
-            P(("kind", "zombie"), ("typeId", 0), ("atk", 500)));
-        Assert.Equal(AtomRejectionReason.ParamNotImplemented, r.Reason);
+            P(("kind", kind), ("typeId", 0), ("atk", 500)));
+
+        if (shouldPass) Assert.True(r.IsOk, r.ToString());
+        else Assert.Equal(AtomRejectionReason.ParamNotHonoured, r.Reason);
     }
 
     // G1 again, the conditional half: hp is forwarded for zombies and dropped for plants.
@@ -225,13 +235,14 @@ public class AtomKindRegistryTests
             P(("kind", "zombie"), ("col", 3))).Reason);
     }
 
-    // G2: cells[] is allowlisted; the executor sets a single cell.
+    // E28 fix #7 (spec-param-parity.md §3 row 7): cells[] now validates — ExecSetBox paints every
+    // listed cell instead of refusing the param outright.
     [Fact]
-    public void BoxSet_cells_rejects_as_unimplemented()
+    public void BoxSet_cells_validates_now_that_the_executor_paints_every_listed_cell()
     {
         var r = AtomKindRegistry.Validate("box.set",
-            P(("boxType", "Dirt"), ("cells", new[] { 1, 2 })));
-        Assert.Equal(AtomRejectionReason.ParamNotImplemented, r.Reason);
+            P(("boxType", 2), ("cells", new[] { 1, 2 })));
+        Assert.True(r.IsOk, r.ToString());
     }
 
     // G4 CLOSED 2026-08-22. capPerMatch sat in the FA9 allowlist implemented nowhere, so E1 refused

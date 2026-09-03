@@ -17,6 +17,11 @@ public static class EffectTriggers
     public const string OnGranted = "OnGranted";
     public const string OnRemoved = "OnRemoved";
     public const string OnTimer = "OnTimer";
+
+    /// <summary>E33 (spec-activation-edge.md §2.1): an actor's own decision to act. Mirrors
+    /// AtomTriggers.OnActivate (A18b) — the two constants must be byte-identical, because EffectBag
+    /// matches by string.</summary>
+    public const string OnActivate = "OnActivate";
 }
 
 public static class EffectActions

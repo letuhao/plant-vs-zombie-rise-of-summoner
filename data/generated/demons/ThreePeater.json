@@ -6,7 +6,18 @@
   "elementPrimary": "Earth",
   "elementSecondary": null,
   "gameTypeId": 14,
-  "magnitudes": {},
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 13560,
+    "resource.max.spirit": 6328,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 814,
+    "resource.regen.spirit": 316,
+    "resource.regen.stamina": 226
+  },
   "pTheta": 452,
   "rangeCells": 5,
   "rarity": "Cultivated",
@@ -14,12 +25,12 @@
   "speciesId": "ThreePeater",
   "theta": 13,
   "traitPool": [
-    "Lane-compensation ballistic mechanics",
-    "Multi-lane projectile discharge"
+    "Lateral bullet compensation",
+    "Triple-lane projectile discharge"
   ],
   "variantCount": 2,
   "variants": [
-    "mutated",
+    "ancient",
     "normal"
   ]
 }

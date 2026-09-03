@@ -20,7 +20,8 @@ public sealed record ImportOutcome(
     int ChannelPolicies,
     int RowsChanged,
     long CatalogRevision,
-    ContentHashStamp? ContentHash)
+    ContentHashStamp? ContentHash,
+    int Affixes = 0)
 {
     public bool IsOk => Errors.Count == 0;
 }
@@ -85,9 +86,24 @@ public sealed partial class RpgStore
             ValidateAtoms(content, atomsById, curvesById, errors);
             ValidateRarities(content, ordinalOwner, errors);
 
+            // E32 (spec-affix-import-path.md §3.1 break 4, §3.3): hand-authored affixes validate
+            // against the batch's OWN incoming atoms (the common case: a new atom and the bundle
+            // that references it, in one import). §3.3's generated 1:1 affixes are derived here too
+            // — never committed as rows, but available to the container-pool lookup below so a pool
+            // referencing an atom's own generated wrapper (freshly imported, never explicitly
+            // authored) still resolves within the same batch.
+            var affixesToWrite = ValidateAffixes(content, atomsById, errors);
+            var affixesToWriteById = affixesToWrite.ToDictionary(a => a.AffixId, StringComparer.Ordinal);
+            var generatedAffixesById = AffixLibraryGenerator.Generate(atomsById.Values)
+                .ToDictionary(a => a.AffixId, StringComparer.Ordinal);
+            AffixRow? LookupAffixForImport(string id) =>
+                affixesToWriteById.TryGetValue(id, out var authored) ? authored
+                : generatedAffixesById.TryGetValue(id, out var generated) ? generated
+                : GetAffix(id);
+
             // Containers whose stored copy is byte-identical are skipped, not rewritten: `revision`
             // is a hashed column and an identical rewrite would move the content hash.
-            var containersToWrite = ValidateContainers(content, atomsById, errors);
+            var containersToWrite = ValidateContainers(content, atomsById, LookupAffixForImport, errors);
             var elementTable = ValidateElements(content, errors);
             var rosterToWrite = elementTable is not null && !SameRoster(GetElementTable(), elementTable)
                 ? elementTable
@@ -116,6 +132,16 @@ public sealed partial class RpgStore
 
                 foreach (var a in content.Atoms)
                     changed += UpsertAtomUnlocked(db, a, tx);
+
+                // E32 (spec-affix-import-path.md §3.1 break 4): after atoms (an affix references
+                // one), before containers (a container's pool references an affix). Only
+                // hand-authored, already-resolved affixes are rows — §3.3's 1:1 generated ones are
+                // derived above for validation and never committed.
+                foreach (var a in affixesToWrite)
+                {
+                    WriteAffixUnlocked(db, tx, a);
+                    changed++;
+                }
 
                 foreach (var c in containersToWrite)
                 {
@@ -154,7 +180,7 @@ public sealed partial class RpgStore
                 !dryRun, errors,
                 content.Atoms.Count, content.Containers.Count, content.Curves.Count, content.Rarities.Count,
                 content.Elements.Count, content.ChannelPolicies.Count, changed,
-                GetCatalogRevision(), ComputeContentHash());
+                GetCatalogRevision(), ComputeContentHash(), content.Affixes.Count);
         }
     }
 
@@ -227,19 +253,19 @@ public sealed partial class RpgStore
     }
 
     List<ContainerRow> ValidateContainers(
-        SeedContent content, Dictionary<string, AtomRow> atomsById, List<SeedError> errors)
+        SeedContent content, Dictionary<string, AtomRow> atomsById,
+        Func<string, AffixRow?> lookupAffix, List<SeedError> errors)
     {
         var write = new List<ContainerRow>();
 
         foreach (var c in content.Containers)
         {
-            // Affixes are not yet part of SeedContent's own import batch (T3.1 scope — that lands
-            // with the seed-file migration, T3.2); a container imported here can only reference an
-            // affix already committed to the store. Resolving against GetAffix rather than a batch
-            // dictionary is honest about that, not a silent gap: a container naming a not-yet-
-            // authored affix fails validation exactly as it should.
+            // E32 (spec-affix-import-path.md §3.1 break 4): a container may now reference an affix
+            // hand-authored in the SAME import batch, or one of the atom set's own 1:1-generated
+            // wrappers (§3.3) — never only an affix already committed to the store, which is what
+            // made the whole affix pipeline unreachable before this fix.
             var check = ContainerValidator.Validate(
-                c, id => atomsById.TryGetValue(id, out var a) ? a : null, GetAffix);
+                c, id => atomsById.TryGetValue(id, out var a) ? a : null, lookupAffix);
             if (!check.IsOk)
             {
                 errors.Add(Error(content, c.ContainerId, check));
@@ -253,9 +279,39 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
-    /// One id, one row — across all four kinds, in one namespace.
+    /// E32 (spec-affix-import-path.md §3.1 break 4, §3.2): validates hand-authored affixes against
+    /// the batch's own incoming atoms, resolving an absent <c>class</c> to its derived value before
+    /// returning — the tables never carry a null class (§3.2's "absent → legal, derive it" decision).
+    /// Skips a row that is byte-identical to what is already stored, the same no-op discipline every
+    /// other content kind here already follows.
+    /// </summary>
+    List<AffixRow> ValidateAffixes(
+        SeedContent content, Dictionary<string, AtomRow> atomsById, List<SeedError> errors)
+    {
+        var write = new List<AffixRow>();
+        AtomRow? LookupAtomForAffix(string id) => atomsById.TryGetValue(id, out var a) ? a : null;
+
+        foreach (var a in content.Affixes)
+        {
+            var check = AffixValidator.Validate(a, LookupAtomForAffix, DomainMembers, FamilyVariantHasAnyTierUnlocked);
+            if (!check.IsOk)
+            {
+                errors.Add(Error(content, a.AffixId, check));
+                continue;
+            }
+
+            var resolved = a.Class is null ? a with { Class = AffixValidator.ResolveClass(a, LookupAtomForAffix) } : a;
+            if (!SameAffixContent(GetAffix(resolved.AffixId), resolved)) write.Add(resolved);
+        }
+
+        return write;
+    }
+
+    /// <summary>
+    /// One id, one row — across all five kinds, in one namespace (E32 joined affixes to the four
+    /// that were already here).
     ///
-    /// <para>Four namespaces that only overlap by accident is the more expensive rule to hold, and a
+    /// <para>Five namespaces that only overlap by accident is the more expensive rule to hold, and a
     /// container named after an atom is a mistake either way.</para>
     /// </summary>
     static void RefuseDuplicates(SeedContent content, List<SeedError> errors)
@@ -265,7 +321,8 @@ public sealed partial class RpgStore
         foreach (var id in content.Atoms.Select(a => a.AtomId)
                      .Concat(content.Containers.Select(c => c.ContainerId))
                      .Concat(content.Curves.Select(c => c.CurveId))
-                     .Concat(content.Rarities.Select(r => r.RarityId)))
+                     .Concat(content.Rarities.Select(r => r.RarityId))
+                     .Concat(content.Affixes.Select(a => a.AffixId)))
         {
             if (!seen.Add(id))
                 errors.Add(Error(content, id, AtomRejection.Fail(

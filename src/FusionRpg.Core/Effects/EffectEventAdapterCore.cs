@@ -28,6 +28,9 @@ public static class EffectEventAdapterCore
             string.Equals(kind, "bullet.init", StringComparison.OrdinalIgnoreCase))
             return MapSpawn(kind, p, tick, matchKey);
 
+        if (string.Equals(kind, "actor.activate", StringComparison.OrdinalIgnoreCase))
+            return MapActivate(p, tick, matchKey);
+
         if (string.Equals(kind, "effect.timer", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(kind, "combat.timer", StringComparison.OrdinalIgnoreCase))
         {
@@ -120,6 +123,32 @@ public static class EffectEventAdapterCore
             ActorPtr = Str(p, "ptr"),
             TypeId = IntOrNull(p, "type") ?? IntOrNull(p, "typeId")
                      ?? IntOrNull(p, "plantType") ?? IntOrNull(p, "bulletType"),
+            Tick = tick,
+            ScenarioId = Str(p, "scenarioId")
+        };
+    }
+
+    /// <summary>
+    /// E33 (spec-activation-edge.md §2.2): the activation edge — "this actor decided to act" — reaches
+    /// the atom layer the same way every other lawn event does. `actorPtr` is required, never
+    /// defaulted; a payload with none maps to no event, never a board-wide fan-out (the inverse of
+    /// G5's <c>FindObjectsOfType&lt;Zombie&gt;()</c> hole). `actionId`, if present, is telemetry only
+    /// — the atom layer has no action vocabulary and gains none here.
+    /// </summary>
+    static EffectEventDto? MapActivate(Dictionary<string, object> p, long tick, string? matchKey)
+    {
+        var actorPtr = Str(p, "actorPtr");
+        if (string.IsNullOrEmpty(actorPtr)) return null;
+
+        return new EffectEventDto
+        {
+            Trigger = EffectTriggers.OnActivate,
+            MatchKey = matchKey,
+            Side = Str(p, "side"),
+            ActorPtr = actorPtr,
+            TargetPtr = Str(p, "targetPtr"),
+            TypeId = IntOrNull(p, "typeId"),
+            TargetTypeId = IntOrNull(p, "targetTypeId"),
             Tick = tick,
             ScenarioId = Str(p, "scenarioId")
         };

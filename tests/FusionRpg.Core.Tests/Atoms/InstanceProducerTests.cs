@@ -161,6 +161,49 @@ public class InstanceProducerTests
         Assert.Equal(instA!.ContentFingerprint(), instB!.ContentFingerprint());
     }
 
+    /// <summary>E30 (spec-channel-pool.md §5 test 2), the literal wording — "the same seed replays
+    /// byte-identically, asserted over ContentFingerprint()" — proven at the INSTANCE layer this time
+    /// (`ResolverTests.cs` proves the same fact at the resolver layer directly), now that
+    /// <see cref="InstanceProducer.Compose"/>'s own signature threads <c>lookupPool</c> through to
+    /// <see cref="Resolver.Resolve"/>.</summary>
+    [Fact]
+    public void A_pooled_channel_atom_reproduces_identically_over_ContentFingerprint()
+    {
+        var pool = new ChannelPoolRow("pool.test.repro", null, new[]
+        {
+            new ChannelPoolMember("chan.a", 1000),
+            new ChannelPoolMember("chan.b", 1000),
+            new ChannelPoolMember("chan.c", 1000),
+        });
+        ChannelPoolRow? LookupPool(string id) => id == pool.PoolId ? pool : null;
+
+        Seed(new AffixRow("affix.pooled-repro", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.pooled-repro.t1") }));
+        var pooledAtom = new AtomRow
+        {
+            AtomId = "atom.pooled-repro.t1", KindId = "stat.derived", FamilyId = "atom.pooled-repro", Variant = "", Tier = 1,
+            ParamsJson = """{"channel":{"pool":"pool.test.repro","count":1},"op":"flat","amount":{"min":10,"max":200,"roll":"onInstantiate"}}""",
+        };
+        Catalog[pooledAtom.AtomId] = pooledAtom;
+        var c = new ContainerRow
+        {
+            ContainerId = "item.pooled-instance-repro", Kind = ContainerKind.Item, PrefixRolls = 1,
+            Pool = new[] { new ContainerPoolRow("affix.pooled-repro", 100) },
+        };
+
+        var a = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 55, PinTheta, Tuning,
+            out var instA, lookupPool: LookupPool);
+        var b = InstanceProducer.Compose(c, LookupAtom, LookupAffix, DomainMembers, 55, PinTheta, Tuning,
+            out var instB, lookupPool: LookupPool);
+
+        Assert.True(a.IsOk, a.ToString()); Assert.True(b.IsOk, b.ToString());
+        Assert.Equal(instA!.ContentFingerprint(), instB!.ContentFingerprint());
+
+        // And the pool actually resolved — a concrete string channel, not the raw pool-object JSON.
+        var resolvedChannel = System.Text.Json.JsonDocument.Parse(instA.Atoms.Last().ValuesJson)
+            .RootElement.GetProperty("channel");
+        Assert.Equal(System.Text.Json.JsonValueKind.String, resolvedChannel.ValueKind);
+    }
+
     [Fact]
     public void A_bad_container_is_rejected_and_composes_no_instance()
     {

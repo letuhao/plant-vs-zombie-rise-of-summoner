@@ -1,4 +1,4 @@
-using FusionRpg.Tools.AtomImporter;
+using FusionRpg.Data.Seed;
 using Xunit;
 
 namespace FusionRpg.AtomImporter.Tests;
@@ -176,6 +176,30 @@ public class SeedScannerTests : IDisposable
 
         Assert.DoesNotContain(files, f => f.Replace('\\', '/').Contains("/curves/", StringComparison.Ordinal));
         Assert.DoesNotContain(files, f => f.Replace('\\', '/').Contains("/rarity/", StringComparison.Ordinal));
+    }
+
+    // ---- E32 test 9: the two halves of the affix write path ------------------------------------
+
+    /// <summary>The test 9 the spec's own §5 names as "the one that would have prevented this
+    /// module" — seedsmith wrote to a folder nothing swept and nobody noticed, because no test
+    /// compared the two. Reads seedsmith's own `OUTPUT_DIR` line directly (not the spec's prose
+    /// claim), so a future path change on either side fails this test rather than silently
+    /// reopening the gap.</summary>
+    [Fact]
+    public void AtomImporter_swept_folder_matches_seedsmiths_own_affix_write_path()
+    {
+        var root = RepoRoot();
+        var generatorPath = Path.Combine(root, "tools", "seedsmith", "seedsmith", "adapters", "effects", "affix", "generate_affixes.py");
+        Assert.True(File.Exists(generatorPath), $"seedsmith's affix generator moved or was renamed: {generatorPath}");
+
+        var source = File.ReadAllText(generatorPath);
+        var match = System.Text.RegularExpressions.Regex.Match(
+            source, @"OUTPUT_DIR\s*=\s*REPO_ROOT\s*/\s*""data""\s*/\s*""seed""\s*/\s*""effects""\s*/\s*""affixes""");
+        Assert.True(match.Success,
+            "seedsmith's OUTPUT_DIR no longer reads REPO_ROOT/data/seed/effects/affixes — " +
+            "update SeedScanner.OwnedFolders's \"effects/affixes\" entry to match, in the same change");
+
+        Assert.Contains("effects/affixes", SeedScanner.OwnedFolders);
     }
 
     static string RepoRoot()

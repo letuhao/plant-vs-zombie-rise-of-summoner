@@ -352,12 +352,22 @@ class PostureBalanceMetric(Metric):
 
 class UnresolvedCountMetric(Metric):
     """Per voted field, the unresolved (1-1-1) share is reported, and a high rate is a finding —
-    it means a weak description, not a species-level defect (spec §2, option-permutation.md §5)."""
+    it means a weak description, not a species-level defect (spec §2, option-permutation.md §5).
+
+    Promoted to `gates=True` 2026-09-03 (a deliberate, later act, per this program's own registered
+    design — `model.py`'s "starts False for every new metric; promotion is a deliberate, later,
+    separate act"). Found by audit: an unresolved `aptitudePrimary` is not merely a description-
+    quality signal — `SpeciesExpander.Expand` has no edge to derive a magnitude from, so every
+    species with an unresolved aptitude was silently generated with ZERO stats
+    (SnorkleZombie/ThreePeater in the real 28-species tree, both fixed the same day by making
+    `SpeciesExpander` refuse to expand one at all). Gating the RATE here stops a full run early —
+    before spending thousands of model calls — if the aptitude-primary description is systematically
+    too ambiguous to converge, rather than discovering it species-by-species after the fact."""
 
     id = "DemonRoster/UnresolvedCount"
     family = "DemonRoster"
     loop = Loop.CLOSED
-    gates = False
+    gates = True
     needs = frozenset({"demon_anchors"})
     covers: "tuple[str, ...]" = ()
 

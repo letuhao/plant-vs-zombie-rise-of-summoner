@@ -4,6 +4,7 @@ using FusionRpg.Contracts;
 using FusionRpg.Core;
 using FusionRpg.Data;
 using FusionRpg.Data.Abstractions;
+using FusionRpg.Data.Seed;
 using FusionRpg.Server;
 using Microsoft.AspNetCore.SignalR;
 
@@ -138,11 +139,36 @@ if (SimFlags.Enabled)
 }
 
 var app = builder.Build();
-app.Services.GetRequiredService<RpgStore>().Init();
+var store = app.Services.GetRequiredService<RpgStore>();
+store.Init();
+
+// E46 (player-content-boot): AtomImporter was only ever invoked from a dev script
+// (scripts/deploy-play.ps1), never from a player's own install — so a real player's content tables
+// were never populated and the server ran forever on the shipped code fallback with nothing saying
+// so. Self-heal here, gated on catalog_revision so a normal relaunch never re-imports (that would
+// bump the revision and make every already-rolled effect_instance unbindable,
+// spec-player-content-boot.md §4): revision 0 means this is the first launch since unzip (or a
+// corrupted/skipped install), so this is also the "first-run repair" the spec's own §3.1 asks for —
+// for this launcher there is no separate install step, so both happen at the same moment, in the
+// same code path. RunSelfHealing never throws: a broken or missing seed tree must not take the
+// server down with it (§3.2, §4) — the fallback stays playable either way.
+var contentBoot = SeedImportRunner.RunSelfHealing(store, AppContext.BaseDirectory);
+store.RecordContentBootOutcome(contentBoot.ContentSource, contentBoot.Detail);
+Console.WriteLine(contentBoot.Status switch
+{
+    SeedImportStatus.Imported =>
+        $"[content] imported the seed tree — catalog now at revision {store.GetCatalogRevision()}",
+    SeedImportStatus.AlreadyCurrent =>
+        $"[content] catalog already at revision {store.GetCatalogRevision()} — no import needed",
+    SeedImportStatus.SeedTreeNotFound =>
+        $"[content] no seed tree found near the server — running on the shipped code fallback ({contentBoot.Detail})",
+    _ => $"[content] seed import failed — running on the shipped code fallback: {contentBoot.Detail}",
+});
+
 // E20: without this, ElementTable/PowerTables.Current never move off their shipped code copy, and
 // an imported roster or coefficient row changes the content hash and nothing else (completeness
 // audit A2). A store with nothing imported behaves exactly as before.
-app.Services.GetRequiredService<RpgStore>().LoadContentIntoRuntime();
+store.LoadContentIntoRuntime();
 // Fail fast on demon content errors: the catalogs are lazy, and a bad species surfacing on the
 // first request would permanently poison WaveCatalog's static initializer (review I6).
 _ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;

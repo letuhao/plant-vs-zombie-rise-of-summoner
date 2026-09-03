@@ -58,10 +58,25 @@ Three consequences the specs got wrong:
 
 ### Units — non-negotiable
 
+> **⛔ CORRECTED 2026-09-03 (E42 `units-correction`).** This table used to give one row —
+> *"Derived-channel magnitudes — resolver points, `AccuracyScale = CritRateScale = 100.0`"* — to every
+> derived channel. That was wrong for `combat.power.*` / `combat.defense.*` / `combat.shield.*`, and the
+> item program proved it and handed the fix over on 2026-08-22
+> ([`item/atom-layer-handoff.md`](../item/atom-layer-handoff.md) §1). It sat uncorrected for eleven days
+> because `DESIGN-GATE.md` makes this file win over every spec, so no downstream document could fix it
+> by being right — only editing this file closes it. **The decisive negative evidence:**
+> `CombatProbabilityPolicy` declares `AccuracyScale`, `CritRateScale`, `CritDamageScale` and `Steepness`
+> — **there is no `PowerScale` and no `DefenseScale`**
+> (`src/FusionRpg.Core/Stats/Derived/CombatPolicies.cs:10-13`), and `OverlayCombatCalculator` sums
+> `(power − defense)` straight into `weightedDelta` with no sigmoid anywhere in the call path
+> (`src/FusionRpg.Core/Combat/OverlayCombatCalculator.cs:84-89,104`). So `+10 fire power` is **+10
+> damage** — the peer of `+10 hp`, not a tenth of it under a sigmoid.
+
 | Kind of value | Unit |
 |---|---|
 | Primary-channel magnitudes | game units (hit points, attack points) |
-| Derived-channel magnitudes | **resolver points** — sigmoid scale, `AccuracyScale = CritRateScale = 100.0` |
+| `combat.power.*` · `combat.defense.*` · `combat.shield.*` | **game units** — additive damage / hit points, summed directly (`OverlayCombatCalculator.cs:84-89`). **Not resolver points.** |
+| `combat.accuracy.*` · `dodge` · `crit.rate` · `crit.resist` · `crit.damage` · `crit.resist.damage` | **resolver points** — sigmoid scale, `AccuracyScale = CritRateScale = CritDamageScale = 100.0` (`CombatPolicies.cs:10-12`) |
 | `chance`, curve multipliers, ratios | **integer per-mille** |
 | Durations | integer ms |
 

@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using FusionRpg.CheatCore;
 using FusionRpg.Contracts;
@@ -25,6 +26,15 @@ public static class DebugSessionState
 
 public static class DebugEndpoints
 {
+    /// <summary>E33 (spec-activation-edge.md §2.1): every `public const string` on <paramref name="t"/>,
+    /// in declaration order — the source of truth `/effects/contract` publishes from, so the endpoint
+    /// cannot drift from the class it names without a code change to <paramref name="t"/> itself.</summary>
+    static string[] PublicConstStrings(Type t) =>
+        t.GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string))
+            .Select(f => (string)f.GetRawConstantValue()!)
+            .ToArray();
+
     public static void MapDebug(this WebApplication app)
     {
         var g = app.MapGroup("/api/debug");
@@ -375,23 +385,22 @@ public static class DebugEndpoints
         g.MapGet("/effects/session-grants", (EffectGrantSession grants) =>
             Results.Ok(new { count = grants.Count, grants = grants.Snapshot() }));
 
+        // E33 (spec-activation-edge.md §2.1, §2.1a): both arrays used to be hand-copied and had
+        // drifted from their own source classes — `triggers` was missing OnActivate, `actions` was
+        // missing GrantShield and ModifyDerivedStat, all three real (GrantShield has a live executor;
+        // ModifyDerivedStat is declarative-by-design but still part of the published vocabulary). A
+        // published-but-not-declared or declared-but-not-published constant is exactly "a published
+        // list that lies", the defect this endpoint exists to not repeat — so both arrays are now
+        // reflected off their own class's public const fields, which is what makes "every constant,
+        // and no others" true by construction rather than by someone remembering to edit two lists in
+        // sync. E34 grows EffectTriggers to 13 and needs no edit here for that to stay correct; E35/
+        // E36/E37 grow EffectActions the same way.
         g.MapGet("/effects/contract", () => Results.Ok(new
         {
             contractVersion = FoundationContractVersion.Current,
             frozen = true,
-            triggers = new[]
-            {
-                EffectTriggers.OnSpawn, EffectTriggers.OnDamageDealt, EffectTriggers.OnDamageTaken,
-                EffectTriggers.OnDeath, EffectTriggers.OnGranted, EffectTriggers.OnRemoved,
-                EffectTriggers.OnTimer
-            },
-            actions = new[]
-            {
-                EffectActions.ModifyStat, EffectActions.ApplyStatus, EffectActions.ClearStatus,
-                EffectActions.SpawnEntity, EffectActions.BoardAction, EffectActions.SpawnGridItem,
-                EffectActions.ClearGridItem, EffectActions.SetBoxType, EffectActions.Economy,
-                EffectActions.ApplyResourceDelta
-            }
+            triggers = PublicConstStrings(typeof(EffectTriggers)),
+            actions = PublicConstStrings(typeof(EffectActions))
         }));
 
         // T5.7 / `dev-reforge` (spec-dev-reforge.md, effect-pipeline module 10; also

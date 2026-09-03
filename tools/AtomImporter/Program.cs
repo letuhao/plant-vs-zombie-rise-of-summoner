@@ -1,6 +1,7 @@
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Power;
 using FusionRpg.Data;
+using FusionRpg.Data.Seed;
 using FusionRpg.Tools.AtomImporter;
 
 // The seed importer (E14a). Reads data/seed/**.json, validates everything, and writes it in one
@@ -48,8 +49,12 @@ if (string.IsNullOrWhiteSpace(dataDir))
     return 2;
 }
 
-var roots = SeedScanner.Roots(seedRoot, explicitRoot: positional.Count > 0, Directory.Exists);
-var files = SeedScanner.Files(roots);
+// SeedScanner and the sweep/read/collect sequence below now live in FusionRpg.Data.Seed
+// (SeedImportRunner, E46 player-content-boot) — the server's own self-healing startup import calls
+// the exact same members, so there is one implementation of "how a seed tree becomes catalog rows"
+// rather than a second copy that can drift the way the affix folder once did unnoticed.
+var roots = SeedImportRunner.Roots(seedRoot, explicitRoot: positional.Count > 0);
+var files = SeedImportRunner.Files(roots);
 
 if (files.Count == 0)
 {
@@ -61,21 +66,17 @@ if (files.Count == 0)
     return 1;
 }
 
-var read = new List<(string Path, string Json)>(files.Count);
-foreach (var file in files)
+SeedCollectResult collected;
+try
 {
-    try
-    {
-        read.Add((Relative(seedRoot, file), File.ReadAllText(file)));
-    }
-    catch (IOException ex)
-    {
-        Console.Error.WriteLine($"{Relative(seedRoot, file)}: {ex.Message}");
-        return 2;
-    }
+    collected = SeedImportRunner.Collect(seedRoot, files);
+}
+catch (IOException ex)
+{
+    Console.Error.WriteLine(ex.Message);
+    return 2;
 }
 
-var collected = AtomSeedFile.Collect(read);
 if (!collected.IsOk)
 {
     Report(collected.Errors, "the files were refused; nothing was imported");
@@ -139,7 +140,8 @@ if (validate)
 Console.WriteLine(
     $"{files.Count} file(s): {outcome.Atoms} atom(s), {outcome.Containers} container(s), " +
     $"{outcome.Curves} curve(s), {outcome.Rarities} rarity band(s), " +
-    $"{outcome.Elements} element(s), {outcome.ChannelPolicies} channel policy row(s)");
+    $"{outcome.Elements} element(s), {outcome.ChannelPolicies} channel policy row(s), " +
+    $"{outcome.Affixes} affix(es)");
 if (check)
 {
     // The revision and the hash below are the CURRENT ones, read after the rollback — saying
@@ -166,20 +168,5 @@ static void Report(IReadOnlyList<SeedError> errors, string headline)
     foreach (var e in errors) Console.Error.WriteLine("  " + e);
 }
 
-static string Relative(string root, string path)
-{
-    var parent = Directory.GetParent(root)?.Parent?.FullName ?? root;
-    return Path.GetRelativePath(parent, path).Replace('\\', '/');
-}
-
-static string? FindUp(params string[] segments)
-{
-    var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
-    while (dir is not null)
-    {
-        var candidate = Path.Combine(new[] { dir.FullName }.Concat(segments).ToArray());
-        if (Directory.Exists(candidate)) return candidate;
-        dir = dir.Parent;
-    }
-    return null;
-}
+static string? FindUp(params string[] segments) =>
+    SeedImportRunner.FindUp(Directory.GetCurrentDirectory(), segments);

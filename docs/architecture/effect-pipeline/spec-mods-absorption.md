@@ -33,8 +33,35 @@ For each equipped item on a unique actor:
 1. Resolve the item's own `item.*` container through `InstanceProducer.Produce` (module 4), owned by
    the actor's `OwnerScope`, `slot` set to the equip slot, `source` recording the item instance.
 2. The resulting `effect_binding` row replaces the equivalent entry `BuildModsJson` used to synthesize.
-3. `mods_json` becomes **derived, then removed** — read-through during the migration window, deleted
-   once every live actor's equipped slots have a binding.
+3. `mods_json`'s **grant half stops being written at cutover.** The column stays on disk, unread for
+   grants, and its removal is the separate later cleanup Boundaries already defers.
+
+#### ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — no read-through window. The cutover is per-actor and atomic
+
+**Step 3 used to read *"derived, then removed — read-through during the migration window"*, and that
+contradicted two other sections of this same spec:**
+
+- *"There is no steady state where both are live for the same slot"* (§"The double-grant invariant")
+- **Never:** *"leave a live actor with a grant through both paths simultaneously, **even during
+  migration** — the cutover is per-actor and atomic, not gradual per-slot"* (§Boundaries)
+
+**The atomic cutover wins**, and the read-through clause is deleted rather than reconciled:
+
+1. **It is stated twice and testable once.** `an_actor_never_carries_the_same_grant_through_both_paths`
+   is already in the testing table. A read-through window makes that test unwritable — during the
+   window, both paths *are* live by design, so the invariant has no moment at which it holds.
+2. **It is the reversible half.** A per-actor atomic cutover is re-runnable per actor and needs no
+   code that must later be deleted. A read-through window needs a dual-read path in
+   `UniqueLoadoutSpec`, which then becomes its own removal task — a second migration created by the
+   first.
+3. **It carries no risk the window was buying.** The window's implied benefit is *"a half-migrated
+   actor still works"*, and per-actor atomicity delivers that directly: an actor is either fully on
+   `effect_binding` or fully on `mods_json`, and both are complete states.
+
+**What would overturn it:** an actor whose equipped set is too large to migrate inside one
+transaction. `rpg_unique_stat_mods` is per-actor and slot-bounded, so that is not a live concern —
+if it ever becomes one, the answer is a per-actor **queue**, still atomic per actor, never a
+read-through.
 
 ### The double-grant invariant this module exists to close
 
@@ -97,5 +124,7 @@ the cutover is per-actor and atomic, not gradual per-slot.
 ## Success criteria
 
 - [ ] Every equipped item on every unique actor has a real `effect_binding`.
+- [ ] The cutover is **per-actor and atomic**; no read-through window ships (§"The migration shape",
+      decided 2026-09-03).
 - [ ] No actor carries the same item's grant through `mods_json` and `effect_binding` at once, proven by test.
 - [ ] A real save fixture's effective stats are unchanged before/after migration.

@@ -36,7 +36,8 @@ public static class InstanceProducer
         out InstanceRow? instance,
         VariantShift? variant = null,
         InstanceOrigin origin = InstanceOrigin.Drop,
-        long catalogRevision = 0)
+        long catalogRevision = 0,
+        Func<string, ChannelPoolRow?>? lookupPool = null)
     {
         instance = null;
 
@@ -57,7 +58,7 @@ public static class InstanceProducer
         }
 
         var drawn = Resolver.Resolve(
-            container, lookupAtom, lookupAffix, domainMembers, rollSeed, variant, contentScaleMilli);
+            container, lookupAtom, lookupAffix, domainMembers, rollSeed, variant, contentScaleMilli, lookupPool);
         var nextSeq = rows.Count == 0 ? 1 : rows.Max(r => r.Seq) + 1;
 
         foreach (var a in drawn.Atoms)

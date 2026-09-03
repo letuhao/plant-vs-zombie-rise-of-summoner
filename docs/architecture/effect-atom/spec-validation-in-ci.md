@@ -91,16 +91,46 @@ text.
 
 ## Known residuals
 
-- **`--validate` runs in CI nowhere.** Verified by reading `.github/workflows/ci.yml`: the only tool
+**⛔ EVERY RESIDUAL BELOW CARRIES A DISPOSITION — DECIDED 2026-09-03 (owner removed themselves as a
+gate):** *claimed* by a named module, a *named follow-up*, or *accepted as-is with the reason*.
+
+- **[CLAIMED — E47 `validate-gate-ci`] `--validate` runs in CI nowhere.** Verified by reading `.github/workflows/ci.yml`: the only tool
   invocations are `DemonSpeciesGen --check` (`:50`), `DemonCorpusDump --verify` (`:130`) and
   `ItemSeedValidator` (`:136`). What E24 wired into CI is **B5** — the two missing test projects, plus
   the guard — while **B4**'s gate is reachable only from a hand-run command line and from its own unit
   and seam tests. The module's name overstates what shipped; one `ci.yml` step would close it.
-- **Drift evaluates zero atoms against the real corpus.** Freshly parsed atoms carry no stored
-  `power_json` until something backfills it, so `power drift: 0 evaluated` is the honest current state,
-  not a bug — but a gate that evaluates nothing catches nothing, and the printed count is the only thing
-  that makes that visible.
-- **Lint reports 20 warnings on the shipped corpus** (orphan atoms: the migrated `fx-*` defs are not
-  container-referenced). Expected and non-blocking by design, so the standing state of a clean run is
-  "20 warnings", which erodes the signal value of a warning here.
-- **Budget stays unimplementable** until the rarity schema grows a ceiling column.
+- **[ACCEPTED AS-IS; the visibility half CLAIMED — E47] Drift evaluates zero atoms against the real
+  corpus.** Freshly parsed atoms carry no stored `power_json` until something backfills it, so
+  `power drift: 0 evaluated` is the honest current state, not a bug — but a gate that evaluates nothing
+  catches nothing, and the printed count is the only thing that makes that visible.
+  ⛔ **DECIDED 2026-09-03 — a zero denominator is the true state of the corpus and needs no fix here.**
+  Drift compares a computed price against a **stored** one; with nothing stored there is nothing to
+  disagree with, and manufacturing a backfill so the gate has something to chew on would fabricate the
+  baseline it is supposed to check against. The design already refuses to let that look green: every
+  pass prints its evaluated count precisely *"so an empty pass cannot look thorough"*
+  (`ValidationGateTests`).
+  **The one thing that is owed, and its owner:** E47's CI step must print that evaluated count into the
+  CI log, so the zero stays visible in the place people actually read rather than only at a hand-run
+  prompt. **Trigger to re-decide:** the first run that writes `power_json` — at that point the
+  denominator becomes real and drift's disposition is re-taken as part of *that* work.
+- **[CLAIMED — E47 `validate-gate-ci`] Lint reports 20 warnings on the shipped corpus** (orphan atoms:
+  the migrated `fx-*` defs are not container-referenced). Expected and non-blocking by design, so the
+  standing state of a clean run is "20 warnings", which erodes the signal value of a warning here.
+  ⛔ **DECIDED 2026-09-03 — this is exactly what E47 says it owns first.** Its map row:
+  *"Owns the CI step **and the finding policy it needs first** — at ~490 generated rows `orphan` fires
+  per unreferenced atom, and a gate that fires 83,100 times on its first real run is one that gets
+  commented out"* (`effect-atom-map.md:326`). The 20 warnings today and the 83,100 tomorrow are one
+  problem — a finding class with no policy — and E47 owns the policy. No separate follow-up.
+- **[CLAIMED — action-corpus `A-G1 tier-access-gate`, cross-program] Budget stays unimplementable**
+  until the rarity schema grows a ceiling column.
+  ⛔ **DECIDED 2026-09-03 — the missing ceiling has an owner, and it is not rarity-keyed.**
+  [spec-validate-gate-ci.md](spec-validate-gate-ci.md):79 already records that the shipped budget is
+  *"rarity-keyed with zero production callers"* and that **E47 does not wire it**, so the gap needed an
+  owner elsewhere. **A-G1 is it:** it owns a per-rung `powerBudgetMilli` derived from the shipped
+  `qPowerMilli` × `poolRolls` (never a new curve), and its AC3 is *"`ContentValidation.Budget` has a
+  rung-keyed overload **and a production caller**"*
+  (`docs/architecture/action-corpus/spec-tier-access-gate.md` §6). That is precisely this residual's
+  missing ceiling source, arriving rung-keyed rather than rarity-keyed.
+  **What would overturn it:** A-G1's own assertion 2 staying blocked on effect-atom D2 — in which case
+  the budget stays unimplementable, but it stays unimplementable **with a named owner and a named
+  blocker**, which is a different state from unowned.

@@ -321,10 +321,12 @@ stages, and one (`/recipes`) splits between a reference and a workshop.
 | [00-foundation.html](00-foundation.html) | Tokens · primitives · domain tokens · entity ladders · comparison · band shells · control clusters |
 | [01-shell-home.html](01-shell-home.html) | Boot / title / save select · the Sanctum stage · HUD · rail · first-run script · unlock states |
 | [02-collection.html](02-collection.html) | Creatures · Relics · Fusion — the itemisation surfaces, with comparison in situ |
-| [03-world.html](03-world.html) | World map stage · sector inspector · legions · Expeditions · Pacts |
+| [03-world.html](03-world.html) | World map stage · sector inspector · legions · Expeditions · Pacts — **world sections superseded by plate 11**; Expeditions and Pacts stand |
 | [04-run-stages.html](04-run-stages.html) | Lawn stage · Battle stage · their HUDs, transport and target surfaces |
 | [05-chronicle-almanac.html](05-chronicle-almanac.html) | Chronicle · Almanac · the reference and history surfaces |
 | [06-system-dev.html](06-system-dev.html) | Run result · level-up · confirms · toasts · Settings · rebinding · Display and Sound · the keymap · the developer tree |
 | [07-flows.html](07-flows.html) | Loadout · deploy targeting · the pact offer · the four first-session beats · focus order and directional input · the last ladder rungs |
 | [08-actor-sheet.html](08-actor-sheet.html) | Actor sheet · specimen and commander role extensions |
 | [09-commander-list.html](09-commander-list.html) | Commanders layer · persisted default · list → Actor sheet |
+| [10-actor-hud.html](10-actor-hud.html) | Per-unit lawn HUD — identity / resource / status rows · dual render |
+| [11-world-stage.html](11-world-stage.html) | **The world map component catalog** — every map component in all its states, with the field that drives it. Supersedes plate 03 §A–B |

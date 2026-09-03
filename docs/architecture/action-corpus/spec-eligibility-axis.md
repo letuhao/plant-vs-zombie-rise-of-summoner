@@ -41,7 +41,7 @@ question those fields describe. **A corpus with no eligibility surface is conten
 | The only `scope` in the action layer is **effect** scope, an unrelated concept | **built** | `ActionRow.cs:72` — `ActionScopeRow(ActionId, AtomId, ActionEffectScope)`, defaulting to `EachTarget`. **Do not overload it** |
 | `UnlockLadder` / `UnlockState` | **built, fully tested** | and reachable only from tests, because nothing can compute a candidate set |
 | `SpeciesBasics.SpeciesKey` is an **opaque key**, deliberately not a catalog join | **built** | `ActionRow.cs:83` states this |
-| Family assignments are keyed on **demon ids**, not `species_key` | **built**, mismatched | `data/seed/demons/_generated/family-assignments.json`; `grep species_key tools/seedsmith` returns nothing |
+| Family assignments are keyed on the **catalog `SpeciesId`, lowercased** | **built**, and it joins | `data/seed/demons/_generated/family-assignments.json` — ⛔ **CORRECTED 2026-09-03.** This row said *"keyed on demon ids, not `species_key`"* and called the join **mismatched**. Re-measured 2026-09-03: **53 keys, every one an exact `SpeciesId` of `DemonSpeciesCatalog.Generated.cs` (84 rows), every one already lowercase, zero keys outside the catalog, no species carrying two families, 19 distinct families.** The join is a dictionary lookup, not a repair job — which is what makes §3.2's decision cheap |
 | Whether `scope`/`scopeKey` is a column or a table | ⛔ **an open decision** the ideal §6 defers | — |
 
 **Sorted: real gap**, and the only one in this program that no amount of content generation can route
@@ -76,9 +76,14 @@ query that reads them. It does not touch `ActionCompiler`, `ActionValidator`'s e
 loadout, or the ladder's logic.
 
 ⚠️ **`rungBand` → `Rung` needs a stated collapse rule.** `StructureBudgetGuard.Check` resolves
-`rungTable.TryGet(row.Rung)` — **one** row — while a `[5,10]` band spans budgets of 3 and 7 axes. A band
+`rungTable.TryGet(row.Rung)` — **one** row — while a signature band spans budgets of 0 and 7 axes. A band
 that silently becomes its minimum, or its maximum, is a balance decision made by an implementation
 detail. **State the rule here or the guard checks the wrong budget.**
+⛔ **CORRECTED 2026-09-03:** this read *"a `[5,10]` band … 3 and 7 axes"*. The signature window's
+floor of 5 is dropped, so the band is `[1,10]` and its floor row carries `structureBudget: []`
+(`data/tuning/action-rungs.v1.json` rung 1) — the spread the collapse rule has to resolve is **wider**
+than the sentence claimed, not narrower (`spec-rung-semantics.md` §3.2;
+`spec-distribution-planner.md` §3 step 4).
 
 ### 3.1 The axis
 
@@ -112,9 +117,39 @@ candidates(actor) = { a : a.scope = general }
   it, and an unordered candidate set makes replay undefinable.
 - **A miss is empty, never everything.** An actor whose family is unknown gets the general tier only.
   **The failure mode to design against is a null `scopeKey` silently matching all rows.**
-- **`familyOf(actor)` is the join that does not exist.** Family assignments are keyed on demon ids;
-  `speciesKey` is opaque. **This module owns defining that resolution — and it must be a real mapping,
-  not a string-equality accident.**
+- **`familyOf(actor)` — ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate).**
+
+  **`familyOf(actor)` is a load-time, immutable `speciesKey → familyId` dictionary, built from
+  `data/seed/actions/_generated/family-map.json`, whose keys are the catalog `SpeciesId` lowercased.**
+  A miss returns `null`, and `null` yields the general tier only.
+
+  Three facts make this the derived answer rather than a preference, all re-measured 2026-09-03:
+
+  1. **The keys already are the canonical species key.** `family-assignments.json` holds **53** keys;
+     every one is an exact `SpeciesId` from `DemonSpeciesCatalog.Generated.cs`, and every one is
+     already lowercase. Zero keys fall outside the catalog.
+  2. **`spec-characteristic-pool.md:98` already declares that key canonical** — *"The canonical
+     species key is the catalog `SpeciesId`, lowercase. The anchor tree is joined on
+     `speciesId.lower()`."* A-S0 is the module that reads the demon seed, so the projection is
+     emitted **there** and this module consumes a committed file. That is why no coupling is
+     introduced: the action layer reads a seed file, exactly as it reads every other one, and never
+     references `DemonSpeciesCatalog`.
+  3. **The relation is a function.** No species carries two families (measured: all 53 values are
+     one-element lists over 19 distinct family ids), so `familyOf` returns a scalar and not a set.
+     The projection takes `value[0]` and **refuses at generation time** any entry whose list length
+     is not 1 — so the day a species gains a second family, the generator stops rather than
+     silently picking the first.
+
+  **This is a real mapping, not a string-equality accident**, and the difference is the validated key
+  set: a lookup against a checked, load-time-frozen dictionary whose every key was proven to be a
+  catalog species is not the same operation as comparing two strings and hoping.
+
+  **What would overturn it:** family assignments gaining a key that is not a catalog `SpeciesId`, or a
+  species gaining a second family. Both are caught by the refusals above rather than discovered in
+  play, and both are fixed in the projection, not in this module.
+
+  **Reach, stated honestly:** the family tier covers **53 of 84** species. The other 31 get the general
+  tier and their own species tier — correct behaviour, and it is §7's `seedsmith D2` row, not a defect.
 
 ### 3.3 What it plugs into
 
@@ -149,7 +184,7 @@ set to be called *with* — so the ladder stops being reachable only from tests.
 | 3 | **Planted violation:** a `species`-scoped row with a null `scopeKey` **does not** appear for an unrelated actor | The worst failure mode, asserted |
 | 4 | The candidate set is **ordinally sorted and stable** across two calls | Replay is definable |
 | 5 | `UnlockState.TryAccept` is driven **from a real candidate set**, not a test fixture | The ladder stops being test-only |
-| 6 | A `family`-scoped row whose `scopeKey` names no known family is a **load-time refusal** | No orphan rows |
+| 6 | A `family`-scoped row whose `scopeKey` names no known family is a **load-time refusal** — asserted in **A-C1's** suite, not this one; here the mirror case is asserted: such a row, constructed directly, appears in **no** candidate set | No orphan rows, and no schema coupling to buy them — §3.2's ⛔ DECIDED note |
 | 7 | **Planted violation:** a fourth `scope` value fails to compile or is refused | A1's closure held mechanically |
 | 8 | `ActionEffectScope` is untouched — its defaults and behaviour unchanged | §4's first boundary |
 
@@ -173,10 +208,33 @@ working eligibility system and one that silently grants every species action to 
 3. A null `scopeKey` matches **only** `general` — asserted by a planted violation.
 4. An unknown family yields general-tier only.
 5. `familyOf(actor)` is a defined mapping, not string-equality luck, and its failure is empty rather than
-   wrong.
+   wrong. ⛔ **DECIDED 2026-09-03 (owner removed themselves as a gate)** — §3.2 states the mapping,
+   its source file, its three measured justifications and its two refusals.
+5b. **The unknown-family refusal lives in A-C1, not here.** ⛔ **DECIDED 2026-09-03 (owner removed
+   themselves as a gate).** §3.1 and §4 forbid this module joining the demon catalog; test 6 required a
+   load-time refusal for an unknown family, which needs the family list. Both hold if the check runs
+   where the vocabulary checks already run: `spec-corpus-loader.md` §3 step 5 refuses an unknown member
+   of every closed vocabulary against the code of record, and `scopeKey` is already one of A-C1's
+   `reference_fields` (§3 step 4). So **A-C1 adds the family-map key set as an eleventh checked
+   vocabulary** and refuses a `family`-scoped entry naming an unknown family, and the C# side keeps
+   `scopeKey` opaque: `familyOf` returns `null`, the row joins **no** candidate set, and it is inert
+   rather than wrong. **Reasoning:** the refusal is not weakened — it moves to the layer that already
+   owns refusals and already has the list, and it costs this module no dependency it spent §4 forbidding.
+   **What would overturn it:** the family list becoming a generated C# constant, or `ActionRow` gaining a
+   real foreign key to the demon catalog — at either point the refusal can move into the action layer
+   for free, and it should.
 6. `UnlockState.TryAccept` is exercised from a real candidate set in at least one test.
 7. `ActionEffectScope` is unchanged.
 8. The boundary against `effect-pipeline` module 8's tag eligibility is stated in the map, not only here.
+
+---
+
+## 6a. ⛔ Two process gates this module must clear first
+
+**Added 2026-09-03** by the plan-coverage audit, which found this module in the same position as E45.
+
+1. **A `decisions.md` row.** This adds six columns to `ActionRow`, which persists to `rpg_action`. A grep of `decisions.md` finds **no row for action eligibility or scope**. The todo's own precedent cuts both ways and must be applied consistently: **E35 *creates* the attach-point row it needs**, and **E45 is deferred entirely** because it *"has a spec and no `decisions.md` row. The ADR is the gate."* **A-E1 must create its row** — deferring it would block the module that gates the whole program.
+2. **A SQLite migration.** A database created before this change has `rpg_action` without the six columns. The house pattern is already in the tree (`RpgStore.AtomInstances.cs:100-102` handles exactly this shape for `effect_instance`); follow it. **A migration-less schema change is how an existing save stops loading.**
 
 ---
 

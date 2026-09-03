@@ -1,7 +1,8 @@
 # Spec: `family-propose` (A-P2)
 
 **Module id:** `family-propose` · **Status:** proposed 2026-09-03 · **Program:** [action-corpus](../action-corpus-map.md) · **Model calls: yes**
-**Depends on:** `A-S1 distribution-planner` · **Feeds:** `A-P3 signature-propose` (its output is P3's context)
+**Depends on:** `A-S1 distribution-planner` · **Feeds:** `A-S2 brief-assembly`, which turns this stage's
+**accepted, deduped, id-assigned** round into `A-P3 signature-propose`'s brief
 ⚠️ The capability map's own gate still stands — *"Not approved. No module spec may be written until it is"*
 (`action-corpus-map.md:3-5`). Written ahead of approval on the owner's instruction; not buildable until it lifts.
 
@@ -41,8 +42,8 @@ that second job belongs to `A-P3`, which is why these are two pipelines and not 
 |---|---|
 | Family assignments — **53 species across 19 family tokens** | `data/seed/demons/_generated/family-assignments.json` (measured 2026-09-03: 53 keys; values are lists of family tokens, e.g. `bucketnutzombie: ["bucket"]`) |
 | Motif assignments — **84 species**, each with `motifs`, `antiMotifs`, `basis`, `tautological` | `data/seed/demons/_generated/motif-assignments.json` (84 keys) |
-| Closed action vocabularies (5 categories, 6 target modes, 4 shapes, 8 tags) | `ActionEnums.cs:26-47`, `ActionTargetSpec.cs:14-33`, `:42-48` |
-| Rung table with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:12-21` |
+| Closed action vocabularies (5 categories, 6 target modes, 4 shapes, 8 tags) | `ActionEnums.cs:26-49`, `ActionTargetSpec.cs:14-33`, `:42-48` |
+| Rung table with per-row `structureBudget` | `data/tuning/action-rungs.v1.json:11-20` |
 | Schema audit — numeric fields **and** a missing `blocked` escape both rejected | `pipeline/model.py:53-99` |
 | Permutation, vote resolution, bounded self-heal | `anchor/permute.py:16-30`, `anchor/vote.py:23-40`, `llm_caller.py:207-236` |
 | The stage shape to copy exactly | `adapters/effects/affix/prompts.py:26-112`, `generate_affixes.py:74-96` |
@@ -158,6 +159,19 @@ FAMILY_ACTION_SCHEMA = {
 
 - **No `number`/`integer`, no numeric-string enum member, no `pattern` admitting digits.** Both enums are
   filled at call time from the brief's own lists, so the model can only choose, never invent.
+
+**⛔ DECIDED 2026-09-03 — where that enum's members come from.** `allowedAtomFamilies` now has a
+stated source: the **98 authored affix families** in `data/seed/items/affix-families/*.json`
+(`entries[].id`). Until this decision no spec said which set `atomFamilies` names, and the tree holds
+three **completely disjoint** candidates — 17 demo families under `data/seed/atoms/`, the 98 authored
+ones, and the 5 ids in `data/seed/actions/pairings.json`, with **zero overlap between any pair**
+(measured 2026-09-03; the evidence table is in `spec-distribution-planner.md` §2).
+
+It matters to this stage specifically, because the enum is what the model is allowed to say: with no
+namespace the planner could have opened a brief onto ids that resolve nowhere, and the model would
+have chosen correctly from a list of fictions. Every member of this enum is now an id that exists,
+carries a `kindId`, a `params.channel` and a `powerBand`, and the "do not invent a family" rule has
+something real to be measured against.
 - **`none` is a member of `motifsExpressed`.** A model that expressed no family motif must be able to say so;
   a silently omitted key would hand the entry a hidden pass through the quality gate — tag absence is a stat.
 - **The enum is filled from `brief.anchor.familyMotifs`**, the derived family set, **not** from a
@@ -187,7 +201,7 @@ what makes one member special.* Four negative clauses:
 
 ### What the brief inlines
 
-`build_brief(context)` renders literal values and cites no file (`affix/prompts.py:66-80` states the reason).
+`build_brief(context)` renders literal values and cites no file (`affix/prompts.py:60-61` states the reason).
 In order: the family id and its theme label; the family's motifs, in permuted order; the family's
 **anti-motifs**, each with the sentence *"an action expressing this is rejected"*; the planner's mechanical
 slot (`category`, `targetMode`, `areaShape`, `relation`, `kind`) and the rung band as a label, never numbers;
@@ -267,7 +281,7 @@ default.
    `anchor.familyAntiMotifs` or `anchor.familyMotifBasis` **key is absent** raises; a key present
    with an **empty list** is legal and renders the explicit *"this family has no shared motif"*
    sentence, exactly as A-P3 handles an empty `familyActions`
-   (`spec-signature-propose.md:156-158`). ⛔ **CORRECTED 2026-09-03 (review F15):** *"a brief without
+   (`spec-signature-propose.md:229-231`). ⛔ **CORRECTED 2026-09-03 (review F15):** *"a brief without
    derived family motifs raises"* rejected every brief A-S1 could produce, because no spec owned the
    derivation; A-S1 §3 step 2b now owns it, and absent-versus-empty is the distinction that makes
    this criterion satisfiable.
@@ -299,6 +313,21 @@ default.
 | Channel pools | **effect-atom E30** | outside this program |
 | Binding production | **effect-pipeline module 4** | `effect_binding` has zero rows |
 
+**⛔ DECIDED 2026-09-03 — this stage's accepted output feeds A-S2, not A-P3 directly.** A-P3's brief
+carries `familyActions`, and it raises when that key is absent
+(`spec-signature-propose.md:229-231`). Nothing owned assembling it: A-S1 builds briefs in a static,
+token-free phase and `familyActions` does not exist until *this* stage's round has been generated,
+validated, deduped and **id-assigned**. So **100% of A-P3's input would have raised.** A new module,
+**A-S2** `brief-assembly`, owns that step and reads this stage's accepted round.
+
+**This is F15 recurring, one field over.** Family motifs had the identical defect in the same brief —
+A-P2 said *"A-S1 owns it"*, A-S1 never mentioned it, and this spec's AC5 rejected 100% of A-S1's
+output; the review called it *"ownership passed in a circle."* It was closed by writing the
+derivation into A-S1 §3 step 2b. `familyActions` sat one field over and was not caught, and it closes
+the same way — a named owner. **What this stage owes A-S2 is the accepted round, not raw output:** a
+candidate that A-S4 rejected or A-S3 deduped away must never reach a P3 brief as something to differ
+from.
+
 **Hazards.**
 
 1. **The family tier may not earn a pipeline at the shipped roster.** 2.8 species per family; eleven of the
@@ -314,5 +343,5 @@ default.
    price (needs D2) and a budget check with a production caller (`action-corpus-ideal.md:707-728`). Until
    all three hold, briefs are **structure-gated**. This stage must not branch on tier — it reads the pool
    it is given.
-4. **The `~1,162 calls/h` rate is unsourced** (`action-corpus-ideal.md:1447`), so any hour figure derived
+4. **The `~1,162 calls/h` rate is unsourced** (`action-corpus-ideal.md:1448`; the figure itself is at `:561`), so any hour figure derived
    from this stage's budget is unverified.

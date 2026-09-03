@@ -88,7 +88,33 @@ public static ResolvedDraw Resolve(ContainerRow container, Func<string, AtomRow?
 Step 3 (expand refs) is deterministic given steps 1-2's output — it needs no RNG of its own, which is
 consistent with `definitions.md` listing it without a stream.
 
-### Variant shifts (Q12) — parameters of the resolve, not content
+### ⛔ New dependency, added 2026-09-03 — a fifth stream for `channel-pool` (E30)
+
+`spec-channel-pool.md` (E30, effect-atom Wave 7) lets an atom's `params.channel` name a pool instead of
+one concrete channel — `{ "pool": "pool.element-power", "count": 1 }` — and needs this module to turn
+that reference into concrete channels at roll time. E30's own §4 boundary correction already declares
+the dependency in this direction ("E30 declares a dependency on effect-pipeline module 2"); this is the
+matching acknowledgement on this side, since a spec that is depended on should say so too.
+
+**Execution semantics are decided** (`spec-channel-pool.md` §3.2a, 2026-09-03): a pooled reference
+expands into `count` separate `ResolvedAtom`s, same `atom_id`, same ONE rolled magnitude, different
+concrete `channel` each — never one entry carrying an array. This runs inside step 5 (values), after an
+atom's identity is already fixed by step 4, on a **fifth named stream**, `channel.pool`, derived exactly
+like the other four:
+
+| Layer | Stream name |
+|---|---|
+| slots | `affix.slot` |
+| affixes | `affix.draw` |
+| tiers | `affix.tier` |
+| values | `atom.value` |
+| **channel pool (E30)** | **`channel.pool`** |
+
+The draw itself (weighted, without replacement unless `allowRepeat`) is the same weighted-pick shape
+this module's own affix draw already implements — no second algorithm, this module's existing one
+reused at a different layer. **Not yet implemented** — `RollValues` today clones a pool-object `channel`
+value verbatim rather than resolving it, so a pooled reference currently freezes unread. This is the
+named next step for whoever picks up this module's code again, not a silent gap.
 
 `effect-pipeline-ideal.md` §7 Q12, and `ssot-rarity.md` §3.6: rarity buys breadth and tier ceiling,
 never magnitude directly — *"a multiplier on the rung makes rarity dominant and destroys the overlap
@@ -96,14 +122,30 @@ the owner asked for"* (`CurveInput.Rarity` is banned on `container_kind = 'item'
 `variant` (per `demon-seed`'s own `variants` anchor field) shifts a **resolution parameter**, and
 authors nothing:
 
-| Variant | Shifts |
-|---|---|
-| `ancient` | tier window up one step |
-| `mutated` | +1 pool draw, -1 tier |
-| `corrupted` | rerolls one element slot |
-| `blessed` | +1 prefix roll |
-| `cursed` | +1 suffix roll, -1 prefix roll |
-| `shiny` | cosmetic only — no resolution change |
+> **⛔ RE-VERIFIED 2026-09-03 (owner removed themselves as a gate) — the variant shift table is
+> SHIPPED, and its one genuinely underspecified row has been resolved in data.** An objection that
+> `corrupted`'s *"rerolls one element slot"* invents a field is **not true today**: the field is
+> `VariantShift.RerollsOneElementSlot` (`src/FusionRpg.Core/Effects/Atoms/VariantShift.cs:19-23`),
+> parsed from `rerollsOneElementSlot` by `VariantShiftTable.Parse` (`:90`), and honoured by
+> `Resolver.ResolveSlots`' `corruptedRerollSpent` (`Resolver.cs:93`, `:111-115`) — *"spent at most once per
+> resolve regardless of how many element slots exist."*
+>
+> **The row that WAS underspecified is `mutated`.** *"+1 pool draw"* never said **which budget**, and
+> a resolver with two independent budgets cannot act on it. **It is resolved as `prefixRollShift: 1`**
+> (`data/tuning/variant-shifts.v1.json`), which is the reading that keeps `mutated` distinct from
+> `cursed` (suffix-weighted) and pairs its `-1 tier` with breadth on the same side `blessed` adds to.
+> The table below is corrected to name the shipped fields rather than prose. **What would overturn
+> it:** a balance pass wanting `mutated` to widen the suffix side — a one-key edit to the tuning file,
+> which is exactly why it lives there.
+
+| Variant | `tierWindowShift` | `prefixRollShift` | `suffixRollShift` | `rerollsOneElementSlot` |
+|---|--:|--:|--:|---|
+| `ancient` | +1 | 0 | 0 | — |
+| `mutated` | −1 | **+1** | 0 | — |
+| `corrupted` | 0 | 0 | 0 | **true** |
+| `blessed` | 0 | +1 | 0 | — |
+| `cursed` | 0 | −1 | +1 | — |
+| `shiny` | 0 | 0 | 0 | — (cosmetic only) |
 
 Zero new containers, zero new authoring per variant per species — a variant is felt across the whole
 roster the instant its shift table changes. The shift table itself is `data/tuning/variant-

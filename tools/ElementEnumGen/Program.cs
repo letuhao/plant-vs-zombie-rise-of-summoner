@@ -12,6 +12,10 @@ using FusionRpg.Tools.ElementEnumGen;
 //
 // Exit codes: 0 clean, 1 mismatch found, 2 could not start.
 
+// The shipped fx-*.json atom seed files, named explicitly (E43, spec-family-expand.md §3.3) — the
+// AllDirectories glob this replaces enforced nothing, it just happened to match only these three.
+var ShippedFxFiles = new[] { "fx-board.json", "fx-core.json", "fx-status.json" };
+
 var mode = "check";
 string? emitPath = null;
 var positional = new List<string>();
@@ -36,7 +40,15 @@ if (seedRoot is null || !Directory.Exists(seedRoot))
 if (mode == "effect-emit")
 {
     var atomsDir = Path.Combine(seedRoot, "atoms");
-    var files = Directory.GetFiles(atomsDir, "fx-*.json", SearchOption.AllDirectories)
+    // E43 (spec-family-expand.md §3.3): an AllDirectories glob on "fx-*.json" was a filename
+    // CONVENTION nothing enforced — E43's own generated output lives under atoms/generated/ and is
+    // never named fx-*, but nothing stopped a future file from being. An explicit allow-list is a
+    // named refusal at generation time instead of a glob that would have silently swept a 491st def
+    // into this catalog the day someone else picked a matching name. Update this list, not the glob,
+    // when a real fx-*.json ships.
+    var files = ShippedFxFiles
+        .Select(name => Path.Combine(atomsDir, name))
+        .Where(File.Exists)
         .OrderBy(f => f, StringComparer.Ordinal)
         .Select(f => (f, File.ReadAllText(f)))
         .ToArray();

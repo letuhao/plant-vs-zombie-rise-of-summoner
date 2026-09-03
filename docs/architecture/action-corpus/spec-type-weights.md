@@ -108,6 +108,28 @@ module's two shape vectors a real consumer that is not a second roll:
   through the authored `ActionRow.Targeting` (`ActionRow.cs:40`). **Nothing new rolls**, which is the
   law that made this a decision rather than a preference.
 
+**⛔ DECIDED 2026-09-03 — `action-type-weights.v1.json` ships with stated NEUTRAL defaults, tuned
+from the smoke batch.** Same precedent as everywhere else in this program:
+`spec-innate-picker.md` §3.3's per-mille multipliers *"defaulting to 1000, at which the score
+reproduces the lexicographic tuple exactly"* (`spec-innate-picker.md:124-125`) — a neutral value with
+its reasoning, so the module is buildable today.
+
+| Key | Used by | Default | Why this is the neutral one |
+|---|---|---|---|
+| `base` | §3 step 1's `base + (5 - i) * step` | **1000** | With `step: 0` this alone yields a flat 200-per-category vector, so `base` sets the floor and `step` alone controls spread |
+| `step` | same | **250** | Ranks 1..5 score 2000/1750/1500/1250/1000 → `400/350/300/250/200` per-mille after normalisation. Monotone, ordered by lean, and **no category is ever zero** — a zeroed category would make a whole slice of the corpus unplannable from a *default* |
+| `separationMilli` | §3 step 2, indexed by A-S0's `separation` 0..4 (`null` takes the `0` row) | **`[0, 250, 500, 750, 1000]`** | Linear, spanning the full range: `separation: 0` collapses the spread to flat (the honest "we did not differentiate"), `separation: 4` keeps `base`/`step` intact. It is the identity ramp — the least opinionated total function over the five rows |
+| `targetModeMilli` rows | §3 step 4, keyed on lean head plus `reach` | **uniform 1000 per mode within each row**, normalised to `167/167/167/167/166/166` over the six modes | Six modes, no evidence yet which a species should prefer; the shipped example vector in §2 is an **illustration of a tuned row**, not the default |
+| `areaShapeMilli` | §3 step 4's conditional sub-vector | **uniform**, `250` each over the four shapes | Same reasoning, four shapes |
+| `primaryMilli` / `secondaryMilli` | §3 step 5's element bias | **`400` / `200`**, remainder split evenly | A primary twice its secondary, and both above the even split (`167`), so the bias is real and visible at the default rather than indistinguishable from uniform. This is the one place a flat default would be *wrong*: an element bias vector with no bias is not a neutral value, it is a deleted feature |
+
+**Every default keeps §5's invariants true by construction**: each vector sums to exactly 1000 after
+the largest-remainder normalisation, every value is an integer per-mille, and no category, mode or
+shape is zero. `_meta` in the shipped file states all of the above, that the values are **untuned
+placeholders**, and that the first smoke batch's `type-weights.json` plus A-S5's quota-drift and
+cell-occupancy findings are the evidence they move on. **Re-tuning is a config change**, never a
+rebuild — which is why these are rows and not constants.
+
 ## 3. The algorithm
 
 1. **Rank to weight.** For a species whose `leanOrder` is `[c1..c5]`, the raw score of `ci` is
@@ -189,6 +211,14 @@ module's two shape vectors a real consumer that is not a second roll:
 3. No `float`, `double`, or decimal literal appears anywhere in the file or in the module's source.
 4. Every coefficient the algorithm uses is a row in `data/tuning/action-type-weights.v1.json`; a magic
    number audit over the module reports zero targets.
+4b. That file **exists and ships with the stated neutral defaults** (the table above §3):
+   `base: 1000`, `step: 250`, `separationMilli: [0, 250, 500, 750, 1000]`, uniform `targetModeMilli`
+   and `areaShapeMilli` rows, and `primaryMilli: 400` / `secondaryMilli: 200`. A test asserts every
+   default vector sums to exactly 1000 after normalisation and that no category, mode or shape is
+   zero at the default; `_meta` says in those words that the values are untuned placeholders and that
+   the first smoke batch, read through A-S5's quota-drift and cell-occupancy findings, is the
+   evidence they move on. **Re-tuning is a config change.** ⛔ **DECIDED 2026-09-03** — §2's example
+   vectors are an illustration of a *tuned* row and were never a default.
 5. A species with A-S0 `separation == 0` produces a measurably flatter category vector than one with
    `separation == 4`, and the flattening factor is a tuning row. A species with `separation: null`
    takes the same row as `0`, and a test asserts a **family-less** species still gets a vector shaped

@@ -1,0 +1,291 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.ferocity",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Ferocity T1",
+      "params": {
+        "channel": "atk",
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.ferocity",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Ferocity T2",
+      "params": {
+        "channel": "atk",
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.ferocity",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Ferocity T3",
+      "params": {
+        "channel": "atk",
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.ferocity",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Ferocity T4",
+      "params": {
+        "channel": "atk",
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.ferocity",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Ferocity T5",
+      "params": {
+        "channel": "atk",
+        "op": "increased",
+        "amount": {
+          "min": 219,
+          "max": 435,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.might",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Might T1",
+      "params": {
+        "channel": "atk",
+        "op": "flat",
+        "amount": {
+          "min": 2,
+          "max": 4,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.might",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Might T2",
+      "params": {
+        "channel": "atk",
+        "op": "flat",
+        "amount": {
+          "min": 3,
+          "max": 7,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.might",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Might T3",
+      "params": {
+        "channel": "atk",
+        "op": "flat",
+        "amount": {
+          "min": 6,
+          "max": 12,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.might",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Might T4",
+      "params": {
+        "channel": "atk",
+        "op": "flat",
+        "amount": {
+          "min": 11,
+          "max": 21,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.might",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Might T5",
+      "params": {
+        "channel": "atk",
+        "op": "flat",
+        "amount": {
+          "min": 19,
+          "max": 37,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.savagery",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Savagery T1",
+      "params": {
+        "channel": "atk",
+        "op": "more",
+        "amount": {
+          "min": 13,
+          "max": 25,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.savagery",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Savagery T2",
+      "params": {
+        "channel": "atk",
+        "op": "more",
+        "amount": {
+          "min": 22,
+          "max": 44,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.savagery",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Savagery T3",
+      "params": {
+        "channel": "atk",
+        "op": "more",
+        "amount": {
+          "min": 39,
+          "max": 77,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.savagery",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Savagery T4",
+      "params": {
+        "channel": "atk",
+        "op": "more",
+        "amount": {
+          "min": 68,
+          "max": 136,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.savagery",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Savagery T5",
+      "params": {
+        "channel": "atk",
+        "op": "more",
+        "amount": {
+          "min": 120,
+          "max": 238,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-attack.json",
+        "generator": "E43"
+      }
+    }
+  ]
+}

@@ -24,7 +24,10 @@ public static class InjectorCombatBridge
         ActorElementTypes elementTypes;
         if (InjectorElementOverride.TryGet(key, out var pinnedTypes))
         {
-            // Pinned prove-pack scenarios isolate their math — the patron aura stays out.
+            // E27: InjectorElementOverride now wins over a REAL resolved value, not a missing one —
+            // pinned prove-pack scenarios isolate their math and the patron aura stays out, exactly as
+            // before, but "before" used to mean overriding Neutral. Checked first, unconditionally:
+            // this branch always short-circuits ResolveElementTypesFromHub below.
             elementTypes = pinnedTypes;
         }
         else
@@ -41,6 +44,13 @@ public static class InjectorCombatBridge
     static ActorElementTypes ResolveElementTypesFromHub(string key) =>
         ResolveElementTypesFromHub(key, out _);
 
+    /// <summary>
+    /// E27 (spec-lawn-element-bind.md): the species' element, via the shared
+    /// <see cref="LawnElementResolverHost"/> — cached per actor per match, so the board scan behind it
+    /// runs at most once per actor rather than on every hit. `elementTypes:` now rides the same
+    /// StatContext that already carries baseline/typeId/cheat scale, mirroring `BattleEngine.cs:36`'s
+    /// construction (secondary collapses to null when it equals primary).
+    /// </summary>
     static ActorElementTypes ResolveElementTypesFromHub(string key, out string side)
     {
         var hub = CheatState.ActorHub;
@@ -48,22 +58,8 @@ public static class InjectorCombatBridge
             && !hub.Stats.TryGetBaseline(key.ToUpperInvariant(), out baseline))
             baseline = new EntityBaseline { Hp = 100, MaxHp = 100, Atk = 10 };
 
-        var board = InjectorBoardSnapshot.Capture();
-        side = "plant";
-        var typeId = 0;
-        foreach (var e in board.Entities)
-        {
-            if (!CombatPtr.EqualsPtr(e.Ptr, key)) continue;
-            side = e.Side ?? "plant";
-            typeId = e.TypeId;
-            break;
-        }
-
-        if (typeId == 0
-            && CheatState.SelectedPtr != IntPtr.Zero
-            && CombatPtr.EqualsPtr(CheatState.SelectedPtr.ToString("X"), key)
-            && !string.IsNullOrWhiteSpace(CheatState.SelectedSide))
-            side = CheatState.SelectedSide;
+        var (resolvedSide, typeId, elementTypes) = LawnElementResolverHost.Resolve(key);
+        side = resolvedSide;
 
         var ctx = string.Equals(side, "zombie", StringComparison.OrdinalIgnoreCase)
             ? hub.Stats.Contexts.ForZombie(
@@ -73,7 +69,8 @@ public static class InjectorCombatBridge
                 matchKey: GameHooks.MatchKey,
                 playerId: CheatState.PvzStatsPlayerId > 0 ? CheatState.PvzStatsPlayerId : null,
                 cheatScale: CheatState.EffectiveStats(),
-                pvzStatsMods: CheatState.PvzStatsMods)
+                pvzStatsMods: CheatState.PvzStatsMods,
+                elementTypes: elementTypes)
             : hub.Stats.Contexts.ForPlant(
                 key,
                 baseline,
@@ -81,7 +78,8 @@ public static class InjectorCombatBridge
                 matchKey: GameHooks.MatchKey,
                 playerId: CheatState.PvzStatsPlayerId > 0 ? CheatState.PvzStatsPlayerId : null,
                 cheatScale: CheatState.EffectiveStats(),
-                pvzStatsMods: CheatState.PvzStatsMods);
+                pvzStatsMods: CheatState.PvzStatsMods,
+                elementTypes: elementTypes);
 
         return hub.Resolve(ctx).ElementTypes;
     }

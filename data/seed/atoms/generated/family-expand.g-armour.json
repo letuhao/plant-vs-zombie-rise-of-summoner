@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "kind": "atom",
+  "entries": [
+    {
+      "family": "atom.resilience",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Resilience T1",
+      "params": {
+        "channel": "defense",
+        "op": "increased",
+        "amount": {
+          "min": 23,
+          "max": 47,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.resilience",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Resilience T2",
+      "params": {
+        "channel": "defense",
+        "op": "increased",
+        "amount": {
+          "min": 41,
+          "max": 81,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.resilience",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Resilience T3",
+      "params": {
+        "channel": "defense",
+        "op": "increased",
+        "amount": {
+          "min": 72,
+          "max": 142,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.resilience",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Resilience T4",
+      "params": {
+        "channel": "defense",
+        "op": "increased",
+        "amount": {
+          "min": 125,
+          "max": 249,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.resilience",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Resilience T5",
+      "params": {
+        "channel": "defense",
+        "op": "increased",
+        "amount": {
+          "min": 219,
+          "max": 435,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.warding",
+      "tier": 1,
+      "kind": "stat.modify",
+      "name": "Warding T1",
+      "params": {
+        "channel": "defense",
+        "op": "flat",
+        "amount": {
+          "min": 1,
+          "max": 1,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.warding",
+      "tier": 2,
+      "kind": "stat.modify",
+      "name": "Warding T2",
+      "params": {
+        "channel": "defense",
+        "op": "flat",
+        "amount": {
+          "min": 1,
+          "max": 3,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.warding",
+      "tier": 3,
+      "kind": "stat.modify",
+      "name": "Warding T3",
+      "params": {
+        "channel": "defense",
+        "op": "flat",
+        "amount": {
+          "min": 3,
+          "max": 5,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.warding",
+      "tier": 4,
+      "kind": "stat.modify",
+      "name": "Warding T4",
+      "params": {
+        "channel": "defense",
+        "op": "flat",
+        "amount": {
+          "min": 5,
+          "max": 9,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    },
+    {
+      "family": "atom.warding",
+      "tier": 5,
+      "kind": "stat.modify",
+      "name": "Warding T5",
+      "params": {
+        "channel": "defense",
+        "op": "flat",
+        "amount": {
+          "min": 8,
+          "max": 16,
+          "roll": "onApply"
+        }
+      },
+      "tags": {
+        "generatedFrom": "g-armour.json",
+        "generator": "E43"
+      }
+    }
+  ]
+}

@@ -203,6 +203,31 @@ public class AtomCompilerTests
     }
 
     [Fact]
+    public void A_box_set_cells_array_survives_compile_as_a_structured_list_not_a_stringified_blob()
+    {
+        // E28 fix #7 (spec-param-parity.md §3 row 7): AtomCompiler.Plain() used to fall through to
+        // el.ToString() for Array/Object — the raw JSON text as an opaque string. A reader expecting
+        // a list of {row, col} cells got a string instead, which is structurally useless.
+        var atom = Atom("atom.paint-many", "box.set",
+            "{\"boxType\":2,\"cells\":[{\"row\":1,\"col\":2},{\"row\":3,\"col\":4}]}",
+            When(EffectTriggers.OnDamageDealt));
+
+        var def = Assert.Single(Compile(atom).Defs);
+        var action = Assert.Single(def.Actions);
+
+        var cells = Assert.IsType<List<object?>>(action.Params["cells"]);
+        Assert.Equal(2, cells.Count);
+
+        var first = Assert.IsType<Dictionary<string, object?>>(cells[0]);
+        Assert.Equal(1, first["row"]);
+        Assert.Equal(2, first["col"]);
+
+        var second = Assert.IsType<Dictionary<string, object?>>(cells[1]);
+        Assert.Equal(3, second["row"]);
+        Assert.Equal(4, second["col"]);
+    }
+
+    [Fact]
     public void A_triggerless_permanent_modifier_is_emitted_as_Passive()
     {
         // EffectType defaults to Triggered, and the bag fires the lifecycle pair only when the def is

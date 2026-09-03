@@ -294,14 +294,15 @@ public sealed partial class RpgStore
         out string? bindingId,
         VariantShift? variant = null,
         InstanceOrigin origin = InstanceOrigin.Drop,
-        long catalogRevision = 0)
+        long catalogRevision = 0,
+        Func<string, ChannelPoolRow?>? lookupPool = null)
     {
         instanceId = null;
         bindingId = null;
 
         var compose = InstanceProducer.Compose(
             container, GetAtom, GetAffix, domainMembers, rollSeed, thetaContent, tuning,
-            out var instance, variant, origin, catalogRevision);
+            out var instance, variant, origin, catalogRevision, lookupPool);
         if (!compose.IsOk) return compose;
 
         var binding = new BindingRow

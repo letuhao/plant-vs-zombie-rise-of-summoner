@@ -153,6 +153,18 @@ not need a running server.
 
 - **Pinning ships after the gate.** The automatic rule is playable on its own, and the gate should test
   the mechanic rather than a UI for overriding it.
-- **The gauge belongs to the world panel, not the stage HUD.** `resource-hub-ssot.md` §4 requires
-  surfaces carrying two scopes to separate them by *scope* — this is empire scope, which is neither the
-  lawn's sun bank nor an actor's pools, and the world panel is where empire scope already lives.
+- **~~The gauge belongs to the world panel, not the stage HUD.~~ Amended 2026-09-03 — it lives in
+  both: summary up, detail down.** A compact income · upkeep · **net** · stock strip in the stage HUD,
+  and the full per-component breakdown in the world panel.
+
+  The original reasoning stands and is what makes the amendment safe: `resource-hub-ssot.md` §4
+  requires a surface carrying two scopes to separate them by *scope*, and this is empire scope —
+  neither the lawn's `pvz.*` sun bank nor an actor's pools. A HUD strip carrying **only** empire scope
+  does not mix scopes, so the rule is satisfied rather than bent. What the original decision got wrong
+  was the consequence: this spec's own §"The gauge" calls for *"one reading, always visible, the way a
+  city-builder shows power"*, and a panel the player must open cannot be always visible. The shipped
+  `LoamGauge.tsx:6` carries that same sentence in its doc comment while sitting in a scrolling column
+  — the claim was never deliverable from a panel.
+
+  Decided by the owner while reviewing [plate 11](../../design/11-world-stage.html) §G, which draws
+  both halves. Full reasoning: [world-stage-ideal.md](../world-stage-ideal.md) §8b.5.

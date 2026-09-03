@@ -37,6 +37,13 @@ public static class Resolver
     /// <paramref name="variant"/> is a resolution <b>parameter</b>, never a container — <c>null</c>
     /// for "normal"/"shiny" (both have zero resolution effect from this resolver's own perspective).
     /// </summary>
+    /// <param name="lookupPool">E30 (spec-channel-pool.md §3.2a, decided 2026-09-03): resolves a pool
+    /// id to its row, so a pooled <c>channel</c> reference can be drawn on its own named stream
+    /// (<c>channel.pool</c>, the fifth). <c>null</c> in every context with no pool catalog to ask, in
+    /// which case a pooled-channel atom throws rather than silently freezing its raw pool-object JSON
+    /// unread — validation is expected to have refused a pooled reference reaching this resolver
+    /// without a caller able to resolve it, so this is a "should never happen" guard, not a
+    /// user-facing rejection.</param>
     public static ResolvedDraw Resolve(
         ContainerRow container,
         Func<string, AtomRow?> lookupAtom,
@@ -44,7 +51,8 @@ public static class Resolver
         Func<string, IReadOnlyList<string>> domainMembers,
         long rollSeed,
         VariantShift? variant = null,
-        long contentScaleMilli = 1000)
+        long contentScaleMilli = 1000,
+        Func<string, ChannelPoolRow?>? lookupPool = null)
     {
         if (container.Pool.Count == 0) return new ResolvedDraw(Array.Empty<ResolvedAtom>());
 
@@ -61,11 +69,20 @@ public static class Resolver
         var affixRng = new AtomRandom(unchecked((ulong)rollSeed), "affix.draw." + container.ContainerId);
         var prefixRolls = variant?.ShiftPrefixRolls(container.PrefixRolls) ?? container.PrefixRolls;
         var suffixRolls = variant?.ShiftSuffixRolls(container.SuffixRolls) ?? container.SuffixRolls;
-        var drawn = new List<string>();
-        drawn.AddRange(DrawFromPool(container.Pool, lookupAffix, lookupAtom, affixRng, prefixRolls,
-            a => a.Class is AffixClass.Prefix or AffixClass.Mixed));
-        drawn.AddRange(DrawFromPool(container.Pool, lookupAffix, lookupAtom, affixRng, suffixRolls,
-            a => a.Class is AffixClass.Suffix or AffixClass.Mixed));
+
+        // ep-1 / A1 (spec-affix-schema.md, decided 2026-09-03): two passes, state carried between
+        // them — a `Mixed` affix drawn in the prefix pass spends ONE of each budget simultaneously
+        // (never doubling either), and can never be drawn a second time in the suffix pass. Both
+        // passes still consume the single `affix.draw` stream in fixed prefix-then-suffix order, so a
+        // pool with no `Mixed` affix rolls byte-identically to before this fix.
+        var (prefixDrawn, suffixBudgetAfterPrefix) =
+            DrawPrefixPass(container.Pool, lookupAffix, lookupAtom, affixRng, prefixRolls, suffixRolls);
+        var suffixDrawn = DrawSuffixPass(
+            container.Pool, lookupAffix, lookupAtom, affixRng, suffixBudgetAfterPrefix,
+            alreadyDrawn: new HashSet<string>(prefixDrawn, StringComparer.Ordinal));
+        var drawn = new List<string>(prefixDrawn.Count + suffixDrawn.Count);
+        drawn.AddRange(prefixDrawn);
+        drawn.AddRange(suffixDrawn);
 
         // Step 3 — atoms. Deterministic given steps 1-2's output; no RNG of its own (definitions.md
         // lists it without a stream).
@@ -80,7 +97,15 @@ public static class Resolver
 
         // Step 5 — values. One shared stream, consumed in the tiered list's own fixed order.
         var valueRng = new AtomRandom(unchecked((ulong)rollSeed), "atom.value." + container.ContainerId);
-        return RollValues(tiered, lookupAtom, valueRng, contentScaleMilli);
+
+        // E30 (spec-channel-pool.md §3.2a): the fifth named stream, derived exactly like the other
+        // four — a pooled channel's draw never shares a stream with any other layer, so adding it
+        // never shifts an existing layer's draws (definitions.md:231-236), and a container with no
+        // pooled-channel atom consumes it not at all (it is only ever read inside RollValues, and
+        // only for an atom whose channel is actually a pool reference).
+        var channelPoolRng = new AtomRandom(unchecked((ulong)rollSeed), "channel.pool." + container.ContainerId);
+
+        return RollValues(tiered, lookupAtom, valueRng, contentScaleMilli, lookupPool, channelPoolRng);
     }
 
     /// <summary>Every distinct (affix, slot name) pair across the WHOLE pool, resolved once each, in
@@ -122,42 +147,93 @@ public static class Resolver
         return resolved;
     }
 
-    /// <summary>Weighted draw, at most one affix per group, <paramref name="rolls"/> times, restricted
-    /// to affixes whose <see cref="AffixClass"/> satisfies <paramref name="eligible"/> — the same
-    /// weighted-pick-with-group-exclusion shape <see cref="Instantiator.Draw"/> uses, but drawing
-    /// AFFIX ids (not yet expanded) since step 3 needs the unexpanded bundle to apply resolved slots.</summary>
-    static List<string> DrawFromPool(
+    /// <summary>One pool row, with its affix and group pre-resolved — the shape both draw passes
+    /// share, so the weighted pick itself (<see cref="PickOne"/>) never re-derives either.</summary>
+    readonly record struct DrawCandidate(ContainerPoolRow Row, AffixRow Affix, string Group);
+
+    /// <summary>The prefix pass (A1, spec-affix-schema.md): eligible affixes are <c>Prefix</c>, plus
+    /// <c>Mixed</c> for as long as <paramref name="suffixBudget"/> is still positive — once it hits
+    /// zero, a further `Mixed` pick would spend a suffix roll the container never had, so it drops
+    /// out of eligibility for the REST of this pass (never re-added, even if nothing else remains).
+    /// Each `Mixed` affix actually drawn decrements the returned budget by exactly one, which the
+    /// suffix pass then rolls for — the "one of each, simultaneously" rule.</summary>
+    static (List<string> Drawn, int SuffixBudgetRemaining) DrawPrefixPass(
         IReadOnlyList<ContainerPoolRow> pool, Func<string, AffixRow?> lookupAffix,
-        Func<string, AtomRow?> lookupAtom, AtomRandom rng, int rolls, Func<AffixRow, bool> eligible)
+        Func<string, AtomRow?> lookupAtom, AtomRandom rng, int prefixRolls, int suffixBudget)
     {
         var picked = new List<string>();
-        if (rolls <= 0) return picked;
+        if (prefixRolls <= 0) return (picked, suffixBudget);
 
         var remaining = pool
-            .Where(p => p.Weight > 0 && eligible(lookupAffix(p.AffixId)!))
-            .Select(p => (Row: p, Group: GroupOf(p, lookupAffix(p.AffixId)!, lookupAtom)))
+            .Where(p => p.Weight > 0)
+            .Select(p => new DrawCandidate(p, lookupAffix(p.AffixId)!, GroupOf(p, lookupAffix(p.AffixId)!, lookupAtom)))
+            .Where(c => c.Affix.Class is AffixClass.Prefix or AffixClass.Mixed)
             .ToList();
 
-        for (var roll = 0; roll < rolls && remaining.Count > 0; roll++)
+        for (var roll = 0; roll < prefixRolls; roll++)
         {
-            var total = remaining.Sum(c => c.Row.Weight);
-            var target = rng.NextInclusive(1, total);
+            var eligible = suffixBudget > 0 ? remaining : remaining.Where(c => c.Affix.Class != AffixClass.Mixed).ToList();
+            var chosen = PickOne(eligible, rng);
+            if (chosen is null) break;
 
-            var running = 0;
-            var chosen = remaining[^1];
-            foreach (var candidate in remaining)
-            {
-                running += candidate.Row.Weight;
-                if (running < target) continue;
-                chosen = candidate;
-                break;
-            }
+            picked.Add(chosen.Value.Row.AffixId);
+            if (chosen.Value.Affix.Class == AffixClass.Mixed) suffixBudget -= 1;
+            remaining.RemoveAll(c => string.Equals(c.Group, chosen.Value.Group, StringComparison.Ordinal));
+        }
 
-            picked.Add(chosen.Row.AffixId);
-            remaining.RemoveAll(c => string.Equals(c.Group, chosen.Group, StringComparison.Ordinal));
+        return (picked, suffixBudget);
+    }
+
+    /// <summary>The suffix pass: eligible affixes are <c>Suffix</c> or <c>Mixed</c>, EXCLUDING every
+    /// affix id the prefix pass already drew — the fix for the second half of the double-draw defect
+    /// (a `Mixed` affix could otherwise be picked again here, on the same container instance).</summary>
+    static List<string> DrawSuffixPass(
+        IReadOnlyList<ContainerPoolRow> pool, Func<string, AffixRow?> lookupAffix,
+        Func<string, AtomRow?> lookupAtom, AtomRandom rng, int suffixRolls, IReadOnlySet<string> alreadyDrawn)
+    {
+        var picked = new List<string>();
+        if (suffixRolls <= 0) return picked;
+
+        var remaining = pool
+            .Where(p => p.Weight > 0 && !alreadyDrawn.Contains(p.AffixId))
+            .Select(p => new DrawCandidate(p, lookupAffix(p.AffixId)!, GroupOf(p, lookupAffix(p.AffixId)!, lookupAtom)))
+            .Where(c => c.Affix.Class is AffixClass.Suffix or AffixClass.Mixed)
+            .ToList();
+
+        for (var roll = 0; roll < suffixRolls; roll++)
+        {
+            var chosen = PickOne(remaining, rng);
+            if (chosen is null) break;
+
+            picked.Add(chosen.Value.Row.AffixId);
+            remaining.RemoveAll(c => string.Equals(c.Group, chosen.Value.Group, StringComparison.Ordinal));
         }
 
         return picked;
+    }
+
+    /// <summary>The one weighted pick both passes share — total-weight target, first candidate whose
+    /// running sum reaches it. Consumes exactly one <see cref="AtomRandom.NextInclusive"/> draw when
+    /// <paramref name="candidates"/> is non-empty, none otherwise (so an exhausted pass never perturbs
+    /// the shared stream for a roll that picked nothing).</summary>
+    static DrawCandidate? PickOne(IReadOnlyList<DrawCandidate> candidates, AtomRandom rng)
+    {
+        if (candidates.Count == 0) return null;
+
+        var total = candidates.Sum(c => c.Row.Weight);
+        var target = rng.NextInclusive(1, total);
+
+        var running = 0;
+        var chosen = candidates[^1];
+        foreach (var candidate in candidates)
+        {
+            running += candidate.Row.Weight;
+            if (running < target) continue;
+            chosen = candidate;
+            break;
+        }
+
+        return chosen;
     }
 
     /// <summary>Group for a pool row's affix — mirrors <c>Instantiator.GroupOf</c> exactly: an explicit
@@ -242,10 +318,17 @@ public static class Resolver
     /// the same three-roll-moment split <see cref="Instantiator.Freeze"/> uses, scaled by
     /// <paramref name="contentScaleMilli"/> the same way (default 1000 = ×1.000, i.e. unscaled, for
     /// every T3.3 call site that predates T3.6 and never supplies one).
+    ///
+    /// <para><b>E30 (spec-channel-pool.md §3.2a):</b> an atom whose <c>channel</c> is a pool
+    /// reference expands into <paramref name="lookupPool"/>'s resolved <c>count</c> separate
+    /// <see cref="ResolvedAtom"/>s here — same <c>atom_id</c>, the SAME one-rolled magnitude on every
+    /// copy, a different concrete channel each. Every other param (including <c>amount</c>) is rolled
+    /// exactly once, before the channel draw, and shared across every expanded copy — "+15% to all
+    /// resistances" is one roll of 15%, not six independent ones.</para>
     /// </summary>
     static ResolvedDraw RollValues(
         IReadOnlyList<string> atomIds, Func<string, AtomRow?> lookupAtom, AtomRandom valueRng,
-        long contentScaleMilli)
+        long contentScaleMilli, Func<string, ChannelPoolRow?>? lookupPool, AtomRandom channelPoolRng)
     {
         var rows = new List<ResolvedAtom>(atomIds.Count);
 
@@ -260,9 +343,24 @@ public static class Resolver
 
             var frozen = new Dictionary<string, object?>(StringComparer.Ordinal);
             using var doc = JsonDocument.Parse(atom.ParamsJson);
+            ChannelRef? pooledChannel = null;
 
             foreach (var prop in doc.RootElement.EnumerateObject())
             {
+                if (string.Equals(prop.Name, "channel", StringComparison.OrdinalIgnoreCase)
+                    && prop.Value.ValueKind == JsonValueKind.Object)
+                {
+                    var readChannel = ChannelRefJson.TryRead(prop.Value, out var channelRef);
+                    if (readChannel.IsOk && channelRef.IsPool)
+                    {
+                        // Deferred, not frozen inline — resolved once every OTHER param (the
+                        // magnitude included) has been rolled, so the pool draw below can stamp the
+                        // SAME frozen dict onto `count` copies.
+                        pooledChannel = channelRef;
+                        continue;
+                    }
+                }
+
                 var def = kind.Params.Defs.FirstOrDefault(d =>
                     string.Equals(d.Name, prop.Name, StringComparison.OrdinalIgnoreCase));
 
@@ -285,10 +383,71 @@ public static class Resolver
                 };
             }
 
-            rows.Add(new ResolvedAtom(atomId, JsonSerializer.Serialize(frozen, JsonOpts)));
+            if (pooledChannel is not { } cref)
+            {
+                rows.Add(new ResolvedAtom(atomId, JsonSerializer.Serialize(frozen, JsonOpts)));
+                continue;
+            }
+
+            if (lookupPool is null)
+                throw new InvalidOperationException(
+                    $"{atomId}: channel is a pool reference and no pool catalog was supplied to resolve it " +
+                    "— validation should have refused this atom reaching the resolver without one");
+
+            var pool = lookupPool(cref.PoolId!)
+                ?? throw new InvalidOperationException(
+                    $"{atomId}: unknown pool '{cref.PoolId}' — validation should have caught this");
+
+            foreach (var channel in DrawPoolChannels(pool, cref.Count, cref.AllowRepeat, channelPoolRng))
+            {
+                var copy = new Dictionary<string, object?>(frozen, StringComparer.Ordinal) { ["channel"] = channel };
+                rows.Add(new ResolvedAtom(atomId, JsonSerializer.Serialize(copy, JsonOpts)));
+            }
         }
 
         return new ResolvedDraw(rows);
+    }
+
+    /// <summary>E30 (spec-channel-pool.md §3.2a): <paramref name="count"/> weighted draws on the
+    /// pool's own <c>channel.pool</c> stream — without replacement unless <paramref name="allowRepeat"/>,
+    /// the same weighted-pick shape <see cref="PickOne"/> already implements for affix draws, reused
+    /// at this layer rather than reimplemented.</summary>
+    static List<string> DrawPoolChannels(ChannelPoolRow pool, int count, bool allowRepeat, AtomRandom rng)
+    {
+        var picked = new List<string>(count);
+
+        if (allowRepeat)
+        {
+            for (var i = 0; i < count; i++)
+                picked.Add(WeightedPickChannel(pool.Members, rng));
+            return picked;
+        }
+
+        var remaining = new List<ChannelPoolMember>(pool.Members);
+        for (var i = 0; i < count && remaining.Count > 0; i++)
+        {
+            var chosen = WeightedPickChannel(remaining, rng);
+            picked.Add(chosen);
+            remaining.RemoveAll(m => string.Equals(m.Channel, chosen, StringComparison.Ordinal));
+        }
+        return picked;
+    }
+
+    static string WeightedPickChannel(IReadOnlyList<ChannelPoolMember> members, AtomRandom rng)
+    {
+        var total = members.Sum(m => m.WeightMilli);
+        var target = rng.NextInclusive(1, total);
+
+        var running = 0;
+        var chosen = members[^1];
+        foreach (var m in members)
+        {
+            running += m.WeightMilli;
+            if (running < target) continue;
+            chosen = m;
+            break;
+        }
+        return chosen.Channel;
     }
 
     static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = false };

@@ -98,6 +98,20 @@ public sealed partial class RpgStore
               innate_action_id TEXT
             );
             """);
+
+        // A-E1 (spec-eligibility-axis.md §3.0/§6a gate 2): a database created before this module has
+        // rpg_action without these six columns — CREATE TABLE IF NOT EXISTS is a no-op against it, so
+        // the addition has to be explicit, same shape as T3.4's effect_instance migration above.
+        // Defaults (scope='general', pairing_role='none') only ever apply to pre-migration rows read
+        // back after this point; UpsertAction always supplies real values from here on.
+        EnsureColumn(db, "rpg_action", "scope", "TEXT NOT NULL DEFAULT 'general'");
+        EnsureColumn(db, "rpg_action", "scope_key", "TEXT");
+        EnsureColumn(db, "rpg_action", "category", "TEXT");
+        EnsureColumn(db, "rpg_action", "pairing_role", "TEXT NOT NULL DEFAULT 'none'");
+        EnsureColumn(db, "rpg_action", "structure_axes_json", "TEXT NOT NULL DEFAULT '[]'");
+        EnsureColumn(db, "rpg_action", "atom_families_json", "TEXT NOT NULL DEFAULT '[]'");
+        EnsureColumn(db, "rpg_action", "rung_band_json", "TEXT");
+        Exec(db, "CREATE INDEX IF NOT EXISTS ix_rpg_action_scope ON rpg_action(scope, scope_key);");
     }
 
     // ---- rpg_action -------------------------------------------------------------------------------
@@ -143,7 +157,9 @@ public sealed partial class RpgStore
                    recovery_ticks, commitment, interruptible, interrupt_refund_milli, slot_consuming,
                    priority_band, cooldown_class, cooldown_key, cooldown_ticks, starts_at,
                    interrupt_cooldown_milli, target_spec_json, min_range, max_range,
-                   range_channel, requires_line_of_sight, conditions_json)
+                   range_channel, requires_line_of_sight, conditions_json,
+                   scope, scope_key, category, pairing_role, structure_axes_json, atom_families_json,
+                   rung_band_json)
                 VALUES
                   ($id, $name, $kind, $rung, $tags, $enabled, coalesce((SELECT revision FROM rpg_action WHERE action_id = $id), 0) + 1,
                    $grantable, $dae, $container,
@@ -151,7 +167,9 @@ public sealed partial class RpgStore
                    $recovery, $commitment, $interruptible, $refund, $slotConsuming,
                    $priority, $cdClass, $cdKey, $cdTicks, $startsAt,
                    $interruptCd, $tspec, $minRange, $maxRange,
-                   $rangeCh, $los, $conditions)
+                   $rangeCh, $los, $conditions,
+                   $scope, $scopeKey, $category, $pairingRole, $structureAxes, $atomFamilies,
+                   $rungBand)
                 -- The update is SKIPPED when nothing differs, so `revision` counts how many times
                 -- this row CHANGED rather than how many times it was written -- the same fix
                 -- `effect_atom`'s own UpsertAtom already carries (E14a: import twice, hash
@@ -175,7 +193,10 @@ public sealed partial class RpgStore
                   target_spec_json = excluded.target_spec_json,
                   min_range = excluded.min_range, max_range = excluded.max_range,
                   range_channel = excluded.range_channel,
-                  requires_line_of_sight = excluded.requires_line_of_sight, conditions_json = excluded.conditions_json
+                  requires_line_of_sight = excluded.requires_line_of_sight, conditions_json = excluded.conditions_json,
+                  scope = excluded.scope, scope_key = excluded.scope_key, category = excluded.category,
+                  pairing_role = excluded.pairing_role, structure_axes_json = excluded.structure_axes_json,
+                  atom_families_json = excluded.atom_families_json, rung_band_json = excluded.rung_band_json
                 WHERE rpg_action.name IS NOT excluded.name
                   OR rpg_action.kind IS NOT excluded.kind
                   OR rpg_action.rung IS NOT excluded.rung
@@ -205,7 +226,14 @@ public sealed partial class RpgStore
                   OR rpg_action.max_range IS NOT excluded.max_range
                   OR rpg_action.range_channel IS NOT excluded.range_channel
                   OR rpg_action.requires_line_of_sight IS NOT excluded.requires_line_of_sight
-                  OR rpg_action.conditions_json IS NOT excluded.conditions_json;
+                  OR rpg_action.conditions_json IS NOT excluded.conditions_json
+                  OR rpg_action.scope IS NOT excluded.scope
+                  OR rpg_action.scope_key IS NOT excluded.scope_key
+                  OR rpg_action.category IS NOT excluded.category
+                  OR rpg_action.pairing_role IS NOT excluded.pairing_role
+                  OR rpg_action.structure_axes_json IS NOT excluded.structure_axes_json
+                  OR rpg_action.atom_families_json IS NOT excluded.atom_families_json
+                  OR rpg_action.rung_band_json IS NOT excluded.rung_band_json;
                 """,
                 ("$id", row.ActionId), ("$name", row.Name), ("$kind", ActionKinds.Name(row.Kind)),
                 ("$rung", row.Rung),
@@ -226,7 +254,16 @@ public sealed partial class RpgStore
                 ("$minRange", row.MinRange), ("$maxRange", row.MaxRange),
                 ("$rangeCh", (object?)row.RangeChannel ?? DBNull.Value),
                 ("$los", row.RequiresLineOfSight ? 1 : 0),
-                ("$conditions", (object?)row.ConditionsJson ?? DBNull.Value));
+                ("$conditions", (object?)row.ConditionsJson ?? DBNull.Value),
+                ("$scope", EligibilityScopes.Name(row.Scope)),
+                ("$scopeKey", (object?)row.ScopeKey ?? DBNull.Value),
+                ("$category", row.Category is { } cat ? ActionCategories.Name(cat) : (object)DBNull.Value),
+                ("$pairingRole", PairingRoles.Name(row.PairingRole)),
+                ("$structureAxes", JsonSerializer.Serialize(row.StructureAxes)),
+                ("$atomFamilies", JsonSerializer.Serialize(row.AtomFamilies)),
+                ("$rungBand", row.RungBand is { } band
+                    ? JsonSerializer.Serialize(new[] { band.Floor, band.Ceiling })
+                    : (object)DBNull.Value));
 
             return ActionRejection.Ok;
         }
@@ -245,7 +282,9 @@ public sealed partial class RpgStore
                        recovery_ticks, commitment, interruptible, interrupt_refund_milli, slot_consuming,
                        priority_band, cooldown_class, cooldown_key, cooldown_ticks, starts_at,
                        target_spec_json, min_range, max_range,
-                       range_channel, requires_line_of_sight, conditions_json
+                       range_channel, requires_line_of_sight, conditions_json,
+                       scope, scope_key, category, pairing_role, structure_axes_json, atom_families_json,
+                       rung_band_json
                 FROM rpg_action WHERE action_id = $id;
                 """;
             cmd.Parameters.AddWithValue("$id", actionId);
@@ -301,6 +340,19 @@ public sealed partial class RpgStore
 
         ActionTargetSpecJson.TryRead(r.IsDBNull(25) ? null : r.GetString(25), out var targeting);
 
+        EligibilityScopes.TryParse(r.GetString(31), out var scope);
+        ActionCategory? category = null;
+        if (!r.IsDBNull(33) && ActionCategories.TryParse(r.GetString(33), out var cat)) category = cat;
+        PairingRoles.TryParse(r.GetString(34), out var pairingRole);
+        var structureAxes = JsonSerializer.Deserialize<string[]>(r.GetString(35)) ?? Array.Empty<string>();
+        var atomFamilies = JsonSerializer.Deserialize<string[]>(r.GetString(36)) ?? Array.Empty<string>();
+        RungBand? rungBand = null;
+        if (!r.IsDBNull(37))
+        {
+            var pair = JsonSerializer.Deserialize<int[]>(r.GetString(37));
+            if (pair is { Length: 2 }) rungBand = new RungBand(pair[0], pair[1]);
+        }
+
         return new ActionRow
         {
             ActionId = r.GetString(0),
@@ -320,6 +372,13 @@ public sealed partial class RpgStore
             RangeChannel = r.IsDBNull(28) ? null : r.GetString(28),
             RequiresLineOfSight = r.GetInt32(29) != 0,
             ConditionsJson = r.IsDBNull(30) ? null : r.GetString(30),
+            Scope = scope,
+            ScopeKey = r.IsDBNull(32) ? null : r.GetString(32),
+            Category = category,
+            PairingRole = pairingRole,
+            StructureAxes = structureAxes,
+            AtomFamilies = atomFamilies,
+            RungBand = rungBand,
         };
     }
 

@@ -96,10 +96,51 @@ after it.
 
 ## Known residuals
 
-- **Battle has no status stat applier.** The mechanism is Core-pure and would work there; nothing
-  subscribes. A status declaring a `stat` block is silently inert in the battle runtime today, which is
-  the same shape of gap A1 described for the lawn.
-- **The injector half is text-guarded only** (see above).
-- **The try/catch swallows to `CheatState.Error`.** A malformed payload degrades to a log line rather
-  than a refusal; the refusal lives upstream at import and at `StatusEffectBridge` (C2's
+**⛔ EVERY RESIDUAL BELOW CARRIES A DISPOSITION — DECIDED 2026-09-03 (owner removed themselves as a
+gate):** *claimed* by a named module, a *named follow-up*, or *accepted as-is with the reason*.
+
+- **[FOLLOW-UP — `E49 battle-status-stat`] Battle has no status stat applier.** The mechanism is
+  Core-pure and would work there; nothing subscribes. A status declaring a `stat` block is silently
+  inert in the battle runtime today, which is the same shape of gap A1 described for the lawn.
+  ⛔ **DECIDED 2026-09-03.** *Scope, one line:* subscribe battle's status runtime to `OnApplied` /
+  `OnEnded` with the same `StatusStatPayload.ToModifiers` / `SourceIdOf` pair E21 wired on the lawn,
+  through battle's own modifier bag and recompute.
+  **Why a follow-up and not accepted:** re-verified 2026-09-03 — `StatusRuntime.OnApplied`
+  (`StatusRuntime.cs:118`) has exactly **two** subscribers in `src/`, both in the injector
+  (`EffectRuntime.cs:69` and `Hud/ActorHudInvalidator.cs:25`), so `rally`, `expose`, `command` and
+  `shatter` are inert in battle in exactly the way E21 existed to stop them being inert on the lawn.
+  The mechanism is already proven Core-side by `StatusStatApplierSeamTests` through the real
+  `StatSystem` chain, so what is missing is **two subscriptions**, not a design.
+  **What would overturn it:** battle deciding statuses should not touch composed stats at all — a
+  product decision, and one that would have to be written down rather than left as an absent
+  subscription.
+
+- **[CONVERTED TO A CRITERIA-STATED TASK — `T-live-E21`] The injector half is text-guarded only** (see
+  above), so **the executing half of this module has never been proven by a test.**
+  ⛔ **DECIDED 2026-09-03.** This is not decidable from the repo: `EffectRuntime` cannot be
+  instantiated outside the game process, which is why the four guard tests read it as **text**
+  (`StatusStatApplierGuardTests.cs:27-67`). No offline test can close it, so it converts to a task
+  needing physical access, and **it blocks nothing** — not this module, not E49, not any Wave 7
+  module.
+  **What to check:** on a live lawn (`live-lawn-quick-start`, MelonLoader default game), apply to a
+  targeted actor a status carrying a non-empty `stat` block — `rally` is the shipped example.
+  **What a pass looks like:** the composed channel on that actor rises while the instance is live and
+  returns to baseline when it expires, observed through the actor sheet or HUD; the reapply fires for
+  the `entity:`-prefixed owner key; and `CheatState.Error` carries nothing for that window.
+  **What a fail looks like:** no change on apply (the reapply or the owner-key grammar is wrong), or an
+  error line (the swallow below caught something). Either outcome is recorded here, not re-litigated
+  offline.
+
+- **[ACCEPTED AS-IS] The try/catch swallows to `CheatState.Error`.** A malformed payload degrades to a
+  log line rather than a refusal; the refusal lives upstream at import and at `StatusEffectBridge` (C2's
   `status-stat-overlay-without-ModifyStat` check), not here.
+  ⛔ **DECIDED 2026-09-03 — this does not need fixing, and the reason is the shape of the boundary.**
+  A stat apply runs inside the status runtime during a frame-budgeted match; letting it throw would
+  take the **status runtime** down for every status on the board because one status declared a bad
+  block, which converts a content defect into a match-ending one. A swallow at the outermost
+  per-status boundary is the correct shape, and it is not silent — it reports through `CheatState.Error`.
+  The refusal that actually prevents the bad content is upstream, where it can reject rather than
+  degrade, and that is where it lives.
+  **What would overturn it:** `CheatState.Error` ceasing to surface anywhere a human reads. The swallow
+  is acceptable **because** it reports; if the report goes away, the disposition flips and the fix is
+  the report, not the throw.

@@ -1,7 +1,13 @@
-namespace FusionRpg.Tools.AtomImporter;
+namespace FusionRpg.Data.Seed;
 
 /// <summary>
 /// Which files an import sweeps.
+///
+/// <para>Moved here from <c>tools/AtomImporter</c> (E46, player-content-boot) so the server's
+/// self-healing startup import can sweep the same folders the CLI always has — a server referencing
+/// a <c>tools/</c> project would be backwards, and a second copy of this class is exactly the kind of
+/// drift that let seedsmith's affix folder silently stop being swept once already (see the doc comment
+/// on <see cref="OwnedFolders"/>). <c>tools/AtomImporter/Program.cs</c> now calls this same class.</para>
 ///
 /// <para>The one decision in this tool that can be silently wrong. <c>data/seed/</c> also holds the
 /// item seed corpus — a different format read by <c>tools/ItemSeedValidator</c> — so a recursive
@@ -10,9 +16,15 @@ namespace FusionRpg.Tools.AtomImporter;
 /// </summary>
 public static class SeedScanner
 {
-    /// <summary>The folders the atom importer owns. Nothing else under the seed root is its business.</summary>
+    /// <summary>The folders the atom importer owns. Nothing else under the seed root is its business.
+    /// <c>effects/affixes</c> (E32, spec-affix-import-path.md §3.1 break 3) is where seedsmith's own
+    /// affix stage writes (`tools/seedsmith/seedsmith/adapters/effects/affix/generate_affixes.py`'s
+    /// own `OUTPUT_DIR`) — the two halves of this path must name the same folder, or the pipeline can
+    /// silently write to a folder nothing sweeps, exactly as it did before this fix. A test
+    /// (`SeedScannerTests.cs`) reads that Python file's own `OUTPUT_DIR` line and asserts it names
+    /// this exact entry, mechanically, so the two-halves-disagree failure cannot recur unnoticed.</summary>
     public static readonly string[] OwnedFolders =
-        { "atoms", "containers", "curves", "rarity", "elements", "channel-policy" };
+        { "atoms", "containers", "curves", "rarity", "elements", "channel-policy", "channel-pools", "effects/affixes" };
 
     /// <summary>
     /// The folders to sweep. A root the caller named explicitly is swept whole — that is the escape

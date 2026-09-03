@@ -6,6 +6,17 @@ Module **E40** in the [atom effect map](../effect-atom-map.md) §13 (Wave 8). De
 > **Reads [definitions.md](definitions.md)** — the shared vocabulary pinned after the 2026-08-22 audit.
 > Where this spec and the definitions disagree, **the definitions win**.
 
+> **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the coefficient data path.**
+> Coefficients do **not** live in `data/tuning/effects.v1.json`: that file has no coefficient section
+> (its keys are `matchupRead` and `damageFxFloater`), and `CoefficientTable` never reads `data/tuning/`
+> at all — the only reader is `RpgStore.GetPowerTables` over the **content-hashed** `power_coefficient`
+> table (`RpgStore.Power.cs:61-72`; hash registry V3 at `ContentHashRegistry.cs:148-160`). **The path is
+> a seed kind, `data/seed/power/coefficients.v1.json`**, decided in full at
+> [`spec-power-sweep.md`](spec-power-sweep.md) §4.1. `CoefficientTable.Authored()` stays the
+> no-database fallback and this module does not edit it. **This spec's coefficient row lands in that
+> seed file.**
+
+
 ## Objective
 
 Pets, buckets, coins and mowers cannot be placed by any atom. `spawn.entity` knows three kinds
@@ -117,8 +128,9 @@ So: E40 prices what it can and **flags the rest rather than guessing**.
   `LawnCoords` row/column clamps are **structural** (a cell outside the board is not a balance question)
   and must say so in a comment; `MatchCaps` limits such as `MaxLivingBullets`
   (`DebugActions.cs:996`) are per-runtime caps and are exempt for the same reason — with the comment.
-- **No number a balance pass would change, in code.** Spawn coefficients and any per-kind weight live in
-  `data/tuning/effects.v1.json`.
+- **No number a balance pass would change, in code.** Spawn coefficients live in
+  `data/seed/power/coefficients.v1.json` (see the decision below); any per-kind weight that is not a
+  coefficient lives in `data/tuning/effects.v1.json`.
 
 ## 4. Testing strategy
 

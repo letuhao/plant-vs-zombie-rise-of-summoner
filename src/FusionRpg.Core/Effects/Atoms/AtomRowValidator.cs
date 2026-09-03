@@ -76,7 +76,8 @@ public static class AtomRowValidator
     public static AtomRejection Validate(
         AtomRow row,
         Func<string, CurveInput?>? curveInput = null,
-        Func<string, DerivedComposeKind?>? composeKindOf = null)
+        Func<string, DerivedComposeKind?>? composeKindOf = null,
+        Func<string, ChannelPoolRow?>? lookupPool = null)
     {
         if (row is null) return AtomRejection.Fail(AtomRejectionReason.BadParamValue, "null row");
 
@@ -123,6 +124,9 @@ public static class AtomRowValidator
 
         var opCheck = ValidateOp(row, pars, composeKindOf);
         if (!opCheck.IsOk) return opCheck;
+
+        var poolCheck = ValidateChannelPoolRef(row, pars, lookupPool, composeKindOf);
+        if (!poolCheck.IsOk) return poolCheck;
 
         // E2 wiring: a param the kind declares as a Value carries a value spec, and a spec whose
         // range runs backwards or whose roll policy does not exist must never reach the table.
@@ -311,7 +315,13 @@ public static class AtomRowValidator
             if (string.IsNullOrEmpty(channel)) return AtomRejection.Ok;
 
             var kind = composeKindOf(channel);
-            if (kind is null) return AtomRejection.Ok; // unregistered channel is G6's job, not this check's
+            // E29 (spec-kind-value-guard.md §1.1, closed 2026-09-03): an unregistered channel is
+            // AtomKindRegistry.Validate's job now — its generic Vocabulary check on stat.derived's
+            // own `channel` ParamDef refuses it directly (BadParamValue), reading DerivedStatRegistry
+            // fresh rather than a copy. This comment used to say "G6's job", but G6 was scoped to
+            // stat.modify only and never actually ran for stat.derived — `crit.rat` for `crit.rate`
+            // validated, bound, compiled, and wrote nothing forever until E29 closed that hand-off.
+            if (kind is null) return AtomRejection.Ok;
 
             var acceptedOps = DerivedComposeAcceptedOps[kind.Value];
             if (!Array.Exists(acceptedOps, o => string.Equals(o, op, StringComparison.Ordinal)))
@@ -322,6 +332,92 @@ public static class AtomRowValidator
         }
 
         return AtomRejection.Ok;
+    }
+
+    /// <summary>
+    /// E30 (spec-channel-pool.md §3.3): the five load-time refusals for a pooled <c>channel</c>
+    /// reference — <c>lookupPool</c> is caller-supplied (this stays free of I/O, matching
+    /// <c>composeKindOf</c>'s own discipline), <c>null</c> in every context with no pool catalog to
+    /// ask, in which case a pool-object channel value is not yet checkable and this is a no-op (the
+    /// generic schema/vocabulary checks above have already accepted the row's SHAPE by this point;
+    /// only a supplied <c>lookupPool</c> can judge whether the referenced pool actually exists).
+    /// Skipped entirely for the concrete-channel form — that path is unchanged (§4: "the concrete
+    /// form is not deprecated").
+    /// </summary>
+    static AtomRejection ValidateChannelPoolRef(
+        AtomRow row, IReadOnlyDictionary<string, object?> pars,
+        Func<string, ChannelPoolRow?>? lookupPool, Func<string, DerivedComposeKind?>? composeKindOf)
+    {
+        if (lookupPool is null) return AtomRejection.Ok;
+        if (!pars.TryGetValue("channel", out var channelRaw) || channelRaw is null) return AtomRejection.Ok;
+
+        var read = ChannelRefJson.TryRead(channelRaw, out var channelRef);
+        if (!read.IsOk) return Fail(read.Reason, read.Detail);
+        if (!channelRef.IsPool) return AtomRejection.Ok; // concrete form — nothing for this check to do
+
+        // Rule 1: the pool id must exist.
+        var pool = lookupPool(channelRef.PoolId!);
+        if (pool is null)
+            return Fail(AtomRejectionReason.BadParamValue, $"channel: unknown pool '{channelRef.PoolId}'");
+
+        // Rule 2: every member must be a registered channel of the vocabulary THIS kind reads —
+        // primary for stat.modify, derived for stat.derived, resource for resource.delta — read
+        // fresh on every call, never cached (E29's own discipline, extended to pool members).
+        IReadOnlyCollection<string>? vocabulary = row.KindId switch
+        {
+            "stat.modify" => AtomKindRegistry.PrimaryChannels,
+            "stat.derived" => FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault()
+                .AllRegistered.Select(d => d.ChannelId).ToArray(),
+            "resource.delta" => FusionRpg.Core.Stats.Derived.DerivedStatChannels.ResourceIds,
+            _ => null,
+        };
+        if (vocabulary is not null)
+        {
+            foreach (var member in pool.Members)
+            {
+                if (!vocabulary.Contains(member.Channel, StringComparer.Ordinal))
+                    return Fail(AtomRejectionReason.BadParamValue,
+                        $"channel: pool '{pool.PoolId}' member '{member.Channel}' is not a registered {row.KindId} channel");
+            }
+        }
+
+        // Rule 3 (stat.derived only, mirroring ValidateOp's own scoping): every member's compose
+        // kind must accept this atom's op — a pool whose members disagree is refused whole, never
+        // partially honoured.
+        if (string.Equals(row.KindId, "stat.derived", StringComparison.Ordinal) && composeKindOf is not null
+            && pars.TryGetValue("op", out var opRaw))
+        {
+            var op = (opRaw is JsonElement opEl && opEl.ValueKind == JsonValueKind.String ? opEl.GetString() : opRaw?.ToString())
+                     ?.ToLowerInvariant();
+            foreach (var member in pool.Members)
+            {
+                var kind = composeKindOf(member.Channel);
+                if (kind is null) continue; // an unregistered member already failed rule 2 above
+                var acceptedOps = DerivedComposeAcceptedOps[kind.Value];
+                if (!Array.Exists(acceptedOps, o => string.Equals(o, op, StringComparison.Ordinal)))
+                    return Fail(AtomRejectionReason.ParamNotHonoured,
+                        $"channel: pool '{pool.PoolId}' member '{member.Channel}' ({kind.Value}) does not accept op '{op}' — " +
+                        $"a pool whose members disagree about which ops they accept is refused, not partially honoured");
+            }
+        }
+
+        // Rule 4: count is floored at 1 (a structural bound — a draw of zero members is not an
+        // effect, per AGENTS.md's no-hard-caps rule and its required comment), and above the member
+        // count is a load-time refusal unless allowRepeat opts into it — never a silent clamp.
+        if (channelRef.Count < 1)
+            return Fail(AtomRejectionReason.BadParamValue, $"channel: pool '{pool.PoolId}' count {channelRef.Count} must be >= 1");
+        if (channelRef.Count > pool.Members.Count && !channelRef.AllowRepeat)
+            return Fail(AtomRejectionReason.BadParamValue,
+                $"channel: pool '{pool.PoolId}' count {channelRef.Count} exceeds its {pool.Members.Count} members and allowRepeat is false");
+
+        // Rule 5 (an empty members array) is structurally impossible here — ChannelPoolFile.TryParse
+        // already refuses that at the POOL FILE's own load time, before any atom row could reference
+        // a pool with zero members. Restated as a comment rather than a dead check.
+
+        return AtomRejection.Ok;
+
+        AtomRejection Fail(AtomRejectionReason reason, string detail) =>
+            AtomRejection.Fail(reason, $"{row.AtomId}: {detail}");
     }
 
     static bool TryParseObject(

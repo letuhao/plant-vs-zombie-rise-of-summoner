@@ -90,7 +90,8 @@
       "name": "Spawn + clear grid item",
       "icdKey": "fx.grid_item_cycle",
       "params": {
-        "selector": "last",
+        "row": 2,
+        "col": 3,
         "gridItemType": 7
       },
       "variant": "b",
@@ -105,7 +106,7 @@
       "name": "Set dirt box",
       "icdKey": "fx.set_dirt_box",
       "params": {
-        "boxType": 1,
+        "boxType": 2,
         "row": 2,
         "col": 3
       },

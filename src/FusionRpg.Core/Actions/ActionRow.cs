@@ -51,6 +51,63 @@ public sealed record ActionRow
     // ---- usability -----------------------------------------------------------------------------
     /// <summary>Raw predicate JSON — compiled through E3, not here (A4).</summary>
     public string? ConditionsJson { get; init; }
+
+    // ---- eligibility (A-E1, spec-eligibility-axis.md §3.1) -----------------------------------
+    /// <summary>Which tier's rule decides who may hold this action. Column, not table — every
+    /// action has exactly one scope (§3.1).</summary>
+    public EligibilityScope Scope { get; init; } = EligibilityScope.General;
+
+    /// <summary><c>null</c> for <see cref="EligibilityScope.General"/>; a family id for
+    /// <see cref="EligibilityScope.Family"/>; a species key for <see cref="EligibilityScope.Species"/>.
+    /// Opaque — never joined against the demon catalog (§4, matching <see cref="SpeciesBasicsRow"/>'s
+    /// own discipline).</summary>
+    public string? ScopeKey { get; init; }
+
+    // ---- corpus metadata (A-E1 §3.0 — six fields the corpus needs and ActionRow had no home for) --
+    /// <summary>Reuses the existing <see cref="ActionCategory"/> vocabulary (§4 — never a second one).
+    /// <c>null</c> for an action the corpus has not categorized (every basic/innate authored before
+    /// this module shipped).</summary>
+    public ActionCategory? Category { get; init; }
+
+    /// <summary>Whether this action sets up or cashes in an <c>EnablerPayoffPairings</c> pairing.
+    /// <see cref="PairingRole.None"/> is the default — a real value, never absence.</summary>
+    public PairingRole PairingRole { get; init; } = PairingRole.None;
+
+    /// <summary>Structure-axis tags the corpus authored for this action (A-S3's fingerprint, A-S4's
+    /// g2). Opaque strings — this module does not own or validate the axis vocabulary.</summary>
+    public IReadOnlyList<string> StructureAxes { get; init; } = Array.Empty<string>();
+
+    /// <summary>Atom-family ids this action's pool draws reference (E30's pool references). Opaque
+    /// strings, drawn from <c>data/seed/items/affix-families/*.json</c> — this module does not
+    /// validate membership (that is A-C1's job).</summary>
+    public IReadOnlyList<string> AtomFamilies { get; init; } = Array.Empty<string>();
+
+    /// <summary>The authored rung window. <see cref="Rung"/> stays the single collapsed value
+    /// <see cref="StructureBudgetGuard.Check"/> actually resolves against
+    /// (<see cref="RungBand.Collapse"/> — <c>Rung = rungBand[1]</c>, the ceiling, §3.0). <c>null</c>
+    /// for an action authored before this module shipped, which carries only <see cref="Rung"/>.</summary>
+    public RungBand? RungBand { get; init; }
+}
+
+/// <summary>A-E1 (spec-eligibility-axis.md §3.0, acceptance 1b): the authored `[floor, ceiling]`
+/// window a corpus action's <see cref="ActionRow.Rung"/> collapses from. <see cref="Collapse"/> is the
+/// one stated rule — <c>Rung = rungBand[1]</c>, the ceiling — because <see cref="StructureBudgetGuard"/>
+/// resolves a single rung-table row and a band silently becoming its floor or its ceiling is a balance
+/// decision an implementation detail must not make quietly.</summary>
+public sealed record RungBand(int Floor, int Ceiling)
+{
+    public int Collapse() => Ceiling;
+}
+
+/// <summary>A-U1 (spec-rung-semantics.md §3.1, 2026-09-03): the holder-derived rung
+/// (<c>Unlock.UnlockLadder.EffectiveRung</c> — <c>min(earnCount, rungCap)</c>), wrapped so it cannot
+/// silently re-merge with the AUTHORED <see cref="ActionRow.Rung"/> int
+/// <see cref="StructureBudgetGuard"/> reads — the exact confusion the spec's own §1 finding names
+/// ("does a rung mean the same thing to the author, the holder and the guard? Today it does not").
+/// Fixes magnitude and cost for one holder; never structure, which is a property of the content.</summary>
+public readonly record struct EffectiveRung(int Value)
+{
+    public override string ToString() => Value.ToString();
 }
 
 /// <summary>

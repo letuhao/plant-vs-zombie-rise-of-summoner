@@ -82,12 +82,28 @@ They look identical and should not be merged, because the channel layers genuine
 
 ### ⚠️ They are not the same units
 
-**`+10 hp` is ten hit points.** **`+10 fire power` is ten *resolver points*** — sigmoid scale, where `AccuracyScale` and `CritRateScale` are `100.0`, so ten points is 0.1 sigmoid units. For calibration: `critical-hunter` grants **+150** crit-rate points, moving crit from ~7.6% to ~26.9%; the patron aura converts per-mille to points by dividing by ten, so its 150‰ clamp is **+15 points**, not +15%.
+> **⛔ CORRECTED 2026-09-03 (E42 `units-correction`).** This worked example used to say *"`+10 fire
+> power` is ten resolver points"*, repeating `definitions.md`'s own former error in the same words —
+> which is worse than the error alone, because a worked example is what a later session copies rather
+> than checks. **`combat.power.*` is game units, not resolver points**
+> (`OverlayCombatCalculator.cs:84-89`; no `PowerScale` exists in `CombatProbabilityPolicy`). The example
+> is replaced with a genuinely sigmoid family so the point being made — that not every derived channel
+> shares primary's units — still holds, and holds for a true reason this time.
+
+**`+10 hp` is ten hit points.** **`+10 fire power` is ten damage** — the peer of `+10 hp`, additive, no
+sigmoid. **`+10 crit rate` is a different story**: it is ten *resolver points* on a sigmoid scale, where
+`CritRateScale` is `100.0`, so ten points is 0.1 sigmoid units. For calibration: `critical-hunter` grants
+**+150** crit-rate points, moving crit from ~7.6% to ~26.9%; the patron aura converts per-mille to points
+by dividing by ten, so its 150‰ clamp is **+15 points**, not +15%.
 
 Two consequences that must not be forgotten:
 
-1. **Tier bands are per channel family, never copied across.** A tier-3 `vitality` might be +45 hp while a tier-3 `elemental_power` is +30 points.
-2. **This is exactly what `normalize(magnitude, referenceScale)` in the power cost function is for.** A naive coefficient table that prices `+10 hp` and `+10 fire power` alike is wrong by an order of magnitude.
+1. **Tier bands are per channel family, never copied across.** A tier-3 `vitality` might be +45 hp, a
+   tier-3 `elemental_power` +30 damage, and a tier-3 `keen_edge` (crit rate) +20 resolver points — three
+   different scales, none interchangeable.
+2. **This is exactly what `normalize(magnitude, referenceScale)` in the power cost function is for.** A
+   naive coefficient table that prices `+10 hp` and `+10 crit rate` alike is wrong by an order of
+   magnitude.
 
 ---
 

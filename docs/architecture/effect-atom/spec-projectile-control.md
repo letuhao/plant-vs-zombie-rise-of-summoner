@@ -6,6 +6,17 @@ Module **E37** in the [atom effect map](../effect-atom-map.md) §13 (Wave 8). De
 > **Reads [definitions.md](definitions.md)** — the shared vocabulary pinned after the 2026-08-22 audit.
 > Where this spec and the definitions disagree, **the definitions win**.
 
+> **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the coefficient data path.**
+> Coefficients do **not** live in `data/tuning/effects.v1.json`: that file has no coefficient section
+> (its keys are `matchupRead` and `damageFxFloater`), and `CoefficientTable` never reads `data/tuning/`
+> at all — the only reader is `RpgStore.GetPowerTables` over the **content-hashed** `power_coefficient`
+> table (`RpgStore.Power.cs:61-72`; hash registry V3 at `ContentHashRegistry.cs:148-160`). **The path is
+> a seed kind, `data/seed/power/coefficients.v1.json`**, decided in full at
+> [`spec-power-sweep.md`](spec-power-sweep.md) §4.1. `CoefficientTable.Authored()` stays the
+> no-database fallback and this module does not edit it. **This spec's coefficient row lands in that
+> seed file.**
+
+
 ## Objective
 
 Make a projectile's damage and behaviour authorable. Two halves, and they are different problems:
@@ -174,8 +185,9 @@ adding `BulletModify` beside them rather than making it three. Criterion 4 asser
 - **No hard ceiling on damage.** Any bound is an overflow guard derived from the `int` field and it
   **throws**. The `Math.Max(1, …)` floor already in `CheatPrefixes.cs:81` is a **structural** minimum
   (a zero-damage bullet is inert, not balanced) and must carry a comment saying so.
-- **No literal on the balance surface.** Coefficients and defaults live in
-  `data/tuning/effects.v1.json`; `CoefficientTable.Authored()` is the code fallback a host with no
+- **No literal on the balance surface.** Coefficients live in `data/seed/power/coefficients.v1.json`
+  (see the decision below); other defaults live in `data/tuning/effects.v1.json`;
+  `CoefficientTable.Authored()` is the code fallback a host with no
   database runs on, not a place to park a tuned number.
 - **Do not rewrite `BulletInitCheat`.** Add alongside it, cheat last. Routing the operator path through
   atoms would make an operator knob depend on content loading.

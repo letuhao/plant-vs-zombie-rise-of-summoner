@@ -208,9 +208,17 @@ unlock arrives at rung 1 and is indistinguishable from a general one — the *"d
 `structureBudget` is already a per-rung closed list of complexity axes — `scopeSplit`, `riderStatus`,
 `condition`, `sequence`, `consumption`, `reaction`, `restriction` — with `StructureBudgetGuard`
 rejecting an over-budget action by naming the rung and the axis. Because the higher rungs carry the
-richer budgets, **a scope's rung ceiling already gates its structure ceiling as a side effect.** A
-general action capped at rung 4 can never spend on `condition`, `sequence`, `consumption`, `reaction`
-or `restriction`, because those axes do not appear until rungs 5, 7 and 9.
+richer budgets, ~~**a scope's rung ceiling already gates its structure ceiling as a side effect.**~~
+⛔ **CORRECTED 2026-09-03 (A-U1, §40.1 below, `spec-rung-semantics.md` §3.1) — this does not hold.**
+`StructureBudgetGuard.Check` reads `row.Rung`, the **authored** column, while a scope's *ceiling* on
+what a holder can reach is a property of `effectiveRung` — derived per holder from `earnCount`
+(`UnlockLadder.Rung`, never wired to the guard). Clamping the derived value never reaches the guard,
+so a window does **not** buy structure as a side effect of buying magnitude; the two are independent
+until something explicitly reads a holder's `effectiveRung` and re-checks structure against it, which
+nothing does today. A general action capped at rung 4 can never spend on `condition`, `sequence`,
+`consumption`, `reaction` or `restriction` **only because no general-scope action is authored above
+rung 4** (the authored `Rung` on every general row stays ≤4) — not because a holder's ceiling enforces
+it. See §40.1 for the original finding.
 
 So one window buys both halves of *"stronger"*: a bigger number **and** a wider capability, with no
 second mechanism for either. `spec-action-seeding.md` §6 already states the principle this rests on —

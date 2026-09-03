@@ -34,10 +34,10 @@ entirely.
 | Thing | Evidence |
 |---|---|
 | The rung table — 10 rows with `minTier`/`maxTier`/`poolRolls`/`qPowerMilli`/`costMulti`/`cdMulti`/`structureBudget`, `cap: 10` | `data/tuning/action-rungs.v1.json` |
-| `structureBudget` per rung, and the guard that rejects an over-budget action naming rung and axis | `StructureBudgetGuard.cs:38` |
+| `structureBudget` per rung, and the guard that rejects an over-budget action naming rung and axis | `StructureBudgetGuard.cs:47-49` (`Check` at `:38`) |
 | `rung(n) = min(earnCount, cap)` — the only input is `earnCount` | `UnlockLadder.cs:56-61` |
 | Enabler/payoff pairing data and its closed-loop coverage assertion | `EnablerPayoffPairings.cs:20-31`, `EnablerPayoffCoverage.cs:21-34` |
-| The 21 statuses a payoff can key on | `StatusCatalogBootstrap.cs:15-56` |
+| The 21 statuses a payoff can key on | `StatusCatalogBootstrap.cs:16-58` |
 | Closed slot vocabularies: 5 categories, 3 kinds, **6** target modes, 4 area shapes, 4 relations | `ActionEnums.cs:10-49`; `ActionTargetSpec.cs:16-47` |
 | A committed dry-run entrypoint pattern to match (`--dry-run` prints briefs, makes no calls; `--count` bounds a real run) | `adapters/effects/affix/generate_affixes.py:74-99` |
 
@@ -72,8 +72,33 @@ There is no planner, no brief schema, and no quota table.
 ## 2. Inputs and outputs
 
 **Reads:** `role-lean.json` and `characteristic-pool.json` (A-S0) · `type-weights.json` (A-T1) ·
-`data/tuning/action-rungs.v1.json` · `data/tuning/action-corpus-run.v1.json` (**new** — every count) ·
-the previous round's coverage report from A-S5 · the accepted corpus, for `avoidNeighbours`.
+`data/tuning/action-rungs.v1.json` · `data/tuning/action-corpus-run.v1.json` (**new** — every count) · `data/tuning/action-dedup.v1.json` (**A-S3's**, read never written — `k` and the field-distance rule, §3 step 8) ·
+**`data/seed/items/affix-families/*.json`** (**new** — the atom-family namespace) ·
+`data/seed/actions/pairings.json` · the previous round's coverage report from A-S5 · the accepted
+corpus, for `avoidNeighbours`.
+
+**⛔ DECIDED 2026-09-03 — `atomFamilies` names the 98 authored affix families.** §3 step 7 has always
+required an atom source and this Reads list had none, so the module was not buildable as written.
+Three candidate namespaces sit in the tree and **no spec said which one `atomFamilies` means.**
+Measured 2026-09-03, they are **completely disjoint — zero overlap between any pair:**
+
+| Candidate namespace | Count | Evidence |
+|---|---|---|
+| Demo/fixture atom rows | **17** families | `data/seed/atoms/fx-core.json`, `fx-board.json`, `fx-status.json`, `trait-critical-hunter.json` — `entries[].family`, e.g. `atom.fx-cold-on-hit`, `atom.critical-hunter` |
+| **Authored affix families** | **98** ids across 15 files | `data/seed/items/affix-families/*.json` — `entries[].id`, e.g. `g-precision.json` → `atom.precision`, `atom.keen-edge`, `atom.cruelty` |
+| Ids in the pairing table | **5** | `data/seed/actions/pairings.json` — `atom.chill-punisher`, `atom.chill-applier`, `atom.rot-punisher`, `atom.rot-applier`, `atom.blight-applier` |
+
+**The 98 are the namespace.** They are the authored, reviewed, shipped set: every entry carries an
+`id`, a `kindId`, a `params.channel`, a `powerBand`, a role matrix and a `_meta` provenance block
+(`data/seed/items/affix-families/g-precision.json`). The 17 under `data/seed/atoms/` are fixtures for
+the effect-atom importer, not content — `data/seed/README.md:9-10` sweeps that folder for the atom
+importer, and none of the four files is a family catalogue. The 5 in `pairings.json` name nothing
+that exists anywhere, which is the defect §3 step 6's rewrite deliverable fixes.
+
+**Consequence, stated once and inherited by five specs.** `pool.allowedAtomFamilies` and
+`pool.forbiddenAtomFamilies` are always subsets of those 98; the `atomFamilies` enum handed to
+A-P1/A-P2/A-P3 is filled from that subset; A-S3 renders the same ids inside `sorted(atomFamilies)`;
+and A-S5's `pairingReach` counts its denominator against 98.
 
 **Writes** `data/seed/actions/_briefs/round-<n>.json`, `kind: "action-brief"`, in the A-C1 envelope.
 One entry per brief:
@@ -94,13 +119,14 @@ One entry per brief:
   "slot": {                                     // group C — the PLANNER decides these
     "category": "attack", "targetMode": "area", "areaShape": "row",
     "relation": "enemy", "kind": "skill",
-    "rungBand": [5, 10], "structureAxes": ["riderStatus", "condition"]
+    "rungBand": [1, 10], "structureAxes": ["riderStatus", "condition"]
   },
-  "pool": {                                     // group D
-    "allowedAtomFamilies": ["atom.burn", "atom.spread"],
-    "forbiddenAtomFamilies": ["atom.crit-rate", "atom.crit-damage"]
+  "pool": {                                     // group D — ids from the 98 authored families, above
+    "allowedAtomFamilies": ["atom.searing-strike", "atom.volley"],
+    "forbiddenAtomFamilies": ["atom.keen-edge", "atom.cruelty"]
   },
   // group E — atom FAMILIES, never statuses. `role: "none"` is the common case; see §3 step 6.
+  // `pairedPayoffFamily` shown pre-rewrite; the real key arrives with §3 step 6's deliverable.
   "pairing": { "role": "enabler", "pairedPayoffFamily": "atom.rot-punisher" },
   "avoidNeighbours": [                          // group F — proactive dedup
     { "actionId": "action.species.cherrybomb.001",
@@ -132,12 +158,58 @@ against the code of record, and each is load-bearing downstream:
 - **`targetMode`/`areaShape` are AUTHORED here (F5).** See §3 step 4a.
 - **`familyMotifs` is derived here (F15).** See §3 step 2b.
 
+**⛔ CORRECTED 2026-09-03 (namespace + rung decisions).** Two more values in the example named
+nothing real:
+
+- **The pool ids are real families now.** They were `atom.burn` / `atom.spread` and
+  `atom.crit-rate` / `atom.crit-damage`, and **none of the four exists** in any of the three
+  namespaces measured above. They are now `atom.searing-strike` and `atom.volley`
+  (`data/seed/items/affix-families/g-on-hit.json`), and the genuine multiplicative pair
+  `atom.keen-edge` / `atom.cruelty` (`g-precision.json`) — see §3 step 7.
+- **The signature `rungBand` is `[1, 10]`.** The floor of 5 is dropped — §3 step 4, and
+  [`spec-rung-semantics.md`](spec-rung-semantics.md) §3.2.
+
 ## 3. The algorithm
 
 1. **Read the run target.** `generalCount`, `perFamilyCount`, `perSpeciesCount` and `mode`
    (`smoke` | `full`) come from `data/tuning/action-corpus-run.v1.json`. **`full` requires an explicit
    `--full` flag *and* a passing quality gate from the previous smoke batch** — constraint 2 turned
    into a refusal rather than a note.
+
+   **⛔ DECIDED 2026-09-03 — the file ships with stated defaults, and the default is a smoke run.**
+   The precedent is `spec-innate-picker.md` §3.3's: *"per-mille multipliers … **defaulting to 1000**,
+   at which the score reproduces the lexicographic tuple exactly"*
+   (`spec-innate-picker.md:124-125`) — a neutral value with its reasoning written down, so the module
+   is buildable today and the numbers move on evidence rather than on a decision nobody can make yet.
+
+   ```jsonc
+   {
+     "schemaVersion": 1, "version": 1,
+     "_meta": {
+       "owner": "docs/architecture/action-corpus/spec-distribution-planner.md (A-S1) §3 step 1",
+       // NEUTRAL, not tuned. The smallest batch that exercises every stage end to end and still
+       // produces evidence a quality gate can read. Every count is a placeholder the FIRST smoke
+       // batch replaces; re-tuning is a config change, never a rebuild.
+       "default": "neutral-untuned",
+       // The 8 species in the four-way catalog/motif/family/anchor join
+       // (spec-characteristic-pool.md:192) — the only ones carrying every signal A-S0 derives, so a
+       // thin result is the pipeline's fault and not the data's.
+       "smokeSubjects": "four-way-join-8"
+     },
+     "mode": "smoke",
+     "generalCount": 5,
+     "perFamilyCount": 1,
+     "perSpeciesCount": 1,
+     "multiplicativePairs": [["atom.keen-edge", "atom.cruelty"]],
+     "familyMotifMax": 6,
+     "avoidNeighbourK": 3
+   }
+   ```
+
+   **`mode: "smoke"` is the default and it is not a preference.** Constraint 2 makes a full run an
+   owner decision on the smoke batch's evidence; a config file defaulting to `full` would make that
+   decision by omission. The counts are deliberately the smallest that still exercise all three
+   scopes — general, family and species — because a batch that skips a scope proves nothing about it.
 2. **Enumerate the plan's subjects, from real data.** Species: the 84 catalog rows. Families: the 19
    distinct families in `family-assignments.json`, whose sizes are measured, not assumed — `cherry` 7,
    `fire` 5, `pea` 5, `ice` 4, then three at 3, **eleven** at 2 and `nut` at 1. ⛔ **CORRECTED
@@ -164,7 +236,7 @@ against the code of record, and each is load-bearing downstream:
 
    **Why intersection and not union**, stated so it can be overturned on evidence: A-P2's own
    judgement is *"what makes the whole family recognisable, not what makes one member special"*
-   (`spec-family-propose.md:107`). A union hands the model motifs owned by exactly one member — that
+   (`spec-family-propose.md:179-180`). A union hands the model motifs owned by exactly one member — that
    is a signature motif wearing a family label, and it is precisely the output A-P3 exists to produce.
    The union is also permissive where it matters most: the set becomes A-P2's `motifsExpressed` enum,
    so a union of six lets a family action express a motif no sibling shares.
@@ -182,7 +254,7 @@ against the code of record, and each is load-bearing downstream:
    **Absent is a defect; empty is a value.** Every family-scoped brief carries `anchor.familyMotifs`,
    `anchor.familyAntiMotifs` and `anchor.familyMotifBasis` as **keys**, even when a list is empty —
    the same absent-versus-empty discipline A-P3 applies to `familyActions`
-   (`spec-signature-propose.md:156-158`).
+   (`spec-signature-propose.md:229-231`).
 
 3. **Allocate categories by quota, not by sampling.** For each subject, `count` briefs are split across
    the five categories by largest remainder over A-T1's `categoryMilli`, computed in `long`, widening
@@ -191,8 +263,31 @@ against the code of record, and each is load-bearing downstream:
    not approximate**, which is what makes A-S5's question *"is the plan satisfiable?"* rather than
    *"did the model drift?"*.
 4. **Assign the rung window per scope** from tuning: general **1-4**, family **1-7**, signature
-   **5-10** — geometrically even, three rungs apart, each ceiling 2.315× the last. Emitted as
+   **1-10** — the *ceilings* geometrically even, three rungs apart, each 2.315× the last. Emitted as
    `rungBand`, never as a magnitude.
+
+   **⛔ DECIDED 2026-09-03 — the signature floor is DROPPED. The window is `[1,10]`, not `[5,10]`.**
+
+   **The floor at issue is this module's authored `rungBand` floor and nothing else.** `minRung`
+   **never existed in code or data** — grepped 2026-09-03, zero hits for `minRung` across `src/` and
+   `data/`; the only `MinRung` in the tree is `AuraTuning.cs:20`, the aura ladder's own rung-7 floor,
+   an unrelated system. So there was never a holder-side clamp to remove: the "5" was written here,
+   in a spec, and it is removed here.
+
+   Why it goes: a floor of 5 makes the holder's rung constant at 5 across `earnCount ∈ [0,5)`, which
+   is a piecewise second curve by [`spec-rung-semantics.md`](spec-rung-semantics.md) §3.2, and the
+   one power ladder admits no private curves.
+
+   **What does not change: the ceiling, and therefore the tier split.** The signature ceiling is
+   still **10**, so step 5's union-to-ceiling assignment is untouched — signature keeps **6**
+   assignable axes, family 5, general 2, and `restriction` stays the signature tier's one exclusive
+   axis. The differentiating work was always the ceiling's; the floor only prevented a low-rung
+   *instance*, which is what the ladder is for.
+
+   **The `costMulti: 3627` argument is now moot.** It was the price of the floor — rung 5 in
+   `data/tuning/action-rungs.v1.json` — paid by a player with zero earn history. With no floor, a
+   first-ever signature unlock arrives at rung 1 and pays `costMulti: 1000`. Wherever that 3.6×
+   appears as an argument against the floor, it now records a cost nobody pays.
 
    **⛔ The `rungBand` → `ActionRow.Rung` collapse rule, stated here — added 2026-09-03 (review
    F3/F13).** `ActionRow.Rung` is one `int` (`ActionRow.cs:23`) and `StructureBudgetGuard.Check`
@@ -256,7 +351,7 @@ against the code of record, and each is load-bearing downstream:
    |---|---|---|---|
    | general | `[1,4]` | rung 4 | `scopeSplit`, `riderStatus` — **2** |
    | family | `[1,7]` | rung 7 | + `condition`, `sequence`, `consumption` — **5** |
-   | signature | `[5,10]` | rung 10 | + `restriction` — **6** (`reaction` subtracted, below) |
+   | signature | `[1,10]` | rung 10 | + `restriction` — **6** (`reaction` subtracted, below) |
 
    **`reaction` is subtracted, always, and a brief naming it is REFUSED — not flagged.** It is
    unspendable, not undetectable: `StructureBudgetGuard.cs:27-30` verified `ActionKind` has exactly
@@ -313,16 +408,107 @@ against the code of record, and each is load-bearing downstream:
      overwhelming majority of briefs, and the run report states the payoff-key count and the share of
      briefs whose pool could touch one. Growing the table is a **named, separate deliverable** owned
      with the atom families themselves; until it lands, the pairing tier covers only the briefs whose
-     pool reaches `atom.chill-punisher` or `atom.rot-punisher`.
-7. **Set `allowedAtomFamilies`.** Constraint 4: **the same eligible set for every tier**, with only
+     pool reaches a real payoff family.
+
+   **⛔ DECIDED 2026-09-03 — NAMED DELIVERABLE: rewrite `pairings.json` into the 98-family namespace.**
+
+   §2's measurement makes the earlier wording optimistic in a way that matters. All five ids in the
+   shipped file — `atom.chill-punisher`, `atom.chill-applier`, `atom.rot-punisher`,
+   `atom.rot-applier`, `atom.blight-applier` — belong to **none** of the three namespaces. They name
+   nothing. So `IsPayoff` returns false for every one of the 98 families a brief can carry, and
+   `pairing.role` is `none` for **100%** of briefs, not "most". This module ships with the file
+   rewritten to real ids.
+
+   Three constraints the rewrite is bound by, each verified against the code of record:
+
+   1. **The file's shape does not change — only the ids inside it.** `EnablerPayoffPairings.Parse`
+      requires the root itself to be the payoff → `[enablers]` map
+      (`EnablerPayoffPairings.cs:47-48`), and A-C1 §4 forbids wrapping it in the seed envelope
+      (`spec-corpus-loader.md:209-210`). Rewriting the ids is compatible with both; re-shaping the
+      file is not.
+   2. **Every payoff keeps at least one enabler.** `Parse` throws on a payoff with zero enablers, in
+      those words — *"a payoff with no possible enabler is the exact unreal combination §5 forbids
+      pricing a discount for"* (`EnablerPayoffPairings.cs:64-67`). A rewrite that mapped four of the
+      five ids and dropped the fifth would fail at parse time, not at review.
+   3. **The payoff side has to be authored, not renamed.** The 98 already hold seven status
+      **appliers** that are natural enablers — `atom.freezing` (`status: freeze`), `atom.venomous`
+      (`poison`), `atom.mesmerizing` (`hypno`), `atom.withering` (`wither`), `atom.bloodletting`
+      (`leech`), `atom.sporing` (`spore`), `atom.entangling` (`kelp`), all in
+      `data/seed/items/affix-families/g-affliction.json`. They hold **no family authored as a
+      status-gated punisher** — measured 2026-09-03 across all 15 files, no entry gates on a status
+      an ally applied. So the rewrite adds payoff families rather than renaming existing ones, which
+      is why it is owned with the atom families and named here as a deliverable rather than performed
+      inline. **Until it lands the pairing tier is empty rather than wrong**, and A-S5's
+      `pairingReach` reports that with the honest denominator.
+7. **Set `allowedAtomFamilies`** — drawn from the **98 authored affix families** (§2's Reads and its
+   namespace decision). Constraint 4: **the same eligible set for every tier**, with only
    `forbiddenAtomFamilies` narrowing it — and the one narrowing that is always applied is *never both
-   halves of a known multiplicative pair* (crit rate with crit damage), because pricing is knowingly
-   additive there and the generated corpus is disproportionately that shape.
+   halves of a known multiplicative pair*, because pricing is knowingly additive there and the
+   generated corpus is disproportionately that shape.
+
+   **⛔ CORRECTED 2026-09-03 — the pair is `atom.keen-edge` / `atom.cruelty`.** This step named
+   `atom.crit-rate` / `atom.crit-damage`, and **neither id exists** in any of the three namespaces
+   §2 measures — so *"the one narrowing that is always applied"* would have narrowed nothing at all.
+   The real pair, read from `data/seed/items/affix-families/g-precision.json`:
+
+   | Family | Name | Channel | Op |
+   |---|---|---|---|
+   | `atom.keen-edge` | Keen Edge | `combat.crit.rate.{variant}` | `Flat` |
+   | `atom.cruelty` | Cruelty | `combat.crit.damage.{variant}` | `Flat` |
+
+   The same file holds their `Replace` twins on the same two channels — `atom.prec-verdict`
+   (`combat.crit.rate.{variant}`) and `atom.prec-reckoning` (`combat.crit.damage.{variant}`) — so a
+   two-id constant would miss two of the four ways to build the pair. **The forbidden pairs are a
+   `multiplicativePairs` list in `data/tuning/action-corpus-run.v1.json`** (step 1's default file),
+   authored as rate-family × damage-family over those two channels, because which pairs multiply is
+   exactly what a balance pass changes. The `combat.crit.resist.*` families in `g-evade.json` and
+   `g-ward.json` are defensive and are not part of the pair.
 8. **Fill `avoidNeighbours`** from the accepted corpus: the k nearest already-accepted fingerprints in
-   the same `(scope, scopeKey)`, k a tuning row, ordered by fingerprint field distance then by action
-   id ordinal. The fingerprint rendered here is **A-S3's, verbatim** (`spec-dedup-select.md` §2) —
-   one definition, quoted, never a second one shaped like it. Proactive dedup is far cheaper than
-   generate-and-reject.
+   the same `(scope, scopeKey)`, ordered by fingerprint field distance then by action id ordinal. The
+   fingerprint rendered here is **A-S3's, verbatim** (`spec-dedup-select.md` §2) — one definition,
+   quoted, never a second one shaped like it. Proactive dedup is far cheaper than generate-and-reject.
+
+   **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — `k`'s home and its value.** This step
+   read *"k a tuning row"* and named no file; the two files §2 declares are
+   `action-rungs.v1.json` and `action-corpus-run.v1.json`, and neither carries it.
+
+   **`k` is read from `data/tuning/action-dedup.v1.json`, which already declares it.**
+   `spec-dedup-select.md` §2 lists that file's contents as *"the t3 threshold, **k**, and the t2
+   field-distance rule"* (`spec-dedup-select.md:53-54`). So this is not a new tunable and not a new
+   file: it is the same read-the-other-module's-definition discipline this step already applies to the
+   fingerprint. A-S1 **reads** `action-dedup.v1.json`; A-S3 owns it.
+
+   **Default `k = 8`, derived from the fingerprint's own shape.** The fingerprint has **seven**
+   components — `sorted(atomFamilies) | category | targetMode | areaShape | relation |
+   sorted(structureAxes) | pairingRole` (`spec-dedup-select.md:86-88`) — and tier 2 hard-rejects at a
+   distance of exactly **one** field (`spec-dedup-select.md:141-143`). `k = 7 + 1` is the smallest
+   value that can show the model **one neighbour per field tier 2 could reject on, plus one**, so
+   `avoidNeighbours` cannot systematically under-cover the rejection surface it exists to pre-empt.
+   It is neutral in the sense that matters here: it is read off the structure being defended, not
+   fitted to an outcome. **Re-tune trigger:** the smoke batch's combined t1+t2 reject rate — near zero
+   means k can fall and save prompt tokens (the cost is linear in k); a tier dominated by t2 rejects
+   means it must rise.
+
+   **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — "fingerprint field distance",
+   defined.** The term appeared in this step and in no spec, which left the ordering undefined and
+   this step unimplementable.
+
+   **Field distance is the number of the seven fingerprint components whose rendered wire strings
+   differ — a Hamming distance over the component vector, range 0..7, integer.** The two list-valued
+   components (`sorted(atomFamilies)`, `sorted(structureAxes)`) compare as their **rendered strings**,
+   byte-wise, so a one-member difference in `atomFamilies` is a distance of 1 and not a set
+   difference. Ties break on action id ordinal, as this step already says.
+
+   **Why this and not a set-aware or semantic metric:** it is the *same* quantity tier 2 already
+   rejects on — *"matches an accepted one modulo exactly one field"* is distance 1 — so the brief
+   orders neighbours by exactly the measure that will judge the model's answer. Any other metric would
+   be a second definition shaped like the first, which is the defect this step's own
+   *"A-S3's, verbatim"* rule exists to stop, and a semantic one would put a non-hash quantity on the
+   brief path. The rule itself is stored as A-S3's already-declared *"t2 field-distance rule"* row in
+   `action-dedup.v1.json`. **What would overturn it:** measured neighbour sets that are uninformative
+   because `pairingRole` and `areaShape` are near-constant (A-S3 §2 already warns `pairingRole`
+   carries almost no separating power) — the fix then is a **weighted** Hamming distance with the
+   weights in the same tuning row, not a different metric.
 
 **⛔ One field, one name — corrected 2026-09-03 (review).** Four names were in circulation for what
 read as one field: `atomPools` (A-C1's stored seed), `allowedAtomFamilies` (this brief), `atomFamilies`
@@ -361,7 +547,15 @@ constraint, which is binding, and not by a field name, which drifts.
   the report gives the count.
 - **Never invent a pairing key.** The payoff/enabler vocabulary is `pairings.json`'s, and a payoff
   with no authored enabler is refused at parse time (`EnablerPayoffPairings.cs:64-67`). If the pool
-  reaches no payoff family, the role is `none` — that is the answer, not a gap to fill.
+  reaches no payoff family, the role is `none` — that is the answer, not a gap to fill. ⛔ **The
+  rewrite in §3 step 6 is not an exception to this**: it re-authors the *table*, as a reviewed
+  deliverable, and the planner still only reads it.
+- **Never name an atom family outside the 98.** Every `allowedAtomFamilies`,
+  `forbiddenAtomFamilies` and `pairedPayoffFamily` id is an `entries[].id` from
+  `data/seed/items/affix-families/*.json` (§2). The 17 fixture families under `data/seed/atoms/` are
+  not content and are never eligible.
+- **Never assemble A-P3's brief.** It carries `familyActions`, which does not exist at this module's
+  static phase; **A-S2** `brief-assembly` owns it (§7).
 - **Never let the target shape be decided twice.** `targetMode`/`areaShape` are authored here (§3
   step 4a); nothing downstream re-rolls them, and `ActionSeeder.cs:55` is the runtime generator's own
   roll on a path a corpus action does not take.
@@ -374,15 +568,17 @@ constraint, which is binding, and not by a field name, which drifts.
 | **Determinism** | two runs with the same tuning, lean, weights and coverage report produce a byte-identical `round-<n>.json`, asserted by hash |
 | **Quota exactness** | for every subject, the per-category brief counts sum to the subject's count, and each matches the largest-remainder allocation of its `categoryMilli` exactly |
 | **Planted violation — a magnitude in a brief** | a brief carrying `"chance": 250`, `"durationMs": 3000`, `"powerMilli"`, a string field matching `^[0-9]+$`, or an enum of numeric strings is **refused by the schema audit**, all four shapes tested |
-| **Planted violation — unpaired payoff** | a plan where a `payoff` brief has no `enabler` brief carrying the same `pairedPayoffFamily` in its `(scope, scopeKey)` group **fails the planner's own check**, mirroring `EnablerPayoffCoverage.cs:21-34` on the plan side. The planted pair uses `atom.rot-punisher` / `atom.rot-applier`, the real keys |
+| **Planted violation — unpaired payoff** | a plan where a `payoff` brief has no `enabler` brief carrying the same `pairedPayoffFamily` in its `(scope, scopeKey)` group **fails the planner's own check**, mirroring `EnablerPayoffCoverage.cs:21-34` on the plan side. ⛔ **CORRECTED 2026-09-03:** the planted pair was `atom.rot-punisher` / `atom.rot-applier`, called "the real keys" — they are in **none** of the three namespaces (§2). The test reads its planted pair **from the rewritten `pairings.json` at test time** (first key, first enabler), never hard-coded, so it moves with §3 step 6's deliverable instead of planting ids that name nothing |
+| **Atom-family namespace** | every `allowedAtomFamilies`, `forbiddenAtomFamilies` and `pairedPayoffFamily` id emitted over a whole round is an `entries[].id` of `data/seed/items/affix-families/*.json`; an id drawn from `data/seed/atoms/` is **refused**, naming the file it came from. The count is asserted as a literal — **98** — so a namespace change fails loudly |
 | **Pairing vocabulary** | every `pairedPayoffFamily` is a key of `pairings.json` and every forced enabler is a member of `EnablersOf` it; a brief carrying a **status id** in that field is refused, naming the field |
 | **Structure axes — union-to-ceiling** | the assignable sets are asserted as literals: general **2**, family **5**, signature **6**; a brief naming `reaction` is **refused**, and one naming `restriction` carries `structureEnforced: false` |
 | **Family motifs derived** | every family-scoped brief carries `familyMotifs`, `familyAntiMotifs` and `familyMotifBasis` as keys; all 19 families resolve `intersection` against today's data, and the intersection for `cherry` is asserted as exactly two motifs |
 | **Target shape allocation** | `targetMode` counts per subject equal the largest-remainder allocation of A-T1's `targetModeMilli` exactly, and `areaShapeMilli` is consulted only for briefs allocated `area` |
 | **Casing** | every emitted `category`, `targetMode`, `areaShape` and `relation` round-trips through `ActionCategories.TryParse` / `ActionTargetModes.TryParse` / `ActionAreaShapes.TryParse` / `RelationKinds.TryParse`; `"Area"` is refused |
 | **Planted violation — family widening** | a tuning file that narrows `allowedAtomFamilies` per tier while any of constraint 4's three gates is absent is **refused**, naming the missing gate |
-| **Planted violation — multiplicative pair** | a plan allowing crit-rate and crit-damage in one brief is refused |
-| **Full-run refusal** | `mode: "full"` without `--full` and without a passing smoke gate exits non-zero with a message naming the missing evidence |
+| **Planted violation — multiplicative pair** | a plan allowing `atom.keen-edge` and `atom.cruelty` in one brief is refused, naming both; the same holds for their `Replace` twins `atom.prec-verdict` / `atom.prec-reckoning`, and the pairs are read from `multiplicativePairs` rather than hard-coded (§3 step 7) |
+| **Full-run refusal** | `mode: "full"` without `--full` and without a passing smoke gate exits non-zero with a message naming the missing evidence; the shipped `action-corpus-run.v1.json` is asserted to carry `mode: "smoke"`, so a default flipped to `full` fails here rather than at run time (§3 step 1) |
+| **Rung window** | every signature `rungBand` is `[1, 10]`; a band with a floor above 1 is **refused**, naming `spec-rung-semantics.md` §3.2. The union-to-ceiling axis counts are unchanged — general 2, family 5, signature 6 — and asserted alongside it |
 | **`--dry-run`** | renders every brief and makes zero calls; the transport stub raises if anything tries |
 | **Roster** | subject counts are asserted as literals: 84 species, 19 families, 53 family-assigned species. Drift toward 904 fails |
 | **Overflow** | quota arithmetic is `long`, widened before multiplying, divided by 1000 once; forced overflow **throws** |
@@ -393,9 +589,11 @@ constraint, which is binding, and not by a field name, which drifts.
    and every entry validates against the brief schema.
 2. The schema audit finds no numeric field, testing all four smuggling shapes.
 3. Per-subject category counts equal the largest-remainder allocation of A-T1's weights, exactly.
-4. Every `rungBand` is inside its scope's window: general ⊆ [1,4], family ⊆ [1,7], signature ⊆ [5,10],
+4. Every `rungBand` is inside its scope's window: general ⊆ [1,4], family ⊆ [1,7], signature ⊆ [1,10],
    and the `Rung = rungBand[1]` collapse rule (§3 step 4) is asserted, so `StructureBudgetGuard.Check`
-   resolves the same row the axes were drawn from.
+   resolves the same row the axes were drawn from. ⛔ **DECIDED 2026-09-03:** the signature window's
+   floor was 5; it is dropped (§3 step 4). The **ceiling is unchanged at 10**, so the axis counts —
+   general 2, family 5, signature 6 — do not move.
 4b. Every brief's `targetMode` and `areaShape` are **authored** (§3 step 4a) and every value parses
    through the code of record's own `TryParse` — `"self" "single" "multi" "rolledTarget" "all" "area"`
    (`ActionTargetSpec.cs:103-112`) and `"row" "column" "square" "rectangle"` (`:134-141`).
@@ -405,6 +603,13 @@ constraint, which is binding, and not by a field name, which drifts.
    this criterion named a *status*, and the shipped pairing surface has none.
 6. `allowedAtomFamilies` is identical across tiers, and the run report states that family-access
    widening is gated and names the three missing preconditions.
+6b. Every atom-family id emitted anywhere in the round is one of the **98** in
+   `data/seed/items/affix-families/*.json` (§2), asserted against the files rather than a constant.
+   ⛔ **DECIDED 2026-09-03** — the namespace was never stated and three disjoint candidates existed.
+6c. `data/tuning/action-corpus-run.v1.json` exists with **stated neutral defaults** and `mode: "smoke"`
+   (§3 step 1), its `_meta` says the counts are untuned placeholders the first smoke batch replaces,
+   and no count the algorithm uses is a literal in the module source
+   (`python scripts/audit-magic-numbers.py` reports zero targets for it).
 7. Briefs whose structure axes include `restriction` carry `structureEnforced: false`, and the report
    gives the count. A brief naming `reaction` is **refused**, and a test asserts the refusal.
    ⛔ **CORRECTED 2026-09-03 (review F3/F4):** under the old intersection rule this criterion had
@@ -413,6 +618,13 @@ constraint, which is binding, and not by a field name, which drifts.
 7b. Every family-scoped brief carries `anchor.familyMotifs`, `anchor.familyAntiMotifs` and
    `anchor.familyMotifBasis` as keys (§3 step 2b) — the derivation A-P2's AC5 requires and which
    nothing owned before.
+7b. **`avoidNeighbours` is reproducible from a stated rule.** `k` is read from
+   `data/tuning/action-dedup.v1.json` (**not** from `action-corpus-run.v1.json`), defaults to **8**,
+   and a test asserts the default equals the fingerprint's component count plus one — so a change to
+   the fingerprint's shape that does not move `k` fails. Neighbour ordering is the **field distance**
+   of §3 step 8 (Hamming over the seven rendered components, ties on action id ordinal), asserted by a
+   planted pair at distances 1 and 3 and by a shuffled-input determinism test. ⛔ **DECIDED
+   2026-09-03 (owner removed themselves as a gate)** — both terms were used and neither was defined.
 8. `--dry-run` produces briefs and zero model calls; `mode: full` refuses without the flag and the gate.
 9. A rerun over unchanged inputs is byte-identical by hash, with provenance recording corpus hash,
    tuning version, prompt version and round.
@@ -421,9 +633,21 @@ constraint, which is binding, and not by a field name, which drifts.
 
 **Depends on:** **A-S0** (map §4 and §5), **A-T1** (weights), **A-S5** (round n+1 targets — a cycle
 that is broken by round 1 reading no report), and A-C1's envelope for its output file.
-**Depended on by:** **A-P1**, **A-P2** and **A-P3**, each of which reads exactly one brief. A-P1 and
-A-P2 may run in parallel; A-P3 waits on A-P2 because a signature must differ from its own family's
-output.
+**Depended on by:** **A-P1** and **A-P2**, each of which reads exactly one brief, and **A-S2**
+`brief-assembly`, which reads this module's plan. A-P1 and A-P2 may run in parallel.
+
+**⛔ DECIDED 2026-09-03 — this module assembles the P1 and P2 briefs only. A-S2 owns the P3 brief.**
+A-P3's brief carries `familyActions`, and that field does not exist until A-P2's round has been
+generated, validated, deduped and **id-assigned** — so it cannot be built in this module's static,
+token-free Phase 3. No module owned that step, and A-P3 raises on a brief whose `familyActions` key
+is absent (`spec-signature-propose.md:229-231`), so **100% of A-P3's input would have raised.**
+
+**This is F15 recurring, one field over.** Family *motifs* had the identical defect — A-P2 said
+*"A-S1 owns it"*, A-S1 never mentioned it, and A-P2's AC5 rejected 100% of this module's output; the
+review's own words were *"ownership passed in a circle."* It was closed by writing the derivation
+here (§3 step 2b). `familyActions` sat one field over in the same brief and was not caught. It closes
+the same way — a named owner: **A-S2** `brief-assembly` reads this plan plus A-P2's accepted, deduped,
+id-assigned round and emits A-P3's brief. This module emits neither `familyActions` nor a P3 brief.
 **Cross-program (map §7):** channel pools come from **effect-atom E30** — briefs reference pools, so a
 pool id that does not resolve yet is an edge, not an error. The **power** program owes the rung window
 a row in the caps register; §5 constraint 2 promised one and `ssot-power-scale.md` §11 does not have it.

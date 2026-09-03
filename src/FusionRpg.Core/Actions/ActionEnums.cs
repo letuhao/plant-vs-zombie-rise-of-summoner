@@ -67,6 +67,30 @@ public enum ActionCostTiming
     PerTick,
 }
 
+/// <summary>
+/// A-E1 (spec-eligibility-axis.md §3.1): which tier's rule decides who may hold an action — exactly
+/// the three the action-corpus program generates. A fourth value would encode a distinction
+/// <see cref="ActionKind"/> already carries (A1's closure — see <see cref="EligibilityScopes"/>).
+/// </summary>
+public enum EligibilityScope
+{
+    General = 0,
+    Family,
+    Species,
+}
+
+/// <summary>
+/// A-E1 (spec-eligibility-axis.md §3.0): whether a generated action sets up or cashes in a
+/// conditional-payoff pairing (`EnablerPayoffPairings`). <c>None</c> is a real value, never an
+/// omission — most actions pair with nothing, and the field must say so rather than being absent.
+/// </summary>
+public enum PairingRole
+{
+    None = 0,
+    Enabler,
+    Payoff,
+}
+
 public static class ActionKinds
 {
     public static string Name(ActionKind kind) => kind switch
@@ -195,6 +219,50 @@ public static class ActionCostTimings
             case "onCommit": timing = ActionCostTiming.OnCommit; return true;
             case "perTick": timing = ActionCostTiming.PerTick; return true;
             default: timing = default; return false;
+        }
+    }
+}
+
+public static class EligibilityScopes
+{
+    public static string Name(EligibilityScope scope) => scope switch
+    {
+        EligibilityScope.General => "general",
+        EligibilityScope.Family => "family",
+        EligibilityScope.Species => "species",
+        _ => "",
+    };
+
+    public static bool TryParse(string? text, out EligibilityScope scope)
+    {
+        switch (text)
+        {
+            case "general": scope = EligibilityScope.General; return true;
+            case "family": scope = EligibilityScope.Family; return true;
+            case "species": scope = EligibilityScope.Species; return true;
+            default: scope = default; return false;
+        }
+    }
+}
+
+public static class PairingRoles
+{
+    public static string Name(PairingRole role) => role switch
+    {
+        PairingRole.None => "none",
+        PairingRole.Enabler => "enabler",
+        PairingRole.Payoff => "payoff",
+        _ => "",
+    };
+
+    public static bool TryParse(string? text, out PairingRole role)
+    {
+        switch (text)
+        {
+            case "none": role = PairingRole.None; return true;
+            case "enabler": role = PairingRole.Enabler; return true;
+            case "payoff": role = PairingRole.Payoff; return true;
+            default: role = default; return false;
         }
     }
 }

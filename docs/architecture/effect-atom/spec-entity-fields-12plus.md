@@ -5,7 +5,20 @@ Module **E38** in the [atom effect map](../effect-atom-map.md) §13 (Wave 8). De
 
 > **Reads [definitions.md](definitions.md)** — the shared vocabulary pinned after the 2026-08-22 audit.
 > Where this spec and the definitions disagree, **the definitions win**. E38 authors magnitudes from
-> its §2 units, which the item program corrected on 2026-08-22.
+> its §2 units. ⛔ **CORRECTED 2026-09-03**: the item program *proposed* the units fix on 2026-08-22, but
+> `definitions.md` itself carried the wrong row until **E42** applied it on 2026-09-03. E38 depends on
+> E42, not merely on the 2026-08-22 handoff.
+
+> **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — the coefficient data path.**
+> Coefficients do **not** live in `data/tuning/effects.v1.json`: that file has no coefficient section
+> (its keys are `matchupRead` and `damageFxFloater`), and `CoefficientTable` never reads `data/tuning/`
+> at all — the only reader is `RpgStore.GetPowerTables` over the **content-hashed** `power_coefficient`
+> table (`RpgStore.Power.cs:61-72`; hash registry V3 at `ContentHashRegistry.cs:148-160`). **The path is
+> a seed kind, `data/seed/power/coefficients.v1.json`**, decided in full at
+> [`spec-power-sweep.md`](spec-power-sweep.md) §4.1. `CoefficientTable.Authored()` stays the
+> no-database fallback and this module does not edit it. **This spec's coefficient row lands in that
+> seed file.**
+
 
 ## Objective
 
@@ -124,11 +137,49 @@ through `CheatAbsoluteStatPlugin` (`src/FusionRpg.Core/Stats/Plugins/CheatAbsolu
   **Preserve the refusal**, and say in a comment that it is a structural floor (a zero speed is not a
   balance value; it is a stuck entity), not a progression cap.
 - **`P-ATK-ADD` has no value guard at all** — `if (CheatState.IsUserSet("P-ATK-ADD")) p.attackSpeedAdder = CheatState.FVal("P-ATK-ADD");`
-  and nothing else. A negative attack-speed adder reaches the Unity field today. Promotion must **make
-  a decision and record it**: either negative is meaningful for an adder (say so, keep it unguarded)
-  or it is not (add the guard, and note that this is a **behaviour change to a shipped operator key**,
-  not a like-for-like move). Carrying "no guard" across silently is the third option and the wrong one
-  — it is the shape that hides which of the two the author meant.
+  and nothing else. A negative attack-speed adder reaches the Unity field today.
+
+  > **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate): negative is meaningful. `P-ATK-ADD`
+  > stays unguarded, and the comment says why.**
+  >
+  > **An adder is a signed delta by construction** — that is what distinguishes it from
+  > `P-ATK-CD`/`P-PROD-CD` (countdowns, `>= 0`, a duration cannot be negative) and from
+  > `P-SPEED`/`P-MOVE`/`Z-SPD` (speeds, `> 0`, a zero freezes the entity). A delta with a sign is the
+  > one shape in the twelve for which "negative" is an ordinary value, and the repo already treats a
+  > deliberate drawback as legitimate content — E28's `backwards-interval` lint **warns and does not
+  > block** on exactly this kind of authoring.
+  >
+  > **The tie-break is that keeping it unguarded is the reversible choice.** Adding the guard is a
+  > **behaviour change to a shipped operator key** — an operator who has been setting a negative adder
+  > loses it silently. Keeping it is the status quo, and adding a guard later costs one line if a
+  > reason appears.
+  >
+  > **Where the floor belongs if one is ever needed:** on the **composed** attack rate, not on the
+  > adder. That is where `StatChannels.MinimumInterval` already lives (`ModifierOp.cs:57`) and it is
+  > the only place that can see whether the sum went non-positive — an adder cannot know what it is
+  > being added to. **A per-key clamp would be the wrong layer even if the value were wrong.**
+  >
+  > **What would overturn it, and it is a live check this decision does not block on:** if a
+  > sufficiently negative `attackSpeedAdder` makes a plant stop firing entirely rather than fire
+  > slower, the value is structurally invalid, not merely a drawback, and the floor above becomes
+  > required. **See §2b.1 — it does not block any other work in this module.**
+
+#### 2b.1 Criteria-stated task (needs a live lawn, blocks nothing)
+
+**What to check:** with a plant on the board, set `P-ATK-ADD` to a large negative value (start at
+`-100`, then `-1000`) and watch whether the plant's attack rate degrades smoothly or the plant stops
+attacking / behaves erratically.
+
+**Pass:** the plant fires more slowly and keeps firing. `P-ATK-ADD` stays unguarded per §2b, and the
+task closes with the observation recorded.
+
+**Fail:** the plant stops firing, fires infinitely fast, or throws. Then the composed attack rate gets
+a **structural** floor at `StatChannels.MinimumInterval`'s call site, with the comment `AGENTS.md`
+requires — still not a guard on the key.
+
+**Why it blocks nothing:** the decision above is *"keep today's behaviour"*, so every other promotion
+in this module proceeds on the eleven guarded keys and on `P-ATK-ADD` unchanged. The task can run
+before, during, or after.
 
 **None of the three is a decision this spec gets to skip.** Twelve promotions with one assumed guard
 shape is how a key changes meaning during a refactor nobody reviewed as a behaviour change.
@@ -138,8 +189,9 @@ shape is how a key changes meaning during a refactor nobody reviewed as a behavi
 
 ### 2c. Pricing
 
-Twelve rows in `CoefficientTable.Authored()`, and a row per channel in `data/tuning/effects.v1.json`
-where the table is data-loaded. A missing row is **not** zero — `CoefficientTable.Find` falls back to
+Twelve rows in `data/seed/power/coefficients.v1.json` (see the decision below), which import into
+`power_coefficient`. **`CoefficientTable.Authored()` is not edited** — it is the no-database fallback,
+and a coefficient added there would move every golden with no content-hash change. A missing row is **not** zero — `CoefficientTable.Find` falls back to
 the kind's channel-less row (`CoefficientTable.cs:75-82`), so an unpriced level-up quietly prices as
 ten hit points rather than reporting `unpriced`. That fallback is why every one of the twelve needs an
 explicit row even where the number is a guess.
@@ -171,7 +223,7 @@ That is the same failure the comment four lines above the flip records already h
 *"Pricing the signed value made every damage atom worth a negative amount — so a budget over a damage
 item RELAXED as the item got deadlier"* (`CostFunction.cs:60-63`).
 
-**What E38 must decide and write down** — it is a choice, not a bug with one fix:
+**The two frames E38 had to choose between** — it is a choice, not a bug with one fix. **Decided 2026-09-03, immediately after this list:**
 
 1. **Bearer frame, kept.** `takeDmgMultiplier` stays `LowerIsBetter`, and a raise on *oneself* is
    correctly a penalty. A debuff **applied to an enemy** is then not a `stat.modify` on the caster's
@@ -181,8 +233,36 @@ item RELAXED as the item got deadlier"* (`CostFunction.cs:60-63`).
 2. **Target frame.** The channel is declared `HigherIsBetter` on the ground that content only ever
    raises it on someone else. That makes a self-buff *reducing* it price as a penalty, which is worse.
 
-Whichever is chosen, §2c's coefficient row carries the reason in its comment, and §4 gets a test for
-the direction that is *not* obvious — a **raise**, not only the reduction the table tests today.
+#### ⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — **option 1, the bearer frame.** `takeDmgMultiplier` stays `LowerIsBetter`
+
+The spec called option 1 *"the likely answer"*; it is now the decision. Three reasons, in the order
+they carry weight:
+
+1. **Option 2 is worse in the same way, on a case that is more common.** Declaring the channel
+   `HigherIsBetter` makes a **self-buff** — *"I take 20% less damage"*, the ordinary defensive
+   affix — price as a **penalty**. That is the same sign inversion moved onto the more frequently
+   authored direction, so it trades a rare mispricing for a common one.
+2. **The channel is a bearer's own stat, and everything that writes it writes a bearer's.**
+   `Z-TAKEMULT` reaches `EntityStatWriter.cs:141` on the entity being written, and §2a's own
+   justification is *"lower is better **for the bearer**"*. Nothing in the write surface expresses
+   "someone else's `takeDmgMultiplier`" — the frame is not a choice the code left open, it is the
+   frame the code already has.
+3. **The debuff has a correct home already.** *"This target takes +X% damage"* is a `status.apply`
+   whose payload carries the modifier, and the status is priced as a status — by its own coefficient,
+   its trigger frequency and its uptime, which is a better model of a debuff's worth than a flat
+   channel magnitude anyway.
+
+**So E38 must say plainly, in §2a and in the coefficient row's comment: `takeDmgMultiplier` is not the
+authoring surface for *"enemies take more damage"*.** That sentence is the deliverable of this
+decision — without it, the first author to want the debuff reaches for the channel, gets a negative
+price, and files a bug against the cost function.
+
+**What would overturn it:** a target-framed write surface appearing — an atom that applies a
+`stat.modify` to an entity other than its bearer. That is a **new attach point**, not a channel
+direction, and it would make the frame question a real fork rather than a naming one.
+
+Under the bearer frame, §2c's coefficient row carries the reason in its comment, and §4 gets a test
+for the direction that is *not* obvious — a **raise**, not only the reduction the table tests today.
 
 ## 3. What it must NOT do
 
@@ -198,8 +278,10 @@ the direction that is *not* obvious — a **raise**, not only the reduction the 
   say so in a comment; a countdown gets the same floor for the same reason and the same comment.
   `Math.Max(1L, …)` on max HP is structural too. Anything else is a soft cap in
   `data/tuning/stats.v1.json`, never a `const`.
-- **No number a balance pass would change, in code.** Coefficients, floors and any soft cap live in
-  `data/tuning/`. `CoefficientTable.Authored()` is the no-database fallback, not a tuning file.
+- **No number a balance pass would change, in code.** Coefficients live in
+  `data/seed/power/coefficients.v1.json`; floors and soft caps live in `data/tuning/`.
+  `CoefficientTable.Authored()` is the no-database fallback, not a tuning file, and this module does
+  not edit it.
 - **Do not promote `Z-SLOW-FREEZE` / `Z-SLOW-COLD` / `Z-SLOW-BUTTER`** (`EntityStatWriter.cs:149-155`).
   Those floats are owned by the status runtime; a channel over them would give one slow two owners.
   Scope discipline, exactly as E16 held the line at three.
@@ -221,7 +303,7 @@ the direction that is *not* obvious — a **raise**, not only the reduction the 
 | Cost function on a `takeDmgMultiplier` **reduction** | prices as a **benefit**, not a penalty |
 | Cost function on a `takeDmgMultiplier` **raise** | matches whichever frame §2c chose, and the test names it. Under the bearer frame it prices **negative**, and a second test asserts that *"enemies take more damage"* is authored as a `status.apply` payload instead — the sign trap must be pinned in the direction that is not obvious |
 | `P-SPEED 0` / `P-MOVE 0` / `Z-SPD 0` / `Z-SPD-O 0` set by an operator | still **refused**, as `EntityStatWriter.cs:117`, `:119`, `:145`, `:147` refuse them today. A promotion that starts accepting zero here freezes the entity |
-| `P-ATK-ADD` negative | behaves as §2b's recorded decision says, and the decision is written down. Not left to whichever guard the promotion happened to copy |
+| `P-ATK-ADD` negative | reaches the field unguarded, per §2b's decision, and a test pins the absence of a guard so a later promotion cannot add one silently |
 | Each of the twelve | has a coefficient row; a removed row makes the atom report `unpriced`, never the generic fallback |
 | `P-LEVEL 0` set by an operator | still reaches `theLevel`; asserts the `>= 0` guard, not `> 0` |
 | The existing eleven channels | unchanged, goldens unmoved |
@@ -241,12 +323,16 @@ half is covered by `guard-single-writer.ps1` plus the extras text guard, and con
    is green.
 5. Every promoted cheat key still works from the operator menu, now as an `Override`, and **each of the
    three guard shapes in §2b is preserved** — `P-LEVEL 0` and the other six `>= 0` keys still accept
-   zero, the four `> 0` keys still refuse it, and `P-ATK-ADD`'s missing guard is resolved by a written
-   decision rather than copied.
-6. The three `LowerIsBetter` channels price as benefits when reduced, **and `takeDmgMultiplier`'s
-   raise direction prices as §2c decides**, with the reason in the coefficient row's comment and a
-   test on the non-obvious direction.
-7. All twelve have coefficient rows; none falls through to the channel-less row.
+   zero, the four `> 0` keys still refuse it, and **`P-ATK-ADD` stays unguarded** with the reason
+   recorded (§2b, decided 2026-09-03) and a test pinning the absence of the guard.
+6. The three `LowerIsBetter` channels price as benefits when reduced, and `takeDmgMultiplier`'s
+   **raise** prices as **negative power under the bearer frame** (§2c, decided 2026-09-03), with the
+   reason in the coefficient row's comment and a test on that non-obvious direction — plus a second
+   test asserting *"enemies take more damage"* is authored as a `status.apply` payload.
+6b. §2a and the coefficient row both state that `takeDmgMultiplier` is **not** the authoring surface
+   for *"enemies take more damage"*.
+7. All twelve have coefficient rows in `data/seed/power/coefficients.v1.json`; none falls through to
+   the channel-less row.
 8. **`Z-TAKEMULT` is confirmed live before it ships as a channel.** E16 recorded it LIVE-inconclusive;
    an owner-run lawn proof that a `takeDmgMultiplier` change alters incoming damage is a gate on this
    channel, not on the module. If the proof fails, the channel ships refused with the reason recorded
@@ -260,6 +346,6 @@ half is covered by `guard-single-writer.ps1` plus the extras text guard, and con
 | **E16 `channel-extension`** | Same shape, already run. Its "never promote `Z-TAKEMULT`" boundary is superseded by map §13; its LIVE-inconclusive finding is not |
 | **effect-pipeline overlap** | Map §16: E30 owns the pool contract, effect-pipeline owns the slot declaration and resolver. E38 adds channels; it must not add a resolver |
 | **battle-timeline B25/B26** | B26 freezes shield and DoT behaviour while this edits the shared compose path, and the injector is not built by CI. Sequence, do not straddle |
-| **`definitions.md` §2 units** | E38 authors magnitudes from it; it is the file that wins under `DESIGN-GATE.md` |
+| **E42 `units-correction`** | ✅ **CLOSED 2026-09-03.** `definitions.md` §2 now correctly states `combat.power.*`/`combat.defense.*`/`combat.shield.*` as flat game units. E38's magnitudes may be authored |
 | **Stale instances** | A `catalog_revision` bump makes every rolled `effect_instance` unbindable (`StaleInstance`) |
 | **Goldens** | E16 moved none. Twelve new channels with no content using them should move none either — if a golden moves, that is a finding, not a re-bless |
