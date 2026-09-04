@@ -165,7 +165,7 @@ public class WorldCedeForecastTests : IAsyncLifetime
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
-            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v1.json")));
+            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v2.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
             FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v4.json")));
         // Committing "dave" alone runs Zomboss's FrontierRulesPolicy too (two-hearths' AI auto-fill),

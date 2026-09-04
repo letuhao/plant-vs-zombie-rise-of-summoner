@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 3000,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": "Light",
+  "gameTypeId": 1308,
+  "magnitudes": {
+    "combat.block.shred.omni": 542,
+    "combat.parry.shred.omni": 542,
+    "combat.power.omni": 362,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 6328,
+    "resource.regen.hp": 136,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "SunJalapeno",
+  "theta": 13,
+  "traitPool": [
+    "cannibalistic-growth",
+    "collateral-combustion",
+    "sunlight-conversion"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "cursed",
+    "mutated",
+    "normal"
+  ]
+}

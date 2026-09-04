@@ -7,18 +7,16 @@
   "elementSecondary": null,
   "gameTypeId": 7,
   "magnitudes": {
-    "combat.block.shred.omni": 380,
-    "combat.parry.shred.omni": 380,
-    "combat.power.omni": 470,
-    "combat.shield.pen.omni": 271,
+    "combat.power.omni": 723,
+    "combat.shield.pen.omni": 904,
     "resource.max.hp": 2712,
     "resource.max.hunger": 2260,
-    "resource.max.qi": 3796,
+    "resource.max.qi": 6328,
     "resource.max.spirit": 1356,
-    "resource.max.stamina": 5515,
+    "resource.max.stamina": 3616,
     "resource.regen.hp": 136,
     "resource.regen.hunger": 136,
-    "resource.regen.qi": 235,
+    "resource.regen.qi": 362,
     "resource.regen.spirit": 90,
     "resource.regen.stamina": 226
   },
@@ -29,9 +27,9 @@
   "speciesId": "FumeShroom",
   "theta": 13,
   "traitPool": [
-    "Aerosol-Projection",
-    "Armor-Piercing",
-    "High-Velocity Smoke"
+    "armor-piercing",
+    "infinite-penetration",
+    "smoke-projection"
   ],
   "variantCount": 2,
   "variants": [

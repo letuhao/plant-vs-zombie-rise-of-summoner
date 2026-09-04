@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
   "elementPrimary": "Earth",
@@ -32,9 +32,9 @@
   "speciesId": "ConeZombie",
   "theta": 13,
   "traitPool": [
+    "food-mimicry",
     "improvised-armor",
-    "oblivious",
-    "percussive-defense"
+    "oblivious"
   ],
   "variantCount": 0,
   "variants": []

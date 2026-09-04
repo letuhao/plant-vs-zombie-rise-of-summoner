@@ -299,13 +299,18 @@ public class EntityFieldsTwelvePlusTests
         }
     }
 
+    // E41 (spec-ui-attach-point.md §2c): landed a thirteenth row (ui.present, kind-wide, coeffMilli 0)
+    // in this same seed file after this test was written — updated here rather than left stale the
+    // moment a sibling module added its own row, matching this session's own established precedent
+    // for a shared-file count guard (AtomKindRegistryTests.cs's KindCount/AttachPointCount rows).
     [Fact]
-    public void The_seed_file_carries_no_extra_rows_beyond_the_twelve()
+    public void The_seed_file_carries_exactly_the_twelve_plus_ui_presents_own_row()
     {
         // A removed row makes the atom report unpriced once a real import runs — this is the sibling
         // check that a stray or duplicated row was not authored either.
         var content = LoadCoefficientSeedFile(out _);
-        Assert.Equal(TwelveChannels.Length, content.Coefficients.Count);
+        Assert.Equal(TwelveChannels.Length + 1, content.Coefficients.Count);
+        Assert.Contains(content.Coefficients, c => c.KindId == "ui.present" && c.Channel == "");
     }
 
     static SeedContent LoadCoefficientSeedFile(out IReadOnlyList<SeedError> errors)

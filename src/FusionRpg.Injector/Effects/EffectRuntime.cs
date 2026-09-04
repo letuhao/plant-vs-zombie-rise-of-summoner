@@ -99,6 +99,9 @@ public static class EffectRuntime
             };
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
             _bag.Status = _status;
+            // E41 (spec-ui-attach-point.md §2b): op:meter/op:banner's own collaborator, wired the same
+            // way DamageFxCueAdapter.Sink is wired onto the Funnel below for op:number.
+            _bag.UiPresent = InjectorUiPresentSink.Instance;
             WireCombatMath(_bag);
             _ = new EffectFunnel(_bag, DamageFxCueAdapter.Sink);
             _plugins = EffectPluginHostFactory.Create(_bag);
@@ -247,6 +250,10 @@ public static class EffectRuntime
         try { CheatActions.ReapplyAllLiving(); } catch { }
         InjectorDerivedOverride.Clear();
         InjectorElementOverride.Clear();
+        // E41: an atom-authored meter is per-match state, the same reason match.modify's own
+        // MatchModifyWrites drains on this same path — leaving one set would leak silently into the
+        // next match's HUD.
+        Hud.ActorHudMeterOverride.Clear();
         try { Hud.ActorHudCache.Clear(); } catch { }
 
         DebugRuntime.Emit("debug.effect.cleared", new Dictionary<string, object>

@@ -1,0 +1,37 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Light",
+  "elementSecondary": null,
+  "gameTypeId": 1333,
+  "magnitudes": {
+    "resource.max.hp": 960,
+    "resource.max.hunger": 2080,
+    "resource.max.qi": 480,
+    "resource.max.spirit": 240,
+    "resource.max.stamina": 640,
+    "resource.regen.hp": 64,
+    "resource.regen.hunger": 120,
+    "resource.regen.qi": 32,
+    "resource.regen.spirit": 16,
+    "resource.regen.stamina": 40
+  },
+  "pTheta": 80,
+  "rangeCells": 1,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "CherryHypno",
+  "theta": 0,
+  "traitPool": [
+    "charm-inducing",
+    "reactive",
+    "transmutative"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "cursed",
+    "mutated"
+  ]
+}

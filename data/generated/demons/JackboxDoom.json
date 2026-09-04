@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 3000,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 1242,
+  "magnitudes": {
+    "combat.block.shred.omni": 163,
+    "combat.parry.shred.omni": 163,
+    "combat.power.omni": 108,
+    "resource.max.hp": 4611,
+    "resource.max.hunger": 8904,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 4429,
+    "resource.regen.hp": 294,
+    "resource.regen.hunger": 516,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "JackboxDoom",
+  "theta": 13,
+  "traitPool": [
+    "ash-based damage",
+    "chain-reaction detonation",
+    "zombie-triggered combustion"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "cursed",
+    "mutated"
+  ]
+}

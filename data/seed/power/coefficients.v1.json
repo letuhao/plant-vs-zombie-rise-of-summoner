@@ -85,6 +85,13 @@
       "coeffMilli": 1000,
       "referenceScale": 1,
       "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as zombieSpeedCurrent."
+    },
+    {
+      "kindId": "ui.present",
+      "channel": "",
+      "coeffMilli": 0,
+      "referenceScale": 1,
+      "note": "E41 (spec-ui-attach-point.md sec 2c), authored -- not a fitted sweep result, and never will be. A present is read-only: it never writes stat/resource/status/shield/board/currency state, so it is worth exactly zero power, deliberately, in both directions -- a UI atom must not become a free rider that inflates a container's apparent budget, and it must not tax one either. This row exists so CoefficientTable.Find returns an AUTHORED zero (verdict Priced) rather than falling through to the channel-less-row-missing case (verdict unpriced) -- an authored zero and a missing row are different claims, and this row is what keeps them different. Do not delete this row to 'simplify' -- ui.present has PowerCategory.None (AtomKindRegistryTests.cs's own cosmetic exemption), and a missing coefficient here is the exact PLANTED_VIOLATION this module's own pricing test guards against."
     }
   ]
 }

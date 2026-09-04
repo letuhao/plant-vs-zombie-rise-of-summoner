@@ -27,15 +27,18 @@
   },
   "pTheta": 452,
   "rangeCells": 3,
-  "rarity": "Chaff",
+  "rarity": "Cultivated",
   "side": "zombie",
   "speciesId": "BucketZombie",
   "theta": 13,
   "traitPool": [
-    "bucket_armored",
-    "magnetic_vulnerability",
-    "tactical_intelligence"
+    "improvised-armor",
+    "magnetic-vulnerability",
+    "tactical-intelligence"
   ],
-  "variantCount": 0,
-  "variants": []
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "normal"
+  ]
 }

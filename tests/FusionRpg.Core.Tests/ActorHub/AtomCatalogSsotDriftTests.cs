@@ -53,8 +53,9 @@ public class AtomCatalogSsotDriftTests
         // E36 (spec-wave-control.md): 13 -> 14 kinds, wave.control on the same Match attach point.
         // E37 (spec-projectile-control.md): 14 -> 15 kinds, bullet.modify on the existing Board point
         // (no attach-point change).
-        Assert.Equal(15, AtomKindRegistry.KindCount);
-        Assert.Equal(6, AtomKindRegistry.AttachPointCount);
+        // E41 (spec-ui-attach-point.md): 15 -> 16 kinds, 6 -> 7 attach points, with ui.present / Ui.
+        Assert.Equal(16, AtomKindRegistry.KindCount);
+        Assert.Equal(7, AtomKindRegistry.AttachPointCount);
 
         Assert.Contains($"Derived — {registry.AllRegistered.Count} registered", text);
         Assert.Contains($"Primary — {StatChannels.All.Length}, and only these", text);

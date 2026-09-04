@@ -1,0 +1,44 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 305,
+  "magnitudes": {
+    "combat.defense.omni": 407,
+    "combat.heal.power": 3797,
+    "combat.power.omni": 506,
+    "progression.bonus.atk": 1898,
+    "progression.bonus.defense": 1356,
+    "progression.bonus.maxHp": 1085,
+    "resource.max.hp": 3254,
+    "resource.max.hunger": 2938,
+    "resource.max.qi": 3662,
+    "resource.max.spirit": 2305,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 98,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 1,
+  "rarity": "Cultivated",
+  "side": "zombie",
+  "speciesId": "BlackFootball_c",
+  "theta": 13,
+  "traitPool": [
+    "high_resilience",
+    "lifesteal_interruption",
+    "loyal_enforcer",
+    "status_immunity"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "normal"
+  ]
+}

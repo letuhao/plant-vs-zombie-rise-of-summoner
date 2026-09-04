@@ -110,11 +110,24 @@ def test_themes_module_never_imports_from_the_items_adapter():
 
 
 def test_load_theme_keys_returns_the_thirteen_registered_legacy_themes_prefixed():
+    """⭐ Updated 2026-09-04 (item module 13, `set-charm-gen`): a THIRD append-only population,
+    `build.*`, joined the union — 36 keys, 12 aptitudes x 3 archetypes, in
+    `data/seed/items/_registry/build-themes.v1.json`. A `set` requires a `themeKey` and the build
+    set families belong to no species, so without it a build set is unauthorable; ruled as a third
+    namespace rather than a loosened `themeKey`, because making it *required* on `unique` is the
+    intended direction (`spec-demon-themes.md` 7) and loosening it here would reverse that.
+
+    The thirteen legacy themes are still asserted exactly — this test's original subject — and the
+    new population is asserted alongside rather than the count being loosened to `>= 13`."""
     keys = load_theme_keys()
-    assert len(keys) == 13
-    assert all(k.startswith("theme.") for k in keys)
+    legacy = {k for k in keys if k.startswith("theme.")}
+    build = {k for k in keys if k.startswith("build.")}
+    assert len(legacy) == 13
+    assert len(build) == 36
+    assert legacy | build == keys
     assert "theme.rot-bloom" in keys
     assert "theme.rusted-legion" in keys
+    assert "build.might-offense" in keys
 
 
 def test_theme_key_vocabulary_is_the_union_and_prefixes_cannot_collide():

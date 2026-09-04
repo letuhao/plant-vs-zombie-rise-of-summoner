@@ -20,16 +20,17 @@
   },
   "pTheta": 452,
   "rangeCells": 3,
-  "rarity": "Chaff",
+  "rarity": "Sprout",
   "side": "zombie",
   "speciesId": "BalloonZombie",
   "theta": 13,
   "traitPool": [
-    "Balloon-Dependent",
-    "Buoyant",
-    "High-Altitude",
-    "Invulnerable-in-Flight"
+    "aerial-evasion",
+    "balloon-buoyancy",
+    "unintentional-ascension"
   ],
-  "variantCount": 0,
-  "variants": []
+  "variantCount": 1,
+  "variants": [
+    "normal"
+  ]
 }

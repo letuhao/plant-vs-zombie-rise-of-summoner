@@ -52,6 +52,17 @@ public static class LoamPolicy
     public static long DevelopmentAndDangerUpkeep(int developmentLevel, int dangerBand) =>
         (long)developmentLevel * DevelopmentUpkeepPerLevel + (long)dangerBand * DangerUpkeepPerBand;
 
+    // ---- sector-development (spec-sector-development.md §3, empire-economy-ssot.md A8) ----
+
+    /// <summary>
+    /// What one level of development adds to a sector's own loam yield — the yield half of A8's
+    /// invariant ("development must raise yield faster than it raises upkeep"), read by
+    /// <see cref="Growth.DevelopmentYield"/>. Lives beside <see cref="DevelopmentUpkeepPerLevel"/> in
+    /// the same tuning file (`data/tuning/loam.v{n}.json`'s `development` block) so the comparison is
+    /// readable by inspection, not split across two files.
+    /// </summary>
+    public static long DevelopmentYieldPerLevel => Tuning.Development.YieldPerLevel;
+
     // ---- FadePolicy (spec-loam-calc.md #5) ----
 
     /// <summary>What a surplus sector recovers each turn, fixed — never the fast side of the pair.</summary>

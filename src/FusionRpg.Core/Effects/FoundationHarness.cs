@@ -13,6 +13,7 @@ public sealed class FoundationHarness
     readonly SeededEffectRandom _rng;
     readonly RecordingEffectSink _sink;
     readonly RecordingDamageFxSink _fx;
+    readonly RecordingUiPresentSink _uiPresent;
     readonly EffectBag _bag;
     readonly ActorDerivedLookup _derived = new();
     readonly ActorElementLookup _elements = new();
@@ -24,12 +25,14 @@ public sealed class FoundationHarness
         _rng = new SeededEffectRandom(seed);
         _sink = new RecordingEffectSink();
         _fx = new RecordingDamageFxSink();
+        _uiPresent = new RecordingUiPresentSink();
         var catalog = new InMemoryEffectCatalog();
         catalog.ReplaceAll(EffectAtomCatalog.CreateAll());
         var grants = new InMemoryEffectGrantStore();
         var proc = new EffectProcPolicy(_clock, _rng);
         _bag = new EffectBag(catalog, grants, proc, _sink);
         _bag.UtcNow = () => _clock.UtcNow;
+        _bag.UiPresent = _uiPresent;
         _bag.Status = new StatusRuntime(
             StatusCatalogBootstrap.CreateDefault(),
             (ptr, attackerLess) => _derived.Resolve(ptr, attackerLess));
@@ -46,6 +49,7 @@ public sealed class FoundationHarness
     public EffectFunnel Funnel { get; }
     public RecordingEffectSink Sink => _sink;
     public RecordingDamageFxSink Fx => _fx;
+    public RecordingUiPresentSink UiPresent => _uiPresent;
     public FakeEffectClock Clock => _clock;
 
     public EffectGrant Grant(EffectGrantDto dto)
@@ -53,6 +57,7 @@ public sealed class FoundationHarness
         _sink.Items.Clear();
         _sink.Fired.Clear();
         _fx.Items.Clear();
+        _uiPresent.Clear();
         return _bag.Grant(dto);
     }
 
@@ -74,6 +79,7 @@ public sealed class FoundationHarness
         _sink.Items.Clear();
         _sink.Fired.Clear();
         _fx.Items.Clear();
+        _uiPresent.Clear();
         _bag.ClearAll();
     }
 
@@ -167,6 +173,7 @@ public sealed class FoundationHarness
         _sink.Items.Clear();
         _sink.Fired.Clear();
         _fx.Items.Clear();
+        _uiPresent.Clear();
         _breakdowns.Clear();
         return _bag.OnEvent(ev);
     }

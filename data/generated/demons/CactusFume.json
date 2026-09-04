@@ -1,0 +1,38 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Air",
+  "elementSecondary": null,
+  "gameTypeId": 1393,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 7865,
+    "resource.max.spirit": 4113,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 10,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 529,
+    "resource.regen.spirit": 158,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "CactusFume",
+  "theta": 13,
+  "traitPool": [
+    "aerial-specialization",
+    "armor-piercing",
+    "mode-shifting",
+    "smoke-projection"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

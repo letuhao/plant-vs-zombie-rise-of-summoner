@@ -1,0 +1,39 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1314,
+  "magnitudes": {
+    "combat.power.omni": 298,
+    "progression.bonus.atk": 1356,
+    "resource.max.hp": 3796,
+    "resource.max.hunger": 2802,
+    "resource.max.qi": 4611,
+    "resource.max.spirit": 2622,
+    "resource.max.stamina": 4972,
+    "resource.regen.hp": 48,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 339,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 280
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "MagnetMelon",
+  "theta": 13,
+  "traitPool": [
+    "armor-piercing",
+    "ferrous-fusion",
+    "metallic-impact"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "cursed",
+    "mutated"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 3000,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 928,
+  "magnitudes": {
+    "combat.block.shred.omni": 459,
+    "combat.parry.shred.omni": 459,
+    "combat.power.omni": 306,
+    "resource.max.hp": 13005,
+    "resource.max.hunger": 25118,
+    "resource.max.qi": 7650,
+    "resource.max.spirit": 3826,
+    "resource.max.stamina": 12495,
+    "resource.regen.hp": 829,
+    "resource.regen.hunger": 1454,
+    "resource.regen.qi": 510,
+    "resource.regen.spirit": 256,
+    "resource.regen.stamina": 637
+  },
+  "pTheta": 1275,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "SuperHypnoDoom",
+  "theta": 36,
+  "traitPool": [
+    "fusion-hybridization",
+    "non-destructive-detonation",
+    "summoning-burst",
+    "zombie-catalyst"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "mutated"
+  ]
+}

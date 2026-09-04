@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Fire",
@@ -23,18 +23,17 @@
   },
   "pTheta": 452,
   "rangeCells": 3,
-  "rarity": "Cultivated",
+  "rarity": "Sprout",
   "side": "plant",
   "speciesId": "CherryBomb",
   "theta": 13,
   "traitPool": [
-    "Anti-Undead",
-    "Area-of-Effect",
-    "Detonating"
+    "area-of-effect",
+    "detonating",
+    "zombie-clearing"
   ],
-  "variantCount": 2,
+  "variantCount": 1,
   "variants": [
-    "mutated",
     "normal"
   ]
 }

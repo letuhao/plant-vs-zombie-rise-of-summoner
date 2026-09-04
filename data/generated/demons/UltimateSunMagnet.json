@@ -1,0 +1,39 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Light",
+  "elementSecondary": null,
+  "gameTypeId": 974,
+  "magnitudes": {
+    "resource.max.hp": 5568,
+    "resource.max.hunger": 4640,
+    "resource.max.qi": 27840,
+    "resource.max.spirit": 12992,
+    "resource.max.stamina": 7424,
+    "resource.regen.hp": 19,
+    "resource.regen.hunger": 278,
+    "resource.regen.qi": 1670,
+    "resource.regen.spirit": 650,
+    "resource.regen.stamina": 464
+  },
+  "pTheta": 928,
+  "rangeCells": 3,
+  "rarity": "Chimeric",
+  "side": "plant",
+  "speciesId": "UltimateSunMagnet",
+  "theta": 27,
+  "traitPool": [
+    "ferrous-synthesis",
+    "healing-catalyst",
+    "magnetic-buffing",
+    "resource-conversion"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "ancient",
+    "blessed",
+    "mutated"
+  ]
+}

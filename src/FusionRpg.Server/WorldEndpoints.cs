@@ -116,7 +116,8 @@ public static class WorldEndpoints
                 Stance = c.Stance,
                 LanePath = c.LanePath ?? new List<string>(),
                 Amount = c.Amount,
-                StructureId = c.StructureId
+                StructureId = c.StructureId,
+                ProjectId = c.ProjectId
             }).ToList();
 
             // One pass over the batch — the store reads the world once and owns which turn is open.

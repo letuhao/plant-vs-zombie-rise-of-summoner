@@ -80,6 +80,36 @@ threatBand unresolved 11/833, 98/833 generation failures.
   pre-existing/concurrent — different subsystem, different file tree
   `data/seed/actions/_briefs/round-1.json`, already `git status`-modified before this session
   touched it).
+> ### ✅ RESOLVED 2026-09-04 21:20 (owner-approved) — **C2 left two starter plants on the top rarity rung; both corrected, and a guard added**
+>
+> **Fixed, not just reported.** Both rows are corrected in place with full `_provenance.manualCorrection`
+> (from/to/why), and the demon suite is now **183/183 green** (was 4 red).
+>
+> | Species | was | now | how it was caught |
+> |---|---|---|---|
+> | `Peashooter` | `almanac`, **6** variants | `cultivated`, `[normal, mutated]` | only 6-variant row in 841; no `ancient`; `confidence.rarity` was **split** with minority `sprout`; own reason text says *"a nuisance or minor obstacle"* |
+> | `SunFlower` | `almanac`, **7** variants | `cultivated`, `[normal, mutated]` | only 7-variant row; own reason says *"a passive resource producer with no offensive or destructive capabilities"* |
+>
+> ⚠️ **The one that should worry you: `SunFlower`'s `confidence.rarity` was `high`, not `split`** — the
+> classifier was *confidently* wrong, and only the variant-count outlier gave it away. Worth a prompt
+> look; the rest of the `almanac` rung is coherent (six `Ultimate*` units, `JacksonDriverBoss`,
+> `ZombieBoss`), so this is not a systemic rung problem.
+>
+> ⭐ **A guard now enforces what the data already implied.** Across 841 rows the variant count tracks
+> the rarity rung tightly and monotonically (chaff 0, sprout 1, cultivated 1–2, fused/chimeric/heirloom
+> 2–3, firstseed 3, sunwoven 3–4, almanac 4) — but **nothing checked it**, and the only existing
+> assertion covered two hand-named species, which is why two bad rows sat there at once.
+> `tests/FusionRpg.Core.Tests/Demons/VariantCountBandTests.cs` now sweeps every anchor through
+> `_index.json`, names offenders by species id, keeps the `unresolved` exemption **bounded** (fails if
+> unclassified rows exceed 5% of the corpus), and asserts the ladder stays monotonic. Falsified:
+> restoring Peashooter's old row reddens it with `Peashooter: rarity 'almanac' allows 4..4 variants, has 6`.
+>
+> Also updated `SpeciesExpanderTests`' trait expectation — C2 moved traits to lower-kebab
+> (`Defensive` → `defensive-line`), which is corpus-wide: **2802 lower-case tokens against 79
+> upper-first**. Same maintenance path that test's own comment already documents for C3.
+>
+> <details><summary>Original report (kept — its first hypothesis was wrong and the correction is instructive)</summary>
+>
 > ### ⛔ Handoff finding from the battle-timeline session, 2026-09-04 20:40 — **C2's second pass left a live inconsistency**
 >
 > Reported rather than fixed: this is the demon stream's surface, and the fix is a pipeline/index
@@ -128,6 +158,8 @@ threatBand unresolved 11/833, 98/833 generation failures.
 > starter plant landing there with 6 variants reads as a classification regression, not a new truth. The
 > tests are currently doing their job.
 
+> </details>
+
 - [~] C2: redeploy kit-shape corpus-wide (`rerun --pipeline kit-shape --all`) — **first pass done
   2026-09-04, 641/904 succeeded, 263 failed; root-caused live, second pass in flight.**
   - First pass (`workers=4`, 2860 calls, ~80 min): 641 completed, 263 failed. Investigated rather
@@ -167,6 +199,32 @@ threatBand unresolved 11/833, 98/833 generation failures.
     in later.
   - **C2 final: 837/904 kit-shape-current (925 species total minus the 64 never-classified minus
     the 3 residual timeouts), corpus-wide redeploy complete.**
+> ### ⛔ C3 is marked done, but **9 rows still carry `attackTempo: "unresolved"`** — and they hard-fail the species import
+>
+> Found 2026-09-04 while clearing cross-stream reds. C3's line reads *"self-heal every currently-unresolved
+> field"*; `attackTempo` was not covered.
+>
+> **It is not cosmetic — it fails the import outright**, and fail-closed means all-or-nothing:
+> ```
+> FusionRpg.Data.Tests.DemonSpeciesImportCliTests
+>   A_real_import_against_the_real_committed_tree_succeeds_and_writes_a_real_store   FAILED
+>   A_stale_committed_file_refuses_the_whole_import_and_writes_nothing               FAILED
+>   -> 'SeaMagnet': attackTempo 'unresolved' has no entry in demon-shape.v1.json
+> ```
+> The second failure is collateral: it asserts the refusal message contains "stale", but the import dies
+> on SeaMagnet before it ever reaches the staleness check — so **one unhealed row masks an unrelated
+> test's real subject.**
+>
+> **The 9:** `SeaMagnet`, `CactusPumpkin`, `SunBomb`, `Chrysantheautumn`, `DoomSeaShroom`, `CherrySplit`,
+> `BloverPot`, `JackboxJumpZombie`, `ImpZombie` — 9 of 831 rows.
+>
+> ⛔ **Deliberately not healed by me.** `attackTempo`'s vocabulary is a closed five
+> (`ponderous` 3000 / `slow` 2400 / `steady` 1500 / `quick` 900 / `flurry` 500 in `demon-shape.v1.json`)
+> with **no sanctioned default** — the `demon-fix-unresolved` skill covers `threatBand` *only*, and says
+> so precisely because the other fields have no defensible fallback. Picking a tempo is a classification
+> call, which is this pipeline's job and not a hand edit. A targeted
+> `run --species SeaMagnet,CactusPumpkin,…` re-classify is the fix.
+
 - [x] C3: self-heal every currently-unresolved field (`rerun --unresolved`) — **done 2026-09-04,
   110/110 succeeded, 0 failed, 2159 calls.** Full 8-pipeline reclassification for every species
   with at least one unresolved voted field (rarity/aptitude/element/threatBand/attackTempo),

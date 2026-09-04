@@ -1,0 +1,42 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 36,
+  "magnitudes": {
+    "combat.defense.omni": 407,
+    "combat.power.omni": 506,
+    "combat.shield.pen.omni": 633,
+    "progression.bonus.defense": 1356,
+    "progression.bonus.maxHp": 1085,
+    "resource.max.hp": 3254,
+    "resource.max.hunger": 2938,
+    "resource.max.qi": 5244,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 98,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 307,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Cultivated",
+  "side": "plant",
+  "speciesId": "SpruceShooter",
+  "theta": 13,
+  "traitPool": [
+    "armor-ignoring",
+    "frost-immune",
+    "piercing-projectile"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "ancient",
+    "normal"
+  ]
+}

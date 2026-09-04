@@ -55,6 +55,7 @@ public static class DebugRuntime
         SessionActive = false;
         InjectorDerivedOverride.Clear();
         InjectorElementOverride.Clear();
+        Hud.ActorHudMeterOverride.Clear(); // E41: per-match state, same reset as the two lines above
         try { Hud.ActorHudCache.Clear(); } catch { }
         Emit("debug.session.end", new Dictionary<string, object> { ["scenarioId"] = id });
         ScenarioId = "";

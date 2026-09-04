@@ -102,7 +102,14 @@ public class SpeciesExpanderTests
         // Traits are open-vocabulary, LLM-proposed content (identity pipeline) — re-classified
         // during demon-corpus-self-heal's own C3 unresolved-field healing pass, 2026-09-04
         // ("Rapid-fire" -> "Rhythmic-attack"), a legitimate outcome, not a defect.
-        Assert.Equal(new[] { "Projectile-launching", "Defensive", "Rhythmic-attack" }, species.TraitPool);
+        //
+        // Re-classified AGAIN by C2's kit-shape pass later the same day, and updated here for the
+        // same reason: casing moved to lower-kebab and "Defensive" narrowed to "defensive-line".
+        // The casing half is corpus-wide, not local to this row — a sweep of every anchor counts
+        // **2802 lower-case trait tokens against 79 upper-first**, so the corpus has a convention and
+        // this row follows it. Verified as a vocabulary shift rather than data loss: the trait COUNT
+        // and the three concepts are unchanged.
+        Assert.Equal(new[] { "projectile-launching", "defensive-line", "rhythmic-attack" }, species.TraitPool);
         Assert.Null(species.Name); // never resolved here — species-import's own job (T4.6)
     }
 

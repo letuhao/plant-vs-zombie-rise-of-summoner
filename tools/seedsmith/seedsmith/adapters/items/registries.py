@@ -42,9 +42,18 @@ def load_theme_keys() -> frozenset[str]:
     legal `themeKey` values. Demon themes are not loaded from a committed file here (none is
     committed yet — see the demons feature's own build notes); a caller with a live demon theme
     registry unions its keys in via `demon_theme_keys`.
+
+    ⭐ **A THIRD population landed 2026-09-04 (item module 13, `set-charm-gen`): `build.*`.** A
+    `set` REQUIRES a `themeKey` (`kinds.py`'s own spec, mirroring `KindCatalog.cs`), and the 36
+    build set families are keyed on `(aptitude, archetype)` and belong to no species — so without
+    it a build set is unauthorable. Ruled as a third append-only namespace rather than a loosened
+    `themeKey`, because `spec-demon-themes.md` §7 names making it *required* on `unique` as the
+    intended direction and loosening it here would reverse that. Collision-free against `theme.*`
+    and `demon.*` by construction, exactly the namespace split §2.2a already established.
     """
     legacy = frozenset(f"theme.{t['id']}" for t in _load("themes.v1.json")["themes"])
-    return legacy
+    build = frozenset(row["themeKey"] for row in _load("build-themes.v1.json")["themes"])
+    return legacy | build
 
 
 def load_vocabularies(

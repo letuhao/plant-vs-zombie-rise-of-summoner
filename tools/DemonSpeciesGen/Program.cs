@@ -99,9 +99,17 @@ if (explainSpeciesId is not null)
 }
 
 var stale = new List<string>();
+var skipped = new List<string>();
 var written = 0;
 foreach (var anchor in anchors)
 {
+    var unresolvedFields = SpeciesExpander.UnresolvedFields(anchor);
+    if (unresolvedFields.Count > 0)
+    {
+        skipped.Add($"{anchor.SpeciesId} ({string.Join(", ", unresolvedFields)})");
+        continue;
+    }
+
     ConcreteSpecies species;
     try { species = SpeciesExpander.Expand(anchor, aptitudeTuning, powerTuning, shapeTuning, threatTuning); }
     catch (Exception ex)
@@ -128,6 +136,13 @@ foreach (var anchor in anchors)
     }
 }
 
+if (skipped.Count > 0)
+{
+    Console.WriteLine(
+        $"{skipped.Count} species skipped — still unresolved on at least one voted field, not " +
+        $"generated: {string.Join("; ", skipped)}");
+}
+
 if (check)
 {
     if (stale.Count > 0)
@@ -135,11 +150,11 @@ if (check)
         Console.Error.WriteLine($"{stale.Count} species stale against {outRoot}: {string.Join(", ", stale)}");
         return 1;
     }
-    Console.WriteLine($"--check: clean, {anchors.Count} species match {outRoot}");
+    Console.WriteLine($"--check: clean, {anchors.Count - skipped.Count} species match {outRoot}");
     return 0;
 }
 
-Console.WriteLine($"{anchors.Count} species expanded, {written} file(s) written to {outRoot}");
+Console.WriteLine($"{anchors.Count - skipped.Count} species expanded, {written} file(s) written to {outRoot}");
 return 0;
 
 static void Explain(

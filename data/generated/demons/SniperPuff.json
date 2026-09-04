@@ -1,0 +1,42 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 1290,
+  "magnitudes": {
+    "combat.block.shred.omni": 163,
+    "combat.parry.shred.omni": 163,
+    "combat.power.omni": 108,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 4611,
+    "resource.max.spirit": 2622,
+    "resource.max.stamina": 4429,
+    "resource.regen.hp": 48,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 339,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "SniperPuff",
+  "theta": 13,
+  "traitPool": [
+    "critical-strike precision",
+    "explosive fusion",
+    "low-profile",
+    "split-form mechanics"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "blessed",
+    "mutated",
+    "normal"
+  ]
+}

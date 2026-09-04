@@ -1,0 +1,43 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Dark",
+  "elementSecondary": null,
+  "gameTypeId": 232,
+  "magnitudes": {
+    "combat.block.shred.omni": 380,
+    "combat.parry.shred.omni": 380,
+    "combat.power.omni": 470,
+    "combat.shield.pen.omni": 271,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 3796,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 5515,
+    "resource.regen.hp": 136,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 235,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Heirloom",
+  "side": "zombie",
+  "speciesId": "SummonedHorse",
+  "theta": 13,
+  "traitPool": [
+    "charm_negation",
+    "immunity_to_crowd_control",
+    "non_lethal_penetration",
+    "phantom_dash"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "ancient",
+    "corrupted",
+    "normal"
+  ]
+}

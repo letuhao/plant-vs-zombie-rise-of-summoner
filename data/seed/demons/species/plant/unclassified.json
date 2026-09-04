@@ -327,7 +327,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:22:50Z",
+      "emittedUtc": "2026-09-04T14:37:28Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -475,7 +475,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:23:02Z",
+      "emittedUtc": "2026-09-04T14:37:28Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -548,7 +548,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:23:26Z",
+      "emittedUtc": "2026-09-04T14:37:49Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -917,7 +917,7 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:13:56Z",
+      "emittedUtc": "2026-09-04T14:38:08Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,

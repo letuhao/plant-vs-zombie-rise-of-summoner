@@ -60,7 +60,7 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "contracts.v1.json"))));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
             FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "loam.v1.json"))));
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "loam.v2.json"))));
         var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(
             System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "world.v4.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);

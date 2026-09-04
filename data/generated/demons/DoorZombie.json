@@ -1,6 +1,6 @@
 {
   "acquisition": "CaptureOnly",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
   "elementPrimary": "Earth",
@@ -27,14 +27,15 @@
   },
   "pTheta": 452,
   "rangeCells": 3,
-  "rarity": "Heirloom",
+  "rarity": "Grafted",
   "side": "zombie",
   "speciesId": "DoorZombie",
   "theta": 13,
   "traitPool": [
-    "Immobilized by heavy iron door",
-    "Magnetic vulnerability",
-    "Residual altruism"
+    "adhesive-trapped",
+    "door-bound",
+    "justice-driven",
+    "magnetically-vulnerable"
   ],
   "variantCount": 2,
   "variants": [

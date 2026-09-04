@@ -120,6 +120,134 @@ public class GrowthPhasesTests
         Assert.StartsWith("growth.pulse:", entry.Detail);
     }
 
+    // ---- W52: sector-wide projects advance here, never in Production ---------------------------
+
+    static WorldSector SectorWithProject(string id, string? owner, string? projectId, int? turnsRemaining) =>
+        new()
+        {
+            SectorId = id, TypeId = "stable", OwnerFactionId = owner,
+            ProjectId = projectId, ProjectTurnsRemaining = turnsRemaining
+        };
+
+    [Fact]
+    public void A_project_with_more_than_one_turn_remaining_only_decrements()
+    {
+        var world = World(currentTurn: 6, SectorWithProject("s1", "f1", "raise-development-placeholder", 3));
+        var report = new TurnReport();
+
+        var result = RunGrowth(world, report, turn: 8); // not a week boundary — isolates the project alone
+
+        var sector = result.Sectors.Single();
+        Assert.Equal("raise-development-placeholder", sector.ProjectId);
+        Assert.Equal(2, sector.ProjectTurnsRemaining);
+        Assert.DoesNotContain(report.Entries, e => e.Detail.StartsWith("develop.completed"));
+    }
+
+    [Fact]
+    public void A_project_reaching_zero_completes_clears_and_reports()
+    {
+        var world = World(currentTurn: 6, SectorWithProject("s1", "f1", "raise-development-placeholder", 1));
+        var report = new TurnReport();
+
+        var result = RunGrowth(world, report, turn: 8);
+
+        var sector = result.Sectors.Single();
+        Assert.Null(sector.ProjectId);
+        Assert.Null(sector.ProjectTurnsRemaining);
+        Assert.Contains(report.Entries,
+            e => e.Kind == TurnReportKinds.Event && e.Detail == "develop.completed:raise-development-placeholder");
+    }
+
+    // ---- W53: a completed project is what raises DevelopmentLevel -------------------------------
+
+    [Fact]
+    public void A_completed_project_raises_DevelopmentLevel_by_its_authored_amount_once_and_reports_it()
+    {
+        var project = ProjectCatalog.Get("raise-development-placeholder");
+        var world = World(currentTurn: 6, SectorWithProject("s1", "f1", project.ProjectId, 1) with { DevelopmentLevel = 5 });
+        var report = new TurnReport();
+
+        var result = RunGrowth(world, report, turn: 8);
+
+        var sector = result.Sectors.Single();
+        Assert.Equal(5 + project.DevelopmentBonus, sector.DevelopmentLevel);
+        Assert.Contains(report.Entries,
+            e => e.Kind == TurnReportKinds.Event && e.Detail == "development.raised:" + project.DevelopmentBonus
+                 && e.SectorId == "s1");
+    }
+
+    [Fact]
+    public void A_sector_with_no_project_never_has_its_DevelopmentLevel_touched()
+    {
+        var world = World(currentTurn: 6, Sector("s1", "f1", new[] { Seat("f1") }) with { DevelopmentLevel = 7 });
+
+        var result = RunGrowth(world, new TurnReport(), turn: 8);
+
+        Assert.Equal(7, result.Sectors.Single().DevelopmentLevel);
+    }
+
+    [Fact]
+    public void No_number_of_Growth_passes_ever_lowers_a_sectors_DevelopmentLevel()
+    {
+        // AGENTS.md's no-hard-progression-ceiling rule cuts both ways here: there is no
+        // de-development anywhere. A long run of ordinary turns (no project, no seat) must never see
+        // the level move at all, let alone downward.
+        var world = World(currentTurn: 6, Sector("s1", "f1", Array.Empty<WorldSlot>()) with { DevelopmentLevel = 4 });
+        var seed = world;
+
+        for (var turn = 7; turn <= 30; turn++)
+        {
+            var before = seed.Sectors.Single().DevelopmentLevel;
+            seed = RunGrowth(seed, new TurnReport(), turn);
+            Assert.True(seed.Sectors.Single().DevelopmentLevel >= before);
+        }
+
+        Assert.Equal(4, seed.Sectors.Single().DevelopmentLevel);
+    }
+
+    [Fact]
+    public void A_sector_with_no_project_is_untouched_by_project_advancement()
+    {
+        var world = World(currentTurn: 6, Sector("s1", "f1", new[] { Seat("f1") }));
+        var report = new TurnReport();
+
+        RunGrowth(world, report, turn: 8);
+
+        Assert.DoesNotContain(report.Entries, e => e.Detail.StartsWith("develop."));
+    }
+
+    [Fact]
+    public void An_unowned_sectors_project_still_advances_matching_LoamPhases_Production_own_precedent()
+    {
+        // `LoamPhases.Production`'s own `DecrementConstruction` counts a structure down unconditional
+        // on ownership — a project follows the identical rule here, one phase over. A lost sector's
+        // half-finished project is cleared explicitly, in `LoamPhases.Pressure`'s own `Lost` branch,
+        // never silently frozen here by an ownership check this phase does not otherwise need.
+        var world = World(currentTurn: 6, SectorWithProject("s1", null, "raise-development-placeholder", 1));
+        var report = new TurnReport();
+
+        var result = RunGrowth(world, report, turn: 8);
+
+        Assert.Null(result.Sectors.Single().ProjectId);
+        Assert.Contains(report.Entries, e => e.Detail == "develop.completed:raise-development-placeholder");
+    }
+
+    [Fact]
+    public void A_completing_project_and_a_recruit_pulse_both_report_in_the_same_pass_independently()
+    {
+        var world = World(currentTurn: 6,
+            SectorWithProject("s1", "f1", "raise-development-placeholder", 1) with { Slots = new[] { Seat("f1") } });
+        var report = new TurnReport();
+
+        var result = RunGrowth(world, report, turn: 7); // a real week boundary — both effects fire together
+
+        var sector = result.Sectors.Single();
+        Assert.Null(sector.ProjectId);
+        Assert.Equal(SeatPulse, sector.RecruitStock);
+        Assert.Contains(report.Entries, e => e.Detail == "develop.completed:raise-development-placeholder");
+        Assert.Contains(report.Entries, e => e.Detail.StartsWith("growth.pulse:"));
+    }
+
     [Fact]
     public void Every_held_seat_accrues_independently_in_stable_sector_id_order()
     {

@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1252,
+  "magnitudes": {
+    "combat.block.shred.omni": 396,
+    "combat.parry.shred.omni": 396,
+    "combat.power.omni": 264,
+    "resource.max.hp": 1980,
+    "resource.max.hunger": 1650,
+    "resource.max.qi": 1980,
+    "resource.max.spirit": 990,
+    "resource.max.stamina": 4620,
+    "resource.regen.hp": 99,
+    "resource.regen.hunger": 99,
+    "resource.regen.qi": 132,
+    "resource.regen.spirit": 66,
+    "resource.regen.stamina": 165
+  },
+  "pTheta": 330,
+  "rangeCells": 3,
+  "rarity": "Heirloom",
+  "side": "plant",
+  "speciesId": "GoldDoom",
+  "theta": 9,
+  "traitPool": [
+    "free-charge-on-upgrade",
+    "hole-less-impact",
+    "non-explosive",
+    "wealth-consuming"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "normal",
+    "shiny"
+  ]
+}

@@ -21,6 +21,29 @@ namespace FusionRpg.Core.Demons.Generation;
 public static class SpeciesExpander
 {
     /// <summary>
+    /// The voted anchor fields that can carry the classification pipeline's own literal
+    /// `"unresolved"` sentinel (a genuine 3-way vote that never converged,
+    /// spec-option-permutation.md §4) — a real, ongoing corpus state, not a corrupt anchor.
+    /// <see cref="Expand"/> deliberately fails loud on any of these rather than silently guessing
+    /// (see the comment inline below), so a batch caller over the WHOLE corpus needs to skip a
+    /// still-unresolved species BEFORE calling <see cref="Expand"/>, not catch its exception —
+    /// this is that check, shared so `DemonSpeciesGen`/`DemonSpeciesImport` never duplicate the
+    /// field list. `threatBand` is excluded: a null/absent value there already has a real,
+    /// sanctioned fallback (<see cref="DemonThreatTuning.InferredDefaultRung"/>), read by
+    /// <see cref="Expand"/> itself via <c>threatTuning.OffsetFor</c> — never a batch-level skip.
+    /// </summary>
+    public static IReadOnlyList<string> UnresolvedFields(AnchorRow anchor)
+    {
+        var fields = new List<string>();
+        if (anchor.Rarity == "unresolved") fields.Add("rarity");
+        if (anchor.AptitudePrimary == "unresolved") fields.Add("aptitudePrimary");
+        if (anchor.ElementPrimary == "unresolved") fields.Add("elementPrimary");
+        if (anchor.AttackTempo == "unresolved") fields.Add("attackTempo");
+        if (anchor.DeployMode == "unresolved") fields.Add("deployMode");
+        return fields;
+    }
+
+    /// <summary>
     /// Expand one anchor. <paramref name="statedIntervalMs"/> is `power-parse`'s own extracted
     /// interval when one exists (spec §4: a stated interval always wins over the classified
     /// `attackTempo` table) — null when none was extracted for this species.

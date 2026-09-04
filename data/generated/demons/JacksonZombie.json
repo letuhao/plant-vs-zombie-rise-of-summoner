@@ -23,17 +23,20 @@
   },
   "pTheta": 452,
   "rangeCells": 3,
-  "rarity": "Heirloom",
+  "rarity": "Almanac",
   "side": "zombie",
   "speciesId": "JacksonZombie",
   "theta": 13,
   "traitPool": [
-    "Moonwalk Entrance",
-    "Rhythmic Reconstitution",
-    "Synchronized Minion Summoning"
+    "moonwalk entry",
+    "rhythmic replenishment",
+    "stylized attire",
+    "summoner"
   ],
-  "variantCount": 2,
+  "variantCount": 4,
   "variants": [
+    "ancient",
+    "mutated",
     "normal",
     "shiny"
   ]

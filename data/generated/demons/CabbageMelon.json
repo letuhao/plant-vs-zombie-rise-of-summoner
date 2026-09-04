@@ -1,0 +1,36 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1124,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 5424,
+    "resource.max.spirit": 3164,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 407,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "CabbageMelon",
+  "theta": 13,
+  "traitPool": [
+    "bouncing-projectile",
+    "hybrid-offspring"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

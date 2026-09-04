@@ -17,15 +17,16 @@ public class AtomKindRegistryTests
     }
 
     [Fact]
-    public void Vocabulary_is_closed_at_fifteen_kinds_and_six_attach_points()
+    public void Vocabulary_is_closed_at_sixteen_kinds_and_seven_attach_points()
     {
-        // E35 (spec-match-modify.md §2.1), E36 (spec-wave-control.md §2.1), then E37
-        // (spec-projectile-control.md §2b): each states only its own +1 delta over the state before it
-        // (12 kinds/5 attach points, then 13/6, then 14/6, then 15/6 — E37 adds no attach point, its
-        // bullet.modify reuses the existing Board) — the guard itself is a self-consistency check
-        // (Const == BuiltCount), never a copied literal, so a sibling Wave 8 module landing its own
-        // kind/attach point moves these two consts again without this test needing to guess the wave's
-        // combined end state.
+        // E35 (spec-match-modify.md §2.1), E36 (spec-wave-control.md §2.1), E37
+        // (spec-projectile-control.md §2b), then E41 (spec-ui-attach-point.md §2a): each states only
+        // its own +1 delta over the state before it (12 kinds/5 attach points, then 13/6, then 14/6,
+        // then 15/6 — E37 adds no attach point, its bullet.modify reuses the existing Board — then
+        // 16/7 — E41's ui.present is the second Wave 8 module to add its own attach point, Ui) — the
+        // guard itself is a self-consistency check (Const == BuiltCount), never a copied literal, so a
+        // sibling Wave 8 module landing its own kind/attach point moves these two consts again without
+        // this test needing to guess the wave's combined end state.
         Assert.Equal(AtomKindRegistry.KindCount, AtomKindRegistry.All.Count);
         Assert.Equal(AtomKindRegistry.AttachPointCount, Enum.GetValues<AttachPoint>().Length);
     }
@@ -71,6 +72,14 @@ public class AtomKindRegistryTests
         // names -- a declared trigger nothing ever raises.
         var permanentModifiers = new[] { "stat.derived", "bullet.modify" };
 
+        // E41 (spec-ui-attach-point.md §2b.1): a SEPARATE exemption set from permanentModifiers above
+        // — a different axis entirely. permanentModifiers is about TRIGGERS (a grant's presence is
+        // the effect, so it declares none); cosmetic is about PRICING CATEGORY (a present writes no
+        // state, so a category on it would let a floater be budgeted as if it contributed real
+        // power). Conflating the two sets would blur what each one means — a kind could be cosmetic
+        // without being a permanent modifier (ui.present carries triggers, AllTriggers) or vice versa.
+        var cosmetic = new[] { "ui.present" };
+
         foreach (var kind in AtomKindRegistry.All)
         {
             var anyRuntime = kind.SupportIn(RuntimeId.Lawn) != RuntimeState.None
@@ -87,7 +96,11 @@ public class AtomKindRegistryTests
             else
                 Assert.True(kind.Triggers.Count > 0, $"{kind.KindId} allows no trigger");
 
-            Assert.True(kind.Categories != PowerCategory.None, $"{kind.KindId} prices to no category");
+            if (cosmetic.Contains(kind.KindId))
+                Assert.True(kind.Categories == PowerCategory.None,
+                    $"{kind.KindId} is cosmetic (writes no state) and must price to no category");
+            else
+                Assert.True(kind.Categories != PowerCategory.None, $"{kind.KindId} prices to no category");
         }
     }
 

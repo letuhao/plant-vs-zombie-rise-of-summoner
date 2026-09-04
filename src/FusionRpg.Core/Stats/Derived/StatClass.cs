@@ -76,5 +76,24 @@ public enum UnitClass
     /// mitigation chain — `PierceFactor(d,s) = 1/(1+max(0,d)/s)` and its amplification-side mirror
     /// `AmpFactorReciprocal`, both asymptotic rather than linear or sigmoid. Covers `combat.penetration`
     /// `/absorption/amplification/reduction`.</summary>
-    ReciprocalPoints
+    ReciprocalPoints,
+
+    /// <summary>
+    /// A whole count of loam — the world economy's resource. **The thirteenth class**, authorised
+    /// 2026-09-04 by the world-numbers program (W37/W38) and specified in
+    /// `spec-magnitude-and-units.md` §3.
+    ///
+    /// <para>No context part: it is a plain whole count, and a flow's own sign/arrow/colour belong to
+    /// `LoamFigure`'s composition rather than to this class. Covers `WorldSectorDto`'s loam production
+    /// / upkeep / net / stock blocks and the four `…Milli`-named loam-cost fields
+    /// (`StructureDef.CostMilli`, `LoamPolicy.WellCostMilli` / `WaystationCostMilli` /
+    /// `GranaryCostMilli`) — those names say milli but carry whole loam, which is precisely the
+    /// misreading `BuildResolver.cs:101,115` exists downstream of.</para>
+    ///
+    /// <para>⛔ **Added here 2026-09-04, later than it should have been.** The doc and the TypeScript
+    /// `UnitClass` union both gained it on the authorisation date; this enum did not, so
+    /// `UnitClassContractParityTests` — the guard written for exactly this "a class added to one side
+    /// with the other forgotten" case — sat red. It did its job; nobody read it.</para>
+    /// </summary>
+    LoamUnits
 }

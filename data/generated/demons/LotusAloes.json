@@ -1,0 +1,44 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Ice",
+  "elementSecondary": null,
+  "gameTypeId": 1227,
+  "magnitudes": {
+    "combat.shield.capacity.omni": 1320,
+    "combat.shield.regen.omni": 22,
+    "combat.shield.toughness.omni": 48,
+    "progression.bonus.arm2": 192,
+    "progression.bonus.maxHp": 288,
+    "resource.max.hp": 624,
+    "resource.max.hunger": 568,
+    "resource.max.qi": 1824,
+    "resource.max.spirit": 856,
+    "resource.max.stamina": 1072,
+    "resource.regen.hp": 3,
+    "resource.regen.hunger": 24,
+    "resource.regen.qi": 111,
+    "resource.regen.spirit": 44,
+    "resource.regen.stamina": 54
+  },
+  "pTheta": 80,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "LotusAloes",
+  "theta": 0,
+  "traitPool": [
+    "cryo-absorption",
+    "frost-immunity",
+    "rhythmic-regeneration",
+    "velocity-augmentation"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "blessed",
+    "mutated",
+    "normal"
+  ]
+}

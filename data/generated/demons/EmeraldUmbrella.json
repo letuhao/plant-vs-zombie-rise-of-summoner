@@ -1,0 +1,39 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Air",
+  "elementSecondary": null,
+  "gameTypeId": 916,
+  "magnitudes": {
+    "resource.max.hp": 5424,
+    "resource.max.hunger": 11752,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 362,
+    "resource.regen.hunger": 678,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "EmeraldUmbrella",
+  "theta": 13,
+  "traitPool": [
+    "economic-catalyst",
+    "kinetic-amplification",
+    "projectile-deflection",
+    "statue-resilience"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "mutated",
+    "normal",
+    "shiny"
+  ]
+}

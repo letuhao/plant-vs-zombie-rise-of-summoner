@@ -1,0 +1,37 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Ice",
+  "elementSecondary": null,
+  "gameTypeId": 51,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 5424,
+    "resource.max.spirit": 3164,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 407,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Cultivated",
+  "side": "zombie",
+  "speciesId": "SnowDrownZombie",
+  "theta": 13,
+  "traitPool": [
+    "cryogenic-projectile",
+    "frost-infusion",
+    "trident-wielder"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "normal"
+  ]
+}

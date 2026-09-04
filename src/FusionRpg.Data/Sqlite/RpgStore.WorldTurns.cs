@@ -167,7 +167,7 @@ public sealed partial class RpgStore
         ins.Parameters.AddWithValue("$kind", command.Kind);
         ins.Parameters.AddWithValue("$payload", JsonSerializer.Serialize(new CommandPayload(
             command.EntityId, command.SectorId, command.SlotIndex, command.LanePath, command.Stance,
-            command.Amount, command.StructureId, command.WardenId)));
+            command.Amount, command.StructureId, command.WardenId, command.ProjectId)));
         ins.Parameters.AddWithValue("$now", now);
         // Bounded at the boundary like every other free-text field: an audit string is not worth
         // failing a turn over, and an unbounded one is a row nobody budgeted for.
@@ -442,7 +442,8 @@ public sealed partial class RpgStore
     /// </summary>
     sealed record CommandPayload(
         string? EntityId, string? SectorId, int? SlotIndex, IReadOnlyList<string>? LanePath,
-        string? Stance = null, long? Amount = null, string? StructureId = null, string? WardenId = null);
+        string? Stance = null, long? Amount = null, string? StructureId = null, string? WardenId = null,
+        string? ProjectId = null);
 
     /// <summary>Reports are kept for the most recent turns; older ones are re-derived on demand.</summary>
     public const int ReportHotTail = 50;
@@ -662,7 +663,8 @@ public sealed partial class RpgStore
             LanePath = payload.LanePath ?? Array.Empty<string>(),
             Amount = payload.Amount,
             StructureId = payload.StructureId,
-            WardenId = payload.WardenId
+            WardenId = payload.WardenId,
+            ProjectId = payload.ProjectId
         };
     }
 

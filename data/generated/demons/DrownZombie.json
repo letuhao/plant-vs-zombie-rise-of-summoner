@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 2400,
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
   "elementPrimary": "Dark",

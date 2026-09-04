@@ -246,4 +246,61 @@ public class WorldCommandAdmissionTests
         Assert.False(ok);
         Assert.Equal("sector.unknown", reason);
     }
+
+    // world-map W52: `develop` — names a sector and a known project, needs no entity. Ownership,
+    // an already-in-progress project and `LoamStock` are all resolution-time (`DevelopResolver` at
+    // Snapshot), not admission-time — the identical discipline `raise` already applies, so admission
+    // here only checks a sector was named and the project id is one the catalog knows.
+
+    const string RealProjectId = "raise-development-placeholder";
+
+    static WorldCommand Develop(string commander, string? sectorId, string? projectId = RealProjectId) => new()
+    {
+        CommanderId = commander, CommandId = "c-develop", Kind = WorldCommandKinds.Develop,
+        SectorId = sectorId, ProjectId = projectId
+    };
+
+    [Fact]
+    public void Develop_is_a_known_kind()
+    {
+        Assert.Contains(WorldCommandKinds.Develop, WorldCommandKinds.All);
+        Assert.True(WorldCommandKinds.IsKnown(WorldCommandKinds.Develop));
+    }
+
+    [Fact]
+    public void Developing_a_named_sector_with_a_known_project_is_admitted_regardless_of_ownership()
+    {
+        // Deliberately not an ownership check here — "black-gate" is unowned at first-light's world
+        // creation, and admission still passes it through: DevelopResolver is what says "not yours",
+        // at Snapshot, re-validated against the state the turn actually produced.
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Develop("dave", "black-gate"));
+        Assert.True(ok, reason);
+    }
+
+    [Fact]
+    public void Developing_with_no_sector_named_is_refused()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Develop("dave", sectorId: null));
+        Assert.False(ok);
+        Assert.Equal("sector.missing", reason);
+    }
+
+    [Fact]
+    public void Developing_at_an_unknown_sector_is_refused_by_the_shared_check()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Develop("dave", "nowhere"));
+        Assert.False(ok);
+        Assert.Equal("sector.unknown", reason);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("no-such-project")]
+    public void Developing_with_no_known_project_named_is_refused(string? projectId)
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Develop("dave", "homeworld", projectId));
+        Assert.False(ok);
+        Assert.Equal("project.unknown", reason);
+    }
 }

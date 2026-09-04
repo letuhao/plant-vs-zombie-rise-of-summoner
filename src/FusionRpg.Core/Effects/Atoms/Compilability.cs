@@ -77,6 +77,14 @@ public static class Compilability
         // ChainDepth-guarded, ExecWaveControl-shaped opcode E36 built never actually runs. Params
         // stay {op, wave, timerMs, enabled} on both paths — no key-mismatch to guard.
         "wave.control",
+
+        // E41 (spec-ui-attach-point.md §2b): ui.present -> EffectActions.PresentUi. Unlike
+        // stat.derived/bullet.modify immediately above, this one is NOT declarative — it carries
+        // real triggers (AllTriggers) and a real per-fire executor (EffectBag.ExecPresentUi), the
+        // same shape shield.grant already has. Params stay {op, amount, tag, bannerId, meterId,
+        // ratio, durationMs} on both the compiled and runner paths (ToOpcodeShape only rewrites
+        // stat.modify/stat.derived), so there is no key-mismatch to guard here either.
+        "ui.present",
     };
 
     /// <summary>The only leaves a legacy grant overlay can express.</summary>

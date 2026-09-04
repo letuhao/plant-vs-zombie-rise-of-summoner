@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1108,
+  "magnitudes": {
+    "combat.block.shred.omni": 542,
+    "combat.parry.shred.omni": 542,
+    "combat.power.omni": 362,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 6328,
+    "resource.regen.hp": 136,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "CherrySplit",
+  "theta": 13,
+  "traitPool": [
+    "cherry-burst",
+    "manual-evolution",
+    "projectile-rebound"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "blessed",
+    "mutated",
+    "normal"
+  ]
+}

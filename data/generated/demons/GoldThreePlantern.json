@@ -1,0 +1,38 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Light",
+  "elementSecondary": null,
+  "gameTypeId": 982,
+  "magnitudes": {
+    "resource.max.hp": 6468,
+    "resource.max.hunger": 5390,
+    "resource.max.qi": 32340,
+    "resource.max.spirit": 15092,
+    "resource.max.stamina": 8624,
+    "resource.regen.hp": 23,
+    "resource.regen.hunger": 323,
+    "resource.regen.qi": 1940,
+    "resource.regen.spirit": 755,
+    "resource.regen.stamina": 539
+  },
+  "pTheta": 1078,
+  "rangeCells": 3,
+  "rarity": "Cultivated",
+  "side": "plant",
+  "speciesId": "GoldThreePlantern",
+  "theta": 31,
+  "traitPool": [
+    "Currency generation",
+    "Energy storage/conduit",
+    "Light-scaling",
+    "Tri-beam refraction"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "normal"
+  ]
+}

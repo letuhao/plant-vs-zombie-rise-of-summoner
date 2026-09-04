@@ -1,9 +1,9 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 2400,
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
-  "elementPrimary": "Dark",
+  "elementPrimary": "Earth",
   "elementSecondary": null,
   "gameTypeId": 3,
   "magnitudes": {
@@ -20,15 +20,18 @@
   },
   "pTheta": 452,
   "rangeCells": 5,
-  "rarity": "Chaff",
+  "rarity": "Cultivated",
   "side": "zombie",
   "speciesId": "PolevaulterZombie",
   "theta": 13,
   "traitPool": [
-    "disposable-tooling",
-    "momentum-based",
-    "vaulting"
+    "momentum-based leap",
+    "obstacle bypass",
+    "post-leap deceleration"
   ],
-  "variantCount": 0,
-  "variants": []
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
 }

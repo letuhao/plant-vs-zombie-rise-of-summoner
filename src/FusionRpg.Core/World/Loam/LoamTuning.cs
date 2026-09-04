@@ -6,6 +6,14 @@ public sealed record LoamUpkeepTuning(
     long SeepPerTurn, long LoamCapacity, long BaseUpkeepPerSector,
     long GarrisonUpkeepPerMember, long DevelopmentUpkeepPerLevel, long DangerUpkeepPerBand);
 
+/// <summary>
+/// world-map W55 (spec-sector-development.md §3, empire-economy-ssot.md A8): the yield half of the
+/// invariant "development must raise yield faster than it raises upkeep" — living beside
+/// <see cref="LoamUpkeepTuning.DevelopmentUpkeepPerLevel"/> in the same tuning file on purpose, so
+/// the comparison A8 makes is readable by inspection, not split across two files.
+/// </summary>
+public sealed record LoamDevelopmentTuning(long YieldPerLevel);
+
 public sealed record LoamFadeTuning(
     int RecoveryMilli, int BaseDecayMilli, int DecayPerDeficitUnitMilli,
     long DecayScaleDivisor, int MaxDecayMilli, int AbandonmentHorizonTurns);
@@ -25,8 +33,8 @@ public sealed record LoamTextureTuning(
 /// <see cref="LoamPolicy.Configure"/> and <see cref="LoamTuningLoader"/>.</summary>
 public sealed record LoamTuning(
     int SchemaVersion, int Version,
-    LoamUpkeepTuning Upkeep, LoamFadeTuning Fade, LoamLegionSupplyTuning LegionSupply,
-    LoamStructuresTuning Structures, LoamTextureTuning Texture);
+    LoamUpkeepTuning Upkeep, LoamDevelopmentTuning Development, LoamFadeTuning Fade,
+    LoamLegionSupplyTuning LegionSupply, LoamStructuresTuning Structures, LoamTextureTuning Texture);
 
 public sealed class LoamTuningRejection : Exception
 {
@@ -60,6 +68,10 @@ public static class LoamTuningLoader
                 GarrisonUpkeepPerMember: Long(u, "garrisonUpkeepPerMember", "upkeep"),
                 DevelopmentUpkeepPerLevel: Long(u, "developmentUpkeepPerLevel", "upkeep"),
                 DangerUpkeepPerBand: Long(u, "dangerUpkeepPerBand", "upkeep"));
+
+            var d = Obj(root, "development", "$");
+            var development = new LoamDevelopmentTuning(
+                YieldPerLevel: Long(d, "yieldPerLevel", "development"));
 
             var f = Obj(root, "fade", "$");
             var fade = new LoamFadeTuning(
@@ -97,7 +109,7 @@ public static class LoamTuningLoader
                 UnmadeMemberHp: Long(t, "unmadeMemberHp", "texture"),
                 UnmadeMemberCount: Int(t, "unmadeMemberCount", "texture"));
 
-            return new LoamTuning(schemaVersion, version, upkeep, fade, legionSupply, structures, texture);
+            return new LoamTuning(schemaVersion, version, upkeep, development, fade, legionSupply, structures, texture);
         }
     }
 

@@ -1,0 +1,39 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1315,
+  "magnitudes": {
+    "combat.power.omni": 994,
+    "progression.bonus.atk": 4520,
+    "resource.max.hp": 6328,
+    "resource.max.hunger": 4068,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 8136,
+    "resource.regen.hp": 136,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 407
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "IronMelon",
+  "theta": 13,
+  "traitPool": [
+    "armor-piercing",
+    "heavy-projectile",
+    "iron-clad"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

@@ -19,15 +19,16 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "split",
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:58:54Z",
+      "emittedUtc": "2026-09-04T14:45:42Z",
       "minorityValues": {
+        "aptitudePrimary": "Precision",
         "attackTempo": "flurry",
         "rarity": "chimeric"
       },
@@ -45,7 +46,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Pierce",
     "aptitudeSecondary": "Precision",
     "attackTempo": "quick",
     "basis": "stated",
@@ -57,8 +58,8 @@
       "projectile-flora"
     ],
     "gameTypeId": 5001,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Finesse",
+    "pure": true,
     "rarity": "fused",
     "reach": "short",
     "reason": "The creature's ability to scale damage exponentially through multiple bounces, freeze mechanics, and boss-targeting traits makes it a significant combat threat rather than a mere pest.",

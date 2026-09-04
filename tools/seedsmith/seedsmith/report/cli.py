@@ -27,6 +27,7 @@ from ..metrics.coverage import EmptyPartitionMetric
 from ..metrics.linkage import ALL_LINKAGE_METRICS
 from ..metrics.pairwise import PairwiseHole
 from ..metrics.balance import LadderInversion, OutOfEnvelope
+from ..metrics.cell_occupancy import CellOccupancy
 from ..metrics.distribution import CellDeviation, Evenness, Inequality
 from ..metrics.constraint import Constraint
 from ..metrics.exemplar import ExemplarConformance
@@ -61,6 +62,7 @@ def build_registry() -> MetricRegistry:
     registry.register(CellDeviation())
     registry.register(Evenness())
     registry.register(Inequality())
+    registry.register(CellOccupancy())
     registry.register(Constraint())
     registry.register(ExemplarConformance())
     registry.register(SemanticDedup())
@@ -270,6 +272,66 @@ def cmd_effects(args: argparse.Namespace) -> int:
 
     print(f"unknown effects command {args.effects_command!r}")
     return EXIT_CANNOT_RUN
+
+
+def cmd_items(args: argparse.Namespace) -> int:
+    """`seedsmith items generate --kind set|charm --population build|species` (item module 13).
+
+    ⚠ **No `items` subcommand existed** — `build_parser` registered `check`, `report`, `metrics`,
+    `demons` and `effects` and nothing else, so every command the module-13 spec listed was a
+    documented interface that did not exist. The same defect class `cmd_demons`'s own docstring
+    records twice. Made true here rather than softened in the spec.
+
+    ⛔ **`--dry-run` is the default, and that is deliberate.** A real run is ~1,800 model calls; a
+    flag you must remember to pass to avoid spending them is a flag someone eventually forgets.
+    `--write` is the explicit opt-in, and it currently refuses: the generation graph is not wired
+    (see the module's own todo entry), and a command that silently writes nothing is worse than one
+    that says so.
+    """
+    if args.items_command != "generate":
+        print(f"unknown items command {args.items_command!r}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    from ..adapters.items.setgen import run as run_mod
+    from ..adapters.items.setgen import themes as themes_mod
+    from ..adapters.items.setgen import tuning as tuning_mod
+    from ..adapters.items.setgen import vocab as vocab_mod
+    from ..adapters.items.setgen.verdict import GATING_METRICS, missing_thresholds
+
+    tuning = tuning_mod.load()
+    vocabulary = vocab_mod.build(tuning)
+    try:
+        plan = run_mod.plan_run(kind=args.kind, population=args.population,
+                                tuning=tuning, vocabulary=vocabulary)
+    except ValueError as exc:
+        print(f"seedsmith: {exc}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    coverage = themes_mod.coverage_report(themes_mod.load_species_themes())
+    summary = {
+        **plan.summary(),
+        "kind": args.kind,
+        "population": args.population,
+        "capabilityPicks": vocabulary.capability_count,
+        "statPicks": vocabulary.stat_count,
+        "themeCoverage": {"species": coverage.species, "themes": coverage.themes,
+                          "uncovered": len(coverage.uncovered),
+                          "orphaned": len(coverage.orphaned)},
+        "gatingMetrics": sorted(GATING_METRICS),
+        "gatesMissingAThreshold": missing_thresholds(tuning),
+    }
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+    if args.sample_brief and plan.subjects:
+        print("\n--- sample brief ---")
+        print(plan.subjects[0].brief)
+
+    if args.write:
+        print("seedsmith: --write is refused — the generation graph for `items generate` is not "
+              "wired yet (module 13's own deferred item). The plan above is real; the model call "
+              "is not.", file=sys.stderr)
+        return EXIT_REFUSED
+    return EXIT_CLEAN
 
 
 def cmd_demons(args: argparse.Namespace) -> int:
@@ -914,6 +976,20 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--dry-run", action="store_true",
                      help="fix-unresolved: report what would change without writing anything")
     demons.set_defaults(func=cmd_demons)
+
+    items = sub.add_parser("items", help="item corpus generation entrypoints (module 13)")
+    items_sub = items.add_subparsers(dest="items_command", required=True)
+    igen = items_sub.add_parser("generate", help="plan a set/charm generation run")
+    igen.add_argument("--kind", default="set", choices=("set", "charm"))
+    igen.add_argument("--population", default="species", choices=("species", "build"))
+    igen.add_argument("--dry-run", dest="dry_run", action="store_true",
+                      help="the default and currently the only mode — assemble the plan, make no "
+                           "model calls")
+    igen.add_argument("--write", action="store_true",
+                      help="refused today: the generation graph is not wired")
+    igen.add_argument("--sample-brief", dest="sample_brief", action="store_true",
+                      help="print the first subject's assembled brief")
+    items.set_defaults(func=cmd_items)
 
     effects = sub.add_parser("effects", help="effect-pipeline generation entrypoints")
     effects_sub = effects.add_subparsers(dest="effects_command", required=True)

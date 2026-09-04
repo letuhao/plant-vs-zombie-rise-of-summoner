@@ -28,9 +28,9 @@
   "speciesId": "Peashooter",
   "theta": 13,
   "traitPool": [
-    "Defensive",
-    "Projectile-launching",
-    "Rapid-fire"
+    "defensive-line",
+    "projectile-launching",
+    "rhythmic-attack"
   ],
   "variantCount": 2,
   "variants": [

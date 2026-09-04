@@ -1,0 +1,37 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Light",
+  "elementSecondary": null,
+  "gameTypeId": 1000,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 13560,
+    "resource.max.spirit": 6328,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 814,
+    "resource.regen.spirit": 316,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "PeaSunFlower",
+  "theta": 13,
+  "traitPool": [
+    "resource-recovering projectiles",
+    "solar-generating ammunition"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "blessed",
+    "mutated",
+    "normal"
+  ]
+}

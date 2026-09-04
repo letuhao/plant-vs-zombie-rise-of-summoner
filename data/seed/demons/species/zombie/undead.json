@@ -250,85 +250,6 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "observed",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "attackTempo": "high",
-        "deployMode": "split",
-        "elementPrimary": "high",
-        "rarity": "unresolved"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:01:14Z",
-      "minorityValues": {
-        "deployMode": "PlantAvatar"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Fortitude",
-    "aptitudeSecondary": "none",
-    "attackTempo": "ponderous",
-    "basis": "observed",
-    "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
-    "elementSecondary": "none",
-    "family": [
-      "undead",
-      "armored-reanimates"
-    ],
-    "gameTypeId": 106,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "unresolved",
-    "reach": "short",
-    "reason": "With a massive combined health pool of 2470 and the ability to drop defensive iron buckets upon death, this unit functions as a heavy tank rather than a mere raider.",
-    "resourceProfile": [
-      "hp"
-    ],
-    "side": "zombie",
-    "speciesId": "BucketNutZombie",
-    "targetPreference": "frontline",
-    "traits": [
-      "magnetic-vulnerability",
-      "iron-infused",
-      "projectile-drop"
-    ],
-    "variants": [
-      "normal",
-      "mutated"
-    ],
-    "verdict": "too-low"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
         "kit-shape": 2,
         "threat-audit": 1
       },
@@ -946,88 +867,6 @@
       "self-delusional"
     ],
     "variants": [],
-    "verdict": "too-low"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 2,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "split",
-        "attackTempo": "high",
-        "deployMode": "split",
-        "elementPrimary": "high",
-        "rarity": "unresolved"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:12:16Z",
-      "minorityValues": {
-        "aptitudePrimary": "Agility",
-        "deployMode": "HypnoAlly"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "CaptureOnly"
-    ],
-    "aptitudePrimary": "Retribution",
-    "aptitudeSecondary": "Agility",
-    "attackTempo": "slow",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
-    "elementSecondary": "none",
-    "family": [
-      "undead",
-      "aquatic-morphic"
-    ],
-    "gameTypeId": 59,
-    "posture": "Bastion",
-    "pure": false,
-    "rarity": "unresolved",
-    "reach": "melee",
-    "reason": "The creature's ability to instantly reset to full health and re-enter the battlefield makes it a persistent threat that exceeds a mere warden level.",
-    "resourceProfile": [
-      "hp",
-      "poise"
-    ],
-    "side": "zombie",
-    "speciesId": "DolphinPaper",
-    "targetPreference": "backline",
-    "traits": [
-      "newspaper-driven",
-      "re-entry-loop",
-      "directional-reversal",
-      "mermaid-failed-surgery"
-    ],
-    "variants": [
-      "normal",
-      "corrupted"
-    ],
     "verdict": "too-low"
   },
   {
@@ -3272,84 +3111,6 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "attackTempo": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "unresolved"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:08:26Z",
-      "minorityValues": {},
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Agility",
-    "aptitudeSecondary": "none",
-    "attackTempo": "slow",
-    "basis": "observed",
-    "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
-    "elementSecondary": "none",
-    "family": [
-      "undead",
-      "impulse-driven"
-    ],
-    "gameTypeId": 3,
-    "posture": "Finesse",
-    "pure": true,
-    "rarity": "unresolved",
-    "reach": "long",
-    "reason": "The creature's ability is a simple single-use movement mechanic that can be easily countered by tall plants, making it a minor tactical nuisance rather than a scourge.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "zombie",
-    "speciesId": "PolevaulterZombie",
-    "targetPreference": "frontline",
-    "traits": [
-      "vaulting",
-      "momentum-based",
-      "disposable-tooling"
-    ],
-    "variants": [
-      "normal",
-      "mutated"
-    ],
-    "verdict": "too-high"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
@@ -3515,11 +3276,11 @@
         "aptitudePrimary": "unresolved",
         "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "unresolved",
+        "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:19:57Z",
+      "emittedUtc": "2026-09-04T14:46:01Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -3540,7 +3301,7 @@
     "attackTempo": "slow",
     "basis": "stated",
     "deployMode": "HypnoAlly",
-    "elementPrimary": "unresolved",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
       "undead",
@@ -4875,7 +4636,7 @@
       "auditVerdict": null,
       "basis": "blocked",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "split",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -4883,8 +4644,9 @@
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:53:47Z",
+      "emittedUtc": "2026-09-04T14:38:41Z",
       "minorityValues": {
+        "aptitudePrimary": "Vigor",
         "threatBand": "pest"
       },
       "promptVersions": {
@@ -4901,7 +4663,7 @@
     "acquisition": [
       "CaptureOnly"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "blocked",
@@ -4912,8 +4674,8 @@
       "undead"
     ],
     "gameTypeId": 247,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "chaff",
     "reach": "short",
     "reason": "Without any descriptive traits or combat data, the creature lacks the established presence required for a higher threat classification.",

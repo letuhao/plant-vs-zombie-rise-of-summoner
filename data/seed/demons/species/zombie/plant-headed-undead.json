@@ -22,12 +22,14 @@
         "aptitudePrimary": "high",
         "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "unresolved",
+        "elementPrimary": "split",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:06:49Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T14:44:11Z",
+      "minorityValues": {
+        "elementPrimary": "earth"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -47,7 +49,7 @@
     "attackTempo": "steady",
     "basis": "stated",
     "deployMode": "HypnoAlly",
-    "elementPrimary": "unresolved",
+    "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
       "plant-headed undead"

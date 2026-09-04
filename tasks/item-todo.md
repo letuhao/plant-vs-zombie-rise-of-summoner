@@ -44,8 +44,24 @@ map*. A decline moves its dependents to Phase 5 with the decline recorded.
 - [ ] Add a staleness check to the pipeline so a snapshot can never drift silently again
 
 **Acceptance:** the registry covers every shipped species; the check fails a deliberate drift.
+~~**Verify:** registry count equals `ls data/seed/demons/species/{plant,zombie} | wc -l` (**386**
+today: 292 + 94).~~
+
+⛔ **Corrected 2026-09-04 while building module 13 (P3.3) — this step is sized against the wrong
+denominator, and the Verify line above would have certified a still-broken registry as complete.**
+The files under `data/seed/demons/species/{plant,zombie}/` are **family** files, each holding many
+species; `_index.json` is a flat `{speciesId: "plant/family.json"}` map and it is the species list.
+Measured: **840 species across 495 family files** (both move — the concurrent stream is rewriting the
+tree). So the gap `theme-refresh` closes is **84 of 840 — 772 uncovered**, not 84 of 386.
+
+⛔ **And 16 published themes are ORPHANS** — they name a `speciesId` the anchor tree no longer ships
+(`cherrygatling`, `cherrypaperzombie`, `cornpot`, `dancepolzombie`, `dolldiamond`, …). A republish
+that only *adds* leaves them behind, so the staleness check has to look both ways.
+
 **Verify:** `python -m pytest tools/seedsmith`; registry count equals
-`ls data/seed/demons/species/{plant,zombie} | wc -l` (**386** today: 292 + 94).
+`len(json.load(open('data/seed/demons/species/_index.json')))`, and module 13's
+`the_theme_registry_covers_every_shipped_species` / `the_species_count_is_the_index_not_the_file_count`
+go from asserting the gap exists to asserting it is closed.
 
 ### P0.3 — seedsmith: `theme-enrich` (D34)
 
@@ -95,6 +111,16 @@ with plant **bodies**).
 - [ ] Fix the stale `frozenNote` (reads *"FROZEN v2"* at `registryVersion 3`)
 - [ ] **Re-author the 18 legacy sets** under the twelve-role cap — the same generation run module 13
       performs for the ~904, so no extra pass
+
+      ⛔ **Re-measured 2026-09-04 at P3.3, and still open.** Counted directly off
+      `data/seed/items/sets/**` rather than from any document: **18 of 30 sets** name a dropped role —
+      **10 use `head-guard`, 11 use `sense`, 3 use both** — and
+      `seedsmith check --adapter items --metric Linkage/SetCompletability` reports **30 GAP findings**
+      over exactly those 18. ⚠ **It cannot be closed deterministically, and module 13 refused to try.**
+      A member role is a **model-chosen** field under P1 ("the model writes identity, deterministic
+      code writes magnitude"), so a code-side role swap would be deterministic code writing identity —
+      the exact inversion P1 forbids. It closes with the generation run, exactly as D30 priced it.
+      **Cross-referenced from P3.3.**
 
 **Acceptance:** ⚠ **corrected 2026-09-04 against a measured result, not a prediction.**
 `Linkage/SetCompletability` (which **gates**) is *not* clean against the corrected core — correcting
@@ -1289,7 +1315,15 @@ boot, imports the loot corpus after `store.Init()`);
    normalised away. The ids are seedsmith-allocated — `tools/ItemSeedValidator/Registries/NamespaceAllocation.cs`
    reads the breakpoints out of `idNamespaces.charms.resonanceNote` — so the rename and that reader move
    together. **Cross-referenced into P3.3 (module 13).** It bites at count 10, which is why nobody has
-   hit it at counts 2–3
+   hit it at counts 2–3.
+
+   ⏸ **Answered at P3.3 2026-09-04: examined, and deliberately not renamed — it is FOUR moving parts,
+   one of them a frozen registry.** `NamespaceAllocation.cs:219-231` scrapes the breakpoints out of
+   `naming.v1.json`'s `resonanceNote` **prose** and rebuilds the id unpadded through `int.Parse`, so
+   padding the corpus alone makes the allocation mismatch; `naming.v1.json` is
+   `registryVersion 4, "frozen": true`, which makes the note edit an **Ask first**; and
+   `All_ten_shipped_resonance_ids_are_unpadded_…` pins the current spelling on purpose. Module 13
+   generates the 60 authored charms, not the 10 resonance containers.
 3. ⚠ **`spec-threshold-grants.md`'s "blocking contradiction in the shipped role vocabulary" is STALE,
    and the honest answer is that module 3 already fixed it.** The spec names three 13-role / 895‰
    sources against D3's twelve. All three now agree: `core.v1.json` is `registryVersion 2` with
@@ -1371,7 +1405,11 @@ own measured test.
       already passing on today's corpus.** It is `Distribution/CellOccupancy` in
       `spec-set-charm-gen.md` §, a **generation distinctness** gate over the generated population —
       this module generates nothing. Measured on the 30 shipped sets as a data point, not as a gate:
-      **28 cells, median 1, max 2, 26 of 28 singletons.** The gate belongs where the generator is
+      **28 cells, median 1, max 2, 26 of 28 singletons.** The gate belongs where the generator is.
+      ✅ **Landed at P3.3 2026-09-04** as `Distribution/CellOccupancy`
+      (`seedsmith/metrics/cell_occupancy.py`), registered in `build_registry()` and reproducing those
+      exact four numbers from real data. It ships `gates = False` with a written promotion trigger —
+      the threshold is defined over the generated ~904, not over these 30
 - [ ] ⏸ **Module 16 (`sockets`) should reuse `ThresholdEvaluator` rather than write a second one.**
       Same shape — count inserts in one item, grant at breakpoints — at the **host item's** scope
       rather than the actor's. Deliberately not folded in: merging them would make the scope a
@@ -1406,7 +1444,7 @@ ThresholdGrantCorpusTests.cs}`, `tests/FusionRpg.Data.Tests/Items/ItemSetStoreTe
 
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ThresholdGrant"`; `dotnet test tests\FusionRpg.Data.Tests --filter ItemSetStore`; `.\scripts\guard-dal.ps1`
 
-### P3.3 — Module 13 `set-charm-gen` (model calls)
+### ✅ P3.3 — Module 13 `set-charm-gen` — MACHINERY BUILT AND VERIFIED 2026-09-04 (⏸ the generative authoring pass itself is model-call work and is explicitly out of scope for a coding session — named below with who runs it)
 
 ⛔ **Addendum 2026-09-04, found while building module 11 (`drop-volume`).** The shipped 40-table
 seedsmith drop-table corpus (`data/seed/items/drop-tables/`) already references **70 `charm` entries**
@@ -1416,26 +1454,314 @@ by name — `ContentRuleViolated{drop.entry-kind-unavailable}` — rather than d
 names this module plus X7 as what unblocks it. **Not a defect in module 11 or in the corpus**: the
 entries were authored deliberately in wave R2 to close the "144 uniques, 70 charms and 60 consumables
 that no table could yield" gap `entry-shapes.md` §9 records. Filed here so this module knows those 70
-references are already waiting on it.
+references are already waiting on it. **Still true after this pass** — this module builds the
+generator, not the container kind.
 
-- [ ] 36 build set families + 1 set and 1 charm per species, consuming the refreshed theme registry
-- [ ] **Capped to the twelve hybrid-core roles before generation**, not validated after
-- [ ] Ids key on `speciesId` (all 84 verified kebab-legal; re-verify at 386). ⚠ `naming.v1.json`'s
-      `set.{themeId}-{seq:03}` over a demon `themeKey` yields `set.demon.allpeater-001` — **two dots,
-      ungrammatical**
-- [ ] The 36 **build** sets belong to no species — they need a third `build.*` theme population
-- [ ] ⭐ **D15: a set has no rarity.** Rarity is the quality of a set's *member pieces*; a set completes
-      from pieces of **any rung**. This makes the rarity key vacuous, and module 7's **SC7** then makes a
-      registered key with no shipped consumer **reject at load** — so the key must be dropped, not left
-      declared. ⚠ D21's *"base rarity: high"* row is struck by the same ruling
-- [ ] **D17 is a position, not an oversight: keep the dead tail.** ~904 species sets and ~904 charms
-      against roughly five deployed actors. Most will never be seen by any given player. **Do not
-      "optimise" the roster down** — D12's roster-scale generation is the point
-- [ ] Registers its channels with L0 on load
+⭐ **What "model calls" means for this module, decided by reading the plan's own text rather than
+guessing.** The spec's Project structure is a **Python seedsmith package**, not C#: `setgen/`,
+`charmgen/`, a `cli.py` edit, a new registry, a new tuning file and a new metric. All of that is
+deterministic and all of it is built here. The one genuinely generative step — drawing 36 build sets
+and ~904 species sets and ~904 charms out of a model — cannot be run from a coding session, so it is
+deferred **by name**, with the command that runs it and the person who runs it stated. Everything the
+run consumes, everything it emits ids for, and everything that judges it afterwards is built and
+tested against real shipped data.
 
-> ### ✅ CHECKPOINT 3
-> A drop table produces an item at a level; its rarity distribution matches the published bands; a set
-> bonus fires at its breakpoint at `unique-actor:` scope. **No atom is written at `player:` scope.**
+- [x] ⭐ **The twelve-role cap is a GENERATOR INPUT and it is applied inside the SCHEMA, not after.**
+      `setgen/roles.py` enumerates `HYBRID_CORE_ROLES`, and `schema.set_schema` puts that exact tuple
+      in `members[].items.properties.role.enum` — so the model is **never offered** `head-guard`, and
+      `SetRoleNotUniversal` is unproducible from a well-formed answer. That is the whole point:
+      §3.7 fires at LOAD, so ~1,000 sets checked afterwards is ~1,000 rejections and a re-run.
+      `every_generated_member_role_is_in_the_twelve` asserts the schema enum *is* the tuple, and
+      `a_generated_set_never_claims_head_guard_sense_or_ward_array` names all three drops
+- [x] ⚠ **The spec's own reason for enumerating rather than deriving is now STALE, and the code says
+      so instead of repeating it.** The spec's code-style block says to enumerate because
+      `core.v1.json`'s `hybridEligible` flags still name thirteen roles at 895‰. They do not — P1.3
+      shipped `registryVersion 2` and **`assert_core_agrees()` re-measures 800‰ over exactly those
+      twelve on every call** (measured, not asserted from the doc). The list stays enumerated for the
+      *other* reason `linkage.py` already states — it must work against a fixture with no registry —
+      and the drift check is what keeps the two honest.
+      `a_role_table_that_moved_raises_instead_of_being_absorbed` moves one `budgetWeightMilli` by 5 in
+      a temp copy and asserts `RoleCapViolation`
+- [x] ⭐ **`audit_schema`-clean by construction, proven three ways.** Both schemas return `[]` from
+      `audit_schema`; adding one bare `{"type": "integer"}` field makes `Pipeline(...)` **raise at
+      construction** (`a_bare_integer_magnitude_field_fails_pipeline_construction`); and
+      `pieces` is the single legal numeric shape — a closed enum **read from the tuning file**, so
+      the schema and the distributor cannot disagree about which piece counts are legal. Neither
+      schema carries a name on the deny-list: no `tier` (tiers come from `numerics`), no `cost`
+      (`apCost` is derived from `charmClass`), no `powerBand` (the distributor assigns the band
+      positionally). **No allow-list escape hatch was used anywhere** — the schemas avoid the names
+      rather than exempting them
+- [x] **`data/tuning/set-charm-gen.v1.json` + a pure parser, and the parser refuses rather than
+      defaults.** Every number a balance pass would touch is there — set shape, the piece roll plan,
+      the AE budget, the charm class table, all three distinctness thresholds with their derivations
+      written beside them. `SetCharmGenTuning` has **no default for any key**: a missing one raises
+      `SetCharmTuningError` at load, because a generator silently running on a default is how an
+      unreviewed number reaches ~1,800 entries. Nine structural invariants are checked at load, each
+      with its own message so a balance pass reads which one it broke
+- [x] ⭐ **Both of ssot-sets §3.9's named failure modes are refused BY THE PARSER, so no run can be
+      configured into them.** `fixedIdentityAtoms = 0` is *"fixed like a unique"* and
+      `prefixRolls + suffixRolls >= rareComparisonRolls` is *"rolled like a rare — set jail arriving
+      through the item layer, where none of §3.5's five rules can reach it."*
+      `no_set_piece_is_fixed_like_a_unique_or_rolled_like_a_rare` feeds the parser each cheat as a
+      real temp tuning file and asserts the refusal by message
+- [x] ⭐ **The vocabularies are COUNTED from the live corpus, never transcribed — and they reproduce
+      the spec's arithmetic exactly.** `vocab.build()` over the real 98 affix families:
+      **42 capability families → 60 picks** (39 element-free + 3 × 7 variant) and **56 stat families
+      → 242 picks** (2 element-free + 31 × 7 variant + 23 `stat.modify`). The standing rule from this
+      program's own plan phase — *never derive a design proportion from a snapshot of a generated
+      corpus* — applies to a vocabulary size just as hard, so the counts live in a test and in the
+      todo, never in the tuning file. A family whose `kindId` is in neither bucket **raises** rather
+      than being quietly dropped
+- [x] **The distributor prices what the model chose and refuses what it broke, naming every rule.**
+      `distribute_set` returns ALL violations, not the first — one capability at the lowest threshold
+      (`SetCapabilityMissing` / `SetTierForbiddenAtom`), stats only above it, no `More`-op family on
+      any tier, a threshold at 2 with no exceptions, top threshold ≤ member count, ≤ 6 roles, at most
+      one armament (`SetRoleForbidden`), and the AE budget. **Nothing is repaired into legality** —
+      silently fixing a draft teaches the next call nothing, which is `call_with_self_heal`'s own
+      reasoning
+- [x] **The AE budget is integer per-mille and the apportionment is exact.** `aePerMemberMilli` 1500,
+      so a 4-piece set is 6000 milli-AE; the split is by atom count with the remainder landing on the
+      top threshold, so the sum **equals** the budget and can never round above it.
+      `a_sets_total_tier_value_never_exceeds_one_and_a_half_AE_per_member` asserts both the bound and
+      the equality; the multiply happens before the divide, once
+- [x] ⭐ **The id defect that would have shipped broken is refused at the minting function.**
+      `emit.set_id("demon.allpeater", 1)` raises `IdRefused` with *"two dots"* in the message;
+      `emit.set_id("allpeater", 1)` gives `set.allpeater-001` and `tier_container_id(..., 4)` gives
+      `set.allpeater-001-04`. The pad is asserted load-bearing by sorting `-02 / -04 / -10`
+      (module 12 proved that at the DAL). Minting into the **900-999 correction range** is refused,
+      and so is a `speciesId` that collides with one of `naming.v1.json`'s five pinned partitions.
+      `every_shipped_species_id_is_kebab_legal_and_mintable` re-verifies all 84 rather than trusting
+      the spec's "verified safe"
+- [x] ⭐ **`data/seed/items/_registry/build-themes.v1.json` — the third `themeKey` population, and it
+      is DERIVED, not authored.** 36 rows = 12 aptitudes × 3 archetypes, generated from
+      `data/seed/aptitudes/roster.json` (the checked-in mirror of `AptitudeCatalog.All`, whose own
+      count is `PostureCount × PerPosture`), so a thirteenth aptitude changes the grid by
+      construction. `aptitudeMeaning` / `aptitudeReading` are that roster's own strings carried
+      verbatim — **no flavour is invented in this file.** Deliberately not frozen, and append-only.
+      Wired into `registries.load_theme_keys()` (Python) and `RegistrySet`/`ReferenceCheck` (C#), so
+      a build set's `themeKey` resolves on both sides
+- [x] **The theme bridge is one-way and asserted structurally.**
+      `nothing_in_the_generator_writes_the_demons_corpus` scans every module in `setgen/` and
+      `charmgen/` for a write verb on the same line as `demons`, and
+      `nothing_generated_keys_on_theme_rarity` scans for a read of `theme.rarity` (§2.4a — rarity is a
+      roster snapshot, not an attribute)
+- [x] ⭐ **`Distribution/CellOccupancy` built and registered — the reskin bar, on the axis that
+      carries distinctness.** Cell key = `(capability, sorted multiset of the stat families at every
+      threshold above the lowest)`. Measured on the real 30-set corpus: **28 cells, median 1, max 2,
+      26 singletons (928‰)** — the same numbers P3.2 measured by hand, now produced by a registered
+      metric. Capability usage (**19 distinct over 30 sets**) is emitted as a separate NOTE and
+      **never gates**, because passing it proves nothing about distinctness
+- [x] **The run verdict is `pass` only when every gating metric both ran and cleared.**
+      `verdict.py` names the five gates and the tuning key each threshold is read from;
+      `missing_thresholds()` returns `[]` and the meta-test asserts it, so *"a command with no
+      threshold is something you run and then argue about"* is closed as a fact, not an intention. A
+      held partition alone denies the pass; a FAIL beats a NOT_MEASURED; the two report-only metrics
+      still appear in the report, because a metric that runs and is never read is the same as one
+      that never ran
+- [x] ⛔ **`seedsmith items` — the subcommand group the spec's own Commands block called and that did
+      not exist.** `build_parser` registered `check`/`report`/`metrics`/`demons`/`effects` and nothing
+      else, so every command the spec listed was a documented interface that only worked if you knew
+      the private module path. `items generate --kind set|charm --population build|species` now runs,
+      prints the plan as JSON, and `--sample-brief` prints a real assembled brief. **`--write` is
+      refused with a reason** rather than silently writing nothing
+- [x] **Resume is built and atomic.** `run.plan_run` reads a ledger and returns only the subjects not
+      already done; `write_ledger` writes through a temp file and `os.replace`s, so a killed process
+      leaves the old ledger or the new one, never half of one. `the_run_resumes_after_an_interrupt_without_duplicating_entries`
+      marks 10 of 36 done and asserts 26 remain with zero overlap; `re_running_over_unchanged_themes_is_byte_identical`
+      compares both the subject dicts and the assembled brief text
+- [x] **`set_eligible` / `charm_potency` are never asked back.** Module 7 dropped both under SC7 (D15
+      makes the first vacuous — a set has no rarity and completes from pieces of any rung — and a
+      registered key with no shipped consumer rejects at seed load). `SC7Tests` greps every module in
+      both packages **and** the tuning file for either name
+- [x] **D17's dead tail is protected in code.** `the_tuning_file_carries_no_content_ceiling` refuses
+      `maxGeneratedSets` / `maxSpeciesSets` / `rosterCap` anywhere in the tuning file — a cap on the
+      generated population would be a hard progression ceiling on content breadth, and D12's
+      roster-scale generation is the point
+
+**⛔ Five defects / stale claims found while building, all measured rather than asserted:**
+
+1. ⛔ **D30's 18 legacy sets are STILL OPEN, and the corpus says so directly.** Measured against
+   `data/seed/items/sets/**` rather than trusting any document: **18 of 30 sets** name a dropped
+   role — **10 use `head-guard`, 11 use `sense`, 3 use both** — and
+   `seedsmith check --adapter items --metric Linkage/SetCompletability` reports **30 GAP findings**
+   over exactly those 18. This is D30's own accepted cost and it closes only when the generation run
+   below actually executes. **Cross-referenced into P0.5.** ⚠ Not fixable deterministically: a member
+   role is a **model-chosen** field under P1, so a code-side role swap would be deterministic code
+   writing identity — the exact inversion P1 forbids.
+2. ⛔ **The species denominator every D34 number is quoted against counts the wrong thing.** The plan
+   and the spec both say *"386 species (292 plant + 94 zombie)"*, derived from
+   `ls data/seed/demons/species/{plant,zombie} | wc -l`. Those are **family files**, each holding many
+   species. `_index.json` is a flat `{speciesId: "plant/family.json"}` map and it holds **840
+   species** across **495 family files** (measured 2026-09-04; the tree is being rewritten by the
+   concurrent stream, so both move). So the theme-registry staleness is **84 of 840 — 772 uncovered**,
+   not 84 of 386. `species_family_file_count()` exists as its own function precisely so a test can pin
+   that it is NOT the species count. **Cross-referenced into P0.2** — `theme-refresh` is sized against
+   the wrong number today.
+3. ⛔ **16 published themes name a species the anchor tree no longer ships** (`cherrygatling`,
+   `cherrypaperzombie`, `cornpot`, `dancepolzombie`, `dolldiamond`, …). `coverage_report` reports
+   `orphaned` beside `uncovered` for exactly this reason: a republish that only *adds* leaves them
+   behind. **Cross-referenced into P0.2.**
+4. ⛔ **`SemanticDedup/NearDuplicate`'s MinHash estimate over-reports by up to 7× on names this
+   short — and this module's spec makes that metric a GATE.** Measured on live corpus names:
+
+   | pair | true Jaccard | 32-hash MinHash estimate |
+   |---|---|---|
+   | `'Tier Duration'` / `'Husk of the Murmuration'` | **0.120** | 0.844 |
+   | `'Spiralled Bead'` / `'Spiralled Intercom'` | **0.333** | 0.906 |
+   | `'Root of the Foundation'` / `'Signet of the Foundation'` | 0.652 | 0.719 |
+
+   Over the 100 shipped set + charm rows the shared metric flags **4** pairs; the exact filter finds
+   **1**. Gating a run on a signal with that false-positive rate would fail every run for the wrong
+   reason. Fixed **for this module only** — `setgen/dedup.py` applies the standard MinHash+LSH
+   pattern (LSH proposes, exact Jaccard filters) and imports `shingles` from the shared metric so the
+   tokenisation cannot drift. ⚠ **The shared metric is deliberately NOT changed from here**: it is
+   registered for every adapter and its 62-finding count is another stream's baseline. The test
+   pinning the divergence is written so the eventual fix has something waiting for it.
+5. ⚠ **Mitigation #2 does not hold uniformly, and the spec states it as though it does.** *"Capability
+   families carry `roles`, so a set's member roles already narrow the legal capability pool"* is true
+   for most roles — `retinue` reaches **7 of 60**, `footing` **13 of 60** — but **`jewel-minor-a`
+   reaches all 60**. It is the universal capability host in the shipped corpus, so a set claiming a
+   minor jewel gets the whole pool back and the constraint does no work for it. Found by a test whose
+   first draft assumed narrowing everywhere and failed; corrected against the data rather than the
+   data being read as wrong.
+
+**Three judgement calls the spec does not state, all named:**
+
+- ⚠ **`CellOccupancy` ships `gates = False`, and the promotion trigger is written down rather than
+  remembered.** The threshold is defined over the **generated species-set population** (~904), which
+  does not exist; today's corpus is 30 legacy sets, a different denominator, and promoting now would
+  gate CI on the wrong population. The finding is still **GAP** severity when the median is exceeded,
+  so a plain `seedsmith check` catches it, and `verdict.py` treats it as a real gate for the run
+  itself. `PROMOTION_TRIGGER` is a module constant a test asserts.
+- ⚠ **The 5‰ near-duplicate ceiling is not measurable at n = 100 — one pair is already 10‰.** The
+  shipped set + charm population has **zero** exact duplicates and **one** genuine near-duplicate
+  (`'Root of the Foundation'` / `'Signet of the Foundation'`, true Jaccard 0.652). The test asserts
+  the exact count — so a second pair is a failure — and records that the rate exceeds the ceiling
+  *because of granularity*, not because of a distinctness problem. The threshold is meaningful at
+  ~1,844 entries, where 5‰ is ~9 pairs.
+- ⚠ **A family's legality on a dropped role is filtered out of the brief.** The shipped families list
+  `head-guard` / `sense` / `ward-array` in their own `roles`, and printing that verbatim would put a
+  dropped role in front of the model in the same document that tells it those roles do not exist.
+  Found by a test; `_core_roles` narrows the display to the twelve.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `python -m pytest tests/test_set_charm_gen.py -q` | **78 passed, 201 subtests** (new) |
+| `python -m pytest` (seedsmith, full) | **1583 passed, 1 skipped, 288 subtests** — exactly P3.2's 1505 plus this module's 78 |
+| `python -m seedsmith items generate --kind set --population build --dry-run` | **36 subjects, held 0, complete true**; 60 capability picks / 242 stat picks; `gatesMissingAThreshold: []` |
+| `python -m seedsmith items generate --kind set --population species --dry-run` | **53 subjects, 31 held (`basis=name`), complete false** — the honest answer while P0.3 is unbuilt |
+| `python -m seedsmith items generate --kind charm --population build` | **refused, exit 2** — there is no build charm population |
+| `python -m seedsmith check … --metric Distribution/CellOccupancy` | **30 sets over 28 cells: median 1 (threshold ≤ 2), max 2, singletons 26/28 (928‰)** + the capability-usage NOTE (19 distinct) |
+| `python -m seedsmith check … --adapter items --gate` | exit 1, **61 gap / 80 note / 14 not_measured** — the 61 gaps are **byte-identical to the pre-build set** (diffed); the only delta is **+2 NOTE** from the new metric |
+| `python -m seedsmith check … --metric Linkage/SetCompletability` | **30 gap** — D30's 18 sets, unchanged and expected |
+| `dotnet build tools/ItemSeedValidator` | **0 warnings, 0 errors** |
+| `dotnet run --project tools\ItemSeedValidator` | **165 errors across 120 partitions — identical to the module-6/8/11/12 baseline.** Zero new findings from the `build-themes` union |
+| `dotnet run --project tools\AtomImporter -- --check --validate` | **clean** — 17 files, 66 atoms, 7 containers, 10 rarity bands |
+| `python scripts\audit-overflow.py` | **0 critical**, 55 findings — unchanged from P3.2 |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0**, 17 total; the 5 `items` rows are modules 8/10's pre-existing ones. Nothing this module added is C# |
+| `.\scripts\guard-dal.ps1` / `guard-single-writer.ps1` / `guard-funnel-delta.ps1` / `guard-secondary-no-unity.ps1` | **all four OK** |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6177 passed / 0 failed** — ⭐ the six-failure baseline measured at the start of this session is **gone**, fixed upstream by the concurrent stream mid-session |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **713 passed / 2 failed** — both `DemonSpeciesImportCliTests`, the concurrent demon stream's (48 files under `data/seed/demons/` are mid-edit in `git status`). Down from the 3-failure baseline: `AtomStoreTests.An_unknown_trigger_is_rejected` was also fixed upstream |
+| `dotnet test tests\FusionRpg.Guard.Tests` | **197 / 197**, up from 184 at P3.2 |
+
+⚠ **One Core run aborted with *"Test host process crashed"* mid-suite** (1 failure recorded before the
+abort, `Demons.VariantCountBandTests`). The immediately following clean re-run is 6177/0. Same
+intermittent P3.2 recorded for `Data.Tests`, now seen on `Core.Tests` too, and it happens while the
+concurrent stream is rewriting the species tree under both.
+
+⚠ **One test in another suite had to be updated, and it is this module's change that moved it.**
+`test_demon_themes.py::test_load_theme_keys_returns_the_thirteen_registered_legacy_themes_prefixed`
+pinned the themeKey vocabulary at exactly two populations. Rewritten to assert **13 legacy + 36 build
+= the whole union**, so the original subject (exactly thirteen legacy themes) is still pinned exactly
+rather than loosened to `>= 13`.
+
+- [ ] ⏸ ⭐ **THE GENERATIVE AUTHORING PASS ITSELF — 36 build sets + ~904 species sets + ~904 charms —
+      is out of scope for this pass, and this is the honest boundary, not a gap in the build.** It is
+      ~1,844 live model calls; a coding session cannot make them. **Who runs it:** the owner, from
+      their own terminal, once the two blockers below clear. Everything the run needs is built: the
+      briefs assemble, the ids mint, the schema is audit-clean, the distributor prices, the ledger
+      resumes and the verdict judges. **Until it runs, `Linkage/SetCompletability` stays red on 18
+      sets and the species population's verdict is `not_measured` — both by design.**
+- [ ] ⏸ **The generation graph is not wired, and `--write` says so instead of writing nothing.** A
+      `workflow/graphs/item_set.py` (mirroring `workflow/graphs/effect_affix.py`) is what connects
+      `plan_run`'s subjects to `llm_caller`. Deliberately not stubbed: a graph that silently produces
+      nothing is worse than a command that refuses. `cmd_items` returns `EXIT_REFUSED` with the
+      reason.
+- [ ] ⏸ **P0.2 `theme-refresh` and P0.3 `theme-enrich` are unbuilt, and they gate the species half of
+      the run — they are seedsmith's modules, not this one's.** Today **31 of 84** themes sit at
+      `basis = "name"` and are HELD (never generated from, never silently skipped), and the registry
+      covers 84 of **840** species. This module's contribution is to make both states *loud*:
+      `holdback_report` and `coverage_report` are what the run verdict reads, and defect 2 above
+      corrects the number P0.2 is sized against. **The build half (36 sets) needs neither** and is
+      `complete: true` today.
+- [ ] ⏸ **`naming.v1.json` registryVersion 3 — widening the set `partitionCount` from 5 to ~904 — is
+      an ASK-FIRST on a frozen registry and is not done here.** The spec's own Boundaries list it
+      under *"Ask first"*, and the file's `frozenNote` prices a required change at *"v3 plus an
+      explicit re-run decision."* `emit.set_id` already mints the correct shape and refuses a
+      collision with the five pinned partitions, so nothing is blocked by the bump not having
+      happened — it is a registry ceremony the owner owns.
+- [ ] ⏸ **`demon.*` themeKeys do not resolve in `ItemSeedValidator`, so a generated species set would
+      report `RegistryValueUnknown` today.** `ReferenceCheck` resolves `themeKey` against
+      `RegistrySet.ThemeIds`, which is now `theme.*` ∪ `build.*` — the demon population lives in
+      `data/seed/demons/_registry/themes.v1.json`, and having the **items** validator read the
+      **demons** registry is a boundary decision, not an edit. Named rather than crossed: the Python
+      adapter already has the seam (`load_vocabularies(demon_theme_keys=…)`); the C# tool does not.
+      **This blocks persisting species sets, not generating them.**
+- [ ] ⏸ **`Distribution/CellOccupancy` promotion to `gates = True`** — trigger recorded in
+      `PROMOTION_TRIGGER` and asserted by a test. It flips with the generation run, not before.
+- [ ] ⏸ **X4 / L0 channel registration — sets and charms SUPPLY the `set` and `charm` channels to
+      effect-pipeline's pool composition, and L0 is unspecced and unbuilt.** Generation can proceed
+      (channels are a weighting layer over an already-legal pool) but **the run's value is not
+      provable until L0 lands**, which the spec itself says should be stated before tokens are spent.
+      Restated here so it is said twice.
+- [ ] ⏸ **X7 — `ContainerKind` gaining D27's four values — same blocker P3.1 and P3.2 both carry.**
+      Nothing this module generates has a legal container home until it lands. A wiring gap with a
+      named owner, not a wall.
+- [ ] ⏸ **P3.2's defect 2 — the ten unpadded resonance ids — was examined here and is deliberately
+      NOT renamed, because the rename needs a frozen-registry bump and would break a shipped test.**
+      Module 12 forwarded it to this module. Traced end to end: the ids live in
+      `data/seed/items/charms/resonance.json` (`charm.res-offense-2`), the allocation is derived by
+      `tools/ItemSeedValidator/Registries/NamespaceAllocation.cs:219-231`, which regex-scrapes the
+      breakpoints out of **`naming.v1.json`'s `resonanceNote` prose** and rebuilds
+      `charm.res-{axis}-{breakpoint}` **unpadded via `int.Parse`** — so padding the corpus alone
+      makes the allocation mismatch. `naming.v1.json` is `registryVersion 4, "frozen": true`, which
+      puts the note edit under the same **Ask first** as the set `partitionCount` bump. And
+      `ThresholdGrantCorpusTests.All_ten_shipped_resonance_ids_are_unpadded_and_the_divergence_is_measured_not_normalised_away`
+      asserts the current spelling on purpose. **Four things move together or none do**; this module
+      generates the 60 authored charms, not the 10 resonance containers, which the spec itself says
+      *"are not charms a player carries."* **Cross-referenced back into P3.2.**
+- [ ] ⏸ **`SemanticDedup/NearDuplicate`'s MinHash false-positive rate (defect 4) is fixed for this
+      module only.** The shared metric keeps its estimate; the one-line change (verify each LSH
+      candidate with exact Jaccard) belongs to whoever owns that metric's baseline, and the test
+      pinning the divergence is already written.
+
+**Files:** `data/tuning/set-charm-gen.v1.json` (new — set shape, piece roll plan, AE budget, charm
+class table, the three distinctness thresholds with their derivations);
+`data/seed/items/_registry/build-themes.v1.json` (new — 36 `build.*` keys, derived from the aptitude
+roster); `tools/seedsmith/seedsmith/adapters/items/setgen/{__init__.py, roles.py, tuning.py, vocab.py,
+schema.py, brief.py, themes.py, distribute.py, cells.py, dedup.py, emit.py, verdict.py, run.py}` (new);
+`tools/seedsmith/seedsmith/adapters/items/charmgen/{__init__.py, rules.py}` (new);
+`tools/seedsmith/seedsmith/metrics/cell_occupancy.py` (new — `Distribution/CellOccupancy`);
+`tools/seedsmith/seedsmith/report/cli.py` (EDIT — the `items` subcommand group, `CellOccupancy`
+registered); `tools/seedsmith/seedsmith/adapters/items/registries.py` (EDIT — the `build.*` population
+unioned into `load_theme_keys`); `tools/ItemSeedValidator/Registries/RegistrySet.cs` (EDIT — optional
+`build-themes.v1.json`, unioned into `ThemeIds`); `tools/ItemSeedValidator/Checks/ReferenceCheck.cs`
+(EDIT — strip `build.` as well as `theme.`); `tools/seedsmith/tests/test_set_charm_gen.py` (new, 78
+tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey union is three populations).
+
+**Verify:** `cd tools\seedsmith; python -m pytest tests/test_set_charm_gen.py -q`;
+`python -m seedsmith items generate --kind set --population build --dry-run`;
+`python -m seedsmith check ..\..\data\seed\items --adapter items --metric Distribution/CellOccupancy`;
+`dotnet run --project tools\ItemSeedValidator`
+
+> ### ⏸ CHECKPOINT 3 — HALF HELD, AND NAMED
+> A drop table produces an item at a level and its rarity distribution matches the published bands
+> (module 11, P3.1 ✅). A set bonus fires at its breakpoint at `unique-actor:` scope with no atom at
+> `player:` scope (module 12, P3.2 ✅). **The remaining half — a *generated* set doing that — waits on
+> the model-call run named above, and on X7 for a container to bind into.** Stated as held rather than
+> ticked: the machinery is built and tested, the content is not authored.
 
 ---
 

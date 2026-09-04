@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 500,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Light",
+  "elementSecondary": null,
+  "gameTypeId": 1365,
+  "magnitudes": {
+    "combat.block.shred.omni": 270,
+    "combat.parry.shred.omni": 270,
+    "combat.power.omni": 180,
+    "resource.max.hp": 7640,
+    "resource.max.hunger": 14756,
+    "resource.max.qi": 4494,
+    "resource.max.spirit": 2247,
+    "resource.max.stamina": 7340,
+    "resource.regen.hp": 486,
+    "resource.regen.hunger": 853,
+    "resource.regen.qi": 300,
+    "resource.regen.spirit": 150,
+    "resource.regen.stamina": 374
+  },
+  "pTheta": 749,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "StarHypno",
+  "theta": 22,
+  "traitPool": [
+    "charm-triggering",
+    "post-consumption transformation",
+    "star-projectile emission"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "cursed",
+    "mutated"
+  ]
+}

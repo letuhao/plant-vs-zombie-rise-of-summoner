@@ -2749,7 +2749,58 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   - Acceptance against the spec's own §5 (1-8): done, independently re-verified above — no
     owner-run/deferred item on this module (unlike its Wave-8 siblings, E39 carries no explicit
     live-proof-only acceptance criterion of its own).
-- [ ] **E40 `spawn-non-grid`** · **M** · Deps: E28 · widen `kind`, do not add one. `present` is scoped out.
+- [x] **E40 `spawn-non-grid`** · **M** · Deps: E28 · widen `kind`, do not add one. `present` is scoped out.
+  - **Owner activity note**: mid-build, the owner committed (`dcabac3 "update seeds"`), which swept
+    this module's `AtomKindRegistry.cs`/`InjectorEffectActionSink.cs` edits into a real commit
+    alongside unrelated concurrent species-data work — independently confirmed via
+    `git show --stat dcabac3` and `git log`. No git write command was run by this session or its
+    delegate; the commit is the owner's own manual action per repo policy.
+  - **The seven-value domain and the coin refusal — independently re-read live in
+    `AtomKindRegistry.cs`**: `SpawnEntityKinds` confirmed present; a dedicated, named `Validate()`
+    block refuses `kind: "coin"` at load with the reason
+    `"spawn.entity.kind 'coin' is refused at load: CreateItem.SetCoin's call safety..."` — confirmed
+    via direct grep, matching §3's explicit "never shipped inert" instruction. **The coin safety
+    finding is honest, not evasive**: the delegate checked `GameCaptureHooks.cs`'s own capture-hook
+    comment for conclusive evidence either way and found none ("no consumer outside debug
+    sessions... ~per-kill rate" says nothing about call safety) — refusing rather than guessing is
+    the correct call given the spec's own explicit instruction not to claim this path before
+    proving it.
+  - **`pet`/`bucket`/`mower` executor arms — independently re-read live**: `ExecSpawnEntity`'s
+    switch confirmed to route `"pet"`/`"bucket"`/`"mower"` to new `SpawnPetOnce`/`SpawnBucketOnce`/
+    `SpawnMowerOnce` helpers, which call `DebugActions.SpawnPet`/`SpawnBucket`/`SpawnMower`
+    (independently re-read in full in `DebugActions.cs`) — `LawnCoords.ClampCol`/`ClampRow` applied
+    to row/col on the way in, matching the existing `PlaceGridItem` precedent exactly.
+  - **A real defect caught by an actual build against the live game DLLs, independently confirmed
+    present as a fix, not merely claimed**: `CreateMower.SetMower` is an **instance** method, not
+    static — confirmed via direct read of `DebugActions.SpawnMower`, which now correctly calls
+    `CreateMower.Instance.SetMower(...)` with a five-line comment explaining exactly how this was
+    discovered (`CS0120` on the first, spec-literal static-call attempt) and why Harmony's own
+    postfix signature (which omits `__instance`) is not reliable evidence either way. This is
+    genuine, verified engineering rigor beyond what the spec's own citation would have produced.
+  - **`present` correctly scoped out, `grid.spawn` correctly untouched** — independently confirmed:
+    `present` is simply absent from `SpawnEntityKinds`' seven values (refused by the ordinary
+    vocabulary check, no special-cased block needed), and `git show --stat dcabac3` /
+    current `git status` show no changes to any `grid.spawn`-owning code path.
+  - **`KindCount`/`AttachPointCount` — independently confirmed via `git show dcabac3` that neither
+    constant line appears in this module's diff**, matching acceptance criterion 8's own framing
+    (a statement about this module's own diff, not the wave's absolute end-state numbers, which
+    several sibling modules this session already moved).
+  - **Independently re-run by this session**: `FusionRpg.Guard.Tests` (filtered to
+    `SpawnNonGrid*`) — **14/14 passing**, matching the report exactly.
+  - **⛔ Core.Tests independent re-verification blocked by a real, confirmed-unrelated, currently
+    live concurrent build break** — not E40's, not this session's, and not yet resolved as of this
+    evidence: `dotnet build` on `FusionRpg.Core` fails with `CS0234` in
+    `src/FusionRpg.Core/World/Turn/WorldCommandAdmission.cs` (`FusionRpg.Core.World.Growth.ProjectCatalog`
+    does not exist), confirmed via `git status` to be a genuinely modified, unrelated file (a
+    concurrent "world stage"/"growth" work stream, matching this session's own standing memory of
+    that peer program) — retried once, not transient, still broken. This session could not
+    independently re-run `FusionRpg.Core.Tests` as a result. The delegate's own reported run
+    (6141/6144, 3 pre-existing unrelated failures) happened before this specific break appeared in
+    the tree; the source-level verification above (domain, coin refusal, executor arms, the
+    `CreateMower.Instance` fix) stands on direct code reads independent of any test run.
+  - Acceptance against the spec's own §5 (1-4, 6-8): done, independently re-verified above via
+    source reads and Guard.Tests; (5, coin): correctly refused with reason rather than claimed,
+    per the spec's own explicit instruction — the honest resolution, not a gap.
 - [ ] **E41 `ui-attach-point`** · **M** · Deps: — · read-only; **first producer for
   `ActorHudResources.Meters`**, declared and serialized with no producer today.
 - [ ] **ep-7 `world-seed`** · **M** · Deps: ep-2 · `effect-pipeline/spec-world-seed.md`

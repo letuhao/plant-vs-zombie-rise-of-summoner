@@ -116,6 +116,33 @@
         "identity": 1,
         "kit-shape": 1,
         "threat-audit": 1
+      },
+      "manualCorrection": {
+        "utc": "2026-09-04T13:45:00Z",
+        "field": [
+          "rarity",
+          "variants"
+        ],
+        "from": {
+          "rarity": "almanac",
+          "variants": [
+            "normal",
+            "mutated",
+            "corrupted",
+            "blessed",
+            "cursed",
+            "shiny"
+          ]
+        },
+        "to": {
+          "rarity": "cultivated",
+          "variants": [
+            "normal",
+            "mutated"
+          ]
+        },
+        "by": "battle-timeline session, owner-approved",
+        "why": "The kit-shape rerun classified the game's STARTER PLANT at 'almanac', the top rung of ten, with 6 variants. Four independent signals contradict that, and no single one of them would have been enough alone: (1) 6 variants is out of band for EVERY rung -- across 841 corpus rows the counts track rarity tightly (chaff 0, sprout 1, cultivated 2, fused/chimeric/heirloom 2-3, almanac 4), and this was the ONLY 6-variant row in the corpus; (2) 18 of the 20 genuine almanac rows carry the 'ancient' variant and this row does not; (3) the row's own classifier metadata disagrees with itself -- confidence.rarity is 'split' with minorityValues.rarity 'sprout', so the model was not confident in almanac; (4) the row's own reason text calls it 'a basic first line of defense ... more a nuisance or minor obstacle'. Corrected to 'cultivated' with 2 variants: that is what SpeciesExpanderTests documents against ssot-rarity.md 3.3, and 111 of 122 cultivated rows carry exactly [normal, mutated]. NOTE FOR A RERUN: this is a manual override of a split classification. If the pipeline re-emits 'almanac' here, the prompt or the tie-break is what needs fixing, not this row."
       }
     },
     "acquisition": [
@@ -134,7 +161,7 @@
     "gameTypeId": 0,
     "posture": "Force",
     "pure": true,
-    "rarity": "almanac",
+    "rarity": "cultivated",
     "reach": "long",
     "reason": "As a basic first line of defense that deals consistent damage to single targets, it functions more as a nuisance or minor obstacle rather than a coordinated raider.",
     "resourceProfile": [
@@ -151,11 +178,7 @@
     ],
     "variants": [
       "normal",
-      "mutated",
-      "corrupted",
-      "blessed",
-      "cursed",
-      "shiny"
+      "mutated"
     ],
     "verdict": "too-low"
   },

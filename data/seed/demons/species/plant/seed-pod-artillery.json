@@ -20,15 +20,16 @@
       "basis": "observed",
       "confidence": {
         "aptitudePrimary": "split",
-        "attackTempo": "unresolved",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "split",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:06:49Z",
+      "emittedUtc": "2026-09-04T14:30:15Z",
       "minorityValues": {
         "aptitudePrimary": "Precision",
+        "attackTempo": "quick",
         "elementPrimary": "fire"
       },
       "promptVersions": {
@@ -47,7 +48,7 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "unresolved",
+    "attackTempo": "flurry",
     "basis": "observed",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",

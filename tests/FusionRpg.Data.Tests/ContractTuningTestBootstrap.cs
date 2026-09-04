@@ -114,6 +114,8 @@ internal static class ContractTuningTestBootstrap
         Upkeep: new LoamUpkeepTuning(
             SeepPerTurn: 50, LoamCapacity: 300, BaseUpkeepPerSector: 10,
             GarrisonUpkeepPerMember: 2, DevelopmentUpkeepPerLevel: 5, DangerUpkeepPerBand: 3),
+        // world-map W55, matches loam.v2.json's own `development.yieldPerLevel` exactly.
+        Development: new LoamDevelopmentTuning(YieldPerLevel: 6),
         Fade: new LoamFadeTuning(
             RecoveryMilli: 20, BaseDecayMilli: 40, DecayPerDeficitUnitMilli: 1,
             DecayScaleDivisor: 5, MaxDecayMilli: 300, AbandonmentHorizonTurns: 3),

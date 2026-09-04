@@ -1,0 +1,38 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Light",
+  "elementSecondary": null,
+  "gameTypeId": 993,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 13560,
+    "resource.max.spirit": 6328,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 814,
+    "resource.regen.spirit": 316,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "HypnoCattailGirl",
+  "theta": 13,
+  "traitPool": [
+    "aquatic-affinity",
+    "charm-aura",
+    "homing-magic-projectiles",
+    "synergistic-fusion"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "shiny"
+  ]
+}

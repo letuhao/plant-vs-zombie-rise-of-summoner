@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 2400,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Earth",
@@ -23,18 +23,17 @@
   },
   "pTheta": 452,
   "rangeCells": 3,
-  "rarity": "Cultivated",
+  "rarity": "Sprout",
   "side": "plant",
   "speciesId": "Squash",
   "theta": 13,
   "traitPool": [
-    "Ambush-Leaping",
-    "Crushing-Impact",
-    "Executioner"
+    "ambush-leap",
+    "area-of-effect-impact",
+    "squash-mechanic"
   ],
-  "variantCount": 2,
+  "variantCount": 1,
   "variants": [
-    "ancient",
     "normal"
   ]
 }

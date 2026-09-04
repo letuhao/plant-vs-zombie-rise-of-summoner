@@ -33,11 +33,18 @@ public static class RarityBudgetKeys
         new RarityBudgetKeyDef("enhance_cap", "enhance-reroll (15)", HasDecidedShape: true),
         new RarityBudgetKeyDef("power_ceiling", "item-power-reads (9)", HasDecidedShape: true),
 
+        // ⭐ UNBLOCKED 2026-09-04 by module 14 (salvage-craft), which decided the shape ssot-rarity.md
+        // §5 recorded as "awaiting I9": one integer per rung, the SUBSTRATE quantity a salvage of that
+        // rung returns before the affix bonus (`salvageCoefficient.{rung}.substrateBase` in
+        // data/tuning/materials.v1.json, seeded by RpgStore.SeedSalvageYield). It satisfies §9.8's one
+        // constraint on this key — it must NOT reuse `shard.{DemonRarity}` ids — by naming no shard id
+        // at all: the shard leg is R1's rung−1 rule, which is derived, not a per-rung budget row.
+        new RarityBudgetKeyDef("salvage_yield", "salvage-craft (14)", HasDecidedShape: true),
+
         // Awaiting a decided shape — named in ssot-rarity.md §5 as "awaiting", not seeded here.
         new RarityBudgetKeyDef("socket_min", "sockets (16)", HasDecidedShape: false),
         new RarityBudgetKeyDef("socket_max", "sockets (16)", HasDecidedShape: false),
         new RarityBudgetKeyDef("reroll_cost_mult", "enhance-reroll (15)", HasDecidedShape: false),
-        new RarityBudgetKeyDef("salvage_yield", "salvage-craft (14)", HasDecidedShape: false),
 
         // set_eligible and charm_potency are deliberately ABSENT, not merely undecided: D15 makes the
         // former vacuous (a set has no rarity) and spec-set-charm-gen.md never reads the latter. Never

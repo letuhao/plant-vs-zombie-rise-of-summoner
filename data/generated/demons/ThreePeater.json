@@ -9,28 +9,27 @@
   "magnitudes": {
     "resource.max.hp": 2712,
     "resource.max.hunger": 2260,
-    "resource.max.qi": 13560,
-    "resource.max.spirit": 6328,
+    "resource.max.qi": 5424,
+    "resource.max.spirit": 3164,
     "resource.max.stamina": 3616,
     "resource.regen.hp": 9,
     "resource.regen.hunger": 136,
-    "resource.regen.qi": 814,
-    "resource.regen.spirit": 316,
+    "resource.regen.qi": 407,
+    "resource.regen.spirit": 90,
     "resource.regen.stamina": 226
   },
   "pTheta": 452,
-  "rangeCells": 5,
-  "rarity": "Cultivated",
+  "rangeCells": 3,
+  "rarity": "Sprout",
   "side": "plant",
   "speciesId": "ThreePeater",
   "theta": 13,
   "traitPool": [
-    "Lateral bullet compensation",
-    "Triple-lane projectile discharge"
+    "lane-compensating ammunition",
+    "triple-stream projectile"
   ],
-  "variantCount": 2,
+  "variantCount": 1,
   "variants": [
-    "ancient",
     "normal"
   ]
 }

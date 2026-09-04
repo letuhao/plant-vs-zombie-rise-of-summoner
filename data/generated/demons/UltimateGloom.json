@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Ice",
+  "elementSecondary": null,
+  "gameTypeId": 910,
+  "magnitudes": {
+    "combat.block.shred.omni": 1530,
+    "combat.parry.shred.omni": 1530,
+    "combat.power.omni": 1020,
+    "resource.max.hp": 7650,
+    "resource.max.hunger": 6375,
+    "resource.max.qi": 7650,
+    "resource.max.spirit": 3825,
+    "resource.max.stamina": 17850,
+    "resource.regen.hp": 383,
+    "resource.regen.hunger": 383,
+    "resource.regen.qi": 510,
+    "resource.regen.spirit": 255,
+    "resource.regen.stamina": 638
+  },
+  "pTheta": 1275,
+  "rangeCells": 3,
+  "rarity": "Chimeric",
+  "side": "plant",
+  "speciesId": "UltimateGloom",
+  "theta": 36,
+  "traitPool": [
+    "ashen-death-burst",
+    "cryogenic-spore-emission",
+    "reactive-detonation",
+    "volatile-essence"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "cursed",
+    "mutated"
+  ]
+}

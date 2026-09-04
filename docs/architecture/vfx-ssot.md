@@ -1,6 +1,6 @@
 # VFX SSOT — cue → recipe → primitive presentation layer
 
-**Status:** **Locked (2026-08-20); LIVE-proven (2026-08-21, 43/43 + owner visual confirmation)** — migration phases 1–4 in code: the §16 element extension, the `status.{id}.apply` producer path (all 21 catalog statuses seeded), burst shapes, crit-pop/amount-tier floaters with shadow pass, idle-cheap tick, registry-based anchors, element-only hit accents, and the three LIVE render fixes (§10, §16.4). Verdict: `docs/research/effect-runtime/_prove-vfx.json`. See [../../SPEC.md](../../SPEC.md) + `tasks/vfx-v2-todo.md`.
+**Status:** **Locked (2026-08-20); COMPLETE (2026-09-04)** — v1 element visuals, v2 hit/heal polish, and v3 sustained status visuals are all built, LIVE-proven and owner-closed. In code: the §16 element extension, `status.{id}.apply|expire` producer paths (21 statuses seeded, 13 custom carrying sustained sets), burst shapes, crit-pop/amount-tier floaters with shadow pass, idle-cheap tick, registry-based anchors with `UnitFrameResolver` anchor kinds (§9), element-only hit accents, fifteen aura motion styles across five identity batches (§17), shield-bar visuals, and a **config-backed balance surface** (`data/tuning/vfx.v3.json` → `VfxTuning`, §7). Verdicts: prove-vfx **46/46** (`docs/research/effect-runtime/_prove-vfx.json`); identity audit **13/13 sustain-glance pass, 0 fail, 0 color-only pairs**, LIVE **13/13 sustainedStarted** (`docs/research/vfx/status-identity-audit-2026-08-30.md`). Human forced-choice trials waived by the owner. See [../../SPEC.md](../../SPEC.md), `tasks/vfx-v2-todo.md`, `tasks/vfx-v3-todo.md`, `tasks/vfx-identity-batch*-todo.md`.
 **Parent:** [decisions.md](decisions.md) (ADR row **VFX**). Cue producers: [effect-funnel.md](effect-funnel.md), [status-ssot.md](status-ssot.md), [combat-damage-ssot.md](combat-damage-ssot.md). Current implementation being replaced: `src/FusionRpg.Injector/Fx/*`, `src/FusionRpg.Core/Effects/DamageFx.cs`.
 
 This spec defines the **presentation layer** for RPG overlay visual feedback. It does **not** own gameplay state, and it does **not** replace vanilla PVZ animations or particles.
@@ -207,9 +207,16 @@ New kinds (beam, ring, screen shake, trail) are **new spec rows in this table + 
 
 ## 7. Rules and budgets (core, pure)
 
-`VfxRules` generalizes `DamageFxFloaterRules`. All constants live here so tests can lock them.
+`VfxRules` generalizes `DamageFxFloaterRules`.
 
-| Policy key | Role | v1 value |
+**Config-backed since 2026-08-24 (tunables-ssot.md T1/T5):** the numbers below are no longer `const` — they load from
+`data/tuning/vfx.v{n}.json` (current: **v3**) into the `VfxTuning` record tree (`VfxRulesTuning`, `VfxSustainedTuning`,
+`VfxRenderTuning`, `VfxShieldBarTuning`, `VfxIdentityTuning`) and are read through `VfxRules` / `VfxTintMath.MaxStrength` /
+`VfxSustainedRules`. A balance pass retunes a file, not a rebuild. There is **no built-in fallback** — a consumer that
+reads tuning before `Configure(...)` throws, so a missing config fails loudly instead of silently reverting to defaults.
+The table records the shipped v1 values as the reference point; the JSON is the SSOT.
+
+| Policy key | Role | value |
 |---|---|---|
 | `VfxRules.FloaterCap` | Max live floaters | **64** (unchanged) |
 | `VfxRules.BurstCap` | Max live burst GameObjects | **24** (unchanged) |
@@ -293,7 +300,7 @@ VFX animate on **`unscaledDeltaTime`**, matching today. Deliberate: floaters/bur
 ## 10. FxResources (injector, shared)
 
 - Absorbs `OverlayShaderProbe` (candidate list, live `Shader.Find`, probe events) unchanged.
-- Owns the cached material(s) and textures (`StealParticleTexture`, `SoftDisc`) currently in `OverlayWorldFx`.
+- Owns the cached materials and generated textures (`SoftDisc`, marker shapes) — the retired `OverlayWorldFx` held these before the pool rewrite.
 - Primitives request materials by role (`AdditiveParticle`, future `SpriteTint`); FxResources caches per role.
 - No shader available → primitives that need one skip with reason `no-shader`, floaters still work (IMGUI needs no shader). This matches today's degradation.
 - Texture is **always the generated soft disc** (changed 2026-08-21): the v1 steal-first rule rendered arbitrary vanilla imagery inside our bursts (electric/lightning sprite sheets — LIVE finding), nondeterministic per scene. The steal is deleted, which also makes all VFX code `FindObjectsOfType`-free (guard-pinned).

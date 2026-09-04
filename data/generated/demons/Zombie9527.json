@@ -1,0 +1,42 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 125,
+  "magnitudes": {
+    "combat.defense.omni": 407,
+    "progression.bonus.defense": 1356,
+    "progression.bonus.maxHp": 1085,
+    "resource.max.hp": 3254,
+    "resource.max.hunger": 2938,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 2938,
+    "resource.max.stamina": 6147,
+    "resource.regen.hp": 10,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 381
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Almanac",
+  "side": "zombie",
+  "speciesId": "Zombie9527",
+  "theta": 13,
+  "traitPool": [
+    "agile-sprinter",
+    "high-resilience",
+    "momentum-shifting"
+  ],
+  "variantCount": 4,
+  "variants": [
+    "ancient",
+    "mutated",
+    "normal",
+    "shiny"
+  ]
+}

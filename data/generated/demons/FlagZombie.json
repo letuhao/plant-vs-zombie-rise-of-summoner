@@ -23,7 +23,7 @@
   },
   "pTheta": 452,
   "rangeCells": 1,
-  "rarity": "Chaff",
+  "rarity": "Cultivated",
   "side": "zombie",
   "speciesId": "FlagZombie",
   "theta": 13,
@@ -32,6 +32,9 @@
     "increased_mobility",
     "wave-signaling"
   ],
-  "variantCount": 0,
-  "variants": []
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "normal"
+  ]
 }

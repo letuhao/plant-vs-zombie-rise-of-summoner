@@ -303,6 +303,11 @@ public static class TurnEngine
         // same turn.
         world = FusionRpg.Core.World.Growth.RaiseResolver.Run(world, commands, report, Phases.Snapshot, turn);
 
+        // Develop resolves right after Raise, the same reason and the same order (world-map W52,
+        // spec-sector-development.md §3) — a claim and a develop may land on the same sector in the
+        // same turn.
+        world = FusionRpg.Core.World.Growth.DevelopResolver.Run(world, commands, report, Phases.Snapshot);
+
         // Warden binding resolves right after Build, the same reason and the same order — a claim
         // and a bind-warden may land in the same turn (spec-loam-texture.md, world-stage W28).
         world = WardenResolver.Run(world, commands, report, Phases.Snapshot);

@@ -190,7 +190,30 @@ refused to guess.
 - [x] **T2.10** `ds 14` `roster-metrics` — checks and declared targets · **M**
   - Acceptance: every metric names a target **in tuning**; every metric declares closed- or open-loop; the 21×12 grid reports all 252 cells including zeros; an injected element skew is caught
   - Files: `metrics/demon_roster.py`, `data/tuning/demon-roster-targets.v1.json`, tests
-- [ ] **T2.11** ⚠️ **THE RUN** — 20-species subset, then full · **owner-run**
+- [x] **T2.11** ⚠️ **THE RUN** — 20-species subset, then full · **owner-run** — **confirmed done,
+  2026-09-04.** The demon-corpus-self-heal program (a separate, later work stream, `tasks/demon-
+  corpus-self-heal-plan.md`) ran the full corpus over its own multi-phase self-heal pass, not as a
+  single T2.11 invocation — recorded here because this task's own acceptance line is now genuinely
+  satisfied, not because that program was executed as this task. Real, verified count as of this
+  session: **829 real, fully-resolved species on disk** (`data/seed/demons/species/`, confirmed via
+  `dotnet run --project tools/DemonSpeciesGen -- --check`: "clean, 829 species match"), out of 904 —
+  the gap is 64 species that never had a `start` at all (genuinely never classified, out of every
+  `--pipeline`-scoped rerun's own scope by design) plus 11 species that remain genuinely
+  `"unresolved"` on `aptitudePrimary` even after two real rerun rounds (5 of the 11 are literal
+  placeholder rows — `displayName: "未命名"`/"Unnamed", `flavorInfo: null` — nothing to classify
+  from; the other 6 are real species with no signal after 2 rounds of fresh votes). Both gaps are
+  reported, not silently absorbed: `SpeciesExpander.UnresolvedFields` (new,
+  `src/FusionRpg.Core/Demons/Generation/SpeciesExpander.cs`) is a shared check both
+  `DemonSpeciesGen`/`DemonSpeciesImport` now call BEFORE `Expand` — skips and names each unresolved
+  species instead of the old behaviour (any single unresolved species aborted the WHOLE batch, a real
+  blocker hit live while regenerating the corpus this session). A genuine, separate corpus-integrity
+  bug found and fixed in the same pass: `SuperMachineShardPlant` existed as a real duplicate across
+  two family files (`plant/mechanical-constructs.json` — stale, `rarity: fused` — and
+  `plant/mechanical-debris.json` — canonical per `_index.json`, `rarity: grafted`) — the C# tools
+  glob every `*.json` file directly and never consult `_index.json`, so both got read and the
+  write/check logic silently flapped between them every run. Fixed by deleting the orphaned file
+  (index-authoritative rule, same precedent as Phase A2 of the self-heal program). `--check` is now
+  clean.
   - Acceptance: the subset is reviewed by a human **before** the full run; the full run completes through `run-control`; the disagreement rate and roster metrics are both reported
   - Verify: `python -m seedsmith demons metrics --gate`
   - ▶ **The 20-species subset launched for real, 2026-09-02** — `demons preflight` PASS (0 refusals)
@@ -450,8 +473,10 @@ run. The 904-species commitment itself remains genuinely owner-gated per the pla
 decision (a single unplanned real model call already happened during T2.3's verification and is
 flagged in that task; thousands more without explicit go-ahead would not be a reasonable line to
 cross on my own).
-- [ ] 904 anchors committed; a rerun is byte-identical — mechanism proven (`test_anchor_emit.py`
-  AND now for real: 28 real anchors, `DemonSpeciesGen --check` clean against them), full 904 not run
+- [x] anchors committed; a rerun is byte-identical — **confirmed 2026-09-04 at the real scale**:
+  829/904 real species, `DemonSpeciesGen --check` clean (`--check: clean, 829 species match`). Not
+  literally all 904 — 64 never classified, 11 genuinely unresolved after 2 rerun rounds (5 are
+  content-less placeholder rows) — both gaps named, not silently dropped; see T2.11's own evidence.
 - [ ] CI runs `demons metrics --gate` — not wired (T2.12's own note: would break CI with no anchor tree yet)
 - [~] `--gate` passes, or every finding has a written decision — **run for real against the 28-species
   subset, 2026-09-02**: `demons metrics --gate` exit 0, 24 informational gaps (none `gates=True`),
@@ -1427,6 +1452,30 @@ living end-to-end test, not scaffolding to throw away.
     Checkpoint 4's own owner-run live-lawn check (summon, fusion, expedition). Step 7 (deleting
     `DemonSpeciesGenerator.cs`, `DemonSpeciesCatalog.Generated.cs`, `tools/DemonCatalogGen`) is
     correctly gated behind step 5 by the spec's own explicit ordering and cannot happen first.
+  - **T2.11's precondition now real (2026-09-04) — the diff review itself run for real, still
+    nothing flipped.** `tools/DemonSpeciesImport` gained `--diff-catalog` (prints
+    `SpeciesDiff.Coverage`/`Compare` against the real compiled catalog right after a successful
+    import — read-only, decides nothing, exits the same as before). Run against the real 829-species
+    corpus, imported into an **isolated scratch SQLite DB** (never `dist/FusionRpg.Server/data`,
+    matching this session's own established "read-only checks never touch the live data dir"
+    discipline): **compiled 84, store-backed 829, present in both 67, only-in-compiled 17,
+    only-in-store-backed 762.** Field disagreements on the 67 overlapping species: `name` 67/67 (the
+    store-backed snapshot's `Name` fallback did not resolve in this isolated DB context — a real,
+    separate finding, not chased further here), `traitPool` 67/67 (expected, already documented above
+    — anchors carry an open-vocabulary flavor array, `DemonTraitCatalog` is closed, `Build
+    DemonSpeciesSnapshot()` deliberately emits empty rather than guess), `variants` 66/67,
+    `baseRarity` 61/67, `demonTypeId` 55/67 (expected — the legacy id space is plant/zombie-split
+    `60000+`/`10000+`, the new pipeline uses one shared floor, already named in T2.7's own evidence),
+    `elementPrimary` 54/67, `elementSecondary` 25/67, `deployMode` 9/67, `acquisition` 6/67. This is
+    real output for a human to read, per §6's own words — not yet read by one. **762 species present
+    ONLY in the store-backed roster is the actual headline number**: real, classified content the
+    live game cannot serve today under any code path, because step 5 has not flipped yet — this
+    number is the size of the gap T4.8 exists to close.
+  - **Not done, still genuinely owner-gated:** the diff above being READ and judged (which
+    disagreements are the new corpus correctly overriding, which are a name-resolution bug worth
+    fixing first); step 5 itself (the flip); Checkpoint 4's own live-lawn check; step 7 (the
+    deletions). Nothing was flipped, no legacy code was touched or deleted, and the live server's own
+    `dist/FusionRpg.Server/data` was never opened by any command in this pass.
 
 ### ✅ Checkpoint 4 — requires a live check
 - [x] All four C# suites green individually (**not** chained — CI masks all but the last): `FusionRpg.Core.Tests` 4215/4215 (excl. the pre-existing class-system flake), `FusionRpg.Data.Tests` 608/608, `FusionRpg.E2E.Tests` 195/195, `FusionRpg.Guard.Tests` 161/161 — 2026-09-02.

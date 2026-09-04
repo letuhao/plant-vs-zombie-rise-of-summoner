@@ -20,6 +20,16 @@ public static class ReferenceCheck
         ("element", "elements"), ("category", "categories"),
     };
 
+    /// <summary>The three themeKey prefixes, stripped before resolving against ThemeIds.</summary>
+    static readonly string[] ThemePrefixes = { "theme.", "build." };
+
+    static string StripThemePrefix(string value)
+    {
+        foreach (var prefix in ThemePrefixes)
+            if (value.StartsWith(prefix, StringComparison.Ordinal)) return value[prefix.Length..];
+        return value;
+    }
+
     /// <summary>Keys that hold a nameKey or an icon key, never an id reference.</summary>
     static bool IsKeyField(string key) => key is "id" || key.EndsWith("Key", StringComparison.Ordinal);
 
@@ -104,8 +114,13 @@ public static class ReferenceCheck
             if (!string.Equals(key, refKey, StringComparison.Ordinal)) continue;
 
             // themeKey is written as the theme's nameKey (theme.rot-bloom); accept both spellings.
-            var candidate = registry == "themes" && value.StartsWith("theme.", StringComparison.Ordinal)
-                ? value["theme.".Length..]
+            // Three populations share the field and cannot collide because each has its own
+            // prefix: `theme.` (legacy, frozen), `build.` (item module 13's 36 aptitude x
+            // archetype build sets) and `demon.` (published by the demons feature). The first two
+            // resolve against ThemeIds once their prefix is stripped; `demon.` does not resolve
+            // here at all yet and is a named, open gap rather than a silent pass.
+            var candidate = registry == "themes"
+                ? StripThemePrefix(value)
                 : value;
 
             var (members, label) = registry switch

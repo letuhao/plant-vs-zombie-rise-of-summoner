@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1007,
+  "magnitudes": {
+    "combat.block.shred.omni": 380,
+    "combat.parry.shred.omni": 380,
+    "combat.power.omni": 253,
+    "resource.max.hp": 3525,
+    "resource.max.hunger": 5108,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 5515,
+    "resource.regen.hp": 203,
+    "resource.regen.hunger": 298,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "PeaMine",
+  "theta": 13,
+  "traitPool": [
+    "kinetic-burst",
+    "low-profile",
+    "proximity-scaling",
+    "resource-reclaiming"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

@@ -273,8 +273,10 @@ public static class AtomCompiler
         return (defs, rejected);
     }
 
-    /// <summary>Kind to the FA opcode its sink implements. Null for kinds with no opcode.</summary>
-    static string? OpcodeOf(string kindId) => kindId switch
+    /// <summary>Kind to the FA opcode its sink implements. Null for kinds with no opcode. Public so a
+    /// guard test (E41: Ui-attached kinds never compile to a state-writing opcode) can read it without
+    /// duplicating this switch.</summary>
+    public static string? OpcodeOf(string kindId) => kindId switch
     {
         "stat.modify" => EffectActions.ModifyStat,
         "stat.derived" => EffectActions.ModifyDerivedStat,
@@ -294,6 +296,8 @@ public static class AtomCompiler
         "wave.control" => EffectActions.WaveControl,
         // E37 (spec-projectile-control.md §2b).
         "bullet.modify" => EffectActions.BulletModify,
+        // E41 (spec-ui-attach-point.md §2b).
+        "ui.present" => EffectActions.PresentUi,
         _ => null,
     };
 

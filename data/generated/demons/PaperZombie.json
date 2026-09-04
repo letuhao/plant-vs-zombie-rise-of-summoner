@@ -3,7 +3,7 @@
   "attackIntervalMs": 1500,
   "attackIntervalSource": "classified",
   "deployMode": "HypnoAlly",
-  "elementPrimary": "Dark",
+  "elementPrimary": "Earth",
   "elementSecondary": null,
   "gameTypeId": 5,
   "magnitudes": {
@@ -25,9 +25,9 @@
   "speciesId": "PaperZombie",
   "theta": 13,
   "traitPool": [
-    "cognitive-agitation",
-    "inverted-reading",
-    "newspaper-dependency"
+    "newspaper-dependent",
+    "obsessive-reader",
+    "sudden-frenzy"
   ],
   "variantCount": 0,
   "variants": []

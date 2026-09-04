@@ -1,0 +1,42 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 3000,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 969,
+  "magnitudes": {
+    "combat.block.shred.omni": 380,
+    "combat.parry.shred.omni": 380,
+    "combat.power.omni": 253,
+    "resource.max.hp": 3525,
+    "resource.max.hunger": 5108,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 5515,
+    "resource.regen.hp": 203,
+    "resource.regen.hunger": 298,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Chimeric",
+  "side": "plant",
+  "speciesId": "UltimateJalaNut",
+  "theta": 13,
+  "traitPool": [
+    "artillery-synergy-catalyst",
+    "kinetic-projectile-summoning",
+    "sunlight-conversion-defense",
+    "thermal-status-infliction",
+    "unlimited-vitality-overflow"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "mutated"
+  ]
+}

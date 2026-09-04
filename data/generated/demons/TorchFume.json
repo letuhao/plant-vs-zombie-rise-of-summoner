@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 1389,
+  "magnitudes": {
+    "combat.power.omni": 294,
+    "combat.shield.pen.omni": 368,
+    "resource.max.hp": 6252,
+    "resource.max.hunger": 12077,
+    "resource.max.qi": 5150,
+    "resource.max.spirit": 1839,
+    "resource.max.stamina": 4904,
+    "resource.regen.hp": 398,
+    "resource.regen.hunger": 699,
+    "resource.regen.qi": 319,
+    "resource.regen.spirit": 123,
+    "resource.regen.stamina": 307
+  },
+  "pTheta": 613,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "TorchFume",
+  "theta": 18,
+  "traitPool": [
+    "energy-compression",
+    "passive-defense",
+    "projectile-absorption",
+    "thermal-conversion"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "blessed",
+    "mutated",
+    "normal"
+  ]
+}

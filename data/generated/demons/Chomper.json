@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 2400,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Earth",
@@ -22,19 +22,18 @@
     "resource.regen.stamina": 226
   },
   "pTheta": 452,
-  "rangeCells": 1,
-  "rarity": "Cultivated",
+  "rangeCells": 3,
+  "rarity": "Sprout",
   "side": "plant",
   "speciesId": "Chomper",
   "theta": 13,
   "traitPool": [
-    "Devouring",
-    "Fragile Mandibles",
-    "High-Impact Digestion"
+    "devouring",
+    "fragile mastication",
+    "high-impact digestion"
   ],
-  "variantCount": 2,
+  "variantCount": 1,
   "variants": [
-    "mutated",
     "normal"
   ]
 }

@@ -105,11 +105,11 @@
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "unresolved",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:47:30Z",
+      "emittedUtc": "2026-09-04T14:43:40Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -120,6 +120,32 @@
         "identity": 1,
         "kit-shape": 1,
         "threat-audit": 1
+      },
+      "manualCorrection": {
+        "utc": "2026-09-04T14:52:00Z",
+        "field": [
+          "rarity"
+        ],
+        "from": {
+          "rarity": "heirloom",
+          "variants": [
+            "normal",
+            "ancient",
+            "mutated",
+            "blessed"
+          ]
+        },
+        "to": {
+          "rarity": "almanac",
+          "variants": [
+            "normal",
+            "ancient",
+            "mutated",
+            "blessed"
+          ]
+        },
+        "by": "battle-timeline session, owner-approved",
+        "why": "Caught by VariantCountBandTests within minutes of the kit-shape pass emitting it (emittedUtc 14:43:40Z) -- 4 variants against heirloom's 2..3 band. ⭐ Fixed in the OPPOSITE direction to Peashooter/SunFlower, and the reason matters: there the row's own text said 'nuisance' / 'passive resource producer', so the RARITY was too high. Here it reads 'a force multiplier that summons high-tier, uncapturable units capable of massive damage mitigation, healing' -- so the variant set is right and the rarity was too LOW. Raised to almanac rather than trimming generated content: 4 variants including 'ancient' is the exact profile of 18 of the 20 almanac rows, and that rung is otherwise the Ultimate*/Boss cohort this unit belongs to. ⚠️ 'sunwoven' (3..4) would also satisfy the band and is the conservative alternative if a reviewer thinks almanac too strong -- flagging rather than hiding the judgement call. NOTE: the corpus was still being written when this was corrected (44 files touched in the preceding 40 minutes); if the pass re-emits this row, the band guard will catch it again, which is the point of having it."
       }
     },
     "acquisition": [
@@ -133,12 +159,13 @@
     "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
-      "fungal-summoner"
+      "Fungal Summoner",
+      "Mycelial Tactician"
     ],
     "gameTypeId": 305,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "unresolved",
+    "rarity": "almanac",
     "reach": "short",
     "reason": "The creature acts as a force multiplier that summons high-tier, uncapturable units capable of massive damage mitigation, healing, and large-scale unit conversion.",
     "resourceProfile": [
@@ -150,19 +177,16 @@
     "targetPreference": "swarm",
     "threatBand": "tyrant",
     "traits": [
-      "leader-summoning",
-      "non-capturable",
-      "buff-provider",
-      "transmutative"
+      "Leader Summoning",
+      "Buffing",
+      "Unit Conversion",
+      "Non-Capturable"
     ],
     "variants": [
       "normal",
       "ancient",
       "mutated",
-      "corrupted",
-      "blessed",
-      "cursed",
-      "shiny"
+      "blessed"
     ]
   }
 ]

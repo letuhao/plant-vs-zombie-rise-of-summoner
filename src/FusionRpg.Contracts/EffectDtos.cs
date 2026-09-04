@@ -86,6 +86,19 @@ public static class EffectActions
     /// constant is the whole of the "grow the published /effects/contract list" requirement.
     /// </summary>
     public const string BulletModify = "BulletModify";
+
+    /// <summary>
+    /// E41 (spec-ui-attach-point.md §2b): <c>ui.present</c>'s opcode. Bag-side, the same shape
+    /// <see cref="GrantShield"/> and <see cref="ApplyResourceDelta"/> already use — <c>EffectBag.FireGrant</c>
+    /// handles it inline and it never becomes an <c>EffectActionPlanItem</c> that reaches
+    /// <c>InjectorEffectActionSink</c>'s stat/resource/status/shield/board arms, which is what makes the
+    /// <c>Ui</c> attach point's read-only rule structural rather than a convention nobody enforces.
+    /// `op:number` reuses the existing <c>IDamageFxSink</c> floater path; `op:meter`/`op:banner` go
+    /// through the new <c>IUiPresentSink</c>. Same reflection-published obligation as
+    /// <see cref="ModifyMatch"/>/<see cref="WaveControl"/>/<see cref="BulletModify"/> — declaring this
+    /// constant is the whole of the "grow the published /effects/contract list" requirement.
+    /// </summary>
+    public const string PresentUi = "PresentUi";
 }
 
 public static class EffectTypes

@@ -86,7 +86,7 @@ section, which was corrected first; **this header was missed in that pass and is
   - Acceptance: report goldens carry events + stamp; sweep-guard test; v1 rows still decodable.
   - Verify: `--filter ~Battle|~WebMatch`. Files: `BattleModels.cs`, `BattleReportEmitter.cs`, `WebMatchService.cs`, tests. Scope: M.
 
-- [~] **Task U14: Golden re-baseline + expedition sweep — DONE except owner sign-off.** Re-blessed: 4 battle hashes (shape tests held WITHOUT seed re-selection: stomp Victory, wipe Defeat + coward retreat all survived the re-tune — the 90% target preserved the golden shapes), 4 expedition hashes (named serialization-shape churn; resolver byte-stability proven by its own determinism tests). Sweep report: `docs/research/combat-unification-v2-sweep.txt` — mirror-match symmetry 48–56% (engine balanced); bare-stat squad table shows content difficulty cliffs (0%/100%) from determinism, NOT an adoption regression (v1 baseline not reconstructible — battle code was never committed). **⛔ Awaiting owner sign-off on the sweep before this task closes.** ✅ **Checked, not assumed (2026-09-04): this gate is written into the PLAN, not appended by a session.** `combat-unification-plan.md` line 76 gives the mitigation for *"re-tune lands wrong feel"* as **"win-rate sweep with owner sign-off at U14"** — an audit-defined acceptance criterion. It is also the one kind of item a session cannot discharge for itself: a **balance judgement**, not a measurement.
+- [x] **Task U14: Golden re-baseline + expedition sweep — CLOSED 2026-09-04, OWNER SIGNED OFF.** ⭐ **The owner reviewed the sweep and accepted the −1.67 % shift (`classic-round` 89.58 % → `hybrid-atb` 87.92 %) on 2026-09-04**, discharging the `combat-unification-plan.md:76` gate (*"win-rate sweep with owner sign-off at U14"*). The decision was taken with the attribution in hand: **the entire delta belongs to one axis** — `ActionPointsEconomy(2)` — with `FixedIncrement`, `W = 4`, `EarlyBoundWithFallback` and B39's `OrdersBySpeed` each measured at **exactly 0.00 %**, and mirror-match symmetry at **48–56 %** showing the engine itself is balanced. Original evidence below. Re-blessed: 4 battle hashes (shape tests held WITHOUT seed re-selection: stomp Victory, wipe Defeat + coward retreat all survived the re-tune — the 90% target preserved the golden shapes), 4 expedition hashes (named serialization-shape churn; resolver byte-stability proven by its own determinism tests). Sweep report: `docs/research/combat-unification-v2-sweep.txt` — mirror-match symmetry 48–56% (engine balanced); bare-stat squad table shows content difficulty cliffs (0%/100%) from determinism, NOT an adoption regression (v1 baseline not reconstructible — battle code was never committed). **⛔ Awaiting owner sign-off on the sweep before this task closes.** ✅ **Checked, not assumed (2026-09-04): this gate is written into the PLAN, not appended by a session.** `combat-unification-plan.md` line 76 gives the mitigation for *"re-tune lands wrong feel"* as **"win-rate sweep with owner sign-off at U14"** — an audit-defined acceptance criterion. It is also the one kind of item a session cannot discharge for itself: a **balance judgement**, not a measurement.
   - ⚠️ **Reconciled 2026-09-04, because the ground moved under this report.** It was measured with expeditions and web matches on `classic-round`; **they now run `hybrid-atb`** (B36) with readiness ordering wired (B39). Its per-wave win rates and its mirror-match symmetry therefore describe a configuration production no longer runs.
   - ✅ **What is newly known, and it shrinks what the sign-off is deciding.** B34's staged sweep measures the whole `classic-round` → `hybrid-atb` move at **−1.67 %**, attributed to a single axis (the action-points economy) with every other axis measured at exactly **0.00 %** — including B39's readiness ordering, which is inert until content authors a `turn.speed`. So the delta this report's numbers would shift by is one named, measured figure rather than an open question. Table: [`_sweep-hybrid-atb.md`](../docs/research/battle/_sweep-hybrid-atb.md).
   - **What is still owed is a judgement, not a measurement:** whether a 89.58 % → 87.92 % squad win rate, and the content difficulty cliffs this report already named, are the balance the owner wants. **No further run would answer that** — which is why this stays open rather than being closed on evidence.
@@ -327,7 +327,42 @@ not zero.** `RulesetVersion` stays **4**; this phase re-blesses nothing.
       because *"the predictor cannot see it"* and *"nothing reads it"* are different problems with
       different fixes, and the old wording ("unbuilt") conflated them.
 
-- [ ] ⏸ **S5: species → action eligibility content** *(blocked, condition not date)*
+- [x] ✅ **S5: species → action eligibility content — CLOSED 2026-09-04.** Unblocked by this session's
+  own demon-corpus fix (the two mis-rarified starter plants), then closed by **verifying the shipped
+  content** rather than authoring more of it.
+  - ⭐ **The reframe that closed it: the content already existed.** This task was parked as *"author
+    eligibility rows"*, and the assumption that none existed was never checked. They do — the
+    action-corpus program had already committed them:
+    **`committed-round-1.json` carries 14 `family`-scoped rows and 5 `general`; `committed-round-2.json`
+    carries 5 `species`-scoped; `species-innate.json` holds 84 species→innate-action entries.**
+    What was genuinely missing was any proof that they *resolve*.
+  - ⛔ **And that gap was real, not theoretical.** `EligibilityAxisTests` covers the mechanism
+    thoroughly, but **every one of its scope cases is a synthetic row** — nothing read the shipped
+    files. A `family`/`species` row whose `scopeKey` had gone stale during the demon re-classification
+    would resolve to nothing, **silently**: the action stays authored, shipped, and unreachable, with
+    no test saying a word. That is precisely the risk this task was parked on.
+  - **Acceptance, both clauses met against the real files** —
+    `tests/FusionRpg.Core.Tests/Actions/AuthoredEligibilityResolvesTests.cs`:
+    - ✅ **"Authored rows resolve"** — every `family` key names a family the map actually assigns and
+      every `species` key names a species the catalog actually ships. **Measured: 0 dangling keys**,
+      with liveness assertions so "none" cannot be trivially true because the parse read nothing.
+    - ✅ **"S1's neutral invariant holds for actors with none"** — an actor with a null species key gets
+      the general tier and *exactly* the general tier, over the whole shipped set. Guards the two-nulls-
+      compare-equal accident that would make a mis-authored row universal.
+    - ✅ **Plus the positive half** — a real mapped species really does reach its family's authored
+      actions. Without it, a `familyOf` returning nothing for everyone would still pass clause 1.
+  - **Falsifiers run, both reddening the intended test:** planting a dangling family `scopeKey`, and
+    flipping a `general` row to `species` with a null key. Seed file restored byte-clean after each.
+  - Verify: `--filter ~Eligibility` + full Core. — **16/16 green** across the new file and
+    `EligibilityAxisTests` together.
+  - ⚠️ **Finding handed on, not silently absorbed: `_generated/family-map.json` is stale.**
+    **12 of its 53 species keys no longer exist in the catalog** (`cherrygatling`, `jalastar`,
+    `doublesnow`, `doublecherry`, `hypnojalapeno`, `dollsilver`, `hypnopeashooter`, `cornpot`,
+    `jalagatling`, `icecaltrop`, +2) — it was generated 2026-09-03, before the corpus churn. **It does
+    not break the authored rows** (their keys are family *ids*, which survived, hence 0 danglers), but
+    any species renamed in the churn has quietly lost its family assignment and so cannot reach
+    family-scoped actions. **Regenerating it is A-S0's job** — no generator for it is committed in this
+    repo, so it is not a one-command fix from here. Scope: M.
   - Which species hold which actions is **eligibility**, and `A-E1 eligibility-axis` already shipped it
     (`content-stack-todo.md:528`) — `ActionRow` carries `scope`/`scope_key`, `ActionEligibility`
     evaluates it. This task **consumes** that; it adds no mapping table.

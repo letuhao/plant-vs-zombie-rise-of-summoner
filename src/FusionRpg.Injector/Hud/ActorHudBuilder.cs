@@ -45,6 +45,11 @@ public static class ActorHudBuilder
 
         var statusTokens = BuildStatusTokens(TryStatusRuntime(), ptr);
 
+        // E41 (spec-ui-attach-point.md §4): ActorHudResources.Meters' first-ever producer.
+        // ActorHudMeterOverride is null (no meters authored for this ptr) far more often than not, so
+        // this is a cheap dictionary lookup on the hot HUD-read path, not a new scan.
+        var meters = ActorHudMeterOverride.TryGet(ptr);
+
         var compose = new ActorHudComposer.ActorHudComposeInput(
             ActorHudUniqueFlags.TryIsUnique(ptr),
             bindingPhase,
@@ -54,7 +59,8 @@ public static class ActorHudBuilder
             shieldMax,
             statusTokens,
             tuning.StatusStripMax,
-            tuning.HpSliverEnabled);
+            tuning.HpSliverEnabled,
+            Meters: meters);
 
         return ActorHudComposer.Compose(compose);
     }

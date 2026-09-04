@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Air",
+  "elementSecondary": null,
+  "gameTypeId": 34,
+  "magnitudes": {
+    "combat.block.shred.omni": 542,
+    "combat.parry.shred.omni": 542,
+    "combat.power.omni": 362,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 6328,
+    "resource.regen.hp": 136,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Cultivated",
+  "side": "plant",
+  "speciesId": "ElectricOnion",
+  "theta": 13,
+  "traitPool": [
+    "chain lightning",
+    "conductive discharge",
+    "symbiotic charging"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

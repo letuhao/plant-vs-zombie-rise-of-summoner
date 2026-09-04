@@ -56,18 +56,29 @@ public class LoamForecastTests
         Assert.Null(LoamForecast.WillRelease(world, ComponentOf(world, "s")));
     }
 
+    /// <summary>
+    /// world-map W55 (empire-economy-ssot.md A8): once `LoamProduction.For` gains a real
+    /// development-yield term, a sourceless sector's own `DevelopmentLevel` alone can no longer
+    /// create a shortfall — A8 requires the yield rate to exceed the upkeep rate, so any positive
+    /// `DevelopmentLevel` is now a net *contributor*, not a drag. Every fixture below that still
+    /// wants "a sourceless, high-upkeep sector" adds a compensating `danger: 2 * development` on top
+    /// of whatever danger it already carried — `2` because `DevelopmentYieldPerLevel(6) /
+    /// DangerUpkeepPerBand(3) == 2` exactly, at the real configured tuning — which cancels the new
+    /// yield term precisely and reproduces the exact pre-W55 upkeep-minus-production balance,
+    /// verified against the real shipped tuning rather than assumed.
+    /// </summary>
     [Fact]
     public void A_shortfall_against_a_sector_already_this_fragile_forecasts_its_release()
     {
-        var world = World(new[] { Sector("s", stock: 0, stability: 50, development: 10, danger: 4), Elsewhere() });
+        var world = World(new[] { Sector("s", stock: 0, stability: 50, development: 10, danger: 4 + 2 * 10), Elsewhere() });
         Assert.Equal("s", LoamForecast.WillRelease(world, ComponentOf(world, "s")));
     }
 
     [Fact]
     public void Picks_the_weakest_contributor_not_the_first_by_id()
     {
-        var mild = Sector("mild", stock: 0, stability: 50, development: 1, danger: 0);
-        var harsh = Sector("harsh", stock: 0, stability: 50, development: 5, danger: 4);
+        var mild = Sector("mild", stock: 0, stability: 50, development: 1, danger: 0 + 2 * 1);
+        var harsh = Sector("harsh", stock: 0, stability: 50, development: 5, danger: 4 + 2 * 5);
         var world = World(
             new[] { mild, harsh, Elsewhere() },
             new[] { new WorldLane { LaneId = "l", FromSectorId = "mild", ToSectorId = "harsh", TypeId = LaneTypeCatalog.RiftLaneTypeId } });
@@ -156,7 +167,9 @@ public class LoamForecastTests
     {
         var cases = new (WorldState World, bool ShouldRelease)[]
         {
-            (World(new[] { Sector("s", stock: 0, stability: 50, development: 10, danger: 4), Elsewhere() }), true),
+            // world-map W55: `danger: 4 + 2 * 10` compensates the new development-yield term the
+            // same way the two tests above do — see their own shared doc comment.
+            (World(new[] { Sector("s", stock: 0, stability: 50, development: 10, danger: 4 + 2 * 10), Elsewhere() }), true),
             (World(new[] { Sector("s", slots: new[] { Rootbed(0) }) }), false)
         };
 

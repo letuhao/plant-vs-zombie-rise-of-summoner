@@ -25,13 +25,13 @@
   "speciesId": "HypnoShroom",
   "theta": 13,
   "traitPool": [
-    "Neurotoxic Spores",
-    "Self-Destructing",
-    "Symbiotic Reanimation"
+    "mind-altering spores",
+    "self-sacrificial",
+    "zombie-conversion"
   ],
   "variantCount": 2,
   "variants": [
-    "mutated",
+    "corrupted",
     "normal"
   ]
 }

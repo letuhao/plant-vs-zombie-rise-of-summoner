@@ -1,0 +1,39 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Light",
+  "elementSecondary": "Fire",
+  "gameTypeId": 227,
+  "magnitudes": {
+    "resource.max.hp": 8640,
+    "resource.max.hunger": 7200,
+    "resource.max.qi": 43200,
+    "resource.max.spirit": 20160,
+    "resource.max.stamina": 11520,
+    "resource.regen.hp": 30,
+    "resource.regen.hunger": 432,
+    "resource.regen.qi": 2592,
+    "resource.regen.spirit": 1008,
+    "resource.regen.stamina": 720
+  },
+  "pTheta": 1440,
+  "rangeCells": 3,
+  "rarity": "Almanac",
+  "side": "plant",
+  "speciesId": "DiamondImitater",
+  "theta": 40,
+  "traitPool": [
+    "event-triggering",
+    "stochastic-manifestation",
+    "unpredictable-outcome"
+  ],
+  "variantCount": 4,
+  "variants": [
+    "ancient",
+    "cursed",
+    "mutated",
+    "normal"
+  ]
+}

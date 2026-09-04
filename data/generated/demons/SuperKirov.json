@@ -1,0 +1,48 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Air",
+  "elementSecondary": null,
+  "gameTypeId": 205,
+  "magnitudes": {
+    "combat.block.shred.omni": 163,
+    "combat.block.strength.omni": 475,
+    "combat.defense.omni": 285,
+    "combat.parry.shred.omni": 163,
+    "combat.parry.strength.omni": 475,
+    "combat.power.omni": 108,
+    "combat.shield.capacity.omni": 2848,
+    "combat.shield.toughness.omni": 190,
+    "progression.bonus.arm1": 2531,
+    "progression.bonus.defense": 1898,
+    "resource.max.hp": 10939,
+    "resource.max.hunger": 6373,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 6328,
+    "resource.regen.hp": 48,
+    "resource.regen.hunger": 294,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 353
+  },
+  "pTheta": 452,
+  "rangeCells": 5,
+  "rarity": "Cultivated",
+  "side": "zombie",
+  "speciesId": "SuperKirov",
+  "theta": 13,
+  "traitPool": [
+    "explosive-descent",
+    "flight",
+    "high-durability",
+    "swarm-summoning"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "normal"
+  ]
+}

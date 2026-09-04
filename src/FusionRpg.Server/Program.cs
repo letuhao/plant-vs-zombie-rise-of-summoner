@@ -32,7 +32,7 @@ FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "contracts.v1.json"))));
 FusionRpg.Core.World.Loam.LoamPolicy.Configure(
     FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "loam.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "loam.v2.json"))));
 var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(
     File.ReadAllText(Path.Combine(tuningDir, "world.v4.json")));
 FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
@@ -130,6 +130,13 @@ var dropVolumeTuning = FusionRpg.Core.Items.Drops.DropVolumeTuning.Parse(
 var frameMixTuning = FusionRpg.Core.Items.Thresholds.FrameMixTuning.Parse(
     File.ReadAllText(Path.Combine(tuningDir, "item-frame-mix.v1.json")));
 _ = frameMixTuning;
+// item-ideal.md, salvage-craft (module 14): the ten-operation reference cost table and the ten-rung
+// salvage coefficients. Parsed and validated at boot for the same reason as the four above — the
+// parser refuses rather than defaults, and D24's "imbue prices on bore's curve" is checked at load,
+// so a balance pass that moves one and forgets the other fails here rather than at the first
+// crafted socket. Consumed by SeedSalvageYield and by the recipe import below.
+var materialTuning = FusionRpg.Core.Items.Materials.MaterialTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "materials.v1.json")));
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
@@ -166,6 +173,38 @@ var app = builder.Build();
 var store = app.Services.GetRequiredService<RpgStore>();
 store.Init();
 store.SeedRarityLadder(itemRarityTuning);
+// item-ideal.md, salvage-craft (module 14): `salvage_yield`, the sixth `rarity_budget` key, whose
+// shape ssot-rarity.md §5 recorded as "awaiting I9" until this module decided it. Seeded here rather
+// than inside SeedRarityLadder so module 7's own seeding never grows a dependency on a later
+// module's tuning file.
+store.SeedSalvageYield(materialTuning.Salvage);
+
+// item-ideal.md, salvage-craft (module 14): the authored recipe corpus
+// (data/seed/items/recipes/*.json) resolved against the reference cost table. Never fatal, same rule
+// as the loot corpus below. ⛔ Entries this build cannot resolve are refused BY NAME with the module
+// that unblocks them — never silently dropped — and the count is printed so a corpus regression is
+// visible at boot.
+{
+    var recipesDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "recipes");
+    if (Directory.Exists(recipesDir))
+    {
+        try
+        {
+            var catalog = FusionRpg.Core.Items.Materials.MaterialRecipeCatalog.Load(
+                Directory.EnumerateFiles(recipesDir, "*.json").OrderBy(f => f, StringComparer.Ordinal)
+                    .Select(File.ReadAllText),
+                materialTuning);
+            var imported = store.ImportRecipeCatalog(catalog);
+            Console.WriteLine($"[craft] imported {imported} recipes, refused {catalog.Refusals.Count}");
+            foreach (var refusal in catalog.Refusals)
+                Console.WriteLine($"[craft]   refused {refusal.RecipeId}: {refusal.Rule} — {refusal.Detail}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[craft] recipe import failed — no recipes loaded: {ex.Message}");
+        }
+    }
+}
 // item-ideal.md, item-card (module 10): N1's item_display_template, seeded from the already-shipped
 // data/seed/items/display-templates/*.json (98 rows, one per affix family) -- never re-authored here.
 {

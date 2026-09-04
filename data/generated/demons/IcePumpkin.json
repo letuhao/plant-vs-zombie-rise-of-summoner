@@ -1,0 +1,38 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Ice",
+  "elementSecondary": null,
+  "gameTypeId": 1436,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 13560,
+    "resource.max.spirit": 6328,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 814,
+    "resource.regen.spirit": 316,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 1,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "IcePumpkin",
+  "theta": 13,
+  "traitPool": [
+    "energy-gating",
+    "frost-retention",
+    "reactive-release"
+  ],
+  "variantCount": 3,
+  "variants": [
+    "blessed",
+    "mutated",
+    "normal"
+  ]
+}

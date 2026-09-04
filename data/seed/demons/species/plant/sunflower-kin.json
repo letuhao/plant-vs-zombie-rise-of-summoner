@@ -37,6 +37,34 @@
         "identity": 1,
         "kit-shape": 1,
         "threat-audit": 1
+      },
+      "manualCorrection": {
+        "utc": "2026-09-04T13:50:00Z",
+        "field": [
+          "rarity",
+          "variants"
+        ],
+        "from": {
+          "rarity": "almanac",
+          "variants": [
+            "normal",
+            "ancient",
+            "mutated",
+            "corrupted",
+            "blessed",
+            "cursed",
+            "shiny"
+          ]
+        },
+        "to": {
+          "rarity": "cultivated",
+          "variants": [
+            "normal",
+            "mutated"
+          ]
+        },
+        "by": "battle-timeline session, owner-approved",
+        "why": "Same defect as Peashooter, found by the same sweep. The kit-shape rerun placed the game's passive sun producer on 'almanac', the top rung -- a rung otherwise occupied entirely by Ultimates and Bosses (UltimateCabbageCannon, UltimateImpKing, JacksonDriverBoss, ZombieBoss, six Ultimate* units). Two signals isolate it: (1) it carried SEVEN variants, the only such row in 841, where every other almanac row has exactly 4; (2) its own reason text reads 'a passive resource producer with no offensive or destructive capabilities'. NOTE: unlike Peashooter, confidence.rarity here was 'high', not 'split' -- so the classifier was confidently wrong, which is the more concerning of the two and worth a prompt look. Corrected to cultivated + [normal, mutated], the 111-of-122 cultivated norm and what SpeciesExpanderTests documents against ssot-rarity.md 3.3."
       }
     },
     "acquisition": [
@@ -55,7 +83,7 @@
     "gameTypeId": 1,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "almanac",
+    "rarity": "cultivated",
     "reach": "short",
     "reason": "The creature is a passive resource producer with no offensive or destructive capabilities, making it a utility rather than a threat.",
     "resourceProfile": [
@@ -71,12 +99,7 @@
     ],
     "variants": [
       "normal",
-      "ancient",
-      "mutated",
-      "corrupted",
-      "blessed",
-      "cursed",
-      "shiny"
+      "mutated"
     ],
     "verdict": "too-high"
   },

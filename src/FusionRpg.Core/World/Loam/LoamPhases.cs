@@ -193,7 +193,13 @@ public static class LoamPhases
                     // behaviour that already existed: this branch never touched `s.Slots` before.
                     Slots = s.Slots
                         .Select(sl => sl with { StructureId = null, ConstructionTurnsRemaining = null })
-                        .ToList()
+                        .ToList(),
+                    // A half-finished sector-wide project is the identical loss, one level up
+                    // (world-map W52, spec-sector-development.md §3) — a ghost `ProjectId` that
+                    // `Growth` never sees again (this sector is unowned from here on, and a lost
+                    // sector's own recapture starts fresh) would otherwise sit on the sector forever,
+                    // permanently blocking a future `develop` order via `develop.already-developing`.
+                    ProjectId = null, ProjectTurnsRemaining = null
                 };
             }
 

@@ -17,18 +17,18 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "stated",
+      "basis": "observed",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "high",
         "attackTempo": "high",
-        "deployMode": "high",
+        "deployMode": "split",
         "elementPrimary": "high",
-        "rarity": "unresolved"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T09:58:12Z",
+      "emittedUtc": "2026-09-04T14:39:50Z",
       "minorityValues": {
-        "aptitudePrimary": "Fortitude"
+        "deployMode": "PlantAvatar"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -44,41 +44,38 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Might",
-    "aptitudeSecondary": "Fortitude",
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "none",
     "attackTempo": "ponderous",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "dark",
+    "basis": "observed",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "armored undead",
-      "colossus"
+      "armored undead"
     ],
-    "gameTypeId": 233,
+    "gameTypeId": 106,
     "posture": "Force",
     "pure": true,
-    "rarity": "unresolved",
+    "rarity": "cultivated",
     "reach": "short",
-    "reason": "While extremely powerful, the creature's mechanics rely on specific elemental resistances and scaling rather than the world-ending, existential threat implied by a 'calamity' rating.",
+    "reason": "With a massive combined health pool of 2470 and the ability to drop defensive iron buckets upon death, this unit functions as a heavy tank rather than a mere raider.",
     "resourceProfile": [
-      "hp",
-      "stamina"
+      "hp"
     ],
     "side": "zombie",
-    "speciesId": "ArmedGargantuar",
+    "speciesId": "BucketNutZombie",
     "targetPreference": "frontline",
     "traits": [
-      "adaptive ocular resistance",
-      "multi-hit hammer strike",
-      "summoner",
-      "integrated martial prowess"
+      "iron-reinforced",
+      "bucket-dropping",
+      "magnet-sensitive"
     ],
     "variants": [
-      "mutated",
-      "corrupted"
+      "normal",
+      "shiny"
     ],
-    "verdict": "too-high"
+    "verdict": "too-low"
   },
   {
     "_derived": [

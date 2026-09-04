@@ -8,10 +8,14 @@ using FusionRpg.Data;
 // import if the committed data/generated/demons/** tree is stale against that re-derivation, then
 // writes the roster in one transaction via RpgStore.ImportSpecies — never raw SQL.
 //
-// Usage: dotnet run --project tools/DemonSpeciesImport -- [--seed <dir>] [--db <dir>]
+// Usage: dotnet run --project tools/DemonSpeciesImport -- [--seed <dir>] [--db <dir>] [--diff-catalog]
 //        --seed   default: data/seed/demons/species, found by walking up from the working directory
 //        --out    default: data/generated/demons — read for the staleness check, not written
 //        --db     default: $FUSIONRPG_DATA, else dist/FusionRpg.Server/data beside the repo root
+//        --diff-catalog   after a successful import, print the store-backed roster's field-by-field
+//                         diff against the compiled legacy catalog (SpeciesDiff.Compare/Coverage,
+//                         T4.8 step 4's own review artifact) — read-only, decides nothing, a human
+//                         reads this before step 5's flip. No effect on exit code or what is written.
 //
 // Exit codes: 0 imported, 1 refused (stale tree or a bad row), 2 could not start.
 
@@ -19,6 +23,7 @@ var args2 = args.ToList();
 string? seedOverride = TakeOption("--seed");
 string? outOverride = TakeOption("--out");
 string? dbOverride = TakeOption("--db");
+var diffCatalog = args2.Remove("--diff-catalog");
 
 string? TakeOption(string flag)
 {
@@ -80,10 +85,22 @@ foreach (var file in Directory.GetFiles(seedRoot, "*.json", SearchOption.AllDire
 }
 
 // ---- re-derive every species, and refuse the WHOLE import if the committed tree disagrees ---------
+// A species still "unresolved" on a voted field is skipped BEFORE expansion (SpeciesExpander.Expand
+// fails loud on one, by design — see its own UnresolvedFields doc comment) — never imported, never
+// counted toward the staleness check below, so a genuinely-incomplete classification does not block
+// the whole roster's import.
 var species = new List<ConcreteSpecies>();
 var stale = new List<string>();
+var skipped = new List<string>();
 foreach (var anchor in anchors)
 {
+    var unresolvedFields = SpeciesExpander.UnresolvedFields(anchor);
+    if (unresolvedFields.Count > 0)
+    {
+        skipped.Add($"{anchor.SpeciesId} ({string.Join(", ", unresolvedFields)})");
+        continue;
+    }
+
     ConcreteSpecies expanded;
     try { expanded = SpeciesExpander.Expand(anchor, aptitudeTuning, powerTuning, shapeTuning, threatTuning); }
     catch (Exception ex)
@@ -106,6 +123,13 @@ if (stale.Count > 0)
         $"just the stale rows (a half-imported roster is a state nobody authored): {string.Join(", ", stale)}");
     Console.Error.WriteLine("run 'dotnet run --project tools/DemonSpeciesGen' and commit the result first");
     return 1;
+}
+
+if (skipped.Count > 0)
+{
+    Console.WriteLine(
+        $"{skipped.Count} species skipped — still unresolved on at least one voted field, not " +
+        $"imported: {string.Join("; ", skipped)}");
 }
 
 // RpgStore's static ctor (RpgStore.Atoms.cs's ComposeKindRegistry) builds a DerivedStatRegistry,
@@ -131,7 +155,39 @@ if (!outcome.IsOk)
 Console.WriteLine(
     $"{species.Count} species: {outcome.Written} written, {outcome.Unchanged} unchanged, " +
     $"{outcome.Deleted} deleted (absent upstream)");
+
+if (diffCatalog)
+    PrintCatalogDiff(store);
+
 return 0;
+
+static void PrintCatalogDiff(RpgStore store)
+{
+    FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+    var compiled = FusionRpg.Core.Demons.DemonSpeciesCatalog.All.ToList();
+    var storeBacked = store.BuildDemonSpeciesSnapshot();
+
+    var (onlyInCompiled, onlyInStoreBacked) = SpeciesDiff.Coverage(compiled, storeBacked);
+    var fieldDiffs = SpeciesDiff.Compare(compiled, storeBacked);
+
+    Console.WriteLine();
+    Console.WriteLine("=== catalog diff: compiled (legacy) vs store-backed (this program's own corpus) ===");
+    Console.WriteLine($"compiled: {compiled.Count} species, store-backed: {storeBacked.Count} species");
+    Console.WriteLine($"only in compiled ({onlyInCompiled.Count}): {string.Join(", ", onlyInCompiled)}");
+    Console.WriteLine($"only in store-backed ({onlyInStoreBacked.Count}, first 20 of possibly more): " +
+        string.Join(", ", onlyInStoreBacked.Take(20)) + (onlyInStoreBacked.Count > 20 ? ", ..." : ""));
+    Console.WriteLine($"present in both: {compiled.Count - onlyInCompiled.Count}");
+    Console.WriteLine($"field disagreements: {fieldDiffs.Count}");
+
+    var byField = fieldDiffs.GroupBy(d => d.Field).OrderByDescending(g => g.Count());
+    foreach (var g in byField)
+        Console.WriteLine($"  {g.Key,-16} {g.Count()} disagreement(s)");
+
+    Console.WriteLine();
+    Console.WriteLine("first 30 field disagreements, for a human to read:");
+    foreach (var d in fieldDiffs.Take(30))
+        Console.WriteLine($"  {d.SpeciesId,-24} {d.Field,-16} compiled='{d.Compiled}' storeBacked='{d.StoreBacked}'");
+}
 
 static string? FindUp(params string[] segments)
 {

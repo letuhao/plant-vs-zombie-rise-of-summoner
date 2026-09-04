@@ -1,7 +1,7 @@
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
-/// The seam an atom kind hooks into. Six as of E35, guarded by the "Atom attach points" row in
+/// The seam an atom kind hooks into. Seven as of E41, guarded by the "Atom attach points" row in
 /// decisions.md (that row did not exist before E35 — <c>AtomKindRegistryTests.cs</c> is the guard
 /// test it names) — this is the list that keeps the vocabulary finite and auditable.
 /// </summary>
@@ -19,6 +19,15 @@ public enum AttachPoint
     /// `match.modify` is the first (and, on this attach point, still only) kind.
     /// </summary>
     Match,
+
+    /// <summary>
+    /// E41 (spec-ui-attach-point.md §2a): read-only by construction, not by convention. A kind on
+    /// this attach point shows the player a number, a banner or a meter — it never writes stat,
+    /// resource, status, shield, board, currency or Unity combat state, and it never reads state
+    /// back into content (a HUD is an output). `ui.present` is the first (and, today, only) kind —
+    /// see <c>EffectBag.FireGrant</c>'s own bag-side branch for the sink separation this guarantees.
+    /// </summary>
+    Ui,
 }
 
 /// <summary>

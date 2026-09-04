@@ -20,14 +20,14 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
-        "attackTempo": "unresolved",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "split",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:09:30Z",
+      "emittedUtc": "2026-09-04T14:30:39Z",
       "minorityValues": {
         "rarity": "heirloom",
         "threatBand": "nuisance"
@@ -48,7 +48,7 @@
     ],
     "aptitudePrimary": "Bulwark",
     "aptitudeSecondary": "none",
-    "attackTempo": "unresolved",
+    "attackTempo": "ponderous",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",

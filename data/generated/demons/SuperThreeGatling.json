@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1271,
+  "magnitudes": {
+    "combat.block.shred.omni": 1114,
+    "combat.parry.shred.omni": 1114,
+    "combat.power.omni": 742,
+    "resource.max.hp": 5568,
+    "resource.max.hunger": 4640,
+    "resource.max.qi": 5568,
+    "resource.max.spirit": 2784,
+    "resource.max.stamina": 12992,
+    "resource.regen.hp": 278,
+    "resource.regen.hunger": 278,
+    "resource.regen.qi": 371,
+    "resource.regen.spirit": 186,
+    "resource.regen.stamina": 464
+  },
+  "pTheta": 928,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "SuperThreeGatling",
+  "theta": 27,
+  "traitPool": [
+    "burst-fire capability",
+    "stochastic healing",
+    "temporary invulnerability",
+    "triple-lane projection"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

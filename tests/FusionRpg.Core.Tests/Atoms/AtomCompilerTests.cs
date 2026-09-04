@@ -503,8 +503,11 @@ public class AtomCompilerTests
     // "a hand-maintained list currently missing two constants" was stale even before this module
     // shipped; E35 had already found and fixed that).
     // E37 (spec-projectile-control.md §2b.2) grows this by one more again, to 15, with BulletModify.
+    // E41 (spec-ui-attach-point.md §2b) grows this by one more again, to 16, with PresentUi -- the
+    // same reflection mechanism, re-verified rather than assumed, growing the published
+    // /effects/contract list with no separate endpoint edit, exactly as E35/E36/E37 already found.
     [Fact]
-    public void EffectActions_publishes_fifteen_constants_including_ModifyMatch_WaveControl_and_BulletModify()
+    public void EffectActions_publishes_sixteen_constants_including_ModifyMatch_WaveControl_BulletModify_and_PresentUi()
     {
         var consts = typeof(EffectActions)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
@@ -512,9 +515,10 @@ public class AtomCompilerTests
             .Select(f => (string)f.GetRawConstantValue()!)
             .ToArray();
 
-        Assert.Equal(15, consts.Length);
+        Assert.Equal(16, consts.Length);
         Assert.Contains(EffectActions.ModifyMatch, consts);
         Assert.Contains(EffectActions.WaveControl, consts);
         Assert.Contains(EffectActions.BulletModify, consts);
+        Assert.Contains(EffectActions.PresentUi, consts);
     }
 }

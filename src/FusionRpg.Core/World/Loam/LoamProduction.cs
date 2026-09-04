@@ -35,6 +35,14 @@ public static class LoamProduction
             total += LoamPolicy.SeepPerTurn * multiplierMilli / 1000;
         }
 
+        // world-map W55 (empire-economy-ssot.md A8): the yield half of "development must pay" —
+        // additive to the Rootbed sum above, the same way a well's own multiplier is additive to it,
+        // never a replacement. Ships real (not identity) the moment a sector's DevelopmentLevel is
+        // nonzero, but every shipped template and every existing golden starts every sector at
+        // DevelopmentLevel 0 and no scripted turn sequence in an existing test ever orders `develop`,
+        // so this moves no golden — proven by running them, not merely argued.
+        total += Growth.DevelopmentYield.For(sector.DevelopmentLevel, LoamPolicy.DevelopmentYieldPerLevel);
+
         return total;
     }
 

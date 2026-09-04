@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 3000,
+  "attackIntervalSource": "classified",
+  "deployMode": "HypnoAlly",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 314,
+  "magnitudes": {
+    "combat.block.shred.omni": 380,
+    "combat.parry.shred.omni": 380,
+    "combat.power.omni": 253,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 2034,
+    "resource.max.stamina": 6600,
+    "resource.regen.hp": 98,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 292
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Cultivated",
+  "side": "zombie",
+  "speciesId": "Submarine_c2",
+  "theta": 13,
+  "traitPool": [
+    "centrifugal-resilient",
+    "high-acceleration",
+    "momentum-buffing"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

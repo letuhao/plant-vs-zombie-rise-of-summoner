@@ -621,6 +621,10 @@ public sealed partial class RpgStore : IRpgDb
         // loot_source / drop_table[_group|_entry] / item_drop_log / item_generation /
         // item_loot_pity / item_first_clear — item-ideal.md, drop-volume (module 11).
         EnsureLootSchemaUnlocked(db);
+        // material_recipe / material_recipe_cost / rpg_material_spend_log — I9 §6.1–6.2,
+        // salvage-craft (module 14). The material INVENTORY table (rpg_demon_materials) is DDL'd
+        // above with the demon tables and is deliberately not renamed here.
+        EnsureMaterialSchemaUnlocked(db);
         // item_set / item_set_member / item_set_tier — ssot-sets.md §4.2, threshold-grants (module 12).
         EnsureItemSetSchemaUnlocked(db);
         // effect_element + both matchup matrices (spec-element-roster-data.md, E18).

@@ -1,0 +1,43 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Light",
+  "elementSecondary": null,
+  "gameTypeId": 955,
+  "magnitudes": {
+    "combat.shield.capacity.omni": 24860,
+    "combat.shield.regen.omni": 407,
+    "combat.shield.toughness.omni": 904,
+    "progression.bonus.arm2": 3616,
+    "progression.bonus.maxHp": 5424,
+    "resource.max.hp": 5424,
+    "resource.max.hunger": 5424,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 11752,
+    "resource.regen.hp": 38,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 480
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Chimeric",
+  "side": "plant",
+  "speciesId": "UltimateLunarCabbage",
+  "theta": 13,
+  "traitPool": [
+    "area_of_effect_healing",
+    "lunar_summoning",
+    "scaling_light_damage",
+    "synergistic_star_linkage"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "mutated"
+  ]
+}

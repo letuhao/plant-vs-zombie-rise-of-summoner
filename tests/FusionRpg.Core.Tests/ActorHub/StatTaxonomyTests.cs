@@ -79,7 +79,15 @@ public class StatTaxonomyTests
             "StatusPotencyPoints", "PerMilleRatio", "Milliseconds", "Count", "Flag", "LadderIndex",
             // class-system additions, both authorised 2026-08-26 (spec-primary-stats.md §3.2,
             // spec-unit-class-close.md §3.3/§3.5) — ten classes become twelve.
-            "AptitudePoints", "ReciprocalPoints"
+            "AptitudePoints", "ReciprocalPoints",
+            // world-numbers W37/W38, authorised 2026-09-04 (spec-magnitude-and-units.md §3) — twelve
+            // become thirteen. ⚠️ Note what this list IS: a fourth hand-maintained copy of the member
+            // set, in a test named "referenced not redefined". The enum, the TypeScript union, the
+            // ledger doc and this array must all be edited together, and on 2026-09-04 three of the
+            // four were — the enum was missed, and `UnitClassContractParityTests` sat red until
+            // someone read it. The duplication is deliberate (each copy guards a different boundary),
+            // but it is exactly why adding a class needs all four touched in one change.
+            "LoamUnits"
         };
         Assert.Equal(expectedUnits.OrderBy(x => x), Enum.GetNames(unitClassTypes[0]).OrderBy(x => x));
 

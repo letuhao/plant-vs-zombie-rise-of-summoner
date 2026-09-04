@@ -20,15 +20,16 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
-        "attackTempo": "unresolved",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:14:28Z",
+      "emittedUtc": "2026-09-04T14:30:39Z",
       "minorityValues": {
+        "attackTempo": "quick",
         "threatBand": "pest"
       },
       "promptVersions": {
@@ -47,7 +48,7 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "unresolved",
+    "attackTempo": "steady",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",

@@ -1,0 +1,855 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "frozen": false,
+  "_meta": {
+    "owner": "docs/architecture/item/spec-set-charm-gen.md (module 13, set-charm-gen)",
+    "purpose": "The third themeKey population. `set` REQUIRES a themeKey (adapters/items/kinds.py, KindCatalog.cs), and the 36 build set families are keyed on (aptitude, archetype) and belong to no species - so without this file a build set is unauthorable. RULED 2026-09-04: a third `build.` namespace, not a loosened `themeKey` (spec-demon-themes.md 7 names making themeKey REQUIRED on `unique` as the intended direction, and loosening it here would reverse that).",
+    "collisionNote": "Collision-free against `theme.*` (legacy, 13 registered / 5 in use) and `demon.*` by construction - the same namespace split spec-demon-themes.md 2.2a already established. Three prefixes, one union, no shared body.",
+    "derivation": "MECHANICAL, not authored: 12 aptitudes x 3 archetypes. The aptitude axis is read from data/seed/aptitudes/roster.json (the checked-in mirror of AptitudeCatalog.All, which computes its own count as PostureCount x PerPosture) so a thirteenth aptitude changes this grid by construction rather than by a forgotten edit. `aptitudeMeaning` and `aptitudeReading` are that roster's own `role`/`reading` strings, carried verbatim into the brief - no flavour is invented here. `antiMotifs` is the opposing archetype, which is a derivation, not a judgement.",
+    "appendOnly": "Append-only, like every other theme population. An entry is retired with `retired: true`, never deleted, and an id is never reused.",
+    "notFrozen": "Deliberately NOT frozen. themes.v1.json and naming.v1.json are frozen wave-0 registries whose bumps cost an explicit re-run decision; this file is derived from a roster that is itself allowed to grow, so freezing it would make an aptitude addition a registry ceremony."
+  },
+  "themes": [
+    {
+      "id": "might-offense",
+      "themeKey": "build.might-offense",
+      "aptitude": "Might",
+      "posture": "force",
+      "archetype": "offense",
+      "displayName": "Might / Offense",
+      "motifs": [
+        "might",
+        "force",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "universal offence — power",
+      "aptitudeReading": "Hit harder.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "might-defense",
+      "themeKey": "build.might-defense",
+      "aptitude": "Might",
+      "posture": "force",
+      "archetype": "defense",
+      "displayName": "Might / Defense",
+      "motifs": [
+        "might",
+        "force",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "universal offence — power",
+      "aptitudeReading": "Hit harder.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "might-balance",
+      "themeKey": "build.might-balance",
+      "aptitude": "Might",
+      "posture": "force",
+      "archetype": "balance",
+      "displayName": "Might / Balance",
+      "motifs": [
+        "might",
+        "force",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "universal offence — power",
+      "aptitudeReading": "Hit harder.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "fortitude-offense",
+      "themeKey": "build.fortitude-offense",
+      "aptitude": "Fortitude",
+      "posture": "force",
+      "archetype": "offense",
+      "displayName": "Fortitude / Offense",
+      "motifs": [
+        "fortitude",
+        "force",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "mitigation — defense · absorption · reduction",
+      "aptitudeReading": "Take less of everything.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "fortitude-defense",
+      "themeKey": "build.fortitude-defense",
+      "aptitude": "Fortitude",
+      "posture": "force",
+      "archetype": "defense",
+      "displayName": "Fortitude / Defense",
+      "motifs": [
+        "fortitude",
+        "force",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "mitigation — defense · absorption · reduction",
+      "aptitudeReading": "Take less of everything.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "fortitude-balance",
+      "themeKey": "build.fortitude-balance",
+      "aptitude": "Fortitude",
+      "posture": "force",
+      "archetype": "balance",
+      "displayName": "Fortitude / Balance",
+      "motifs": [
+        "fortitude",
+        "force",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "mitigation — defense · absorption · reduction",
+      "aptitudeReading": "Take less of everything.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "vigor-offense",
+      "themeKey": "build.vigor-offense",
+      "aptitude": "Vigor",
+      "posture": "force",
+      "archetype": "offense",
+      "displayName": "Vigor / Offense",
+      "motifs": [
+        "vigor",
+        "force",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "shield — shield.capacity/regen/toughness",
+      "aptitudeReading": "More to lose before you lose.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "vigor-defense",
+      "themeKey": "build.vigor-defense",
+      "aptitude": "Vigor",
+      "posture": "force",
+      "archetype": "defense",
+      "displayName": "Vigor / Defense",
+      "motifs": [
+        "vigor",
+        "force",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "shield — shield.capacity/regen/toughness",
+      "aptitudeReading": "More to lose before you lose.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "vigor-balance",
+      "themeKey": "build.vigor-balance",
+      "aptitude": "Vigor",
+      "posture": "force",
+      "archetype": "balance",
+      "displayName": "Vigor / Balance",
+      "motifs": [
+        "vigor",
+        "force",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "shield — shield.capacity/regen/toughness",
+      "aptitudeReading": "More to lose before you lose.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "onslaught-offense",
+      "themeKey": "build.onslaught-offense",
+      "aptitude": "Onslaught",
+      "posture": "force",
+      "archetype": "offense",
+      "displayName": "Onslaught / Offense",
+      "motifs": [
+        "onslaught",
+        "force",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "breaks guard + reflect",
+      "aptitudeReading": "Their guard stops mattering.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "onslaught-defense",
+      "themeKey": "build.onslaught-defense",
+      "aptitude": "Onslaught",
+      "posture": "force",
+      "archetype": "defense",
+      "displayName": "Onslaught / Defense",
+      "motifs": [
+        "onslaught",
+        "force",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "breaks guard + reflect",
+      "aptitudeReading": "Their guard stops mattering.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "onslaught-balance",
+      "themeKey": "build.onslaught-balance",
+      "aptitude": "Onslaught",
+      "posture": "force",
+      "archetype": "balance",
+      "displayName": "Onslaught / Balance",
+      "motifs": [
+        "onslaught",
+        "force",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "breaks guard + reflect",
+      "aptitudeReading": "Their guard stops mattering.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "agility-offense",
+      "themeKey": "build.agility-offense",
+      "aptitude": "Agility",
+      "posture": "finesse",
+      "archetype": "offense",
+      "displayName": "Agility / Offense",
+      "motifs": [
+        "agility",
+        "finesse",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "dodge",
+      "aptitudeReading": "Be somewhere else.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "agility-defense",
+      "themeKey": "build.agility-defense",
+      "aptitude": "Agility",
+      "posture": "finesse",
+      "archetype": "defense",
+      "displayName": "Agility / Defense",
+      "motifs": [
+        "agility",
+        "finesse",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "dodge",
+      "aptitudeReading": "Be somewhere else.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "agility-balance",
+      "themeKey": "build.agility-balance",
+      "aptitude": "Agility",
+      "posture": "finesse",
+      "archetype": "balance",
+      "displayName": "Agility / Balance",
+      "motifs": [
+        "agility",
+        "finesse",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "dodge",
+      "aptitudeReading": "Be somewhere else.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "composure-offense",
+      "themeKey": "build.composure-offense",
+      "aptitude": "Composure",
+      "posture": "finesse",
+      "archetype": "offense",
+      "displayName": "Composure / Offense",
+      "motifs": [
+        "composure",
+        "finesse",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "crit-denial",
+      "aptitudeReading": "Nothing lands clean on you.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "composure-defense",
+      "themeKey": "build.composure-defense",
+      "aptitude": "Composure",
+      "posture": "finesse",
+      "archetype": "defense",
+      "displayName": "Composure / Defense",
+      "motifs": [
+        "composure",
+        "finesse",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "crit-denial",
+      "aptitudeReading": "Nothing lands clean on you.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "composure-balance",
+      "themeKey": "build.composure-balance",
+      "aptitude": "Composure",
+      "posture": "finesse",
+      "archetype": "balance",
+      "displayName": "Composure / Balance",
+      "motifs": [
+        "composure",
+        "finesse",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "crit-denial",
+      "aptitudeReading": "Nothing lands clean on you.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "pierce-offense",
+      "themeKey": "build.pierce-offense",
+      "aptitude": "Pierce",
+      "posture": "finesse",
+      "archetype": "offense",
+      "displayName": "Pierce / Offense",
+      "motifs": [
+        "pierce",
+        "finesse",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "breaks mitigation + shield",
+      "aptitudeReading": "Armour stops mattering.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "pierce-defense",
+      "themeKey": "build.pierce-defense",
+      "aptitude": "Pierce",
+      "posture": "finesse",
+      "archetype": "defense",
+      "displayName": "Pierce / Defense",
+      "motifs": [
+        "pierce",
+        "finesse",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "breaks mitigation + shield",
+      "aptitudeReading": "Armour stops mattering.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "pierce-balance",
+      "themeKey": "build.pierce-balance",
+      "aptitude": "Pierce",
+      "posture": "finesse",
+      "archetype": "balance",
+      "displayName": "Pierce / Balance",
+      "motifs": [
+        "pierce",
+        "finesse",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "breaks mitigation + shield",
+      "aptitudeReading": "Armour stops mattering.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "focus-offense",
+      "themeKey": "build.focus-offense",
+      "aptitude": "Focus",
+      "posture": "finesse",
+      "archetype": "offense",
+      "displayName": "Focus / Offense",
+      "motifs": [
+        "focus",
+        "finesse",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "utility — qi, efficiency, cooldowns",
+      "aptitudeReading": "Do it again, sooner, cheaper.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "focus-defense",
+      "themeKey": "build.focus-defense",
+      "aptitude": "Focus",
+      "posture": "finesse",
+      "archetype": "defense",
+      "displayName": "Focus / Defense",
+      "motifs": [
+        "focus",
+        "finesse",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "utility — qi, efficiency, cooldowns",
+      "aptitudeReading": "Do it again, sooner, cheaper.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "focus-balance",
+      "themeKey": "build.focus-balance",
+      "aptitude": "Focus",
+      "posture": "finesse",
+      "archetype": "balance",
+      "displayName": "Focus / Balance",
+      "motifs": [
+        "focus",
+        "finesse",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "utility — qi, efficiency, cooldowns",
+      "aptitudeReading": "Do it again, sooner, cheaper.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "bulwark-offense",
+      "themeKey": "build.bulwark-offense",
+      "aptitude": "Bulwark",
+      "posture": "bastion",
+      "archetype": "offense",
+      "displayName": "Bulwark / Offense",
+      "motifs": [
+        "bulwark",
+        "bastion",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "guard — parry/block rate and strength",
+      "aptitudeReading": "Stop it outright, sometimes.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "bulwark-defense",
+      "themeKey": "build.bulwark-defense",
+      "aptitude": "Bulwark",
+      "posture": "bastion",
+      "archetype": "defense",
+      "displayName": "Bulwark / Defense",
+      "motifs": [
+        "bulwark",
+        "bastion",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "guard — parry/block rate and strength",
+      "aptitudeReading": "Stop it outright, sometimes.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "bulwark-balance",
+      "themeKey": "build.bulwark-balance",
+      "aptitude": "Bulwark",
+      "posture": "bastion",
+      "archetype": "balance",
+      "displayName": "Bulwark / Balance",
+      "motifs": [
+        "bulwark",
+        "bastion",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "guard — parry/block rate and strength",
+      "aptitudeReading": "Stop it outright, sometimes.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "retribution-offense",
+      "themeKey": "build.retribution-offense",
+      "aptitude": "Retribution",
+      "posture": "bastion",
+      "archetype": "offense",
+      "displayName": "Retribution / Offense",
+      "motifs": [
+        "retribution",
+        "bastion",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "reflect",
+      "aptitudeReading": "Hitting you costs them.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "retribution-defense",
+      "themeKey": "build.retribution-defense",
+      "aptitude": "Retribution",
+      "posture": "bastion",
+      "archetype": "defense",
+      "displayName": "Retribution / Defense",
+      "motifs": [
+        "retribution",
+        "bastion",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "reflect",
+      "aptitudeReading": "Hitting you costs them.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "retribution-balance",
+      "themeKey": "build.retribution-balance",
+      "aptitude": "Retribution",
+      "posture": "bastion",
+      "archetype": "balance",
+      "displayName": "Retribution / Balance",
+      "motifs": [
+        "retribution",
+        "bastion",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "reflect",
+      "aptitudeReading": "Hitting you costs them.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "precision-offense",
+      "themeKey": "build.precision-offense",
+      "aptitude": "Precision",
+      "posture": "bastion",
+      "archetype": "offense",
+      "displayName": "Precision / Offense",
+      "motifs": [
+        "precision",
+        "bastion",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "breaks dodge — accuracy",
+      "aptitudeReading": "They cannot dodge.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "precision-defense",
+      "themeKey": "build.precision-defense",
+      "aptitude": "Precision",
+      "posture": "bastion",
+      "archetype": "defense",
+      "displayName": "Precision / Defense",
+      "motifs": [
+        "precision",
+        "bastion",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "breaks dodge — accuracy",
+      "aptitudeReading": "They cannot dodge.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "precision-balance",
+      "themeKey": "build.precision-balance",
+      "aptitude": "Precision",
+      "posture": "bastion",
+      "archetype": "balance",
+      "displayName": "Precision / Balance",
+      "motifs": [
+        "precision",
+        "bastion",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "breaks dodge — accuracy",
+      "aptitudeReading": "They cannot dodge.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "ferocity-offense",
+      "themeKey": "build.ferocity-offense",
+      "aptitude": "Ferocity",
+      "posture": "bastion",
+      "archetype": "offense",
+      "displayName": "Ferocity / Offense",
+      "motifs": [
+        "ferocity",
+        "bastion",
+        "offense"
+      ],
+      "antiMotifs": [
+        "defense"
+      ],
+      "aptitudeMeaning": "breaks crit-denial — crit.rate/damage",
+      "aptitudeReading": "Sometimes it is much worse.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "ferocity-defense",
+      "themeKey": "build.ferocity-defense",
+      "aptitude": "Ferocity",
+      "posture": "bastion",
+      "archetype": "defense",
+      "displayName": "Ferocity / Defense",
+      "motifs": [
+        "ferocity",
+        "bastion",
+        "defense"
+      ],
+      "antiMotifs": [
+        "offense"
+      ],
+      "aptitudeMeaning": "breaks crit-denial — crit.rate/damage",
+      "aptitudeReading": "Sometimes it is much worse.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    },
+    {
+      "id": "ferocity-balance",
+      "themeKey": "build.ferocity-balance",
+      "aptitude": "Ferocity",
+      "posture": "bastion",
+      "archetype": "balance",
+      "displayName": "Ferocity / Balance",
+      "motifs": [
+        "ferocity",
+        "bastion",
+        "balance"
+      ],
+      "antiMotifs": [],
+      "aptitudeMeaning": "breaks crit-denial — crit.rate/damage",
+      "aptitudeReading": "Sometimes it is much worse.",
+      "expression": {
+        "item": "stat emphasis and threshold shape - what committing further to this aptitude buys",
+        "action": "not applicable - a build theme names no action expression"
+      },
+      "basis": "derived",
+      "retired": false
+    }
+  ]
+}

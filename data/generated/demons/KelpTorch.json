@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 1056,
+  "magnitudes": {
+    "combat.block.shred.omni": 96,
+    "combat.parry.shred.omni": 96,
+    "combat.power.omni": 64,
+    "resource.max.hp": 480,
+    "resource.max.hunger": 400,
+    "resource.max.qi": 480,
+    "resource.max.spirit": 240,
+    "resource.max.stamina": 1120,
+    "resource.regen.hp": 24,
+    "resource.regen.hunger": 24,
+    "resource.regen.qi": 32,
+    "resource.regen.spirit": 16,
+    "resource.regen.stamina": 40
+  },
+  "pTheta": 80,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "KelpTorch",
+  "theta": 0,
+  "traitPool": [
+    "combustive seed-ignition",
+    "flame-growth synthesis",
+    "projectile-infusion"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

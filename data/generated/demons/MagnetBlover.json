@@ -1,0 +1,37 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1102,
+  "magnitudes": {
+    "resource.max.hp": 480,
+    "resource.max.hunger": 400,
+    "resource.max.qi": 2400,
+    "resource.max.spirit": 1120,
+    "resource.max.stamina": 640,
+    "resource.regen.hp": 2,
+    "resource.regen.hunger": 24,
+    "resource.regen.qi": 144,
+    "resource.regen.spirit": 56,
+    "resource.regen.stamina": 40
+  },
+  "pTheta": 80,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "MagnetBlover",
+  "theta": 0,
+  "traitPool": [
+    "ferrous-consumption",
+    "magnetic-attraction",
+    "transient-existence"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

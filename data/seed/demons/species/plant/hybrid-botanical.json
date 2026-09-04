@@ -19,15 +19,16 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "split",
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:39:00Z",
+      "emittedUtc": "2026-09-04T14:45:42Z",
       "minorityValues": {
+        "aptitudePrimary": "Precision",
         "attackTempo": "flurry"
       },
       "promptVersions": {
@@ -44,7 +45,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Focus",
     "aptitudeSecondary": "Focus",
     "attackTempo": "quick",
     "basis": "stated",
@@ -56,8 +57,8 @@
       "magical-fauna-mimic"
     ],
     "gameTypeId": 993,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Finesse",
+    "pure": true,
     "rarity": "fused",
     "reach": "long",
     "reason": "The creature's ability to fire full-screen tracking projectiles and charm enemies with high-damage, defense-ignoring magic makes it a high-tier threat far exceeding a mere marauder.",

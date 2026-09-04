@@ -1,0 +1,45 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 935,
+  "magnitudes": {
+    "combat.block.strength.omni": 678,
+    "combat.defense.omni": 407,
+    "combat.parry.strength.omni": 678,
+    "combat.shield.capacity.omni": 4068,
+    "combat.shield.toughness.omni": 271,
+    "progression.bonus.arm1": 3616,
+    "progression.bonus.defense": 2712,
+    "resource.max.hp": 14464,
+    "resource.max.hunger": 8136,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 1356,
+    "resource.max.stamina": 6328,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 362,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 407
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "IFVPumpkin",
+  "theta": 13,
+  "traitPool": [
+    "electromagnetic-pulse",
+    "high-density-armor",
+    "iron-consumption",
+    "magnetic-shielding"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

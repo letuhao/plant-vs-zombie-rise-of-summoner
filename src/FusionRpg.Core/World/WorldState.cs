@@ -2,14 +2,24 @@ using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.World;
 
-/// <summary>How far along a sector's life it is (spec-world-model.md §The sector's life).</summary>
+/// <summary>
+/// How far along a sector's life it is (spec-world-model.md §The sector's life). Persisted and
+/// hashed **by name, never by ordinal** (`RpgStore.World.cs` writes `s.Phase.ToString()` and reads
+/// back via `Enum.Parse&lt;SectorPhase&gt;`; `WorldCanonical.Row` hashes the same string form) — the
+/// identical property `SlotTypeCatalog.cs`'s own `SlotKind` relies on, which is what makes removing
+/// an unused member here safe.
+///
+/// `Developed` was removed world-map W54 (spec-sector-development.md §3): declared but referenced
+/// nowhere in `src/` — development level is the number (`WorldSector.DevelopmentLevel`, world-map
+/// W53's own producer), and a phase mirroring it would be derived state that rots, which
+/// spec-world-movement.md already forbids ("no storage of anything recomputable").
+/// </summary>
 public enum SectorPhase
 {
     Unknown,
     Explored,
     Contested,
     Held,
-    Developed,
     Besieged,
     Lost
 }

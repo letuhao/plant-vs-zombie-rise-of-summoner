@@ -240,9 +240,13 @@ public class LoamPhasesTests
     [Fact]
     public void The_weakest_ground_goes_first_not_an_arbitrary_sector()
     {
+        // world-map W55 (empire-economy-ssot.md A8): `danger: N + 2 * development` compensates the
+        // new development-yield term — `DevelopmentYieldPerLevel(6) / DangerUpkeepPerBand(3) == 2`
+        // at the real configured tuning — reproducing the exact pre-W55 upkeep-minus-production
+        // balance for a sourceless sector, so "harsh" stays the worse balance it always was.
         var rootbed = Sector("source", "f1", stock: 0, slots: new[] { Rootbed(0) });
-        var mild = Sector("mild", "f1", stock: 0, development: 1, danger: 0);
-        var harsh = Sector("harsh", "f1", stock: 0, development: 5, danger: 4); // worse balance than "mild"
+        var mild = Sector("mild", "f1", stock: 0, development: 1, danger: 0 + 2 * 1);
+        var harsh = Sector("harsh", "f1", stock: 0, development: 5, danger: 4 + 2 * 5); // worse balance than "mild"
         var world = new WorldState
         {
             WorldId = "w", TemplateId = "t", Seed = 1,

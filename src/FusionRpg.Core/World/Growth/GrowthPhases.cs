@@ -36,14 +36,16 @@ public static class GrowthPhases
 
         foreach (var sector in world.Sectors)
         {
-            if (sector.OwnerFactionId is null)
+            var working = AdvanceProject(sector, report, phase);
+
+            if (working.OwnerFactionId is null)
             {
-                sectors.Add(sector);
+                sectors.Add(working);
                 continue;
             }
 
-            var hasSeat = sector.Slots.Any(sl => sl.SlotTypeId == SlotTypeCatalog.SeatSlotTypeId);
-            var lairCleared = sector.Slots.Any(sl =>
+            var hasSeat = working.Slots.Any(sl => sl.SlotTypeId == SlotTypeCatalog.SeatSlotTypeId);
+            var lairCleared = working.Slots.Any(sl =>
                 SlotTypeCatalog.Get(sl.SlotTypeId).Kind == SlotKind.Lair && sl.GuardState == GuardState.Cleared);
 
             var pulse = RecruitPolicy.PulseFor(
@@ -51,16 +53,54 @@ public static class GrowthPhases
 
             if (pulse <= 0)
             {
-                sectors.Add(sector);
+                sectors.Add(working);
                 continue;
             }
 
             // Structural, not prose (world-stage W39's SectorId field) — the same discipline
             // `LoamPhases.Production`'s own "loam.overflow" line already follows.
-            report.Add(phase, TurnReportKinds.Event, sector.SectorId, "growth.pulse:" + pulse, sector.SectorId);
-            sectors.Add(sector with { RecruitStock = sector.RecruitStock + pulse });
+            report.Add(phase, TurnReportKinds.Event, working.SectorId, "growth.pulse:" + pulse, working.SectorId);
+            sectors.Add(working with { RecruitStock = working.RecruitStock + pulse });
         }
 
         return world with { Sectors = sectors };
+    }
+
+    /// <summary>
+    /// world-map W52 (spec-sector-development.md §3): a sector-wide project counts down here, never
+    /// in `Production` — the deliberate split the task's own text states, mirroring
+    /// `LoamPhases.DecrementConstruction`'s exact shape one level up, including its "decrement
+    /// unconditional on ownership" precedent (`LoamPhases.Production` counts a structure down even
+    /// for a sector that changed hands earlier the same turn; a lost sector's half-built structure
+    /// is only ever cleared explicitly, in `LoamPhases.Pressure`'s own `Lost` branch — a project
+    /// follows the identical rule, cleared there too, never here).
+    ///
+    /// Reaching zero completes the project — world-map W53 is the one line this adds: a completed
+    /// project raises the sector's <see cref="WorldSector.DevelopmentLevel"/> by the project's own
+    /// authored <see cref="ProjectDef.DevelopmentBonus"/>, once, closing the trap
+    /// empire-economy-ssot.md A8 names (development priced as pure cost with no producer). **No code
+    /// path anywhere lowers a level** — AGENTS.md's no-hard-progression-ceiling rule applies
+    /// symmetrically in the other direction too: nothing here, or anywhere else in `src/`, claws a
+    /// level back, matching the acceptance's own explicit "there is no de-development" clause.
+    /// </summary>
+    static WorldSector AdvanceProject(WorldSector sector, TurnReport report, string phase)
+    {
+        if (sector.ProjectId is not { } projectId) return sector;
+
+        var remaining = (sector.ProjectTurnsRemaining ?? 0) - 1;
+        if (remaining > 0)
+            return sector with { ProjectTurnsRemaining = remaining };
+
+        report.Add(phase, TurnReportKinds.Event, sector.SectorId, "develop.completed:" + projectId, sector.SectorId);
+        var completed = sector with { ProjectId = null, ProjectTurnsRemaining = null };
+
+        // Defensive, matching `LoamProduction.For`'s own `StructureCatalog.IsKnown` guard before a
+        // `.Get` one module over: a persisted sector's `ProjectId` could in principle outlive a
+        // future catalog edit that removes the row, and completion must not throw for that.
+        var bonus = ProjectCatalog.IsKnown(projectId) ? ProjectCatalog.Get(projectId).DevelopmentBonus : 0;
+        if (bonus <= 0) return completed;
+
+        report.Add(phase, TurnReportKinds.Event, sector.SectorId, "development.raised:" + bonus, sector.SectorId);
+        return completed with { DevelopmentLevel = completed.DevelopmentLevel + bonus };
     }
 }

@@ -19,7 +19,7 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "split",
         "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -27,8 +27,9 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:16:01Z",
+      "emittedUtc": "2026-09-04T14:46:01Z",
       "minorityValues": {
+        "aptitudePrimary": "Focus",
         "attackTempo": "ponderous"
       },
       "promptVersions": {
@@ -45,7 +46,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Fortitude",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "inferred",
@@ -56,8 +57,8 @@
       "fungal-luminary"
     ],
     "gameTypeId": 1078,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "fused",
     "reach": "short",
     "reason": "The creature functions primarily as a utility light source with no offensive capabilities or combat traits mentioned in its lore.",

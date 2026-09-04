@@ -1,0 +1,37 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 67,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 3616,
+    "resource.max.stamina": 7232,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 447
+  },
+  "pTheta": 452,
+  "rangeCells": 1,
+  "rarity": "Sprout",
+  "side": "zombie",
+  "speciesId": "MiniSandMonster",
+  "theta": 13,
+  "traitPool": [
+    "collision-detonation",
+    "high-agility",
+    "sand-camouflage",
+    "tumble-movement"
+  ],
+  "variantCount": 1,
+  "variants": [
+    "normal"
+  ]
+}

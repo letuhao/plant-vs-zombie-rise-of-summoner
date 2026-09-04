@@ -20,15 +20,17 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "unresolved",
-        "attackTempo": "unresolved",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:00:47Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T14:45:43Z",
+      "minorityValues": {
+        "attackTempo": "slow"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,7 +47,7 @@
     ],
     "aptitudePrimary": "unresolved",
     "aptitudeSecondary": "none",
-    "attackTempo": "unresolved",
+    "attackTempo": "steady",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",

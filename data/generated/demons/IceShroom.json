@@ -25,13 +25,13 @@
   "speciesId": "IceShroom",
   "theta": 13,
   "traitPool": [
-    "Anti-groundling specialization",
-    "Area-of-effect freezing",
-    "Frostbite application"
+    "anti-ground-unit",
+    "area-of-effect freezing",
+    "frost-infusion"
   ],
   "variantCount": 2,
   "variants": [
-    "ancient",
+    "mutated",
     "normal"
   ]
 }

@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Dark",
@@ -21,20 +21,22 @@
     "resource.regen.stamina": 407
   },
   "pTheta": 452,
-  "rangeCells": 1,
-  "rarity": "Heirloom",
+  "rangeCells": 3,
+  "rarity": "Almanac",
   "side": "zombie",
   "speciesId": "ArmedGargantuar",
   "theta": 13,
   "traitPool": [
-    "adaptive_eye_affinity",
-    "armored_giant",
-    "multi_hit_striker",
-    "summoner_aura"
+    "adaptive_visual_signaling",
+    "integrated_martial_arts",
+    "multi-modal_resistance",
+    "summoning_strike"
   ],
-  "variantCount": 2,
+  "variantCount": 4,
   "variants": [
-    "cursed",
-    "mutated"
+    "ancient",
+    "corrupted",
+    "mutated",
+    "normal"
   ]
 }

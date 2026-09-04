@@ -448,6 +448,9 @@ public sealed class WorldCommandRequest
 
     /// <summary>Which structure a `build` order names (spec-loam-structures.md, world-stage W22).</summary>
     public string? StructureId { get; set; }
+
+    /// <summary>Which project a `develop` order names (spec-sector-development.md §3, world-map W52).</summary>
+    public string? ProjectId { get; set; }
 }
 
 /// <summary>

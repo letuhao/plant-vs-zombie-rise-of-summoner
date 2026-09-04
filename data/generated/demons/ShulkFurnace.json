@@ -1,0 +1,44 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Air",
+  "elementSecondary": null,
+  "gameTypeId": 1224,
+  "magnitudes": {
+    "combat.block.strength.omni": 120,
+    "combat.defense.omni": 72,
+    "combat.parry.strength.omni": 120,
+    "combat.shield.capacity.omni": 720,
+    "combat.shield.toughness.omni": 48,
+    "progression.bonus.arm1": 640,
+    "progression.bonus.defense": 480,
+    "resource.max.hp": 2560,
+    "resource.max.hunger": 1440,
+    "resource.max.qi": 480,
+    "resource.max.spirit": 240,
+    "resource.max.stamina": 1120,
+    "resource.regen.hp": 2,
+    "resource.regen.hunger": 64,
+    "resource.regen.qi": 32,
+    "resource.regen.spirit": 16,
+    "resource.regen.stamina": 72
+  },
+  "pTheta": 80,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "ShulkFurnace",
+  "theta": 0,
+  "traitPool": [
+    "aerial-mobility",
+    "area-of-effect-protection",
+    "temporal-reversion"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

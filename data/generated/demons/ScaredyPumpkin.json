@@ -1,0 +1,39 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Earth",
+  "elementSecondary": null,
+  "gameTypeId": 1200,
+  "magnitudes": {
+    "combat.defense.omni": 316,
+    "combat.heal.power": 3616,
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 4520,
+    "resource.max.spirit": 12656,
+    "resource.max.stamina": 3616,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 407,
+    "resource.regen.spirit": 452,
+    "resource.regen.stamina": 226
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "ScaredyPumpkin",
+  "theta": 13,
+  "traitPool": [
+    "courage_aura",
+    "fear_negation",
+    "protective_presence"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "normal"
+  ]
+}

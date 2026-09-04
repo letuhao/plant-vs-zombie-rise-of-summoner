@@ -1,0 +1,37 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Ice",
+  "elementSecondary": null,
+  "gameTypeId": 363,
+  "magnitudes": {
+    "resource.max.hp": 480,
+    "resource.max.hunger": 400,
+    "resource.max.qi": 2400,
+    "resource.max.spirit": 1120,
+    "resource.max.stamina": 640,
+    "resource.regen.hp": 2,
+    "resource.regen.hunger": 24,
+    "resource.regen.qi": 144,
+    "resource.regen.spirit": 56,
+    "resource.regen.stamina": 40
+  },
+  "pTheta": 80,
+  "rangeCells": 5,
+  "rarity": "Cultivated",
+  "side": "plant",
+  "speciesId": "Tower_iceblover",
+  "theta": 0,
+  "traitPool": [
+    "buffing-catalyst",
+    "frost-emission",
+    "temporal-decay"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
+}

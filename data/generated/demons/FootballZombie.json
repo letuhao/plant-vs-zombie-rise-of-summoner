@@ -23,15 +23,18 @@
   },
   "pTheta": 452,
   "rangeCells": 1,
-  "rarity": "Chaff",
+  "rarity": "Cultivated",
   "side": "zombie",
   "speciesId": "FootballZombie",
   "theta": 13,
   "traitPool": [
-    "Equipment-Dependent Weakness",
-    "High Durability",
-    "High Mobility"
+    "high-durability",
+    "high-mobility",
+    "magnetic-weakness"
   ],
-  "variantCount": 0,
-  "variants": []
+  "variantCount": 2,
+  "variants": [
+    "mutated",
+    "normal"
+  ]
 }

@@ -20,15 +20,17 @@
   },
   "pTheta": 452,
   "rangeCells": 5,
-  "rarity": "Chaff",
+  "rarity": "Sprout",
   "side": "plant",
   "speciesId": "ScaredyShroom",
   "theta": 13,
   "traitPool": [
-    "Projectile-based spore dispersal",
-    "Proximity-triggered fear response",
-    "Reactive defensive crouching"
+    "projectile-spore-emission",
+    "proximity-sensitive",
+    "reactive-cowering"
   ],
-  "variantCount": 0,
-  "variants": []
+  "variantCount": 1,
+  "variants": [
+    "normal"
+  ]
 }

@@ -134,6 +134,34 @@ buildings and obstacles exist to serve it. See §5.13.
 30. **`structure-seed` is its own program**, mirroring `demon-seed` beside `demon-system`. Ideal:
     [structure-seed-ideal.md](structure-seed-ideal.md).
 
+**Round 8 — after the spec completeness audit (2026-09-04).** See
+[base-defense/_completeness-audit.md](base-defense/_completeness-audit.md).
+
+31. **⛔ §5.17 addendum 2's ⛔ is OVERRIDDEN. The siege AI reads cover when choosing where to stop.**
+    The owner's call, against the recommendation, and recorded with the risk rather than quietly
+    softened. Relic removed cover-seeking over five patches for unpredictability; the counter-argument
+    accepted here is that an AI with no notion that a cell is dangerous walks into a kill zone every
+    turn, which makes cover a mechanic the player must respect and the opponent does not.
+    **The residual risk is the one Relic actually hit** — *"unpredictable behaviours"* — and it is
+    mitigated by §5.20's own rule 1 (a total order with a documented tie-break) plus R6's decision
+    trace, neither of which Relic's real-time pathfinder had. `siege-ai` keeps the risk term as
+    specced.
+32. **Structure HP is on `P(Θ)` reading the sector's `DevelopmentLevel`, multiplied by an authored
+    MATERIAL TIER.** *"we will use llm to generate variant like stone wall, iron wall that iron wall
+    have more defense than stone wall."* So a structure's magnitude has two factors: the **tier
+    ordinal** the seed authors (identity — stone, iron, …) and `P(Θ_development)` (magnitude —
+    deterministic). **This is seedsmith Law 2 stated as content**: the model picks *which material*,
+    deterministic code turns that ordinal into a number. A model never picks the HP.
+33. **`structure-seed` needs a DETERMINISTIC PLANNER stage before any model call.** *"pipeline
+    generator need a deterministic planner (not LLM) to prepare what it should generate first."*
+    The planner decides the generation plan — which kinds, which material tiers, how many of each,
+    which slots they may sit on — and the model then writes identity into slots the planner already
+    fixed. This is the seedsmith rule *"order the build so the model-free modules come first"*
+    promoted from advice to a required stage, and it makes the tier ladder (stone < iron < …)
+    a **planned** property rather than one that emerges from whatever the model happened to name.
+    Belongs to `structure-seed`; recorded here because decision 32 depends on it.
+34. **The bulk material is `rubble`.** `ironwork` is refined from it (decision 28).
+
 **No open questions remain.**
 
 **Consequence worth stating, because two of these answers combine:** with the central area as a
@@ -889,7 +917,7 @@ on `A5` and `A10` ([action-map.md:107-108](action-map.md)). Nothing else blocks 
 | **Cell occupancy** | A unit must not walk through another | Already inside `A10`'s stated scope: *"Grid, occupancy, distance"* |
 | **Pathing** | Obstacles reroute rather than merely block | Nothing exists. `GridDistance` is Chebyshev distance only — a metric, not a pathfinder |
 | **A refused-move reason on the wire** | GG-55: *never disable a control without saying why* | The world stage's `targeting/` module already has `BlockedTarget.tsx` and `blockedPlacement.ts` built and inert (§3.3) — the pattern is there to copy |
-| **A movement magnitude** | How far one move action carries | A magnitude, so it reads `P(Θ)` — **not** a new `f(level)` |
+| **A movement distance** | How far one move action carries | ⛔ **Corrected 2026-09-04 — an earlier draft put this on `P(Θ)`, which is a category error.** At the shipped dial `P(1) = 106`, so a move range of **106 cells** saturates the board on turn one. **Board-space quantities are neither contests nor damage magnitudes** — they are flat, board-bounded tunables, the same treatment `CompiledAction.MaxRange` has always had. `ssot-power-scale.md` §10's inventory is closed and contains no range, distance or duration scale |
 
 ### 5.13 Buildings and obstacles — trench warfare
 
@@ -2167,7 +2195,7 @@ Every number this introduces. None is a `const`. Proposed home:
 | `field` | **the concurrent-deployment cap per side**, per base tier — one integer, identical for both sides (§5.9). Plus the between-waves pause, if batch |
 | `slots.legion` | **legion slots per side** in the central defense area, per base tier — even numbers (2, 4, …); growth per development level if any. Sized against the game's 6-10 total legions (`world-stage-ideal.md` §8e.3) |
 | `legion` | **max members per legion** — the limit §3.6 shows does not exist yet. Author it like `expeditions.v1.json`'s `squadSlots`, never like `WebMatchService`'s `const int maxSquad = 6` |
-| `structures` | per defensive-structure HP, damage, range, build cost, build turns — magnitudes as `long`, derived from `P(Θ)` |
+| `structures` | **Two classes, and mixing them was a defect corrected 2026-09-04.** ① **Magnitudes** — HP, damage — `long`, derived from `P(Θ)`. ② **Board-space and pacing quantities** — range (cells), footprint, build turns — **flat authored tunables, never `P(Θ)`**: a build turn-count growing quadratically means a wall takes hundreds of turns at depth. Build **cost** is also flat, per PS-5: *"within one economy loop, faucet and sink scale on the same read, or neither does"*, and the material faucets are `Θ`-invariant |
 | `waves` | attacker composition weights, per-band scaling brackets (piecewise linear, §4.4), arrival forecast fidelity. **Note §3.5: wave composition is a code const today and there is no wave data file at all** — this feature should fix that rather than add a second hand-written array |
 | `defense` | the entrenchment multiplier that replaces `PlaceholderBattleResolver.DefenderBonusMilli`; structure-loss consequences |
 | `development` | **lives in `data/tuning/loam.v{n}.json`, not here** — beside `upkeep.developmentUpkeepPerLevel`, because `empire-economy-ssot.md`'s A8 invariant (*development must raise yield faster than it raises upkeep*) is a comparison between two numbers and splitting them across files makes it unverifiable by reading |
@@ -2299,7 +2327,106 @@ surface — verified against the §1 note that requires checking it even when no
 
 ---
 
-## 11. Next step
+## 11. Adversarial audit — 2026-09-04, four lenses
+
+Four independent audits — economy, playability, engineering, architecture-gate — run against this
+document before `/spec`, in the shape [loam-map.md](loam-map.md) §1 established. None was told about the
+others. **Every finding below was verified against source by this session**, not accepted on report.
+
+### 11.1 The convergence — four lenses, one decision
+
+**All four independently attacked decision 20 (the whole-city board), and it is why decision 26 revises
+it.** Recorded because the convergence is the evidence, not any single finding.
+
+| Lens | Finding | Status |
+|---|---|---|
+| Economy | **The _defender's_ garrison starves on turn 1.** `SupplyGraph.ConnectedSectors`'s `Usable` excludes any sector where `ZoneOfControl.IsHeldAgainst` is true — so a besieged sector drops out of **its own owner's** supply. Then `LegionSupply.Resolve`: not in supply → `remaining = carried − burn` → `destroyed`. A garrison has no bearers, so carried is 0 | **Closed by 26**, but see 11.2 F1 — the mechanism is still live |
+| Economy | **The besieger is never topped up.** The top-up loop is gated on `component.Contains(at)` over sectors the faction **owns**. Budget is one tank: `200·bearers − 10·members·turns` ≈ **one structure per siege** | **Closed by decision 27** — paths 2–4 bypass materials |
+| Engineering | **A whole-city board needs a procedural tactical-level generator** with a stability contract — deterministic, stable across turns, slot growth and capture. `world-generator` scale, absent from §7 | **Closed by 26.** A district needs a far weaker generator |
+| Playability | **~360–600 unit decisions per engagement**, against AoW4's hard cap of **18 total** citing *"Duration & Mental Load"*, and Arknights' **8** concurrent | **Reduced by 26**; the residual is decision 29's accepted risk |
+| Playability | **Turn 4 is turn 1 with less HP.** No positional progress survives; re-engagement is automatic (`MovementPhase.cs` calls `ContactResolver` unconditionally); and `BattleSideOutcome.Routed` *"keeps the field it is on"* — the loser cannot withdraw | **Closed by 26** for the multi-turn case; 11.2 F5 keeps the withdraw gap open |
+| Architecture | **The `siege` stage contradicts a locked row**, not a stale doc | **Open — see §11.5** |
+
+### 11.2 Findings that survive decision 26 and change the design
+
+| # | Severity | Finding | Verdict |
+|---|---|---|---|
+| **F1** | **High** | **A besieged sector still drops out of its owner's supply**, whatever the board's extent. Even a single-engagement siege runs `Pressure` (phase 6) after `Sieges` (phase 3) | **The design changes.** A besieged base needs an explicit supply exemption — *a base with stores is not a legion in the field*. Prerequisite, not follow-up |
+| **F1b** | **High** | **Besieging a capital grants the defender map-wide supply immunity.** `if (!connectedByFaction.TryGetValue(...) \|\| connected.Count == 0) continue;` — a faction with no connected sectors skips the burn **entirely** | **Pre-existing defect**, surfaced by this design. Belongs to the loam program; named here so it is not rediscovered |
+| **F2** | **Critical** | **`MaxRounds` is global, not per-profile.** `BattleModeProfile` carries `W`, `WScope`, `Commitment`, `PassQuantum`, `WReact`, `RendezvousEnabled`, `ForecastExactness`, `OrdersBySpeed`, `RequiresLiveInput` — **and no round horizon**. Hitting 50 yields `Stalemate`. **`[JsonIgnore]` cannot save this** — it is an engine constant every golden was resolved under | **The design changes.** Move `MaxRounds`/`RoundDurationMs` onto the profile, `classic-round` = today's global so goldens hold byte-for-byte. A named §7 cost |
+| **F3** | **High** | **The world seam cannot see a board.** `IBattleResolver.Resolve(request, combatants, seed)` — `combatants` is one or two `WorldEntity` records; `BattleRequest` carries no sector, slots, structures or lanes. `BattleApplication` has two methods, neither applying structure damage | **The doc was wrong** to call this *"a missing argument at every call site"*. It is a **seam widening**. The separate claim that widening moves no golden **does** hold — verified zero hits in `WorldCanonical.cs` and `RpgStore.World*.cs` |
+| **F4** | **High** | **The played seat is another program's, and it is specced and building.** `spec-interactive-turns.md`, written the same day, covers T6 + T10 with `decisions_json` appended **per decision**; T11 owns live sessions | **Consume T6/T10/T11, never re-derive.** The largest scope overlap in the document |
+| **F5** | **High** | **No withdraw, no concession, no walkover short-circuit.** Grep over 2,300 lines returns nothing. **So the raid — decision 20's own headline justification — has no verb** | **The design changes**, and the mechanism exists at the wrong scale: `BattleRunState.CheckRetreats()` already implements *"the actor leaves the battle alive"* for the `coward` trait. A side-level withdraw is that path plus a `Withdrawn` member on `BattleSideOutcome` — unhashed, so no golden moves |
+| **F6** | **High** | **The turn order is a random shuffle of both sides, re-rolled every round.** `BattleEngine.cs:314-336` draws a fresh `InitiativeRng.NextInt(1000)` per actor per round; `classic-round` orders on `(0L, jitter)`. **You cannot execute a two-unit plan** — which contradicts §5.20's Into the Breach thesis this document endorses | **The design changes.** The siege profile row sets `OrdersBySpeed` with **jitter disabled**, and the FE presents a contiguous per-side block. Both are profile-row properties — *"a row, not a branch"* |
+| **F7** | **Medium** | **Garrisoning costs a shared field-cap slot**, so the defender spends the scarce shared resource to switch on its own investment. Past `N − k` emplacements, `DevelopmentLevel`'s defense slots buy nothing | **Partly answered by decision 27** — laboured and summoned works cost an *action*, not a slot. The residual is a balance question for the first pass |
+| **F8** | **Medium** | **The batch trigger is state-based and turtle-exploitable.** *"The field resolves"* is undefined; one surviving unit behind a rampart blocks the next batch and wins on `MaxRounds`. Every batching game surveyed is **timed** | **The design changes.** Make it *clock, or field cleared, whichever first* — one tunable row |
+| **F9** | **Medium** | **Hidden mines contradict the perfect-information framing.** §5.18 kind 4 is *"unrevealed to the other side"*; §5.16 R6 forbids hidden modifiers and §5.20 is built on Into the Breach, which has **zero** hidden information | **Pick one.** Recommend revealed mines (the telegraph model), consistent with R6 |
+| **F10** | **Medium** | **`DepletionMilli` cannot carry decision 22.** It is one `int` per **sector**, and a sector routinely carries several producing slots. `empire-economy-ssot.md` §7a **already claims the same field** for spawn depletion | **§5.22's *"a producer, not a schema"* is wrong.** Depletion belongs on the slot, which is a hashed-row change needing the conditional-row precedent |
+| **F11** | **Medium** | **Capture transfers the stockpile free.** `ClaimResolver` never touches `LoamStock` — up to 600 per sector. Rare today; base defense makes capture *the* loop | **The design changes**, and the change belongs here because this program makes it load-bearing |
+| **F12** | **Medium** | **Decision 21 buys zero economy.** 4 rootbeds + wells = 400/turn against a 300 cap; at equilibrium the marginal producer's entire output is destroyed as overflow | **The design changes.** Capacity must grow alongside slots, or decision 21 gains *slots*, not capacity |
+
+### 11.3 Findings that survive as build costs, not design changes
+
+| # | Finding | Cost |
+|---|---|---|
+| **C1** | **§3's inventory was surveyed against `HEAD`.** The working tree carries **741 insertions across 15 files** in `Core/Battle`, plus an untracked `World/Growth/`. Four §3 rows are now false — the turn FSM **is** instantiated, profiles **do** resolve, `RequiresLiveInput` **is** read, `TurnEngine.Growth` **is** wired | **Re-run the inventory against the working tree at `/spec`.** §3's *conclusions* all survived spot-checking; its coordinates did not |
+| **C2** | **No deterministic grid pathfinder exists.** The only pathfinder is `ReachMap`'s Dijkstra, O(V²·log V) with a per-iteration allocation, justified *"at six sectors"*. Its own comment names the hazard: *"a heap would need the same tie-break written explicitly or a replay could disagree with itself"* | A **new determinism-sensitive build** — heap A*, integer costs, explicit ordinal tie-break |
+| **C3** | **A new RNG stream or draw site cannot be hidden by `[JsonIgnore]`.** The working tree's own `RidersRng` shows the correct pattern: *"the method returns before touching any RNG for an empty list… no other stream is perturbed"* | **Fourth §7 prerequisite: every new stream and draw site must be _structurally unreachable_ when the siege feature is absent — an early return, not a defaulted value** |
+| **C4** | **`EffectBag.cs:180` defaults `UtcNow` to a real wall clock**, and `WorldDeterminismGuardTests` covers **`Core/World` only**. Four hosts override it by hand | **Extend the guard to `Core/Battle` and `Core/Effects` before a siege host exists.** A live gap in the repo's own coverage |
+| **C5** | **Turn-commit cost omits its largest term** — `rpg_world_faction_intel` serializes `slots_json` per (faction × sector), and `Insert` creates a fresh `SqliteCommand` per row | **Measure before choosing a diffing writer.** Statement reuse may recover most of it |
+| **C6** | **The FE is world-stage scale or larger.** Measured: the lawn Phaser island is **~2,166 LOC**; `stages/world` is **~6,518**. §7.4's four bullets cover the generic board layer only — the smaller half | Budget **5–8k LOC**. The lawn island is a reference implementation to read, not to reuse |
+| **C7** | **Batch waves land on the kernel baseline's one named hole** — *"a wave spawn that arms 200 events on one tick would drain all 200 in a single frame"* | Bounded/resumable drain is a **prerequisite of batch waves** |
+
+### 11.4 Corrections to this document's own claims — six, all verified
+
+Recorded in full because the pattern matters more than any single error: **four of six were citing a
+comment or a single line instead of reading the code or the surrounding section** — the failure
+`DESIGN-GATE.md` evidence rules 2 and 3 exist to prevent, committed by the session that quoted them.
+
+| # | Claim as written | Truth |
+|---|---|---|
+| 1 | `BattleEngine.Resolve` has no player-input seam | **It has one** — an eighth parameter, `IIntentSource? intentSource`, omitted at all three production call sites. *Favourable* error |
+| 2 | *"World replay reuses the stored record rather than re-simulating"* | **`RpgStore.WorldTurns.cs:599-606` re-simulates from turn zero with no resolver.** Recorded in §2 rule 7's box |
+| 3 | *"`LegionSupply` is unwired"* | **Wired at `TurnEngine.cs:236`.** The doc quoted a stale class comment |
+| 4 | *"`Resolve`'s profile is never referenced in the method body"* | **It is read** — *"B37: the profile is now READ"*. The doc quoted the doc comment, not the body |
+| 5 | *"A unit that moves does not also strike that turn"* | **The opposite of the source.** `action-map.md:430`'s heading is *"Move and attack: two separate actions, and the clock decides whether you get both"* — and the doc cited the wrong file (`action-corpus-ideal.md`) |
+| 6 | §0 carried a duplicated, text-stripped Round 3 block | A broken shell heredoc ate the backticked names. **Removed** |
+
+**Systematic drift, also recorded:** every `BattleEngine.cs` / `BattleRunState.cs` citation in §3 is
+30–160 lines stale, entirely because of C1's uncommitted wave. **The claims survived every spot-check;
+the coordinates did not** — and a wrong location is worse than none for a downstream session.
+
+### 11.5 Open, and owed before `/spec`
+
+**The `siege` stage contradicts a locked row, and this document booked it as documentation drift.**
+
+`decisions.md`'s **Game GUI** row (locked 2026-08-22): *"the 20 flat routes become **4 stages**, 8 layers
+and 1 gated tree… Rules GG-1…GG-61 are binding… with **20 CI checks**."* And design decision **D2** at
+`game-gui-principles.md:965`: *"**Four stages, one at a time.**"*
+
+`AGENTS.md`: *"Architecture changes that lock behavior need `decisions.md` first."*
+
+**A `decisions.md` amendment is owed before `/spec`, and the CI checks behind the four-stage count have
+to be costed.** §10's checklist ticked *"I checked decisions.md for a lock covering this"* — and its own
+honest gap explains the miss: `game-gui-principles.md` was read *"GG-1…GG-14 and the audit table;
+GG-15…GG-61 by heading only"*, and D2 lives at `:965`.
+
+### 11.6 Verified compliant — stated once, not padded
+
+Cover as a **flat dodge delta reading `Θ`** (the strongest ladder reasoning in the document, and
+independently confirmed by a shipped CoH2 rebalance: damage-cover changes shots-to-kill, accuracy-cover
+does not) · the **grid dimension as a §11.3 board cap** with the `MaxLivingPlants` precedent and an
+uncapped tower-tier escape valve · **sector capacity priced, not capped**, citing the `MaxSlots`
+deletion by name · **no fifth `WhoKind`**, with the correct bar and the correct reason ·
+**`SectorPhase.Besieged` left unused** as derivable state · **standalone-first** — a web-mode board, PvZ
+nowhere on the critical path · the **`docs/design/` check**, re-verified independently: nine
+`spec-*.md`, none covering a board, base or defense surface · and **§3.2–§3.4's inventory is
+substantively accurate everywhere probed**, including its hardest claim — the three round-loop rules
+that reject a non-acting combatant.
+
+---
+
+## 12. Next step
 
 `/spec` for a capability map plus module specs — **after the three questions in §8 are answered.**
 Module ids, dependency direction and build order are not written here on purpose: getting a map wrong

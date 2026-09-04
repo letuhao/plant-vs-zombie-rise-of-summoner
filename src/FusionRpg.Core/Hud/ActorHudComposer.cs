@@ -15,7 +15,12 @@ public static class ActorHudComposer
         IReadOnlyList<ActorHudStatusToken> StatusTokens,
         int StatusStripMax,
         bool HpSliverEnabled,
-        double? HpSliverRatio = null);
+        double? HpSliverRatio = null,
+        // E41 (spec-ui-attach-point.md §4): the first producer ActorHudResources.Meters has ever
+        // had — declared and serialized (ActorHudWireSerializer.cs) since before this module, filled
+        // by nothing. Optional/defaulted so every pre-E41 caller (ActorHudBuilder.Build, until it is
+        // updated alongside this) keeps compiling and keeps composing a null Meters exactly as before.
+        IReadOnlyList<ActorHudMeter>? Meters = null);
 
     public static ActorHudSnapshot Compose(ActorHudComposeInput input)
     {
@@ -27,6 +32,11 @@ public static class ActorHudComposer
         var role = bound ? "specimen" : "vanilla";
         var tier = input.IsUniquePlant || bound ? ActorHudTier.Unique : ActorHudTier.Normal;
 
+        // E41: Meters is populated independently of the shield/HP-sliver branches below (an atom-
+        // authored meter has nothing to do with whether this actor also carries a shield), so a
+        // Meters-only actor must still get a Resources block even when neither existing branch fires.
+        var hasMeters = input.Meters is { Count: > 0 };
+
         ActorHudResources? resources = null;
         if (input.ShieldStacks is not null)
         {
@@ -35,11 +45,15 @@ public static class ActorHudComposer
                 input.HpSliverEnabled && input.HpSliverRatio is not null
                     ? new ActorHudHpSliver(input.HpSliverRatio.Value)
                     : null,
-                null);
+                input.Meters);
         }
         else if (input.HpSliverEnabled && input.HpSliverRatio is not null)
         {
-            resources = new ActorHudResources(null, new ActorHudHpSliver(input.HpSliverRatio.Value), null);
+            resources = new ActorHudResources(null, new ActorHudHpSliver(input.HpSliverRatio.Value), input.Meters);
+        }
+        else if (hasMeters)
+        {
+            resources = new ActorHudResources(null, null, input.Meters);
         }
 
         var (visible, overflow) = ActorHudLayout.Prioritize(input.StatusTokens, input.StatusStripMax);

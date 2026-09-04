@@ -167,6 +167,14 @@ public sealed class EffectBag
     /// <summary>Shield layer above the Funnel — null keeps combat byte-identical (no shields).</summary>
     public FusionRpg.Core.Combat.Shield.ShieldGate? ShieldGate { get; set; }
 
+    /// <summary>
+    /// E41 (spec-ui-attach-point.md §2b): the <c>op:meter</c>/<c>op:banner</c> collaborator — null
+    /// skips with a named reason (<c>:hud-runtime-missing</c>), the same optional-collaborator shape
+    /// <see cref="ShieldGate"/>/<see cref="Status"/> already use. <c>op:number</c> needs no collaborator
+    /// here — it reuses the Funnel's existing <see cref="IDamageFxSink"/> present path.
+    /// </summary>
+    public IUiPresentSink? UiPresent { get; set; }
+
     /// <summary>aura-skill T20: the same actor-resolution function wired into `CombatMath`/
     /// `ShieldGate` ("same resolve as combat" — `EffectRuntime.WireCombatMath`'s own comment) —
     /// threaded through to <see cref="Combat.CombatDamageDispatcher.DispatchInstant"/>'s
@@ -425,6 +433,18 @@ public sealed class EffectBag
                 continue;
             }
 
+            // E41 (spec-ui-attach-point.md §2a): bag-side, the same shape as GrantShield immediately
+            // above and ApplyResourceDelta below — a Ui-attached kind's action never becomes an
+            // EffectActionPlanItem and never reaches _sink.Execute (InjectorEffectActionSink's stat/
+            // resource/status/shield/board arms). That is the module's central read-only invariant,
+            // made structural by this branch existing rather than left as a convention nobody enforces
+            // (Ui_attached_kinds_never_reach_the_generic_sink, tests/.../UiPresentTests.cs).
+            if (string.Equals(action.Action, EffectActions.PresentUi, StringComparison.OrdinalIgnoreCase))
+            {
+                ExecPresentUi(grant, ev, merged);
+                continue;
+            }
+
             if (string.Equals(action.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase))
             {
                 var packet = DamagePacketBuilder.FromOverlay(
@@ -632,6 +652,107 @@ public sealed class EffectBag
             else if (applied.Outcome == FusionRpg.Core.Combat.Shield.ShieldApplyOutcome.DroppedWeaker)
                 _lastSkipped.Add(grant.GrantId + ":shield-dropped-weaker");
         }
+    }
+
+    /// <summary>
+    /// E41 (spec-ui-attach-point.md §2b): <c>ui.present</c>'s own executor — read-only by construction
+    /// (see the caller's own comment). No target resolution needs a <c>target</c> param (the kind
+    /// declares none, matching <c>resource.delta</c>/<c>status.apply</c>'s "the target comes from the
+    /// event" precedent) — <see cref="ResolvePresentTargetPtr"/> mirrors the injector's own
+    /// <c>ResolveStatusTargetPtr</c> exactly (event TargetPtr, falling back to ActorPtr).
+    ///
+    /// <para><c>op:number</c> reuses the Funnel's existing merge/throttle-tested floater path
+    /// (<see cref="IDamageFxSink"/>/<c>DamageFxDto.MergedCount</c>) rather than a bespoke one — the
+    /// 2026-08 perf audit's own discipline, restated in §3's "no present on the per-hit path
+    /// uncached" rule. <c>op:meter</c>/<c>op:banner</c> go through <see cref="UiPresent"/>, null-safe
+    /// with a named skip (matching <see cref="ShieldGate"/>'s own "runtime-missing" shape) since
+    /// neither has a Funnel-level merge queue of its own.</para>
+    /// </summary>
+    void ExecPresentUi(EffectGrant grant, EffectEventDto ev, Dictionary<string, object?> merged)
+    {
+        var op = JsonOverlay.GetString(merged, "op");
+        switch (op)
+        {
+            case "number":
+            {
+                var targetPtr = ResolvePresentTargetPtr(ev);
+                if (string.IsNullOrEmpty(targetPtr))
+                {
+                    _lastSkipped.Add(grant.GrantId + ":present-no-target");
+                    return;
+                }
+
+                var tagStr = JsonOverlay.GetString(merged, "tag");
+                var tag = !string.IsNullOrEmpty(tagStr)
+                    && Enum.TryParse<DamageFxTag>(tagStr, ignoreCase: true, out var parsed)
+                        ? parsed
+                        : DamageFxTag.Neutral;
+
+                Funnel?.EnqueuePresent(new DamageFxDto
+                {
+                    TargetPtr = targetPtr,
+                    Amount = (long)JsonOverlay.GetDouble(merged, "amount"),
+                    Tag = tag,
+                    Fx = "float",
+                    MergedCount = 1,
+                });
+                return;
+            }
+
+            case "meter":
+            {
+                if (UiPresent == null)
+                {
+                    _lastSkipped.Add(grant.GrantId + ":hud-runtime-missing");
+                    return;
+                }
+
+                var targetPtr = ResolvePresentTargetPtr(ev);
+                if (string.IsNullOrEmpty(targetPtr))
+                {
+                    _lastSkipped.Add(grant.GrantId + ":present-no-target");
+                    return;
+                }
+
+                var meterId = JsonOverlay.GetString(merged, "meterId") ?? "";
+                // §3: ratio's per-mille magnitude divides by 1000 exactly once, last, right here at
+                // the boundary into the 0..1 ratio IUiPresentSink/ActorHudMeter carries.
+                var ratio = JsonOverlay.GetDouble(merged, "ratio") / 1000.0;
+                UiPresent.SetMeter(targetPtr, meterId, ratio);
+                return;
+            }
+
+            case "banner":
+            {
+                if (UiPresent == null)
+                {
+                    _lastSkipped.Add(grant.GrantId + ":hud-runtime-missing");
+                    return;
+                }
+
+                var bannerId = JsonOverlay.GetString(merged, "bannerId") ?? "";
+                int? durationMs = merged.ContainsKey("durationMs")
+                    ? JsonOverlay.GetInt(merged, "durationMs")
+                    : null;
+                UiPresent.ShowBanner(bannerId, durationMs);
+                return;
+            }
+
+            default:
+                // AtomKindRegistry.Validate's own op vocabulary already refuses this at bind time --
+                // defence in depth, a named skip rather than a silent no-op if reached anyway.
+                _lastSkipped.Add(grant.GrantId + ":present-unknown-op");
+                return;
+        }
+    }
+
+    /// <summary>Prefer event TargetPtr; if empty, use ActorPtr — the same precedence
+    /// <c>InjectorEffectActionSink.ResolveStatusTargetPtr</c> uses for FA2/FA10.</summary>
+    static string ResolvePresentTargetPtr(EffectEventDto ev)
+    {
+        if (!string.IsNullOrEmpty(ev.TargetPtr)) return ev.TargetPtr!;
+        if (!string.IsNullOrEmpty(ev.ActorPtr)) return ev.ActorPtr!;
+        return "";
     }
 
     public int TickDots()

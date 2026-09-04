@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 3000,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 1277,
+  "magnitudes": {
+    "combat.block.shred.omni": 1728,
+    "combat.parry.shred.omni": 1728,
+    "combat.power.omni": 1152,
+    "resource.max.hp": 8640,
+    "resource.max.hunger": 7200,
+    "resource.max.qi": 8640,
+    "resource.max.spirit": 4320,
+    "resource.max.stamina": 20160,
+    "resource.regen.hp": 432,
+    "resource.regen.hunger": 432,
+    "resource.regen.qi": 576,
+    "resource.regen.spirit": 288,
+    "resource.regen.stamina": 720
+  },
+  "pTheta": 1440,
+  "rangeCells": 5,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "DoomStar",
+  "theta": 40,
+  "traitPool": [
+    "fragmentation",
+    "meteor-impact",
+    "self-destructive"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "mutated"
+  ]
+}

@@ -236,6 +236,16 @@ public static class EffectOverlayMerge
         {
             "amount", "element", "priority", "sourceClass", "durationTicks", "refillOnMerge",
             "target", "chance", "icd_ms", "max_stacks", "filters"
+        },
+        // E41 (spec-ui-attach-point.md §2b): ui.present's own overlay allowlist. Found missing for
+        // ModifyMatch/WaveControl/BulletModify (E35/E36/E37) while wiring this one — none of the
+        // three has an entry here either, so a real Grant() of match.modify/wave.control/bullet.modify
+        // content would hit this same "unknown action" refusal; those three kinds are still unwired
+        // further down this specific funnel (out of this module's scope — noted, not fixed).
+        [EffectActions.PresentUi] = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "op", "amount", "tag", "bannerId", "meterId", "ratio", "durationMs",
+            "chance", "icd_ms", "max_stacks", "filters"
         }
     };
 

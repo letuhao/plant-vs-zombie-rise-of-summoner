@@ -1,0 +1,40 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 900,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Air",
+  "elementSecondary": null,
+  "gameTypeId": 207,
+  "magnitudes": {
+    "resource.max.hp": 2712,
+    "resource.max.hunger": 2260,
+    "resource.max.qi": 2712,
+    "resource.max.spirit": 3616,
+    "resource.max.stamina": 7232,
+    "resource.regen.hp": 9,
+    "resource.regen.hunger": 136,
+    "resource.regen.qi": 181,
+    "resource.regen.spirit": 90,
+    "resource.regen.stamina": 447
+  },
+  "pTheta": 452,
+  "rangeCells": 3,
+  "rarity": "Almanac",
+  "side": "zombie",
+  "speciesId": "QuickJacksonZombie",
+  "theta": 13,
+  "traitPool": [
+    "damage reduction",
+    "high-speed sliding",
+    "obstacle bypass",
+    "summoner"
+  ],
+  "variantCount": 4,
+  "variants": [
+    "ancient",
+    "mutated",
+    "normal",
+    "shiny"
+  ]
+}

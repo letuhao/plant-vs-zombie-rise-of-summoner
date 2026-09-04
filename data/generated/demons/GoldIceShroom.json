@@ -1,0 +1,41 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Ice",
+  "elementSecondary": null,
+  "gameTypeId": 1368,
+  "magnitudes": {
+    "combat.block.shred.omni": 780,
+    "combat.parry.shred.omni": 780,
+    "combat.power.omni": 520,
+    "resource.max.hp": 5568,
+    "resource.max.hunger": 4640,
+    "resource.max.qi": 7239,
+    "resource.max.spirit": 3898,
+    "resource.max.stamina": 11321,
+    "resource.regen.hp": 201,
+    "resource.regen.hunger": 279,
+    "resource.regen.qi": 511,
+    "resource.regen.spirit": 186,
+    "resource.regen.stamina": 464
+  },
+  "pTheta": 928,
+  "rangeCells": 3,
+  "rarity": "Heirloom",
+  "side": "plant",
+  "speciesId": "GoldIceShroom",
+  "theta": 27,
+  "traitPool": [
+    "economic-catalyst",
+    "gold-infused",
+    "multi-stage-burst",
+    "wealth-based-cryogenesis"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "shiny"
+  ]
+}

@@ -60,8 +60,18 @@ public static class WorldCommandKinds
     /// </summary>
     public const string Raise = "raise";
 
+    /// <summary>
+    /// Start a sector-wide project on a sector this faction holds (world-map W52,
+    /// spec-sector-development.md §3), spending the sector's own `LoamStock` — a project raises the
+    /// whole sector (development, defense, capacity), never one slot's output, which is what `build`
+    /// is for. Needs no entity, the same shape `raise` already uses: a project belongs to the
+    /// sector, not a legion. Resolves in `Snapshot`, right after `raise`, for the identical
+    /// ownership-race reason `BuildResolver`/`RaiseResolver` both already state.
+    /// </summary>
+    public const string Develop = "develop";
+
     public static readonly IReadOnlyList<string> All =
-        new[] { StandFast, Move, Clear, Claim, Stance, Sustain, Build, Cede, BindWarden, Raise };
+        new[] { StandFast, Move, Clear, Claim, Stance, Sustain, Build, Cede, BindWarden, Raise, Develop };
 
     public static bool IsKnown(string? kind) =>
         kind != null && All.Contains(kind, StringComparer.Ordinal);
@@ -112,4 +122,7 @@ public sealed record WorldCommand
     /// the same way `StructureId` is validated only inside the `build` admission arm, not generically.
     /// </summary>
     public string? WardenId { get; init; }
+
+    /// <summary>Which project a `develop` order names (spec-sector-development.md §3, world-map W52).</summary>
+    public string? ProjectId { get; init; }
 }

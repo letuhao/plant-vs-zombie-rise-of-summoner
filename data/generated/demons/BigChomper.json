@@ -1,9 +1,9 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
-  "elementPrimary": "Dark",
+  "elementPrimary": "Earth",
   "elementSecondary": null,
   "gameTypeId": 1174,
   "magnitudes": {
@@ -28,13 +28,12 @@
   "speciesId": "BigChomper",
   "theta": 27,
   "traitPool": [
-    "Mass Consumption",
-    "Size-Scaling Digestion",
-    "Voracious Maw"
+    "digestive-latency",
+    "size-shifting",
+    "voracious"
   ],
-  "variantCount": 3,
+  "variantCount": 2,
   "variants": [
-    "ancient",
     "mutated",
     "normal"
   ]

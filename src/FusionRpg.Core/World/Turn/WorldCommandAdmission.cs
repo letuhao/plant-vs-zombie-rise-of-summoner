@@ -84,6 +84,16 @@ public static class WorldCommandAdmission
             if (namedSector is null) return (false, "sector.missing");
         }
 
+        if (command.Kind == WorldCommandKinds.Develop)
+        {
+            // No entity — `develop` starts a sector-wide project, not a legion order. Ownership is
+            // deferred to `Snapshot`, the same discipline `raise` already applies (`DevelopResolver`
+            // re-validates it there rather than trusting this admission gate).
+            if (namedSector is null) return (false, "sector.missing");
+            if (command.ProjectId is not { } projectId || !Growth.ProjectCatalog.IsKnown(projectId))
+                return (false, "project.unknown");
+        }
+
         if (command.Kind == WorldCommandKinds.Sustain)
         {
             if (command.EntityId is null) return (false, "entity.missing");

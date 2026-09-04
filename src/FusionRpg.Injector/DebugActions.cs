@@ -170,6 +170,114 @@ public static class DebugActions
         }
     }
 
+    // E40 (spec-spawn-non-grid.md §2a): pet/bucket/mower widen spawn.entity.kind onto three more
+    // Unity write paths that were reachable only from CheatActions/the cheat menu (CheatActions.cs's
+    // own SpawnPet/SpawnBucket) or from nowhere at all (CreateMower.SetMower -- patched for capture,
+    // never called, GameHooks.cs's MowerPlace hook). Same idiom as SpawnPlant/SpawnZombie/SpawnBullet
+    // above: parse the payload, clamp col/row through LawnCoords (structural -- an out-of-board cell
+    // is not a legal placement, never a balance question, the same reasoning MatchCaps' per-runtime
+    // spawn caps like MaxLivingBullets carry), call the real game API, dump a debug emit, return
+    // false rather than throw on a null result or a caught exception.
+
+    /// <returns>False if no board, Create null, or exception; true if spawn completed.</returns>
+    public static bool SpawnPet(JsonElement p)
+    {
+        try
+        {
+            var board = GameHooks.Board;
+            if (board == null) { CheatState.Error("debug.spawn-pet: no board"); return false; }
+
+            var typeId = Int(p, "typeId", 0);
+            var col = LawnCoords.ClampCol(Int(p, "col", CheatState.SpawnCol));
+            var row = LawnCoords.ClampRow(Int(p, "row", CheatState.SpawnRow));
+
+            var pet = MiniPet.SetPet(board, LawnCoords.CellCenter(col, row), (PetType)typeId);
+            if (pet == null) { CheatState.Error("debug.spawn-pet null"); return false; }
+
+            DebugRuntime.Emit("debug.spawn.pet", new Dictionary<string, object>
+            {
+                ["ptr"] = GameDumps.Ptr(pet),
+                ["typeId"] = typeId,
+                ["col"] = col,
+                ["row"] = row,
+            });
+            CheatState.Note($"debug spawn pet {typeId} @{col},{row}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.spawn-pet: " + ex.Message);
+            return false;
+        }
+    }
+
+    /// <returns>False if no board/itemManager, Create null, or exception; true if spawn completed.</returns>
+    public static bool SpawnBucket(JsonElement p)
+    {
+        try
+        {
+            var board = GameHooks.Board ?? Board.Instance;
+            var mgr = GameAPP.itemManager;
+            if (mgr == null || board == null) { CheatState.Error("debug.spawn-bucket: no board/itemManager"); return false; }
+
+            var typeId = Int(p, "typeId", 0);
+            var col = LawnCoords.ClampCol(Int(p, "col", CheatState.SpawnCol));
+            var row = LawnCoords.ClampRow(Int(p, "row", CheatState.SpawnRow));
+
+            var bucket = mgr.SetBucket(board, (BucketType)typeId, LawnCoords.CellCenter(col, row));
+            if (bucket == null) { CheatState.Error("debug.spawn-bucket null"); return false; }
+
+            DebugRuntime.Emit("debug.spawn.bucket", new Dictionary<string, object>
+            {
+                ["ptr"] = GameDumps.Ptr(bucket),
+                ["typeId"] = typeId,
+                ["col"] = col,
+                ["row"] = row,
+            });
+            CheatState.Note($"debug spawn bucket {typeId} @{col},{row}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.spawn-bucket: " + ex.Message);
+            return false;
+        }
+    }
+
+    /// <returns>False if Create null or exception; true if spawn completed.</returns>
+    public static bool SpawnMower(JsonElement p)
+    {
+        try
+        {
+            var typeId = Int(p, "typeId", 0);
+            var row = LawnCoords.ClampRow(Int(p, "row", CheatState.SpawnRow));
+            var x = p.TryGetProperty("x", out var xEl) && xEl.TryGetSingle(out var xv) ? xv : 0f;
+
+            // CreateMower.SetMower is an INSTANCE method (confirmed by a real build against the
+            // BepInEx interop DLLs -- CS0120 on the static call form; the spec's own citation and
+            // GameHooks.cs's Harmony Postfix on it, MowerPlace, both omit __instance, which is not
+            // reliable evidence either way for Harmony). Same shape as CreatePlant.Instance.SetPlant /
+            // CreateBullet.Instance.SetBullet above.
+            var mower = CreateMower.Instance.SetMower((MowerType)typeId, x, row);
+            if (mower == null) { CheatState.Error("debug.spawn-mower null"); return false; }
+
+            DebugRuntime.Emit("debug.spawn.mower", new Dictionary<string, object>
+            {
+                ["ptr"] = GameDumps.Ptr(mower),
+                ["typeId"] = typeId,
+                ["row"] = row,
+                ["x"] = x,
+            });
+            CheatState.Note($"debug spawn mower {typeId} row={row}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            CheatState.Error("debug.spawn-mower: " + ex.Message);
+            return false;
+        }
+    }
+
     /// <summary>Clear Tab A scales, P-/Z- absolutes, and D damage/probe knobs to identity defaults.</summary>
     public static void ResetMods()
     {

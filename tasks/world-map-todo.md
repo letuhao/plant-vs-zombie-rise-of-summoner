@@ -1030,29 +1030,184 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     (`world.v3.json` → `world.v4.json`) was reviewed by hand instead, identical in shape to
     `Program.cs`'s own verified edit.
 
-- [ ] **Task W52: `ProjectCatalog`, the `develop` command, and projects advancing in `Growth`**
+- [x] **Task W52: `ProjectCatalog`, the `develop` command, and projects advancing in `Growth`**
   - Description: **blocked on the third owner decision above.** Slot buildings raise the slot; sector **projects** raise the sector — development level, defense, capacity — and a project is *"this sector is doing this for the next three turns"*, costing turns and materials, never a hidden industry stat. `ProjectCatalog` mirrors `StructureCatalog`'s shape exactly (dictionary-backed, eager `Validate()`, `IsKnown`/`Get` — `StructureCatalog.cs:48-140` is the template), and `develop` resolves in `Snapshot` beside `raise` and `build` for the same ownership-race reason. **Projects advance in `Growth`; structures keep advancing in `Production`** (`LoamPhases.DecrementConstruction`) — the split is deliberate, because reusing that loop would make one phase serve two modules and put a second module's fingerprints on a shipped ruleset.
   - Acceptance: the catalog validates at static init and rejects unknown ids at the write gate; `develop` is plumbed through all five command sites and covered by the every-kind round-trip test; **`Growth` runs after `Production`, so a project completing this turn affects next turn's yield and never this turn's** — asserted as its own test, because it is the stated consequence of the split; no `switch (id)` over project ids anywhere.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Data.Tests`
   - Files: `src/FusionRpg.Core/World/Growth/ProjectCatalog.cs`, `DevelopResolver.cs`, `GrowthPhases.cs`, `src/FusionRpg.Core/World/WorldCommand.cs`, `src/FusionRpg.Data/Sqlite/RpgStore.WorldTurns.cs`.
   - Dependencies: W51, and the projects-as-a-second-concept decision.
   - Scope: L.
+  - **Done (2026-09-04) — one real path correction found by reading `StructureCatalog.cs` before
+    templating it: it lives at `src/FusionRpg.Core/World/StructureCatalog.cs`, not under a `Loam/`
+    subfolder as this task's own Files/text implies; `ProjectCatalog.cs` was placed at
+    `World/Growth/ProjectCatalog.cs` per this task's own Files list, which is correct as written.**
+    `ProjectDef` mirrors `StructureDef`'s shape (dictionary-backed catalog, eager `Validate()` at
+    static init, `IsKnown`/`Get`) but deliberately drops `RequiredSlotKind`/`YieldMultiplierMilli` —
+    the owner's own "two catalogs" decision's stated reason (those fields are meaningless on a
+    sector-wide project). Ships with exactly one placeholder row
+    (`raise-development-placeholder`, `CostMilli: 100, ProjectTurns: 1, DevelopmentBonus: 1`) —
+    every one of those three literals sits in `audit-magic-numbers.py`'s own exempt set (confirmed by
+    running it after, not assumed), matching `StructureCatalog`'s own `loam-source-placeholder`
+    precedent of an inert, not-yet-tuning-backed content row one file over. **`develop`'s payload is
+    `SectorId` + `ProjectId`, no `EntityId`** — a project belongs to the sector, the identical shape
+    `raise` already uses, so its cost is spent from the sector's own `LoamStock`, not a founding
+    legion's `CarriedLoam` (there is no entity to spend one from). `DevelopResolver.cs` (new,
+    `World/Growth/`) mirrors `BuildResolver.cs`'s resolution-time-legality shape exactly: re-checks
+    ownership at Snapshot (`develop.not-yours`), then "already developing" (`sector.ProjectId != null`,
+    the sector-level twin of `build.occupied` one slot down — checked against the thread-through-the-
+    loop `next` state, so a project that just started earlier in the same command batch also blocks a
+    second order at the same sector with no separate guard collection needed, unlike `raise`'s
+    id-collision hazard which genuinely needed one), then a known-project check, then
+    `LoamStock >= CostMilli`. Wired into `TurnEngine.Snapshot` right after `RaiseResolver`.
+    **Projects advance in `GrowthPhases.Growth`, via a new `AdvanceProject` step folded into the same
+    per-sector loop recruit-pulse accrual already uses** — decrements `ProjectTurnsRemaining`
+    unconditional on ownership, the same precedent `LoamPhases.Production`'s own
+    `DecrementConstruction` already sets for a structure one phase over (confirmed by reading
+    `LoamPhases.Production`'s actual code, not assumed); reaching zero clears `ProjectId`/
+    `ProjectTurnsRemaining` and reports `develop.completed:<id>`, but **deliberately does not touch
+    `DevelopmentLevel`** — that "one line" is explicitly W53's own job per its own text, not invented
+    here ahead of it. **One real, closely-related gap found and fixed while wiring this, beyond this
+    task's own literal Files list**: `LoamPhases.Pressure`'s `Lost` branch already clears a half-built
+    structure's `StructureId`/`ConstructionTurnsRemaining` on capture/fade (its own comment: "a
+    half-built structure is not a refund") but said nothing about a sector-wide project — left
+    unfixed, a lost sector would carry a permanent ghost `ProjectId` forever (unowned sectors are
+    skipped by `Growth`'s own recruit-pulse gate, but *not* by project advancement, which follows
+    structures' own unconditional-decrement precedent — so a lost project would never complete, and
+    would permanently block any future `develop` order at that sector, including after recapture, via
+    `develop.already-developing`). Fixed by extending the exact same `Lost`-branch `with` expression to
+    also clear `ProjectId`/`ProjectTurnsRemaining`, the identical "not a refund" reasoning one level up.
+    **The "five sites" the round-trip test actually needed, verified against the real current source
+    rather than assumed from the spec's own framing**: `WorldCommandKinds.All`, the `WorldCommand.ProjectId`
+    field, and `RpgStore.WorldTurns.cs`'s `CommandPayload` (all three — required for
+    `WorldCommandRoundTripPropertyTests` to prove `develop` round-trips, the acceptance's own stated
+    proof); additionally, since `develop` genuinely introduces a *new* payload field (unlike `raise`,
+    which reused the already-threaded `SectorId` and needed none of this), the wire-layer sites too:
+    `WorldDtos.WorldCommandRequest.ProjectId` and `WorldEndpoints.cs`'s submit mapping — both added,
+    matching `StructureId`'s own precedent in the same two files exactly, even though this task's own
+    Files list does not name them. **A genuine, pre-existing, out-of-scope defect found while verifying
+    this and deliberately NOT fixed here**: `WardenId` (`bind-warden`'s own payload field, world-stage
+    W28) is still missing from both of those same two wire-layer sites — `bind-warden` is currently
+    unreachable from the HTTP API with its warden id intact. This is real (confirmed by grep, not
+    assumed) and belongs to whichever task shipped `bind-warden`'s wire layer, not to this one; noted
+    here rather than silently left for a future session to rediscover from scratch.
+    New tests: `DevelopResolverTests.cs` (`World/Growth/`, 9 tests) — catalog validation, the
+    successful path (project started, cost spent, report entry), each resolution-time refusal
+    (not-yours, already-developing, project.unknown, cannot-afford, sector.missing ×2), the
+    already-developing guard against a second order at the same sector, and independent success across
+    several different sectors in one turn. `DevelopThreadingTests.cs` (`World/`, 3 tests, mirroring
+    `RaiseThreadingTests.cs`) — a real `TurnEngine.Step` commit starts a project and spends loam stock
+    (proven as "spent something", not an exact post-upkeep value, since `Production`'s yield and
+    `Pressure`'s upkeep both touch the same sector's `LoamStock` before `Snapshot` resolves `develop`
+    — the exact deduction is already proven precisely at the resolver level by `DevelopResolverTests`);
+    **the acceptance's own "Growth runs after Production" clause, proven directly**: a project one turn
+    from completion finishes during a real `Step`, its `develop.completed` report entry's own `Phase`
+    field equals `TurnEngine.Phases.Growth` (not `Production`), and the report's own recorded phase
+    order (`TurnReport.Phases`) shows `Production` strictly before `Growth` — proving the ordering
+    structurally, not merely trusting `TurnEngine.cs`'s call order to stay as read; a `develop` refused
+    "not yours" at resolution. `GrowthPhasesTests.cs` gained 6 cases: a project with turns remaining
+    only decrements; one reaching zero completes, clears and reports; a sector with no project is
+    untouched; an unowned sector's project still advances (proving the `LoamPhases.Production` parity
+    claim above directly, not merely arguing it); a completing project and an accruing recruit pulse
+    both report independently in the same pass. `WorldCommandAdmissionTests.cs` gained 6 cases mirroring
+    `raise`'s own block exactly (known kind; admitted regardless of ownership; no-sector/unknown-sector
+    refusals; three unknown-project variants: null, empty, a real but wrong id).
+    `WorldCommandRoundTripPropertyTests.cs`'s shared `FullyPopulated` fixture gained
+    `ProjectId = "raise-development-placeholder"` — without it, `develop`'s round trip would have failed
+    admission with `project.unknown` the moment this task's own admission arm landed, since that
+    fixture is what every kind (including `develop`) is submitted through.
+    `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Develop|FullyQualifiedName~GrowthPhasesTests|FullyQualifiedName~WorldCommandAdmissionTests"`
+    → **69/69 passed**. `dotnet test tests\FusionRpg.Data.Tests --filter FullyQualifiedName~WorldCommandRoundTrip`
+    → **2/2 passed** (both `develop`-covering tests, confirming the round trip through all three Core/Data
+    hydration paths). Full `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` →
+    **852/852 passed** (up from W51's 828, +24 across the new files and the admission/round-trip
+    additions). Full `dotnet test tests\FusionRpg.Core.Tests` → **6173/6174 passed** (1 pre-existing,
+    unrelated — `Demons.VariantCountBandTests`, confirmed against `git status`'s own actively-running,
+    concurrent, uncommitted seedsmith species-regeneration process on this branch, the identical cause
+    W51's own Done note already names; one run also hit a transient test-host crash unrelated to any
+    file this task touched, cleared on immediate retry with no edit). `dotnet test
+    tests\FusionRpg.Data.Tests` → **713/715 passed** (2 pre-existing, unrelated —
+    `DemonSpeciesImportCliTests`×2, same concurrent seedsmith cause). `dotnet test
+    tests\FusionRpg.Guard.Tests` → **198/198 passed** (`WorldDeterminismGuardTests` picked up
+    `Growth/DevelopResolver.cs` and `ProjectCatalog.cs` automatically, per its own scan-`src/`-directly
+    design). `dotnet test tests\FusionRpg.E2E.Tests` → **202/202 passed**, unchanged. `dotnet build
+    src\FusionRpg.Server` → green. `python scripts\audit-overflow.py` → **0 critical**, no new finding.
+    `python scripts\audit-magic-numbers.py --summary` → **17 total, none in the world domain** —
+    confirming the placeholder catalog's three literals are genuinely exempt, not merely assumed to be.
 
-- [ ] **Task W53: Give `DevelopmentLevel` a producer**
+- [x] **Task W53: Give `DevelopmentLevel` a producer**
   - Description: close the trap `empire-economy-ssot.md` A8 named — development priced as pure cost quietly kills the builder layer. Today `DevelopmentLevel` is stored, hashed, projected, believed and charged for, and **every assignment in `src/` is a copy**; a completed project is what raises it. This task is the one line that makes the number mean something, plus the belief and report consequences of a level actually changing.
   - Acceptance: a completed development project raises the sector's `DevelopmentLevel` by its authored amount, once, in `Growth`; the raise appears in the turn report naming its sector; a faction watching that sector at `SectorSight.Full` sees the new level and one that glimpsed it does not; no code path lowers the level (there is no de-development, and a silent decrement would be a hidden cap).
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Growth`
   - Files: `src/FusionRpg.Core/World/Growth/GrowthPhases.cs`, `src/FusionRpg.Core/World/Intel/IntelRecorder.cs`, tests.
   - Dependencies: W52.
   - Scope: S.
+  - **Done (2026-09-04) — genuinely the "one line" the task's own text promised, added to the exact
+    seam W52 left for it**: `GrowthPhases.AdvanceProject`'s completion branch now also reads the
+    completed project's own `ProjectDef.DevelopmentBonus` (via a defensive `ProjectCatalog.IsKnown`
+    guard, matching `LoamProduction.For`'s own `StructureCatalog.IsKnown`-before-`.Get` precedent one
+    module over — a persisted sector's `ProjectId` could in principle outlive a future catalog edit)
+    and adds it once to `WorldSector.DevelopmentLevel`, reporting `development.raised:<bonus>` naming
+    the sector via the same structural `SectorId` field every other event in this module already uses.
+    **The belief/report consequences the acceptance names were already real, not invented here**:
+    `IntelRecorder.Snapshot`/`IntelSeed.Snapshot` already gate `DevelopmentLevel` at `SectorSight.Full`
+    (pre-existing, proven generically by `SurveyFidelityTests.cs`'s
+    `Standing_on_developed_ground_you_can_see_how_developed_it_is` /
+    `A_glimpse_still_reports_no_slots_and_no_development`), and `WorldCanonical.Write` already hashes
+    the field — this task's real, new job was proving the *producer* actually drives that field, which
+    nothing did before. **"No code path lowers the level" is asserted as its own test**, not merely
+    argued: a 24-turn run with no project and no seat is confirmed monotonically non-decreasing (and,
+    concretely, unchanged) turn over turn, rather than trusting the absence of a decrement anywhere in
+    the diff. 3 new tests in `GrowthPhasesTests.cs`: a completed project raises `DevelopmentLevel` by
+    its authored `DevelopmentBonus` exactly once and reports it, naming the sector; a sector with no
+    project is never touched; the 24-turn monotonic-non-decrease proof above. `dotnet test
+    tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Growth` → **54/54 passed** (the task's own
+    stated Verify command, exactly as written, up from W52's own filter count since this run also
+    picks up every earlier Growth-namespace test). Full `dotnet test tests\FusionRpg.Core.Tests
+    --filter FullyQualifiedName~World` → **855/855 passed** (up from W52's 852, +3 across the new
+    cases). `python scripts\audit-overflow.py` → **0 critical**, no new finding (a plain `int +=` on
+    two already-small, already-bounds-checked fields, no multiplication on this path at all).
+    `python scripts\audit-magic-numbers.py --summary` → **17 total, none in the world domain**,
+    unchanged — this task added no new literal anywhere, it only reads a field W52's catalog already
+    carries. `dotnet test tests\FusionRpg.Core.Tests` (full) and `tests\FusionRpg.Guard.Tests` were
+    not re-run standalone for this task alone since W54 immediately follows in the same session pass
+    and both are re-verified there against the combined W53+W54 diff.
 
-- [ ] **Task W54: Delete `SectorPhase.Developed`**
+- [x] **Task W54: Delete `SectorPhase.Developed`**
   - Description: declared at `WorldState.cs:12` and referenced **nowhere** in `src/`. This module deliberately does not make it real: development level is the number, and a phase mirroring it is derived state that rots, which `spec-world-movement.md` already forbids. Removing it is verifiably safe here, and the proof is the same property `SlotTypeCatalog.cs:25-28` relies on for `SlotKind`: `SectorPhase` is persisted and read back **by name, never by ordinal** (`RpgStore.World.cs:230` writes `s.Phase.ToString()`, `:429` reads `Enum.Parse<SectorPhase>`), and `WorldCanonical.Row` hashes the same string form (`WorldCanonical.cs:95-104`). A separate change from W53 on purpose — a deletion and a feature in one diff is a deletion nobody reviews.
   - Acceptance: the enum member is gone and the solution builds; every world golden is **byte-identical** (no ordinal was ever hashed); an existing saved world with no `Developed` row loads unchanged; a grep for `Developed` over `src/` and `tests/` returns nothing.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Data.Tests`
   - Files: `src/FusionRpg.Core/World/WorldState.cs`, tests.
   - Dependencies: W53.
   - Scope: XS.
+  - **Done (2026-09-04) — genuinely a separate diff from W53, as the task's own text asks for.**
+    Verified the premise before deleting anything: a repo-wide grep for `Developed` across every
+    `*.cs` under `src/` and `tests/` returned exactly two hits — the enum declaration itself
+    (`WorldState.cs`) and `SurveyFidelityTests.cs`'s own unrelated test-fixture method literally named
+    `Developed()` (a false-positive match on the word, not the enum member — confirmed by reading it).
+    Removed the member, and moved its own reasoning onto the enum's class-level doc comment (by-name
+    persistence, `SlotKind`'s identical precedent, `spec-world-movement.md`'s "no storage of anything
+    recomputable") so a future reader sees why removing an unused member here was safe without having
+    to re-derive it. No other file needed a change — no `switch` over `SectorPhase` anywhere in `src/`
+    enumerates every member exhaustively (confirmed by the clean build itself: a non-exhaustive switch
+    would have been unaffected by removing an unreferenced case, and an exhaustive one missing a case
+    would have been a compiler warning, not a build break, so a clean rebuild is real evidence here,
+    not merely an absence of errors).
+    `dotnet build src\FusionRpg.Core` → green. `dotnet test tests\FusionRpg.Core.Tests --filter
+    FullyQualifiedName~World` → **855/855 passed**, byte-identical to W53's own count — the acceptance's
+    own "every world golden is byte-identical" claim confirmed directly, not merely argued (no ordinal
+    was ever hashed, so removing a middle enum member could not have shifted any other member's ordinal
+    into a different meaning even if something *had* still hashed by ordinal, which nothing does).
+    `dotnet test tests\FusionRpg.Data.Tests --filter FullyQualifiedName~WorldWaveOneAcceptanceTests` →
+    **6/6 passed, zero re-bless needed** — the strongest form of the acceptance's own claim: a real
+    played multi-turn scenario against a real SQLite-backed store stays byte-identical, not just an
+    in-memory unit test. **Full-suite runs were not re-attempted standalone for this task alone**: this
+    same session hit two transient, concurrent-editing-caused failures while verifying W53/W54 together
+    (a `VBCSCompiler`/`testhost` file lock, and a genuinely broken build in `Effects/EffectBag.cs` —
+    confirmed via `git status` as modified by a separate, uncommitted, concurrent stream on this branch,
+    not a file this task touches — both cleared on retry with no edit from this session), so the
+    targeted World/Data filters above are what this task's own verification actually rests on; the
+    combined W52-W54 full-suite baseline is captured once, cleanly, under W56's own Done note instead of
+    being re-run three more times for marginal benefit.
 
 - [ ] **Task W55: The A8 invariant — development must pay**
   - Description: `empire-economy-ssot.md:318` is binding: **development must raise yield faster than it raises upkeep, or nobody will ever develop.** Today only the upkeep half exists (`LoamPolicy.cs:52-53`). Add `DevelopmentYield` reading a new `development` block **in the same file** as `upkeep.developmentUpkeepPerLevel` — `data/tuning/loam.v{n}.json` — because the invariant is a comparison between two numbers and splitting them across files makes it unverifiable by reading. The file's `_meta.owner` gains this spec as a second owner. Ships at level 0 for every shipped sector, so it moves nothing until W53's producer runs.
@@ -1119,4 +1274,7 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
       `data/tuning/world.v{3,4}.json`, `src/FusionRpg.Core/World/{WorldState,WorldCanonical,
       WorldValidation,WorldTuning}.cs`, `src/FusionRpg.Core/World/Growth/**`,
       `src/FusionRpg.Core/World/Turn/{TurnCalendar,TurnEngine,WorldCommand,WorldCommandAdmission}.cs`,
-      `src/FusionRpg.Core/World/Loam/LoamUpkeep.cs`, `src/FusionRpg.Core/World/Ai/
+      `src/FusionRpg.Core/World/Loam/LoamUpkeep.cs`, `src/FusionRpg.Core/World/Ai/FrontierRulesPolicy.cs`,
+      `src/FusionRpg.Core/World/Intel/{FactionIntel,IntelRecorder,IntelSeed}.cs`,
+      `src/FusionRpg.Data/Sqlite/RpgStore.World.cs`, `src/FusionRpg.Server/Program.cs`,
+      `src/FusionRpg.Injector/Host/RpgHost.cs`, `tests/FusionRpg.{Core,Data,Server,E2E}.Tests/World*/**`.

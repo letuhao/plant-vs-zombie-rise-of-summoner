@@ -55,9 +55,9 @@ And one schema-level error that would have shipped into the atom spec:
 
 ---
 
-## 2. The closed kind list — 15
+## 2. The closed kind list — 16
 
-Fifteen kinds cover everything that has a working consumer today. Eleven map to a shipped FA opcode; `stat.derived` is a direct channel write with no opcode (four magnitude sites — patron, stars, injuries, contracts — already wrote derived channels with none); `match.modify` (E35, 2026-09-04) is the first kind on the `Match` attach point, mapping to `ModifyMatch` and writing one `Board.config` field for the match through `CheatState` + `CheatActions.ApplyBoardConfig` rather than an entity's own stats; `wave.control` (E36, 2026-09-04) is the second, mapping to `WaveControl` and driving `CheatActions.SummonWave`/`HugeWave`/`SetWaveTimer` plus `DebugActions.WaveFreeze` — the content path for the four wave-pressure writes that were cheat-only before; `bullet.modify` (E37, 2026-09-04) adds no new attach point — it reuses `board` — and is a second declarative permanent modifier alongside `stat.derived`: the grant's presence is read as a resolved value inside the existing `Bullet.InitData` postfix, never fired by an event.
+Sixteen kinds cover everything that has a working consumer today. Eleven map to a shipped FA opcode; `stat.derived` is a direct channel write with no opcode (four magnitude sites — patron, stars, injuries, contracts — already wrote derived channels with none); `match.modify` (E35, 2026-09-04) is the first kind on the `Match` attach point, mapping to `ModifyMatch` and writing one `Board.config` field for the match through `CheatState` + `CheatActions.ApplyBoardConfig` rather than an entity's own stats; `wave.control` (E36, 2026-09-04) is the second, mapping to `WaveControl` and driving `CheatActions.SummonWave`/`HugeWave`/`SetWaveTimer` plus `DebugActions.WaveFreeze` — the content path for the four wave-pressure writes that were cheat-only before; `bullet.modify` (E37, 2026-09-04) adds no new attach point — it reuses `board` — and is a second declarative permanent modifier alongside `stat.derived`: the grant's presence is read as a resolved value inside the existing `Bullet.InitData` postfix, never fired by an event; `ui.present` (E41, 2026-09-04) is the first kind on a new, seventh attach point, `Ui` — read-only by construction, mapping to `PresentUi` and executed bag-side in `EffectBag.FireGrant` (never a plan item any state-writing sink arm can reach) — `op:number` reuses the existing `IDamageFxSink` floater path, `op:meter`/`op:banner` go through the new `IUiPresentSink`.
 
 | # | Kind | Attach point | Maps to | Runtime support |
 |---|---|---|---|---|
@@ -76,8 +76,9 @@ Fifteen kinds cover everything that has a working consumer today. Eleven map to 
 | 13 | `match.modify` | match | `ModifyMatch` | lawn ✅ · battle ✖ (no `Board.config`, no consumer) · sim ✖ (same) |
 | 14 | `wave.control` | match | `WaveControl` | lawn ✅ · battle ✖ (no `BoardSpawner`, no consumer) · sim ✖ (same) |
 | 15 | `bullet.modify` | board | `BulletModify` *(declarative — no sink arm)* | lawn ✅ (`Bullet.InitData` resolved read) · battle ✖ (no projectile, pending) · sim ✖ (same) |
+| 16 | `ui.present` | **ui** | `PresentUi` *(bag-side — never a plan item the state sink sees)* | lawn ✅ (`EffectBag.ExecPresentUi`) · battle ✖ (no present sink today, pending) · sim ✖ (same) |
 
-**Six attach points:** stat · resource · status · shield · board · match. `decisions.md`'s "Atom attach points" row is the thing that guards this list now — it did not exist before E35, which wrote it the same day it added `match`.
+**Seven attach points:** stat · resource · status · shield · board · match · **ui**. `decisions.md`'s "Atom attach points" row is the thing that guards this list now — it did not exist before E35, which wrote it the same day it added `match`; E41 amended it the same day again to add `ui`.
 
 `match` differs from `board` on purpose: a `board` kind acts on a cell or an entity within the running match (`spawn.entity`, `board.action`, `grid.spawn`, `grid.clear`, `box.set` — each takes `row`/`col`); a `match` kind changes a rule the whole match is played under and names no cell.
 
@@ -307,8 +308,8 @@ Not free, and worth naming: the enum **ordinal is load-bearing**, a test asserts
 
 | Thing | Count | Growth policy |
 |---|---|---|
-| **Attach points** | **6** | reviewed change to `decisions.md`'s "Atom attach points" row |
-| **Kinds** | **14** | reviewed code change |
+| **Attach points** | **7** | reviewed change to `decisions.md`'s "Atom attach points" row |
+| **Kinds** | **16** | reviewed code change |
 | **Triggers** | **13** | reviewed code change — `OnWave`/`OnMatchStart`/`OnMatchEnd`/`OnSunCollect`/`OnGridPlace` added by E34 (was 8 here until 2026-09-04) |
 | **Predicate leaves** | **~8** | reviewed code change |
 | Owner-key scopes | **7 total**, including `sector:{id}` and `slot:{id}` | reviewed change |
@@ -321,4 +322,4 @@ Not free, and worth naming: the enum **ordinal is load-bearing**, a test asserts
 | Tiers per family | **unbounded** | data |
 | Atoms | **unbounded** | data |
 
-Fourteen kinds and six attach points is the whole machine. Everything a player will ever see is families and tiers on top of it.
+Sixteen kinds and seven attach points is the whole machine. Everything a player will ever see is families and tiers on top of it.

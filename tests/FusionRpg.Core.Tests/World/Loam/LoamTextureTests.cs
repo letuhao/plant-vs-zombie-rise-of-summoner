@@ -140,6 +140,13 @@ public class LoamTextureTests
     /// they still run a shortfall, so `Weakest` (worse per-sector balance) always picks "poor" —
     /// proving the pressure raise on "rich" is contagion from its neighbour fading, not "rich"
     /// fading on its own account.
+    ///
+    /// `DangerBand = 20` (world-map W55, empire-economy-ssot.md A8): once `LoamProduction.For` gains
+    /// a real development-yield term, `DevelopmentLevel` alone can no longer make a sourceless
+    /// sector a net drag — A8 requires yield to exceed upkeep, so any positive `DevelopmentLevel` is
+    /// now a net *contributor*. `DangerBand = 2 * DevelopmentLevel` compensates exactly
+    /// (`DevelopmentYieldPerLevel(6) / DangerUpkeepPerBand(3) == 2` at the real configured tuning),
+    /// reproducing this fixture's original pre-W55 upkeep-minus-production balance precisely.
     /// </summary>
     static WorldState ContagionFixture(int poorPressure = 0, int richPressure = 0) => new()
     {
@@ -151,7 +158,7 @@ public class LoamTextureTests
             new WorldSector
             {
                 SectorId = "poor", TypeId = "stable", OwnerFactionId = "dave", StabilityMilli = 1000,
-                DevelopmentLevel = 10, PressureMilli = poorPressure
+                DevelopmentLevel = 10, DangerBand = 20, PressureMilli = poorPressure
             }
         },
         Lanes = new[]

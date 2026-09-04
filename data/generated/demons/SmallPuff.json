@@ -23,19 +23,18 @@
   },
   "pTheta": 452,
   "rangeCells": 3,
-  "rarity": "Cultivated",
+  "rarity": "Sprout",
   "side": "plant",
   "speciesId": "SmallPuff",
   "theta": 13,
   "traitPool": [
-    "Exponential propagation",
-    "High-density clustering",
-    "Low-profile",
-    "Spore-stacking"
+    "exponential-proliferation",
+    "high-density-planting",
+    "low-profile",
+    "spore-stacking"
   ],
-  "variantCount": 2,
+  "variantCount": 1,
   "variants": [
-    "mutated",
     "normal"
   ]
 }

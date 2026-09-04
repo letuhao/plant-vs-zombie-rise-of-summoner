@@ -1,0 +1,38 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 2400,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Air",
+  "elementSecondary": null,
+  "gameTypeId": 920,
+  "magnitudes": {
+    "resource.max.hp": 9465,
+    "resource.max.hunger": 18282,
+    "resource.max.qi": 12250,
+    "resource.max.spirit": 5847,
+    "resource.max.stamina": 7424,
+    "resource.regen.hp": 526,
+    "resource.regen.hunger": 1058,
+    "resource.regen.qi": 761,
+    "resource.regen.spirit": 325,
+    "resource.regen.stamina": 464
+  },
+  "pTheta": 928,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "UltimateBlover",
+  "theta": 27,
+  "traitPool": [
+    "high-capacity-storage",
+    "homing-projectile",
+    "kinetic-acceleration",
+    "star-attraction"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "mutated"
+  ]
+}

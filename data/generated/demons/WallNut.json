@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Earth",
@@ -26,15 +26,15 @@
     "resource.regen.stamina": 407
   },
   "pTheta": 452,
-  "rangeCells": 1,
-  "rarity": "Cultivated",
+  "rangeCells": 3,
+  "rarity": "Grafted",
   "side": "plant",
   "speciesId": "WallNut",
   "theta": 13,
   "traitPool": [
-    "Explosion-Resistant",
-    "Fusion-Retentive",
-    "Splash-Damage Mitigation"
+    "explosive-resistance",
+    "protective-shell",
+    "splash-mitigation"
   ],
   "variantCount": 2,
   "variants": [

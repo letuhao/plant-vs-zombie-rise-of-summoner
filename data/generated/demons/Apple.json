@@ -1,0 +1,43 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Light",
+  "elementSecondary": null,
+  "gameTypeId": 223,
+  "magnitudes": {
+    "combat.block.strength.omni": 920,
+    "combat.defense.omni": 552,
+    "combat.parry.strength.omni": 920,
+    "combat.shield.capacity.omni": 5517,
+    "combat.shield.toughness.omni": 368,
+    "progression.bonus.arm1": 4904,
+    "progression.bonus.defense": 3678,
+    "resource.max.hp": 19616,
+    "resource.max.hunger": 11034,
+    "resource.max.qi": 3678,
+    "resource.max.spirit": 1839,
+    "resource.max.stamina": 8582,
+    "resource.regen.hp": 13,
+    "resource.regen.hunger": 490,
+    "resource.regen.qi": 245,
+    "resource.regen.spirit": 123,
+    "resource.regen.stamina": 552
+  },
+  "pTheta": 613,
+  "rangeCells": 3,
+  "rarity": "Cultivated",
+  "side": "plant",
+  "speciesId": "Apple",
+  "theta": 18,
+  "traitPool": [
+    "delayed-regeneration",
+    "energy-reactive",
+    "protective-barrier"
+  ],
+  "variantCount": 1,
+  "variants": [
+    "blessed"
+  ]
+}

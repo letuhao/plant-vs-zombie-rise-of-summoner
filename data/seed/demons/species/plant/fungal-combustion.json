@@ -97,7 +97,7 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "split",
         "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
@@ -105,8 +105,10 @@
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T11:38:35Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T14:38:47Z",
+      "minorityValues": {
+        "aptitudePrimary": "Retribution"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -121,7 +123,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Focus",
     "aptitudeSecondary": "Onslaught",
     "attackTempo": "steady",
     "basis": "inferred",
@@ -133,8 +135,8 @@
       "aquatic-mycelium"
     ],
     "gameTypeId": 1430,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Finesse",
+    "pure": true,
     "rarity": "fused",
     "reach": "short",
     "reason": "The creature functions primarily as a passive environmental modifier that scales through repetitive interaction rather than direct combat aggression.",

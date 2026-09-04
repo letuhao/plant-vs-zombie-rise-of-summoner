@@ -20,13 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
-        "attackTempo": "unresolved",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:03:33Z",
+      "emittedUtc": "2026-09-04T14:30:40Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -44,7 +44,7 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "unresolved",
+    "attackTempo": "steady",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",

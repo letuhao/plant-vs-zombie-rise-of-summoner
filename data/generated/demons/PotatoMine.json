@@ -1,10 +1,10 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Earth",
-  "elementSecondary": null,
+  "elementSecondary": "Fire",
   "gameTypeId": 4,
   "magnitudes": {
     "resource.max.hp": 5424,
@@ -19,20 +19,18 @@
     "resource.regen.stamina": 226
   },
   "pTheta": 452,
-  "rangeCells": 1,
-  "rarity": "Cultivated",
+  "rangeCells": 3,
+  "rarity": "Sprout",
   "side": "plant",
   "speciesId": "PotatoMine",
   "theta": 13,
   "traitPool": [
-    "Contact-Triggered",
-    "Delayed Activation",
-    "Ground-Burrowed",
-    "Low Profile"
+    "delayed-detonation",
+    "grounded-detonation",
+    "low-profile"
   ],
-  "variantCount": 2,
+  "variantCount": 1,
   "variants": [
-    "mutated",
     "normal"
   ]
 }

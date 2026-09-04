@@ -20,14 +20,15 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
-        "attackTempo": "unresolved",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-04T10:48:23Z",
+      "emittedUtc": "2026-09-04T14:30:40Z",
       "minorityValues": {
+        "attackTempo": "ponderous",
         "rarity": "chaff"
       },
       "promptVersions": {
@@ -46,7 +47,7 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "unresolved",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "dark",
@@ -61,6 +62,7 @@
     "reach": "short",
     "reason": "As a projectile unit launched from a Giant Zombie to breach defenses, its role in bypassing frontline obstacles elevates its threat beyond a mere raider.",
     "resourceProfile": [
+      "hp",
       "hp"
     ],
     "side": "zombie",

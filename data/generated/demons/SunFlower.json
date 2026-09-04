@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 2400,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Light",
@@ -19,18 +19,18 @@
     "resource.regen.stamina": 226
   },
   "pTheta": 452,
-  "rangeCells": 1,
+  "rangeCells": 3,
   "rarity": "Cultivated",
   "side": "plant",
   "speciesId": "SunFlower",
   "theta": 13,
   "traitPool": [
-    "Delayed-Activation",
-    "Resource-Generating"
+    "delayed-yield",
+    "sun-production"
   ],
   "variantCount": 2,
   "variants": [
-    "ancient",
+    "mutated",
     "normal"
   ]
 }

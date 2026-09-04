@@ -1,6 +1,6 @@
 {
   "acquisition": "Summonable",
-  "attackIntervalMs": 1500,
+  "attackIntervalMs": 3000,
   "attackIntervalSource": "classified",
   "deployMode": "PlantAvatar",
   "elementPrimary": "Fire",
@@ -23,16 +23,18 @@
   },
   "pTheta": 452,
   "rangeCells": 3,
-  "rarity": "Chaff",
+  "rarity": "Cultivated",
   "side": "plant",
   "speciesId": "DoomShroom",
   "theta": 13,
   "traitPool": [
-    "Aquatic-Resistant",
-    "Area-of-Effect",
-    "Explosive-Impact",
-    "Soil-Sterilizing"
+    "area-of-effect detonation",
+    "ash-based damage",
+    "soil sterilization"
   ],
-  "variantCount": 0,
-  "variants": []
+  "variantCount": 2,
+  "variants": [
+    "corrupted",
+    "normal"
+  ]
 }

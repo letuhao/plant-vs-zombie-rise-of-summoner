@@ -1,0 +1,48 @@
+{
+  "acquisition": "Summonable",
+  "attackIntervalMs": 1500,
+  "attackIntervalSource": "classified",
+  "deployMode": "PlantAvatar",
+  "elementPrimary": "Fire",
+  "elementSecondary": null,
+  "gameTypeId": 1234,
+  "magnitudes": {
+    "combat.block.strength.omni": 84,
+    "combat.defense.omni": 50,
+    "combat.parry.strength.omni": 84,
+    "combat.shield.capacity.omni": 1824,
+    "combat.shield.regen.omni": 22,
+    "combat.shield.toughness.omni": 82,
+    "progression.bonus.arm1": 448,
+    "progression.bonus.arm2": 192,
+    "progression.bonus.defense": 336,
+    "progression.bonus.maxHp": 288,
+    "resource.max.hp": 2080,
+    "resource.max.hunger": 1296,
+    "resource.max.qi": 480,
+    "resource.max.spirit": 240,
+    "resource.max.stamina": 1408,
+    "resource.regen.hp": 3,
+    "resource.regen.hunger": 52,
+    "resource.regen.qi": 32,
+    "resource.regen.spirit": 16,
+    "resource.regen.stamina": 76
+  },
+  "pTheta": 80,
+  "rangeCells": 3,
+  "rarity": "Fused",
+  "side": "plant",
+  "speciesId": "SuperFurnace",
+  "theta": 0,
+  "traitPool": [
+    "energy-infusion",
+    "essence-release",
+    "localized heat-aura",
+    "self-destructing-on-proximity"
+  ],
+  "variantCount": 2,
+  "variants": [
+    "blessed",
+    "normal"
+  ]
+}

@@ -40,7 +40,8 @@ public class WorldCommandRoundTripPropertyTests : IDisposable
     /// One command per kind, every optional member populated with a value real enough to pass
     /// admission for every kind at once — `homeworld` slot 3 is a real rootbed, `well` is a real
     /// structure id, `l-home-ember` a real lane, `scout` a real stance, `demon-1` an opaque warden id
-    /// (Core validates only that it is non-blank, per `WorldCommandAdmission.cs`'s `bind-warden` arm).
+    /// (Core validates only that it is non-blank, per `WorldCommandAdmission.cs`'s `bind-warden` arm),
+    /// `raise-development-placeholder` a real project id (world-map W52).
     /// Admission only checks the fields *its own* kind cares about (verified by reading
     /// `WorldCommandAdmission.cs` before writing this — `move`/`stand-fast` check nothing
     /// kind-specific at all), so setting every field on every kind is accepted rather than refused
@@ -58,7 +59,8 @@ public class WorldCommandRoundTripPropertyTests : IDisposable
         LanePath = new[] { "l-home-ember" },
         Amount = 100,
         StructureId = "well",
-        WardenId = "demon-1"
+        WardenId = "demon-1",
+        ProjectId = "raise-development-placeholder"
     };
 
     static readonly PropertyInfo[] Properties = typeof(WorldCommand).GetProperties();

@@ -15,10 +15,10 @@ public static class AtomKindRegistry
 {
     // Structural (tunables-ssot.md T2), all three: closed-vocabulary cardinalities, not balance —
     // each must match what this registry actually builds below, not a dial a balance pass turns.
-    // E35 (spec-match-modify.md §2.1): 5 -> 6 with AttachPoint.Match. Wave 8 states its combined end
-    // state (7, once Ui lands too) in one place only — that spec's own §2.1 — so this module asserts
-    // only its own +1 delta, never the wave total.
-    public const int AttachPointCount = 6;
+    // E35 (spec-match-modify.md §2.1): 5 -> 6 with AttachPoint.Match. E41 (spec-ui-attach-point.md
+    // §2a): 6 -> 7 with AttachPoint.Ui, Wave 8's stated combined end state (spec-match-modify.md
+    // §2.1) — this module asserts only its own +1 delta, never the wave total.
+    public const int AttachPointCount = 7;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     // E35: 12 -> 13 with match.modify, the first Match-attached kind.
     // E36 (spec-wave-control.md §2.1): 13 -> 14 with wave.control, the second Match-attached kind.
@@ -26,7 +26,9 @@ public static class AtomKindRegistry
     // E37 (spec-projectile-control.md §2b): 14 -> 15 with bullet.modify, on the EXISTING Board attach
     // point (no AttachPointCount change here either — this module adds no attach point, §2b's own
     // "No new attach point" rule).
-    public const int KindCount = 15;
+    // E41 (spec-ui-attach-point.md §2a): 15 -> 16 with ui.present, the first (and, today, only)
+    // Ui-attached kind — AttachPointCount moves alongside it this time (see above).
+    public const int KindCount = 16;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     // E34 (spec-trigger-vocabulary.md §2.1): 8 -> 13 with OnWave/OnMatchStart/OnMatchEnd/
     // OnSunCollect/OnGridPlace. Verified live before editing, per this module's own caution about
@@ -210,6 +212,45 @@ public static class AtomKindRegistry
     /// per-mille (amount 1500 = x1.5); <c>set</c>/<c>add</c> are whole damage units.</summary>
     static readonly string[] BulletModifyOps = { "set", "add", "scale" };
 
+    /// <summary>E41 (spec-ui-attach-point.md §2b): the three ops <c>ui.present</c>'s own executor
+    /// (<c>EffectBag.ExecPresentUi</c>) implements. Wired as this ParamDef's own Vocabulary — unlike
+    /// <see cref="WaveControlOps"/>, none of the three has a plausible-but-wrong name worth a
+    /// dedicated named refusal, so the generic membership loop in <see cref="Validate"/> is enough.</summary>
+    static readonly string[] UiPresentOps = { "number", "banner", "meter" };
+
+    /// <summary>E41 (spec-ui-attach-point.md §2b): the eleven <see cref="FusionRpg.Contracts.DamageFxTag"/>
+    /// names, lowercased — <c>tag</c>'s own vocabulary, reusing the closed set <c>DamageFxPalette.Rgb</c>
+    /// already colours rather than inventing a parallel one (§2b.1's own "no new palette" rule).</summary>
+    static readonly string[] UiPresentTagValues =
+    {
+        "neutral", "heal", "weak", "resist", "null", "absorb", "reflect", "dodge", "crit",
+        "penetrate", "block",
+    };
+
+    /// <summary>
+    /// E41 (spec-ui-attach-point.md §2b.1, "the two vocabularies, and neither is a tuning table"):
+    /// <c>bannerId</c>'s own SSOT. DECIDED 2026-09-03 that the real home is the shipped i18n catalog's
+    /// <c>banner.</c> prefix (<c>web/fusion-rpg-web/src/i18n/locales/en/messages.po</c>) — but that
+    /// file, read directly while this module was built, is a gettext <c>.po</c> extracted by
+    /// <c>@lingui/cli</c>: <c>msgid</c> IS the source sentence, not a stable <c>"banner.xxx"</c> key,
+    /// and it carries no <c>banner.</c>-prefixed entries today. A grep for <c>.po</c>/<c>messages.po</c>
+    /// across <c>src/</c> finds no C# reader anywhere (only a bundled web asset matches "i18n", not a
+    /// catalog reader), and Core has no established pattern for reading a <c>web/</c>-relative file at
+    /// runtime (checked: no repo-root resolver exists in <c>FusionRpg.Core</c>) — a deployed server
+    /// does not even ship the <c>web/</c> sources. §2b.1's own "criteria-stated task" (whether the
+    /// in-game HUD renderer can resolve a key at all) needs the injector build and is explicitly not
+    /// this module's to attempt.
+    ///
+    /// <para><b>Best-effort default per that section:</b> the closed-vocabulary SHAPE ships now —
+    /// Vocabulary-checked, refused at load if unknown, exactly like every other id in this file — but
+    /// the SET starts empty, because no banner id is authored anywhere yet; legalising one
+    /// prematurely would be inventing a parallel catalog, which §2b explicitly forbids. The day a
+    /// banner id is authored — a resolved catalog reader, or the seed-file fallback §2b.1's "Fail"
+    /// branch names (<c>data/seed/hud-banners/</c>) if the HUD renderer turns out to need one — it is
+    /// added here and nothing else on this kind changes.</para>
+    /// </summary>
+    static readonly string[] UiPresentBannerCatalogIds = Array.Empty<string>();
+
     static readonly Dictionary<string, AtomKind> Kinds = Build();
 
     public static IReadOnlyCollection<AtomKind> All => Kinds.Values;
@@ -341,7 +382,63 @@ public static class AtomKindRegistry
             }
         }
 
+        // E41 (spec-ui-attach-point.md §2b/§4): ui.present's own per-op required-param and range
+        // checks — the same "own value check" shape as wave.control's op-specific block immediately
+        // above. `amount`/`ratio` cannot be plain ParamDef.Required=true because each is required only
+        // under ONE op, not unconditionally; a range check (ratio's 0-1000 bound, a bounded ratio per
+        // §3, never a progression ceiling) has no home in the generic Vocabulary membership loop
+        // either, since it is a range, not a set.
+        if (string.Equals(kindId, "ui.present", StringComparison.Ordinal))
+        {
+            var opRaw = pars.TryGetValue("op", out var opVal) ? opVal : null;
+            var opStr = opRaw is JsonElement opEl && opEl.ValueKind == JsonValueKind.String
+                ? opEl.GetString()
+                : opRaw?.ToString();
+
+            if (string.Equals(opStr, "number", StringComparison.OrdinalIgnoreCase)
+                && !pars.ContainsKey("amount"))
+                return AtomRejection.Fail(AtomRejectionReason.MissingParam,
+                    "ui.present op:number needs an explicit amount");
+
+            if (string.Equals(opStr, "meter", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!pars.ContainsKey("ratio"))
+                    return AtomRejection.Fail(AtomRejectionReason.MissingParam,
+                        "ui.present op:meter needs an explicit ratio");
+
+                if (pars.TryGetValue("ratio", out var ratioRaw) && TryRatioMilli(ratioRaw, out var ratioMilli)
+                    && (ratioMilli < 0 || ratioMilli > 1000))
+                    return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                        $"ui.present.ratio {ratioMilli} is per-mille, bounded 0-1000 (a fraction of the " +
+                        "meter's own pool, never a magnitude that could exceed the pool it measures)");
+            }
+        }
+
         return AtomRejection.Ok;
+    }
+
+    /// <summary>
+    /// E41: reads `ratio` either as a plain boxed number (tests, mirroring <see cref="TryInt"/>) or as
+    /// a value-spec object's own `min` (the shape a content-authored <c>{"min":..,"max":..}</c> takes
+    /// at this layer — <c>ratio</c> is <see cref="ParamKind.Value"/>, and the bound applies to both
+    /// ends of an authored range the same way <c>Min &lt;= Max</c> already does).
+    /// </summary>
+    static bool TryRatioMilli(object? v, out int result)
+    {
+        switch (v)
+        {
+            case int i: result = i; return true;
+            case long l when l is >= int.MinValue and <= int.MaxValue: result = (int)l; return true;
+            case JsonElement { ValueKind: JsonValueKind.Number } je: return je.TryGetInt32(out result);
+            case JsonElement { ValueKind: JsonValueKind.Object } je:
+                if (je.TryGetProperty("min", out var minEl) && minEl.ValueKind == JsonValueKind.Number)
+                    return minEl.TryGetInt32(out result);
+                result = 0;
+                return false;
+            case Dictionary<string, object?> d when d.TryGetValue("min", out var minRaw):
+                return TryRatioMilli(minRaw, out result);
+            default: result = 0; return false;
+        }
     }
 
     /// <summary>Read an int out of either a plain boxed number (tests) or a wire `JsonElement`
@@ -761,6 +858,48 @@ public static class AtomKindRegistry
                 "in data/tuning/match.v1.json's waveHoldFloorSeconds, not a bare literal). Refused at " +
                 "ChainDepth > 0 — summon/huge cause spawns, which re-emit the events that could " +
                 "re-trigger this same atom, and that loop cannot be diagnosed after the fact."),
+
+            // ---- Ui -------------------------------------------------------------------------
+            // E41 (spec-ui-attach-point.md): the first, read-only-by-construction attach point.
+            // Every other Wave 8 kind changes what happens on the board; this one changes what the
+            // player KNOWS happened — a floater number, a banner, a HUD meter. See §2a's own rule,
+            // restated by AttachPoint.Ui's doc comment: a kind here may never appear in a plan item
+            // any state executor handles (EffectBag.FireGrant's own bag-side branch is what makes
+            // that structural, not this doc comment).
+            new("ui.present", AttachPoint.Ui, new ParamSchema(
+                    new ParamDef("op", ParamKind.String, Required: true, Vocabulary: () => UiPresentOps),
+                    new ParamDef("amount", ParamKind.Value, HonouredOnlyWhen: "op=number"),
+                    // §2b: one of the eleven DamageFxTag names, lowercased — optional on every op
+                    // (not honoured-only-when, unlike amount/bannerId/meterId/ratio), since a present
+                    // may want a colour regardless of which op produced it.
+                    new ParamDef("tag", ParamKind.String, Vocabulary: () => UiPresentTagValues),
+                    new ParamDef("bannerId", ParamKind.String, HonouredOnlyWhen: "op=banner",
+                        Vocabulary: () => UiPresentBannerCatalogIds),
+                    // meterId's Vocabulary is the SAME live function resource.delta's own `channel`
+                    // param already reads (ResourceChannels, declared above) — not a copy, so the
+                    // vocabulary widens the day a seventh resource lands in
+                    // DerivedStatChannels.ResourceIds, with zero edits to this kind (E29 rule 2).
+                    new ParamDef("meterId", ParamKind.String, HonouredOnlyWhen: "op=meter",
+                        Vocabulary: ResourceChannels),
+                    // Per-mille 0-1000, a bounded ratio (§3) — checked below, not via Vocabulary
+                    // (a range check, not a membership check).
+                    new ParamDef("ratio", ParamKind.Value, HonouredOnlyWhen: "op=meter"),
+                    new ParamDef("durationMs", ParamKind.Int)),
+                // Lawn: Full — no present sink exists in Battle/Sim today (RuntimeState.None, marked
+                // pending per E1's own living-table rule, never "never": a present sink could land
+                // there later, the same shape bullet.modify/match.modify already record for Battle).
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.None),
+                AllTriggers,
+                // §2b.1's own MANDATORY guard amendment: PowerCategory.None requires the `cosmetic`
+                // exemption in AtomKindRegistryTests.cs's Every_kind_declares_a_runtime_a_trigger_and_
+                // a_power_category, alongside (never merged with) the existing permanentModifiers set
+                // — a present writes no state, so a category on it would let a floater be budgeted as
+                // if it contributed real power (§2c: priced at exactly zero, a DIFFERENT claim from no
+                // category at all).
+                PowerCategory.None,
+                "op is number|banner|meter. A present is read-only: it never writes state and is " +
+                "never read back into content. amount only under number, bannerId only under banner, " +
+                "meterId/ratio only under meter."),
         };
 
         var map = new Dictionary<string, AtomKind>(StringComparer.OrdinalIgnoreCase);
